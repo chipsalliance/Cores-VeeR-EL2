@@ -28,6 +28,7 @@ import el2_pkg::*;
   (
    input logic                  clk,
    input logic                  rst_l,
+   input logic                  dbg_rst_l,
    input logic [31:1]           rst_vec,
    input logic                  nmi_int,
    input logic [31:1]           nmi_vec,
@@ -38,7 +39,7 @@ import el2_pkg::*;
    output logic [1:0]  trace_rv_i_valid_ip,
    output logic [1:0]  trace_rv_i_exception_ip,
    output logic [4:0]  trace_rv_i_ecause_ip,
-   output logic [2:0]  trace_rv_i_interrupt_ip,
+   output logic [1:0]  trace_rv_i_interrupt_ip,
    output logic [31:0] trace_rv_i_tval_ip,
 
    output logic                 dccm_clk_override,
@@ -825,10 +826,8 @@ import el2_pkg::*;
       assert_fetch_indbghalt: assert #0 (~(ifu.ifc_fetch_req_f & dec.tlu.dbg_tlu_halted_f & ~dec.tlu.dcsr_single_step_running)) else $display("ERROR: Fetching in dBG halt!");
 `endif
 
-
-   // -----------------   DEBUG END -----------------------------
-
    assign core_rst_l = rst_l & (dbg_core_rst_l | scan_mode);
+
    // fetch
    el2_ifu #(.pt(pt)) ifu (
       .rst_l(core_rst_l),
@@ -1250,7 +1249,7 @@ if  (pt.BUILD_AHB_LITE == 1) begin
       assign trace_rv_i_valid_ip[1:0]     = rv_trace_pkt.rv_i_valid_ip[1:0];
       assign trace_rv_i_exception_ip[1:0] = rv_trace_pkt.rv_i_exception_ip[1:0];
       assign trace_rv_i_ecause_ip[4:0]    = rv_trace_pkt.rv_i_ecause_ip[4:0];
-      assign trace_rv_i_interrupt_ip[2:0] = rv_trace_pkt.rv_i_interrupt_ip[2:0];
+      assign trace_rv_i_interrupt_ip[1:0] = rv_trace_pkt.rv_i_interrupt_ip[1:0];
       assign trace_rv_i_tval_ip[31:0]     = rv_trace_pkt.rv_i_tval_ip[31:0];
 
 

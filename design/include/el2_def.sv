@@ -9,7 +9,7 @@ typedef struct packed {
                        logic [31:0] rv_i_address_ip;
                        logic [1:0] rv_i_exception_ip;
                        logic [4:0] rv_i_ecause_ip;
-                       logic [2:0] rv_i_interrupt_ip;
+                       logic [1:0] rv_i_interrupt_ip;
                        logic [31:0] rv_i_tval_ip;
                        } el2_trace_pkt_t;
 

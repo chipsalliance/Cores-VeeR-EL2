@@ -28,6 +28,7 @@ import el2_pkg::*;
 (
    input logic                       clk,
    input logic                       rst_l,
+   input logic                       dbg_rst_l,
    input logic [31:1]                rst_vec,
    input logic                       nmi_int,
    input logic [31:1]                nmi_vec,
@@ -39,7 +40,7 @@ import el2_pkg::*;
    output logic [1:0]  trace_rv_i_valid_ip,
    output logic [1:0]  trace_rv_i_exception_ip,
    output logic [4:0]  trace_rv_i_ecause_ip,
-   output logic [2:0]  trace_rv_i_interrupt_ip,
+   output logic [1:0]  trace_rv_i_interrupt_ip,
    output logic [31:0] trace_rv_i_tval_ip,
 
    // Bus signals
@@ -695,7 +696,7 @@ import el2_pkg::*;
            .tdoEnable (),                  // Test Data Output enable
 
            // Processor Signals
-           .core_rst_n  (core_rst_l),     // Core reset, active low
+           .core_rst_n  (dbg_rst_l),      // Primary reset active low
            .core_clk    (clk),            // Core clock
            .jtag_id     (jtag_id),        // 32 bit JTAG ID
            .rd_data     (dmi_reg_rdata),  // 32 bit Read data from  Processor

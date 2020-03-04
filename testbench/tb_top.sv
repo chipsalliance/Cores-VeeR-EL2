@@ -13,64 +13,62 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-`ifndef VERILATOR
-module tb_top;
-`else
+`ifdef VERILATOR
 module tb_top ( input bit core_clk );
-`endif
-
-`ifndef VERILATOR
+`else
+module tb_top;
     bit                         core_clk;
 `endif
     logic                       rst_l;
+    logic                       porst_l;
     logic                       nmi_int;
 
     logic        [31:0]         reset_vector;
     logic        [31:0]         nmi_vector;
     logic        [31:1]         jtag_id;
 
-    logic        [31:0]         ic_haddr        ;
-    logic        [2:0]          ic_hburst       ;
-    logic                       ic_hmastlock    ;
-    logic        [3:0]          ic_hprot        ;
-    logic        [2:0]          ic_hsize        ;
-    logic        [1:0]          ic_htrans       ;
-    logic                       ic_hwrite       ;
-    logic        [63:0]         ic_hrdata       ;
-    logic                       ic_hready       ;
-    logic                       ic_hresp        ;
+    logic        [31:0]         ic_haddr;
+    logic        [2:0]          ic_hburst;
+    logic                       ic_hmastlock;
+    logic        [3:0]          ic_hprot;
+    logic        [2:0]          ic_hsize;
+    logic        [1:0]          ic_htrans;
+    logic                       ic_hwrite;
+    logic        [63:0]         ic_hrdata;
+    logic                       ic_hready;
+    logic                       ic_hresp;
 
-    logic        [31:0]         lsu_haddr       ;
-    logic        [2:0]          lsu_hburst      ;
-    logic                       lsu_hmastlock   ;
-    logic        [3:0]          lsu_hprot       ;
-    logic        [2:0]          lsu_hsize       ;
-    logic        [1:0]          lsu_htrans      ;
-    logic                       lsu_hwrite      ;
-    logic        [63:0]         lsu_hrdata      ;
-    logic        [63:0]         lsu_hwdata      ;
-    logic                       lsu_hready      ;
-    logic                       lsu_hresp        ;
+    logic        [31:0]         lsu_haddr;
+    logic        [2:0]          lsu_hburst;
+    logic                       lsu_hmastlock;
+    logic        [3:0]          lsu_hprot;
+    logic        [2:0]          lsu_hsize;
+    logic        [1:0]          lsu_htrans;
+    logic                       lsu_hwrite;
+    logic        [63:0]         lsu_hrdata;
+    logic        [63:0]         lsu_hwdata;
+    logic                       lsu_hready;
+    logic                       lsu_hresp;
 
-    logic        [31:0]         sb_haddr        ;
-    logic        [2:0]          sb_hburst       ;
-    logic                       sb_hmastlock    ;
-    logic        [3:0]          sb_hprot        ;
-    logic        [2:0]          sb_hsize        ;
-    logic        [1:0]          sb_htrans       ;
-    logic                       sb_hwrite       ;
+    logic        [31:0]         sb_haddr;
+    logic        [2:0]          sb_hburst;
+    logic                       sb_hmastlock;
+    logic        [3:0]          sb_hprot;
+    logic        [2:0]          sb_hsize;
+    logic        [1:0]          sb_htrans;
+    logic                       sb_hwrite;
 
-    logic        [63:0]         sb_hrdata       ;
-    logic        [63:0]         sb_hwdata       ;
-    logic                       sb_hready       ;
-    logic                       sb_hresp        ;
+    logic        [63:0]         sb_hrdata;
+    logic        [63:0]         sb_hwdata;
+    logic                       sb_hready;
+    logic                       sb_hresp;
 
     logic        [31:0]         trace_rv_i_insn_ip;
     logic        [31:0]         trace_rv_i_address_ip;
     logic        [1:0]          trace_rv_i_valid_ip;
     logic        [1:0]          trace_rv_i_exception_ip;
     logic        [4:0]          trace_rv_i_ecause_ip;
-    logic        [2:0]          trace_rv_i_interrupt_ip;
+    logic        [1:0]          trace_rv_i_interrupt_ip;
     logic        [31:0]         trace_rv_i_tval_ip;
 
     logic                       o_debug_mode_status;
@@ -82,10 +80,10 @@ module tb_top ( input bit core_clk );
     logic                       o_cpu_run_ack;
 
     logic                       mailbox_write;
-    logic        [63:0]         dma_hrdata       ;
-    logic        [63:0]         dma_hwdata       ;
-    logic                       dma_hready       ;
-    logic                       dma_hresp        ;
+    logic        [63:0]         dma_hrdata;
+    logic        [63:0]         dma_hwdata;
+    logic                       dma_hready;
+    logic                       dma_hresp;
 
     logic                       mpc_debug_halt_req;
     logic                       mpc_debug_run_req;
@@ -94,7 +92,7 @@ module tb_top ( input bit core_clk );
     logic                       mpc_debug_run_ack;
     logic                       debug_brkpt_status;
 
-    bit        [31:0]           cycleCnt       ;
+    bit        [31:0]           cycleCnt;
     logic                       mailbox_data_val;
 
     wire                        dma_hready_out;
@@ -286,6 +284,27 @@ module tb_top ( input bit core_clk );
     wire [1:0]                  dma_axi_rresp;
     wire                        dma_axi_rlast;
 
+    wire                        lmem_axi_arvalid;
+    wire                        lmem_axi_arready;
+
+    wire                        lmem_axi_rvalid;
+    wire [`RV_LSU_BUS_TAG-1:0]  lmem_axi_rid;
+    wire [1:0]                  lmem_axi_rresp;
+    wire [63:0]                 lmem_axi_rdata;
+    wire                        lmem_axi_rlast;
+    wire                        lmem_axi_rready;
+
+    wire                        lmem_axi_awvalid;
+    wire                        lmem_axi_awready;
+
+    wire                        lmem_axi_wvalid;
+    wire                        lmem_axi_wready;
+
+    wire [1:0]                  lmem_axi_bresp;
+    wire                        lmem_axi_bvalid;
+    wire [`RV_LSU_BUS_TAG-1:0]  lmem_axi_bid;
+    wire                        lmem_axi_bready;
+
 `endif
     wire[63:0] WriteData;
 
@@ -329,18 +348,18 @@ module tb_top ( input bit core_clk );
         wb_valid[0]  <= rvtop.swerv.dec.dec_i0_wen_r;
         wb_dest[0]   <= rvtop.swerv.dec.dec_i0_waddr_r;
         wb_data[0]   <= rvtop.swerv.dec.dec_i0_wdata_r;
-        if (rvtop.trace_rv_i_valid_ip !== 0) begin
-           $fwrite(tp,"%b,%h,%h,%0h,%0h,3,%b,%h,%h,%b\n", rvtop.trace_rv_i_valid_ip, 0, trace_rv_i_address_ip,
+        if (trace_rv_i_valid_ip !== 0) begin
+           $fwrite(tp,"%b,%h,%h,%0h,%0h,3,%b,%h,%h,%b\n", trace_rv_i_valid_ip, 0, trace_rv_i_address_ip,
                   0, trace_rv_i_insn_ip,trace_rv_i_exception_ip,trace_rv_i_ecause_ip,
                   trace_rv_i_tval_ip,trace_rv_i_interrupt_ip);
            // Basic trace - no exception register updates
            // #1 0 ee000000 b0201073 c 0b02       00000000
            for (int i=0; i<1; i++)
-               if (rvtop.trace_rv_i_valid_ip[i]==1) begin
+               if (trace_rv_i_valid_ip[i]==1) begin
                    commit_count++;
                    $fwrite (el, "%10d : %6s 0 %h %h %s\n", cycleCnt, $sformatf("#%0d",commit_count),
                           trace_rv_i_address_ip[31+i*32 -:32], trace_rv_i_insn_ip[31+i*32-:32],
-                          wb_dest[i] !=0 ?  $sformatf("r%0d=%h", wb_dest[i], wb_data[i]) : "");
+                          (wb_dest[i] !=0 && wb_data[0])?  $sformatf("r%0d=%h", wb_dest[i], wb_data[i]) : "");
                end
         end
     end
@@ -363,6 +382,7 @@ module tb_top ( input bit core_clk );
         fd = $fopen("console.log","w");
         commit_count = 0;
         preload_dccm();
+        preload_iccm();
 
 `ifndef VERILATOR
         if($test$plusargs("dumpon")) $dumpvars;
@@ -372,12 +392,14 @@ module tb_top ( input bit core_clk );
 
 
     assign rst_l = cycleCnt > 5;
+    assign porst_l = cycleCnt > 2;
 
    //=========================================================================-
    // RTL instance
    //=========================================================================-
 el2_swerv_wrapper rvtop (
     .rst_l                  ( rst_l         ),
+    .dbg_rst_l              ( porst_l       ),
     .clk                    ( core_clk      ),
     .rst_vec                ( reset_vector[31:1]),
     .nmi_int                ( nmi_int       ),
@@ -590,40 +612,40 @@ el2_swerv_wrapper rvtop (
 
     //-------------------------- DMA AXI signals--------------------------
     // AXI Write Channels
-    .dma_axi_awvalid        (1'b0),
+    .dma_axi_awvalid        (dma_axi_awvalid),
     .dma_axi_awready        (dma_axi_awready),
-    .dma_axi_awid           (dma_axi_awid),
-    .dma_axi_awaddr         (dma_axi_awaddr),
-    .dma_axi_awsize         (dma_axi_awsize),
-    .dma_axi_awprot         (dma_axi_awprot),
-    .dma_axi_awlen          (dma_axi_awlen),
-    .dma_axi_awburst        (dma_axi_awburst),
+    .dma_axi_awid           ('0),
+    .dma_axi_awaddr         (lsu_axi_awaddr),
+    .dma_axi_awsize         (lsu_axi_awsize),
+    .dma_axi_awprot         (lsu_axi_awprot),
+    .dma_axi_awlen          (lsu_axi_awlen),
+    .dma_axi_awburst        (lsu_axi_awburst),
 
 
-    .dma_axi_wvalid         (1'b0),
+    .dma_axi_wvalid         (dma_axi_wvalid),
     .dma_axi_wready         (dma_axi_wready),
-    .dma_axi_wdata          (dma_axi_wdata),
-    .dma_axi_wstrb          (dma_axi_wstrb),
-    .dma_axi_wlast          (dma_axi_wlast),
+    .dma_axi_wdata          (lsu_axi_wdata),
+    .dma_axi_wstrb          (lsu_axi_wstrb),
+    .dma_axi_wlast          (lsu_axi_wlast),
 
     .dma_axi_bvalid         (dma_axi_bvalid),
-    .dma_axi_bready         (1'b0),
+    .dma_axi_bready         (dma_axi_bready),
     .dma_axi_bresp          (dma_axi_bresp),
-    .dma_axi_bid            (dma_axi_bid),
+    .dma_axi_bid            (),
 
 
-    .dma_axi_arvalid        (1'b0),
+    .dma_axi_arvalid        (dma_axi_arvalid),
     .dma_axi_arready        (dma_axi_arready),
-    .dma_axi_arid           (dma_axi_arid),
-    .dma_axi_araddr         (dma_axi_araddr),
-    .dma_axi_arsize         (dma_axi_arsize),
-    .dma_axi_arprot         (dma_axi_arprot),
-    .dma_axi_arlen          (dma_axi_arlen),
-    .dma_axi_arburst        (dma_axi_arburst),
+    .dma_axi_arid           ('0),
+    .dma_axi_araddr         (lsu_axi_araddr),
+    .dma_axi_arsize         (lsu_axi_arsize),
+    .dma_axi_arprot         (lsu_axi_arprot),
+    .dma_axi_arlen          (lsu_axi_arlen),
+    .dma_axi_arburst        (lsu_axi_arburst),
 
     .dma_axi_rvalid         (dma_axi_rvalid),
-    .dma_axi_rready         (1'b0),
-    .dma_axi_rid            (dma_axi_rid),
+    .dma_axi_rready         (dma_axi_rready),
+    .dma_axi_rid            (),
     .dma_axi_rdata          (dma_axi_rdata),
     .dma_axi_rresp          (dma_axi_rresp),
     .dma_axi_rlast          (dma_axi_rlast),
@@ -768,23 +790,23 @@ defparam lmem.TAGW =`RV_LSU_BUS_TAG;
 axi_slv  lmem(
     .aclk(core_clk),
     .rst_l(rst_l),
-    .arvalid(lsu_axi_arvalid),
-    .arready(lsu_axi_arready),
+    .arvalid(lmem_axi_arvalid),
+    .arready(lmem_axi_arready),
     .araddr(lsu_axi_araddr),
     .arid(lsu_axi_arid),
     .arlen(lsu_axi_arlen),
     .arburst(lsu_axi_arburst),
     .arsize(lsu_axi_arsize),
 
-    .rvalid(lsu_axi_rvalid),
-    .rready(lsu_axi_rready),
-    .rdata(lsu_axi_rdata),
-    .rresp(lsu_axi_rresp),
-    .rid(lsu_axi_rid),
-    .rlast(lsu_axi_rlast),
+    .rvalid(lmem_axi_rvalid),
+    .rready(lmem_axi_rready),
+    .rdata(lmem_axi_rdata),
+    .rresp(lmem_axi_rresp),
+    .rid(lmem_axi_rid),
+    .rlast(lmem_axi_rlast),
 
-    .awvalid(lsu_axi_awvalid),
-    .awready(lsu_axi_awready),
+    .awvalid(lmem_axi_awvalid),
+    .awready(lmem_axi_awready),
     .awaddr(lsu_axi_awaddr),
     .awid(lsu_axi_awid),
     .awlen(lsu_axi_awlen),
@@ -793,25 +815,145 @@ axi_slv  lmem(
 
     .wdata(lsu_axi_wdata),
     .wstrb(lsu_axi_wstrb),
-    .wvalid(lsu_axi_wvalid),
-    .wready(lsu_axi_wready),
+    .wvalid(lmem_axi_wvalid),
+    .wready(lmem_axi_wready),
 
-    .bvalid(lsu_axi_bvalid),
-    .bready(lsu_axi_bready),
-    .bresp(lsu_axi_bresp),
-    .bid(lsu_axi_bid)
+    .bvalid(lmem_axi_bvalid),
+    .bready(lmem_axi_bready),
+    .bresp(lmem_axi_bresp),
+    .bid(lmem_axi_bid)
 );
+
+axi_lsu_dma_bridge # (`RV_LSU_BUS_TAG,`RV_LSU_BUS_TAG ) bridge(
+    .clk(core_clk),
+    .reset_l(rst_l),
+
+    .m_arvalid(lsu_axi_arvalid),
+    .m_arid(lsu_axi_arid),
+    .m_araddr(lsu_axi_araddr),
+    .m_arready(lsu_axi_arready),
+
+    .m_rvalid(lsu_axi_rvalid),
+    .m_rready(lsu_axi_rready),
+    .m_rdata(lsu_axi_rdata),
+    .m_rid(lsu_axi_rid),
+    .m_rresp(lsu_axi_rresp),
+    .m_rlast(lsu_axi_rlast),
+
+    .m_awvalid(lsu_axi_awvalid),
+    .m_awid(lsu_axi_awid),
+    .m_awaddr(lsu_axi_awaddr),
+    .m_awready(lsu_axi_awready),
+
+    .m_wvalid(lsu_axi_wvalid),
+    .m_wready(lsu_axi_wready),
+
+    .m_bresp(lsu_axi_bresp),
+    .m_bvalid(lsu_axi_bvalid),
+    .m_bid(lsu_axi_bid),
+    .m_bready(lsu_axi_bready),
+
+    .s0_arvalid(lmem_axi_arvalid),
+    .s0_arready(lmem_axi_arready),
+
+    .s0_rvalid(lmem_axi_rvalid),
+    .s0_rid(lmem_axi_rid),
+    .s0_rresp(lmem_axi_rresp),
+    .s0_rdata(lmem_axi_rdata),
+    .s0_rlast(lmem_axi_rlast),
+    .s0_rready(lmem_axi_rready),
+
+    .s0_awvalid(lmem_axi_awvalid),
+    .s0_awready(lmem_axi_awready),
+
+    .s0_wvalid(lmem_axi_wvalid),
+    .s0_wready(lmem_axi_wready),
+
+    .s0_bresp(lmem_axi_bresp),
+    .s0_bvalid(lmem_axi_bvalid),
+    .s0_bid(lmem_axi_bid),
+    .s0_bready(lmem_axi_bready),
+
+
+    .s1_arvalid(dma_axi_arvalid),
+    .s1_arready(dma_axi_arready),
+
+    .s1_rvalid(dma_axi_rvalid),
+    .s1_rresp(dma_axi_rresp),
+    .s1_rdata(dma_axi_rdata),
+    .s1_rlast(dma_axi_rlast),
+    .s1_rready(dma_axi_rready),
+
+    .s1_awvalid(dma_axi_awvalid),
+    .s1_awready(dma_axi_awready),
+
+    .s1_wvalid(dma_axi_wvalid),
+    .s1_wready(dma_axi_wready),
+
+    .s1_bresp(dma_axi_bresp),
+    .s1_bvalid(dma_axi_bvalid),
+    .s1_bready(dma_axi_bready)
+);
+
+
 `endif
 
+task preload_iccm;
+bit[31:0] data;
+bit[31:0] addr, eaddr, saddr, faddr;
+int adr;
+/*
+addresses:
+ 0xffec - ICCM start address to load
+ 0xfff0 - ICCM end address to load
+ 0xfff4 - imem start address
+*/
+
+addr = 'hffec;
+saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
+if ( (saddr < `RV_ICCM_SADR) || (saddr > `RV_ICCM_EADR)) return;
+`ifndef RV_ICCM_ENABLE
+    $display("********************************************************");
+    $display("ICCM preload: there is no ICCM in SweRV, terminating !!!");
+    $display("********************************************************");
+    $finish;
+`endif
+init_iccm;
+addr = 'hfff0;
+eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
+addr = 'hfff4;
+faddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
+$display("ICCM pre-load from %h to %h", saddr, eaddr);
+
+for(addr= saddr; addr <= eaddr; addr+=4) begin
+    adr = faddr & 'hffff;
+    data = {imem.mem[adr+3],imem.mem[adr+2],imem.mem[adr+1],imem.mem[adr]};
+    slam_iccm_ram(addr, data == 0 ? 0 : {riscv_ecc32(data),data});
+    faddr+=4;
+end
+
+endtask
 
 task preload_dccm;
 bit[31:0] data;
 bit[31:0] addr, eaddr;
 int adr;
+/*
+addresses:
+ 0xfff8 - DCCM start address to load
+ 0xfffc - ICCM end address to load
+ 0x0    - lmem start addres to load from
+*/
 
 addr = 'hfff8;
 eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 if (eaddr != `RV_DCCM_SADR) return;
+`ifndef RV_DCCM_ENABLE
+    $display("********************************************************");
+    $display("DCCM preload: there is no DCCM in SweRV, terminating !!!");
+    $display("********************************************************");
+    $finish;
+`endif
 addr = 'hfffc;
 eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 $display("DCCM pre-load from %h to %h", `RV_DCCM_SADR, eaddr);
@@ -824,16 +966,20 @@ end
 
 endtask
 
+`define ICCM_PATH `RV_TOP.mem.iccm.iccm
 `ifdef VERILATOR
-`define DRAM(bank) rvtop.mem.Gen_dccm_enable.dccm.mem_bank[bank].ram.ram_core
+`define DRAM(bk) rvtop.mem.Gen_dccm_enable.dccm.mem_bank[bk].ram.ram_core
+`define IRAM(bk) `ICCM_PATH.mem_bank[bk].iccm_bank.ram_core
 `else
-`define DRAM(bank) rvtop.mem.Gen_dccm_enable.dccm.mem_bank[bank].dccm.dccm_bank.ram_core
+`define DRAM(bk) rvtop.mem.Gen_dccm_enable.dccm.mem_bank[bk].dccm.dccm_bank.ram_core
+`define IRAM(bk) `ICCM_PATH.mem_bank[bk].iccm.iccm_bank.ram_core
 `endif
+
 
 task slam_dccm_ram(input [31:0] addr, input[38:0] data);
 int bank, indx;
 bank = get_dccm_bank(addr, indx);
-//`ifndef VERILATOR
+`ifdef RV_DCCM_ENABLE
 case(bank)
 0: `DRAM(0)[indx] = data;
 1: `DRAM(1)[indx] = data;
@@ -850,7 +996,82 @@ case(bank)
 7: `DRAM(7)[indx] = data;
 `endif
 endcase
-//`endif
+`endif
+//$display("Writing bank %0d indx=%0d A=%h, D=%h",bank, indx, addr, data);
+endtask
+
+
+task slam_iccm_ram( input[31:0] addr, input[38:0] data);
+int bank, idx;
+
+bank = get_iccm_bank(addr, idx);
+`ifdef RV_ICCM_ENABLE
+case(bank) // {
+  0: `IRAM(0)[idx] = data;
+  1: `IRAM(1)[idx] = data;
+ `ifdef RV_ICCM_NUM_BANKS_4
+  2: `IRAM(2)[idx] = data;
+  3: `IRAM(3)[idx] = data;
+ `endif
+ `ifdef RV_ICCM_NUM_BANKS_8
+  2: `IRAM(2)[idx] = data;
+  3: `IRAM(3)[idx] = data;
+  4: `IRAM(4)[idx] = data;
+  5: `IRAM(5)[idx] = data;
+  6: `IRAM(6)[idx] = data;
+  7: `IRAM(7)[idx] = data;
+ `endif
+
+ `ifdef RV_ICCM_NUM_BANKS_16
+  2: `IRAM(2)[idx] = data;
+  3: `IRAM(3)[idx] = data;
+  4: `IRAM(4)[idx] = data;
+  5: `IRAM(5)[idx] = data;
+  6: `IRAM(6)[idx] = data;
+  7: `IRAM(7)[idx] = data;
+  8: `IRAM(8)[idx] = data;
+  9: `IRAM(9)[idx] = data;
+  10: `IRAM(10)[idx] = data;
+  11: `IRAM(11)[idx] = data;
+  12: `IRAM(12)[idx] = data;
+  13: `IRAM(13)[idx] = data;
+  14: `IRAM(14)[idx] = data;
+  15: `IRAM(15)[idx] = data;
+ `endif
+endcase // }
+`endif
+endtask
+
+task init_iccm;
+`ifdef RV_ICCM_ENABLE
+    `IRAM(0) = '{default:39'h0};
+    `IRAM(1) = '{default:39'h0};
+`ifdef RV_ICCM_NUM_BANKS_4
+    `IRAM(2) = '{default:39'h0};
+    `IRAM(3) = '{default:39'h0};
+`endif
+`ifdef RV_ICCM_NUM_BANKS_8
+    `IRAM(4) = '{default:39'h0};
+    `IRAM(5) = '{default:39'h0};
+    `IRAM(6) = '{default:39'h0};
+    `IRAM(7) = '{default:39'h0};
+`endif
+
+`ifdef RV_ICCM_NUM_BANKS_16
+    `IRAM(4) = '{default:39'h0};
+    `IRAM(5) = '{default:39'h0};
+    `IRAM(6) = '{default:39'h0};
+    `IRAM(7) = '{default:39'h0};
+    `IRAM(8) = '{default:39'h0};
+    `IRAM(9) = '{default:39'h0};
+    `IRAM(10) = '{default:39'h0};
+    `IRAM(11) = '{default:39'h0};
+    `IRAM(12) = '{default:39'h0};
+    `IRAM(13) = '{default:39'h0};
+    `IRAM(14) = '{default:39'h0};
+    `IRAM(15) = '{default:39'h0};
+ `endif
+`endif
 endtask
 
 
@@ -866,7 +1087,7 @@ synd[6] = ^{data, synd[5:0]};
 return synd;
 endfunction
 
-function int get_dccm_bank(input int addr,  output int bank_idx);
+function int get_dccm_bank(input[31:0] addr,  output int bank_idx);
 `ifdef RV_DCCM_NUM_BANKS_2
     bank_idx = int'(addr[`RV_DCCM_BITS-1:3]);
     return int'( addr[2]);
@@ -878,5 +1099,22 @@ function int get_dccm_bank(input int addr,  output int bank_idx);
     return int'( addr[4:2]);
 `endif
 endfunction
+
+function int get_iccm_bank(input[31:0] addr,  output int bank_idx);
+`ifdef RV_DCCM_NUM_BANKS_2
+    bank_idx = int'(addr[`RV_DCCM_BITS-1:3]);
+    return int'( addr[2]);
+`elsif RV_ICCM_NUM_BANKS_4
+    bank_idx = int'(addr[`RV_ICCM_BITS-1:4]);
+    return int'(addr[3:2]);
+`elsif RV_ICCM_NUM_BANKS_8
+    bank_idx = int'(addr[`RV_ICCM_BITS-1:5]);
+    return int'( addr[4:2]);
+`elsif RV_ICCM_NUM_BANKS_16
+    bank_idx = int'(addr[`RV_ICCM_BITS-1:6]);
+    return int'( addr[5:2]);
+`endif
+endfunction
+
 
 endmodule

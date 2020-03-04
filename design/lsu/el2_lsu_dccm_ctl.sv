@@ -100,7 +100,10 @@ import el2_pkg::*;
 
    input logic [31:0]                      store_data_m,
    input logic                             dma_dccm_wen,
+   input logic                             dma_pic_wen,
    input logic [2:0]                       dma_mem_tag_m,
+   input logic [31:0]                      dma_mem_addr,       // DMA address
+   input logic [63:0]                      dma_mem_wdata,      // DMA write data
    input logic [31:0]                      dma_dccm_wdata_lo,
    input logic [31:0]                      dma_dccm_wdata_hi,
    input logic [pt.DCCM_ECC_WIDTH-1:0]     dma_dccm_wdata_ecc_hi,         // ECC bits for the DMA wdata
@@ -365,14 +368,14 @@ import el2_pkg::*;
    assign dccm_data_ecc_hi_m[pt.DCCM_ECC_WIDTH-1:0] = dccm_rd_data_hi[pt.DCCM_FDATA_WIDTH-1:pt.DCCM_DATA_WIDTH];
 
    // PIC signals. PIC ignores the lower 2 bits of address since PIC memory registers are 32-bits
-   assign picm_wren          = lsu_pkt_r.valid & lsu_pkt_r.store & addr_in_pic_r & lsu_commit_r;
+   assign picm_wren          = (lsu_pkt_r.valid & lsu_pkt_r.store & addr_in_pic_r & lsu_commit_r) | dma_pic_wen;
    assign picm_rden          = lsu_pkt_d.valid & lsu_pkt_d.load  & addr_in_pic_d;
    assign picm_mken          = lsu_pkt_d.valid & lsu_pkt_d.store & addr_in_pic_d;  // Get the mask for stores
-   assign picm_rdaddr[31:0]  = pt.PIC_BASE_ADDR | {17'b0,lsu_addr_d[14:0]};
+   assign picm_rdaddr[31:0]  = pt.PIC_BASE_ADDR | {{32-pt.PIC_BITS{1'b0}},lsu_addr_d[pt.PIC_BITS-1:0]};
 
-   assign picm_wraddr[31:0]  = pt.PIC_BASE_ADDR | {{32-pt.PIC_BITS{1'b0}},lsu_addr_r[pt.PIC_BITS-1:0]};
+   assign picm_wraddr[31:0]  = pt.PIC_BASE_ADDR | {{32-pt.PIC_BITS{1'b0}},(dma_pic_wen ? dma_mem_addr[pt.PIC_BITS-1:0] : lsu_addr_r[pt.PIC_BITS-1:0])};
 
-   assign picm_wr_data[31:0] = store_datafn_lo_r[31:0];
+   assign picm_wr_data[31:0] = dma_pic_wen ? dma_mem_wdata[31:0] : store_datafn_lo_r[31:0];
 
    assign picm_mask_data_m[31:0] = picm_rd_data_m[31:0];
    assign picm_rd_data_m[63:0]   = {picm_rd_data[31:0],picm_rd_data[31:0]};

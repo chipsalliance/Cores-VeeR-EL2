@@ -425,7 +425,7 @@ import el2_pkg::*;
                                                     dec_tlu_i0_valid_wb1 | dec_tlu_i0_exc_valid_wb1};
    assign rv_trace_pkt.rv_i_exception_ip = {dec_tlu_int_valid_wb1, dec_tlu_i0_exc_valid_wb1};
    assign rv_trace_pkt.rv_i_ecause_ip =     dec_tlu_exc_cause_wb1[4:0];  // replicate across ports
-   assign rv_trace_pkt.rv_i_interrupt_ip = {dec_tlu_int_valid_wb1,2'b0};
+   assign rv_trace_pkt.rv_i_interrupt_ip = {dec_tlu_int_valid_wb1,1'b0};
    assign rv_trace_pkt.rv_i_tval_ip =    dec_tlu_mtval_wb1[31:0];        // replicate across ports
 // end trace
 

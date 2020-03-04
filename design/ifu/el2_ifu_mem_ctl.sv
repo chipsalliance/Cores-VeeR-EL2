@@ -1343,7 +1343,7 @@ assign  ic_real_rd_wp_unused  =  (ifc_fetch_req_bf &  ~ifc_iccm_access_bf  &  ~i
 
 
 assign ic_wr_en[pt.ICACHE_NUM_WAYS-1:0] = bus_ic_wr_en[pt.ICACHE_NUM_WAYS-1:0] & {pt.ICACHE_NUM_WAYS{write_ic_16_bytes}};
-assign ic_write_stall                =  write_ic_16_bytes &  ~((((miss_state== CRIT_BYP_OK) | (miss_state==STREAM)) & ~(bus_ifu_wr_en_ff & last_beat & ~uncacheable_miss_ff)));
+assign ic_write_stall                =  write_ic_16_bytes &  ~((((miss_state== CRIT_BYP_OK) | ((miss_state==STREAM) & ~(exu_flush_final | ifu_bp_hit_taken_q_f  | stream_eol_f ))) & ~(bus_ifu_wr_en_ff & last_beat & ~uncacheable_miss_ff)));
 
    rvdff #(1) reset_all_tag_ff (.*, .clk(active_clk),  .din(dec_tlu_fence_i_wb), .dout(reset_all_tags));
 

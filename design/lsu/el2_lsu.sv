@@ -257,7 +257,7 @@ import el2_pkg::*;
    logic        is_sideeffects_m;
    logic [2:0]  dma_mem_tag_d, dma_mem_tag_m;
    logic        ldst_nodma_mtor;
-   logic        dma_dccm_wen;
+   logic        dma_dccm_wen, dma_pic_wen;
    logic [31:0] dma_dccm_wdata_lo, dma_dccm_wdata_hi;
    logic [pt.DCCM_ECC_WIDTH-1:0] dma_dccm_wdata_ecc_lo, dma_dccm_wdata_ecc_hi;
 
@@ -291,6 +291,7 @@ import el2_pkg::*;
    assign dccm_ready = ~(dec_lsu_valid_raw_d | ldst_nodma_mtor | ld_single_ecc_error_r_ff);
 
    assign dma_dccm_wen = dma_dccm_req & dma_mem_write & addr_in_dccm_d;
+   assign dma_pic_wen  = dma_dccm_req & dma_mem_write & addr_in_pic_d;
    assign {dma_dccm_wdata_hi[31:0], dma_dccm_wdata_lo[31:0]} = dma_mem_wdata[63:0] >> {dma_mem_addr[2:0], 3'b000};   // Shift the dma data to lower bits to make it consistent to lsu stores
 
 

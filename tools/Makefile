@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Western Digital Corporation or its affiliates.
+# Copyright 2020 Western Digital Corporation or its affiliates.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,21 +27,24 @@ snapshot = $(target)
 SWERV_CONFIG = ${RV_ROOT}/configs/swerv.config
 IRUN = xrun
 VCS = vcs
+VLOG = qverilog
 VERILATOR = verilator
 GCC_PREFIX = riscv64-unknown-elf
 BUILD_DIR = snapshots/${snapshot}
 TBDIR = ${RV_ROOT}/testbench
 
 # Define test name
-TEST = hello_world2
+TEST = hello_world
 
 # Define test name
-TEST_DIR = ${RV_ROOT}/testbench/asm
+TEST_DIR = ${TBDIR}/asm
+HEX_DIR = ${TBDIR}/hex
 
 ifdef debug
  DEBUG_PLUS = +dumpon
  IRUN_DEBUG = -access +rc
  IRUN_DEBUG_RUN = -input ${RV_ROOT}/testbench/input.tcl
+ VERILATOR_DEBUG = --trace
 endif
 
 # provide specific link file
@@ -73,18 +76,18 @@ all: clean verilator
 
 clean:
 	rm -rf *.log *.s *.hex *.dis *.tbl irun* vcs* simv* snapshots swerv* \
-	verilator* *.exe obj* *.o ucli.key vc_hdrs.h csrc *.csv
+	verilator* *.exe obj* *.o ucli.key vc_hdrs.h csrc *.csv work
 
 # If define files do not exist, then run swerv.config.
 ${BUILD_DIR}/defines.h :
-	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/swerv.config -target=$(target)
+	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/swerv.config -target=$(target) $(CONF_PARAMS)
 
 verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h test_tb_top.cpp
 	echo '`undef ASSERT_ON' >> ${BUILD_DIR}/common_defines.vh
 	$(VERILATOR) '-UASSERT_ON' --cc -CFLAGS ${CFLAGS} $(defines) \
 	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist \
 	  -Wno-WIDTH -Wno-UNOPTFLAT ${TBFILES} --top-module tb_top \
-	  -exe test_tb_top.cpp --trace --autoflush
+	  -exe test_tb_top.cpp --autoflush $(VERILATOR_DEBUG)
 	cp ${RV_ROOT}/testbench/test_tb_top.cpp obj_dir/
 	$(MAKE) -C obj_dir/ -f Vtb_top.mk $(VERILATOR_MAKE_FLAGS)
 	touch verilator-build
@@ -107,7 +110,7 @@ irun-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	touch irun-build
 
 verilator: program.hex verilator-build
-	./obj_dir/Vtb_top ${DEBUG_PLUS}
+	./obj_dir/Vtb_top
 
 irun: program.hex irun-build
 	$(IRUN) -64bit -abvglobalfailurelimit 1 +lic_queue -licqueue \
@@ -117,23 +120,30 @@ irun: program.hex irun-build
 vcs: program.hex vcs-build
 	./simv $(DEBUG_PLUS) +vcs+lic+wait  -l vcs.log
 
+vlog: program.hex ${TBFILES} ${BUILD_DIR}/defines.h
+	$(VLOG) -l vlog.log -sv -mfcu +incdir+${BUILD_DIR}+${RV_ROOT}/design/include+${RV_ROOT}/design/lib\
+        $(defines) -f ${RV_ROOT}/testbench/flist ${TBFILES} -R ${DEBUG_PLUS}
+
+
+ifeq ($(shell which $(GCC_PREFIX)-gcc 2> /dev/null),)
+program.hex: ${BUILD_DIR}/defines.h
+	@echo " !!! No $(GCC_PREFIX)-gcc in path, using canned hex files !!"
+	cp ${HEX_DIR}/$(TEST).program.hex program.hex
+	cp ${HEX_DIR}/$(TEST).data.hex data.hex
+else
+ifneq (,$(wildcard $(TEST_DIR)/$(TEST).makefile))
+program.hex:
+	$(MAKE) -f $(TEST_DIR)/$(TEST).makefile
+else
 program.hex: $(TEST).o $(LINK)
 	@echo Building $(TEST)
-ifeq ($(shell which $(GCC_PREFIX)-as),)
-	@echo " !!! No $(GCC_PREFIX)-as in path, using canned hex files !!"
-	cp ${RV_ROOT}/testbench/hex/*.hex .
-else
-ifeq (,$(wildcard $(TEST_DIR)/$(TEST).makefile))
 	$(GCC_PREFIX)-ld -m elf32lriscv --discard-none -T$(LINK) -o $(TEST).exe $(TEST).o
-	$(GCC_PREFIX)-objcopy -O verilog --only-section ".data*" --change-section-lma .data=0 $(TEST).exe data.hex
-	$(GCC_PREFIX)-objcopy -O verilog --only-section ".text"  $(TEST).exe program.hex
+	$(GCC_PREFIX)-objcopy -O verilog --only-section ".data*" --change-section-lma .data*-0x10000 $(TEST).exe data.hex
+	$(GCC_PREFIX)-objcopy -O verilog --only-section ".text*"  $(TEST).exe program.hex
 	$(GCC_PREFIX)-objdump -S  $(TEST).exe > $(TEST).dis
 	$(GCC_PREFIX)-nm -f posix -C $(TEST).exe > $(TEST).tbl
 	@echo Completed building $(TEST)
-else
-	$(MAKE) -f $(TEST_DIR)/$(TEST).makefile
-endif
-endif
+
 
 %.o : %.s ${BUILD_DIR}/defines.h
 	$(GCC_PREFIX)-cpp -I${BUILD_DIR}  $<  > $(TEST).cpp.s
@@ -144,9 +154,12 @@ ABI = -mabi=ilp32 -march=rv32imc
 
 %.o : %.c ${BUILD_DIR}/defines.h
 	$(GCC_PREFIX)-gcc -I${BUILD_DIR} ${TEST_CFLAGS} ${ABI} -nostdlib -c $< -o $@	
+endif
+endif
+
 
 help:
 	@echo Make sure the environment variable RV_ROOT is set.
-	@echo Possible targets: verilator vcs irun help clean all verilator-build irun-build vcs-build program.hex
+	@echo Possible targets: verilator vcs irun vlog help clean all verilator-build irun-build vcs-build program.hex
 
-.PHONY: help clean verilator vcs irun 
+.PHONY: help clean verilator vcs irun vlog

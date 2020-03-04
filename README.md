@@ -1,4 +1,4 @@
-# EL2 SweRV RISC-V Core<sup>TM</sup> 1.0 from Western Digital
+# EL2 SweRV RISC-V Core<sup>TM</sup> 1.1 from Western Digital
 
 This repository contains the SweRV EL2 Core<sup>TM</sup>  design RTL
 
@@ -141,12 +141,12 @@ The simulation run/build command has following generic form:
     make -f $RV_ROOT/tools/Makefile [<simulator>] [debug=1] [snapshot=mybuild] [target=<target>] [TEST=<test>] [TEST_DIR=<path_to_test_dir>]
 
 where:
-```
-<simulator> -  can be 'verilator' (by default) 'irun' - Cadence xrun, 'vcs' - Synopsys VCS
+``` 
+<simulator> -  can be 'verilator' (by default) 'irun' - Cadence xrun, 'vcs' - Synopsys VCS, 'vlog' Mentor Questa
                if not provided, 'make' cleans work directory, builds verilator executable and runs a test.
 debug=1     -  allows VCD generation for verilator and VCS and SHM waves for irun option.
 <target>    -  predefined CPU configurations 'default' ( by default), 'default_ahb', 'typical_pd', 'high_perf' 
-TEST        -  allows to run a C (<test>.c) or assembly (<test>.s) test, hello_world2 is run by default 
+TEST        -  allows to run a C (<test>.c) or assembly (<test>.s) test, hello_world is run by default 
 TEST_DIR    -  alternative to test source directory testbench/asm
 <snapshot>  -  run and build executable model of custom CPU configuration, remember to provide 'snapshot' argument 
                for runs on custom configurations.
@@ -164,27 +164,32 @@ If you want to compile a test only, you can run:
     make -f $RV_ROOT/tools/Makefile program.hex TEST=<test> [TEST_DIR=/path/to/dir]
 
 
-For the cmark test, the script in `$RV_ROOT/tools/calc_cmarks.pl` can be used
-to extract the core-marks score by invoking that script in the run
-directory.
-
-The Makefile uses  `$RV_ROOT/testbench/linker.ld` file by default to build test executable.
+The Makefile uses  `$RV_ROOT/testbench/link.ld` file by default to build test executable.
 User can provide test specific linker file in form `<test_name>.ld` to build the test executable,
  in the same directory with the test source.
 
 User also can create a test specific makefile in form `<test_name>.makefile`, containing building instructions
 how to create `program.hex` and `data.hex` files used by simulation. The private makefile should be in the same directory
 as the test source.  
-*(`program.hex` file is loaded to instruction bus memory slave and 'data.hex' file is loaded to LSU bus memory slave and
+*(`program.hex` file is loaded to instruction bus memory slave and `data.hex` file is loaded to LSU bus memory slave and
 optionally to DCCM at the beginning of simulation)*.
+
+Note: You may need to delete `program.hex` file from work directory, when run a new test.
 
 The  `$RV_ROOT/testbench/asm` directory contains following tests ready to simulate:
 ```
-hello_world2      - default tes to run, prints Hello World message to screen and console.log
+hello_world      - default tes to run, prints Hello World message to screen and console.log
 hello_world_dccm  - the same as above, but takes the string from preloaded DCCM.
+hello_world_iccm  - the same as hello_world, but loads the test code to ICCM via LSU to DMA bridge and then executes
+                  it from there. Runs on EL2 with AXI4 buses only. 
 cmark             - coremark benchmark running with code and data in external memories
 cmark_dccm        - the same as above, running data and stack from DCCM (faster)
+cmark_iccm        - the same as above with preloaded code to ICCM. 
 ```
+
+The `$RV_ROOT/testbench/hex` directory contains precompiled hex files of the tests, ready for simulation in case RISCV SW tools are not installed.
+
+**Note**: The testbench has a simple synthesizable bridge that allows you to load the ICCM via load/store instructions. This is only supported for AXI4 builds.
 
 ----
 Western Digital, the Western Digital logo, G-Technology, SanDisk, Tegile, Upthere, WD, SweRV Core, SweRV ISS, 

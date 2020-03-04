@@ -89,6 +89,19 @@ import el2_pkg::*;
                                                                                       ((addr_bank_inc[pt.ICCM_BANK_HI:2] == i) ?
                                                                                                     addr_bank_inc[pt.ICCM_BITS-1 : pt.ICCM_BANK_INDEX_LO] :
                                                                                                     iccm_rw_addr[pt.ICCM_BITS-1 : pt.ICCM_BANK_INDEX_LO]);
+ `ifdef VERILATOR
+
+    el2_ram #(.depth(1<<pt.ICCM_INDEX_BITS), .width(39)) iccm_bank (
+                                     // Primary ports
+                                     .ME(iccm_clken[i]),
+                                     .CLK(clk),
+                                     .WE(wren_bank[i]),
+                                     .ADR(addr_bank[i]),
+                                     .D(iccm_bank_wr_data[i][38:0]),
+                                     .Q(iccm_bank_dout[i][38:0])
+
+                                      );
+ `else
 
      if (pt.ICCM_INDEX_BITS == 6 ) begin : iccm
                ram_64x39 iccm_bank (
@@ -212,6 +225,8 @@ import el2_pkg::*;
 
                                       );
      end // block: iccm
+`endif
+
    // match the redundant rows
    assign sel_red1[i]  = (redundant_valid[1]  & (((iccm_rw_addr[pt.ICCM_BITS-1:2] == redundant_address[1][pt.ICCM_BITS-1:2]) & (iccm_rw_addr[3:2] == i)) |
                                                  ((addr_bank_inc[pt.ICCM_BITS-1:2]== redundant_address[1][pt.ICCM_BITS-1:2]) & (addr_bank_inc[3:2] == i))));

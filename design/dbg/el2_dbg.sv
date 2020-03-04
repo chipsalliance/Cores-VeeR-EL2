@@ -109,6 +109,7 @@ import el2_pkg::*;
    // general inputs
    input logic                         clk,
    input logic                         rst_l,
+   input logic                         dbg_rst_l,
    input logic                         clk_override,
    input logic                         scan_mode
 );
@@ -147,6 +148,8 @@ import el2_pkg::*;
    logic         dmstatus_havereset_wren;
    logic         dmstatus_havereset_rst;
    logic         dmstatus_resumeack;
+   logic         dmstatus_unavail;
+   logic         dmstatus_running;
    logic         dmstatus_halted;
    logic         dmstatus_havereset;
 
@@ -227,7 +230,7 @@ import el2_pkg::*;
    // end clocking section
 
    // Reset logic
-   assign dbg_dm_rst_l = rst_l & (dmcontrol_reg[0] | scan_mode);
+   assign dbg_dm_rst_l = dbg_rst_l & (dmcontrol_reg[0] | scan_mode);
    assign dbg_core_rst_l = ~dmcontrol_reg[1];
 
    // system bus register
@@ -253,10 +256,10 @@ import el2_pkg::*;
 
    assign sbcs_illegal_size = sbcs_reg[19];    // Anything bigger than 64 bits is illegal
 
-   assign sbaddress0_incr[3:0] = ({4{(sbcs_reg[19:17] == 3'b000)}} &  4'b0001) |
-                                 ({4{(sbcs_reg[19:17] == 3'b001)}} &  4'b0010) |
-                                 ({4{(sbcs_reg[19:17] == 3'b010)}} &  4'b0100) |
-                                 ({4{(sbcs_reg[19:17] == 3'b100)}} &  4'b1000);
+   assign sbaddress0_incr[3:0] = ({4{(sbcs_reg[19:17] == 3'h0)}} &  4'b0001) |
+                                 ({4{(sbcs_reg[19:17] == 3'h1)}} &  4'b0010) |
+                                 ({4{(sbcs_reg[19:17] == 3'h2)}} &  4'b0100) |
+                                 ({4{(sbcs_reg[19:17] == 3'h3)}} &  4'b1000);
 
    // sbdata
    assign        sbdata0_reg_wren0   = dmi_reg_en & dmi_reg_wr_en & (dmi_reg_addr == 7'h3c);   // write data only when single read is 0
@@ -287,13 +290,14 @@ import el2_pkg::*;
    assign sbdata0wr_access  = dmi_reg_en &  dmi_reg_wr_en & (dmi_reg_addr == 7'h3c);                   // write to sbdata0 will start write command to system bus
 
    // memory mapped registers
-   // dmcontrol register has only 6 bits implemented. 31: haltreq, 30: resumereq, 29: haltreset, 28: ackhavereset, 1: ndmreset, 0: dmactive.
+   // dmcontrol register has only 5 bits implemented. 31: haltreq, 30: resumereq, 28: ackhavereset, 1: ndmreset, 0: dmactive.
    // rest all the bits are zeroed out
    // dmactive flop is reset based on core rst_l, all other flops use dm_rst_l
    assign dmcontrol_wren      = (dmi_reg_addr ==  7'h10) & dmi_reg_en & dmi_reg_wr_en;
+   assign dmcontrol_reg[29]  = '0;
    assign dmcontrol_reg[27:2] = '0;
-   rvdffs #(5) dmcontrolff (.din({dmi_reg_wdata[31:28],dmi_reg_wdata[1]}), .dout({dmcontrol_reg[31:28], dmcontrol_reg[1]}), .en(dmcontrol_wren), .rst_l(dbg_dm_rst_l), .clk(dbg_free_clk));
-   rvdffs #(1) dmcontrol_dmactive_ff (.din(dmi_reg_wdata[0]), .dout(dmcontrol_reg[0]), .en(dmcontrol_wren), .rst_l(rst_l), .clk(dbg_free_clk));
+   rvdffs #(4) dmcontrolff (.din({dmi_reg_wdata[31:30],dmi_reg_wdata[28],dmi_reg_wdata[1]}), .dout({dmcontrol_reg[31:30], dmcontrol_reg[28], dmcontrol_reg[1]}), .en(dmcontrol_wren), .rst_l(dbg_dm_rst_l), .clk(dbg_free_clk));
+   rvdffs #(1) dmcontrol_dmactive_ff (.din(dmi_reg_wdata[0]), .dout(dmcontrol_reg[0]), .en(dmcontrol_wren), .rst_l(dbg_rst_l), .clk(dbg_free_clk));
    rvdff  #(1) dmcontrol_wrenff(.din(dmcontrol_wren), .dout(dmcontrol_wren_Q), .rst_l(dbg_dm_rst_l), .clk(dbg_free_clk));
 
    // dmstatus register bits that are implemented
@@ -301,10 +305,12 @@ import el2_pkg::*;
    // rest all the bits are zeroed out
    assign dmstatus_reg[31:20] = '0;
    assign dmstatus_reg[19:18] = {2{dmstatus_havereset}};
-   assign dmstatus_reg[15:10] = '0;
+   assign dmstatus_reg[15:14] = '0;
    assign dmstatus_reg[7]     = '1;
    assign dmstatus_reg[6:4]   = '0;
    assign dmstatus_reg[17:16] = {2{dmstatus_resumeack}};
+   assign dmstatus_reg[13:12] = {2{dmstatus_unavail}};
+   assign dmstatus_reg[11:10] = {2{dmstatus_running}};
    assign dmstatus_reg[9:8]   = {2{dmstatus_halted}};
    assign dmstatus_reg[3:0]   = 4'h2;
 
@@ -313,6 +319,9 @@ import el2_pkg::*;
 
    assign dmstatus_havereset_wren = (dmi_reg_addr == 7'h10) & dmi_reg_wdata[1] & dmi_reg_en & dmi_reg_wr_en;
    assign dmstatus_havereset_rst  = (dmi_reg_addr == 7'h10) & dmi_reg_wdata[28] & dmi_reg_en & dmi_reg_wr_en;
+
+   assign dmstatus_unavail = dmcontrol_reg[1] | ~rst_l;
+   assign dmstatus_running = ~(dmstatus_unavail | dmstatus_halted);
 
    rvdffs  #(1) dmstatus_resumeack_reg (.din(dmstatus_resumeack_din), .dout(dmstatus_resumeack), .en(dmstatus_resumeack_wren), .rst_l(dbg_dm_rst_l), .clk(dbg_free_clk));
    rvdff   #(1) dmstatus_halted_reg    (.din(dec_tlu_dbg_halted & ~dec_tlu_mpc_halted_only),     .dout(dmstatus_halted), .rst_l(dbg_dm_rst_l), .clk(dbg_free_clk));
@@ -332,11 +341,8 @@ import el2_pkg::*;
    assign        abstractcs_error_sel1 = dmi_reg_en & dmi_reg_wr_en & (dmi_reg_addr == 7'h17) & ~((dmi_reg_wdata[31:24] == 8'b0) | (dmi_reg_wdata[31:24] == 8'h2));
    assign        abstractcs_error_sel2 = core_dbg_cmd_done & core_dbg_cmd_fail;
    assign        abstractcs_error_sel3 = dmi_reg_en & dmi_reg_wr_en & (dmi_reg_addr == 7'h17) & ~dmstatus_reg[9];  //(dbg_state != HALTED);
-   assign        abstractcs_error_sel4 = (dmi_reg_addr ==  7'h17) & dmi_reg_en & dmi_reg_wr_en & (dmi_reg_wdata[31:24] == 8'h2) &
-                                         ( ((dmi_reg_wdata[22:20] == 3'b001) &  data1_reg[0]) |
-                                           ((dmi_reg_wdata[22:20] == 3'b010) &  (|data1_reg[1:0])) |
-                                           dmi_reg_wdata[22] | (dmi_reg_wdata[22:20] == 3'b011)
-                                           );
+   assign        abstractcs_error_sel4 = (dmi_reg_addr ==  7'h17) & dmi_reg_en & dmi_reg_wr_en &
+                                         ((dmi_reg_wdata[22:20] != 3'b010) | ((dmi_reg_wdata[31:24] == 8'h2) && (|data1_reg[1:0])));  // Only word size is allowed
 
    assign        abstractcs_error_sel5 = (dmi_reg_addr ==  7'h16) & dmi_reg_en & dmi_reg_wr_en;
 
@@ -358,7 +364,7 @@ import el2_pkg::*;
    // command[16] = 1: write, 0: read
    // Size - 2, Bits Not implemented: 23 (aamvirtual), 19-autoincrement, 18-postexec, 17-transfer
    assign     command_wren = (dmi_reg_addr ==  7'h17) & dmi_reg_en & dmi_reg_wr_en & (dbg_state == HALTED);
-   assign     command_din[31:0] = {dmi_reg_wdata[31:24],1'b0,3'b010,3'b0,dmi_reg_wdata[16:0]};
+   assign     command_din[31:0] = {dmi_reg_wdata[31:24],1'b0,dmi_reg_wdata[22:20],3'b0,dmi_reg_wdata[16:0]};
    rvdffe #(32) dmcommand_reg (.*, .din(command_din[31:0]), .dout(command_reg[31:0]), .en(command_wren), .rst_l(dbg_dm_rst_l));
 
    // data0 reg
@@ -386,18 +392,18 @@ import el2_pkg::*;
       dbg_state_en            = 1'b0;
       abstractcs_busy_wren    = 1'b0;
       abstractcs_busy_din     = 1'b0;
-      dbg_halt_req            = dmcontrol_wren_Q & dmcontrol_reg[31];      // single pulse output to the core. Need to drive every time this register is written since core might be halted due to MPC
+      dbg_halt_req            = dmcontrol_wren_Q & dmcontrol_reg[31] & ~dmcontrol_reg[1];      // single pulse output to the core. Need to drive every time this register is written since core might be halted due to MPC
       dbg_resume_req          = 1'b0;                                      // single pulse output to the core
 
        case (dbg_state)
             IDLE: begin
                      dbg_nxtstate         = (dmstatus_reg[9] | dec_tlu_mpc_halted_only) ? HALTED : HALTING;         // initiate the halt command to the core
                      dbg_state_en         = ((dmcontrol_reg[31] & ~dec_tlu_debug_mode) | dmstatus_reg[9] | dec_tlu_mpc_halted_only) & ~dmcontrol_reg[1];      // when the jtag writes the halt bit in the DM register, OR when the status indicates H
-                     dbg_halt_req         = dmcontrol_reg[31];                          // only when jtag has written the halt_req bit in the control. Removed debug mode qualification during MPC changes
+                     dbg_halt_req         = dmcontrol_reg[31] & ~dmcontrol_reg[1];                           // only when jtag has written the halt_req bit in the control. Removed debug mode qualification during MPC changes
             end
             HALTING : begin
-                     dbg_nxtstate         = HALTED;                                        // Goto HALTED once the core sends an ACK
-                     dbg_state_en         = dmstatus_reg[9];                               // core indicates halted
+                     dbg_nxtstate         = dmcontrol_reg[1] ? IDLE : HALTED;                                 // Goto HALTED once the core sends an ACK
+                     dbg_state_en         = dmstatus_reg[9] | dmcontrol_reg[1];                               // core indicates halted
             end
             HALTED: begin
                      // wait for halted to go away before send to resume. Else start of new command
@@ -409,22 +415,22 @@ import el2_pkg::*;
                      dbg_resume_req       = dbg_state_en & (dbg_nxtstate == RESUMING);                       // single cycle pulse to core if resuming
             end
             CMD_START: begin
-                     dbg_nxtstate         = (|abstractcs_reg[10:8]) ? CMD_DONE : CMD_WAIT;                   // new command sent to the core
-                     dbg_state_en         = dbg_cmd_valid | (|abstractcs_reg[10:8]);
+                     dbg_nxtstate         = dmcontrol_reg[1] ? IDLE : (|abstractcs_reg[10:8]) ? CMD_DONE : CMD_WAIT;    // new command sent to the core
+                     dbg_state_en         = dbg_cmd_valid | (|abstractcs_reg[10:8]) | dmcontrol_reg[1];
             end
             CMD_WAIT: begin
-                     dbg_nxtstate         = CMD_DONE;
-                     dbg_state_en         = core_dbg_cmd_done;                   // go to done state for one cycle after completing current command
+                     dbg_nxtstate         = dmcontrol_reg[1] ? IDLE : CMD_DONE;
+                     dbg_state_en         = core_dbg_cmd_done | dmcontrol_reg[1];                   // go to done state for one cycle after completing current command
             end
             CMD_DONE: begin
-                     dbg_nxtstate         = HALTED;
+                     dbg_nxtstate         = dmcontrol_reg[1] ? IDLE : HALTED;
                      dbg_state_en         = 1'b1;
                      abstractcs_busy_wren = dbg_state_en;                    // remove the busy bit from the abstracts ( bit 12 )
                      abstractcs_busy_din  = 1'b0;
             end
             RESUMING : begin
                      dbg_nxtstate            = IDLE;
-                     dbg_state_en            = dmstatus_reg[17];             // resume ack has been updated in the dmstatus register
+                     dbg_state_en            = dmstatus_reg[17] | dmcontrol_reg[1];             // resume ack has been updated in the dmstatus register
            end
            default : begin
                      dbg_nxtstate            = IDLE;
@@ -450,7 +456,7 @@ import el2_pkg::*;
                                     ({32{dmi_reg_addr == 7'h3d}} & sbdata1_reg[31:0]);
 
 
-   rvdffs #($bits(state_t)) dbg_state_reg    (.din(dbg_nxtstate), .dout({dbg_state}), .en(dbg_state_en), .rst_l(dbg_dm_rst_l), .clk(dbg_free_clk));
+   rvdffs #($bits(state_t)) dbg_state_reg    (.din(dbg_nxtstate), .dout({dbg_state}), .en(dbg_state_en), .rst_l(dbg_dm_rst_l & rst_l), .clk(dbg_free_clk));
    // Ack will use the power on reset only otherwise there won't be any ack until dmactive is 1
    rvdffs #(32)             dmi_rddata_reg   (.din(dmi_reg_rdata_din[31:0]), .dout(dmi_reg_rdata[31:0]), .en(dmi_reg_en), .rst_l(dbg_dm_rst_l), .clk(dbg_free_clk));
 

@@ -1,5 +1,6 @@
 #include "defines.h"
 
+#define ITERATIONS 1
 extern int STACK;
 void main();
 
@@ -1198,7 +1199,9 @@ MAIN_RETURN_TYPE main(int argc, char *argv[]) {
 #else
         ee_printf("Total time (secs): %d\n",time_in_secs(total_time));
         if (time_in_secs(total_time) > 0)
-                ee_printf("Iterations/Sec   : %d\n",default_num_contexts*results[0].iterations/time_in_secs(total_time));
+//              ee_printf("Iterations/Sec   : %d\n",default_num_contexts*results[0].iterations/time_in_secs(total_time));
+                ee_printf("Iterat/Sec/MHz   : %d.%d\n",1000*default_num_contexts*results[0].iterations/time_in_secs(total_time),
+                             100000*default_num_contexts*results[0].iterations/time_in_secs(total_time) % 100);
 #endif
         if (time_in_secs(total_time) < 10) {
                 ee_printf("ERROR! Must execute for at least 10 secs for a valid result!\n");
@@ -2080,8 +2083,7 @@ ee_u8 check_data_types() {
         volatile ee_s32 seed2_volatile=0x8;
         volatile ee_s32 seed3_volatile=0x8;
 #endif
-//      volatile ee_s32 seed4_volatile=ITERATIONS;
-        volatile ee_s32 seed4_volatile=1;
+        volatile ee_s32 seed4_volatile=ITERATIONS;
         volatile ee_s32 seed5_volatile=0;
 /* Porting : Timing functions
         How to capture time and convert to seconds must be ported to whatever is supported by the platform.
@@ -2102,7 +2104,9 @@ ee_u8 check_data_types() {
 #define MYTIMEDIFF(fin,ini) ((fin)-(ini))
 #define TIMER_RES_DIVIDER 1
 #define SAMPLE_TIME_IMPLEMENTATION 1
-#define EE_TICKS_PER_SEC (NSECS_PER_SEC / TIMER_RES_DIVIDER)
+//#define EE_TICKS_PER_SEC (NSECS_PER_SEC / TIMER_RES_DIVIDER)
+
+#define EE_TICKS_PER_SEC 1000
 
 /** Define Host specific (POSIX), or target specific global time variables. */
 static CORETIMETYPE start_time_val, stop_time_val;

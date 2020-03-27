@@ -128,7 +128,7 @@ import el2_pkg::*;
    logic               fir_dccm_access_error_d, fir_nondccm_access_error_d;
    logic               fir_dccm_access_error_m, fir_nondccm_access_error_m;
 
-   logic [2:0]         exc_mscause_d, exc_mscause_m;
+   logic [3:0]         exc_mscause_d, exc_mscause_m;
    logic [31:0]        rs1_d_raw;
    logic [31:0]        store_data_d, store_data_pre_m, store_data_m_in;
    logic [31:0]        bus_read_data_r;
@@ -173,7 +173,7 @@ import el2_pkg::*;
 
    if (pt.LOAD_TO_USE_PLUS1 == 1) begin: L2U_Plus1_1
       logic               access_fault_r, misaligned_fault_r;
-      logic [2:0]         exc_mscause_r;
+      logic [3:0]         exc_mscause_r;
       logic               fir_dccm_access_error_r, fir_nondccm_access_error_r;
 
       // Generate exception packet
@@ -181,14 +181,14 @@ import el2_pkg::*;
       assign lsu_error_pkt_r.single_ecc_error = lsu_single_ecc_error_r & ~lsu_error_pkt_r.exc_valid & ~lsu_pkt_r.dma;
       assign lsu_error_pkt_r.inst_type = lsu_pkt_r.store;
       assign lsu_error_pkt_r.exc_type  = ~misaligned_fault_r;
-      assign lsu_error_pkt_r.mscause[2:0] = (lsu_double_ecc_error_r & ~misaligned_fault_r & ~access_fault_r) ? 3'h1 : exc_mscause_r[2:0];
+      assign lsu_error_pkt_r.mscause[3:0] = (lsu_double_ecc_error_r & ~misaligned_fault_r & ~access_fault_r) ? 4'h1 : exc_mscause_r[3:0];
       assign lsu_error_pkt_r.addr[31:0] = lsu_addr_r[31:0];
 
       assign lsu_fir_error[1:0] = fir_nondccm_access_error_r ? 2'b11 : (fir_dccm_access_error_r ? 2'b10 : ((lsu_pkt_r.fast_int & lsu_double_ecc_error_r) ? 2'b01 : 2'b00));
 
       rvdff #(1) access_fault_rff             (.din(access_fault_m),             .dout(access_fault_r),             .clk(lsu_c1_r_clk), .*);
       rvdff #(1) misaligned_fault_rff         (.din(misaligned_fault_m),         .dout(misaligned_fault_r),         .clk(lsu_c1_r_clk), .*);
-      rvdff #(3) exc_mscause_rff              (.din(exc_mscause_m[2:0]),         .dout(exc_mscause_r[2:0]),         .clk(lsu_c1_r_clk), .*);
+      rvdff #(4) exc_mscause_rff              (.din(exc_mscause_m[3:0]),         .dout(exc_mscause_r[3:0]),         .clk(lsu_c1_r_clk), .*);
       rvdff #(1) fir_dccm_access_error_mff    (.din(fir_dccm_access_error_m),    .dout(fir_dccm_access_error_r),    .clk(lsu_c1_r_clk), .*);
       rvdff #(1) fir_nondccm_access_error_mff (.din(fir_nondccm_access_error_m), .dout(fir_nondccm_access_error_r), .clk(lsu_c1_r_clk), .*);
 
@@ -200,7 +200,7 @@ import el2_pkg::*;
       assign lsu_error_pkt_m.single_ecc_error = lsu_single_ecc_error_m & ~lsu_error_pkt_m.exc_valid & ~lsu_pkt_m.dma;
       assign lsu_error_pkt_m.inst_type = lsu_pkt_m.store;
       assign lsu_error_pkt_m.exc_type  = ~misaligned_fault_m;
-      assign lsu_error_pkt_m.mscause[2:0] = (lsu_double_ecc_error_m & ~misaligned_fault_m & ~access_fault_m) ? 3'h1 : exc_mscause_m[2:0];
+      assign lsu_error_pkt_m.mscause[3:0] = (lsu_double_ecc_error_m & ~misaligned_fault_m & ~access_fault_m) ? 4'h1 : exc_mscause_m[3:0];
       assign lsu_error_pkt_m.addr[31:0] = lsu_addr_m[31:0];
 
       assign lsu_fir_error_m[1:0] = fir_nondccm_access_error_m ? 2'b11 : (fir_dccm_access_error_m ? 2'b10 : ((lsu_pkt_m.fast_int & lsu_double_ecc_error_m) ? 2'b01 : 2'b00));
@@ -318,7 +318,7 @@ import el2_pkg::*;
 
    rvdff #(1) access_fault_mff     (.din(access_fault_d),     .dout(access_fault_m),     .clk(lsu_c1_m_clk), .*);
    rvdff #(1) misaligned_fault_mff (.din(misaligned_fault_d), .dout(misaligned_fault_m), .clk(lsu_c1_m_clk), .*);
-   rvdff #(3) exc_mscause_mff      (.din(exc_mscause_d[2:0]), .dout(exc_mscause_m[2:0]), .clk(lsu_c1_m_clk), .*);
+   rvdff #(4) exc_mscause_mff      (.din(exc_mscause_d[3:0]), .dout(exc_mscause_m[3:0]), .clk(lsu_c1_m_clk), .*);
 
    rvdff #(1) fir_dccm_access_error_mff    (.din(fir_dccm_access_error_d),    .dout(fir_dccm_access_error_m),    .clk(lsu_c1_m_clk), .*);
    rvdff #(1) fir_nondccm_access_error_mff (.din(fir_nondccm_access_error_d), .dout(fir_nondccm_access_error_m), .clk(lsu_c1_m_clk), .*);

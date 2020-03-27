@@ -793,6 +793,12 @@ import el2_pkg::*;
    logic                   lsu_fastint_stall_any;
 
 
+   logic [7:0]  pic_claimid;
+   logic [3:0]  pic_pl, dec_tlu_meicurpl, dec_tlu_meipt;
+   logic        mexintpend;
+   logic        mhwakeup;
+
+
    //assign lsu_fastint_stall_any = 1'b0;
 
    assign active_state = (~dec_pause_state_cg | dec_tlu_flush_lower_r)  | dec_tlu_misc_clk_override;
@@ -881,12 +887,6 @@ import el2_pkg::*;
       .*
 
    );
-
-   logic [7:0]  pic_claimid;
-   logic [3:0]  pic_pl, dec_tlu_meicurpl, dec_tlu_meipt;
-
-   logic        mexintpend;
-   logic        mhwakeup;
 
    el2_pic_ctrl  #(.pt(pt)) pic_ctrl_inst (
                   .clk_override(dec_tlu_pic_clk_override),

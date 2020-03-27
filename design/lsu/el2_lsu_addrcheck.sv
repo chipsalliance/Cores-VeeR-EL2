@@ -45,7 +45,7 @@ import el2_pkg::*;
 
    output logic         access_fault_d,            // access fault
    output logic         misaligned_fault_d,        // misaligned
-   output logic [2:0]   exc_mscause_d,             // mscause for access/misaligned faults
+   output logic [3:0]   exc_mscause_d,             // mscause for access/misaligned faults
 
    output logic         fir_dccm_access_error_d,   // Fast interrupt dccm access error
    output logic         fir_nondccm_access_error_d,// Fast interrupt dccm access error
@@ -66,8 +66,8 @@ import el2_pkg::*;
    logic        base_reg_dccm_or_pic;
    logic        unmapped_access_fault_d, mpu_access_fault_d, picm_access_fault_d, regpred_access_fault_d;
    logic        regcross_misaligned_fault_d, sideeffect_misaligned_fault_d;
-   logic [2:0]  access_fault_mscause_d;
-   logic        misaligned_fault_mscause_d;
+   logic [3:0]  access_fault_mscause_d;
+   logic [3:0]  misaligned_fault_mscause_d;
 
    if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable
       // Start address check
@@ -169,7 +169,7 @@ import el2_pkg::*;
    end
 
    assign access_fault_d = (unmapped_access_fault_d | mpu_access_fault_d | picm_access_fault_d | regpred_access_fault_d) & lsu_pkt_d.valid & ~lsu_pkt_d.dma;
-   assign access_fault_mscause_d[2:0] = unmapped_access_fault_d ? 3'h0 : mpu_access_fault_d ? 3'h3 : regpred_access_fault_d ? 3'h5 : picm_access_fault_d ? 3'h6 : 3'h7;
+   assign access_fault_mscause_d[3:0] = unmapped_access_fault_d ? 4'h2 : mpu_access_fault_d ? 4'h3 : regpred_access_fault_d ? 4'h5 : picm_access_fault_d ? 4'h6 : 4'h0;
 
    // Misaligned happens due to 2 reasons
    // 0. Region cross
@@ -177,9 +177,9 @@ import el2_pkg::*;
    assign regcross_misaligned_fault_d = (start_addr_d[31:28] != end_addr_d[31:28]);
    assign sideeffect_misaligned_fault_d = (is_sideeffects_d & ~is_aligned_d);
    assign misaligned_fault_d = (regcross_misaligned_fault_d | (sideeffect_misaligned_fault_d & addr_external_d)) & lsu_pkt_d.valid & ~lsu_pkt_d.dma;
-   assign misaligned_fault_mscause_d = regcross_misaligned_fault_d ? 1'b0 : 1'b1;
+   assign misaligned_fault_mscause_d[3:0] = regcross_misaligned_fault_d ? 4'h2 : sideeffect_misaligned_fault_d ? 4'h1 : 4'h0;
 
-   assign exc_mscause_d[2:0] = misaligned_fault_d ? {2'b0,misaligned_fault_mscause_d} : access_fault_mscause_d[2:0];
+   assign exc_mscause_d[3:0] = misaligned_fault_d ? misaligned_fault_mscause_d[3:0] : access_fault_mscause_d[3:0];
 
    // Fast interrupt error logic
    assign fir_dccm_access_error_d    = ((start_addr_in_dccm_region_d & ~start_addr_in_dccm_d) |

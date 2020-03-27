@@ -1,3 +1,14 @@
+# EL2 SweRV RISC-V Core<sup>TM</sup> 1.2 from Western Digital
+
+## Release Notes
+
+### Bug fixes
+
+### Improvements
+
+Internal timers.
+
+
 # EL2 SweRV RISC-V Core<sup>TM</sup> 1.1 from Western Digital
 
 ## Release Notes

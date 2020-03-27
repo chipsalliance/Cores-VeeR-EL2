@@ -164,7 +164,7 @@ typedef struct packed {
                       logic single_ecc_error;
                       logic inst_type;   //0: Load, 1: Store
                       logic exc_type;    //0: MisAligned, 1: Access Fault
-                      logic [2:0] mscause;
+                      logic [3:0] mscause;
                       logic [31:0] addr;
                       } el2_lsu_error_pkt_t;
 

@@ -1,4 +1,4 @@
-# EL2 SweRV RISC-V Core<sup>TM</sup> 1.1 from Western Digital
+# EL2 SweRV RISC-V Core<sup>TM</sup> 1.2 from Western Digital
 
 This repository contains the SweRV EL2 Core<sup>TM</sup>  design RTL
 
@@ -190,6 +190,10 @@ cmark_iccm        - the same as above with preloaded code to ICCM.
 The `$RV_ROOT/testbench/hex` directory contains precompiled hex files of the tests, ready for simulation in case RISCV SW tools are not installed.
 
 **Note**: The testbench has a simple synthesizable bridge that allows you to load the ICCM via load/store instructions. This is only supported for AXI4 builds.
+
+**Building an FPGA speed optimized model:**  
+Use ``-set=fpga_optimize=1`` option to ``swerv.config`` to build a model that is removes clock gating logic from flop model so that the FPGA builds can run a higher speeds.
+
 
 ----
 Western Digital, the Western Digital logo, G-Technology, SanDisk, Tegile, Upthere, WD, SweRV Core, SweRV ISS, 

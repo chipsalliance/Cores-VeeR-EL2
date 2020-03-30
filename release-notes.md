@@ -2,8 +2,6 @@
 
 ## Release Notes
 
-## Release Notes
-
 * Modified MSCAUSE encoding to be consistent with current internal specification
 * Added internal timers
 

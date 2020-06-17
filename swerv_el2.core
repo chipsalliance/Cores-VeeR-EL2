@@ -63,7 +63,7 @@ targets:
     tools:
       verilator :
         mode : lint-only
-    toplevel : swerv_wrapper
+    toplevel : el2_swerv_wrapper
 
   synth:
     default_tool : vivado
@@ -74,7 +74,7 @@ targets:
       vivado:
         part : xc7a100tcsg324-1
         pnr  : none
-    toplevel : swerv_wrapper
+    toplevel : el2_swerv_wrapper
 
 generate:
   swerv_default_config:

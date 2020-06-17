@@ -49,23 +49,26 @@ filesets:
       - design/el2_swerv_wrapper.sv
     file_type : systemVerilogSource
 
+  verilator_waiver: {files: [tools/verilator_waiver.vlt : {file_type : systemVerilogSource}]}
+
   vivado_tcl: {files: [tools/vivado.tcl : {file_type : tclSource}]}
 
 targets:
-  default:
+  default: &default
     filesets :
+      # Waivers must be first, because the must be in the compilation unit
+      - "tool_verilator ? (verilator_waiver)"
       - rtl
       - "tool_vivado ? (vivado_tcl)"
   lint:
+    <<: *default
     default_tool: verilator
-    filesets : [rtl]
     generate : [swerv_default_config]
     tools:
       verilator :
         mode : lint-only
         verilator_options:
           - "-Wall"
-          - "-Wno-fatal"
     toplevel : el2_swerv_wrapper
 
   synth:

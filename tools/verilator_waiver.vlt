@@ -1,0 +1,2095 @@
+// DESCRIPTION: Verilator output: Waivers generated with --waiver-output
+
+`verilator_config
+
+// Below you find suggested waivers. You have three options:
+//   1. Fix the reason for the linter warning
+//   2. Keep the waiver permanently if you are sure this is okay
+//   3. Keep the waiver temporarily to suppress the output
+
+// TODO: Fix in design or explain
+lint_off -rule DECLFILENAME -file "*/design/include/el2_def.sv" -match "Filename 'el2_def' does not match PACKAGE name: 'el2_pkg'"
+
+// TODO: Fix in design or explain
+lint_off -rule DECLFILENAME -file "*/design/lib/el2_lib.sv" -match "Filename 'el2_lib' does not match MODULE name: 'el2_btb_tag_hash'"
+
+// TODO: Fix in design or explain
+lint_off -rule DECLFILENAME -file "*/design/lib/beh_lib.sv" -match "Filename 'beh_lib' does not match MODULE name: 'rvdff'"
+
+// TODO: Fix in design or explain
+lint_off -rule DECLFILENAME -file "*/design/el2_pic_ctrl.sv" -match "Filename 'el2_pic_ctrl' does not match MODULE name: 'el2_cmp_and_mux'"
+
+// TODO: Fix in design or explain
+lint_off -rule DECLFILENAME -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Filename 'el2_ifu_ic_mem' does not match MODULE name: 'EL2_IC_DATA'"
+
+// TODO: Fix in design or explain
+lint_off -rule DECLFILENAME -file "*/design/dec/el2_dec_decode_ctl.sv" -match "Filename 'el2_dec_decode_ctl' does not match MODULE name: 'el2_dec_dec_ctl'"
+
+// TODO: Fix in design or explain
+lint_off -rule DECLFILENAME -file "*/design/dec/el2_dec_tlu_ctl.sv" -match "Filename 'el2_dec_tlu_ctl' does not match MODULE name: 'el2_dec_timer_ctl'"
+
+// TODO: Fix in design or explain
+lint_off -rule DECLFILENAME -file "*/design/lib/mem_lib.sv" -match "Filename 'mem_lib' does not match MODULE name: 'el2_ram'"
+
+// TODO: Fix in design or explain
+lint_off -rule PINCONNECTEMPTY -file "*/design/el2_swerv_wrapper.sv" -match "Cell pin connected by name with empty reference: 'tdoEnable'"
+
+// TODO: Fix in design or explain
+lint_off -rule DECLFILENAME -file "*/design/el2_swerv.sv" -match "Filename 'el2_swerv' does not match NOTFOUNDMODULE name: 'axi4_to_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule VARHIDDEN -file "*/design/ifu/el2_ifu_bp_ctl.sv" -match "Declaration of signal hides declaration in upper scope: 'j'*"
+
+// TODO: Fix in design or explain
+lint_off -rule VARHIDDEN -file "*/design/el2_pic_ctrl.sv" -match "Declaration of signal hides declaration in upper scope: 'i'*"
+
+// TODO: Fix in design or explain
+lint_off -rule VARHIDDEN -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Declaration of signal hides declaration in upper scope: 'ic_tag_parity'*"
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/exu/el2_exu.sv" -match "Operator SUB expects 32 or 5 bits on the RHS, but RHS's SEL generates 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/el2_pic_ctrl.sv" -match "Operator LT expects 32 or 10 bits on the LHS, but LHS's SEL generates 9 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/el2_pic_ctrl.sv" -match "Operator DIV expects 32 bits on the LHS, but LHS's SEL generates 9 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/lsu/el2_lsu_dccm_mem.sv" -match "Operator SUB expects 5 bits on the RHS, but RHS's SEL generates 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/lsu/el2_lsu_dccm_mem.sv" -match "Operator SUB expects 5 bits on the RHS, but RHS's SEL generates 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_bp_ctl.sv" -match "Operator ADD expects 32 or 4 bits on the LHS, but LHS's SEL generates 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_bp_ctl.sv" -match "Operator COND expects 32 or 3 bits on the Conditional False, but Conditional False's SEL generates 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_bp_ctl.sv" -match "Operator DIV expects 32 bits on the LHS, but LHS's SEL generates 11 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_aln_ctl.sv" -match "Operator ADD expects 32 or 6 bits on the RHS, but RHS's SEL generates 4 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Operator SUB expects 32 or 5 bits on the RHS, but RHS's SEL generates 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Operator SUB expects 5 bits on the RHS, but RHS's SEL generates 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule VARHIDDEN -file "*/design/ifu/el2_ifu_bp_ctl.sv" -match "Declaration of signal hides declaration in upper scope: 'j'*"
+
+// TODO: Fix in design or explain
+lint_off -rule VARHIDDEN -file "*/design/el2_pic_ctrl.sv" -match "Declaration of signal hides declaration in upper scope: 'i'*"
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Operator ASSIGNW expects 2 bits on the Assign RHS, but Assign RHS's FUNCREF 'f_Enc8to3' generates 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Operator GTE expects 32 or 5 bits on the LHS, but LHS's SEL generates 4 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/lib/el2_lib.sv" -match "Bit extraction of var[9:2] requires 4 bit index, not 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Bit extraction of var[15:0] requires 4 bit index, not 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Bit extraction of var[31:0] requires 5 bit index, not 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/dec/el2_dec_decode_ctl.sv" -match "Bit extraction of var[9:2] requires 4 bit index, not 2 bits."
+
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Bit extraction of var[31:1] requires 5 bit index, not 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Operator EQ expects 5 bits on the LHS, but LHS's SEL generates 3 bits."
+
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Bit extraction of var[12:6] requires 4 bit index, not 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Operator COND expects 3 bits on the Conditional True, but Conditional True's SEL generates 1 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Operator COND expects 3 bits on the Conditional False, but Conditional False's SEL generates 1 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Operator ASSIGNW expects 1 bits on the Assign RHS, but Assign RHS's COND generates 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Operator SUB expects 5 bits on the RHS, but RHS's SEL generates 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Bit extraction of var[12:3] requires 4 bit index, not 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Operator SUB expects 5 bits on the RHS, but RHS's SEL generates 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Operator ASSIGNW expects 2 bits on the Assign RHS, but Assign RHS's REPLICATE generates 4 bits."
+
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Bit extraction of var[12:6] requires 4 bit index, not 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Bit extraction of var[12:3] requires 4 bit index, not 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Bit extraction of var[31:3] requires 5 bit index, not 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Bit extraction of var[36:13] requires 6 bit index, not 5 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Bit extraction of var[12:3] requires 4 bit index, not 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Operator EQ expects 32 bits on the LHS, but LHS's SEL generates 1 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Operator EQ expects 32 bits on the LHS, but LHS's SEL generates 1 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Bit extraction of var[12:4] requires 4 bit index, not 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Bit extraction of var[12:1] requires 4 bit index, not 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Bit extraction of var[5:1] requires 3 bit index, not 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Bit extraction of var[12:1] requires 4 bit index, not 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Bit extraction of var[5:1] requires 3 bit index, not 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Operator COND expects 65 bits on the Conditional True, but Conditional True's SEL generates 64 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Operator COND expects 65 bits on the Conditional True, but Conditional True's REPLICATE generates 64 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Operator COND expects 65 bits on the Conditional True, but Conditional True's REPLICATE generates 64 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Operator ASSIGNW expects 64 bits on the Assign RHS, but Assign RHS's COND generates 65 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Operator COND expects 65 bits on the Conditional True, but Conditional True's SEL generates 64 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Operator COND expects 65 bits on the Conditional True, but Conditional True's REPLICATE generates 64 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Operator COND expects 65 bits on the Conditional True, but Conditional True's REPLICATE generates 64 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Operator ASSIGNW expects 64 bits on the Assign RHS, but Assign RHS's COND generates 65 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_bp_ctl.sv" -match "Bit extraction of var[9:2] requires 4 bit index, not 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_bp_ctl.sv" -match "Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's ADD generates 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_bp_ctl.sv" -match "Operator SUB expects 32 or 5 bits on the RHS, but RHS's SEL generates 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_bp_ctl.sv" -match "Operator SUB expects 32 or 5 bits on the RHS, but RHS's SEL generates 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_bp_ctl.sv" -match "Operator SUB expects 32 or 4 bits on the RHS, but RHS's SEL generates 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_bp_ctl.sv" -match "Operator SUB expects 32 or 4 bits on the RHS, but RHS's SEL generates 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_ifc_ctl.sv" -match "Operator ASSIGNW expects 31 bits on the Assign RHS, but Assign RHS's REPLICATE generates 32 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_aln_ctl.sv" -match "Bit extraction of var[9:2] requires 4 bit index, not 2 bits."
+
+lint_off -rule WIDTH -file "*/design/lsu/el2_lsu_dccm_mem.sv" -match "Operator ADD expects 32 bits on the LHS, but LHS's SEL generates 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/lsu/el2_lsu_dccm_mem.sv" -match "Operator ADD expects 32 bits on the RHS, but RHS's SEL generates 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/exu/el2_exu.sv" -match "Bit extraction of var[9:2] requires 4 bit index, not 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/exu/el2_exu.sv" -match "Bit extraction of var[20:0] requires 5 bit index, not 4 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/exu/el2_exu.sv" -match "Operator SUB expects 32 or 5 bits on the RHS, but RHS's SEL generates 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_iccm_mem.sv" -match "Operator ADD expects 15 bits on the RHS, but RHS's SEL generates 2 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_iccm_mem.sv" -match "Bit extraction of var[15:4] requires 4 bit index, not 5 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/ifu/el2_ifu_iccm_mem.sv" -match "Bit extraction of var[15:1] requires 4 bit index, not 5 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/el2_dma_ctrl.sv" -match "Operator GTE expects 4 bits on the RHS, but RHS's VARREF 'DEPTH' generates 3 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule WIDTH -file "*/design/el2_pic_ctrl.sv" -match "Operator SUB expects 32 or 11 bits on the RHS, but RHS's SEL generates 9 bits."
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'mbist_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not driven, nor used: 'jtag_tdoEn'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'haddr'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'hburst'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'hmastlock'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'hprot'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'hsize'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'htrans'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'hwrite'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'lsu_haddr'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'lsu_hburst'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'lsu_hmastlock'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'lsu_hprot'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'lsu_hsize'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'lsu_htrans'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'lsu_hwrite'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'lsu_hwdata'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'sb_haddr'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'sb_hburst'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'sb_hmastlock'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'sb_hprot'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'sb_hsize'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'sb_htrans'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'sb_hwrite'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'sb_hwdata'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'dma_hrdata'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'dma_hreadyout'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv_wrapper.sv" -match "Signal is not used: 'dma_hresp'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/dmi/dmi_wrapper.v" -match "Signal is not used: 'dmireset'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'haddr'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'hburst'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'hmastlock'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'hprot'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'hsize'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'htrans'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'hwrite'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'hrdata'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'hready'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'hresp'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_haddr'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_hburst'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_hmastlock'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_hprot'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_hsize'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_htrans'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_hwrite'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_hwdata'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'lsu_hrdata'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'lsu_hready'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'lsu_hresp'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_haddr'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_hburst'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_hmastlock'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_hprot'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_hsize'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_htrans'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_hwrite'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_hwdata'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'sb_hrdata'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'sb_hready'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'sb_hresp'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dma_hsel'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dma_haddr'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dma_hburst'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dma_hmastlock'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dma_hprot'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dma_hsize'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dma_htrans'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dma_hwrite'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dma_hwdata'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dma_hreadyin'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_hrdata'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_hreadyout'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_hresp'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dmi_hard_reset'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not driven, nor used: 'hwdata_nc'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_axi_awready_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_axi_wready_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_axi_bvalid_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_axi_bready_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_axi_bresp_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_axi_bid_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_axi_arready_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_axi_rvalid_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_axi_rid_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_axi_rdata_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_axi_rresp_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'lsu_axi_rlast_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'lsu_axi_bready_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'ifu_axi_awready_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'ifu_axi_wready_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'ifu_axi_bvalid_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'ifu_axi_bready_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'ifu_axi_bresp_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'ifu_axi_bid_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'ifu_axi_arready_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'ifu_axi_rvalid_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'ifu_axi_rid_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'ifu_axi_rdata_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'ifu_axi_rresp_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'ifu_axi_rlast_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'ifu_axi_awready_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'ifu_axi_wready_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'ifu_axi_bvalid_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'ifu_axi_bready_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'ifu_axi_bresp_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'ifu_axi_bid_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'ifu_axi_rlast_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_axi_awready_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_axi_wready_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_axi_bvalid_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_axi_bready_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_axi_bresp_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_axi_bid_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_axi_arready_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_axi_rvalid_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_axi_rid_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_axi_rdata_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_axi_rresp_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'sb_axi_rlast_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'sb_axi_bready_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'sb_axi_bid_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'sb_axi_rid_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'sb_axi_rlast_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_awvalid_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_awid_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_awaddr_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_awsize_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_awprot_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_awlen_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_awburst_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_wvalid_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_wdata_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_wstrb_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_wlast_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_bready_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_arvalid_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_arid_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_araddr_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_arsize_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_arprot_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_arlen_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_arburst_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/el2_swerv.sv" -match "Signal is not driven: 'dma_axi_rready_ahb'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dma_axi_awprot_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dma_axi_awlen_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dma_axi_awburst_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dma_axi_wlast_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dma_axi_arprot_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dma_axi_arlen_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dma_axi_arburst_int'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dec_tlu_ifu_clk_override'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_swerv.sv" -match "Signal is not used: 'dec_tlu_bus_clk_override'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_pic_ctrl.sv" -match "Bits of signal are not used: 'intpriority_reg_we'[0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_pic_ctrl.sv" -match "Bits of signal are not used: 'intenable_reg_we'[0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_pic_ctrl.sv" -match "Bits of signal are not used: 'gw_config_reg_we'[0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_pic_ctrl.sv" -match "Bits of signal are not used: 'gw_clear_reg_we'[0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_pic_ctrl.sv" -match "Signal is not driven, nor used: 'levelx_intpend_w_prior_en'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_pic_ctrl.sv" -match "Signal is not driven, nor used: 'levelx_intpend_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_pic_ctrl.sv" -match "Signal is not driven, nor used: 'l2_intpend_w_prior_en_ff'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_pic_ctrl.sv" -match "Signal is not driven, nor used: 'l2_intpend_id_ff'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_pic_ctrl.sv" -match "Signal is not driven, nor used: 'prithresh_reg_write'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_pic_ctrl.sv" -match "Signal is not driven, nor used: 'prithresh_reg_read'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_pic_ctrl.sv" -match "Bits of signal are not used: 'extintsrc_req_sync'[0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_pic_ctrl.sv" -match "Signal is not driven, nor used: 'pic_waddr_c1_clken'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_dma_ctrl.sv" -match "Bits of signal are not used: 'dbg_cmd_type'[0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_dma_ctrl.sv" -match "Signal is not used: 'fifo_error_bus'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_dma_ctrl.sv" -match "Signal is not used: 'fifo_posted_write'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_dma_ctrl.sv" -match "Signal is not used: 'fifo_mid'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_dma_ctrl.sv" -match "Signal is not used: 'fifo_prty'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_dma_ctrl.sv" -match "Signal is not used: 'dma_mem_addr_in_pic_region_nc'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_dma_ctrl.sv" -match "Signal is not used: 'dma_mem_addr_in_dccm_region_nc'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_dma_ctrl.sv" -match "Signal is not used: 'dma_mem_addr_in_iccm_region_nc'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/el2_dma_ctrl.sv" -match "Signal is not driven, nor used: 'axi_rsp_sent'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_iccm_mem.sv" -match "Bits of signal are not used: 'iccm_wr_size'[2]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_iccm_mem.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_iccm_mem.sv" -match "Bits of signal are not used: 'addr_bank_inc'[1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu.sv" -match "Signal is not driven, nor used: 'ifc_fetch_req_f_raw'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/exu/el2_exu.sv" -match "Bits of signal are not driven: 'exu_mp_pkt'[37:4]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/exu/el2_exu.sv" -match "Bits of signal are not used: 'final_predict_mp'[37:4]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/exu/el2_exu.sv" -match "Signal is not driven, nor used: 'flush_in_d'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/exu/el2_exu.sv" -match "Bits of signal are not used: 'i0_pp_r'[49:38,34:1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/exu/el2_exu.sv" -match "Bits of signal are not used: 'predpipe_r'[4:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu.sv" -match "Signal is not driven, nor used: 'lsu_i0_valid_d'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu.sv" -match "Signal is not driven, nor used: 'lsu_i0_valid_m'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu.sv" -match "Signal is not driven, nor used: 'lsu_i0_valid_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_mem.sv" -match "Bits of signal are not used: 'dccm_wr_addr_lo'[1:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_mem.sv" -match "Bits of signal are not used: 'dccm_wr_addr_hi'[1:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_mem.sv" -match "Bits of signal are not used: 'dccm_rd_addr_lo'[1:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_mem.sv" -match "Bits of signal are not used: 'dccm_rd_addr_hi'[1:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_mem.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_mem.sv" -match "Signal is not driven, nor used: 'rd_addr_even'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_mem.sv" -match "Signal is not driven, nor used: 'rd_addr_odd'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_mem.sv" -match "Signal is not driven, nor used: 'wrdata'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/dmi/rvjtag_tap.v" -match "Signal is not used: 'pause_dr'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/dmi/rvjtag_tap.v" -match "Signal is not used: 'pause_ir'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_aln_ctl.sv" -match "Bits of signal are not used: 'firstpc'[31:26]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_aln_ctl.sv" -match "Bits of signal are not used: 'secondpc'[31:26]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_aln_ctl.sv" -match "Bits of signal are not used: 'f1hist1'[1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_aln_ctl.sv" -match "Bits of signal are not used: 'f1hist0'[1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_aln_ctl.sv" -match "Bits of signal are not used: 'f1pc4'[1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_aln_ctl.sv" -match "Bits of signal are not used: 'f1ret'[1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_aln_ctl.sv" -match "Bits of signal are not used: 'f1way'[1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_aln_ctl.sv" -match "Bits of signal are not used: 'f1brend'[1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_aln_ctl.sv" -match "Signal is not driven, nor used: 'first_legal'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_bp_ctl.sv" -match "Bits of signal are not used: 'exu_mp_pkt'[37:4]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_bp_ctl.sv" -match "Bits of signal are not used: 'wayhit_p1_f'[1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_bp_ctl.sv" -match "Bits of signal are not used: 'btb_sel_data_f'[3]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_bp_ctl.sv" -match "Bits of signal are not used: 'bloc_f'[0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Bits of signal are not used: 'ic_rw_addr_q_inc'[12:6]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Bits of signal are not used: 'ic_rw_addr'[3]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Bits of signal are not used: 'ic_debug_addr'[5:3]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Bits of signal are not used: 'ic_debug_wr_data'[70:69,63:32,10:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Signal is not used: 'ic_tag_corrected_data_unc'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Signal is not used: 'ic_tag_corrected_ecc_unc'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Bits of signal are not used: 'ic_tag_ecc'[6:5]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_ic_mem.sv" -match "Signal is not driven, nor used: 'ic_tag_parity'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Signal is not used: 'ic_parerr'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Bits of signal are not used: 'ic_byp_data_only_new'[79:64]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Bits of signal are not used: 'ifu_status_wr_addr'[31:13,5:1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Bits of signal are not used: 'ic_final_data'[63:32]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Signal is not used: 'scnd_miss_req_ff2'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/ifu/el2_ifu_mem_ctl.sv" -match "Bits of signal are not used: 'dma_mem_addr_ff'[3]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/dec/el2_dec_decode_ctl.sv" -match "Bits of signal are not used: 'dec_i0_brp'[33]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/dec/el2_dec_decode_ctl.sv" -match "Signal is not used: 'dec_i0_pc_d'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/dec/el2_dec_decode_ctl.sv" -match "Bits of signal are not driven: 'mul_p'[14:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/dec/el2_dec_decode_ctl.sv" -match "Bits of signal are not used: 'wbd'[23:13,11:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/dec/el2_dec_decode_ctl.sv" -match "Signal is not used: 'div_inst'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/dec/el2_dec_ib_ctl.sv" -match "Bits of signal are not used: 'dbg_cmd_addr'[31:12]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/dec/el2_dec_tlu_ctl.sv" -match "Signal is not used: 'csr_mcpc'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/dec/el2_dec_tlu_ctl.sv" -match "Signal is not used: 'csr_mdeau'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/exu/el2_exu_alu_ctl.sv" -match "Bits of signal are not used: 'shift_amount'[5]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/exu/el2_exu_alu_ctl.sv" -match "Bits of signal are not used: 'shift_long'[62:32]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/exu/el2_exu_mul_ctl.sv" -match "Bits of signal are not used: 'mul_p'[14:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/exu/el2_exu_mul_ctl.sv" -match "Bits of signal are not used: 'prod_x'[65:64]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/exu/el2_exu_div_ctl.sv" -match "Bits of signal are not used: 'a_eff_shift'[31:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/exu/el2_exu_div_ctl.sv" -match "Bits of signal are not used: 'short_dividend'[6:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_clkdomain.sv" -match "Signal is not used: 'addr_in_dccm_m'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_clkdomain.sv" -match "Bits of signal are not used: 'lsu_p'[12:1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_clkdomain.sv" -match "Bits of signal are not used: 'lsu_pkt_d'[12:7,5:1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_clkdomain.sv" -match "Bits of signal are not used: 'lsu_pkt_m'[12:7,5:1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_clkdomain.sv" -match "Bits of signal are not used: 'lsu_pkt_r'[12:1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_lsc_ctl.sv" -match "Signal is not used: 'lsu_ld_data_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_lsc_ctl.sv" -match "Bits of signal are not used: 'dma_mem_wdata_shifted'[63:32]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_stbuf.sv" -match "Bits of signal are not used: 'lsu_addr_d'[15:3,1:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_stbuf.sv" -match "Bits of signal are not used: 'lsu_addr_m'[1:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_stbuf.sv" -match "Bits of signal are not used: 'end_addr_d'[15:3,1:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_stbuf.sv" -match "Bits of signal are not used: 'end_addr_m'[1:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_stbuf.sv" -match "Bits of signal are not used: 'lsu_pkt_m'[12:7,5,3:1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_stbuf.sv" -match "Bits of signal are not used: 'lsu_pkt_r'[12,7,5,3:1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_stbuf.sv" -match "Signal is not used: 'cmpen_hi_m'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_stbuf.sv" -match "Signal is not used: 'cmpen_lo_m'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_intf.sv" -match "Bits of signal are not used: 'lsu_addr_d'[31:3,1:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_intf.sv" -match "Bits of signal are not used: 'end_addr_d'[31:3,1:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_intf.sv" -match "Signal is not used: 'lsu_axi_rlast'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_intf.sv" -match "Bits of signal are not driven, nor used: 'ld_fwddata_lo'[63:32]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_intf.sv" -match "Bits of signal are not driven, nor used: 'ld_fwddata_hi'[63:32]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_intf.sv" -match "Bits of signal are not used: 'ld_fwddata_m'[63:32]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_ecc.sv" -match "Bits of signal are not used: 'lsu_pkt_m'[12:8,5,3:1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_ecc.sv" -match "Signal is not used: 'lsu_pkt_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_ecc.sv" -match "Signal is not used: 'lsu_dccm_rden_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_ecc.sv" -match "Signal is not used: 'addr_in_dccm_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_ecc.sv" -match "Signal is not used: 'lsu_addr_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_ecc.sv" -match "Signal is not used: 'end_addr_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_ecc.sv" -match "Signal is not used: 'dccm_rdata_hi_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_ecc.sv" -match "Signal is not used: 'dccm_rdata_lo_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_ecc.sv" -match "Signal is not used: 'dccm_data_ecc_hi_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_ecc.sv" -match "Signal is not used: 'dccm_data_ecc_lo_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_ecc.sv" -match "Bits of signal are not used: 'lsu_addr_m'[15:3,1:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_ecc.sv" -match "Bits of signal are not used: 'end_addr_m'[15:3,1:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_ecc.sv" -match "Signal is not driven, nor used: 'is_ldst_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_ecc.sv" -match "Signal is not driven, nor used: 'double_ecc_error_hi_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_ecc.sv" -match "Signal is not driven, nor used: 'double_ecc_error_lo_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_ecc.sv" -match "Signal is not used: 'ecc_out_hi_nc'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_ecc.sv" -match "Signal is not used: 'ecc_out_lo_nc'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Signal is not used: 'lsu_c1_r_clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Bits of signal are not used: 'lsu_pkt_r'[12,8,5,3:1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Bits of signal are not used: 'lsu_pkt_m'[12,8,5,3:1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Bits of signal are not used: 'lsu_pkt_d'[12:10,5,3:1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Bits of signal are not used: 'lsu_addr_d'[31:16]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Bits of signal are not used: 'lsu_addr_r'[31:16]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Bits of signal are not used: 'end_addr_m'[1:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Signal is not driven: 'dccm_rdata_hi_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Signal is not driven: 'dccm_rdata_lo_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Signal is not driven: 'dccm_data_ecc_hi_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Signal is not driven: 'dccm_data_ecc_lo_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNDRIVEN -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Signal is not driven: 'lsu_ld_data_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Signal is not used: 'sec_data_hi_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Signal is not used: 'sec_data_lo_r'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Bits of signal are not used: 'dma_mem_addr'[31:15]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Bits of signal are not used: 'dma_mem_wdata'[63:32]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Signal is not used: 'lsu_ld_data_m_nc'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Signal is not used: 'lsu_ld_data_corr_m_nc'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_dccm_ctl.sv" -match "Bits of signal are not driven, nor used: 'store_data_mask'[63:32]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_trigger.sv" -match "Bits of signal are not used: 'lsu_pkt_m'[12:11,8,5,3:1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'en'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'SE'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/dec/el2_dec_tlu_ctl.sv" -match "Signal is not used: 'dec_csr_rdaddr_d'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Bits of signal are not used: 'lsu_pkt_m'[12:8,6:1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Bits of signal are not used: 'lsu_pkt_r'[12,8,4:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Bits of signal are not used: 'lsu_addr_m'[1:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Bits of signal are not used: 'end_addr_m'[1:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'lsu_nonblock_dual'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'bus_pend_trxn'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'bus_pend_trxnQ'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'bus_pend_trxn_ns'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not driven, nor used: 'mdbhd_en'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'lsu_axi_awvalid_q'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'lsu_axi_awready_q'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'lsu_axi_wvalid_q'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'lsu_axi_wready_q'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'lsu_axi_arvalid_q'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'lsu_axi_arready_q'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'lsu_axi_bvalid_q'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'lsu_axi_bready_q'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'lsu_axi_rvalid_q'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'lsu_axi_rready_q'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'lsu_axi_bid_q'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'lsu_axi_rid_q'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'lsu_axi_bresp_q'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'lsu_axi_rresp_q'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Signal is not used: 'lsu_axi_rdata_q'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_bus_buffer.sv" -match "Bits of signal are not used: 'Dec_value'[0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_addrcheck.sv" -match "Bits of signal are not used: 'lsu_pkt_d'[8,5,3:1]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_addrcheck.sv" -match "Signal is not used: 'rs1_d'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_addrcheck.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lsu/el2_lsu_addrcheck.sv" -match "Signal is not used: 'end_addr_in_pic_region_d'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not used: 'scan_mode'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Signal is not driven, nor used: 'l1clk'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Bits of signal are not used: 'addr'[14:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Bits of signal are not used: 'start_addr'[14:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Bits of signal are not used: 'addr'[15:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Bits of signal are not used: 'start_addr'[15:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule UNUSED -file "*/design/lib/beh_lib.sv" -match "Bits of signal are not used: 'addr'[15:0]"
+
+// TODO: Fix in design or explain
+lint_off -rule VARHIDDEN -file "*/design/ifu/el2_ifu_bp_ctl.sv" -match "Declaration of signal hides declaration in upper scope: 'j'*"
+
+// TODO: Fix in design or explain
+lint_off -rule VARHIDDEN -file "*/design/el2_pic_ctrl.sv" -match "Declaration of signal hides declaration in upper scope: 'i'*"
+
+// TODO: Fix in design or explain
+lint_off -rule BLKSEQ -file "*/design/lib/mem_lib.sv" -match "Blocking assignments (=) in sequential (flop or latch) block*"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/lsu/el2_lsu_lsc_ctl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.lsu.lsu_lsc_ctl.lsu_error_pkt_m'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/lsu/el2_lsu_lsc_ctl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.lsu.lsu_lsc_ctl.lsu_error_pkt_m'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[0].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[0].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[1].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[1].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[2].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[2].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[3].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[3].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[4].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[4].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[5].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[5].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[6].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[6].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[7].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[7].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[8].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[8].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[9].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[9].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[10].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[10].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[11].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[11].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[12].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[12].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[13].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[13].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[14].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[14].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[15].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[15].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[16].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[16].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[0].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[0].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[1].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[1].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[2].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[2].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[3].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[3].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[4].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[4].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[5].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[5].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[6].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[6].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[7].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[7].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[8].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[8].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[0].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[0].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[1].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[1].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[2].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[2].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[3].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[3].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[4].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[4].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[0].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[0].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[1].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[1].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[2].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[2].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[4].COMPARE[0].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[4].COMPARE[0].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[4].COMPARE[1].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[4].COMPARE[1].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[0].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[0].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[1].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[1].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[2].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[2].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[3].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[3].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[4].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[4].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[5].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[5].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[6].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[6].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[7].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[7].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[8].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[8].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[9].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[9].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[10].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[10].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[11].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[11].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[12].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[12].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[13].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[13].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[14].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[14].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[15].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[15].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[16].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[16].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[0].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[0].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[1].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[1].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[2].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[2].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[3].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[3].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[4].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[4].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[5].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[5].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[6].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[6].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[7].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[7].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[8].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[8].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[0].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[0].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[1].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[1].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[2].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[2].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[3].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[3].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[4].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[4].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[0].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[0].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[1].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[1].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[2].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[2].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[4].COMPARE[0].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[4].COMPARE[0].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[4].COMPARE[1].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/el2_pic_ctrl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[4].COMPARE[1].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/ifu/el2_ifu_ifc_ctl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.ifu.ifc.line_wrap'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/ifu/el2_ifu_ifc_ctl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.ifu.ifc.line_wrap'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/lsu/el2_lsu_stbuf.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.lsu.stbuf.ldst_dual_d'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/lsu/el2_lsu_stbuf.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.lsu.stbuf.ldst_dual_d'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/lsu/el2_lsu_bus_intf.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.lsu.bus_intf.ldst_dual_d'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/lsu/el2_lsu_bus_intf.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.lsu.bus_intf.ldst_dual_d'"
+
+// TODO: Fix in design or explain
+lint_off -rule UNOPTFLAT -file "*/design/dec/el2_dec_decode_ctl.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: '*.el2_swerv_wrapper.swerv.dec.decode.cam'*"
+
+lint_off -rule UNOPTFLAT
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_swerv_wrapper.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.core_rst_l'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/dbg/el2_dbg.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.dbg.dbg_dm_rst_l'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/lib/beh_lib.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.dbg.__Vcellinp__dbg_state_reg__rst_l'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/ifu/el2_ifu_ifc_ctl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.ifu.ifc.line_wrap'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/dec/el2_dec_decode_ctl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.dec.decode.cam'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/lsu/el2_lsu_lsc_ctl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.lsu.lsu_lsc_ctl.lsu_error_pkt_m'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/lsu/el2_lsu_stbuf.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.lsu.stbuf.ldst_dual_d'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/lsu/el2_lsu_bus_intf.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.lsu.bus_intf.ldst_dual_d'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[0].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[0].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[1].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[1].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[2].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[2].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[3].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[3].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[4].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[4].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[5].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[5].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[6].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[6].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[7].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[7].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[8].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[8].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[9].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[9].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[10].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[10].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[11].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[11].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[12].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[12].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[13].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[13].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[14].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[14].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[15].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[15].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[16].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[0].COMPARE[16].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[0].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[0].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[1].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[1].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[2].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[2].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[3].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[3].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[4].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[4].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[5].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[5].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[6].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[6].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[7].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[7].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[8].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[1].COMPARE[8].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[0].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[0].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[1].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[1].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[2].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[2].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[3].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[3].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[4].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[2].COMPARE[4].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[0].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[0].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[1].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[1].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[2].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[3].COMPARE[2].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[4].COMPARE[0].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[4].COMPARE[0].cmp_l1__out_id'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[4].COMPARE[1].cmp_l1__out_priority'"
+
+// TODO: Fix in design or explain
+lint_off -rule IMPERFECTSCH -file "*/design/el2_pic_ctrl.sv" -match "Imperfect scheduling of variable: '*.el2_swerv_wrapper.swerv.pic_ctrl_inst.__Vcellout__genblock.LEVEL[4].COMPARE[1].cmp_l1__out_id'"
+

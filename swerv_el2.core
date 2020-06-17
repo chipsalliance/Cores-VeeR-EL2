@@ -63,6 +63,9 @@ targets:
     tools:
       verilator :
         mode : lint-only
+        verilator_options:
+          - "-Wall"
+          - "-Wno-fatal"
     toplevel : el2_swerv_wrapper
 
   synth:

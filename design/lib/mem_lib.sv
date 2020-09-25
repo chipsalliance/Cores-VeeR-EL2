@@ -28,7 +28,7 @@ module ram_``depth``x``width(               \
 reg [(width-1):0] ram_core [(depth-1):0];   \
                                             \
 always @(posedge CLK) begin              \
-   if (ME && WE) ram_core[ADR] = D;        \
+   if (ME && WE) ram_core[ADR] <= D;        \
    if (ME && ~WE) Q <= ram_core[ADR];       \
 end                                         \
                                             \

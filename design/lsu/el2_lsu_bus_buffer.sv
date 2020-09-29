@@ -651,7 +651,6 @@ import el2_pkg::*;
       always_comb begin
          buf_nxtstate[i]          = IDLE;
          buf_state_en[i]          = '0;
-         buf_cmd_state_bus_en[i]  = '0;
          buf_resp_state_bus_en[i] = '0;
          buf_state_bus_en[i]      = '0;
          buf_wr_en[i]             = '0;
@@ -671,10 +670,12 @@ import el2_pkg::*;
                      buf_wr_en[i]    = buf_state_en[i];
                      buf_data_en[i]  = buf_state_en[i];
                      buf_data_in[i]   = (ibuf_drain_vld & (i == ibuf_tag)) ? ibuf_data_out[31:0] : store_data_lo_r[31:0];
+                     buf_cmd_state_bus_en[i]  = '0;
             end
             WAIT: begin
                      buf_nxtstate[i] = dec_tlu_force_halt ? IDLE : CMD;
                      buf_state_en[i] = lsu_bus_clk_en | dec_tlu_force_halt;
+                     buf_cmd_state_bus_en[i]  = '0;
             end
             CMD: begin
                      buf_nxtstate[i]          = dec_tlu_force_halt ? IDLE : (obuf_nosend & bus_rsp_read & (bus_rsp_read_tag == obuf_rdrsp_tag)) ? DONE_WAIT : RESP;
@@ -706,6 +707,7 @@ import el2_pkg::*;
                                                                                          (bus_rsp_read_error  & buf_ldfwd[i] & (bus_rsp_read_tag == (pt.LSU_BUS_TAG)'(buf_ldfwdtag[i]))) |
                                                                                          (bus_rsp_write_error & pt.BUILD_AXI_NATIVE & (bus_rsp_write_tag == (pt.LSU_BUS_TAG)'(i))));
                      buf_data_in[i][31:0]      = (buf_state_en[i] & ~buf_error_en[i]) ? (buf_addr[i][2] ? bus_rsp_rdata[63:32] : bus_rsp_rdata[31:0]) : bus_rsp_rdata[31:0];
+                     buf_cmd_state_bus_en[i]  = '0;
             end
             DONE_PARTIAL: begin   // Other part of dual load hasn't returned
                      buf_nxtstate[i]           = dec_tlu_force_halt ? IDLE : (buf_ldfwd[i] | buf_ldfwd[buf_dualtag[i]] | any_done_wait_state) ? DONE_WAIT : DONE;
@@ -713,10 +715,12 @@ import el2_pkg::*;
                                                                  //(buf_ldfwd[i] & (bus_rsp_read_tag == (pt.LSU_BUS_TAG)'(buf_ldfwdtag[i]))) |
                                                                  (buf_ldfwd[buf_dualtag[i]] & (bus_rsp_read_tag == (pt.LSU_BUS_TAG)'(buf_ldfwdtag[buf_dualtag[i]]))));
                      buf_state_en[i]           = (buf_state_bus_en[i] & lsu_bus_clk_en) | dec_tlu_force_halt;
+                     buf_cmd_state_bus_en[i]  = '0;
             end
             DONE_WAIT: begin  // WAIT state if there are multiple outstanding nb returns
                       buf_nxtstate[i]           = dec_tlu_force_halt ? IDLE : DONE;
                       buf_state_en[i]           = ((RspPtr == DEPTH_LOG2'(i)) | (buf_dual[i] & (buf_dualtag[i] == RspPtr))) | dec_tlu_force_halt;
+                     buf_cmd_state_bus_en[i]  = '0;
             end
             DONE: begin
                      buf_nxtstate[i]           = IDLE;
@@ -724,6 +728,7 @@ import el2_pkg::*;
                      buf_state_en[i]           = 1'b1;
                      buf_ldfwd_in[i]           = 1'b0;
                      buf_ldfwd_en[i]           = buf_state_en[i];
+                     buf_cmd_state_bus_en[i]  = '0;
             end
             default : begin
                      buf_nxtstate[i]          = IDLE;

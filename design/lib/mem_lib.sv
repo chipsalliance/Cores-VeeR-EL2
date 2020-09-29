@@ -194,6 +194,12 @@ endmodule
 `EL2_RAM_BE(128, 88)
 `EL2_RAM_BE(64, 88)
 
+   `EL2_RAM(64, 39)
+   `EL2_RAM_BE(32, 104)
+   `EL2_RAM_BE(32, 52)
+   `EL2_RAM_BE(32, 88)
+   `EL2_RAM_BE(32, 44)
+
 
 `undef EL2_RAM
 `undef EL2_RAM_BE

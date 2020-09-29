@@ -29,6 +29,7 @@ IRUN = xrun
 VCS = vcs
 VLOG = qverilog
 VERILATOR = verilator
+RIVIERA = riviera
 GCC_PREFIX = riscv64-unknown-elf
 BUILD_DIR = snapshots/${snapshot}
 TBDIR = ${RV_ROOT}/testbench
@@ -45,6 +46,7 @@ ifdef debug
  IRUN_DEBUG = -access +rc
  IRUN_DEBUG_RUN = -input ${RV_ROOT}/testbench/input.tcl
  VERILATOR_DEBUG = --trace
+ RIVIERA_DEBUG = +access +r
 endif
 
 # provide specific link file
@@ -76,7 +78,8 @@ all: clean verilator
 
 clean:
 	rm -rf *.log *.s *.hex *.dis *.tbl irun* vcs* simv* snapshots swerv* \
-	verilator* *.exe obj* *.o ucli.key vc_hdrs.h csrc *.csv work
+	verilator* *.exe obj* *.o ucli.key vc_hdrs.h csrc *.csv work \
+	vsimsa.cfg library.cfg riviera-build wave.asdb*
 
 # If define files do not exist, then run swerv.config.
 ${BUILD_DIR}/defines.h :
@@ -109,6 +112,19 @@ irun-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	  -I${RV_ROOT}/testbench -elaborate  -snapshot ${snapshot}
 	touch irun-build
 
+riviera-build: ${TBFILES} ${BUILD_DIR}/defines.h
+	vlib work
+	vlog -work work \
+		-err VCP2694 W1 \
+		+incdir+${RV_ROOT}/design/lib \
+		+incdir+${RV_ROOT}/design/include \
+		+incdir+${BUILD_DIR} \
+		-y ${RV_ROOT}/design/lib +libext+.v+.vh \
+		$(defines) \
+		-f ${RV_ROOT}/testbench/flist \
+		${TBFILES} 
+	touch riviera-build
+
 verilator: program.hex verilator-build
 	./obj_dir/Vtb_top
 
@@ -124,6 +140,8 @@ vlog: program.hex ${TBFILES} ${BUILD_DIR}/defines.h
 	$(VLOG) -l vlog.log -sv -mfcu +incdir+${BUILD_DIR}+${RV_ROOT}/design/include+${RV_ROOT}/design/lib\
         $(defines) -f ${RV_ROOT}/testbench/flist ${TBFILES} -R ${DEBUG_PLUS}
 
+riviera: program.hex riviera-build
+	vsim -c -lib work ${DEBUG_PLUS} ${RIVIERA_DEBUG} tb_top -do "run -all; exit" -l riviera.log
 
 ifeq ($(shell which $(GCC_PREFIX)-gcc 2> /dev/null),)
 program.hex: ${BUILD_DIR}/defines.h
@@ -162,4 +180,4 @@ help:
 	@echo Make sure the environment variable RV_ROOT is set.
 	@echo Possible targets: verilator vcs irun vlog help clean all verilator-build irun-build vcs-build program.hex
 
-.PHONY: help clean verilator vcs irun vlog
+.PHONY: help clean verilator vcs irun vlog riviera

@@ -536,14 +536,18 @@ import el2_pkg::*;
 
    always_comb begin
       found = 0;
-      cam_wen[NBLOAD_SIZE_MSB:0] = '0;
       for (int i=0; i<32'(NBLOAD_SIZE); i++) begin
          if (~found) begin
             if (~cam[i].valid) begin
                cam_wen[i] = cam_write;
                found = 1'b1;
             end
+            else begin
+               cam_wen[i] = 0;
+            end
          end
+          else
+            cam_wen[i] = 0;
       end
    end
 

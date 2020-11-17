@@ -1,6 +1,6 @@
 //********************************************************************************
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2020 Western Digital Corporation or it's affiliates.
+// Copyright 2020 Western Digital Corporation or its affiliates.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@ import el2_pkg::*;
 `include "el2_param.vh"
  )
   (
-   input logic free_clk,
-   input logic active_clk,
-   input logic clk,
-   input logic rst_l,
+   input logic free_l2clk,                   // Clock always.                  Through one clock header.  For flops with    second header built in.
+   input logic active_clk,                   // Clock only while core active.  Through two clock headers. For flops without second clock header built in.
+   input logic clk,                          // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.
+   input logic rst_l,                        // reset, active low
 
-   input logic dec_i0_decode_d,
+   input logic dec_i0_decode_d,              // Valid instruction at D and not blocked
 
    input logic exu_flush_final, // flush, includes upper and lower
    input logic dec_tlu_i0_commit_cmt , // committed i0
@@ -86,7 +86,6 @@ import el2_pkg::*;
    input  logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_rid,
    input  logic [63:0]                     ifu_axi_rdata,
    input  logic [1:0]                      ifu_axi_rresp,
-
 
    input  logic                      ifu_bus_clk_en,
 
@@ -160,24 +159,24 @@ import el2_pkg::*;
    output logic       ifu_pmu_bus_trxn, // iside bus transactions
 
 
-   output logic       ifu_i0_icaf,         // Instructio 0 access fault. From Aligner to Decode
+   output logic       ifu_i0_icaf,         // Instruction 0 access fault. From Aligner to Decode
    output logic [1:0] ifu_i0_icaf_type, // Instruction 0 access fault type
 
-   output logic  ifu_i0_valid,        // Instructio 0 valid. From Aligner to Decode
-   output logic  ifu_i0_icaf_f1,      // Instruction 0 has access fault on second fetch group
+   output logic  ifu_i0_valid,        // Instruction 0 valid. From Aligner to Decode
+   output logic  ifu_i0_icaf_second,  // Instruction 0 has access fault on second 2B of 4B inst
    output logic  ifu_i0_dbecc,        // Instruction 0 has double bit ecc error
    output logic  iccm_dma_sb_error,   // Single Bit ECC error from a DMA access
-   output logic[31:0] ifu_i0_instr,   // Instructio 0 . From Aligner to Decode
-   output logic[31:1] ifu_i0_pc,      // Instructio 0 pc. From Aligner to Decode
-   output logic ifu_i0_pc4,           // Instructio 0 is 4 byte. From Aligner to Decode
+   output logic[31:0] ifu_i0_instr,   // Instruction 0 . From Aligner to Decode
+   output logic[31:1] ifu_i0_pc,      // Instruction 0 pc. From Aligner to Decode
+   output logic ifu_i0_pc4,           // Instruction 0 is 4 byte. From Aligner to Decode
 
    output logic ifu_miss_state_idle,   // There is no outstanding miss. Cache miss state is idle.
 
-
-   output el2_br_pkt_t i0_brp,           // Instructio 0 branch packet. From Aligner to Decode
+   output el2_br_pkt_t i0_brp,           // Instruction 0 branch packet. From Aligner to Decode
    output logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] ifu_i0_bp_index, // BP index
    output logic [pt.BHT_GHR_SIZE-1:0] ifu_i0_bp_fghr, // BP FGHR
    output logic [pt.BTB_BTAG_SIZE-1:0] ifu_i0_bp_btag, // BP tag
+   output logic [$clog2(pt.BTB_SIZE)-1:0]         ifu_i0_fa_index,          // Fully associt btb index
 
    input el2_predict_pkt_t  exu_mp_pkt, // mispredict packet
    input logic [pt.BHT_GHR_SIZE-1:0] exu_mp_eghr, // execute ghr
@@ -188,16 +187,18 @@ import el2_pkg::*;
    input el2_br_tlu_pkt_t dec_tlu_br0_r_pkt, // slot0 update/error pkt
    input logic [pt.BHT_GHR_SIZE-1:0] exu_i0_br_fghr_r, // fghr to bp
    input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] exu_i0_br_index_r, // bp index
+   input logic [$clog2(pt.BTB_SIZE)-1:0] dec_fa_error_index, // Fully associt btb error index
 
    input dec_tlu_flush_lower_wb,
 
    output logic [15:0] ifu_i0_cinst,
 
+
 /// Icache debug
    input  el2_cache_debug_pkt_t        dec_tlu_ic_diag_pkt ,
    output logic                    ifu_ic_debug_rd_data_valid,
-    output logic                                iccm_buf_correct_ecc,
-    output logic                                iccm_correction_state,
+   output logic                                iccm_buf_correct_ecc,
+   output logic                                iccm_correction_state,
 
    input logic scan_mode
    );
@@ -220,22 +221,16 @@ import el2_pkg::*;
    logic        ic_write_stall;
    logic        ic_dma_active;
    logic        ifc_dma_access_ok;
-   logic        ic_access_fault_f;
+   logic [1:0]  ic_access_fault_f;
    logic [1:0]  ic_access_fault_type_f;
    logic        ifu_ic_mb_empty;
 
-
    logic ic_hit_f;
 
-   // fetch control
-   el2_ifu_ifc_ctl #(.pt(pt)) ifc (.*
-                    );
-
-   logic [1:0]  ifu_bp_way_f; // way indication; right justified
-   logic  ifu_bp_hit_taken_f; // kill next fetch; taken target found
+   logic [1:0] ifu_bp_way_f; // way indication; right justified
+   logic       ifu_bp_hit_taken_f; // kill next fetch; taken target found
    logic [31:1] ifu_bp_btb_target_f; //  predicted target PC
    logic        ifu_bp_inst_mask_f; // tell ic which valids to kill because of a taken branch; right justified
-
    logic [1:0]  ifu_bp_hist1_f; // history counters for all 4 potential branches; right justified
    logic [1:0]  ifu_bp_hist0_f; // history counters for all 4 potential branches; right justified
    logic [11:0] ifu_bp_poffset_f; // predicted target
@@ -243,9 +238,28 @@ import el2_pkg::*;
    logic [1:0]  ifu_bp_pc4_f; // pc4 indication; right justified
    logic [1:0]  ifu_bp_valid_f; // branch valid, right justified
    logic [pt.BHT_GHR_SIZE-1:0] ifu_bp_fghr_f;
+   logic [1:0] [$clog2(pt.BTB_SIZE)-1:0] ifu_bp_fa_index_f;
+
+
+   // fetch control
+   el2_ifu_ifc_ctl #(.pt(pt)) ifc (.*
+                    );
 
    // branch predictor
-   el2_ifu_bp_ctl #(.pt(pt)) bp (.*);
+   if (pt.BTB_ENABLE==1) begin  : bpred
+      el2_ifu_bp_ctl #(.pt(pt)) bp (.*);
+   end
+   else begin : bpred
+      assign ifu_bp_hit_taken_f = '0;
+      // verif wires
+      logic btb_wr_en_way0, btb_wr_en_way1,dec_tlu_error_wb;
+      logic [16+pt.BTB_BTAG_SIZE:0] btb_wr_data;
+      assign btb_wr_en_way0 = '0;
+      assign btb_wr_en_way1 = '0;
+      assign btb_wr_data = '0;
+      assign dec_tlu_error_wb ='0;
+      assign ifu_bp_inst_mask_f = 1'b1;
+   end
 
 
    logic [1:0]   ic_fetch_val_f;
@@ -253,7 +267,7 @@ import el2_pkg::*;
    logic [31:0] ifu_fetch_data_f;
    logic ifc_fetch_req_f;
    logic ifc_fetch_req_f_raw;
-   logic iccm_rd_ecc_double_err;  // This fetch has an iccm double error.
+   logic [1:0] iccm_rd_ecc_double_err;  // This fetch has an iccm double error.
 
    logic ifu_async_error_start;
 
@@ -269,7 +283,10 @@ import el2_pkg::*;
  logic                       ifc_region_acc_fault_bf;       // Access fault. in ICCM region but offset is outside defined ICCM.
 
    // aligner
-   el2_ifu_aln_ctl #(.pt(pt)) aln (.*);
+
+   el2_ifu_aln_ctl #(.pt(pt)) aln (
+                                    .*
+                                    );
 
 
    // icache
@@ -316,29 +333,29 @@ import el2_pkg::*;
    logic        exu_flush_final_d1;
    assign mppc_ns[31:1] = `EXU.i0_flush_upper_x ? `EXU.exu_i0_pc_x : `EXU.dec_i0_pc_d;
    assign mppc_ns[0] = 1'b0;
-   rvdff #(33)  mdseal_ff (.*, .din({mppc_ns[31:0], exu_flush_final}), .dout({mppc[31:0], exu_flush_final_d1}));
+   rvdff #(33)  junk_ff (.*, .clk(active_clk), .din({mppc_ns[31:0], exu_flush_final}), .dout({mppc[31:0], exu_flush_final_d1}));
    logic  tmp_bnk;
-   assign tmp_bnk = bp.btb_sel_f[1];
+   assign tmp_bnk = bpred.bp.btb_sel_f[1];
 
    always @(negedge clk) begin
       if(`DEC.tlu.mcyclel[31:0] == 32'h0000_0010) begin
-         $display("BTB_CONFIG: %d",pt.BTB_ARRAY_DEPTH*4);
+         $display("BTB_CONFIG: %d",pt.BTB_SIZE);
          `ifndef BP_NOGSHARE
-         $display("BHT_CONFIG: %d gshare: 1",pt.BHT_ARRAY_DEPTH*4);
+         $display("BHT_CONFIG: %d gshare: 1",pt.BHT_SIZE);
          `else
-         $display("BHT_CONFIG: %d gshare: 0",pt.BHT_ARRAY_DEPTH*4);
+         $display("BHT_CONFIG: %d gshare: 0",pt.BHT_SIZE);
          `endif
          $display("RS_CONFIG: %d", pt.RET_STACK_SIZE);
       end
        if(exu_flush_final_d1 & ~(dec_tlu_br0_r_pkt.br_error | dec_tlu_br0_r_pkt.br_start_error) & (exu_mp_pkt.misp | exu_mp_pkt.ataken))
-         $display("%7d BTB_MP  : index: %0h bank: %0h call: %b ret: %b ataken: %b hist: %h valid: %b tag: %h targ: %h eghr: %b pred: %b ghr_index: %h brpc: %h way: %h", `DEC.tlu.mcyclel[31:0]+32'ha, exu_mp_addr[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO], 1'b0, exu_mp_call, exu_mp_ret, exu_mp_ataken, exu_mp_hist[1:0], exu_mp_valid, exu_mp_btag[pt.BTB_BTAG_SIZE-1:0], {exu_flush_path_final[31:1], 1'b0}, exu_mp_eghr[pt.BHT_GHR_SIZE-1:0], exu_mp_valid, bp.bht_wr_addr0, mppc[31:0], exu_mp_pkt.way);
+         $display("%7d BTB_MP  : index: %0h bank: %0h call: %b ret: %b ataken: %b hist: %h valid: %b tag: %h targ: %h eghr: %b pred: %b ghr_index: %h brpc: %h way: %h", `DEC.tlu.mcyclel[31:0]+32'ha, exu_mp_addr[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO], 1'b0, exu_mp_call, exu_mp_ret, exu_mp_ataken, exu_mp_hist[1:0], exu_mp_valid, exu_mp_btag[pt.BTB_BTAG_SIZE-1:0], {exu_flush_path_final[31:1], 1'b0}, exu_mp_eghr[pt.BHT_GHR_SIZE-1:0], exu_mp_valid, bpred.bp.bht_wr_addr0, mppc[31:0], exu_mp_pkt.way);
 
      for(int i = 0; i < 8; i++) begin
       if(ifu_bp_valid_f[i] & ifc_fetch_req_f)
-        $display("%7d BTB_HIT : index: %0h bank: %0h call: %b ret: %b taken: %b strength: %b tag: %h targ: %0h ghr: %4b ghr_index: %h way: %h", `DEC.tlu.mcyclel[31:0]+32'ha,btb_rd_addr_f[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO],bp.btb_sel_f[1], bp.btb_rd_call_f, bp.btb_rd_ret_f, ifu_bp_hist1_f[tmp_bnk], ifu_bp_hist0_f[tmp_bnk], bp.fetch_rd_tag_f[pt.BTB_BTAG_SIZE-1:0], {ifu_bp_btb_target_f[31:1], 1'b0}, bp.fghr[pt.BHT_GHR_SIZE-1:0], bp.bht_rd_addr_f, ifu_bp_way_f[tmp_bnk]);
+        $display("%7d BTB_HIT : index: %0h bank: %0h call: %b ret: %b taken: %b strength: %b tag: %h targ: %0h ghr: %4b ghr_index: %h way: %h", `DEC.tlu.mcyclel[31:0]+32'ha,btb_rd_addr_f[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO],bpred.bp.btb_sel_f[1], bpred.bp.btb_rd_call_f, bpred.bp.btb_rd_ret_f, ifu_bp_hist1_f[tmp_bnk], ifu_bp_hist0_f[tmp_bnk], bpred.bp.fetch_rd_tag_f[pt.BTB_BTAG_SIZE-1:0], {ifu_bp_btb_target_f[31:1], 1'b0}, bpred.bp.fghr[pt.BHT_GHR_SIZE-1:0], bpred.bp.bht_rd_addr_f, ifu_bp_way_f[tmp_bnk]);
      end
       if(dec_tlu_br0_r_pkt.valid & ~(dec_tlu_br0_r_pkt.br_error | dec_tlu_br0_r_pkt.br_start_error))
-        $display("%7d BTB_UPD0: ghr_index: %0h bank: %0h hist: %h  way: %h", `DEC.tlu.mcyclel[31:0]+32'ha,bp.br0_hashed_wb[pt.BHT_ADDR_HI:pt.BHT_ADDR_LO],{dec_tlu_br0_r_pkt.middle}, dec_tlu_br0_r_pkt.hist, dec_tlu_br0_r_pkt.way);
+        $display("%7d BTB_UPD0: ghr_index: %0h bank: %0h hist: %h  way: %h", `DEC.tlu.mcyclel[31:0]+32'ha,bpred.bp.br0_hashed_wb[pt.BHT_ADDR_HI:pt.BHT_ADDR_LO],{dec_tlu_br0_r_pkt.middle}, dec_tlu_br0_r_pkt.hist, dec_tlu_br0_r_pkt.way);
 
       if(dec_tlu_br0_r_pkt.br_error | dec_tlu_br0_r_pkt.br_start_error)
         $display("%7d BTB_ERR0: index: %0h bank: %0h start: %b rfpc: %h way: %h", `DEC.tlu.mcyclel[31:0]+32'ha,exu_i0_br_index_r[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO],1'b0, dec_tlu_br0_r_pkt.br_start_error, {exu_flush_path_final[31:1], 1'b0}, dec_tlu_br0_r_pkt.way);

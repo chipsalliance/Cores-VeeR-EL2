@@ -1,6 +1,6 @@
 //********************************************************************************
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2020 Western Digital Corporation or it's affiliates.
+// Copyright 2020 Western Digital Corporation or its affiliates.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import el2_pkg::*;
   (
 
    input logic clk,
-   input logic active_clk,
    input logic rst_l,
 
    input logic ic_hit_f,      // Icache hit, enables F address capture
@@ -43,6 +42,8 @@ import el2_pkg::*;
    input el2_br_tlu_pkt_t dec_tlu_br0_r_pkt, // BP commit update packet, includes errors
    input logic [pt.BHT_GHR_SIZE-1:0] exu_i0_br_fghr_r, // fghr to bp
    input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] exu_i0_br_index_r, // bp index
+
+   input logic [$clog2(pt.BTB_SIZE)-1:0] dec_fa_error_index, // Fully associative btb error index
 
    input logic dec_tlu_flush_lower_wb, // used to move EX4 RS to EX1 and F
    input logic dec_tlu_flush_leak_one_wb, // don't hit for leak one fetches
@@ -72,10 +73,21 @@ import el2_pkg::*;
    output logic [1:0] ifu_bp_valid_f, // branch valid, right justified
    output logic [11:0] ifu_bp_poffset_f, // predicted target
 
+   output logic [1:0] [$clog2(pt.BTB_SIZE)-1:0]    ifu_bp_fa_index_f, // predicted branch index (fully associative option)
+
    input  logic       scan_mode
    );
 
-   localparam TAG_START=16+pt.BTB_BTAG_SIZE;
+
+   localparam BTB_DWIDTH =  pt.BTB_TOFFSET_SIZE+pt.BTB_BTAG_SIZE+5;
+   localparam BTB_DWIDTH_TOP =  int'(pt.BTB_TOFFSET_SIZE)+int'(pt.BTB_BTAG_SIZE)+4;
+   localparam BTB_FA_INDEX = $clog2(pt.BTB_SIZE)-1;
+   localparam FA_CMP_LOWER = $clog2(pt.ICACHE_LN_SZ);
+   localparam FA_TAG_END_UPPER= 5+int'(pt.BTB_TOFFSET_SIZE)+int'(FA_CMP_LOWER)-1; // must cast to int or vcs build fails
+   localparam FA_TAG_START_LOWER = 3+int'(pt.BTB_TOFFSET_SIZE)+int'(FA_CMP_LOWER);
+   localparam FA_TAG_END_LOWER = 5+int'(pt.BTB_TOFFSET_SIZE);
+
+   localparam TAG_START=BTB_DWIDTH-1;
    localparam PC4=4;
    localparam BOFF=3;
    localparam CALL=2;
@@ -84,9 +96,10 @@ import el2_pkg::*;
 
    localparam LRU_SIZE=pt.BTB_ARRAY_DEPTH;
    localparam NUM_BHT_LOOP = (pt.BHT_ARRAY_DEPTH > 16 ) ? 16 : pt.BHT_ARRAY_DEPTH;
-   localparam NUM_BHT_LOOP_INNER_HI =  (pt.BHT_ARRAY_DEPTH > 16 ) ? pt.BHT_ADDR_LO+3 : pt.BHT_ADDR_HI;
-   localparam NUM_BHT_LOOP_OUTER_LO =  (pt.BHT_ARRAY_DEPTH > 16 ) ? pt.BHT_ADDR_LO+4 : pt.BHT_ADDR_LO;
+   localparam NUM_BHT_LOOP_INNER_HI =  (pt.BHT_ARRAY_DEPTH > 16 ) ?pt.BHT_ADDR_LO+3 : pt.BHT_ADDR_HI;
+   localparam NUM_BHT_LOOP_OUTER_LO =  (pt.BHT_ARRAY_DEPTH > 16 ) ?pt.BHT_ADDR_LO+4 : pt.BHT_ADDR_LO;
    localparam BHT_NO_ADDR_MATCH  = ( pt.BHT_ARRAY_DEPTH <= 16 );
+
 
    logic exu_mp_valid_write;
    logic exu_mp_ataken;
@@ -120,13 +133,12 @@ import el2_pkg::*;
    logic              rs_push, rs_pop, rs_hold;
    logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] btb_rd_addr_p1_f, btb_wr_addr, btb_rd_addr_f;
    logic [pt.BTB_BTAG_SIZE-1:0] btb_wr_tag, fetch_rd_tag_f, fetch_rd_tag_p1_f;
-   logic [16+pt.BTB_BTAG_SIZE:0]        btb_wr_data;
+   logic [BTB_DWIDTH-1:0]        btb_wr_data;
    logic               btb_wr_en_way0, btb_wr_en_way1;
 
 
    logic               dec_tlu_error_wb, btb_valid, dec_tlu_br0_middle_wb;
    logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO]        btb_error_addr_wb;
-
    logic branch_error_collision_f, fetch_mp_collision_f, branch_error_collision_p1_f, fetch_mp_collision_p1_f;
 
    logic  branch_error_bank_conflict_f;
@@ -142,17 +154,17 @@ import el2_pkg::*;
 
    logic leak_one_f, leak_one_f_d1;
 
-   logic [LRU_SIZE-1:0][16+pt.BTB_BTAG_SIZE:0]  btb_bank0_rd_data_way0_out ;
+   logic [LRU_SIZE-1:0][BTB_DWIDTH-1:0]  btb_bank0_rd_data_way0_out ;
 
-   logic [LRU_SIZE-1:0][16+pt.BTB_BTAG_SIZE:0]  btb_bank0_rd_data_way1_out ;
+   logic [LRU_SIZE-1:0][BTB_DWIDTH-1:0]  btb_bank0_rd_data_way1_out ;
 
-   logic                [16+pt.BTB_BTAG_SIZE:0] btb_bank0_rd_data_way0_f ;
-   logic                [16+pt.BTB_BTAG_SIZE:0] btb_bank0_rd_data_way1_f ;
+   logic                [BTB_DWIDTH-1:0] btb_bank0_rd_data_way0_f ;
+   logic                [BTB_DWIDTH-1:0] btb_bank0_rd_data_way1_f ;
 
-   logic                [16+pt.BTB_BTAG_SIZE:0] btb_bank0_rd_data_way0_p1_f ;
-   logic                [16+pt.BTB_BTAG_SIZE:0] btb_bank0_rd_data_way1_p1_f ;
+   logic                [BTB_DWIDTH-1:0] btb_bank0_rd_data_way0_p1_f ;
+   logic                [BTB_DWIDTH-1:0] btb_bank0_rd_data_way1_p1_f ;
 
-   logic                [16+pt.BTB_BTAG_SIZE:0] btb_vbank0_rd_data_f, btb_vbank1_rd_data_f;
+   logic                [BTB_DWIDTH-1:0] btb_vbank0_rd_data_f, btb_vbank1_rd_data_f;
 
    logic                                         final_h;
    logic                                         btb_fg_crossing_f;
@@ -167,10 +179,10 @@ import el2_pkg::*;
    logic [31:2] fetch_addr_p1_f;
 
 
-   logic exu_mp_way, exu_mp_way_f, dec_tlu_br0_way_wb, dec_tlu_way_wb, dec_tlu_way_wb_f;
-   logic                [16+pt.BTB_BTAG_SIZE:0] btb_bank0e_rd_data_f, btb_bank0e_rd_data_p1_f;
+   logic exu_mp_way, exu_mp_way_f, dec_tlu_br0_way_wb, dec_tlu_way_wb;
+   logic                [BTB_DWIDTH-1:0] btb_bank0e_rd_data_f, btb_bank0e_rd_data_p1_f;
 
-   logic                [16+pt.BTB_BTAG_SIZE:0] btb_bank0o_rd_data_f;
+   logic                [BTB_DWIDTH-1:0] btb_bank0o_rd_data_f;
 
    logic [1:0] tag_match_way0_expanded_f, tag_match_way1_expanded_f;
 
@@ -178,7 +190,7 @@ import el2_pkg::*;
     logic [1:0]                                  bht_bank0_rd_data_f;
     logic [1:0]                                  bht_bank1_rd_data_f;
     logic [1:0]                                  bht_bank0_rd_data_p1_f;
-logic exu_flush_final_d1;
+   genvar                                        j, i;
 
    assign exu_mp_valid = exu_mp_pkt.misp & ~leak_one_f; // conditional branch mispredict
    assign exu_mp_boffset = exu_mp_pkt.boffset;  // branch offset
@@ -229,6 +241,12 @@ logic exu_flush_final_d1;
    assign branch_error_bank_conflict_f = branch_error_collision_f & dec_tlu_error_wb;
    assign branch_error_bank_conflict_p1_f = branch_error_collision_p1_f & dec_tlu_error_wb;
 
+   // set on leak one, hold until next flush without leak one
+   assign leak_one_f = (dec_tlu_flush_leak_one_wb & dec_tlu_flush_lower_wb) | (leak_one_f_d1 & ~dec_tlu_flush_lower_wb);
+
+logic exu_flush_final_d1;
+
+ if(!pt.BTB_FULLYA) begin
    assign fetch_mp_collision_f = ( (exu_mp_btag[pt.BTB_BTAG_SIZE-1:0] == fetch_rd_tag_f[pt.BTB_BTAG_SIZE-1:0]) &
                                     exu_mp_valid & ifc_fetch_req_f &
                                     (exu_mp_addr[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] == btb_rd_addr_f[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO])
@@ -237,26 +255,18 @@ logic exu_flush_final_d1;
                                        exu_mp_valid & ifc_fetch_req_f &
                                        (exu_mp_addr[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] == btb_rd_addr_p1_f[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO])
                                        );
-   // set on leak one, hold until next flush without leak one
-   assign leak_one_f = (dec_tlu_flush_leak_one_wb & dec_tlu_flush_lower_wb) | (leak_one_f_d1 & ~dec_tlu_flush_lower_wb);
-
-
-   rvdff #(4) coll_ff (.*, .clk(active_clk),
-                         .din({exu_flush_final, exu_mp_way, dec_tlu_way_wb, leak_one_f}),
-                        .dout({exu_flush_final_d1, exu_mp_way_f, dec_tlu_way_wb_f, leak_one_f_d1}));
-
    // 2 -way SA, figure out the way hit and mux accordingly
    assign tag_match_way0_f = btb_bank0_rd_data_way0_f[BV] & (btb_bank0_rd_data_way0_f[TAG_START:17] == fetch_rd_tag_f[pt.BTB_BTAG_SIZE-1:0]) &
-                              ~(dec_tlu_way_wb_f & branch_error_bank_conflict_f) & ifc_fetch_req_f & ~leak_one_f;
+                              ~(dec_tlu_way_wb & branch_error_bank_conflict_f) & ifc_fetch_req_f & ~leak_one_f;
 
    assign tag_match_way1_f = btb_bank0_rd_data_way1_f[BV] & (btb_bank0_rd_data_way1_f[TAG_START:17] == fetch_rd_tag_f[pt.BTB_BTAG_SIZE-1:0]) &
-                              ~(dec_tlu_way_wb_f & branch_error_bank_conflict_f) & ifc_fetch_req_f & ~leak_one_f;
+                              ~(dec_tlu_way_wb & branch_error_bank_conflict_f) & ifc_fetch_req_f & ~leak_one_f;
 
    assign tag_match_way0_p1_f = btb_bank0_rd_data_way0_p1_f[BV] & (btb_bank0_rd_data_way0_p1_f[TAG_START:17] == fetch_rd_tag_p1_f[pt.BTB_BTAG_SIZE-1:0]) &
-                              ~(dec_tlu_way_wb_f & branch_error_bank_conflict_p1_f) & ifc_fetch_req_f & ~leak_one_f;
+                              ~(dec_tlu_way_wb & branch_error_bank_conflict_p1_f) & ifc_fetch_req_f & ~leak_one_f;
 
    assign tag_match_way1_p1_f = btb_bank0_rd_data_way1_p1_f[BV] & (btb_bank0_rd_data_way1_p1_f[TAG_START:17] == fetch_rd_tag_p1_f[pt.BTB_BTAG_SIZE-1:0]) &
-                              ~(dec_tlu_way_wb_f & branch_error_bank_conflict_p1_f) & ifc_fetch_req_f & ~leak_one_f;
+                              ~(dec_tlu_way_wb & branch_error_bank_conflict_p1_f) & ifc_fetch_req_f & ~leak_one_f;
 
 
    // Both ways could hit, use the offset bit to reorder
@@ -276,21 +286,22 @@ logic exu_flush_final_d1;
    assign wayhit_f[1:0] = tag_match_way0_expanded_f[1:0] | tag_match_way1_expanded_f[1:0];
    assign wayhit_p1_f[1:0] = tag_match_way0_expanded_p1_f[1:0] | tag_match_way1_expanded_p1_f[1:0];
 
-   assign btb_bank0o_rd_data_f[16+pt.BTB_BTAG_SIZE:0] = ( ({17+pt.BTB_BTAG_SIZE{tag_match_way0_expanded_f[1]}} & btb_bank0_rd_data_way0_f[16+pt.BTB_BTAG_SIZE:0]) |
-                                                            ({17+pt.BTB_BTAG_SIZE{tag_match_way1_expanded_f[1]}} & btb_bank0_rd_data_way1_f[16+pt.BTB_BTAG_SIZE:0]) );
-   assign btb_bank0e_rd_data_f[16+pt.BTB_BTAG_SIZE:0] = ( ({17+pt.BTB_BTAG_SIZE{tag_match_way0_expanded_f[0]}} & btb_bank0_rd_data_way0_f[16+pt.BTB_BTAG_SIZE:0]) |
-                                                            ({17+pt.BTB_BTAG_SIZE{tag_match_way1_expanded_f[0]}} & btb_bank0_rd_data_way1_f[16+pt.BTB_BTAG_SIZE:0]) );
+   assign btb_bank0o_rd_data_f[BTB_DWIDTH-1:0] = ( ({17+pt.BTB_BTAG_SIZE{tag_match_way0_expanded_f[1]}} & btb_bank0_rd_data_way0_f[BTB_DWIDTH-1:0]) |
+                                                            ({17+pt.BTB_BTAG_SIZE{tag_match_way1_expanded_f[1]}} & btb_bank0_rd_data_way1_f[BTB_DWIDTH-1:0]) );
+   assign btb_bank0e_rd_data_f[BTB_DWIDTH-1:0] = ( ({17+pt.BTB_BTAG_SIZE{tag_match_way0_expanded_f[0]}} & btb_bank0_rd_data_way0_f[BTB_DWIDTH-1:0]) |
+                                                            ({17+pt.BTB_BTAG_SIZE{tag_match_way1_expanded_f[0]}} & btb_bank0_rd_data_way1_f[BTB_DWIDTH-1:0]) );
 
-   assign btb_bank0e_rd_data_p1_f[16+pt.BTB_BTAG_SIZE:0] = ( ({17+pt.BTB_BTAG_SIZE{tag_match_way0_expanded_p1_f[0]}} & btb_bank0_rd_data_way0_p1_f[16+pt.BTB_BTAG_SIZE:0]) |
-                                                               ({17+pt.BTB_BTAG_SIZE{tag_match_way1_expanded_p1_f[0]}} & btb_bank0_rd_data_way1_p1_f[16+pt.BTB_BTAG_SIZE:0]) );
+   assign btb_bank0e_rd_data_p1_f[BTB_DWIDTH-1:0] = ( ({17+pt.BTB_BTAG_SIZE{tag_match_way0_expanded_p1_f[0]}} & btb_bank0_rd_data_way0_p1_f[BTB_DWIDTH-1:0]) |
+                                                               ({17+pt.BTB_BTAG_SIZE{tag_match_way1_expanded_p1_f[0]}} & btb_bank0_rd_data_way1_p1_f[BTB_DWIDTH-1:0]) );
 
    // virtual bank order
 
-   assign btb_vbank0_rd_data_f[16+pt.BTB_BTAG_SIZE:0] = ( ({17+pt.BTB_BTAG_SIZE{fetch_start_f[0]}} &  btb_bank0e_rd_data_f[16+pt.BTB_BTAG_SIZE:0]) |
-                                                            ({17+pt.BTB_BTAG_SIZE{fetch_start_f[1]}} &  btb_bank0o_rd_data_f[16+pt.BTB_BTAG_SIZE:0]) );
-   assign btb_vbank1_rd_data_f[16+pt.BTB_BTAG_SIZE:0] = ( ({17+pt.BTB_BTAG_SIZE{fetch_start_f[0]}} &  btb_bank0o_rd_data_f[16+pt.BTB_BTAG_SIZE:0]) |
-                                                            ({17+pt.BTB_BTAG_SIZE{fetch_start_f[1]}} &  btb_bank0e_rd_data_p1_f[16+pt.BTB_BTAG_SIZE:0]) );
+   assign btb_vbank0_rd_data_f[BTB_DWIDTH-1:0] = ( ({17+pt.BTB_BTAG_SIZE{fetch_start_f[0]}} &  btb_bank0e_rd_data_f[BTB_DWIDTH-1:0]) |
+                                                            ({17+pt.BTB_BTAG_SIZE{fetch_start_f[1]}} &  btb_bank0o_rd_data_f[BTB_DWIDTH-1:0]) );
+   assign btb_vbank1_rd_data_f[BTB_DWIDTH-1:0] = ( ({17+pt.BTB_BTAG_SIZE{fetch_start_f[0]}} &  btb_bank0o_rd_data_f[BTB_DWIDTH-1:0]) |
+                                                            ({17+pt.BTB_BTAG_SIZE{fetch_start_f[1]}} &  btb_bank0e_rd_data_p1_f[BTB_DWIDTH-1:0]) );
 
+   assign way_raw[1:0] =  tag_match_vway1_expanded_f[1:0] | (~vwayhit_f[1:0] & btb_vlru_rd_f[1:0]);
 
    // --------------------------------------------------------------------------------
    // --------------------------------------------------------------------------------
@@ -306,8 +317,12 @@ logic exu_flush_final_d1;
 
    assign mp_wrlru_b0[LRU_SIZE-1:0] = mp_wrindex_dec[LRU_SIZE-1:0] & {LRU_SIZE{exu_mp_valid}};
 
-   genvar     j, i;
 
+   assign btb_lru_b0_hold[LRU_SIZE-1:0] = ~mp_wrlru_b0[LRU_SIZE-1:0] & ~fetch_wrlru_b0[LRU_SIZE-1:0];
+
+   // Forward the mp lru information to the fetch, avoids multiple way hits later
+   assign use_mp_way = fetch_mp_collision_f;
+   assign use_mp_way_p1 = fetch_mp_collision_p1_f;
 
    assign lru_update_valid_f = (vwayhit_f[0] | vwayhit_f[1]) & ifc_fetch_req_f & ~leak_one_f;
 
@@ -317,17 +332,12 @@ logic exu_flush_final_d1;
    assign fetch_wrlru_p1_b0[LRU_SIZE-1:0] = fetch_wrindex_p1_dec[LRU_SIZE-1:0] &
                                          {LRU_SIZE{lru_update_valid_f}};
 
-   assign btb_lru_b0_hold[LRU_SIZE-1:0] = ~mp_wrlru_b0[LRU_SIZE-1:0] & ~fetch_wrlru_b0[LRU_SIZE-1:0];
-
-   // Forward the mp lru information to the fetch, avoids multiple way hits later
-   assign use_mp_way = fetch_mp_collision_f;
-   assign use_mp_way_p1 = fetch_mp_collision_p1_f;
-
-
    assign btb_lru_b0_ns[LRU_SIZE-1:0] = ( (btb_lru_b0_hold[LRU_SIZE-1:0] & btb_lru_b0_f[LRU_SIZE-1:0]) |
                                           (mp_wrlru_b0[LRU_SIZE-1:0] & {LRU_SIZE{~exu_mp_way}}) |
                                           (fetch_wrlru_b0[LRU_SIZE-1:0] & {LRU_SIZE{tag_match_way0_f}}) |
                                           (fetch_wrlru_p1_b0[LRU_SIZE-1:0] & {LRU_SIZE{tag_match_way0_p1_f}}) );
+
+
 
    assign btb_lru_rd_f = use_mp_way ? exu_mp_way_f : |(fetch_wrindex_dec[LRU_SIZE-1:0] & btb_lru_b0_f[LRU_SIZE-1:0]);
 
@@ -340,12 +350,12 @@ logic exu_flush_final_d1;
    assign tag_match_vway1_expanded_f[1:0] = ( ({2{fetch_start_f[0]}} & {tag_match_way1_expanded_f[1:0]}) |
                                                ({2{fetch_start_f[1]}} & {tag_match_way1_expanded_p1_f[0], tag_match_way1_expanded_f[1]}) );
 
-   assign way_raw[1:0] =  tag_match_vway1_expanded_f[1:0] | (~vwayhit_f[1:0] & btb_vlru_rd_f[1:0]);
 
    rvdffe #(LRU_SIZE) btb_lru_ff (.*, .en(ifc_fetch_req_f | exu_mp_valid),
                                     .din(btb_lru_b0_ns[(LRU_SIZE)-1:0]),
                                    .dout(btb_lru_b0_f[(LRU_SIZE)-1:0]));
 
+ end // if (!pt.BTB_FULLYA)
    // Detect end of cache line and mask as needed
    logic eoc_near;
    logic eoc_mask;
@@ -353,8 +363,6 @@ logic exu_flush_final_d1;
    assign eoc_mask = ~eoc_near| (|(~ifc_fetch_addr_f[2:1]));
 
 
-   assign vwayhit_f[1:0] = ( ({2{fetch_start_f[0]}} & {wayhit_f[1:0]}) |
-                              ({2{fetch_start_f[1]}} & {wayhit_p1_f[0], wayhit_f[1]})) & {eoc_mask, 1'b1};
 
    // --------------------------------------------------------------------------------
    // --------------------------------------------------------------------------------
@@ -456,7 +464,10 @@ logic exu_flush_final_d1;
                                          ({pt.BHT_GHR_SIZE{~exu_flush_final_d1 & ifc_fetch_req_f & ic_hit_f & ~leak_one_f_d1}} & merged_ghr[pt.BHT_GHR_SIZE-1:0]) |
                                          ({pt.BHT_GHR_SIZE{~exu_flush_final_d1 & ~(ifc_fetch_req_f & ic_hit_f & ~leak_one_f_d1)}} & fghr[pt.BHT_GHR_SIZE-1:0]));
 
-   rvdff #(pt.BHT_GHR_SIZE) fetchghr (.*, .clk(active_clk), .din(fghr_ns[pt.BHT_GHR_SIZE-1:0]), .dout(fghr[pt.BHT_GHR_SIZE-1:0]));
+   rvdffie #(.WIDTH(pt.BHT_GHR_SIZE+3),.OVERRIDE(1)) fetchghr (.*,
+                                          .din ({exu_flush_final, exu_mp_way, leak_one_f, fghr_ns[pt.BHT_GHR_SIZE-1:0]}),
+                                          .dout({exu_flush_final_d1, exu_mp_way_f, leak_one_f_d1, fghr[pt.BHT_GHR_SIZE-1:0]}));
+
    assign ifu_bp_fghr_f[pt.BHT_GHR_SIZE-1:0] = fghr[pt.BHT_GHR_SIZE-1:0];
 
 
@@ -502,7 +513,8 @@ assign use_fa_plus = (~bht_dir_f[0] & ~fetch_start_f[0] & ~btb_rd_pc4_f);
    assign bp_total_branch_offset_f =  bloc_f[1] ^ btb_rd_pc4_f;
 
    logic [31:2] adder_pc_in_f, ifc_fetch_adder_prior;
-   rvdffe #(30) faddrf_ff (.*, .en(ifc_fetch_req_f & ~ifu_bp_hit_taken_f & ic_hit_f), .din(ifc_fetch_addr_f[31:2]), .dout(ifc_fetch_adder_prior[31:2]));
+   rvdfflie #(.WIDTH(30), .LEFT(19)) faddrf_ff (.*, .en(ifc_fetch_req_f & ~ifu_bp_hit_taken_f & ic_hit_f), .din(ifc_fetch_addr_f[31:2]), .dout(ifc_fetch_adder_prior[31:2]));
+
 
    assign ifu_bp_poffset_f[11:0] = btb_rd_tgt_f[11:0];
 
@@ -514,8 +526,9 @@ assign use_fa_plus = (~bht_dir_f[0] & ~fetch_start_f[0] & ~btb_rd_pc4_f);
                          .offset(btb_rd_tgt_f[11:0]),
                          .dout(bp_btb_target_adder_f[31:1])
                          );
-   // mux in the return stack address here for a predicted return assuming the RS is valid
-   assign ifu_bp_btb_target_f[31:1] = (btb_rd_ret_f & ~btb_rd_call_f & rets_out[0][0]) ? rets_out[0][31:1] : bp_btb_target_adder_f[31:1];
+   // mux in the return stack address here for a predicted return assuming the RS is valid, quite if no prediction
+   assign ifu_bp_btb_target_f[31:1] = (({31{btb_rd_ret_f & ~btb_rd_call_f & rets_out[0][0] & ifu_bp_hit_taken_f}} & rets_out[0][31:1]) |
+                                       ({31{~(btb_rd_ret_f & ~btb_rd_call_f & rets_out[0][0]) & ifu_bp_hit_taken_f}} & bp_btb_target_adder_f[31:1]) );
 
 
    // ----------------------------------------------------------------------
@@ -539,7 +552,7 @@ assign use_fa_plus = (~bht_dir_f[0] & ~fetch_start_f[0] & ~btb_rd_pc4_f);
 
    assign rsenable[0] = ~rs_hold;
 
-   for (i=0; i<32'(pt.RET_STACK_SIZE); i++) begin : retstack
+   for (i=0; i<pt.RET_STACK_SIZE; i++) begin : retstack
 
       // for the last entry in the stack, we don't have a pop position
       if(i==pt.RET_STACK_SIZE-1) begin
@@ -570,25 +583,38 @@ assign use_fa_plus = (~bht_dir_f[0] & ~fetch_start_f[0] & ~btb_rd_pc4_f);
 
    assign btb_wr_tag[pt.BTB_BTAG_SIZE-1:0] = exu_mp_btag[pt.BTB_BTAG_SIZE-1:0];
 
-if(pt.BTB_BTAG_FOLD) begin : btbfold
-   el2_btb_tag_hash_fold #(.pt(pt)) rdtagf  (.hash(fetch_rd_tag_f[pt.BTB_BTAG_SIZE-1:0]),    .pc({ifc_fetch_addr_f[pt.BTB_ADDR_HI+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE:pt.BTB_ADDR_HI+1]}));
-   el2_btb_tag_hash_fold #(.pt(pt)) rdtagp1f(.hash(fetch_rd_tag_p1_f[pt.BTB_BTAG_SIZE-1:0]), .pc({fetch_addr_p1_f[ pt.BTB_ADDR_HI+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE:pt.BTB_ADDR_HI+1]}));
-end
-else begin
-   el2_btb_tag_hash #(.pt(pt)) rdtagf(.hash(fetch_rd_tag_f[pt.BTB_BTAG_SIZE-1:0]), .pc({ifc_fetch_addr_f[pt.BTB_ADDR_HI+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE:pt.BTB_ADDR_HI+1]}));
-   el2_btb_tag_hash #(.pt(pt)) rdtagp1f(.hash(fetch_rd_tag_p1_f[pt.BTB_BTAG_SIZE-1:0]), .pc({fetch_addr_p1_f[pt.BTB_ADDR_HI+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE:pt.BTB_ADDR_HI+1]}));
-end
+   if(!pt.BTB_FULLYA) begin
 
-   assign btb_wr_data[16+pt.BTB_BTAG_SIZE:0] = {btb_wr_tag[pt.BTB_BTAG_SIZE-1:0], exu_mp_tgt[11:0], exu_mp_pc4, exu_mp_boffset, exu_mp_call | exu_mp_ja, exu_mp_ret | exu_mp_ja, btb_valid} ;
+      if(pt.BTB_BTAG_FOLD) begin : btbfold
+         el2_btb_tag_hash_fold #(.pt(pt)) rdtagf  (.hash(fetch_rd_tag_f[pt.BTB_BTAG_SIZE-1:0]),
+                                                    .pc({ifc_fetch_addr_f[pt.BTB_ADDR_HI+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE:pt.BTB_ADDR_HI+1]}));
+         el2_btb_tag_hash_fold #(.pt(pt)) rdtagp1f(.hash(fetch_rd_tag_p1_f[pt.BTB_BTAG_SIZE-1:0]),
+                                                    .pc({fetch_addr_p1_f[ pt.BTB_ADDR_HI+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE:pt.BTB_ADDR_HI+1]}));
+      end
+      else begin
+         el2_btb_tag_hash #(.pt(pt)) rdtagf(.hash(fetch_rd_tag_f[pt.BTB_BTAG_SIZE-1:0]),
+                                             .pc({ifc_fetch_addr_f[pt.BTB_ADDR_HI+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE:pt.BTB_ADDR_HI+1]}));
+         el2_btb_tag_hash #(.pt(pt)) rdtagp1f(.hash(fetch_rd_tag_p1_f[pt.BTB_BTAG_SIZE-1:0]),
+                                               .pc({fetch_addr_p1_f[pt.BTB_ADDR_HI+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE:pt.BTB_ADDR_HI+1]}));
+      end
 
-   assign exu_mp_valid_write = exu_mp_valid & exu_mp_ataken;
-   assign btb_wr_en_way0 = ( ({{~exu_mp_way & exu_mp_valid_write & ~dec_tlu_error_wb}}) |
-                             ({{~dec_tlu_way_wb & dec_tlu_error_wb}}));
+      assign btb_wr_en_way0 = ( ({{~exu_mp_way & exu_mp_valid_write & ~dec_tlu_error_wb}}) |
+                                ({{~dec_tlu_way_wb & dec_tlu_error_wb}}));
 
-   assign btb_wr_en_way1 = ( ({{exu_mp_way & exu_mp_valid_write & ~dec_tlu_error_wb}}) |
-                             ({{dec_tlu_way_wb & dec_tlu_error_wb}}));
-   assign btb_wr_addr[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] = dec_tlu_error_wb ? btb_error_addr_wb[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] : exu_mp_addr[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO];
+      assign btb_wr_en_way1 = ( ({{exu_mp_way & exu_mp_valid_write & ~dec_tlu_error_wb}}) |
+                                ({{dec_tlu_way_wb & dec_tlu_error_wb}}));
+      assign btb_wr_addr[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] = dec_tlu_error_wb ? btb_error_addr_wb[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] : exu_mp_addr[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO];
 
+
+      assign vwayhit_f[1:0] = ( ({2{fetch_start_f[0]}} & {wayhit_f[1:0]}) |
+                                ({2{fetch_start_f[1]}} & {wayhit_p1_f[0], wayhit_f[1]})) & {eoc_mask, 1'b1};
+
+   end // if (!pt.BTB_FULLYA)
+
+   assign btb_wr_data[BTB_DWIDTH-1:0] = {btb_wr_tag[pt.BTB_BTAG_SIZE-1:0], exu_mp_tgt[pt.BTB_TOFFSET_SIZE-1:0], exu_mp_pc4, exu_mp_boffset,
+                                                exu_mp_call | exu_mp_ja, exu_mp_ret | exu_mp_ja, btb_valid} ;
+
+   assign exu_mp_valid_write = exu_mp_valid & exu_mp_ataken & ~exu_mp_pkt.valid;
    logic [1:0] bht_wr_data0, bht_wr_data2;
    logic [1:0] bht_wr_en0, bht_wr_en2;
 
@@ -622,46 +648,172 @@ end
    // BTB
    // Entry -> tag[pt.BTB_BTAG_SIZE-1:0], toffset[11:0], pc4, boffset, call, ret, valid
 
+   if(!pt.BTB_FULLYA) begin
 
-    for (j=0 ; j<32'(LRU_SIZE) ; j++) begin : BTB_FLOPS
-      // Way 0
-          rvdffe #(17+pt.BTB_BTAG_SIZE) btb_bank0_way0 (.*,
+      for (j=0 ; j<LRU_SIZE ; j++) begin : BTB_FLOPS
+         // Way 0
+         rvdffe #(17+pt.BTB_BTAG_SIZE) btb_bank0_way0 (.*,
                     .en(((btb_wr_addr[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] == j) & btb_wr_en_way0)),
-                    .din        (btb_wr_data[16+pt.BTB_BTAG_SIZE:0]),
+                    .din        (btb_wr_data[BTB_DWIDTH-1:0]),
                     .dout       (btb_bank0_rd_data_way0_out[j]));
 
-      // Way 1
-          rvdffe #(17+pt.BTB_BTAG_SIZE) btb_bank0_way1 (.*,
+         // Way 1
+         rvdffe #(17+pt.BTB_BTAG_SIZE) btb_bank0_way1 (.*,
                     .en(((btb_wr_addr[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] == j) & btb_wr_en_way1)),
-                    .din        (btb_wr_data[16+pt.BTB_BTAG_SIZE:0]),
+                    .din        (btb_wr_data[BTB_DWIDTH-1:0]),
                     .dout       (btb_bank0_rd_data_way1_out[j]));
 
-    end
+      end
 
 
     always_comb begin : BTB_rd_mux
-        btb_bank0_rd_data_way0_f[16+pt.BTB_BTAG_SIZE:0] = '0 ;
-        btb_bank0_rd_data_way1_f[16+pt.BTB_BTAG_SIZE:0] = '0 ;
-        btb_bank0_rd_data_way0_p1_f[16+pt.BTB_BTAG_SIZE:0] = '0 ;
-        btb_bank0_rd_data_way1_p1_f[16+pt.BTB_BTAG_SIZE:0] = '0 ;
+        btb_bank0_rd_data_way0_f[BTB_DWIDTH-1:0] = '0 ;
+        btb_bank0_rd_data_way1_f[BTB_DWIDTH-1:0] = '0 ;
+        btb_bank0_rd_data_way0_p1_f[BTB_DWIDTH-1:0] = '0 ;
+        btb_bank0_rd_data_way1_p1_f[BTB_DWIDTH-1:0] = '0 ;
 
         for (int j=0; j< LRU_SIZE; j++) begin
           if (btb_rd_addr_f[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] == (pt.BTB_ADDR_HI-pt.BTB_ADDR_LO+1)'(j)) begin
 
-           btb_bank0_rd_data_way0_f[16+pt.BTB_BTAG_SIZE:0] =  btb_bank0_rd_data_way0_out[j];
-           btb_bank0_rd_data_way1_f[16+pt.BTB_BTAG_SIZE:0] =  btb_bank0_rd_data_way1_out[j];
+           btb_bank0_rd_data_way0_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way0_out[j];
+           btb_bank0_rd_data_way1_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way1_out[j];
 
           end
         end
         for (int j=0; j< LRU_SIZE; j++) begin
           if (btb_rd_addr_p1_f[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] == (pt.BTB_ADDR_HI-pt.BTB_ADDR_LO+1)'(j)) begin
 
-           btb_bank0_rd_data_way0_p1_f[16+pt.BTB_BTAG_SIZE:0] =  btb_bank0_rd_data_way0_out[j];
-           btb_bank0_rd_data_way1_p1_f[16+pt.BTB_BTAG_SIZE:0] =  btb_bank0_rd_data_way1_out[j];
+           btb_bank0_rd_data_way0_p1_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way0_out[j];
+           btb_bank0_rd_data_way1_p1_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way1_out[j];
 
           end
         end
     end
+end // if (!pt.BTB_FULLYA)
+
+
+
+
+
+      if(pt.BTB_FULLYA) begin : fa
+
+         logic found1, hit0, hit1;
+         logic btb_used_reset, write_used;
+         logic [$clog2(pt.BTB_SIZE)-1:0] btb_fa_wr_addr0, hit0_index, hit1_index;
+
+         logic [pt.BTB_SIZE-1:0]         btb_tag_hit, btb_offset_0, btb_offset_1, btb_used_ns, btb_used,
+                                         wr0_en, btb_upper_hit;
+         logic [pt.BTB_SIZE-1:0][BTB_DWIDTH-1:0] btbdata;
+
+         // Fully Associative tag hash uses bits 31:3. Bits 2:1 are the offset bits used for the 4 tag comp banks
+         // Full tag used to speed up lookup. There is one 31:3 cmp per entry, and 4 2:1 cmps per entry.
+
+         logic [FA_CMP_LOWER-1:1]  ifc_fetch_addr_p1_f;
+
+
+         assign ifc_fetch_addr_p1_f[FA_CMP_LOWER-1:1] = ifc_fetch_addr_f[FA_CMP_LOWER-1:1] + 1'b1;
+
+         assign fetch_mp_collision_f = ( (exu_mp_btag[pt.BTB_BTAG_SIZE-1:0] == ifc_fetch_addr_f[31:1]) &
+                                      exu_mp_valid & ifc_fetch_req_f & ~exu_mp_pkt.way);
+         assign fetch_mp_collision_p1_f = ( (exu_mp_btag[pt.BTB_BTAG_SIZE-1:0] == {ifc_fetch_addr_f[31:FA_CMP_LOWER], ifc_fetch_addr_p1_f[FA_CMP_LOWER-1:1]}) &
+                                      exu_mp_valid & ifc_fetch_req_f & ~exu_mp_pkt.way);
+
+      always_comb begin
+         btb_vbank0_rd_data_f = '0;
+         btb_vbank1_rd_data_f = '0;
+         btb_tag_hit = '0;
+         btb_upper_hit = '0;
+         btb_offset_0 = '0;
+         btb_offset_1 = '0;
+
+         found1 = 1'b0;
+         hit0 = 1'b0;
+         hit1 = 1'b0;
+         hit0_index = '0;
+         hit1_index = '0;
+         btb_fa_wr_addr0 = '0;
+
+         for(int i=0; i<pt.BTB_SIZE; i++) begin
+            // Break the cmp into chunks for lower area.
+            // Chunk1: FA 31:6 or 31:5 depending on icache line size
+            // Chunk2: FA 5:1 or 4:1 depending on icache line size
+            btb_upper_hit[i] = (btbdata[i][BTB_DWIDTH_TOP:FA_TAG_END_UPPER] == ifc_fetch_addr_f[31:FA_CMP_LOWER]) & btbdata[i][0] & ~wr0_en[i];
+            btb_offset_0[i] = (btbdata[i][FA_TAG_START_LOWER:FA_TAG_END_LOWER] == ifc_fetch_addr_f[FA_CMP_LOWER-1:1]) & btb_upper_hit[i];
+            btb_offset_1[i] = (btbdata[i][FA_TAG_START_LOWER:FA_TAG_END_LOWER] == ifc_fetch_addr_p1_f[FA_CMP_LOWER-1:1]) & btb_upper_hit[i];
+
+            if(~hit0) begin
+               if(btb_offset_0[i]) begin
+                  hit0_index[BTB_FA_INDEX:0] = (BTB_FA_INDEX+1)'(i);
+                  // hit unless we are also writing this entry at the same time
+                  hit0 = 1'b1;
+               end
+            end
+            if(~hit1) begin
+               if(btb_offset_1[i]) begin
+                  hit1_index[BTB_FA_INDEX:0] = (BTB_FA_INDEX+1)'(i);
+                  hit1 = 1'b1;
+               end
+            end
+
+
+            // Mux out the 2 potential branches
+            if(btb_offset_0[i] == 1'b1)
+              btb_vbank0_rd_data_f[BTB_DWIDTH-1:0] = fetch_mp_collision_f ? btb_wr_data : btbdata[i];
+            if(btb_offset_1[i] == 1'b1)
+              btb_vbank1_rd_data_f[BTB_DWIDTH-1:0] = fetch_mp_collision_p1_f ? btb_wr_data : btbdata[i];
+
+            // find the first zero from bit zero in the used vector, this is the write address
+            if(~found1) begin
+               if(~btb_used[i]) begin
+                  btb_fa_wr_addr0[BTB_FA_INDEX:0] = i[BTB_FA_INDEX:0];
+                  found1 = 1'b1;
+               end
+            end
+         end
+      end // always_comb begin
+
+`ifdef RV_ASSERT_ON
+   btbhitonehot0: assert #0 ($onehot0(btb_offset_0));
+   btbhitonehot1: assert #0 ($onehot0(btb_offset_1));
+`endif
+
+   assign vwayhit_f[1:0] = {hit1, hit0} & {eoc_mask, 1'b1};
+
+   // way bit is reused as the predicted bit
+   assign way_raw[1:0] =  vwayhit_f[1:0] | {fetch_mp_collision_p1_f, fetch_mp_collision_f};
+
+   for (j=0 ; j<pt.BTB_SIZE ; j++) begin : BTB_FAFLOPS
+
+      assign wr0_en[j] = ((btb_fa_wr_addr0[BTB_FA_INDEX:0] == j) & (exu_mp_valid_write & ~exu_mp_pkt.way)) |
+                         ((dec_fa_error_index == j) & dec_tlu_error_wb);
+
+      rvdffe #(BTB_DWIDTH) btb_fa (.*, .clk(clk),
+                                   .en  (wr0_en[j]),
+                                   .din (btb_wr_data[BTB_DWIDTH-1:0]),
+                                   .dout(btbdata[j]));
+   end // block: BTB_FAFLOPS
+
+   assign ifu_bp_fa_index_f[1] = hit1 ? hit1_index : '0;
+   assign ifu_bp_fa_index_f[0] = hit0 ? hit0_index : '0;
+
+   assign btb_used_reset = &btb_used[pt.BTB_SIZE-1:0];
+   assign btb_used_ns[pt.BTB_SIZE-1:0] = ({pt.BTB_SIZE{vwayhit_f[1]}} & (32'b1 << hit1_index[BTB_FA_INDEX:0])) |
+                                         ({pt.BTB_SIZE{vwayhit_f[0]}} & (32'b1 << hit0_index[BTB_FA_INDEX:0])) |
+                                         ({pt.BTB_SIZE{exu_mp_valid_write & ~exu_mp_pkt.way & ~dec_tlu_error_wb}} & (32'b1 << btb_fa_wr_addr0[BTB_FA_INDEX:0])) |
+                                         ({pt.BTB_SIZE{btb_used_reset}} & {pt.BTB_SIZE{1'b0}}) |
+                                         ({pt.BTB_SIZE{~btb_used_reset & dec_tlu_error_wb}} & (btb_used[pt.BTB_SIZE-1:0] & ~(32'b1 << dec_fa_error_index[BTB_FA_INDEX:0]))) |
+                                         (~{pt.BTB_SIZE{btb_used_reset | dec_tlu_error_wb}} & btb_used[pt.BTB_SIZE-1:0]);
+
+   assign write_used = btb_used_reset | ifu_bp_hit_taken_f | exu_mp_valid_write | dec_tlu_error_wb;
+
+
+   rvdffe #(pt.BTB_SIZE) btb_usedf (.*, .clk(clk),
+                    .en  (write_used),
+                    .din (btb_used_ns[pt.BTB_SIZE-1:0]),
+                    .dout(btb_used[pt.BTB_SIZE-1:0]));
+
+end // block: fa
+
 
    //-----------------------------------------------------------------------------
    // BHT
@@ -676,11 +828,12 @@ end
    logic [1:0] [(pt.BHT_ARRAY_DEPTH/NUM_BHT_LOOP)-1:0][NUM_BHT_LOOP-1:0]           bht_bank_sel   ;
 
    for ( i=0; i<2; i++) begin : BANKS
-     for (genvar k=0 ; k < 32'((pt.BHT_ARRAY_DEPTH)/NUM_BHT_LOOP) ; k++) begin : BHT_CLK_GROUP
+     for (genvar k=0 ; k < (pt.BHT_ARRAY_DEPTH)/NUM_BHT_LOOP ; k++) begin : BHT_CLK_GROUP
      assign bht_bank_clken[i][k]  = (bht_wr_en0[i] & ((bht_wr_addr0[pt.BHT_ADDR_HI: NUM_BHT_LOOP_OUTER_LO]==k) |  BHT_NO_ADDR_MATCH)) |
                                     (bht_wr_en2[i] & ((bht_wr_addr2[pt.BHT_ADDR_HI: NUM_BHT_LOOP_OUTER_LO]==k) |  BHT_NO_ADDR_MATCH));
-
-     rvclkhdr bht_bank_grp_cgc ( .en(bht_bank_clken[i][k]), .l1clk(bht_bank_clk[i][k]), .* );
+`ifndef RV_FPGA_OPTIMIZE
+     rvclkhdr bht_bank_grp_cgc ( .en(bht_bank_clken[i][k]), .l1clk(bht_bank_clk[i][k]), .* ); // ifndef RV_FPGA_OPTIMIZE
+`endif
 
      for (j=0 ; j<NUM_BHT_LOOP ; j++) begin : BHT_FLOPS
        assign   bht_bank_sel[i][k][j]    = (bht_wr_en0[i] & (bht_wr_addr0[NUM_BHT_LOOP_INNER_HI :pt.BHT_ADDR_LO] == j) & ((bht_wr_addr0[pt.BHT_ADDR_HI: NUM_BHT_LOOP_OUTER_LO]==k) | BHT_NO_ADDR_MATCH)) |
@@ -690,9 +843,11 @@ end
                                                                                                                       bht_wr_data0[1:0]   ;
 
 
-          rvdffs #(2) bht_bank (.*,
+          rvdffs_fpga #(2) bht_bank (.*,
                     .clk        (bht_bank_clk[i][k]),
                     .en         (bht_bank_sel[i][k][j]),
+                    .rawclk     (clk),
+                    .clken      (bht_bank_sel[i][k][j]),
                     .din        (bht_bank_wr_data[i][k][j]),
                     .dout       (bht_bank_rd_data_out[i][(16*k)+j]));
 
@@ -716,9 +871,6 @@ end
     end // block: BHT_rd_mux
 
 
-
-
-
 function [1:0] countones;
       input [1:0] valid;
 
@@ -728,25 +880,5 @@ countones[1:0] = {2'b0, valid[1]} +
                  {2'b0, valid[0]};
       end
    endfunction
-   function [2:0] newlru; // updated lru
-      input [2:0] lru;// current lru
-      input [1:0] used;// hit way
-      begin
-newlru[2] = (lru[2] & ~used[0]) | (~used[1] & ~used[0]);
-newlru[1] = (~used[1] & ~used[0]) | (used[0]);
-newlru[0] = (~lru[2] & lru[1] & ~used[1] & ~used[0]) | (~lru[1] & ~lru[0] & used[0]) | (
-    ~lru[2] & lru[0] & used[0]) | (lru[0] & ~used[1] & ~used[0]);
-      end
-   endfunction //
-
-   function [1:0] lru2way; // new repl way taking invalid ways into account
-      input [2:0] lru; // current lru
-      input [2:0] v; // current way valids
-      begin
-         lru2way[1] = (~lru[2] & lru[1] & ~lru[0] & v[1] & v[0]) | (lru[2] & lru[0] & v[1] & v[0]) | (~v[2] & v[1] & v[0]);
-         lru2way[0] = (lru[2] & ~lru[0] & v[2] & v[0]) | (~v[1] & v[0]);
-      end
-   endfunction
-
 endmodule // el2_ifu_bp_ctl
 

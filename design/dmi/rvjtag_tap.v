@@ -173,6 +173,7 @@ always_comb begin
                     endcase
                 end
     capture_dr: begin
+                    nsr[0] = 1'b0;
                     case(1)
                     dr_en[0]:   nsr = {{USER_DR_LENGTH-15{1'b0}}, idle, dmi_stat, abits, version};
                     dr_en[1]:   nsr = {{AWIDTH{1'b0}}, rd_data, rd_status};

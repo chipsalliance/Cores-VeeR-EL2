@@ -1,6 +1,6 @@
- //********************************************************************************
+//********************************************************************************
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2020 Western Digital Corporation or it's affiliates.
+// Copyright 2020 Western Digital Corporation or its affiliates.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,18 +27,18 @@ import el2_pkg::*;
 `include "el2_param.vh"
  )
   (
-   input logic clk,
-   input logic free_clk,                                            // free clock always except during pause
-   input logic active_clk,                                          // Active always except during pause
-   input logic rst_l,
+   input logic clk,                                                 // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.
+   input logic active_clk,                                          // Clock only while core active.  Through two clock headers. For flops without second clock header built in.
+   input logic free_l2clk,                                          // Clock always.                  Through one clock header.  For flops with    second header built in.
+   input logic rst_l,                                               // reset, active low
 
    input logic                       exu_flush_final,               // Flush from the pipeline., includes flush lower
    input logic                       dec_tlu_flush_lower_wb,        // Flush lower from the pipeline.
    input logic                       dec_tlu_flush_err_wb,          // Flush from the pipeline due to perr.
-   input logic                       dec_tlu_i0_commit_cmt,          // committed i0 instruction
-   input logic                       dec_tlu_force_halt,             // force halt.
+   input logic                       dec_tlu_i0_commit_cmt,         // committed i0 instruction
+   input logic                       dec_tlu_force_halt,            // force halt.
 
-   input logic [31:1]                ifc_fetch_addr_bf,                 // Fetch Address byte aligned always.      F1 stage.
+   input logic [31:1]                ifc_fetch_addr_bf,             // Fetch Address byte aligned always.      F1 stage.
    input logic                       ifc_fetch_uncacheable_bf,      // The fetch request is uncacheable space. F1 stage
    input logic                       ifc_fetch_req_bf,              // Fetch request. Comes with the address.  F1 stage
    input logic                       ifc_fetch_req_bf_raw,          // Fetch request without some qualifications. Used for clock-gating. F1 stage
@@ -46,7 +46,7 @@ import el2_pkg::*;
    input logic                       ifc_region_acc_fault_bf,       // Access fault. in ICCM region but offset is outside defined ICCM.
    input logic                       ifc_dma_access_ok,             // It is OK to give dma access to the ICCM. (ICCM is not busy this cycle).
    input logic                       dec_tlu_fence_i_wb,            // Fence.i instruction is committing. Clear all Icache valids.
-   input logic                       ifu_bp_hit_taken_f,           // Branch is predicted taken. Kill the fetch next cycle.
+   input logic                       ifu_bp_hit_taken_f,            // Branch is predicted taken. Kill the fetch next cycle.
 
    input logic                       ifu_bp_inst_mask_f,            // tell ic which valids to kill because of a taken branch, right justified
 
@@ -160,10 +160,10 @@ import el2_pkg::*;
    input  logic [1:0]                ifu_fetch_val,
    // IFU control signals
    output logic                      ic_hit_f,               // Hit in Icache(if Icache access) or ICCM access( ICCM always has ic_hit_f)
-   output logic                      ic_access_fault_f,      // Access fault (bus error or ICCM access in region but out of offset range).
+   output logic [1:0]                ic_access_fault_f,      // Access fault (bus error or ICCM access in region but out of offset range).
    output logic [1:0]                ic_access_fault_type_f, // Access fault types
    output logic                      iccm_rd_ecc_single_err, // This fetch has a single ICCM ecc  error.
-   output logic                      iccm_rd_ecc_double_err, // This fetch has a double ICCM ecc  error.
+   output logic [1:0]                iccm_rd_ecc_double_err, // This fetch has a double ICCM ecc  error.
    output logic                      ic_error_start,         // This has any I$ errors ( data/tag/ecc/parity )
 
    output logic                      ifu_async_error_start,  // Or of the sb iccm, and all the icache errors sent to aligner to stop
@@ -183,7 +183,6 @@ import el2_pkg::*;
 
    input  logic         scan_mode
    );
-
 
 //  Create different defines for ICACHE and ICCM enable combinations
 
@@ -219,6 +218,7 @@ import el2_pkg::*;
 
    logic           ifu_wr_data_comb_err ;
    logic           ifu_byp_data_err_new;
+   logic  [1:0]    ifu_byp_data_err_f;
    logic           ifu_wr_cumulative_err_data;
    logic           ifu_wr_cumulative_err;
    logic           ifu_wr_data_comb_err_ff;
@@ -229,7 +229,7 @@ import el2_pkg::*;
    logic           ifc_iccm_access_f ;
    logic           ifc_region_acc_fault_f;
    logic           ifc_region_acc_fault_final_f;
-   logic           ifc_bus_acc_fault_f;
+   logic  [1:0]    ifc_bus_acc_fault_f;
    logic           ic_act_miss_f;
    logic           ic_miss_under_miss_f;
    logic           ic_ignore_2nd_miss_f;
@@ -312,14 +312,12 @@ import el2_pkg::*;
    logic         ifu_pmu_bus_busy_in;
    logic         ic_debug_ict_array_sel_in;
    logic         ic_debug_ict_array_sel_ff;
-   logic         debug_data_clk;
    logic         debug_data_clken;
    logic         last_data_recieved_in ;
    logic         last_data_recieved_ff ;
 
    logic                          ifu_bus_rvalid           ;
    logic                          ifu_bus_rvalid_ff        ;
-   logic                          ifu_bus_rvalid_unq    ;
    logic                          ifu_bus_rvalid_unq_ff    ;
    logic                          ifu_bus_arready_unq       ;
    logic                          ifu_bus_arready_unq_ff    ;
@@ -335,28 +333,28 @@ import el2_pkg::*;
    logic [63:0]                   ifu_bus_rsp_rdata;
    logic [1:0]                    ifu_bus_rsp_opc;
 
-  logic [pt.ICACHE_NUM_BEATS-1:0]    write_fill_data;
-  logic [pt.ICACHE_NUM_BEATS-1:0]    wr_data_c1_clk;
-  logic [pt.ICACHE_NUM_BEATS-1:0]    ic_miss_buff_data_valid_in;
-  logic [pt.ICACHE_NUM_BEATS-1:0]    ic_miss_buff_data_valid;
-  logic [pt.ICACHE_NUM_BEATS-1:0]    ic_miss_buff_data_error_in;
-  logic [pt.ICACHE_NUM_BEATS-1:0]    ic_miss_buff_data_error;
-  logic [pt.ICACHE_BEAT_ADDR_HI:1]    byp_fetch_index;
-  logic [pt.ICACHE_BEAT_ADDR_HI:2]    byp_fetch_index_0;
-  logic [pt.ICACHE_BEAT_ADDR_HI:2]    byp_fetch_index_1;
-  logic [pt.ICACHE_BEAT_ADDR_HI:3]    byp_fetch_index_inc;
-  logic [pt.ICACHE_BEAT_ADDR_HI:2]    byp_fetch_index_inc_0;
-  logic [pt.ICACHE_BEAT_ADDR_HI:2]    byp_fetch_index_inc_1;
-  logic          miss_buff_hit_unq_f ;
-  logic          stream_hit_f ;
-  logic          stream_miss_f ;
-  logic          stream_eol_f ;
-  logic          crit_byp_hit_f ;
-  logic [pt.IFU_BUS_TAG-1:0] other_tag ;
-  logic [(2*pt.ICACHE_NUM_BEATS)-1:0] [31:0] ic_miss_buff_data;
-  logic [63:0] ic_miss_buff_half;
-  logic        scnd_miss_req, scnd_miss_req_q, scnd_miss_req_ff2;
-  logic        scnd_miss_req_in;
+   logic [pt.ICACHE_NUM_BEATS-1:0]    write_fill_data;
+   logic [pt.ICACHE_NUM_BEATS-1:0]    wr_data_c1_clk;
+   logic [pt.ICACHE_NUM_BEATS-1:0]    ic_miss_buff_data_valid_in;
+   logic [pt.ICACHE_NUM_BEATS-1:0]    ic_miss_buff_data_valid;
+   logic [pt.ICACHE_NUM_BEATS-1:0]    ic_miss_buff_data_error_in;
+   logic [pt.ICACHE_NUM_BEATS-1:0]    ic_miss_buff_data_error;
+   logic [pt.ICACHE_BEAT_ADDR_HI:1]    byp_fetch_index;
+   logic [pt.ICACHE_BEAT_ADDR_HI:2]    byp_fetch_index_0;
+   logic [pt.ICACHE_BEAT_ADDR_HI:2]    byp_fetch_index_1;
+   logic [pt.ICACHE_BEAT_ADDR_HI:3]    byp_fetch_index_inc;
+   logic [pt.ICACHE_BEAT_ADDR_HI:2]    byp_fetch_index_inc_0;
+   logic [pt.ICACHE_BEAT_ADDR_HI:2]    byp_fetch_index_inc_1;
+   logic          miss_buff_hit_unq_f ;
+   logic          stream_hit_f ;
+   logic          stream_miss_f ;
+   logic          stream_eol_f ;
+   logic          crit_byp_hit_f ;
+   logic [pt.IFU_BUS_TAG-1:0] other_tag ;
+   logic [(2*pt.ICACHE_NUM_BEATS)-1:0] [31:0] ic_miss_buff_data;
+   logic [63:0] ic_miss_buff_half;
+   logic        scnd_miss_req, scnd_miss_req_q;
+   logic        scnd_miss_req_in;
 
 
    logic [pt.ICCM_BITS-1:2]                iccm_ecc_corr_index_ff;
@@ -435,6 +433,7 @@ import el2_pkg::*;
    logic   ic_crit_wd_rdy;         // Critical fetch is ready to be bypassed.
 
    logic   ifu_bp_hit_taken_q_f;
+   logic   ifu_bus_rvalid_unq;
    logic   bus_cmd_beat_en;
 
 
@@ -443,11 +442,16 @@ import el2_pkg::*;
 
 
    assign fetch_bf_f_c1_clken  = ifc_fetch_req_bf_raw | ifc_fetch_req_f | miss_pending | exu_flush_final | scnd_miss_req;
-   assign debug_c1_clken        = ic_debug_rd_en | ic_debug_wr_en ;
+   assign debug_c1_clken       = ic_debug_rd_en | ic_debug_wr_en ;
    // C1 - 1 clock pulse for data
+`ifdef RV_FPGA_OPTIMIZE
+   assign fetch_bf_f_c1_clk = 1'b0;
+   assign debug_c1_clk      = 1'b0;
+`else
+   rvclkhdr fetch_bf_f_c1_cgc    ( .en(fetch_bf_f_c1_clken),     .l1clk(fetch_bf_f_c1_clk), .* );
+   rvclkhdr debug_c1_cgc         ( .en(debug_c1_clken),          .l1clk(debug_c1_clk), .* );
+`endif
 
-   rvclkhdr fetch_bf_f_c1_cgc   ( .en(fetch_bf_f_c1_clken),     .l1clk(fetch_bf_f_c1_clk), .* );
-   rvclkhdr debug_c1_cgc         ( .en(debug_c1_clken),     .l1clk(debug_c1_clk), .* );
 
 // ------ end clock gating section ------------------------
 
@@ -529,7 +533,7 @@ import el2_pkg::*;
          end
       endcase
    end
-   rvdffs #(($bits(miss_state_t))) miss_state_ff (.clk(free_clk), .din(miss_nxtstate), .dout({miss_state}), .en(miss_state_en),   .*);
+   rvdffs #(($bits(miss_state_t))) miss_state_ff (.clk(active_clk), .din(miss_nxtstate), .dout({miss_state}), .en(miss_state_en),   .*);
 
   logic    sel_hold_imb     ;
 
@@ -554,14 +558,14 @@ import el2_pkg::*;
 
    assign sel_hold_imb_scnd                                =((miss_state == SCND_MISS) | ic_miss_under_miss_f) & ~flush_final_f ;
    assign way_status_mb_scnd_in[pt.ICACHE_STATUS_BITS-1:0] = (miss_state == SCND_MISS) ? way_status_mb_scnd_ff[pt.ICACHE_STATUS_BITS-1:0] : {way_status[pt.ICACHE_STATUS_BITS-1:0]} ;
-   assign tagv_mb_scnd_in[pt.ICACHE_NUM_WAYS-1:0]          = (miss_state == SCND_MISS) ? tagv_mb_scnd_ff[pt.ICACHE_NUM_WAYS-1:0]          : ({ic_tag_valid[pt.ICACHE_NUM_WAYS-1:0]} & {pt.ICACHE_NUM_WAYS{~reset_all_tags}});
+   assign tagv_mb_scnd_in[pt.ICACHE_NUM_WAYS-1:0]          = (miss_state == SCND_MISS) ? tagv_mb_scnd_ff[pt.ICACHE_NUM_WAYS-1:0]          : ({ic_tag_valid[pt.ICACHE_NUM_WAYS-1:0]} & {pt.ICACHE_NUM_WAYS{~reset_all_tags & ~exu_flush_final}});
    assign uncacheable_miss_scnd_in   = sel_hold_imb_scnd ? uncacheable_miss_scnd_ff : ifc_fetch_uncacheable_bf ;
 
 
-   rvdff #(1)  unc_miss_scnd_ff    (.*, .clk(fetch_bf_f_c1_clk), .din (uncacheable_miss_scnd_in), .dout(uncacheable_miss_scnd_ff));
-   rvdff #(31) imb_f_scnd_ff       (.*, .clk(fetch_bf_f_c1_clk), .din ({imb_scnd_in[31:1]}), .dout({imb_scnd_ff[31:1]}));
-   rvdff #(pt.ICACHE_STATUS_BITS)  mb_rep_wayf2_scnd_ff (.*, .clk(fetch_bf_f_c1_clk), .din ({way_status_mb_scnd_in[pt.ICACHE_STATUS_BITS-1:0]}), .dout({way_status_mb_scnd_ff[pt.ICACHE_STATUS_BITS-1:0]}));
-   rvdff #(pt.ICACHE_NUM_WAYS)     mb_tagv_scnd_ff      (.*, .clk(fetch_bf_f_c1_clk), .din ({tagv_mb_scnd_in[pt.ICACHE_NUM_WAYS-1:0]}), .dout({tagv_mb_scnd_ff[pt.ICACHE_NUM_WAYS-1:0]}));
+   rvdff_fpga #(1)  unc_miss_scnd_ff    (.*, .clk(fetch_bf_f_c1_clk), .clken(fetch_bf_f_c1_clken), .rawclk(clk), .din (uncacheable_miss_scnd_in), .dout(uncacheable_miss_scnd_ff));
+   rvdffpcie #(31) imb_f_scnd_ff       (.*, .en(fetch_bf_f_c1_clken),  .din ({imb_scnd_in[31:1]}), .dout({imb_scnd_ff[31:1]}));
+   rvdff_fpga #(pt.ICACHE_STATUS_BITS)  mb_rep_wayf2_scnd_ff (.*, .clk(fetch_bf_f_c1_clk), .clken(fetch_bf_f_c1_clken), .rawclk(clk), .din ({way_status_mb_scnd_in[pt.ICACHE_STATUS_BITS-1:0]}), .dout({way_status_mb_scnd_ff[pt.ICACHE_STATUS_BITS-1:0]}));
+   rvdff_fpga #(pt.ICACHE_NUM_WAYS)     mb_tagv_scnd_ff      (.*, .clk(fetch_bf_f_c1_clk), .clken(fetch_bf_f_c1_clken), .rawclk(clk), .din ({tagv_mb_scnd_in[pt.ICACHE_NUM_WAYS-1:0]}), .dout({tagv_mb_scnd_ff[pt.ICACHE_NUM_WAYS-1:0]}));
 
 
 
@@ -597,45 +601,40 @@ import el2_pkg::*;
                                                          miss_pending                            ? way_status_mb_ff[pt.ICACHE_STATUS_BITS-1:0] :
                                                                                                   {way_status[pt.ICACHE_STATUS_BITS-1:0]} ;
    assign tagv_mb_in[pt.ICACHE_NUM_WAYS-1:0]          = scnd_miss_req ? (tagv_mb_scnd_ff[pt.ICACHE_NUM_WAYS-1:0] | ({pt.ICACHE_NUM_WAYS {scnd_miss_index_match}} & replace_way_mb_any[pt.ICACHE_NUM_WAYS-1:0])) :
-                                                         miss_pending ? tagv_mb_ff[pt.ICACHE_NUM_WAYS-1:0]  : ({ic_tag_valid[pt.ICACHE_NUM_WAYS-1:0]} & {pt.ICACHE_NUM_WAYS{~reset_all_tags}}) ;
+                                                         miss_pending ? tagv_mb_ff[pt.ICACHE_NUM_WAYS-1:0]  : ({ic_tag_valid[pt.ICACHE_NUM_WAYS-1:0]} & {pt.ICACHE_NUM_WAYS{~reset_all_tags & ~exu_flush_final}}) ;
 
    assign reset_ic_in           = miss_pending & ~scnd_miss_req_q &  (reset_all_tags |  reset_ic_ff) ;
 
-   rvdff #(1)  reset_ic_f (.*, .clk(free_clk), .din (reset_ic_in), .dout(reset_ic_ff));
-   rvdff #(1)  uncache_ff (.*, .clk(active_clk), .din (ifc_fetch_uncacheable_bf), .dout(fetch_uncacheable_ff));
 
 
-
-   rvdff #(31) ifu_fetch_addr_f_ff (.*,
-                    .clk (fetch_bf_f_c1_clk),
-                    .din ({ifc_fetch_addr_bf[31:1]}),
-                    .dout({ifu_fetch_addr_int_f[31:1]}));
+   rvdffpcie #(31) ifu_fetch_addr_f_ff (.*, .en(fetch_bf_f_c1_clken), .din ({ifc_fetch_addr_bf[31:1]}), .dout({ifu_fetch_addr_int_f[31:1]}));
 
    assign vaddr_f[pt.ICACHE_BEAT_ADDR_HI:1] = ifu_fetch_addr_int_f[pt.ICACHE_BEAT_ADDR_HI:1] ;
 
-   rvdff #(1)  unc_miss_ff     (.*, .clk(fetch_bf_f_c1_clk), .din (uncacheable_miss_in), .dout(uncacheable_miss_ff));
-   rvdff #(31) imb_f_ff       (.*, .clk(fetch_bf_f_c1_clk), .din ({imb_in[31:1]}), .dout({imb_ff[31:1]}));
+   rvdffpcie #(31) imb_f_ff        (.*, .en(fetch_bf_f_c1_clken), .din (imb_in[31:1]), .dout(imb_ff[31:1]));
+   rvdff_fpga #(1) unc_miss_ff     (.*, .clk(fetch_bf_f_c1_clk), .clken(fetch_bf_f_c1_clken), .rawclk(clk),  .din ( uncacheable_miss_in),               .dout( uncacheable_miss_ff));
 
 
    assign miss_addr_in[31:pt.ICACHE_BEAT_ADDR_HI+1]      = (~miss_pending                    ) ? imb_ff[31:pt.ICACHE_BEAT_ADDR_HI+1] :
                                                            (                scnd_miss_req_q  ) ? imb_scnd_ff[31:pt.ICACHE_BEAT_ADDR_HI+1] : miss_addr[31:pt.ICACHE_BEAT_ADDR_HI+1] ;
 
-   rvdff #(31-pt.ICACHE_BEAT_ADDR_HI) miss_f_ff       (.*, .clk(busclk_reset), .din ({miss_addr_in[31:pt.ICACHE_BEAT_ADDR_HI+1]}), .dout({miss_addr[31:pt.ICACHE_BEAT_ADDR_HI+1]}));
+
+   rvdfflie #(.WIDTH(31-pt.ICACHE_BEAT_ADDR_HI),.LEFT(31-pt.ICACHE_BEAT_ADDR_HI-8)) miss_f_ff       (.*, .en(bus_ifu_bus_clk_en | ic_act_miss_f | dec_tlu_force_halt), .din ({miss_addr_in[31:pt.ICACHE_BEAT_ADDR_HI+1]}), .dout({miss_addr[31:pt.ICACHE_BEAT_ADDR_HI+1]}));
 
 
 
-   rvdff #(pt.ICACHE_STATUS_BITS)  mb_rep_wayf2_ff (.*, .clk(fetch_bf_f_c1_clk), .din ({way_status_mb_in[pt.ICACHE_STATUS_BITS-1:0]}), .dout({way_status_mb_ff[pt.ICACHE_STATUS_BITS-1:0]}));
 
-   rvdff #(pt.ICACHE_NUM_WAYS)  mb_tagv_ff      (.*, .clk(fetch_bf_f_c1_clk), .din ({tagv_mb_in[pt.ICACHE_NUM_WAYS-1:0]}), .dout({tagv_mb_ff[pt.ICACHE_NUM_WAYS-1:0]}));
+
+   rvdff_fpga #(pt.ICACHE_STATUS_BITS)  mb_rep_wayf2_ff (.*, .clk(fetch_bf_f_c1_clk),  .clken(fetch_bf_f_c1_clken), .rawclk(clk),  .din ({way_status_mb_in[pt.ICACHE_STATUS_BITS-1:0]}), .dout({way_status_mb_ff[pt.ICACHE_STATUS_BITS-1:0]}));
+   rvdff_fpga #(pt.ICACHE_NUM_WAYS)     mb_tagv_ff      (.*, .clk(fetch_bf_f_c1_clk),  .clken(fetch_bf_f_c1_clken), .rawclk(clk),  .din ({tagv_mb_in[pt.ICACHE_NUM_WAYS-1:0]}), .dout({tagv_mb_ff[pt.ICACHE_NUM_WAYS-1:0]}));
 
    assign ifc_fetch_req_qual_bf  = ifc_fetch_req_bf  & ~((miss_state == CRIT_WRD_RDY) & flush_final_f) & ~stream_miss_f ;// & ~exu_flush_final ;
-   rvdff #(1) fetch_req_f_ff  (.*, .clk(active_clk),  .din(ifc_fetch_req_qual_bf), .dout(ifc_fetch_req_f_raw));
 
    assign ifc_fetch_req_f       = ifc_fetch_req_f_raw & ~exu_flush_final ;
 
-   rvdff #(1) ifu_iccm_acc_ff     (.*, .clk(fetch_bf_f_c1_clk), .din(ifc_iccm_access_bf),      .dout(ifc_iccm_access_f));
-   rvdff #(1) ifu_iccm_reg_acc_ff (.*, .clk(fetch_bf_f_c1_clk), .din(ifc_region_acc_fault_final_bf), .dout(ifc_region_acc_fault_final_f));
-   rvdff #(1) rgn_acc_ff          (.*, .clk(fetch_bf_f_c1_clk), .din(ifc_region_acc_fault_bf),       .dout(ifc_region_acc_fault_f));
+   rvdff_fpga #(1) ifu_iccm_acc_ff     (.*, .clk(fetch_bf_f_c1_clk), .clken(fetch_bf_f_c1_clken), .rawclk(clk),   .din(ifc_iccm_access_bf),      .dout(ifc_iccm_access_f));
+   rvdff_fpga #(1) ifu_iccm_reg_acc_ff (.*, .clk(fetch_bf_f_c1_clk), .clken(fetch_bf_f_c1_clken), .rawclk(clk),   .din(ifc_region_acc_fault_final_bf), .dout(ifc_region_acc_fault_final_f));
+   rvdff_fpga #(1) rgn_acc_ff          (.*, .clk(fetch_bf_f_c1_clk), .clken(fetch_bf_f_c1_clken), .rawclk(clk),   .din(ifc_region_acc_fault_bf),       .dout(ifc_region_acc_fault_f));
 
 
    assign ifu_ic_req_addr_f[31:3]  = {miss_addr[31:pt.ICACHE_BEAT_ADDR_HI+1] , ic_req_addr_bits_hi_3[pt.ICACHE_BEAT_ADDR_HI:3] };
@@ -654,7 +653,6 @@ import el2_pkg::*;
 
   assign ic_rw_addr[31:1]      = ifu_ic_rw_int_addr[31:1] ;
 
-  rvdff #(1) sel_mb_ff (.*, .clk(free_clk),  .din (sel_mb_addr), .dout(sel_mb_addr_ff));
 
 if (pt.ICACHE_ECC == 1) begin: icache_ecc_1
    logic [6:0]       ic_wr_ecc;
@@ -669,7 +667,7 @@ if (pt.ICACHE_ECC == 1) begin: icache_ecc_1
                            .din    (ic_miss_buff_half[63:0]),
                            .ecc_out(ic_miss_buff_ecc[6:0]));
 
-   for (genvar i=0; i < 32'(pt.ICACHE_BANKS_WAY) ; i++) begin : ic_wr_data_loop
+   for (genvar i=0; i < pt.ICACHE_BANKS_WAY ; i++) begin : ic_wr_data_loop
       assign ic_wr_data[i][70:0]  =  ic_wr_16bytes_data[((71*i)+70): (71*i)];
    end
 
@@ -682,13 +680,15 @@ if (pt.ICACHE_ECC == 1) begin: icache_ecc_1
   assign ifu_ic_debug_rd_data_in[70:0] = ic_debug_ict_array_sel_ff ? {2'b0,ictag_debug_rd_data[25:21],32'b0,ictag_debug_rd_data[20:0],{7-pt.ICACHE_STATUS_BITS{1'b0}}, way_status[pt.ICACHE_STATUS_BITS-1:0],3'b0,ic_debug_tag_val_rd_out} :
                                                                      ic_debug_rd_data[70:0];
 
-  rvdff #(71) ifu_debug_data_ff (.*, .clk (debug_data_clk),
-                    .din ({
-                           ifu_ic_debug_rd_data_in[70:0]
-                          }),
-                    .dout({
-                           ifu_ic_debug_rd_data[70:0]
-                           }));
+  rvdffe #(71) ifu_debug_data_ff (.*,
+                                  .en (debug_data_clken),
+                                  .din ({
+                                         ifu_ic_debug_rd_data_in[70:0]
+                                         }),
+                                  .dout({
+                                         ifu_ic_debug_rd_data[70:0]
+                                         })
+                                  );
 
   assign ic_wr_16bytes_data[141:0] =  ifu_bus_rid_ff[0] ? {ic_wr_ecc[6:0] , ifu_bus_rdata_ff[63:0] ,  ic_miss_buff_ecc[6:0] , ic_miss_buff_half[63:0] } :
                                                         {ic_miss_buff_ecc[6:0] ,  ic_miss_buff_half[63:0] , ic_wr_ecc[6:0] , ifu_bus_rdata_ff[63:0] } ;
@@ -709,7 +709,7 @@ else begin : icache_parity_1
 
 
    for (genvar i=0; i < pt.ICACHE_BANKS_WAY ; i++) begin : ic_wr_data_loop
-      assign ic_wr_data[i][67:0]  =  ic_wr_16bytes_data[((68*i)+67): (68*i)];
+      assign ic_wr_data[i][70:0]  =  {3'b0, ic_wr_16bytes_data[((68*i)+67): (68*i)]};
    end
 
 
@@ -722,13 +722,15 @@ else begin : icache_parity_1
    assign ifu_ic_debug_rd_data_in[70:0] = ic_debug_ict_array_sel_ff ? {6'b0,ictag_debug_rd_data[21],32'b0,ictag_debug_rd_data[20:0],{7-pt.ICACHE_STATUS_BITS{1'b0}},way_status[pt.ICACHE_STATUS_BITS-1:0],3'b0,ic_debug_tag_val_rd_out} :
                                                                       ic_debug_rd_data[70:0] ;
 
-   rvdff #(71) ifu_debug_data_ff (.*, .clk (debug_data_clk),
-                    .din ({
-                           ifu_ic_debug_rd_data_in[70:0]
-                          }),
-                    .dout({
-                           ifu_ic_debug_rd_data[70:0]
-                           }));
+   rvdffe #(71) ifu_debug_data_ff (.*,
+                                   .en (debug_data_clken),
+                                   .din ({
+                                          ifu_ic_debug_rd_data_in[70:0]
+                                          }),
+                                   .dout({
+                                          ifu_ic_debug_rd_data[70:0]
+                                          })
+                                   );
 
    assign ic_wr_16bytes_data[135:0] =  ifu_bus_rid_ff[0] ? {ic_wr_parity[3:0] , ifu_bus_rdata_ff[63:0] ,  ic_miss_buff_parity[3:0] , ic_miss_buff_half[63:0] } :
                                                         {ic_miss_buff_parity[3:0] ,  ic_miss_buff_half[63:0] , ic_wr_parity[3:0] , ifu_bus_rdata_ff[63:0] } ;
@@ -740,11 +742,9 @@ end
   assign ifu_wr_cumulative_err      = (ifu_wr_data_comb_err | ifu_wr_data_comb_err_ff) & ~reset_beat_cnt;
   assign ifu_wr_cumulative_err_data =  ifu_wr_data_comb_err | ifu_wr_data_comb_err_ff ;
 
-  rvdff #(1) cumul_err_ff (.*, .clk(free_clk),  .din (ifu_wr_cumulative_err), .dout(ifu_wr_data_comb_err_ff));
 
-
-  assign sel_byp_data     =  (ic_crit_wd_rdy | (miss_state == STREAM) | (miss_state == CRIT_BYP_OK)) & ~ifu_byp_data_err_new;
-  assign sel_ic_data      = ~(ic_crit_wd_rdy | (miss_state == STREAM) | (miss_state == CRIT_BYP_OK)) & ~fetch_req_iccm_f ;
+  assign sel_byp_data     =  (ic_crit_wd_rdy | (miss_state == STREAM) | (miss_state == CRIT_BYP_OK));
+  assign sel_ic_data      = ~(ic_crit_wd_rdy | (miss_state == STREAM) | (miss_state == CRIT_BYP_OK) | (miss_state == MISS_WAIT)) & ~fetch_req_iccm_f & ~ifc_region_acc_fault_final_f;
 
  if (pt.ICCM_ICACHE==1) begin: iccm_icache
   assign sel_iccm_data    =  fetch_req_iccm_f  ;
@@ -779,14 +779,14 @@ if (pt.NO_ICCM_NO_ICACHE == 1 ) begin: no_iccm_no_icache
 end
 
 
-  assign ifc_bus_acc_fault_f   =  ic_byp_hit_f & ifu_byp_data_err_new ;
+  assign ifc_bus_acc_fault_f[1:0]   =  {2{ic_byp_hit_f}} & ifu_byp_data_err_f[1:0] ;
   assign ic_data_f[31:0]      = ic_final_data[31:0];
 
 
-rvdff #(1) flush_final_ff (.*, .clk(free_clk), .din({exu_flush_final}), .dout({flush_final_f}));
+
 assign fetch_req_f_qual       = ic_hit_f & ~exu_flush_final;
-assign ic_access_fault_f  = (ifc_region_acc_fault_final_f | ifc_bus_acc_fault_f)  & ~exu_flush_final;
-assign ic_access_fault_type_f[1:0] = iccm_rd_ecc_double_err        ? 2'b01 :
+assign ic_access_fault_f[1:0]  = ({2{ifc_region_acc_fault_final_f}} | ifc_bus_acc_fault_f[1:0])  & {2{~exu_flush_final}};
+assign ic_access_fault_type_f[1:0] = |iccm_rd_ecc_double_err       ? 2'b01 :
                                      ifc_region_acc_fault_f        ? 2'b10 :
                                      ifc_region_acc_fault_memory_f ? 2'b11 :  2'b00 ;
 
@@ -802,28 +802,33 @@ assign two_byte_instr    =  (ic_data_f[1:0] != 2'b11 )  ;
      logic [63:0]       ic_miss_buff_data_in;
      assign ic_miss_buff_data_in[63:0] = ifu_bus_rsp_rdata[63:0];
 
-     for (genvar i=0; i<32'(pt.ICACHE_NUM_BEATS); i++) begin :  wr_flop
-       assign write_fill_data[i]        =   bus_ifu_wr_en & (  (pt.IFU_BUS_TAG)'(i)  == ifu_bus_rsp_tag[pt.IFU_BUS_TAG-1:0]);
-       rvclkhdr data_c1_cgc  ( .en(write_fill_data[i]),    .l1clk(wr_data_c1_clk[i]), .* );
-       rvdff #(32) byp_data_0_ff (.*,
-                 .clk (wr_data_c1_clk[i]),
-                 .din (ic_miss_buff_data_in[31:0]),
-                 .dout(ic_miss_buff_data[i*2][31:0]));
+     for (genvar i=0; i<pt.ICACHE_NUM_BEATS; i++) begin :  wr_flop
 
-       rvdff #(32) byp_data_1_ff (.*,
-                 .clk (wr_data_c1_clk[i]),
-                 .din (ic_miss_buff_data_in[63:32]),
-                 .dout(ic_miss_buff_data[i*2+1][31:0]));
+        assign write_fill_data[i]        =   bus_ifu_wr_en & (  (pt.IFU_BUS_TAG)'(i)  == ifu_bus_rsp_tag[pt.IFU_BUS_TAG-1:0]);
+
+        rvdffe #(32) byp_data_0_ff (.*,
+                                    .en (write_fill_data[i]),
+                                    .din (ic_miss_buff_data_in[31:0]),
+                                    .dout(ic_miss_buff_data[i*2][31:0])
+                                    );
+
+        rvdffe #(32) byp_data_1_ff (.*,
+                                    .en (write_fill_data[i]),
+                                    .din (ic_miss_buff_data_in[63:32]),
+                                    .dout(ic_miss_buff_data[i*2+1][31:0])
+                                    );
 
         assign ic_miss_buff_data_valid_in[i]  = write_fill_data[i] ? 1'b1  : (ic_miss_buff_data_valid[i]  & ~ic_act_miss_f) ;
+
         rvdff #(1) byp_data_valid_ff (.*,
-                  .clk (free_clk),
+                  .clk (active_clk),
                   .din (ic_miss_buff_data_valid_in[i]),
                   .dout(ic_miss_buff_data_valid[i]));
 
         assign ic_miss_buff_data_error_in[i]  = write_fill_data[i] ? bus_ifu_wr_data_error  : (ic_miss_buff_data_error[i]  & ~ic_act_miss_f) ;
+
         rvdff #(1) byp_data_error_ff (.*,
-                  .clk (free_clk),
+                  .clk (active_clk),
                   .din (ic_miss_buff_data_error_in[i] ),
                   .dout(ic_miss_buff_data_error[i]));
      end
@@ -852,7 +857,6 @@ assign two_byte_instr    =  (ic_data_f[1:0] != 2'b11 )  ;
                                      (                        crit_wd_byp_ok_ff   & ~uncacheable_miss_ff &  ~exu_flush_final & ~ifu_bp_hit_taken_q_f) |
                                      (ic_crit_wd_rdy_new_ff & ~fetch_req_icache_f & crit_wd_byp_ok_ff    &  ~exu_flush_final) ;
 
-   rvdff #(1)           crit_wd_new_ff      (.*, .clk(free_clk),  .din(ic_crit_wd_rdy_new_in),   .dout(ic_crit_wd_rdy_new_ff));
 
   assign byp_fetch_index[pt.ICACHE_BEAT_ADDR_HI:1]          =    ifu_fetch_addr_int_f[pt.ICACHE_BEAT_ADDR_HI:1]       ;
   assign byp_fetch_index_0[pt.ICACHE_BEAT_ADDR_HI:2]        =   {ifu_fetch_addr_int_f[pt.ICACHE_BEAT_ADDR_HI:3],1'b0} ;
@@ -865,6 +869,13 @@ assign two_byte_instr    =  (ic_data_f[1:0] != 2'b11 )  ;
                                  (~ifu_fetch_addr_int_f[2] &   ifu_fetch_addr_int_f[1] &                                                                           ic_miss_buff_data_error[byp_fetch_index[pt.ICACHE_BEAT_ADDR_HI:3]] )  |
                                  ( ifu_fetch_addr_int_f[2] &  ~ifu_fetch_addr_int_f[1] &                                                                           ic_miss_buff_data_error[byp_fetch_index[pt.ICACHE_BEAT_ADDR_HI:3]] )  |
                                  ( ifu_fetch_addr_int_f[2] &   ifu_fetch_addr_int_f[1] & (ic_miss_buff_data_error[byp_fetch_index_inc[pt.ICACHE_BEAT_ADDR_HI:3]] | ic_miss_buff_data_error[byp_fetch_index[pt.ICACHE_BEAT_ADDR_HI:3]] )) ;
+
+  assign  ifu_byp_data_err_f[1:0]  =   (ic_miss_buff_data_error[byp_fetch_index[pt.ICACHE_BEAT_ADDR_HI:3]] )  ? 2'b11 :
+                                      ( ifu_fetch_addr_int_f[2] &  ifu_fetch_addr_int_f[1] &   ~(ic_miss_buff_data_error[byp_fetch_index[pt.ICACHE_BEAT_ADDR_HI:3]] ) & (~miss_wrap_f & ic_miss_buff_data_error[byp_fetch_index_inc[pt.ICACHE_BEAT_ADDR_HI:3]])) ? 2'b10 : 2'b00;
+
+
+
+
 
   assign ic_byp_data_only_pre_new[79:0] =  ({80{~ifu_fetch_addr_int_f[2]}} &   {ic_miss_buff_data[byp_fetch_index_inc_0][15:0],ic_miss_buff_data[byp_fetch_index_1][31:0]     , ic_miss_buff_data[byp_fetch_index_0][31:0]}) |
                                            ({80{ ifu_fetch_addr_int_f[2]}} &   {ic_miss_buff_data[byp_fetch_index_inc_1][15:0],ic_miss_buff_data[byp_fetch_index_inc_0][31:0] , ic_miss_buff_data[byp_fetch_index_1][31:0]}) ;
@@ -901,7 +912,8 @@ assign ic_miss_buff_half[63:0]    = {ic_miss_buff_data[{other_tag,1'b1}],ic_miss
 /////////////////////////////////////////////////////////////////////////////////////
 
 
-assign ic_rd_parity_final_err = ic_tag_perr & sel_ic_data & ~(ifc_region_acc_fault_final_f | ifc_bus_acc_fault_f) ;
+assign ic_rd_parity_final_err = ic_tag_perr & ~exu_flush_final & sel_ic_data & ~(ifc_region_acc_fault_final_f | (|ifc_bus_acc_fault_f)) &
+                                      (fetch_req_icache_f & ~reset_all_tags & (~miss_pending | (miss_state==HIT_U_MISS)) & ~sel_mb_addr_ff);
 
 logic [pt.ICACHE_NUM_WAYS-1:0]                   perr_err_inv_way;
 logic [pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO]   perr_ic_index_ff;
@@ -910,13 +922,12 @@ logic                                         perr_sb_write_status   ;
 
 
 
-   rvdffs #(pt.ICACHE_INDEX_HI-pt.ICACHE_TAG_INDEX_LO+1) perr_dat_ff    (.clk(active_clk), .din(ifu_ic_rw_int_addr_ff[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO]), .dout(perr_ic_index_ff[pt.ICACHE_INDEX_HI : pt.ICACHE_TAG_INDEX_LO]), .en(perr_sb_write_status),  .*);
+   rvdffe #(.WIDTH(pt.ICACHE_INDEX_HI-pt.ICACHE_TAG_INDEX_LO+1),.OVERRIDE(1)) perr_dat_ff    (.din(ifu_ic_rw_int_addr_ff[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO]), .dout(perr_ic_index_ff[pt.ICACHE_INDEX_HI : pt.ICACHE_TAG_INDEX_LO]), .en(perr_sb_write_status),  .*);
 
    assign perr_err_inv_way[pt.ICACHE_NUM_WAYS-1:0]   =  {pt.ICACHE_NUM_WAYS{perr_sel_invalidate}} ;
    assign iccm_correct_ecc     = (perr_state == ECC_CORR);
    assign dma_sb_err_state     = (perr_state == DMA_SB_ERR);
    assign iccm_buf_correct_ecc = iccm_correct_ecc & ~dma_sb_err_state_ff;
-    rvdff  #((1))  dma_sb_err_ff  (.clk(active_clk), .din(dma_sb_err_state),   .dout(dma_sb_err_state_ff),   .*);
 
 
 
@@ -965,7 +976,8 @@ logic                                         perr_sb_write_status   ;
          end
       endcase
    end
-   rvdffs #(($bits(perr_state_t))) perr_state_ff (.clk(free_clk), .din(perr_nxtstate), .dout({perr_state}), .en(perr_state_en),   .*);
+
+   rvdffs #(($bits(perr_state_t))) perr_state_ff (.clk(active_clk), .din(perr_nxtstate), .dout({perr_state}), .en(perr_state_en),   .*);
 
    //////////////////////////////////// Create stop fetch State Machine /////////////////////////
    //////////////////////////////////// Create stop fetch State Machine /////////////////////////
@@ -1013,29 +1025,30 @@ logic                                         perr_sb_write_status   ;
          end
       endcase
    end
-   rvdffs #(($bits(err_stop_state_t))) err_stop_state_ff (.clk(free_clk), .din(err_stop_nxtstate), .dout({err_stop_state}), .en(err_stop_state_en),   .*);
+   rvdffs #(($bits(err_stop_state_t))) err_stop_state_ff (.clk(active_clk), .din(err_stop_nxtstate), .dout({err_stop_state}), .en(err_stop_state_en),   .*);
 
 
 
    assign bus_ifu_bus_clk_en =  ifu_bus_clk_en ;
 
-   rvclkhdr bus_clk_f(.en(bus_ifu_bus_clk_en),
-                   .l1clk(busclk), .*);
+`ifdef RV_FPGA_OPTIMIZE
+   assign busclk = 1'b0;
+   assign busclk_force = 1'b0;
+`else
+   rvclkhdr bus_clk_f(.en(bus_ifu_bus_clk_en), .l1clk(busclk), .*);
+   rvclkhdr bus_clk(.en(bus_ifu_bus_clk_en | dec_tlu_force_halt), .l1clk(busclk_force), .*);
+`endif
 
-   rvclkhdr bus_clk(.en(bus_ifu_bus_clk_en | dec_tlu_force_halt),
-                   .l1clk(busclk_force), .*);
 
-   rvdff #(1)           bus_clken_ff     (.*, .clk(free_clk), .din(bus_ifu_bus_clk_en), .dout(bus_ifu_bus_clk_en_ff));
-   rvdff #(1)           scnd_mss_req_ff  (.*, .clk(free_clk), .din(scnd_miss_req_in),   .dout(scnd_miss_req_q));
-   rvdff #(1)           scnd_mss_req_ff2 (.*, .clk(free_clk), .din(scnd_miss_req),      .dout(scnd_miss_req_ff2));
+
    assign  scnd_miss_req = scnd_miss_req_q & ~exu_flush_final;
 
    assign  ifc_bus_ic_req_ff_in  = (ic_act_miss_f | bus_cmd_req_hold | ifu_bus_cmd_valid) & ~dec_tlu_force_halt & ~((bus_cmd_beat_count== {pt.ICACHE_BEAT_BITS{1'b1}}) & ifu_bus_cmd_valid & ifu_bus_cmd_ready & miss_pending);
-   rvdff #(1) bus_ic_req_ff2(.*, .clk(busclk_force), .din(ifc_bus_ic_req_ff_in), .dout(ifu_bus_cmd_valid));
+
+   rvdff_fpga #(1) bus_ic_req_ff2(.*, .clk(busclk_force), .clken(bus_ifu_bus_clk_en | dec_tlu_force_halt), .rawclk(clk), .din(ifc_bus_ic_req_ff_in), .dout(ifu_bus_cmd_valid));
 
    assign    bus_cmd_req_in  = (ic_act_miss_f | bus_cmd_req_hold) & ~bus_cmd_sent & ~dec_tlu_force_halt ; // hold until first command sent
-   // changes for making the bus blocking
-   rvdff #(1)  bus_cmd_req_ff  (.*,  .clk(free_clk), .din(bus_cmd_req_in), .dout(bus_cmd_req_hold));
+
 
 
     // AXI command signals
@@ -1044,7 +1057,7 @@ logic                                         perr_sb_write_status   ;
     assign ifu_axi_arid[pt.IFU_BUS_TAG-1:0] = ((pt.IFU_BUS_TAG)'(bus_rd_addr_count[pt.ICACHE_BEAT_BITS-1:0])) & {pt.IFU_BUS_TAG{ifu_bus_cmd_valid}};
     assign ifu_axi_araddr[31:0]          =   {ifu_ic_req_addr_f[31:3],3'b0}  & {32{ifu_bus_cmd_valid}};
     assign ifu_axi_arsize[2:0]           =  3'b011;
-    assign ifu_axi_arprot[2:0]           = '0;
+    assign ifu_axi_arprot[2:0]           = 3'b101;
     assign ifu_axi_arcache[3:0]          = 4'b1111;
     assign ifu_axi_arregion[3:0]         = ifu_ic_req_addr_f[31:28];
     assign ifu_axi_arlen[7:0]            = '0;
@@ -1077,12 +1090,12 @@ logic                                         perr_sb_write_status   ;
    assign ifu_bus_rvalid_unq      =  ifu_axi_rvalid ;
    assign ifu_bus_arvalid         =  ifu_axi_arvalid ;
 
-   rvdff #(1)               bus_rdy_ff      (.*, .clk(busclk), .din(ifu_bus_arready_unq),            .dout(ifu_bus_arready_unq_ff));
-   rvdff #(1)               bus_rsp_vld_ff  (.*, .clk(busclk), .din(ifu_bus_rvalid_unq),             .dout(ifu_bus_rvalid_unq_ff));
-   rvdff #(1)               bus_cmd_ff      (.*, .clk(busclk), .din(ifu_bus_arvalid),                .dout(ifu_bus_arvalid_ff));
-   rvdff #(2)               bus_rsp_cmd_ff  (.*, .clk(busclk), .din(ifu_axi_rresp[1:0]),             .dout(ifu_bus_rresp_ff[1:0]));
-   rvdff #(64)              bus_data_ff     (.*, .clk(busclk), .din(ifu_axi_rdata[63:0]),            .dout(ifu_bus_rdata_ff[63:0]));
-   rvdff #(pt.IFU_BUS_TAG)  bus_rsp_tag_ff  (.*, .clk(busclk), .din(ifu_axi_rid[pt.IFU_BUS_TAG-1:0]),.dout(ifu_bus_rid_ff[pt.IFU_BUS_TAG-1:0]));
+   rvdff_fpga #(1)               bus_rdy_ff      (.*, .clk(busclk),  .clken(bus_ifu_bus_clk_en), .rawclk(clk), .din(ifu_bus_arready_unq),            .dout(ifu_bus_arready_unq_ff));
+   rvdff_fpga #(1)               bus_rsp_vld_ff  (.*, .clk(busclk),  .clken(bus_ifu_bus_clk_en), .rawclk(clk), .din(ifu_bus_rvalid_unq),             .dout(ifu_bus_rvalid_unq_ff));
+   rvdff_fpga #(1)               bus_cmd_ff      (.*, .clk(busclk),  .clken(bus_ifu_bus_clk_en), .rawclk(clk), .din(ifu_bus_arvalid),                .dout(ifu_bus_arvalid_ff));
+   rvdff_fpga #(2)               bus_rsp_cmd_ff  (.*, .clk(busclk),  .clken(bus_ifu_bus_clk_en), .rawclk(clk), .din(ifu_axi_rresp[1:0]),             .dout(ifu_bus_rresp_ff[1:0]));
+   rvdff_fpga #(pt.IFU_BUS_TAG)  bus_rsp_tag_ff  (.*, .clk(busclk),  .clken(bus_ifu_bus_clk_en), .rawclk(clk), .din(ifu_axi_rid[pt.IFU_BUS_TAG-1:0]),.dout(ifu_bus_rid_ff[pt.IFU_BUS_TAG-1:0]));
+   rvdffe #(64)                  bus_data_ff     (.*, .clk(clk),     .din(ifu_axi_rdata[63:0]),            .dout(ifu_bus_rdata_ff[63:0]), .en(ifu_bus_clk_en & ifu_axi_rvalid));
 
    assign ifu_bus_cmd_ready = ifu_axi_arready ;
    assign ifu_bus_rsp_valid = ifu_axi_rvalid ;
@@ -1099,11 +1112,7 @@ logic                                         perr_sb_write_status   ;
 
 
 
-
-
-
-   // Create write signals so we can write to the miss-buffer directly from
-   // the bus.
+   // Create write signals so we can write to the miss-buffer directly from the bus.
 
    assign ifu_bus_rvalid            =  ifu_bus_rsp_valid & bus_ifu_bus_clk_en ;
 
@@ -1122,10 +1131,9 @@ logic                                         perr_sb_write_status   ;
                                                           ({pt.ICACHE_BEAT_BITS{bus_inc_data_beat_cnt}}   & (bus_data_beat_count[pt.ICACHE_BEAT_BITS-1:0] + {{pt.ICACHE_BEAT_BITS-1{1'b0}},1'b1})) |
                                                           ({pt.ICACHE_BEAT_BITS{bus_hold_data_beat_cnt}}  &  bus_data_beat_count[pt.ICACHE_BEAT_BITS-1:0]);
 
-   rvdff #(pt.ICACHE_BEAT_BITS)  bus_mb_beat_count_ff (.*, .clk(free_clk), .din ({bus_new_data_beat_count[pt.ICACHE_BEAT_BITS-1:0]}), .dout({bus_data_beat_count[pt.ICACHE_BEAT_BITS-1:0]}));
 
    assign last_data_recieved_in =  (bus_ifu_wr_en_ff &  bus_last_data_beat & ~scnd_miss_req) | (last_data_recieved_ff & ~ic_act_miss_f) ;
-   rvdff #(1)  last_beat_ff (.*, .clk(free_clk), .din (last_data_recieved_in), .dout(last_data_recieved_ff));
+
 
 
 // Request Address Count
@@ -1134,7 +1142,7 @@ logic                                         perr_sb_write_status   ;
                                                            ( bus_cmd_sent                    ) ? (bus_rd_addr_count[pt.ICACHE_BEAT_BITS-1:0] + 3'b001) :
                                                                                                   bus_rd_addr_count[pt.ICACHE_BEAT_BITS-1:0];
 
-   rvdff #(pt.ICACHE_BEAT_BITS)  bus_rd_addr_ff (.*,  .clk(busclk_reset), .din ({bus_new_rd_addr_count[pt.ICACHE_BEAT_BITS-1:0]}), .dout({bus_rd_addr_count[pt.ICACHE_BEAT_BITS-1:0]}));
+   rvdff_fpga #(pt.ICACHE_BEAT_BITS)  bus_rd_addr_ff (.*,  .clk(busclk_reset),  .clken (bus_ifu_bus_clk_en | ic_act_miss_f | dec_tlu_force_halt), .rawclk(clk), .din ({bus_new_rd_addr_count[pt.ICACHE_BEAT_BITS-1:0]}), .dout({bus_rd_addr_count[pt.ICACHE_BEAT_BITS-1:0]}));
 
 
 
@@ -1150,11 +1158,15 @@ logic                                         perr_sb_write_status   ;
                                                           ({pt.ICACHE_BEAT_BITS{bus_inc_cmd_beat_cnt}}              & (bus_cmd_beat_count[pt.ICACHE_BEAT_BITS-1:0] + {{pt.ICACHE_BEAT_BITS-1{1'b0}}, 1'b1})) |
                                                           ({pt.ICACHE_BEAT_BITS{bus_hold_cmd_beat_cnt}}             &  bus_cmd_beat_count[pt.ICACHE_BEAT_BITS-1:0]) ;
 
-   rvclkhdr bus_clk_reset(.en(bus_ifu_bus_clk_en | ic_act_miss_f | dec_tlu_force_halt),
-                   .l1clk(busclk_reset), .*);
+`ifdef RV_FPGA_OPTIMIZE
+   assign busclk_reset = 1'b0;
+`else
+   rvclkhdr bus_clk_reset(.en(bus_ifu_bus_clk_en | ic_act_miss_f | dec_tlu_force_halt), .l1clk(busclk_reset), .*);
+`endif
 
 
-   rvdffs #(pt.ICACHE_BEAT_BITS)  bus_cmd_beat_ff (.*, .clk(busclk_reset), .en (bus_cmd_beat_en), .din ({bus_new_cmd_beat_count[pt.ICACHE_BEAT_BITS-1:0]}),
+
+   rvdffs_fpga #(pt.ICACHE_BEAT_BITS)  bus_cmd_beat_ff (.*, .clk(busclk_reset), .clken (bus_ifu_bus_clk_en | ic_act_miss_f | dec_tlu_force_halt), .rawclk(clk), .en (bus_cmd_beat_en), .din ({bus_new_cmd_beat_count[pt.ICACHE_BEAT_BITS-1:0]}),
                     .dout({bus_cmd_beat_count[pt.ICACHE_BEAT_BITS-1:0]}));
 
 
@@ -1166,12 +1178,26 @@ logic                                         perr_sb_write_status   ;
    assign  bus_ifu_wr_en_ff_wo_err  =  ifu_bus_rvalid_ff & miss_pending &  ~uncacheable_miss_ff;
 
 
-   rvdff #(1)  act_miss_ff (.*, .clk(free_clk), .din (ic_act_miss_f), .dout(ic_act_miss_f_delayed));
+   rvdffie #(10) misc_ff
+       ( .*,
+         .clk(free_l2clk),
+         .din( {ic_act_miss_f,        ifu_wr_cumulative_err,exu_flush_final,  ic_crit_wd_rdy_new_in,bus_ifu_bus_clk_en,   scnd_miss_req_in,bus_cmd_req_in,  last_data_recieved_in,
+ifc_dma_access_ok_d,   dma_iccm_req}),
+         .dout({ic_act_miss_f_delayed,ifu_wr_data_comb_err_ff,  flush_final_f,ic_crit_wd_rdy_new_ff,bus_ifu_bus_clk_en_ff,scnd_miss_req_q, bus_cmd_req_hold,last_data_recieved_ff,
+ifc_dma_access_ok_prev,dma_iccm_req_f})
+         );
+
+   rvdffie #(.WIDTH(pt.ICACHE_BEAT_BITS+5),.OVERRIDE(1)) misc1_ff
+       ( .*,
+         .clk(free_l2clk),
+         .din( {reset_ic_in,sel_mb_addr,   bus_new_data_beat_count[pt.ICACHE_BEAT_BITS-1:0],ifc_region_acc_fault_memory_bf,ic_debug_rd_en,       ic_debug_rd_en_ff}),
+         .dout({reset_ic_ff,sel_mb_addr_ff,bus_data_beat_count[pt.ICACHE_BEAT_BITS-1:0],    ifc_region_acc_fault_memory_f, ic_debug_rd_en_ff,ifu_ic_debug_rd_data_valid})
+         );
+
    assign    reset_tag_valid_for_miss = ic_act_miss_f_delayed & (miss_state == CRIT_BYP_OK) & ~uncacheable_miss_ff;
    assign    bus_ifu_wr_data_error    = |ifu_bus_rsp_opc[1:0] &  ifu_bus_rvalid  & miss_pending;
    assign    bus_ifu_wr_data_error_ff = |ifu_bus_rresp_ff[1:0] &  ifu_bus_rvalid_ff  & miss_pending;
 
-   rvdff #(1)           dma_ok_prev_ff  (.*, .clk(free_clk),  .din(ifc_dma_access_ok_d), .dout(ifc_dma_access_ok_prev));
 
    assign ic_crit_wd_rdy   =  ic_crit_wd_rdy_new_in | ic_crit_wd_rdy_new_ff ;
    assign last_beat        =  bus_last_data_beat & bus_ifu_wr_en_ff;
@@ -1182,7 +1208,6 @@ logic                                         perr_sb_write_status   ;
    assign ifc_dma_access_ok_d  = ifc_dma_access_ok &  ~iccm_correct_ecc & ~iccm_dma_sb_error;
    assign ifc_dma_access_q_ok  = ifc_dma_access_ok &  ~iccm_correct_ecc & ifc_dma_access_ok_prev &  (perr_state == ERR_IDLE)  & ~iccm_dma_sb_error;
    assign iccm_ready           = ifc_dma_access_q_ok ;
-   rvdff #(1)  dma_req_ff (.*, .clk(free_clk), .din (dma_iccm_req), .dout(dma_iccm_req_f));
 
    logic [1:0]        iccm_ecc_word_enable;
 
@@ -1233,13 +1258,19 @@ logic                                         perr_sb_write_status   ;
          assign iccm_dma_rdata_in[63:0]      = iccm_dma_ecc_error_in ? {2{dma_mem_addr[31:0]}} : {iccm_dma_rdata_1_muxed[31:0], iccm_corrected_data[0]};
          assign iccm_dma_ecc_error_in   =   |(iccm_double_ecc_error[1:0]);
 
-         rvdff #(3) dma_tag_ff1      (.*, .clk(free_clk), .din(dma_mem_tag[2:0]),        .dout(dma_mem_tag_ff[2:0]));
-         rvdff #(3) dma_tag_ff2      (.*, .clk(free_clk), .din(dma_mem_tag_ff[2:0]),     .dout(iccm_dma_rtag[2:0]));
-         rvdff #(2) dma_addr_bt3_ff  (.*, .clk(free_clk), .din(dma_mem_addr[3:2]),       .dout(dma_mem_addr_ff[3:2]));
-         rvdff #(1) ccm_rdy_in_ff    (.*, .clk(free_clk), .din(iccm_dma_rden),           .dout(iccm_dma_rvalid_in));
-         rvdff #(1) ccm_rdy_ff       (.*, .clk(free_clk), .din(iccm_dma_rvalid_in),      .dout(iccm_dma_rvalid));
-         rvdff #(1) ccm_err_ff       (.*, .clk(free_clk), .din(iccm_dma_ecc_error_in),   .dout(iccm_dma_ecc_error));
-         rvdff #(64)dma_data_ff      (.*, .clk(free_clk), .din(iccm_dma_rdata_in[63:0]), .dout(iccm_dma_rdata[63:0]));
+         rvdffe    #(64) dma_data_ff      (.*, .clk(clk), .en(iccm_dma_rvalid_in),  .din(iccm_dma_rdata_in[63:0]), .dout(iccm_dma_rdata[63:0]));
+         rvdffie   #(11) dma_misc_bits    (.*, .clk(free_l2clk), .din({dma_mem_tag[2:0],
+                                                                       dma_mem_tag_ff[2:0],
+                                                                       dma_mem_addr[3:2],
+                                                                       iccm_dma_rden,
+                                                                       iccm_dma_rvalid_in,
+                                                                       iccm_dma_ecc_error_in }),
+                                                                .dout({dma_mem_tag_ff[2:0],
+                                                                       iccm_dma_rtag[2:0],
+                                                                       dma_mem_addr_ff[3:2],
+                                                                       iccm_dma_rvalid_in,
+                                                                       iccm_dma_rvalid,
+                                                                       iccm_dma_ecc_error }));
 
          assign iccm_rw_addr[pt.ICCM_BITS-1:1]    = (  ifc_dma_access_q_ok & dma_iccm_req  & ~iccm_correct_ecc) ? dma_mem_addr[pt.ICCM_BITS-1:1] :
                                                  (~(ifc_dma_access_q_ok & dma_iccm_req) &  iccm_correct_ecc) ? {iccm_ecc_corr_index_ff[pt.ICCM_BITS-1:2],1'b0} : ifc_fetch_addr_bf[pt.ICCM_BITS-1:1] ;
@@ -1271,21 +1302,30 @@ logic                                         perr_sb_write_status   ;
 end
 
   assign iccm_rd_ecc_single_err  = (|iccm_single_ecc_error[1:0] ) & ifc_iccm_access_f & ifc_fetch_req_f;
-  assign iccm_rd_ecc_double_err  = (|iccm_double_ecc_error[1:0] ) & ifc_iccm_access_f;
+  assign iccm_rd_ecc_double_err[1:0]  = ~ifu_fetch_addr_int_f[1] ? ({iccm_double_ecc_error[0], iccm_double_ecc_error[0]} ) & {2{ifc_iccm_access_f}} :
+                                                                   ({iccm_double_ecc_error[1], iccm_double_ecc_error[0]} ) & {2{ifc_iccm_access_f}} ;
 
   assign iccm_corrected_data_f_mux[31:0] = iccm_single_ecc_error[0] ? iccm_corrected_data[0] : iccm_corrected_data[1];
   assign iccm_corrected_ecc_f_mux[6:0]   = iccm_single_ecc_error[0] ? iccm_corrected_ecc[0]  : iccm_corrected_ecc[1];
 
   assign iccm_ecc_write_status           = ((iccm_rd_ecc_single_err & ~iccm_rd_ecc_single_err_ff)  & ~exu_flush_final) | iccm_dma_sb_error;
-  assign iccm_rd_ecc_single_err_hold_in  = (iccm_rd_ecc_single_err | iccm_rd_ecc_single_err_ff) & ~exu_flush_final ; // & ~(perr_state == ERR_IDLE);
+  assign iccm_rd_ecc_single_err_hold_in  = (iccm_rd_ecc_single_err | iccm_rd_ecc_single_err_ff) & ~exu_flush_final ;
   assign iccm_error_start                =  iccm_rd_ecc_single_err;
   assign iccm_ecc_corr_index_in[pt.ICCM_BITS-1:2] = iccm_single_ecc_error[0] ? iccm_rw_addr_f[pt.ICCM_BITS-1:2] : iccm_rw_addr_f[pt.ICCM_BITS-1:2] + 1'b1 ;
 
-   rvdff #(pt.ICCM_BITS-2) iccm_index_f   (.*, .clk(free_clk), .din(iccm_rw_addr[pt.ICCM_BITS-1:2]),     .dout(iccm_rw_addr_f[pt.ICCM_BITS-1:2]));
-   rvdff  #((1))          ecc_rr_ff    (.clk(free_clk),     .din(iccm_rd_ecc_single_err_hold_in),  .dout(iccm_rd_ecc_single_err_ff),            .*);
-   rvdffs #((32))         ecc_dat0_ff  (.clk(free_clk),     .din(iccm_corrected_data_f_mux[31:0]), .dout(iccm_ecc_corr_data_ff[31:0]),          .en(iccm_ecc_write_status),  .*);
-   rvdffs #((7))          ecc_dat1_ff  (.clk(free_clk),     .din(iccm_corrected_ecc_f_mux[6:0]),   .dout(iccm_ecc_corr_data_ff[38:32]),         .en(iccm_ecc_write_status),  .*);
-   rvdffs #((pt.ICCM_BITS-2))ecc_ind0_ff  (.clk(free_clk),     .din(iccm_ecc_corr_index_in[pt.ICCM_BITS-1:2]),   .dout(iccm_ecc_corr_index_ff[pt.ICCM_BITS-1:2]),.en(iccm_ecc_write_status),  .*);
+   rvdffie #(pt.ICCM_BITS-1) iccm_index_f   (.*, .clk(free_l2clk), .din({iccm_rw_addr[pt.ICCM_BITS-1:2],
+                                                                         iccm_rd_ecc_single_err_hold_in
+                                                                                                       }),
+                                                                  .dout({iccm_rw_addr_f[pt.ICCM_BITS-1:2],
+                                                                         iccm_rd_ecc_single_err_ff}));
+
+   rvdffe #((39+(pt.ICCM_BITS-2)))      ecc_dat0_ff  (
+                                                      .clk(clk),
+                                                      .din({iccm_corrected_ecc_f_mux[6:0],  iccm_corrected_data_f_mux[31:0],iccm_ecc_corr_index_in[pt.ICCM_BITS-1:2]}),
+                                                      .dout({iccm_ecc_corr_data_ff[38:0]   ,iccm_ecc_corr_index_ff[pt.ICCM_BITS-1:2]}),
+                                                      .en(iccm_ecc_write_status),
+                                                      .*
+                                                      );
 
      end else begin : iccm_disabled
          assign iccm_dma_rvalid = 1'b0 ;
@@ -1300,7 +1340,7 @@ end
 
 
          assign iccm_rd_ecc_single_err                 = 1'b0 ;
-         assign iccm_rd_ecc_double_err                 = 1'b0 ;
+         assign iccm_rd_ecc_double_err                 = '0 ;
          assign iccm_rd_ecc_single_err_ff              = 1'b0 ;
          assign iccm_error_start                         = 1'b0;
          assign iccm_ecc_corr_index_ff[pt.ICCM_BITS-1:2]  =  '0;
@@ -1318,7 +1358,6 @@ end
 ////// ICCM signals
 
 
-//  Use the equation below for more power savings.
  assign   ic_rd_en    =  (ifc_fetch_req_bf & ~ifc_fetch_uncacheable_bf & ~ifc_iccm_access_bf  &
                             ~(((miss_state == STREAM) & ~miss_state_en)                                       |
                               ((miss_state == CRIT_BYP_OK) & ~miss_state_en)                                  |
@@ -1327,7 +1366,6 @@ end
                               ((miss_state == CRIT_WRD_RDY) & ~miss_state_en)  |
                               ((miss_state == CRIT_BYP_OK) &  miss_state_en &  (miss_nxtstate == MISS_WAIT))  ))  |
                              ( ifc_fetch_req_bf & exu_flush_final  & ~ifc_fetch_uncacheable_bf & ~ifc_iccm_access_bf )     ;
-
 
 logic   ic_real_rd_wp_unused;
 assign  ic_real_rd_wp_unused  =  (ifc_fetch_req_bf &  ~ifc_iccm_access_bf  &  ~ifc_region_acc_fault_final_bf & ~dec_tlu_fence_i_wb & ~stream_miss_f & ~ic_act_miss_f &
@@ -1345,7 +1383,6 @@ assign  ic_real_rd_wp_unused  =  (ifc_fetch_req_bf &  ~ifc_iccm_access_bf  &  ~i
 assign ic_wr_en[pt.ICACHE_NUM_WAYS-1:0] = bus_ic_wr_en[pt.ICACHE_NUM_WAYS-1:0] & {pt.ICACHE_NUM_WAYS{write_ic_16_bytes}};
 assign ic_write_stall                =  write_ic_16_bytes &  ~((((miss_state== CRIT_BYP_OK) | ((miss_state==STREAM) & ~(exu_flush_final | ifu_bp_hit_taken_q_f  | stream_eol_f ))) & ~(bus_ifu_wr_en_ff & last_beat & ~uncacheable_miss_ff)));
 
-   rvdff #(1) reset_all_tag_ff (.*, .clk(active_clk),  .din(dec_tlu_fence_i_wb), .dout(reset_all_tags));
 
 
 
@@ -1361,26 +1398,36 @@ if (pt.ICACHE_ENABLE == 1 ) begin: icache_enabled
                                                                            ifu_status_wr_addr[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO];
 
    // status
-         rvdff #(pt.ICACHE_TAG_LO-pt.ICACHE_TAG_INDEX_LO) status_wr_addr_ff (.*,  .clk(free_clk), .din(ifu_status_wr_addr_w_debug[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO]),
-                   .dout(ifu_status_wr_addr_ff[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO]));
 
          assign way_status_wr_en_w_debug = way_status_wr_en | (ic_debug_wr_en  & ic_debug_tag_array);
-         rvdff #(1) status_wren_ff (.*, .clk(free_clk),  .din(way_status_wr_en_w_debug), .dout(way_status_wr_en_ff));
 
          assign way_status_new_w_debug[pt.ICACHE_STATUS_BITS-1:0]  = (ic_debug_wr_en  & ic_debug_tag_array) ? (pt.ICACHE_STATUS_BITS == 1) ? ic_debug_wr_data[4] : ic_debug_wr_data[6:4] :
                                                 way_status_new[pt.ICACHE_STATUS_BITS-1:0] ;
-         rvdff #(pt.ICACHE_STATUS_BITS) status_data_ff (.*,  .clk(free_clk), .din(way_status_new_w_debug[pt.ICACHE_STATUS_BITS-1:0]), .dout(way_status_new_ff[pt.ICACHE_STATUS_BITS-1:0]));
+
+   rvdffie #(.WIDTH(pt.ICACHE_TAG_LO-pt.ICACHE_TAG_INDEX_LO+1+pt.ICACHE_STATUS_BITS),.OVERRIDE(1))  status_misc_ff
+     (.*,
+      .clk(free_l2clk),
+      .din({ ifu_status_wr_addr_w_debug[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO], way_status_wr_en_w_debug, way_status_new_w_debug[pt.ICACHE_STATUS_BITS-1:0]}),
+      .dout({ifu_status_wr_addr_ff[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO],      way_status_wr_en_ff,      way_status_new_ff[pt.ICACHE_STATUS_BITS-1:0]} )
+      );
 
    logic [(pt.ICACHE_TAG_DEPTH/8)-1 : 0] way_status_clken;
    logic [(pt.ICACHE_TAG_DEPTH/8)-1 : 0] way_status_clk;
 
-   for (genvar i=0 ; i<32'(pt.ICACHE_TAG_DEPTH)/8 ; i++) begin : CLK_GRP_WAY_STATUS
+   for (genvar i=0 ; i<pt.ICACHE_TAG_DEPTH/8 ; i++) begin : CLK_GRP_WAY_STATUS
       assign way_status_clken[i] = (ifu_status_wr_addr_ff[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO+3] == i );
-      rvclkhdr way_status_cgc ( .en(way_status_clken[i]),   .l1clk(way_status_clk[i]), .* );
+     `ifdef RV_FPGA_OPTIMIZE
+        assign way_status_clk[i] = 1'b0;
+     `else
+           rvclkhdr way_status_cgc ( .en(way_status_clken[i]),   .l1clk(way_status_clk[i]), .* );
+     `endif
+
 
       for (genvar j=0 ; j<8 ; j++) begin : WAY_STATUS
-         rvdffs #(pt.ICACHE_STATUS_BITS) ic_way_status (.*,
+         rvdffs_fpga #(pt.ICACHE_STATUS_BITS) ic_way_status (.*,
                    .clk(way_status_clk[i]),
+                   .clken(way_status_clken[i]),
+                   .rawclk(clk),
                    .en(((ifu_status_wr_addr_ff[pt.ICACHE_TAG_INDEX_LO+2:pt.ICACHE_TAG_INDEX_LO] == j) & way_status_wr_en_ff)),
                    .din(way_status_new_ff[pt.ICACHE_STATUS_BITS-1:0]),
                    .dout(way_status_out[8*i+j]));
@@ -1389,38 +1436,38 @@ if (pt.ICACHE_ENABLE == 1 ) begin: icache_enabled
 
   always_comb begin : way_status_out_mux
       way_status[pt.ICACHE_STATUS_BITS-1:0] = '0 ;
-      for (int j=0; j< 32'(pt.ICACHE_TAG_DEPTH); j++) begin : status_mux_loop
+      for (int j=0; j< pt.ICACHE_TAG_DEPTH; j++) begin : status_mux_loop
         if (ifu_ic_rw_int_addr_ff[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] == (pt.ICACHE_TAG_LO-pt.ICACHE_TAG_INDEX_LO)'(j)) begin : mux_out
          way_status[pt.ICACHE_STATUS_BITS-1:0] =  way_status_out[j];
         end
       end
   end
 
-assign ifu_ic_rw_int_addr_w_debug[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] = ((ic_debug_rd_en | ic_debug_wr_en ) & ic_debug_tag_array) ?
+         assign ifu_ic_rw_int_addr_w_debug[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] = ((ic_debug_rd_en | ic_debug_wr_en ) & ic_debug_tag_array) ?
                                                                         ic_debug_addr[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] :
                                                                         ifu_ic_rw_int_addr[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO];
-
-         rvdff #(pt.ICACHE_TAG_LO-pt.ICACHE_TAG_INDEX_LO) tag_addr_ff (.*, .clk(free_clk),
-                   .din(ifu_ic_rw_int_addr_w_debug[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO]),
-                   .dout(ifu_ic_rw_int_addr_ff[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO]));
-
          assign ifu_tag_wren_w_debug[pt.ICACHE_NUM_WAYS-1:0] = ifu_tag_wren[pt.ICACHE_NUM_WAYS-1:0] | ic_debug_tag_wr_en[pt.ICACHE_NUM_WAYS-1:0] ;
-         rvdff #(pt.ICACHE_NUM_WAYS) tag_v_we_ff (.*, .clk(free_clk),
-                   .din(ifu_tag_wren_w_debug[pt.ICACHE_NUM_WAYS-1:0]),
-                   .dout(ifu_tag_wren_ff[pt.ICACHE_NUM_WAYS-1:0]));
 
          assign ic_valid_w_debug = (ic_debug_wr_en & ic_debug_tag_array) ? ic_debug_wr_data[0] : ic_valid;
-         rvdff #(1) tag_v_ff (.*, .clk(free_clk),
-                   .din(ic_valid_w_debug),
-                   .dout(ic_valid_ff));
+
+         rvdffie #(pt.ICACHE_TAG_LO-pt.ICACHE_TAG_INDEX_LO+pt.ICACHE_NUM_WAYS+1) tag_addr_ff (.*,
+                                                                                              .clk(free_l2clk),
+                                                                                              .din({ifu_ic_rw_int_addr_w_debug[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO],
+                                                                                                    ifu_tag_wren_w_debug[pt.ICACHE_NUM_WAYS-1:0],
+                                                                                                    ic_valid_w_debug}),
+                                                                                              .dout({ifu_ic_rw_int_addr_ff[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO],
+                                                                                                     ifu_tag_wren_ff[pt.ICACHE_NUM_WAYS-1:0],
+                                                                                                     ic_valid_ff})
+                                                                                              );
+
 
    logic [pt.ICACHE_NUM_WAYS-1:0] [pt.ICACHE_TAG_DEPTH-1:0] ic_tag_valid_out ;
 
    logic [(pt.ICACHE_TAG_DEPTH/32)-1:0] [pt.ICACHE_NUM_WAYS-1:0] tag_valid_clken ;
    logic [(pt.ICACHE_TAG_DEPTH/32)-1:0] [pt.ICACHE_NUM_WAYS-1:0] tag_valid_clk   ;
 
-   for (genvar i=0 ; i<32'(pt.ICACHE_TAG_DEPTH)/32 ; i++) begin : CLK_GRP_TAG_VALID
-      for (genvar j=0; j<32'(pt.ICACHE_NUM_WAYS); j++) begin : way_clken
+   for (genvar i=0 ; i<pt.ICACHE_TAG_DEPTH/32 ; i++) begin : CLK_GRP_TAG_VALID
+      for (genvar j=0; j<pt.ICACHE_NUM_WAYS; j++) begin : way_clken
       if (pt.ICACHE_TAG_DEPTH == 32 ) begin
         assign tag_valid_clken[i][j] =  ifu_tag_wren_ff[j] | perr_err_inv_way[j] | reset_all_tags;
       end else begin
@@ -1428,11 +1475,19 @@ assign ifu_ic_rw_int_addr_w_debug[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] = (
                                         ((perr_ic_index_ff     [pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO+5] == i ) &  perr_err_inv_way[j]) | reset_all_tags);
       end
 
-      rvclkhdr way_status_cgc ( .en(tag_valid_clken[i][j]),   .l1clk(tag_valid_clk[i][j]), .* );
+     `ifdef RV_FPGA_OPTIMIZE
+        assign tag_valid_clk[i][j]  = 1'b0;
+     `else
+           rvclkhdr way_status_cgc ( .en(tag_valid_clken[i][j]),   .l1clk(tag_valid_clk[i][j]), .* );
+     `endif
+
+
 
       for (genvar k=0 ; k<32 ; k++) begin : TAG_VALID
-         rvdffs #(1) ic_way_tagvalid_dup (.*,
+         rvdffs_fpga #(1) ic_way_tagvalid_dup (.*,
                    .clk(tag_valid_clk[i][j]),
+                   .clken(tag_valid_clken[i][j]),
+                   .rawclk(clk),
                    .en(((ifu_ic_rw_int_addr_ff[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] == (k + 32*i)) & ifu_tag_wren_ff[j] ) |
                        ((perr_ic_index_ff     [pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] == (k + 32*i)) & perr_err_inv_way[j]) | reset_all_tags),
                    .din(ic_valid_ff & ~reset_all_tags & ~perr_sel_invalidate),
@@ -1452,7 +1507,7 @@ assign ifu_ic_rw_int_addr_w_debug[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] = (
       end
       end
   end
-//   four-way set associative - three bits
+   //   four-way set associative - three bits
 //   each bit represents one branch point in a binary decision tree; let 1
 //   represent that the left side has been referenced more recently than the
 //   right side, and 0 vice-versa
@@ -1482,10 +1537,10 @@ assign ifu_ic_rw_int_addr_w_debug[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] = (
    assign replace_way_mb_any[0] = (~way_status_mb_ff[1] & ~way_status_mb_ff[0] & (&tagv_mb_ff[3:0])) |
                                   (~tagv_mb_ff[0] ) ;
 
-   assign way_status_hit_new[pt.ICACHE_STATUS_BITS-1:0] = ({3{ic_rd_hit[0]}} & {way_status[2] , 1'b1 , 1'b1}) |
-                                   ({3{ic_rd_hit[1]}} & {way_status[2] , 1'b0 , 1'b1}) |
-                                   ({3{ic_rd_hit[2]}} & {1'b1 ,way_status[1]  , 1'b0}) |
-                                   ({3{ic_rd_hit[3]}} & {1'b0 ,way_status[1]  , 1'b0}) ;
+   assign way_status_hit_new[pt.ICACHE_STATUS_BITS-1:0] = ({3{~exu_flush_final & ic_rd_hit[0]}} & {way_status[2] , 1'b1 , 1'b1}) |
+                                                          ({3{~exu_flush_final & ic_rd_hit[1]}} & {way_status[2] , 1'b0 , 1'b1}) |
+                                                          ({3{~exu_flush_final & ic_rd_hit[2]}} & {1'b1 ,way_status[1]  , 1'b0}) |
+                                                          ({3{~exu_flush_final & ic_rd_hit[3]}} & {1'b0 ,way_status[1]  , 1'b0}) ;
 
   assign way_status_rep_new[pt.ICACHE_STATUS_BITS-1:0] = ({3{replace_way_mb_any[0]}} & {way_status_mb_ff[2] , 1'b1 , 1'b1}) |
                                    ({3{replace_way_mb_any[1]}} & {way_status_mb_ff[2] , 1'b0 , 1'b1}) |
@@ -1506,7 +1561,7 @@ assign ifu_ic_rw_int_addr_w_debug[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] = (
 
   assign way_status_wr_en  = (bus_ifu_wr_en_ff_q  & last_beat) | ic_act_hit_f;
 
-   for (genvar i=0; i<32'(pt.ICACHE_NUM_WAYS); i++) begin  : bus_wren_loop
+   for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin  : bus_wren_loop
       assign bus_wren[i]           = bus_ifu_wr_en_ff_q & replace_way_mb_any[i] & miss_pending ;
       assign bus_wren_last[i]      = bus_ifu_wr_en_ff_wo_err & replace_way_mb_any[i] & miss_pending & bus_last_data_beat;
       assign ifu_tag_wren[i]       = bus_wren_last[i] | wren_reset_miss[i];
@@ -1528,7 +1583,7 @@ end else begin: icache_disabled
 
 end
 
-   assign ic_tag_valid[pt.ICACHE_NUM_WAYS-1:0] = ic_tag_valid_unq[pt.ICACHE_NUM_WAYS-1:0]   & {pt.ICACHE_NUM_WAYS{(~fetch_uncacheable_ff & ifc_fetch_req_f) }} ;
+   assign ic_tag_valid[pt.ICACHE_NUM_WAYS-1:0] = ic_tag_valid_unq[pt.ICACHE_NUM_WAYS-1:0]   & {pt.ICACHE_NUM_WAYS{(~fetch_uncacheable_ff & ifc_fetch_req_f_raw) }} ;
    assign ic_debug_tag_val_rd_out           = |(ic_tag_valid_unq[pt.ICACHE_NUM_WAYS-1:0] &  ic_debug_way_ff[pt.ICACHE_NUM_WAYS-1:0]   & {pt.ICACHE_NUM_WAYS{ic_debug_rd_en_ff}}) ;
 ///////////////////////////////////////////
 // PMU signals
@@ -1536,19 +1591,21 @@ end
 
  assign ifu_pmu_ic_miss_in   = ic_act_miss_f ;
  assign ifu_pmu_ic_hit_in    = ic_act_hit_f  ;
- assign ifu_pmu_bus_error_in = ifc_bus_acc_fault_f;
+ assign ifu_pmu_bus_error_in = |ifc_bus_acc_fault_f;
  assign ifu_pmu_bus_trxn_in  = bus_cmd_sent ;
  assign ifu_pmu_bus_busy_in  = ifu_bus_arvalid_ff & ~ifu_bus_arready_ff & miss_pending ;
 
-   rvdff #(5) ifu_pmu_sigs_ff (.*,
-                    .clk (active_clk),
-                    .din ({ifu_pmu_ic_miss_in,
+   rvdffie #(9) ifu_pmu_sigs_ff (.*,
+                    .clk (free_l2clk),
+                    .din ({ifc_fetch_uncacheable_bf, ifc_fetch_req_qual_bf, dma_sb_err_state, dec_tlu_fence_i_wb,
+                           ifu_pmu_ic_miss_in,
                            ifu_pmu_ic_hit_in,
                            ifu_pmu_bus_error_in,
                            ifu_pmu_bus_busy_in,
                            ifu_pmu_bus_trxn_in
                           }),
-                    .dout({ifu_pmu_ic_miss,
+                    .dout({fetch_uncacheable_ff, ifc_fetch_req_f_raw, dma_sb_err_state_ff, reset_all_tags,
+                           ifu_pmu_ic_miss,
                            ifu_pmu_ic_hit,
                            ifu_pmu_bus_error,
                            ifu_pmu_bus_busy,
@@ -1577,7 +1634,8 @@ assign ic_debug_tag_wr_en[pt.ICACHE_NUM_WAYS-1:0] = {pt.ICACHE_NUM_WAYS{ic_debug
 
 assign ic_debug_ict_array_sel_in      =  ic_debug_rd_en & ic_debug_tag_array ;
 
-rvdff #(01+pt.ICACHE_NUM_WAYS) ifu_debug_sel_ff (.*, .clk (debug_c1_clk),
+rvdff_fpga #(01+pt.ICACHE_NUM_WAYS) ifu_debug_sel_ff (.*, .clk (debug_c1_clk),
+                    .clken(debug_c1_clken), .rawclk(clk),
                     .din ({ic_debug_ict_array_sel_in,
                            ic_debug_way[pt.ICACHE_NUM_WAYS-1:0]
                           }),
@@ -1586,25 +1644,10 @@ rvdff #(01+pt.ICACHE_NUM_WAYS) ifu_debug_sel_ff (.*, .clk (debug_c1_clk),
                            }));
 
 
-rvdff #(1) ifu_debug_rd_en_ff (.*,.clk(free_clk),
-                    .din ({
-                           ic_debug_rd_en
-                          }),
-                    .dout({
-                           ic_debug_rd_en_ff
-                           }));
 
 
 assign debug_data_clken  =  ic_debug_rd_en_ff;
-rvclkhdr debug_data_c1_cgc ( .en(debug_data_clken),   .l1clk(debug_data_clk), .* );
 
-rvdff #(1) ifu_debug_valid_ff (.*, .clk(free_clk),
-                    .din ({
-                           ic_debug_rd_en_ff
-                          }),
-                    .dout({
-                           ifu_ic_debug_rd_data_valid
-                           }));
 
 
 
@@ -1623,7 +1666,6 @@ rvdff #(1) ifu_debug_valid_ff (.*, .clk(free_clk),
 
    assign ifc_region_acc_fault_final_bf = ifc_region_acc_fault_bf | ifc_region_acc_fault_memory_bf;
 
-rvdff #(1) acc_f_m_ff (.*, .clk(free_clk),  .din ( ifc_region_acc_fault_memory_bf ), .dout( ifc_region_acc_fault_memory_f ));
 
 
 

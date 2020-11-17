@@ -209,6 +209,7 @@ csr[ csr_mpmc      ] = {  csr_mpmc      }
 csr[ csr_mcpc      ] = {  csr_mcpc presync postsync }
 csr[ csr_meicidpl  ] = {  csr_meicidpl  }
 csr[ csr_mcgc      ] = {  csr_mcgc      }
+csr[ csr_mcountinhibit] = {  csr_mcountinhibit presync postsync }
 csr[ csr_mfdc      ] = {  csr_mfdc presync postsync }
 csr[ csr_dcsr      ] = {  csr_dcsr      }
 csr[ csr_dpc       ] = {  csr_dpc       }

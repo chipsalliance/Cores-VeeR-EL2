@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2020 Western Digital Corporation or it's affiliates.
+// Copyright 2020 Western Digital Corporation or its affiliates.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ if (SHORT == 1) begin
    assign dout = din;
 end
 else begin
-`ifdef CLOCKGATE
+`ifdef RV_CLOCKGATE
    always @(posedge tb_top.clk) begin
       #0 $strobe("CG: %0t %m din %x dout %x clk %b width %d",$time,din,dout,clk,WIDTH);
    end
@@ -85,7 +85,85 @@ else begin
 end
 endmodule
 
-module rvdffe #( parameter WIDTH=1, SHORT=0 )
+// _fpga versions
+module rvdff_fpga #( parameter WIDTH=1, SHORT=0 )
+   (
+     input logic [WIDTH-1:0] din,
+     input logic           clk,
+     input logic           clken,
+     input logic           rawclk,
+     input logic           rst_l,
+
+     output logic [WIDTH-1:0] dout
+     );
+
+if (SHORT == 1) begin
+   assign dout = din;
+end
+else begin
+   `ifdef RV_FPGA_OPTIMIZE
+    rvdffs #(WIDTH) dffs (.clk(rawclk), .en(clken), .*);
+`else
+    rvdff #(WIDTH)  dff (.*);
+`endif
+end
+endmodule
+
+// rvdff with 2:1 input mux to flop din iff sel==1
+module rvdffs_fpga #( parameter WIDTH=1, SHORT=0 )
+   (
+     input logic [WIDTH-1:0] din,
+     input logic             en,
+     input logic           clk,
+     input logic           clken,
+     input logic           rawclk,
+     input logic           rst_l,
+
+     output logic [WIDTH-1:0] dout
+     );
+
+if (SHORT == 1) begin : genblock
+   assign dout = din;
+end
+else begin : genblock
+`ifdef RV_FPGA_OPTIMIZE
+   rvdffs #(WIDTH)   dffs (.clk(rawclk), .en(clken & en), .*);
+`else
+   rvdffs #(WIDTH)   dffs (.*);
+`endif
+end
+
+endmodule
+
+// rvdff with en and clear
+module rvdffsc_fpga #( parameter WIDTH=1, SHORT=0 )
+   (
+     input logic [WIDTH-1:0] din,
+     input logic             en,
+     input logic             clear,
+     input logic             clk,
+     input logic             clken,
+     input logic             rawclk,
+     input logic             rst_l,
+
+     output logic [WIDTH-1:0] dout
+     );
+
+   logic [WIDTH-1:0]          din_new;
+if (SHORT == 1) begin
+   assign dout = din;
+end
+else begin
+`ifdef RV_FPGA_OPTIMIZE
+   rvdffs  #(WIDTH)   dffs  (.clk(rawclk), .din(din[WIDTH-1:0] & {WIDTH{~clear}}),.en((en | clear) & clken), .*);
+`else
+   rvdffsc #(WIDTH)   dffsc (.*);
+`endif
+end
+endmodule
+
+
+module rvdffe #( parameter WIDTH=1, SHORT=0, OVERRIDE=0 )
    (
      input  logic [WIDTH-1:0] din,
      input  logic           en,
@@ -104,8 +182,8 @@ if (SHORT == 1) begin : genblock
 end
 else begin : genblock
 
-`ifndef PHYSICAL
-   if (WIDTH >= 8) begin: genblock
+`ifndef RV_PHYSICAL
+   if (WIDTH >= 8 || OVERRIDE==1) begin: genblock
 `endif
 
 `ifdef RV_FPGA_OPTIMIZE
@@ -115,14 +193,225 @@ else begin : genblock
       rvdff #(WIDTH) dff (.*, .clk(l1clk));
 `endif
 
-`ifndef PHYSICAL
+`ifndef RV_PHYSICAL
    end
    else
-      $error("%m: rvdffe width must be >= 8");
+      $error("%m: rvdffe must be WIDTH >= 8");
 `endif
 end // else: !if(SHORT == 1)
 
 endmodule // rvdffe
+
+
+module rvdffpcie #( parameter WIDTH=31 )
+   (
+     input  logic [WIDTH-1:0] din,
+     input  logic             clk,
+     input  logic             rst_l,
+     input  logic             en,
+     input  logic             scan_mode,
+     output logic [WIDTH-1:0] dout
+     );
+
+
+
+`ifndef RV_PHYSICAL
+   if (WIDTH == 31) begin: genblock
+`endif
+
+`ifdef RV_FPGA_OPTIMIZE
+      rvdffs #(WIDTH) dff ( .* );
+`else
+
+      rvdfflie #(.WIDTH(WIDTH), .LEFT(19)) dff (.*);
+
+`endif
+
+`ifndef RV_PHYSICAL
+   end
+   else
+      $error("%m: rvdffpcie width must be 31");
+`endif
+endmodule
+
+// format: { LEFT, EXTRA }
+// LEFT # of bits will be done with rvdffie, all else EXTRA with rvdffe
+module rvdfflie #( parameter WIDTH=16, LEFT=8 )
+   (
+     input  logic [WIDTH-1:0] din,
+     input  logic             clk,
+     input  logic             rst_l,
+     input  logic             en,
+     input  logic             scan_mode,
+     output logic [WIDTH-1:0] dout
+     );
+
+   localparam EXTRA = WIDTH-LEFT;
+
+
+
+
+
+
+
+   localparam LMSB = WIDTH-1;
+   localparam LLSB = LMSB-LEFT+1;
+   localparam XMSB = LLSB-1;
+   localparam XLSB = LLSB-EXTRA;
+
+
+`ifndef RV_PHYSICAL
+   if (WIDTH >= 16 && LEFT >= 8 && EXTRA >= 8) begin: genblock
+`endif
+
+`ifdef RV_FPGA_OPTIMIZE
+      rvdffs #(WIDTH) dff ( .* );
+`else
+
+      rvdffiee #(LEFT)  dff_left  (.*, .din(din[LMSB:LLSB]), .dout(dout[LMSB:LLSB]));
+
+
+      rvdffe  #(EXTRA)  dff_extra (.*, .din(din[XMSB:XLSB]), .dout(dout[XMSB:XLSB]));
+
+
+
+
+`endif
+
+`ifndef RV_PHYSICAL
+   end
+   else
+      $error("%m: rvdfflie musb be WIDTH >= 16 && LEFT >= 8 && EXTRA >= 8");
+`endif
+endmodule
+
+
+
+
+// special power flop for predict packet
+// format: { LEFT, RIGHT==31 }
+// LEFT # of bits will be done with rvdffe; RIGHT is enabled by LEFT[LSB] & en
+module rvdffppe #( parameter WIDTH=32 )
+   (
+     input  logic [WIDTH-1:0] din,
+     input  logic             clk,
+     input  logic             rst_l,
+     input  logic             en,
+     input  logic             scan_mode,
+     output logic [WIDTH-1:0] dout
+     );
+
+   localparam RIGHT = 31;
+   localparam LEFT = WIDTH - RIGHT;
+
+   localparam LMSB = WIDTH-1;
+   localparam LLSB = LMSB-LEFT+1;
+   localparam RMSB = LLSB-1;
+   localparam RLSB = LLSB-RIGHT;
+
+
+`ifndef RV_PHYSICAL
+   if (WIDTH>=32 && LEFT>=8 && RIGHT>=8) begin: genblock
+`endif
+
+`ifdef RV_FPGA_OPTIMIZE
+      rvdffs #(WIDTH) dff ( .* );
+`else
+      rvdffe #(LEFT)     dff_left (.*, .din(din[LMSB:LLSB]), .dout(dout[LMSB:LLSB]));
+
+      rvdffe #(RIGHT)   dff_right (.*, .din(din[RMSB:RLSB]), .dout(dout[RMSB:RLSB]), .en(en & din[LLSB]));  // qualify with pret
+
+
+`endif
+
+`ifndef RV_PHYSICAL
+   end
+   else
+      $error("%m: must be WIDTH>=32 && LEFT>=8 && RIGHT>=8");
+`endif
+endmodule
+
+
+
+
+module rvdffie #( parameter WIDTH=1, OVERRIDE=0 )
+   (
+     input  logic [WIDTH-1:0] din,
+
+     input  logic           clk,
+     input  logic           rst_l,
+     input  logic             scan_mode,
+     output logic [WIDTH-1:0] dout
+     );
+
+   logic                      l1clk;
+   logic                      en;
+
+
+
+
+
+
+
+
+`ifndef RV_PHYSICAL
+   if (WIDTH >= 8 || OVERRIDE==1) begin: genblock
+`endif
+
+      assign en = |(din ^ dout);
+
+`ifdef RV_FPGA_OPTIMIZE
+      rvdffs #(WIDTH) dff ( .* );
+`else
+      rvclkhdr clkhdr ( .* );
+      rvdff #(WIDTH) dff (.*, .clk(l1clk));
+`endif
+
+`ifndef RV_PHYSICAL
+   end
+   else
+     $error("%m: rvdffie must be WIDTH >= 8");
+`endif
+
+
+endmodule
+
+// ie flop but it has an .en input
+module rvdffiee #( parameter WIDTH=1, OVERRIDE=0 )
+   (
+     input  logic [WIDTH-1:0] din,
+
+     input  logic           clk,
+     input  logic           rst_l,
+     input  logic           scan_mode,
+     input  logic           en,
+     output logic [WIDTH-1:0] dout
+     );
+
+   logic                      l1clk;
+   logic                      final_en;
+
+`ifndef RV_PHYSICAL
+   if (WIDTH >= 8 || OVERRIDE==1) begin: genblock
+`endif
+
+      assign final_en = (|(din ^ dout)) & en;
+
+`ifdef RV_FPGA_OPTIMIZE
+      rvdffs #(WIDTH) dff ( .*, .en(final_en) );
+`else
+      rvdffe #(WIDTH) dff (.*,  .en(final_en));
+`endif
+
+`ifndef RV_PHYSICAL
+   end
+   else
+      $error("%m: rvdffie width must be >= 8");
+`endif
+
+endmodule
+
+
 
 module rvsyncss #(parameter WIDTH = 251)
    (
@@ -136,6 +425,23 @@ module rvsyncss #(parameter WIDTH = 251)
 
    rvdff #(WIDTH) sync_ff1  (.*, .din (din[WIDTH-1:0]),     .dout(din_ff1[WIDTH-1:0]));
    rvdff #(WIDTH) sync_ff2  (.*, .din (din_ff1[WIDTH-1:0]), .dout(dout[WIDTH-1:0]));
+
+endmodule // rvsyncss
+
+module rvsyncss_fpga #(parameter WIDTH = 251)
+   (
+     input  logic                 gw_clk,
+     input  logic                 rawclk,
+     input  logic                 clken,
+     input  logic                 rst_l,
+     input  logic [WIDTH-1:0]     din,
+     output logic [WIDTH-1:0]     dout
+     );
+
+   logic [WIDTH-1:0]              din_ff1;
+
+   rvdff_fpga #(WIDTH) sync_ff1  (.*, .clk(gw_clk), .rawclk(rawclk), .clken(clken), .din (din[WIDTH-1:0]),     .dout(din_ff1[WIDTH-1:0]));
+   rvdff_fpga #(WIDTH) sync_ff2  (.*, .clk(gw_clk), .rawclk(rawclk), .clken(clken), .din (din_ff1[WIDTH-1:0]), .dout(dout[WIDTH-1:0]));
 
 endmodule // rvsyncss
 
@@ -468,6 +774,7 @@ module `TEC_RV_ICG
 
 endmodule
 
+`ifndef RV_FPGA_OPTIMIZE
 module rvclkhdr
   (
    input  logic en,
@@ -477,11 +784,12 @@ module rvclkhdr
    );
 
    logic   SE;
-   assign       SE = scan_mode;
+   assign       SE = 0;
 
    `TEC_RV_ICG clkhdr ( .*, .EN(en), .CK(clk), .Q(l1clk));
 
 endmodule // rvclkhdr
+`endif
 
 module rvoclkhdr
   (
@@ -492,7 +800,7 @@ module rvoclkhdr
    );
 
    logic   SE;
-   assign       SE = scan_mode;
+   assign       SE = 0;
 
 `ifdef RV_FPGA_OPTIMIZE
    assign l1clk = clk;

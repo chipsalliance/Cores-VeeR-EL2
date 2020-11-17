@@ -1,6 +1,6 @@
 //********************************************************************************
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2020 Western Digital Corporation or it's affiliates.
+// Copyright 2020 Western Digital Corporation or its affiliates.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,10 +42,12 @@ import el2_pkg::*;
    output logic [pt.DCCM_FDATA_WIDTH-1:0]  dccm_rd_data_hi,
 
 //`ifdef pt.DCCM_ENABLE
+   input el2_dccm_ext_in_pkt_t  [pt.DCCM_NUM_BANKS-1:0] dccm_ext_in_pkt,
 
 //`endif
 
    //ICCM ports
+   input el2_ccm_ext_in_pkt_t   [pt.ICCM_NUM_BANKS-1:0]  iccm_ext_in_pkt,
 
    input logic [pt.ICCM_BITS-1:1]  iccm_rw_addr,
    input logic                                        iccm_buf_correct_ecc,                    // ICCM is doing a single bit error correct cycle
@@ -66,6 +68,8 @@ import el2_pkg::*;
    input  logic         ic_rd_en,
    input  logic [63:0] ic_premux_data,      // Premux data to be muxed with each way of the Icache.
    input  logic         ic_sel_premux_data, // Premux data sel
+   input el2_ic_data_ext_in_pkt_t   [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0]         ic_data_ext_in_pkt,
+   input el2_ic_tag_ext_in_pkt_t    [pt.ICACHE_NUM_WAYS-1:0]           ic_tag_ext_in_pkt,
 
    input  logic [pt.ICACHE_BANKS_WAY-1:0][70:0]               ic_wr_data,         // Data to fill to the Icache. With ECC
    input  logic [70:0]               ic_debug_wr_data,   // Debug wr cache.
@@ -89,6 +93,9 @@ import el2_pkg::*;
    input  logic         scan_mode
 
 );
+
+   logic active_clk;
+   rvoclkhdr active_cg   ( .en(1'b1),         .l1clk(active_clk), .* );
 
    // DCCM Instantiation
    if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable

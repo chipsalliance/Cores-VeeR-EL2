@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2020 Western Digital Corporation or it's affiliates.
+// Copyright 2020 Western Digital Corporation or its affiliates.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,23 +27,26 @@ import el2_pkg::*;
 #(
 `include "el2_param.vh"
  )(
-   input logic                          clk,
-   input logic                          rst_l,
-   input logic                          scan_mode,
+   input logic                          clk,                                // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.
+   input logic                          clk_override,                       // Override non-functional clock gating
+   input logic                          rst_l,                              // reset, active low
+   input logic                          scan_mode,                          // scan mode
    input logic                          dec_tlu_external_ldfwd_disable,     // disable load to load forwarding for externals
-   input logic                          dec_tlu_wb_coalescing_disable,    // disable write buffer coalescing
-   input logic                          dec_tlu_sideeffect_posted_disable, // disable the posted sideeffect load store to the bus
+   input logic                          dec_tlu_wb_coalescing_disable,      // disable write buffer coalescing
+   input logic                          dec_tlu_sideeffect_posted_disable,  // disable the posted sideeffect load store to the bus
 
    // various clocks needed for the bus reads and writes
-   input logic                          lsu_c1_m_clk,
-   input logic                          lsu_c1_r_clk,
-   input logic                          lsu_c2_r_clk,
-   input logic                          lsu_bus_ibuf_c1_clk,
-   input logic                          lsu_bus_obuf_c1_clk,
-   input logic                          lsu_bus_buf_c1_clk,
-   input logic                          lsu_free_c2_clk,
-   input logic                          free_clk,
-   input logic                          lsu_busm_clk,
+   input logic                          lsu_bus_obuf_c1_clken,              // obuf clock enable
+   input logic                          lsu_busm_clken,                     // bus clock enable
+
+   input logic                          lsu_c1_r_clk,                       // r pipe single pulse clock
+   input logic                          lsu_c2_r_clk,                       // r pipe double pulse clock
+   input logic                          lsu_bus_ibuf_c1_clk,                // ibuf single pulse clock
+   input logic                          lsu_bus_obuf_c1_clk,                // obuf single pulse clock
+   input logic                          lsu_bus_buf_c1_clk,                 // buf  single pulse clock
+   input logic                          lsu_free_c2_clk,                    // free clock double pulse clock
+   input logic                          active_clk,                         // Clock only while core active.  Through two clock headers. For flops without second clock header built in.
+   input logic                          lsu_busm_clk,                       // bus clock
 
    input logic                          dec_lsu_valid_raw_d,               // Raw valid for address computation
    input logic                          lsu_busreq_m,                      // bus request is in m
@@ -51,11 +54,9 @@ import el2_pkg::*;
    input                                el2_lsu_pkt_t lsu_pkt_m,          // lsu packet flowing down the pipe
    input                                el2_lsu_pkt_t lsu_pkt_r,          // lsu packet flowing down the pipe
 
-   input logic [31:0]                   lsu_addr_d,                        // lsu address flowing down the pipe
    input logic [31:0]                   lsu_addr_m,                        // lsu address flowing down the pipe
    input logic [31:0]                   lsu_addr_r,                        // lsu address flowing down the pipe
 
-   input logic [31:0]                   end_addr_d,                        // lsu address flowing down the pipe
    input logic [31:0]                   end_addr_m,                        // lsu address flowing down the pipe
    input logic [31:0]                   end_addr_r,                        // lsu address flowing down the pipe
 
@@ -64,14 +65,14 @@ import el2_pkg::*;
 
    input logic                          lsu_commit_r,                      // lsu instruction in r commits
    input logic                          is_sideeffects_m,                  // lsu attribute is side_effects
-   input logic                          flush_m_up,                           // flush
+   input logic                          flush_m_up,                        // flush
    input logic                          flush_r,                           // flush
+   input logic                          ldst_dual_d, ldst_dual_m, ldst_dual_r,
 
    output logic                         lsu_busreq_r,                      // bus request is in r
    output logic                         lsu_bus_buffer_pend_any,           // bus buffer has a pending bus entry
    output logic                         lsu_bus_buffer_full_any,           // write buffer is full
    output logic                         lsu_bus_buffer_empty_any,          // write buffer is empty
-   output logic                         lsu_bus_idle_any,                  // NO pending responses from the bus
    output logic [31:0]                  bus_read_data_m,                   // the bus return data
 
 
@@ -139,7 +140,6 @@ import el2_pkg::*;
    input  logic [pt.LSU_BUS_TAG-1:0]   lsu_axi_rid,
    input  logic [63:0]                 lsu_axi_rdata,
    input  logic [1:0]                  lsu_axi_rresp,
-   input  logic                        lsu_axi_rlast,
 
    input logic                         lsu_bus_clk_en
 
@@ -148,7 +148,6 @@ import el2_pkg::*;
 
 
    logic              lsu_bus_clk_en_q;
-   logic              ldst_dual_d, ldst_dual_m, ldst_dual_r;
 
    logic [3:0]        ldst_byteen_m, ldst_byteen_r;
    logic [7:0]        ldst_byteen_ext_m, ldst_byteen_ext_r;
@@ -185,7 +184,6 @@ import el2_pkg::*;
    assign ldst_byteen_m[3:0] = ({4{lsu_pkt_m.by}}   & 4'b0001) |
                                  ({4{lsu_pkt_m.half}} & 4'b0011) |
                                  ({4{lsu_pkt_m.word}} & 4'b1111);
-   assign ldst_dual_d = (lsu_addr_d[2] != end_addr_d[2]);
 
    // Read/Write Buffer
    el2_lsu_bus_buffer #(.pt(pt)) bus_buffer (
@@ -263,106 +261,104 @@ import el2_pkg::*;
 
    // Fifo flops
 
-   rvdff #(.WIDTH(1)) clken_ff (.din(lsu_bus_clk_en), .dout(lsu_bus_clk_en_q), .clk(free_clk), .*);
+   rvdff #(.WIDTH(1)) clken_ff (.din(lsu_bus_clk_en), .dout(lsu_bus_clk_en_q), .clk(active_clk), .*);
 
-   rvdff #(.WIDTH(1)) ldst_dual_mff (.din(ldst_dual_d), .dout(ldst_dual_m), .clk(lsu_c1_m_clk), .*);
-   rvdff #(.WIDTH(1)) ldst_dual_rff (.din(ldst_dual_m), .dout(ldst_dual_r), .clk(lsu_c1_r_clk), .*);
    rvdff #(.WIDTH(1)) is_sideeffects_rff (.din(is_sideeffects_m), .dout(is_sideeffects_r), .clk(lsu_c1_r_clk), .*);
 
    rvdff #(4) lsu_byten_rff (.*, .din(ldst_byteen_m[3:0]), .dout(ldst_byteen_r[3:0]), .clk(lsu_c1_r_clk));
 
-`ifdef ASSERT_ON
+`ifdef RV_ASSERT_ON
 
-     // Assertion to check AXI write address is aligned to size
-     property lsu_axi_awaddr_aligned;
-       @(posedge lsu_busm_clk) disable iff(~rst_l) lsu_axi_awvalid |-> ((lsu_axi_awsize[2:0] == 3'h0)                                   |
-                                                                        ((lsu_axi_awsize[2:0] == 3'h1) & (lsu_axi_awaddr[0] == 1'b0))   |
-                                                                        ((lsu_axi_awsize[2:0] == 3'h2) & (lsu_axi_awaddr[1:0] == 2'b0)) |
-                                                                        ((lsu_axi_awsize[2:0] == 3'h3) & (lsu_axi_awaddr[2:0] == 3'b0)));
-     endproperty
-     assert_lsu_axi_awaddr_aligned: assert property (lsu_axi_awaddr_aligned) else
-       $display("Assertion lsu_axi_awaddr_aligned failed: lsu_axi_awvalid=1'b%b, lsu_axi_awsize=3'h%h, lsu_axi_awaddr=32'h%h",lsu_axi_awvalid, lsu_axi_awsize[2:0], lsu_axi_awaddr[31:0]);
-     // Assertion to check awvalid stays stable during entire bus clock
+  // Assertion to check AXI write address is aligned to size
+  property lsu_axi_awaddr_aligned;
+    @(posedge lsu_busm_clk) disable iff(~rst_l) lsu_axi_awvalid |-> ((lsu_axi_awsize[2:0] == 3'h0)                                   |
+                                                                     ((lsu_axi_awsize[2:0] == 3'h1) & (lsu_axi_awaddr[0] == 1'b0))   |
+                                                                     ((lsu_axi_awsize[2:0] == 3'h2) & (lsu_axi_awaddr[1:0] == 2'b0)) |
+                                                                     ((lsu_axi_awsize[2:0] == 3'h3) & (lsu_axi_awaddr[2:0] == 3'b0)));
+  endproperty
+  assert_lsu_axi_awaddr_aligned: assert property (lsu_axi_awaddr_aligned) else
+    $display("Assertion lsu_axi_awaddr_aligned failed: lsu_axi_awvalid=1'b%b, lsu_axi_awsize=3'h%h, lsu_axi_awaddr=32'h%h",lsu_axi_awvalid, lsu_axi_awsize[2:0], lsu_axi_awaddr[31:0]);
+  // Assertion to check awvalid stays stable during entire bus clock
 
-     // Assertion to check AXI read address is aligned to size
-     property lsu_axi_araddr_aligned;
-       @(posedge lsu_busm_clk) disable iff(~rst_l) lsu_axi_arvalid |-> ((lsu_axi_arsize[2:0] == 3'h0)                                   |
-                                                                        ((lsu_axi_arsize[2:0] == 3'h1) & (lsu_axi_araddr[0] == 1'b0))   |
-                                                                        ((lsu_axi_arsize[2:0] == 3'h2) & (lsu_axi_araddr[1:0] == 2'b0)) |
-                                                                        ((lsu_axi_arsize[2:0] == 3'h3) & (lsu_axi_araddr[2:0] == 3'b0)));
-     endproperty
-     assert_lsu_axi_araddr_aligned: assert property (lsu_axi_araddr_aligned) else
-       $display("Assertion lsu_axi_araddr_aligned failed: lsu_axi_awvalid=1'b%b, lsu_axi_awsize=3'h%h, lsu_axi_araddr=32'h%h",lsu_axi_awvalid, lsu_axi_awsize[2:0], lsu_axi_araddr[31:0]);
+  // Assertion to check AXI read address is aligned to size
+  property lsu_axi_araddr_aligned;
+    @(posedge lsu_busm_clk) disable iff(~rst_l) lsu_axi_arvalid |-> ((lsu_axi_arsize[2:0] == 3'h0)                                   |
+                                                                     ((lsu_axi_arsize[2:0] == 3'h1) & (lsu_axi_araddr[0] == 1'b0))   |
+                                                                     ((lsu_axi_arsize[2:0] == 3'h2) & (lsu_axi_araddr[1:0] == 2'b0)) |
+                                                                     ((lsu_axi_arsize[2:0] == 3'h3) & (lsu_axi_araddr[2:0] == 3'b0)));
+  endproperty
+  assert_lsu_axi_araddr_aligned: assert property (lsu_axi_araddr_aligned) else
+    $display("Assertion lsu_axi_araddr_aligned failed: lsu_axi_awvalid=1'b%b, lsu_axi_awsize=3'h%h, lsu_axi_araddr=32'h%h",lsu_axi_awvalid, lsu_axi_awsize[2:0], lsu_axi_araddr[31:0]);
 
-     // Assertion to check awvalid stays stable during entire bus clock
-    property lsu_axi_awvalid_stable;
-        @(posedge clk) disable iff(~rst_l)  (lsu_axi_awvalid != $past(lsu_axi_awvalid)) |-> $past(lsu_bus_clk_en);
-     endproperty
-     assert_lsu_axi_awvalid_stable: assert property (lsu_axi_awvalid_stable) else
-        $display("LSU AXI awvalid changed in middle of bus clock");
+  // Assertion to check awvalid stays stable during entire bus clock
+ property lsu_axi_awvalid_stable;
+     @(posedge clk) disable iff(~rst_l)  (lsu_axi_awvalid != $past(lsu_axi_awvalid)) |-> ($past(lsu_bus_clk_en) | dec_tlu_force_halt);
+  endproperty
+  assert_lsu_axi_awvalid_stable: assert property (lsu_axi_awvalid_stable) else
+     $display("LSU AXI awvalid changed in middle of bus clock");
 
-     // Assertion to check awid stays stable during entire bus clock
-     property lsu_axi_awid_stable;
-        @(posedge clk) disable iff(~rst_l)  (lsu_axi_awvalid & (lsu_axi_awid[pt.LSU_BUS_TAG-1:0] != $past(lsu_axi_awid[pt.LSU_BUS_TAG-1:0]))) |-> $past(lsu_bus_clk_en);
-     endproperty
-     assert_lsu_axi_awid_stable: assert property (lsu_axi_awid_stable) else
-        $display("LSU AXI awid changed in middle of bus clock");
+  // Assertion to check awid stays stable during entire bus clock
+  property lsu_axi_awid_stable;
+     @(posedge clk) disable iff(~rst_l)  (lsu_axi_awvalid & (lsu_axi_awid[pt.LSU_BUS_TAG-1:0] != $past(lsu_axi_awid[pt.LSU_BUS_TAG-1:0]))) |-> $past(lsu_bus_clk_en);
+  endproperty
+  assert_lsu_axi_awid_stable: assert property (lsu_axi_awid_stable) else
+     $display("LSU AXI awid changed in middle of bus clock");
 
-     // Assertion to check awaddr stays stable during entire bus clock
-     property lsu_axi_awaddr_stable;
-        @(posedge clk) disable iff(~rst_l)  (lsu_axi_awvalid & (lsu_axi_awaddr[31:0] != $past(lsu_axi_awaddr[31:0]))) |-> $past(lsu_bus_clk_en);
-     endproperty
-     assert_lsu_axi_awaddr_stable: assert property (lsu_axi_awaddr_stable) else
-        $display("LSU AXI awaddr changed in middle of bus clock");
+  // Assertion to check awaddr stays stable during entire bus clock
+  property lsu_axi_awaddr_stable;
+     @(posedge clk) disable iff(~rst_l)  (lsu_axi_awvalid & (lsu_axi_awaddr[31:0] != $past(lsu_axi_awaddr[31:0]))) |-> $past(lsu_bus_clk_en);
+  endproperty
+  assert_lsu_axi_awaddr_stable: assert property (lsu_axi_awaddr_stable) else
+     $display("LSU AXI awaddr changed in middle of bus clock");
 
-     // Assertion to check awsize stays stable during entire bus clock
-     property lsu_axi_awsize_stable;
-        @(posedge clk) disable iff(~rst_l)  (lsu_axi_awvalid & (lsu_axi_awsize[2:0] != $past(lsu_axi_awsize[2:0]))) |-> $past(lsu_bus_clk_en);
-     endproperty
-     assert_lsu_axi_awsize_stable: assert property (lsu_axi_awsize_stable) else
-        $display("LSU AXI awsize changed in middle of bus clock");
+  // Assertion to check awsize stays stable during entire bus clock
+  property lsu_axi_awsize_stable;
+     @(posedge clk) disable iff(~rst_l)  (lsu_axi_awvalid & (lsu_axi_awsize[2:0] != $past(lsu_axi_awsize[2:0]))) |-> $past(lsu_bus_clk_en);
+  endproperty
+  assert_lsu_axi_awsize_stable: assert property (lsu_axi_awsize_stable) else
+     $display("LSU AXI awsize changed in middle of bus clock");
 
-     // Assertion to check wstrb stays stable during entire bus clock
-     property lsu_axi_wstrb_stable;
-        @(posedge clk) disable iff(~rst_l)  (lsu_axi_wvalid & (lsu_axi_wstrb[7:0] != $past(lsu_axi_wstrb[7:0]))) |-> $past(lsu_bus_clk_en);
-     endproperty
-     assert_lsu_axi_wstrb_stable: assert property (lsu_axi_wstrb_stable) else
-        $display("LSU AXI wstrb changed in middle of bus clock");
+  // Assertion to check wstrb stays stable during entire bus clock
+  property lsu_axi_wstrb_stable;
+     @(posedge clk) disable iff(~rst_l)  (lsu_axi_wvalid & (lsu_axi_wstrb[7:0] != $past(lsu_axi_wstrb[7:0]))) |-> $past(lsu_bus_clk_en);
+  endproperty
+  assert_lsu_axi_wstrb_stable: assert property (lsu_axi_wstrb_stable) else
+     $display("LSU AXI wstrb changed in middle of bus clock");
 
-     // Assertion to check wdata stays stable during entire bus clock
-     property lsu_axi_wdata_stable;
-        @(posedge clk) disable iff(~rst_l)  (lsu_axi_wvalid & (lsu_axi_wdata[63:0] != $past(lsu_axi_wdata[63:0]))) |-> $past(lsu_bus_clk_en);
-     endproperty
-     assert_lsu_axi_wdata_stable: assert property (lsu_axi_wdata_stable) else
-        $display("LSU AXI wdata changed in middle of bus clock");
+  // Assertion to check wdata stays stable during entire bus clock
+  property lsu_axi_wdata_stable;
+     @(posedge clk) disable iff(~rst_l)  (lsu_axi_wvalid & (lsu_axi_wdata[63:0] != $past(lsu_axi_wdata[63:0]))) |-> $past(lsu_bus_clk_en);
+  endproperty
+  assert_lsu_axi_wdata_stable: assert property (lsu_axi_wdata_stable) else
+     $display("LSU AXI wdata changed in middle of bus clock");
 
-     // Assertion to check awvalid stays stable during entire bus clock
-     property lsu_axi_arvalid_stable;
-        @(posedge clk) disable iff(~rst_l)  (lsu_axi_arvalid != $past(lsu_axi_arvalid)) |-> $past(lsu_bus_clk_en);
-     endproperty
-     assert_lsu_axi_arvalid_stable: assert property (lsu_axi_arvalid_stable) else
-        $display("LSU AXI awvalid changed in middle of bus clock");
+  // Assertion to check awvalid stays stable during entire bus clock
+  property lsu_axi_arvalid_stable;
+     @(posedge clk) disable iff(~rst_l)  (lsu_axi_arvalid != $past(lsu_axi_arvalid)) |-> ($past(lsu_bus_clk_en) | dec_tlu_force_halt);
+  endproperty
+  assert_lsu_axi_arvalid_stable: assert property (lsu_axi_arvalid_stable) else
+     $display("LSU AXI awvalid changed in middle of bus clock");
 
-     // Assertion to check awid stays stable during entire bus clock
-     property lsu_axi_arid_stable;
-        @(posedge clk) disable iff(~rst_l)  (lsu_axi_arvalid & (lsu_axi_arid[pt.LSU_BUS_TAG-1:0] != $past(lsu_axi_arid[pt.LSU_BUS_TAG-1:0]))) |-> $past(lsu_bus_clk_en);
-     endproperty
-     assert_lsu_axi_arid_stable: assert property (lsu_axi_arid_stable) else
-        $display("LSU AXI awid changed in middle of bus clock");
+  // Assertion to check awid stays stable during entire bus clock
+  property lsu_axi_arid_stable;
+     @(posedge clk) disable iff(~rst_l)  (lsu_axi_arvalid & (lsu_axi_arid[pt.LSU_BUS_TAG-1:0] != $past(lsu_axi_arid[pt.LSU_BUS_TAG-1:0]))) |-> $past(lsu_bus_clk_en);
+  endproperty
+  assert_lsu_axi_arid_stable: assert property (lsu_axi_arid_stable) else
+     $display("LSU AXI awid changed in middle of bus clock");
 
-     // Assertion to check awaddr stays stable during entire bus clock
-     property lsu_axi_araddr_stable;
-        @(posedge clk) disable iff(~rst_l)  (lsu_axi_arvalid & (lsu_axi_araddr[31:0] != $past(lsu_axi_araddr[31:0]))) |-> $past(lsu_bus_clk_en);
-     endproperty
-     assert_lsu_axi_araddr_stable: assert property (lsu_axi_araddr_stable) else
-        $display("LSU AXI awaddr changed in middle of bus clock");
+  // Assertion to check awaddr stays stable during entire bus clock
+  property lsu_axi_araddr_stable;
+     @(posedge clk) disable iff(~rst_l)  (lsu_axi_arvalid & (lsu_axi_araddr[31:0] != $past(lsu_axi_araddr[31:0]))) |-> $past(lsu_bus_clk_en);
+  endproperty
+  assert_lsu_axi_araddr_stable: assert property (lsu_axi_araddr_stable) else
+     $display("LSU AXI awaddr changed in middle of bus clock");
 
-     // Assertion to check awsize stays stable during entire bus clock
-     property lsu_axi_arsize_stable;
-        @(posedge clk) disable iff(~rst_l)  (lsu_axi_awvalid & (lsu_axi_arsize[2:0] != $past(lsu_axi_arsize[2:0]))) |-> $past(lsu_bus_clk_en);
-     endproperty
-     assert_lsu_axi_arsize_stable: assert property (lsu_axi_arsize_stable) else
-        $display("LSU AXI awsize changed in middle of bus clock");
+  // Assertion to check awsize stays stable during entire bus clock
+  property lsu_axi_arsize_stable;
+     @(posedge clk) disable iff(~rst_l)  (lsu_axi_awvalid & (lsu_axi_arsize[2:0] != $past(lsu_axi_arsize[2:0]))) |-> $past(lsu_bus_clk_en);
+  endproperty
+  assert_lsu_axi_arsize_stable: assert property (lsu_axi_arsize_stable) else
+     $display("LSU AXI awsize changed in middle of bus clock");
 
 `endif
 

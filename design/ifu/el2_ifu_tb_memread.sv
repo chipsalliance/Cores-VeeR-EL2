@@ -1,6 +1,6 @@
 //********************************************************************************
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2020 Western Digital Corporation or it's affiliates.
+// Copyright 2020 Western Digital Corporation or its affiliates.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,10 +41,9 @@ module el2_ifu_tb_memread;
       clk=0;
       rst_l=0;
 
-      // initialize the reads and populate the istruction arrays
+      // initialize the reads and populate the instruction arrays
       $readmemh ("left64k", compressed );
       $readmemh ("right64k", expected );
-
 
       $dumpfile ("top.vcd");
       $dumpvars;

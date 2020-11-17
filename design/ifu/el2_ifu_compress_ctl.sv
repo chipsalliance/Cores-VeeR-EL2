@@ -1,6 +1,6 @@
 //********************************************************************************
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2020 Western Digital Corporation or it's affiliates.
+// Copyright 2020 Western Digital Corporation or its affiliates.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import el2_pkg::*;
 `include "el2_param.vh"
  )
   (
-   input  logic [15:0] din,
-   output logic [31:0] dout
+   input  logic [15:0] din,        // 16-bit   compressed instruction
+   output logic [31:0] dout        // 32-bit uncompressed instruction
    );
 
 
@@ -40,27 +40,27 @@ import el2_pkg::*;
 
    logic [4:0]   rs2d,rdd,rdpd,rs2pd;
 
-logic rdrd;
-logic rdrs1;
-logic rs2rs2;
-logic rdprd;
-logic rdprs1;
-logic rs2prs2;
-logic rs2prd;
-logic uimm9_2;
-logic ulwimm6_2;
-logic ulwspimm7_2;
-logic rdeq2;
-logic rdeq1;
-logic rs1eq2;
-logic sbroffset8_1;
-logic simm9_4;
-logic simm5_0;
-logic sjaloffset11_1;
-logic sluimm17_12;
-logic uimm5_0;
-logic uswimm6_2;
-logic uswspimm7_2;
+   logic rdrd;
+   logic rdrs1;
+   logic rs2rs2;
+   logic rdprd;
+   logic rdprs1;
+   logic rs2prs2;
+   logic rs2prd;
+   logic uimm9_2;
+   logic ulwimm6_2;
+   logic ulwspimm7_2;
+   logic rdeq2;
+   logic rdeq1;
+   logic rs1eq2;
+   logic sbroffset8_1;
+   logic simm9_4;
+   logic simm5_0;
+   logic sjaloffset11_1;
+   logic sluimm17_12;
+   logic uimm5_0;
+   logic uswimm6_2;
+   logic uswspimm7_2;
 
 
 

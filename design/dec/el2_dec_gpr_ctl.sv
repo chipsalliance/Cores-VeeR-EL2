@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2020 Western Digital Corporation or it's affiliates.
+// Copyright 2020 Western Digital Corporation or its affiliates.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import el2_pkg::*;
 #(
    `include "el2_param.vh"
  )  (
-    input logic [4:0]  raddr0,      // logical read addresses
+    input logic [4:0]  raddr0,       // logical read addresses
     input logic [4:0]  raddr1,
 
     input logic        wen0,         // write enable
@@ -42,18 +42,18 @@ import el2_pkg::*;
     input  logic        scan_mode
 );
 
-   logic [31:1] [31:0] gpr_out;     // 31 x 32 bit GPRs
+   logic [31:1] [31:0] gpr_out;      // 31 x 32 bit GPRs
    logic [31:1] [31:0] gpr_in;
    logic [31:1] w0v,w1v,w2v;
    logic [31:1] gpr_wr_en;
 
-   // GPR Write Enables for power savings
+   // GPR Write Enables
    assign gpr_wr_en[31:1] = (w0v[31:1] | w1v[31:1] | w2v[31:1]);
    for ( genvar j=1; j<32; j++ )  begin : gpr
       rvdffe #(32) gprff (.*, .en(gpr_wr_en[j]), .din(gpr_in[j][31:0]), .dout(gpr_out[j][31:0]));
    end : gpr
 
-// the read out
+   // the read out
    always_comb begin
       rd0[31:0] = 32'b0;
       rd1[31:0] = 32'b0;
@@ -79,7 +79,7 @@ import el2_pkg::*;
      end
    end // always_comb begin
 
-`ifdef ASSERT_ON
+`ifdef RV_ASSERT_ON
 
    logic  write_collision_unused;
    assign write_collision_unused = ( (w0v[31:1] == w1v[31:1]) & wen0 & wen1 ) |

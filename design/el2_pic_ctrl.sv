@@ -1,6 +1,6 @@
 //********************************************************************************
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2020 Western Digital Corporation or it's affiliates.
+// Copyright 2020 Western Digital Corporation or its affiliates.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ module el2_pic_ctrl #(
 
                      input  logic                   clk,                  // Core clock
                      input  logic                   free_clk,             // free clock
-                     input  logic                   active_clk,           // active clock
                      input  logic                   rst_l,                // Reset for all flops
                      input  logic                   clk_override,         // Clock over-ride for gating
+                     input  logic                   io_clk_override,      // PIC IO  Clock over-ride for gating
                      input  logic [pt.PIC_TOTAL_INT_PLUS1-1:0]   extintsrc_req,  // Interrupt requests
                      input  logic [31:0]            picm_rdaddr,          // Address of the register
                      input  logic [31:0]            picm_wraddr,          // Address of the register
@@ -68,6 +68,12 @@ localparam INT_GRPS              =   INTPEND_SIZE / 32 ;
 localparam INTPRIORITY_BITS      =  4 ;
 localparam ID_BITS               =  8 ;
 localparam int GW_CONFIG[pt.PIC_TOTAL_INT_PLUS1-1:0] = '{default:0} ;
+
+localparam INT_ENABLE_GRPS       =   (pt.PIC_TOTAL_INT_PLUS1 - 1)  / 4 ;
+
+logic [pt.PIC_TOTAL_INT_PLUS1-1:0]           intenable_clk_enable ;
+logic [INT_ENABLE_GRPS:0]                    intenable_clk_enable_grp ;
+logic [INT_ENABLE_GRPS:0]                    gw_clk ;
 
 logic  addr_intpend_base_match;
 
@@ -111,12 +117,6 @@ logic [pt.PIC_TOTAL_INT_PLUS1-1:0] [ID_BITS-1:0]          intpend_id;
 logic [INTPRIORITY_BITS-1:0]                 maxint;
 logic [INTPRIORITY_BITS-1:0]                 selected_int_priority;
 logic [INT_GRPS-1:0] [31:0]                  intpend_rd_part_out ;
-
-
-logic [NUM_LEVELS:NUM_LEVELS/2] [(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2))+1:0] [INTPRIORITY_BITS-1:0] levelx_intpend_w_prior_en;
-logic [NUM_LEVELS:NUM_LEVELS/2] [(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2))+1:0] [ID_BITS-1:0]          levelx_intpend_id;
-logic [(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2)):0] [INTPRIORITY_BITS-1:0] l2_intpend_w_prior_en_ff;
-logic [(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2)):0] [ID_BITS-1:0]          l2_intpend_id_ff;
 
 logic                                        config_reg;
 logic                                        intpriord;
@@ -191,19 +191,24 @@ assign waddr_config_gw_base_match   = (picm_waddr_ff[31:NUM_LEVELS+2] == EXT_INT
 
 rvdff #(32) picm_radd_flop  (.*, .din (picm_rdaddr),        .dout(picm_raddr_ff),         .clk(pic_raddr_c1_clk));
 rvdff #(32) picm_wadd_flop  (.*, .din (picm_wraddr),        .dout(picm_waddr_ff),         .clk(pic_data_c1_clk));
-rvdff  #(1) picm_wre_flop   (.*, .din (picm_wren),          .dout(picm_wren_ff),          .clk(active_clk));
-rvdff  #(1) picm_rde_flop   (.*, .din (picm_rden),          .dout(picm_rden_ff),          .clk(active_clk));
-rvdff  #(1) picm_mke_flop   (.*, .din (picm_mken),          .dout(picm_mken_ff),          .clk(active_clk));
+rvdff  #(1) picm_wre_flop   (.*, .din (picm_wren),          .dout(picm_wren_ff),          .clk(free_clk));
+rvdff  #(1) picm_rde_flop   (.*, .din (picm_rden),          .dout(picm_rden_ff),          .clk(free_clk));
+rvdff  #(1) picm_mke_flop   (.*, .din (picm_mken),          .dout(picm_mken_ff),          .clk(free_clk));
 rvdff #(32) picm_dat_flop   (.*, .din (picm_wr_data[31:0]), .dout(picm_wr_data_ff[31:0]), .clk(pic_data_c1_clk));
 
-rvsyncss  #(pt.PIC_TOTAL_INT_PLUS1-1) sync_inst
-(
- .clk (free_clk),
- .dout(extintsrc_req_sync[pt.PIC_TOTAL_INT_PLUS1-1:1]),
- .din (extintsrc_req[pt.PIC_TOTAL_INT_PLUS1-1:1]),
- .*) ;
 
-assign extintsrc_req_sync[0] = extintsrc_req[0];
+genvar p ;
+for (p=0; p<=INT_ENABLE_GRPS ; p++) begin  : IO_CLK_GRP
+   if (p==INT_ENABLE_GRPS) begin : LAST_GRP
+       assign intenable_clk_enable_grp[p] = |intenable_clk_enable[pt.PIC_TOTAL_INT_PLUS1-1 : p*4] | io_clk_override;
+       rvoclkhdr intenable_c1_cgc   ( .en(intenable_clk_enable_grp[p]),  .l1clk(gw_clk[p]), .* );
+   end else begin :  CLK_GRPS
+       assign intenable_clk_enable_grp[p] = |intenable_clk_enable[p*4+3 : p*4] | io_clk_override;
+       rvoclkhdr intenable_c1_cgc   ( .en(intenable_clk_enable_grp[p]),  .l1clk(gw_clk[p]), .* );
+   end
+end
+
+
 
 genvar i ;
 for (i=0; i<pt.PIC_TOTAL_INT_PLUS1 ; i++) begin  : SETREG
@@ -223,15 +228,33 @@ for (i=0; i<pt.PIC_TOTAL_INT_PLUS1 ; i++) begin  : SETREG
      rvdffs #(INTPRIORITY_BITS) intpriority_ff  (.*, .en( intpriority_reg_we[i]), .din (picm_wr_data_ff[INTPRIORITY_BITS-1:0]), .dout(intpriority_reg[i]), .clk(pic_pri_c1_clk));
      rvdffs #(1)                 intenable_ff   (.*, .en( intenable_reg_we[i]),   .din (picm_wr_data_ff[0]),                    .dout(intenable_reg[i]),   .clk(pic_int_c1_clk));
 
+     assign intenable_clk_enable[i]  =  gw_config_reg[i][1] | intenable_reg_we[i] | intenable_reg[i] | gw_clear_reg_we[i] ;
+
+     rvsyncss_fpga  #(1) sync_inst
+     (
+      .gw_clk      (gw_clk[i/4]),
+      .rawclk      (clk),
+      .clken       (intenable_clk_enable_grp[i/4]),
+      .dout        (extintsrc_req_sync[i]),
+      .din         (extintsrc_req[i]),
+      .*) ;
+
+
+
+//     if (GW_CONFIG[i]) begin
 
         rvdffs #(2)                 gw_config_ff   (.*, .en( gw_config_reg_we[i]),   .din (picm_wr_data_ff[1:0]),                  .dout(gw_config_reg[i]),   .clk(gw_config_c1_clk));
-        el2_configurable_gw config_gw_inst(.*, .clk(free_clk),
-                         .extintsrc_req_sync(extintsrc_req_sync[i]) ,
-                         .meigwctrl_polarity(gw_config_reg[i][0]) ,
-                         .meigwctrl_type(gw_config_reg[i][1]) ,
-                         .meigwclr(gw_clear_reg_we[i]) ,
-                         .extintsrc_req_config(extintsrc_req_gw[i])
-                            );
+
+        el2_configurable_gw config_gw_inst(.*,
+                                            .gw_clk(gw_clk[i/4]),
+                                            .rawclk(clk),
+                                            .clken (intenable_clk_enable_grp[i/4]),
+                                            .extintsrc_req_sync(extintsrc_req_sync[i]) ,
+                                            .meigwctrl_polarity(gw_config_reg[i][0]) ,
+                                            .meigwctrl_type(gw_config_reg[i][1]) ,
+                                            .meigwclr(gw_clear_reg_we[i]) ,
+                                            .extintsrc_req_config(extintsrc_req_gw[i])
+                                            );
 
  end else begin : INT_ZERO
      assign intpriority_reg_we[i] =  1'b0 ;
@@ -248,6 +271,8 @@ for (i=0; i<pt.PIC_TOTAL_INT_PLUS1 ; i++) begin  : SETREG
      assign intpriority_reg[i] = {INTPRIORITY_BITS{1'b0}} ;
      assign intenable_reg[i]   = 1'b0 ;
      assign extintsrc_req_gw[i] = 1'b0 ;
+     assign extintsrc_req_sync[i]    = 1'b0 ;
+     assign intenable_clk_enable[i] = 1'b0;
  end
 
 
@@ -266,10 +291,14 @@ end
 if (pt.PIC_2CYCLE == 1) begin : genblock
         logic [NUM_LEVELS/2:0] [pt.PIC_TOTAL_INT_PLUS1+2:0] [INTPRIORITY_BITS-1:0] level_intpend_w_prior_en;
         logic [NUM_LEVELS/2:0] [pt.PIC_TOTAL_INT_PLUS1+2:0] [ID_BITS-1:0]          level_intpend_id;
+        logic [NUM_LEVELS:NUM_LEVELS/2] [(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2))+1:0] [INTPRIORITY_BITS-1:0] levelx_intpend_w_prior_en;
+        logic [NUM_LEVELS:NUM_LEVELS/2] [(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2))+1:0] [ID_BITS-1:0]          levelx_intpend_id;
 
         assign level_intpend_w_prior_en[0][pt.PIC_TOTAL_INT_PLUS1+2:0] = {4'b0,4'b0,4'b0,intpend_w_prior_en[pt.PIC_TOTAL_INT_PLUS1-1:0]} ;
         assign level_intpend_id[0][pt.PIC_TOTAL_INT_PLUS1+2:0]         = {8'b0,8'b0,8'b0,intpend_id[pt.PIC_TOTAL_INT_PLUS1-1:0]} ;
 
+        logic [(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2)):0] [INTPRIORITY_BITS-1:0] l2_intpend_w_prior_en_ff;
+        logic [(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2)):0] [ID_BITS-1:0]          l2_intpend_id_ff;
 
         assign levelx_intpend_w_prior_en[NUM_LEVELS/2][(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2))+1:0] = {{1*INTPRIORITY_BITS{1'b0}},l2_intpend_w_prior_en_ff[(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2)):0]} ;
         assign levelx_intpend_id[NUM_LEVELS/2][(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2))+1:0]         = {{1*ID_BITS{1'b1}},l2_intpend_id_ff[(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2)):0]} ;
@@ -326,6 +355,7 @@ else begin : genblock
         assign level_intpend_id[0][pt.PIC_TOTAL_INT_PLUS1+1:0] = {{2*ID_BITS{1'b1}},intpend_id[pt.PIC_TOTAL_INT_PLUS1-1:0]} ;
 
 ///  Do the prioritization of the interrupts here  ////////////
+// genvar l, m , j, k;  already declared outside ifdef
  for (l=0; l<NUM_LEVELS ; l++) begin : LEVEL
     for (m=0; m<=(pt.PIC_TOTAL_INT_PLUS1)/(2**(l+1)) ; m++) begin : COMPARE
        if ( m == (pt.PIC_TOTAL_INT_PLUS1)/(2**(l+1))) begin
@@ -362,9 +392,14 @@ rvdffs #(1) config_reg_ff  (.*, .clk(free_clk), .en(config_reg_we), .din (config
 assign intpriord  = config_reg ;
 
 
+
+//////////////////////////////////////////////////////////////////////////
+// Send the interrupt to the core if it is above the thresh-hold
+//////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
 /// ClaimId  Reg and Corresponding PL
 ///////////////////////////////////////////////////////////
+//
 assign pl_in_q[INTPRIORITY_BITS-1:0] = intpriord ? ~pl_in : pl_in ;
 rvdff #(ID_BITS)          claimid_ff  (.*,  .din (claimid_in[ID_BITS-1:00]),     .dout(claimid[ID_BITS-1:00]),    .clk(free_clk));
 rvdff  #(INTPRIORITY_BITS) pl_ff      (.*, .din (pl_in_q[INTPRIORITY_BITS-1:0]), .dout(pl[INTPRIORITY_BITS-1:0]), .clk(free_clk));
@@ -379,6 +414,8 @@ rvdff #(1) mexintpend_ff  (.*, .clk(free_clk), .din (mexintpend_in), .dout(mexin
 assign maxint[INTPRIORITY_BITS-1:0]      =  intpriord ? 0 : 15 ;
 assign mhwakeup_in = ( pl_in_q[INTPRIORITY_BITS-1:0] == maxint) ;
 rvdff #(1) wake_up_ff  (.*, .clk(free_clk), .din (mhwakeup_in), .dout(mhwakeup));
+
+
 
 
 
@@ -471,9 +508,10 @@ endmodule // cmp_and_mux
 
 
 module el2_configurable_gw (
-                             input logic clk,
+                             input logic gw_clk,
+                             input logic rawclk,
+                             input logic clken,
                              input logic rst_l,
-
                              input logic extintsrc_req_sync ,
                              input logic meigwctrl_polarity ,
                              input logic meigwctrl_type ,
@@ -486,7 +524,8 @@ module el2_configurable_gw (
   logic  gw_int_pending_in , gw_int_pending ;
 
   assign gw_int_pending_in =  (extintsrc_req_sync ^ meigwctrl_polarity) | (gw_int_pending & ~meigwclr) ;
-  rvdff #(1) int_pend_ff        (.*, .clk(clk), .din (gw_int_pending_in),     .dout(gw_int_pending));
+  rvdff_fpga #(1) int_pend_ff        (.*, .clk(gw_clk), .rawclk(rawclk), .clken(clken), .din (gw_int_pending_in),     .dout(gw_int_pending));
+
 
   assign extintsrc_req_config =  meigwctrl_type ? ((extintsrc_req_sync ^  meigwctrl_polarity) | gw_int_pending) : (extintsrc_req_sync ^  meigwctrl_polarity) ;
 

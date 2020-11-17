@@ -1,4 +1,4 @@
-# EL2 SweRV RISC-V Core<sup>TM</sup> 1.2 from Western Digital
+# EL2 SweRV RISC-V Core<sup>TM</sup> 1.3 from Western Digital
 
 This repository contains the SweRV EL2 Core<sup>TM</sup>  design RTL
 
@@ -24,13 +24,14 @@ Files under the [tools](tools/) directory may be available under a different lic
     ├── tools                   # Scripts/Makefiles
     └── testbench               # (Very) simple testbench
         ├── asm                 #   Example assembly files
-        └── hex                 #   Canned demo hex files
+        ├── hex                 #   Canned demo hex files
+        └── tests               #   Example tests
  
 ## Dependencies
 
-- Verilator **(4.020 or later)** must be installed on the system if running with verilator
+- Verilator **(4.102 or later)** must be installed on the system if running with verilator
 - If adding/removing instructions, espresso must be installed (used by *tools/coredecode*)
-- RISCV tool chain (based on gcc version 7.3 or higher) must be
+- RISCV tool chain (based on gcc version 8.3 or higher) must be
 installed so that it can be used to prepare RISCV binaries to run.
 
 ## Quickstart guide
@@ -57,7 +58,15 @@ This will update the **default** snapshot in $RV_ROOT/configs/snapshots/default/
 Add `-snapshot=dccm64`, for example, if you wish to name your build snapshot *dccm64* and refer to it during the build.  
 
 There are 4 predefined target configurations: `default`, `default_ahb`, `typical_pd` and `high_perf` that can be selected via 
-the `-target=name` option to swerv.config.
+the `-target=name` option to swerv.config. **Note:** that the `typical_pd` target is what we base our published PPA numbers. It does not include an ICCM.
+
+**Building an FPGA speed optimized model:**
+Use ``-fpga_optimize=1`` option to ``swerv.config`` to build a model that removes clock gating logic from flop model so that the FPGA builds can run at higher speeds. **This is now the default option for
+targets other than ``typical_pd``.**
+
+**Building a Power optimized model (ASIC flows):**
+Use ``-fpga_optimize=0`` option to ``swerv.config`` to build a model that **enables** clock gating logic into the flop model so that the ASIC flows get a better power footprint. **This is now the default option for
+target``typical_pd``.**
 
 This script derives the following consistent set of include files :  
 
@@ -70,6 +79,7 @@ This script derives the following consistent set of include files :
     ├── perl_configs.pl                         # Perl %configs hash for scripting
     ├── pic_map_auto.h                          # PIC memory map based on configure size
     └── whisper.json                            # JSON file for swerv-iss
+    └── link.ld                                 # default linker control file
 
 
 
@@ -107,7 +117,7 @@ execute a short sequence of instructions that writes out "HELLO WORLD"
 to the bus.
 
     
-The simulation produces output on the screen like:  
+The simulation produces output on the screen like: u 
 ```
 
 VerilatorTB: Start of sim
@@ -130,8 +140,6 @@ The simulation generates following files:
   gtkwave or similar waveform viewers.
   
 You can re-execute simulation using:  
-     ` ./obj_dir/Vtb_top `  
-or  
     `make -f $RV_ROOT/tools/Makefile verilator`
 
 
@@ -143,20 +151,20 @@ The simulation run/build command has following generic form:
 where:
 ``` 
 <simulator> -  can be 'verilator' (by default) 'irun' - Cadence xrun, 'vcs' - Synopsys VCS, 'vlog' Mentor Questa
-               if not provided, 'make' cleans work directory, builds verilator executable and runs a test.
+               'riviera'- Aldec Riviera-PRO. if not provided, 'make' cleans work directory, builds verilator executable and runs a test.
 debug=1     -  allows VCD generation for verilator and VCS and SHM waves for irun option.
 <target>    -  predefined CPU configurations 'default' ( by default), 'default_ahb', 'typical_pd', 'high_perf' 
 TEST        -  allows to run a C (<test>.c) or assembly (<test>.s) test, hello_world is run by default 
-TEST_DIR    -  alternative to test source directory testbench/asm
+TEST_DIR    -  alternative to test source directory testbench/asm or testbench/tests
 <snapshot>  -  run and build executable model of custom CPU configuration, remember to provide 'snapshot' argument 
                for runs on custom configurations.
-
+CONF_PARAMS -  allows to provide -set options to swerv.conf script to alter predefined EL2 targets parameters
 ```
 Example:
      
     make -f $RV_ROOT/tools/Makefile verilator TEST=cmark
 
-will simulate  testbench/asm/cmark.c program with verilator 
+will build and simulate  testbench/asm/cmark.c program with verilator 
 
 
 If you want to compile a test only, you can run:
@@ -164,35 +172,43 @@ If you want to compile a test only, you can run:
     make -f $RV_ROOT/tools/Makefile program.hex TEST=<test> [TEST_DIR=/path/to/dir]
 
 
-The Makefile uses  `$RV_ROOT/testbench/link.ld` file by default to build test executable.
+The Makefile uses  `snapshot/<target>/link.ld` file, generated by swerv.conf script by default to build test executable.
 User can provide test specific linker file in form `<test_name>.ld` to build the test executable,
- in the same directory with the test source.
+in the same directory with the test source.
 
 User also can create a test specific makefile in form `<test_name>.makefile`, containing building instructions
-how to create `program.hex` and `data.hex` files used by simulation. The private makefile should be in the same directory
-as the test source.  
-*(`program.hex` file is loaded to instruction bus memory slave and `data.hex` file is loaded to LSU bus memory slave and
-optionally to DCCM at the beginning of simulation)*.
+how to create `program.hex` file used by simulation. The private makefile should be in the same directory
+as the test source. See examples in `testbench/asm` directory.
+
+Another way to alter test building process is to use `<test_name>.mki` file in test source directory. It may help to select multiple sources
+to compile and/or alter compilation swiches. See examples in `testbench/tests/` directory
+ 
+*(`program.hex` file is loaded to instruction and LSU bus memory slaves and
+optionally to DCCM/ICCM at the beginning of simulation)*.
+
+User can build `program.hex` file by any other means and then run simulation with following command:
+
+    make -f $RV_ROOT/tools/Makefile <simulator>
 
 Note: You may need to delete `program.hex` file from work directory, when run a new test.
 
 The  `$RV_ROOT/testbench/asm` directory contains following tests ready to simulate:
 ```
-hello_world      - default tes to run, prints Hello World message to screen and console.log
+hello_world       - default test program to run, prints Hello World message to screen and console.log
 hello_world_dccm  - the same as above, but takes the string from preloaded DCCM.
 hello_world_iccm  - the same as hello_world, but loads the test code to ICCM via LSU to DMA bridge and then executes
-                  it from there. Runs on EL2 with AXI4 buses only. 
+                    it from there. Runs on EL2 with AXI4 buses only. 
 cmark             - coremark benchmark running with code and data in external memories
 cmark_dccm        - the same as above, running data and stack from DCCM (faster)
-cmark_iccm        - the same as above with preloaded code to ICCM. 
+cmark_iccm        - the same as above with preloaded code to ICCM (slower, optimized for size to fit into default ICCM). 
+
+dhry              - Run dhrystone. (Scale by 1757 to get DMIPS/MHZ)
 ```
 
 The `$RV_ROOT/testbench/hex` directory contains precompiled hex files of the tests, ready for simulation in case RISCV SW tools are not installed.
 
 **Note**: The testbench has a simple synthesizable bridge that allows you to load the ICCM via load/store instructions. This is only supported for AXI4 builds.
 
-**Building an FPGA speed optimized model:**  
-Use ``-set=fpga_optimize=1`` option to ``swerv.config`` to build a model that is removes clock gating logic from flop model so that the FPGA builds can run a higher speeds.
 
 
 ----

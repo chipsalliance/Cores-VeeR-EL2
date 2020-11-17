@@ -1,5 +1,7 @@
 +libext+.v+.sv
 //-y $SYNOPSYS_SYN_ROOT/dw/sim_ver
++define+RV_OPENSOURCE
++incdir+$RV_ROOT/testbench
 $RV_ROOT/design/el2_swerv_wrapper.sv
 $RV_ROOT/design/el2_mem.sv
 $RV_ROOT/design/el2_pic_ctrl.sv

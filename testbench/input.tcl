@@ -1,4 +1,4 @@
 database -open waves -into waves.shm -default
-probe -create tb_top -depth all -database waves
+probe -create tb_top -depth all -database waves -memories -all
 run
 exit

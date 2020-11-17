@@ -1,0 +1,2 @@
+TEST_CFLAGS = -finline-limit=400 -mbranch-cost=1 -Ofast -fno-code-hoisting -funroll-all-loops
+OFILES = crt0.o printf.o cmark.o

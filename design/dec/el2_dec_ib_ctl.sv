@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2020 Western Digital Corporation or it's affiliates.
+// Copyright 2020 Western Digital Corporation or its affiliates.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,47 +19,52 @@ import el2_pkg::*;
 `include "el2_param.vh"
  )
   (
-   input logic                 dbg_cmd_valid,  // valid dbg cmd
+   input logic                 dbg_cmd_valid,                      // valid dbg cmd
 
-   input logic                 dbg_cmd_write,  // dbg cmd is write
-   input logic [1:0]           dbg_cmd_type,   // dbg type
-   input logic [31:0]          dbg_cmd_addr,   // expand to 31:0
+   input logic                 dbg_cmd_write,                      // dbg cmd is write
+   input logic [1:0]           dbg_cmd_type,                       // dbg type
+   input logic [31:0]          dbg_cmd_addr,                       // expand to 31:0
 
-   input el2_br_pkt_t i0_brp,                      // i0 branch packet from aligner
-   input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] ifu_i0_bp_index, // BP index
-   input logic [pt.BHT_GHR_SIZE-1:0] ifu_i0_bp_fghr, // BP FGHR
-   input logic [pt.BTB_BTAG_SIZE-1:0] ifu_i0_bp_btag, // BP tag
-   input logic       ifu_i0_pc4,                   // i0 is 4B inst else 2B
-   input logic       ifu_i0_valid,                 // i0 valid from ifu
-   input logic       ifu_i0_icaf,                  // i0 instruction access fault
-   input logic [1:0] ifu_i0_icaf_type,         // i0 instruction access fault type
+   input el2_br_pkt_t i0_brp,                                     // i0 branch packet from aligner
+   input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] ifu_i0_bp_index,    // BP index
+   input logic [pt.BHT_GHR_SIZE-1:0] ifu_i0_bp_fghr,               // BP FGHR
+   input logic [pt.BTB_BTAG_SIZE-1:0] ifu_i0_bp_btag,              // BP tag
+   input logic [$clog2(pt.BTB_SIZE)-1:0] ifu_i0_fa_index,          // Fully associt btb index
 
-   input logic   ifu_i0_icaf_f1,               // i0 has access fault on second fetch group
-   input logic   ifu_i0_dbecc,                 // i0 double-bit error
-   input logic [31:0]  ifu_i0_instr,           // i0 instruction from the aligner
-   input logic [31:1]  ifu_i0_pc,              // i0 pc from the aligner
+   input logic       ifu_i0_pc4,                                   // i0 is 4B inst else 2B
+   input logic       ifu_i0_valid,                                 // i0 valid from ifu
+   input logic       ifu_i0_icaf,                                  // i0 instruction access fault
+   input logic [1:0] ifu_i0_icaf_type,                             // i0 instruction access fault type
+
+   input logic   ifu_i0_icaf_second,                               // i0 has access fault on second 2B of 4B inst
+   input logic   ifu_i0_dbecc,                                     // i0 double-bit error
+   input logic [31:0]  ifu_i0_instr,                               // i0 instruction from the aligner
+   input logic [31:1]  ifu_i0_pc,                                  // i0 pc from the aligner
 
 
-   output logic dec_ib0_valid_d,               // ib0 valid
+   output logic dec_ib0_valid_d,                                   // ib0 valid
+   output logic dec_debug_valid_d,                                 // Debug read or write at D-stage
 
 
-   output logic [31:0] dec_i0_instr_d,         // i0 inst at decode
+   output logic [31:0] dec_i0_instr_d,                             // i0 inst at decode
 
-   output logic [31:1] dec_i0_pc_d,            // i0 pc at decode
+   output logic [31:1] dec_i0_pc_d,                                // i0 pc at decode
 
-   output logic dec_i0_pc4_d,                  // i0 is 4B inst else 2B
+   output logic dec_i0_pc4_d,                                      // i0 is 4B inst else 2B
 
-   output el2_br_pkt_t dec_i0_brp,            // i0 branch packet at decode
-   output logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] dec_i0_bp_index,            // i0 branch index
-   output logic [pt.BHT_GHR_SIZE-1:0] dec_i0_bp_fghr, // BP FGHR
-   output logic [pt.BTB_BTAG_SIZE-1:0] dec_i0_bp_btag, // BP tag
-   output logic dec_i0_icaf_d,                 // i0 instruction access fault at decode
-   output logic dec_i0_icaf_f1_d,              // i0 instruction access fault at decode for f1 fetch group
-   output logic [1:0] dec_i0_icaf_type_d,      // i0 instruction access fault type
-   output logic dec_i0_dbecc_d,                // i0 double-bit error at decode
-   output logic dec_debug_wdata_rs1_d,         // put debug write data onto rs1 source: machine is halted
+   output el2_br_pkt_t dec_i0_brp,                                // i0 branch packet at decode
+   output logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] dec_i0_bp_index,   // i0 branch index
+   output logic [pt.BHT_GHR_SIZE-1:0] dec_i0_bp_fghr,              // BP FGHR
+   output logic [pt.BTB_BTAG_SIZE-1:0] dec_i0_bp_btag,             // BP tag
+   output logic [$clog2(pt.BTB_SIZE)-1:0] dec_i0_bp_fa_index,          // Fully associt btb index
 
-   output logic dec_debug_fence_d             // debug fence inst
+   output logic dec_i0_icaf_d,                                     // i0 instruction access fault at decode
+   output logic dec_i0_icaf_second_d,                              // i0 instruction access fault on second 2B of 4B inst
+   output logic [1:0] dec_i0_icaf_type_d,                          // i0 instruction access fault type
+   output logic dec_i0_dbecc_d,                                    // i0 double-bit error at decode
+   output logic dec_debug_wdata_rs1_d,                             // put debug write data onto rs1 source: machine is halted
+
+   output logic dec_debug_fence_d                                  // debug fence inst
 
    );
 
@@ -78,12 +83,12 @@ import el2_pkg::*;
 
    logic [34:0]  ifu_i0_pcdata, pc0;
 
-   assign ifu_i0_pcdata[34:0] = { ifu_i0_icaf_f1, ifu_i0_dbecc, ifu_i0_icaf,
+   assign ifu_i0_pcdata[34:0] = { ifu_i0_icaf_second, ifu_i0_dbecc, ifu_i0_icaf,
                                   ifu_i0_pc[31:1], ifu_i0_pc4 };
 
    assign pc0[34:0] = ifu_i0_pcdata[34:0];
 
-   assign dec_i0_icaf_f1_d = pc0[34];   // icaf's can only decode as i0
+   assign dec_i0_icaf_second_d = pc0[34];   // icaf's can only decode as i0
 
    assign dec_i0_dbecc_d = pc0[33];
 
@@ -146,11 +151,14 @@ import el2_pkg::*;
 
    assign dec_ib0_valid_d = ifu_i0_valid | debug_valid;
 
+   assign dec_debug_valid_d = debug_valid;
+
    assign dec_i0_instr_d[31:0] = ib0[31:0];
 
    assign dec_i0_brp = i0_brp;
    assign dec_i0_bp_index = ifu_i0_bp_index;
    assign dec_i0_bp_fghr = ifu_i0_bp_fghr;
    assign dec_i0_bp_btag = ifu_i0_bp_btag;
+   assign dec_i0_bp_fa_index = ifu_i0_fa_index;
 
 endmodule

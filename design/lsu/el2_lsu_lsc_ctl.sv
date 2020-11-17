@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2020 Western Digital Corporation or it's affiliates.
+// Copyright 2020 Western Digital Corporation or its affiliates.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,38 +30,43 @@ import el2_pkg::*;
 #(
 `include "el2_param.vh"
  )(
-   input logic               rst_l,
+   input logic                rst_l,                     // reset, active low
+   input logic                clk_override,              // Override non-functional clock gating
+   input logic                clk,                       // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.
 
    // clocks per pipe
-   input logic               lsu_c1_m_clk,
-   input logic               lsu_c1_r_clk,
-   input logic               lsu_c2_m_clk,
-   input logic               lsu_c2_r_clk,
-   input logic               lsu_store_c1_m_clk,
+   input logic                lsu_c1_m_clk,
+   input logic                lsu_c1_r_clk,
+   input logic                lsu_c2_m_clk,
+   input logic                lsu_c2_r_clk,
+   input logic                lsu_store_c1_m_clk,
 
-   input  logic [31:0]        lsu_ld_data_r,
-   input  logic [31:0]        lsu_ld_data_corr_r,        // ECC corrected data
-   input logic                lsu_single_ecc_error_r,
-   input logic                lsu_double_ecc_error_r,
+   input logic [31:0]         lsu_ld_data_r,             // Load data R-stage
+   input logic [31:0]         lsu_ld_data_corr_r,        // ECC corrected data R-stage
+   input logic                lsu_single_ecc_error_r,    // ECC single bit error R-stage
+   input logic                lsu_double_ecc_error_r,    // ECC double bit error R-stage
 
-   input  logic [31:0]        lsu_ld_data_m,
-   input logic                lsu_single_ecc_error_m,
-   input logic                lsu_double_ecc_error_m,
+   input logic [31:0]         lsu_ld_data_m,             // Load data M-stage
+   input logic                lsu_single_ecc_error_m,    // ECC single bit error M-stage
+   input logic                lsu_double_ecc_error_m,    // ECC double bit error M-stage
 
-   input logic                flush_m_up,
-   input logic                flush_r,
+   input logic                flush_m_up,                // Flush M and D stage
+   input logic                flush_r,                   // Flush R-stage
+   input logic                ldst_dual_d,               // load/store is unaligned at 32 bit boundary D-stage
+   input logic                ldst_dual_m,               // load/store is unaligned at 32 bit boundary M-stage
+   input logic                ldst_dual_r,               // load/store is unaligned at 32 bit boundary R-stage
 
-   input logic [31:0]         exu_lsu_rs1_d,        // address
-   input logic [31:0]         exu_lsu_rs2_d,        // store data
+   input logic [31:0]         exu_lsu_rs1_d,             // address
+   input logic [31:0]         exu_lsu_rs2_d,             // store data
 
-   input el2_lsu_pkt_t       lsu_p,                // lsu control packet
-   input logic                dec_lsu_valid_raw_d,  // Raw valid for address computation
-   input logic [11:0]         dec_lsu_offset_d,
+   input el2_lsu_pkt_t       lsu_p,                     // lsu control packet
+   input logic                dec_lsu_valid_raw_d,       // Raw valid for address computation
+   input logic [11:0]         dec_lsu_offset_d,          // 12b offset for load/store addresses
 
-   input  logic [31:0]        picm_mask_data_m,
-   input  logic [31:0]        bus_read_data_m,
-   output logic [31:0]        lsu_result_m,
-   output logic [31:0]        lsu_result_corr_r,     // This is the ECC corrected data going to RF
+   input  logic [31:0]        picm_mask_data_m,          // PIC data M-stage
+   input  logic [31:0]        bus_read_data_m,           // the bus return data
+   output logic [31:0]        lsu_result_m,              // lsu load data
+   output logic [31:0]        lsu_result_corr_r,         // This is the ECC corrected data going to RF
    // lsu address down the pipe
    output logic [31:0]        lsu_addr_d,
    output logic [31:0]        lsu_addr_m,
@@ -73,15 +78,15 @@ import el2_pkg::*;
    // store data down the pipe
    output logic [31:0]        store_data_m,
 
-   input  logic [31:0]         dec_tlu_mrac_ff,
-   output logic                lsu_exc_m,
-   output logic                is_sideeffects_m,
-   output logic                lsu_commit_r,
-   output logic                lsu_single_ecc_error_incr,
-   output el2_lsu_error_pkt_t lsu_error_pkt_r,
+   input  logic [31:0]         dec_tlu_mrac_ff,          // CSR for memory region control
+   output logic                lsu_exc_m,                // Access or misaligned fault
+   output logic                is_sideeffects_m,         // is sideffects space
+   output logic                lsu_commit_r,             // lsu instruction in r commits
+   output logic                lsu_single_ecc_error_incr,// LSU inc SB error counter
+   output el2_lsu_error_pkt_t lsu_error_pkt_r,          // lsu exception packet
 
-   output logic [31:1]         lsu_fir_addr,        // fast interrupt address
-   output logic [1:0]          lsu_fir_error,       // Error during fast interrupt lookup
+   output logic [31:1]         lsu_fir_addr,             // fast interrupt address
+   output logic [1:0]          lsu_fir_error,            // Error during fast interrupt lookup
 
    // address in dccm/pic/external per pipe stage
    output logic               addr_in_dccm_d,
@@ -106,10 +111,11 @@ import el2_pkg::*;
    output el2_lsu_pkt_t      lsu_pkt_m,
    output el2_lsu_pkt_t      lsu_pkt_r,
 
-   input  logic               scan_mode
+   input  logic               scan_mode                  // Scan mode
 
    );
 
+   logic [31:3]        end_addr_pre_m, end_addr_pre_r;
    logic [31:0]        full_addr_d;
    logic [31:0]        full_end_addr_d;
    logic [31:0]        lsu_rs1_d;
@@ -147,7 +153,6 @@ import el2_pkg::*;
    assign rs1_d[31:0] = (lsu_pkt_d.load_ldst_bypass_d) ? lsu_result_m[31:0] : rs1_d_raw[31:0];
 
    // generate the ls address
-   // need to refine this is memory is only 128KB
    rvlsadder   lsadder  (.rs1(rs1_d[31:0]),
                        .offset(offset_d[11:0]),
                        .dout(full_addr_d[31:0])
@@ -205,8 +210,10 @@ import el2_pkg::*;
 
       assign lsu_fir_error_m[1:0] = fir_nondccm_access_error_m ? 2'b11 : (fir_dccm_access_error_m ? 2'b10 : ((lsu_pkt_m.fast_int & lsu_double_ecc_error_m) ? 2'b01 : 2'b00));
 
-      rvdff #($bits(el2_lsu_error_pkt_t)) lsu_error_pkt_rff(.*, .din(lsu_error_pkt_m),      .dout(lsu_error_pkt_r),    .clk(lsu_c2_r_clk));
-      rvdff #(2)                           lsu_fir_error_rff(.*, .din(lsu_fir_error_m[1:0]), .dout(lsu_fir_error[1:0]), .clk(lsu_c2_r_clk));
+      rvdff  #(1)                             lsu_exc_valid_rff       (.*, .din(lsu_error_pkt_m.exc_valid),                        .dout(lsu_error_pkt_r.exc_valid),                        .clk(lsu_c2_r_clk));
+      rvdff  #(1)                             lsu_single_ecc_error_rff(.*, .din(lsu_error_pkt_m.single_ecc_error),                 .dout(lsu_error_pkt_r.single_ecc_error),                 .clk(lsu_c2_r_clk));
+      rvdffe #($bits(el2_lsu_error_pkt_t)-2) lsu_error_pkt_rff       (.*, .din(lsu_error_pkt_m[$bits(el2_lsu_error_pkt_t)-1:2]), .dout(lsu_error_pkt_r[$bits(el2_lsu_error_pkt_t)-1:2]), .en(lsu_error_pkt_m.exc_valid | lsu_error_pkt_m.single_ecc_error | clk_override));
+      rvdff #(2)                              lsu_fir_error_rff       (.*, .din(lsu_fir_error_m[1:0]),                             .dout(lsu_fir_error[1:0]),                               .clk(lsu_c2_r_clk));
    end
 
    //Create DMA packet
@@ -247,7 +254,7 @@ import el2_pkg::*;
       assign lsu_ld_datafn_r[31:0]  = addr_external_r ? bus_read_data_r[31:0] : lsu_ld_data_r[31:0];
       assign lsu_ld_datafn_corr_r[31:0]  = addr_external_r ? bus_read_data_r[31:0] : lsu_ld_data_corr_r[31:0];
 
-      // this is really R stage but don't want to make all the changes to support M,R buses
+      // this is really R stage signal
       assign lsu_result_m[31:0] = ({32{ lsu_pkt_r.unsign & lsu_pkt_r.by  }} & {24'b0,lsu_ld_datafn_r[7:0]}) |
                                   ({32{ lsu_pkt_r.unsign & lsu_pkt_r.half}} & {16'b0,lsu_ld_datafn_r[15:0]}) |
                                   ({32{~lsu_pkt_r.unsign & lsu_pkt_r.by  }} & {{24{  lsu_ld_datafn_r[7]}}, lsu_ld_datafn_r[7:0]}) |
@@ -304,8 +311,14 @@ import el2_pkg::*;
    rvdff #(32) samff (.*, .din(lsu_addr_d[31:0]), .dout(lsu_addr_m[31:0]), .clk(lsu_c1_m_clk));
    rvdff #(32) sarff (.*, .din(lsu_addr_m[31:0]), .dout(lsu_addr_r[31:0]), .clk(lsu_c1_r_clk));
 
-   rvdff #(32) end_addr_mff (.*, .din(end_addr_d[31:0]), .dout(end_addr_m[31:0]), .clk(lsu_c1_m_clk));
-   rvdff #(32) end_addr_rff (.*, .din(end_addr_m[31:0]), .dout(end_addr_r[31:0]), .clk(lsu_c1_r_clk));
+   assign end_addr_m[31:3] = ldst_dual_m ? end_addr_pre_m[31:3] : lsu_addr_m[31:3];       // This is for power saving
+   assign end_addr_r[31:3] = ldst_dual_r ? end_addr_pre_r[31:3] : lsu_addr_r[31:3];       // This is for power saving
+
+   rvdffe #(29) end_addr_hi_mff (.*, .din(end_addr_d[31:3]), .dout(end_addr_pre_m[31:3]), .en((lsu_pkt_d.valid & ldst_dual_d) | clk_override));
+   rvdffe #(29) end_addr_hi_rff (.*, .din(end_addr_m[31:3]), .dout(end_addr_pre_r[31:3]), .en((lsu_pkt_m.valid & ldst_dual_m) | clk_override));
+
+   rvdff #(3)  end_addr_lo_mff (.*, .din(end_addr_d[2:0]), .dout(end_addr_m[2:0]), .clk(lsu_c1_m_clk));
+   rvdff #(3)  end_addr_lo_rff (.*, .din(end_addr_m[2:0]), .dout(end_addr_r[2:0]), .clk(lsu_c1_r_clk));
 
    rvdff #(1) addr_in_dccm_mff(.din(addr_in_dccm_d), .dout(addr_in_dccm_m), .clk(lsu_c1_m_clk), .*);
    rvdff #(1) addr_in_dccm_rff(.din(addr_in_dccm_m), .dout(addr_in_dccm_r), .clk(lsu_c1_r_clk), .*);
@@ -323,6 +336,6 @@ import el2_pkg::*;
    rvdff #(1) fir_dccm_access_error_mff    (.din(fir_dccm_access_error_d),    .dout(fir_dccm_access_error_m),    .clk(lsu_c1_m_clk), .*);
    rvdff #(1) fir_nondccm_access_error_mff (.din(fir_nondccm_access_error_d), .dout(fir_nondccm_access_error_m), .clk(lsu_c1_m_clk), .*);
 
-   rvdff #(32) bus_read_data_r_ff (.*, .din(bus_read_data_m[31:0]), .dout(bus_read_data_r[31:0]), .clk(lsu_c1_r_clk));
+   rvdffe #(32) bus_read_data_r_ff (.*, .din(bus_read_data_m[31:0]), .dout(bus_read_data_r[31:0]), .en(addr_external_m | clk_override));
 
 endmodule

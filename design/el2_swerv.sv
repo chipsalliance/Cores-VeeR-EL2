@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2020 Western Digital Corporation or it's affiliates.
+// Copyright 2020 Western Digital Corporation or its affiliates.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,13 +34,17 @@ import el2_pkg::*;
    input logic [31:1]           nmi_vec,
    output logic                 core_rst_l,   // This is "rst_l | dbg_rst_l"
 
+   output logic                 active_l2clk,
+   output logic                 free_l2clk,
+
    output logic [31:0] trace_rv_i_insn_ip,
    output logic [31:0] trace_rv_i_address_ip,
-   output logic [1:0]  trace_rv_i_valid_ip,
-   output logic [1:0]  trace_rv_i_exception_ip,
+   output logic   trace_rv_i_valid_ip,
+   output logic   trace_rv_i_exception_ip,
    output logic [4:0]  trace_rv_i_ecause_ip,
-   output logic [1:0]  trace_rv_i_interrupt_ip,
+   output logic   trace_rv_i_interrupt_ip,
    output logic [31:0] trace_rv_i_tval_ip,
+
 
    output logic                 dccm_clk_override,
    output logic                 icm_clk_override,
@@ -304,6 +308,7 @@ import el2_pkg::*;
    output logic [1:0]                   dma_axi_rresp,
    output logic                         dma_axi_rlast,
 
+
  //// AHB LITE BUS
    output logic [31:0]           haddr,
    output logic [2:0]            hburst,
@@ -366,16 +371,11 @@ import el2_pkg::*;
    input   logic                 dbg_bus_clk_en,
    input   logic                 dma_bus_clk_en,
 
-
-   // Debug ports
-   input logic                   dmi_reg_en,                // read or write
-   input logic [6:0]             dmi_reg_addr,              // address of DM register
-   input logic                   dmi_reg_wr_en,             // write instruction
-   input logic [31:0]            dmi_reg_wdata,             // write data
-   // outputs from the dbg back to jtag
-   output logic [31:0]           dmi_reg_rdata,
-   input logic                   dmi_hard_reset,
-
+   input logic                  dmi_reg_en,                // read or write
+   input logic [6:0]            dmi_reg_addr,              // address of DM register
+   input logic                  dmi_reg_wr_en,             // write instruction
+   input logic [31:0]           dmi_reg_wdata,             // write data
+   output logic [31:0]          dmi_reg_rdata,
 
    input logic [pt.PIC_TOTAL_INT:1]           extintsrc_req,
    input logic                   timer_int,
@@ -385,8 +385,6 @@ import el2_pkg::*;
 
 
 
-
-`define ADDRWIDTH 32
 
    logic [63:0]                  hwdata_nc;
    //----------------------------------------------------------------------
@@ -517,6 +515,7 @@ import el2_pkg::*;
    logic [1:0]                   dma_axi_arburst_int;
    logic                         dma_axi_rready_int;
 
+
 // Icache debug
    logic [70:0] ifu_ic_debug_rd_data; // diagnostic icache read data
    logic ifu_ic_debug_rd_data_valid; // diagnostic icache read data valid
@@ -528,8 +527,7 @@ import el2_pkg::*;
    logic  [31:0] gpr_i0_rs1_d;
    logic  [31:0] gpr_i0_rs2_d;
 
-   logic [31:0] dec_i0_rs1_bypass_data_d;
-   logic [31:0] dec_i0_rs2_bypass_data_d;
+   logic [31:0] dec_i0_result_r;
    logic [31:0] exu_i0_result_x;
    logic [31:1] exu_i0_pc_x;
    logic [31:1] exu_npc_r;
@@ -546,10 +544,11 @@ import el2_pkg::*;
    logic         dec_i0_select_pc_d;
 
    logic [31:1] dec_i0_pc_d;
-   logic [1:0]  dec_i0_rs1_bypass_en_d;
-   logic [1:0]  dec_i0_rs2_bypass_en_d;
+   logic [3:0]  dec_i0_rs1_bypass_en_d;
+   logic [3:0]  dec_i0_rs2_bypass_en_d;
 
    logic         dec_i0_alu_decode_d;
+   logic         dec_i0_branch_d;
 
    logic         ifu_miss_state_idle;
    logic         dec_tlu_flush_noredir_r;
@@ -568,6 +567,7 @@ import el2_pkg::*;
 
 
    el2_lsu_pkt_t    lsu_p;
+   logic             dec_qual_lsu_d;
 
    logic        dec_lsu_valid_raw_d;
    logic [11:0] dec_lsu_offset_d;
@@ -582,6 +582,7 @@ import el2_pkg::*;
    logic         lsu_load_stall_any;       // This is for blocking loads
    logic         lsu_store_stall_any;      // This is for blocking stores
    logic         lsu_idle_any;             // doesn't include DMA
+   logic         lsu_active;               // lsu is active. used for clock
 
 
    logic [31:1]  lsu_fir_addr;        // fast interrupt address
@@ -597,11 +598,13 @@ import el2_pkg::*;
    logic [31:0]                          lsu_nonblock_load_data;
 
    logic        dec_csr_ren_d;
+   logic [31:0] dec_csr_rddata_d;
 
    logic [31:0] exu_csr_rs1_x;
 
    logic        dec_tlu_i0_commit_cmt;
    logic        dec_tlu_flush_lower_r;
+   logic        dec_tlu_flush_lower_wb;
    logic        dec_tlu_i0_kill_writeb_r;     // I0 is flushed, don't writeback any results to arch state
    logic        dec_tlu_fence_i_r;            // flush is a fence_i rfnpc, flush icache
 
@@ -674,7 +677,7 @@ import el2_pkg::*;
    logic [1:0]  ifu_i0_icaf_type;
 
 
-   logic        ifu_i0_icaf_f1;
+   logic        ifu_i0_icaf_second;
    logic        ifu_i0_dbecc;
    logic        iccm_dma_sb_error;
 
@@ -683,6 +686,9 @@ import el2_pkg::*;
    logic [pt.BHT_GHR_SIZE-1:0] ifu_i0_bp_fghr;
    logic [pt.BTB_BTAG_SIZE-1:0] ifu_i0_bp_btag;
 
+   logic [$clog2(pt.BTB_SIZE)-1:0] ifu_i0_fa_index;
+   logic [$clog2(pt.BTB_SIZE)-1:0] dec_fa_error_index; // Fully associative btb error index
+
 
    el2_predict_pkt_t dec_i0_predict_p_d;
 
@@ -690,7 +696,7 @@ import el2_pkg::*;
    logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] i0_predict_index_d;     // DEC predict index
    logic [pt.BTB_BTAG_SIZE-1:0] i0_predict_btag_d;               // DEC predict branch tag
 
-      // PIC ports
+   // PIC ports
    logic                  picm_wren;
    logic                  picm_rden;
    logic                  picm_mken;
@@ -698,7 +704,6 @@ import el2_pkg::*;
    logic [31:0]           picm_wraddr;
    logic [31:0]           picm_wr_data;
    logic [31:0]           picm_rd_data;
-
 
    // feature disable from mfdc
    logic  dec_tlu_external_ldfwd_disable; // disable external load forwarding
@@ -716,6 +721,8 @@ import el2_pkg::*;
    logic  dec_tlu_dccm_clk_override;
    logic  dec_tlu_icm_clk_override;
 
+   logic  dec_tlu_picio_clk_override;
+
    assign        dccm_clk_override = dec_tlu_dccm_clk_override;   // dccm memory
    assign        icm_clk_override = dec_tlu_icm_clk_override;    // icache/iccm memory
 
@@ -723,7 +730,7 @@ import el2_pkg::*;
 
    logic [31:0]            dbg_cmd_addr;              // the address of the debug command to used by the core
    logic [31:0]            dbg_cmd_wrdata;            // If the debug command is a write command, this has the data to be written to the CSR/GPR
-   logic                   dbg_cmd_valid;             // command is being driven by the dbg module. One pulse. Only dirven when core_halted has been seen
+   logic                   dbg_cmd_valid;             // commad is being driven by the dbg module. One pulse. Only dirven when core_halted has been seen
    logic                   dbg_cmd_write;             // 1: write command; 0: read_command
    logic [1:0]             dbg_cmd_type;              // 0:gpr 1:csr 2: memory
    logic [1:0]             dbg_cmd_size;              // size of the abstract mem access debug command
@@ -746,11 +753,11 @@ import el2_pkg::*;
    logic                   dec_dbg_cmd_done;          // This will be treated like a valid signal
    logic                   dec_dbg_cmd_fail;          // Abstract command failed
    logic                   dec_tlu_mpc_halted_only;   // Only halted due to MPC
-   logic                   dec_tlu_dbg_halted;            // The core has finished the queiscing sequence. Sticks this signal high
+   logic                   dec_tlu_dbg_halted;        // The core has finished the queiscing sequence. Sticks this signal high
    logic                   dec_tlu_resume_ack;
    logic                   dec_tlu_debug_mode;        // Core is in debug mode
    logic                   dec_debug_wdata_rs1_d;
-   logic                   dec_tlu_force_halt;  // halt has been forced
+   logic                   dec_tlu_force_halt;        // halt has been forced
 
    logic [1:0]             dec_data_en;
    logic [1:0]             dec_ctl_en;
@@ -776,7 +783,8 @@ import el2_pkg::*;
    logic                   ifu_pmu_bus_trxn;
 
    logic                   active_state;
-   logic                   free_clk, active_clk;
+   logic                   free_clk;
+   logic                   active_clk;
    logic                   dec_pause_state_cg;
 
    logic                   lsu_nonblock_load_data_error;
@@ -787,24 +795,37 @@ import el2_pkg::*;
    logic [31:2]            dec_tlu_meihap;
    logic                   dec_extint_stall;
 
-   el2_trace_pkt_t  rv_trace_pkt;
+   el2_trace_pkt_t  trace_rv_trace_pkt;
 
 
    logic                   lsu_fastint_stall_any;
-
 
    logic [7:0]  pic_claimid;
    logic [3:0]  pic_pl, dec_tlu_meicurpl, dec_tlu_meipt;
    logic        mexintpend;
    logic        mhwakeup;
 
+   logic        dma_active;
 
-   //assign lsu_fastint_stall_any = 1'b0;
 
-   assign active_state = (~dec_pause_state_cg | dec_tlu_flush_lower_r)  | dec_tlu_misc_clk_override;
+   logic        pause_state;
+   logic        halt_state;
 
-   rvoclkhdr free_cg   ( .en(1'b1),         .l1clk(free_clk), .* );
-   rvoclkhdr active_cg ( .en(active_state), .l1clk(active_clk), .* );
+   logic        dec_tlu_core_empty;
+
+   assign pause_state = dec_pause_state_cg & ~(dma_active | lsu_active) & dec_tlu_core_empty;
+
+   assign halt_state = o_cpu_halt_status & ~(dma_active | lsu_active);
+
+
+   assign active_state = (~(halt_state | pause_state) | dec_tlu_flush_lower_r | dec_tlu_flush_lower_wb)  | dec_tlu_misc_clk_override;
+
+   rvoclkhdr free_cg2   ( .clk(clk), .en(1'b1),         .l1clk(free_l2clk), .* );
+   rvoclkhdr active_cg2 ( .clk(clk), .en(active_state), .l1clk(active_l2clk), .* );
+
+// all other clock headers are 1st level
+   rvoclkhdr free_cg1   ( .clk(free_l2clk),     .en(1'b1), .l1clk(free_clk), .* );
+   rvoclkhdr active_cg1 ( .clk(active_l2clk),   .en(1'b1), .l1clk(active_clk), .* );
 
 
    assign core_dbg_cmd_done = dma_dbg_cmd_done | dec_dbg_cmd_done;
@@ -812,6 +833,8 @@ import el2_pkg::*;
    assign core_dbg_rddata[31:0] = dma_dbg_cmd_done ? dma_dbg_rddata[31:0] : dec_dbg_rddata[31:0];
 
    el2_dbg #(.pt(pt)) dbg (
+      .rst_l(core_rst_l),
+      .clk(free_l2clk),
       .clk_override(dec_tlu_misc_clk_override),
 
       // AXI signals
@@ -824,111 +847,124 @@ import el2_pkg::*;
       .sb_axi_rvalid(sb_axi_rvalid_int),
       .sb_axi_rdata(sb_axi_rdata_int[63:0]),
       .sb_axi_rresp(sb_axi_rresp_int[1:0]),
-
       .*
    );
 
-`ifdef ASSERT_ON
+`ifdef RV_ASSERT_ON
       assert_fetch_indbghalt: assert #0 (~(ifu.ifc_fetch_req_f & dec.tlu.dbg_tlu_halted_f & ~dec.tlu.dcsr_single_step_running)) else $display("ERROR: Fetching in dBG halt!");
 `endif
 
-   assign core_rst_l = rst_l & (dbg_core_rst_l | scan_mode);
+   // -----------------   DEBUG END -----------------------------
 
+   assign core_rst_l = rst_l & (dbg_core_rst_l | scan_mode);
    // fetch
    el2_ifu #(.pt(pt)) ifu (
-      .rst_l(core_rst_l),
-      .dec_tlu_flush_err_wb       (dec_tlu_flush_err_r      ),
-      .dec_tlu_flush_noredir_wb   (dec_tlu_flush_noredir_r  ),
-      .dec_tlu_fence_i_wb         (dec_tlu_fence_i_r        ),
-      .dec_tlu_flush_leak_one_wb  (dec_tlu_flush_leak_one_r ),
-      .dec_tlu_flush_lower_wb     (dec_tlu_flush_lower_r    ),
+                            .clk(active_l2clk),
+                            .rst_l(core_rst_l),
+                            .dec_tlu_flush_err_wb       (dec_tlu_flush_err_r      ),
+                            .dec_tlu_flush_noredir_wb   (dec_tlu_flush_noredir_r  ),
+                            .dec_tlu_fence_i_wb         (dec_tlu_fence_i_r        ),
+                            .dec_tlu_flush_leak_one_wb  (dec_tlu_flush_leak_one_r ),
+                            .dec_tlu_flush_lower_wb     (dec_tlu_flush_lower_r    ),
 
-      // AXI signals
-      .ifu_axi_arready(ifu_axi_arready_int),
-      .ifu_axi_rvalid(ifu_axi_rvalid_int),
-      .ifu_axi_rid(ifu_axi_rid_int[pt.IFU_BUS_TAG-1:0]),
-      .ifu_axi_rdata(ifu_axi_rdata_int[63:0]),
-      .ifu_axi_rresp(ifu_axi_rresp_int[1:0]),
+                            // AXI signals
+                            .ifu_axi_arready(ifu_axi_arready_int),
+                            .ifu_axi_rvalid(ifu_axi_rvalid_int),
+                            .ifu_axi_rid(ifu_axi_rid_int[pt.IFU_BUS_TAG-1:0]),
+                            .ifu_axi_rdata(ifu_axi_rdata_int[63:0]),
+                            .ifu_axi_rresp(ifu_axi_rresp_int[1:0]),
 
-       .*
-   );
+                            .*
+                            );
 
 
    el2_dec #(.pt(pt)) dec (
-            .dbg_cmd_wrdata(dbg_cmd_wrdata[1:0]),
-            .rst_l(core_rst_l),
-            .*
-            );
+                            .clk(active_l2clk),
+                            .dbg_cmd_wrdata(dbg_cmd_wrdata[1:0]),
+                            .rst_l(core_rst_l),
+                            .*
+                            );
 
    el2_exu #(.pt(pt)) exu (
-      .rst_l(core_rst_l),
-      .*
-   );
+                            .clk(active_l2clk),
+                            .rst_l(core_rst_l),
+                            .*
+                            );
 
    el2_lsu #(.pt(pt)) lsu (
-      .rst_l(core_rst_l),
-      .clk_override(dec_tlu_lsu_clk_override),
-      .dec_tlu_i0_kill_writeb_r(dec_tlu_i0_kill_writeb_r),
+                            .clk(active_l2clk),
+                            .rst_l(core_rst_l),
+                            .clk_override(dec_tlu_lsu_clk_override),
+                            .dec_tlu_i0_kill_writeb_r(dec_tlu_i0_kill_writeb_r),
 
-      // AXI signals
-      .lsu_axi_awready(lsu_axi_awready_int),
-      .lsu_axi_wready(lsu_axi_wready_int),
-      .lsu_axi_bvalid(lsu_axi_bvalid_int),
-      .lsu_axi_bid(lsu_axi_bid_int[pt.LSU_BUS_TAG-1:0]),
-      .lsu_axi_bresp(lsu_axi_bresp_int[1:0]),
+                            // AXI signals
+                            .lsu_axi_awready(lsu_axi_awready_int),
+                            .lsu_axi_wready(lsu_axi_wready_int),
+                            .lsu_axi_bvalid(lsu_axi_bvalid_int),
+                            .lsu_axi_bid(lsu_axi_bid_int[pt.LSU_BUS_TAG-1:0]),
+                            .lsu_axi_bresp(lsu_axi_bresp_int[1:0]),
 
-      .lsu_axi_arready(lsu_axi_arready_int),
-      .lsu_axi_rvalid(lsu_axi_rvalid_int),
-      .lsu_axi_rid(lsu_axi_rid_int[pt.LSU_BUS_TAG-1:0]),
-      .lsu_axi_rdata(lsu_axi_rdata_int[63:0]),
-      .lsu_axi_rresp(lsu_axi_rresp_int[1:0]),
-      .lsu_axi_rlast(lsu_axi_rlast_int),
+                            .lsu_axi_arready(lsu_axi_arready_int),
+                            .lsu_axi_rvalid(lsu_axi_rvalid_int),
+                            .lsu_axi_rid(lsu_axi_rid_int[pt.LSU_BUS_TAG-1:0]),
+                            .lsu_axi_rdata(lsu_axi_rdata_int[63:0]),
+                            .lsu_axi_rresp(lsu_axi_rresp_int[1:0]),
+                            .lsu_axi_rlast(lsu_axi_rlast_int),
 
-      .*
+                            .*
 
-   );
+                            );
+
 
    el2_pic_ctrl  #(.pt(pt)) pic_ctrl_inst (
-                  .clk_override(dec_tlu_pic_clk_override),
-                  .picm_mken (picm_mken),
-                  .extintsrc_req({extintsrc_req[pt.PIC_TOTAL_INT:1],1'b0}),
-                  .pl(pic_pl[3:0]),
-                  .claimid(pic_claimid[7:0]),
-                  .meicurpl(dec_tlu_meicurpl[3:0]),
-                  .meipt(dec_tlu_meipt[3:0]),
-                  .rst_l(core_rst_l),
-                     .*);
+                                            .clk(free_l2clk),
+                                            .clk_override(dec_tlu_pic_clk_override),
+                                            .io_clk_override(dec_tlu_picio_clk_override),
+                                            .picm_mken (picm_mken),
+                                            .extintsrc_req({extintsrc_req[pt.PIC_TOTAL_INT:1],1'b0}),
+                                            .pl(pic_pl[3:0]),
+                                            .claimid(pic_claimid[7:0]),
+                                            .meicurpl(dec_tlu_meicurpl[3:0]),
+                                            .meipt(dec_tlu_meipt[3:0]),
+                                            .rst_l(core_rst_l),
+                                            .*);
 
    el2_dma_ctrl #(.pt(pt)) dma_ctrl (
-      .rst_l(core_rst_l),
-      .clk_override(dec_tlu_misc_clk_override),
+                                      .clk(free_l2clk),
+                                      .rst_l(core_rst_l),
+                                      .clk_override(dec_tlu_misc_clk_override),
 
-      // AXI signals
-      .dma_axi_awvalid(dma_axi_awvalid_int),
-      .dma_axi_awid(dma_axi_awid_int[pt.DMA_BUS_TAG-1:0]),
-      .dma_axi_awaddr(dma_axi_awaddr_int[31:0]),
-      .dma_axi_awsize(dma_axi_awsize_int[2:0]),
-      .dma_axi_wvalid(dma_axi_wvalid_int),
-      .dma_axi_wdata(dma_axi_wdata_int[63:0]),
-      .dma_axi_wstrb(dma_axi_wstrb_int[7:0]),
-      .dma_axi_bready(dma_axi_bready_int),
+                                      // AXI signals
+                                      .dma_axi_awvalid(dma_axi_awvalid_int),
+                                      .dma_axi_awid(dma_axi_awid_int[pt.DMA_BUS_TAG-1:0]),
+                                      .dma_axi_awaddr(dma_axi_awaddr_int[31:0]),
+                                      .dma_axi_awsize(dma_axi_awsize_int[2:0]),
+                                      .dma_axi_wvalid(dma_axi_wvalid_int),
+                                      .dma_axi_wdata(dma_axi_wdata_int[63:0]),
+                                      .dma_axi_wstrb(dma_axi_wstrb_int[7:0]),
+                                      .dma_axi_bready(dma_axi_bready_int),
 
-      .dma_axi_arvalid(dma_axi_arvalid_int),
-      .dma_axi_arid(dma_axi_arid_int[pt.DMA_BUS_TAG-1:0]),
-      .dma_axi_araddr(dma_axi_araddr_int[31:0]),
-      .dma_axi_arsize(dma_axi_arsize_int[2:0]),
-      .dma_axi_rready(dma_axi_rready_int),
+                                      .dma_axi_arvalid(dma_axi_arvalid_int),
+                                      .dma_axi_arid(dma_axi_arid_int[pt.DMA_BUS_TAG-1:0]),
+                                      .dma_axi_araddr(dma_axi_araddr_int[31:0]),
+                                      .dma_axi_arsize(dma_axi_arsize_int[2:0]),
+                                      .dma_axi_rready(dma_axi_rready_int),
 
-      .*
-   );
+                                      .*
+                                      );
 
    if (pt.BUILD_AHB_LITE == 1) begin: Gen_AXI_To_AHB
 
       // AXI4 -> AHB Gasket for LSU
       axi4_to_ahb #(.pt(pt),
                     .TAG(pt.LSU_BUS_TAG)) lsu_axi4_to_ahb (
+
+         .clk(free_l2clk),
+         .free_clk(free_clk),
+         .rst_l(core_rst_l),
          .clk_override(dec_tlu_bus_clk_override),
          .bus_clk_en(lsu_bus_clk_en),
+         .dec_tlu_force_halt(dec_tlu_force_halt),
 
          // AXI Write Channels
          .axi_awvalid(lsu_axi_awvalid),
@@ -983,9 +1019,12 @@ import el2_pkg::*;
 
       axi4_to_ahb #(.pt(pt),
                     .TAG(pt.IFU_BUS_TAG)) ifu_axi4_to_ahb (
-         .clk(clk),
+         .clk(free_l2clk),
+         .free_clk(free_clk),
+         .rst_l(core_rst_l),
          .clk_override(dec_tlu_bus_clk_override),
          .bus_clk_en(ifu_bus_clk_en),
+         .dec_tlu_force_halt(dec_tlu_force_halt),
 
           // AHB-Lite signals
          .ahb_haddr(haddr[31:0]),
@@ -1040,8 +1079,12 @@ import el2_pkg::*;
       // AXI4 -> AHB Gasket for System Bus
       axi4_to_ahb #(.pt(pt),
                     .TAG(pt.SB_BUS_TAG)) sb_axi4_to_ahb (
+         .clk(free_l2clk),
+         .free_clk(free_clk),
+         .rst_l(dbg_rst_l),
          .clk_override(dec_tlu_bus_clk_override),
          .bus_clk_en(dbg_bus_clk_en),
+         .dec_tlu_force_halt(1'b0),
 
          // AXI Write Channels
          .axi_awvalid(sb_axi_awvalid),
@@ -1096,6 +1139,8 @@ import el2_pkg::*;
       //AHB -> AXI4 Gasket for DMA
       ahb_to_axi4 #(.pt(pt),
                     .TAG(pt.DMA_BUS_TAG)) dma_ahb_to_axi4 (
+         .clk(free_l2clk),
+         .rst_l(core_rst_l),
          .clk_override(dec_tlu_bus_clk_override),
          .bus_clk_en(dma_bus_clk_en),
 
@@ -1219,7 +1264,7 @@ import el2_pkg::*;
 
 
 if  (pt.BUILD_AHB_LITE == 1) begin
-`ifdef ASSERT_ON
+`ifdef RV_ASSERT_ON
    property ahb_trxn_aligned;
      @(posedge clk) disable iff(~rst_l) (lsu_htrans[1:0] != 2'b0)  |-> ((lsu_hsize[2:0] == 3'h0)                              |
                                                                         ((lsu_hsize[2:0] == 3'h1) & (lsu_haddr[0] == 1'b0))   |
@@ -1244,15 +1289,19 @@ if  (pt.BUILD_AHB_LITE == 1) begin
       // unpack packet
       // also need retires_p==3
 
-      assign trace_rv_i_insn_ip[31:0]     = rv_trace_pkt.rv_i_insn_ip[31:0];
-      assign trace_rv_i_address_ip[31:0]  = rv_trace_pkt.rv_i_address_ip[31:0];
-      assign trace_rv_i_valid_ip[1:0]     = rv_trace_pkt.rv_i_valid_ip[1:0];
-      assign trace_rv_i_exception_ip[1:0] = rv_trace_pkt.rv_i_exception_ip[1:0];
-      assign trace_rv_i_ecause_ip[4:0]    = rv_trace_pkt.rv_i_ecause_ip[4:0];
-      assign trace_rv_i_interrupt_ip[1:0] = rv_trace_pkt.rv_i_interrupt_ip[1:0];
-      assign trace_rv_i_tval_ip[31:0]     = rv_trace_pkt.rv_i_tval_ip[31:0];
+      assign trace_rv_i_insn_ip[31:0]     = trace_rv_trace_pkt.trace_rv_i_insn_ip[31:0];
 
+      assign trace_rv_i_address_ip[31:0]  = trace_rv_trace_pkt.trace_rv_i_address_ip[31:0];
 
+      assign trace_rv_i_valid_ip     = trace_rv_trace_pkt.trace_rv_i_valid_ip;
+
+      assign trace_rv_i_exception_ip = trace_rv_trace_pkt.trace_rv_i_exception_ip;
+
+      assign trace_rv_i_ecause_ip[4:0]    = trace_rv_trace_pkt.trace_rv_i_ecause_ip[4:0];
+
+      assign trace_rv_i_interrupt_ip = trace_rv_trace_pkt.trace_rv_i_interrupt_ip;
+
+      assign trace_rv_i_tval_ip[31:0]     = trace_rv_trace_pkt.trace_rv_i_tval_ip[31:0];
 
 
 

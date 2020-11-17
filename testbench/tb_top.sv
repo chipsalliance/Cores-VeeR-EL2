@@ -13,10 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-`ifdef VERILATOR
-module tb_top ( input bit core_clk );
-`else
+`ifndef VERILATOR
 module tb_top;
+`else
+module tb_top ( input bit core_clk );
+`endif
+
+`ifndef VERILATOR
     bit                         core_clk;
 `endif
     logic                       rst_l;
@@ -27,48 +30,48 @@ module tb_top;
     logic        [31:0]         nmi_vector;
     logic        [31:1]         jtag_id;
 
-    logic        [31:0]         ic_haddr;
-    logic        [2:0]          ic_hburst;
-    logic                       ic_hmastlock;
-    logic        [3:0]          ic_hprot;
-    logic        [2:0]          ic_hsize;
-    logic        [1:0]          ic_htrans;
-    logic                       ic_hwrite;
-    logic        [63:0]         ic_hrdata;
-    logic                       ic_hready;
-    logic                       ic_hresp;
+    logic        [31:0]         ic_haddr        ;
+    logic        [2:0]          ic_hburst       ;
+    logic                       ic_hmastlock    ;
+    logic        [3:0]          ic_hprot        ;
+    logic        [2:0]          ic_hsize        ;
+    logic        [1:0]          ic_htrans       ;
+    logic                       ic_hwrite       ;
+    logic        [63:0]         ic_hrdata       ;
+    logic                       ic_hready       ;
+    logic                       ic_hresp        ;
 
-    logic        [31:0]         lsu_haddr;
-    logic        [2:0]          lsu_hburst;
-    logic                       lsu_hmastlock;
-    logic        [3:0]          lsu_hprot;
-    logic        [2:0]          lsu_hsize;
-    logic        [1:0]          lsu_htrans;
-    logic                       lsu_hwrite;
-    logic        [63:0]         lsu_hrdata;
-    logic        [63:0]         lsu_hwdata;
-    logic                       lsu_hready;
-    logic                       lsu_hresp;
+    logic        [31:0]         lsu_haddr       ;
+    logic        [2:0]          lsu_hburst      ;
+    logic                       lsu_hmastlock   ;
+    logic        [3:0]          lsu_hprot       ;
+    logic        [2:0]          lsu_hsize       ;
+    logic        [1:0]          lsu_htrans      ;
+    logic                       lsu_hwrite      ;
+    logic        [63:0]         lsu_hrdata      ;
+    logic        [63:0]         lsu_hwdata      ;
+    logic                       lsu_hready      ;
+    logic                       lsu_hresp        ;
 
-    logic        [31:0]         sb_haddr;
-    logic        [2:0]          sb_hburst;
-    logic                       sb_hmastlock;
-    logic        [3:0]          sb_hprot;
-    logic        [2:0]          sb_hsize;
-    logic        [1:0]          sb_htrans;
-    logic                       sb_hwrite;
+    logic        [31:0]         sb_haddr        ;
+    logic        [2:0]          sb_hburst       ;
+    logic                       sb_hmastlock    ;
+    logic        [3:0]          sb_hprot        ;
+    logic        [2:0]          sb_hsize        ;
+    logic        [1:0]          sb_htrans       ;
+    logic                       sb_hwrite       ;
 
-    logic        [63:0]         sb_hrdata;
-    logic        [63:0]         sb_hwdata;
-    logic                       sb_hready;
-    logic                       sb_hresp;
+    logic        [63:0]         sb_hrdata       ;
+    logic        [63:0]         sb_hwdata       ;
+    logic                       sb_hready       ;
+    logic                       sb_hresp        ;
 
     logic        [31:0]         trace_rv_i_insn_ip;
     logic        [31:0]         trace_rv_i_address_ip;
-    logic        [1:0]          trace_rv_i_valid_ip;
-    logic        [1:0]          trace_rv_i_exception_ip;
+    logic                       trace_rv_i_valid_ip;
+    logic                       trace_rv_i_exception_ip;
     logic        [4:0]          trace_rv_i_ecause_ip;
-    logic        [1:0]          trace_rv_i_interrupt_ip;
+    logic                       trace_rv_i_interrupt_ip;
     logic        [31:0]         trace_rv_i_tval_ip;
 
     logic                       o_debug_mode_status;
@@ -80,10 +83,10 @@ module tb_top;
     logic                       o_cpu_run_ack;
 
     logic                       mailbox_write;
-    logic        [63:0]         dma_hrdata;
-    logic        [63:0]         dma_hwdata;
-    logic                       dma_hready;
-    logic                       dma_hresp;
+    logic        [63:0]         dma_hrdata       ;
+    logic        [63:0]         dma_hwdata       ;
+    logic                       dma_hready       ;
+    logic                       dma_hresp        ;
 
     logic                       mpc_debug_halt_req;
     logic                       mpc_debug_run_req;
@@ -92,15 +95,15 @@ module tb_top;
     logic                       mpc_debug_run_ack;
     logic                       debug_brkpt_status;
 
-    bit        [31:0]           cycleCnt;
+    int                         cycleCnt;
     logic                       mailbox_data_val;
 
     wire                        dma_hready_out;
     int                         commit_count;
 
-    logic                       wb_valid[1:0];
-    logic [4:0]                 wb_dest[1:0];
-    logic [31:0]                wb_data[1:0];
+    logic                       wb_valid;
+    logic [4:0]                 wb_dest;
+    logic [31:0]                wb_data;
 
 `ifdef RV_BUILD_AXI4
    //-------------------------- LSU AXI signals--------------------------
@@ -307,6 +310,7 @@ module tb_top;
 
 `endif
     wire[63:0] WriteData;
+    string                      abi_reg[32]; // ABI register names
 
 
     assign mailbox_write = lmem.mailbox_write;
@@ -345,40 +349,75 @@ module tb_top;
 
     // trace monitor
     always @(posedge core_clk) begin
-        wb_valid[0]  <= rvtop.swerv.dec.dec_i0_wen_r;
-        wb_dest[0]   <= rvtop.swerv.dec.dec_i0_waddr_r;
-        wb_data[0]   <= rvtop.swerv.dec.dec_i0_wdata_r;
-        if (trace_rv_i_valid_ip !== 0) begin
+        wb_valid  <= rvtop.swerv.dec.dec_i0_wen_r;
+        wb_dest   <= rvtop.swerv.dec.dec_i0_waddr_r;
+        wb_data   <= rvtop.swerv.dec.dec_i0_wdata_r;
+        if (trace_rv_i_valid_ip) begin
            $fwrite(tp,"%b,%h,%h,%0h,%0h,3,%b,%h,%h,%b\n", trace_rv_i_valid_ip, 0, trace_rv_i_address_ip,
                   0, trace_rv_i_insn_ip,trace_rv_i_exception_ip,trace_rv_i_ecause_ip,
                   trace_rv_i_tval_ip,trace_rv_i_interrupt_ip);
            // Basic trace - no exception register updates
            // #1 0 ee000000 b0201073 c 0b02       00000000
-           for (int i=0; i<1; i++)
-               if (trace_rv_i_valid_ip[i]==1) begin
-                   commit_count++;
-                   $fwrite (el, "%10d : %6s 0 %h %h %s\n", cycleCnt, $sformatf("#%0d",commit_count),
-                          trace_rv_i_address_ip[31+i*32 -:32], trace_rv_i_insn_ip[31+i*32-:32],
-                          (wb_dest[i] !=0 && wb_data[0])?  $sformatf("r%0d=%h", wb_dest[i], wb_data[i]) : "");
-               end
+           commit_count++;
+           $fwrite (el, "%10d : %8s 0 %h %h%13s ; %s\n", cycleCnt, $sformatf("#%0d",commit_count),
+                        trace_rv_i_address_ip, trace_rv_i_insn_ip,
+                        (wb_dest !=0 && wb_valid)?  $sformatf("%s=%h", abi_reg[wb_dest], wb_data) : "             ",
+                        dasm(trace_rv_i_insn_ip, trace_rv_i_address_ip, wb_dest & {5{wb_valid}}, wb_data)
+                   );
         end
+        if(rvtop.swerv.dec.dec_nonblock_load_wen)
+           $fwrite (el, "%10d : %32s=%h ; nbL\n", cycleCnt, abi_reg[rvtop.swerv.dec.dec_nonblock_load_waddr], rvtop.swerv.dec.lsu_nonblock_load_data);
+        if(rvtop.swerv.dec.exu_div_wren)
+           $fwrite (el, "%10d : %32s=%h ; nbD\n", cycleCnt, abi_reg[rvtop.swerv.dec.div_waddr_wb], rvtop.swerv.dec.exu_div_result);
     end
 
 
     initial begin
+        abi_reg[0] = "zero";
+        abi_reg[1] = "ra";
+        abi_reg[2] = "sp";
+        abi_reg[3] = "gp";
+        abi_reg[4] = "tp";
+        abi_reg[5] = "t0";
+        abi_reg[6] = "t1";
+        abi_reg[7] = "t2";
+        abi_reg[8] = "s0";
+        abi_reg[9] = "s1";
+        abi_reg[10] = "a0";
+        abi_reg[11] = "a1";
+        abi_reg[12] = "a2";
+        abi_reg[13] = "a3";
+        abi_reg[14] = "a4";
+        abi_reg[15] = "a5";
+        abi_reg[16] = "a6";
+        abi_reg[17] = "a7";
+        abi_reg[18] = "s2";
+        abi_reg[19] = "s3";
+        abi_reg[20] = "s4";
+        abi_reg[21] = "s5";
+        abi_reg[22] = "s6";
+        abi_reg[23] = "s7";
+        abi_reg[24] = "s8";
+        abi_reg[25] = "s9";
+        abi_reg[26] = "s10";
+        abi_reg[27] = "s11";
+        abi_reg[28] = "t3";
+        abi_reg[29] = "t4";
+        abi_reg[30] = "t5";
+        abi_reg[31] = "t6";
     // tie offs
         jtag_id[31:28] = 4'b1;
         jtag_id[27:12] = '0;
         jtag_id[11:1]  = 11'h45;
-        reset_vector = 32'h0;
+        reset_vector = `RV_RESET_VEC;
         nmi_vector   = 32'hee000000;
         nmi_int   = 0;
 
-        $readmemh("data.hex",     lmem.mem);
+        $readmemh("program.hex",  lmem.mem);
         $readmemh("program.hex",  imem.mem);
         tp = $fopen("trace_port.csv","w");
         el = $fopen("exec.log","w");
-        $fwrite (el, "//Cycle : #inst 0  pc opcode reg regnum value\n");
+        $fwrite (el, "//   Cycle : #inst    0    pc    opcode    reg=value   ; mnemonic\n");
         fd = $fopen("console.log","w");
         commit_count = 0;
         preload_dccm();
@@ -691,6 +730,12 @@ el2_swerv_wrapper rvtop (
     .dec_tlu_perfcnt2       (),
     .dec_tlu_perfcnt3       (),
 
+// remove mems DFT pins for opensource
+    .dccm_ext_in_pkt        ('0),
+    .iccm_ext_in_pkt        ('0),
+    .ic_data_ext_in_pkt     ('0),
+    .ic_tag_ext_in_pkt      ('0),
+
     .soft_int               ('0),
     .core_id                ('0),
     .scan_mode              ( 1'b0 ),         // To enable scan mode
@@ -900,16 +945,15 @@ axi_lsu_dma_bridge # (`RV_LSU_BUS_TAG,`RV_LSU_BUS_TAG ) bridge(
 
 task preload_iccm;
 bit[31:0] data;
-bit[31:0] addr, eaddr, saddr, faddr;
-int adr;
+bit[31:0] addr, eaddr, saddr;
+
 /*
 addresses:
- 0xffec - ICCM start address to load
- 0xfff0 - ICCM end address to load
- 0xfff4 - imem start address
+ 0xfffffff0 - ICCM start address to load
+ 0xfffffff4 - ICCM end address to load
 */
 
-addr = 'hffec;
+addr = 'hffff_fff0;
 saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 if ( (saddr < `RV_ICCM_SADR) || (saddr > `RV_ICCM_EADR)) return;
 `ifndef RV_ICCM_ENABLE
@@ -918,53 +962,49 @@ if ( (saddr < `RV_ICCM_SADR) || (saddr > `RV_ICCM_EADR)) return;
     $display("********************************************************");
     $finish;
 `endif
-init_iccm;
-addr = 'hfff0;
+addr += 4;
 eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
-addr = 'hfff4;
-faddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 $display("ICCM pre-load from %h to %h", saddr, eaddr);
 
 for(addr= saddr; addr <= eaddr; addr+=4) begin
-    adr = faddr & 'hffff;
-    data = {imem.mem[adr+3],imem.mem[adr+2],imem.mem[adr+1],imem.mem[adr]};
+    data = {imem.mem[addr+3],imem.mem[addr+2],imem.mem[addr+1],imem.mem[addr]};
     slam_iccm_ram(addr, data == 0 ? 0 : {riscv_ecc32(data),data});
-    faddr+=4;
 end
 
 endtask
 
+
 task preload_dccm;
 bit[31:0] data;
-bit[31:0] addr, eaddr;
-int adr;
+bit[31:0] addr, saddr, eaddr;
+
 /*
 addresses:
- 0xfff8 - DCCM start address to load
- 0xfffc - ICCM end address to load
- 0x0    - lmem start addres to load from
+ 0xffff_fff8 - DCCM start address to load
+ 0xffff_fffc - DCCM end address to load
 */
 
-addr = 'hfff8;
-eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
-if (eaddr != `RV_DCCM_SADR) return;
+addr = 'hffff_fff8;
+saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
+if (saddr < `RV_DCCM_SADR || saddr > `RV_DCCM_EADR) return;
 `ifndef RV_DCCM_ENABLE
     $display("********************************************************");
     $display("DCCM preload: there is no DCCM in SweRV, terminating !!!");
     $display("********************************************************");
     $finish;
 `endif
-addr = 'hfffc;
+addr += 4;
 eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
-$display("DCCM pre-load from %h to %h", `RV_DCCM_SADR, eaddr);
+$display("DCCM pre-load from %h to %h", saddr, eaddr);
 
-for(addr=`RV_DCCM_SADR; addr <= eaddr; addr+=4) begin
-    adr = addr & 'hffff;
-    data = {lmem.mem[adr+3],lmem.mem[adr+2],lmem.mem[adr+1],lmem.mem[adr]};
+for(addr=saddr; addr <= eaddr; addr+=4) begin
+    data = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
     slam_dccm_ram(addr, data == 0 ? 0 : {riscv_ecc32(data),data});
 end
 
 endtask
+
+
 
 `define ICCM_PATH `RV_TOP.mem.iccm.iccm
 `ifdef VERILATOR
@@ -1116,5 +1156,8 @@ function int get_iccm_bank(input[31:0] addr,  output int bank_idx);
 `endif
 endfunction
 
+/* verilator lint_off CASEINCOMPLETE */
+`include "dasm.svi"
+/* verilator lint_on CASEINCOMPLETE */
 
 endmodule

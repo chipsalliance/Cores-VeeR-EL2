@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2020 Western Digital Corporation or it's affiliates.
+// Copyright 2020 Western Digital Corporation or its affiliates.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,16 +20,18 @@ import el2_pkg::*;
 `include "el2_param.vh"
  )
   (
+   input logic dec_tlu_trace_disable,
+   input logic dec_debug_valid_d,
 
-   input logic dec_tlu_flush_extint,
+   input logic dec_tlu_flush_extint,         // Flush external interrupt
 
-   input logic dec_tlu_force_halt, // invalidate nonblock load cam on a force halt event
+   input logic dec_tlu_force_halt,           // invalidate nonblock load cam on a force halt event
 
-   output logic dec_extint_stall,
+   output logic dec_extint_stall,            // Stall from external interrupt
 
-   input  logic [15:0] ifu_i0_cinst,          // 16b compressed instruction
-   output logic [31:0] dec_i0_inst_wb1,       // 32b instruction at wb+1 for trace encoder
-   output logic [31:1] dec_i0_pc_wb1,         // 31b pc at wb+1 for trace encoder
+   input  logic [15:0] ifu_i0_cinst,         // 16b compressed instruction
+   output logic [31:0] dec_i0_inst_wb,       // 32b instruction at wb+1 for trace encoder
+   output logic [31:1] dec_i0_pc_wb,         // 31b pc at wb+1 for trace encoder
 
 
    input logic                                lsu_nonblock_load_valid_m,       // valid nonblock load at m
@@ -39,8 +41,6 @@ import el2_pkg::*;
    input logic                                lsu_nonblock_load_data_valid,    // valid nonblock load data back
    input logic                                lsu_nonblock_load_data_error,    // nonblock load bus error
    input logic [pt.LSU_NUM_NBLOAD_WIDTH-1:0]  lsu_nonblock_load_data_tag,      // -> corresponding tag
-
-   input logic [31:0]                         lsu_nonblock_load_data,          // nonblock load data
 
 
    input logic [3:0] dec_i0_trigger_match_d,          // i0 decode trigger matches
@@ -59,17 +59,16 @@ import el2_pkg::*;
    input logic [1:0] dbg_cmd_wrdata,                  // disambiguate fence, fence_i
 
    input logic dec_i0_icaf_d,                         // icache access fault
-   input logic dec_i0_icaf_f1_d,                      // i0 instruction access fault at decode for f1 fetch group
+   input logic dec_i0_icaf_second_d,                  // i0 instruction access fault on second 2B of 4B inst
    input logic [1:0] dec_i0_icaf_type_d,              // i0 instruction access fault type
 
    input logic dec_i0_dbecc_d,                        // icache/iccm double-bit error
 
-   input el2_br_pkt_t dec_i0_brp,                         // branch packet
-   input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] dec_i0_bp_index,            // i0 branch index
-   input logic [pt.BHT_GHR_SIZE-1:0] dec_i0_bp_fghr, // BP FGHR
+   input el2_br_pkt_t dec_i0_brp,                    // branch packet
+   input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] dec_i0_bp_index,   // i0 branch index
+   input logic [pt.BHT_GHR_SIZE-1:0] dec_i0_bp_fghr,  // BP FGHR
    input logic [pt.BTB_BTAG_SIZE-1:0] dec_i0_bp_btag, // BP tag
-
-   input logic [31:1] dec_i0_pc_d,                    // pc
+   input logic [$clog2(pt.BTB_SIZE)-1:0] dec_i0_bp_fa_index,          // Fully associt btb index
 
    input logic lsu_idle_any,                          // lsu idle: if fence instr & ~lsu_idle then stall decode
 
@@ -107,46 +106,45 @@ import el2_pkg::*;
 
    input logic [31:0] exu_i0_result_x,                // from primary alu's
 
-   input logic  clk,                                  // for rvdffe's
-   input logic  free_clk,
-   input logic  active_clk,                           // clk except for halt / pause
+   input logic  clk,                                  // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.
+   input logic  active_clk,                           // Clock only while core active.  Through two clock headers. For flops without second clock header built in.
+   input logic  free_l2clk,                           // Clock always.                  Through one clock header.  For flops with    second header built in.
 
-   input logic  clk_override,                         // test stuff
-   input logic  rst_l,
+   input logic  clk_override,                         // Override non-functional clock gating
+   input logic  rst_l,                                // Flop reset
 
 
 
-   output logic         dec_i0_rs1_en_d,              // rs1 enable at decode
-   output logic         dec_i0_rs2_en_d,
+   output logic        dec_i0_rs1_en_d,               // rs1 enable at decode
+   output logic        dec_i0_rs2_en_d,               // rs2 enable at decode
 
-   output logic [4:0] dec_i0_rs1_d,                   // rs1 logical source
-   output logic [4:0] dec_i0_rs2_d,
+   output logic [4:0]  dec_i0_rs1_d,                  // rs1 logical source
+   output logic [4:0]  dec_i0_rs2_d,                  // rs2 logical source
 
    output logic [31:0] dec_i0_immed_d,                // 32b immediate data decode
 
 
    output logic [12:1] dec_i0_br_immed_d,             // 12b branch immediate
 
-   output el2_alu_pkt_t i0_ap,                            // alu packets
+   output el2_alu_pkt_t i0_ap,                       // alu packets
 
-   output logic          dec_i0_decode_d,             // i0 decode
+   output logic        dec_i0_decode_d,               // i0 decode
 
-   output logic          dec_i0_alu_decode_d,         // decode to D-stage alu
-
-   output logic [31:0]   dec_i0_rs1_bypass_data_d,    // i0 rs1 bypass data
-   output logic [31:0]   dec_i0_rs2_bypass_data_d,    // i0 rs2 bypass data
-
+   output logic        dec_i0_alu_decode_d,           // decode to D-stage alu
+   output logic        dec_i0_branch_d,               // Branch in D-stage
 
    output logic [4:0]  dec_i0_waddr_r,                // i0 logical source to write to gpr's
    output logic        dec_i0_wen_r,                  // i0 write enable
    output logic [31:0] dec_i0_wdata_r,                // i0 write data
 
-   output logic          dec_i0_select_pc_d,          // i0 select pc for rs1 - branches
+   output logic        dec_i0_select_pc_d,            // i0 select pc for rs1 - branches
 
-   output logic [1:0]    dec_i0_rs1_bypass_en_d,      // i0 rs1 bypass enable
-   output logic [1:0]    dec_i0_rs2_bypass_en_d,      // i0 rs2 bypass enable
+   output logic [3:0]    dec_i0_rs1_bypass_en_d,      // i0 rs1 bypass enable
+   output logic [3:0]    dec_i0_rs2_bypass_en_d,      // i0 rs2 bypass enable
+   output logic [31:0]   dec_i0_result_r,             // Result R-stage
 
    output el2_lsu_pkt_t    lsu_p,                    // load/store packet
+   output logic             dec_qual_lsu_d,           // LSU instruction at D.  Use to quiet LSU operands
 
    output el2_mul_pkt_t    mul_p,                    // multiply packet
 
@@ -179,6 +177,8 @@ import el2_pkg::*;
    output logic [pt.BHT_GHR_SIZE-1:0] i0_predict_fghr_d, // i0 predict fghr
    output logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] i0_predict_index_d, // i0 predict index
    output logic [pt.BTB_BTAG_SIZE-1:0] i0_predict_btag_d, // i0_predict branch tag
+
+   output logic [$clog2(pt.BTB_SIZE)-1:0] dec_fa_error_index, // Fully associt btb error index
 
    output logic [1:0] dec_data_en,                    // clock-gating logic
    output logic [1:0] dec_ctl_en,
@@ -316,7 +316,7 @@ import el2_pkg::*;
 
    logic [3:0]        i0_pipe_en;
    logic              i0_r_ctl_en,  i0_x_ctl_en,  i0_wb_ctl_en;
-   logic              i0_x_data_en, i0_r_data_en, i0_wb_data_en, i0_wb1_data_en;
+   logic              i0_x_data_en, i0_r_data_en, i0_wb_data_en;
 
    logic              debug_fence_i;
    logic              debug_fence;
@@ -362,6 +362,17 @@ import el2_pkg::*;
 
    logic flush_final_r;
 
+   logic bitmanip_zbb_legal;
+   logic bitmanip_zbs_legal;
+   logic bitmanip_zbe_legal;
+   logic bitmanip_zbc_legal;
+   logic bitmanip_zbp_legal;
+   logic bitmanip_zbr_legal;
+   logic bitmanip_zbf_legal;
+   logic bitmanip_zba_legal;
+   logic bitmanip_zbb_zbp_legal;
+   logic bitmanip_legal;
+
    logic              data_gate_en;
    logic              data_gate_clk;
 
@@ -401,7 +412,6 @@ import el2_pkg::*;
 
    logic [12:1] last_br_immed_x;
 
-   logic [24:7]        div_inst;
    logic [31:0]        i0_inst_d;
    logic [31:0]        i0_inst_x;
    logic [31:0]        i0_inst_r;
@@ -411,39 +421,34 @@ import el2_pkg::*;
    logic [31:1]        i0_pc_wb;
 
    logic               i0_wb_en;
-   logic               i0_wb1_en;
+
+   logic               trace_enable;
+
+   logic               debug_valid_x;
 
    el2_inst_pkt_t i0_itype;
    el2_reg_pkt_t i0r;
 
 
+   rvdffie  #(8) misc1ff (.*,
+                          .clk(free_l2clk),
+                          .din( {leak1_i1_stall_in,leak1_i0_stall_in,dec_tlu_flush_extint,pause_state_in ,dec_tlu_wr_pause_r, tlu_wr_pause_r1,illegal_lockout_in,ps_stall_in}),
+                          .dout({leak1_i1_stall,   leak1_i0_stall,   dec_extint_stall,    pause_state,       tlu_wr_pause_r1,tlu_wr_pause_r2,illegal_lockout,   ps_stall   })
+                          );
 
+   rvdffie  #(8) misc2ff (.*,
+                          .clk(free_l2clk),
+                          .din( {lsu_trigger_match_m[3:0],lsu_pmu_misaligned_m,div_active_in,exu_flush_final,  dec_debug_valid_d}),
+                          .dout({lsu_trigger_match_r[3:0],lsu_pmu_misaligned_r,div_active,       flush_final_r,    debug_valid_x})
+                          );
 
-   // Start - Data gating {{
-
-
-   assign data_gate_en  = (dec_tlu_wr_pause_r    ^  tlu_wr_pause_r1   ) |   // replaces free_clk
-                          (tlu_wr_pause_r1       ^  tlu_wr_pause_r2   ) |   // replaces free_clk
-                          (dec_tlu_flush_extint  ^  dec_extint_stall  ) |
-                          (leak1_i1_stall_in     ^  leak1_i1_stall    ) |   // replaces free_clk
-                          (leak1_i0_stall_in     ^  leak1_i0_stall    ) |   // replaces free_clk
-                          (pause_state_in        ^  pause_state       ) |   // replaces free_clk
-                          (ps_stall_in           ^  ps_stall          ) |   // replaces free_clk
-                          (exu_flush_final       ^  flush_final_r     ) |   // replaces free_clk
-                          (illegal_lockout_in    ^  illegal_lockout   );    // replaces active_clk
-
-   rvclkhdr data_gated_cgc        (.*, .en(data_gate_en),    .l1clk(data_gate_clk));
-
-   // End  - Data gating }}
-
-
-
+if(pt.BTB_ENABLE==1) begin
 // branch prediction
 
 
    // in leak1_mode, ignore any predictions for i0, treat branch as if we haven't seen it before
    // in leak1 mode, also ignore branch errors for i0
-   assign i0_brp_valid                        =  dec_i0_brp.valid & ~leak1_mode;
+   assign i0_brp_valid                        =  dec_i0_brp.valid & ~leak1_mode & ~i0_icaf_d;
 
    assign dec_i0_predict_p_d.misp        =  '0;
    assign dec_i0_predict_p_d.ataken      =  '0;
@@ -460,7 +465,7 @@ import el2_pkg::*;
 
    // no toffset error for a pret
    assign i0_br_toffset_error                               =  i0_brp_valid & dec_i0_brp.hist[1] & (dec_i0_brp.toffset[11:0] != i0_br_offset[11:0]) & ~i0_pret_raw;
-   assign i0_ret_error                                      =  i0_brp_valid & dec_i0_brp.ret & ~i0_pret_raw;
+   assign i0_ret_error                                      =  i0_brp_valid & (dec_i0_brp.ret ^ i0_pret_raw);
    assign i0_br_error                                       =  dec_i0_brp.br_error | i0_notbr_error | i0_br_toffset_error | i0_ret_error;
    assign dec_i0_predict_p_d.br_error                       =  i0_br_error & i0_legal_decode_d & ~leak1_mode;
    assign dec_i0_predict_p_d.br_start_error                 =  dec_i0_brp.br_start_error & i0_legal_decode_d & ~leak1_mode;
@@ -472,7 +477,42 @@ import el2_pkg::*;
    assign i0_predict_fghr_d[pt.BHT_GHR_SIZE-1:0]            =  dec_i0_bp_fghr[pt.BHT_GHR_SIZE-1:0];
    assign dec_i0_predict_p_d.way                            =  dec_i0_brp.way;
 
+
+   if(pt.BTB_FULLYA) begin
+      logic btb_error_found, btb_error_found_f;
+      logic [$clog2(pt.BTB_SIZE)-1:0] fa_error_index_ns;
+
+      assign btb_error_found = (i0_br_error_all | btb_error_found_f) & ~dec_tlu_flush_lower_r;
+      assign fa_error_index_ns = (i0_br_error_all & ~btb_error_found_f) ? dec_i0_bp_fa_index : dec_fa_error_index;
+
+      rvdff #($clog2(pt.BTB_SIZE)+1) btberrorfa_f   (.*, .clk(active_clk),
+                                                         .din({btb_error_found,    fa_error_index_ns}),
+                                                         .dout({btb_error_found_f, dec_fa_error_index}));
+
+
+   end
+   else
+     assign dec_fa_error_index = 'b0;
+
+
    //   end
+end // if (pt.BTB_ENABLE==1)
+else begin
+
+   always_comb begin
+      dec_i0_predict_p_d = '0;
+      dec_i0_predict_p_d.pcall       =  i0_pcall;  // don't mark as pcall if branch error
+      dec_i0_predict_p_d.pja         =  i0_pja;
+      dec_i0_predict_p_d.pret        =  i0_pret;
+      dec_i0_predict_p_d.pc4         =  dec_i0_pc4_d;
+   end
+
+   assign i0_br_error_all = '0;
+   assign i0_predict_index_d = '0;
+   assign i0_predict_btag_d = '0;
+   assign i0_predict_fghr_d = '0;
+   assign i0_brp_valid = '0;
+end // else: !if(pt.BTB_ENABLE==1)
 
    // on br error turn anything into a nop
    // on i0 instruction fetch access fault turn anything into a nop
@@ -521,6 +561,32 @@ import el2_pkg::*;
    assign i0_ap.blt     =  i0_dp.blt;
    assign i0_ap.bge     =  i0_dp.bge;
 
+   assign i0_ap.clz     =  i0_dp.clz;
+   assign i0_ap.ctz     =  i0_dp.ctz;
+   assign i0_ap.pcnt    =  i0_dp.pcnt;
+   assign i0_ap.sext_b  =  i0_dp.sext_b;
+   assign i0_ap.sext_h  =  i0_dp.sext_h;
+   assign i0_ap.sh1add  =  i0_dp.sh1add;
+   assign i0_ap.sh2add  =  i0_dp.sh2add;
+   assign i0_ap.sh3add  =  i0_dp.sh3add;
+   assign i0_ap.zba     =  i0_dp.zba;
+   assign i0_ap.slo     =  i0_dp.slo;
+   assign i0_ap.sro     =  i0_dp.sro;
+   assign i0_ap.min     =  i0_dp.min;
+   assign i0_ap.max     =  i0_dp.max;
+   assign i0_ap.pack    =  i0_dp.pack;
+   assign i0_ap.packu   =  i0_dp.packu;
+   assign i0_ap.packh   =  i0_dp.packh;
+   assign i0_ap.rol     =  i0_dp.rol;
+   assign i0_ap.ror     =  i0_dp.ror;
+   assign i0_ap.grev    =  i0_dp.grev;
+   assign i0_ap.gorc    =  i0_dp.gorc;
+   assign i0_ap.zbb     =  i0_dp.zbb;
+   assign i0_ap.sbset   =  i0_dp.sbset;
+   assign i0_ap.sbclr   =  i0_dp.sbclr;
+   assign i0_ap.sbinv   =  i0_dp.sbinv;
+   assign i0_ap.sbext   =  i0_dp.sbext;
+
    assign i0_ap.csr_write =  i0_csr_write_only_d;
    assign i0_ap.csr_imm   =  i0_dp.csr_imm;
    assign i0_ap.jal       =  i0_jal;
@@ -537,13 +603,18 @@ import el2_pkg::*;
    always_comb begin
       found = 0;
       cam_wen[NBLOAD_SIZE_MSB:0] = '0;
-      for (int i=0; i<32'(NBLOAD_SIZE); i++) begin
+      for (int i=0; i<NBLOAD_SIZE; i++) begin
          if (~found) begin
             if (~cam[i].valid) begin
                cam_wen[i] = cam_write;
                found = 1'b1;
             end
+            else begin
+               cam_wen[i] = 0;
+            end
          end
+         else
+            cam_wen[i] = 0;
       end
    end
 
@@ -562,7 +633,7 @@ import el2_pkg::*;
 
    // checks
 
-`ifdef ASSERT_ON
+`ifdef RV_ASSERT_ON
    assert_dec_data_valid_data_error_onehot:    assert #0 ($onehot0({lsu_nonblock_load_data_valid,lsu_nonblock_load_data_error}));
    assert_dec_cam_inv_reset_onehot:            assert #0 ($onehot0(cam_inv_reset_val[NBLOAD_SIZE_MSB:0]));
    assert_dec_cam_data_reset_onehot:           assert #0 ($onehot0(cam_data_reset_val[NBLOAD_SIZE_MSB:0]));
@@ -607,7 +678,8 @@ import el2_pkg::*;
            cam_in[i].valid = 1'b0;
       end
 
-   rvdff #( $bits(el2_load_cam_pkt_t) ) cam_ff (.*, .clk(free_clk), .din(cam_in[i]), .dout(cam_raw[i]));
+
+   rvdffie #( $bits(el2_load_cam_pkt_t) ) cam_ff (.*, .din(cam_in[i]), .dout(cam_raw[i]));
 
 
    assign nonblock_load_write[i] = (load_data_tag[NBLOAD_TAG_MSB:0] == cam_raw[i].tag[NBLOAD_TAG_MSB:0]) & cam_raw[i].valid;
@@ -619,7 +691,7 @@ end : cam_array
 
    assign load_data_tag[NBLOAD_TAG_MSB:0] = lsu_nonblock_load_data_tag[NBLOAD_TAG_MSB:0];
 
-`ifdef ASSERT_ON
+`ifdef RV_ASSERT_ON
    assert_dec_cam_nonblock_load_write_onehot:   assert #0 ($onehot0(nonblock_load_write[NBLOAD_SIZE_MSB:0]));
 `endif
 
@@ -634,7 +706,7 @@ end : cam_array
       dec_nonblock_load_waddr[4:0] = '0;
       i0_nonblock_load_stall = i0_nonblock_boundary_stall;
 
-      for (int i=0; i<32'(NBLOAD_SIZE); i++) begin
+      for (int i=0; i<NBLOAD_SIZE; i++) begin
          dec_nonblock_load_waddr[4:0] |= ({5{nonblock_load_write[i]}} & cam[i].rd[4:0]);
          i0_nonblock_load_stall |= dec_i0_rs1_en_d & cam[i].valid & (cam[i].rd[4:0] == i0r.rs1[4:0]);
          i0_nonblock_load_stall |= dec_i0_rs2_en_d & cam[i].valid & (cam[i].rd[4:0] == i0r.rs2[4:0]);
@@ -677,6 +749,11 @@ end : cam_array
          if (i0_dp.load)                 i0_itype = LOAD;
          if (i0_dp.store)                i0_itype = STORE;
          if (i0_dp.pm_alu)               i0_itype = ALU;
+         if (i0_dp.zbb | i0_dp.zbs |
+             i0_dp.zbe | i0_dp.zbc |
+             i0_dp.zbp | i0_dp.zbr |
+             i0_dp.zbf | i0_dp.zba)
+                                         i0_itype = BITMANIPU;
          if ( csr_read & ~csr_write)     i0_itype = CSRREAD;
          if (~csr_read &  csr_write)     i0_itype = CSRWRITE;
          if ( csr_read &  csr_write)     i0_itype = CSRRW;
@@ -706,16 +783,13 @@ end : cam_array
 
 
 
-   // can't make this clock active_clock
    assign leak1_i1_stall_in = (dec_tlu_flush_leak_one_r | (leak1_i1_stall & ~dec_tlu_flush_lower_r));
 
-   rvdff #(1) leak1_i1_stall_ff (.*, .clk(data_gate_clk), .din(leak1_i1_stall_in), .dout(leak1_i1_stall));
 
    assign leak1_mode = leak1_i1_stall;
 
    assign leak1_i0_stall_in = ((dec_i0_decode_d & leak1_i1_stall) | (leak1_i0_stall & ~dec_tlu_flush_lower_r));
 
-   rvdff #(1) leak1_i0_stall_ff (.*, .clk(data_gate_clk), .din(leak1_i0_stall_in), .dout(leak1_i0_stall));
 
 
 
@@ -762,10 +836,22 @@ end : cam_array
    assign mul_p.rs1_sign =  i0_dp.rs1_sign;
    assign mul_p.rs2_sign =  i0_dp.rs2_sign;
    assign mul_p.low      =  i0_dp.low;
-
-
-   rvdff #(1) extint_stall_ff (.*, .clk(data_gate_clk), .din(dec_tlu_flush_extint), .dout(dec_extint_stall));
-
+   assign mul_p.bext     =  i0_dp.bext;
+   assign mul_p.bdep     =  i0_dp.bdep;
+   assign mul_p.clmul    =  i0_dp.clmul;
+   assign mul_p.clmulh   =  i0_dp.clmulh;
+   assign mul_p.clmulr   =  i0_dp.clmulr;
+   assign mul_p.grev     =  i0_dp.grev;
+   assign mul_p.gorc     =  i0_dp.gorc;
+   assign mul_p.shfl     =  i0_dp.shfl;
+   assign mul_p.unshfl   =  i0_dp.unshfl;
+   assign mul_p.crc32_b  =  i0_dp.crc32_b;
+   assign mul_p.crc32_h  =  i0_dp.crc32_h;
+   assign mul_p.crc32_w  =  i0_dp.crc32_w;
+   assign mul_p.crc32c_b =  i0_dp.crc32c_b;
+   assign mul_p.crc32c_h =  i0_dp.crc32c_h;
+   assign mul_p.crc32c_w =  i0_dp.crc32c_w;
+   assign mul_p.bfp      =  i0_dp.bfp;
 
    always_comb  begin
       lsu_p = '0;
@@ -784,6 +870,7 @@ end : cam_array
          lsu_p.by                           =  i0_dp.by   ;
          lsu_p.half                         =  i0_dp.half ;
          lsu_p.word                         =  i0_dp.word ;
+         lsu_p.stack                        = (i0r.rs1[4:0]==5'd2);   // stack reference
 
          lsu_p.load_ldst_bypass_d          =  load_ldst_bypass_d ;
          lsu_p.store_data_bypass_d         =  store_data_bypass_d;
@@ -791,7 +878,8 @@ end : cam_array
 
          lsu_p.unsign  =  i0_dp.unsign;
       end
-   end // always_comb begin
+   end
+
 
    assign  dec_lsu_valid_raw_d    = (i0_valid_d & (i0_dp_raw.load | i0_dp_raw.store) & ~dma_dccm_stall_any & ~i0_block_raw_d) | dec_extint_stall;
 
@@ -816,7 +904,7 @@ end : cam_array
 
    // csr logic
 
-   assign dec_csr_ren_d  = i0_dp.csr_read;
+   assign dec_csr_ren_d  = i0_dp.csr_read & i0_valid_d;
    assign csr_ren_qual_d = i0_dp.csr_read & i0_legal_decode_d;
 
    assign csr_clr_d =   i0_dp.csr_clr   & i0_legal_decode_d;
@@ -825,13 +913,13 @@ end : cam_array
 
    assign i0_csr_write_only_d = i0_csr_write & ~i0_dp.csr_read;
 
-   assign dec_csr_wen_unq_d = (i0_dp.csr_clr | i0_dp.csr_set | i0_csr_write);   // for csr legal, can't write read-only csr
+   assign dec_csr_wen_unq_d = (i0_dp.csr_clr | i0_dp.csr_set | i0_csr_write) & i0_valid_d;   // for csr legal, can't write read-only csr
 
-   assign dec_csr_any_unq_d = any_csr_d;
+   assign dec_csr_any_unq_d = any_csr_d & i0_valid_d;
 
 
-   assign dec_csr_rdaddr_d[11:0]  =  i0[31:20];
-   assign dec_csr_wraddr_r[11:0] =  r_d.csrwaddr[11:0];
+   assign dec_csr_rdaddr_d[11:0] =  {12{dec_csr_any_unq_d}} & i0[31:20];
+   assign dec_csr_wraddr_r[11:0] =  {12{r_d.csrwen & r_d.i0valid}} & r_d.csrwaddr[11:0];
 
 
    // make sure csr doesn't write same cycle as dec_tlu_flush_lower_wb
@@ -853,7 +941,7 @@ end : cam_array
 
    // perform the update operation if any
 
-   rvdffe #(37) csr_rddata_x_ff (.*, .en(i0_x_data_en), .din( {i0[19:15],dec_csr_rddata_d[31:0]}), .dout({csrimm_x[4:0],csr_rddata_x[31:0]}));
+   rvdffe #(37) csr_rddata_x_ff (.*, .en(i0_x_data_en & any_csr_d), .din( {i0[19:15],dec_csr_rddata_d[31:0]}), .dout({csrimm_x[4:0],csr_rddata_x[31:0]}));
 
 
    assign csr_mask_x[31:0]       = ({32{ csr_imm_x}} & {27'b0,csrimm_x[4:0]}) |
@@ -875,15 +963,13 @@ end : cam_array
 
    assign pause_state_in = (dec_tlu_wr_pause_r | pause_state) & ~clear_pause;
 
-   rvdff #(1) pause_state_f (.*, .clk(data_gate_clk), .din(pause_state_in), .dout(pause_state));
 
 
    assign dec_pause_state = pause_state;
 
-   rvdff #(2) pause_state_r_ff (.*, .clk(data_gate_clk), .din({dec_tlu_wr_pause_r,tlu_wr_pause_r1}), .dout({tlu_wr_pause_r1,tlu_wr_pause_r2}));
 
 
-   assign dec_pause_state_cg = pause_state & ~tlu_wr_pause_r1 & ~tlu_wr_pause_r2;
+      assign dec_pause_state_cg = pause_state & ~tlu_wr_pause_r1 & ~tlu_wr_pause_r2;
 
 // end pause
 
@@ -894,19 +980,16 @@ end : cam_array
                                     (dec_tlu_wr_pause_r) ? dec_csr_wrdata_r[31:0] : write_csr_data_x[31:0];
 
    // will hold until write-back at which time the CSR will be updated while GPR is possibly written with prior CSR
-   rvdffe #(32) write_csr_ff (.*, .en(csr_data_wen), .din(write_csr_data_in[31:0]), .dout(write_csr_data[31:0]));
+   rvdffe #(32) write_csr_ff (.*, .clk(free_l2clk), .en(csr_data_wen), .din(write_csr_data_in[31:0]), .dout(write_csr_data[31:0]));
 
    assign pause_stall = pause_state;
 
    // for csr write only data is produced by the alu
-   assign dec_csr_wrdata_r[31:0]  = (r_d.csrwonly) ? i0_result_corr_r[31:0] : write_csr_data[31:0];
+   assign dec_csr_wrdata_r[31:0]  = (r_d.csrwonly & r_d.i0valid) ? i0_result_corr_r[31:0] : write_csr_data[31:0];
 
 
 
-// read the csr value through rs2 immed port
-   assign dec_i0_immed_d[31:0] = ({32{ i0_dp.csr_read}} & dec_csr_rddata_d[31:0]) |
-                                 ({32{~i0_dp.csr_read}} & i0_immed_d[31:0]);
-// end csr stuff
+   assign dec_i0_immed_d[31:0] =  i0_immed_d[31:0];
 
    assign     i0_immed_d[31:0] = ({32{i0_dp.imm12}}                         & { {20{i0[31]}},i0[31:20] }) |  // jalr
                                  ({32{i0_dp.shimm5}}                        & {  27'b0,      i0[24:20] }) |
@@ -924,7 +1007,9 @@ end : cam_array
 
    assign i0_valid_d = dec_ib0_valid_d;
 
-   assign i0_load_stall_d =   i0_dp.load & (lsu_load_stall_any | dma_dccm_stall_any);
+   // load_stall includes bus_barrier
+
+   assign i0_load_stall_d = (i0_dp.load ) & (lsu_load_stall_any | dma_dccm_stall_any);
 
    assign i0_store_stall_d =  i0_dp.store & (lsu_store_stall_any | dma_dccm_stall_any);
 
@@ -981,11 +1066,56 @@ end : cam_array
 
 
 
+   if       (pt.BITMANIP_ZBB == 1)
+     assign bitmanip_zbb_legal      =  1'b1;
+   else
+     assign bitmanip_zbb_legal      = ~(i0_dp.zbb & ~i0_dp.zbp);
+
+   if       (pt.BITMANIP_ZBS == 1)
+     assign bitmanip_zbs_legal      =  1'b1;
+   else
+     assign bitmanip_zbs_legal      = ~i0_dp.zbs;
+
+   if       (pt.BITMANIP_ZBE == 1)
+     assign bitmanip_zbe_legal      =  1'b1;
+   else
+     assign bitmanip_zbe_legal      = ~i0_dp.zbe;
+
+   if       (pt.BITMANIP_ZBC == 1)
+     assign bitmanip_zbc_legal      =  1'b1;
+   else
+     assign bitmanip_zbc_legal      = ~i0_dp.zbc;
+
+   if       (pt.BITMANIP_ZBP == 1)
+     assign bitmanip_zbp_legal      =  1'b1;
+   else
+     assign bitmanip_zbp_legal      = ~(i0_dp.zbp & ~i0_dp.zbb);
+
+   if       (pt.BITMANIP_ZBR == 1)
+     assign bitmanip_zbr_legal      =  1'b1;
+   else
+     assign bitmanip_zbr_legal      = ~i0_dp.zbr;
+
+   if       (pt.BITMANIP_ZBF == 1)
+     assign bitmanip_zbf_legal      =  1'b1;
+   else
+     assign bitmanip_zbf_legal      = ~i0_dp.zbf;
+
+   if (pt.BITMANIP_ZBA == 1)
+     assign bitmanip_zba_legal      =  1'b1;
+   else
+     assign bitmanip_zba_legal      = ~i0_dp.zba;
+
+   if     ( (pt.BITMANIP_ZBB == 1) | (pt.BITMANIP_ZBP == 1) )
+     assign bitmanip_zbb_zbp_legal  =  1'b1;
+   else
+     assign bitmanip_zbb_zbp_legal  = ~(i0_dp.zbb & i0_dp.zbp);
 
 
    assign any_csr_d      =  i0_dp.csr_read | i0_csr_write;
+   assign bitmanip_legal =  bitmanip_zbb_legal & bitmanip_zbs_legal & bitmanip_zbe_legal & bitmanip_zbc_legal & bitmanip_zbp_legal & bitmanip_zbr_legal & bitmanip_zbf_legal & bitmanip_zba_legal & bitmanip_zbb_zbp_legal;
 
-   assign i0_legal       =  i0_dp.legal & (~any_csr_d | dec_csr_legal_d);
+   assign i0_legal       =  i0_dp.legal & (~any_csr_d | dec_csr_legal_d) & bitmanip_legal;
 
 
 
@@ -1000,7 +1130,6 @@ end : cam_array
 
    assign illegal_lockout_in = (shift_illegal | illegal_lockout) & ~flush_final_r;
 
-   rvdff #(1) illegal_lockout_any_ff (.*, .clk(data_gate_clk), .din(illegal_lockout_in), .dout(illegal_lockout));
 
 
    // allow illegals to flow down the pipe
@@ -1017,8 +1146,8 @@ end : cam_array
 
    assign dec_pmu_decode_stall = i0_valid_d & ~dec_i0_decode_d;
 
-   assign dec_pmu_postsync_stall = postsync_stall;
-   assign dec_pmu_presync_stall  = presync_stall;
+   assign dec_pmu_postsync_stall = postsync_stall & i0_valid_d;
+   assign dec_pmu_presync_stall  = presync_stall & i0_valid_d;
 
 
 
@@ -1027,7 +1156,6 @@ end : cam_array
                          ( ps_stall & prior_inflight_x                 );
 
 
-   rvdff #(1) postsync_stallff (.*, .clk(data_gate_clk), .din(ps_stall_in), .dout(ps_stall));
 
    assign postsync_stall =  ps_stall;
 
@@ -1038,19 +1166,19 @@ end : cam_array
    assign prior_inflight = prior_inflight_x | prior_inflight_wb;
 
    assign dec_i0_alu_decode_d = i0_exulegal_decode_d & i0_dp.alu;
+   assign dec_i0_branch_d     = i0_dp.condbr | i0_dp.jal | i0_br_error_all;
 
    assign lsu_decode_d = i0_legal_decode_d    & i0_dp.lsu;
    assign mul_decode_d = i0_exulegal_decode_d & i0_dp.mul;
    assign div_decode_d = i0_exulegal_decode_d & i0_dp.div;
 
+   assign dec_qual_lsu_d = i0_dp.lsu;
 
 
 
-   rvdff  #(1) flushff (.*, .clk(data_gate_clk), .din(exu_flush_final), .dout(flush_final_r));
 
 
-
-// scheduling logic for primary alu's
+// scheduling logic for alu
 
    assign i0_rs1_depend_i0_x  = dec_i0_rs1_en_d & x_d.i0v & (x_d.i0rd[4:0] == i0r.rs1[4:0]);
    assign i0_rs1_depend_i0_r  = dec_i0_rs1_en_d & r_d.i0v & (r_d.i0rd[4:0] == i0r.rs1[4:0]);
@@ -1100,8 +1228,8 @@ end : cam_array
 
 
    assign d_t.legal              =  i0_legal_decode_d;
-   assign d_t.icaf               =  i0_icaf_d & i0_legal_decode_d;            // dbecc is icaf exception
-   assign d_t.icaf_f1            =  dec_i0_icaf_f1_d & i0_legal_decode_d;     // this includes icaf and dbecc
+   assign d_t.icaf               =  i0_icaf_d & i0_legal_decode_d;                // dbecc is icaf exception
+   assign d_t.icaf_second        =  dec_i0_icaf_second_d & i0_legal_decode_d;     // this includes icaf and dbecc
    assign d_t.icaf_type[1:0]     =  dec_i0_icaf_type_d[1:0];
 
    assign d_t.fence_i            = (i0_dp.fence_i | debug_fence_i) & i0_legal_decode_d;
@@ -1116,7 +1244,7 @@ end : cam_array
 
 
 
-   rvdffe #( $bits(el2_trap_pkt_t) ) trap_xff (.*, .en(i0_x_ctl_en), .din(d_t),  .dout(x_t));
+   rvdfflie #( .WIDTH($bits(el2_trap_pkt_t)),.LEFT(9) ) trap_xff (.*, .en(i0_x_ctl_en), .din(d_t),  .dout(x_t));
 
    always_comb begin
       x_t_in = x_t;
@@ -1124,10 +1252,8 @@ end : cam_array
    end
 
 
-   rvdffe  #($bits(el2_trap_pkt_t) ) trap_r_ff (.*, .en(i0_x_ctl_en), .din(x_t_in),  .dout(r_t));
+   rvdfflie  #( .WIDTH($bits(el2_trap_pkt_t)),.LEFT(9) ) trap_r_ff (.*, .en(i0_x_ctl_en), .din(x_t_in),  .dout(r_t));
 
-   rvdff   #(4) lsu_trigger_match_rff    (.*, .din(lsu_trigger_match_m[3:0]),  .dout(lsu_trigger_match_r[3:0]));
-   rvdff   #(1) lsu_pmu_misaligned_m_rff (.*, .din(lsu_pmu_misaligned_m),      .dout(lsu_pmu_misaligned_r));
 
     always_comb begin
 
@@ -1171,7 +1297,7 @@ end : cam_array
 
    assign d_d.csrwen                =  dec_csr_wen_unq_d   & i0_legal_decode_d;
    assign d_d.csrwonly              =  i0_csr_write_only_d & dec_i0_decode_d;
-   assign d_d.csrwaddr[11:0]        =  i0[31:20];    // csr write address for rd==0 case
+   assign d_d.csrwaddr[11:0]        =  (d_d.csrwen) ? i0[31:20] : '0;    // csr write address for rd==0 case
 
 
    rvdff  #(3) i0cgff               (.*, .clk(active_clk),            .din(i0_pipe_en[3:1]), .dout(i0_pipe_en[2:0]));
@@ -1184,14 +1310,13 @@ end : cam_array
    assign i0_x_data_en              = ( i0_pipe_en[3]   | clk_override);
    assign i0_r_data_en              = ( i0_pipe_en[2]   | clk_override);
    assign i0_wb_data_en             = ( i0_pipe_en[1]   | clk_override);
-   assign i0_wb1_data_en            = ( i0_pipe_en[0]   | clk_override);
 
    assign dec_data_en[1:0]          = {i0_x_data_en, i0_r_data_en};
    assign dec_ctl_en[1:0]           = {i0_x_ctl_en,  i0_r_ctl_en};
 
 
 
-   rvdffe #( $bits(el2_dest_pkt_t) ) e1ff (.*, .en(i0_x_ctl_en), .din(d_d),  .dout(x_d));
+   rvdfflie #( .WIDTH($bits(el2_dest_pkt_t)),.LEFT(15) ) e1ff (.*, .en(i0_x_ctl_en), .din(d_d),  .dout(x_d));
 
    always_comb begin
       x_d_in = x_d;
@@ -1200,7 +1325,7 @@ end : cam_array
       x_d_in.i0valid     = x_d.i0valid & ~dec_tlu_flush_lower_wb & ~dec_tlu_flush_lower_r;
    end
 
-   rvdffe #( $bits(el2_dest_pkt_t) ) r_d_ff (.*, .en(i0_r_ctl_en), .din(x_d_in), .dout(r_d));
+   rvdfflie #( .WIDTH($bits(el2_dest_pkt_t)), .LEFT(15) ) r_d_ff (.*, .en(i0_r_ctl_en), .din(x_d_in), .dout(r_d));
 
 
    always_comb begin
@@ -1208,6 +1333,7 @@ end : cam_array
         r_d_in = r_d;
 
 
+      // for the bench
       r_d_in.i0rd[4:0]   =  r_d.i0rd[4:0];
 
       r_d_in.i0v         = (r_d.i0v      & ~dec_tlu_flush_lower_wb);
@@ -1219,7 +1345,7 @@ end : cam_array
    end
 
 
-   rvdffe #($bits(el2_dest_pkt_t)) wbff (.*, .en(i0_wb_ctl_en), .din(r_d_in), .dout(wbd));
+   rvdfflie #(.WIDTH($bits(el2_dest_pkt_t)), .LEFT(15)) wbff (.*, .en(i0_wb_ctl_en), .din(r_d_in), .dout(wbd));
 
    assign dec_i0_waddr_r[4:0]       =  r_d_in.i0rd[4:0];
 
@@ -1229,13 +1355,11 @@ end : cam_array
 
 
    // divide stuff
-
    assign div_e1_to_r         = (x_d.i0div & x_d.i0valid) |
                                 (r_d.i0div & r_d.i0valid);
 
    assign div_active_in = i0_div_decode_d | (div_active & ~exu_div_wren & ~nonblock_div_cancel);
 
-   rvdff  #(1) divactiveff   (.*, .clk(free_clk), .din(div_active_in), .dout(div_active));
 
    assign dec_div_active = div_active;
 
@@ -1260,9 +1384,6 @@ end : cam_array
 
    assign i0_div_decode_d            =  i0_legal_decode_d & i0_dp.div;
 
-   rvdffs #(5) divff                 (.*, .en(i0_div_decode_d), .din(i0r.rd[4:0]),  .dout(div_waddr_wb[4:0]));
-
-
 // for load_to_use_plus1, the load result data is merged in R stage instead of D
 
    if ( pt.LOAD_TO_USE_PLUS1 == 1 ) begin : genblock1
@@ -1275,7 +1396,7 @@ end : cam_array
    end
 
 
-   rvdffe #(32) i0_result_r_ff       (.*, .en(i0_r_data_en),  .din(i0_result_x[31:0]),       .dout(i0_result_r_raw[31:0]));
+   rvdffe #(32) i0_result_r_ff       (.*, .en(i0_r_data_en & (x_d.i0v | x_d.csrwen | debug_valid_x)),  .din(i0_result_x[31:0]),       .dout(i0_result_r_raw[31:0]));
 
    // correct lsu load data - don't use for bypass, do pass down the pipe
    assign i0_result_corr_r[31:0]     = (r_d.i0v & r_d.i0load) ? lsu_result_corr_r[31:0] : i0_result_r_raw[31:0];
@@ -1285,22 +1406,29 @@ end : cam_array
 
 
 
-
    assign i0_wb_en                   =  i0_wb_data_en;
-   assign i0_wb1_en                  =  i0_wb1_data_en;
+
    assign i0_inst_wb_in[31:0]        =  i0_inst_r[31:0];
    assign i0_inst_d[31:0]            = (dec_i0_pc4_d)    ?  i0[31:0]                                  :  {16'b0, ifu_i0_cinst[15:0]};
 
-   rvdffe #(18) divinstff            (.*, .en(i0_div_decode_d), .din(i0_inst_d[24:7]),         .dout(div_inst[24:7]));
-   rvdffe #(32) i0xinstff            (.*, .en(i0_x_data_en),    .din(i0_inst_d[31:0]),         .dout(i0_inst_x[31:0]));
-   rvdffe #(32) i0cinstff            (.*, .en(i0_r_data_en),    .din(i0_inst_x[31:0]),         .dout(i0_inst_r[31:0]));
-   rvdffe #(32) i0wbinstff           (.*, .en(i0_wb_en),        .din(i0_inst_wb_in[31:0]),     .dout(i0_inst_wb[31:0]));
-   rvdffe #(32) i0wb1instff          (.*, .en(i0_wb1_en),       .din(i0_inst_wb[31:0]),        .dout(dec_i0_inst_wb1[31:0]));
-   rvdffe #(31) i0wbpcff             (.*, .en(i0_wb_en),        .din(dec_tlu_i0_pc_r[31:1]),   .dout(    i0_pc_wb[31:1]));
-   rvdffe #(31) i0wb1pcff            (.*, .en(i0_wb1_en),       .din(        i0_pc_wb[31:1]),  .dout(dec_i0_pc_wb1[31:1]));
+
+   assign trace_enable = ~dec_tlu_trace_disable;
 
 
-   rvdffe #(31) i0_pc_r_ff           (.*, .en(i0_r_data_en), .din(exu_i0_pc_x[31:1]), .dout(dec_i0_pc_r[31:1]));
+   rvdffe #(.WIDTH(5),.OVERRIDE(1))  i0rdff  (.*, .en(i0_div_decode_d),        .din(i0r.rd[4:0]),             .dout(div_waddr_wb[4:0]));
+
+   rvdffe #(32) i0xinstff            (.*, .en(i0_x_data_en & trace_enable),    .din(i0_inst_d[31:0]),         .dout(i0_inst_x[31:0]));
+   rvdffe #(32) i0cinstff            (.*, .en(i0_r_data_en & trace_enable),    .din(i0_inst_x[31:0]),         .dout(i0_inst_r[31:0]));
+
+   rvdffe #(32) i0wbinstff           (.*, .en(i0_wb_en & trace_enable),        .din(i0_inst_wb_in[31:0]),     .dout(i0_inst_wb[31:0]));
+   rvdffe #(31) i0wbpcff             (.*, .en(i0_wb_en & trace_enable),        .din(dec_tlu_i0_pc_r[31:1]),   .dout(  i0_pc_wb[31:1]));
+
+   assign dec_i0_inst_wb[31:0] = i0_inst_wb[31:0];
+   assign dec_i0_pc_wb[31:1] = i0_pc_wb[31:1];
+
+
+
+   rvdffpcie #(31) i0_pc_r_ff           (.*, .en(i0_r_data_en), .din(exu_i0_pc_x[31:1]), .dout(dec_i0_pc_r[31:1]));
 
    assign dec_tlu_i0_pc_r[31:1]      = dec_i0_pc_r[31:1];
 
@@ -1331,19 +1459,18 @@ end : cam_array
    assign i0_rs2bypass[0]                =  i0_rs2_depth_d[1] & (i0_rs2_class_d.alu | i0_rs2_class_d.mul | i0_rs2_class_d.load);
 
 
-   assign dec_i0_rs1_bypass_en_d[1]      =  i0_rs1bypass[2];
-   assign dec_i0_rs1_bypass_en_d[0]      =  i0_rs1bypass[1] | i0_rs1bypass[0] | (~i0_rs1bypass[2] & i0_rs1_nonblock_load_bypass_en_d);
-   assign dec_i0_rs2_bypass_en_d[1]      =  i0_rs2bypass[2];
-   assign dec_i0_rs2_bypass_en_d[0]      =  i0_rs2bypass[1] | i0_rs2bypass[0] | (~i0_rs2bypass[2] & i0_rs2_nonblock_load_bypass_en_d);
+   assign dec_i0_rs1_bypass_en_d[3]      =  i0_rs1_nonblock_load_bypass_en_d & ~i0_rs1bypass[0] & ~i0_rs1bypass[1] & ~i0_rs1bypass[2];
+   assign dec_i0_rs1_bypass_en_d[2]      =  i0_rs1bypass[2];
+   assign dec_i0_rs1_bypass_en_d[1]      =  i0_rs1bypass[1];
+   assign dec_i0_rs1_bypass_en_d[0]      =  i0_rs1bypass[0];
+
+   assign dec_i0_rs2_bypass_en_d[3]      =  i0_rs2_nonblock_load_bypass_en_d & ~i0_rs2bypass[0] & ~i0_rs2bypass[1] & ~i0_rs2bypass[2];
+   assign dec_i0_rs2_bypass_en_d[2]      =  i0_rs2bypass[2];
+   assign dec_i0_rs2_bypass_en_d[1]      =  i0_rs2bypass[1];
+   assign dec_i0_rs2_bypass_en_d[0]      =  i0_rs2bypass[0];
 
 
-   assign dec_i0_rs1_bypass_data_d[31:0] = ({32{ i0_rs1bypass[1]                                                      }} & lsu_result_m[31:0]) |
-                                           ({32{                    i0_rs1bypass[0]                                   }} & i0_result_r[31:0] ) |
-                                           ({32{~i0_rs1bypass[1] & ~i0_rs1bypass[0] & i0_rs1_nonblock_load_bypass_en_d}} & lsu_nonblock_load_data[31:0]);
-
-   assign dec_i0_rs2_bypass_data_d[31:0] = ({32{ i0_rs2bypass[1]                                                      }} & lsu_result_m[31:0]) |
-                                           ({32{                    i0_rs2bypass[0]                                   }} & i0_result_r[31:0] ) |
-                                           ({32{~i0_rs2bypass[1] & ~i0_rs2bypass[0] & i0_rs2_nonblock_load_bypass_en_d}} & lsu_nonblock_load_data[31:0]);
+   assign dec_i0_result_r[31:0]          =  i0_result_r[31:0];
 
 
 endmodule // el2_dec_decode_ctl
@@ -1381,7 +1508,14 @@ import el2_pkg::*;
    assign i[31:0] = inst[31:0];
 
 
-assign out.alu = (i[2]) | (i[6]) | (!i[25]&i[4]) | (!i[5]&i[4]);
+assign out.alu = (i[30]&i[24]&i[23]&!i[22]&!i[21]&!i[20]&i[14]&!i[5]&i[4]) | (i[29]
+    &!i[27]&!i[24]&i[4]) | (!i[25]&!i[13]&!i[12]&i[4]) | (!i[30]&!i[25]
+    &i[13]&i[12]) | (i[27]&i[25]&i[14]&i[4]) | (i[29]&i[27]&!i[14]&i[4]) | (
+    i[29]&!i[14]&i[5]&i[4]) | (!i[27]&!i[25]&i[14]&i[4]) | (i[30]&!i[29]
+    &!i[13]&i[4]) | (!i[30]&!i[27]&!i[25]&i[4]) | (i[13]&!i[5]&i[4]) | (
+    !i[12]&!i[5]&i[4]) | (i[2]) | (i[6]) | (i[30]&i[24]&i[23]&i[22]&i[21]
+    &i[20]&!i[5]&i[4]) | (!i[30]&i[29]&!i[24]&!i[23]&i[22]&i[21]&i[20]
+    &!i[5]&i[4]) | (!i[30]&i[24]&!i[23]&!i[22]&!i[21]&!i[20]&!i[5]&i[4]);
 
 assign out.rs1 = (!i[14]&!i[13]&!i[2]) | (!i[13]&i[11]&!i[2]) | (i[19]&i[13]&!i[2]) | (
     !i[13]&i[10]&!i[2]) | (i[18]&i[13]&!i[2]) | (!i[13]&i[9]&!i[2]) | (
@@ -1396,7 +1530,8 @@ assign out.imm12 = (!i[4]&!i[3]&i[2]) | (i[13]&!i[5]&i[4]&!i[2]) | (!i[13]&!i[12
 
 assign out.rd = (!i[5]&!i[2]) | (i[5]&i[2]) | (i[4]);
 
-assign out.shimm5 = (!i[13]&i[12]&!i[5]&i[4]&!i[2]);
+assign out.shimm5 = (i[27]&!i[13]&i[12]&!i[5]&i[4]&!i[2]) | (!i[30]&!i[13]&i[12]
+    &!i[5]&i[4]&!i[2]) | (i[14]&!i[13]&i[12]&!i[5]&i[4]&!i[2]);
 
 assign out.imm20 = (i[5]&i[3]) | (i[4]&i[2]);
 
@@ -1411,30 +1546,33 @@ assign out.lsu = (!i[6]&!i[4]&!i[2]);
 assign out.add = (!i[14]&!i[13]&!i[12]&!i[5]&i[4]) | (!i[5]&!i[3]&i[2]) | (!i[30]
     &!i[25]&!i[14]&!i[13]&!i[12]&!i[6]&i[4]&!i[2]);
 
-assign out.sub = (i[30]&!i[12]&!i[6]&i[5]&i[4]&!i[2]) | (!i[25]&!i[14]&i[13]&!i[6]
-    &i[4]&!i[2]) | (!i[14]&i[13]&!i[5]&i[4]&!i[2]) | (i[6]&!i[4]&!i[2]);
+assign out.sub = (i[30]&!i[14]&!i[12]&!i[6]&i[5]&i[4]&!i[2]) | (!i[29]&!i[25]&!i[14]
+    &i[13]&!i[6]&i[4]&!i[2]) | (i[27]&i[25]&i[14]&!i[6]&i[5]&!i[2]) | (
+    !i[14]&i[13]&!i[5]&i[4]&!i[2]) | (i[6]&!i[4]&!i[2]);
 
-assign out.land = (i[14]&i[13]&i[12]&!i[5]&!i[2]) | (!i[25]&i[14]&i[13]&i[12]&!i[6]
-    &!i[2]);
+assign out.land = (!i[27]&!i[25]&i[14]&i[13]&i[12]&!i[6]&!i[2]) | (i[14]&i[13]&i[12]
+    &!i[5]&!i[2]);
 
-assign out.lor = (!i[6]&i[3]) | (!i[25]&i[14]&i[13]&!i[12]&!i[6]&!i[2]) | (i[5]&i[4]
-    &i[2]) | (!i[13]&!i[12]&i[6]&i[4]) | (i[14]&i[13]&!i[12]&!i[5]&!i[2]);
+assign out.lor = (!i[6]&i[3]) | (!i[29]&!i[27]&!i[25]&i[14]&i[13]&!i[12]&!i[6]&!i[2]) | (
+    i[5]&i[4]&i[2]) | (!i[13]&!i[12]&i[6]&i[4]) | (i[14]&i[13]&!i[12]
+    &!i[5]&!i[2]);
 
-assign out.lxor = (!i[25]&i[14]&!i[13]&!i[12]&i[4]&!i[2]) | (i[14]&!i[13]&!i[12]
-    &!i[5]&i[4]&!i[2]);
+assign out.lxor = (!i[29]&!i[27]&!i[25]&i[14]&!i[13]&!i[12]&i[4]&!i[2]) | (i[14]
+    &!i[13]&!i[12]&!i[5]&i[4]&!i[2]);
 
-assign out.sll = (!i[25]&!i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+assign out.sll = (!i[29]&!i[27]&!i[25]&!i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
 
-assign out.sra = (i[30]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+assign out.sra = (i[30]&!i[29]&!i[27]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
 
-assign out.srl = (!i[30]&!i[25]&i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+assign out.srl = (!i[30]&!i[29]&!i[27]&!i[25]&i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
 
-assign out.slt = (!i[25]&!i[14]&i[13]&!i[6]&i[4]&!i[2]) | (!i[14]&i[13]&!i[5]&i[4]
-    &!i[2]);
+assign out.slt = (!i[29]&!i[25]&!i[14]&i[13]&!i[6]&i[4]&!i[2]) | (!i[14]&i[13]&!i[5]
+    &i[4]&!i[2]);
 
-assign out.unsign = (!i[14]&i[13]&i[12]&!i[5]&!i[2]) | (i[13]&i[6]&!i[4]&!i[2]) | (
-    i[14]&!i[5]&!i[4]) | (!i[25]&!i[14]&i[13]&i[12]&!i[6]&!i[2]) | (
-    i[25]&i[14]&i[12]&!i[6]&i[5]&!i[2]);
+assign out.unsign = (!i[27]&i[25]&i[14]&i[12]&!i[6]&i[5]&!i[2]) | (!i[14]&i[13]
+    &i[12]&!i[5]&!i[2]) | (i[13]&i[6]&!i[4]&!i[2]) | (i[14]&!i[5]&!i[4]) | (
+    !i[25]&!i[14]&i[13]&i[12]&!i[6]&!i[2]) | (i[27]&i[25]&i[14]&i[13]
+    &!i[6]&i[5]&!i[2]);
 
 assign out.condbr = (i[6]&!i[4]&!i[2]);
 
@@ -1489,56 +1627,198 @@ assign out.ecall = (!i[21]&!i[20]&!i[13]&!i[12]&i[6]&i[4]);
 
 assign out.mret = (i[29]&!i[13]&!i[12]&i[6]&i[4]);
 
-assign out.mul = (i[25]&!i[14]&!i[6]&i[5]&i[4]&!i[2]);
+assign out.mul = (!i[30]&i[27]&i[24]&i[20]&i[14]&!i[13]&i[12]&!i[5]&i[4]&!i[2]) | (
+    i[29]&i[27]&!i[24]&i[23]&i[14]&!i[13]&i[12]&!i[5]&i[4]&!i[2]) | (
+    i[29]&i[27]&!i[24]&!i[20]&i[14]&!i[13]&i[12]&!i[5]&i[4]&!i[2]) | (
+    i[27]&!i[25]&i[13]&!i[12]&!i[6]&i[5]&i[4]&!i[2]) | (i[30]&i[27]&i[13]
+    &!i[6]&i[5]&i[4]&!i[2]) | (i[29]&i[27]&i[22]&!i[20]&i[14]&!i[13]
+    &i[12]&!i[5]&i[4]&!i[2]) | (i[29]&i[27]&!i[21]&i[20]&i[14]&!i[13]
+    &i[12]&!i[5]&i[4]&!i[2]) | (i[29]&i[27]&!i[22]&i[21]&i[14]&!i[13]
+    &i[12]&!i[5]&i[4]&!i[2]) | (i[30]&i[29]&i[27]&!i[23]&i[14]&!i[13]
+    &i[12]&!i[5]&i[4]&!i[2]) | (!i[30]&i[27]&i[23]&i[14]&!i[13]&i[12]
+    &!i[5]&i[4]&!i[2]) | (!i[30]&!i[29]&i[27]&!i[25]&!i[13]&i[12]&!i[6]
+    &i[4]&!i[2]) | (i[25]&!i[14]&!i[6]&i[5]&i[4]&!i[2]) | (i[30]&!i[27]
+    &i[24]&!i[14]&!i[13]&i[12]&!i[5]&i[4]&!i[2]) | (i[29]&i[27]&i[14]
+    &!i[6]&i[5]&!i[2]);
 
-assign out.rs1_sign = (i[25]&!i[14]&i[13]&!i[12]&!i[6]&i[5]&i[4]&!i[2]) | (i[25]
-    &!i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+assign out.rs1_sign = (!i[27]&i[25]&!i[14]&i[13]&!i[12]&!i[6]&i[5]&i[4]&!i[2]) | (
+    !i[27]&i[25]&!i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
 
-assign out.rs2_sign = (i[25]&!i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+assign out.rs2_sign = (!i[27]&i[25]&!i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
 
 assign out.low = (i[25]&!i[14]&!i[13]&!i[12]&i[5]&i[4]&!i[2]);
 
-assign out.div = (i[25]&i[14]&!i[6]&i[5]&!i[2]);
+assign out.div = (!i[27]&i[25]&i[14]&!i[6]&i[5]&!i[2]);
 
-assign out.rem = (i[25]&i[14]&i[13]&!i[6]&i[5]&!i[2]);
+assign out.rem = (!i[27]&i[25]&i[14]&i[13]&!i[6]&i[5]&!i[2]);
 
 assign out.fence = (!i[5]&i[3]);
 
 assign out.fence_i = (i[12]&!i[5]&i[3]);
 
-assign out.pm_alu = (i[28]&i[22]&!i[13]&!i[12]&i[4]) | (i[4]&i[2]) | (!i[25]&!i[6]
-    &i[4]) | (!i[5]&i[4]);
+assign out.clz = (i[30]&!i[27]&!i[24]&!i[22]&!i[21]&!i[20]&!i[14]&!i[13]&i[12]&!i[5]
+    &i[4]&!i[2]);
+
+assign out.ctz = (i[30]&!i[27]&!i[24]&!i[22]&i[20]&!i[14]&!i[13]&i[12]&!i[5]&i[4]
+    &!i[2]);
+
+assign out.pcnt = (i[30]&!i[27]&!i[24]&i[21]&!i[14]&!i[13]&i[12]&!i[5]&i[4]&!i[2]);
+
+assign out.sext_b = (i[30]&!i[27]&i[22]&!i[20]&!i[14]&!i[13]&i[12]&!i[5]&i[4]&!i[2]);
+
+assign out.sext_h = (i[30]&!i[27]&i[22]&i[20]&!i[14]&!i[13]&i[12]&!i[5]&i[4]&!i[2]);
+
+assign out.slo = (!i[30]&i[29]&!i[27]&!i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+
+assign out.sro = (!i[30]&i[29]&!i[27]&i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+
+assign out.min = (i[27]&i[25]&i[14]&!i[12]&!i[6]&i[5]&!i[2]);
+
+assign out.max = (i[27]&i[25]&i[14]&i[12]&!i[6]&i[5]&!i[2]);
+
+assign out.pack = (!i[30]&i[27]&!i[25]&!i[13]&!i[12]&i[5]&i[4]&!i[2]);
+
+assign out.packu = (i[30]&i[27]&!i[13]&!i[12]&i[5]&i[4]&!i[2]);
+
+assign out.packh = (!i[30]&i[27]&!i[25]&i[13]&i[12]&!i[6]&i[5]&!i[2]);
+
+assign out.rol = (i[30]&!i[27]&!i[14]&i[12]&!i[6]&i[5]&i[4]&!i[2]);
+
+assign out.ror = (i[30]&i[29]&!i[27]&i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+
+assign out.zbb = (i[30]&!i[27]&!i[24]&!i[14]&!i[13]&i[12]&!i[5]&i[4]&!i[2]) | (
+    !i[30]&i[27]&i[14]&i[13]&i[12]&!i[6]&i[5]&!i[2]) | (i[30]&i[29]&!i[27]
+    &i[14]&!i[13]&i[12]&!i[5]&i[4]&!i[2]) | (i[27]&!i[13]&!i[12]&i[5]
+    &i[4]&!i[2]) | (i[30]&i[14]&!i[13]&!i[12]&!i[6]&i[5]&!i[2]) | (i[30]
+    &!i[27]&i[13]&!i[6]&i[5]&i[4]&!i[2]) | (i[30]&i[29]&!i[27]&!i[6]&i[5]
+    &i[4]&!i[2]) | (i[30]&i[29]&i[24]&i[23]&i[22]&i[21]&i[20]&i[14]&!i[13]
+    &i[12]&!i[5]&i[4]&!i[2]) | (!i[30]&i[29]&i[27]&!i[24]&!i[23]&i[22]
+    &i[21]&i[20]&i[14]&!i[13]&i[12]&!i[5]&i[4]&!i[2]) | (!i[30]&i[27]
+    &i[24]&!i[23]&!i[22]&!i[21]&!i[20]&i[14]&!i[13]&i[12]&!i[5]&i[4]&!i[2]) | (
+    i[30]&i[29]&i[24]&i[23]&!i[22]&!i[21]&!i[20]&i[14]&!i[13]&i[12]&!i[5]
+    &i[4]&!i[2]) | (i[27]&i[25]&i[14]&!i[6]&i[5]&!i[2]);
+
+assign out.sbset = (!i[30]&i[29]&i[27]&!i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+
+assign out.sbclr = (i[30]&!i[29]&!i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+
+assign out.sbinv = (i[30]&i[29]&i[27]&!i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+
+assign out.sbext = (i[30]&!i[29]&i[27]&i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+
+assign out.zbs = (i[29]&i[27]&!i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]) | (i[30]&!i[29]
+    &i[27]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+
+assign out.bext = (!i[30]&i[27]&!i[25]&i[13]&!i[12]&!i[6]&i[5]&i[4]&!i[2]);
+
+assign out.bdep = (i[30]&i[27]&i[13]&!i[12]&!i[6]&i[5]&i[4]&!i[2]);
+
+assign out.zbe = (i[27]&!i[25]&i[13]&!i[12]&!i[6]&i[5]&i[4]&!i[2]);
+
+assign out.clmul = (i[27]&i[25]&!i[14]&!i[13]&!i[6]&i[5]&i[4]&!i[2]);
+
+assign out.clmulh = (i[27]&!i[14]&i[13]&i[12]&!i[6]&i[5]&!i[2]);
+
+assign out.clmulr = (i[27]&!i[14]&!i[12]&!i[6]&i[5]&i[4]&!i[2]);
+
+assign out.zbc = (i[27]&i[25]&!i[14]&!i[6]&i[5]&i[4]&!i[2]);
+
+assign out.grev = (i[30]&i[29]&i[27]&i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+
+assign out.gorc = (!i[30]&i[29]&i[27]&i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+
+assign out.shfl = (!i[30]&!i[29]&i[27]&!i[25]&!i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+
+assign out.unshfl = (!i[30]&!i[29]&i[27]&!i[25]&i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+
+assign out.zbp = (!i[30]&i[29]&!i[27]&!i[13]&i[12]&!i[5]&i[4]&!i[2]) | (!i[30]&!i[29]
+    &i[27]&!i[13]&i[12]&!i[5]&i[4]&!i[2]) | (i[30]&!i[27]&i[13]&!i[6]
+    &i[5]&i[4]&!i[2]) | (i[27]&!i[25]&!i[13]&!i[12]&i[5]&i[4]&!i[2]) | (
+    i[30]&i[14]&!i[13]&!i[12]&i[5]&i[4]&!i[2]) | (i[29]&!i[27]&i[12]&!i[6]
+    &i[5]&i[4]&!i[2]) | (!i[30]&!i[29]&i[27]&!i[25]&i[12]&!i[6]&i[5]&i[4]
+    &!i[2]) | (i[29]&i[14]&!i[13]&i[12]&!i[6]&i[4]&!i[2]);
+
+assign out.crc32_b = (i[30]&!i[27]&i[24]&!i[23]&!i[21]&!i[20]&!i[14]&!i[13]&i[12]
+    &!i[5]&i[4]&!i[2]);
+
+assign out.crc32_h = (i[30]&!i[27]&i[24]&!i[23]&i[20]&!i[14]&!i[13]&i[12]&!i[5]&i[4]
+    &!i[2]);
+
+assign out.crc32_w = (i[30]&!i[27]&i[24]&!i[23]&i[21]&!i[14]&!i[13]&i[12]&!i[5]&i[4]
+    &!i[2]);
+
+assign out.crc32c_b = (i[30]&!i[27]&i[23]&!i[21]&!i[20]&!i[14]&!i[13]&i[12]&!i[5]
+    &i[4]&!i[2]);
+
+assign out.crc32c_h = (i[30]&!i[27]&i[23]&i[20]&!i[14]&!i[13]&i[12]&!i[5]&i[4]&!i[2]);
+
+assign out.crc32c_w = (i[30]&!i[27]&i[23]&i[21]&!i[14]&!i[13]&i[12]&!i[5]&i[4]&!i[2]);
+
+assign out.zbr = (i[30]&!i[27]&i[24]&!i[14]&!i[13]&i[12]&!i[5]&i[4]&!i[2]);
+
+assign out.bfp = (i[30]&i[27]&i[13]&i[12]&!i[6]&i[5]&!i[2]);
+
+assign out.zbf = (i[30]&i[27]&i[13]&i[12]&!i[6]&i[5]&!i[2]);
+
+assign out.sh1add = (i[29]&!i[14]&!i[12]&!i[6]&i[5]&i[4]&!i[2]);
+
+assign out.sh2add = (i[29]&i[14]&!i[13]&!i[12]&i[5]&i[4]&!i[2]);
+
+assign out.sh3add = (i[29]&i[14]&i[13]&!i[6]&i[5]&!i[2]);
+
+assign out.zba = (i[29]&!i[12]&!i[6]&i[5]&i[4]&!i[2]);
+
+assign out.pm_alu = (i[28]&i[22]&!i[13]&!i[12]&i[4]) | (!i[30]&!i[29]&!i[27]&!i[25]
+    &!i[6]&i[4]) | (!i[29]&!i[27]&!i[25]&!i[13]&i[12]&!i[6]&i[4]) | (
+    !i[29]&!i[27]&!i[25]&!i[14]&!i[6]&i[4]) | (i[13]&!i[5]&i[4]) | (i[4]
+    &i[2]) | (!i[12]&!i[5]&i[4]);
 
 
-
-assign out.legal = (!i[31]&!i[30]&i[29]&i[28]&!i[27]&!i[26]&!i[25]&!i[24]&!i[23]
-    &!i[22]&i[21]&!i[20]&!i[19]&!i[18]&!i[17]&!i[16]&!i[15]&!i[14]&!i[11]
+assign out.legal = (!i[31]&!i[30]&!i[29]&i[28]&!i[27]&!i[26]&!i[25]&!i[24]&!i[23]
+    &i[22]&!i[21]&i[20]&!i[19]&!i[18]&!i[17]&!i[16]&!i[15]&!i[14]&!i[11]
     &!i[10]&!i[9]&!i[8]&!i[7]&i[6]&i[5]&i[4]&!i[3]&!i[2]&i[1]&i[0]) | (
-    !i[31]&!i[30]&!i[29]&i[28]&!i[27]&!i[26]&!i[25]&!i[24]&!i[23]&i[22]
-    &!i[21]&i[20]&!i[19]&!i[18]&!i[17]&!i[16]&!i[15]&!i[14]&!i[11]&!i[10]
+    !i[31]&!i[30]&i[29]&i[28]&!i[27]&!i[26]&!i[25]&!i[24]&!i[23]&!i[22]
+    &i[21]&!i[20]&!i[19]&!i[18]&!i[17]&!i[16]&!i[15]&!i[14]&!i[11]&!i[10]
     &!i[9]&!i[8]&!i[7]&i[6]&i[5]&i[4]&!i[3]&!i[2]&i[1]&i[0]) | (!i[31]
     &!i[30]&!i[29]&!i[28]&!i[27]&!i[26]&!i[25]&!i[24]&!i[23]&!i[22]&!i[21]
     &!i[19]&!i[18]&!i[17]&!i[16]&!i[15]&!i[14]&!i[11]&!i[10]&!i[9]&!i[8]
-    &!i[7]&i[5]&i[4]&!i[3]&!i[2]&i[1]&i[0]) | (!i[31]&!i[30]&!i[29]&!i[28]
-    &!i[27]&!i[26]&!i[25]&!i[6]&i[4]&!i[3]&i[1]&i[0]) | (!i[31]&!i[29]
-    &!i[28]&!i[27]&!i[26]&!i[25]&!i[14]&!i[13]&!i[12]&!i[6]&!i[3]&!i[2]
-    &i[1]&i[0]) | (!i[31]&!i[29]&!i[28]&!i[27]&!i[26]&!i[25]&i[14]&!i[13]
-    &i[12]&!i[6]&i[4]&!i[3]&i[1]&i[0]) | (!i[31]&!i[30]&!i[29]&!i[28]
-    &!i[27]&!i[26]&!i[6]&i[5]&i[4]&!i[3]&i[1]&i[0]) | (!i[14]&!i[13]
-    &!i[12]&i[6]&i[5]&!i[4]&!i[3]&i[1]&i[0]) | (i[14]&i[6]&i[5]&!i[4]
-    &!i[3]&!i[2]&i[1]&i[0]) | (!i[12]&!i[6]&!i[5]&i[4]&!i[3]&i[1]&i[0]) | (
-    !i[14]&!i[13]&i[5]&!i[4]&!i[3]&!i[2]&i[1]&i[0]) | (i[12]&i[6]&i[5]
-    &i[4]&!i[3]&!i[2]&i[1]&i[0]) | (!i[31]&!i[30]&!i[29]&!i[28]&!i[27]
-    &!i[26]&!i[25]&!i[24]&!i[23]&!i[22]&!i[21]&!i[20]&!i[19]&!i[18]&!i[17]
-    &!i[16]&!i[15]&!i[14]&!i[13]&!i[11]&!i[10]&!i[9]&!i[8]&!i[7]&!i[6]
-    &!i[5]&!i[4]&i[3]&i[2]&i[1]&i[0]) | (!i[31]&!i[30]&!i[29]&!i[28]
-    &!i[19]&!i[18]&!i[17]&!i[16]&!i[15]&!i[14]&!i[13]&!i[12]&!i[11]&!i[10]
-    &!i[9]&!i[8]&!i[7]&!i[6]&!i[5]&!i[4]&i[3]&i[2]&i[1]&i[0]) | (i[13]
-    &i[6]&i[5]&i[4]&!i[3]&!i[2]&i[1]&i[0]) | (!i[13]&!i[6]&!i[5]&!i[4]
-    &!i[3]&!i[2]&i[1]&i[0]) | (i[6]&i[5]&!i[4]&i[3]&i[2]&i[1]&i[0]) | (
-    i[13]&!i[6]&!i[5]&i[4]&!i[3]&i[1]&i[0]) | (!i[14]&!i[12]&!i[6]&!i[4]
-    &!i[3]&!i[2]&i[1]&i[0]) | (!i[6]&i[4]&!i[3]&i[2]&i[1]&i[0]);
-
+    &!i[7]&i[5]&i[4]&!i[3]&!i[2]&i[1]&i[0]) | (!i[31]&i[29]&!i[28]&!i[26]
+    &!i[25]&i[24]&!i[22]&!i[20]&!i[6]&!i[5]&i[4]&!i[3]&i[1]&i[0]) | (
+    !i[31]&i[29]&!i[28]&!i[26]&!i[25]&i[24]&!i[22]&!i[21]&!i[6]&!i[5]
+    &i[4]&!i[3]&i[1]&i[0]) | (!i[31]&i[29]&!i[28]&!i[26]&!i[25]&!i[23]
+    &!i[22]&!i[20]&!i[6]&!i[5]&i[4]&!i[3]&i[1]&i[0]) | (!i[31]&i[29]
+    &!i[28]&!i[26]&!i[25]&!i[24]&!i[23]&!i[21]&!i[6]&!i[5]&i[4]&!i[3]
+    &i[1]&i[0]) | (!i[31]&!i[30]&!i[29]&!i[28]&!i[26]&i[25]&i[13]&!i[6]
+    &i[4]&!i[3]&i[1]&i[0]) | (!i[31]&!i[30]&!i[28]&!i[26]&!i[25]&!i[24]
+    &!i[6]&!i[5]&i[4]&!i[3]&i[1]&i[0]) | (!i[31]&!i[30]&!i[28]&!i[27]
+    &!i[26]&!i[25]&i[14]&!i[12]&!i[6]&i[4]&!i[3]&i[1]&i[0]) | (!i[31]
+    &!i[30]&!i[28]&!i[27]&!i[26]&!i[25]&i[13]&!i[12]&!i[6]&i[4]&!i[3]
+    &i[1]&i[0]) | (!i[31]&!i[29]&!i[28]&!i[27]&!i[26]&!i[25]&!i[13]&!i[12]
+    &!i[6]&i[4]&!i[3]&i[1]&i[0]) | (!i[31]&!i[28]&!i[27]&!i[26]&!i[25]
+    &i[14]&!i[6]&!i[5]&i[4]&!i[3]&i[1]&i[0]) | (!i[31]&!i[30]&!i[29]
+    &!i[28]&!i[26]&!i[13]&i[12]&i[5]&i[4]&!i[3]&!i[2]&i[1]&i[0]) | (
+    !i[31]&!i[30]&!i[29]&!i[28]&!i[26]&i[14]&!i[6]&i[5]&i[4]&!i[3]&i[1]
+    &i[0]) | (!i[31]&i[30]&!i[28]&i[27]&!i[26]&!i[25]&!i[13]&i[12]&!i[6]
+    &i[4]&!i[3]&i[1]&i[0]) | (!i[31]&i[29]&!i[28]&i[27]&!i[26]&!i[25]
+    &!i[6]&!i[5]&i[4]&!i[3]&i[1]&i[0]) | (!i[31]&!i[30]&!i[28]&!i[27]
+    &!i[26]&!i[25]&!i[6]&!i[5]&i[4]&!i[3]&i[1]&i[0]) | (!i[31]&!i[30]
+    &!i[29]&!i[28]&!i[27]&!i[26]&!i[6]&i[5]&i[4]&!i[3]&i[1]&i[0]) | (
+    !i[14]&!i[13]&!i[12]&i[6]&i[5]&!i[4]&!i[3]&i[1]&i[0]) | (!i[31]&!i[29]
+    &!i[28]&!i[26]&!i[25]&i[14]&!i[6]&i[5]&i[4]&!i[3]&i[1]&i[0]) | (
+    !i[31]&i[29]&!i[28]&!i[26]&!i[25]&!i[13]&i[12]&i[5]&i[4]&!i[3]&!i[2]
+    &i[1]&i[0]) | (i[14]&i[6]&i[5]&!i[4]&!i[3]&!i[2]&i[1]&i[0]) | (!i[14]
+    &!i[13]&i[5]&!i[4]&!i[3]&!i[2]&i[1]&i[0]) | (!i[12]&!i[6]&!i[5]&i[4]
+    &!i[3]&i[1]&i[0]) | (!i[13]&i[12]&i[6]&i[5]&!i[3]&!i[2]&i[1]&i[0]) | (
+    !i[31]&!i[30]&!i[29]&!i[28]&!i[27]&!i[26]&!i[25]&!i[24]&!i[23]&!i[22]
+    &!i[21]&!i[20]&!i[19]&!i[18]&!i[17]&!i[16]&!i[15]&!i[14]&!i[13]&!i[11]
+    &!i[10]&!i[9]&!i[8]&!i[7]&!i[6]&!i[5]&!i[4]&i[3]&i[2]&i[1]&i[0]) | (
+    !i[31]&!i[30]&!i[29]&!i[28]&!i[19]&!i[18]&!i[17]&!i[16]&!i[15]&!i[14]
+    &!i[13]&!i[12]&!i[11]&!i[10]&!i[9]&!i[8]&!i[7]&!i[6]&!i[5]&!i[4]&i[3]
+    &i[2]&i[1]&i[0]) | (i[13]&i[6]&i[5]&i[4]&!i[3]&!i[2]&i[1]&i[0]) | (
+    i[6]&i[5]&!i[4]&i[3]&i[2]&i[1]&i[0]) | (!i[14]&!i[12]&!i[6]&!i[4]
+    &!i[3]&!i[2]&i[1]&i[0]) | (!i[13]&!i[6]&!i[5]&!i[4]&!i[3]&!i[2]&i[1]
+    &i[0]) | (i[13]&!i[6]&!i[5]&i[4]&!i[3]&i[1]&i[0]) | (!i[6]&i[4]&!i[3]
+    &i[2]&i[1]&i[0]);
 
 
 endmodule // el2_dec_dec_ctl

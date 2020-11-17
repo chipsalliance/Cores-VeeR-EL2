@@ -11,7 +11,7 @@
     * Zbs and Zbb are enabled by default. Use -set=bitmanip+zb*=1 to enable other sub-extensions.
 * Enhancements and additional configurations options for a faster divider
 * JTAG controller intial state issue fixed
-* Branch predictor fully-associative mode fo 8,16,32 entries.
+* Branch predictor fully-associative mode for 8,16,32 entries.
 * Corner case bugs fixes related to 
     * Bus protocol corner cases (ahb)
     * Fetch bus error recording improved accuracy

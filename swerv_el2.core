@@ -1,6 +1,6 @@
 CAPI=2:
 
-name : chipsalliance.org:cores:SweRV_EL2:1.2
+name : chipsalliance.org:cores:SweRV_EL2:1.3
 
 filesets:
   rtl:

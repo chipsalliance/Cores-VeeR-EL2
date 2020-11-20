@@ -34,7 +34,7 @@ IRUN = xrun
 VCS = vcs
 VLOG = qverilog
 VERILATOR = verilator
-RIVEIRA = riviera
+RIVIERA = riviera
 GCC_PREFIX = riscv64-unknown-elf
 BUILD_DIR = snapshots/${snapshot}
 TBDIR = ${RV_ROOT}/testbench
@@ -103,7 +103,7 @@ all: clean verilator
 clean:
 	rm -rf *.log *.s *.hex *.dis *.tbl irun* vcs* simv* snapshots swerv* \
 	verilator* *.exe obj* *.o ucli.key vc_hdrs.h csrc *.csv work\
-	work dataset.asdb  library.cfg vsimsa.cfg  riviera-build wave.asdb
+	dataset.asdb  library.cfg vsimsa.cfg  riviera-build wave.asdb
 
 
 

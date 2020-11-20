@@ -602,7 +602,6 @@ end // else: !if(pt.BTB_ENABLE==1)
 
    always_comb begin
       found = 0;
-      cam_wen[NBLOAD_SIZE_MSB:0] = '0;
       for (int i=0; i<NBLOAD_SIZE; i++) begin
          if (~found) begin
             if (~cam[i].valid) begin
@@ -617,7 +616,6 @@ end // else: !if(pt.BTB_ENABLE==1)
             cam_wen[i] = 0;
       end
    end
-
 
    assign cam_write          = lsu_nonblock_load_valid_m;
    assign cam_write_tag[NBLOAD_TAG_MSB:0] = lsu_nonblock_load_tag_m[NBLOAD_TAG_MSB:0];

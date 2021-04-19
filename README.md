@@ -1,4 +1,4 @@
-# EL2 SweRV RISC-V Core<sup>TM</sup> 1.3 from Western Digital
+# EL2 SweRV RISC-V Core<sup>TM</sup> 1.4 from Western Digital
 
 This repository contains the EL2 RISC-V SweRV Core<sup>TM</sup>  design RTL
 
@@ -85,7 +85,7 @@ This script derives the following consistent set of include files :
 
 ### Building a model
 
-while in a work directory:
+While in a work directory:
 
 1. Set the RV_ROOT environment variable to the root of the SweRV directory structure.
 Example for bash shell:  

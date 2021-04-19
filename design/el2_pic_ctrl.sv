@@ -196,7 +196,15 @@ rvdff  #(1) picm_rde_flop   (.*, .din (picm_rden),          .dout(picm_rden_ff),
 rvdff  #(1) picm_mke_flop   (.*, .din (picm_mken),          .dout(picm_mken_ff),          .clk(free_clk));
 rvdff #(32) picm_dat_flop   (.*, .din (picm_wr_data[31:0]), .dout(picm_wr_data_ff[31:0]), .clk(pic_data_c1_clk));
 
-
+//rvsyncss  #(pt.PIC_TOTAL_INT_PLUS1-1) sync_inst
+//(
+// .clk (free_clk),
+// .dout(extintsrc_req_sync[pt.PIC_TOTAL_INT_PLUS1-1:1]),
+// .din (extintsrc_req[pt.PIC_TOTAL_INT_PLUS1-1:1]),
+// .*) ;
+//
+//assign extintsrc_req_sync[0] = extintsrc_req[0];
+/*
 genvar p ;
 for (p=0; p<=INT_ENABLE_GRPS ; p++) begin  : IO_CLK_GRP
    if (p==INT_ENABLE_GRPS) begin : LAST_GRP
@@ -207,10 +215,45 @@ for (p=0; p<=INT_ENABLE_GRPS ; p++) begin  : IO_CLK_GRP
        rvoclkhdr intenable_c1_cgc   ( .en(intenable_clk_enable_grp[p]),  .l1clk(gw_clk[p]), .* );
    end
 end
+*/
 
 
 
 genvar i ;
+genvar p ;
+for (p=0; p<=INT_ENABLE_GRPS ; p++) begin  : IO_CLK_GRP
+wire grp_clk, grp_clken;
+
+    assign grp_clken = |intenable_clk_enable[(p==INT_ENABLE_GRPS?pt.PIC_TOTAL_INT_PLUS1-1:p*4+3) : p*4] | io_clk_override;
+
+  `ifndef RV_FPGA_OPTIMIZE
+    rvclkhdr intenable_c1_cgc( .en(grp_clken),  .l1clk(grp_clk), .* );
+  `else
+    assign gw_clk[p] = 1'b0 ;
+  `endif
+
+    for(genvar i= (p==0 ? 1: 0); i< (p==INT_ENABLE_GRPS ? pt.PIC_TOTAL_INT_PLUS1-p*4 :4); i++) begin : GW
+        el2_configurable_gw gw_inst(
+             .*,
+            .gw_clk(grp_clk),
+            .rawclk(clk),
+            .clken (grp_clken),
+            .extintsrc_req(extintsrc_req[i+p*4]) ,
+            .meigwctrl_polarity(gw_config_reg[i+p*4][0]) ,
+            .meigwctrl_type(gw_config_reg[i+p*4][1]) ,
+            .meigwclr(gw_clear_reg_we[i+p*4]) ,
+            .extintsrc_req_config(extintsrc_req_gw[i+p*4])
+        );
+    end
+end
+
+
+
+
+
+
+
+
 for (i=0; i<pt.PIC_TOTAL_INT_PLUS1 ; i++) begin  : SETREG
 
  if (i > 0 ) begin : NON_ZERO_INT
@@ -227,9 +270,11 @@ for (i=0; i<pt.PIC_TOTAL_INT_PLUS1 ; i++) begin  : SETREG
 
      rvdffs #(INTPRIORITY_BITS) intpriority_ff  (.*, .en( intpriority_reg_we[i]), .din (picm_wr_data_ff[INTPRIORITY_BITS-1:0]), .dout(intpriority_reg[i]), .clk(pic_pri_c1_clk));
      rvdffs #(1)                 intenable_ff   (.*, .en( intenable_reg_we[i]),   .din (picm_wr_data_ff[0]),                    .dout(intenable_reg[i]),   .clk(pic_int_c1_clk));
+     rvdffs #(2)                 gw_config_ff   (.*, .en( gw_config_reg_we[i]),   .din (picm_wr_data_ff[1:0]),                  .dout(gw_config_reg[i]),   .clk(gw_config_c1_clk));
 
      assign intenable_clk_enable[i]  =  gw_config_reg[i][1] | intenable_reg_we[i] | intenable_reg[i] | gw_clear_reg_we[i] ;
 
+/*
      rvsyncss_fpga  #(1) sync_inst
      (
       .gw_clk      (gw_clk[i/4]),
@@ -241,9 +286,7 @@ for (i=0; i<pt.PIC_TOTAL_INT_PLUS1 ; i++) begin  : SETREG
 
 
 
-//     if (GW_CONFIG[i]) begin
 
-        rvdffs #(2)                 gw_config_ff   (.*, .en( gw_config_reg_we[i]),   .din (picm_wr_data_ff[1:0]),                  .dout(gw_config_reg[i]),   .clk(gw_config_c1_clk));
 
         el2_configurable_gw config_gw_inst(.*,
                                             .gw_clk(gw_clk[i/4]),
@@ -255,6 +298,7 @@ for (i=0; i<pt.PIC_TOTAL_INT_PLUS1 ; i++) begin  : SETREG
                                             .meigwclr(gw_clear_reg_we[i]) ,
                                             .extintsrc_req_config(extintsrc_req_gw[i])
                                             );
+             */
 
  end else begin : INT_ZERO
      assign intpriority_reg_we[i] =  1'b0 ;
@@ -285,6 +329,10 @@ end
 
         assign pl_in[INTPRIORITY_BITS-1:0]                  =      selected_int_priority[INTPRIORITY_BITS-1:0] ;
 
+//if (pt.PIC_2CYCLE == 1) begin : genblock
+//end
+//else begin : genblock
+//end
 
  genvar l, m , j, k;
 
@@ -512,7 +560,7 @@ module el2_configurable_gw (
                              input logic rawclk,
                              input logic clken,
                              input logic rst_l,
-                             input logic extintsrc_req_sync ,
+                             input logic extintsrc_req ,
                              input logic meigwctrl_polarity ,
                              input logic meigwctrl_type ,
                              input logic meigwclr ,
@@ -521,7 +569,13 @@ module el2_configurable_gw (
                             );
 
 
-  logic  gw_int_pending_in , gw_int_pending ;
+  logic  gw_int_pending_in, gw_int_pending, extintsrc_req_sync;
+
+  rvsyncss_fpga  #(1) sync_inst (
+      .dout        (extintsrc_req_sync),
+      .din         (extintsrc_req),
+      .*) ;
+
 
   assign gw_int_pending_in =  (extintsrc_req_sync ^ meigwctrl_polarity) | (gw_int_pending & ~meigwclr) ;
   rvdff_fpga #(1) int_pend_ff        (.*, .clk(gw_clk), .rawclk(rawclk), .clken(clken), .din (gw_int_pending_in),     .dout(gw_int_pending));

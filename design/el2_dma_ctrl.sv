@@ -318,7 +318,7 @@ module el2_dma_ctrl #(
    //Dbg outputs
    assign dma_dbg_ready    = fifo_empty & dbg_dma_bubble;
    assign dma_dbg_cmd_done = (fifo_valid[RspPtr] & fifo_dbg[RspPtr] & fifo_done[RspPtr]);
-   assign dma_dbg_cmd_fail     = |fifo_error[RspPtr];
+   assign dma_dbg_cmd_fail     = (|fifo_error[RspPtr] & dma_dbg_cmd_done) ;
 
    assign dma_dbg_sz[1:0]          = fifo_sz[RspPtr][1:0];
    assign dma_dbg_addr[1:0]        = fifo_addr[RspPtr][1:0];

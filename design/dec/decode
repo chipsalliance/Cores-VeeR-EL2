@@ -3,23 +3,53 @@
 
 clz       =  [011000000000.....001.....0010011]
 ctz       =  [011000000001.....001.....0010011]
-pcnt      =  [011000000010.....001.....0010011]
+cpop      =  [011000000010.....001.....0010011]
 sext_b    =  [011000000100.....001.....0010011]
 sext_h    =  [011000000101.....001.....0010011]
-slo       =  [0010000..........001.....0110011]
-sro       =  [0010000..........101.....0110011]
-sloi      =  [0010000..........001.....0010011]
-sroi      =  [0010000..........101.....0010011]
 
 min       =  [0000101..........100.....0110011]
-max       =  [0000101..........101.....0110011]
-minu      =  [0000101..........110.....0110011]
+max       =  [0000101..........110.....0110011]
+minu      =  [0000101..........101.....0110011]
 maxu      =  [0000101..........111.....0110011]
 
 andn      =  [0100000..........111.....0110011]
 orn       =  [0100000..........110.....0110011]
 xnor      =  [0100000..........100.....0110011]
-pack      =  [0000100..........100.....0110011]
+
+#pack     =  [0000100..........100.....0110011]
+zext_h    =  [000010000000.....100.....0110011]
+pack1     =  [000010000001.....100.....0110011]
+pack2     =  [000010000010.....100.....0110011]
+pack3     =  [000010000011.....100.....0110011]
+pack4     =  [000010000100.....100.....0110011]
+pack5     =  [000010000101.....100.....0110011]
+pack6     =  [000010000110.....100.....0110011]
+pack7     =  [000010000111.....100.....0110011]
+pack8     =  [000010001000.....100.....0110011]
+pack9     =  [000010001001.....100.....0110011]
+pack10    =  [000010001010.....100.....0110011]
+pack11    =  [000010001011.....100.....0110011]
+pack12    =  [000010001100.....100.....0110011]
+pack13    =  [000010001101.....100.....0110011]
+pack14    =  [000010001110.....100.....0110011]
+pack15    =  [000010001111.....100.....0110011]
+pack16    =  [000010010000.....100.....0110011]
+pack17    =  [000010010001.....100.....0110011]
+pack18    =  [000010010010.....100.....0110011]
+pack19    =  [000010010011.....100.....0110011]
+pack20    =  [000010010100.....100.....0110011]
+pack21    =  [000010010101.....100.....0110011]
+pack22    =  [000010010110.....100.....0110011]
+pack23    =  [000010010111.....100.....0110011]
+pack24    =  [000010011000.....100.....0110011]
+pack25    =  [000010011001.....100.....0110011]
+pack26    =  [000010011010.....100.....0110011]
+pack27    =  [000010011011.....100.....0110011]
+pack28    =  [000010011100.....100.....0110011]
+pack29    =  [000010011101.....100.....0110011]
+pack30    =  [000010011110.....100.....0110011]
+pack31    =  [000010011111.....100.....0110011]
+
 packu     =  [0100100..........100.....0110011]
 packh     =  [0000100..........111.....0110011]
 rol       =  [0110000..........001.....0110011]
@@ -30,28 +60,28 @@ sh1add    =  [0010000..........010.....0110011]
 sh2add    =  [0010000..........100.....0110011]
 sh3add    =  [0010000..........110.....0110011]
 
-sbset     =  [0010100..........001.....0110011]
-sbclr     =  [0100100..........001.....0110011]
-sbinv     =  [0110100..........001.....0110011]
-sbext     =  [0100100..........101.....0110011]
+bset      =  [0010100..........001.....0110011]
+bclr      =  [0100100..........001.....0110011]
+binv      =  [0110100..........001.....0110011]
+bext      =  [0100100..........101.....0110011]
 
-sbseti    =  [0010100..........001.....0010011]
-sbclri    =  [0100100..........001.....0010011]
-sbinvi    =  [0110100..........001.....0010011]
-sbexti    =  [0100100..........101.....0010011]
+bseti     =  [0010100..........001.....0010011]
+bclri     =  [0100100..........001.....0010011]
+binvi     =  [0110100..........001.....0010011]
+bexti     =  [0100100..........101.....0010011]
 
 grev      =  [0110100..........101.....0110011]
 #grevi    =  [01101............101.....0010011]
-grevi0   =   [011010000000.....101.....0010011]
-grevi1   =   [011010000001.....101.....0010011]
-grevi2   =   [011010000010.....101.....0010011]
-grevi3   =   [011010000011.....101.....0010011]
-grevi4   =   [011010000100.....101.....0010011]
-grevi5   =   [011010000101.....101.....0010011]
-grevi6   =   [011010000110.....101.....0010011]
-grevi7   =   [011010000111.....101.....0010011]
-grevi8   =   [011010001000.....101.....0010011]
-grevi9   =   [011010001001.....101.....0010011]
+grevi0    =  [011010000000.....101.....0010011]
+grevi1    =  [011010000001.....101.....0010011]
+grevi2    =  [011010000010.....101.....0010011]
+grevi3    =  [011010000011.....101.....0010011]
+grevi4    =  [011010000100.....101.....0010011]
+grevi5    =  [011010000101.....101.....0010011]
+grevi6    =  [011010000110.....101.....0010011]
+grevi7    =  [011010000111.....101.....0010011]
+grevi8    =  [011010001000.....101.....0010011]
+grevi9    =  [011010001001.....101.....0010011]
 grevi10   =  [011010001010.....101.....0010011]
 grevi11   =  [011010001011.....101.....0010011]
 grevi12   =  [011010001100.....101.....0010011]
@@ -74,8 +104,7 @@ grevi27   =  [011010011011.....101.....0010011]
 grevi28   =  [011010011100.....101.....0010011]
 grevi29   =  [011010011101.....101.....0010011]
 grevi30   =  [011010011110.....101.....0010011]
-#grevi31  =  [011010011111.....101.....0010011]    # REV
-rev       =  [011010011111.....101.....0010011]
+grevi31   =  [011010011111.....101.....0010011]
 
 gorc      =  [0010100..........101.....0110011]
 #gorci    =  [00101............101.....0010011]
@@ -96,8 +125,7 @@ gorci12   =  [001010001100.....101.....0010011]
 gorci13   =  [001010001101.....101.....0010011]
 gorci14   =  [001010001110.....101.....0010011]
 gorci15   =  [001010001111.....101.....0010011]
-#gorci16  =  [001010010000.....101.....0010011]    # ORC16
-orc16     =  [001010010000.....101.....0010011]
+gorci16   =  [001010010000.....101.....0010011]
 gorci17   =  [001010010001.....101.....0010011]
 gorci18   =  [001010010010.....101.....0010011]
 gorci19   =  [001010010011.....101.....0010011]
@@ -121,8 +149,8 @@ shfli     =  [00001000.........001.....0010011]
 unshfl    =  [0000100..........101.....0110011]
 unshfli   =  [00001000.........101.....0010011]
 
-bdep      =  [0100100..........110.....0110011]
-bext      =  [0000100..........110.....0110011]
+bdecompress =  [0100100..........110.....0110011]
+bcompress   =  [0000100..........110.....0110011]
 
 clmul     =  [0000101..........001.....0110011]
 clmulr    =  [0000101..........010.....0110011]
@@ -136,6 +164,11 @@ crc32c_h  =  [011000011001.....001.....0010011]
 crc32c_w  =  [011000011010.....001.....0010011]
 
 bfp       =  [0100100..........111.....0110011]
+
+xperm_n   =  [0010100..........010.....0110011]
+xperm_b   =  [0010100..........100.....0110011]
+xperm_h   =  [0010100..........110.....0110011]
+
 
 
 
@@ -348,11 +381,9 @@ rv32i = {
       fence_i
       clz
       ctz
-      pcnt
+      cpop
       sext_b
       sext_h
-      slo
-      sro
       min
       max
       pack
@@ -361,13 +392,13 @@ rv32i = {
       rol
       ror
       zbb
-      sbset
-      sbclr
-      sbinv
-      sbext
-      zbs
+      bset
+      bclr
+      binv
       bext
-      bdep
+      zbs
+      bcompress
+      bdecompress
       zbe
       clmul
       clmulh
@@ -377,6 +408,9 @@ rv32i = {
       gorc
       shfl
       unshfl
+      xperm_n
+      xperm_b
+      xperm_h
       zbp
       crc32_b
       crc32_h
@@ -398,13 +432,9 @@ rv32i = {
 
 rv32i[clz]       =  { alu zbb     rs1     rd                       clz   }
 rv32i[ctz]       =  { alu zbb     rs1     rd                       ctz   }
-rv32i[pcnt]      =  { alu zbb     rs1     rd                       pcnt  }
+rv32i[cpop]      =  { alu zbb     rs1     rd                       cpop  }
 rv32i[sext_b]    =  { alu zbb     rs1     rd                       sext_b}
 rv32i[sext_h]    =  { alu zbb     rs1     rd                       sext_h}
-rv32i[slo]       =  { alu     zbp rs1 rs2 rd                       slo   }
-rv32i[sro]       =  { alu     zbp rs1 rs2 rd                       sro   }
-rv32i[sloi]      =  { alu     zbp rs1     rd         shimm5        slo   }
-rv32i[sroi]      =  { alu     zbp rs1     rd         shimm5        sro   }
 rv32i[min]       =  { alu zbb     rs1 rs2 rd                sub    min   }
 rv32i[max]       =  { alu zbb     rs1 rs2 rd                sub    max   }
 rv32i[minu]      =  { alu zbb     rs1 rs2 rd  unsign        sub    min   }
@@ -412,30 +442,33 @@ rv32i[maxu]      =  { alu zbb     rs1 rs2 rd  unsign        sub    max   }
 rv32i[andn]      =  { alu zbb zbp rs1 rs2 rd                       land  }
 rv32i[orn]       =  { alu zbb zbp rs1 rs2 rd                       lor   }
 rv32i[xnor]      =  { alu zbb zbp rs1 rs2 rd                       lxor  }
-rv32i[pack]      =  { alu zbb zbp rs1 rs2 rd                       pack  }
-rv32i[packu]     =  { alu zbb zbp rs1 rs2 rd                       packu }
-rv32i[packh]     =  { alu zbb zbp rs1 rs2 rd                       packh }
+rv32i[packu]     =  { alu     zbp rs1 rs2 rd                       packu }
+rv32i[packh]     =  { alu     zbp rs1 rs2 rd                       packh zbe zbf}
 rv32i[rol]       =  { alu zbb zbp rs1 rs2 rd                       rol   }
 rv32i[ror]       =  { alu zbb zbp rs1 rs2 rd                       ror   }
 rv32i[rori]      =  { alu zbb zbp rs1     rd         shimm5        ror   }
-rv32i[sbset]     =  { alu zbs     rs1 rs2 rd                       sbset }
-rv32i[sbclr]     =  { alu zbs     rs1 rs2 rd                       sbclr }
-rv32i[sbinv]     =  { alu zbs     rs1 rs2 rd                       sbinv }
-rv32i[sbext]     =  { alu zbs     rs1 rs2 rd                       sbext }
-rv32i[sbseti]    =  { alu zbs     rs1     rd         shimm5        sbset }
-rv32i[sbclri]    =  { alu zbs     rs1     rd         shimm5        sbclr }
-rv32i[sbinvi]    =  { alu zbs     rs1     rd         shimm5        sbinv }
-rv32i[sbexti]    =  { alu zbs     rs1     rd         shimm5        sbext }
+rv32i[bset]      =  { alu zbs     rs1 rs2 rd                       bset  }
+rv32i[bclr]      =  { alu zbs     rs1 rs2 rd                       bclr  }
+rv32i[binv]      =  { alu zbs     rs1 rs2 rd                       binv  }
+rv32i[bext]      =  { alu zbs     rs1 rs2 rd                       bext  }
+rv32i[bseti]     =  { alu zbs     rs1     rd         shimm5        bset  }
+rv32i[bclri]     =  { alu zbs     rs1     rd         shimm5        bclr  }
+rv32i[binvi]     =  { alu zbs     rs1     rd         shimm5        binv  }
+rv32i[bexti]     =  { alu zbs     rs1     rd         shimm5        bext  }
 rv32i[sh1add]    =  { alu zba     rs1 rs2 rd                       sh1add}
 rv32i[sh2add]    =  { alu zba     rs1 rs2 rd                       sh2add}
 rv32i[sh3add]    =  { alu zba     rs1 rs2 rd                       sh3add}
+
+#v32i[pack]      =  { alu     zbp rs1 rs2 rd                       pack  zbe zbf}
+rv32i[zext_h]    =  { alu zbb zbp rs1 rs2 rd                       pack  zbe zbf}   # pack with rs2=x0
+rv32i[pack{1-31}]=  { alu     zbp rs1 rs2 rd                       pack  zbe zbf}
 
 rv32i[mul]       =  { mul         rs1 rs2 rd low                         }
 rv32i[mulh]      =  { mul         rs1 rs2 rd rs1_sign rs2_sign           }
 rv32i[mulhu]     =  { mul         rs1 rs2 rd                             }
 rv32i[mulhsu]    =  { mul         rs1 rs2 rd rs1_sign                    }
-rv32i[bext]      =  { mul zbe     rs1 rs2 rd                       bext  }
-rv32i[bdep]      =  { mul zbe     rs1 rs2 rd                       bdep  }
+rv32i[bcompress]   =  { mul zbe     rs1 rs2 rd                       bcompress   }
+rv32i[bdecompress] =  { mul zbe     rs1 rs2 rd                       bdecompress }
 rv32i[clmul]     =  { mul zbc     rs1 rs2 rd                       clmul }
 rv32i[clmulh]    =  { mul zbc     rs1 rs2 rd                       clmulh}
 rv32i[clmulr]    =  { mul zbc     rs1 rs2 rd                       clmulr}
@@ -452,19 +485,16 @@ rv32i[bfp]       =  { mul zbf     rs1 rs2 rd                       bfp   }
 rv32i[grev]          =  { mul     zbp rs1 rs2 rd                       grev  }
 
 rv32i[grevi{0-23}]   =  { mul     zbp rs1     rd         shimm5        grev  }
-rv32i[grevi{25-30}]  =  { mul     zbp rs1     rd         shimm5        grev  }
+rv32i[grevi{25-31}]  =  { mul     zbp rs1     rd         shimm5        grev  }
 
 rv32i[rev8]          =  { alu zbb zbp rs1     rd         shimm5        grev  } # grevi24
-rv32i[rev]           =  { alu zbb zbp rs1     rd         shimm5        grev  } # grevi31
 
 rv32i[gorc]          =  { mul     zbp rs1 rs2 rd                       gorc  }
 
 rv32i[gorci{0-6}]    =  { mul     zbp rs1     rd         shimm5        gorc  }
-rv32i[gorci{8-15}]   =  { mul     zbp rs1     rd         shimm5        gorc  }
-rv32i[gorci{17-31}]  =  { mul     zbp rs1     rd         shimm5        gorc  }
+rv32i[gorci{8-31}]   =  { mul     zbp rs1     rd         shimm5        gorc  }
 
 rv32i[orc_b]         =  { alu zbb zbp rs1     rd         shimm5        gorc  }  # gorci7
-rv32i[orc16]         =  { alu zbb zbp rs1     rd         shimm5        gorc  }  # gorci16
 
 
 rv32i[shfl]      =  { mul     zbp rs1 rs2 rd                       shfl  }
@@ -472,6 +502,11 @@ rv32i[shfli]     =  { mul     zbp rs1     rd         shimm5        shfl  }
 
 rv32i[unshfl]    =  { mul     zbp rs1 rs2 rd                       unshfl}
 rv32i[unshfli]   =  { mul     zbp rs1     rd         shimm5        unshfl}
+
+rv32i[xperm_n]   =  { mul     zbp rs1 rs2 rd                       xperm_n}
+rv32i[xperm_b]   =  { mul     zbp rs1 rs2 rd                       xperm_b}
+rv32i[xperm_h]   =  { mul     zbp rs1 rs2 rd                       xperm_h}
+
 
 
 rv32i[div]       =  { div rs1 rs2 rd           }

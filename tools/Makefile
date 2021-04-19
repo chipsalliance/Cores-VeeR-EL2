@@ -41,22 +41,13 @@ TBDIR = ${RV_ROOT}/testbench
 
 # Define test name
 TEST = hello_world
-
-# Define test name
-ifneq (,$(wildcard $(TBDIR)/asm/$(TEST).s))
-	TEST_DIR = ${TBDIR}/asm
-else
-ifneq (,$(wildcard $(TBDIR)/asm/$(TEST).c))
-	TEST_DIR = ${TBDIR}/asm
-else
-ifneq (,$(wildcard $(TBDIR)/tests/$(TEST)))
-	TEST_DIR = $(TBDIR)/tests/$(TEST)
-else 
-	TEST_DIR = ${TBDIR}/asm
-endif
-endif
-endif
+TEST_DIR = ${TBDIR}/asm
 HEX_DIR = ${TBDIR}/hex
+
+# Determine test directory
+ifneq (,$(wildcard $(TBDIR)/tests/$(TEST)))
+  TEST_DIR = $(TBDIR)/tests/$(TEST)
+endif
 
 OFILES = $(TEST).o
 
@@ -101,7 +92,7 @@ VERILATOR_MAKE_FLAGS = OPT_FAST="-Os"
 all: clean verilator
 
 clean:
-	rm -rf *.log *.s *.hex *.dis *.tbl irun* vcs* simv* snapshots swerv* \
+	rm -rf *.log *.s *.hex *.dis *.tbl irun* vcs* simv* *.map snapshots swerv* \
 	verilator* *.exe obj* *.o ucli.key vc_hdrs.h csrc *.csv work\
 	dataset.asdb  library.cfg vsimsa.cfg  riviera-build wave.asdb
 
@@ -189,7 +180,7 @@ program.hex:
 else
 program.hex: $(OFILES) $(LINK)
 	@echo Building $(TEST)
-	$(GCC_PREFIX)-gcc -Wl,-m,elf32lriscv -Wl,--discard-none -T$(LINK) -o $(TEST).exe $(OFILES) -nostartfiles -nostdlib $(TEST_LIBS)
+	$(GCC_PREFIX)-gcc $(ABI) -Wl,-Map=$(TEST).map -lgcc -T$(LINK) -o $(TEST).exe $(OFILES) -nostartfiles  $(TEST_LIBS)
 	$(GCC_PREFIX)-objcopy -O verilog  $(TEST).exe program.hex
 	$(GCC_PREFIX)-objdump -S  $(TEST).exe > $(TEST).dis
 	@echo Completed building $(TEST)

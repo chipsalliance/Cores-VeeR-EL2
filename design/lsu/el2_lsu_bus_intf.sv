@@ -211,10 +211,10 @@ import el2_pkg::*;
    assign store_data_hi_r[31:0]   = store_data_ext_r[63:32];
    assign store_data_lo_r[31:0]   = store_data_ext_r[31:0];
 
-   assign ld_addr_rhit_lo_lo = (lsu_addr_m[31:2] == lsu_addr_r[31:2]) & lsu_pkt_r.valid & lsu_pkt_r.store & lsu_busreq_m;
-   assign ld_addr_rhit_lo_hi = (end_addr_m[31:2] == lsu_addr_r[31:2]) & lsu_pkt_r.valid & lsu_pkt_r.store & lsu_busreq_m;
-   assign ld_addr_rhit_hi_lo = (lsu_addr_m[31:2] == end_addr_r[31:2]) & lsu_pkt_r.valid & lsu_pkt_r.store & lsu_busreq_m;
-   assign ld_addr_rhit_hi_hi = (end_addr_m[31:2] == end_addr_r[31:2]) & lsu_pkt_r.valid & lsu_pkt_r.store & lsu_busreq_m;
+   assign ld_addr_rhit_lo_lo = (lsu_addr_m[31:2] == lsu_addr_r[31:2]) & lsu_pkt_r.valid & lsu_pkt_r.store & lsu_busreq_m & lsu_busreq_r;
+   assign ld_addr_rhit_lo_hi = (end_addr_m[31:2] == lsu_addr_r[31:2]) & lsu_pkt_r.valid & lsu_pkt_r.store & lsu_busreq_m & lsu_busreq_r;
+   assign ld_addr_rhit_hi_lo = (lsu_addr_m[31:2] == end_addr_r[31:2]) & lsu_pkt_r.valid & lsu_pkt_r.store & lsu_busreq_m & lsu_busreq_r;
+   assign ld_addr_rhit_hi_hi = (end_addr_m[31:2] == end_addr_r[31:2]) & lsu_pkt_r.valid & lsu_pkt_r.store & lsu_busreq_m & lsu_busreq_r;
 
    for (genvar i=0; i<4; i++) begin: GenBusBufFwd
       assign ld_byte_rhit_lo_lo[i] = ld_addr_rhit_lo_lo & ldst_byteen_lo_r[i] & ldst_byteen_lo_m[i];

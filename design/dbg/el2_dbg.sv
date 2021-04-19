@@ -108,6 +108,7 @@ import el2_pkg::*;
 
    // general inputs
    input logic                         clk,
+   input logic                         free_clk,
    input logic                         rst_l,        // This includes both top rst and debug rst
    input logic                         dbg_rst_l,
    input logic                         clk_override,
@@ -247,6 +248,7 @@ import el2_pkg::*;
    logic [2:0]        sb_axi_size;
 
    logic              dbg_dm_rst_l;
+   logic              rst_l_sync;
 
    //clken
    logic              dbg_free_clken;
@@ -270,6 +272,9 @@ import el2_pkg::*;
    // Reset logic
    assign dbg_dm_rst_l = dbg_rst_l & (dmcontrol_reg[0] | scan_mode);
    assign dbg_core_rst_l = ~dmcontrol_reg[1] | scan_mode;
+
+   // synchronize the rst
+   rvsyncss #(1) rstl_syncff (.din(rst_l), .dout(rst_l_sync), .clk(free_clk), .rst_l(dbg_rst_l));
 
    // system bus register
    // sbcs[31:29], sbcs - [22]:sbbusyerror, [21]: sbbusy, [20]:sbreadonaddr, [19:17]:sbaccess, [16]:sbautoincrement, [15]:sbreadondata, [14:12]:sberror, sbsize=32, 128=0, 64/32/16/8 are legal
@@ -362,7 +367,7 @@ import el2_pkg::*;
    assign dmstatus_haveresetn_wren  = (dmi_reg_addr == 7'h10) & dmi_reg_wdata[28] & dmi_reg_en & dmi_reg_wr_en & dmcontrol_reg[0];   // clear the havereset
    assign dmstatus_havereset        = ~dmstatus_haveresetn;
 
-   assign dmstatus_unavail = dmcontrol_reg[1] | ~rst_l;
+   assign dmstatus_unavail = dmcontrol_reg[1] | ~rst_l_sync;
    assign dmstatus_running = ~(dmstatus_unavail | dmstatus_halted);
 
    rvdffs  #(1) dmstatus_resumeack_reg  (.din(dmstatus_resumeack_din), .dout(dmstatus_resumeack), .en(dmstatus_resumeack_wren), .rst_l(dbg_dm_rst_l), .clk(dbg_free_clk));

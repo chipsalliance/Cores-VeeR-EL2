@@ -26,7 +26,7 @@
 extern  int     Int_Glob;
 extern  char    Ch_1_Glob;
 
-
+#if 0
 int
 strcmp(const char* s1, const char* s2)
 {
@@ -39,7 +39,9 @@ strcmp(const char* s1, const char* s2)
     return 0;
   return *s1 > *s2? 1 : -1;
 }
-
+#else
+extern int strcmp( char* s1, char* s2);
+#endif
 
 Boolean Func_3 (Enumeration Enum_Par_Val);
 

@@ -721,10 +721,10 @@ end // if (!pt.BTB_FULLYA)
       always_comb begin
          btb_vbank0_rd_data_f = '0;
          btb_vbank1_rd_data_f = '0;
-         btb_tag_hit = '0;
-         btb_upper_hit = '0;
-         btb_offset_0 = '0;
-         btb_offset_1 = '0;
+//       btb_tag_hit = '0;
+//       btb_upper_hit = '0;
+//       btb_offset_0 = '0;
+//       btb_offset_1 = '0;
 
          found1 = 1'b0;
          hit0 = 1'b0;
@@ -734,22 +734,28 @@ end // if (!pt.BTB_FULLYA)
          btb_fa_wr_addr0 = '0;
 
          for(int i=0; i<pt.BTB_SIZE; i++) begin
+            logic upper_hit, offset_0, offset_1;
+
             // Break the cmp into chunks for lower area.
             // Chunk1: FA 31:6 or 31:5 depending on icache line size
             // Chunk2: FA 5:1 or 4:1 depending on icache line size
-            btb_upper_hit[i] = (btbdata[i][BTB_DWIDTH_TOP:FA_TAG_END_UPPER] == ifc_fetch_addr_f[31:FA_CMP_LOWER]) & btbdata[i][0] & ~wr0_en[i];
-            btb_offset_0[i] = (btbdata[i][FA_TAG_START_LOWER:FA_TAG_END_LOWER] == ifc_fetch_addr_f[FA_CMP_LOWER-1:1]) & btb_upper_hit[i];
-            btb_offset_1[i] = (btbdata[i][FA_TAG_START_LOWER:FA_TAG_END_LOWER] == ifc_fetch_addr_p1_f[FA_CMP_LOWER-1:1]) & btb_upper_hit[i];
+//          btb_upper_hit[i] = (btbdata[i][BTB_DWIDTH_TOP:FA_TAG_END_UPPER] == ifc_fetch_addr_f[31:FA_CMP_LOWER]) & btbdata[i][0] & ~wr0_en[i];
+//          btb_offset_0[i] = (btbdata[i][FA_TAG_START_LOWER:FA_TAG_END_LOWER] == ifc_fetch_addr_f[FA_CMP_LOWER-1:1]) & btb_upper_hit[i];
+//          btb_offset_1[i] = (btbdata[i][FA_TAG_START_LOWER:FA_TAG_END_LOWER] == ifc_fetch_addr_p1_f[FA_CMP_LOWER-1:1]) & btb_upper_hit[i];
+
+            upper_hit = (btbdata[i][BTB_DWIDTH_TOP:FA_TAG_END_UPPER] == ifc_fetch_addr_f[31:FA_CMP_LOWER]) & btbdata[i][0] & ~wr0_en[i];
+            offset_0 = (btbdata[i][FA_TAG_START_LOWER:FA_TAG_END_LOWER] == ifc_fetch_addr_f[FA_CMP_LOWER-1:1]) & upper_hit;
+            offset_1 = (btbdata[i][FA_TAG_START_LOWER:FA_TAG_END_LOWER] == ifc_fetch_addr_p1_f[FA_CMP_LOWER-1:1]) & upper_hit;
 
             if(~hit0) begin
-               if(btb_offset_0[i]) begin
+               if(offset_0) begin
                   hit0_index[BTB_FA_INDEX:0] = (BTB_FA_INDEX+1)'(i);
                   // hit unless we are also writing this entry at the same time
                   hit0 = 1'b1;
                end
             end
             if(~hit1) begin
-               if(btb_offset_1[i]) begin
+               if(offset_1) begin
                   hit1_index[BTB_FA_INDEX:0] = (BTB_FA_INDEX+1)'(i);
                   hit1 = 1'b1;
                end
@@ -757,13 +763,13 @@ end // if (!pt.BTB_FULLYA)
 
 
             // Mux out the 2 potential branches
-            if(btb_offset_0[i] == 1'b1)
+            if(offset_0)
               btb_vbank0_rd_data_f[BTB_DWIDTH-1:0] = fetch_mp_collision_f ? btb_wr_data : btbdata[i];
-            if(btb_offset_1[i] == 1'b1)
+            if(offset_1)
               btb_vbank1_rd_data_f[BTB_DWIDTH-1:0] = fetch_mp_collision_p1_f ? btb_wr_data : btbdata[i];
 
             // find the first zero from bit zero in the used vector, this is the write address
-            if(~found1) begin
+            if(~found1 & ((exu_mp_valid_write & ~exu_mp_pkt.way) | dec_tlu_error_wb)) begin
                if(~btb_used[i]) begin
                   btb_fa_wr_addr0[BTB_FA_INDEX:0] = i[BTB_FA_INDEX:0];
                   found1 = 1'b1;
@@ -772,10 +778,10 @@ end // if (!pt.BTB_FULLYA)
          end
       end // always_comb begin
 
-`ifdef RV_ASSERT_ON
-   btbhitonehot0: assert #0 ($onehot0(btb_offset_0));
-   btbhitonehot1: assert #0 ($onehot0(btb_offset_1));
-`endif
+//`ifdef RV_ASSERT_ON
+//   btbhitonehot0: assert #0 ($onehot0(btb_offset_0));
+//   btbhitonehot1: assert #0 ($onehot0(btb_offset_1));
+//`endif
 
    assign vwayhit_f[1:0] = {hit1, hit0} & {eoc_mask, 1'b1};
 
@@ -821,13 +827,16 @@ end // block: fa
    //
    //-----------------------------------------------------------------------------
 
-   logic [1:0] [(pt.BHT_ARRAY_DEPTH/NUM_BHT_LOOP)-1:0][NUM_BHT_LOOP-1:0][1:0]      bht_bank_wr_data ;
+//   logic [1:0] [(pt.BHT_ARRAY_DEPTH/NUM_BHT_LOOP)-1:0][NUM_BHT_LOOP-1:0][1:0]      bht_bank_wr_data ;
    logic [1:0] [pt.BHT_ARRAY_DEPTH-1:0] [1:0]                bht_bank_rd_data_out ;
    logic [1:0] [(pt.BHT_ARRAY_DEPTH/NUM_BHT_LOOP)-1:0]                 bht_bank_clken ;
    logic [1:0] [(pt.BHT_ARRAY_DEPTH/NUM_BHT_LOOP)-1:0]                 bht_bank_clk   ;
-   logic [1:0] [(pt.BHT_ARRAY_DEPTH/NUM_BHT_LOOP)-1:0][NUM_BHT_LOOP-1:0]           bht_bank_sel   ;
+//   logic [1:0] [(pt.BHT_ARRAY_DEPTH/NUM_BHT_LOOP)-1:0][NUM_BHT_LOOP-1:0]           bht_bank_sel   ;
 
    for ( i=0; i<2; i++) begin : BANKS
+     wire[pt.BHT_ARRAY_DEPTH-1:0] wr0, wr1;
+     assign wr0 = bht_wr_en0[i] << bht_wr_addr0;
+     assign wr1 = bht_wr_en2[i] << bht_wr_addr2;
      for (genvar k=0 ; k < (pt.BHT_ARRAY_DEPTH)/NUM_BHT_LOOP ; k++) begin : BHT_CLK_GROUP
      assign bht_bank_clken[i][k]  = (bht_wr_en0[i] & ((bht_wr_addr0[pt.BHT_ADDR_HI: NUM_BHT_LOOP_OUTER_LO]==k) |  BHT_NO_ADDR_MATCH)) |
                                     (bht_wr_en2[i] & ((bht_wr_addr2[pt.BHT_ADDR_HI: NUM_BHT_LOOP_OUTER_LO]==k) |  BHT_NO_ADDR_MATCH));
@@ -836,19 +845,24 @@ end // block: fa
 `endif
 
      for (j=0 ; j<NUM_BHT_LOOP ; j++) begin : BHT_FLOPS
-       assign   bht_bank_sel[i][k][j]    = (bht_wr_en0[i] & (bht_wr_addr0[NUM_BHT_LOOP_INNER_HI :pt.BHT_ADDR_LO] == j) & ((bht_wr_addr0[pt.BHT_ADDR_HI: NUM_BHT_LOOP_OUTER_LO]==k) | BHT_NO_ADDR_MATCH)) |
-                                           (bht_wr_en2[i] & (bht_wr_addr2[NUM_BHT_LOOP_INNER_HI :pt.BHT_ADDR_LO] == j) & ((bht_wr_addr2[pt.BHT_ADDR_HI: NUM_BHT_LOOP_OUTER_LO]==k) | BHT_NO_ADDR_MATCH)) ;
+     wire[1:0] wdata;
+     wire  bank_sel = wr1[NUM_BHT_LOOP*k+j] | wr0[NUM_BHT_LOOP*k+j];
 
-       assign bht_bank_wr_data[i][k][j]  = (bht_wr_en2[i] & (bht_wr_addr2[NUM_BHT_LOOP_INNER_HI:pt.BHT_ADDR_LO] == j) & ((bht_wr_addr2[pt.BHT_ADDR_HI: NUM_BHT_LOOP_OUTER_LO]==k) | BHT_NO_ADDR_MATCH)) ? bht_wr_data2[1:0] :
-                                                                                                                      bht_wr_data0[1:0]   ;
+//       assign   bht_bank_sel[i][k][j]    = (bht_wr_en0[i] & (bht_wr_addr0[NUM_BHT_LOOP_INNER_HI :pt.BHT_ADDR_LO] == j) & ((bht_wr_addr0[pt.BHT_ADDR_HI: NUM_BHT_LOOP_OUTER_LO]==k) | BHT_NO_ADDR_MATCH)) |
+//                                           (bht_wr_en2[i] & (bht_wr_addr2[NUM_BHT_LOOP_INNER_HI :pt.BHT_ADDR_LO] == j) & ((bht_wr_addr2[pt.BHT_ADDR_HI: NUM_BHT_LOOP_OUTER_LO]==k) | BHT_NO_ADDR_MATCH)) ;
+
+//       assign bht_bank_wr_data[i][k][j]  = (bht_wr_en2[i] & (bht_wr_addr2[NUM_BHT_LOOP_INNER_HI:pt.BHT_ADDR_LO] == j) & ((bht_wr_addr2[pt.BHT_ADDR_HI: NUM_BHT_LOOP_OUTER_LO]==k) | BHT_NO_ADDR_MATCH)) ? bht_wr_data2[1:0] :
+//                                                                                                                      bht_wr_data0[1:0]   ;
+       assign wdata  = wr1[NUM_BHT_LOOP*k+j] ? bht_wr_data2[1:0] :bht_wr_data0;
+
 
 
           rvdffs_fpga #(2) bht_bank (.*,
                     .clk        (bht_bank_clk[i][k]),
-                    .en         (bht_bank_sel[i][k][j]),
+                    .en         (bank_sel),
                     .rawclk     (clk),
-                    .clken      (bht_bank_sel[i][k][j]),
-                    .din        (bht_bank_wr_data[i][k][j]),
+                    .clken      (bank_sel),
+                    .din        (wdata),
                     .dout       (bht_bank_rd_data_out[i][(16*k)+j]));
 
       end // block: BHT_FLOPS

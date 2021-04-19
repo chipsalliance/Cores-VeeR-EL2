@@ -129,11 +129,9 @@ typedef struct packed {
 typedef struct packed {
                        logic clz;
                        logic ctz;
-                       logic pcnt;
+                       logic cpop;
                        logic sext_b;
                        logic sext_h;
-                       logic slo;
-                       logic sro;
                        logic min;
                        logic max;
                        logic pack;
@@ -144,10 +142,10 @@ typedef struct packed {
                        logic grev;
                        logic gorc;
                        logic zbb;
-                       logic sbset;
-                       logic sbclr;
-                       logic sbinv;
-                       logic sbext;
+                       logic bset;
+                       logic bclr;
+                       logic binv;
+                       logic bext;
                        logic sh1add;
                        logic sh2add;
                        logic sh3add;
@@ -205,11 +203,9 @@ typedef struct packed {
 typedef struct packed {
                        logic clz;
                        logic ctz;
-                       logic pcnt;
+                       logic cpop;
                        logic sext_b;
                        logic sext_h;
-                       logic slo;
-                       logic sro;
                        logic min;
                        logic max;
                        logic pack;
@@ -220,13 +216,13 @@ typedef struct packed {
                        logic grev;
                        logic gorc;
                        logic zbb;
-                       logic sbset;
-                       logic sbclr;
-                       logic sbinv;
-                       logic sbext;
-                       logic zbs;
+                       logic bset;
+                       logic bclr;
+                       logic binv;
                        logic bext;
-                       logic bdep;
+                       logic zbs;
+                       logic bcompress;
+                       logic bdecompress;
                        logic zbe;
                        logic clmul;
                        logic clmulh;
@@ -234,6 +230,9 @@ typedef struct packed {
                        logic zbc;
                        logic shfl;
                        logic unshfl;
+                       logic xperm_n;
+                       logic xperm_b;
+                       logic xperm_h;
                        logic zbp;
                        logic crc32_b;
                        logic crc32_h;
@@ -306,8 +305,8 @@ typedef struct packed {
                        logic rs1_sign;
                        logic rs2_sign;
                        logic low;
-                       logic bext;
-                       logic bdep;
+                       logic bcompress;
+                       logic bdecompress;
                        logic clmul;
                        logic clmulh;
                        logic clmulr;
@@ -322,6 +321,9 @@ typedef struct packed {
                        logic crc32c_h;
                        logic crc32c_w;
                        logic bfp;
+                       logic xperm_n;
+                       logic xperm_b;
+                       logic xperm_h;
                        } el2_mul_pkt_t;
 
 typedef struct packed {

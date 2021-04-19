@@ -53,8 +53,8 @@ import el2_pkg::*;
 
 
    // ZBE
-   logic                ap_bext;
-   logic                ap_bdep;
+   logic                ap_bcompress;
+   logic                ap_bdecompress;
 
    // ZBC
    logic                ap_clmul;
@@ -66,6 +66,9 @@ import el2_pkg::*;
    logic                ap_gorc;
    logic                ap_shfl;
    logic                ap_unshfl;
+   logic                ap_xperm_n;
+   logic                ap_xperm_b;
+   logic                ap_xperm_h;
 
    // ZBR
    logic                ap_crc32_b;
@@ -81,13 +84,13 @@ import el2_pkg::*;
 
    if (pt.BITMANIP_ZBE == 1)
      begin
-       assign ap_bext         =  mul_p.bext;
-       assign ap_bdep         =  mul_p.bdep;
+       assign ap_bcompress    =  mul_p.bcompress;
+       assign ap_bdecompress  =  mul_p.bdecompress;
      end
    else
      begin
-       assign ap_bext         =  1'b0;
-       assign ap_bdep         =  1'b0;
+       assign ap_bcompress    =  1'b0;
+       assign ap_bdecompress  =  1'b0;
      end
 
    if (pt.BITMANIP_ZBC == 1)
@@ -109,6 +112,9 @@ import el2_pkg::*;
        assign ap_gorc         =  mul_p.gorc;
        assign ap_shfl         =  mul_p.shfl;
        assign ap_unshfl       =  mul_p.unshfl;
+       assign ap_xperm_n      =  mul_p.xperm_n;
+       assign ap_xperm_b      =  mul_p.xperm_b;
+       assign ap_xperm_h      =  mul_p.xperm_h;
      end
    else
      begin
@@ -116,6 +122,9 @@ import el2_pkg::*;
        assign ap_gorc         =  1'b0;
        assign ap_shfl         =  1'b0;
        assign ap_unshfl       =  1'b0;
+       assign ap_xperm_n      =  1'b0;
+       assign ap_xperm_b      =  1'b0;
+       assign ap_xperm_h      =  1'b0;
      end
 
    if (pt.BITMANIP_ZBR == 1)
@@ -175,59 +184,61 @@ import el2_pkg::*;
    assign prod_x[65:0]           =  rs1_x  *  rs2_x;
 
 
-   // * * * * * * * * * * * * * * * * * *  BitManip  :  BEXT, BDEP   * * * * * * * * * * * * * * * * * *
 
 
-   // *** BEXT == "gather"  ***
+   // * * * * * * * * * * * * * * * * * *  BitManip  :  BCOMPRESS, BDECOMPRESS * * * * * * * * * * * * *
 
-   logic        [31:0]    bext_d;
-   logic                  bext_test_bit_d;
-   integer                bext_i, bext_j;
+
+   // *** BCOMPRESS == "gather"  ***
+
+   logic        [31:0]    bcompress_d;
+   logic                  bcompress_test_bit_d;
+   integer                bcompress_i, bcompress_j;
 
 
    always_comb
      begin
 
-       bext_j                    =      0;
-       bext_test_bit_d           =   1'b0;
-       bext_d[31:0]              =  32'b0;
+       bcompress_j                             =      0;
+       bcompress_test_bit_d                    =   1'b0;
+       bcompress_d[31:0]                       =  32'b0;
 
-       for (bext_i=0; bext_i<32; bext_i++)
+       for (bcompress_i=0; bcompress_i<32; bcompress_i++)
          begin
-             bext_test_bit_d     =  rs2_in[bext_i];
-             if (bext_test_bit_d)
+             bcompress_test_bit_d              =  rs2_in[bcompress_i];
+             if (bcompress_test_bit_d)
                begin
-                  bext_d[bext_j] =  rs1_in[bext_i];
-                  bext_j         =  bext_j + 1;
-               end  // IF  bext_test_bit
-         end        // FOR bext_i
+                  bcompress_d[bcompress_j]     =  rs1_in[bcompress_i];
+                  bcompress_j                  =  bcompress_j + 1;
+               end  // IF  bcompress_test_bit
+         end        // FOR bcompress_i
      end            // ALWAYS_COMB
 
 
 
-   // *** BDEP == "scatter" ***
+   // *** BDECOMPRESS == "scatter" ***
 
-   logic        [31:0]    bdep_d;
-   logic                  bdep_test_bit_d;
-   integer                bdep_i, bdep_j;
+   logic        [31:0]    bdecompress_d;
+   logic                  bdecompress_test_bit_d;
+   integer                bdecompress_i, bdecompress_j;
 
 
    always_comb
      begin
 
-       bdep_j                    =      0;
-       bdep_test_bit_d           =   1'b0;
-       bdep_d[31:0]              =  32'b0;
+       bdecompress_j                           =      0;
+       bdecompress_test_bit_d                  =   1'b0;
+       bdecompress_d[31:0]                     =  32'b0;
 
-       for (bdep_i=0; bdep_i<32; bdep_i++)
+       for (bdecompress_i=0; bdecompress_i<32; bdecompress_i++)
          begin
-             bdep_test_bit_d     =  rs2_in[bdep_i];
-             if (bdep_test_bit_d)
+             bdecompress_test_bit_d            =  rs2_in[bdecompress_i];
+             if (bdecompress_test_bit_d)
                begin
-                  bdep_d[bdep_i] =  rs1_in[bdep_j];
-                  bdep_j         =  bdep_j + 1;
-               end  // IF  bdep_test_bit
-         end        // FOR bdep_i
+                  bdecompress_d[bdecompress_i] =  rs1_in[bdecompress_j];
+                  bdecompress_j                =  bdecompress_j + 1;
+               end  // IF  bdecompress_test_bit
+         end        // FOR bdecompress_i
      end            // ALWAYS_COMB
 
 
@@ -450,6 +461,88 @@ import el2_pkg::*;
 
 
 
+   // * * * * * * * * * * * * * * * * * *  BitManip  :  XPERM          * * * * * * * * * * * * * * * * *
+
+//
+// These instructions operate on nibbles/bytes/half-words/words.
+// rs1 is a vector of data words and rs2 is a vector of indices into rs1.
+// The result of the instruction is the vector rs2 with each element replaced by the corresponding data word from rs1,
+// or zero then the index in rs2 is out of bounds.
+//
+//   uint_xlen_t xperm(uint_xlen_t rs1, uint_xlen_t rs2, int sz_log2)
+//   {
+//       uint_xlen_t r = 0;
+//       uint_xlen_t sz = 1LL << sz_log2;
+//       uint_xlen_t mask = (1LL << sz) - 1;
+//       for (int i = 0; i < XLEN; i += sz)
+//           { uint_xlen_t pos = ((rs2 >> i) & mask) << sz_log2;
+//             if (pos < XLEN)
+//                 r |= ((rs1 >> pos) & mask) << i;
+//           }
+//       return r;
+//   }
+//
+// uint_xlen_t xperm_n (uint_xlen_t rs1, uint_xlen_t rs2) { return xperm(rs1, rs2, 2); }
+// uint_xlen_t xperm_b (uint_xlen_t rs1, uint_xlen_t rs2) { return xperm(rs1, rs2, 3); }
+// uint_xlen_t xperm_h (uint_xlen_t rs1, uint_xlen_t rs2) { return xperm(rs1, rs2, 4); }
+// uint_xlen_t xperm_w (uint_xlen_t rs1, uint_xlen_t rs2) { return xperm(rs1, rs2, 5); }   Not part of RV32
+//
+// The xperm.[nbhw] instructions can be implemented with an XLEN/4-lane nibble-wide crossbarswitch.
+
+// *** XPERM_B ***
+
+   // XLEN    = 32
+   // SZ_LOG2 =  3
+   // SZ      = 4'd8;
+   // MASK    = ( 1 << 8 ) - 1
+   //         = 8'hFF
+
+   // integer                xperm_b_i;
+   // logic        [31:0]    xperm_b_r;
+   // logic        [3:0]     xperm_b_sz;
+   // logic        [7:0]     xperm_b_mask;
+   // logic        [31:0]    xperm_b_pos;
+   //
+   //
+   // assign xperm_b_sz[3:0]        =  4'd8;
+   // assign xperm_b_mask[7:0]      =  8'hff;
+   //
+   // always_comb
+   //   begin
+   //     xperm_b_r[31:0] = 32'b0;
+   //
+   //     for (xperm_b_i=0; xperm_b_i<32; xperm_b_i = xperm_b_i + xperm_b_sz)     // This code did not work...
+   //       begin
+   //         xperm_b_pos[31:0] = ( (rs2_in[31:0] >> xperm_b_i) & {24'h0,xperm_b_mask[7:0]} ) << 3;
+   //         if (xperm_b_pos[31:0] < 32'd32)
+   //            xperm_b_r[31:0] = xperm_b_r[31:0] | ( ((rs1_in[31:0] >> xperm_b_pos[4:0]) & {24'h0,xperm_b_mask[7:0]}) << xperm_b_i );
+   //       end
+   //   end
+
+   logic        [31:0]    xperm_n;
+   logic        [31:0]    xperm_b;
+   logic        [31:0]    xperm_h;
+
+   assign xperm_n[03:00]         =  { 4{    ~rs2_in[03]     }} & ( (rs1_in[31:0] >> {rs2_in[02:00],2'b0}) &     4'hf );   // This is a 8:1 mux with qualified selects
+   assign xperm_n[07:04]         =  { 4{    ~rs2_in[07]     }} & ( (rs1_in[31:0] >> {rs2_in[06:04],2'b0}) &     4'hf );
+   assign xperm_n[11:08]         =  { 4{    ~rs2_in[11]     }} & ( (rs1_in[31:0] >> {rs2_in[10:08],2'b0}) &     4'hf );
+   assign xperm_n[15:12]         =  { 4{    ~rs2_in[15]     }} & ( (rs1_in[31:0] >> {rs2_in[14:12],2'b0}) &     4'hf );
+   assign xperm_n[19:16]         =  { 4{    ~rs2_in[19]     }} & ( (rs1_in[31:0] >> {rs2_in[18:16],2'b0}) &     4'hf );
+   assign xperm_n[23:20]         =  { 4{    ~rs2_in[23]     }} & ( (rs1_in[31:0] >> {rs2_in[22:20],2'b0}) &     4'hf );
+   assign xperm_n[27:24]         =  { 4{    ~rs2_in[27]     }} & ( (rs1_in[31:0] >> {rs2_in[26:24],2'b0}) &     4'hf );
+   assign xperm_n[31:28]         =  { 4{    ~rs2_in[31]     }} & ( (rs1_in[31:0] >> {rs2_in[30:28],2'b0}) &     4'hf );
+
+   assign xperm_b[07:00]         =  { 8{ ~(| rs2_in[07:02]) }} & ( (rs1_in[31:0] >> {rs2_in[01:00],3'b0}) &    8'hff );   // This is a 4:1 mux with qualified selects
+   assign xperm_b[15:08]         =  { 8{ ~(| rs2_in[15:10]) }} & ( (rs1_in[31:0] >> {rs2_in[09:08],3'b0}) &    8'hff );
+   assign xperm_b[23:16]         =  { 8{ ~(| rs2_in[23:18]) }} & ( (rs1_in[31:0] >> {rs2_in[17:16],3'b0}) &    8'hff );
+   assign xperm_b[31:24]         =  { 8{ ~(| rs2_in[31:26]) }} & ( (rs1_in[31:0] >> {rs2_in[25:24],3'b0}) &    8'hff );
+
+   assign xperm_h[15:00]         =  {16{ ~(| rs2_in[15:01]) }} & ( (rs1_in[31:0] >> {rs2_in[00]   ,4'b0}) & 16'hffff );   // This is a 2:1 mux with qualified selects
+   assign xperm_h[31:16]         =  {16{ ~(| rs2_in[31:17]) }} & ( (rs1_in[31:0] >> {rs2_in[16]   ,4'b0}) & 16'hffff );
+
+
+
+
    // * * * * * * * * * * * * * * * * * *  BitManip  :  CRC32, CRC32c  * * * * * * * * * * * * * * * * *
 
    // ***  computed from   https: //crccalc.com  ***
@@ -564,12 +657,26 @@ import el2_pkg::*;
 
    // * * * * * * * * * * * * * * * * * *  BitManip  :  BFP          * * * * * * * * * * * * * * * * * *
 
+
+   // uint_xlen_t bfp(uint_xlen_t rs1, uint_xlen_t rs2)
+   // {
+   //    uint_xlen_t cfg = rs2 >> (XLEN/2);
+   //    if ((cfg >> 30) == 2) cfg = cfg >> 16;
+   //    int len          = (cfg >> 8) & (XLEN/2-1);
+   //    int off          = cfg & (XLEN-1);
+   //    len              = len ? len : XLEN/2;
+   //    uint_xlen_t mask = slo(0, len) << off;
+   //    uint_xlen_t data = rs2 << off;
+   //    return (data & mask) | (rs1 & ~mask);
+
+
    logic        [4:0]     bfp_len;
    logic        [4:0]     bfp_off;
    logic        [31:0]    bfp_len_mask_;
+   logic        [31:0]    bfp_off_mask_;
    logic        [15:0]    bfp_preshift_data;
-   logic        [63:0]    bfp_shift_data;
-   logic        [63:0]    bfp_shift_mask;
+   logic        [31:0]    bfp_shift_data;
+   logic        [31:0]    bfp_shift_mask;
    logic        [31:0]    bfp_result_d;
 
 
@@ -578,13 +685,13 @@ import el2_pkg::*;
    assign bfp_off[4:0]           =  rs2_in[20:16];
 
    assign bfp_len_mask_[31:0]    =  32'hffff_ffff  <<  bfp_len[4:0];
+   assign bfp_off_mask_[31:0]    =  32'hffff_ffff  <<  bfp_off[4:0];
    assign bfp_preshift_data[15:0]=  rs2_in[15:0] & ~bfp_len_mask_[15:0];
 
-   assign bfp_shift_data[63:0]   = {16'b0,bfp_preshift_data[15:0], 16'b0,bfp_preshift_data[15:0]}  <<  bfp_off[4:0];
-   assign bfp_shift_mask[63:0]   = {bfp_len_mask_[31:0],           bfp_len_mask_[31:0]}            <<  bfp_off[4:0];
+   assign bfp_shift_data[31:0]   = {16'b0,bfp_preshift_data[15:0]}  <<  bfp_off[4:0];
+   assign bfp_shift_mask[31:0]   = (bfp_len_mask_[31:0]             <<  bfp_off[4:0]) | ~bfp_off_mask_[31:0];
 
-   assign bfp_result_d[31:0]     = bfp_shift_data[63:32] | (rs1_in[31:0] & bfp_shift_mask[63:32]);
-
+   assign bfp_result_d[31:0]     = bfp_shift_data[31:0] | (rs1_in[31:0] & bfp_shift_mask[31:0]);
 
 
 
@@ -592,24 +699,27 @@ import el2_pkg::*;
    // * * * * * * * * * * * * * * * * * *  BitManip  :  Common logic * * * * * * * * * * * * * * * * * *
 
 
-   assign bitmanip_sel_d         =  ap_bext | ap_bdep | ap_clmul | ap_clmulh | ap_clmulr | ap_grev | ap_gorc | ap_shfl | ap_unshfl | crc32_all | ap_bfp;
+   assign bitmanip_sel_d         =  ap_bcompress | ap_bdecompress | ap_clmul | ap_clmulh | ap_clmulr | ap_grev | ap_gorc | ap_shfl | ap_unshfl | crc32_all | ap_bfp | ap_xperm_n | ap_xperm_b | ap_xperm_h;
 
-   assign bitmanip_d[31:0]       = ( {32{ap_bext}}     &       bext_d[31:0]        ) |
-                                   ( {32{ap_bdep}}     &       bdep_d[31:0]        ) |
-                                   ( {32{ap_clmul}}    &       clmul_raw_d[31:0]   ) |
-                                   ( {32{ap_clmulh}}   & {1'b0,clmul_raw_d[62:32]} ) |
-                                   ( {32{ap_clmulr}}   &       clmul_raw_d[62:31]  ) |
-                                   ( {32{ap_grev}}     &       grev_d[31:0]        ) |
-                                   ( {32{ap_gorc}}     &       gorc_d[31:0]        ) |
-                                   ( {32{ap_shfl}}     &       shfl_d[31:0]        ) |
-                                   ( {32{ap_unshfl}}   &       unshfl_d[31:0]      ) |
-                                   ( {32{ap_crc32_b}}  &       crc32_bd[31:0]      ) |
-                                   ( {32{ap_crc32_h}}  &       crc32_hd[31:0]      ) |
-                                   ( {32{ap_crc32_w}}  &       crc32_wd[31:0]      ) |
-                                   ( {32{ap_crc32c_b}} &       crc32c_bd[31:0]     ) |
-                                   ( {32{ap_crc32c_h}} &       crc32c_hd[31:0]     ) |
-                                   ( {32{ap_crc32c_w}} &       crc32c_wd[31:0]     ) |
-                                   ( {32{ap_bfp}}      &       bfp_result_d[31:0]  );
+   assign bitmanip_d[31:0]       = ( {32{ap_bcompress}}    &       bcompress_d[31:0]   ) |
+                                   ( {32{ap_bdecompress}}  &       bdecompress_d[31:0] ) |
+                                   ( {32{ap_clmul}}        &       clmul_raw_d[31:0]   ) |
+                                   ( {32{ap_clmulh}}       & {1'b0,clmul_raw_d[62:32]} ) |
+                                   ( {32{ap_clmulr}}       &       clmul_raw_d[62:31]  ) |
+                                   ( {32{ap_grev}}         &       grev_d[31:0]        ) |
+                                   ( {32{ap_gorc}}         &       gorc_d[31:0]        ) |
+                                   ( {32{ap_shfl}}         &       shfl_d[31:0]        ) |
+                                   ( {32{ap_unshfl}}       &       unshfl_d[31:0]      ) |
+                                   ( {32{ap_crc32_b}}      &       crc32_bd[31:0]      ) |
+                                   ( {32{ap_crc32_h}}      &       crc32_hd[31:0]      ) |
+                                   ( {32{ap_crc32_w}}      &       crc32_wd[31:0]      ) |
+                                   ( {32{ap_crc32c_b}}     &       crc32c_bd[31:0]     ) |
+                                   ( {32{ap_crc32c_h}}     &       crc32c_hd[31:0]     ) |
+                                   ( {32{ap_crc32c_w}}     &       crc32c_wd[31:0]     ) |
+                                   ( {32{ap_bfp}}          &       bfp_result_d[31:0]  ) |
+                                   ( {32{ap_xperm_n}}      &       xperm_n[31:0]       ) |
+                                   ( {32{ap_xperm_b}}      &       xperm_b[31:0]       ) |
+                                   ( {32{ap_xperm_h}}      &       xperm_h[31:0]       );
 
 
 

@@ -315,7 +315,7 @@ if (pt.ICACHE_BYPASS_ENABLE == 1) begin \
              end                                                                                                                          \
              else begin                                                                                                                   \
                  assign wb_dout[i][k]                      =   wb_dout_pre_up[i][k] ;                                                     \
-                 assign ic_bank_way_clken_final_up[i][k]   =  ic_bank_way_clken[i][k];                                                    \
+                 assign ic_bank_way_clken_final_up[i][k]   =  ic_bank_way_clken[k][i];                                                    \
              end
 
 

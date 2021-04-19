@@ -75,31 +75,27 @@ import el2_pkg::*;
    // Zbb
    logic                  ap_clz;
    logic                  ap_ctz;
-   logic                  ap_pcnt;
+   logic                  ap_cpop;
    logic                  ap_sext_b;
    logic                  ap_sext_h;
    logic                  ap_min;
    logic                  ap_max;
-   logic                  ap_pack;
-   logic                  ap_packu;
-   logic                  ap_packh;
    logic                  ap_rol;
    logic                  ap_ror;
-   logic                  ap_rev;
    logic                  ap_rev8;
    logic                  ap_orc_b;
-   logic                  ap_orc16;
    logic                  ap_zbb;
 
    // Zbs
-   logic                  ap_sbset;
-   logic                  ap_sbclr;
-   logic                  ap_sbinv;
-   logic                  ap_sbext;
+   logic                  ap_bset;
+   logic                  ap_bclr;
+   logic                  ap_binv;
+   logic                  ap_bext;
 
-   // Zbr
-   logic                  ap_slo;
-   logic                  ap_sro;
+   // Zbp
+   logic                  ap_pack;
+   logic                  ap_packu;
+   logic                  ap_packh;
 
    // Zba
    logic                  ap_sh1add;
@@ -113,7 +109,7 @@ import el2_pkg::*;
      begin
        assign ap_clz          =  ap.clz;
        assign ap_ctz          =  ap.ctz;
-       assign ap_pcnt         =  ap.pcnt;
+       assign ap_cpop         =  ap.cpop;
        assign ap_sext_b       =  ap.sext_b;
        assign ap_sext_h       =  ap.sext_h;
        assign ap_min          =  ap.min;
@@ -123,7 +119,7 @@ import el2_pkg::*;
      begin
        assign ap_clz          =  1'b0;
        assign ap_ctz          =  1'b0;
-       assign ap_pcnt         =  1'b0;
+       assign ap_cpop         =  1'b0;
        assign ap_sext_b       =  1'b0;
        assign ap_sext_h       =  1'b0;
        assign ap_min          =  1'b0;
@@ -133,57 +129,57 @@ import el2_pkg::*;
 
    if ( (pt.BITMANIP_ZBB == 1) | (pt.BITMANIP_ZBP == 1) )
      begin
-       assign ap_pack         =  ap.pack;
-       assign ap_packu        =  ap.packu;
-       assign ap_packh        =  ap.packh;
        assign ap_rol          =  ap.rol;
        assign ap_ror          =  ap.ror;
-       assign ap_rev          =  ap.grev & (b_in[4:0] == 5'b11111);
        assign ap_rev8         =  ap.grev & (b_in[4:0] == 5'b11000);
        assign ap_orc_b        =  ap.gorc & (b_in[4:0] == 5'b00111);
-       assign ap_orc16        =  ap.gorc & (b_in[4:0] == 5'b10000);
        assign ap_zbb          =  ap.zbb;
      end
    else
      begin
-       assign ap_pack         =  1'b0;
-       assign ap_packu        =  1'b0;
-       assign ap_packh        =  1'b0;
        assign ap_rol          =  1'b0;
        assign ap_ror          =  1'b0;
-       assign ap_rev          =  1'b0;
        assign ap_rev8         =  1'b0;
        assign ap_orc_b        =  1'b0;
-       assign ap_orc16        =  1'b0;
        assign ap_zbb          =  1'b0;
      end
 
 
    if (pt.BITMANIP_ZBS == 1)
      begin
-       assign ap_sbset        =  ap.sbset;
-       assign ap_sbclr        =  ap.sbclr;
-       assign ap_sbinv        =  ap.sbinv;
-       assign ap_sbext        =  ap.sbext;
+       assign ap_bset         =  ap.bset;
+       assign ap_bclr         =  ap.bclr;
+       assign ap_binv         =  ap.binv;
+       assign ap_bext         =  ap.bext;
      end
    else
      begin
-       assign ap_sbset        =  1'b0;
-       assign ap_sbclr        =  1'b0;
-       assign ap_sbinv        =  1'b0;
-       assign ap_sbext        =  1'b0;
+       assign ap_bset         =  1'b0;
+       assign ap_bclr         =  1'b0;
+       assign ap_binv         =  1'b0;
+       assign ap_bext         =  1'b0;
      end
 
 
    if (pt.BITMANIP_ZBP == 1)
      begin
-       assign ap_slo          =  ap.slo;
-       assign ap_sro          =  ap.sro;
+       assign ap_packu        =  ap.packu;
      end
    else
      begin
-       assign ap_slo          =  1'b0;
-       assign ap_sro          =  1'b0;
+       assign ap_packu        =  1'b0;
+     end
+
+
+   if ( (pt.BITMANIP_ZBB == 1) | (pt.BITMANIP_ZBP == 1) | (pt.BITMANIP_ZBE == 1) | (pt.BITMANIP_ZBF == 1) )
+     begin
+       assign ap_pack         =  ap.pack;
+       assign ap_packh        =  ap.packh;
+     end
+   else
+     begin
+       assign ap_pack         =  1'b0;
+       assign ap_packh        =  1'b0;
      end
 
 
@@ -278,7 +274,6 @@ import el2_pkg::*;
 
 
 
-   // * * * * * * * * * * * * * * * * * *  BitManip  :  SLO,SRO      * * * * * * * * * * * * * * * * * *
    // * * * * * * * * * * * * * * * * * *  BitManip  :  ROL,ROR      * * * * * * * * * * * * * * * * * *
    // * * * * * * * * * * * * * * * * * *  BitManip  :  ZBEXT        * * * * * * * * * * * * * * * * * *
 
@@ -293,12 +288,10 @@ import el2_pkg::*;
                                          ( { 6{ap.sra}}   &          {1'b0,b_in[4:0]}  ) |
                                          ( { 6{ap_rol}}   & (6'd32 - {1'b0,b_in[4:0]}) ) |
                                          ( { 6{ap_ror}}   &          {1'b0,b_in[4:0]}  ) |
-                                         ( { 6{ap_slo}}   & (6'd32 - {1'b0,b_in[4:0]}) ) |
-                                         ( { 6{ap_sro}}   &          {1'b0,b_in[4:0]}  ) |
-                                         ( { 6{ap_sbext}} &          {1'b0,b_in[4:0]}  );
+                                         ( { 6{ap_bext}}  &          {1'b0,b_in[4:0]}  );
 
 
-   assign shift_mask[31:0]             = ( 32'hffffffff << ({5{ap.sll | ap_slo}} & b_in[4:0]) );
+   assign shift_mask[31:0]             = ( 32'hffffffff << ({5{ap.sll}} & b_in[4:0]) );
 
 
    assign shift_extend[31:0]           =  a_in[31:0];
@@ -306,14 +299,12 @@ import el2_pkg::*;
    assign shift_extend[62:32]          = ( {31{ap.sra}} & {31{a_in[31]}} ) |
                                          ( {31{ap.sll}} &     a_in[30:0] ) |
                                          ( {31{ap_rol}} &     a_in[30:0] ) |
-                                         ( {31{ap_ror}} &     a_in[30:0] ) |
-                                         ( {31{ap_slo}} &     a_in[30:0] ) |
-                                         ( {31{ap_sro}} & {31{  1'b1  }} );
+                                         ( {31{ap_ror}} &     a_in[30:0] );
 
 
    assign shift_long[62:0]    = ( shift_extend[62:0] >> shift_amount[4:0] );   // 62-32 unused
 
-   assign sout[31:0]          = ( shift_long[31:0] & shift_mask[31:0] ) | ( {32{ap_slo}} & ~shift_mask[31:0] );
+   assign sout[31:0]          =   shift_long[31:0] & shift_mask[31:0];
 
 
 
@@ -363,26 +354,26 @@ import el2_pkg::*;
 
 
 
-   // * * * * * * * * * * * * * * * * * *  BitManip  :  PCNT         * * * * * * * * * * * * * * * * * *
+   // * * * * * * * * * * * * * * * * * *  BitManip  :  CPOP         * * * * * * * * * * * * * * * * * *
 
-   logic        [5:0]     bitmanip_pcnt;
-   logic        [5:0]     bitmanip_pcnt_result;
+   logic        [5:0]     bitmanip_cpop;
+   logic        [5:0]     bitmanip_cpop_result;
 
 
-   integer                bitmanip_pcnt_i;
+   integer                bitmanip_cpop_i;
 
    always_comb
      begin
-       bitmanip_pcnt[5:0]               =  6'b0;
+       bitmanip_cpop[5:0]               =  6'b0;
 
-       for (bitmanip_pcnt_i=0; bitmanip_pcnt_i<32; bitmanip_pcnt_i++)
+       for (bitmanip_cpop_i=0; bitmanip_cpop_i<32; bitmanip_cpop_i++)
          begin
-            bitmanip_pcnt[5:0]          =  bitmanip_pcnt[5:0] + {5'b0,a_in[bitmanip_pcnt_i]};
-         end      // FOR    bitmanip_pcnt_i
+            bitmanip_cpop[5:0]          =  bitmanip_cpop[5:0] + {5'b0,a_in[bitmanip_cpop_i]};
+         end      // FOR    bitmanip_cpop_i
      end          // ALWAYS_COMB
 
 
-   assign bitmanip_pcnt_result[5:0]    =  {6{ap_pcnt}} & bitmanip_pcnt[5:0];
+   assign bitmanip_cpop_result[5:0]    =  {6{ap_cpop}} & bitmanip_cpop[5:0];
 
 
 
@@ -404,13 +395,13 @@ import el2_pkg::*;
 
    assign bitmanip_minmax_sel          =  ap_min | ap_max;
 
-
    logic                  bitmanip_minmax_sel_a;
 
    assign bitmanip_minmax_sel_a        =  ge  ^ ap_min;
 
    assign bitmanip_minmax_result[31:0] = ({32{bitmanip_minmax_sel &  bitmanip_minmax_sel_a}}  &  a_in[31:0]) |
                                          ({32{bitmanip_minmax_sel & ~bitmanip_minmax_sel_a}}  &  b_in[31:0]);
+
 
 
 
@@ -426,18 +417,10 @@ import el2_pkg::*;
 
 
 
-   // * * * * * * * * * * * * * * * * * *  BitManip  :  REV, REV8, ORC_B * * * * * * * * * * * * * * * *
+   // * * * * * * * * * * * * * * * * * *  BitManip  :  REV, ORC_B   * * * * * * * * * * * * * * * * * *
 
-   logic        [31:0]    bitmanip_rev_result;
    logic        [31:0]    bitmanip_rev8_result;
    logic        [31:0]    bitmanip_orc_b_result;
-   logic        [31:0]    bitmanip_orc16_result;
-
-   assign bitmanip_rev_result[31:0]    = {32{ap_rev}}   &
-                                         {a_in[00],a_in[01],a_in[02],a_in[03],a_in[04],a_in[05],a_in[06],a_in[07],
-                                          a_in[08],a_in[09],a_in[10],a_in[11],a_in[12],a_in[13],a_in[14],a_in[15],
-                                          a_in[16],a_in[17],a_in[18],a_in[19],a_in[20],a_in[21],a_in[22],a_in[23],
-                                          a_in[24],a_in[25],a_in[26],a_in[27],a_in[28],a_in[29],a_in[30],a_in[31]};
 
    assign bitmanip_rev8_result[31:0]   = {32{ap_rev8}}  & {a_in[7:0],a_in[15:8],a_in[23:16],a_in[31:24]};
 
@@ -466,8 +449,6 @@ import el2_pkg::*;
 
    assign bitmanip_orc_b_result[31:0]  = {32{ap_orc_b}} & { {8{| a_in[31:24]}}, {8{| a_in[23:16]}}, {8{| a_in[15:8]}}, {8{| a_in[7:0]}} };
 
-   assign bitmanip_orc16_result[31:0]  = {32{ap_orc16}} & {     {a_in[31:16] | a_in[15:0]},             {a_in[31:16] | a_in[15:0]}      };
-
 
 
    // * * * * * * * * * * * * * * * * * *  BitManip  :  ZBSET, ZBCLR, ZBINV  * * * * * * * * * * * * * *
@@ -477,16 +458,16 @@ import el2_pkg::*;
 
    assign bitmanip_sb_1hot[31:0]       = ( 32'h00000001 << b_in[4:0] );
 
-   assign bitmanip_sb_data[31:0]       = ( {32{ap_sbset}} & ( a_in[31:0] |  bitmanip_sb_1hot[31:0]) ) |
-                                         ( {32{ap_sbclr}} & ( a_in[31:0] & ~bitmanip_sb_1hot[31:0]) ) |
-                                         ( {32{ap_sbinv}} & ( a_in[31:0] ^  bitmanip_sb_1hot[31:0]) );
+   assign bitmanip_sb_data[31:0]       = ( {32{ap_bset}} & ( a_in[31:0] |  bitmanip_sb_1hot[31:0]) ) |
+                                         ( {32{ap_bclr}} & ( a_in[31:0] & ~bitmanip_sb_1hot[31:0]) ) |
+                                         ( {32{ap_binv}} & ( a_in[31:0] ^  bitmanip_sb_1hot[31:0]) );
 
 
 
 
 
 
-   assign sel_shift           =  ap.sll  | ap.srl | ap.sra | ap_slo | ap_sro | ap_rol | ap_ror;
+   assign sel_shift           =  ap.sll  | ap.srl | ap.sra | ap_rol | ap_ror;
    assign sel_adder           = (ap.add  | ap.sub | ap_zba) & ~ap.slt & ~ap_min & ~ap_max;
    assign sel_pc              =  ap.jal  | pp_in.pcall | pp_in.pja | pp_in.pret;
    assign csr_write_data[31:0]= (ap.csr_imm)  ?  b_in[31:0]  :  a_in[31:0];
@@ -501,18 +482,16 @@ import el2_pkg::*;
                                 ({32{sel_pc}}       & {pcout[31:1],1'b0}    ) |
                                 ({32{ap.csr_write}} &  csr_write_data[31:0] ) |
                                                       {31'b0, slt_one}        |
-                                ({32{ap_sbext}}     & {31'b0, sout[0]}      ) |
+                                ({32{ap_bext}}      & {31'b0, sout[0]}      ) |
                                                       {26'b0, bitmanip_clz_ctz_result[5:0]} |
-                                                      {26'b0, bitmanip_pcnt_result[5:0]}    |
+                                                      {26'b0, bitmanip_cpop_result[5:0]}    |
                                                        bitmanip_sext_result[31:0]    |
                                                        bitmanip_minmax_result[31:0]  |
                                                        bitmanip_pack_result[31:0]    |
                                                        bitmanip_packu_result[31:0]   |
                                                        bitmanip_packh_result[31:0]   |
-                                                       bitmanip_rev_result[31:0]     |
                                                        bitmanip_rev8_result[31:0]    |
                                                        bitmanip_orc_b_result[31:0]   |
-                                                       bitmanip_orc16_result[31:0]   |
                                                        bitmanip_sb_data[31:0];
 
 

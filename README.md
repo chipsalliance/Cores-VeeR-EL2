@@ -1,6 +1,6 @@
 # EL2 SweRV RISC-V Core<sup>TM</sup> 1.3 from Western Digital
 
-This repository contains the SweRV EL2 Core<sup>TM</sup>  design RTL
+This repository contains the EL2 RISC-V SweRV Core<sup>TM</sup>  design RTL
 
 ## License
 
@@ -53,7 +53,7 @@ For example to build with a DCCM of size 64 Kb:
 
 `% $RV_ROOT/configs/swerv.config -dccm_size=64`  
 
-This will update the **default** snapshot in $RV_ROOT/configs/snapshots/default/ with parameters for a 64K DCCM.  
+This will update the **default** snapshot in ./snapshots/default/ with parameters for a 64K DCCM.  
 
 Add `-snapshot=dccm64`, for example, if you wish to name your build snapshot *dccm64* and refer to it during the build.  
 
@@ -70,7 +70,7 @@ target``typical_pd``.**
 
 This script derives the following consistent set of include files :  
 
-    $RV_ROOT/configs/snapshots/default
+    ./snapshots/default
     ├── common_defines.vh                       # `defines for testbench or design
     ├── defines.h                               # #defines for C/assembly headers
     ├── el2_param.vh                            # Design parameters
@@ -99,13 +99,10 @@ Example for csh or its derivatives:
     *(Name your snapshot to distinguish it from the default. Without an explicit name, it will update/override the __default__ snapshot)* 
     For example if `mybuild` is the name for the snapshot:
 
-    set BUILD_PATH environment variable:
-    
-    `setenv BUILD_PATH snapshots/mybuild`
      
     `$RV_ROOT/configs/swerv.config [configuration options..] -snapshot=mybuild`  
     
-    Snapshots are placed in `$BUILD_PATH` directory
+    Snapshots are placed in ./snapshots directory
 
 
 1. Running a simple Hello World program (verilator)

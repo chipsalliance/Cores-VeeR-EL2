@@ -186,8 +186,8 @@ import el2_pkg::*;
    logic                                          consume_fb1, consume_fb0;
    logic [1:0]                                    icaf_eff;
 
-   localparam                                     BRDATA_SIZE  = pt.BTB_ENABLE ? 16+($clog2(pt.BTB_SIZE)*2*pt.BTB_FULLYA) : 2;
-   localparam                                     BRDATA_WIDTH = pt.BTB_ENABLE ? 8+($clog2(pt.BTB_SIZE)*pt.BTB_FULLYA) : 1;
+   localparam                                     BRDATA_SIZE  = pt.BTB_ENABLE ? 16+($clog2(pt.BTB_SIZE)*2*pt.BTB_FULLYA) : 4;
+   localparam                                     BRDATA_WIDTH = pt.BTB_ENABLE ? 8+($clog2(pt.BTB_SIZE)*pt.BTB_FULLYA) : 2;
    logic [BRDATA_SIZE-1:0]                        brdata_in, brdata2, brdata1, brdata0;
    logic [BRDATA_SIZE-1:0]                        brdata1eff, brdata0eff;
    logic [BRDATA_SIZE-1:0]                        brdata1final, brdata0final;
@@ -229,8 +229,9 @@ else begin
                                                         .din({qwen[2] ? {misc_data_in[MHI:0], brdata_in[BRDATA_SIZE-1:0]} : {misc2[MHI:0], brdata2[BRDATA_SIZE-1:0]},
                                                               qwen[1] ? {misc_data_in[MHI:0], brdata_in[BRDATA_SIZE-1:0]} : {misc1[MHI:0], brdata1[BRDATA_SIZE-1:0]},
                                                               qwen[0] ? {misc_data_in[MHI:0], brdata_in[BRDATA_SIZE-1:0]} : {misc0[MHI:0], brdata0[BRDATA_SIZE-1:0]}}),
-                                                        .dout({misc2[MHI:0],misc1[MHI:0],misc0[MHI:0],
-                                                               brdata2[BRDATA_SIZE-1:0], brdata1[BRDATA_SIZE-1:0], brdata0[BRDATA_SIZE-1:0]})
+                                                        .dout({misc2[MHI:0], brdata2[BRDATA_SIZE-1:0],
+                                                               misc1[MHI:0], brdata1[BRDATA_SIZE-1:0],
+                                                               misc0[MHI:0], brdata0[BRDATA_SIZE-1:0]})
                                                         );
 end
 
@@ -395,7 +396,7 @@ end
 
       assign {brdata1eff[BRDATA_SIZE-1:0],brdata0eff[BRDATA_SIZE-1:0]} = (({BRDATA_SIZE*2{qren[0]}} & {brdata1[BRDATA_SIZE-1:0],brdata0[BRDATA_SIZE-1:0]}) |
                                                                           ({BRDATA_SIZE*2{qren[1]}} & {brdata2[BRDATA_SIZE-1:0],brdata1[BRDATA_SIZE-1:0]}) |
-                                                                       ({BRDATA_SIZE*2{qren[2]}} & {brdata0[BRDATA_SIZE-1:0],brdata2[BRDATA_SIZE-1:0]}));
+                                                                          ({BRDATA_SIZE*2{qren[2]}} & {brdata0[BRDATA_SIZE-1:0],brdata2[BRDATA_SIZE-1:0]}));
 
       assign brdata0final[BRDATA_SIZE-1:0] = (({BRDATA_SIZE{q0sel[0]}} & {                     brdata0eff[2*BRDATA_WIDTH-1:0]}) |
                                               ({BRDATA_SIZE{q0sel[1]}} & {{BRDATA_WIDTH{1'b0}},brdata0eff[BRDATA_SIZE-1:BRDATA_WIDTH]}));

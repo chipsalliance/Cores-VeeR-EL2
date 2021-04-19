@@ -31,6 +31,8 @@ whisperPuts(const char* s)
 {
   while (*s)
     whisperPutc(*s++);
+  whisperPutc('\n');
+//  whisperPutc(0xd);
   return 1;
 }
 

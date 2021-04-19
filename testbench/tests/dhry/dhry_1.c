@@ -135,18 +135,14 @@ main ()
         /* Warning: With 16-Bit processors and Number_Of_Runs > 32000,  */
         /* overflow may occur for this array element.                   */
 
-  printf ("\n");
   printf ("Dhrystone Benchmark, Version 2.1 (Language: C)\n");
-  printf ("\n");
   if (Reg)
   {
     printf ("Program compiled with 'register' attribute\n");
-    printf ("\n");
   }
   else
   {
     printf ("Program compiled without 'register' attribute\n");
-    printf ("\n");
   }
 
   #ifndef SWERV
@@ -257,10 +253,7 @@ main ()
 
 #endif
 
-  printf ("Execution ends\n");
-  printf ("\n");
-  printf ("Final values of the variables used in the benchmark:\n");
-  printf ("\n");
+  printf ("Final values of the variables used in the benchmark:\n\n");
   printf ("Int_Glob:            %d\n", Int_Glob);
   printf ("        should be:   %d\n", 5);
   printf ("Bool_Glob:           %d\n", Bool_Glob);
@@ -273,8 +266,7 @@ main ()
   printf ("        should be:   %d\n", 7);
   printf ("Arr_2_Glob[8][7]:    %d\n", Arr_2_Glob[8][7]);
   printf ("        should be:   Number_Of_Runs + 10\n");
-  printf ("Ptr_Glob->\n");
-  printf ("  Ptr_Comp:          %d\n", (int) Ptr_Glob->Ptr_Comp);
+  printf ("Ptr_Glob->Ptr_Comp:  %x\n", (int) Ptr_Glob->Ptr_Comp);
   printf ("        should be:   (implementation-dependent)\n");
   printf ("  Discr:             %d\n", Ptr_Glob->Discr);
   printf ("        should be:   %d\n", 0);
@@ -282,10 +274,9 @@ main ()
   printf ("        should be:   %d\n", 2);
   printf ("  Int_Comp:          %d\n", Ptr_Glob->variant.var_1.Int_Comp);
   printf ("        should be:   %d\n", 17);
-  printf ("  Str_Comp:          %s\n", Ptr_Glob->variant.var_1.Str_Comp);
+  printf ("  Str_Comp:          %s", Ptr_Glob->variant.var_1.Str_Comp);
   printf ("        should be:   DHRYSTONE PROGRAM, SOME STRING\n");
-  printf ("Next_Ptr_Glob->\n");
-  printf ("  Ptr_Comp:          %d\n", (int) Next_Ptr_Glob->Ptr_Comp);
+  printf ("Next_Ptr_Glob->Ptr_Comp:%x\n", (int) Next_Ptr_Glob->Ptr_Comp);
   printf ("        should be:   (implementation-dependent), same as above\n");
   printf ("  Discr:             %d\n", Next_Ptr_Glob->Discr);
   printf ("        should be:   %d\n", 0);
@@ -293,8 +284,7 @@ main ()
   printf ("        should be:   %d\n", 1);
   printf ("  Int_Comp:          %d\n", Next_Ptr_Glob->variant.var_1.Int_Comp);
   printf ("        should be:   %d\n", 18);
-  printf ("  Str_Comp:          %s\n",
-                                Next_Ptr_Glob->variant.var_1.Str_Comp);
+  printf ("  Str_Comp:          %s", Next_Ptr_Glob->variant.var_1.Str_Comp);
   printf ("        should be:   DHRYSTONE PROGRAM, SOME STRING\n");
   printf ("Int_1_Loc:           %d\n", Int_1_Loc);
   printf ("        should be:   %d\n", 5);
@@ -304,9 +294,9 @@ main ()
   printf ("        should be:   %d\n", 7);
   printf ("Enum_Loc:            %d\n", Enum_Loc);
   printf ("        should be:   %d\n", 1);
-  printf ("Str_1_Loc:           %s\n", Str_1_Loc);
+  printf ("Str_1_Loc:           %s", Str_1_Loc);
   printf ("        should be:   DHRYSTONE PROGRAM, 1'ST STRING\n");
-  printf ("Str_2_Loc:           %s\n", Str_2_Loc);
+  printf ("Str_2_Loc:           %s", Str_2_Loc);
   printf ("        should be:   DHRYSTONE PROGRAM, 2'ND STRING\n");
   printf ("\n");
 

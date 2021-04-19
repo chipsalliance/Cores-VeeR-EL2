@@ -312,6 +312,7 @@ module tb_top ( input bit core_clk );
     wire[63:0] WriteData;
     string                      abi_reg[32]; // ABI register names
 
+`define DEC rvtop.swerv.dec
 
     assign mailbox_write = lmem.mailbox_write;
     assign WriteData = lmem.WriteData;
@@ -336,7 +337,7 @@ module tb_top ( input bit core_clk );
         // End Of test monitor
         if(mailbox_write && WriteData[7:0] == 8'hff) begin
             $display("TEST_PASSED");
-            $display("\nFinished : minstret = %0d, mcycle = %0d", rvtop.swerv.dec.tlu.minstretl[31:0],rvtop.swerv.dec.tlu.mcyclel[31:0]);
+            $display("\nFinished : minstret = %0d, mcycle = %0d", `DEC.tlu.minstretl[31:0],`DEC.tlu.mcyclel[31:0]);
             $display("See \"exec.log\" for execution trace with register updates..\n");
             $finish;
         end
@@ -349,9 +350,9 @@ module tb_top ( input bit core_clk );
 
     // trace monitor
     always @(posedge core_clk) begin
-        wb_valid  <= rvtop.swerv.dec.dec_i0_wen_r;
-        wb_dest   <= rvtop.swerv.dec.dec_i0_waddr_r;
-        wb_data   <= rvtop.swerv.dec.dec_i0_wdata_r;
+        wb_valid  <= `DEC.dec_i0_wen_r;
+        wb_dest   <= `DEC.dec_i0_waddr_r;
+        wb_data   <= `DEC.dec_i0_wdata_r;
         if (trace_rv_i_valid_ip) begin
            $fwrite(tp,"%b,%h,%h,%0h,%0h,3,%b,%h,%h,%b\n", trace_rv_i_valid_ip, 0, trace_rv_i_address_ip,
                   0, trace_rv_i_insn_ip,trace_rv_i_exception_ip,trace_rv_i_ecause_ip,
@@ -365,10 +366,14 @@ module tb_top ( input bit core_clk );
                         dasm(trace_rv_i_insn_ip, trace_rv_i_address_ip, wb_dest & {5{wb_valid}}, wb_data)
                    );
         end
-        if(rvtop.swerv.dec.dec_nonblock_load_wen)
-           $fwrite (el, "%10d : %32s=%h ; nbL\n", cycleCnt, abi_reg[rvtop.swerv.dec.dec_nonblock_load_waddr], rvtop.swerv.dec.lsu_nonblock_load_data);
-        if(rvtop.swerv.dec.exu_div_wren)
-           $fwrite (el, "%10d : %32s=%h ; nbD\n", cycleCnt, abi_reg[rvtop.swerv.dec.div_waddr_wb], rvtop.swerv.dec.exu_div_result);
+        if(`DEC.dec_nonblock_load_wen) begin
+            $fwrite (el, "%10d : %32s=%h ; nbL\n", cycleCnt, abi_reg[`DEC.dec_nonblock_load_waddr], `DEC.lsu_nonblock_load_data);
+            tb_top.gpr[0][`DEC.dec_nonblock_load_waddr] = `DEC.lsu_nonblock_load_data;
+        end
+        if(`DEC.exu_div_wren) begin
+            $fwrite (el, "%10d : %32s=%h ; nbD\n", cycleCnt, abi_reg[`DEC.div_waddr_wb], `DEC.exu_div_result);
+            tb_top.gpr[0][`DEC.div_waddr_wb] = `DEC.exu_div_result;
+        end
     end
 
 
@@ -952,7 +957,9 @@ addresses:
  0xfffffff0 - ICCM start address to load
  0xfffffff4 - ICCM end address to load
 */
-
+`ifndef VERILATOR
+init_iccm();
+`endif
 addr = 'hffff_fff0;
 saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 if ( (saddr < `RV_ICCM_SADR) || (saddr > `RV_ICCM_EADR)) return;

@@ -948,7 +948,7 @@ logic                                         perr_sb_write_status   ;
       case (perr_state)
          ERR_IDLE: begin : err_idle
                   perr_nxtstate         =  iccm_dma_sb_error ? DMA_SB_ERR : (ic_error_start & ~exu_flush_final) ? IC_WFF : ECC_WFF;
-                  perr_state_en         =  (((iccm_error_start | ic_error_start) & ~exu_flush_final) | iccm_dma_sb_error) & ~dec_tlu_force_halt;
+                  perr_state_en         =  (((iccm_error_start | ic_error_start) & ~dec_tlu_flush_lower_wb) | iccm_dma_sb_error) & ~dec_tlu_force_halt;
                   perr_sb_write_status  =  perr_state_en;
          end
          IC_WFF: begin : icache_wff    // All the I$ data and/or Tag errors ( parity/ECC ) will come to this state

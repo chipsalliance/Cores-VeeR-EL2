@@ -312,7 +312,7 @@ module tb_top ( input bit core_clk );
     wire[63:0] WriteData;
     string                      abi_reg[32]; // ABI register names
 
-`define DEC rvtop.swerv.dec
+`define DEC rvtop.veer.dec
 
     assign mailbox_write = lmem.mailbox_write;
     assign WriteData = lmem.WriteData;
@@ -441,7 +441,7 @@ module tb_top ( input bit core_clk );
    //=========================================================================-
    // RTL instance
    //=========================================================================-
-el2_swerv_wrapper rvtop (
+el2_veer_wrapper rvtop (
     .rst_l                  ( rst_l         ),
     .dbg_rst_l              ( porst_l       ),
     .clk                    ( core_clk      ),
@@ -965,7 +965,7 @@ saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 if ( (saddr < `RV_ICCM_SADR) || (saddr > `RV_ICCM_EADR)) return;
 `ifndef RV_ICCM_ENABLE
     $display("********************************************************");
-    $display("ICCM preload: there is no ICCM in SweRV, terminating !!!");
+    $display("ICCM preload: there is no ICCM in VeeR, terminating !!!");
     $display("********************************************************");
     $finish;
 `endif
@@ -996,7 +996,7 @@ saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 if (saddr < `RV_DCCM_SADR || saddr > `RV_DCCM_EADR) return;
 `ifndef RV_DCCM_ENABLE
     $display("********************************************************");
-    $display("DCCM preload: there is no DCCM in SweRV, terminating !!!");
+    $display("DCCM preload: there is no DCCM in VeeR, terminating !!!");
     $display("********************************************************");
     $finish;
 `endif

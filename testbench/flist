@@ -2,10 +2,10 @@
 //-y $SYNOPSYS_SYN_ROOT/dw/sim_ver
 +define+RV_OPENSOURCE
 +incdir+$RV_ROOT/testbench
-$RV_ROOT/design/el2_swerv_wrapper.sv
+$RV_ROOT/design/el2_veer_wrapper.sv
 $RV_ROOT/design/el2_mem.sv
 $RV_ROOT/design/el2_pic_ctrl.sv
-$RV_ROOT/design/el2_swerv.sv
+$RV_ROOT/design/el2_veer.sv
 $RV_ROOT/design/el2_dma_ctrl.sv
 $RV_ROOT/design/ifu/el2_ifu_aln_ctl.sv
 $RV_ROOT/design/ifu/el2_ifu_compress_ctl.sv

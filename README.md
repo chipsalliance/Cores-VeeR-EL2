@@ -1,6 +1,6 @@
-# EL2 SweRV RISC-V Core<sup>TM</sup> 1.4 from Western Digital
+# EL2 VeeR RISC-V Core<sup>TM</sup> 1.4 from Western Digital
 
-This repository contains the EL2 RISC-V SweRV Core<sup>TM</sup>  design RTL
+This repository contains the EL2 RISC-V VeeR Core<sup>TM</sup>  design RTL
 
 ## License
 
@@ -41,31 +41,31 @@ installed so that it can be used to prepare RISCV binaries to run.
 1. Run make with tools/Makefile
 
 ## Release Notes for this version
-Please see [release notes](release-notes.md) for changes and bug fixes in this version of SweRV
+Please see [release notes](release-notes.md) for changes and bug fixes in this version of VeeR
 
 ### Configurations
 
-SweRV can be configured by running the `$RV_ROOT/configs/swerv.config` script:
+VeeR can be configured by running the `$RV_ROOT/configs/veer.config` script:
 
-`% $RV_ROOT/configs/swerv.config -h` for detailed help options
+`% $RV_ROOT/configs/veer.config -h` for detailed help options
 
 For example to build with a DCCM of size 64 Kb:  
 
-`% $RV_ROOT/configs/swerv.config -dccm_size=64`  
+`% $RV_ROOT/configs/veer.config -dccm_size=64`  
 
 This will update the **default** snapshot in ./snapshots/default/ with parameters for a 64K DCCM.  
 
 Add `-snapshot=dccm64`, for example, if you wish to name your build snapshot *dccm64* and refer to it during the build.  
 
 There are 4 predefined target configurations: `default`, `default_ahb`, `typical_pd` and `high_perf` that can be selected via 
-the `-target=name` option to swerv.config. **Note:** that the `typical_pd` target is what we base our published PPA numbers. It does not include an ICCM.
+the `-target=name` option to veer.config. **Note:** that the `typical_pd` target is what we base our published PPA numbers. It does not include an ICCM.
 
 **Building an FPGA speed optimized model:**
-Use ``-fpga_optimize=1`` option to ``swerv.config`` to build a model that removes clock gating logic from flop model so that the FPGA builds can run at higher speeds. **This is now the default option for
+Use ``-fpga_optimize=1`` option to ``veer.config`` to build a model that removes clock gating logic from flop model so that the FPGA builds can run at higher speeds. **This is now the default option for
 targets other than ``typical_pd``.**
 
 **Building a Power optimized model (ASIC flows):**
-Use ``-fpga_optimize=0`` option to ``swerv.config`` to build a model that **enables** clock gating logic into the flop model so that the ASIC flows get a better power footprint. **This is now the default option for
+Use ``-fpga_optimize=0`` option to ``veer.config`` to build a model that **enables** clock gating logic into the flop model so that the ASIC flows get a better power footprint. **This is now the default option for
 target``typical_pd``.**
 
 This script derives the following consistent set of include files :  
@@ -78,7 +78,7 @@ This script derives the following consistent set of include files :
     ├── pd_defines.vh                           # `defines for physical design
     ├── perl_configs.pl                         # Perl %configs hash for scripting
     ├── pic_map_auto.h                          # PIC memory map based on configure size
-    └── whisper.json                            # JSON file for swerv-iss
+    └── whisper.json                            # JSON file for veer-iss
     └── link.ld                                 # default linker control file
 
 
@@ -87,11 +87,11 @@ This script derives the following consistent set of include files :
 
 While in a work directory:
 
-1. Set the RV_ROOT environment variable to the root of the SweRV directory structure.
+1. Set the RV_ROOT environment variable to the root of the VeeR directory structure.
 Example for bash shell:  
-    `export RV_ROOT=/path/to/swerv`  
+    `export RV_ROOT=/path/to/veer`  
 Example for csh or its derivatives:  
-    `setenv RV_ROOT /path/to/swerv`
+    `setenv RV_ROOT /path/to/veer`
     
 1. Create your specific configuration
 
@@ -100,7 +100,7 @@ Example for csh or its derivatives:
     For example if `mybuild` is the name for the snapshot:
 
      
-    `$RV_ROOT/configs/swerv.config [configuration options..] -snapshot=mybuild`  
+    `$RV_ROOT/configs/veer.config [configuration options..] -snapshot=mybuild`  
     
     Snapshots are placed in ./snapshots directory
 
@@ -109,7 +109,7 @@ Example for csh or its derivatives:
 
     `make -f $RV_ROOT/tools/Makefile`
 
-This command will build a verilator model of SweRV EL2 with AXI bus, and
+This command will build a verilator model of VeeR EL2 with AXI bus, and
 execute a short sequence of instructions that writes out "HELLO WORLD"
 to the bus.
 
@@ -120,7 +120,7 @@ The simulation produces output on the screen like: u
 VerilatorTB: Start of sim
 
 ----------------------------------
-Hello World from SweRV EL2 @WDC !!
+Hello World from VeeR EL2 @WDC !!
 ----------------------------------
 TEST_PASSED
 
@@ -155,7 +155,7 @@ TEST        -  allows to run a C (<test>.c) or assembly (<test>.s) test, hello_w
 TEST_DIR    -  alternative to test source directory testbench/asm or testbench/tests
 <snapshot>  -  run and build executable model of custom CPU configuration, remember to provide 'snapshot' argument 
                for runs on custom configurations.
-CONF_PARAMS -  allows to provide -set options to swerv.conf script to alter predefined EL2 targets parameters
+CONF_PARAMS -  allows to provide -set options to veer.conf script to alter predefined EL2 targets parameters
 ```
 Example:
      
@@ -169,7 +169,7 @@ If you want to compile a test only, you can run:
     make -f $RV_ROOT/tools/Makefile program.hex TEST=<test> [TEST_DIR=/path/to/dir]
 
 
-The Makefile uses  `snapshot/<target>/link.ld` file, generated by swerv.conf script by default to build test executable.
+The Makefile uses  `snapshot/<target>/link.ld` file, generated by veer.conf script by default to build test executable.
 User can provide test specific linker file in form `<test_name>.ld` to build the test executable,
 in the same directory with the test source.
 
@@ -209,6 +209,6 @@ The `$RV_ROOT/testbench/hex` directory contains precompiled hex files of the tes
 
 
 ----
-Western Digital, the Western Digital logo, G-Technology, SanDisk, Tegile, Upthere, WD, SweRV Core, SweRV ISS, 
+Western Digital, the Western Digital logo, G-Technology, SanDisk, Tegile, Upthere, WD, VeeR Core, VeeR ISS, 
 and OmniXtend are registered trademarks or trademarks of Western Digital Corporation or its affiliates in the US 
 and/or other countries. All other marks are the property of their respective owners.

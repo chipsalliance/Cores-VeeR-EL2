@@ -18,10 +18,10 @@ $RV_ROOT/design/include/el2_def.sv
 +incdir+/wdc/apps/mentor/questa/formal/2019.2/share/MODIFIED/dw/dw_datapath
         /wdc/apps/mentor/questa/formal/2019.2/share/MODIFIED/dw/dw.remodel.v
 
-$RV_ROOT/design/el2_swerv_wrapper.sv
+$RV_ROOT/design/el2_veer_wrapper.sv
 $RV_ROOT/design/el2_mem.sv
 $RV_ROOT/design/el2_pic_ctrl.sv
-$RV_ROOT/design/el2_swerv.sv
+$RV_ROOT/design/el2_veer.sv
 $RV_ROOT/design/el2_dma_ctrl.sv
 $RV_ROOT/design/ifu/el2_ifu_aln_ctl.sv
 $RV_ROOT/design/ifu/el2_ifu_compress_ctl.sv

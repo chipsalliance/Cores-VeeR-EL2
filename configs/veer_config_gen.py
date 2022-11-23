@@ -4,7 +4,7 @@ import os
 import subprocess
 import sys
 
-class SwervConfigGenerator(Generator):
+class VeerConfigGenerator(Generator):
     def run(self):
         script_root = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
         files = [
@@ -24,7 +24,7 @@ class SwervConfigGenerator(Generator):
         env = os.environ.copy()
         env['RV_ROOT'] = script_root
         env['BUILD_PATH'] = os.getcwd()
-        args = ['configs/swerv.config'] + self.config.get('args', [])
+        args = ['configs/veer.config'] + self.config.get('args', [])
 
         rc = subprocess.call(args, cwd=script_root, env=env, stdout=subprocess.DEVNULL)
         if rc:
@@ -36,6 +36,6 @@ class SwervConfigGenerator(Generator):
 
         self.add_files(files)
 
-g = SwervConfigGenerator()
+g = VeerConfigGenerator()
 g.run()
 g.write()

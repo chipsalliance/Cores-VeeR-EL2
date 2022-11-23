@@ -16,11 +16,11 @@
 //********************************************************************************
 // $Id$
 //
-// Function: Top level SWERV core file
+// Function: Top level VeeR core file
 // Comments:
 //
 //********************************************************************************
-module el2_swerv
+module el2_veer
 import el2_pkg::*;
 #(
 `include "el2_param.vh"
@@ -1305,5 +1305,5 @@ if  (pt.BUILD_AHB_LITE == 1) begin
 
 
 
-endmodule // el2_swerv
+endmodule // el2_veer
 

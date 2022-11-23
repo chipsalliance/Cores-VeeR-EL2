@@ -6,3 +6,6 @@ obj_dir
 *.log
 *.exe
 *.swp
+verilator-build
+program.hex
+snapshots

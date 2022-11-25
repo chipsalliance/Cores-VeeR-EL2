@@ -60,6 +60,10 @@ ifdef debug
  RIVIERA_DEBUG = +access +r
 endif
 
+ifdef compliance
+ VERILATOR_DEBUG = +define+RISCOF_COMPLIANCE
+endif
+
 # provide specific link file
 ifeq (,$(wildcard $(TEST_DIR)/$(TEST).ld))
 	LINK = $(BUILD_DIR)/link.ld
@@ -144,6 +148,9 @@ riviera-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	touch riviera-build
 
 ############ TEST Simulation ###############################
+riscof_compliance:
+	riscof run --env ./riscv-arch-test/riscv-test-suite/env/ --suite ./riscv-arch-test/riscv-test-suite/rv32i_m/I
+
 
 verilator: program.hex verilator-build
 	./obj_dir/Vtb_top

@@ -22,6 +22,7 @@ Files under the [tools](tools/) directory may be available under a different lic
     │   └── lsu                 #   Load/Store
     ├── docs
     ├── tools                   # Scripts/Makefiles
+    ├── compliance              # riscof compliance setup
     └── testbench               # (Very) simple testbench
         ├── asm                 #   Example assembly files
         ├── hex                 #   Canned demo hex files

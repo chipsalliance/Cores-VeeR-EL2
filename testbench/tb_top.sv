@@ -310,6 +310,21 @@ module tb_top ( input bit core_clk );
 
 `endif
     wire[63:0] WriteData;
+`ifdef RISCOF_COMPLIANCE
+    reg [1034:0] program_file;
+    reg [1034:0] signature_file;
+    integer fd1;
+    always_ff @(negedge lmem.aclk) begin
+        fd1 = $fopen(signature_file,"a");
+        if(lmem.awvalid && lmem.awaddr == 32'h5500_0000)begin
+            $fwrite(fd1, "%h\n",{
+            lmem.wdata[31:24],
+            lmem.wdata[23:16],
+            lmem.wdata[15:08],
+            lmem.wdata[07:00]});
+        end
+    end
+`endif
     string                      abi_reg[32]; // ABI register names
 
 `define DEC rvtop.swerv.dec
@@ -417,9 +432,16 @@ module tb_top ( input bit core_clk );
         reset_vector = `RV_RESET_VEC;
         nmi_vector   = 32'hee000000;
         nmi_int   = 0;
-
+`ifdef RISCOF_COMPLIANCE
+        fd1 = $fopen(signature_file,"w");
+        if ($value$plusargs("CODE=%s", program_file))begin
+            $readmemh(program_file, lmem.mem);
+            $readmemh(program_file, imem.mem);
+        end
+`else
         $readmemh("program.hex",  lmem.mem);
         $readmemh("program.hex",  imem.mem);
+`endif
         tp = $fopen("trace_port.csv","w");
         el = $fopen("exec.log","w");
         $fwrite (el, "//   Cycle : #inst    0    pc    opcode    reg=value   ; mnemonic\n");

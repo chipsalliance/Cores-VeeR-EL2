@@ -9,13 +9,28 @@
         .word 128;                                                      \
         .align 8; .global end_regstate; end_regstate:                   \
         .word 4;
+                                         \
 
+#define STDOUT 0xd0580000
 //RV_COMPLIANCE_HALT
-#define RVMODEL_HALT                                              \
-  li x1, 1;                                                                   \
-  write_tohost:                                                               \
-    sw x1, tohost, t5;                                                        \
-    j write_tohost;
+#define RVMODEL_HALT     \
+      li a1, 0x55000000 ;\
+      la a2, begin_signature  ;\
+      la a3, end_signature ;\
+      loop:;\
+      lw t3, 0(a2) ;\
+      sw t3, 0(a1) ;\
+      addi a2,a2,4 ;\
+      blt a2,a3,loop ;\
+  /* Write 0xff to STDOUT for TB to termiate test.*/ ;\
+  _finish:;\
+      li x3, STDOUT;\
+      addi x5, x0, 0xff;\
+      sb x5, 0(x3);\
+      beq x0, x0, _finish;\
+  .rept 100;\
+      nop;\
+  .endr;
 
 #define RVMODEL_BOOT
 

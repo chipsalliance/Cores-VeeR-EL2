@@ -315,7 +315,9 @@ module tb_top ( input bit core_clk );
     reg [1034:0] signature_file;
     integer fd1;
     always_ff @(negedge lmem.aclk) begin
-        fd1 = $fopen(signature_file,"a");
+        if ($value$plusargs("FILE=%s", signature_file)) begin
+            fd1 = $fopen(signature_file,"a");
+        end
         if(lmem.awvalid && lmem.awaddr == 32'h5500_0000)begin
             $fwrite(fd1, "%h\n",{
             lmem.wdata[31:24],
@@ -433,7 +435,9 @@ module tb_top ( input bit core_clk );
         nmi_vector   = 32'hee000000;
         nmi_int   = 0;
 `ifdef RISCOF_COMPLIANCE
-        fd1 = $fopen(signature_file,"w");
+        if ($value$plusargs("FILE=%s", signature_file)) begin
+            fd1 = $fopen(signature_file,"w");
+        end
         if ($value$plusargs("CODE=%s", program_file))begin
             $readmemh(program_file, lmem.mem);
             $readmemh(program_file, imem.mem);

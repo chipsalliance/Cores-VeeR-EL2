@@ -86,9 +86,9 @@ class swerv_el2(pluginTemplate):
         
         # runs only once
        build_swerv_el2 = 'cd $RV_ROOT \n \
-       make -f ./tools/Makefile'
+       make -f ./tools/Makefile verilator-build compliance=1'
 
-    #    utils.shellCommand(build_swerv_el2).run()   
+       utils.shellCommand(build_swerv_el2).run()   
        # verilator run test
        self.sigdump_cmd = 'cd $RV_ROOT \n \
        ./obj_dir/Vtb_top +FILE={0} +CODE={1}/my.hex'

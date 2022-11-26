@@ -207,6 +207,16 @@ The `$RV_ROOT/testbench/hex` directory contains precompiled hex files of the tes
 
 **Note**: The testbench has a simple synthesizable bridge that allows you to load the ICCM via load/store instructions. This is only supported for AXI4 builds.
 
+### Running Compliance Tests
+For running compliance tests you need to install [riscof](https://riscof.readthedocs.io/en/latest/intro.html) along with a RISC-V reference model which is going to be [sail](https://riscof.readthedocs.io/en/latest/installation.html#install-plugin-models). For setting up the environment use the following commands.
+```
+pip install riscof
+git submodule init
+git submodule update
+```
+This will install riscof and clone the riscv-arch-test repository containing the compliance tests. For running the compliance test, run the following command.
+`make -f $RV_ROOT/tools/Makefile riscof_compliance`
+
 
 
 ----

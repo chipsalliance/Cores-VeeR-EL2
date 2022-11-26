@@ -149,8 +149,8 @@ riviera-build: ${TBFILES} ${BUILD_DIR}/defines.h
 
 ############ TEST Simulation ###############################
 riscof_compliance:
-	riscof -v debug run --env ./riscv-arch-test/riscv-test-suite/env/ --suite ./riscv-arch-test/riscv-test-suite/rv32i_m/I
-
+	riscof run --env $(RV_ROOT)/compliance/riscv-arch-test/riscv-test-suite/env/ \
+	           --suite $(RV_ROOT)/compliance/riscv-arch-test/riscv-test-suite/rv32i_m/
 
 verilator: program.hex verilator-build
 	./obj_dir/Vtb_top

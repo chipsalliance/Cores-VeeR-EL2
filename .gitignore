@@ -6,4 +6,4 @@ obj_dir
 *.log
 *.exe
 *.swp
-*/riscof_work
+riscof_work

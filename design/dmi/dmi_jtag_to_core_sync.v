@@ -44,21 +44,52 @@ reg [2:0]   rden, wren;
 assign reg_en    = c_wr_en | c_rd_en;
 assign reg_wr_en = c_wr_en;
 
+// synchronizers
+wire rden_s;
+wire wren_s;
 
-// synchronizers  
+`ifdef TECH_SPECIFIC_RV_SYNC
+    `USER_RV_SYNC #(
+        .WIDTH  (2),
+        .DEFAULT(2'd0)
+     ) sync (
+        .clk    (clk),
+        .rst_n  (rst_n),
+        .d      ({rd_en, wr_en}),
+        .q      ({rden_s, wren_s})
+    );
+`else
+    reg [1:0] rden_r;
+    reg [1:0] wren_r;
+    always @ ( posedge clk or negedge rst_n) begin
+        if(!rst_n) begin
+            rden_r <= '0;
+            wren_r <= '0;
+        end
+        else begin
+            rden_r <= {rden_r[0], rd_en};
+            wren_r <= {wren_r[0], wr_en};
+        end
+    end
+    assign rden_s = rden_r[1];
+    assign wren_s = wren_r[1];
+`endif
+
+// edge detectors
+reg prv_rden;
+reg prv_wren;
+
 always @ ( posedge clk or negedge rst_n) begin
     if(!rst_n) begin
-        rden <= '0;
-        wren <= '0;
-    end
-    else begin
-        rden <= {rden[1:0], rd_en};
-        wren <= {wren[1:0], wr_en};
+        prv_rden <= 1'b0;
+        prv_wren <= 1'b0;
+    end else begin
+        prv_rden <= rden_s;
+        prv_wren <= wren_s;
     end
 end
 
-assign c_rd_en = rden[1] & ~rden[2];
-assign c_wr_en = wren[1] & ~wren[2];
- 
+assign c_rd_en = prv_rden & ~rden_s;
+assign c_wr_en = prv_wren & ~wren_s;
 
 endmodule

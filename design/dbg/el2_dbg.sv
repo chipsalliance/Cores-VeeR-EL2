@@ -274,7 +274,19 @@ import el2_pkg::*;
    assign dbg_core_rst_l = ~dmcontrol_reg[1] | scan_mode;
 
    // synchronize the rst
+`ifdef TECH_SPECIFIC_RV_SYNC
+   `USER_RV_SYNC #(
+      .WIDTH  (1),
+      .DEFAULT(1'b0)
+   ) rstl_sync (
+      .clk    (free_clk),
+      .rst_n  (dbg_rst_l),
+      .d      (rst_l),
+      .q      (rst_l_sync)
+   );
+`else
    rvsyncss #(1) rstl_syncff (.din(rst_l), .dout(rst_l_sync), .clk(free_clk), .rst_l(dbg_rst_l));
+`endif
 
    // system bus register
    // sbcs[31:29], sbcs - [22]:sbbusyerror, [21]: sbbusy, [20]:sbreadonaddr, [19:17]:sbaccess, [16]:sbautoincrement, [15]:sbreadondata, [14:12]:sberror, sbsize=32, 128=0, 64/32/16/8 are legal

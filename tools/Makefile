@@ -81,7 +81,7 @@ includes = -I${BUILD_DIR}
 
 # CFLAGS for verilator generated Makefiles. Without -std=c++11 it
 # complains for `auto` variables
-CFLAGS += "-std=c++11"
+CFLAGS += "-std=c++20"
 
 # Optimization for better performance; alternative is nothing for
 # slower runtime (faster compiles) -O2 for faster runtime (slower
@@ -108,8 +108,8 @@ verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h test_tb_top.cpp
 	echo '`undef RV_ASSERT_ON' >> ${BUILD_DIR}/common_defines.vh
 	$(VERILATOR)  --cc -CFLAGS ${CFLAGS} $(defines) \
 	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist \
-	  -Wno-WIDTH -Wno-UNOPTFLAT ${TBFILES} --top-module tb_top \
-	  -exe test_tb_top.cpp --autoflush $(VERILATOR_DEBUG)
+	  -Wno-WIDTH -Wno-UNOPTFLAT -Wno-IMPLICITSTATIC ${TBFILES} --top-module tb_top \
+	  -exe test_tb_top.cpp --timing --autoflush $(VERILATOR_DEBUG)
 	cp ${RV_ROOT}/testbench/test_tb_top.cpp obj_dir/
 	$(MAKE) -j -e -C obj_dir/ -f Vtb_top.mk $(VERILATOR_MAKE_FLAGS)
 	touch verilator-build

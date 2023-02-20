@@ -51,7 +51,6 @@ int main(int argc, char** argv) {
       tfp->dump (main_time);
 #endif
       main_time += 5;
-      tb->core_clk = !tb->core_clk;
       tb->eval();
   }
 

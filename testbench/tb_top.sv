@@ -13,15 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-`ifndef VERILATOR
 module tb_top;
-`else
-module tb_top ( input bit core_clk );
-`endif
 
-`ifndef VERILATOR
     bit                         core_clk;
-`endif
     logic                       rst_l;
     logic                       porst_l;
     logic                       nmi_int;
@@ -428,10 +422,8 @@ module tb_top ( input bit core_clk );
         preload_dccm();
         preload_iccm();
 
-`ifndef VERILATOR
         if($test$plusargs("dumpon")) $dumpvars;
         forever  core_clk = #5 ~core_clk;
-`endif
     end
 
 
@@ -957,9 +949,7 @@ addresses:
  0xfffffff0 - ICCM start address to load
  0xfffffff4 - ICCM end address to load
 */
-`ifndef VERILATOR
 init_iccm();
-`endif
 addr = 'hffff_fff0;
 saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 if ( (saddr < `RV_ICCM_SADR) || (saddr > `RV_ICCM_EADR)) return;
@@ -1014,13 +1004,8 @@ endtask
 
 
 `define ICCM_PATH `RV_TOP.mem.iccm.iccm
-`ifdef VERILATOR
-`define DRAM(bk) rvtop.mem.Gen_dccm_enable.dccm.mem_bank[bk].ram.ram_core
-`define IRAM(bk) `ICCM_PATH.mem_bank[bk].iccm_bank.ram_core
-`else
 `define DRAM(bk) rvtop.mem.Gen_dccm_enable.dccm.mem_bank[bk].dccm.dccm_bank.ram_core
 `define IRAM(bk) `ICCM_PATH.mem_bank[bk].iccm.iccm_bank.ram_core
-`endif
 
 
 task slam_dccm_ram(input [31:0] addr, input[38:0] data);

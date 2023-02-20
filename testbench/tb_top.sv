@@ -744,6 +744,7 @@ el2_veer_wrapper rvtop (
     .soft_int               ('0),
     .core_id                ('0),
     .scan_mode              ( 1'b0 ),         // To enable scan mode
+    .scan_rst_l             ( 1'b1 ),
     .mbist_mode             ( 1'b0 )        // to enable mbist
 
 );

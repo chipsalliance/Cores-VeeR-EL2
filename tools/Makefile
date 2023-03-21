@@ -179,7 +179,7 @@ program.hex:
 else
 program.hex: $(OFILES) $(LINK)
 	@echo Building $(TEST)
-	$(GCC_PREFIX)-gcc $(ABI) -Wl,-Map=$(TEST).map -lgcc -T$(LINK) -o $(TEST).exe $(OFILES) -nostartfiles  $(TEST_LIBS)
+	$(GCC_PREFIX)-gcc $(ABI) -Wl,-Map=$(TEST).map -T$(LINK) -o $(TEST).exe $(OFILES) -nostartfiles -nostdlib $(TEST_LIBS)
 	$(GCC_PREFIX)-objcopy -O verilog  $(TEST).exe program.hex
 	$(GCC_PREFIX)-objdump -S  $(TEST).exe > $(TEST).dis
 	@echo Completed building $(TEST)

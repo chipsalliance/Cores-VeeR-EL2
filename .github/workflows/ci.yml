@@ -8,16 +8,34 @@ jobs:
 
   Test:
     runs-on: ubuntu-latest
+    env:
+      CCACHE_DIR: "/opt/veer-el2/.cache/"
 
     steps:
       - name: Install utils
         run: |
-          sudo apt -qqy update && sudo apt -qqy install git autoconf automake \
+          sudo apt -qqy update && sudo apt -qqy install --no-install-recommends \
+            git autoconf automake \
             autotools-dev curl python3 libmpc-dev libmpfr-dev libgmp-dev \
             gawk build-essential bison flex texinfo gperf libtool patchutils \
             bc zlib1g zlib1g-dev libexpat-dev ninja-build cpanminus \
             ccache libfl2 libfl-dev gcc-riscv64-unknown-elf picolibc-riscv64-unknown-elf
           sudo cpanm Bit::Vector
+
+      - name: Create Cache Timestamp
+        id: cache_timestamp
+        uses: nanzm/get-time-action@v1.1
+        with:
+          format: 'YYYY-MM-DD-HH-mm-ss'
+
+      - name: Setup cache
+        uses: actions/cache@v2
+        timeout-minutes: 3
+        continue-on-error: true
+        with:
+          path: "/opt/veer-el2/.cache/"
+          key: cache_${{ steps.cache_timestamp.outputs.time }}
+          restore-keys: cache_
 
       - name: Build Verilator
         run: |

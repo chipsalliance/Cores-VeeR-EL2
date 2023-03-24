@@ -1,0 +1,19 @@
+name: verible-lint-trigger-receive
+
+on:
+  workflow_run:
+    workflows: verible-lint-trigger-send
+    types:
+      - completed
+
+jobs:
+  verible-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: chipsalliance/verible-linter-action/trigger-receive@main
+      - uses: chipsalliance/verible-linter-action@main
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          paths: |
+            ./design

@@ -1,0 +1,16 @@
+name: verible-verilog-format
+on:
+  pull_request:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - uses: chipsalliance/verible-formatter-action@main
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        fail_on_formatting_suggestions: ${{ github.event_name != 'pull_request' }}

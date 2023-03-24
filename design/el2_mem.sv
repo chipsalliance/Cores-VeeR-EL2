@@ -90,7 +90,7 @@ import el2_pkg::*;
    output logic         ic_tag_perr,        // Icache Tag parity error
 
 
-   input  logic         scan_mode
+   input        logic                                                                                                scan_mode
 
 );
 

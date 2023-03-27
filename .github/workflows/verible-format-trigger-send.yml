@@ -1,0 +1,13 @@
+name: verible-format-trigger-send
+
+on:
+  pull_request:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  verible-format-trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: chipsalliance/verible-formatter-action/trigger-send@main

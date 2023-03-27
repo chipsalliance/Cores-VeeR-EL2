@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - uses: chipsalliance/verible-formatter-action/trigger-receive@main
-    - uses: chipsalliance/verible-formatter-action@main
+    - uses: antmicro/verible-formatter-action@mczyz/ci-debug
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         fail_on_formatting_suggestions: ${{ github.event_name != 'pull_request' }}

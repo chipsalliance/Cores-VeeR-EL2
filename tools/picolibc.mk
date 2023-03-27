@@ -2,6 +2,7 @@ GCC_PREFIX    ?= riscv64-unknown-elf
 MAKEFILE_PATH  = $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 PICOLIBC_PATH  = $(abspath $(MAKEFILE_PATH)/../third_party/picolibc)
 BUILD_PATH     = $(PICOLIBC_PATH)/build
+INSTALL_PATH   = $(PICOLIBC_PATH)/install
 
 ifeq ($(CCACHE), )
 	MESON_CROSS_CC = '$(GCC_PREFIX)-gcc'
@@ -38,7 +39,7 @@ $(BUILD_PATH):
 $(BUILD_PATH)/cross.txt: | $(BUILD_PATH)
 	@echo "$$CROSSFILE" > $@
 
-$(BUILD_PATH)/libc.a: $(BUILD_PATH)/cross.txt | $(BUILD_PATH)
+$(INSTALL_PATH)/picolibc.specs: $(BUILD_PATH)/cross.txt | $(BUILD_PATH)
 
 	cd $(PICOLIBC_PATH) && meson $(BUILD_PATH) \
 		-Dmultilib=true \
@@ -50,12 +51,13 @@ $(BUILD_PATH)/libc.a: $(BUILD_PATH)/cross.txt | $(BUILD_PATH)
 		-Dformat-default=integer \
 		-Dincludedir=picolibc/$(GCC_PREFIX)/include \
 		-Dlibdir=picolibc/$(GCC_PREFIX)/lib \
+        -Dprefix=$(INSTALL_PATH) \
+        -Dspecsdir=$(INSTALL_PATH) \
 		--cross-file $(BUILD_PATH)/cross.txt
 
-	cd $(BUILD_PATH) && meson compile
-	cp $(BUILD_PATH)/newlib/librv32imac_ilp32/*.a $(BUILD_PATH)/
+	cd $(BUILD_PATH) && meson install
 
-all: $(BUILD_PATH)/libc.a | $(BUILD_PATH)
+all: $(INSTALL_PATH)/picolibc.specs
 
 clean:
 	rm -rf $(BUILD_PATH)

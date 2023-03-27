@@ -38,7 +38,7 @@ RIVIERA = riviera
 GCC_PREFIX = riscv64-unknown-elf
 BUILD_DIR = snapshots/${snapshot}
 TBDIR = ${RV_ROOT}/testbench
-PICOLIBC_DIR = ${RV_ROOT}/third-party/picolibc
+PICOLIBC_DIR = ${RV_ROOT}/third_party/picolibc/install
 
 # Define test name
 TEST = hello_world
@@ -183,7 +183,7 @@ program.hex: picolibc
 else
 program.hex: picolibc $(OFILES) $(LINK)
 	@echo Building $(TEST)
-	$(GCC_PREFIX)-gcc $(ABI) -Wl,-Map=$(TEST).map -T$(LINK) -o $(TEST).exe -I$(PICOLIBC_DIR)/newlib/libc/include -I$(PICOLIBC_DIR)/build $(OFILES) -nostartfiles -nostdlib -L$(PICOLIBC_DIR)/build -lc $(TEST_LIBS)
+	$(GCC_PREFIX)-gcc $(ABI) --verbose -Wl,-Map=$(TEST).map -T$(LINK) --specs=$(PICOLIBC_DIR)/picolibc.specs $(TEST_LIBS) -nostartfiles $(OFILES) -o $(TEST).exe
 	$(GCC_PREFIX)-objcopy -O verilog  $(TEST).exe program.hex
 	$(GCC_PREFIX)-objdump -S  $(TEST).exe > $(TEST).dis
 	@echo Completed building $(TEST)
@@ -195,7 +195,7 @@ program.hex: picolibc $(OFILES) $(LINK)
 
 
 %.o : %.c picolibc ${BUILD_DIR}/defines.h
-	$(GCC_PREFIX)-gcc ${includes} -I$(PICOLIBC_DIR)/newlib/libc/include -I$(PICOLIBC_DIR)/build ${TEST_CFLAGS} -DCOMPILER_FLAGS="\"${TEST_CFLAGS}\"" ${ABI} -nostdlib -c $< -o $@
+	$(GCC_PREFIX)-gcc ${includes} --specs=$(PICOLIBC_DIR)/picolibc.specs ${TEST_CFLAGS} -DCOMPILER_FLAGS="\"${TEST_CFLAGS}\"" ${ABI} -c $< -o $@
 
 endif
 endif

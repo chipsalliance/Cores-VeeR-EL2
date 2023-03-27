@@ -38,6 +38,7 @@ RIVIERA = riviera
 GCC_PREFIX = riscv64-unknown-elf
 BUILD_DIR = snapshots/${snapshot}
 TBDIR = ${RV_ROOT}/testbench
+PICOLIBC_DIR = ${RV_ROOT}/third-party/picolibc
 
 # Define test name
 TEST = hello_world
@@ -166,20 +167,23 @@ riviera: program.hex riviera-build
 
 
 ############ TEST build ###############################
-    
+
+picolibc:
+	$(MAKE) -f ${RV_ROOT}/tools/picolibc.mk all
+
 ifeq ($(shell which $(GCC_PREFIX)-gcc 2> /dev/null),)
-program.hex: ${BUILD_DIR}/defines.h
+program.hex: picolibc ${BUILD_DIR}/defines.h
 	@echo " !!! No $(GCC_PREFIX)-gcc in path, using canned hex files !!"
 	cp ${HEX_DIR}/$(TEST).hex program.hex
 else
 ifneq (,$(wildcard $(TEST_DIR)/$(TEST).makefile))
-program.hex:
+program.hex: picolibc
 	@echo Building $(TEST) via $(TEST_DIR)/$(TEST).makefile
 	$(MAKE) -f $(TEST_DIR)/$(TEST).makefile
 else
-program.hex: $(OFILES) $(LINK)
+program.hex: picolibc $(OFILES) $(LINK)
 	@echo Building $(TEST)
-	$(GCC_PREFIX)-gcc $(ABI) -Wl,-Map=$(TEST).map -T$(LINK) -o $(TEST).exe $(OFILES) -nostartfiles -nostdlib $(TEST_LIBS)
+	$(GCC_PREFIX)-gcc $(ABI) -Wl,-Map=$(TEST).map -T$(LINK) -o $(TEST).exe -I$(PICOLIBC_DIR)/newlib/libc/include -I$(PICOLIBC_DIR)/build $(OFILES) -nostartfiles -nostdlib -L$(PICOLIBC_DIR)/build -lc $(TEST_LIBS)
 	$(GCC_PREFIX)-objcopy -O verilog  $(TEST).exe program.hex
 	$(GCC_PREFIX)-objdump -S  $(TEST).exe > $(TEST).dis
 	@echo Completed building $(TEST)
@@ -190,8 +194,8 @@ program.hex: $(OFILES) $(LINK)
 	$(GCC_PREFIX)-as ${ABI} $*.cpp.s -o $@
 
 
-%.o : %.c ${BUILD_DIR}/defines.h
-	$(GCC_PREFIX)-gcc ${includes} ${TEST_CFLAGS} -DCOMPILER_FLAGS="\"${TEST_CFLAGS}\"" ${ABI} -nostdlib -c $< -o $@
+%.o : %.c picolibc ${BUILD_DIR}/defines.h
+	$(GCC_PREFIX)-gcc ${includes} -I$(PICOLIBC_DIR)/newlib/libc/include -I$(PICOLIBC_DIR)/build ${TEST_CFLAGS} -DCOMPILER_FLAGS="\"${TEST_CFLAGS}\"" ${ABI} -nostdlib -c $< -o $@
 
 endif
 endif
@@ -201,5 +205,5 @@ help:
 	@echo Make sure the environment variable RV_ROOT is set.
 	@echo Possible targets: verilator vcs irun vlog riviera help clean all verilator-build irun-build vcs-build riviera-build program.hex
 
-.PHONY: help clean verilator vcs irun vlog riviera
+.PHONY: help clean picolibc verilator vcs irun vlog riviera
 

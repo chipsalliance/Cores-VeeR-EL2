@@ -1,15 +1,17 @@
-name: verible-verilog-format
+name: verible-format-trigger-receive
+
 on:
-  pull_request:
-  push:
-    branches:
-      - 'main'
+  workflow_run:
+    workflows: verible-format-trigger-send
+    types:
+      - completed
 
 jobs:
-  format:
+  verible-format-review:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
+    - uses: chipsalliance/verible-formatter-action/trigger-receive@main
     - uses: chipsalliance/verible-formatter-action@main
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}

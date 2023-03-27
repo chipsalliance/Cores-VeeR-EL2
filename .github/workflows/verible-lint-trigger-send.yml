@@ -4,7 +4,7 @@ on:
   pull_request:
 
 jobs:
-  verible-trigger:
+  verible-lint-trigger:
     runs-on: ubuntu-latest
     steps:
       - uses: chipsalliance/verible-linter-action/trigger-send@main

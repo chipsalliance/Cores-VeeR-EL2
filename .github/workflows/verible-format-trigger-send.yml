@@ -2,9 +2,6 @@ name: verible-format-trigger-send
 
 on:
   pull_request:
-  push:
-    branches:
-      - 'main'
 
 jobs:
   verible-format-trigger:

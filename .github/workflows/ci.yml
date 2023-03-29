@@ -54,25 +54,15 @@ jobs:
         with:
           name: verilator
           path: /opt/*.tar.gz
+          retention-days: 1
 
   tests:
-    name: Tests
+    name: Regression tests
     runs-on: ubuntu-latest
     needs: verilator
-
-    strategy:
-      fail-fast: false
-      matrix:
-        test:
-          - name: hello_world
-          - name: hello_world_dccm
-          - name: hello_world_iccm
-          - name: cmark
-          - name: cmark_dccm
-          - name: cmark_iccm
-          - name: dhry
     env:
       DEBIAN_FRONTEND: "noninteractive"
+      TESTS: "hello_world hello_world_dccm hello_world_iccm cmark cmark_dccm cmark_iccm dhry"
 
     steps:
       - name: Install utils
@@ -104,9 +94,15 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Run test
+      - name: Run tests
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
-          $RV_ROOT/configs/veer.config
-          make -f $RV_ROOT/tools/Makefile verilator TEST=${{ matrix.test.name }}
+          bash .github/scripts/run_tests.sh
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: results
+          path: ./results/

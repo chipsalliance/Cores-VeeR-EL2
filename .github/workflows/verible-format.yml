@@ -1,0 +1,20 @@
+name: Verible formatter
+
+on:
+  pull_request_target:
+
+jobs:
+  format-review:
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: chipsalliance/verible-formatter-action@main
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          fail_on_formatting_suggestions: ${{ github.event_name != 'pull_request_target' }}

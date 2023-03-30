@@ -429,7 +429,7 @@ module tb_top ( input bit core_clk );
         preload_iccm();
 
 `ifndef VERILATOR
-        if($test$plusargs("dumpon")) $dumpvars;
+        if($value$plusargs("dumpon")) $dumpvars;
         forever  core_clk = #5 ~core_clk;
 `endif
     end

@@ -172,7 +172,7 @@ import el2_pkg::*;
    rvdffpcie #(31)                      i_flush_r_ff         (.*, .clk(clk),        .en ( r_data_en     ),  .din ( i0_flush_path_x[31:1]         ),  .dout( i0_flush_path_upper_r[31:1]) );
    rvdffpcie #(31)                      i_npc_r_ff           (.*, .clk(clk),        .en ( r_data_en     ),  .din ( pred_correct_npc_x[31:1]      ),  .dout( pred_correct_npc_r[31:1]   ) );
 
-   rvdffie #(pt.BHT_GHR_SIZE + 2, 1) i_misc_ff (
+   rvdffie #( .WIDTH(pt.BHT_GHR_SIZE + 2), .OVERRIDE(1) ) i_misc_ff (
       .clk      (clk),
       .rst_l    (rst_l),
       .scan_mode(scan_mode),

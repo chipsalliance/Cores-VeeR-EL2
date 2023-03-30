@@ -67,7 +67,6 @@ localparam INTPEND_SIZE          = (pt.PIC_TOTAL_INT_PLUS1 < 32)  ? 32  :
 localparam INT_GRPS              =   INTPEND_SIZE / 32 ;
 localparam INTPRIORITY_BITS      =  4 ;
 localparam ID_BITS               =  8 ;
-localparam int GW_CONFIG[pt.PIC_TOTAL_INT_PLUS1-1:0] = '{default:0} ;
 
 localparam INT_ENABLE_GRPS       =   (pt.PIC_TOTAL_INT_PLUS1 - 1)  / 4 ;
 

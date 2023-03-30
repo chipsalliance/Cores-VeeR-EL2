@@ -83,9 +83,9 @@ always @ (negedge HCLK ) begin
     if(HREADY & HSEL & |HTRANS) begin
 `ifdef VERILATOR
         if(iws_rand & ~HPROT[0])
-            iws = $random & 15;
+            iws = $urandom & 15;
         if(dws_rand & HPROT[0])
-            dws = $random & 15;
+            dws = $urandom & 15;
 `else
         if(iws_rand & ~HPROT[0])
             ok = std::randomize(iws) with {iws dist {0:=10, [1:3]:/2, [4:15]:/1};};

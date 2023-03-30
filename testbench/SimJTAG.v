@@ -40,7 +40,7 @@ module SimJTAG #(
 
    bit          r_reset;
 
-   wire [31:0]  random_bits = $random;
+   wire [31:0]  random_bits = $urandom;
 
    wire         #0.1 __jtag_TDO = jtag_TDO_driven ?
                 jtag_TDO_data : random_bits[0];

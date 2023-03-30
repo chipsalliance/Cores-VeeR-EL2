@@ -1391,7 +1391,7 @@ end
 
 
    assign mtval_ns[31:0] = (({32{mtval_capture_pc_r}} & {pc_r[31:1], 1'b0}) |
-                            ({32{mtval_capture_pc_plus2_r}} & {pc_r[31:1] + 31'b1, 1'b0}) |
+                            ({32{mtval_capture_pc_plus2_r}} & {pc_r[31:1] + 31'b0000000000000000000000000000001, 1'b0}) |
                             ({32{mtval_capture_inst_r}} & dec_illegal_inst[31:0]) |
                             ({32{mtval_capture_lsu_r}} & lsu_error_pkt_addr_r[31:0]) |
                             ({32{wr_mtval_r & ~interrupt_valid_r}} & dec_csr_wrdata_r[31:0]) |
@@ -1625,7 +1625,7 @@ end
 
    rvdffs #(2)  mfdhs_ff (.*, .clk(free_clk), .en(wr_mfdhs_r | dbg_tlu_halted), .din(mfdhs_ns[1:0]), .dout(mfdhs[1:0]));
 
-   assign force_halt_ctr[31:0] = debug_halt_req_f ? (force_halt_ctr_f[31:0] + 32'b1) : (dbg_tlu_halted_f ? 32'b0 : force_halt_ctr_f[31:0]);
+   assign force_halt_ctr[31:0] = debug_halt_req_f ? (force_halt_ctr_f[31:0] + 32'b00000000000000000000000000000001) : (dbg_tlu_halted_f ? 32'b0 : force_halt_ctr_f[31:0]);
 
    rvdffe #(32)  forcehaltctr_ff (.*, .en(mfdht[0]), .din(force_halt_ctr[31:0]), .dout(force_halt_ctr_f[31:0]));
 

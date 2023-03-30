@@ -411,7 +411,7 @@ module tb_top ( input bit core_clk );
         abi_reg[30] = "t5";
         abi_reg[31] = "t6";
     // tie offs
-        jtag_id[31:28] = 4'b1;
+        jtag_id[31:28] = 4'b0001;
         jtag_id[27:12] = '0;
         jtag_id[11:1]  = 11'h45;
         reset_vector = `RV_RESET_VEC;

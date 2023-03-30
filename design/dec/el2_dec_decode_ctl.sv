@@ -978,7 +978,7 @@ end : cam_array
 
    assign csr_data_wen = ((csr_clr_x | csr_set_x | csr_write_x) & csr_read_x) | dec_tlu_wr_pause_r | pause_state;
 
-   assign write_csr_data_in[31:0] = (pause_state)         ? (write_csr_data[31:0] - 32'b1) :
+   assign write_csr_data_in[31:0] = (pause_state)         ? (write_csr_data[31:0] - 32'b00000000000000000000000000000001) :
                                     (dec_tlu_wr_pause_r) ? dec_csr_wrdata_r[31:0] : write_csr_data_x[31:0];
 
    // will hold until write-back at which time the CSR will be updated while GPR is possibly written with prior CSR

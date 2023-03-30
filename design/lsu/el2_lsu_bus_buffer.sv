@@ -471,10 +471,10 @@ import el2_pkg::*;
    // Output buffer logic starts here
    //------------------------------------------------------------------------------
 
-   assign obuf_wr_wait = (buf_numvld_wrcmd_any[3:0] == 4'b1) & (buf_numvld_cmd_any[3:0] == 4'b1) & (obuf_wr_timer != TIMER_MAX) &
+   assign obuf_wr_wait = (buf_numvld_wrcmd_any[3:0] == 4'b0001) & (buf_numvld_cmd_any[3:0] == 4'b0001) & (obuf_wr_timer != TIMER_MAX) &
                          ~bus_coalescing_disable & ~buf_nomerge[CmdPtr0] & ~buf_sideeffect[CmdPtr0] & ~obuf_force_wr_en;
    assign obuf_wr_timer_in = obuf_wr_en ? 3'b0: (((buf_numvld_cmd_any > 4'b0) & (obuf_wr_timer < TIMER_MAX)) ? (obuf_wr_timer + 1'b1) : obuf_wr_timer);
-   assign obuf_force_wr_en = lsu_busreq_m & ~lsu_busreq_r & ~ibuf_valid & (buf_numvld_cmd_any[3:0] == 4'b1) & (lsu_addr_m[31:2] != buf_addr[CmdPtr0][31:2]);   // Entry in m can't merge with entry going to obuf and there is no entry in between
+   assign obuf_force_wr_en = lsu_busreq_m & ~lsu_busreq_r & ~ibuf_valid & (buf_numvld_cmd_any[3:0] == 4'b0001) & (lsu_addr_m[31:2] != buf_addr[CmdPtr0][31:2]);   // Entry in m can't merge with entry going to obuf and there is no entry in between
    assign ibuf_buf_byp = ibuf_byp & (buf_numvld_pend_any[3:0] == 4'b0) & (~lsu_pkt_r.store | no_dword_merge_r);
 
    assign obuf_wr_en = ((ibuf_buf_byp & lsu_commit_r & ~(is_sideeffects_r & bus_sideeffect_pend)) |

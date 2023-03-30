@@ -225,7 +225,7 @@ import el2_pkg::*;
    el2_btb_addr_hash #(.pt(pt)) f1hash(.pc(ifc_fetch_addr_f[pt.BTB_INDEX3_HI:pt.BTB_INDEX1_LO]), .hash(btb_rd_addr_f[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO]));
 
 
-   assign fetch_addr_p1_f[31:2] = ifc_fetch_addr_f[31:2] + 30'b1;
+   assign fetch_addr_p1_f[31:2] = ifc_fetch_addr_f[31:2] + 30'b000000000000000000000000000001;
    el2_btb_addr_hash #(.pt(pt)) f1hash_p1(.pc(fetch_addr_p1_f[pt.BTB_INDEX3_HI:pt.BTB_INDEX1_LO]), .hash(btb_rd_addr_p1_f[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO]));
 
    assign btb_sel_f[1] = ~bht_dir_f[0];
@@ -803,11 +803,11 @@ end // if (!pt.BTB_FULLYA)
    assign ifu_bp_fa_index_f[0] = hit0 ? hit0_index : '0;
 
    assign btb_used_reset = &btb_used[pt.BTB_SIZE-1:0];
-   assign btb_used_ns[pt.BTB_SIZE-1:0] = ({pt.BTB_SIZE{vwayhit_f[1]}} & (32'b1 << hit1_index[BTB_FA_INDEX:0])) |
-                                         ({pt.BTB_SIZE{vwayhit_f[0]}} & (32'b1 << hit0_index[BTB_FA_INDEX:0])) |
-                                         ({pt.BTB_SIZE{exu_mp_valid_write & ~exu_mp_pkt.way & ~dec_tlu_error_wb}} & (32'b1 << btb_fa_wr_addr0[BTB_FA_INDEX:0])) |
+   assign btb_used_ns[pt.BTB_SIZE-1:0] = ({pt.BTB_SIZE{vwayhit_f[1]}} & (32'b00000000000000000000000000000001 << hit1_index[BTB_FA_INDEX:0])) |
+                                         ({pt.BTB_SIZE{vwayhit_f[0]}} & (32'b00000000000000000000000000000001 << hit0_index[BTB_FA_INDEX:0])) |
+                                         ({pt.BTB_SIZE{exu_mp_valid_write & ~exu_mp_pkt.way & ~dec_tlu_error_wb}} & (32'b00000000000000000000000000000001 << btb_fa_wr_addr0[BTB_FA_INDEX:0])) |
                                          ({pt.BTB_SIZE{btb_used_reset}} & {pt.BTB_SIZE{1'b0}}) |
-                                         ({pt.BTB_SIZE{~btb_used_reset & dec_tlu_error_wb}} & (btb_used[pt.BTB_SIZE-1:0] & ~(32'b1 << dec_fa_error_index[BTB_FA_INDEX:0]))) |
+                                         ({pt.BTB_SIZE{~btb_used_reset & dec_tlu_error_wb}} & (btb_used[pt.BTB_SIZE-1:0] & ~(32'b00000000000000000000000000000001 << dec_fa_error_index[BTB_FA_INDEX:0]))) |
                                          (~{pt.BTB_SIZE{btb_used_reset | dec_tlu_error_wb}} & btb_used[pt.BTB_SIZE-1:0]);
 
    assign write_used = btb_used_reset | ifu_bp_hit_taken_f | exu_mp_valid_write | dec_tlu_error_wb;

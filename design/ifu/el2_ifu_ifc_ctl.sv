@@ -126,7 +126,7 @@ end // if (pt.BTB_ENABLE=1)
                   ({31{sel_next_addr_bf}} & {fetch_addr_next[31:1]})); // SEQ path
 
 end
-   assign fetch_addr_next[31:1] = {({ifc_fetch_addr_f[31:2]} + 31'b1), fetch_addr_next_1 };
+   assign fetch_addr_next[31:1] = {({ifc_fetch_addr_f[31:2]} + 31'b0000000000000000000000000000001), fetch_addr_next_1 };
    assign line_wrap = (fetch_addr_next[pt.ICACHE_TAG_INDEX_LO] ^ ifc_fetch_addr_f[pt.ICACHE_TAG_INDEX_LO]);
 
    assign fetch_addr_next_1 = line_wrap ? 1'b0 : ifc_fetch_addr_f[1];

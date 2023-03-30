@@ -167,7 +167,7 @@ import el2_pkg::*;
   );
 
    // Calculate start/end address for load/store
-   assign addr_offset_d[2:0]      = ({3{lsu_pkt_d.half}} & 3'b01) | ({3{lsu_pkt_d.word}} & 3'b11) | ({3{lsu_pkt_d.dword}} & 3'b111);
+   assign addr_offset_d[2:0]      = ({3{lsu_pkt_d.half}} & 3'b001) | ({3{lsu_pkt_d.word}} & 3'b011) | ({3{lsu_pkt_d.dword}} & 3'b111);
    assign end_addr_offset_d[12:0] = {offset_d[11],offset_d[11:0]} + {9'b0,addr_offset_d[2:0]};
    assign full_end_addr_d[31:0]   = rs1_d[31:0] + {{19{end_addr_offset_d[12]}},end_addr_offset_d[12:0]};
    assign end_addr_d[31:0]        = full_end_addr_d[31:0];
@@ -224,9 +224,9 @@ import el2_pkg::*;
       dma_pkt_d.store   = dma_mem_write;
       dma_pkt_d.load    = ~dma_mem_write;
       dma_pkt_d.by      = (dma_mem_sz[2:0] == 3'b0);
-      dma_pkt_d.half    = (dma_mem_sz[2:0] == 3'b1);
-      dma_pkt_d.word    = (dma_mem_sz[2:0] == 3'b10);
-      dma_pkt_d.dword   = (dma_mem_sz[2:0] == 3'b11);
+      dma_pkt_d.half    = (dma_mem_sz[2:0] == 3'b001);
+      dma_pkt_d.word    = (dma_mem_sz[2:0] == 3'b010);
+      dma_pkt_d.dword   = (dma_mem_sz[2:0] == 3'b011);
    end
 
    always_comb begin

@@ -163,10 +163,10 @@ import el2_pkg::*;
 
     rvdffs_fpga #($bits(state_t)) state_reg (.*, .din(buf_nxtstate), .dout({buf_state}), .en(buf_state_en), .clk(bus_clk), .clken(bus_clk_en), .rawclk(clk));
 
-   assign master_wstrb[7:0]   = ({8{ahb_hsize_q[2:0] == 3'b0}}  & (8'b1    << ahb_haddr_q[2:0])) |
-                                ({8{ahb_hsize_q[2:0] == 3'b1}}  & (8'b11   << ahb_haddr_q[2:0])) |
-                                ({8{ahb_hsize_q[2:0] == 3'b10}} & (8'b1111 << ahb_haddr_q[2:0])) |
-                                ({8{ahb_hsize_q[2:0] == 3'b11}} & 8'b1111_1111);
+   assign master_wstrb[7:0]   = ({8{ahb_hsize_q[2:0] == 3'b0}}  & (8'b00000001    << ahb_haddr_q[2:0])) |
+                                ({8{ahb_hsize_q[2:0] == 3'b001}}  & (8'b00000011   << ahb_haddr_q[2:0])) |
+                                ({8{ahb_hsize_q[2:0] == 3'b010}} & (8'b00001111 << ahb_haddr_q[2:0])) |
+                                ({8{ahb_hsize_q[2:0] == 3'b011}} & 8'b1111_1111);
 
    // AHB signals
    assign ahb_hreadyout       = ahb_hresp ? (ahb_hresp_q & ~ahb_hready_q) :

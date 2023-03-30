@@ -135,9 +135,9 @@ assign tdoEnable = shift_dr | shift_ir;
 ///////////////////////////////////////////////////////
 
 always @ (negedge tck or negedge trst) begin
-   if (!trst) ir <= 5'b1;
+   if (!trst) ir <= 5'b00001;
    else begin
-      if (jtag_reset) ir <= 5'b1;
+      if (jtag_reset) ir <= 5'b00001;
       else if (update_ir) ir <= (sr[4:0] == '0) ? 5'h1f :sr[4:0];
    end
 end

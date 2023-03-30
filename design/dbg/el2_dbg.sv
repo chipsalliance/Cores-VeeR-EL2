@@ -278,7 +278,7 @@ import el2_pkg::*;
 
    // system bus register
    // sbcs[31:29], sbcs - [22]:sbbusyerror, [21]: sbbusy, [20]:sbreadonaddr, [19:17]:sbaccess, [16]:sbautoincrement, [15]:sbreadondata, [14:12]:sberror, sbsize=32, 128=0, 64/32/16/8 are legal
-   assign        sbcs_reg[31:29] = 3'b1;
+   assign        sbcs_reg[31:29] = 3'b001;
    assign        sbcs_reg[28:23] = '0;
    assign        sbcs_reg[19:15] = {sbcs_reg_int[19], ~sbcs_reg_int[18], sbcs_reg_int[17:15]};
    assign        sbcs_reg[11:5]  = 7'h20;

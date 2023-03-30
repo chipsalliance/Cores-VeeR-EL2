@@ -89,7 +89,7 @@ input logic [(width-1):0] D,
 output logic [(width-1):0] Q,
  `EL2_LOCAL_RAM_TEST_IO
 );
-reg [(width-1):0] ram_core [(depth-1):0];
+reg [(width-1):0] ram_core [depth];
 
 always @(posedge CLK) begin
 `ifdef GTLSIM

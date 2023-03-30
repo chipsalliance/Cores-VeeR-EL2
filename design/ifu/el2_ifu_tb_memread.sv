@@ -17,8 +17,8 @@
 
 module el2_ifu_tb_memread;
 
-   logic [15:0] compressed [0:128000]; // vector of compressed instructions
-   logic [31:0] expected [0:128000];   // vector of correspoding expected instruction
+   logic [15:0] compressed [128001]; // vector of compressed instructions
+   logic [31:0] expected [128001];   // vector of correspoding expected instruction
 
 
    logic        rst_l;

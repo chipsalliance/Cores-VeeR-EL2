@@ -360,7 +360,7 @@ import el2_pkg::*;
       if(dec_tlu_br0_r_pkt.br_error | dec_tlu_br0_r_pkt.br_start_error)
         $display("%7d BTB_ERR0: index: %0h bank: %0h start: %b rfpc: %h way: %h", `DEC.tlu.mcyclel[31:0]+32'ha,exu_i0_br_index_r[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO],1'b0, dec_tlu_br0_r_pkt.br_start_error, {exu_flush_path_final[31:1], 1'b0}, dec_tlu_br0_r_pkt.way);
    end // always @ (negedge clk)
-      function [1:0] encode4_2;
+      function static [1:0] encode4_2;
       input [3:0] in;
 
       encode4_2[1] = in[3] | in[2];

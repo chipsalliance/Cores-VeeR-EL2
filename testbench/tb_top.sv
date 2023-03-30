@@ -949,7 +949,7 @@ axi_lsu_dma_bridge # (`RV_LSU_BUS_TAG,`RV_LSU_BUS_TAG ) bridge(
 
 `endif
 
-task preload_iccm;
+task static preload_iccm;
 bit[31:0] data;
 bit[31:0] addr, eaddr, saddr;
 
@@ -982,7 +982,7 @@ end
 endtask
 
 
-task preload_dccm;
+task static preload_dccm;
 bit[31:0] data;
 bit[31:0] addr, saddr, eaddr;
 
@@ -1024,7 +1024,7 @@ endtask
 `endif
 
 
-task slam_dccm_ram(input [31:0] addr, input[38:0] data);
+task static slam_dccm_ram(input [31:0] addr, input[38:0] data);
 int bank, indx;
 bank = get_dccm_bank(addr, indx);
 `ifdef RV_DCCM_ENABLE
@@ -1049,7 +1049,7 @@ endcase
 endtask
 
 
-task slam_iccm_ram( input[31:0] addr, input[38:0] data);
+task static slam_iccm_ram( input[31:0] addr, input[38:0] data);
 int bank, idx;
 
 bank = get_iccm_bank(addr, idx);
@@ -1090,7 +1090,7 @@ endcase // }
 `endif
 endtask
 
-task init_iccm;
+task static init_iccm;
 `ifdef RV_ICCM_ENABLE
     `IRAM(0) = '{default:39'h0};
     `IRAM(1) = '{default:39'h0};
@@ -1123,7 +1123,7 @@ task init_iccm;
 endtask
 
 
-function[6:0] riscv_ecc32(input[31:0] data);
+function static [6:0] riscv_ecc32(input[31:0] data);
 reg[6:0] synd;
 synd[0] = ^(data & 32'h56aa_ad5b);
 synd[1] = ^(data & 32'h9b33_366d);
@@ -1135,7 +1135,7 @@ synd[6] = ^{data, synd[5:0]};
 return synd;
 endfunction
 
-function int get_dccm_bank(input[31:0] addr,  output int bank_idx);
+function static int get_dccm_bank(input[31:0] addr,  output int bank_idx);
 `ifdef RV_DCCM_NUM_BANKS_2
     bank_idx = int'(addr[`RV_DCCM_BITS-1:3]);
     return int'( addr[2]);
@@ -1148,7 +1148,7 @@ function int get_dccm_bank(input[31:0] addr,  output int bank_idx);
 `endif
 endfunction
 
-function int get_iccm_bank(input[31:0] addr,  output int bank_idx);
+function static int get_iccm_bank(input[31:0] addr,  output int bank_idx);
 `ifdef RV_DCCM_NUM_BANKS_2
     bank_idx = int'(addr[`RV_DCCM_BITS-1:3]);
     return int'( addr[2]);

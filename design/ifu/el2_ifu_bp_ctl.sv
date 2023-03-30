@@ -885,7 +885,7 @@ end // block: fa
     end // block: BHT_rd_mux
 
 
-function [1:0] countones;
+function static [1:0] countones;
       input [1:0] valid;
 
       begin

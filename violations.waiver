@@ -1,0 +1,1 @@
+waive --rule=module-filename --location="design/lib/.*_lib.sv"

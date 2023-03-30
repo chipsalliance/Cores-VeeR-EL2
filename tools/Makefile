@@ -76,7 +76,7 @@ VPATH = $(TEST_DIR) $(BUILD_DIR) $(TBDIR)
 TBFILES = $(TBDIR)/tb_top.sv $(TBDIR)/ahb_sif.sv
 
 defines  = $(BUILD_DIR)/common_defines.vh
-defines += ${RV_ROOT}/design/include/el2_def.sv
+defines += ${RV_ROOT}/design/include/el2_pkg.sv
 defines += $(BUILD_DIR)/el2_pdef.vh
 includes = -I${BUILD_DIR}
 

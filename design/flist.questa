@@ -5,7 +5,7 @@
 $RV_ROOT/workspace/work/snapshots/default/common_defines.vh
 
 
-$RV_ROOT/design/include/el2_def.sv
+$RV_ROOT/design/include/el2_pkg.sv
 
 # +incdir+$RV_ROOT/workspace/work/snapshots/default
 # +incdir+$RV_ROOT/configs/snapshots/default

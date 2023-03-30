@@ -1,6 +1,6 @@
 #-*-dotf-*-
 
-$RV_ROOT/design/include/el2_def.sv
+$RV_ROOT/design/include/el2_pkg.sv
 
 +incdir+$RV_ROOT/design/lib
 +incdir+$RV_ROOT/design/include

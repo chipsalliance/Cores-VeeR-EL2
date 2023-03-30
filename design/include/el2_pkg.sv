@@ -1,6 +1,6 @@
 // performance monitor stuff
-//`ifndef EL2_DEF_SV
-//`define EL2_DEF_SV
+//`ifndef EL2_PKG_SV
+//`define EL2_PKG_SV
 package el2_pkg;
 
 typedef struct packed {

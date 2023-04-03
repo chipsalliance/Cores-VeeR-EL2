@@ -291,7 +291,7 @@ endmodule
 // special power flop for predict packet
 // format: { LEFT, RIGHT==31 }
 // LEFT # of bits will be done with rvdffe; RIGHT is enabled by LEFT[LSB] & en
-module rvdffppe #( parameter WIDTH=32 )
+module rvdffppe #( parameter integer WIDTH = 39 )
    (
      input  logic [WIDTH-1:0] din,
      input  logic             clk,
@@ -301,13 +301,13 @@ module rvdffppe #( parameter WIDTH=32 )
      output logic [WIDTH-1:0] dout
      );
 
-   localparam RIGHT = 31;
-   localparam LEFT = WIDTH - RIGHT;
+   localparam integer RIGHT = 31;
+   localparam integer LEFT  = WIDTH - RIGHT;
 
-   localparam LMSB = WIDTH-1;
-   localparam LLSB = LMSB-LEFT+1;
-   localparam RMSB = LLSB-1;
-   localparam RLSB = LLSB-RIGHT;
+   localparam integer LMSB  = WIDTH-1;
+   localparam integer LLSB  = LMSB-LEFT+1;
+   localparam integer RMSB  = LLSB-1;
+   localparam integer RLSB  = LLSB-RIGHT;
 
 
 `ifndef RV_PHYSICAL

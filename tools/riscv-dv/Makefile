@@ -20,7 +20,6 @@ VERILATOR_EXE   = $(RV_ROOT)/testbench/test_tb_top.cpp
 GCC_PREFIX      = riscv64-unknown-elf
 ARCH            = rv32imc
 ABI             = ilp32
-#LDSCRIPT        = $(RV_ROOT)/testbench/link.ld
 LDSCRIPT        = link.ld
 
 HDL_FILES = $(WORK_DIR)/common_defines.vh \
@@ -70,16 +69,24 @@ $(TEST_DIR)/program.hex: $(TEST_DIR)/program.elf
 	$(GCC_PREFIX)-objcopy -O verilog $< $@
 
 # Run the ISS simulation
-$(TEST_DIR)/iss_run.log: $(TEST_DIR)/program.elf
-	spike -m0x2000:0x100000 --isa=$(ARCH) --log=$@ -l $<
+$(TEST_DIR)/iss_trace.csv: $(TEST_DIR)/program.elf
+	spike -m0x2000:0x100000 --isa=$(ARCH) --log=$(TEST_DIR)/iss_run.log --log-commits -l $<
+	python3 $(RISCV_DV_PATH)/scripts/spike_log_to_trace_csv.py --log $(TEST_DIR)/iss_run.log --csv $@
 
 # Run the HDL simulation
-$(TEST_DIR)/hdl_run.log: $(WORK_DIR)/verilator/Vtb_top $(TEST_DIR)/program.hex
+$(TEST_DIR)/hdl_trace.csv: $(WORK_DIR)/verilator/Vtb_top $(TEST_DIR)/program.hex
 	cd $(TEST_DIR) && $(abspath $(WORK_DIR)/verilator/Vtb_top) 2>&1 | tee hdl_run.log
+	python3 veer_log_to_trace_csv.py --log $(TEST_DIR)/exec.log --csv $@
 
-run: $(TEST_DIR)/run.log
+compare: $(TEST_DIR)/iss_trace.csv $(TEST_DIR)/hdl_trace.csv
+	rm -rf compare.log
+	python3 $(RISCV_DV_PATH)/scripts/instr_trace_compare.py \
+		--csv_file_1 $(TEST_DIR)/iss_trace.csv --csv_name_1 ISS --csv_file_2 $(TEST_DIR)/hdl_trace.csv --csv_name_2 HDL \
+		--in_order_mode 1 --log compare.log --verbose 10 --mismatch_print_limit 20
+
+run: $(TEST_DIR)/iss_trace.csv $(TEST_DIR)/hdl_trace.csv
 
 clean:
 	rm -rf $(WORK_DIR)
 
-.PHONY: clean run
+.PHONY: clean run compare

@@ -76,7 +76,7 @@ $(TEST_DIR)/iss_trace.csv: $(TEST_DIR)/program.elf
 # Run the HDL simulation
 $(TEST_DIR)/hdl_trace.csv: $(WORK_DIR)/verilator/Vtb_top $(TEST_DIR)/program.hex
 	cd $(TEST_DIR) && $(abspath $(WORK_DIR)/verilator/Vtb_top) 2>&1 | tee hdl_run.log
-	python3 veer_log_to_trace_csv.py --log $(TEST_DIR)/exec.log --csv $@
+	PYTHONPATH=$(RISCV_DV_PATH)/scripts python3 veer_log_to_trace_csv.py --log $(TEST_DIR)/exec.log --csv $@
 
 compare: $(TEST_DIR)/iss_trace.csv $(TEST_DIR)/hdl_trace.csv
 	rm -rf compare.log

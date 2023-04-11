@@ -10,7 +10,7 @@ INSTR_COUNT     = 100
 
 VEER_TARGET     = default
 VEER_CONF       = -set build_axi4 \
-                  -set reset_vec=0x2000
+                  -set reset_vec=0x2000 # Needed for spike
 
 VERILATOR       = verilator
 VERILATOR_CFLAGS= "-std=c++11"
@@ -27,6 +27,8 @@ HDL_FILES = $(WORK_DIR)/common_defines.vh \
             $(RV_ROOT)/testbench/tb_top.sv \
             $(RV_ROOT)/testbench/ahb_sif.sv \
             $(RV_ROOT)/design/include/el2_def.sv
+
+all: compare
 
 # Directory rules
 $(WORK_DIR):
@@ -89,18 +91,22 @@ $(TEST_DIR)/hdl_trace.log: $(WORK_DIR)/verilator/Vtb_top $(TEST_DIR)/program.hex
 	cd $(TEST_DIR) && $(abspath $(WORK_DIR)/verilator/Vtb_top)
 	mv $(TEST_DIR)/exec.log $@
 
-$(TEST_DIR)/hdl_trace.csv: veer_log_to_trace_csv.py $(TEST_DIR)/hdl_trace.log
+$(TEST_DIR)/hdl_trace.csv: $(TEST_DIR)/hdl_trace.log veer_log_to_trace_csv.py
 	PYTHONPATH=$(RISCV_DV_PATH)/scripts python3 veer_log_to_trace_csv.py --log $< --csv $@
 
-compare: $(TEST_DIR)/iss_trace.csv $(TEST_DIR)/hdl_trace.csv
-	rm -rf compare.log
+$(TEST_DIR)/comparison.log: $(TEST_DIR)/iss_trace.csv $(TEST_DIR)/hdl_trace.csv
+	rm -rf $@
 	python3 $(RISCV_DV_PATH)/scripts/instr_trace_compare.py \
 		--csv_file_1 $(TEST_DIR)/iss_trace.csv --csv_name_1 ISS --csv_file_2 $(TEST_DIR)/hdl_trace.csv --csv_name_2 HDL \
-		--in_order_mode 1 --log compare.log --verbose 10 --mismatch_print_limit 20
+		--in_order_mode 1 --log $@ --verbose 10 --mismatch_print_limit 20
 
-run: $(TEST_DIR)/iss_trace.csv $(TEST_DIR)/hdl_trace.csv
+compare: $(TEST_DIR)/comparison.log
+	@grep "\[PASSED\]" $<
 
 clean:
+	rm -rf $(TEST_DIR)
+
+fullclean:
 	rm -rf $(WORK_DIR)
 
-.PHONY: clean run compare
+.PHONY: clean fullclean compare

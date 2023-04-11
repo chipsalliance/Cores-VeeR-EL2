@@ -61,6 +61,10 @@ def parse_log(file_name):
 
             entry = None
 
+            # Stop on ecall
+            if mnemonic == "ecall":
+                break
+
             # Delayed effect, search the queue
             if gpr is None and mnemonic in ["lw", "div", "divu", "rem", "remu"]:
                 for ent in reversed(queue):

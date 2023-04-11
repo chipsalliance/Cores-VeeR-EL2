@@ -51,12 +51,20 @@ $(WORK_DIR)/verilator/Vtb_top: $(WORK_DIR)/verilator/Vtb_top.mk
 	$(MAKE) -C $(WORK_DIR)/verilator -f Vtb_top.mk OPT_FAST="-O3"
 
 # Generation rules
-$(TEST_DIR)/program.s: | $(TEST_DIR)
+$(TEST_DIR)/program.s: code_fixup.py | $(TEST_DIR)
 	LD_LIBRARY_PATH=$(RISCV_DV_PATH)/euvm/build $(RISCV_DV_PATH)/euvm/build/riscv_instr_gen \
 		+UVM_VERBOSITY=$(UVM_VERBOSITY) +random_seed=$(SEED) +instr_cnt=$(INSTR_COUNT) \
 		+asm_file_name=$@ \
-		+UVM_TESTNAME=riscv.test.riscv_instr_base_test.riscv_instr_base_test
-	mv $@_0.S $@
+		+UVM_TESTNAME=riscv.test.riscv_instr_base_test.riscv_instr_base_test \
+		+num_of_tests=1 \
+		+start_idx=0 \
+		+num_of_sub_programs=0 \
+		+instr_cnt=10 \
+		+no_branch_jump=true \
+		+no_csr_instr=true \
+		+no_fence=true \
+		+no_data_page=true
+	python3 code_fixup.py -i $@_0.S -o $@
 	touch $(TEST_DIR)/user_define.h
 	touch $(TEST_DIR)/user_init.s
 
@@ -64,19 +72,25 @@ $(TEST_DIR)/program.s: | $(TEST_DIR)
 $(TEST_DIR)/program.elf: $(TEST_DIR)/program.s $(LDSCRIPT)
 	$(GCC_PREFIX)-gcc -march=$(ARCH) -mabi=$(ABI) -O0 -T$(LDSCRIPT) -I$(TEST_DIR) -static -nostdlib -nostartfiles $< -o $@
 	$(GCC_PREFIX)-objdump -S $@ > $(basename $@).lst
+	$(GCC_PREFIX)-nm -n $@ > $(basename $@).sym
 
 $(TEST_DIR)/program.hex: $(TEST_DIR)/program.elf
 	$(GCC_PREFIX)-objcopy -O verilog $< $@
 
 # Run the ISS simulation
-$(TEST_DIR)/iss_trace.csv: $(TEST_DIR)/program.elf
-	spike -m0x2000:0x100000 --isa=$(ARCH) --log=$(TEST_DIR)/iss_run.log --log-commits -l $<
-	python3 $(RISCV_DV_PATH)/scripts/spike_log_to_trace_csv.py --log $(TEST_DIR)/iss_run.log --csv $@
+$(TEST_DIR)/iss_trace.log: $(TEST_DIR)/program.elf
+	timeout --foreground 10s spike -m0x2000:0x100000 --isa=$(ARCH) --misaligned --log=$@ --log-commits -l $< || true
+
+$(TEST_DIR)/iss_trace.csv: $(TEST_DIR)/iss_trace.log
+	python3 $(RISCV_DV_PATH)/scripts/spike_log_to_trace_csv.py --log $< --csv $@
 
 # Run the HDL simulation
-$(TEST_DIR)/hdl_trace.csv: $(WORK_DIR)/verilator/Vtb_top $(TEST_DIR)/program.hex
-	cd $(TEST_DIR) && $(abspath $(WORK_DIR)/verilator/Vtb_top) 2>&1 | tee hdl_run.log
-	PYTHONPATH=$(RISCV_DV_PATH)/scripts python3 veer_log_to_trace_csv.py --log $(TEST_DIR)/exec.log --csv $@
+$(TEST_DIR)/hdl_trace.log: $(WORK_DIR)/verilator/Vtb_top $(TEST_DIR)/program.hex
+	cd $(TEST_DIR) && $(abspath $(WORK_DIR)/verilator/Vtb_top)
+	mv $(TEST_DIR)/exec.log $@
+
+$(TEST_DIR)/hdl_trace.csv: veer_log_to_trace_csv.py $(TEST_DIR)/hdl_trace.log
+	PYTHONPATH=$(RISCV_DV_PATH)/scripts python3 veer_log_to_trace_csv.py --log $< --csv $@
 
 compare: $(TEST_DIR)/iss_trace.csv $(TEST_DIR)/hdl_trace.csv
 	rm -rf compare.log

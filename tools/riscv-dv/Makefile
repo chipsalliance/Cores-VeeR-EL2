@@ -54,7 +54,7 @@ $(WORK_DIR)/verilator/Vtb_top: $(WORK_DIR)/verilator/Vtb_top.mk
 
 # Generation rules
 $(TEST_DIR)/program.s: code_fixup.py | $(TEST_DIR)
-	LD_LIBRARY_PATH=$(RISCV_DV_PATH)/euvm/build $(RISCV_DV_PATH)/euvm/build/riscv_instr_gen \
+	riscv_instr_gen \
 		+UVM_VERBOSITY=$(UVM_VERBOSITY) +random_seed=$(SEED) +instr_cnt=$(INSTR_COUNT) \
 		+asm_file_name=$@ \
 		+UVM_TESTNAME=riscv.test.riscv_instr_base_test.riscv_instr_base_test \

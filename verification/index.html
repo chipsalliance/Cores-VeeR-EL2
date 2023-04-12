@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>test.html</title>
+    <link href="assets/style.css" rel="stylesheet" type="text/css"/></head>
+  <body onLoad="init()">
+    <script>/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+function toArray(iter) {
+    if (iter === null) {
+        return null;
+    }
+    return Array.prototype.slice.call(iter);
+}
+
+function find(selector, elem) { // eslint-disable-line no-redeclare
+    if (!elem) {
+        elem = document;
+    }
+    return elem.querySelector(selector);
+}
+
+function findAll(selector, elem) {
+    if (!elem) {
+        elem = document;
+    }
+    return toArray(elem.querySelectorAll(selector));
+}
+
+function sortColumn(elem) {
+    toggleSortStates(elem);
+    const colIndex = toArray(elem.parentNode.childNodes).indexOf(elem);
+    let key;
+    if (elem.classList.contains('result')) {
+        key = keyResult;
+    } else if (elem.classList.contains('links')) {
+        key = keyLink;
+    } else {
+        key = keyAlpha;
+    }
+    sortTable(elem, key(colIndex));
+}
+
+function showAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(showExtras);
+}
+
+function hideAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(hideExtras);
+}
+
+function showExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.remove('collapsed');
+    expandcollapse.classList.remove('expander');
+    expandcollapse.classList.add('collapser');
+}
+
+function hideExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.add('collapsed');
+    expandcollapse.classList.remove('collapser');
+    expandcollapse.classList.add('expander');
+}
+
+function showFilters() {
+    let visibleString = getQueryParameter('visible') || 'all';
+    visibleString = visibleString.toLowerCase();
+    const checkedItems = visibleString.split(',');
+
+    const filterItems = document.getElementsByClassName('filter');
+    for (let i = 0; i < filterItems.length; i++) {
+        filterItems[i].hidden = false;
+
+        if (visibleString != 'all') {
+            filterItems[i].checked = checkedItems.includes(filterItems[i].getAttribute('data-test-result'));
+            filterTable(filterItems[i]);
+        }
+    }
+}
+
+function addCollapse() {
+    // Add links for show/hide all
+    const resulttable = find('table#results-table');
+    const showhideall = document.createElement('p');
+    showhideall.innerHTML = '<a href="javascript:showAllExtras()">Show all details</a> / ' +
+                            '<a href="javascript:hideAllExtras()">Hide all details</a>';
+    resulttable.parentElement.insertBefore(showhideall, resulttable);
+
+    // Add show/hide link to each result
+    findAll('.col-result').forEach(function(elem) {
+        const collapsed = getQueryParameter('collapsed') || 'Passed';
+        const extras = elem.parentNode.nextElementSibling;
+        const expandcollapse = document.createElement('span');
+        if (extras.classList.contains('collapsed')) {
+            expandcollapse.classList.add('expander');
+        } else if (collapsed.includes(elem.innerHTML)) {
+            extras.classList.add('collapsed');
+            expandcollapse.classList.add('expander');
+        } else {
+            expandcollapse.classList.add('collapser');
+        }
+        elem.appendChild(expandcollapse);
+
+        elem.addEventListener('click', function(event) {
+            if (event.currentTarget.parentNode.nextElementSibling.classList.contains('collapsed')) {
+                showExtras(event.currentTarget);
+            } else {
+                hideExtras(event.currentTarget);
+            }
+        });
+    });
+}
+
+function getQueryParameter(name) {
+    const match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function init () { // eslint-disable-line no-unused-vars
+    resetSortHeaders();
+
+    addCollapse();
+
+    showFilters();
+
+    sortColumn(find('.initial-sort'));
+
+    findAll('.sortable').forEach(function(elem) {
+        elem.addEventListener('click',
+            function() {
+                sortColumn(elem);
+            }, false);
+    });
+}
+
+function sortTable(clicked, keyFunc) {
+    const rows = findAll('.results-table-row');
+    const reversed = !clicked.classList.contains('asc');
+    const sortedRows = sort(rows, keyFunc, reversed);
+    /* Whole table is removed here because browsers acts much slower
+     * when appending existing elements.
+     */
+    const thead = document.getElementById('results-table-head');
+    document.getElementById('results-table').remove();
+    const parent = document.createElement('table');
+    parent.id = 'results-table';
+    parent.appendChild(thead);
+    sortedRows.forEach(function(elem) {
+        parent.appendChild(elem);
+    });
+    document.getElementsByTagName('BODY')[0].appendChild(parent);
+}
+
+function sort(items, keyFunc, reversed) {
+    const sortArray = items.map(function(item, i) {
+        return [keyFunc(item), i];
+    });
+
+    sortArray.sort(function(a, b) {
+        const keyA = a[0];
+        const keyB = b[0];
+
+        if (keyA == keyB) return 0;
+
+        if (reversed) {
+            return keyA < keyB ? 1 : -1;
+        } else {
+            return keyA > keyB ? 1 : -1;
+        }
+    });
+
+    return sortArray.map(function(item) {
+        const index = item[1];
+        return items[index];
+    });
+}
+
+function keyAlpha(colIndex) {
+    return function(elem) {
+        return elem.childNodes[1].childNodes[colIndex].firstChild.data.toLowerCase();
+    };
+}
+
+function keyLink(colIndex) {
+    return function(elem) {
+        const dataCell = elem.childNodes[1].childNodes[colIndex].firstChild;
+        return dataCell == null ? '' : dataCell.innerText.toLowerCase();
+    };
+}
+
+function keyResult(colIndex) {
+    return function(elem) {
+        const strings = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed',
+            'Skipped', 'Passed'];
+        return strings.indexOf(elem.childNodes[1].childNodes[colIndex].firstChild.data);
+    };
+}
+
+function resetSortHeaders() {
+    findAll('.sort-icon').forEach(function(elem) {
+        elem.parentNode.removeChild(elem);
+    });
+    findAll('.sortable').forEach(function(elem) {
+        const icon = document.createElement('div');
+        icon.className = 'sort-icon';
+        icon.textContent = 'vvv';
+        elem.insertBefore(icon, elem.firstChild);
+        elem.classList.remove('desc', 'active');
+        elem.classList.add('asc', 'inactive');
+    });
+}
+
+function toggleSortStates(elem) {
+    //if active, toggle between asc and desc
+    if (elem.classList.contains('active')) {
+        elem.classList.toggle('asc');
+        elem.classList.toggle('desc');
+    }
+
+    //if inactive, reset all other functions and add ascending active
+    if (elem.classList.contains('inactive')) {
+        resetSortHeaders();
+        elem.classList.remove('inactive');
+        elem.classList.add('active');
+    }
+}
+
+function isAllRowsHidden(value) {
+    return value.hidden == false;
+}
+
+function filterTable(elem) { // eslint-disable-line no-unused-vars
+    const outcomeAtt = 'data-test-result';
+    const outcome = elem.getAttribute(outcomeAtt);
+    const classOutcome = outcome + ' results-table-row';
+    const outcomeRows = document.getElementsByClassName(classOutcome);
+
+    for(let i = 0; i < outcomeRows.length; i++){
+        outcomeRows[i].hidden = !elem.checked;
+    }
+
+    const rows = findAll('.results-table-row').filter(isAllRowsHidden);
+    const allRowsHidden = rows.length == 0 ? true : false;
+    const notFoundMessage = document.getElementById('not-found-message');
+    notFoundMessage.hidden = !allRowsHidden;
+}
+</script>
+    <h1>test.html</h1>
+    <p>Report generated on 12-Apr-2023 at 15:20:12 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.2.0</p>
+    <h2>Environment</h2>
+    <table id="environment">
+      <tr>
+        <td>CI</td>
+        <td>true</td></tr>
+      <tr>
+        <td>JAVA_HOME</td>
+        <td>/usr/lib/jvm/temurin-11-jdk-amd64</td></tr>
+      <tr>
+        <td>Packages</td>
+        <td>{"pluggy": "1.0.0", "pytest": "7.3.0"}</td></tr>
+      <tr>
+        <td>Platform</td>
+        <td>Linux-5.15.0-1035-azure-x86_64-with-glibc2.35</td></tr>
+      <tr>
+        <td>Plugins</td>
+        <td>{"cocotb-test": "0.2.4", "html": "3.2.0", "md": "0.2.0", "metadata": "2.0.4", "timeout": "2.1.0"}</td></tr>
+      <tr>
+        <td>Python</td>
+        <td>3.10.6</td></tr></table>
+    <h2>Summary</h2>
+    <p>1 tests ran in 15.48 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">1 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">0 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <h2>Results</h2>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable result initial-sort" col="result">Result</th>
+          <th class="sortable" col="name">Test</th>
+          <th class="sortable" col="duration">Duration</th>
+          <th class="sortable links" col="links">Links</th></tr>
+        <tr hidden="true" id="not-found-message">
+          <th colspan="4">No results found. Try to check the filters</th></tr></thead>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">verification/test.py::test_exu_alu</td>
+          <td class="col-duration">15.41</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> -------------------------------Captured log call-------------------------------- <br/>INFO     cocotb:simulator.py:330 Running command: perl /opt/verilator/bin/verilator -cc --exe -Mdir /home/runner/work/Cores-VeeR-EL2/Cores-VeeR-EL2/sim_build -DCOCOTB_SIM=1 --top-module el2_exu_alu_ctl --vpi --public-flat-rw --prefix Vtop -o el2_exu_alu_ctl -LDFLAGS -Wl,-rpath,/home/runner/.local/lib/python3.10/site-packages/cocotb/libs -L/home/runner/.local/lib/python3.10/site-packages/cocotb/libs -lcocotbvpi_verilator -Wno-WIDTH -Wno-UNOPTFLAT --trace-fst --trace-structs -I/home/runner/work/Cores-VeeR-EL2/Cores-VeeR-EL2/snapshots/default /home/runner/.local/lib/python3.10/site-packages/cocotb/share/lib/verilator/verilator.cpp /home/runner/work/Cores-VeeR-EL2/Cores-VeeR-EL2/snapshots/default/common_defines.vh /home/runner/work/Cores-VeeR-EL2/Cores-VeeR-EL2/snapshots/default/el2_pdef.vh /home/runner/work/Cores-VeeR-EL2/Cores-VeeR-EL2/design/include/el2_def.sv /home/runner/work/Cores-VeeR-EL2/Cores-VeeR-EL2/design/lib/beh_lib.sv /home/runner/work/Cores-VeeR-EL2/Cores-VeeR-EL2/design/exu/el2_exu_alu_ctl.sv
+INFO     cocotb:simulator.py:330 Running command: make -C /home/runner/work/Cores-VeeR-EL2/Cores-VeeR-EL2/sim_build -f Vtop.mk
+INFO     cocotb:simulator.py:302 make: Entering directory &#x27;/home/runner/work/Cores-VeeR-EL2/Cores-VeeR-EL2/sim_build&#x27;
+INFO     cocotb:simulator.py:302 ccache g++  -std=c++11 -I.  -MMD -I/opt/verilator/share/verilator/include -I/opt/verilator/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=1 -DVM_TRACE_VCD=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-shadow       -Os -c -o verilator.o /home/runner/.local/lib/python3.10/site-packages/cocotb/share/lib/verilator/verilator.cpp
+INFO     cocotb:simulator.py:302 ccache g++  -std=c++11 -I.  -MMD -I/opt/verilator/share/verilator/include -I/opt/verilator/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=1 -DVM_TRACE_VCD=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-shadow       -Os -c -o verilated.o /opt/verilator/share/verilator/include/verilated.cpp
+INFO     cocotb:simulator.py:302 ccache g++  -std=c++11 -I.  -MMD -I/opt/verilator/share/verilator/include -I/opt/verilator/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=1 -DVM_TRACE_VCD=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-shadow       -Os -c -o verilated_dpi.o /opt/verilator/share/verilator/include/verilated_dpi.cpp
+INFO     cocotb:simulator.py:302 ccache g++  -std=c++11 -I.  -MMD -I/opt/verilator/share/verilator/include -I/opt/verilator/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=1 -DVM_TRACE_VCD=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-shadow       -Os -c -o verilated_vpi.o /opt/verilator/share/verilator/include/verilated_vpi.cpp
+INFO     cocotb:simulator.py:302 ccache g++  -std=c++11 -I.  -MMD -I/opt/verilator/share/verilator/include -I/opt/verilator/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=1 -DVM_TRACE_VCD=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-shadow       -Os -c -o verilated_fst_c.o /opt/verilator/share/verilator/include/verilated_fst_c.cpp
+INFO     cocotb:simulator.py:302 ccache g++  -std=c++11 -I.  -MMD -I/opt/verilator/share/verilator/include -I/opt/verilator/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=1 -DVM_TRACE_VCD=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-shadow       -Os -c -o verilated_threads.o /opt/verilator/share/verilator/include/verilated_threads.cpp
+INFO     cocotb:simulator.py:302 /usr/bin/python3 /opt/verilator/share/verilator/bin/verilator_includer -DVL_INCLUDE_OPT=include Vtop.cpp Vtop___024root__DepSet_h84412442__0.cpp Vtop___024root__DepSet_heccd7ead__0.cpp Vtop__Dpi.cpp Vtop__Trace__0.cpp Vtop___024root__Slow.cpp Vtop___024root__DepSet_h84412442__0__Slow.cpp Vtop___024root__DepSet_heccd7ead__0__Slow.cpp Vtop___024unit__Slow.cpp Vtop___024unit__DepSet_hff17caec__0__Slow.cpp Vtop__Syms.cpp Vtop__Trace__0__Slow.cpp &gt; Vtop__ALL.cpp
+INFO     cocotb:simulator.py:302 ccache g++  -std=c++11 -I.  -MMD -I/opt/verilator/share/verilator/include -I/opt/verilator/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=1 -DVM_TRACE_FST=1 -DVM_TRACE_VCD=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-shadow       -Os -c -o Vtop__ALL.o Vtop__ALL.cpp
+INFO     cocotb:simulator.py:302 echo &quot;&quot; &gt; Vtop__ALL.verilator_deplist.tmp
+INFO     cocotb:simulator.py:302 Archive ar -rcs Vtop__ALL.a Vtop__ALL.o
+INFO     cocotb:simulator.py:302 g++    verilator.o verilated.o verilated_dpi.o verilated_vpi.o verilated_fst_c.o verilated_threads.o Vtop__ALL.a   -Wl,-rpath,/home/runner/.local/lib/python3.10/site-packages/cocotb/libs -L/home/runner/.local/lib/python3.10/site-packages/cocotb/libs -lcocotbvpi_verilator -lz  -pthread -lpthread -latomic   -o el2_exu_alu_ctl
+INFO     cocotb:simulator.py:302 rm Vtop__ALL.verilator_deplist.tmp
+INFO     cocotb:simulator.py:302 make: Leaving directory &#x27;/home/runner/work/Cores-VeeR-EL2/Cores-VeeR-EL2/sim_build&#x27;
+INFO     cocotb:simulator.py:330 Running command: /home/runner/work/Cores-VeeR-EL2/Cores-VeeR-EL2/sim_build/el2_exu_alu_ctl
+INFO     cocotb:simulator.py:302      -.--ns INFO     gpi                                ..mbed/gpi_embed.cpp:76   in set_program_name_in_venv        Did not detect Python virtual environment. Using system-wide Python interpreter
+INFO     cocotb:simulator.py:302      -.--ns INFO     gpi                                ../gpi/GpiCommon.cpp:101  in gpi_print_registered_impl       VPI registered
+INFO     cocotb:simulator.py:302      0.00ns INFO     cocotb                             Running on Verilator version 5.008 2023-03-04
+INFO     cocotb:simulator.py:302      0.00ns INFO     cocotb                             Running tests with cocotb v1.7.2 from /home/runner/.local/lib/python3.10/site-packages/cocotb
+INFO     cocotb:simulator.py:302      0.00ns INFO     cocotb                             Seeding Python random module with 1681312812
+INFO     cocotb:simulator.py:302      0.00ns INFO     cocotb.regression                  Found test tests.test-exu-alu.test_add
+INFO     cocotb:simulator.py:302      0.00ns INFO     cocotb.regression                  Found test tests.test-exu-alu.test_sub
+INFO     cocotb:simulator.py:302      0.00ns INFO     cocotb.regression                  running test_add (1/2)
+INFO     cocotb:simulator.py:302      0.00ns INFO     cocotb.el2_exu_alu_ctl             input clock = 100 MHz, period = 10.00 ns
+INFO     cocotb:simulator.py:302     60.00ns INFO     cocotb.regression                  test_add passed
+INFO     cocotb:simulator.py:302     60.00ns INFO     cocotb.regression                  running test_sub (2/2)
+INFO     cocotb:simulator.py:302     60.00ns INFO     cocotb.el2_exu_alu_ctl             input clock = 100 MHz, period = 10.00 ns
+INFO     cocotb:simulator.py:302    130.00ns INFO     cocotb.regression                  test_sub passed
+INFO     cocotb:simulator.py:302    130.00ns INFO     cocotb.regression                  **************************************************************************************
+INFO     cocotb:simulator.py:302                                                         ** TEST                          STATUS  SIM TIME (ns)  REAL TIME (s)  RATIO (ns/s) **
+INFO     cocotb:simulator.py:302                                                         **************************************************************************************
+INFO     cocotb:simulator.py:302                                                         ** tests.test-exu-alu.test_add    PASS          60.00           0.00      16410.98  **
+INFO     cocotb:simulator.py:302                                                         ** tests.test-exu-alu.test_sub    PASS          70.00           0.00      50999.73  **
+INFO     cocotb:simulator.py:302                                                         **************************************************************************************
+INFO     cocotb:simulator.py:302                                                         ** TESTS=2 PASS=2 FAIL=0 SKIP=0                130.00           0.15        857.06  **
+INFO     cocotb:simulator.py:302                                                         **************************************************************************************
+INFO     cocotb:simulator.py:302 
+INFO     cocotb:simulator.py:302 - :0: Verilog $finish
+INFO     cocotb:simulator.py:262 Results file: /home/runner/work/Cores-VeeR-EL2/Cores-VeeR-EL2/sim_build/pudxyy7i_results.xml<br/></div></td></tr></tbody></table></body></html>

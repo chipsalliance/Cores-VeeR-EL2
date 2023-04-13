@@ -10,7 +10,13 @@ INSTR_COUNT     = 100
 
 VEER_TARGET     = default
 VEER_CONF       = -set build_axi4 \
-                  -set reset_vec=0x2000 # Needed for spike
+                  -set reset_vec=0x2000 \
+                  -set inst_access_enable0=1 \
+                  -set inst_access_addr0=0x00000000 \
+                  -set inst_access_mask0=0x001fffff \
+                  -set data_access_enable0=1 \
+                  -set data_access_addr0=0x00000000 \
+                  -set data_access_mask0=0x001fffff
 
 VERILATOR       = verilator
 VERILATOR_CFLAGS= "-std=c++11"
@@ -61,8 +67,8 @@ $(TEST_DIR)/program.s: code_fixup.py | $(TEST_DIR)
 		+num_of_tests=1 \
 		+start_idx=0 \
 		+num_of_sub_programs=0 \
-		+instr_cnt=10 \
-		+no_branch_jump=true \
+		+instr_cnt=1000 \
+		+no_branch_jump=false \
 		+no_csr_instr=true \
 		+no_fence=true \
 		+no_data_page=true
@@ -81,14 +87,14 @@ $(TEST_DIR)/program.hex: $(TEST_DIR)/program.elf
 
 # Run the Spike ISS simulation
 $(TEST_DIR)/spike_trace.log: $(TEST_DIR)/program.elf
-	timeout --foreground 10s spike -m0x2000:0x100000 --isa=$(ARCH) --misaligned --log=$@ --log-commits -l $< || true
+	timeout --foreground 10s spike -m0x2000:0x98000 --isa=$(ARCH) --misaligned --log=$@ --log-commits -l $< || true
 
 $(TEST_DIR)/spike_trace.csv: $(TEST_DIR)/spike_trace.log
 	python3 $(RISCV_DV_PATH)/scripts/spike_log_to_trace_csv.py --log $< --csv $@
 
 # Run the Whisper ISS simulation
-$(TEST_DIR)/whisper_trace.log: $(TEST_DIR)/program.elf
-	whisper --isa imc --xlen 32 -l -t $< > $@ || rm -rf $@
+$(TEST_DIR)/whisper_trace.log: $(TEST_DIR)/program.elf whisper.json
+	whisper -v --configfile whisper.json --isa imc --xlen 32 --memorysize 0x100000 --raw -m 1000000 -l -t $< > $@ || rm -rf $@
 
 $(TEST_DIR)/whisper_trace.csv: $(TEST_DIR)/whisper_trace.log
 	python3 $(RISCV_DV_PATH)/scripts/whisper_log_trace_csv.py --log $< --csv $@

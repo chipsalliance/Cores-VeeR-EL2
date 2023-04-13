@@ -8,7 +8,8 @@ from riscv_trace_csv import RiscvInstructionTraceEntry, RiscvInstructionTraceCsv
 
 INSTR_RE = re.compile(r"^\s*(?P<cyc>[0-9]+)\s+:\s+#(?P<inst>[0-9]+)\s+0\s+"
                       r"(?P<pc>[0-9a-f]+)\s+(?P<opc>[0-9a-f]+)\s+"
-                      r"((?P<reg>[^=;]+)=(?P<val>[0-9a-f]+))?"
+                      r"((?P<reg>[^=;]+)=(?P<val>[0-9a-f]+))?\s+"
+                      r"((?P<csr>[^=;]+)=(?P<csr_val>[0-9a-f]+))?"
                       r"\s+;\s+(?P<mnemonic>.*)")
 
 NB_RE    = re.compile(r"^\s*(?P<cyc>[0-9]+)\s+:\s+"
@@ -52,8 +53,11 @@ def parse_log(file_name):
             groups = match.groupdict()
 
             gpr = None
+            csr = None
             if groups["reg"] and groups["val"]:
                 gpr = ("{}:{}".format(groups["reg"], groups["val"]))
+            if groups["csr"] and groups["csr_val"]:
+                csr = ("{}:{}".format(groups["csr"], groups["csr_val"]))
 
             fields   = groups["mnemonic"].split()
             mnemonic = fields[0]
@@ -97,6 +101,8 @@ def parse_log(file_name):
             # Append GPR if any
             if gpr:
                 entry.gpr.append(gpr)
+            if csr:
+                entry.csr.append(csr)
 
             # Enqueue
             if enqueue:

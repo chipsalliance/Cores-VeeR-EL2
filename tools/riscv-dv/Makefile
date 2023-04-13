@@ -79,12 +79,19 @@ $(TEST_DIR)/program.elf: $(TEST_DIR)/program.s $(LDSCRIPT)
 $(TEST_DIR)/program.hex: $(TEST_DIR)/program.elf
 	$(GCC_PREFIX)-objcopy -O verilog $< $@
 
-# Run the ISS simulation
-$(TEST_DIR)/iss_trace.log: $(TEST_DIR)/program.elf
+# Run the Spike ISS simulation
+$(TEST_DIR)/spike_trace.log: $(TEST_DIR)/program.elf
 	timeout --foreground 10s spike -m0x2000:0x100000 --isa=$(ARCH) --misaligned --log=$@ --log-commits -l $< || true
 
-$(TEST_DIR)/iss_trace.csv: $(TEST_DIR)/iss_trace.log
+$(TEST_DIR)/spike_trace.csv: $(TEST_DIR)/spike_trace.log
 	python3 $(RISCV_DV_PATH)/scripts/spike_log_to_trace_csv.py --log $< --csv $@
+
+# Run the Whisper ISS simulation
+$(TEST_DIR)/whisper_trace.log: $(TEST_DIR)/program.elf
+	whisper --isa imc --xlen 32 -l -t $< > $@ || rm -rf $@
+
+$(TEST_DIR)/whisper_trace.csv: $(TEST_DIR)/whisper_trace.log
+	python3 $(RISCV_DV_PATH)/scripts/whisper_log_trace_csv.py --log $< --csv $@
 
 # Run the HDL simulation
 $(TEST_DIR)/hdl_trace.log: $(WORK_DIR)/verilator/Vtb_top $(TEST_DIR)/program.hex
@@ -94,14 +101,23 @@ $(TEST_DIR)/hdl_trace.log: $(WORK_DIR)/verilator/Vtb_top $(TEST_DIR)/program.hex
 $(TEST_DIR)/hdl_trace.csv: $(TEST_DIR)/hdl_trace.log veer_log_to_trace_csv.py
 	PYTHONPATH=$(RISCV_DV_PATH)/scripts python3 veer_log_to_trace_csv.py --log $< --csv $@
 
-$(TEST_DIR)/comparison.log: $(TEST_DIR)/iss_trace.csv $(TEST_DIR)/hdl_trace.csv
+$(TEST_DIR)/spike_comparison.log: $(TEST_DIR)/spike_trace.csv $(TEST_DIR)/hdl_trace.csv
 	rm -rf $@
 	python3 $(RISCV_DV_PATH)/scripts/instr_trace_compare.py \
-		--csv_file_1 $(TEST_DIR)/iss_trace.csv --csv_name_1 ISS --csv_file_2 $(TEST_DIR)/hdl_trace.csv --csv_name_2 HDL \
+		--csv_file_1 $(TEST_DIR)/spike_trace.csv --csv_name_1 ISS --csv_file_2 $(TEST_DIR)/hdl_trace.csv --csv_name_2 HDL \
 		--in_order_mode 1 --log $@ --verbose 10 --mismatch_print_limit 20
+	tail -n 2 $@
 
-compare: $(TEST_DIR)/comparison.log
-	@grep "\[PASSED\]" $<
+$(TEST_DIR)/whisper_comparison.log: $(TEST_DIR)/whisper_trace.csv $(TEST_DIR)/hdl_trace.csv
+	rm -rf $@
+	python3 $(RISCV_DV_PATH)/scripts/instr_trace_compare.py \
+		--csv_file_1 $(TEST_DIR)/whisper_trace.csv --csv_name_1 ISS --csv_file_2 $(TEST_DIR)/hdl_trace.csv --csv_name_2 HDL \
+		--in_order_mode 1 --log $@ --verbose 10 --mismatch_print_limit 20
+	tail -n 2 $@
+
+compare: $(TEST_DIR)/spike_comparison.log $(TEST_DIR)/whisper_comparison.log
+	@grep "\[PASSED\]" $(TEST_DIR)/spike_comparison.log   >/dev/null
+	@grep "\[PASSED\]" $(TEST_DIR)/whisper_comparison.log >/dev/null
 
 clean:
 	rm -rf $(TEST_DIR)

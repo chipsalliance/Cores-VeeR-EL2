@@ -156,76 +156,22 @@ jobs:
           path: /opt/*.tar.gz
           retention-days: 1
 
-  instrgen:
-    name: Build RISC-V DV instruction generator
-    runs-on: ubuntu-latest
-    env:
-      DEBIAN_FRONTEND: "noninteractive"
-
-    steps:
-      - name: Install prerequisities
-        run: |
-          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            git build-essential
-
-      - name: Create Cache Timestamp
-        id: cache_timestamp
-        uses: nanzm/get-time-action@v1.1
-        with:
-          format: 'YYYY-MM-DD-HH-mm-ss'
-
-      - name: Setup cache
-        uses: actions/cache@v2
-        timeout-minutes: 3
-        continue-on-error: true
-        with:
-          path: "/opt/veer-el2/.cache/"
-          key: cache_instrgen_${{ steps.cache_timestamp.outputs.time }}
-          restore-keys: cache_instrgen_
-
-      - name: Download eUVM
-        run: |
-          mkdir -p /opt
-          pushd /opt
-            wget https://github.com/coverify/euvm/releases/download/v1.0-beta25/euvm-1.0-beta25.tar.xz
-            tar -Jxf euvm-1.0-beta25.tar.xz
-            mv euvm-1.0-beta25 euvm
-          popd
-
-      - name: Build
-        run: |
-          # TODO: Use upstream once all the relevant changes for RV32IMC land
-          git clone https://github.com/antmicro/riscv-dv -b master+fixes
-          export PATH=/opt/euvm/bin:$PATH
-          mkdir -p /opt/instrgen
-          pushd riscv-dv/euvm/build
-            # FIXME: ldc2 fails to create directories when copying cached object files. Do this manually upfront
-            find ../riscv -type d | sed 's/../picobj-ldc/' | xargs mkdir -p
-            make -j`nproc` TARGET=RV32IMC LDC2="ldc2 --cache=/opt/veer-el2/.cache"
-            cp *.so /opt/instrgen
-            cp riscv_instr_gen /opt/instrgen
-          popd
-          # Bundle LDC shard libs with the instruction generator
-          rsync -a /opt/euvm/lib/*-ldc-shared.so* /opt/instrgen/
-          cd /opt && tar -czvf instrgen.tar.gz instrgen/
-
-      - name: Store binaries
-        uses: actions/upload-artifact@v3
-        with:
-          name: instrgen
-          path: /opt/*.tar.gz
-          retention-days: 1
-
   # TODO: Parallelize this job for multiple tests
   tests:
     name: Run RISC-V DV tests
     runs-on: ubuntu-latest
-    needs: [verilator, spike, veer-iss, instrgen]
+    needs: [verilator, spike, veer-iss]
+    strategy:
+      fail-fast: false
+      matrix:
+        test:
+          - riscv_arithmetic_basic_test
+        iss:
+          - spike
     env:
       DEBIAN_FRONTEND: "noninteractive"
 
     steps:
-
       - name: Install utils
         run: |
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
@@ -251,19 +197,12 @@ jobs:
           name: veer-iss
           path: /opt
 
-      - name: Download instruction generator binaries
-        uses: actions/download-artifact@v3
-        with:
-          name: instrgen
-          path: /opt
-
       - name: Unpack binaries
         run: |
           pushd /opt
             tar -zxvf verilator.tar.gz
             tar -zxvf spike.tar.gz
             tar -zxvf veer-iss.tar.gz
-            tar -zxvf instrgen.tar.gz
           popd
 
       - name: Setup repository
@@ -271,6 +210,10 @@ jobs:
         with:
           submodules: recursive
           path: veer
+
+      - name: Install Python deps
+        run: |
+          pip install -r veer/third_party/riscv-dv/requirements.txt
 
       - name: Create Cache Timestamp
         id: cache_timestamp
@@ -290,14 +233,16 @@ jobs:
       - name: Run test
         run: |
           export PATH=/opt/verilator/bin:$PATH
-          export PATH=/opt/spike/bin:$PATH
           export PATH=/opt/veer-iss:$PATH
-          export PATH=/opt/instrgen:$PATH
-          export LD_LIBRARY_PATH=/opt/instrgen:$LD_LIBRARY_PATH
           export RV_ROOT=`realpath veer`
+          export RISCV_GCC=riscv64-unknown-elf-gcc
+          export RISCV_OBJCOPY=riscv64-unknown-elf-objcopy
+          export SPIKE_PATH=/opt/spike/bin
+
+          ${RISCV_GCC} --version
 
           pushd ${RV_ROOT}
-            cd tools/riscv-dv && make -j`nproc`
+            cd tools/riscv-dv && make -j`nproc` RISCV_DV_TEST=${{ matrix.test }} RISCV_DV_ISS=${{ matrix.iss }} run
           popd
 
       - name: Pack artifacts

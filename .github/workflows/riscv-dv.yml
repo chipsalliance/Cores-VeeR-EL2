@@ -156,7 +156,6 @@ jobs:
           path: /opt/*.tar.gz
           retention-days: 1
 
-  # TODO: Parallelize this job for multiple tests
   tests:
     name: Run RISC-V DV tests
     runs-on: ubuntu-latest
@@ -168,6 +167,7 @@ jobs:
           - riscv_arithmetic_basic_test
         iss:
           - spike
+          - whisper
     env:
       DEBIAN_FRONTEND: "noninteractive"
 
@@ -238,16 +238,17 @@ jobs:
           export RISCV_GCC=riscv64-unknown-elf-gcc
           export RISCV_OBJCOPY=riscv64-unknown-elf-objcopy
           export SPIKE_PATH=/opt/spike/bin
+          export WHISPER_ISS=/opt/veer-iss/whisper
 
           ${RISCV_GCC} --version
 
           pushd ${RV_ROOT}
-            cd tools/riscv-dv && make -j`nproc` RISCV_DV_TEST=${{ matrix.test }} RISCV_DV_ISS=${{ matrix.iss }} run
+            cd tools/riscv-dv && make -j`nproc` RISCV_DV_TEST=${{ matrix.test }} RISCV_DV_ISS=${{ matrix.iss }} RISCV_DV_ITER=3 run
           popd
 
       - name: Pack artifacts
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: riscv-dv-results
+          name: artifacts-${{ matrix.test }}
           path: veer/tools/riscv-dv/work/test_*

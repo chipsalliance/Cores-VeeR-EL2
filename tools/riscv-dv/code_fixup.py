@@ -57,6 +57,8 @@ def main():
 
     args = parser.parse_args()
 
+    max_nops = 10
+
     # Read and parse
     with open(args.i, "r") as fp:
         inp_lines = [AssemblyLine(l) for l in fp.readlines()]
@@ -89,7 +91,7 @@ def main():
         dst = line.operands[0]
         for j, l in enumerate(following):
             if l.operands and l.operands[0] == dst:
-                nops = max(0, 2 - j)
+                nops = max(0, max_nops - j)
                 for _ in range(nops):
                     out_lines.append(" " * 18 + "nop # FIXME: A fixup not to make VeeR cancel a delayed write\n")
                 break

@@ -56,10 +56,20 @@ $(WORK_DIR)/verilator/Vtb_top: $(WORK_DIR)/verilator/Vtb_top.mk
 
 # Code generation, compilation and ISS simulation via RISC-V DV flow
 $(TEST_DIR)/generate.log: | $(TEST_DIR)
+	# Generate
 	PYTHONPATH=$(RISCV_DV_PATH)/pygen python3 $(RISCV_DV_PATH)/run.py --simulator pyflow \
 		--test $(RISCV_DV_TEST) --iss $(RISCV_DV_ISS) \
 		--iterations $(RISCV_DV_ITER) --batch_size $(RISCV_DV_BATCH) \
-		--isa rv32imc --mabi ilp32 -v -o $(TEST_DIR) 2>&1 | tee $(TEST_DIR)/generate.log
+		--isa rv32imc --mabi ilp32 --steps gen -v -o $(TEST_DIR) 2>&1 | tee $(TEST_DIR)/generate.log
+
+	# Patch the code
+	find $(TEST_DIR)/asm_test -name "*.S" -exec python3 code_fixup.py -i {} -o {} \;
+
+	# Compile, simulate
+	PYTHONPATH=$(RISCV_DV_PATH)/pygen python3 $(RISCV_DV_PATH)/run.py --simulator pyflow \
+		--test $(RISCV_DV_TEST) --iss $(RISCV_DV_ISS) \
+		--iterations $(RISCV_DV_ITER) --batch_size $(RISCV_DV_BATCH) \
+		--isa rv32imc --mabi ilp32 --steps gcc_compile,iss_sim -v -o $(TEST_DIR) 2>&1 | tee -a $(TEST_DIR)/generate.log
 
 $(TEST_DIR)/asm_test/%.hex: $(TEST_DIR)/asm_test/%.o
 	$(RISCV_OBJCOPY) -O verilog $< $@

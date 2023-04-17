@@ -71,6 +71,11 @@ def parse_log(file_name):
 
             # Delayed effect, search the queue
             if gpr is None and mnemonic in ["lw", "div", "divu", "rem", "remu"]:
+
+                # Skip if targets x0 (zero) which makes no sense
+                if operands[0] == "zero":
+                    continue 
+
                 for ent in reversed(queue):
 
                     if (ent.operand == "nbL" and mnemonic in ["lw"]) or \
@@ -143,6 +148,7 @@ def parse_log(file_name):
         while len(queue):
             entry = queue[0]
 
+            # Cannot dequeue, break
             if not entry.pc or not entry.gpr:
                 break
 

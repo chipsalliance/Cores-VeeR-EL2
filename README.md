@@ -36,7 +36,7 @@ installed so that it can be used to prepare RISCV binaries to run.
 
 ## Quickstart guide
 
-1. Clone the repository, clone submodules with `git submodule update --recursive`
+1. Clone the repository, clone submodules with `git submodule update --init --recursive`
 1. Setup `RV_ROOT` to point to the path in your local filesystem
 1. Determine your configuration (optional)
 1. Run `make` with `tools/Makefile`

@@ -39,6 +39,7 @@ GCC_PREFIX = riscv64-unknown-elf
 BUILD_DIR = snapshots/${snapshot}
 TBDIR = ${RV_ROOT}/testbench
 PICOLIBC_DIR = ${RV_ROOT}/third_party/picolibc/install
+LIBPYTHON_LOC = $(shell cocotb-config --libpython)
 
 # Define test name
 TEST = hello_world
@@ -144,10 +145,29 @@ riviera-build: ${TBFILES} ${BUILD_DIR}/defines.h
 		${TBFILES}
 	touch riviera-build
 
+############ cocotb Model Builds ###########################
+
+verilator-cocotb-build: ${TBFILES} ${BUILD_DIR}/defines.h test_tb_top.cpp
+	echo '`undef RV_ASSERT_ON' >> ${BUILD_DIR}/common_defines.vh
+	$(VERILATOR)  --cc -CFLAGS ${CFLAGS} $(defines) \
+	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist \
+	  -Wno-WIDTH -Wno-UNOPTFLAT -Wno-IMPLICITSTATIC ${TBFILES} --top-module tb_top \
+	  --autoflush $(VERILATOR_DEBUG) --coverage \
+	  --vpi --public-flat-rw --prefix Vtop \
+	  -LDFLAGS "-Wl,-rpath,$(shell cocotb-config --lib-dir) \
+	    -L$(shell cocotb-config --lib-dir) \
+	    -lcocotbvpi_verilator -lgpi -lcocotb -lgpilog -lcocotbutils" \
+	  -exe $(shell cocotb-config --share)/lib/verilator/verilator.cpp
+	$(MAKE) -j -e -C obj_dir/ -f Vtop.mk $(VERILATOR_MAKE_FLAGS)
+	touch verilator-build
+
 ############ TEST Simulation ###############################
 
 verilator: program.hex verilator-build
 	./obj_dir/Vtb_top
+
+verilator-cocotb: program.hex verilator-cocotb-build
+	./obj_dir/Vtop
 
 irun: program.hex irun-build
 	$(IRUN) -64bit -abvglobalfailurelimit 1 +lic_queue -licqueue \

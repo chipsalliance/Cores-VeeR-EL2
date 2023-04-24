@@ -1,0 +1,254 @@
+name: RISC-V DV tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+
+  verilator:
+    name: Build Verilator
+    runs-on: ubuntu-latest
+    env:
+      CCACHE_DIR: "/opt/veer-el2/.cache/"
+      DEBIAN_FRONTEND: "noninteractive"
+
+    steps:
+      - name: Install prerequisities
+        run: |
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+            git autoconf automake autotools-dev curl python3 python3-pip \
+            libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex \
+            texinfo gperf libtool patchutils bc zlib1g zlib1g-dev libexpat-dev \
+            ninja-build ccache libfl2 libfl-dev
+
+      - name: Create Cache Timestamp
+        id: cache_timestamp
+        uses: nanzm/get-time-action@v1.1
+        with:
+          format: 'YYYY-MM-DD-HH-mm-ss'
+
+      - name: Setup cache
+        uses: actions/cache@v2
+        timeout-minutes: 3
+        continue-on-error: true
+        with:
+          path: "/opt/veer-el2/.cache/"
+          key: cache_verilator_${{ steps.cache_timestamp.outputs.time }}
+          restore-keys: cache_verilator_
+
+      - name: Build Verilator
+        run: |
+          git clone https://github.com/verilator/verilator
+          pushd verilator
+            git checkout v5.002
+            autoconf
+            ./configure --prefix=/opt/verilator
+            make -j `nproc`
+            make install
+          popd
+          cd /opt && tar -czvf verilator.tar.gz verilator/
+
+      - name: Store Verilator binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: verilator
+          path: /opt/*.tar.gz
+          retention-days: 1
+
+  spike:
+    name: Build Spike ISS
+    runs-on: ubuntu-latest
+    env:
+      CCACHE_DIR: "/opt/veer-el2/.cache/"
+      DEBIAN_FRONTEND: "noninteractive"
+
+    steps:
+      - name: Install prerequisities
+        run: |
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+            git build-essential cmake ccache device-tree-compiler
+
+      - name: Create Cache Timestamp
+        id: cache_timestamp
+        uses: nanzm/get-time-action@v1.1
+        with:
+          format: 'YYYY-MM-DD-HH-mm-ss'
+
+      - name: Setup cache
+        uses: actions/cache@v2
+        timeout-minutes: 3
+        continue-on-error: true
+        with:
+          path: "/opt/veer-el2/.cache/"
+          key: cache_spike_${{ steps.cache_timestamp.outputs.time }}
+          restore-keys: cache_spike_
+
+      - name: Build Spike
+        run: |
+          git clone https://github.com/riscv-software-src/riscv-isa-sim spike
+          export CC="ccache gcc"
+          export CXX="ccache g++"
+          pushd spike
+            git checkout d70ea67d
+            mkdir build
+            cd build
+            ../configure --prefix=/opt/spike
+            make -j`nproc`
+            make install
+          popd
+          rm -rf /opt/spike/include # Remove include and lib to save space
+          rm -rf /opt/spike/lib
+          cd /opt && tar -czvf spike.tar.gz spike/
+
+      - name: Store Spike binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: spike
+          path: /opt/*.tar.gz
+          retention-days: 1
+
+  veer-iss:
+    name: Build VeeR-ISS
+    runs-on: ubuntu-latest
+    env:
+      CCACHE_DIR: "/opt/veer-el2/.cache/"
+      DEBIAN_FRONTEND: "noninteractive"
+
+    steps:
+      - name: Install prerequisities
+        run: |
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+            git build-essential ccache libboost-all-dev
+
+      - name: Create Cache Timestamp
+        id: cache_timestamp
+        uses: nanzm/get-time-action@v1.1
+        with:
+          format: 'YYYY-MM-DD-HH-mm-ss'
+
+      - name: Setup cache
+        uses: actions/cache@v2
+        timeout-minutes: 3
+        continue-on-error: true
+        with:
+          path: "/opt/veer-el2/.cache/"
+          key: cache_veer-iss_${{ steps.cache_timestamp.outputs.time }}
+          restore-keys: cache_veer-iss_
+
+      - name: Build VeeR-ISS
+        run: |
+          git clone https://github.com/chipsalliance/VeeR-ISS veer-iss
+          export CC="ccache gcc"
+          export CXX="ccache g++"
+          pushd veer-iss
+            git checkout 666c94e
+            make -j`nproc`
+            mkdir -p /opt/veer-iss
+            cp build-Linux/whisper /opt/veer-iss/
+          popd
+          cd /opt && tar -czvf veer-iss.tar.gz veer-iss/
+
+      - name: Store VeeR-ISS binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: veer-iss
+          path: /opt/*.tar.gz
+          retention-days: 1
+
+  tests:
+    name: Run RISC-V DV tests
+    runs-on: ubuntu-latest
+    needs: [verilator, spike, veer-iss]
+    strategy:
+      fail-fast: false
+      matrix:
+        test:
+          - riscv_arithmetic_basic_test
+        iss:
+          - spike
+          - whisper
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+
+    steps:
+      - name: Install utils
+        run: |
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+            git cpanminus ccache device-tree-compiler python3-minimal python3-pip \
+            libboost-all-dev gcc-riscv64-unknown-elf
+          sudo cpanm Bit::Vector
+
+      - name: Download Verilator binaries
+        uses: actions/download-artifact@v3
+        with:
+          name: verilator
+          path: /opt
+
+      - name: Download Spike binaries
+        uses: actions/download-artifact@v3
+        with:
+          name: spike
+          path: /opt
+
+      - name: Download VeeR-ISS binaries
+        uses: actions/download-artifact@v3
+        with:
+          name: veer-iss
+          path: /opt
+
+      - name: Unpack binaries
+        run: |
+          pushd /opt
+            tar -zxvf verilator.tar.gz
+            tar -zxvf spike.tar.gz
+            tar -zxvf veer-iss.tar.gz
+          popd
+
+      - name: Setup repository
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+          path: veer
+
+      - name: Install Python deps
+        run: |
+          pip install -r veer/third_party/riscv-dv/requirements.txt
+
+      - name: Create Cache Timestamp
+        id: cache_timestamp
+        uses: nanzm/get-time-action@v1.1
+        with:
+          format: 'YYYY-MM-DD-HH-mm-ss'
+
+      - name: Setup cache
+        uses: actions/cache@v2
+        timeout-minutes: 3
+        continue-on-error: true
+        with:
+          path: "/opt/veer-el2/.cache/"
+          key: cache_tests_${{ steps.cache_timestamp.outputs.time }}
+          restore-keys: cache_tests_
+
+      - name: Run test
+        run: |
+          export PATH=/opt/verilator/bin:$PATH
+          export PATH=/opt/veer-iss:$PATH
+          export RV_ROOT=`realpath veer`
+          export RISCV_GCC=riscv64-unknown-elf-gcc
+          export RISCV_OBJCOPY=riscv64-unknown-elf-objcopy
+          export SPIKE_PATH=/opt/spike/bin
+          export WHISPER_ISS=/opt/veer-iss/whisper
+
+          ${RISCV_GCC} --version
+
+          pushd ${RV_ROOT}
+            cd tools/riscv-dv && make -j`nproc` RISCV_DV_TEST=${{ matrix.test }} RISCV_DV_ISS=${{ matrix.iss }} RISCV_DV_ITER=3 run
+          popd
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts-${{ matrix.test }}
+          path: veer/tools/riscv-dv/work/test_*

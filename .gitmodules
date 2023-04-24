@@ -1,3 +1,6 @@
 [submodule "third-party/picolibc"]
 	path = third_party/picolibc
 	url = https://github.com/picolibc/picolibc
+[submodule "third_party/riscv-dv"]
+	path = third_party/riscv-dv
+	url = https://github.com/antmicro/riscv-dv

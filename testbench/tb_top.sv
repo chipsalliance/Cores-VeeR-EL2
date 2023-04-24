@@ -105,6 +105,10 @@ module tb_top ( input bit core_clk );
     logic [4:0]                 wb_dest;
     logic [31:0]                wb_data;
 
+    logic                       wb_csr_valid;
+    logic [11:0]                wb_csr_dest;
+    logic [31:0]                wb_csr_data;
+
 `ifdef RV_BUILD_AXI4
    //-------------------------- LSU AXI signals--------------------------
    // AXI Write Channels
@@ -350,9 +354,12 @@ module tb_top ( input bit core_clk );
 
     // trace monitor
     always @(posedge core_clk) begin
-        wb_valid  <= `DEC.dec_i0_wen_r;
-        wb_dest   <= `DEC.dec_i0_waddr_r;
-        wb_data   <= `DEC.dec_i0_wdata_r;
+        wb_valid      <= `DEC.dec_i0_wen_r;
+        wb_dest       <= `DEC.dec_i0_waddr_r;
+        wb_data       <= `DEC.dec_i0_wdata_r;
+        wb_csr_valid  <= `DEC.dec_csr_wen_r;
+        wb_csr_dest   <= `DEC.dec_csr_wraddr_r;
+        wb_csr_data   <= `DEC.dec_csr_wrdata_r;
         if (trace_rv_i_valid_ip) begin
            $fwrite(tp,"%b,%h,%h,%0h,%0h,3,%b,%h,%h,%b\n", trace_rv_i_valid_ip, 0, trace_rv_i_address_ip,
                   0, trace_rv_i_insn_ip,trace_rv_i_exception_ip,trace_rv_i_ecause_ip,
@@ -360,18 +367,19 @@ module tb_top ( input bit core_clk );
            // Basic trace - no exception register updates
            // #1 0 ee000000 b0201073 c 0b02       00000000
            commit_count++;
-           $fwrite (el, "%10d : %8s 0 %h %h%13s ; %s\n", cycleCnt, $sformatf("#%0d",commit_count),
+           $fwrite (el, "%10d : %8s 0 %h %h%13s %14s ; %s\n", cycleCnt, $sformatf("#%0d",commit_count),
                         trace_rv_i_address_ip, trace_rv_i_insn_ip,
-                        (wb_dest !=0 && wb_valid)?  $sformatf("%s=%h", abi_reg[wb_dest], wb_data) : "             ",
+                        (wb_dest !=0 && wb_valid)?  $sformatf("%s=%h", abi_reg[wb_dest], wb_data) : "            ",
+                        (wb_csr_valid)? $sformatf("c%h=%h", wb_csr_dest, wb_csr_data) : "             ",
                         dasm(trace_rv_i_insn_ip, trace_rv_i_address_ip, wb_dest & {5{wb_valid}}, wb_data)
                    );
         end
         if(`DEC.dec_nonblock_load_wen) begin
-            $fwrite (el, "%10d : %32s=%h ; nbL\n", cycleCnt, abi_reg[`DEC.dec_nonblock_load_waddr], `DEC.lsu_nonblock_load_data);
+            $fwrite (el, "%10d : %32s=%h                ; nbL\n", cycleCnt, abi_reg[`DEC.dec_nonblock_load_waddr], `DEC.lsu_nonblock_load_data);
             tb_top.gpr[0][`DEC.dec_nonblock_load_waddr] = `DEC.lsu_nonblock_load_data;
         end
         if(`DEC.exu_div_wren) begin
-            $fwrite (el, "%10d : %32s=%h ; nbD\n", cycleCnt, abi_reg[`DEC.div_waddr_wb], `DEC.exu_div_result);
+            $fwrite (el, "%10d : %32s=%h                ; nbD\n", cycleCnt, abi_reg[`DEC.div_waddr_wb], `DEC.exu_div_result);
             tb_top.gpr[0][`DEC.div_waddr_wb] = `DEC.exu_div_result;
         end
     end
@@ -422,7 +430,7 @@ module tb_top ( input bit core_clk );
         $readmemh("program.hex",  imem.mem);
         tp = $fopen("trace_port.csv","w");
         el = $fopen("exec.log","w");
-        $fwrite (el, "//   Cycle : #inst    0    pc    opcode    reg=value   ; mnemonic\n");
+        $fwrite (el, "//   Cycle : #inst    0    pc    opcode    reg=value    csr=value     ; mnemonic\n");
         fd = $fopen("console.log","w");
         commit_count = 0;
         preload_dccm();

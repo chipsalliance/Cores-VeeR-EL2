@@ -748,7 +748,7 @@ module rvecc_decode_64  (
 
  endmodule // rvecc_decode_64
 
-
+`ifndef TECH_SPECIFIC_EC_RV_ICG
 module `TEC_RV_ICG
   (
    input logic SE, EN, CK,
@@ -773,6 +773,7 @@ module `TEC_RV_ICG
    assign Q = CK & en_ff;
 
 endmodule
+`endif
 
 `ifndef RV_FPGA_OPTIMIZE
 module rvclkhdr
@@ -786,7 +787,11 @@ module rvclkhdr
    logic   SE;
    assign       SE = 0;
 
+`ifdef TECH_SPECIFIC_EC_RV_ICG
+   `USER_EC_RV_ICG clkhdr ( .*, .EN(en), .CK(clk), .Q(l1clk));
+`else
    `TEC_RV_ICG clkhdr ( .*, .EN(en), .CK(clk), .Q(l1clk));
+`endif
 
 endmodule // rvclkhdr
 `endif
@@ -805,7 +810,11 @@ module rvoclkhdr
 `ifdef RV_FPGA_OPTIMIZE
    assign l1clk = clk;
 `else
-   `TEC_RV_ICG clkhdr ( .*, .EN(en), .CK(clk), .Q(l1clk));
+   `ifdef TECH_SPECIFIC_EC_RV_ICG
+      `USER_EC_RV_ICG clkhdr ( .*, .EN(en), .CK(clk), .Q(l1clk));
+   `else
+      `TEC_RV_ICG clkhdr ( .*, .EN(en), .CK(clk), .Q(l1clk));
+    `endif
 `endif
 
 endmodule

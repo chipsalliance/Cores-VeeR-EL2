@@ -45,3 +45,4 @@ $RV_ROOT/design/lib/el2_lib.sv
 -v $RV_ROOT/design/lib/mem_lib.sv
 -y $RV_ROOT/design/lib
 -v $RV_ROOT/testbench/axi_lsu_dma_bridge.sv
+-v $RV_ROOT/testbench/user_cells.sv

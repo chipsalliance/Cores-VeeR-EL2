@@ -110,23 +110,6 @@ import el2_pkg::*;
       assign  dccm_clken[i] = (wren_bank[i] | rden_bank[i] | clk_override) ;
       // end clock gating section
 
-`ifdef VERILATOR
-
-        el2_ram #(DCCM_INDEX_DEPTH,39)  ram (
-                                  // Primary ports
-                                  .ME(dccm_clken[i]),
-                                  .CLK(clk),
-                                  .WE(wren_bank[i]),
-                                  .ADR(addr_bank[i]),
-                                  .D(wr_data_bank[i][pt.DCCM_FDATA_WIDTH-1:0]),
-                                  .Q(dccm_bank_dout[i][pt.DCCM_FDATA_WIDTH-1:0]),
-                                  .ROP ( ),
-                                  // These are used by SoC
-                                  `EL2_LOCAL_DCCM_RAM_TEST_PORTS
-                                  .*
-                                  );
-`else
-
       if (DCCM_INDEX_DEPTH == 32768) begin : dccm
          ram_32768x39  dccm_bank (
                                   // Primary ports
@@ -277,7 +260,6 @@ import el2_pkg::*;
                                 .*
                                 );
       end
-`endif
 
    end : mem_bank
 

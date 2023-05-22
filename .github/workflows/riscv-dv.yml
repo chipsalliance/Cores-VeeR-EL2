@@ -303,5 +303,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: artifacts-${{ matrix.test }}
+          name: artifacts-${{ matrix.test }}-${{ matrix.iss }}
           path: veer/tools/riscv-dv/work/test_*

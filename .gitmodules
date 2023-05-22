@@ -3,4 +3,4 @@
 	url = https://github.com/picolibc/picolibc
 [submodule "third_party/riscv-dv"]
 	path = third_party/riscv-dv
-	url = https://github.com/antmicro/riscv-dv
+	url = https://github.com/chipsalliance/riscv-dv

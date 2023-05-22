@@ -1,6 +1,7 @@
 RISCV_DV_PATH   = $(RV_ROOT)/third_party/riscv-dv
 RISCV_DV_ISS   ?= spike
 RISCV_DV_TEST  ?= riscv_arithmetic_basic_test
+RISCV_DV_SEED  ?= 999
 RISCV_DV_ITER  ?= 1
 RISCV_DV_BATCH ?= 1
 
@@ -28,6 +29,8 @@ HDL_FILES = $(WORK_DIR)/common_defines.vh \
             $(RV_ROOT)/testbench/tb_top.sv \
             $(RV_ROOT)/testbench/ahb_sif.sv \
             $(RV_ROOT)/design/include/el2_def.sv
+
+MAKEFILE  = $(abspath $(MAKEFILE_LIST))
 
 all:
 	@echo "Use 'make run'"
@@ -59,7 +62,7 @@ $(TEST_DIR)/generate.log: | $(TEST_DIR)
 	# Generate
 	PYTHONPATH=$(RISCV_DV_PATH)/pygen python3 $(RISCV_DV_PATH)/run.py --simulator pyflow \
 		--test $(RISCV_DV_TEST) --iss $(RISCV_DV_ISS) \
-		--iterations $(RISCV_DV_ITER) --batch_size $(RISCV_DV_BATCH) \
+		--start_seed $(RISCV_DV_SEED) --iterations $(RISCV_DV_ITER) --batch_size $(RISCV_DV_BATCH) \
 		--isa rv32imc --mabi ilp32 --steps gen -v -o $(TEST_DIR) 2>&1 | tee $(TEST_DIR)/generate.log
 
 	# Patch the code
@@ -67,8 +70,8 @@ $(TEST_DIR)/generate.log: | $(TEST_DIR)
 
 	# Compile, simulate
 	PYTHONPATH=$(RISCV_DV_PATH)/pygen python3 $(RISCV_DV_PATH)/run.py --simulator pyflow \
-		--test $(RISCV_DV_TEST) --iss $(RISCV_DV_ISS) \
-		--iterations $(RISCV_DV_ITER) --batch_size $(RISCV_DV_BATCH) \
+		--test $(RISCV_DV_TEST) --iss $(RISCV_DV_ISS) --iss_timeout 60 \
+		--start_seed $(RISCV_DV_SEED) --iterations $(RISCV_DV_ITER) --batch_size $(RISCV_DV_BATCH) \
 		--isa rv32imc --mabi ilp32 --steps gcc_compile,iss_sim -v -o $(TEST_DIR) 2>&1 | tee -a $(TEST_DIR)/generate.log
 
 $(TEST_DIR)/asm_test/%.hex: $(TEST_DIR)/asm_test/%.o
@@ -88,6 +91,9 @@ $(TEST_DIR)/spike_sim/%.csv: $(TEST_DIR)/spike_sim/%.log
 $(TEST_DIR)/whisper_sim/%.csv: $(TEST_DIR)/whisper_sim/%.log
 	python3 $(RISCV_DV_PATH)/scripts/whisper_log_trace_csv.py --log $< --csv $@
 
+$(TEST_DIR)/renode_sim/%.csv: $(TEST_DIR)/renode_sim/%.log
+	python3 $(RISCV_DV_PATH)/scripts/renode_log_to_trace_csv.py --log $< --csv $@
+
 $(SIM_DIR)/%.csv: $(SIM_DIR)/%.log veer_log_to_trace_csv.py
 	PYTHONPATH=$(RISCV_DV_PATH)/scripts python3 veer_log_to_trace_csv.py --log $< --csv $@
 
@@ -101,9 +107,9 @@ $(TEST_DIR)/comp_%.log: $(TEST_DIR)/$(RISCV_DV_ISS)_sim/%.csv $(SIM_DIR)/%.csv
 
 run:
 	# Run RISC-V DV
-	$(MAKE) $(TEST_DIR)/generate.log
+	$(MAKE) -f $(MAKEFILE) $(TEST_DIR)/generate.log
 	# Run HDL simulation(s) and trace comparison
-	find $(TEST_DIR)/ -name "sim_*.log" | sed 's/sim_/comp_/g' | xargs $(MAKE)
+	find $(TEST_DIR)/ -name "sim_*.log" | sed 's/sim_/comp_/g' | xargs $(MAKE) -f $(MAKEFILE)
 	# Check for errors
 	for F in $(TEST_DIR)/comp_*.log; do grep "\[PASSED\]" $$F; if [ $$? -ne 0 ]; then exit 255; fi; done
 

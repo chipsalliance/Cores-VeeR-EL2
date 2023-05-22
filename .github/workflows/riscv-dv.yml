@@ -56,6 +56,51 @@ jobs:
           path: /opt/*.tar.gz
           retention-days: 1
 
+#--------------#
+#    Renode
+#--------------#
+  renode:
+    name: Download Renode
+    runs-on: ubuntu-latest
+    env:
+      CCACHE_DIR: "/opt/veer-el2/.cache/"
+      DEBIAN_FRONTEND: "noninteractive"
+
+    steps:
+      - name: Create Cache Timestamp
+        id: cache_timestamp
+        uses: nanzm/get-time-action@v1.1
+        with:
+          format: 'YYYY-MM-DD-HH-mm-ss'
+
+      - name: Setup cache
+        uses: actions/cache@v2
+        timeout-minutes: 3
+        continue-on-error: true
+        with:
+          path: "/opt/veer-el2/.cache/"
+          key: cache_renode_${{ steps.cache_timestamp.outputs.time }}
+          restore-keys: cache_renode_
+
+      - name: Get latest release
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: "renode/renode"
+          latest: true
+          fileName: "renode-*.linux-portable.tar.gz"
+          extract: false
+
+      - name: Rename the archive
+        run: |
+          mv ${{ github.workspace }}/renode-*.tar.gz ${{ github.workspace }}/renode.tar.gz
+
+      - name: Store Renode binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: renode
+          path: ${{ github.workspace }}/renode.tar.gz
+          retention-days: 1
+
   spike:
     name: Build Spike ISS
     runs-on: ubuntu-latest
@@ -159,7 +204,7 @@ jobs:
   tests:
     name: Run RISC-V DV tests
     runs-on: ubuntu-latest
-    needs: [verilator, spike, veer-iss]
+    needs: [verilator, spike, veer-iss, renode]
     strategy:
       fail-fast: false
       matrix:
@@ -168,6 +213,7 @@ jobs:
         iss:
           - spike
           - whisper
+          - renode
     env:
       DEBIAN_FRONTEND: "noninteractive"
 
@@ -183,6 +229,12 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: verilator
+          path: /opt
+
+      - name: Download Renode binaries
+        uses: actions/download-artifact@v3
+        with:
+          name: renode
           path: /opt
 
       - name: Download Spike binaries
@@ -203,6 +255,7 @@ jobs:
             tar -zxvf verilator.tar.gz
             tar -zxvf spike.tar.gz
             tar -zxvf veer-iss.tar.gz
+            tar -zxvf renode.tar.gz --strip-components=1
           popd
 
       - name: Setup repository
@@ -239,16 +292,21 @@ jobs:
           export RISCV_OBJCOPY=riscv64-unknown-elf-objcopy
           export SPIKE_PATH=/opt/spike/bin
           export WHISPER_ISS=/opt/veer-iss/whisper
-
+          export RENODE_PATH=/opt/renode
           ${RISCV_GCC} --version
 
           pushd ${RV_ROOT}
-            cd tools/riscv-dv && make -j`nproc` RISCV_DV_TEST=${{ matrix.test }} RISCV_DV_ISS=${{ matrix.iss }} RISCV_DV_ITER=3 run
+            cd tools/riscv-dv && make -j`nproc` \
+              RISCV_DV_TEST=${{ matrix.test }} \
+              RISCV_DV_ISS=${{ matrix.iss }} \
+              RISCV_DV_ITER=3 \
+              RISCV_DV_SEED=999 \
+              run
           popd
 
       - name: Pack artifacts
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: artifacts-${{ matrix.test }}
+          name: artifacts-${{ matrix.test }}-${{ matrix.iss }}
           path: veer/tools/riscv-dv/work/test_*

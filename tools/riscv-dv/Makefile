@@ -1,6 +1,7 @@
 RISCV_DV_PATH   = $(RV_ROOT)/third_party/riscv-dv
 RISCV_DV_ISS   ?= spike
 RISCV_DV_TEST  ?= riscv_arithmetic_basic_test
+RISCV_DV_SEED  ?= 999
 RISCV_DV_ITER  ?= 1
 RISCV_DV_BATCH ?= 1
 
@@ -61,7 +62,7 @@ $(TEST_DIR)/generate.log: | $(TEST_DIR)
 	# Generate
 	PYTHONPATH=$(RISCV_DV_PATH)/pygen python3 $(RISCV_DV_PATH)/run.py --simulator pyflow \
 		--test $(RISCV_DV_TEST) --iss $(RISCV_DV_ISS) \
-		--iterations $(RISCV_DV_ITER) --batch_size $(RISCV_DV_BATCH) \
+		--start_seed $(RISCV_DV_SEED) --iterations $(RISCV_DV_ITER) --batch_size $(RISCV_DV_BATCH) \
 		--isa rv32imc --mabi ilp32 --steps gen -v -o $(TEST_DIR) 2>&1 | tee $(TEST_DIR)/generate.log
 
 	# Patch the code
@@ -70,7 +71,7 @@ $(TEST_DIR)/generate.log: | $(TEST_DIR)
 	# Compile, simulate
 	PYTHONPATH=$(RISCV_DV_PATH)/pygen python3 $(RISCV_DV_PATH)/run.py --simulator pyflow \
 		--test $(RISCV_DV_TEST) --iss $(RISCV_DV_ISS) --iss_timeout 60 \
-		--iterations $(RISCV_DV_ITER) --batch_size $(RISCV_DV_BATCH) \
+		--start_seed $(RISCV_DV_SEED) --iterations $(RISCV_DV_ITER) --batch_size $(RISCV_DV_BATCH) \
 		--isa rv32imc --mabi ilp32 --steps gcc_compile,iss_sim -v -o $(TEST_DIR) 2>&1 | tee -a $(TEST_DIR)/generate.log
 
 $(TEST_DIR)/asm_test/%.hex: $(TEST_DIR)/asm_test/%.o

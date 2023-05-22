@@ -296,7 +296,12 @@ jobs:
           ${RISCV_GCC} --version
 
           pushd ${RV_ROOT}
-            cd tools/riscv-dv && make -j`nproc` RISCV_DV_TEST=${{ matrix.test }} RISCV_DV_ISS=${{ matrix.iss }} RISCV_DV_ITER=3 run
+            cd tools/riscv-dv && make -j`nproc` \
+              RISCV_DV_TEST=${{ matrix.test }} \
+              RISCV_DV_ISS=${{ matrix.iss }} \
+              RISCV_DV_ITER=3 \
+              RISCV_DV_SEED=999 \
+              run
           popd
 
       - name: Pack artifacts

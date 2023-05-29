@@ -2788,7 +2788,9 @@ assign dec_csr_rddata_d[31:0] = ( ({32{csr_misa}}      & 32'h40001104) |
 
 endmodule // el2_dec_tlu_ctl
 
-module el2_dec_timer_ctl #(
+module el2_dec_timer_ctl
+import el2_pkg::*;
+#(
 `include "el2_param.vh"
  )
   (

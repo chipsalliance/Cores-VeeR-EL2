@@ -20,7 +20,9 @@
 // Comments:
 //********************************************************************************
 
-module el2_pic_ctrl #(
+module el2_pic_ctrl 
+import el2_pkg::*;
+#(
 `include "el2_param.vh"
  )
                   (

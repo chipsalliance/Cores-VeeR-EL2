@@ -275,10 +275,7 @@ import el2_pkg::*;
 
    // synchronize the rst
 `ifdef TECH_SPECIFIC_RV_SYNC
-   `USER_RV_SYNC #(
-      .WIDTH  (1),
-      .DEFAULT(1'b0)
-   ) rstl_sync (
+   `USER_RV_SYNC rstl_sync (
       .clk    (free_clk),
       .rst_n  (dbg_rst_l),
       .d      (rst_l),

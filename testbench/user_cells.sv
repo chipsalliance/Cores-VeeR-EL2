@@ -37,27 +37,16 @@ endmodule
 // Signal synchronizing module example
 module user_rv_sync (clk, rst_n, d, q);
 
-    parameter             WIDTH     = 1;
-    parameter [WIDTH-1:0] DEFAULT   = 0;
-
     input  logic clk;
     input  logic rst_n;
 
-    input  logic [WIDTH-1:0] d;
-    output logic [WIDTH-1:0] q;
+    input  logic d;
+    output logic q;
 
-    logic [WIDTH-1:0] r;
+    logic r;
 
-    initial begin
-        r = DEFAULT;
-        q = DEFAULT;
-    end
-
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            r <= DEFAULT;
-            q <= DEFAULT;
-        end else begin
+    always @(posedge clk) begin
+        if (rst_n) begin
             r <= d;
             q <= r;
         end

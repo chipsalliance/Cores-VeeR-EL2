@@ -49,14 +49,17 @@ wire rden_s;
 wire wren_s;
 
 `ifdef TECH_SPECIFIC_RV_SYNC
-    `USER_RV_SYNC #(
-        .WIDTH  (2),
-        .DEFAULT(2'd0)
-     ) sync (
+    `USER_RV_SYNC sync_rd
         .clk    (clk),
         .rst_n  (rst_n),
-        .d      ({rd_en, wr_en}),
-        .q      ({rden_s, wren_s})
+        .d      (rd_en),
+        .q      (rden_s)
+    );
+    `USER_RV_SYNC sync_wr
+        .clk    (clk),
+        .rst_n  (rst_n),
+        .d      (wr_en),
+        .q      (wren_s)
     );
 `else
     reg [1:0] rden_r;

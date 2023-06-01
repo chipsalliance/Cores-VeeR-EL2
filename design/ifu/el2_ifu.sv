@@ -241,6 +241,26 @@ import el2_pkg::*;
    logic [1:0] [$clog2(pt.BTB_SIZE)-1:0] ifu_bp_fa_index_f;
 
 
+   logic [1:0]   ic_fetch_val_f;
+   logic [31:0] ic_data_f;
+   logic [31:0] ifu_fetch_data_f;
+   logic ifc_fetch_req_f;
+   logic ifc_fetch_req_f_raw;
+   logic [1:0] iccm_rd_ecc_double_err;  // This fetch has an iccm double error.
+
+   logic ifu_async_error_start;
+
+
+   assign ifu_fetch_data_f[31:0] = ic_data_f[31:0];
+   assign ifu_fetch_val[1:0] = ic_fetch_val_f[1:0];
+   assign ifu_fetch_pc[31:1] = ifc_fetch_addr_f[31:1];
+
+ logic                       ifc_fetch_uncacheable_bf;      // The fetch request is uncacheable space. BF stage
+ logic                       ifc_fetch_req_bf;              // Fetch request. Comes with the address.  BF stage
+ logic                       ifc_fetch_req_bf_raw;          // Fetch request without some qualifications. Used for clock-gating. BF stage
+ logic                       ifc_iccm_access_bf;            // This request is to the ICCM. Do not generate misses to the bus.
+ logic                       ifc_region_acc_fault_bf;       // Access fault. in ICCM region but offset is outside defined ICCM.
+
    // fetch control
    el2_ifu_ifc_ctl #(.pt(pt)) ifc (.*
                     );
@@ -262,25 +282,6 @@ import el2_pkg::*;
    end
 
 
-   logic [1:0]   ic_fetch_val_f;
-   logic [31:0] ic_data_f;
-   logic [31:0] ifu_fetch_data_f;
-   logic ifc_fetch_req_f;
-   logic ifc_fetch_req_f_raw;
-   logic [1:0] iccm_rd_ecc_double_err;  // This fetch has an iccm double error.
-
-   logic ifu_async_error_start;
-
-
-   assign ifu_fetch_data_f[31:0] = ic_data_f[31:0];
-   assign ifu_fetch_val[1:0] = ic_fetch_val_f[1:0];
-   assign ifu_fetch_pc[31:1] = ifc_fetch_addr_f[31:1];
-
- logic                       ifc_fetch_uncacheable_bf;      // The fetch request is uncacheable space. BF stage
- logic                       ifc_fetch_req_bf;              // Fetch request. Comes with the address.  BF stage
- logic                       ifc_fetch_req_bf_raw;          // Fetch request without some qualifications. Used for clock-gating. BF stage
- logic                       ifc_iccm_access_bf;            // This request is to the ICCM. Do not generate misses to the bus.
- logic                       ifc_region_acc_fault_bf;       // Access fault. in ICCM region but offset is outside defined ICCM.
 
    // aligner
 

@@ -1,0 +1,6 @@
+waive --rule=module-filename    --location="design/lib/.*_lib.sv"
+waive --rule=line-length        --location="design/ifu/.*.sv"
+waive --rule=line-length        --location="design/el2_.*_ctrl.sv"
+waive --rule=no-trailing-spaces --location="design/ifu/.*.sv"
+waive --rule=no-trailing-spaces --location="design/el2_.*_ctrl.sv"
+

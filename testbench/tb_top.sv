@@ -13,13 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-`ifndef VERILATOR
+`ifndef TB_EXT_CORE_CLK
 module tb_top;
 `else
 module tb_top ( input bit core_clk );
 `endif
 
-`ifndef VERILATOR
+`ifndef TB_EXT_CORE_CLK
     bit                         core_clk;
 `endif
     logic                       rst_l;
@@ -438,6 +438,8 @@ module tb_top ( input bit core_clk );
 
 `ifndef VERILATOR
         if($test$plusargs("dumpon")) $dumpvars;
+`endif
+`ifndef TB_EXT_CORE_CLK
         forever  core_clk = #5 ~core_clk;
 `endif
     end

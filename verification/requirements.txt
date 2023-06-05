@@ -1,0 +1,13 @@
+# Installing custom cocotb due to:
+# cocotb scheduler incorrectly handles simulation time
+# when Verilator is used with flag --timing
+${RV_ROOT}/third_party/cocotb
+# cocotb==1.7.2
+cocotb-bus==0.2.1
+cocotb-coverage==1.1.0
+cocotb-test==0.2.4
+pytest
+pytest-html
+pytest-timeout
+pytest-md
+pyuvm

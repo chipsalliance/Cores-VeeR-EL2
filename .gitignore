@@ -9,3 +9,9 @@ obj_dir
 verilator-build
 program.hex
 snapshots
+__pycache__
+sim_build
+venv
+results.xml
+verification/sim
+verilator-cocotb-build

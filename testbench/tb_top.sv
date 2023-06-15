@@ -13,6 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
+`include "signature.vh"
+
 `ifndef VERILATOR
 module tb_top;
 `else
@@ -338,6 +341,12 @@ module tb_top ( input bit core_clk );
             $fwrite(fd,"%c", WriteData[7:0]);
             $write("%c", WriteData[7:0]);
         end
+        // Memory signature dump
+`ifdef MEM_SIGNATURE
+        if(mailbox_write && (WriteData[7:0] == 8'hFF || WriteData[7:0] == 8'h01)) begin
+            dump_signature(lmem.mem);
+        end
+`endif
         // End Of test monitor
         if(mailbox_write && WriteData[7:0] == 8'hff) begin
             $display("TEST_PASSED");
@@ -1170,6 +1179,56 @@ function int get_iccm_bank(input[31:0] addr,  output int bank_idx);
     return int'( addr[5:2]);
 `endif
 endfunction
+
+`ifdef MEM_SIGNATURE
+task dump_signature (input bit[7:0] mem[bit[31:0]]);
+    integer fp, i;
+
+    $display("Dumping memory signature...");
+    fp = $fopen("veer.signature", "w");
+    for (i=`MEM_SIGNATURE_BEGIN; i<`MEM_SIGNATURE_END; i=i+4) begin
+
+        // From DCCM
+`ifdef RV_DCCM_ENABLE
+        if (i >= `RV_DCCM_SADR && i < `RV_DCCM_EADR) begin
+            bit[38:0] data;
+            int bank, indx;
+            bank = get_dccm_bank(i, indx);
+
+            case (bank)
+            0: data = `DRAM(0)[indx];
+            1: data = `DRAM(1)[indx];
+            `ifdef RV_DCCM_NUM_BANKS_4
+            2: data = `DRAM(2)[indx];
+            3: data = `DRAM(3)[indx];
+            `endif
+            `ifdef RV_DCCM_NUM_BANKS_8
+            2: data = `DRAM(2)[indx];
+            3: data = `DRAM(3)[indx];
+            4: data = `DRAM(4)[indx];
+            5: data = `DRAM(5)[indx];
+            6: data = `DRAM(6)[indx];
+            7: data = `DRAM(7)[indx];
+            `endif
+            endcase
+
+            $fwrite(fp, "%08X\n", data[31:0]);
+        end else
+`endif
+        // From RAM
+        begin
+            $fwrite(fp, "%02X%02X%02X%02X\n",
+                mem[i+3],
+                mem[i+2],
+                mem[i+1],
+                mem[i+0]
+            );
+        end
+    end
+
+    $fclose(fp);
+endtask
+`endif
 
 /* verilator lint_off CASEINCOMPLETE */
 `include "dasm.svi"

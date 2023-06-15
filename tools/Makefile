@@ -94,7 +94,7 @@ all: clean verilator
 
 clean:
 	rm -rf *.log *.s *.hex *.dis *.tbl irun* vcs* simv* *.map snapshots veer* \
-	verilator* *.exe obj* *.o ucli.key vc_hdrs.h csrc *.csv work\
+	verilator* *.exe *.elf obj* *.o ucli.key vc_hdrs.h csrc *.csv work\
 	dataset.asdb  library.cfg vsimsa.cfg  riviera-build wave.asdb
 
 
@@ -105,17 +105,17 @@ clean:
 ${BUILD_DIR}/defines.h:
 	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/veer.config -target=$(target) $(CONF_PARAMS)
 
-verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h test_tb_top.cpp
+verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h signature.vh test_tb_top.cpp
 	echo '`undef RV_ASSERT_ON' >> ${BUILD_DIR}/common_defines.vh
 	$(VERILATOR)  --cc -CFLAGS ${CFLAGS} $(defines) \
 	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist \
-	  -Wno-WIDTH -Wno-UNOPTFLAT ${TBFILES} --top-module tb_top \
+	  -Wno-WIDTH -Wno-UNOPTFLAT -Wno-IMPLICITSTATIC ${TBFILES} --top-module tb_top \
 	  -exe test_tb_top.cpp --autoflush $(VERILATOR_DEBUG)
 	cp ${RV_ROOT}/testbench/test_tb_top.cpp obj_dir/
 	$(MAKE) -j -e -C obj_dir/ -f Vtb_top.mk $(VERILATOR_MAKE_FLAGS)
 	touch verilator-build
 
-vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
+vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h signature.vh
 	$(VCS) -full64 -assert svaext -sverilog +define+RV_OPENSOURCE \
 	  +error+500 +incdir+${RV_ROOT}/design/lib \
 	  +incdir+${RV_ROOT}/design/include ${BUILD_DIR}/common_defines.vh \
@@ -123,7 +123,7 @@ vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	  -f ${RV_ROOT}/testbench/flist ${TBFILES} -l vcs.log
 	touch vcs-build
 
-irun-build: ${TBFILES} ${BUILD_DIR}/defines.h
+irun-build: ${TBFILES} ${BUILD_DIR}/defines.h signature.vh
 	$(IRUN) -64bit -elaborate $(IRUN_DEBUG) -q -sv -sysv  -nowarn CUVIHR \
 	  -xmlibdirpath . -xmlibdirname veer.build \
 	  -incdir ${RV_ROOT}/design/lib -incdir ${RV_ROOT}/design/include \
@@ -132,7 +132,7 @@ irun-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	  -I${RV_ROOT}/testbench -elaborate  -snapshot ${snapshot} $(profile)
 	touch irun-build
 
-riviera-build: ${TBFILES} ${BUILD_DIR}/defines.h
+riviera-build: ${TBFILES} ${BUILD_DIR}/defines.h signature.vh
 	vlib work
 	vlog -work work \
 		+incdir+${RV_ROOT}/design/lib \
@@ -181,18 +181,34 @@ program.hex: picolibc
 	@echo Building $(TEST) via $(TEST_DIR)/$(TEST).makefile
 	$(MAKE) -f $(TEST_DIR)/$(TEST).makefile
 else
-program.hex: picolibc $(OFILES) $(LINK)
+
+$(TEST).elf: picolibc $(OFILES) $(LINK)
 	@echo Building $(TEST)
-	$(GCC_PREFIX)-gcc $(ABI) --verbose -Wl,-Map=$(TEST).map -T$(LINK) --specs=$(PICOLIBC_DIR)/picolibc.specs $(TEST_LIBS) -nostartfiles $(OFILES) -o $(TEST).exe
-	$(GCC_PREFIX)-objcopy -O verilog  $(TEST).exe program.hex
-	$(GCC_PREFIX)-objdump -S  $(TEST).exe > $(TEST).dis
+	$(GCC_PREFIX)-gcc $(ABI) --verbose -Wl,-Map=$(TEST).map -T$(LINK) --specs=$(PICOLIBC_DIR)/picolibc.specs $(TEST_LIBS) -nostartfiles $(OFILES) -o $(TEST).elf
 	@echo Completed building $(TEST)
 
+program.hex: $(TEST).elf
+	$(GCC_PREFIX)-objcopy -O verilog $< $@
+	$(GCC_PREFIX)-objdump -S $< > $(basename $@).dis
+
+signature.vh: $(TEST).elf
+	$(GCC_PREFIX)-nm -B -n $< > $(basename $<).sym
+	# FIXME: Assuming here that either begin_signature or end_signature implies
+	# that both symbols are present.
+	grep -E "(begin|end)_signature" $(basename $<).sym >/dev/null 2>&1; \
+	if [ $$? -eq 0 ]; then \
+		echo "\`define MEM_SIGNATURE       1" >$@; \
+		echo -n "\`define MEM_SIGNATURE_BEGIN 32'h" >>$@; \
+		cat $(basename $<).sym | grep "begin_signature" | cut -d\  -f 1 >>$@; \
+		echo -n "\`define MEM_SIGNATURE_END   32'h" >>signature.vh; \
+		cat $(basename $<).sym | grep "end_signature"   | cut -d\  -f 1 >>$@; \
+	else \
+		echo "" >$@; \
+	fi
 
 %.o : %.s ${BUILD_DIR}/defines.h
 	$(GCC_PREFIX)-cpp -I${BUILD_DIR}  $<  > $*.cpp.s
 	$(GCC_PREFIX)-as ${ABI} $*.cpp.s -o $@
-
 
 %.o : %.c picolibc ${BUILD_DIR}/defines.h
 	$(GCC_PREFIX)-gcc ${includes} --specs=$(PICOLIBC_DIR)/picolibc.specs ${TEST_CFLAGS} -DCOMPILER_FLAGS="\"${TEST_CFLAGS}\"" ${ABI} -c $< -o $@

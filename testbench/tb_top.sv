@@ -14,16 +14,20 @@
 // limitations under the License.
 //
 
-`include "signature.vh"
-
 `ifndef VERILATOR
 module tb_top;
 `else
-module tb_top ( input bit core_clk );
+module tb_top (
+    input bit                   core_clk,
+    input bit [31:0]            mem_signature_begin,
+    input bit [31:0]            mem_signature_end
+);
 `endif
 
 `ifndef VERILATOR
     bit                         core_clk;
+    bit          [31:0]         mem_signature_begin = 32'd0; // TODO:
+    bit          [31:0]         mem_signature_end   = 32'd0;
 `endif
     logic                       rst_l;
     logic                       porst_l;
@@ -342,11 +346,11 @@ module tb_top ( input bit core_clk );
             $write("%c", WriteData[7:0]);
         end
         // Memory signature dump
-`ifdef MEM_SIGNATURE
         if(mailbox_write && (WriteData[7:0] == 8'hFF || WriteData[7:0] == 8'h01)) begin
-            dump_signature(lmem.mem);
+            if (mem_signature_begin < mem_signature_end) begin
+                dump_signature();
+            end
         end
-`endif
         // End Of test monitor
         if(mailbox_write && WriteData[7:0] == 8'hff) begin
             $display("TEST_PASSED");
@@ -1180,13 +1184,16 @@ function int get_iccm_bank(input[31:0] addr,  output int bank_idx);
 `endif
 endfunction
 
-`ifdef MEM_SIGNATURE
-task dump_signature (input bit[7:0] mem[bit[31:0]]);
+task dump_signature ();
     integer fp, i;
 
-    $display("Dumping memory signature...");
+    $display("Dumping memory signature (0x%08X - 0x%08X)...",
+        mem_signature_begin,
+        mem_signature_end
+    );
+
     fp = $fopen("veer.signature", "w");
-    for (i=`MEM_SIGNATURE_BEGIN; i<`MEM_SIGNATURE_END; i=i+4) begin
+    for (i=mem_signature_begin; i<mem_signature_end; i=i+4) begin
 
         // From DCCM
 `ifdef RV_DCCM_ENABLE
@@ -1218,17 +1225,16 @@ task dump_signature (input bit[7:0] mem[bit[31:0]]);
         // From RAM
         begin
             $fwrite(fp, "%02X%02X%02X%02X\n",
-                mem[i+3],
-                mem[i+2],
-                mem[i+1],
-                mem[i+0]
+                lmem.mem[i+3],
+                lmem.mem[i+2],
+                lmem.mem[i+1],
+                lmem.mem[i+0]
             );
         end
     end
 
     $fclose(fp);
 endtask
-`endif
 
 /* verilator lint_off CASEINCOMPLETE */
 `include "dasm.svi"

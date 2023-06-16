@@ -36,6 +36,18 @@ int main(int argc, char** argv) {
 
   Vtb_top* tb = new Vtb_top;
 
+  // Setup memory signature range if provided. Look for the commandline option
+  // "--mem-signature <begin> <end>". Addresses need to be hexadecimal
+  tb->mem_signature_begin = 0x00000000;
+  tb->mem_signature_end   = 0x00000000;
+
+  for (int i=1; i<argc; ++i) {
+    if (!strcmp(argv[i], "--mem-signature") && (i + 2) < argc) {
+      tb->mem_signature_begin = strtol(argv[i+1], nullptr, 16);
+      tb->mem_signature_end   = strtol(argv[i+2], nullptr, 16);
+    }
+  }
+
   // init trace dump
   VerilatedVcdC* tfp = NULL;
 

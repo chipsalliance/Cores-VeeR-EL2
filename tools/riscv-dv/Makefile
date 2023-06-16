@@ -49,7 +49,6 @@ $(WORK_DIR)/defines.h: | $(WORK_DIR)
 
 # Verilated testbench rules
 $(WORK_DIR)/verilator/Vtb_top.mk: $(WORK_DIR)/defines.h
-	touch $(WORK_DIR)/signature.sv # No need for signature dump, make a dummy file
 	$(VERILATOR) --cc -CFLAGS $(VERILATOR_CFLAGS) $(VERILATOR_INC) \
         $(HDL_FILES) -f $(RV_ROOT)/testbench/flist --top-module tb_top \
 		-exe $(VERILATOR_EXE) -Wno-WIDTH -Wno-UNOPTFLAT --autoflush \

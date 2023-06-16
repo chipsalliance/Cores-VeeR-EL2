@@ -1,0 +1,214 @@
+name: RISCOF tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+
+  verilator:
+    name: Build Verilator
+    runs-on: ubuntu-latest
+    env:
+      CCACHE_DIR: "/opt/veer-el2/.cache/"
+      DEBIAN_FRONTEND: "noninteractive"
+
+    steps:
+      - name: Install prerequisities
+        run: |
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+            git autoconf automake autotools-dev curl python3 python3-pip \
+            libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex \
+            texinfo gperf libtool patchutils bc zlib1g zlib1g-dev libexpat-dev \
+            ninja-build ccache libfl2 libfl-dev
+
+      - name: Create Cache Timestamp
+        id: cache_timestamp
+        uses: nanzm/get-time-action@v1.1
+        with:
+          format: 'YYYY-MM-DD-HH-mm-ss'
+
+      - name: Setup cache
+        uses: actions/cache@v2
+        timeout-minutes: 3
+        continue-on-error: true
+        with:
+          path: "/opt/veer-el2/.cache/"
+          key: cache_verilator_${{ steps.cache_timestamp.outputs.time }}
+          restore-keys: cache_verilator_
+
+      - name: Build Verilator
+        run: |
+          git clone https://github.com/verilator/verilator
+          pushd verilator
+            git checkout v5.002
+            autoconf
+            ./configure --prefix=/opt/verilator
+            make -j `nproc`
+            make install
+          popd
+          cd /opt && tar -czvf verilator.tar.gz verilator/
+
+      - name: Store Verilator binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: verilator
+          path: /opt/*.tar.gz
+          retention-days: 1
+
+  spike:
+    name: Build Spike ISS
+    runs-on: ubuntu-latest
+    env:
+      CCACHE_DIR: "/opt/veer-el2/.cache/"
+      DEBIAN_FRONTEND: "noninteractive"
+
+    steps:
+      - name: Install prerequisities
+        run: |
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+            git build-essential cmake ccache device-tree-compiler
+
+      - name: Create Cache Timestamp
+        id: cache_timestamp
+        uses: nanzm/get-time-action@v1.1
+        with:
+          format: 'YYYY-MM-DD-HH-mm-ss'
+
+      - name: Setup cache
+        uses: actions/cache@v2
+        timeout-minutes: 3
+        continue-on-error: true
+        with:
+          path: "/opt/veer-el2/.cache/"
+          key: cache_spike_${{ steps.cache_timestamp.outputs.time }}
+          restore-keys: cache_spike_
+
+      - name: Build Spike
+        run: |
+          git clone https://github.com/riscv-software-src/riscv-isa-sim spike
+          export CC="ccache gcc"
+          export CXX="ccache g++"
+          pushd spike
+            git checkout d70ea67d
+            mkdir build
+            cd build
+            ../configure --prefix=/opt/spike
+            make -j`nproc`
+            make install
+          popd
+          rm -rf /opt/spike/include # Remove include and lib to save space
+          rm -rf /opt/spike/lib
+          cd /opt && tar -czvf spike.tar.gz spike/
+
+      - name: Store Spike binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: spike
+          path: /opt/*.tar.gz
+          retention-days: 1
+
+  tests:
+    name: Run RISCOF tests
+    runs-on: ubuntu-latest
+    needs: [verilator, spike]
+    env:
+      CCACHE_DIR: "/opt/veer-el2/.cache/"
+      DEBIAN_FRONTEND: "noninteractive"
+
+    steps:
+      - name: Install utils
+        run: |
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+            git ccache python3-minimal python3-pip device-tree-compiler \
+            gcc-riscv64-unknown-elf cpanminus build-essential ninja-build
+          sudo cpanm Bit::Vector
+
+      - name: Download Verilator binaries
+        uses: actions/download-artifact@v3
+        with:
+          name: verilator
+          path: /opt
+
+      - name: Download Spike binaries
+        uses: actions/download-artifact@v3
+        with:
+          name: spike
+          path: /opt
+
+      - name: Unpack binaries
+        run: |
+          pushd /opt
+            tar -zxvf verilator.tar.gz
+            tar -zxvf spike.tar.gz
+          popd
+
+      - name: Create Cache Timestamp
+        id: cache_timestamp
+        uses: nanzm/get-time-action@v1.1
+        with:
+          format: 'YYYY-MM-DD-HH-mm-ss'
+
+      - name: Setup cache
+        uses: actions/cache@v2
+        timeout-minutes: 3
+        continue-on-error: true
+        with:
+          path: "/opt/veer-el2/.cache/"
+          key: cache_riscof_tests_${{ steps.cache_timestamp.outputs.time }}
+          restore-keys: cache_riscof_tests_
+
+      - name: Setup repository
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install RISCOF
+        run: |
+          pip3 install git+https://github.com/riscv/riscof@a25e315
+
+      - name: Clone tests
+        run: |
+          mkdir -p riscof
+          pushd riscof
+            riscof --verbose info arch-test --clone
+            # FIXME: It seems impossible to turn off Zicsr extension. A
+            # temporary solution is to remove the tests.
+            rm -rf riscv-arch-test/riscv-test-suite/rv32i_m/privilege/
+          popd
+
+      - name: Configure RISCOF
+        run: |
+          pushd riscof
+            # Copy RISCOF configuration
+            cp ../tools/riscof/config.ini ./
+            cp -r ../tools/riscof/spike ./
+            cp -r ../tools/riscof/veer ./
+            # Build the test list
+            riscof testlist --config=config.ini --suite=riscv-arch-test/riscv-test-suite/ --env=riscv-arch-test/riscv-test-suite/env
+          popd
+
+      - name: Build VeeR model
+        run: |
+          export PATH=/opt/verilator/bin:$PATH
+          export RV_ROOT=`pwd`
+          pushd riscof
+            $RV_ROOT/configs/veer.config
+            make -f $RV_ROOT/tools/Makefile verilator-build
+          popd
+
+      - name: Run tests
+        run: |
+          export PATH=/opt/spike/bin:$PATH
+          pushd riscof
+            riscof run --no-browser --config=config.ini --suite=riscv-arch-test/riscv-test-suite/ --env=riscv-arch-test/riscv-test-suite/env
+          popd
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: riscof-report
+          path: |
+            riscof/riscof_work/report.html
+            riscof/riscof_work/style.css

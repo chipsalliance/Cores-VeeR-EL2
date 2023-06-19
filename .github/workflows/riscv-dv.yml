@@ -24,12 +24,12 @@ jobs:
 
       - name: Create Cache Timestamp
         id: cache_timestamp
-        uses: nanzm/get-time-action@v1.1
+        uses: nanzm/get-time-action@v2.0
         with:
           format: 'YYYY-MM-DD-HH-mm-ss'
 
       - name: Setup cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         timeout-minutes: 3
         continue-on-error: true
         with:
@@ -69,12 +69,12 @@ jobs:
     steps:
       - name: Create Cache Timestamp
         id: cache_timestamp
-        uses: nanzm/get-time-action@v1.1
+        uses: nanzm/get-time-action@v2.0
         with:
           format: 'YYYY-MM-DD-HH-mm-ss'
 
       - name: Setup cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         timeout-minutes: 3
         continue-on-error: true
         with:
@@ -116,12 +116,12 @@ jobs:
 
       - name: Create Cache Timestamp
         id: cache_timestamp
-        uses: nanzm/get-time-action@v1.1
+        uses: nanzm/get-time-action@v2.0
         with:
           format: 'YYYY-MM-DD-HH-mm-ss'
 
       - name: Setup cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         timeout-minutes: 3
         continue-on-error: true
         with:
@@ -168,12 +168,12 @@ jobs:
 
       - name: Create Cache Timestamp
         id: cache_timestamp
-        uses: nanzm/get-time-action@v1.1
+        uses: nanzm/get-time-action@v2.0
         with:
           format: 'YYYY-MM-DD-HH-mm-ss'
 
       - name: Setup cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         timeout-minutes: 3
         continue-on-error: true
         with:
@@ -259,7 +259,7 @@ jobs:
           popd
 
       - name: Setup repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: recursive
           path: veer
@@ -270,12 +270,12 @@ jobs:
 
       - name: Create Cache Timestamp
         id: cache_timestamp
-        uses: nanzm/get-time-action@v1.1
+        uses: nanzm/get-time-action@v2.0
         with:
           format: 'YYYY-MM-DD-HH-mm-ss'
 
       - name: Setup cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         timeout-minutes: 3
         continue-on-error: true
         with:

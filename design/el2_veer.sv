@@ -32,7 +32,7 @@ import el2_pkg::*;
    input logic [31:1]           rst_vec,
    input logic                  nmi_int,
    input logic [31:1]           nmi_vec,
-   output logic                 core_rst_l,   // This is "rst_l & (scan_rst_l | scan_mode)"
+   output logic                 core_rst_l,   // This is "rst_l | dbg_rst_l"
 
    output logic                 active_l2clk,
    output logic                 free_l2clk,
@@ -380,8 +380,7 @@ import el2_pkg::*;
    input logic [pt.PIC_TOTAL_INT:1]           extintsrc_req,
    input logic                   timer_int,
    input logic                   soft_int,
-   input logic                   scan_mode,
-   input logic                   scan_rst_l
+   input logic                   scan_mode
 );
 
 
@@ -857,7 +856,8 @@ import el2_pkg::*;
 
    // -----------------   DEBUG END -----------------------------
 
-   assign core_rst_l = rst_l & (scan_rst_l | scan_mode);
+   assign core_rst_l = rst_l & (dbg_core_rst_l | scan_mode);
+
    // fetch
    el2_ifu #(.pt(pt)) ifu (
                             .clk(active_l2clk),

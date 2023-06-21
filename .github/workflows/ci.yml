@@ -22,9 +22,14 @@ jobs:
     needs: [Build-Verilator]
     uses: ./.github/workflows/test-verification.yml
 
+  Test-RISCV-DV:
+    name: Test-RISCV-DV
+    needs: [Build-Verilator]
+    uses: ./.github/workflows/test-riscv-dv.yml
+
   Report-Coverage:
     name: Report-Coverage
-    needs: [Test-Regression, Test-Verification]
+    needs: [Test-Regression, Test-Verification, Test-RISCV-DV]
     uses: ./.github/workflows/report-coverage.yml
 
   Report-Pytest:

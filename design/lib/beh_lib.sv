@@ -291,7 +291,7 @@ endmodule
 // special power flop for predict packet
 // format: { LEFT, RIGHT==31 }
 // LEFT # of bits will be done with rvdffe; RIGHT is enabled by LEFT[LSB] & en
-module rvdffppe #( parameter WIDTH=32 )
+module rvdffppe #( parameter integer WIDTH = 39 )
    (
      input  logic [WIDTH-1:0] din,
      input  logic             clk,
@@ -301,13 +301,13 @@ module rvdffppe #( parameter WIDTH=32 )
      output logic [WIDTH-1:0] dout
      );
 
-   localparam RIGHT = 31;
-   localparam LEFT = WIDTH - RIGHT;
+   localparam integer RIGHT = 31;
+   localparam integer LEFT  = WIDTH - RIGHT;
 
-   localparam LMSB = WIDTH-1;
-   localparam LLSB = LMSB-LEFT+1;
-   localparam RMSB = LLSB-1;
-   localparam RLSB = LLSB-RIGHT;
+   localparam integer LMSB  = WIDTH-1;
+   localparam integer LLSB  = LMSB-LEFT+1;
+   localparam integer RMSB  = LLSB-1;
+   localparam integer RLSB  = LLSB-RIGHT;
 
 
 `ifndef RV_PHYSICAL
@@ -748,7 +748,7 @@ module rvecc_decode_64  (
 
  endmodule // rvecc_decode_64
 
-
+`ifndef TECH_SPECIFIC_EC_RV_ICG
 module `TEC_RV_ICG
   (
    input logic SE, EN, CK,
@@ -773,6 +773,7 @@ module `TEC_RV_ICG
    assign Q = CK & en_ff;
 
 endmodule
+`endif
 
 `ifndef RV_FPGA_OPTIMIZE
 module rvclkhdr
@@ -786,7 +787,11 @@ module rvclkhdr
    logic   SE;
    assign       SE = 0;
 
+`ifdef TECH_SPECIFIC_EC_RV_ICG
+   `USER_EC_RV_ICG clkhdr ( .*, .EN(en), .CK(clk), .Q(l1clk));
+`else
    `TEC_RV_ICG clkhdr ( .*, .EN(en), .CK(clk), .Q(l1clk));
+`endif
 
 endmodule // rvclkhdr
 `endif
@@ -805,7 +810,11 @@ module rvoclkhdr
 `ifdef RV_FPGA_OPTIMIZE
    assign l1clk = clk;
 `else
-   `TEC_RV_ICG clkhdr ( .*, .EN(en), .CK(clk), .Q(l1clk));
+   `ifdef TECH_SPECIFIC_EC_RV_ICG
+      `USER_EC_RV_ICG clkhdr ( .*, .EN(en), .CK(clk), .Q(l1clk));
+   `else
+      `TEC_RV_ICG clkhdr ( .*, .EN(en), .CK(clk), .Q(l1clk));
+    `endif
 `endif
 
 endmodule

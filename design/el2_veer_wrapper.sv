@@ -330,7 +330,6 @@ import el2_pkg::*;
    input logic                             i_cpu_run_req, // Async restart req to CPU
    output logic                            o_cpu_run_ack, // Core response to run req
    input logic                             scan_mode,     // To enable scan mode
-   input logic                             scan_rst_l,
    input logic                             mbist_mode     // to enable mbist
 );
 

@@ -2,107 +2,40 @@ name: VeeR-EL2 CI
 
 on:
   push:
+    branches: ["main"]
   pull_request:
+  workflow_dispatch:
 
 jobs:
 
-  verilator:
-    name: Build Verilator
-    runs-on: ubuntu-latest
-    env:
-      CCACHE_DIR: "/opt/veer-el2/.cache/"
-      DEBIAN_FRONTEND: "noninteractive"
+  Build-Verilator:
+    name: Build-Verilator
+    uses: ./.github/workflows/build-verilator.yml
 
-    steps:
-      - name: Install prerequisities
-        run: |
-          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            git autoconf automake autotools-dev curl python3 python3-pip \
-            libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex \
-            texinfo gperf libtool patchutils bc zlib1g zlib1g-dev libexpat-dev \
-            ninja-build ccache libfl2 libfl-dev
+  Test-Regression:
+    name: Test-Regression
+    needs: [Build-Verilator]
+    uses: ./.github/workflows/test-regression.yml
 
-      - name: Create Cache Timestamp
-        id: cache_timestamp
-        uses: nanzm/get-time-action@v1.1
-        with:
-          format: 'YYYY-MM-DD-HH-mm-ss'
+  Test-Verification:
+    name: Test-Verification
+    needs: [Build-Verilator]
+    uses: ./.github/workflows/test-verification.yml
 
-      - name: Setup cache
-        uses: actions/cache@v2
-        timeout-minutes: 3
-        continue-on-error: true
-        with:
-          path: "/opt/veer-el2/.cache/"
-          key: cache_${{ steps.cache_timestamp.outputs.time }}
-          restore-keys: cache_
+  Report-Coverage:
+    name: Report-Coverage
+    needs: [Test-Regression, Test-Verification]
+    uses: ./.github/workflows/report-coverage.yml
 
-      - name: Build Verilator
-        run: |
-          git clone https://github.com/verilator/verilator
-          pushd verilator
-            git checkout v5.002
-            autoconf
-            ./configure --prefix=/opt/verilator
-            make -j `nproc`
-            make install
-          popd
-          cd /opt && tar -czvf verilator.tar.gz verilator/
+  Report-Pytest:
+    name: Report-Pytest
+    needs: [Test-Verification]
+    uses: ./.github/workflows/report-pytest.yml
 
-      - name: Store Verilator binaries
-        uses: actions/upload-artifact@v3
-        with:
-          name: verilator
-          path: /opt/*.tar.gz
-          retention-days: 1
-
-  tests:
-    name: Regression tests
-    runs-on: ubuntu-latest
-    needs: verilator
-    env:
-      DEBIAN_FRONTEND: "noninteractive"
-      TESTS: "hello_world hello_world_dccm hello_world_iccm cmark cmark_dccm cmark_iccm dhry"
-
-    steps:
-      - name: Install utils
-        run: |
-          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            git python3 python3-pip build-essential ninja-build cpanminus ccache \
-            gcc-riscv64-unknown-elf
-          sudo cpanm Bit::Vector
-          pip3 install meson
-
-      - name: Download verilator binaries
-        uses: actions/download-artifact@v3
-        with:
-          name: verilator
-          path: /opt
-
-      - name: Unpack verilator binaries
-        run: |
-          cd /opt && tar -zxvf verilator.tar.gz 
-
-      - name: Setup repository
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-          path: Caliptra
- 
-      - name: Setup repository
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Run tests
-        run: |
-          export PATH=/opt/verilator/bin:$PATH
-          export RV_ROOT=`pwd`
-          bash .github/scripts/run_tests.sh
-
-      - name: Pack artifacts
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: results
-          path: ./results/
+  Publish-to-GH-Pages:
+    permissions:
+      actions: write
+      contents: write
+    name: Publish-to-GH-Pages
+    needs: [Report-Coverage, Report-Pytest]
+    uses: ./.github/workflows/publish-webpage.yml

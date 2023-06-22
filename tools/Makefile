@@ -161,7 +161,16 @@ riviera-build: ${TBFILES} ${BUILD_DIR}/defines.h
 ############ TEST Simulation ###############################
 
 verilator: program.hex verilator-build
-	./obj_dir/Vtb_top
+	# FIXME: Assuming here that either begin_signature or end_signature implies
+	# that both symbols are present.
+	grep -E "(begin|end)_signature" $(TEST).sym >/dev/null 2>&1; \
+	if [ $$? -eq 0 ]; then \
+		BEG=`grep "begin_signature" $(TEST).sym | cut -d\  -f 1`;\
+		END=`grep "end_signature"   $(TEST).sym | cut -d\  -f 1`;\
+		./obj_dir/Vtb_top --mem-signature $${BEG} $${END}; \
+	else \
+		./obj_dir/Vtb_top; \
+	fi
 
 irun: program.hex irun-build
 	$(IRUN) -64bit -abvglobalfailurelimit 1 +lic_queue -licqueue \
@@ -200,6 +209,7 @@ program.hex: picolibc $(OFILES) ${BUILD_DIR}/defines.h
 	$(GCC_PREFIX)-gcc $(ABI) --verbose -Wl,-Map=$(TEST).map -T$(LINK) --specs=$(PICOLIBC_DIR)/picolibc.specs $(TEST_LIBS) -nostartfiles $(OFILES) -o $(TEST).exe
 	$(GCC_PREFIX)-objcopy -O verilog  $(TEST).exe program.hex
 	$(GCC_PREFIX)-objdump -S  $(TEST).exe > $(TEST).dis
+	$(GCC_PREFIX)-nm -B -n $(TEST).exe > $(TEST).sym
 	@echo Completed building $(TEST)
 
 

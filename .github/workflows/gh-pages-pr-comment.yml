@@ -1,0 +1,42 @@
+name: GH-Pages PR Comment
+
+on:
+  workflow_run:
+    workflows: ["VeeR-EL2 CI"]
+    types:
+      - completed
+
+env:
+  WEB_URL: 'https://antmicro.github.io/free-ants/gha-pages/public/'
+
+jobs:
+  comment:
+    name: PR Comment
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    if: ${{ github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success' }}
+    steps:
+
+      - name: Download artifact
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: pr_number
+          path: ./
+          run_id: ${{ github.event.workflow_run.id }}
+
+      - name: Extract PR number
+        id: PR
+        run: |
+          cat pr_number.txt | tee "$GITHUB_OUTPUT"
+
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: ${{ steps.PR.outputs.number }},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Deploying reports to ${{ env.WEB_URL }}/${{ steps.PR.outputs.number }}'
+            })

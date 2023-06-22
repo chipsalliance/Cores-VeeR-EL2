@@ -1,0 +1,31 @@
+name: Report Pytest
+
+on:
+  workflow_call:
+
+jobs:
+  report-html:
+    name: Report html
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup repository
+        uses: actions/checkout@v3
+
+      - name: Download html reports
+        uses: actions/download-artifact@v3
+        with:
+          name: verification_tests_html_data
+          path: ./
+
+      - name: Create html dashboard
+        run: |
+          .github/scripts/create_verification_dashboard.sh
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: verification_dashboard
+          path: |
+            ./verification_dashboard

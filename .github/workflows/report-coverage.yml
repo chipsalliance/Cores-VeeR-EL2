@@ -1,0 +1,61 @@
+name: Coverage report
+
+on:
+  workflow_call:
+
+jobs:
+
+  coverage-report:
+    name: Coverage report
+    runs-on: ubuntu-latest
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+            git cpanminus
+          sudo cpanm Capture::Tiny DateTime DateTime::Format::W3CDTF Devel::Cover \
+            Digest::MD5 File::Spec JSON::XS Memory::Process Time::HiRes Bit::Vector
+
+      - name: Setup repository
+        uses: actions/checkout@v3
+
+        # This step is needed to have the same VeeR codebase as used in tests
+      - name: Configure VeeR
+        run: |
+          export RV_ROOT=`pwd`
+          make defines.h -f $RV_ROOT/tools/Makefile
+
+      - name: Setup lcov
+        run: |
+          git clone https://github.com/linux-test-project/lcov
+          pushd lcov
+            git checkout v1.16
+            echo "LCOV_PATH=`realpath bin`" >> "$GITHUB_ENV"
+          popd
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: regression_tests_coverage_data
+          path: ./
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: verification_tests_coverage_data
+          path: ./
+
+      - name: Generate reports
+        run: |
+          export PATH=${{ env.LCOV_PATH }}:${PATH}
+          bash .github/scripts/gen_coverage_reports.sh
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage_report
+          path: ./report

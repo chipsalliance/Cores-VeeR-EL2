@@ -45,6 +45,20 @@ TEST = hello_world
 TEST_DIR = ${TBDIR}/asm
 HEX_DIR = ${TBDIR}/hex
 
+# Coverage reporting
+# TODO: Set flags for other tools here as well
+ifeq ("$(COVERAGE)", "all")
+    VERILATOR_COVERAGE = --coverage
+else ifeq ("$(COVERAGE)", "branch")
+    VERILATOR_COVERAGE = --coverage-line
+else ifeq ("$(COVERAGE)", "toggle")
+    VERILATOR_COVERAGE = --coverage-toggle
+else ifeq ("$(COVERAGE)", "functional")
+    VERILATOR_COVERAGE = --coverage-user
+else ifneq ("$(COVERAGE)", "")
+    $(error Unknown COVERAGE value '$(COVERAGE)')
+endif
+
 # Determine test directory
 ifneq (,$(wildcard $(TBDIR)/tests/$(TEST)))
   TEST_DIR = $(TBDIR)/tests/$(TEST)
@@ -82,7 +96,7 @@ includes = -I${BUILD_DIR}
 
 # CFLAGS for verilator generated Makefiles. Without -std=c++11 it
 # complains for `auto` variables
-CFLAGS += "-std=c++11"
+CFLAGS += -std=c++11
 
 # Optimization for better performance; alternative is nothing for
 # slower runtime (faster compiles) -O2 for faster runtime (slower
@@ -109,10 +123,10 @@ verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h test_tb_top.cpp
 	echo '`undef RV_ASSERT_ON' >> ${BUILD_DIR}/common_defines.vh
 	$(VERILATOR)  --cc -CFLAGS ${CFLAGS} $(defines) \
 	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist \
-	  -Wno-WIDTH -Wno-UNOPTFLAT ${TBFILES} --top-module tb_top \
-	  -exe test_tb_top.cpp --autoflush $(VERILATOR_DEBUG)
+	  -Wno-WIDTH -Wno-UNOPTFLAT -Wno-IMPLICITSTATIC ${TBFILES} --top-module tb_top \
+	  -exe test_tb_top.cpp --autoflush $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE)
 	cp ${RV_ROOT}/testbench/test_tb_top.cpp obj_dir/
-	$(MAKE) -j -e -C obj_dir/ -f Vtb_top.mk $(VERILATOR_MAKE_FLAGS)
+	$(MAKE) -e -C obj_dir/ -f Vtb_top.mk $(VERILATOR_MAKE_FLAGS)
 	touch verilator-build
 
 vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
@@ -181,7 +195,7 @@ program.hex: picolibc
 	@echo Building $(TEST) via $(TEST_DIR)/$(TEST).makefile
 	$(MAKE) -f $(TEST_DIR)/$(TEST).makefile
 else
-program.hex: picolibc $(OFILES) $(LINK)
+program.hex: picolibc $(OFILES) ${BUILD_DIR}/defines.h
 	@echo Building $(TEST)
 	$(GCC_PREFIX)-gcc $(ABI) --verbose -Wl,-Map=$(TEST).map -T$(LINK) --specs=$(PICOLIBC_DIR)/picolibc.specs $(TEST_LIBS) -nostartfiles $(OFILES) -o $(TEST).exe
 	$(GCC_PREFIX)-objcopy -O verilog  $(TEST).exe program.hex

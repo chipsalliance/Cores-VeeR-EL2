@@ -59,6 +59,11 @@ int main(int argc, char** argv) {
   tfp->close();
 #endif
 
+  // Write coverage data
+#if VM_COVERAGE
+  Verilated::threadContextp()->coveragep()->write("coverage.dat");
+#endif
+
   std::cout << "\nVerilatorTB: End of sim" << std::endl;
   exit(EXIT_SUCCESS);
 

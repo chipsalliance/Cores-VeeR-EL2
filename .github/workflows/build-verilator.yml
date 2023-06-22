@@ -1,8 +1,7 @@
-name: Verilator Nightly Build
+name: Verilator Build
 
 on:
-  schedule:
-    - cron: "0 1 * * *"
+  workflow_call:
 
 jobs:
   verilator:
@@ -12,12 +11,33 @@ jobs:
       matrix:
         VERILATOR_VERSION: [v5.010]
     env:
-      CCACHE_DIR: "/opt/verilator_cache/.cache/"
       TOOL_NAME: verilator
       DEBIAN_FRONTEND: "noninteractive"
 
     steps:
+      - name: Setup Cache Metadata
+        id: cache_metadata
+        run: |
+          cache_date=$(date +"%Y_%m_%d")
+          cache_name=cache_${{ env.TOOL_NAME }}_${{ matrix.VERILATOR_VERSION }}
+          echo "Cache date: "$cache_date
+          echo "Cache name: "$cache_name
+          echo "cache_date=$cache_date" >> "$GITHUB_ENV"
+          echo "cache_name=$cache_name" >> "$GITHUB_ENV"
+
+      - name: Setup cache
+        uses: actions/cache@v3
+        id: cache
+        timeout-minutes: 3
+        with:
+          path: |
+            /opt/verilator
+            /opt/verilator/.cache
+          key: ${{ env.cache_name }}_${{ env.cache_date }}
+          restore-keys: ${{ env.cache_name }}_
+
       - name: Install prerequisities
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
         run: |
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
           autoconf automake autotools-dev \
@@ -33,32 +53,11 @@ jobs:
           texinfo \
           zlib1g zlib1g-dev
 
-      - name: Setup Cache Metadata
-        id: cache_metadata
-        run: |
-          cache_date=$(date +"%Y_%m_%d")
-          cache_name=cache_${{ env.TOOL_NAME }}_${{ matrix.VERILATOR_VERSION }}_$cache_date
-          echo "Cache date: "$cache_date
-          echo "Cache name: "$cache_name
-          ccache_dir=$(ccache --show-config | grep cache_dir | awk '{print $4}')
-          echo "Ccache dir=$ccache_dir"
-          echo "cache_date=$cache_date" >> "$GITHUB_ENV"
-          echo "cache_name=$cache_name" >> "$GITHUB_ENV"
-          # echo "ccache_dir=$ccache_dir" >> "$GITHUB_ENV"
-
-      - name: Setup cache
-        uses: actions/cache@v3
-        id: cache
-        timeout-minutes: 3
-        with:
-          path: |
-            /opt/verilator
-            ${{ env.CCACHE_DIR }}
-          key: ${{ env.cache_name }}
-
       - name: Build Verilator
         if: ${{ steps.cache.outputs.cache-hit != 'true' }}
         run: |
+          export CCACHE_DIR=/opt/verilator/.cache
+          ccache --show-config | grep cache_dir
           git clone https://github.com/verilator/verilator
           pushd verilator
             git checkout ${{ matrix.VERILATOR_VERSION }}

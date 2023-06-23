@@ -5,62 +5,9 @@ on:
 
 jobs:
 
-  spike:
-    name: Build Spike ISS
-    runs-on: ubuntu-latest
-    env:
-      CCACHE_DIR: "/opt/veer-el2/.cache/"
-      DEBIAN_FRONTEND: "noninteractive"
-
-    steps:
-      - name: Install prerequisities
-        run: |
-          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            git build-essential cmake ccache device-tree-compiler
-
-      - name: Create Cache Timestamp
-        id: cache_timestamp
-        uses: nanzm/get-time-action@v1.1
-        with:
-          format: 'YYYY-MM-DD-HH-mm-ss'
-
-      - name: Setup cache
-        uses: actions/cache@v2
-        timeout-minutes: 3
-        continue-on-error: true
-        with:
-          path: "/opt/veer-el2/.cache/"
-          key: cache_spike_${{ steps.cache_timestamp.outputs.time }}
-          restore-keys: cache_spike_
-
-      - name: Build Spike
-        run: |
-          git clone https://github.com/riscv-software-src/riscv-isa-sim spike
-          export CC="ccache gcc"
-          export CXX="ccache g++"
-          pushd spike
-            git checkout d70ea67d
-            mkdir build
-            cd build
-            ../configure --prefix=/opt/spike
-            make -j`nproc`
-            make install
-          popd
-          rm -rf /opt/spike/include # Remove include and lib to save space
-          rm -rf /opt/spike/lib
-          cd /opt && tar -czvf spike.tar.gz spike/
-
-      - name: Store Spike binaries
-        uses: actions/upload-artifact@v3
-        with:
-          name: spike
-          path: /opt/*.tar.gz
-          retention-days: 1
-
   tests:
     name: Run RISCOF tests
     runs-on: ubuntu-latest
-    needs: spike
     strategy:
       fail-fast: false
       matrix:
@@ -69,6 +16,7 @@ jobs:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscof/.cache/"
       VERILATOR_VERSION: v5.010
+      SPIKE_VERSION: d70ea67d
 
     steps:
       - name: Install utils
@@ -85,16 +33,20 @@ jobs:
           time=$(date +"%Y%m%d_%H%M%S_%N")
           cache_verilator_restore_key=cache_verilator_
           cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}
+          cache_spike_restore_key=cache_spike_
+          cache_spike_key=${cache_spike_restore_key}${{ env.SPIKE_VERSION }}
           cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
           cache_test_key=${cache_test_restore_key}${time}
           echo "date=$date" | tee -a "$GITHUB_ENV"
           echo "time=$time" | tee -a "$GITHUB_ENV"
           echo "cache_verilator_restore_key=$cache_verilator_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
+          echo "cache_spike_restore_key=$cache_spike_restore_key" | tee -a "$GITHUB_ENV"
+          echo "cache_spike_key=$cache_spike_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
 
-      - name: Restore verilator cache
+      - name: Restore Verilator cache
         id: cache-verilator-restore
         uses: actions/cache/restore@v3
         with:
@@ -104,6 +56,16 @@ jobs:
           key: ${{ env.cache_verilator_key }}
           restore-keys: ${{ env.cache_verilator_restore_key }}
 
+      - name: Restore Spike cache
+        id: cache-spike-restore
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            /opt/spike
+            /opt/spike/.cache
+          key: ${{ env.cache_spike_key }}
+          restore-keys: ${{ env.cache_spike_restore_key }}
+
       - name: Setup tests cache
         uses: actions/cache@v3
         id: cache-test-setup
@@ -112,18 +74,6 @@ jobs:
             ${{ env.CCACHE_DIR }}
           key: ${{ env.cache_test_key }}
           restore-keys: ${{ env.cache_test_restore_key }}
-
-      - name: Download Spike binaries
-        uses: actions/download-artifact@v3
-        with:
-          name: spike
-          path: /opt
-
-      - name: Unpack binaries
-        run: |
-          pushd /opt
-            tar -zxvf spike.tar.gz
-          popd
 
       - name: Create Cache Timestamp
         id: cache_timestamp

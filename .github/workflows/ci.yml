@@ -12,6 +12,10 @@ jobs:
     name: Build-Verilator
     uses: ./.github/workflows/build-verilator.yml
 
+  Build-Spike:
+    name: Build-Spike
+    uses: ./.github/workflows/build-spike.yml
+
   Test-Regression:
     name: Test-Regression
     needs: [Build-Verilator]
@@ -24,12 +28,12 @@ jobs:
 
   Test-RISCV-DV:
     name: Test-RISCV-DV
-    needs: [Build-Verilator]
+    needs: [Build-Verilator, Build-Spike]
     uses: ./.github/workflows/test-riscv-dv.yml
 
   Test-RISCOF:
     name: Test-RISCOF
-    needs: [Build-Verilator]
+    needs: [Build-Verilator, Build-Spike]
     uses: ./.github/workflows/test-riscof.yml
 
   Report-Coverage:

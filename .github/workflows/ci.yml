@@ -27,9 +27,14 @@ jobs:
     needs: [Build-Verilator]
     uses: ./.github/workflows/test-riscv-dv.yml
 
+  Test-RISCOF:
+    name: Test-RISCOF
+    needs: [Build-Verilator]
+    uses: ./.github/workflows/test-riscof.yml
+
   Report-Coverage:
     name: Report-Coverage
-    needs: [Test-Regression, Test-Verification, Test-RISCV-DV]
+    needs: [Test-Regression, Test-Verification, Test-RISCV-DV, Test-RISCOF]
     uses: ./.github/workflows/report-coverage.yml
 
   Report-Pytest:

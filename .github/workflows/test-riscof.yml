@@ -1,8 +1,7 @@
 name: RISCOF tests
 
 on:
-  push:
-  pull_request:
+  workflow_call:
 
 jobs:
 
@@ -62,6 +61,10 @@ jobs:
     name: Run RISCOF tests
     runs-on: ubuntu-latest
     needs: spike
+    strategy:
+      fail-fast: false
+      matrix:
+        coverage: ["branch", "toggle"] #TODO: add functional coverage
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscof/.cache/"
@@ -173,15 +176,33 @@ jobs:
           export RV_ROOT=`pwd`
           pushd riscof
             $RV_ROOT/configs/veer.config
-            make -f $RV_ROOT/tools/Makefile verilator-build
+            make -f $RV_ROOT/tools/Makefile verilator-build COVERAGE=${{ matrix.coverage }}
           popd
 
-      - name: Run tests
+      - name: Run tests, collect coverage
         run: |
-          export PATH=/opt/spike/bin:$PATH
+          export PATH=/opt/verilator/bin:/opt/spike/bin:$PATH
           pushd riscof
             riscof run --no-browser --config=config.ini --suite=riscv-arch-test/riscv-test-suite/ --env=riscv-arch-test/riscv-test-suite/env
+            mkdir -p coverage
+            verilator_coverage -write ./coverage/coverage.dat `find ./riscof_work/ -type f -name "coverage.dat"`
           popd
+
+      - name: Prepare coverage data
+        run: |
+          export PATH=/opt/verilator/bin:$PATH
+          .github/scripts/convert_coverage_data.sh \
+            ${{ matrix.coverage }} \
+            riscof/coverage \
+            riscof/coverage \
+            coverage_riscof
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: riscof_coverage_data
+          path: riscof/coverage/*.info
 
       - name: Pack artifacts
         if: always()

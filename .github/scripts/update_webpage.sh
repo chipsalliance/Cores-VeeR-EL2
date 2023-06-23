@@ -16,11 +16,15 @@ replace_dir(){
     echo -e "${COLOR_WHITE}SRC_DIR = ${SRC_DIR}${COLOR_CLEAR}"
     echo -e "${COLOR_WHITE}DST_DIR = ${DST_DIR}${COLOR_CLEAR}"
 
-    # Replace existing pages with new ones
-    rm -rf ${DST_DIR}
-    mkdir -p ${DST_DIR}
-    # Copy the new one
-    cp -arf ${SRC_DIR}/* ${DST_DIR}
+    if [ -d "${SRC_DIR}" ]; then
+        # Replace existing pages with new ones
+        rm -rf ${DST_DIR}
+        mkdir -p ${DST_DIR}
+        # Copy the new one
+        cp -arf ${SRC_DIR}/* ${DST_DIR}
+    else
+        echo -e "${COLOR_YELLOW}Source directory not present!${COLOR_CLEAR}"
+    fi
 }
 
 generate_index(){

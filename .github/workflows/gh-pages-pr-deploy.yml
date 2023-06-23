@@ -7,7 +7,7 @@ on:
       - completed
 
 env:
-  ROOT_DIR: './public'
+  ROOT_DIR: './'
 
 jobs:
   deploy:
@@ -19,11 +19,6 @@ jobs:
       contents: write
     if: ${{ github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - name: Download deployment
-        uses: actions/checkout@v3
-        with:
-          ref: gh-pages
-          path: ${{ env.ROOT_DIR }}
 
       - name: Download artifact
         id: download-artifact

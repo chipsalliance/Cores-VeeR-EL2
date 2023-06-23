@@ -5,9 +5,6 @@ on:
     types:
       - closed
 
-env:
-  ROOT_DIR: './public'
-
 jobs:
   build:
     name: PR Remove
@@ -17,24 +14,13 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Setup repository
-        uses: actions/checkout@v3
-
-      - name: Download release
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: actions/checkout@v3
-        with:
-          ref: gh-pages
-          path: ${{ env.ROOT_DIR }}
 
       - name: Save PR number
-        if: github.event_name == 'pull_request' && github.event.action == 'closed'
         run: |
           echo "number=${{ github.event.number }}" >> delete_pr_number.txt
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
-        if: github.event_name == 'pull_request'
         with:
           name: delete_pr_number
           path: ./delete_pr_number.txt

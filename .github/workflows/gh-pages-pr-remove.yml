@@ -7,7 +7,7 @@ on:
       - completed
 
 env:
-  ROOT_DIR: './'
+  ROOT_DIR: './public'
 
 jobs:
   remove:
@@ -18,6 +18,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Setup repository
+        uses: actions/checkout@v3
+
       - name: Download deployment
         uses: actions/checkout@v3
         with:
@@ -36,10 +39,12 @@ jobs:
         id: PR
         run: |
           cat delete_pr_number.txt | tee "$GITHUB_OUTPUT"
+          rm -rf delete_pr_number.txt
 
-      - name: Remove data for closed PR
+      - name: Update the webpage
         run: |
           rm -rf ${{ env.ROOT_DIR }}/dev/${{ steps.PR.outputs.number }}
+          .github/scripts/update_webpage.sh ${{ github.ref_name }} ${{ github.event_name }} ${{ steps.PR.outputs.number }}
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3

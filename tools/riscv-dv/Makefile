@@ -19,6 +19,19 @@ VEER_CONF       = -set build_axi4 \
                   -set data_access_addr0=0x00000000 \
                   -set data_access_mask0=0x001fffff
 
+# Coverage reporting
+ifeq ("$(COVERAGE)", "all")
+    VERILATOR_COVERAGE = --coverage
+else ifeq ("$(COVERAGE)", "branch")
+    VERILATOR_COVERAGE = --coverage-line
+else ifeq ("$(COVERAGE)", "toggle")
+    VERILATOR_COVERAGE = --coverage-toggle
+else ifeq ("$(COVERAGE)", "functional")
+    VERILATOR_COVERAGE = --coverage-user
+else ifneq ("$(COVERAGE)", "")
+    $(error Unknown COVERAGE value '$(COVERAGE)')
+endif
+
 VERILATOR       = verilator
 VERILATOR_CFLAGS= "-std=c++11"
 VERILATOR_INC   = -I$(WORK_DIR) -I$(RV_ROOT)/testbench 
@@ -51,7 +64,8 @@ $(WORK_DIR)/defines.h: | $(WORK_DIR)
 $(WORK_DIR)/verilator/Vtb_top.mk: $(WORK_DIR)/defines.h
 	$(VERILATOR) --cc -CFLAGS $(VERILATOR_CFLAGS) $(VERILATOR_INC) \
         $(HDL_FILES) -f $(RV_ROOT)/testbench/flist --top-module tb_top \
-		-exe $(VERILATOR_EXE) -Wno-WIDTH -Wno-UNOPTFLAT --autoflush \
+		-exe $(VERILATOR_EXE) -Wno-WIDTH -Wno-UNOPTFLAT -Wno-IMPLICITSTATIC --autoflush \
+		$(VERILATOR_COVERAGE) \
 		-Mdir $(WORK_DIR)/verilator
 
 $(WORK_DIR)/verilator/Vtb_top: $(WORK_DIR)/verilator/Vtb_top.mk
@@ -83,6 +97,7 @@ $(SIM_DIR)/%.log: $(TEST_DIR)/asm_test/%.hex $(WORK_DIR)/verilator/Vtb_top
 	cp $< $(basename $@)/program.hex
 	cd $(basename $@) && $(abspath $(WORK_DIR)/verilator/Vtb_top)
 	mv $(basename $@)/exec.log $@
+	mv $(basename $@)/coverage.dat $(basename $@)-coverage.dat
 
 # Log conversion rules
 $(TEST_DIR)/spike_sim/%.csv: $(TEST_DIR)/spike_sim/%.log
@@ -105,6 +120,10 @@ $(TEST_DIR)/comp_%.log: $(TEST_DIR)/$(RISCV_DV_ISS)_sim/%.csv $(SIM_DIR)/%.csv
 		--in_order_mode 1 --log $@ --verbose 10 --mismatch_print_limit 20
 	tail -n 2 $@
 
+# Coverage data aggregation
+$(WORK_DIR)/coverage.dat:
+	verilator_coverage -write $@ `find $(SIM_DIR)/ -name "*coverage.dat"`
+
 run:
 	# Run RISC-V DV
 	$(MAKE) -f $(MAKEFILE) $(TEST_DIR)/generate.log
@@ -112,6 +131,8 @@ run:
 	find $(TEST_DIR)/ -name "sim_*.log" | sed 's/sim_/comp_/g' | xargs $(MAKE) -f $(MAKEFILE)
 	# Check for errors
 	for F in $(TEST_DIR)/comp_*.log; do grep "\[PASSED\]" $$F; if [ $$? -ne 0 ]; then exit 255; fi; done
+	# Aggregate coverage data
+	$(MAKE) $(WORK_DIR)/coverage.dat
 
 clean:
 	rm -rf $(TEST_DIR)

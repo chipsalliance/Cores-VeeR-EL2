@@ -48,6 +48,12 @@ jobs:
           name: verification_tests_coverage_data
           path: ./
 
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: riscv-dv_coverage_data
+          path: ./
+
       - name: Generate reports
         run: |
           export PATH=${{ env.LCOV_PATH }}:${PATH}

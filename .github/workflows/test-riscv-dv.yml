@@ -1,60 +1,9 @@
-name: RISC-V DV tests
+name: RISCV-DV tests
 
 on:
-  push:
-  pull_request:
+  workflow_call:
 
 jobs:
-
-  verilator:
-    name: Build Verilator
-    runs-on: ubuntu-latest
-    env:
-      CCACHE_DIR: "/opt/veer-el2/.cache/"
-      DEBIAN_FRONTEND: "noninteractive"
-
-    steps:
-      - name: Install prerequisities
-        run: |
-          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            git autoconf automake autotools-dev curl python3 python3-pip \
-            libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex \
-            texinfo gperf libtool patchutils bc zlib1g zlib1g-dev libexpat-dev \
-            ninja-build ccache libfl2 libfl-dev
-
-      - name: Create Cache Timestamp
-        id: cache_timestamp
-        uses: nanzm/get-time-action@v2.0
-        with:
-          format: 'YYYY-MM-DD-HH-mm-ss'
-
-      - name: Setup cache
-        uses: actions/cache@v3
-        timeout-minutes: 3
-        continue-on-error: true
-        with:
-          path: "/opt/veer-el2/.cache/"
-          key: cache_verilator_${{ steps.cache_timestamp.outputs.time }}
-          restore-keys: cache_verilator_
-
-      - name: Build Verilator
-        run: |
-          git clone https://github.com/verilator/verilator
-          pushd verilator
-            git checkout v5.002
-            autoconf
-            ./configure --prefix=/opt/verilator
-            make -j `nproc`
-            make install
-          popd
-          cd /opt && tar -czvf verilator.tar.gz verilator/
-
-      - name: Store Verilator binaries
-        uses: actions/upload-artifact@v3
-        with:
-          name: verilator
-          path: /opt/*.tar.gz
-          retention-days: 1
 
 #--------------#
 #    Renode
@@ -101,6 +50,9 @@ jobs:
           path: ${{ github.workspace }}/renode.tar.gz
           retention-days: 1
 
+#--------------#
+#    Spike
+#--------------#
   spike:
     name: Build Spike ISS
     runs-on: ubuntu-latest
@@ -153,6 +105,9 @@ jobs:
           path: /opt/*.tar.gz
           retention-days: 1
 
+#--------------#
+#    VeeR-ISS
+#--------------#
   veer-iss:
     name: Build VeeR-ISS
     runs-on: ubuntu-latest
@@ -201,10 +156,13 @@ jobs:
           path: /opt/*.tar.gz
           retention-days: 1
 
+#--------------#
+#    Tests
+#--------------#
   tests:
     name: Run RISC-V DV tests
     runs-on: ubuntu-latest
-    needs: [verilator, spike, veer-iss, renode]
+    needs: [spike, veer-iss, renode]
     strategy:
       fail-fast: false
       matrix:
@@ -214,8 +172,12 @@ jobs:
           - spike
           - whisper
           - renode
+        coverage: ["branch", "toggle"] #TODO: add functional coverage
+
     env:
       DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/riscv-dv/.cache/"
+      VERILATOR_VERSION: v5.010
 
     steps:
       - name: Install utils
@@ -225,11 +187,32 @@ jobs:
             libboost-all-dev gcc-riscv64-unknown-elf
           sudo cpanm Bit::Vector
 
-      - name: Download Verilator binaries
-        uses: actions/download-artifact@v3
+      - name: Setup Cache Metadata
+        id: cache_metadata
+        run: |
+          date=$(date +"%Y_%m_%d")
+          time=$(date +"%Y%m%d_%H%M%S_%N")
+          cache_verilator_restore_key=cache_verilator_
+          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}
+          cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
+          cache_test_key=${cache_test_restore_key}${time}
+
+          echo "date=$date" | tee -a "$GITHUB_ENV"
+          echo "time=$time" | tee -a "$GITHUB_ENV"
+          echo "cache_verilator_restore_key=$cache_verilator_restore_key" | tee -a "$GITHUB_ENV"
+          echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
+          echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
+          echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
+
+      - name: Restore verilator cache
+        id: cache-verilator-restore
+        uses: actions/cache/restore@v3
         with:
-          name: verilator
-          path: /opt
+          path: |
+            /opt/verilator
+            /opt/verilator/.cache
+          key: ${{ env.cache_verilator_key }}
+          restore-keys: ${{ env.cache_verilator_restore_key }}
 
       - name: Download Renode binaries
         uses: actions/download-artifact@v3
@@ -252,7 +235,6 @@ jobs:
       - name: Unpack binaries
         run: |
           pushd /opt
-            tar -zxvf verilator.tar.gz
             tar -zxvf spike.tar.gz
             tar -zxvf veer-iss.tar.gz
             tar -zxvf renode.tar.gz --strip-components=1
@@ -262,11 +244,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
-          path: veer
 
       - name: Install Python deps
         run: |
-          pip install -r veer/third_party/riscv-dv/requirements.txt
+          pip install -r third_party/riscv-dv/requirements.txt
 
       - name: Create Cache Timestamp
         id: cache_timestamp
@@ -287,26 +268,49 @@ jobs:
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export PATH=/opt/veer-iss:$PATH
-          export RV_ROOT=`realpath veer`
+          export RV_ROOT=`realpath .`
           export RISCV_GCC=riscv64-unknown-elf-gcc
           export RISCV_OBJCOPY=riscv64-unknown-elf-objcopy
           export SPIKE_PATH=/opt/spike/bin
           export WHISPER_ISS=/opt/veer-iss/whisper
           export RENODE_PATH=/opt/renode
+
+          echo "RV_ROOT=${RV_ROOT}" >> ${GITHUB_ENV}
+          echo "PATH=${PATH}"       >> ${GITHUB_ENV}
+
           ${RISCV_GCC} --version
 
-          pushd ${RV_ROOT}
-            cd tools/riscv-dv && make -j`nproc` \
+          pushd tools/riscv-dv
+            make -j`nproc` \
               RISCV_DV_TEST=${{ matrix.test }} \
               RISCV_DV_ISS=${{ matrix.iss }} \
               RISCV_DV_ITER=3 \
               RISCV_DV_SEED=999 \
+              COVERAGE=${{ matrix.coverage }} \
               run
           popd
+
+      - name: Prepare coverage data
+        run: |
+          mkdir -p coverage_riscv-dv_${{ matrix.test }}
+          mv ${RV_ROOT}/tools/riscv-dv/work/coverage.dat coverage_riscv-dv_${{ matrix.test }}/
+          echo "Prepared coverage data"
+          .github/scripts/convert_coverage_data.sh \
+              ${{ matrix.coverage }} \
+              coverage_riscv-dv_${{ matrix.test }} \
+              results coverage_riscv-dv_${{ matrix.test }}
+          echo "convert_coverage_data.sh exited with RET_CODE = "$?
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: riscv-dv_coverage_data
+          path: results/*.info
 
       - name: Pack artifacts
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: artifacts-${{ matrix.test }}-${{ matrix.iss }}
-          path: veer/tools/riscv-dv/work/test_*
+          path: tools/riscv-dv/work/test_*

@@ -7,7 +7,7 @@ on:
       - completed
 
 env:
-  ROOT_DIR: './public'
+  ROOT_DIR: './'
 
 jobs:
   remove:

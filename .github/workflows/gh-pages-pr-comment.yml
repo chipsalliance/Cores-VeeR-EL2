@@ -7,7 +7,7 @@ on:
       - completed
 
 env:
-  WEB_URL: 'https://antmicro.github.io/free-ants/gha-pages/public/'
+  WEB_URL: 'https://chipsalliance.github.io/Cores-VeeR-EL2/'
 
 jobs:
   comment:
@@ -38,5 +38,5 @@ jobs:
               issue_number: ${{ steps.PR.outputs.number }},
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Deploying reports to ${{ env.WEB_URL }}/${{ steps.PR.outputs.number }}'
+              body: 'Links to coverage and verification reports for this PR (#${{ steps.PR.outputs.number }}) are available at ${{ env.WEB_URL }}'
             })

@@ -7,11 +7,9 @@ jobs:
   verilator:
     name: Build Spike
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        TOOL_VERSION: [d70ea67d]
     env:
       TOOL_NAME: spike
+      TOOL_VERSION: d70ea67d
       DEBIAN_FRONTEND: "noninteractive"
 
     steps:
@@ -19,7 +17,7 @@ jobs:
         id: cache_metadata
         run: |
           cache_date=$(date +"%Y_%m_%d")
-          cache_name=cache_${{ env.TOOL_NAME }}_${{ matrix.TOOL_VERSION }}
+          cache_name=cache_${{ env.TOOL_NAME }}_${{ env.TOOL_VERSION }}
           echo "Cache date: "$cache_date
           echo "Cache name: "$cache_name
           echo "cache_date=$cache_date" >> "$GITHUB_ENV"
@@ -51,7 +49,7 @@ jobs:
           export CC="ccache gcc"
           export CXX="ccache g++"
           pushd spike
-            git checkout ${{ matrix.TOOL_VERSION }}
+            git checkout ${{ env.TOOL_VERSION }}
             mkdir build
             cd build
             ../configure --prefix=/opt/spike

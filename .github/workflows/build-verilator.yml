@@ -7,11 +7,9 @@ jobs:
   verilator:
     name: Build Verilator
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        VERILATOR_VERSION: [v5.010]
     env:
       TOOL_NAME: verilator
+      TOOL_VERSION: v5.010
       DEBIAN_FRONTEND: "noninteractive"
 
     steps:
@@ -19,7 +17,7 @@ jobs:
         id: cache_metadata
         run: |
           cache_date=$(date +"%Y_%m_%d")
-          cache_name=cache_${{ env.TOOL_NAME }}_${{ matrix.VERILATOR_VERSION }}
+          cache_name=cache_${{ env.TOOL_NAME }}_${{ env.TOOL_VERSION }}
           echo "Cache date: "$cache_date
           echo "Cache name: "$cache_name
           echo "cache_date=$cache_date" >> "$GITHUB_ENV"
@@ -60,7 +58,7 @@ jobs:
           ccache --show-config | grep cache_dir
           git clone https://github.com/verilator/verilator
           pushd verilator
-            git checkout ${{ matrix.VERILATOR_VERSION }}
+            git checkout ${{ env.TOOL_VERSION }}
             autoconf
             ./configure --prefix=/opt/verilator
             make -j `nproc`

@@ -1,16 +1,16 @@
 # Verification
 
-The verification directory contains [cocotb](https://github.com/cocotb/cocotb) tests and [pyuvm](https://github.com/pyuvm/pyuvm) tests
+The verification directory contains [pyuvm](https://github.com/pyuvm/pyuvm) tests, which rely on [cocotb](https://github.com/cocotb/cocotb) library.
 
 ## Setup
 
-In order to run the tests, one must clone the repository, create a python virtual environment and patch cocotb's verilator support file. Verilator is used as a backend simulator and must be present in the system.
+In order to run the tests, create a python virtual environment. Verilator is used as a backend simulator and must be present in the system.
 
 ### Clone repository
 
-Remember to set the `RV_ROOT` environment variable, which is required to generate a VeeR-EL2 Core configuration files.
+Remember to set the `RV_ROOT` environment variable, which is required to generate VeeR-EL2 Core configuration files.
 
-    git clone git@github.com:chipsalliance/Cores-VeeR-EL2.git
+    git clone --recurse-submodules git@github.com:chipsalliance/Cores-VeeR-EL2.git
     cd Cores-Veer-EL2
     export RV_ROOT=$(pwd)
 
@@ -21,50 +21,43 @@ Remember to set the `RV_ROOT` environment variable, which is required to generat
     source venv/bin/activate
     pip install -r requirements.txt
 
-### Patch cocotb
-
-Due to issues with Verilator's `--timing` options, the `cocotb/share/lib/verilator.cpp` must be patched. The `--timing` option is only required if the HDL code contains timing structures.
-
-TODO: update link to upstream when patch is merged
-
-    cd $RV_ROOT/third_party
-    git clone https://github.com/antmicro/cocotb
-    git checkout mczyz/verilator-patch-timing
-    pip install -e $RV_ROOT/third_party/cocotb
-
 ### Install Verilator
 
-Verification tests were run with Verilator-5.0.10. Installation instruction is avaialable in the Verilator's User Guide:
+Installation instructions are available in the Verilator's User Guide:
 
     https://veripool.org/guide/latest/install.html
 
 ## Tests
 
-All tests are wrapped in a pytest, which can be executed with:
+Each PyUVM test can be either run from a pytest wrapper or directly from a Makefile. The wrapper is placed to provide easier CI integration, HTML reports and Markdown summaries in job descriptions on GitHub. The Makefile execution may be more convenient during debugging.
 
-    python -m pytest -sv <test_name>
+### Example: `test_pyuvm`
 
-If you want to generate html reports, it is recommended to use:
+In `test_pyuvm` directory, a `Makefile` and a wrapper `test_pyuvm.py` are placed.
 
-    python -m pytest -v <test_name> --html=index.html
+    ./verification/
+    └── test_pyuvm
+        ├── Makefile
+        ├── test_pyuvm.py ⟵ pytest wrapper
+        └── test_irq
+           └── test_irq.py ⟵ PyUVM test
 
-If you want to generate a mardkown report, it is recommended to use:
+The pytest wrapper can be executed with a command:
 
-    python -m pytest -v <test_name> --md=test.md
+    python -m pytest -sv test_pyuvm.py
 
-### PyUVM
+If you need to run the test directly from the `Makefile`, please look for the decorator in the pytest wrapper to find valid `UVM_TEST` names:
 
-The PyUVM test uses Makefile located in the verification directory:
+    @pytest.mark.parametrize("UVM_TEST", ["test_irq.test_irq"])
 
-    cd $RV_ROOT/verification
-    UVM_TEST=<valid_test_name> make all
+The test can also be run directly from the Makefile:
 
-Also available targets are:
+    UVM_TEST=test_irq.test_irq make all
 
-    make clean
-    make verilator-pyuvm
+Note that HTML report can be produced with flag `--html=index.html` and a markdown report with `--md=test.md`
 
-Run all tests:
+## CI
 
-    python -m pytest -sv test.py
+PyUVM tests are run in CI with the following workflow:
 
+    .github/workflows/test-verification.yml

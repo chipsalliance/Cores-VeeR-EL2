@@ -33,8 +33,6 @@ output logic HRESP,
 output logic [63:0] HRDATA
 );
 
-parameter MAILBOX_ADDR = 32'hD0580000;
-
 logic write;
 logic [31:0] laddr, addr;
 logic [7:0] strb_lat;
@@ -49,13 +47,9 @@ bit iws_rand;
 bit ok;
 
 // Wires
-wire [63:0] WriteData = HWDATA;
 wire [7:0] strb =  HSIZE == 3'b000 ? 8'h1 << HADDR[2:0] :
                    HSIZE == 3'b001 ? 8'h3 << {HADDR[2:1],1'b0} :
                    HSIZE == 3'b010 ? 8'hf << {HADDR[2],2'b0} : 8'hff;
-
-
-wire mailbox_write = write && laddr==MAILBOX_ADDR;
 
 
 initial begin
@@ -176,12 +170,6 @@ parameter MEM_SIZE_DW = 8192;
 
 bit [7:0] mem [bit[31:0]];
 bit [63:0] memdata;
-wire [63:0] WriteData;
-wire mailbox_write;
-
-
-assign mailbox_write = awvalid && awaddr==MAILBOX_ADDR && rst_l;
-assign WriteData = wdata;
 
 always @ ( posedge aclk or negedge rst_l) begin
     if(!rst_l) begin

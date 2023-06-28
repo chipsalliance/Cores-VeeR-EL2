@@ -20,7 +20,8 @@ module tb_top;
 module tb_top (
     input bit                   core_clk,
     input bit [31:0]            mem_signature_begin,
-    input bit [31:0]            mem_signature_end
+    input bit [31:0]            mem_signature_end,
+    input bit [31:0]            mem_mailbox
 );
 `endif
 
@@ -28,6 +29,7 @@ module tb_top (
     bit                         core_clk;
     bit          [31:0]         mem_signature_begin = 32'd0; // TODO:
     bit          [31:0]         mem_signature_end   = 32'd0;
+    bit          [31:0]         mem_mailbox         = 32'hD0580000;
 `endif
     logic                       rst_l;
     logic                       porst_l;
@@ -90,6 +92,8 @@ module tb_top (
     logic                       o_cpu_run_ack;
 
     logic                       mailbox_write;
+    logic        [63:0]         mailbox_data;
+
     logic        [63:0]         dma_hrdata       ;
     logic        [63:0]         dma_hwdata       ;
     logic                       dma_hready       ;
@@ -320,14 +324,13 @@ module tb_top (
     wire                        lmem_axi_bready;
 
 `endif
-    wire[63:0] WriteData;
     string                      abi_reg[32]; // ABI register names
 
 `define DEC rvtop.veer.dec
 
-    assign mailbox_write = lmem.mailbox_write;
-    assign WriteData = lmem.WriteData;
-    assign mailbox_data_val = WriteData[7:0] > 8'h5 && WriteData[7:0] < 8'h7f;
+    assign mailbox_write    = lmem.awvalid && lmem.awaddr == mem_mailbox && rst_l;
+    assign mailbox_data     = lmem.wdata;
+    assign mailbox_data_val = mailbox_data[7:0] > 8'h5 && mailbox_data[7:0] < 8'h7f;
 
     parameter MAX_CYCLES = 2_000_000;
 
@@ -342,23 +345,23 @@ module tb_top (
         end
         // console Monitor
         if( mailbox_data_val & mailbox_write) begin
-            $fwrite(fd,"%c", WriteData[7:0]);
-            $write("%c", WriteData[7:0]);
+            $fwrite(fd,"%c", mailbox_data[7:0]);
+            $write("%c", mailbox_data[7:0]);
         end
         // Memory signature dump
-        if(mailbox_write && (WriteData[7:0] == 8'hFF || WriteData[7:0] == 8'h01)) begin
+        if(mailbox_write && (mailbox_data[7:0] == 8'hFF || mailbox_data[7:0] == 8'h01)) begin
             if (mem_signature_begin < mem_signature_end) begin
                 dump_signature();
             end
         end
         // End Of test monitor
-        if(mailbox_write && WriteData[7:0] == 8'hff) begin
+        if(mailbox_write && mailbox_data[7:0] == 8'hff) begin
             $display("TEST_PASSED");
             $display("\nFinished : minstret = %0d, mcycle = %0d", `DEC.tlu.minstretl[31:0],`DEC.tlu.mcyclel[31:0]);
             $display("See \"exec.log\" for execution trace with register updates..\n");
             $finish;
         end
-        else if(mailbox_write && WriteData[7:0] == 8'h1) begin
+        else if(mailbox_write && mailbox_data[7:0] == 8'h1) begin
             $display("TEST_FAILED");
             $finish;
         end

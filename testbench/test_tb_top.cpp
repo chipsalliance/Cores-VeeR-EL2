@@ -15,6 +15,7 @@
 //
 #include <stdlib.h>
 #include <iostream>
+#include <iomanip>
 #include <utility>
 #include <string>
 #include <fstream>
@@ -69,12 +70,15 @@ int main(int argc, char** argv) {
 
   tb->mem_signature_begin = 0x00000000;
   tb->mem_signature_end   = 0x00000000;
+  tb->mem_mailbox         = 0xD0580000;
+
+  std::map<std::string, uint64_t> symbols;
 
   // Setup memory signature range by looking up symbol names in the provided
   // symbol dump file
   for (int i=1; i<argc; ++i) {
     if (!strcmp(argv[i], "--symbols") && (i + 1) < argc) {
-      const auto symbols = load_symbols(argv[i+1]);
+      symbols = load_symbols(argv[i+1]);
 
       const auto beg = symbols.find("begin_signature");
       const auto end = symbols.find("end_signature");
@@ -93,6 +97,37 @@ int main(int argc, char** argv) {
       tb->mem_signature_end   = strtol(argv[i+2], nullptr, 16);
     }
   }
+
+  // Set mailbox address if provided. The commandline option is:
+  // "--mailbox-addr <address>"
+  for (int i=1; i<argc; ++i) {
+    if (!strcmp(argv[i], "--mailbox-addr") && (i + 1) < argc) {
+      tb->mem_mailbox = strtol(argv[i+1], nullptr, 16);
+    }
+  }
+
+  // Set mailbox address to the address of the given symbol name via:
+  // "--mailbox-sym <symbol name>"
+  for (int i=1; i<argc; ++i) {
+    if (!strcmp(argv[i], "--mailbox-sym") && (i + 1) < argc) {
+      const char* name = argv[i+1];
+      auto it = symbols.find(name);
+      if (it != symbols.end()) {
+        tb->mem_mailbox = it->second;
+      }
+    }
+  }
+
+  // Report memory addresses
+  std::cout << std::setfill('0');
+
+  std::cout << "mem_signature_begin = " << std::hex << std::setw(8) <<
+    std::uppercase << tb->mem_signature_begin << std::endl;
+  std::cout << "mem_signature_end   = " << std::hex << std::setw(8) <<
+    std::uppercase << tb->mem_signature_end   << std::endl;
+  std::cout << "mem_mailbox         = " << std::hex << std::setw(8) <<
+    std::uppercase << tb->mem_mailbox         << std::endl;
+  std::cout << std::flush;
 
   // init trace dump
   VerilatedVcdC* tfp = NULL;

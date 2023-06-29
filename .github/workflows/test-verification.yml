@@ -92,9 +92,12 @@ jobs:
         run: |
           pip3 install meson
           pip3 install -r $RV_ROOT/verification/requirements.txt
-
+          PYTEST_STYLE_SRC_DIR=${{ github.workspace }}/.github/scripts/pytest/
+          PYTEST_CSS=${PYTEST_STYLE_SRC_DIR}/css/styles.css
+          HTML_FILE=${{ matrix.test }}_${{ matrix.COVERAGE }}.html
           pushd ${TEST_PATH}
-            python -m pytest ${{ matrix.test }}.py -sv --coverage=${{ matrix.COVERAGE }} --html=${{ matrix.test }}_${{ matrix.COVERAGE }}.html --md=$GITHUB_STEP_SUMMARY
+            python -m pytest ${{ matrix.test }}.py -sv --coverage=${{ matrix.COVERAGE }} --html=$HTML_FILE --md=$GITHUB_STEP_SUMMARY --css=$PYTEST_CSS
+            bash ${PYTEST_STYLE_SRC_DIR}/style_pytest_report.sh ${PYTEST_STYLE_SRC_DIR} ${TEST_PATH} ${HTML_FILE}
           popd
 
       - name: Prepare pytest-html data

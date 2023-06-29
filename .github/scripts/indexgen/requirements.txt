@@ -1,0 +1,9 @@
+myst-parser
+sphinx
+sphinx_tabs
+sphinxcontrib-mermaid
+
+https://github.com/antmicro/sphinx-immaterial/releases/download/tip/sphinx_immaterial-0.0.post1.tip-py3-none-any.whl
+https://github.com/antmicro/antmicro-sphinx-utils/archive/main.zip
+
+jinja2

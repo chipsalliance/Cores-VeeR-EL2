@@ -119,7 +119,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: verification_tests_html_data
+          name: verification_dashboard
           path: |
             webpage_*
 

@@ -57,6 +57,10 @@ jobs:
         run: |
           .github/scripts/update_webpage.sh ${{ github.ref_name }} ${{ github.event_name }} ${{ github.event.number }}
 
+      - name: Add redirect index page
+        run: |
+          cp .github/scripts/indexgen/index_redirect/index.html ./public.new/
+
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.ref == 'refs/heads/main' }}

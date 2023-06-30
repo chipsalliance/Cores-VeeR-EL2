@@ -107,6 +107,8 @@ jobs:
             mkdir -p $WEBPAGE_DIR
             mv ${TEST_PATH}/${{ matrix.test }}_${{ matrix.COVERAGE }}.html $WEBPAGE_DIR
             mv ${TEST_PATH}/assets $WEBPAGE_DIR
+            JS_SCRIPT_DIR=${{ github.workspace }}/.github/scripts/pytest/script
+            mv $JS_SCRIPT_DIR $WEBPAGE_DIR
           popd
 
       - name: Prepare coverage data

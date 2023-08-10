@@ -1,15 +1,15 @@
-name: Verilator Build
+name: Spike Build
 
 on:
   workflow_call:
 
 jobs:
   verilator:
-    name: Build Verilator
+    name: Build Spike
     runs-on: ubuntu-latest
     env:
-      TOOL_NAME: verilator
-      TOOL_VERSION: v5.010
+      TOOL_NAME: spike
+      TOOL_VERSION: d70ea67d
       DEBIAN_FRONTEND: "noninteractive"
 
     steps:
@@ -29,8 +29,8 @@ jobs:
         timeout-minutes: 3
         with:
           path: |
-            /opt/verilator
-            /opt/verilator/.cache
+            /opt/spike
+            /opt/spike/.cache
           key: ${{ env.cache_name }}_${{ env.cache_date }}
           restore-keys: ${{ env.cache_name }}_
 
@@ -38,29 +38,24 @@ jobs:
         if: ${{ steps.cache.outputs.cache-hit != 'true' }}
         run: |
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-          autoconf automake autotools-dev \
-          bc bison build-essential \
-          ccache curl \
-          flex \
-          gawk git gperf \
-          help2man \
-          libexpat-dev libfl-dev libfl2 libgmp-dev \
-          libmpc-dev libmpfr-dev libtool \
-          ninja-build \
-          patchutils python3 python3-pip \
-          texinfo \
-          zlib1g zlib1g-dev
+            git build-essential cmake ccache device-tree-compiler
 
-      - name: Build Verilator
+      - name: Build Spike
         if: ${{ steps.cache.outputs.cache-hit != 'true' }}
         run: |
-          export CCACHE_DIR=/opt/verilator/.cache
+          export CCACHE_DIR=/opt/spike/.cache
           ccache --show-config | grep cache_dir
-          git clone https://github.com/verilator/verilator
-          pushd verilator
+          git clone https://github.com/riscv-software-src/riscv-isa-sim spike
+          export CC="ccache gcc"
+          export CXX="ccache g++"
+          pushd spike
             git checkout ${{ env.TOOL_VERSION }}
-            autoconf
-            ./configure --prefix=/opt/verilator
-            make -j `nproc`
+            mkdir build
+            cd build
+            ../configure --prefix=/opt/spike
+            make -j`nproc`
             make install
           popd
+          rm -rf /opt/spike/include # Remove include and lib to save space
+          rm -rf /opt/spike/lib
+

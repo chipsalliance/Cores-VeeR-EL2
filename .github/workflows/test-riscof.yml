@@ -83,7 +83,7 @@ jobs:
 
       - name: Setup cache
         uses: actions/cache@v2
-        timeout-minutes: 3
+        timeout-minutes: 60
         continue-on-error: true
         with:
           path: "/opt/veer-el2/.cache/"

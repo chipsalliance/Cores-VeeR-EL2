@@ -27,66 +27,6 @@ replace_dir(){
     fi
 }
 
-generate_index(){
-    # Generates the top-level index webpage
-    # Args:
-    # ROOT - webpage root path
-    check_args_count $# 1
-    ROOT=$1
-    echo -e "${COLOR_WHITE}=========== generate_index args ===========${COLOR_CLEAR}"
-    echo -e "${COLOR_WHITE}ROOT = ${ROOT}"
-
-    INDEX=${ROOT}/index.html
-    rm -rf ${INDEX}
-
-    # Header
-    echo -n "<!DOCTYPE html>
-    <html>
-    <body>
-
-    <h2>RISC-V VeeR EL2</h2>
-    <h3>Dashboard</h3>
-    <hr>
-    <h3>Main branch</h3>
-    <ul>
-    <li><a href=\"./main/verification_dashboard/verification_dashboard.html\">Verification Dashboard</a></li>
-    <li><a href=\"./main/coverage_dashboard/index.html\">Coverage Dashboard</a></li>
-    </ul>
-    <hr>
-    <h3>Feature branches / pull requests</h3>
-    " >>${INDEX}
-
-    # List subpages
-    pushd ${ROOT}
-    if ! SUBDIRS=`find dev/ -maxdepth 1 -type d ! -name "." ! -name ".." -printf "%P\n" | sort`; then
-        echo -e "Directory dev/ not found"
-    fi
-    popd
-
-    # Body
-    for SUBDIR in ${SUBDIRS}; do
-        echo -e "${COLOR_WHITE}Found subpage ${SUBDIR}${COLOR_CLEAR}"
-        echo -n "
-        <h4>${SUBDIR}</h4>
-        <ul>
-        <li><a href=\"dev/${SUBDIR}/verification_dashboard/verification_dashboard.html\">Verification Dashboard</a></li>
-        <li><a href=\"dev/${SUBDIR}/coverage_dashboard/index.html\">Coverage Dashboard</a></li>
-        </ul>
-        " >>${INDEX}
-    done
-
-    # Footer
-    echo -n "
-    <hr>
-    <p> Copyright 2023 Antmicro</p>
-    </body>
-    </html>
-
-    " >>${INDEX}
-
-    echo -e "${COLOR_WHITE}Index generation ${COLOR_GREEN}SUCCEEDED${COLOR_CLEAR}"
-}
-
 update_webpage(){
     # This function updates the public part of the gh-pages, which contain
     # coverage and verification reports. Different destination directory is
@@ -100,7 +40,7 @@ update_webpage(){
     LOC_GITHUB_EVENT_NAME=$2
     PR_NUMBER=$3
     echo -e "${COLOR_WHITE}========== update_webpage args =========${COLOR_CLEAR}"
-    echo -e "${COLOR_WHITE}LOC_GITHUB_REF_NAME        = ${LOC_GITHUB_REF_NAME}"
+    echo -e "${COLOR_WHITE}LOC_GITHUB_REF_NAME   = ${LOC_GITHUB_REF_NAME}"
     echo -e "${COLOR_WHITE}LOC_GITHUB_EVENT_NAME = ${LOC_GITHUB_EVENT_NAME}"
     echo -e "${COLOR_WHITE}PR_NUMBER             = ${PR_NUMBER}"
 
@@ -120,15 +60,22 @@ update_webpage(){
         echo -e "${COLOR_WHITE}Unknown deployment type ${COLOR_RED}FAIL${COLOR_CLEAR}"
         exit -1
     fi
-    PUBLIC_DIR=./public
+    PUBLIC_DIR=./public.old
 
     replace_dir ./coverage_dashboard ${PUBLIC_DIR}/${DIR}/coverage_dashboard
     replace_dir ./verification_dashboard ${PUBLIC_DIR}/${DIR}/verification_dashboard
 
-    generate_index ${PUBLIC_DIR}
+    pushd .github/scripts/indexgen
+    python -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    popd
 
+    make -C .github/scripts/indexgen all ROOTDIR=`realpath ./public.old` BUILDDIR=`realpath ./public.new`
+
+    echo -e "${COLOR_WHITE}Makefile exit status:$?${COLOR_CLEAR}"
     echo -e "${COLOR_WHITE}================= tree =================${COLOR_CLEAR}"
-    tree ./public/
+    tree -d -L 3 ./public.new/
 
     echo -e "${COLOR_WHITE}Webpage update ${COLOR_GREEN}SUCCEEDED${COLOR_CLEAR}"
     echo -e "${COLOR_WHITE}============ update_webpage ============${COLOR_CLEAR}"

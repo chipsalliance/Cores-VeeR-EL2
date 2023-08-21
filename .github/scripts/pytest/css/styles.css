@@ -1,0 +1,103 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap");
+
+body {
+  background-color: #0e1116;
+  font-family: "Roboto", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+body > *:not(:nth-child(3)) {
+  max-width: 1520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+body > input:first-of-type {
+  margin-left: max(0px, (100% - 1520px) / 2);
+}
+
+h1,
+h2,
+span,
+p {
+  color: #dfe1f1;
+  font-size: 16px;
+}
+
+h1,
+h2 {
+  font-size: 24px;
+  font-weight: 500;
+  margin-top: 75px;
+}
+
+a {
+  color: #00d0c9;
+}
+
+.passed {
+  color: #2fc36e;
+  font-size: 14px;
+  margin-left: 5px !important;
+}
+
+.xfailed,
+.skipped {
+  color: #efac0a;
+  font-size: 14px;
+  margin-left: 5px !important;
+}
+
+.failed,
+.error,
+.xpassed {
+  color: #f21e08;
+  font-size: 14px;
+  margin-left: 5px !important;
+}
+
+.col-name,
+.col-duration {
+  color: #dfe1f1;
+  font-size: 14px;
+}
+
+.sortable {
+  color: #dfe1f1;
+  font-size: 16px;
+}
+
+.log {
+  background-color: #31363c;
+  color: #dfe1f1;
+  overflow: auto;
+}
+
+.bar {
+  display: inline-flex;
+  width: 100%;
+  padding: 20px;
+  align-items: center;
+  background-color: #25292e;
+  box-sizing: border-box;
+}
+
+.bar > .arrow {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.bar > .chip-alliance-link {
+  position: absolute;
+  left: max(150px, (100% - 1520px) / 2);
+}
+
+.bar > .title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  font-weight: 700;
+}

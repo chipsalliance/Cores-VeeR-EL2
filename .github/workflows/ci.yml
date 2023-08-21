@@ -41,15 +41,10 @@ jobs:
     needs: [Test-Regression, Test-Verification, Test-RISCV-DV, Test-RISCOF]
     uses: ./.github/workflows/report-coverage.yml
 
-  Report-Pytest:
-    name: Report-Pytest
-    needs: [Test-Verification]
-    uses: ./.github/workflows/report-pytest.yml
-
   Publish-to-GH-Pages:
     permissions:
       actions: write
       contents: write
     name: Publish-to-GH-Pages
-    needs: [Report-Coverage, Report-Pytest]
+    needs: [Report-Coverage, Test-Verification]
     uses: ./.github/workflows/publish-webpage.yml

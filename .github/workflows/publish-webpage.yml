@@ -3,9 +3,6 @@ name: GH-Pages Build and Main Deploy
 on:
   workflow_call:
 
-env:
-  ROOT_DIR: './public'
-
 jobs:
   build:
     name: Build and Main Deploy
@@ -18,11 +15,8 @@ jobs:
       - name: Setup repository
         uses: actions/checkout@v3
 
-      - name: Checkout gh-pages
-        uses: actions/checkout@v3
-        with:
-          ref: gh-pages
-          path: ${{ env.ROOT_DIR }}
+      - name: Setup python
+        uses: actions/setup-python@v4
 
       - name: Print metadata
         run: |
@@ -41,6 +35,18 @@ jobs:
           name: verification_dashboard
           path: ./verification_dashboard
 
+      - name: Checkout gh-pages
+        uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          path: ./public.checkout
+
+      - name: Preserve only valid items
+        run: |
+          mkdir -p ./public.old
+          cp -r ./public.checkout/doctrees ./public.old/ | true
+          cp -r ./public.checkout/html ./public.old/ | true
+
       - name: Update webpage
         if: github.event_name != 'pull_request'
         run: |
@@ -51,19 +57,23 @@ jobs:
         run: |
           .github/scripts/update_webpage.sh ${{ github.ref_name }} ${{ github.event_name }} ${{ github.event.number }}
 
+      - name: Add redirect index page
+        run: |
+          cp .github/scripts/indexgen/index_redirect/index.html ./public.new/
+
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.ref == 'refs/heads/main' }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ env.ROOT_DIR }}
+          publish_dir: ./public.new
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         if: github.event_name == 'pull_request'
         with:
           name: pr_deployment
-          path: ${{ env.ROOT_DIR }}
+          path: ./public.new
 
       - name: Save PR number
         if: github.event_name == 'pull_request'
@@ -82,4 +92,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: webpage
-          path: ${{ env.ROOT_DIR }}
+          path: ./public.new

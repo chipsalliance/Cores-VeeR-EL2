@@ -1,4 +1,4 @@
-# Development branches / PRs
+# Active pull requests
  * 98
    * [Coverage](98_coverage_dashboard)
    * [Verification tests](98_verification_dashboard)

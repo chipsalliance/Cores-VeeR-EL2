@@ -199,7 +199,7 @@ body {
   padding: 0;
 }
 
-body > *:not(:nth-child(2)) {
+body > *:not(:nth-child(3)) {
   max-width: 1520px;
   margin-left: auto;
   margin-right: auto;
@@ -275,9 +275,15 @@ a {
   box-sizing: border-box;
 }
 
+.bar > .arrow {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
 .bar > .chip-alliance-link {
   position: absolute;
-  left: calc((100% - 1520px) / 2);
+  left: max(150px, (100% - 1520px) / 2);
 }
 
 .bar > .title {

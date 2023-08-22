@@ -24,7 +24,7 @@ jobs:
 
       - name: Setup cache
         uses: actions/cache@v3
-        timeout-minutes: 3
+        timeout-minutes: 60
         continue-on-error: true
         with:
           path: "/opt/veer-el2/.cache/"
@@ -74,7 +74,7 @@ jobs:
 
       - name: Setup cache
         uses: actions/cache@v3
-        timeout-minutes: 3
+        timeout-minutes: 60
         continue-on-error: true
         with:
           path: "/opt/veer-el2/.cache/"
@@ -210,7 +210,7 @@ jobs:
 
       - name: Setup cache
         uses: actions/cache@v3
-        timeout-minutes: 3
+        timeout-minutes: 60
         continue-on-error: true
         with:
           path: "/opt/veer-el2/.cache/"

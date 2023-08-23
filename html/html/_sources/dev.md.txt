@@ -1,4 +1,0 @@
-# Active pull requests
- * 106
-   * [Coverage](106_coverage_dashboard)
-   * [Verification tests](106_verification_dashboard)

@@ -75,6 +75,11 @@ csr_perfvi =        [00110011....]
 csr_mcountinhibit = [001100100000]
 csr_mfdht =         [011111001110]
 csr_mfdhs =         [011111001111]
+csr_pmpcfg =        [00111010....]
+csr_pmpaddr0 =      [00111011....]
+csr_pmpaddr16 =     [00111100....]
+csr_pmpaddr32 =     [00111101....]
+csr_pmpaddr48 =     [00111110....]
 
 .input
 
@@ -171,6 +176,11 @@ csr_dicad0h
 csr_dicad0
 csr_dicad1
 csr_dicago
+     csr_pmpcfg
+     csr_pmpaddr0
+     csr_pmpaddr16
+     csr_pmpaddr32
+     csr_pmpaddr48
      valid_only
      presync
      postsync
@@ -255,5 +265,11 @@ csr[ csr_perfvf    ] = { valid_only }
 csr[ csr_perfvg    ] = { valid_only }
 csr[ csr_perfvh    ] = { valid_only }
 csr[ csr_perfvi    ] = { valid_only }
+
+csr[ csr_pmpcfg    ] = { csr_pmpcfg    }
+csr[ csr_pmpaddr0  ] = { csr_pmpaddr0  }
+csr[ csr_pmpaddr16 ] = { csr_pmpaddr16 }
+csr[ csr_pmpaddr32 ] = { csr_pmpaddr32 }
+csr[ csr_pmpaddr48 ] = { csr_pmpaddr48 }
 
 .end

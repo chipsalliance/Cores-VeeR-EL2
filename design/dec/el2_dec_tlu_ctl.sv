@@ -233,7 +233,11 @@ import el2_pkg::*;
    output logic  dec_tlu_pic_clk_override,  // override PIC clock domain gating
    output logic  dec_tlu_picio_clk_override,// override PICIO clock domain gating
    output logic  dec_tlu_dccm_clk_override, // override DCCM clock domain gating
-   output logic  dec_tlu_icm_clk_override   // override ICCM clock domain gating
+   output logic  dec_tlu_icm_clk_override,  // override ICCM clock domain gating
+
+   // pmp
+   output el2_pmp_cfg_pkt_t pmp_pmpcfg  [pt.PMP_ENTRIES],
+   output logic [31:0]      pmp_pmpaddr [pt.PMP_ENTRIES]
 
    );
 

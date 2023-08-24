@@ -52,11 +52,11 @@ import el2_pkg::*;
    output logic [31:0] dec_pmp_rddata_d, // pmp CSR read data
    output logic        dec_pmp_read_d, // pmp CSR address match
 
+   output el2_pmp_cfg_pkt_t pmp_pmpcfg  [pt.PMP_ENTRIES],
+   output logic [31:0]      pmp_pmpaddr [pt.PMP_ENTRIES],
+
    input  logic        scan_mode
    );
-
-   el2_pmp_cfg_pkt_t pmpcfg  [0:pt.PMP_ENTRIES-1];
-   logic [31:0]      pmpaddr [0:pt.PMP_ENTRIES-1];
 
    logic wr_pmpcfg_r;
    logic [3:0] wr_pmpcfg_group;
@@ -86,9 +86,9 @@ import el2_pkg::*;
 
    for (genvar entry_idx = 0; entry_idx < pt.PMP_ENTRIES; entry_idx++) begin : gen_pmpcfg_ff
       rvdffe #(8) pmpcfg_ff (.*, .clk(free_l2clk),
-                          .en(wr_pmpcfg_r & (wr_pmpcfg_group == entry_idx[5:2]) & (~pmpcfg[entry_idx].lock)),
+                          .en(wr_pmpcfg_r & (wr_pmpcfg_group == entry_idx[5:2]) & (~pmp_pmpcfg[entry_idx].lock)),
                           .din(dec_csr_wrdata_r[(entry_idx[1:0]*8)+7:(entry_idx[1:0]*8)+0] & 8'b10011111),
-                          .dout(pmpcfg[entry_idx]));
+                          .dout(pmp_pmpcfg[entry_idx]));
    end
 
    // ----------------------------------------------------------------------
@@ -112,25 +112,25 @@ import el2_pkg::*;
 
    for (genvar entry_idx = 0; entry_idx < pt.PMP_ENTRIES; entry_idx++) begin : gen_pmpaddr_ff
       rvdffe #(32) pmpaddr_ff (.*, .clk(free_l2clk),
-                          .en(wr_pmpaddr_r & (wr_pmpaddr_address == entry_idx) & (~pmpcfg[entry_idx].lock)),
+                          .en(wr_pmpaddr_r & (wr_pmpaddr_address == entry_idx) & (~pmp_pmpcfg[entry_idx].lock)),
                           .din(dec_csr_wrdata_r[31:0]),
-                          .dout(pmpaddr[entry_idx][31:0]));
+                          .dout(pmp_pmpaddr[entry_idx][31:0]));
    end
 
    // CSR read mux
 
    assign pmp_quarter_rdaddr     = dec_csr_rdaddr_d[3:0];
-   assign pmp_pmpcfg_rddata      = { pmpcfg[{pmp_quarter_rdaddr, 2'h3}],
-                                     pmpcfg[{pmp_quarter_rdaddr, 2'h2}],
-                                     pmpcfg[{pmp_quarter_rdaddr, 2'h1}],
-                                     pmpcfg[{pmp_quarter_rdaddr, 2'h0}]
+   assign pmp_pmpcfg_rddata      = { pmp_pmpcfg[{pmp_quarter_rdaddr, 2'h3}],
+                                     pmp_pmpcfg[{pmp_quarter_rdaddr, 2'h2}],
+                                     pmp_pmpcfg[{pmp_quarter_rdaddr, 2'h1}],
+                                     pmp_pmpcfg[{pmp_quarter_rdaddr, 2'h0}]
                                      };
    assign dec_pmp_read_d         = csr_pmpcfg | csr_pmpaddr0 | csr_pmpaddr16 | csr_pmpaddr32 | csr_pmpaddr48;
    assign dec_pmp_rddata_d[31:0] = ( ({32{csr_pmpcfg}}    & pmp_pmpcfg_rddata) |
-                                     ({32{csr_pmpaddr0}}  & pmpaddr[{2'h0, pmp_quarter_rdaddr}]) |
-                                     ({32{csr_pmpaddr16}} & pmpaddr[{2'h1, pmp_quarter_rdaddr}]) |
-                                     ({32{csr_pmpaddr32}} & pmpaddr[{2'h2, pmp_quarter_rdaddr}]) |
-                                     ({32{csr_pmpaddr48}} & pmpaddr[{2'h3, pmp_quarter_rdaddr}])
+                                     ({32{csr_pmpaddr0}}  & pmp_pmpaddr[{2'h0, pmp_quarter_rdaddr}]) |
+                                     ({32{csr_pmpaddr16}} & pmp_pmpaddr[{2'h1, pmp_quarter_rdaddr}]) |
+                                     ({32{csr_pmpaddr32}} & pmp_pmpaddr[{2'h2, pmp_quarter_rdaddr}]) |
+                                     ({32{csr_pmpaddr48}} & pmp_pmpaddr[{2'h3, pmp_quarter_rdaddr}])
                                      );
 
 endmodule // dec_pmp_ctl

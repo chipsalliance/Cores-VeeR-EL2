@@ -376,6 +376,15 @@ import el2_pkg::*;
    logic csr_mitcnt0;
    logic csr_mitcnt1;
 
+   // PMP unit, isolated for size reasons
+   logic [31:0] dec_pmp_rddata_d;
+   logic dec_pmp_read_d;
+   logic csr_pmpcfg;
+   logic csr_pmpaddr0;
+   logic csr_pmpaddr16;
+   logic csr_pmpaddr32;
+   logic csr_pmpaddr48;
+
    logic nmi_int_sync, timer_int_sync, soft_int_sync, i_cpu_halt_req_sync, i_cpu_run_req_sync, mpc_debug_halt_req_sync, mpc_debug_run_req_sync, mpc_debug_halt_req_sync_raw;
    logic csr_wr_clk;
    logic e4e5_clk, e4_valid, e5_valid, e4e5_valid, internal_dbg_halt_mode_f, internal_dbg_halt_mode_f2;
@@ -458,15 +467,8 @@ import el2_pkg::*;
    logic csr_mhpme5;
    logic csr_mhpme6;
    logic csr_mcountinhibit;
-   logic csr_mitctl0;
-   logic csr_mitctl1;
-   logic csr_mitb0;
-   logic csr_mitb1;
-   logic csr_mitcnt0;
-   logic csr_mitcnt1;
    logic csr_mpmc;
    logic csr_mcpc;
-   logic csr_meicpct;
    logic csr_mdeau;
    logic csr_micect;
    logic csr_miccmect;
@@ -478,11 +480,6 @@ import el2_pkg::*;
    logic csr_dicad0;
    logic csr_dicad1;
    logic csr_dicago;
-   logic csr_pmpcfg;
-   logic csr_pmpaddr0;
-   logic csr_pmpaddr16;
-   logic csr_pmpaddr32;
-   logic csr_pmpaddr48;
    logic valid_only;
    logic presync;
    logic postsync;
@@ -508,6 +505,9 @@ import el2_pkg::*;
 
    el2_dec_timer_ctl  #(.pt(pt)) int_timers(.*);
    // end of internal timers
+
+   el2_dec_pmp_ctl  #(.pt(pt)) pmp(.*);
+   // end of pmp
 
    assign clk_override = dec_tlu_dec_clk_override;
 
@@ -2827,7 +2827,8 @@ assign dec_csr_rddata_d[31:0] = ( ({32{csr_misa}}      & 32'h40001104) |
                                   ({32{csr_mhpme6}}    & {22'b0,mhpme6[9:0]}) |
                                   ({32{csr_mcountinhibit}} & {25'b0, mcountinhibit[6:0]}) |
                                   ({32{csr_mpmc}}      & {30'b0, mpmc[1], 1'b0}) |
-                                  ({32{dec_timer_read_d}} & dec_timer_rddata_d[31:0])
+                                  ({32{dec_timer_read_d}} & dec_timer_rddata_d[31:0]) |
+                                  ({32{dec_pmp_read_d}} & dec_pmp_rddata_d[31:0])
                                   );
 
 

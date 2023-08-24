@@ -14,6 +14,7 @@ $RV_ROOT/design/ifu/el2_ifu.sv
 $RV_ROOT/design/dec/el2_dec_decode_ctl.sv
 $RV_ROOT/design/dec/el2_dec_gpr_ctl.sv
 $RV_ROOT/design/dec/el2_dec_ib_ctl.sv
+$RV_ROOT/design/dec/el2_dec_pmp_ctl.sv
 $RV_ROOT/design/dec/el2_dec_tlu_ctl.sv
 $RV_ROOT/design/dec/el2_dec_trigger.sv
 $RV_ROOT/design/dec/el2_dec.sv

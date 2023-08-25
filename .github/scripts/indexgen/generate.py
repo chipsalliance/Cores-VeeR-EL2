@@ -170,25 +170,26 @@ def main():
     # Reports for development branches / pull requests
     branches = []
     path = os.path.join(args.root, "dev")
-    for file in os.listdir(path):
-        if not os.path.isdir(os.path.join(path, file)):
-            continue
 
-        branches.append(file)
+    if os.path.isdir(path):
+        for file in os.listdir(path):
+            if not os.path.isdir(os.path.join(path, file)):
+                continue
+            branches.append(file)
 
-        make_coverage_report_index(
-            file,
-            os.path.join(args.root,   "dev", file),
-            os.path.join(args.output, "dev", file),
-            args.template
-        )
+            make_coverage_report_index(
+                file,
+                os.path.join(args.root,   "dev", file),
+                os.path.join(args.output, "dev", file),
+                args.template
+            )
 
-        make_verification_report_index(
-            file,
-            os.path.join(args.root,   "dev", file),
-            os.path.join(args.output, "dev", file),
-            args.template
-        )
+            make_verification_report_index(
+                file,
+                os.path.join(args.root,   "dev", file),
+                os.path.join(args.output, "dev", file),
+                args.template
+            )
 
     # Prepare the branch/pr index page
     make_dev_index(branches, args.output, args.template)

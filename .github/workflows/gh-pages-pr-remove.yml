@@ -43,7 +43,8 @@ jobs:
 
       - name: Update the webpage
         run: |
-          rm -rf ${{ env.ROOT_DIR }}/dev/${{ steps.PR.outputs.number }}
+          rm -rf ${{ env.ROOT_DIR }}/html/dev/${{ steps.PR.outputs.number }}
+          rm -rf ${{ env.ROOT_DIR }}/doctrees/dev/${{ steps.PR.outputs.number }}
           .github/scripts/update_webpage.sh ${{ github.ref_name }} ${{ github.event_name }} ${{ steps.PR.outputs.number }}
 
       - name: Deploy

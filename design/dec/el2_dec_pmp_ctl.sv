@@ -55,11 +55,11 @@ import el2_pkg::*;
    input  logic        scan_mode
    );
 
-   logic  [7:0] pmpcfg  [0:pt.PMP_ENTRIES-1];
-   logic [31:0] pmpaddr [0:pt.PMP_ENTRIES-1];
+   el2_pmp_cfg_pkt_t pmpcfg  [0:pt.PMP_ENTRIES-1];
+   logic [31:0]      pmpaddr [0:pt.PMP_ENTRIES-1];
 
    logic wr_pmpcfg_r;
-   logic [3:0] wr_pmpcfg_offset;
+   logic [3:0] wr_pmpcfg_group;
 
    logic wr_pmpaddr0_sel;
    logic wr_pmpaddr16_sel;
@@ -82,13 +82,13 @@ import el2_pkg::*;
    localparam PMPCFG       = 12'h3a0;
 
    assign wr_pmpcfg_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:4] == PMPCFG[11:4]);
-   assign wr_pmpcfg_offset = dec_csr_wraddr_r[3:0]; // selects group of 4 pmpcfg entries (offset 1 -> entries 4-7)
+   assign wr_pmpcfg_group = dec_csr_wraddr_r[3:0]; // selects group of 4 pmpcfg entries (group 1 -> entries 4-7; up to 16 groups)
 
    for (genvar entry_idx = 0; entry_idx < pt.PMP_ENTRIES; entry_idx++) begin : gen_pmpcfg_ff
       rvdffe #(8) pmpcfg_ff (.*, .clk(free_l2clk),
-                          .en(wr_pmpcfg_r & (wr_pmpcfg_offset == entry_idx[3:0]) & (~pmpcfg[entry_idx][7])),
-                          .din(dec_csr_wrdata_r[(entry_idx[1:0]*4)+7:(entry_idx[1:0]*4)+0]), // TODO: will this work?
-                          .dout(pmpcfg[entry_idx][7:0]));
+                          .en(wr_pmpcfg_r & (wr_pmpcfg_group == entry_idx[5:2]) & (~pmpcfg[entry_idx].lock)),
+                          .din(dec_csr_wrdata_r[(entry_idx[1:0]*8)+7:(entry_idx[1:0]*8)+0] & 8'b10011111),
+                          .dout(pmpcfg[entry_idx]));
    end
 
    // ----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import el2_pkg::*;
 
    for (genvar entry_idx = 0; entry_idx < pt.PMP_ENTRIES; entry_idx++) begin : gen_pmpaddr_ff
       rvdffe #(32) pmpaddr_ff (.*, .clk(free_l2clk),
-                          .en(wr_pmpaddr_r & (wr_pmpaddr_address == entry_idx) & (~pmpcfg[entry_idx][7])),
+                          .en(wr_pmpaddr_r & (wr_pmpaddr_address == entry_idx) & (~pmpcfg[entry_idx].lock)),
                           .din(dec_csr_wrdata_r[31:0]),
                           .dout(pmpaddr[entry_idx][31:0]));
    end

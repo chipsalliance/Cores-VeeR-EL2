@@ -404,6 +404,16 @@ typedef struct packed {
                         logic         icache_rd_valid;
                         logic         icache_wr_valid;
             } el2_cache_debug_pkt_t;
+
+
+typedef struct packed {
+                        logic lock;
+                        logic [1:0] reserved;
+                        logic [1:0] addr_match;
+                        logic execute;
+                        logic write;
+                        logic read;
+            } el2_pmp_cfg_pkt_t;
 //`endif
 
 endpackage // el2_pkg

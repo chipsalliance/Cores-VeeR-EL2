@@ -21,7 +21,7 @@ $(GENDIR)/index.md: $(SOURCES) generate.py | $(GENDIR)
 # Build the final webpage. Pass the 'html' target to sphinx, copy report pages
 html: Makefile $(GENDIR)/index.md
 	@$(SPHINXBUILD) -M $@ "$(GENDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-	@rsync -avr "$(ROOTDIR)/" "$(BUILDDIR)/html"
+	@rsync -avr "$(ROOTDIR)/" "$(BUILDDIR)/"
 	@bash update_styles.sh "$(BUILDDIR)"
 
 clean:

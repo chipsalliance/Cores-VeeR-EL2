@@ -2,7 +2,7 @@
 import argparse
 import os
 import shutil
-
+import logging
 import jinja2
 
 # ==============================================================================
@@ -24,7 +24,12 @@ def make_coverage_report_index(branch, root, output, templates):
     """
     Prepares coverage report index page
     """
-
+    logging.debug("=== make_coverage_report_index")
+    logging.debug(f"branch      = {branch}")
+    logging.debug(f"root        = {root}")
+    logging.debug(f"output      = {output}")
+    logging.debug(f"templates   = {templates}")
+    logging.debug("===")
     keys = ["all", "branch", "toggle", "functional"]
     path = os.path.join(root, "coverage_dashboard")
 
@@ -76,7 +81,12 @@ def make_verification_report_index(branch, root, output, templates):
     """
     Prepares verification tests report index page
     """
-
+    logging.debug("=== make_verification_report_index")
+    logging.debug(f"branch      = {branch}")
+    logging.debug(f"root        = {root}")
+    logging.debug(f"output      = {output}")
+    logging.debug(f"templates   = {templates}")
+    logging.debug("===")
     path = os.path.join(root, "verification_dashboard")
 
     # Collect tests
@@ -108,7 +118,11 @@ def make_dev_index(branches, output, templates):
     """
     Prepares the branch/pr index page
     """
-
+    logging.debug("=== make_dev_index")
+    logging.debug(f"branches    = {branches}")
+    logging.debug(f"output      = {output}")
+    logging.debug(f"templates   = {templates}")
+    logging.debug("===")
     params = {
         "branches": branches,
     }
@@ -123,6 +137,7 @@ def make_dev_index(branches, output, templates):
 
 
 def main():
+    logging.basicConfig(encoding="utf-8", level=logging.DEBUG)
 
     # Parse args
     parser = argparse.ArgumentParser()
@@ -169,6 +184,7 @@ def main():
 
     # Reports for development branches / pull requests
     branches = []
+
     path = os.path.join(args.root, "dev")
 
     if os.path.isdir(path):

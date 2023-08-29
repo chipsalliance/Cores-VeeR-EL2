@@ -7,7 +7,7 @@ on:
       - completed
 
 env:
-  ROOT_DIR: './public'
+  ROOT_DIR: './public.old'
 
 jobs:
   remove:
@@ -51,5 +51,5 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ env.ROOT_DIR }}
+          publish_dir: ./public.new
           commit_message: "Remove reports from PR#${{ steps.PR.outputs.number }}"

@@ -62,14 +62,15 @@ update_webpage(){
     fi
     PUBLIC_DIR=./public.old
 
-    replace_dir ./coverage_dashboard ${PUBLIC_DIR}/${DIR}/coverage_dashboard
-    replace_dir ./verification_dashboard ${PUBLIC_DIR}/${DIR}/verification_dashboard
+    replace_dir ./coverage_dashboard ${PUBLIC_DIR}/html/${DIR}/coverage_dashboard
+    replace_dir ./verification_dashboard ${PUBLIC_DIR}/html/${DIR}/verification_dashboard
 
     pushd .github/scripts/indexgen
     python -m venv venv
     source venv/bin/activate
     pip install -r requirements.txt
     popd
+
 
     make -C .github/scripts/indexgen all ROOTDIR=`realpath ./public.old` BUILDDIR=`realpath ./public.new`
 

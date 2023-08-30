@@ -16,12 +16,12 @@ $(GENDIR):
 
 $(GENDIR)/index.md: $(SOURCES) generate.py | $(GENDIR)
 	@rm -rf $(GENDIR)/*
-	@python3 generate.py --template "$(SOURCEDIR)" --root "$(ROOTDIR)" --output "$(GENDIR)"
+	@python3 generate.py --template "$(SOURCEDIR)" --root "$(ROOTDIR)/html" --output "$(GENDIR)"
 
 # Build the final webpage. Pass the 'html' target to sphinx, copy report pages
 html: Makefile $(GENDIR)/index.md
 	@$(SPHINXBUILD) -M $@ "$(GENDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-	@rsync -avr "$(ROOTDIR)/" "$(BUILDDIR)/"
+	@rsync -avrm --include="*/" --include="coverage_dashboard/***" --include="verification_dashboard/***" --exclude="*" "$(ROOTDIR)/" "$(BUILDDIR)/"
 	@bash update_styles.sh "$(BUILDDIR)"
 
 clean:

@@ -89,15 +89,17 @@ $(TEST_DIR)/generate.log: | $(TEST_DIR)
 		--isa rv32imc --mabi ilp32 --steps gcc_compile,iss_sim -v -o $(TEST_DIR) 2>&1 | tee -a $(TEST_DIR)/generate.log
 
 $(TEST_DIR)/asm_test/%.hex: $(TEST_DIR)/asm_test/%.o
+	$(RISCV_NM) -B -n $< > $(basename $@).sym
 	$(RISCV_OBJCOPY) -O verilog $< $@
 
 # HDL simulation
 $(SIM_DIR)/%.log: $(TEST_DIR)/asm_test/%.hex $(WORK_DIR)/verilator/Vtb_top
 	mkdir -p $(basename $@)
 	cp $< $(basename $@)/program.hex
-	cd $(basename $@) && $(abspath $(WORK_DIR)/verilator/Vtb_top)
+	cp $(basename $<).sym $(basename $@)/program.sym
+	cd $(basename $@) && $(abspath $(WORK_DIR)/verilator/Vtb_top) --symbols program.sym --mailbox-sym tohost
 	mv $(basename $@)/exec.log $@
-	mv $(basename $@)/coverage.dat $(basename $@)-coverage.dat
+	if [ -f "$(basename $@)/coverage.dat" ]; then mv $(basename $@)/coverage.dat $(basename $@)-coverage.dat; fi
 
 # Log conversion rules
 $(TEST_DIR)/spike_sim/%.csv: $(TEST_DIR)/spike_sim/%.log
@@ -122,7 +124,12 @@ $(TEST_DIR)/comp_%.log: $(TEST_DIR)/$(RISCV_DV_ISS)_sim/%.csv $(SIM_DIR)/%.csv
 
 # Coverage data aggregation
 $(WORK_DIR)/coverage.dat:
-	verilator_coverage -write $@ `find $(SIM_DIR)/ -name "*coverage.dat"`
+	FILES=`find $(SIM_DIR)/ -name "*coverage.dat"`; \
+	if [ "$${FILES}" != "" ]; then \
+		verilator_coverage -write $@ $${FILES}; \
+	else \
+		touch $@ ; \
+	fi
 
 run:
 	# Run RISC-V DV

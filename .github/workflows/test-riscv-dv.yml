@@ -224,6 +224,7 @@ jobs:
           export RV_ROOT=`realpath .`
           export RISCV_GCC=riscv64-unknown-elf-gcc
           export RISCV_OBJCOPY=riscv64-unknown-elf-objcopy
+          export RISCV_NM=riscv64-unknown-elf-nm
           export SPIKE_PATH=/opt/spike/bin
           export WHISPER_ISS=/opt/veer-iss/whisper
           export RENODE_PATH=/opt/renode

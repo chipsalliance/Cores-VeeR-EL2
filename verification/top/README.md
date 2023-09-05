@@ -16,7 +16,7 @@ Remember to set the `RV_ROOT` environment variable, which is required to generat
 
 ### Prepare python virtual environment
 
-    cd $RV_ROOT/verification
+    cd $RV_ROOT/verification/top
     python -m venv venv
     source venv/bin/activate
     pip install -r requirements.txt
@@ -35,7 +35,7 @@ Each PyUVM test can be either run from a pytest wrapper or directly from a Makef
 
 In `test_pyuvm` directory, a `Makefile` and a wrapper `test_pyuvm.py` are placed.
 
-    ./verification/
+    ./verification/top/
     └── test_pyuvm
         ├── Makefile
         ├── test_pyuvm.py ⟵ pytest wrapper

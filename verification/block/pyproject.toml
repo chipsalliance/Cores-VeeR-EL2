@@ -1,0 +1,24 @@
+# Copyright (C) 2023 Antmicro
+# SPDX-License-Identifier: Apache-2.0
+
+[tool.black]
+line-length = 100
+exclude = '''
+(
+  /(
+    | \.git
+    | \.gitignore
+    | \.gitmodules
+    | \.github
+    | \.nox
+    | \.pytest_cache
+    | __pycache__
+    | venv
+  )/
+  | docs/source/conf.py
+)
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3

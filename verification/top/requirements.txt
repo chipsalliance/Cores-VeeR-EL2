@@ -6,8 +6,8 @@ ${RV_ROOT}/third_party/cocotb
 cocotb-bus==0.2.1
 cocotb-coverage==1.1.0
 cocotb-test==0.2.4
-pytest
-pytest-html
-pytest-timeout
-pytest-md
-pyuvm
+pytest==7.4.1
+pytest-html==3.2.0
+pytest-timeout==2.1.0
+pytest-md==0.2.0
+pyuvm==2.9.1

@@ -85,13 +85,13 @@ jobs:
           echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
           PYTHONUNBUFFERED=1
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
-          TEST_PATH=$RV_ROOT/verification/${{ matrix.test }}
+          TEST_PATH=$RV_ROOT/verification/top/${{ matrix.test }}
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
 
       - name: Run ${{ matrix.test }}
         run: |
           pip3 install meson
-          pip3 install -r $RV_ROOT/verification/requirements.txt
+          pip3 install -r $RV_ROOT/verification/top/requirements.txt
           PYTEST_STYLE_SRC_DIR=${{ github.workspace }}/.github/scripts/pytest/
           PYTEST_CSS=${PYTEST_STYLE_SRC_DIR}/css/styles.css
           HTML_FILE=${{ matrix.test }}_${{ matrix.COVERAGE }}.html

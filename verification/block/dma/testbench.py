@@ -1,10 +1,8 @@
-
-#
 # Copyright (c) 2023 Antmicro
 # SPDX-License-Identifier: Apache-2.0
 
 import os
-import struct
+import random
 import math
 
 import pyuvm
@@ -38,12 +36,38 @@ class BusReadItem(uvm_sequence_item):
         self.data = data
         self.resp = resp
 
+
+class MemWriteItem(uvm_sequence_item):
+    """
+    A generic memory bus write item
+    """
+
+    def __init__(self, mem, addr, data):
+        super().__init__("MemWriteItem")
+        self.mem  = mem
+        self.addr = addr
+        self.data = data
+
+
+class MemReadItem(uvm_sequence_item):
+    """
+    A generic memory bus read item
+    """
+
+    def __init__(self, mem, addr, data):
+        super().__init__("MemReadItem")
+        self.mem  = mem
+        self.addr = addr
+        self.data = data
+
 # ==============================================================================
 
 
 def collect_signals(signals, uut, obj, uut_prefix="", obj_prefix=""):
     """
-    Collects signal objects from UUT and attaches them to the given object
+    Collects signal objects from UUT and attaches them to the given object.
+    Optionally UUT signals can be prefixed with the uut_prefix and object
+    signals with the obj_prefix
     """
 
     for sig in signals:
@@ -62,7 +86,8 @@ def collect_signals(signals, uut, obj, uut_prefix="", obj_prefix=""):
 
 # ==============================================================================
 
-class CoreMemoryBFM:
+
+class CoreMemoryBFM(uvm_component):
     """
     A BFM for the memory side interface of the DMA module
     """
@@ -86,37 +111,146 @@ class CoreMemoryBFM:
         "iccm_dma_ecc_error",
         "iccm_dma_rtag",
         "iccm_dma_rdata",
+
+        "dccm_ready",
+        "iccm_ready",
     ]
 
-    def __init__(self, uut):
+    def __init__(self, name, parent, uut):
+        super().__init__(name, parent)
 
         # Collect signals
         collect_signals(self.SIGNALS, uut, self)
 
-    async def run(self):
+        # Get base addresses and sizes
+        self.iccm_base = ConfigDB().get(None, "", "ICCM_BASE")
+        self.dccm_base = ConfigDB().get(None, "", "DCCM_BASE")
+
+        self.iccm_size = ConfigDB().get(None, "", "ICCM_SIZE")
+        self.dccm_size = ConfigDB().get(None, "", "DCCM_SIZE")
+
+        # Memory content
+        self.iccm_data = dict()
+        self.dccm_data = dict()
+
+    async def run_phase(self):
 
         while True:
             await RisingEdge(self.clk)
 
-            if self.dma_dccm_req.value:
-                self.dccm_dma_rtag.value = 1
-                self.dccm_dma_rvalid.value = 1
-                self.dccm_dma_rdata.value = 0xFEEDBABE
-            else:
-                self.dccm_dma_rvalid.value = 0
+            # Become busy at random for a random cycle count
+            if random.random() < 0.25:
+                self.iccm_ready.value = 0
+                self.dccm_ready.value = 0
 
-            if self.dma_iccm_req.value:
-                self.iccm_dma_rtag.value = 1
-                self.iccm_dma_rvalid.value = 1
-                self.iccm_dma_rdata.value = 0xCAFEBACA
-            else:
-                self.iccm_dma_rvalid.value = 0
+                n = random.randrange(10, 20)
+                await ClockCycles(self.clk, n)
+
+                self.iccm_ready.value = 1
+                self.dccm_ready.value = 1
+
+            # Sample signals
+            tag = int(self.dma_mem_tag)
+
+            # DCCM access
+            if self.dma_dccm_req.value:
+
+                # Decode and check address
+                addr = int(self.dma_mem_addr.value) - self.dccm_base
+                assert addr >= 0 and addr < self.dccm_size
+
+                # Write / read
+                if self.dma_mem_write.value:
+                    self.dccm_data[addr] = int(self.dma_mem_wdata.value)
+                    self.dccm_dma_rvalid.value = 0
+
+                else:
+                    self.dccm_dma_rdata = self.dccm_data.get(addr, 0)
+                    self.dccm_dma_rtag.value = tag
+                    self.dccm_dma_rvalid.value = 1
+                    self.dccm_dma_ecc_error.value = 0
+            
+                await RisingEdge(self.clk)
+
+            # ICCM access
+            elif self.dma_iccm_req.value:
+
+                # Decode and check address
+                addr = int(self.dma_mem_addr.value) - self.iccm_base
+                assert addr >= 0 and addr < self.iccm_size
+
+                # Write / read
+                if self.dma_mem_write.value:
+                    self.iccm_data[addr] = int(self.dma_mem_wdata.value)
+                    self.iccm_dma_rvalid.value = 0
+
+                else:
+                    self.iccm_dma_rdata = self.iccm_data.get(addr, 0)
+                    self.iccm_dma_rtag.value = tag
+                    self.iccm_dma_rvalid.value = 1
+                    self.iccm_dma_ecc_error.value = 0
+
+                await RisingEdge(self.clk)
+
+
+class CoreMemoryMonitor(uvm_component):
+    """
+    A monitor for ICCM / DCCM interface
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.bfm = kwargs["bfm"]
+        del kwargs["bfm"]
+        super().__init__(*args, **kwargs)
+
+        # Get base addresses
+        self.iccm_base = ConfigDB().get(None, "", "ICCM_BASE")
+        self.dccm_base = ConfigDB().get(None, "", "DCCM_BASE")
+
+    def build_phase(self):
+        self.ap = uvm_analysis_port("ap", self)
+
+    async def run_phase(self):
+
+        while True:
+            await RisingEdge(self.bfm.clk)
+
+            # DCCM access
+            if self.bfm.dma_dccm_req.value and \
+               self.bfm.dccm_ready.value:
+
+                if self.bfm.dma_mem_write.value:
+                    addr = int(self.bfm.dma_mem_addr.value) - self.dccm_base
+                    data = int(self.bfm.dma_mem_wdata.value)
+                    self.ap.write(MemWriteItem("DCCM", addr, data))
+
+                    self.logger.debug("DCCM WR: 0x{:08X} 0x{:016X}".format(
+                        addr,
+                        data))
+
+            # ICCM access
+            if self.bfm.dma_iccm_req.value and \
+               self.bfm.iccm_ready.value:
+
+                if self.bfm.dma_mem_write.value:
+                    addr = int(self.bfm.dma_mem_addr.value) - self.iccm_base
+                    data = int(self.bfm.dma_mem_wdata.value)
+                    self.ap.write(MemWriteItem("ICCM", addr, data))
+
+                    self.logger.debug("ICCM WR: 0x{:08X} 0x{:016X}".format(
+                        addr,
+                        data))
+
+            # TODO: Support read accesses
 
 # ==============================================================================
 
 class Axi4LiteBFM(uvm_component):
     """
-    A bus functional model for AXI4 Lite subordinate port
+    A bus functional model for AXI4 Lite subordinate port.
+
+    Does support multi-transfer transactions, does not support overlapped
+    transfers.
     """
 
     SIGNALS = [
@@ -174,6 +308,10 @@ class Axi4LiteBFM(uvm_component):
 
     @staticmethod
     def collect_bytes(data, strb=None):
+        """
+        Collects data bytes asserted on a data bus. Uses the strb value to
+        determine which octets are valid.
+        """
 
         if strb is not None:
             assert len(data) == 8 * len(strb)
@@ -184,7 +322,7 @@ class Axi4LiteBFM(uvm_component):
                 dat = (int(data.value) >> (8 * i)) & 0xFF
                 res.append(dat)
 
-        return bytes(res[::-1])
+        return bytes(res)
 
     async def _wait(self, signal, max_cycles=50):
         """
@@ -241,8 +379,10 @@ class Axi4LiteBFM(uvm_component):
             self.axi_wdata.value = wdata
             self.axi_wstrb.value = wstrb
 
+        # Wait for the last ready
+        await self._wait(self.axi_wready)
+
         # Deassert wvalid
-        await RisingEdge(self.clk)
         self.axi_wvalid.value = 0
 
         # Wait for response
@@ -303,9 +443,10 @@ class Axi4LiteBFM(uvm_component):
             rresp
         ))
 
-        return data, rresp
+        return bytes(data), rresp
 
 # ==============================================================================
+
 
 class Axi4LiteSubordinateDriver(uvm_driver):
     """
@@ -323,12 +464,11 @@ class Axi4LiteSubordinateDriver(uvm_driver):
             it = await self.seq_item_port.get_next_item()
 
             if isinstance(it, BusWriteItem):
-                it.resp = await self.bfm.write(it.addr,
-                                               struct.pack("<I", it.data))
+                it.resp = await self.bfm.write(it.addr, it.data)
 
             elif isinstance(it, BusReadItem):
-                data, resp = await self.bfm.read(it.addr, 4)
-                it.data = struct.unpack("<II", data)
+                # FIXME: Assuming that all read requests are 64-bit wide
+                data, resp = await self.bfm.read(it.addr, 8)
                 it.resp = resp
 
             else:
@@ -382,6 +522,9 @@ class Axi4LiteMonitor(uvm_component):
         )
 
     async def watch_write(self):
+        """
+        Watches the bus for writes
+        """
         state = "idle"
         addr  = None
         data  = None
@@ -422,8 +565,7 @@ class Axi4LiteMonitor(uvm_component):
                 assert not self._w_active()
 
                 state = "idle"
-                self.ap.write(BusWriteItem(addr, struct.unpack("<I", data),
-                                           bresp))
+                self.ap.write(BusWriteItem(addr, bytes(data), bresp))
 
                 self.logger.debug("WR: 0x{:08X} {} 0b{:03b}".format(
                     addr,
@@ -432,6 +574,10 @@ class Axi4LiteMonitor(uvm_component):
                 ))
 
     async def watch_read(self):
+        """
+        Watches the bus for reads
+        """
+
         state = "idle"
         addr  = None
         data  = None
@@ -442,8 +588,7 @@ class Axi4LiteMonitor(uvm_component):
                 state = "idle"
                 rresp = int(self.bfm.axi_rresp.value)
 
-                self.ap.write(BusReadItem(addr, struct.unpack("<II", data),
-                                          rresp))
+                self.ap.write(BusReadItem(addr, bytes(data), rresp))
 
                 self.logger.debug("RD: 0x{:08X} {} 0b{:03b}".format(
                     addr,
@@ -461,7 +606,6 @@ class Axi4LiteMonitor(uvm_component):
                 if self._ar_active():
                     state = "rd_addr"
                     addr  = int(self.bfm.axi_araddr.value)
-                    print("1")
 
             elif state == "rd_addr":
                 assert not self._ar_active()
@@ -501,6 +645,14 @@ class BaseEnv(uvm_env):
         ConfigDB().set(None, "*", "TEST_CLK_PERIOD", 1)
         ConfigDB().set(None, "*", "TEST_ITERATIONS", 50)
 
+        # ICCM and DCCM addresses / sizes are taken from the default VeeR
+        # config.
+        ConfigDB().set(None, "*", "ICCM_BASE",       0xEE000000)
+        ConfigDB().set(None, "*", "DCCM_BASE",       0xF0040000)
+
+        ConfigDB().set(None, "*", "ICCM_SIZE",       0x10000)
+        ConfigDB().set(None, "*", "DCCM_SIZE",       0x10000)
+
         # Sequencers
         self.axi_seqr = uvm_sequencer("axi_seqr", self)
 
@@ -510,7 +662,8 @@ class BaseEnv(uvm_env):
         self.axi_mon = Axi4LiteMonitor("axi_mon", self, bfm=self.axi_bfm)
 
         # Core side memory port
-        self.mem_bfm = CoreMemoryBFM(cocotb.top)
+        self.mem_bfm = CoreMemoryBFM("mem_bfm", self, cocotb.top)
+        self.mem_mon = CoreMemoryMonitor("mem_mon", self, bfm=self.mem_bfm)
 
     def connect_phase(self):
         self.axi_drv.seq_item_port.connect(self.axi_seqr.seq_item_export)
@@ -555,11 +708,8 @@ class BaseTest(uvm_test):
         self.start_clock("clk")
         self.start_clock("free_clk")
 
+        # Enable clock
         cocotb.top.dma_bus_clk_en.value = 1
-        cocotb.top.iccm_ready.value = 1
-        cocotb.top.dccm_ready.value = 1
-
-        cocotb.start_soon(self.env.mem_bfm.run())
 
         # Issue reset
         await self.do_reset()

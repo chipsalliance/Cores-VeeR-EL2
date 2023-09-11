@@ -198,15 +198,19 @@ class CoreMemoryBFM(uvm_component):
                 # Write / read
                 if self.dma_mem_write.value:
                     self.dccm_data[addr] = int(self.dma_mem_wdata.value)
-                    self.dccm_dma_rvalid.value = 0
 
                 else:
-                    self.dccm_dma_rdata = self.dccm_data.get(addr, 0)
+
+                    if addr not in self.dccm_data:
+                        self.dccm_data[addr] = random.randrange(0, (1 << 64) - 1)
+
+                    self.dccm_dma_rdata.value = self.dccm_data[addr]
                     self.dccm_dma_rtag.value = tag
                     self.dccm_dma_rvalid.value = 1
                     self.dccm_dma_ecc_error.value = 0
             
                 await RisingEdge(self.clk)
+                self.dccm_dma_rvalid.value = 0
 
             # ICCM access
             elif self.dma_iccm_req.value:
@@ -218,15 +222,19 @@ class CoreMemoryBFM(uvm_component):
                 # Write / read
                 if self.dma_mem_write.value:
                     self.iccm_data[addr] = int(self.dma_mem_wdata.value)
-                    self.iccm_dma_rvalid.value = 0
 
                 else:
-                    self.iccm_dma_rdata = self.iccm_data.get(addr, 0)
+
+                    if addr not in self.iccm_data:
+                        self.iccm_data[addr] = random.randrange(0, (1 << 64) - 1)
+
+                    self.iccm_dma_rdata.value = self.iccm_data[addr]
                     self.iccm_dma_rtag.value = tag
                     self.iccm_dma_rvalid.value = 1
                     self.iccm_dma_ecc_error.value = 0
 
                 await RisingEdge(self.clk)
+                self.iccm_dma_rvalid.value = 0
 
     async def run_phase(self):
 
@@ -262,33 +270,57 @@ class CoreMemoryMonitor(uvm_component):
         while True:
             await RisingEdge(self.bfm.clk)
 
-            # DCCM access
+            # DCCM request
             if self.bfm.dma_dccm_req.value and \
                self.bfm.dccm_ready.value:
 
-                if self.bfm.dma_mem_write.value:
-                    addr = int(self.bfm.dma_mem_addr.value) - self.dccm_base
-                    data = int(self.bfm.dma_mem_wdata.value)
-                    self.ap.write(MemWriteItem("DCCM", addr, data))
+                addr = int(self.bfm.dma_mem_addr.value) - self.dccm_base
+                data = int(self.bfm.dma_mem_wdata.value)
+                wr   = int(self.bfm.dma_mem_write.value)
 
+                await RisingEdge(self.bfm.clk)
+
+                # Write
+                if wr:
+                    self.ap.write(MemWriteItem("DCCM", addr, data))
                     self.logger.debug("DCCM WR: 0x{:08X} 0x{:016X}".format(
                         addr,
                         data))
 
-            # ICCM access
+                # Read
+                elif self.bfm.dccm_dma_rvalid.value:
+                    data = int(self.bfm.dccm_dma_rdata.value)
+
+                    self.ap.write(MemReadItem("DCCM", addr, data))
+                    self.logger.debug("DCCM RD: 0x{:08X} 0x{:016X}".format(
+                        addr,
+                        data))
+
+            # ICCM request
             if self.bfm.dma_iccm_req.value and \
                self.bfm.iccm_ready.value:
 
-                if self.bfm.dma_mem_write.value:
-                    addr = int(self.bfm.dma_mem_addr.value) - self.iccm_base
-                    data = int(self.bfm.dma_mem_wdata.value)
-                    self.ap.write(MemWriteItem("ICCM", addr, data))
+                addr = int(self.bfm.dma_mem_addr.value) - self.iccm_base
+                data = int(self.bfm.dma_mem_wdata.value)
+                wr   = int(self.bfm.dma_mem_write.value)
 
+                await RisingEdge(self.bfm.clk)
+
+                # Write
+                if wr:
+                    self.ap.write(MemWriteItem("ICCM", addr, data))
                     self.logger.debug("ICCM WR: 0x{:08X} 0x{:016X}".format(
                         addr,
                         data))
 
-            # TODO: Support read accesses
+                # Read
+                elif self.bfm.iccm_dma_rvalid.value:
+                    data = int(self.bfm.iccm_dma_rdata.value)
+
+                    self.ap.write(MemReadItem("ICCM", addr, data))
+                    self.logger.debug("ICCM RD: 0x{:08X} 0x{:016X}".format(
+                        addr,
+                        data))
 
 # ==============================================================================
 
@@ -478,7 +510,9 @@ class Axi4LiteBFM(uvm_component):
         while True:
 
             # Wait for response
-            await self._wait(self.axi_bvalid)
+            await RisingEdge(self.clk)
+            if not self.axi_bvalid.value:
+                continue
 
             bresp = int(self.axi_bresp.value)
             bid   = int(self.axi_bid.value)
@@ -637,11 +671,6 @@ class Axi4LiteMonitor(uvm_component):
         """
         Watches the bus for writes
         """
-        state = "idle"
-        addr  = None
-        data  = None
-        bresp = None
-
         xfers = dict()
 
         # Main loop
@@ -703,24 +732,7 @@ class Axi4LiteMonitor(uvm_component):
         """
         Watches the bus for reads
         """
-
-        state = "idle"
-        addr  = None
-        data  = None
-        resp  = None
-
-        def check_last():
-            if self.bfm.axi_rlast.value:
-                state = "idle"
-                rresp = int(self.bfm.axi_rresp.value)
-
-                self.ap.write(BusReadItem(addr, bytes(data), rresp))
-
-                self.logger.debug("RD: 0x{:08X} {} 0b{:03b}".format(
-                    addr,
-                    ["0x{:02X}".format(b) for b in data],
-                    rresp
-                ))
+        xfers = dict()
 
         # Main loop
         while True:
@@ -728,28 +740,43 @@ class Axi4LiteMonitor(uvm_component):
             # Wait for clock
             await RisingEdge(self.bfm.clk)
 
-            if state == "idle":
-                if self._ar_active():
-                    state = "rd_addr"
-                    addr  = int(self.bfm.axi_araddr.value)
+            # A new read request
+            if self._ar_active():
+                addr = int(self.bfm.axi_araddr.value)
+                arid = int(self.bfm.axi_arid.value)
 
-            elif state == "rd_addr":
-                assert not self._ar_active()
-                assert not self._b_active()
+                if arid in xfers:
+                    self.logger.error(
+                        "Read request for a pending transaction, arid={}".format(
+                        awid
+                    ))
 
-                if self._r_active():
-                    state = "rd_data"
-                    data  = bytearray()
-                    data.extend(self._sample_r())
-                    check_last()
+                else:
+                    xfers[arid] = self.Transfer(arid, addr)
 
-            elif state == "rd_data":
-                assert not self._ar_active()
-                assert not self._b_active()
+            # Read completion
+            if self._r_active():
+                rresp = int(self.bfm.axi_rresp.value)
+                rid   = int(self.bfm.axi_rid.value)
 
-                if self._r_active():
-                    data.extend(self._sample_r())
-                    check_last()
+                if rid not in xfers:
+                    self.logger.error(
+                        "Data read but no transaction is pending"
+                    )
+
+                else:
+                    xfer = xfers[rid]
+                    xfer.data = self._sample_r()
+
+                    del xfers[rid]
+
+                    self.ap.write(BusReadItem(xfer.addr, xfer.data, rresp))
+
+                    self.logger.debug("RD: 0x{:08X} {} 0b{:03b}".format(
+                        xfer.addr,
+                        ["0x{:02X}".format(b) for b in xfer.data],
+                        rresp
+                    ))
 
     async def run_phase(self):
 

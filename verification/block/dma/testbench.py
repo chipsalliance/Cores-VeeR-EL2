@@ -8,6 +8,7 @@ import math
 import pyuvm
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles, FallingEdge, RisingEdge, Timer
+from cocotb.triggers import First, Event, Lock
 from pyuvm import *
 
 # ==============================================================================
@@ -143,6 +144,9 @@ class CoreMemoryBFM(uvm_component):
         self.dccm_data = dict()
 
     async def iccm_busy_task(self):
+        """
+        A task that randomly makes ICCM busy
+        """
 
         while True:
             await RisingEdge(self.clk)
@@ -157,6 +161,9 @@ class CoreMemoryBFM(uvm_component):
                 self.iccm_ready.value = 1
 
     async def dccm_busy_task(self):
+        """
+        A task that randomly makes DCCM busy
+        """
 
         while True:
             await RisingEdge(self.clk)
@@ -171,6 +178,9 @@ class CoreMemoryBFM(uvm_component):
                 self.dccm_ready.value = 1
 
     async def responder(self):
+        """
+        A task for handling read / write responses
+        """
 
         while True:
             await RisingEdge(self.clk)
@@ -219,9 +229,16 @@ class CoreMemoryBFM(uvm_component):
                 await RisingEdge(self.clk)
 
     async def run_phase(self):
+
+        # Initially make ICCM and DCCM ready
+        self.iccm_ready.value = 1
+        self.dccm_ready.value = 1
+
+        # Start tasks
         cocotb.start_soon(self.iccm_busy_task())
         cocotb.start_soon(self.dccm_busy_task())
         cocotb.start_soon(self.responder())
+
 
 class CoreMemoryMonitor(uvm_component):
     """
@@ -275,12 +292,13 @@ class CoreMemoryMonitor(uvm_component):
 
 # ==============================================================================
 
+
 class Axi4LiteBFM(uvm_component):
     """
     A bus functional model for AXI4 Lite subordinate port.
 
-    Does support multi-transfer transactions, does not support overlapped
-    transfers.
+    Does support multi-transfer transactions, supports overlapped transactions
+    for writes
     """
 
     SIGNALS = [
@@ -314,6 +332,17 @@ class Axi4LiteBFM(uvm_component):
         "rlast",
     ]
 
+    class Transfer:
+        """
+        Represents a pending AXI transfer
+        """
+        def __init__(self, tid):
+            self.tid  = tid
+            self.addr = None
+            self.data = None
+
+            self.pending = False
+
     def __init__(self, name, parent, uut):
         super().__init__(name, parent)
 
@@ -336,6 +365,11 @@ class Axi4LiteBFM(uvm_component):
         self.logger.debug(" dwidth = {}".format(self.dwidth))
         self.logger.debug(" swidth = {}".format(self.swidth))
 
+        self.xfer_lock = Lock()
+
+        self.wr_xfers = {i: self.Transfer(i)
+                         for i in range(1 << len(self.axi_awid))}
+
     @staticmethod
     def collect_bytes(data, strb=None):
         """
@@ -354,7 +388,7 @@ class Axi4LiteBFM(uvm_component):
 
         return bytes(res)
 
-    async def _wait(self, signal, max_cycles=50):
+    async def _wait(self, signal, max_cycles=100):
         """
         Waits for a signal to be asserted for at most max_cycles.
         Raises an exception if it does not
@@ -368,14 +402,32 @@ class Axi4LiteBFM(uvm_component):
 
     async def write(self, addr, data):
         """
-        Issues a write transfer and wait for its completion
+        Issues a write transfer, does not wait until it completes
         """
+
+        # Wait for a free transfer id
+        while True:
+            await RisingEdge(self.clk)
+
+            async with self.xfer_lock:
+                awid = None
+                for tid, xfr in self.wr_xfers.items():
+                    if not xfr.pending:
+                        awid = tid
+                        break
+
+                if awid is not None:
+                    xfer = self.wr_xfers[awid]
+                    xfer.pending = True
+                    xfer.addr = addr
+                    xfer.data = data
+                    break
 
         # Send write request
         await self._wait(self.axi_awready)
         self.axi_awvalid.value  = 1
         self.axi_awaddr.value   = addr
-        self.axi_awid.value     = 1
+        self.axi_awid.value     = awid
         self.axi_awsize.value   = int(math.ceil(math.log2(self.dwidth)))
 
         await RisingEdge(self.clk)
@@ -415,25 +467,45 @@ class Axi4LiteBFM(uvm_component):
         # Deassert wvalid
         self.axi_wvalid.value = 0
 
-        # Wait for response
+    async def write_handler(self):
+        """
+        A handler for write transfer completion
+        """
+
+        # Accept responses
         self.axi_bready.value = 1
-        await self._wait(self.axi_bvalid)
 
-        bresp = int(self.axi_bresp.value)
-        bid   = int(self.axi_bid.value)
-        self.axi_bready.value = 0
+        while True:
 
-        self.logger.debug("WR: 0x{:08X} {} 0b{:03b}".format(
-            addr,
-            ["0x{:02X}".format(b) for b in data],
-            bresp
-        ))
+            # Wait for response
+            await self._wait(self.axi_bvalid)
 
-        return bresp
+            bresp = int(self.axi_bresp.value)
+            bid   = int(self.axi_bid.value)
+
+            # Find a pending transfer
+            async with self.xfer_lock:
+
+                xfer = self.wr_xfers.get(bid, None)
+                if not xfer:
+                    self.logger.error(
+                        "Write response for a non-pending tid {}".format(bid))
+                    continue
+
+                xfer.pending = False
+
+                addr = xfer.addr
+                data = xfer.data
+
+            self.logger.debug("WR: 0x{:08X} {} 0b{:03b}".format(
+                addr,
+                ["0x{:02X}".format(b) for b in data],
+                bresp
+            ))
 
     async def read(self, addr, data):
         """
-        Issues a read transfer
+        Issues a read transfer and waits for its completion
         """
 
         # Send read request
@@ -475,6 +547,11 @@ class Axi4LiteBFM(uvm_component):
 
         return bytes(data), rresp
 
+    async def run_phase(self):
+
+        # Start read & write handlers
+        cocotb.start_soon(self.write_handler())
+
 # ==============================================================================
 
 
@@ -494,12 +571,11 @@ class Axi4LiteSubordinateDriver(uvm_driver):
             it = await self.seq_item_port.get_next_item()
 
             if isinstance(it, BusWriteItem):
-                it.resp = await self.bfm.write(it.addr, it.data)
+                await self.bfm.write(it.addr, it.data)
 
             elif isinstance(it, BusReadItem):
                 # FIXME: Assuming that all read requests are 64-bit wide
-                data, resp = await self.bfm.read(it.addr, 8)
-                it.resp = resp
+                await self.bfm.read(it.addr, 8)
 
             else:
                 raise RuntimeError("Unknown item '{}'".format(type(it)))
@@ -511,6 +587,12 @@ class Axi4LiteMonitor(uvm_component):
     """
     A monitor for AXI4 lite bus
     """
+
+    class Transfer:
+        def __init__(self, tid, addr=None):
+            self.tid    = tid
+            self.addr   = addr
+            self.data   = None
 
     def __init__(self, *args, **kwargs):
         self.bfm = kwargs["bfm"]
@@ -560,48 +642,62 @@ class Axi4LiteMonitor(uvm_component):
         data  = None
         bresp = None
 
+        xfers = dict()
+
         # Main loop
         while True:
 
             # Wait for clock
             await RisingEdge(self.bfm.clk)
 
-            if state == "idle":
-                if self._aw_active():
-                    state = "wr_addr"
-                    addr  = int(self.bfm.axi_awaddr.value)
+            # A new write request
+            if self._aw_active():
+                addr = int(self.bfm.axi_awaddr.value)
+                awid = int(self.bfm.axi_awid.value)
 
-            elif state == "wr_addr":
-                assert not self._aw_active()
-                assert not self._b_active()
+                if awid in xfers:
+                    self.logger.error(
+                        "Write request for a pending transaction, awid={}".format(
+                        awid
+                    ))
 
-                if self._w_active():
-                    state = "wr_data"
-                    data  = bytearray()
-                    data.extend(self._sample_w())
+                else:
+                    xfers[awid] = self.Transfer(awid, addr)
 
-            elif state == "wr_data":
-                assert not self._aw_active()
+            # Data (for the last seen awid)
+            if self._w_active():
 
-                if self._w_active():
-                    data.extend(self._sample_w())
+                if awid not in xfers:
+                    self.logger.error(
+                        "Data write but no transaction is pending"
+                    )
 
-                if self._b_active():
-                    state = "wr_resp"
-                    bresp = int(self.bfm.axi_rresp.value)
+                else:
+                    xfer = xfers[awid]
+                    xfer.data = self._sample_w()
 
-            elif state == "wr_resp":
-                assert not self._aw_active()
-                assert not self._w_active()
+            # Write completion
+            if self._b_active():
+                bresp = int(self.bfm.axi_bresp.value)
+                bid   = int(self.bfm.axi_bid.value)
 
-                state = "idle"
-                self.ap.write(BusWriteItem(addr, bytes(data), bresp))
+                if bid not in xfers:
+                    self.logger.error(
+                        "Response for a non-pending transaction, bid={}".format(
+                        bid
+                    ))
 
-                self.logger.debug("WR: 0x{:08X} {} 0b{:03b}".format(
-                    addr,
-                    ["0x{:02X}".format(b) for b in data],
-                    bresp
-                ))
+                else:
+                    xfer = xfers[bid]
+                    del xfers[bid]
+
+                    self.ap.write(BusWriteItem(xfer.addr, xfer.data, bresp))
+
+                    self.logger.debug("WR: 0x{:08X} {} 0b{:03b}".format(
+                        xfer.addr,
+                        ["0x{:02X}".format(b) for b in xfer.data],
+                        bresp
+                    ))
 
     async def watch_read(self):
         """
@@ -686,7 +782,7 @@ class BaseEnv(uvm_env):
         ConfigDB().set(None, "*", "ICCM_BUSY_PROB",  0.05)
         ConfigDB().set(None, "*", "DCCM_BUSY_PROB",  0.05)
 
-        ConfigDB().set(None, "*", "MEM_BUSY_MIN",    5)
+        ConfigDB().set(None, "*", "MEM_BUSY_MIN",    10)
         ConfigDB().set(None, "*", "MEM_BUSY_MAX",    25)
 
         # Sequencers

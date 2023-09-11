@@ -129,25 +129,51 @@ class CoreMemoryBFM(uvm_component):
         self.iccm_size = ConfigDB().get(None, "", "ICCM_SIZE")
         self.dccm_size = ConfigDB().get(None, "", "DCCM_SIZE")
 
+        # Parameters
+        self.iccm_busy = ConfigDB().get(None, "", "ICCM_BUSY_PROB")
+        self.dccm_busy = ConfigDB().get(None, "", "DCCM_BUSY_PROB")
+
+        self.busy_range = (
+            ConfigDB().get(None, "", "MEM_BUSY_MIN"),
+            ConfigDB().get(None, "", "MEM_BUSY_MAX"),
+        )
+
         # Memory content
         self.iccm_data = dict()
         self.dccm_data = dict()
 
-    async def run_phase(self):
+    async def iccm_busy_task(self):
 
         while True:
             await RisingEdge(self.clk)
 
             # Become busy at random for a random cycle count
-            if random.random() < 0.25:
+            if random.random() < self.iccm_busy:
                 self.iccm_ready.value = 0
-                self.dccm_ready.value = 0
 
-                n = random.randrange(10, 20)
+                n = random.randrange(*self.busy_range)
                 await ClockCycles(self.clk, n)
 
                 self.iccm_ready.value = 1
+
+    async def dccm_busy_task(self):
+
+        while True:
+            await RisingEdge(self.clk)
+
+            # Become busy at random for a random cycle count
+            if random.random() < self.dccm_busy:
+                self.dccm_ready.value = 0
+
+                n = random.randrange(*self.busy_range)
+                await ClockCycles(self.clk, n)
+
                 self.dccm_ready.value = 1
+
+    async def responder(self):
+
+        while True:
+            await RisingEdge(self.clk)
 
             # Sample signals
             tag = int(self.dma_mem_tag)
@@ -192,6 +218,10 @@ class CoreMemoryBFM(uvm_component):
 
                 await RisingEdge(self.clk)
 
+    async def run_phase(self):
+        cocotb.start_soon(self.iccm_busy_task())
+        cocotb.start_soon(self.dccm_busy_task())
+        cocotb.start_soon(self.responder())
 
 class CoreMemoryMonitor(uvm_component):
     """
@@ -652,6 +682,12 @@ class BaseEnv(uvm_env):
 
         ConfigDB().set(None, "*", "ICCM_SIZE",       0x10000)
         ConfigDB().set(None, "*", "DCCM_SIZE",       0x10000)
+
+        ConfigDB().set(None, "*", "ICCM_BUSY_PROB",  0.05)
+        ConfigDB().set(None, "*", "DCCM_BUSY_PROB",  0.05)
+
+        ConfigDB().set(None, "*", "MEM_BUSY_MIN",    5)
+        ConfigDB().set(None, "*", "MEM_BUSY_MAX",    25)
 
         # Sequencers
         self.axi_seqr = uvm_sequencer("axi_seqr", self)

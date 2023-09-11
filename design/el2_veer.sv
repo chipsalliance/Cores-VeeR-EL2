@@ -726,6 +726,14 @@ import el2_pkg::*;
    assign        dccm_clk_override = dec_tlu_dccm_clk_override;   // dccm memory
    assign        icm_clk_override = dec_tlu_icm_clk_override;    // icache/iccm memory
 
+   // PMP Signals
+`define PMP_CHANNELS 2
+   el2_pmp_cfg_pkt_t       pmp_pmpcfg  [pt.PMP_ENTRIES];
+   logic [31:0]            pmp_pmpaddr [pt.PMP_ENTRIES];
+   logic [31:0]            pmp_chan_addr [PMP_CHANNELS];
+   logic  [2:0]            pmp_chan_type [PMP_CHANNELS];
+   logic                   pmp_chan_err  [PMP_CHANNELS];
+
    // -----------------------DEBUG  START -------------------------------
 
    logic [31:0]            dbg_cmd_addr;              // the address of the debug command to used by the core
@@ -953,6 +961,12 @@ import el2_pkg::*;
 
                                       .*
                                       );
+
+   el2_pmp #(.pt(pt)) pmp (
+                           .clk(active_l2clk),
+                           .rst_l(core_rst_l),
+                           .*
+                           );
 
    if (pt.BUILD_AHB_LITE == 1) begin: Gen_AXI_To_AHB
 

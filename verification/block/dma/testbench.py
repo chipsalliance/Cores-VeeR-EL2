@@ -43,11 +43,12 @@ class MemWriteItem(uvm_sequence_item):
     A generic memory bus write item
     """
 
-    def __init__(self, mem, addr, data):
+    def __init__(self, mem, addr, data, resp=None):
         super().__init__("MemWriteItem")
         self.mem  = mem
         self.addr = addr
         self.data = data
+        self.resp = resp
 
 
 class MemReadItem(uvm_sequence_item):
@@ -55,11 +56,12 @@ class MemReadItem(uvm_sequence_item):
     A generic memory bus read item
     """
 
-    def __init__(self, mem, addr, data):
+    def __init__(self, mem, addr, data, resp=None):
         super().__init__("MemReadItem")
         self.mem  = mem
         self.addr = addr
         self.data = data
+        self.resp = resp
 
 # ==============================================================================
 
@@ -123,6 +125,12 @@ class CoreMemoryBFM(uvm_component):
         # Collect signals
         collect_signals(self.SIGNALS, uut, self)
 
+        # Memory content
+        self.iccm_data = dict()
+        self.dccm_data = dict()
+
+    def build_phase(self):
+
         # Get base addresses and sizes
         self.iccm_base = ConfigDB().get(None, "", "ICCM_BASE")
         self.dccm_base = ConfigDB().get(None, "", "DCCM_BASE")
@@ -130,18 +138,16 @@ class CoreMemoryBFM(uvm_component):
         self.iccm_size = ConfigDB().get(None, "", "ICCM_SIZE")
         self.dccm_size = ConfigDB().get(None, "", "DCCM_SIZE")
 
-        # Parameters
-        self.iccm_busy = ConfigDB().get(None, "", "ICCM_BUSY_PROB")
-        self.dccm_busy = ConfigDB().get(None, "", "DCCM_BUSY_PROB")
+        # Get parameters
+        self.iccm_busy = ConfigDB().get(self, "", "ICCM_BUSY_PROB")
+        self.dccm_busy = ConfigDB().get(self, "", "DCCM_BUSY_PROB")
 
         self.busy_range = (
-            ConfigDB().get(None, "", "MEM_BUSY_MIN"),
-            ConfigDB().get(None, "", "MEM_BUSY_MAX"),
+            ConfigDB().get(self, "", "MEM_BUSY_MIN"),
+            ConfigDB().get(self, "", "MEM_BUSY_MAX"),
         )
 
-        # Memory content
-        self.iccm_data = dict()
-        self.dccm_data = dict()
+        self.ecc_err_rate = ConfigDB().get(self, "", "ECC_ERROR_RATE")
 
     async def iccm_busy_task(self):
         """
@@ -207,7 +213,8 @@ class CoreMemoryBFM(uvm_component):
                     self.dccm_dma_rdata.value = self.dccm_data[addr]
                     self.dccm_dma_rtag.value = tag
                     self.dccm_dma_rvalid.value = 1
-                    self.dccm_dma_ecc_error.value = 0
+                    self.dccm_dma_ecc_error.value = \
+                        random.random() < self.ecc_err_rate
             
                 await RisingEdge(self.clk)
                 self.dccm_dma_rvalid.value = 0
@@ -231,7 +238,8 @@ class CoreMemoryBFM(uvm_component):
                     self.iccm_dma_rdata.value = self.iccm_data[addr]
                     self.iccm_dma_rtag.value = tag
                     self.iccm_dma_rvalid.value = 1
-                    self.iccm_dma_ecc_error.value = 0
+                    self.iccm_dma_ecc_error.value = \
+                        random.random() < self.ecc_err_rate
 
                 await RisingEdge(self.clk)
                 self.iccm_dma_rvalid.value = 0
@@ -277,18 +285,18 @@ class CoreMemoryMonitor(uvm_component):
                 if is_iccm:
                     addr = req_addr - self.iccm_base
                     data = int(self.bfm.iccm_dma_rdata.value)
-                    self.ap.write(MemReadItem("ICCM", addr, data))
-                    self.logger.debug("ICCM RD: 0x{:08X} 0x{:016X}".format(
-                        addr,
-                        data))
+                    resp = int(self.bfm.iccm_dma_ecc_error.value)
+                    self.ap.write(MemReadItem("ICCM", addr, data, resp))
+                    self.logger.debug("ICCM RD: 0x{:08X} 0x{:016X} {}".format(
+                        addr, data, resp))
 
                 if is_dccm:
                     addr = req_addr - self.dccm_base
                     data = int(self.bfm.dccm_dma_rdata.value)
-                    self.ap.write(MemReadItem("DCCM", addr, data))
-                    self.logger.debug("DCCM RD: 0x{:08X} 0x{:016X}".format(
-                        addr,
-                        data))
+                    resp = int(self.bfm.dccm_dma_ecc_error.value)
+                    self.ap.write(MemReadItem("DCCM", addr, data, resp))
+                    self.logger.debug("DCCM RD: 0x{:08X} 0x{:016X} {}".format(
+                        addr, data, resp))
 
             req_pending = False
 
@@ -804,12 +812,6 @@ class BaseEnv(uvm_env):
         ConfigDB().set(None, "*", "DCCM_SIZE",       0x10000)
         ConfigDB().set(None, "*", "PIC_SIZE",        0x20)
 
-        ConfigDB().set(None, "*", "ICCM_BUSY_PROB",  0.05)
-        ConfigDB().set(None, "*", "DCCM_BUSY_PROB",  0.05)
-
-        ConfigDB().set(None, "*", "MEM_BUSY_MIN",    10)
-        ConfigDB().set(None, "*", "MEM_BUSY_MAX",    25)
-
         ConfigDB().set(None, "*", "ADDR_ALIGN",
             len(cocotb.top.dma_axi_wdata) // 8)
 
@@ -824,6 +826,15 @@ class BaseEnv(uvm_env):
         # Core side memory port
         self.mem_bfm = CoreMemoryBFM("mem_bfm", self, cocotb.top)
         self.mem_mon = CoreMemoryMonitor("mem_mon", self, bfm=self.mem_bfm)
+
+        # Component config
+        ConfigDB().set(self.mem_bfm, "", "ICCM_BUSY_PROB",  0.05)
+        ConfigDB().set(self.mem_bfm, "", "DCCM_BUSY_PROB",  0.05)
+
+        ConfigDB().set(self.mem_bfm, "", "MEM_BUSY_MIN",    10)
+        ConfigDB().set(self.mem_bfm, "", "MEM_BUSY_MAX",    25)
+
+        ConfigDB().set(self.mem_bfm, "", "ECC_ERROR_RATE",  0.0)
 
     def connect_phase(self):
         self.axi_drv.seq_item_port.connect(self.axi_seqr.seq_item_export)

@@ -36,6 +36,10 @@ import el2_pkg::*;
    output logic             pmp_chan_err  [PMP_CHANNELS]
    );
 
+  logic [33:0]                                 csr_pmp_addr_i [pt.PMP_ENTRIES];
+  logic [33:0]                                 pmp_req_addr_i [PMP_CHANNELS];
+  el2_pmp_type_pkt_t [33:0]                    pmp_req_type_i [PMP_CHANNELS];
+
   logic [33:0]                                 region_start_addr [pt.PMP_ENTRIES];
   logic [33:PMP_GRANULARITY+2]                 region_addr_mask  [pt.PMP_ENTRIES];
   logic [PMP_CHANNELS-1:0][pt.PMP_ENTRIES-1:0] region_match_gt;
@@ -55,36 +59,26 @@ import el2_pkg::*;
   //                                                                  |
   // region_match_all -----------------> access_fault_check <----------
   //                                             |
-  //                                             \--> pmp_req_err_o
+  //                                             \--> pmp_chan_err
 
   // A wrapper function in which it is decided which form of permission check function gets called
-  function automatic logic perm_check_wrapper(ibex_pkg::pmp_cfg_t  csr_pmp_cfg,
-                                              ibex_pkg::priv_lvl_e priv_mode,
-                                              logic                permission_check);
+  function automatic logic perm_check_wrapper(el2_pmp_cfg_pkt_t csr_pmp_cfg,
+                                              logic             permission_check);
                           return orig_perm_check(csr_pmp_cfg.lock,
-                                                 priv_mode,
                                                  permission_check);
   endfunction
 
   // Compute permissions checks that apply when MSECCFG.MML is unset. This is the original PMP
   // behaviour before Smepmp was added.
-  function automatic logic orig_perm_check(logic                pmp_cfg_lock,
-                                           ibex_pkg::priv_lvl_e priv_mode,
-                                           logic                permission_check);
-      return (priv_mode == PRIV_LVL_M) ?
+  function automatic logic orig_perm_check(logic pmp_cfg_lock,
+                                           logic permission_check);
+      return (~pmp_cfg_lock | permission_check);
           // For M-mode, any region which matches with the L-bit clear, or with sufficient
           // access permissions will be allowed
-          (~pmp_cfg_lock | permission_check) :
-          // For other modes, the lock bit doesn't matter
-          permission_check;
   endfunction
 
   // Access fault determination / prioritization
-  function automatic logic access_fault_check (logic                     csr_pmp_mseccfg_mmwp,
-                                               logic                     csr_pmp_mseccfg_mml,
-                                               ibex_pkg::pmp_req_e       pmp_req_type,
-                                               logic [pt.PMP_ENTRIES-1:0] match_all,
-                                               ibex_pkg::priv_lvl_e      priv_mode,
+  function automatic logic access_fault_check (logic [pt.PMP_ENTRIES-1:0] match_all,
                                                logic [pt.PMP_ENTRIES-1:0] final_perm_check);
 
 
@@ -109,19 +103,20 @@ import el2_pkg::*;
   // ---------------
 
   for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : g_addr_exp
+    assign csr_pmp_addr_i[r] = {pmp_pmpaddr[r], 2'b00}; // addr conv.: word @ 32-bit -> byte @ 34-bit
     // Start address for TOR matching
     if (r == 0) begin : g_entry0
-      assign region_start_addr[r] = (csr_pmp_cfg_i[r].mode == PMP_MODE_TOR) ? 32'h00000000 :
-                                                                              csr_pmp_addr_i[r];
+      assign region_start_addr[r] = (pmp_pmpcfg[r].mode == TOR) ? 34'h000000000 :
+                                                                  csr_pmp_addr_i[r];
     end else begin : g_oth
-      assign region_start_addr[r] = (csr_pmp_cfg_i[r].mode == PMP_MODE_TOR) ? csr_pmp_addr_i[r-1] :
-                                                                              csr_pmp_addr_i[r];
+      assign region_start_addr[r] = (pmp_pmpcfg[r].mode == TOR) ? csr_pmp_addr_i[r-1] :
+                                                                  csr_pmp_addr_i[r];
     end
     // Address mask for NA matching
     for (genvar b = PMP_GRANULARITY + 2; b < 34; b++) begin : g_bitmask
       if (b == 2) begin : g_bit0
         // Always mask bit 2 for NAPOT
-        assign region_addr_mask[r][b] = (csr_pmp_cfg_i[r].mode != PMP_MODE_NAPOT);
+        assign region_addr_mask[r][b] = (pmp_pmpcfg[r].mode != NAPOT);
       end else begin : g_others
         // We will mask this bit if it is within the programmed granule
         // i.e. addr = yyyy 0111
@@ -129,10 +124,10 @@ import el2_pkg::*;
         //                  | This bit pos is the top of the mask, all lower bits set
         // thus mask = 1111 0000
         if (PMP_GRANULARITY == 0) begin : g_region_addr_mask_zero_granularity
-          assign region_addr_mask[r][b] = (csr_pmp_cfg_i[r].mode != PMP_MODE_NAPOT) |
+          assign region_addr_mask[r][b] = (pmp_pmpcfg[r].mode != NAPOT) |
                                           ~&csr_pmp_addr_i[r][b-1:2];
         end else begin : g_region_addr_mask_other_granularity
-          assign region_addr_mask[r][b] = (csr_pmp_cfg_i[r].mode != PMP_MODE_NAPOT) |
+          assign region_addr_mask[r][b] = (pmp_pmpcfg[r].mode != NAPOT) |
                                           ~&csr_pmp_addr_i[r][b-1:PMP_GRANULARITY+1];
         end
       end
@@ -140,6 +135,7 @@ import el2_pkg::*;
   end
 
   for (genvar c = 0; c < PMP_CHANNELS; c++) begin : g_access_check
+    assign pmp_req_addr_i[c] = {2'b00, pmp_chan_addr[c]}; // addr. widening: 32-bit -> 34-bit
     for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : g_regions
       // Comparators are sized according to granularity
       assign region_match_eq[c][r] = (pmp_req_addr_i[c][33:PMP_GRANULARITY+2] &
@@ -153,11 +149,11 @@ import el2_pkg::*;
 
       always_comb begin
         region_match_all[c][r] = 1'b0;
-        unique case (csr_pmp_cfg_i[r].mode)
-          PMP_MODE_OFF:   region_match_all[c][r] = 1'b0;
-          PMP_MODE_NA4:   region_match_all[c][r] = region_match_eq[c][r];
-          PMP_MODE_NAPOT: region_match_all[c][r] = region_match_eq[c][r];
-          PMP_MODE_TOR: begin
+        unique case (pmp_pmpcfg[r].mode)
+          OFF:   region_match_all[c][r] = 1'b0;
+          NA4:   region_match_all[c][r] = region_match_eq[c][r];
+          NAPOT: region_match_all[c][r] = region_match_eq[c][r];
+          TOR: begin
             region_match_all[c][r] = (region_match_eq[c][r] | region_match_gt[c][r]) &
                                      region_match_lt[c][r];
           end
@@ -167,15 +163,13 @@ import el2_pkg::*;
 
       // Basic permission check compares cfg register only.
       assign region_basic_perm_check[c][r] =
-          ((pmp_req_type_i[c] == PMP_ACC_EXEC)  & csr_pmp_cfg_i[r].exec) |
-          ((pmp_req_type_i[c] == PMP_ACC_WRITE) & csr_pmp_cfg_i[r].write) |
-          ((pmp_req_type_i[c] == PMP_ACC_READ)  & csr_pmp_cfg_i[r].read);
+          ((pmp_req_type_i[c] == EXEC)  & pmp_pmpcfg[r].execute) |
+          ((pmp_req_type_i[c] == WRITE) & pmp_pmpcfg[r].write) |
+          ((pmp_req_type_i[c] == READ)  & pmp_pmpcfg[r].read);
 
       // Check specific required permissions since the behaviour is different
       // between Smepmp implementation and original PMP.
-      assign region_perm_check[c][r] = perm_check_wrapper(csr_pmp_cfg_i[r],
-                                                          pmp_req_type_i[c],
-                                                          priv_mode_i[c],
+      assign region_perm_check[c][r] = perm_check_wrapper(pmp_pmpcfg[r],
                                                           region_basic_perm_check[c][r]);
 
       // Address bits below PMP granularity (which starts at 4 byte) are deliberately unused.
@@ -186,14 +180,8 @@ import el2_pkg::*;
 
     // Once the permission checks of the regions are done, decide if the access is
     // denied by figuring out the matching region and its permission check.
-    assign pmp_req_err_o[c] = access_fault_check(csr_pmp_mseccfg_i.mmwp,
-                                                 csr_pmp_mseccfg_i.mml,
-                                                 pmp_req_type_i[c],
-                                                 region_match_all[c],
-                                                 priv_mode_i[c],
-                                                 region_perm_check[c]);
+    assign pmp_chan_err[c] = access_fault_check(region_match_all[c],
+                                                region_perm_check[c]);
   end
-
-
 
 endmodule // el2_pmp

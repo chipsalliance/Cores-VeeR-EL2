@@ -58,8 +58,8 @@ class TestSequenceRange(uvm_sequence):
             if random.random() >= 0.5:
                 item = BusReadItem(addr)
             else:
-                data = random.randrange(0, (1 << 64) - 1)
-                item = BusWriteItem(addr, struct.pack("<Q", data))
+                data = random.randrange(0, (1 << 32) - 1)
+                item = BusWriteItem(addr, data)
 
             await self.start_item(item)
             await self.finish_item(item)
@@ -79,7 +79,7 @@ class TestEnv(BaseEnv):
         super().connect_phase()
 
         # Connect monitors
-        self.axi_mon.ap.connect(self.scoreboard.fifo.analysis_export)
+        self.dbg_mon.ap.connect(self.scoreboard.fifo.analysis_export)
         self.mem_mon.ap.connect(self.scoreboard.fifo.analysis_export)
 
 # =============================================================================
@@ -99,5 +99,5 @@ class TestAddressOutOfRange(BaseTest):
         self.seq = TestSequenceRange.create("stimulus")
 
     async def run(self):
-        await self.seq.start(self.env.axi_seqr)
+        await self.seq.start(self.env.dbg_seqr)
 

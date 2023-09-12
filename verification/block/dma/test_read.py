@@ -12,7 +12,7 @@ from pyuvm import *
 
 from testbench import BaseEnv, BaseTest
 from testbench import BusReadItem, BusWriteItem
-from testbench import MemReadItem, MemWriteItem
+from scoreboards import ReadScoreboard
 
 # =============================================================================
 
@@ -108,107 +108,6 @@ class TestSequenceBoth(uvm_sequence):
 
             await ClockCycles(cocotb.top.clk, 5)
 
-# =============================================================================
-
-
-class Scoreboard(uvm_component):
-    """
-    A scoreboard that counts reads that happen on AXI and memory sides of the
-    DMA module
-    """
-
-    def __init__(self, name, parent):
-        super().__init__(name, parent)
-
-        self.passed = None
-
-        self.iccm_base = ConfigDB().get(None, "", "ICCM_BASE")
-        self.iccm_size = ConfigDB().get(None, "", "ICCM_SIZE")
-
-        self.dccm_base = ConfigDB().get(None, "", "DCCM_BASE")
-        self.dccm_size = ConfigDB().get(None, "", "DCCM_SIZE")
-
-    def build_phase(self):
-        self.fifo = uvm_tlm_analysis_fifo("fifo", self)
-        self.port = uvm_get_port("port", self)
-
-    def connect_phase(self):
-        self.port.connect(self.fifo.get_export)
-
-    def is_iccm(self, addr):
-        return addr > self.iccm_base and \
-               addr < (self.iccm_base + self.iccm_size)
-
-    def is_dccm(self, addr):
-        return addr > self.dccm_base and \
-               addr < (self.dccm_base + self.dccm_size)
-
-    def check_phase(self):
-
-        iccm_reads = defaultdict(lambda: 0)
-        dccm_reads = defaultdict(lambda: 0)
-
-        # Process writes
-        while self.port.can_get():
-
-            # Get an item
-            got_item, item = self.port.try_get()
-            assert got_item
-
-            # Initially pass
-            if self.passed is None:
-                self.passed = True
-
-            # AXI read. Check and decode its address
-            if isinstance(item, BusReadItem):
-
-                if self.is_iccm(item.addr):
-                    addr = item.addr - self.iccm_base
-                    data = struct.unpack("<Q", item.data)[0]
-                    iccm_reads[(addr, data)] += 1
-
-                elif self.is_dccm(item.addr):
-                    addr = item.addr - self.dccm_base
-                    data = struct.unpack("<Q", item.data)[0]
-                    dccm_reads[(addr, data)] += 1
-
-                else:
-                    self.logger.error(
-                        "Read from a non-memory address 0x{:08X}".format(
-                        item.addr
-                    ))
-                    self.passed = False
-
-            # Memory read
-            elif isinstance(item, MemReadItem):
-                if item.mem == "ICCM":
-                    iccm_reads[(item.addr, item.data,)] += 1
-                elif item.mem == "DCCM":
-                    dccm_reads[(item.addr, item.data,)] += 1
-                else:
-                    self.logger.error(
-                        "Read from an unknown memory region '{}'".format(
-                        item.mem
-                    ))
-                    self.passed = False
-
-        # Check if there is an even number of reads for (each address, data)
-        # for each memory region.
-        for name, d in [("ICCM", iccm_reads), ("DCCM", dccm_reads)]:
-            for key, count in d.items():
-                if count & 1:
-                    self.logger.error(
-                        "{} read count from 0x{:08X} is odd, data {}".format(
-                        name,
-                        key[0],
-                        key[1]
-                    ))
-                    self.passed = False
-
-    def final_phase(self):
-        if not self.passed:
-            self.logger.critical("{} reports a failure".format(type(self)))
-            assert False
 
 # =============================================================================
 
@@ -218,7 +117,7 @@ class TestEnv(BaseEnv):
         super().build_phase()
 
         # Add scoreboard
-        self.scoreboard = Scoreboard("scoreboard", self)
+        self.scoreboard = ReadScoreboard("scoreboard", self)
 
     def connect_phase(self):
         super().connect_phase()

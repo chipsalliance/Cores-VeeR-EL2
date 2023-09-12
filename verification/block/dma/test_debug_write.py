@@ -37,9 +37,9 @@ class TestSequenceDCCM(uvm_sequence):
 
                 addr = dccm_base + random.randrange(0, dccm_size)
                 addr = (addr // align) * align
-                data = random.randrange(0, (1 << 64) - 1)
+                data = random.randrange(0, (1 << 32) - 1)
 
-                item = BusWriteItem(addr, struct.pack("<Q", data))
+                item = BusWriteItem(addr, data)
                 await self.start_item(item)
                 await self.finish_item(item)
 
@@ -66,9 +66,9 @@ class TestSequenceICCM(uvm_sequence):
 
                 addr = iccm_base + random.randrange(0, iccm_size)
                 addr = (addr // align) * align
-                data = random.randrange(0, (1 << 64) - 1)
+                data = random.randrange(0, (1 << 32) - 1)
 
-                item = BusWriteItem(addr, struct.pack("<Q", data))
+                item = BusWriteItem(addr, data)
                 await self.start_item(item)
                 await self.finish_item(item)
 
@@ -103,9 +103,9 @@ class TestSequenceBoth(uvm_sequence):
 
                 addr = mem_base + random.randrange(0, mem_size)
                 addr = (addr // align) * align
-                data = random.randrange(0, (1 << 64) - 1)
+                data = random.randrange(0, (1 << 32) - 1)
 
-                item = BusWriteItem(addr, struct.pack("<Q", data))
+                item = BusWriteItem(addr, data)
                 await self.start_item(item)
                 await self.finish_item(item)
 
@@ -126,7 +126,7 @@ class TestEnv(BaseEnv):
         super().connect_phase()
 
         # Connect monitors
-        self.axi_mon.ap.connect(self.scoreboard.fifo.analysis_export)
+        self.dbg_mon.ap.connect(self.scoreboard.fifo.analysis_export)
         self.mem_mon.ap.connect(self.scoreboard.fifo.analysis_export)
 
 # =============================================================================
@@ -146,7 +146,7 @@ class TestDCCMWrite(BaseTest):
         self.seq = TestSequenceDCCM.create("stimulus")
 
     async def run(self):
-        await self.seq.start(self.env.axi_seqr)
+        await self.seq.start(self.env.dbg_seqr)
 
 
 @pyuvm.test()
@@ -163,7 +163,7 @@ class TestICCMWrite(BaseTest):
         self.seq = TestSequenceICCM.create("stimulus")
 
     async def run(self):
-        await self.seq.start(self.env.axi_seqr)
+        await self.seq.start(self.env.dbg_seqr)
 
 
 @pyuvm.test()
@@ -180,4 +180,4 @@ class TestBothWrite(BaseTest):
         self.seq = TestSequenceBoth.create("stimulus")
 
     async def run(self):
-        await self.seq.start(self.env.axi_seqr)
+        await self.seq.start(self.env.dbg_seqr)

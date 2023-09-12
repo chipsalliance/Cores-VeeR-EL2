@@ -12,14 +12,16 @@ from pyuvm import *
 
 from testbench import BaseEnv, BaseTest
 from testbench import BusReadItem, BusWriteItem
-from scoreboards import WriteScoreboard
+from scoreboards import ReadScoreboard
 
 # =============================================================================
 
+# TODO: The following sequences are identical to those in test_read.py
+# should be isolated to a common file.
 
 class TestSequenceDCCM(uvm_sequence):
     """
-    A sequence of random DCCM writes
+    A sequence of random DCCM reads
     """
 
     def __init__(self, name):
@@ -37,9 +39,8 @@ class TestSequenceDCCM(uvm_sequence):
 
                 addr = dccm_base + random.randrange(0, dccm_size)
                 addr = (addr // align) * align
-                data = random.randrange(0, (1 << 64) - 1)
 
-                item = BusWriteItem(addr, struct.pack("<Q", data))
+                item = BusReadItem(addr)
                 await self.start_item(item)
                 await self.finish_item(item)
 
@@ -48,7 +49,7 @@ class TestSequenceDCCM(uvm_sequence):
 
 class TestSequenceICCM(uvm_sequence):
     """
-    A sequence of random ICCM writes
+    A sequence of random ICCM reads
     """
 
     def __init__(self, name):
@@ -66,9 +67,8 @@ class TestSequenceICCM(uvm_sequence):
 
                 addr = iccm_base + random.randrange(0, iccm_size)
                 addr = (addr // align) * align
-                data = random.randrange(0, (1 << 64) - 1)
 
-                item = BusWriteItem(addr, struct.pack("<Q", data))
+                item = BusReadItem(addr)
                 await self.start_item(item)
                 await self.finish_item(item)
 
@@ -77,7 +77,7 @@ class TestSequenceICCM(uvm_sequence):
 
 class TestSequenceBoth(uvm_sequence):
     """
-    A sequence of random ICCM or DCCM writes
+    A sequence of random ICCM or DCCM reads
     """
 
     def __init__(self, name):
@@ -103,14 +103,12 @@ class TestSequenceBoth(uvm_sequence):
 
                 addr = mem_base + random.randrange(0, mem_size)
                 addr = (addr // align) * align
-                data = random.randrange(0, (1 << 64) - 1)
 
-                item = BusWriteItem(addr, struct.pack("<Q", data))
+                item = BusReadItem(addr)
                 await self.start_item(item)
                 await self.finish_item(item)
 
             await ClockCycles(cocotb.top.clk, 5)
-
 
 # =============================================================================
 
@@ -120,20 +118,20 @@ class TestEnv(BaseEnv):
         super().build_phase()
 
         # Add scoreboard
-        self.scoreboard = WriteScoreboard("scoreboard", self)
+        self.scoreboard = ReadScoreboard("scoreboard", self)
 
     def connect_phase(self):
         super().connect_phase()
 
         # Connect monitors
-        self.axi_mon.ap.connect(self.scoreboard.fifo.analysis_export)
+        self.dbg_mon.ap.connect(self.scoreboard.fifo.analysis_export)
         self.mem_mon.ap.connect(self.scoreboard.fifo.analysis_export)
 
 # =============================================================================
 
 
 @pyuvm.test()
-class TestDCCMWrite(BaseTest):
+class TestDCCMRead(BaseTest):
     """
     DCCM write test
     """
@@ -146,11 +144,11 @@ class TestDCCMWrite(BaseTest):
         self.seq = TestSequenceDCCM.create("stimulus")
 
     async def run(self):
-        await self.seq.start(self.env.axi_seqr)
+        await self.seq.start(self.env.dbg_seqr)
 
 
 @pyuvm.test()
-class TestICCMWrite(BaseTest):
+class TestICCMRead(BaseTest):
     """
     ICCM write test
     """
@@ -163,11 +161,11 @@ class TestICCMWrite(BaseTest):
         self.seq = TestSequenceICCM.create("stimulus")
 
     async def run(self):
-        await self.seq.start(self.env.axi_seqr)
+        await self.seq.start(self.env.dbg_seqr)
 
 
 @pyuvm.test()
-class TestBothWrite(BaseTest):
+class TestBothRead(BaseTest):
     """
     Randomized DCCM/ICCM write test
     """
@@ -180,4 +178,4 @@ class TestBothWrite(BaseTest):
         self.seq = TestSequenceBoth.create("stimulus")
 
     async def run(self):
-        await self.seq.start(self.env.axi_seqr)
+        await self.seq.start(self.env.dbg_seqr)

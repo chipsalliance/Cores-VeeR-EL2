@@ -43,11 +43,12 @@ class MemWriteItem(uvm_sequence_item):
     A generic memory bus write item
     """
 
-    def __init__(self, mem, addr, data, resp=None):
+    def __init__(self, mem, addr, data, size=64, resp=None):
         super().__init__("MemWriteItem")
         self.mem  = mem
         self.addr = addr
         self.data = data
+        self.size = size
         self.resp = resp
 
 
@@ -56,12 +57,38 @@ class MemReadItem(uvm_sequence_item):
     A generic memory bus read item
     """
 
-    def __init__(self, mem, addr, data, resp=None):
+    def __init__(self, mem, addr, data, size=64, resp=None):
         super().__init__("MemReadItem")
         self.mem  = mem
         self.addr = addr
         self.data = data
+        self.size = size
         self.resp = resp
+
+
+class DebugWriteItem(uvm_sequence_item):
+    """
+    A debug bus write item
+    """
+
+    def __init__(self, addr, data, size=32, fail=False):
+        super().__init__("DebugWriteItem")
+        self.addr = addr
+        self.data = data
+        self.size = size
+        self.fail = fail
+
+class DebugReadItem(uvm_sequence_item):
+    """
+    A debug bus read item
+    """
+
+    def __init__(self, addr, data=None, size=32, fail=False):
+        super().__init__("DebugReadItem")
+        self.addr = addr
+        self.data = data
+        self.size = size
+        self.fail = fail
 
 # ==============================================================================
 
@@ -286,7 +313,7 @@ class CoreMemoryMonitor(uvm_component):
                     addr = req_addr - self.iccm_base
                     data = int(self.bfm.iccm_dma_rdata.value)
                     resp = int(self.bfm.iccm_dma_ecc_error.value)
-                    self.ap.write(MemReadItem("ICCM", addr, data, resp))
+                    self.ap.write(MemReadItem("ICCM", addr, data, req_size, resp))
                     self.logger.debug("ICCM RD: 0x{:08X} 0x{:016X} {}".format(
                         addr, data, resp))
 
@@ -294,7 +321,7 @@ class CoreMemoryMonitor(uvm_component):
                     addr = req_addr - self.dccm_base
                     data = int(self.bfm.dccm_dma_rdata.value)
                     resp = int(self.bfm.dccm_dma_ecc_error.value)
-                    self.ap.write(MemReadItem("DCCM", addr, data, resp))
+                    self.ap.write(MemReadItem("DCCM", addr, data, req_size, resp))
                     self.logger.debug("DCCM RD: 0x{:08X} 0x{:016X} {}".format(
                         addr, data, resp))
 
@@ -310,18 +337,19 @@ class CoreMemoryMonitor(uvm_component):
                 req_addr = int(self.bfm.dma_mem_addr.value)
                 req_data = int(self.bfm.dma_mem_wdata.value)
                 req_wr   = int(self.bfm.dma_mem_write.value)
+                req_size = int(self.bfm.dma_mem_sz.value)
 
                 # Writes
                 if req_wr and is_iccm:
                     addr = req_addr - self.iccm_base
-                    self.ap.write(MemWriteItem("ICCM", addr, req_data))
+                    self.ap.write(MemWriteItem("ICCM", addr, req_data, req_size))
                     self.logger.debug("ICCM WR: 0x{:08X} 0x{:016X}".format(
                         addr,
                         req_data))
 
                 if req_wr and is_dccm:
                     addr = req_addr - self.dccm_base
-                    self.ap.write(MemWriteItem("DCCM", addr, req_data))
+                    self.ap.write(MemWriteItem("DCCM", addr, req_data, req_size))
                     self.logger.debug("DCCM WR: 0x{:08X} 0x{:016X}".format(
                         addr,
                         req_data))
@@ -791,6 +819,258 @@ class Axi4LiteMonitor(uvm_component):
 # ==============================================================================
 
 
+class DebugInterfaceBFM(uvm_component):
+    """
+    A DFM for DMA debug interface
+    """
+
+    SIGNALS = [
+        "clk",
+
+        "dbg_cmd_addr",
+        "dbg_cmd_wrdata",
+        "dbg_cmd_valid",
+        "dbg_cmd_write",
+        "dbg_cmd_type",
+        "dbg_cmd_size",
+
+        "dbg_dma_bubble",
+        "dma_dbg_ready",
+
+        "dma_dbg_cmd_done",
+        "dma_dbg_cmd_fail",
+        "dma_dbg_rddata",
+    ]
+
+    def __init__(self, name, parent, uut):
+        super().__init__(name, parent)
+
+        # Collect signals
+        collect_signals(self.SIGNALS, uut, self)
+
+    def build_phase(self):
+
+        self.busy_prob  = ConfigDB().get(self, "", "DBG_BUSY_PROB")
+        self.busy_range = (
+            ConfigDB().get(self, "", "DBG_BUSY_MIN"),
+            ConfigDB().get(self, "", "DBG_BUSY_MAX"),
+        )
+
+    async def _wait(self, signal, max_cycles=100):
+        """
+        Waits for a signal to be asserted for at most max_cycles.
+        Raises an exception if it does not
+        """
+        for i in range(max_cycles):
+            await RisingEdge(self.clk)
+            if signal.value != 0:
+                break
+        else:
+            raise RuntimeError("{} timeout".format(str(signal)))
+
+    async def write(self, addr, data):
+        """
+        Performs a debug interface write. Waits for completion and returns
+        status code
+        """
+
+        # Wait for ready
+        await self._wait(self.dma_dbg_ready)
+
+        # Issue the command
+        self.dbg_cmd_valid.value    = 1
+        self.dbg_cmd_write.value    = 1
+        self.dbg_cmd_size.value     = 2 # Apparently 0=8, 1=16, 2=32
+        self.dbg_cmd_addr.value     = addr
+        self.dbg_cmd_wrdata.value   = data
+
+        await RisingEdge(self.clk)
+
+        self.dbg_cmd_valid.value    = 0
+
+        # Wait for done
+        await self._wait(self.dma_dbg_cmd_done)
+
+        return int(self.dma_dbg_cmd_fail.value)
+
+    async def read(self, addr):
+        """
+        Performs a debug interface write. Waits for completion and returns
+        data and status code
+        """
+
+        # Wait for ready
+        await self._wait(self.dma_dbg_ready)
+
+        # Issue the command
+        self.dbg_cmd_valid.value    = 1
+        self.dbg_cmd_write.value    = 0
+        self.dbg_cmd_size.value     = 2 # Apparently 0=8, 1=16, 2=32
+        self.dbg_cmd_addr.value     = addr
+
+        await RisingEdge(self.clk)
+
+        self.dbg_cmd_valid.value    = 0
+
+        # Wait for done
+        await self._wait(self.dma_dbg_cmd_done)
+
+        return int(self.dma_dbg_rddata.value), \
+               int(self.dma_dbg_cmd_fail.value)
+
+    async def run_phase(self):
+        """
+        The run phase implements a loop that randomly deasserts the pipeline
+        bubble mark to block debug requests.
+        """
+
+        # The only supported dbg_cmd_type is 2 (memory)
+        self.dbg_cmd_type.value   = 2
+        # Permanently mark the pipeline bubble TODO: Randomize that
+        self.dbg_dma_bubble.value = 1
+
+        # Main loop
+        while True:
+            await RisingEdge(self.clk)
+
+            # Become busy at random for a random cycle count by deasserting
+            # the bubble mark
+            if random.random() < self.busy_prob:
+                self.dbg_dma_bubble.value = 0
+
+                n = random.randrange(*self.busy_range)
+                await ClockCycles(self.clk, n)
+
+                self.dbg_dma_bubble.value = 1
+
+# ==============================================================================
+
+
+class DebugInterfaceDriver(uvm_driver):
+    """
+    A driver for the DMA debug interface
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.bfm = kwargs["bfm"]
+        del kwargs["bfm"]
+        super().__init__(*args, **kwargs)
+
+    async def run_phase(self):
+
+        while True:
+            it = await self.seq_item_port.get_next_item()
+
+            if isinstance(it, BusWriteItem):
+                it.resp = await self.bfm.write(it.addr, it.data)
+            elif isinstance(it, BusReadItem):
+                it.data, it.resp = await self.bfm.read(it.addr)
+
+            else:
+                raise RuntimeError("Unknown item '{}'".format(type(it)))
+
+            self.seq_item_port.item_done()
+
+
+class DebugInterfaceMonitor(uvm_component):
+    """
+    A monitor for the DMA debug interface
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.bfm = kwargs["bfm"]
+        del kwargs["bfm"]
+        super().__init__(*args, **kwargs)
+
+    def build_phase(self):
+        self.ap = uvm_analysis_port("ap", self)
+
+    async def run_phase(self):
+
+        pending  = 0
+        prev_rdy = 0
+        curr_rdy = 0
+
+        while True:
+            await RisingEdge(self.bfm.clk)
+
+            # FIXME: It appears that when ready gets deasserted on the same
+            # clock edge where valid gets asserted the module accepts the
+            # command while it should not. The code below stretches the
+            # ready by 1 clock cycle
+            prev_rdy = curr_rdy
+            curr_rdy = self.bfm.dma_dbg_ready.value
+
+            # Sample request data on ready & valid.
+            is_rdy = prev_rdy or curr_rdy
+            if is_rdy and self.bfm.dbg_cmd_valid.value:
+                cmd_addr   = int(self.bfm.dbg_cmd_addr.value)
+                cmd_write  = int(self.bfm.dbg_cmd_write.value)
+                cmd_type   = int(self.bfm.dbg_cmd_type.value)
+                cmd_size   = int(self.bfm.dbg_cmd_size.value)
+                cmd_wrdata = int(self.bfm.dbg_cmd_wrdata.value)
+
+                pending += 1
+
+                # Map size to bits
+                cmd_size = 8 * (1 << cmd_size)
+
+            # Sample read data and send item on done
+            if self.bfm.dma_dbg_cmd_done.value:
+                cmd_rddata = int(self.bfm.dma_dbg_rddata.value)
+                cmd_fail   = int(self.bfm.dma_dbg_cmd_fail.value)
+
+                # No pending transfer
+                if not pending:
+                    self.logger.error(
+                        "dma_dbg_cmd_done == 1 but there was not valid request"
+                    )
+                    continue
+
+                pending -= 1
+
+                # The module supports only type = 0x2 (memory)
+                if cmd_type != 0x2:
+                    self.logger.error("dma_cmd_type != 0x2")
+                    continue
+
+                # Write
+                if cmd_write:
+                    item = DebugWriteItem(
+                        cmd_addr,
+                        cmd_wrdata,
+                        cmd_size,
+                        cmd_fail
+                    )
+                    self.ap.write(item)
+
+                    self.logger.debug("WR: 0x{:08X}: 0x{:08X} ({}){}".format(
+                        cmd_addr,
+                        cmd_wrdata,
+                        cmd_size,
+                        "" if not cmd_fail else " failed!"
+                    ))
+
+                # Read
+                else:
+                    item = DebugReadItem(
+                        cmd_addr,
+                        cmd_rddata,
+                        cmd_size,
+                        cmd_fail
+                    )
+                    self.ap.write(item)
+
+                    self.logger.debug("RD: 0x{:08X}: 0x{:08X} ({}){}".format(
+                        cmd_addr,
+                        cmd_rddata,
+                        cmd_size,
+                        "" if not cmd_fail else " failed!"
+                    ))
+
+# ==============================================================================
+
+
 class BaseEnv(uvm_env):
     """
     Base PyUVM test environment
@@ -817,11 +1097,17 @@ class BaseEnv(uvm_env):
 
         # Sequencers
         self.axi_seqr = uvm_sequencer("axi_seqr", self)
+        self.dbg_seqr = uvm_sequencer("dbg_seqr", self)
 
         # AXI interface
         self.axi_bfm = Axi4LiteBFM("axi_bfm", self, cocotb.top)
         self.axi_drv = Axi4LiteSubordinateDriver("axi_drv", self, bfm=self.axi_bfm)
         self.axi_mon = Axi4LiteMonitor("axi_mon", self, bfm=self.axi_bfm)
+
+        # Debug interface
+        self.dbg_bfm = DebugInterfaceBFM("dbg_bfm", self, cocotb.top)
+        self.dbg_drv = DebugInterfaceDriver("dbg_drv", self, bfm=self.dbg_bfm)
+        self.dbg_mon = DebugInterfaceMonitor("dbg_mon", self, bfm=self.dbg_bfm)
 
         # Core side memory port
         self.mem_bfm = CoreMemoryBFM("mem_bfm", self, cocotb.top)
@@ -836,8 +1122,13 @@ class BaseEnv(uvm_env):
 
         ConfigDB().set(self.mem_bfm, "", "ECC_ERROR_RATE",  0.0)
 
+        ConfigDB().set(self.dbg_bfm, "", "DBG_BUSY_PROB",   0.05)
+        ConfigDB().set(self.dbg_bfm, "", "DBG_BUSY_MIN",    10)
+        ConfigDB().set(self.dbg_bfm, "", "DBG_BUSY_MAX",    25)
+
     def connect_phase(self):
         self.axi_drv.seq_item_port.connect(self.axi_seqr.seq_item_export)
+        self.dbg_drv.seq_item_port.connect(self.dbg_seqr.seq_item_export)
 
 
 # ==============================================================================

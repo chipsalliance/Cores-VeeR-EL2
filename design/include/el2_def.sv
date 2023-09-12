@@ -406,10 +406,25 @@ typedef struct packed {
             } el2_cache_debug_pkt_t;
 
 
+typedef enum logic [2:0] {
+                          READ      = 3'b001,
+                          WRITE     = 3'b010,
+                          EXEC      = 3'b100
+            } el2_pmp_type_pkt_t;
+
+
+typedef enum logic [1:0] {
+                          OFF      = 2'b00,
+                          TOR      = 2'b01,
+                          NA4      = 2'b10,
+                          NAPOT    = 2'b11
+            } el2_pmp_mode_pkt_t;
+
+
 typedef struct packed {
                         logic lock;
                         logic [1:0] reserved;
-                        logic [1:0] addr_match;
+                        el2_pmp_mode_pkt_t mode;
                         logic execute;
                         logic write;
                         logic read;

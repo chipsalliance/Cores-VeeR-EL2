@@ -180,6 +180,8 @@ import el2_pkg::*;
    output logic                      iccm_buf_correct_ecc,
    output logic                      iccm_correction_state,
 
+   input  logic                      ifu_pmp_error,
+
 
    input  logic         scan_mode
    );
@@ -1652,17 +1654,22 @@ assign debug_data_clken  =  ic_debug_rd_en_ff;
 
 
 // memory protection  - equation to look identical to the LSU equation
-   assign ifc_region_acc_okay = (~(|{pt.INST_ACCESS_ENABLE0,pt.INST_ACCESS_ENABLE1,pt.INST_ACCESS_ENABLE2,pt.INST_ACCESS_ENABLE3,pt.INST_ACCESS_ENABLE4,pt.INST_ACCESS_ENABLE5,pt.INST_ACCESS_ENABLE6,pt.INST_ACCESS_ENABLE7})) |
-                               (pt.INST_ACCESS_ENABLE0 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK0)) == (pt.INST_ACCESS_ADDR0 | pt.INST_ACCESS_MASK0)) |
-                               (pt.INST_ACCESS_ENABLE1 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK1)) == (pt.INST_ACCESS_ADDR1 | pt.INST_ACCESS_MASK1)) |
-                               (pt.INST_ACCESS_ENABLE2 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK2)) == (pt.INST_ACCESS_ADDR2 | pt.INST_ACCESS_MASK2)) |
-                               (pt.INST_ACCESS_ENABLE3 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK3)) == (pt.INST_ACCESS_ADDR3 | pt.INST_ACCESS_MASK3)) |
-                               (pt.INST_ACCESS_ENABLE4 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK4)) == (pt.INST_ACCESS_ADDR4 | pt.INST_ACCESS_MASK4)) |
-                               (pt.INST_ACCESS_ENABLE5 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK5)) == (pt.INST_ACCESS_ADDR5 | pt.INST_ACCESS_MASK5)) |
-                               (pt.INST_ACCESS_ENABLE6 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK6)) == (pt.INST_ACCESS_ADDR6 | pt.INST_ACCESS_MASK6)) |
-                               (pt.INST_ACCESS_ENABLE7 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK7)) == (pt.INST_ACCESS_ADDR7 | pt.INST_ACCESS_MASK7));
-
-   assign ifc_region_acc_fault_memory_bf   =  ~ifc_iccm_access_bf & ~ifc_region_acc_okay & ifc_fetch_req_bf;
+   if (pt.PMP_ENTRIES != 0) begin : g_ifc_access_check_pmp
+      assign ifc_region_acc_okay = ~ifu_pmp_error;
+      assign ifc_region_acc_fault_memory_bf = ~ifc_region_acc_okay & ifc_fetch_req_bf;
+   end
+   else begin : g_ifc_access_check
+      assign ifc_region_acc_okay = (~(|{pt.INST_ACCESS_ENABLE0,pt.INST_ACCESS_ENABLE1,pt.INST_ACCESS_ENABLE2,pt.INST_ACCESS_ENABLE3,pt.INST_ACCESS_ENABLE4,pt.INST_ACCESS_ENABLE5,pt.INST_ACCESS_ENABLE6,pt.INST_ACCESS_ENABLE7})) |
+                                 (pt.INST_ACCESS_ENABLE0 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK0)) == (pt.INST_ACCESS_ADDR0 | pt.INST_ACCESS_MASK0)) |
+                                 (pt.INST_ACCESS_ENABLE1 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK1)) == (pt.INST_ACCESS_ADDR1 | pt.INST_ACCESS_MASK1)) |
+                                 (pt.INST_ACCESS_ENABLE2 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK2)) == (pt.INST_ACCESS_ADDR2 | pt.INST_ACCESS_MASK2)) |
+                                 (pt.INST_ACCESS_ENABLE3 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK3)) == (pt.INST_ACCESS_ADDR3 | pt.INST_ACCESS_MASK3)) |
+                                 (pt.INST_ACCESS_ENABLE4 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK4)) == (pt.INST_ACCESS_ADDR4 | pt.INST_ACCESS_MASK4)) |
+                                 (pt.INST_ACCESS_ENABLE5 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK5)) == (pt.INST_ACCESS_ADDR5 | pt.INST_ACCESS_MASK5)) |
+                                 (pt.INST_ACCESS_ENABLE6 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK6)) == (pt.INST_ACCESS_ADDR6 | pt.INST_ACCESS_MASK6)) |
+                                 (pt.INST_ACCESS_ENABLE7 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK7)) == (pt.INST_ACCESS_ADDR7 | pt.INST_ACCESS_MASK7));
+      assign ifc_region_acc_fault_memory_bf = ~ifc_iccm_access_bf & ~ifc_region_acc_okay & ifc_fetch_req_bf;
+   end
 
    assign ifc_region_acc_fault_final_bf = ifc_region_acc_fault_bf | ifc_region_acc_fault_memory_bf;
 

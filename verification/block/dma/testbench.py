@@ -798,15 +798,20 @@ class BaseEnv(uvm_env):
         # config.
         ConfigDB().set(None, "*", "ICCM_BASE",       0xEE000000)
         ConfigDB().set(None, "*", "DCCM_BASE",       0xF0040000)
+        ConfigDB().set(None, "*", "PIC_BASE",        0xF00C0000)
 
         ConfigDB().set(None, "*", "ICCM_SIZE",       0x10000)
         ConfigDB().set(None, "*", "DCCM_SIZE",       0x10000)
+        ConfigDB().set(None, "*", "PIC_SIZE",        0x20)
 
         ConfigDB().set(None, "*", "ICCM_BUSY_PROB",  0.05)
         ConfigDB().set(None, "*", "DCCM_BUSY_PROB",  0.05)
 
         ConfigDB().set(None, "*", "MEM_BUSY_MIN",    10)
         ConfigDB().set(None, "*", "MEM_BUSY_MAX",    25)
+
+        ConfigDB().set(None, "*", "ADDR_ALIGN",
+            len(cocotb.top.dma_axi_wdata) // 8)
 
         # Sequencers
         self.axi_seqr = uvm_sequencer("axi_seqr", self)

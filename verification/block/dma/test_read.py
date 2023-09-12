@@ -30,10 +30,13 @@ class TestSequenceDCCM(uvm_sequence):
         dccm_base = ConfigDB().get(None, "", "DCCM_BASE")
         dccm_size = ConfigDB().get(None, "", "DCCM_SIZE")
 
+        align = ConfigDB().get(None, "", "ADDR_ALIGN")
+
         for j in range(4):
             for i in range(6):
 
                 addr = dccm_base + random.randrange(0, dccm_size)
+                addr = (addr // align) * align
 
                 item = BusReadItem(addr)
                 await self.start_item(item)
@@ -55,10 +58,13 @@ class TestSequenceICCM(uvm_sequence):
         iccm_base = ConfigDB().get(None, "", "ICCM_BASE")
         iccm_size = ConfigDB().get(None, "", "ICCM_SIZE")
 
+        align = ConfigDB().get(None, "", "ADDR_ALIGN")
+
         for j in range(4):
             for i in range(6):
 
                 addr = iccm_base + random.randrange(0, iccm_size)
+                addr = (addr // align) * align
 
                 item = BusReadItem(addr)
                 await self.start_item(item)
@@ -83,6 +89,8 @@ class TestSequenceBoth(uvm_sequence):
         dccm_base = ConfigDB().get(None, "", "DCCM_BASE")
         dccm_size = ConfigDB().get(None, "", "DCCM_SIZE")
 
+        align = ConfigDB().get(None, "", "ADDR_ALIGN")
+
         for j in range(4):
             for i in range(6):
 
@@ -92,6 +100,7 @@ class TestSequenceBoth(uvm_sequence):
                 ])
 
                 addr = mem_base + random.randrange(0, mem_size)
+                addr = (addr // align) * align
 
                 item = BusReadItem(addr)
                 await self.start_item(item)

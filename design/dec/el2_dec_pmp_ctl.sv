@@ -94,6 +94,9 @@ import el2_pkg::*;
    // ----------------------------------------------------------------------
    // PMPADDRx (RW)
    // [31:0] : PMP entry (x) address selector (word addressing)
+   //
+   // NOTE: VeeR-EL2 uses 32-bit physical addressing, register bits 31:30 mapping
+   //       to bits 33:32 of the physical address are always set to 0. (WARL)
 
    localparam  PMPADDR0      = 12'h3b0;
    localparam PMPADDR16      = 12'h3c0;
@@ -111,10 +114,11 @@ import el2_pkg::*;
    assign wr_pmpaddr_address = {wr_pmpaddr_quarter, dec_csr_wraddr_r[3:0]}; // entry address
 
    for (genvar entry_idx = 0; entry_idx < pt.PMP_ENTRIES; entry_idx++) begin : gen_pmpaddr_ff
-      rvdffe #(32) pmpaddr_ff (.*, .clk(free_l2clk),
+      assign pmp_pmpaddr[entry_idx][31:30] = 2'b00;
+      rvdffe #(30) pmpaddr_ff (.*, .clk(free_l2clk),
                           .en(wr_pmpaddr_r & (wr_pmpaddr_address == entry_idx) & (~pmp_pmpcfg[entry_idx].lock)),
-                          .din(dec_csr_wrdata_r[31:0]),
-                          .dout(pmp_pmpaddr[entry_idx][31:0]));
+                          .din(dec_csr_wrdata_r[29:0]),
+                          .dout(pmp_pmpaddr[entry_idx][29:0]));
    end
 
    // CSR read mux

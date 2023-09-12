@@ -267,60 +267,56 @@ class CoreMemoryMonitor(uvm_component):
 
     async def run_phase(self):
 
+        req_pending = False
+
         while True:
             await RisingEdge(self.bfm.clk)
 
-            # DCCM request
-            if self.bfm.dma_dccm_req.value and \
-               self.bfm.dccm_ready.value:
-
-                addr = int(self.bfm.dma_mem_addr.value) - self.dccm_base
-                data = int(self.bfm.dma_mem_wdata.value)
-                wr   = int(self.bfm.dma_mem_write.value)
-
-                await RisingEdge(self.bfm.clk)
-
-                # Write
-                if wr:
-                    self.ap.write(MemWriteItem("DCCM", addr, data))
-                    self.logger.debug("DCCM WR: 0x{:08X} 0x{:016X}".format(
+            # Monitor reads which happen one cycle after a request
+            if req_pending and not req_wr:
+                if is_iccm:
+                    addr = req_addr - self.iccm_base
+                    data = int(self.bfm.iccm_dma_rdata.value)
+                    self.ap.write(MemReadItem("ICCM", addr, data))
+                    self.logger.debug("ICCM RD: 0x{:08X} 0x{:016X}".format(
                         addr,
                         data))
 
-                # Read
-                elif self.bfm.dccm_dma_rvalid.value:
+                if is_dccm:
+                    addr = req_addr - self.dccm_base
                     data = int(self.bfm.dccm_dma_rdata.value)
-
                     self.ap.write(MemReadItem("DCCM", addr, data))
                     self.logger.debug("DCCM RD: 0x{:08X} 0x{:016X}".format(
                         addr,
                         data))
 
-            # ICCM request
-            if self.bfm.dma_iccm_req.value and \
-               self.bfm.iccm_ready.value:
+            req_pending = False
 
-                addr = int(self.bfm.dma_mem_addr.value) - self.iccm_base
-                data = int(self.bfm.dma_mem_wdata.value)
-                wr   = int(self.bfm.dma_mem_write.value)
+            # We have a request
+            is_iccm = self.bfm.dma_iccm_req.value
+            is_dccm = self.bfm.dma_dccm_req.value
 
-                await RisingEdge(self.bfm.clk)
+            if is_iccm or is_dccm:
+                req_pending = True
 
-                # Write
-                if wr:
-                    self.ap.write(MemWriteItem("ICCM", addr, data))
+                req_addr = int(self.bfm.dma_mem_addr.value)
+                req_data = int(self.bfm.dma_mem_wdata.value)
+                req_wr   = int(self.bfm.dma_mem_write.value)
+
+                # Writes
+                if req_wr and is_iccm:
+                    addr = req_addr - self.iccm_base
+                    self.ap.write(MemWriteItem("ICCM", addr, req_data))
                     self.logger.debug("ICCM WR: 0x{:08X} 0x{:016X}".format(
                         addr,
-                        data))
+                        req_data))
 
-                # Read
-                elif self.bfm.iccm_dma_rvalid.value:
-                    data = int(self.bfm.iccm_dma_rdata.value)
-
-                    self.ap.write(MemReadItem("ICCM", addr, data))
-                    self.logger.debug("ICCM RD: 0x{:08X} 0x{:016X}".format(
+                if req_wr and is_dccm:
+                    addr = req_addr - self.dccm_base
+                    self.ap.write(MemWriteItem("DCCM", addr, req_data))
+                    self.logger.debug("DCCM WR: 0x{:08X} 0x{:016X}".format(
                         addr,
-                        data))
+                        req_data))
 
 # ==============================================================================
 

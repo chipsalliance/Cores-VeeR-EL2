@@ -123,6 +123,31 @@ def verify_block(session, blockName, testName, coverage=""):
         raise Exception("SimFailure: cocotb failed. See test logs for more information.")
 
 
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["pic"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_reset",
+        "test_clken",
+        "test_config",
+        "test_prioritization",
+        "test_servicing",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def pic_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["pic-gw"])
+@nox.parametrize("testName", ["test_gateway"])
+@nox.parametrize("coverage", coverageTypes)
+def pic_gw_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
 @nox.session()
 def isort(session: nox.Session) -> None:
     """Options are defined in pyproject.toml file"""

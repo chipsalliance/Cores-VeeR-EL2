@@ -111,6 +111,9 @@ import el2_pkg::*;
    output el2_lsu_pkt_t      lsu_pkt_m,
    output el2_lsu_pkt_t      lsu_pkt_r,
 
+   input  logic              lsu_pmp_error_start,
+   input  logic              lsu_pmp_error_end,
+
    input  logic               scan_mode                  // Scan mode
 
    );

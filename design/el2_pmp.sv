@@ -24,21 +24,20 @@ import el2_pkg::*;
 `include "el2_param.vh"
 )
    (
-   input  logic             clk,                       // Top level clock
-   input  logic             rst_l,                     // Reset
-   input  logic             scan_mode,                 // Scan mode
+   input  logic              clk,                       // Top level clock
+   input  logic              rst_l,                     // Reset
+   input  logic              scan_mode,                 // Scan mode
 
-   input  el2_pmp_cfg_pkt_t pmp_pmpcfg    [pt.PMP_ENTRIES],
-   input  logic [31:0]      pmp_pmpaddr   [pt.PMP_ENTRIES],
+   input  el2_pmp_cfg_pkt_t  pmp_pmpcfg    [pt.PMP_ENTRIES],
+   input  logic [31:0]       pmp_pmpaddr   [pt.PMP_ENTRIES],
 
-   input  logic [31:0]      pmp_chan_addr [PMP_CHANNELS],
-   input  logic  [2:0]      pmp_chan_type [PMP_CHANNELS],
-   output logic             pmp_chan_err  [PMP_CHANNELS]
+   input  logic [31:0]       pmp_chan_addr [PMP_CHANNELS],
+   input  el2_pmp_type_pkt_t pmp_chan_type [PMP_CHANNELS],
+   output logic              pmp_chan_err  [PMP_CHANNELS]
    );
 
   logic [33:0]                                 csr_pmp_addr_i [pt.PMP_ENTRIES];
   logic [33:0]                                 pmp_req_addr_i [PMP_CHANNELS];
-  el2_pmp_type_pkt_t [33:0]                    pmp_req_type_i [PMP_CHANNELS];
 
   logic [33:0]                                 region_start_addr [pt.PMP_ENTRIES];
   logic [33:PMP_GRANULARITY+2]                 region_addr_mask  [pt.PMP_ENTRIES];
@@ -163,9 +162,9 @@ import el2_pkg::*;
 
       // Basic permission check compares cfg register only.
       assign region_basic_perm_check[c][r] =
-          ((pmp_req_type_i[c] == EXEC)  & pmp_pmpcfg[r].execute) |
-          ((pmp_req_type_i[c] == WRITE) & pmp_pmpcfg[r].write) |
-          ((pmp_req_type_i[c] == READ)  & pmp_pmpcfg[r].read);
+          ((pmp_chan_type[c] == EXEC)  & pmp_pmpcfg[r].execute) |
+          ((pmp_chan_type[c] == WRITE) & pmp_pmpcfg[r].write) |
+          ((pmp_chan_type[c] == READ)  & pmp_pmpcfg[r].read);
 
       // Check specific required permissions since the behaviour is different
       // between Smepmp implementation and original PMP.

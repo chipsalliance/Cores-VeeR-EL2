@@ -47,10 +47,10 @@ class ReadScoreboard(uvm_component):
         self.port.connect(self.fifo.get_export)
 
     def is_iccm(self, addr):
-        return addr > self.iccm_base and addr < (self.iccm_base + self.iccm_size)
+        return addr >= self.iccm_base and addr < (self.iccm_base + self.iccm_size)
 
     def is_dccm(self, addr):
-        return addr > self.dccm_base and addr < (self.dccm_base + self.dccm_size)
+        return addr >= self.dccm_base and addr < (self.dccm_base + self.dccm_size)
 
     def check_phase(self):
         iccm_reads = defaultdict(lambda: 0)
@@ -176,10 +176,10 @@ class WriteScoreboard(uvm_component):
         self.port.connect(self.fifo.get_export)
 
     def is_iccm(self, addr):
-        return addr > self.iccm_base and addr < (self.iccm_base + self.iccm_size)
+        return addr >= self.iccm_base and addr < (self.iccm_base + self.iccm_size)
 
     def is_dccm(self, addr):
-        return addr > self.dccm_base and addr < (self.dccm_base + self.dccm_size)
+        return addr >= self.dccm_base and addr < (self.dccm_base + self.dccm_size)
 
     def check_phase(self):
         iccm_writes = defaultdict(lambda: 0)

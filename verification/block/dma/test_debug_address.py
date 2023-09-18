@@ -4,14 +4,11 @@
 import random
 import struct
 
-from cocotb.triggers import ClockCycles
-
 import pyuvm
+from cocotb.triggers import ClockCycles
 from pyuvm import *
-
-from testbench import BaseEnv, BaseTest
-from testbench import BusReadItem, BusWriteItem
 from scoreboards import AccessScoreboard
+from testbench import BaseEnv, BaseTest, BusReadItem, BusWriteItem
 
 # =============================================================================
 
@@ -26,20 +23,18 @@ class TestSequenceRange(uvm_sequence):
         super().__init__(name)
 
     async def body(self):
-
         iccm_base = ConfigDB().get(None, "", "ICCM_BASE")
         iccm_size = ConfigDB().get(None, "", "ICCM_SIZE")
 
         dccm_base = ConfigDB().get(None, "", "DCCM_BASE")
         dccm_size = ConfigDB().get(None, "", "DCCM_SIZE")
 
-        pic_base  = ConfigDB().get(None, "", "PIC_BASE")
-        pic_size  = ConfigDB().get(None, "", "PIC_SIZE")
+        pic_base = ConfigDB().get(None, "", "PIC_BASE")
+        pic_size = ConfigDB().get(None, "", "PIC_SIZE")
 
         align = ConfigDB().get(None, "", "ADDR_ALIGN")
 
         for j in range(50):
-
             # Crude address randomizer
             while True:
                 addr = random.randrange(0, (1 << 32) - 1)
@@ -49,7 +44,7 @@ class TestSequenceRange(uvm_sequence):
                     continue
                 if addr >= dccm_base and addr < dccm_base + dccm_size:
                     continue
-                if addr >= pic_base  and addr < pic_base  + pic_size:
+                if addr >= pic_base and addr < pic_base + pic_size:
                     continue
 
                 break
@@ -82,6 +77,7 @@ class TestEnv(BaseEnv):
         self.dbg_mon.ap.connect(self.scoreboard.fifo.analysis_export)
         self.mem_mon.ap.connect(self.scoreboard.fifo.analysis_export)
 
+
 # =============================================================================
 
 
@@ -100,4 +96,3 @@ class TestAddressOutOfRange(BaseTest):
 
     async def run(self):
         await self.seq.start(self.env.dbg_seqr)
-

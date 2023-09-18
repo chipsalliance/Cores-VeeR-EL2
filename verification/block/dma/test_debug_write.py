@@ -5,14 +5,11 @@ import random
 import struct
 from collections import defaultdict
 
-from cocotb.triggers import ClockCycles
-
 import pyuvm
+from cocotb.triggers import ClockCycles
 from pyuvm import *
-
-from testbench import BaseEnv, BaseTest
-from testbench import BusReadItem, BusWriteItem
 from scoreboards import WriteScoreboard
+from testbench import BaseEnv, BaseTest, BusReadItem, BusWriteItem
 
 # =============================================================================
 
@@ -26,7 +23,6 @@ class TestSequenceDCCM(uvm_sequence):
         super().__init__(name)
 
     async def body(self):
-
         dccm_base = ConfigDB().get(None, "", "DCCM_BASE")
         dccm_size = ConfigDB().get(None, "", "DCCM_SIZE")
 
@@ -34,7 +30,6 @@ class TestSequenceDCCM(uvm_sequence):
 
         for j in range(4):
             for i in range(6):
-
                 addr = dccm_base + random.randrange(0, dccm_size)
                 addr = (addr // align) * align
                 data = random.randrange(0, (1 << 32) - 1)
@@ -55,7 +50,6 @@ class TestSequenceICCM(uvm_sequence):
         super().__init__(name)
 
     async def body(self):
-
         iccm_base = ConfigDB().get(None, "", "ICCM_BASE")
         iccm_size = ConfigDB().get(None, "", "ICCM_SIZE")
 
@@ -63,7 +57,6 @@ class TestSequenceICCM(uvm_sequence):
 
         for j in range(4):
             for i in range(6):
-
                 addr = iccm_base + random.randrange(0, iccm_size)
                 addr = (addr // align) * align
                 data = random.randrange(0, (1 << 32) - 1)
@@ -84,7 +77,6 @@ class TestSequenceBoth(uvm_sequence):
         super().__init__(name)
 
     async def body(self):
-
         iccm_base = ConfigDB().get(None, "", "ICCM_BASE")
         iccm_size = ConfigDB().get(None, "", "ICCM_SIZE")
 
@@ -95,11 +87,12 @@ class TestSequenceBoth(uvm_sequence):
 
         for j in range(4):
             for i in range(6):
-
-                mem_base, mem_size = random.choice([
-                    (iccm_base, iccm_size),
-                    (dccm_base, dccm_size),
-                ])
+                mem_base, mem_size = random.choice(
+                    [
+                        (iccm_base, iccm_size),
+                        (dccm_base, dccm_size),
+                    ]
+                )
 
                 addr = mem_base + random.randrange(0, mem_size)
                 addr = (addr // align) * align
@@ -128,6 +121,7 @@ class TestEnv(BaseEnv):
         # Connect monitors
         self.dbg_mon.ap.connect(self.scoreboard.fifo.analysis_export)
         self.mem_mon.ap.connect(self.scoreboard.fifo.analysis_export)
+
 
 # =============================================================================
 

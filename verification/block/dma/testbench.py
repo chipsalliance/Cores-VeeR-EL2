@@ -1,14 +1,21 @@
 # Copyright (c) 2023 Antmicro
 # SPDX-License-Identifier: Apache-2.0
 
+import math
 import os
 import random
-import math
 
 import pyuvm
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, FallingEdge, RisingEdge, Timer
-from cocotb.triggers import First, Event, Lock
+from cocotb.triggers import (
+    ClockCycles,
+    Event,
+    FallingEdge,
+    First,
+    Lock,
+    RisingEdge,
+    Timer,
+)
 from pyuvm import *
 
 # ==============================================================================
@@ -45,7 +52,7 @@ class MemWriteItem(uvm_sequence_item):
 
     def __init__(self, mem, addr, data, size=64, resp=None):
         super().__init__("MemWriteItem")
-        self.mem  = mem
+        self.mem = mem
         self.addr = addr
         self.data = data
         self.size = size
@@ -59,7 +66,7 @@ class MemReadItem(uvm_sequence_item):
 
     def __init__(self, mem, addr, data, size=64, resp=None):
         super().__init__("MemReadItem")
-        self.mem  = mem
+        self.mem = mem
         self.addr = addr
         self.data = data
         self.size = size
@@ -78,6 +85,7 @@ class DebugWriteItem(uvm_sequence_item):
         self.size = size
         self.fail = fail
 
+
 class DebugReadItem(uvm_sequence_item):
     """
     A debug bus read item
@@ -89,6 +97,7 @@ class DebugReadItem(uvm_sequence_item):
         self.data = data
         self.size = size
         self.fail = fail
+
 
 # ==============================================================================
 
@@ -108,11 +117,10 @@ def collect_signals(signals, uut, obj, uut_prefix="", obj_prefix=""):
 
         else:
             s = None
-            logging.error(
-                "Module {} does not have a signal '{}'".format(str(uut), sig)
-            )
+            logging.error("Module {} does not have a signal '{}'".format(str(uut), sig))
 
         setattr(obj, obj_sig, s)
+
 
 # ==============================================================================
 
@@ -124,7 +132,6 @@ class CoreMemoryBFM(uvm_component):
 
     SIGNALS = [
         "clk",
-
         "dma_dccm_req",
         "dma_iccm_req",
         "dma_mem_tag",
@@ -132,7 +139,6 @@ class CoreMemoryBFM(uvm_component):
         "dma_mem_sz",
         "dma_mem_write",
         "dma_mem_wdata",
-
         "dccm_dma_rvalid",
         "dccm_dma_ecc_error",
         "dccm_dma_rtag",
@@ -141,7 +147,6 @@ class CoreMemoryBFM(uvm_component):
         "iccm_dma_ecc_error",
         "iccm_dma_rtag",
         "iccm_dma_rdata",
-
         "dccm_ready",
         "iccm_ready",
     ]
@@ -157,7 +162,6 @@ class CoreMemoryBFM(uvm_component):
         self.dccm_data = dict()
 
     def build_phase(self):
-
         # Get base addresses and sizes
         self.iccm_base = ConfigDB().get(None, "", "ICCM_BASE")
         self.dccm_base = ConfigDB().get(None, "", "DCCM_BASE")
@@ -223,7 +227,6 @@ class CoreMemoryBFM(uvm_component):
 
             # DCCM access
             if self.dma_dccm_req.value:
-
                 # Decode and check address
                 addr = int(self.dma_mem_addr.value) - self.dccm_base
                 assert addr >= 0 and addr < self.dccm_size
@@ -233,22 +236,19 @@ class CoreMemoryBFM(uvm_component):
                     self.dccm_data[addr] = int(self.dma_mem_wdata.value)
 
                 else:
-
                     if addr not in self.dccm_data:
                         self.dccm_data[addr] = random.randrange(0, (1 << 64) - 1)
 
                     self.dccm_dma_rdata.value = self.dccm_data[addr]
                     self.dccm_dma_rtag.value = tag
                     self.dccm_dma_rvalid.value = 1
-                    self.dccm_dma_ecc_error.value = \
-                        random.random() < self.ecc_err_rate
-            
+                    self.dccm_dma_ecc_error.value = random.random() < self.ecc_err_rate
+
                 await RisingEdge(self.clk)
                 self.dccm_dma_rvalid.value = 0
 
             # ICCM access
             elif self.dma_iccm_req.value:
-
                 # Decode and check address
                 addr = int(self.dma_mem_addr.value) - self.iccm_base
                 assert addr >= 0 and addr < self.iccm_size
@@ -258,21 +258,18 @@ class CoreMemoryBFM(uvm_component):
                     self.iccm_data[addr] = int(self.dma_mem_wdata.value)
 
                 else:
-
                     if addr not in self.iccm_data:
                         self.iccm_data[addr] = random.randrange(0, (1 << 64) - 1)
 
                     self.iccm_dma_rdata.value = self.iccm_data[addr]
                     self.iccm_dma_rtag.value = tag
                     self.iccm_dma_rvalid.value = 1
-                    self.iccm_dma_ecc_error.value = \
-                        random.random() < self.ecc_err_rate
+                    self.iccm_dma_ecc_error.value = random.random() < self.ecc_err_rate
 
                 await RisingEdge(self.clk)
                 self.iccm_dma_rvalid.value = 0
 
     async def run_phase(self):
-
         # Initially make ICCM and DCCM ready
         self.iccm_ready.value = 1
         self.dccm_ready.value = 1
@@ -301,7 +298,6 @@ class CoreMemoryMonitor(uvm_component):
         self.ap = uvm_analysis_port("ap", self)
 
     async def run_phase(self):
-
         req_pending = False
 
         while True:
@@ -314,16 +310,14 @@ class CoreMemoryMonitor(uvm_component):
                     data = int(self.bfm.iccm_dma_rdata.value)
                     resp = int(self.bfm.iccm_dma_ecc_error.value)
                     self.ap.write(MemReadItem("ICCM", addr, data, req_size, resp))
-                    self.logger.debug("ICCM RD: 0x{:08X} 0x{:016X} {}".format(
-                        addr, data, resp))
+                    self.logger.debug("ICCM RD: 0x{:08X} 0x{:016X} {}".format(addr, data, resp))
 
                 if is_dccm:
                     addr = req_addr - self.dccm_base
                     data = int(self.bfm.dccm_dma_rdata.value)
                     resp = int(self.bfm.dccm_dma_ecc_error.value)
                     self.ap.write(MemReadItem("DCCM", addr, data, req_size, resp))
-                    self.logger.debug("DCCM RD: 0x{:08X} 0x{:016X} {}".format(
-                        addr, data, resp))
+                    self.logger.debug("DCCM RD: 0x{:08X} 0x{:016X} {}".format(addr, data, resp))
 
             req_pending = False
 
@@ -336,23 +330,20 @@ class CoreMemoryMonitor(uvm_component):
 
                 req_addr = int(self.bfm.dma_mem_addr.value)
                 req_data = int(self.bfm.dma_mem_wdata.value)
-                req_wr   = int(self.bfm.dma_mem_write.value)
+                req_wr = int(self.bfm.dma_mem_write.value)
                 req_size = int(self.bfm.dma_mem_sz.value)
 
                 # Writes
                 if req_wr and is_iccm:
                     addr = req_addr - self.iccm_base
                     self.ap.write(MemWriteItem("ICCM", addr, req_data, req_size))
-                    self.logger.debug("ICCM WR: 0x{:08X} 0x{:016X}".format(
-                        addr,
-                        req_data))
+                    self.logger.debug("ICCM WR: 0x{:08X} 0x{:016X}".format(addr, req_data))
 
                 if req_wr and is_dccm:
                     addr = req_addr - self.dccm_base
                     self.ap.write(MemWriteItem("DCCM", addr, req_data, req_size))
-                    self.logger.debug("DCCM WR: 0x{:08X} 0x{:016X}".format(
-                        addr,
-                        req_data))
+                    self.logger.debug("DCCM WR: 0x{:08X} 0x{:016X}".format(addr, req_data))
+
 
 # ==============================================================================
 
@@ -371,23 +362,19 @@ class Axi4LiteBFM(uvm_component):
         "awid",
         "awaddr",
         "awsize",
-
         "wvalid",
         "wready",
         "wdata",
         "wstrb",
-
         "bvalid",
         "bready",
         "bresp",
         "bid",
-
         "arvalid",
         "arready",
         "arid",
         "araddr",
         "arsize",
-
         "rvalid",
         "rready",
         "rid",
@@ -400,8 +387,9 @@ class Axi4LiteBFM(uvm_component):
         """
         Represents a pending AXI transfer
         """
+
         def __init__(self, tid):
-            self.tid  = tid
+            self.tid = tid
             self.addr = None
             self.data = None
 
@@ -411,9 +399,7 @@ class Axi4LiteBFM(uvm_component):
         super().__init__(name, parent)
 
         # Collect signals
-        collect_signals(self.SIGNALS, uut, self,
-                        uut_prefix="dma_axi_",
-                        obj_prefix="axi_")
+        collect_signals(self.SIGNALS, uut, self, uut_prefix="dma_axi_", obj_prefix="axi_")
 
         collect_signals(["clk", "rst_l"], uut, self)
 
@@ -431,8 +417,7 @@ class Axi4LiteBFM(uvm_component):
 
         self.xfer_lock = Lock()
 
-        self.wr_xfers = {i: self.Transfer(i)
-                         for i in range(1 << len(self.axi_awid))}
+        self.wr_xfers = {i: self.Transfer(i) for i in range(1 << len(self.axi_awid))}
 
     @staticmethod
     def collect_bytes(data, strb=None):
@@ -489,26 +474,25 @@ class Axi4LiteBFM(uvm_component):
 
         # Send write request
         await self._wait(self.axi_awready)
-        self.axi_awvalid.value  = 1
-        self.axi_awaddr.value   = addr
-        self.axi_awid.value     = awid
-        self.axi_awsize.value   = int(math.ceil(math.log2(self.dwidth)))
+        self.axi_awvalid.value = 1
+        self.axi_awaddr.value = addr
+        self.axi_awid.value = awid
+        self.axi_awsize.value = int(math.ceil(math.log2(self.dwidth)))
 
         await RisingEdge(self.clk)
-        self.axi_awvalid.value  = 0
+        self.axi_awvalid.value = 0
 
         # Send data
         data_len = len(data)
         data_ptr = 0
         while data_len > 0:
-
             # Wait for ready
             await self._wait(self.axi_wready)
-            self.axi_wvalid.value   = 1
+            self.axi_wvalid.value = 1
 
             # Get data
-            xfer_len  = min(self.swidth, data_len)
-            xfer_data = data[data_ptr:data_ptr + xfer_len]
+            xfer_len = min(self.swidth, data_len)
+            xfer_data = data[data_ptr : data_ptr + xfer_len]
             data_ptr += xfer_len
             data_len -= xfer_len
 
@@ -519,7 +503,7 @@ class Axi4LiteBFM(uvm_component):
                 wdata <<= 8
                 wstrb <<= 1
 
-                wdata |= xfer_data[-(1+i)]
+                wdata |= xfer_data[-(1 + i)]
                 wstrb |= 1
 
             self.axi_wdata.value = wdata
@@ -540,22 +524,19 @@ class Axi4LiteBFM(uvm_component):
         self.axi_bready.value = 1
 
         while True:
-
             # Wait for response
             await RisingEdge(self.clk)
             if not self.axi_bvalid.value:
                 continue
 
             bresp = int(self.axi_bresp.value)
-            bid   = int(self.axi_bid.value)
+            bid = int(self.axi_bid.value)
 
             # Find a pending transfer
             async with self.xfer_lock:
-
                 xfer = self.wr_xfers.get(bid, None)
                 if not xfer:
-                    self.logger.error(
-                        "Write response for a non-pending tid {}".format(bid))
+                    self.logger.error("Write response for a non-pending tid {}".format(bid))
                     continue
 
                 xfer.pending = False
@@ -563,11 +544,9 @@ class Axi4LiteBFM(uvm_component):
                 addr = xfer.addr
                 data = xfer.data
 
-            self.logger.debug("WR: 0x{:08X} {} 0b{:03b}".format(
-                addr,
-                ["0x{:02X}".format(b) for b in data],
-                bresp
-            ))
+            self.logger.debug(
+                "WR: 0x{:08X} {} 0b{:03b}".format(addr, ["0x{:02X}".format(b) for b in data], bresp)
+            )
 
     async def read(self, addr, data):
         """
@@ -576,22 +555,21 @@ class Axi4LiteBFM(uvm_component):
 
         # Send read request
         await self._wait(self.axi_awready)
-        self.axi_arvalid.value  = 1
-        self.axi_araddr.value   = addr
-        self.axi_arid.value     = 1
-        self.axi_arsize.value   = int(math.ceil(math.log2(self.dwidth)))
+        self.axi_arvalid.value = 1
+        self.axi_araddr.value = addr
+        self.axi_arid.value = 1
+        self.axi_arsize.value = int(math.ceil(math.log2(self.dwidth)))
 
         await RisingEdge(self.clk)
-        self.axi_arvalid.value  = 0
+        self.axi_arvalid.value = 0
 
         # Receive data
         self.axi_rready.value = 1
 
-        data  = bytearray()
+        data = bytearray()
         rresp = None
 
         while True:
-
             # Wait for valid
             await self._wait(self.axi_rvalid)
 
@@ -605,18 +583,16 @@ class Axi4LiteBFM(uvm_component):
         self.axi_rready.value = 0
         rresp = int(self.axi_rresp.value)
 
-        self.logger.debug("RD: 0x{:08X} {} 0b{:03b}".format(
-            addr,
-            ["0x{:02X}".format(b) for b in data],
-            rresp
-        ))
+        self.logger.debug(
+            "RD: 0x{:08X} {} 0b{:03b}".format(addr, ["0x{:02X}".format(b) for b in data], rresp)
+        )
 
         return bytes(data), rresp
 
     async def run_phase(self):
-
         # Start read & write handlers
         cocotb.start_soon(self.write_handler())
+
 
 # ==============================================================================
 
@@ -632,7 +608,6 @@ class Axi4LiteSubordinateDriver(uvm_driver):
         super().__init__(*args, **kwargs)
 
     async def run_phase(self):
-
         while True:
             it = await self.seq_item_port.get_next_item()
 
@@ -656,9 +631,9 @@ class Axi4LiteMonitor(uvm_component):
 
     class Transfer:
         def __init__(self, tid, addr=None):
-            self.tid    = tid
-            self.addr   = addr
-            self.data   = None
+            self.tid = tid
+            self.addr = addr
+            self.data = None
 
     def __init__(self, *args, **kwargs):
         self.bfm = kwargs["bfm"]
@@ -669,24 +644,19 @@ class Axi4LiteMonitor(uvm_component):
         self.ap = uvm_analysis_port("ap", self)
 
     def _aw_active(self):
-        return self.bfm.axi_awready.value != 0 and \
-               self.bfm.axi_awvalid.value != 0
+        return self.bfm.axi_awready.value != 0 and self.bfm.axi_awvalid.value != 0
 
     def _w_active(self):
-        return self.bfm.axi_wready.value  != 0 and \
-               self.bfm.axi_wvalid.value  != 0
+        return self.bfm.axi_wready.value != 0 and self.bfm.axi_wvalid.value != 0
 
     def _ar_active(self):
-        return self.bfm.axi_arready.value != 0 and \
-               self.bfm.axi_arvalid.value != 0
+        return self.bfm.axi_arready.value != 0 and self.bfm.axi_arvalid.value != 0
 
     def _r_active(self):
-        return self.bfm.axi_rready.value  != 0 and \
-               self.bfm.axi_rvalid.value  != 0
+        return self.bfm.axi_rready.value != 0 and self.bfm.axi_rvalid.value != 0
 
     def _b_active(self):
-        return self.bfm.axi_bready.value  != 0 and \
-               self.bfm.axi_bvalid.value  != 0
+        return self.bfm.axi_bready.value != 0 and self.bfm.axi_bvalid.value != 0
 
     def _sample_w(self):
         return self.bfm.collect_bytes(
@@ -707,7 +677,6 @@ class Axi4LiteMonitor(uvm_component):
 
         # Main loop
         while True:
-
             # Wait for clock
             await RisingEdge(self.bfm.clk)
 
@@ -718,20 +687,16 @@ class Axi4LiteMonitor(uvm_component):
 
                 if awid in xfers:
                     self.logger.error(
-                        "Write request for a pending transaction, awid={}".format(
-                        awid
-                    ))
+                        "Write request for a pending transaction, awid={}".format(awid)
+                    )
 
                 else:
                     xfers[awid] = self.Transfer(awid, addr)
 
             # Data (for the last seen awid)
             if self._w_active():
-
                 if awid not in xfers:
-                    self.logger.error(
-                        "Data write but no transaction is pending"
-                    )
+                    self.logger.error("Data write but no transaction is pending")
 
                 else:
                     xfer = xfers[awid]
@@ -740,13 +705,10 @@ class Axi4LiteMonitor(uvm_component):
             # Write completion
             if self._b_active():
                 bresp = int(self.bfm.axi_bresp.value)
-                bid   = int(self.bfm.axi_bid.value)
+                bid = int(self.bfm.axi_bid.value)
 
                 if bid not in xfers:
-                    self.logger.error(
-                        "Response for a non-pending transaction, bid={}".format(
-                        bid
-                    ))
+                    self.logger.error("Response for a non-pending transaction, bid={}".format(bid))
 
                 else:
                     xfer = xfers[bid]
@@ -754,11 +716,11 @@ class Axi4LiteMonitor(uvm_component):
 
                     self.ap.write(BusWriteItem(xfer.addr, xfer.data, bresp))
 
-                    self.logger.debug("WR: 0x{:08X} {} 0b{:03b}".format(
-                        xfer.addr,
-                        ["0x{:02X}".format(b) for b in xfer.data],
-                        bresp
-                    ))
+                    self.logger.debug(
+                        "WR: 0x{:08X} {} 0b{:03b}".format(
+                            xfer.addr, ["0x{:02X}".format(b) for b in xfer.data], bresp
+                        )
+                    )
 
     async def watch_read(self):
         """
@@ -768,7 +730,6 @@ class Axi4LiteMonitor(uvm_component):
 
         # Main loop
         while True:
-
             # Wait for clock
             await RisingEdge(self.bfm.clk)
 
@@ -779,9 +740,8 @@ class Axi4LiteMonitor(uvm_component):
 
                 if arid in xfers:
                     self.logger.error(
-                        "Read request for a pending transaction, arid={}".format(
-                        awid
-                    ))
+                        "Read request for a pending transaction, arid={}".format(awid)
+                    )
 
                 else:
                     xfers[arid] = self.Transfer(arid, addr)
@@ -789,12 +749,10 @@ class Axi4LiteMonitor(uvm_component):
             # Read completion
             if self._r_active():
                 rresp = int(self.bfm.axi_rresp.value)
-                rid   = int(self.bfm.axi_rid.value)
+                rid = int(self.bfm.axi_rid.value)
 
                 if rid not in xfers:
-                    self.logger.error(
-                        "Data read but no transaction is pending"
-                    )
+                    self.logger.error("Data read but no transaction is pending")
 
                 else:
                     xfer = xfers[rid]
@@ -804,17 +762,17 @@ class Axi4LiteMonitor(uvm_component):
 
                     self.ap.write(BusReadItem(xfer.addr, xfer.data, rresp))
 
-                    self.logger.debug("RD: 0x{:08X} {} 0b{:03b}".format(
-                        xfer.addr,
-                        ["0x{:02X}".format(b) for b in xfer.data],
-                        rresp
-                    ))
+                    self.logger.debug(
+                        "RD: 0x{:08X} {} 0b{:03b}".format(
+                            xfer.addr, ["0x{:02X}".format(b) for b in xfer.data], rresp
+                        )
+                    )
 
     async def run_phase(self):
-
         # Start read & write watchers
         cocotb.start_soon(self.watch_write())
         cocotb.start_soon(self.watch_read())
+
 
 # ==============================================================================
 
@@ -826,17 +784,14 @@ class DebugInterfaceBFM(uvm_component):
 
     SIGNALS = [
         "clk",
-
         "dbg_cmd_addr",
         "dbg_cmd_wrdata",
         "dbg_cmd_valid",
         "dbg_cmd_write",
         "dbg_cmd_type",
         "dbg_cmd_size",
-
         "dbg_dma_bubble",
         "dma_dbg_ready",
-
         "dma_dbg_cmd_done",
         "dma_dbg_cmd_fail",
         "dma_dbg_rddata",
@@ -849,8 +804,7 @@ class DebugInterfaceBFM(uvm_component):
         collect_signals(self.SIGNALS, uut, self)
 
     def build_phase(self):
-
-        self.busy_prob  = ConfigDB().get(self, "", "DBG_BUSY_PROB")
+        self.busy_prob = ConfigDB().get(self, "", "DBG_BUSY_PROB")
         self.busy_range = (
             ConfigDB().get(self, "", "DBG_BUSY_MIN"),
             ConfigDB().get(self, "", "DBG_BUSY_MAX"),
@@ -878,15 +832,15 @@ class DebugInterfaceBFM(uvm_component):
         await self._wait(self.dma_dbg_ready)
 
         # Issue the command
-        self.dbg_cmd_valid.value    = 1
-        self.dbg_cmd_write.value    = 1
-        self.dbg_cmd_size.value     = 2 # Apparently 0=8, 1=16, 2=32
-        self.dbg_cmd_addr.value     = addr
-        self.dbg_cmd_wrdata.value   = data
+        self.dbg_cmd_valid.value = 1
+        self.dbg_cmd_write.value = 1
+        self.dbg_cmd_size.value = 2  # Apparently 0=8, 1=16, 2=32
+        self.dbg_cmd_addr.value = addr
+        self.dbg_cmd_wrdata.value = data
 
         await RisingEdge(self.clk)
 
-        self.dbg_cmd_valid.value    = 0
+        self.dbg_cmd_valid.value = 0
 
         # Wait for done
         await self._wait(self.dma_dbg_cmd_done)
@@ -903,20 +857,19 @@ class DebugInterfaceBFM(uvm_component):
         await self._wait(self.dma_dbg_ready)
 
         # Issue the command
-        self.dbg_cmd_valid.value    = 1
-        self.dbg_cmd_write.value    = 0
-        self.dbg_cmd_size.value     = 2 # Apparently 0=8, 1=16, 2=32
-        self.dbg_cmd_addr.value     = addr
+        self.dbg_cmd_valid.value = 1
+        self.dbg_cmd_write.value = 0
+        self.dbg_cmd_size.value = 2  # Apparently 0=8, 1=16, 2=32
+        self.dbg_cmd_addr.value = addr
 
         await RisingEdge(self.clk)
 
-        self.dbg_cmd_valid.value    = 0
+        self.dbg_cmd_valid.value = 0
 
         # Wait for done
         await self._wait(self.dma_dbg_cmd_done)
 
-        return int(self.dma_dbg_rddata.value), \
-               int(self.dma_dbg_cmd_fail.value)
+        return int(self.dma_dbg_rddata.value), int(self.dma_dbg_cmd_fail.value)
 
     async def run_phase(self):
         """
@@ -925,7 +878,7 @@ class DebugInterfaceBFM(uvm_component):
         """
 
         # The only supported dbg_cmd_type is 2 (memory)
-        self.dbg_cmd_type.value   = 2
+        self.dbg_cmd_type.value = 2
         # Permanently mark the pipeline bubble TODO: Randomize that
         self.dbg_dma_bubble.value = 1
 
@@ -943,6 +896,7 @@ class DebugInterfaceBFM(uvm_component):
 
                 self.dbg_dma_bubble.value = 1
 
+
 # ==============================================================================
 
 
@@ -957,7 +911,6 @@ class DebugInterfaceDriver(uvm_driver):
         super().__init__(*args, **kwargs)
 
     async def run_phase(self):
-
         while True:
             it = await self.seq_item_port.get_next_item()
 
@@ -986,8 +939,7 @@ class DebugInterfaceMonitor(uvm_component):
         self.ap = uvm_analysis_port("ap", self)
 
     async def run_phase(self):
-
-        pending  = 0
+        pending = 0
         prev_rdy = 0
         curr_rdy = 0
 
@@ -1004,10 +956,10 @@ class DebugInterfaceMonitor(uvm_component):
             # Sample request data on ready & valid.
             is_rdy = prev_rdy or curr_rdy
             if is_rdy and self.bfm.dbg_cmd_valid.value:
-                cmd_addr   = int(self.bfm.dbg_cmd_addr.value)
-                cmd_write  = int(self.bfm.dbg_cmd_write.value)
-                cmd_type   = int(self.bfm.dbg_cmd_type.value)
-                cmd_size   = int(self.bfm.dbg_cmd_size.value)
+                cmd_addr = int(self.bfm.dbg_cmd_addr.value)
+                cmd_write = int(self.bfm.dbg_cmd_write.value)
+                cmd_type = int(self.bfm.dbg_cmd_type.value)
+                cmd_size = int(self.bfm.dbg_cmd_size.value)
                 cmd_wrdata = int(self.bfm.dbg_cmd_wrdata.value)
 
                 pending += 1
@@ -1018,13 +970,11 @@ class DebugInterfaceMonitor(uvm_component):
             # Sample read data and send item on done
             if self.bfm.dma_dbg_cmd_done.value:
                 cmd_rddata = int(self.bfm.dma_dbg_rddata.value)
-                cmd_fail   = int(self.bfm.dma_dbg_cmd_fail.value)
+                cmd_fail = int(self.bfm.dma_dbg_cmd_fail.value)
 
                 # No pending transfer
                 if not pending:
-                    self.logger.error(
-                        "dma_dbg_cmd_done == 1 but there was not valid request"
-                    )
+                    self.logger.error("dma_dbg_cmd_done == 1 but there was not valid request")
                     continue
 
                 pending -= 1
@@ -1036,37 +986,26 @@ class DebugInterfaceMonitor(uvm_component):
 
                 # Write
                 if cmd_write:
-                    item = DebugWriteItem(
-                        cmd_addr,
-                        cmd_wrdata,
-                        cmd_size,
-                        cmd_fail
-                    )
+                    item = DebugWriteItem(cmd_addr, cmd_wrdata, cmd_size, cmd_fail)
                     self.ap.write(item)
 
-                    self.logger.debug("WR: 0x{:08X}: 0x{:08X} ({}){}".format(
-                        cmd_addr,
-                        cmd_wrdata,
-                        cmd_size,
-                        "" if not cmd_fail else " failed!"
-                    ))
+                    self.logger.debug(
+                        "WR: 0x{:08X}: 0x{:08X} ({}){}".format(
+                            cmd_addr, cmd_wrdata, cmd_size, "" if not cmd_fail else " failed!"
+                        )
+                    )
 
                 # Read
                 else:
-                    item = DebugReadItem(
-                        cmd_addr,
-                        cmd_rddata,
-                        cmd_size,
-                        cmd_fail
-                    )
+                    item = DebugReadItem(cmd_addr, cmd_rddata, cmd_size, cmd_fail)
                     self.ap.write(item)
 
-                    self.logger.debug("RD: 0x{:08X}: 0x{:08X} ({}){}".format(
-                        cmd_addr,
-                        cmd_rddata,
-                        cmd_size,
-                        "" if not cmd_fail else " failed!"
-                    ))
+                    self.logger.debug(
+                        "RD: 0x{:08X}: 0x{:08X} ({}){}".format(
+                            cmd_addr, cmd_rddata, cmd_size, "" if not cmd_fail else " failed!"
+                        )
+                    )
+
 
 # ==============================================================================
 
@@ -1077,23 +1016,21 @@ class BaseEnv(uvm_env):
     """
 
     def build_phase(self):
-
         # Config
         ConfigDB().set(None, "*", "TEST_CLK_PERIOD", 1)
         ConfigDB().set(None, "*", "TEST_ITERATIONS", 50)
 
         # ICCM and DCCM addresses / sizes are taken from the default VeeR
         # config.
-        ConfigDB().set(None, "*", "ICCM_BASE",       0xEE000000)
-        ConfigDB().set(None, "*", "DCCM_BASE",       0xF0040000)
-        ConfigDB().set(None, "*", "PIC_BASE",        0xF00C0000)
+        ConfigDB().set(None, "*", "ICCM_BASE", 0xEE000000)
+        ConfigDB().set(None, "*", "DCCM_BASE", 0xF0040000)
+        ConfigDB().set(None, "*", "PIC_BASE", 0xF00C0000)
 
-        ConfigDB().set(None, "*", "ICCM_SIZE",       0x10000)
-        ConfigDB().set(None, "*", "DCCM_SIZE",       0x10000)
-        ConfigDB().set(None, "*", "PIC_SIZE",        0x20)
+        ConfigDB().set(None, "*", "ICCM_SIZE", 0x10000)
+        ConfigDB().set(None, "*", "DCCM_SIZE", 0x10000)
+        ConfigDB().set(None, "*", "PIC_SIZE", 0x20)
 
-        ConfigDB().set(None, "*", "ADDR_ALIGN",
-            len(cocotb.top.dma_axi_wdata) // 8)
+        ConfigDB().set(None, "*", "ADDR_ALIGN", len(cocotb.top.dma_axi_wdata) // 8)
 
         # Sequencers
         self.axi_seqr = uvm_sequencer("axi_seqr", self)
@@ -1114,17 +1051,17 @@ class BaseEnv(uvm_env):
         self.mem_mon = CoreMemoryMonitor("mem_mon", self, bfm=self.mem_bfm)
 
         # Component config
-        ConfigDB().set(self.mem_bfm, "", "ICCM_BUSY_PROB",  0.05)
-        ConfigDB().set(self.mem_bfm, "", "DCCM_BUSY_PROB",  0.05)
+        ConfigDB().set(self.mem_bfm, "", "ICCM_BUSY_PROB", 0.05)
+        ConfigDB().set(self.mem_bfm, "", "DCCM_BUSY_PROB", 0.05)
 
-        ConfigDB().set(self.mem_bfm, "", "MEM_BUSY_MIN",    10)
-        ConfigDB().set(self.mem_bfm, "", "MEM_BUSY_MAX",    25)
+        ConfigDB().set(self.mem_bfm, "", "MEM_BUSY_MIN", 10)
+        ConfigDB().set(self.mem_bfm, "", "MEM_BUSY_MAX", 25)
 
-        ConfigDB().set(self.mem_bfm, "", "ECC_ERROR_RATE",  0.0)
+        ConfigDB().set(self.mem_bfm, "", "ECC_ERROR_RATE", 0.0)
 
-        ConfigDB().set(self.dbg_bfm, "", "DBG_BUSY_PROB",   0.05)
-        ConfigDB().set(self.dbg_bfm, "", "DBG_BUSY_MIN",    10)
-        ConfigDB().set(self.dbg_bfm, "", "DBG_BUSY_MAX",    25)
+        ConfigDB().set(self.dbg_bfm, "", "DBG_BUSY_PROB", 0.05)
+        ConfigDB().set(self.dbg_bfm, "", "DBG_BUSY_MIN", 10)
+        ConfigDB().set(self.dbg_bfm, "", "DBG_BUSY_MAX", 25)
 
     def connect_phase(self):
         self.axi_drv.seq_item_port.connect(self.axi_seqr.seq_item_export)

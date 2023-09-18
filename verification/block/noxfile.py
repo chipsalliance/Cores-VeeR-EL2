@@ -147,6 +147,24 @@ def pic_verify(session, blockName, testName, coverage):
 def pic_gw_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["dma"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_reset",
+        "test_read",
+        "test_write",
+        "test_address",
+        "test_ecc",
+        "test_debug_read",
+        "test_debug_write",
+        "test_debug_address",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def dma_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
 
 @nox.session()
 def isort(session: nox.Session) -> None:

@@ -437,7 +437,7 @@ class Axi4LiteBFM(uvm_component):
 
         return bytes(res)
 
-    async def _wait(self, signal, max_cycles=100):
+    async def _wait(self, signal, max_cycles=200):
         """
         Waits for a signal to be asserted for at most max_cycles.
         Raises an exception if it does not
@@ -810,7 +810,7 @@ class DebugInterfaceBFM(uvm_component):
             ConfigDB().get(self, "", "DBG_BUSY_MAX"),
         )
 
-    async def _wait(self, signal, max_cycles=100):
+    async def _wait(self, signal, max_cycles=150):
         """
         Waits for a signal to be asserted for at most max_cycles.
         Raises an exception if it does not

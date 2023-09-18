@@ -1,0 +1,2 @@
+OFILES = crt0.o pmp.o veer.o
+TEST_CFLAGS = -g -O3

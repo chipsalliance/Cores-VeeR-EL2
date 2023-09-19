@@ -141,11 +141,10 @@ jobs:
       - name: Prepare coverage data
         run: |
           export PATH=/opt/verilator/bin:$PATH
-          .github/scripts/convert_coverage_data.sh \
-            ${{ matrix.coverage }} \
-            riscof/coverage \
-            riscof/coverage \
-            coverage_riscof
+          .github/scripts/convert_coverage_data.sh riscof/coverage/
+          echo "convert_coverage_data.sh exited with RET_CODE = "$?
+          mv riscof/coverage/coverage.info \
+             riscof/coverage/coverage_riscof_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()

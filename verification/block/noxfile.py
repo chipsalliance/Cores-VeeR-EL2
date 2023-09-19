@@ -141,7 +141,7 @@ def pic_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
-@nox.parametrize("blockName", ["pic-gw"])
+@nox.parametrize("blockName", ["pic_gw"])
 @nox.parametrize("testName", ["test_gateway"])
 @nox.parametrize("coverage", coverageTypes)
 def pic_gw_verify(session, blockName, testName, coverage):

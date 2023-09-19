@@ -16,9 +16,42 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "trap.h"
+#include "fault.h"
 
-int main(int argc, char *argv[])
+#define TEST_NUMBER 1
+
+int test_store(void)
 {
-    printf("Hello, world!\n");
-    return 0;
+    char *a = 0xf0000000;
+    struct fault ret;
+    TRY {
+        SPDUMP
+        *a = 0xff;
+        return 2;
+    }
+    CATCH {
+        ret = fault_last_get();
+        SPDUMP
+        return (ret.mcause == 7) ? 0 : 1;
+    }
+    END_TRY;
+}
+
+void main(void)
+{
+    int results[TEST_NUMBER];
+    int sum = 0;
+
+    puts("PMP test program");
+    fault_install();
+
+    results[0] = test_store();
+    if (!results[0]) puts("test_store passed");
+    else puts("test_store failed");
+
+    for (int i = 0; i < TEST_NUMBER; i++)
+        sum += results[i];
+
+    exit(sum);
 }

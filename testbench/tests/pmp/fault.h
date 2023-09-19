@@ -14,27 +14,23 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
+#ifndef _FAULT_H
+#define _FAULT_H
 
-extern volatile char tohost;
+#include <setjmp.h>
+#include "trap.h"
+
+#define TRY do { jmp_buf try_buf; if(!setjmp(try_buf)){ fault_setjmp(try_buf);
+#define CATCH } else {
+#define END_TRY } } while(0)
+#define THROW longjmp(try_buf, 1)
 
 
-__attribute__((__noreturn__)) void _exit (int status)
-{
-    if (!status) tohost = 0xff;
-    else tohost = 0x01;
-    while (1) {};
-}
+void fault_install(void);
+void fault_setjmp(jmp_buf env);
+struct fault fault_last_get(void);
+void fault_return(struct fault *fault);
 
-int veer_tb_putc(char c, FILE *stream)
-{
-    (void) stream;
-    tohost = c;
-    return c;
-}
+#define SPDUMP {void * sp; __asm__ __volatile__ ("sw sp, 0(%0)" : "=r"(sp)); printf("%lx\n", sp);}
 
-static FILE __stdio = FDEV_SETUP_STREAM(veer_tb_putc, NULL, NULL, _FDEV_SETUP_WRITE);
-FILE *const stdin = &__stdio;
-__strong_reference(stdin, stdout);
-__strong_reference(stdin, stderr);
+#endif

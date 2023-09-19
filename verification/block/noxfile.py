@@ -103,6 +103,7 @@ def verify_block(session, blockName, testName, coverage=""):
             "COVERAGE_TYPE=" + coverage,
             "MODULE=" + testName,
             "COCOTB_RESULTS_FILE=" + testNameXML,
+            external=True,
             stdout=testLog,
             stderr=testLog,
         )

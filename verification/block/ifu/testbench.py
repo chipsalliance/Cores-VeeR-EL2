@@ -1,15 +1,13 @@
 import os
+import random
+import subprocess
+from queue import Queue
 
 from cocotb.triggers import Timer
 from cocotb.binary import BinaryValue
 
 import pyuvm
 from pyuvm import *
-
-
-def decompress(nop):
-    # TODO: Actually decompress instructions into BinaryValue type
-    return BinaryValue(value="00000000000000000000000000010011")
 
 
 def collect_signals(signals, uut, obj, uut_prefix="", obj_prefix=""):
@@ -32,6 +30,77 @@ def collect_signals(signals, uut, obj, uut_prefix="", obj_prefix=""):
             )
 
         setattr(obj, obj_sig, s)
+
+
+def get_opcode(asm_line, ext="rv32i", size=32):
+    """
+    Generates binary opcode string based on a line of assembly
+    """
+
+    import textwrap
+
+    cmd = f"echo '{asm_line}' | riscv64-unknown-elf-as -march={ext} -o /dev/null -al | tail -n 1"
+    out = subprocess.check_output([cmd], shell=True).decode().split()[2]
+    out = "".join(textwrap.wrap(out, 2)[::-1])
+
+    opcode = f"{int(out, 16):0{size}b}"
+
+    return opcode
+
+
+def generate_assembly_pair():
+    """
+    Generates random assembly instruction that can be compressed
+    """
+
+    # x8--x15 are the allowed registers for compressed instructions
+    dreg = random.randrange(8, 16)
+    sreg = random.randrange(8, 16)
+
+    imm = random.randrange(2**5)
+
+    return random.choice([
+        (f"c.add  x{dreg}, x{sreg}", f"add  x{dreg}, x{dreg}, x{sreg}"),
+        (f"c.or   x{dreg}, x{sreg}", f"or   x{dreg}, x{dreg}, x{sreg}"),
+        (f"c.xor  x{dreg}, x{sreg}", f"xor  x{dreg}, x{dreg}, x{sreg}"),
+        (f"c.sub  x{dreg}, x{sreg}", f"sub  x{dreg}, x{dreg}, x{sreg}"),
+        (f"c.mv   x{dreg}, x{sreg}", f"add  x{dreg}, x0, x{sreg}"),
+        (f"c.andi x{dreg}, {imm}",   f"andi x{dreg}, x{dreg}, {imm}"),
+    ])
+
+
+class CompressedGenerator:
+    """
+    Generates compressed instruction and caches their expected
+    decompressed counterpart, allowing for a fast lookup
+    """
+
+    lookup = {}
+
+    @classmethod
+    def get(self):
+        """
+        Generates compressed/decompressed instruction pair
+        """
+
+        com, dec = generate_assembly_pair()
+
+        com = get_opcode(com, ext="rv32ic", size=16)
+        dec = get_opcode(dec, ext="rv32i", size=32)
+
+        self.lookup[com] = dec
+
+        return com
+
+    @classmethod
+    def check(self, com, dec):
+        """
+        Checks if a previously generated instruction corresponds to the
+        decompressed one given
+        """
+
+        assert com in self.lookup, f"instruction '{com}' not generated before"
+        return self.lookup[com] == dec
 
 
 class DecompressorItem(uvm_sequence_item):
@@ -58,8 +127,8 @@ class CompressedInstructionItem(uvm_sequence_item):
         Creates a 16-bit instruction
         """
 
-        # TODO: Create a random compressed instruction
-        self.instr = int(("0" * 15) + "1")
+        instr = CompressedGenerator.get()
+        self.instr = BinaryValue(value=instr, bigEndian=False)
 
 
 class CompressedSequence(uvm_sequence):
@@ -71,7 +140,7 @@ class CompressedSequence(uvm_sequence):
         super().__init__(name)
 
     async def body(self):
-        for j in range(50):
+        for j in range(200):
             # Create a compressed instruction
             item = CompressedInstructionItem()
             await self.start_item(item)
@@ -169,7 +238,7 @@ class Scoreboard(uvm_component):
 
             # Got a decompressed instruction which is incorrect
             if isinstance(item, DecompressorItem):
-                if item.dout != decompress(item.din):
+                if not CompressedGenerator.check(str(item.din.value), str(item.dout.value)):
                     self.logger.debug(
                         "Instruction decompressed incorrectly: 0x%v -> 0x%v".format(
                         item.din,

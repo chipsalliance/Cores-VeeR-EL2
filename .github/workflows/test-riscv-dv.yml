@@ -217,11 +217,23 @@ jobs:
           key: cache_tests_${{ steps.cache_timestamp.outputs.time }}
           restore-keys: cache_tests_
 
+      - name: Generate code
+        run: |
+          export RV_ROOT=`realpath .`
+
+          pushd tools/riscv-dv
+            make -j`nproc` \
+              RISCV_DV_TEST=${{ matrix.test }} \
+              RISCV_DV_ISS=${{ matrix.iss }} \
+              RISCV_DV_ITER=3 \
+              RISCV_DV_SEED=999 \
+              generate
+          popd
+
       - name: Run test
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export PATH=/opt/veer-iss:$PATH
-          export RV_ROOT=`realpath .`
           export RISCV_GCC=riscv64-unknown-elf-gcc
           export RISCV_OBJCOPY=riscv64-unknown-elf-objcopy
           export RISCV_NM=riscv64-unknown-elf-nm
@@ -229,8 +241,8 @@ jobs:
           export WHISPER_ISS=/opt/veer-iss/whisper
           export RENODE_PATH=/opt/renode
 
-          echo "RV_ROOT=${RV_ROOT}" >> ${GITHUB_ENV}
           echo "PATH=${PATH}"       >> ${GITHUB_ENV}
+          echo "RV_ROOT=${RV_ROOT}" >> ${GITHUB_ENV}
 
           ${RISCV_GCC} --version
 

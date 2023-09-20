@@ -47,7 +47,6 @@ void fault_return(struct fault *fault)
     memcpy(&fault_last, fault, sizeof(fault_last));
 
     // Return to program if setjmp-based try-catch was used
-    __asm__("addi   sp,sp,%0" :: "i" (sizeof(struct fault)));
     if (fault_jmp_env_set) {
         fault_jmp_env_set = 0;
         longjmp(fault_jmp_env, 1);

@@ -80,7 +80,7 @@ _trap(void)
         /* Build a known-working C environment */
 	__asm__(".option	push\n"
                 ".option	norelax\n"
-                "la	sp, STACK\n"
+                "la	        sp, FAULTSTACK\n"
                 ".option	pop");
 
         /* Make space for saved registers */

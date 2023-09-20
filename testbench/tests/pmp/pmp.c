@@ -26,16 +26,15 @@ int test_store(void)
     char *a = 0xf0000000;
     struct fault ret;
     TRY {
-        SPDUMP
         *a = 0xff;
         return 2;
     }
     CATCH {
         ret = fault_last_get();
-        SPDUMP
         return (ret.mcause == 7) ? 0 : 1;
     }
     END_TRY;
+    return 3;
 }
 
 void main(void)
@@ -46,9 +45,11 @@ void main(void)
     puts("PMP test program");
     fault_install();
 
+    puts(":: test_store");
     results[0] = test_store();
-    if (!results[0]) puts("test_store passed");
-    else puts("test_store failed");
+    printf(":: test_store: ");
+    if (!results[0]) puts("passed\n");
+    else printf("failed (%d)\n", results[0]);
 
     for (int i = 0; i < TEST_NUMBER; i++)
         sum += results[i];

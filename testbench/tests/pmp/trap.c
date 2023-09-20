@@ -59,7 +59,7 @@ static void __attribute__((used))
 _ctrap(struct fault *fault)
 {
         int r;
-        printf("RISCV fault\n");
+        printf("RISC-V fault\n");
         for (r = 0; r < NUM_REG; r++)
                 printf("\tx%d %-5.5s%s 0x" FMT "\n", r, names[r], r < 10 ? " " : "", fault->r[r]);
         printf("\tmepc:     0x" FMT "\n", fault->mepc);

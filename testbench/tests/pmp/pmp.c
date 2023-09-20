@@ -19,22 +19,66 @@
 #include "trap.h"
 #include "fault.h"
 
-#define TEST_NUMBER 1
+#define TEST_NUMBER 3
+
+int test_load(void);
+int test_store(void);
+int test_exec(void);
+
+int (*tests[TEST_NUMBER]) (void) = {test_load, test_store, test_exec};
+const char *const test_names[TEST_NUMBER] = {"test_load", "test_store", "test_exec"};
+
+int test_load(void)
+{
+    char b;
+    volatile char *a;
+    struct fault ret;
+
+    TRY {
+        a = (char *)0xf0f0f0f0;
+        b = *a;
+    }
+    CATCH {
+        ret = fault_last_get();
+        return (ret.mcause == 5) ? 0 : 1;
+    }
+    END_TRY;
+    return 2;
+}
 
 int test_store(void)
 {
-    char *a = 0xf0000000;
+    volatile char *a;
     struct fault ret;
+
     TRY {
+        a = (char *)0xf0f0f0f0;
         *a = 0xff;
-        return 2;
     }
     CATCH {
         ret = fault_last_get();
         return (ret.mcause == 7) ? 0 : 1;
     }
     END_TRY;
-    return 3;
+    return 2;
+}
+
+int test_exec(void)
+{
+    typedef void (*func)();
+    func a;
+    struct fault ret;
+
+    TRY {
+        a = (func)0xf0f0f0f0;
+        (*a)();
+    }
+    CATCH {
+        ret = fault_last_get();
+        return (ret.mcause == 2) ? 0 : 1;
+    }
+    END_TRY;
+    return 2;
 }
 
 void main(void)
@@ -42,14 +86,14 @@ void main(void)
     int results[TEST_NUMBER];
     int sum = 0;
 
-    puts("PMP test program");
+    puts("PMP/exception test program");
     fault_install();
 
-    puts(":: test_store");
-    results[0] = test_store();
-    printf(":: test_store: ");
-    if (!results[0]) puts("passed\n");
-    else printf("failed (%d)\n", results[0]);
+    for (int i = 0; i < TEST_NUMBER; i++) {
+        printf(":: %s\n", test_names[i]);
+        results[i] = tests[i]();
+        printf(":: %s: %s (%d)\n", test_names[i], (results[i] ? "failed" : "passed"), results[i]);
+    }
 
     for (int i = 0; i < TEST_NUMBER; i++)
         sum += results[i];

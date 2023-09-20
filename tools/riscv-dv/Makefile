@@ -149,7 +149,7 @@ run:
 	# Run RISC-V DV compilation and simulation
 	$(MAKE) -f $(MAKEFILE) $(TEST_DIR)/iss_sim.log
 	# Run HDL simulation(s) and trace comparison
-	find $(TEST_DIR)/ -name "sim_*.log" | sed 's/sim_/comp_/g' | xargs $(MAKE) -f $(MAKEFILE)
+	find $(TEST_DIR)/$(RISCV_DV_ISS)_sim -name "*.log" | sed 's|sim/|sim/../comp_|g' | xargs realpath --relative-to=$(PWD) | xargs $(MAKE) -f $(MAKEFILE)
 	# Check for errors
 	for F in $(TEST_DIR)/comp_*.log; do grep "\[PASSED\]" $$F; if [ $$? -ne 0 ]; then exit 255; fi; done
 	# Aggregate coverage data

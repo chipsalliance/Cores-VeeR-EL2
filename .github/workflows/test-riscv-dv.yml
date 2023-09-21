@@ -246,14 +246,11 @@ jobs:
 
       - name: Prepare coverage data
         run: |
-          mkdir -p coverage_riscv-dv_${{ matrix.test }}
-          mv ${RV_ROOT}/tools/riscv-dv/work/coverage.dat coverage_riscv-dv_${{ matrix.test }}/
-          echo "Prepared coverage data"
-          .github/scripts/convert_coverage_data.sh \
-              ${{ matrix.coverage }} \
-              coverage_riscv-dv_${{ matrix.test }} \
-              results coverage_riscv-dv_${{ matrix.test }}
+          .github/scripts/convert_coverage_data.sh ${RV_ROOT}/tools/riscv-dv/work/
           echo "convert_coverage_data.sh exited with RET_CODE = "$?
+          mkdir -p results
+          mv ${RV_ROOT}/tools/riscv-dv/work/coverage.info \
+             results/coverage_riscv-dv_${{ matrix.test }}_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()

@@ -51,6 +51,12 @@ jobs:
       - name: Download coverage reports
         uses: actions/download-artifact@v3
         with:
+          name: uarch_tests_coverage_data
+          path: ./
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
           name: riscv-dv_coverage_data
           path: ./
 

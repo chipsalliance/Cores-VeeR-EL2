@@ -86,17 +86,15 @@ jobs:
 
       - name: Prepare coverage data
         run: |
-          pushd ${{ github.workspace }}
-            mkdir -p coverage_${{ matrix.test }}
-            mv ${TEST_PATH}/coverage.dat coverage_${{ matrix.test }}/
-            echo "Prepared coverage data"
-            .github/scripts/convert_coverage_data.sh ${{ matrix.coverage }} ${{ github.workspace }}/coverage_${{ matrix.test }} ${{ github.workspace }}/results coverage_${{ matrix.test }}
-            echo "convert_coverage_data.sh exited with RET_CODE = "$?
-          popd
+          .github/scripts/convert_coverage_data.sh ${TEST_PATH}/
+          echo "convert_coverage_data.sh exited with RET_CODE = "$?
+          mkdir -p results
+          mv ${TEST_PATH}/coverage.info \
+             results/coverage_${{ matrix.test }}_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: regression_tests_coverage_data
-          path: ./results/*.info
+          path: results/*.info

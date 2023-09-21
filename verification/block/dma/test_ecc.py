@@ -1,13 +1,12 @@
 # Copyright (c) 2023 Antmicro <www.antmicro.com>
 # SPDX-License-Identifier: Apache-2.0
 
-import random
-import struct
 from collections import defaultdict
 
 import pyuvm
 from cocotb.triggers import ClockCycles
 from pyuvm import *
+from sequences import AnyMemReadSequence
 from testbench import (
     BaseEnv,
     BaseTest,
@@ -16,43 +15,6 @@ from testbench import (
     MemReadItem,
     MemWriteItem,
 )
-
-# =============================================================================
-
-
-class TestSequence(uvm_sequence):
-    """
-    A sequence of random ICCM or DCCM reads. ECC failure injection is
-    randomized as well.
-    """
-
-    def __init__(self, name):
-        super().__init__(name)
-
-    async def body(self):
-        iccm_base = ConfigDB().get(None, "", "ICCM_BASE")
-        iccm_size = ConfigDB().get(None, "", "ICCM_SIZE")
-
-        dccm_base = ConfigDB().get(None, "", "DCCM_BASE")
-        dccm_size = ConfigDB().get(None, "", "DCCM_SIZE")
-
-        align = ConfigDB().get(None, "", "ADDR_ALIGN")
-
-        for i in range(50):
-            mem_base, mem_size = random.choice(
-                [
-                    (iccm_base, iccm_size),
-                    (dccm_base, dccm_size),
-                ]
-            )
-
-            addr = mem_base + random.randrange(0, mem_size)
-            addr = (addr // align) * align
-
-            item = BusReadItem(addr)
-            await self.start_item(item)
-            await self.finish_item(item)
-
 
 # =============================================================================
 
@@ -115,6 +77,9 @@ class Scoreboard(uvm_component):
                     self.passed = False
 
         # Check reads
+        have_ecc_err = False
+        have_ecc_ok = False
+
         for addr, pair in reads.items():
             if "axi" not in pair:
                 self.logger.error("No AXI transfer for access to 0x{:08X}".format(addr))
@@ -141,6 +106,20 @@ class Scoreboard(uvm_component):
                     )
                 )
                 self.passed = False
+
+            # Check if there were errors injected
+            if pair["mem"]:
+                have_ecc_err = True
+            else:
+                have_ecc_ok = True
+
+        if not have_ecc_err:
+            self.logger.error("There were no ECC errors injected!")
+            self.passed = False
+
+        if not have_ecc_ok:
+            self.logger.error("There were only ECC errors injected!")
+            self.passed = False
 
     def final_phase(self):
         if not self.passed:
@@ -183,7 +162,7 @@ class TestEccError(BaseTest):
 
     def end_of_elaboration_phase(self):
         super().end_of_elaboration_phase()
-        self.seq = TestSequence.create("stimulus")
+        self.seq = AnyMemReadSequence("stimulus")
 
     async def run(self):
         await self.seq.start(self.env.axi_seqr)

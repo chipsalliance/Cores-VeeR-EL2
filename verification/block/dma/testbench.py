@@ -4,6 +4,7 @@
 import math
 import os
 import random
+import struct
 
 import pyuvm
 from cocotb.clock import Clock
@@ -836,7 +837,7 @@ class DebugInterfaceBFM(uvm_component):
         self.dbg_cmd_write.value = 1
         self.dbg_cmd_size.value = 2  # Apparently 0=8, 1=16, 2=32
         self.dbg_cmd_addr.value = addr
-        self.dbg_cmd_wrdata.value = data
+        self.dbg_cmd_wrdata.value = struct.unpack("<I", data)[0]
 
         await RisingEdge(self.clk)
 
@@ -869,7 +870,7 @@ class DebugInterfaceBFM(uvm_component):
         # Wait for done
         await self._wait(self.dma_dbg_cmd_done)
 
-        return int(self.dma_dbg_rddata.value), int(self.dma_dbg_cmd_fail.value)
+        return struct.pack("<I", self.dma_dbg_rddata.value), int(self.dma_dbg_cmd_fail.value)
 
     async def run_phase(self):
         """
@@ -1018,7 +1019,9 @@ class BaseEnv(uvm_env):
     def build_phase(self):
         # Config
         ConfigDB().set(None, "*", "TEST_CLK_PERIOD", 1)
-        ConfigDB().set(None, "*", "TEST_ITERATIONS", 50)
+        ConfigDB().set(None, "*", "TEST_ITERATIONS", 10)
+        ConfigDB().set(None, "*", "TEST_BURST_LEN", 10)
+        ConfigDB().set(None, "*", "TEST_BURST_GAP", 10)
 
         # ICCM and DCCM addresses / sizes are taken from the default VeeR
         # config.

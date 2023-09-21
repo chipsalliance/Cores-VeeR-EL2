@@ -92,6 +92,9 @@ jobs:
           echo "TEST_NAME=$TEST_NAME" >> $GITHUB_ENV
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
 
+          # Fix random generator seed
+          echo "RANDOM_SEED=1377424946" >> $GITHUB_ENV
+
           pip3 install meson nox
 
       - name: Run ${{ matrix.test }}

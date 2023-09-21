@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef _FAULT_H
-#define _FAULT_H
+#ifndef __VEER_H
+#define __VEER_H
 
 #include <setjmp.h>
-#include "trap.h"
 
-void fault_install(void);
-void fault_setjmp(jmp_buf env);
-struct fault fault_last_get(void);
-void fault_return(struct fault *fault);
+#define TRY do { jmp_buf try_buf; if(!setjmp(try_buf)){ fault_setjmp(try_buf);
+#define CATCH } else {
+#define END_TRY } } while(0)
+#define THROW longjmp(try_buf, 1)
 
 #endif

@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        test: ["block/pic", "block/pic_gw"]
+        test: ["block/pic", "block/pic_gw", "block/dma"]
     env:
       CCACHE_DIR: "/opt/verification/.cache/"
       VERILATOR_VERSION: v5.010
@@ -92,6 +92,9 @@ jobs:
           echo "TEST_NAME=$TEST_NAME" >> $GITHUB_ENV
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
 
+          # Fix random generator seed
+          echo "RANDOM_SEED=1377424946" >> $GITHUB_ENV
+
           pip3 install meson nox
 
       - name: Run ${{ matrix.test }}
@@ -123,3 +126,12 @@ jobs:
         with:
           name: uarch_tests_coverage_data
           path: ./results/*.info
+
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: uarch_tests_logs
+          path: |
+            verification/${{ matrix.test }}/*.log
+            verification/${{ matrix.test }}/*.vcd

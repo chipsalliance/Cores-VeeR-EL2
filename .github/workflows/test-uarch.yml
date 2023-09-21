@@ -123,3 +123,12 @@ jobs:
         with:
           name: uarch_tests_coverage_data
           path: ./results/*.info
+
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: uarch_tests_logs
+          path: |
+            verification/${{ matrix.test }}/*.log
+            verification/${{ matrix.test }}/*.vcd

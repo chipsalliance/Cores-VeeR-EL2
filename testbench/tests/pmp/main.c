@@ -32,13 +32,18 @@ const char *const test_names[TEST_NUMBER] = {"test_load", "test_store", "test_ex
 
 int test_load(void)
 {
+    volatile char a;
     char b;
-    volatile char *a;
     struct fault ret;
 
     TRY {
-        a = (char *)0xf0f0f0f0;
-        b = *a;
+        struct pmp_entry_s entry = {
+            .addr = ((uintptr_t)(&a)) >> 2,
+            .cfg = PMP_NA4 | PMP_X | PMP_W
+        };
+        pmp_entry_write(0, &entry);
+        a = 0xde;
+        b = a;
     }
     CATCH {
         ret = fault_last_get();
@@ -50,12 +55,16 @@ int test_load(void)
 
 int test_store(void)
 {
-    volatile char *a;
+    volatile char a;
     struct fault ret;
 
     TRY {
-        a = (char *)0xf0f0f0f0;
-        *a = 0xff;
+        struct pmp_entry_s entry = {
+            .addr = ((uintptr_t)(&a)) >> 2,
+            .cfg = PMP_NA4 | PMP_X | PMP_R
+        };
+        pmp_entry_write(0, &entry);
+        a = 0xde;
     }
     CATCH {
         ret = fault_last_get();
@@ -65,6 +74,11 @@ int test_store(void)
     return 2;
 }
 
+void test_exec_1(void)
+{
+    return;
+}
+
 int test_exec(void)
 {
     typedef void (*func)();
@@ -72,7 +86,12 @@ int test_exec(void)
     struct fault ret;
 
     TRY {
-        a = (func)0xf0f0f0f0;
+        struct pmp_entry_s entry = {
+            .addr = ((uintptr_t)(a)) >> 2,
+            .cfg = PMP_NA4 | PMP_W | PMP_R
+        };
+        pmp_entry_write(0, &entry);
+        a = (func)test_exec_1;
         (*a)();
     }
     CATCH {

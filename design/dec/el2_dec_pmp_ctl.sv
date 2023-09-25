@@ -114,9 +114,17 @@ import el2_pkg::*;
    assign wr_pmpaddr_address = {wr_pmpaddr_quarter, dec_csr_wraddr_r[3:0]}; // entry address
 
    for (genvar entry_idx = 0; entry_idx < pt.PMP_ENTRIES; entry_idx++) begin : gen_pmpaddr_ff
+      logic pmpaddr_lock;
+      logic pmpaddr_lock_next;
+      assign pmpaddr_lock_next = ((entry_idx+1 < pt.PMP_ENTRIES)
+                                  ? (pmp_pmpcfg[entry_idx+1].lock
+                                     & pmp_pmpcfg[entry_idx+1].mode == TOR)
+                                  : 1'b0);
+      assign pmpaddr_lock = pmp_pmpcfg[entry_idx].lock | pmpaddr_lock_next;
       assign pmp_pmpaddr[entry_idx][31:30] = 2'b00;
       rvdffe #(30) pmpaddr_ff (.*, .clk(free_l2clk),
-                          .en(wr_pmpaddr_r & (wr_pmpaddr_address == entry_idx) & (~pmp_pmpcfg[entry_idx].lock)),
+                          .en(wr_pmpaddr_r & (wr_pmpaddr_address == entry_idx)
+                              & (~pmpaddr_lock)),
                           .din(dec_csr_wrdata_r[29:0]),
                           .dout(pmp_pmpaddr[entry_idx][29:0]));
    end

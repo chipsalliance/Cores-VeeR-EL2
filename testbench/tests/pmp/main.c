@@ -23,29 +23,35 @@
 
 #define TEST_NUMBER 3
 
-int test_load(void);
-int test_store(void);
-int test_exec(void);
+int test_load(int);
+int test_store(int);
+int test_exec(int);
 
-int (*tests[TEST_NUMBER]) (void) = {test_load, test_store, test_exec};
+int (*tests[TEST_NUMBER]) (int) = {test_load, test_store, test_exec};
 const char *const test_names[TEST_NUMBER] = {"test_load", "test_store", "test_exec"};
 
-int test_load(void)
+volatile int temp_load;
+volatile int temp_store;
+
+#define PATTERN_A 0xaaaaaaaa
+#define PATTERN_B 0x55555555
+
+int test_load(int id)
 {
-    volatile char a;
-    char b;
+    int temp = PATTERN_B;
     struct fault ret;
 
     TRY {
         struct pmp_entry_s entry = {
-            .addr = ((uintptr_t)(&a)) >> 2,
-            .cfg = PMP_NA4 | PMP_X | PMP_W
+            .addr = ((uintptr_t)(&temp_load)) >> 2,
+            .cfg = PMP_LOCK | PMP_NA4 | PMP_X | PMP_W
         };
-        pmp_entry_write(0, &entry);
-        a = 0xde;
-        b = a;
+        pmp_entry_write(id, &entry);
+        temp_load = PATTERN_A;
+        temp = temp_load;
     }
     CATCH {
+        if ((temp != PATTERN_B) && (temp == PATTERN_A)) return 3;
         ret = fault_last_get();
         return (ret.mcause == 5) ? 0 : 1;
     }
@@ -53,20 +59,21 @@ int test_load(void)
     return 2;
 }
 
-int test_store(void)
+int test_store(int id)
 {
-    volatile char a;
     struct fault ret;
 
     TRY {
+        temp_store = PATTERN_A;
         struct pmp_entry_s entry = {
-            .addr = ((uintptr_t)(&a)) >> 2,
-            .cfg = PMP_NA4 | PMP_X | PMP_R
+            .addr = ((uintptr_t)(&temp_store)) >> 2,
+            .cfg = PMP_LOCK | PMP_NA4 | PMP_X | PMP_R
         };
-        pmp_entry_write(0, &entry);
-        a = 0xde;
+        pmp_entry_write(id, &entry);
+        temp_store = PATTERN_B;
     }
     CATCH {
+        if (temp_store == PATTERN_B) return 3;
         ret = fault_last_get();
         return (ret.mcause == 7) ? 0 : 1;
     }
@@ -74,25 +81,23 @@ int test_store(void)
     return 2;
 }
 
-void test_exec_1(void)
+void __attribute__ ((noinline)) test_exec_1(void)
 {
+    puts(__func__);
     return;
 }
 
-int test_exec(void)
+int test_exec(int id)
 {
-    typedef void (*func)();
-    func a;
     struct fault ret;
 
     TRY {
         struct pmp_entry_s entry = {
-            .addr = ((uintptr_t)(a)) >> 2,
-            .cfg = PMP_NA4 | PMP_W | PMP_R
+            .addr = ((uintptr_t)(test_exec_1)) >> 2,
+            .cfg = PMP_LOCK | PMP_NA4 | PMP_W | PMP_R
         };
-        pmp_entry_write(0, &entry);
-        a = (func)test_exec_1;
-        (*a)();
+        pmp_entry_write(id, &entry);
+        test_exec_1();
     }
     CATCH {
         ret = fault_last_get();
@@ -112,7 +117,7 @@ void main(void)
 
     for (int i = 0; i < TEST_NUMBER; i++) {
         printf(":: %s\n", test_names[i]);
-        results[i] = tests[i]();
+        results[i] = tests[i](i);
         printf(":: %s: %s (%d)\n", test_names[i], (results[i] ? "failed" : "passed"), results[i]);
         sum += results[i];
     }

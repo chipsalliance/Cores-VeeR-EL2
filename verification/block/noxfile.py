@@ -186,6 +186,19 @@ def ifu_compress_verify(session, blockName, testName, coverage):
 )
 @nox.parametrize("coverage", coverageTypes)
 def exu_alu_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["exu_mul"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_mul",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def exu_mul_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
 
 @nox.session()
 def isort(session: nox.Session) -> None:

@@ -1,12 +1,12 @@
 import os
 import random
 import subprocess
+import textwrap
 from queue import Queue
 
-from cocotb.triggers import Timer
-from cocotb.binary import BinaryValue
-
 import pyuvm
+from cocotb.binary import BinaryValue
+from cocotb.triggers import Timer
 from pyuvm import *
 
 
@@ -25,9 +25,7 @@ def collect_signals(signals, uut, obj, uut_prefix="", obj_prefix=""):
 
         else:
             s = None
-            logging.error(
-                "Module {} does not have a signal '{}'".format(str(uut), sig)
-            )
+            logging.error("Module {} does not have a signal '{}'".format(str(uut), sig))
 
         setattr(obj, obj_sig, s)
 
@@ -37,12 +35,15 @@ def get_opcode(asm_line, ext="rv32i", size=32):
     Generates binary opcode string based on a line of assembly
     """
 
-    import textwrap
-
     cmd = f"echo '{asm_line}' | riscv64-unknown-elf-as -march={ext} -o /dev/null -al | tail -n 1"
+
+    # Take instruction hex (3rd column) and change its endianess
     out = subprocess.check_output([cmd], shell=True).decode().split()[2]
     out = "".join(textwrap.wrap(out, 2)[::-1])
 
+    assert len(out) == size // 4, f"instruction '{asm_line}' assembled to unexpected width"
+
+    # Convert hex to bin
     opcode = f"{int(out, 16):0{size}b}"
 
     return opcode
@@ -53,26 +54,38 @@ def generate_assembly_pair():
     Generates random assembly instruction that can be compressed
     """
 
-    # x8--x15 are the allowed registers for compressed instructions
+    # For most compressed instructions only x8--x15 are allowed
     dreg = random.randrange(8, 16)
     sreg = random.randrange(8, 16)
 
-    imm = random.randrange(2**5)
+    imm = random.randrange(2**11)
+    sgn = random.choice(["-", ""])
 
-    return random.choice([
-        (f"c.add  x{dreg}, x{sreg}", f"add  x{dreg}, x{dreg}, x{sreg}"),
-        (f"c.or   x{dreg}, x{sreg}", f"or   x{dreg}, x{dreg}, x{sreg}"),
-        (f"c.xor  x{dreg}, x{sreg}", f"xor  x{dreg}, x{dreg}, x{sreg}"),
-        (f"c.sub  x{dreg}, x{sreg}", f"sub  x{dreg}, x{dreg}, x{sreg}"),
-        (f"c.mv   x{dreg}, x{sreg}", f"add  x{dreg}, x0, x{sreg}"),
-        (f"c.andi x{dreg}, {imm}",   f"andi x{dreg}, x{dreg}, {imm}"),
-    ])
+    # In f-strings below:
+    # {imm%width} -- when the immediate's magnitude has a limited width
+    # {imm or 1}  -- when the immediate cannot be 0
+    # {sgn}{imm}  -- when the immediate is signed
+    return random.choice(
+        [
+            (f"c.add x{dreg}, x{sreg}", f"add x{dreg}, x{dreg}, x{sreg}"),
+            (f"c.or x{dreg}, x{sreg}", f"or x{dreg}, x{dreg}, x{sreg}"),
+            (f"c.xor x{dreg}, x{sreg}", f"xor x{dreg}, x{dreg}, x{sreg}"),
+            (f"c.sub x{dreg}, x{sreg}", f"sub x{dreg}, x{dreg}, x{sreg}"),
+            (f"c.mv x{dreg}, x{sreg}", f"add x{dreg}, x0, x{sreg}"),
+            (f"c.andi x{dreg}, {sgn}{imm%5}", f"andi x{dreg}, x{dreg}, {sgn}{imm%5}"),
+            (f"c.addi x{dreg}, {sgn}{imm%5}", f"addi x{dreg}, x{dreg}, {sgn}{imm%5}"),
+            (f"c.srli x{dreg}, {imm%5 or 1}", f"srli x{dreg}, x{dreg}, {imm%5 or 1}"),
+            (f"c.srai x{dreg}, {imm%5 or 1}", f"srai x{dreg}, x{dreg}, {imm%5 or 1}"),
+            (f"c.slli x{dreg}, {imm%5 or 1}", f"slli x{dreg}, x{dreg}, {imm%5 or 1}"),
+            ("c.ebreak", "ebreak"),
+        ]
+    )
 
 
 class CompressedGenerator:
     """
-    Generates compressed instruction and caches their expected
-    decompressed counterpart, allowing for a fast lookup
+    Generates compressed instructions and caches their expected
+    decompressed counterpart to allow fast checks
     """
 
     lookup = {}
@@ -83,10 +96,10 @@ class CompressedGenerator:
         Generates compressed/decompressed instruction pair
         """
 
-        com, dec = generate_assembly_pair()
+        asm_com, asm_dec = generate_assembly_pair()
 
-        com = get_opcode(com, ext="rv32ic", size=16)
-        dec = get_opcode(dec, ext="rv32i", size=32)
+        com = get_opcode(asm_com, ext="rv32ic", size=16)
+        dec = get_opcode(asm_dec, ext="rv32i", size=32)
 
         self.lookup[com] = dec
 
@@ -99,14 +112,15 @@ class CompressedGenerator:
         decompressed one given
         """
 
-        assert com in self.lookup, f"instruction '{com}' not generated before"
+        assert com in self.lookup, f"instruction 0b{com} not generated before"
         return self.lookup[com] == dec
 
 
-class DecompressorItem(uvm_sequence_item):
+class InstructionPairItem(uvm_sequence_item):
     """
     A generic instruction-input stimulus
     """
+
     def __init__(self, din, dout):
         super().__init__("InstructionItem")
         """
@@ -121,6 +135,7 @@ class CompressedInstructionItem(uvm_sequence_item):
     """
     A generic compressed instruction-input stimulus
     """
+
     def __init__(self):
         super().__init__("CompressedInstructionItem")
         """
@@ -140,7 +155,9 @@ class CompressedSequence(uvm_sequence):
         super().__init__(name)
 
     async def body(self):
-        for j in range(200):
+        count = ConfigDB().get(None, "", "TEST_ITERATIONS")
+
+        for j in range(count):
             # Create a compressed instruction
             item = CompressedInstructionItem()
             await self.start_item(item)
@@ -158,7 +175,7 @@ class DecompressorDriver(uvm_driver):
         uut = kwargs["uut"]
         del kwargs["uut"]
         super().__init__(*args, **kwargs)
-        
+
         # Collect signals
         collect_signals(self.SIGNALS, uut, self)
 
@@ -171,7 +188,6 @@ class DecompressorDriver(uvm_driver):
         await Timer(10, "us")
 
     async def run_phase(self):
-
         while True:
             it = await self.seq_item_port.get_next_item()
             if isinstance(it, CompressedInstructionItem):
@@ -202,7 +218,7 @@ class DecompressorMonitor(uvm_component):
     async def run_phase(self):
         while True:
             await Timer(10, "us")
-            it = DecompressorItem(self.din, self.dout)
+            it = InstructionPairItem(self.din, self.dout)
             self.ap.write(it)
 
 
@@ -224,10 +240,8 @@ class Scoreboard(uvm_component):
         self.port.connect(self.fifo.get_export)
 
     def check_phase(self):
-
         # Process items
         while self.port.can_get():
-
             # Get an item
             got_item, item = self.port.try_get()
             assert got_item
@@ -237,15 +251,14 @@ class Scoreboard(uvm_component):
                 self.passed = True
 
             # Got a decompressed instruction which is incorrect
-            if isinstance(item, DecompressorItem):
+            if isinstance(item, InstructionPairItem):
                 if not CompressedGenerator.check(str(item.din.value), str(item.dout.value)):
                     self.logger.debug(
-                        "Instruction decompressed incorrectly: 0x%v -> 0x%v".format(
-                        item.din,
-                        item.dout
-                    ))
+                        "Instruction decompressed incorrectly: 0b{} -> 0b{}".format(
+                            item.din, item.dout
+                        )
+                    )
                     self.passed = False
-
 
     def final_phase(self):
         if not self.passed:
@@ -259,16 +272,20 @@ class BaseEnv(uvm_env):
     """
 
     def build_phase(self):
-
-        # Add scoreboard
-        self.scoreboard = Scoreboard("scoreboard", self)
+        # Config
+        ConfigDB().set(None, "*", "TEST_ITERATIONS", 500)
 
         # Sequencers
         self.dcm_seqr = uvm_sequencer("dcm_seqr", self)
 
+        # Driver
         self.dcm_drv = DecompressorDriver("dcm_drv", self, uut=cocotb.top)
 
+        # Monitor
         self.dcm_mon = DecompressorMonitor("dcm_mon", self, uut=cocotb.top)
+
+        # Scoreboard
+        self.scoreboard = Scoreboard("scoreboard", self)
 
     def connect_phase(self):
         self.dcm_drv.seq_item_port.connect(self.dcm_seqr.seq_item_export)
@@ -299,4 +316,3 @@ class BaseTest(uvm_test):
 
     async def run(self):
         raise NotImplementedError()
-

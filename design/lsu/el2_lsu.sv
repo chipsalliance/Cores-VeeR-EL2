@@ -183,7 +183,8 @@ import el2_pkg::*;
    output logic [31:0]                     lsu_pmp_addr_end,
    input  logic                            lsu_pmp_error_start,
    input  logic                            lsu_pmp_error_end,
-   output logic                            lsu_pmp_we
+   output logic                            lsu_pmp_we,
+   output logic                            lsu_pmp_re
 
    );
 
@@ -220,7 +221,8 @@ import el2_pkg::*;
 
    el2_lsu_pkt_t    lsu_pkt_d, lsu_pkt_m, lsu_pkt_r;
    logic        lsu_i0_valid_d, lsu_i0_valid_m, lsu_i0_valid_r;
-   assign lsu_pmp_we = lsu_pkt_d.store;
+   assign lsu_pmp_we = lsu_pkt_d.store & lsu_pkt_d.valid;
+   assign lsu_pmp_re = lsu_pkt_d.load & lsu_pkt_d.valid;
 
    // Store Buffer signals
    logic        store_stbuf_reqvld_r;

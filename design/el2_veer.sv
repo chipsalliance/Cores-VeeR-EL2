@@ -740,6 +740,7 @@ import el2_pkg::*;
    logic [31:0] lsu_pmp_addr_end;
    logic        lsu_pmp_error_end;
    logic        lsu_pmp_we;
+   logic        lsu_pmp_re;
 
    // -----------------------DEBUG  START -------------------------------
 
@@ -973,10 +974,10 @@ import el2_pkg::*;
    assign pmp_chan_type[0] = EXEC;
    assign ifu_pmp_error    = pmp_chan_err[0];
    assign pmp_chan_addr[1] = lsu_pmp_addr_start;
-   assign pmp_chan_type[1] = lsu_pmp_we ? WRITE : READ;
+   assign pmp_chan_type[1] = lsu_pmp_we ? WRITE : (lsu_pmp_re ? READ : NONE);
    assign lsu_pmp_error_start = pmp_chan_err[1];
    assign pmp_chan_addr[2] = lsu_pmp_addr_end;
-   assign pmp_chan_type[2] = lsu_pmp_we ? WRITE : READ;
+   assign pmp_chan_type[2] = lsu_pmp_we ? WRITE : (lsu_pmp_re ? READ : NONE);
    assign lsu_pmp_error_end = pmp_chan_err[2];
 
    el2_pmp #(.PMP_CHANNELS(3), .pt(pt)) pmp (

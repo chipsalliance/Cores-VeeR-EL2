@@ -407,6 +407,7 @@ typedef struct packed {
 
 
 typedef enum logic [2:0] {
+                          NONE      = 3'b000,
                           READ      = 3'b001,
                           WRITE     = 3'b010,
                           EXEC      = 3'b100

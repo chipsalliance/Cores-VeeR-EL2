@@ -172,7 +172,7 @@ def dma_verify(session, blockName, testName, coverage):
 @nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["ifu_compress"])
 @nox.parametrize("testName", ["test_compress"])
-@nox.parametrize("coverage", coverageTypes)
+@nox.parametrize("coverage", "toggle")  # No branches in the decompressor
 def ifu_compress_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 

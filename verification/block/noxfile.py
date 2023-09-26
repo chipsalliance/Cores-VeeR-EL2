@@ -168,6 +168,7 @@ def pic_gw_verify(session, blockName, testName, coverage):
 def dma_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
+
 @nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["ifu_compress"])
 @nox.parametrize("testName", ["test_compress"])
@@ -188,6 +189,7 @@ def ifu_compress_verify(session, blockName, testName, coverage):
 def exu_alu_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
+
 @nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["exu_mul"])
 @nox.parametrize(
@@ -199,6 +201,20 @@ def exu_alu_verify(session, blockName, testName, coverage):
 @nox.parametrize("coverage", coverageTypes)
 def exu_mul_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["exu_div"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_div",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def exu_div_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
 
 @nox.session()
 def isort(session: nox.Session) -> None:

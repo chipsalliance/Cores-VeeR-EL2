@@ -17,6 +17,9 @@ jobs:
           - "block/pic_gw"
           - "block/dma"
           - "block/ifu_compress"
+          - "block/exu_alu"
+          - "block/exu_mul"
+          - "block/exu_div"
     env:
       CCACHE_DIR: "/opt/verification/.cache/"
       VERILATOR_VERSION: v5.010

@@ -20,6 +20,10 @@
 #include <setjmp.h>
 #include "trap.h"
 
+#define EXC_INSTRUCTION_ACC_FAULT 1
+#define EXC_LOAD_ACC_FAULT 5
+#define EXC_STORE_ACC_FAULT 7
+
 void fault_install(void);
 void fault_setjmp(jmp_buf env);
 struct fault fault_last_get(void);

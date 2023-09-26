@@ -53,7 +53,7 @@ int test_load(int id)
     CATCH {
         if ((temp != PATTERN_B) && (temp == PATTERN_A)) return 3;
         ret = fault_last_get();
-        return (ret.mcause == 5) ? 0 : 1;
+        return (ret.mcause == EXC_LOAD_ACC_FAULT) ? 0 : 1;
     }
     END_TRY;
     return 2;
@@ -75,7 +75,7 @@ int test_store(int id)
     CATCH {
         if (temp_store == PATTERN_B) return 3;
         ret = fault_last_get();
-        return (ret.mcause == 7) ? 0 : 1;
+        return (ret.mcause == EXC_STORE_ACC_FAULT) ? 0 : 1;
     }
     END_TRY;
     return 2;
@@ -101,7 +101,7 @@ int test_exec(int id)
     }
     CATCH {
         ret = fault_last_get();
-        return (ret.mcause == 2) ? 0 : 1;
+        return (ret.mcause == EXC_INSTRUCTION_ACC_FAULT) ? 0 : 1;
     }
     END_TRY;
     return 2;

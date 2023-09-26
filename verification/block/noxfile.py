@@ -173,7 +173,7 @@ def dma_verify(session, blockName, testName, coverage):
 @nox.parametrize("blockName", ["ifu_compress"])
 @nox.parametrize("testName", ["test_compress"])
 @nox.parametrize("coverage", coverageTypes)
-def ifu_verify(session, blockName, testName, coverage):
+def ifu_compress_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
 

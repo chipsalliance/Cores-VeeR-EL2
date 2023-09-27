@@ -169,6 +169,7 @@ def dma_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
 
+@nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["ifu"])
 @nox.parametrize("testName", ["test_compress"])
 @nox.parametrize("coverage", coverageTypes)

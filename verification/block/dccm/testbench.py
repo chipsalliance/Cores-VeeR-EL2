@@ -66,8 +66,12 @@ class MemDriver(uvm_driver):
                 # Wait for rising edge, do the write
                 await RisingEdge(self.dut.clk)
                 self.dut.dccm_wren.value = 1
+
                 self.dut.dccm_wr_addr_lo.value = it.addr
                 self.dut.dccm_wr_data_lo.value = it.data
+
+                self.dut.dccm_wr_addr_hi.value = it.addr
+                self.dut.dccm_wr_data_hi.value = it.data
 
                 # Wait for rising edge, deassert write
                 await RisingEdge(self.dut.clk)
@@ -78,7 +82,9 @@ class MemDriver(uvm_driver):
                 # Wait for rising edge, do the read
                 await RisingEdge(self.dut.clk)
                 self.dut.dccm_rden.value = 1
+
                 self.dut.dccm_rd_addr_lo.value = it.addr
+                self.dut.dccm_rd_addr_hi.value = it.addr
 
                 # Wait for rising edge, deassert read
                 await RisingEdge(self.dut.clk)
@@ -107,6 +113,9 @@ class MemMonitor(uvm_component):
         while True:
             # Act on rising edges
             await RisingEdge(self.dut.clk)
+
+            # Since the driver drives both lo and hi with the same values
+            # here we sample only lo
 
             # Write
             if self.dut.dccm_wren.value:

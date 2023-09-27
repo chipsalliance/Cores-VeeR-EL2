@@ -124,7 +124,7 @@ jobs:
           echo "include-run=$(python3 .github/scripts/riscv_dv_matrix_include.py run)" | tee -a $GITHUB_OUTPUT
       - id: hash
         run: |
-          echo "files-hash=$(sha256sum **/*.sv **/*.py **/*.yml **/*.yaml | cut -d\  -f1 | sha256sum | cut -d\  -f1)" | tee -a $GITHUB_OUTPUT
+          echo "files-hash=$(sha256sum **/*.sv **/*.py **/*.yml **/*.yaml tools/riscv-dv/*.py | cut -d\  -f1 | sha256sum | cut -d\  -f1)" | tee -a $GITHUB_OUTPUT
 
   generate-code:
     name: Generate code for tests

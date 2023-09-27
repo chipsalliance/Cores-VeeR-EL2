@@ -21,6 +21,7 @@ jobs:
           - "block/exu_mul"
           - "block/exu_div"
           - "block/iccm"
+          - "block/dccm"
     env:
       CCACHE_DIR: "/opt/verification/.cache/"
       VERILATOR_VERSION: v5.010

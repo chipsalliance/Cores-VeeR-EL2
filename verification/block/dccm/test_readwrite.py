@@ -24,17 +24,20 @@ class ReadWriteSequence(uvm_sequence):
         count = ConfigDB().get(None, "", "TEST_ITERATIONS")
         burst = ConfigDB().get(None, "", "TEST_BURST_LEN")
 
+        awidth = ConfigDB().get(None, "", "DCCM_BITS")
+        dwidth = ConfigDB().get(None, "", "DCCM_FDATA_WIDTH")
+
         for i in range(count):
 
             # Randomize unique addresses (aligned)
             addrs = set([
-                random.randrange(0, 1 << 0x10) & ~3    # DCCM_BITS
+                random.randrange(0, 1 << awidth) & ~3
                 for i in range(burst)
             ])
 
             # Issue writes, randomize data
             for addr in addrs:
-                data = random.randrange(0, 1 << 0x20)  # DCCM_FDATA_WIDTH
+                data = random.randrange(0, 1 << dwidth)
 
                 item = MemWriteItem(addr, data)
                 await self.start_item(item)

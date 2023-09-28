@@ -225,6 +225,9 @@ class BaseEnv(uvm_env):
         ConfigDB().set(None, "*", "TEST_ITERATIONS", 50)
         ConfigDB().set(None, "*", "TEST_BURST_LEN", 10)
 
+        ConfigDB().set(None, "*", "DCCM_BITS", 0x10)
+        ConfigDB().set(None, "*", "DCCM_FDATA_WIDTH", 0x20)
+
         # Sequencers
         self.mem_seqr = uvm_sequencer("mem_seqr", self)
 

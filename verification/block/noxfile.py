@@ -215,6 +215,18 @@ def exu_mul_verify(session, blockName, testName, coverage):
 def exu_div_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["iccm"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_readwrite",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def iccm_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
 
 @nox.session()
 def isort(session: nox.Session) -> None:

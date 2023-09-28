@@ -150,6 +150,14 @@ def pic_gw_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["dec_tl"])
+@nox.parametrize("testName", ["test_dec_tl"])
+@nox.parametrize("coverage", "toggle")
+def dec_tl_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["dma"])
 @nox.parametrize(
     "testName",
@@ -175,6 +183,7 @@ def dma_verify(session, blockName, testName, coverage):
 @nox.parametrize("coverage", "toggle")  # No branches in the decompressor
 def ifu_compress_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
+
 
 @nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["exu_alu"])

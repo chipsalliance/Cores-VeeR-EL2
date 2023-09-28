@@ -17,6 +17,7 @@ jobs:
           - "block/pic_gw"
           - "block/dma"
           - "block/ifu_compress"
+          - "block/dec_tl"
           - "block/exu_alu"
           - "block/exu_mul"
           - "block/exu_div"

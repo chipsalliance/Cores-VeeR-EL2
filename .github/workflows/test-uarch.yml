@@ -12,7 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        test: ["block/pic", "block/pic_gw", "block/dma"]
+        test:
+          - "block/pic"
+          - "block/pic_gw"
+          - "block/dma"
+          - "block/ifu_compress"
     env:
       CCACHE_DIR: "/opt/verification/.cache/"
       VERILATOR_VERSION: v5.010

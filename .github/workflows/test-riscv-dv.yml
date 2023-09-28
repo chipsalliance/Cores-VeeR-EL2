@@ -181,6 +181,12 @@ jobs:
               generate
           popd
 
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: riscv-dv_generated_code_${{ matrix.version }}
+          path: tools/riscv-dv/work/**/asm_test/*.S
 
   run-tests:
     name: Run RISC-V DV tests

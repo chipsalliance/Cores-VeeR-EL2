@@ -31,7 +31,7 @@ class ReadWriteSequence(uvm_sequence):
 
             # Randomize unique addresses (aligned)
             addrs = set([
-                random.randrange(0, 1 << awidth) & ~3
+                random.randrange(0, 1 << awidth) & 0xFFFFFFFC
                 for i in range(burst)
             ])
 

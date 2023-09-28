@@ -1,21 +1,14 @@
 # Copyright (c) 2023 Antmicro
 # SPDX-License-Identifier: Apache-2.0
 
-import math
 import os
-import random
-import struct
 
 import pyuvm
 from cocotb.clock import Clock
 from cocotb.triggers import (
     ClockCycles,
-    Event,
     FallingEdge,
-    First,
-    Lock,
     RisingEdge,
-    Timer,
 )
 from pyuvm import *
 
@@ -257,7 +250,7 @@ class BaseTest(uvm_test):
         super().__init__(name, parent)
         self.env_class = env_class
 
-        # Syncrhonize pyuvm logging level with cocotb logging level. Unclear
+        # Synchronize pyuvm logging level with cocotb logging level. Unclear
         # why it does not happen automatically.
         level = logging.getLevelName(os.environ.get("COCOTB_LOG_LEVEL", "INFO"))
         uvm_report_object.set_default_logging_level(level)

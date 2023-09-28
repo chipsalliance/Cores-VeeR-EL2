@@ -130,7 +130,7 @@ $(TEST_DIR)/comp_%.log: $(TEST_DIR)/$(RISCV_DV_ISS)_sim/%.csv $(SIM_DIR)/%.csv
 	python3 $(RISCV_DV_PATH)/scripts/instr_trace_compare.py \
 		--csv_file_1 $(word 1, $^) --csv_name_1 ISS --csv_file_2 $(word 2, $^) --csv_name_2 HDL \
 		--in_order_mode 1 --log $@ --verbose 10 --mismatch_print_limit 20
-	tail -n 2 $@
+	cat $@
 
 # Coverage data aggregation
 $(WORK_DIR)/coverage.dat:

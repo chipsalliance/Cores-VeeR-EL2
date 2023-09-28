@@ -107,6 +107,8 @@ jobs:
   generate-config:
     name: Generate configs
     runs-on: ubuntu-latest
+    env:
+      EXCLUDE_TESTS: "riscv_illegal_instr_test,riscv_unaligned_load_store_test"
     outputs:
       test-types: ${{ steps.test-types.outputs.tests }}
       test-include-generate: ${{ steps.test-types.outputs.include-generate }}

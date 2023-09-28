@@ -1,4 +1,5 @@
 import sys
+import os
 from json import dumps
 from yaml import load, Loader
 from typing import Generator
@@ -24,6 +25,16 @@ if __name__ == "__main__":
     else:
         testlist = parse_yaml(RISCV_DV_HOME + 'yaml/base_testlist.yaml')
     testlist = list(testlist)
+
     # remove, will cause incomplete sim, need customized RTL
     testlist.remove("riscv_csr_test")
+
+    # remove excluded tests
+    excluded = os.environ.get("EXCLUDE_TESTS", None)
+    if excluded is not None:
+        excluded = [s.strip() for s in excluded.split(",")]
+        for test in excluded:
+            if test in testlist:
+                testlist.remove(test)
+
     print(dumps(testlist))

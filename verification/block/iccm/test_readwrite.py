@@ -3,7 +3,6 @@
 import random
 
 import pyuvm
-from cocotb.triggers import ClockCycles
 from pyuvm import *
 from testbench import BaseTest, MemReadItem, MemWriteItem
 

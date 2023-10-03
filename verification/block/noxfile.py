@@ -176,6 +176,45 @@ def dma_verify(session, blockName, testName, coverage):
 def ifu_compress_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["exu_alu"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_arith",
+        "test_logic",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def exu_alu_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["exu_mul"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_mul",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def exu_mul_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["exu_div"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_div",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def exu_div_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
 
 @nox.session()
 def isort(session: nox.Session) -> None:

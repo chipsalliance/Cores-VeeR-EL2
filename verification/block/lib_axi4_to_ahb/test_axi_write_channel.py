@@ -9,7 +9,7 @@ from testbench import BaseTest
 # See description in `test_axi.py`
 
 
-@pyuvm.test()
+@pyuvm.test(expect_error=TimeoutError)
 class TestAXIWriteChannel(BaseTest):
     def end_of_elaboration_phase(self):
         self.seq = TestWriteChannelSeq.create("stimulus")

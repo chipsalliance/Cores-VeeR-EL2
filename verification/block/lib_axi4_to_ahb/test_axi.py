@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import pyuvm
+from cocotb.queue import QueueFull
 from coordinator_seq import TestBothChannelsSeq
 from testbench import BaseTest
 
@@ -43,7 +44,7 @@ from testbench import BaseTest
 # * RVALID should be asserted before RREADY. RREADY should depend on RVALID.
 
 
-@pyuvm.test()
+@pyuvm.test(expect_error=(TimeoutError, QueueFull))
 class TestAXI(BaseTest):
     def end_of_elaboration_phase(self):
         self.seq = TestBothChannelsSeq.create("stimulus")

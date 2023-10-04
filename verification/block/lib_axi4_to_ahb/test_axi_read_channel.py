@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import pyuvm
+from cocotb.queue import QueueFull
 from coordinator_seq import TestReadChannelSeq
 from testbench import BaseTest
 
@@ -9,7 +10,7 @@ from testbench import BaseTest
 # See description in `test_axi.py`
 
 
-@pyuvm.test()
+@pyuvm.test(expect_error=QueueFull)
 class TestAXIReadChannel(BaseTest):
     def end_of_elaboration_phase(self):
         self.seq = TestReadChannelSeq.create("stimulus")

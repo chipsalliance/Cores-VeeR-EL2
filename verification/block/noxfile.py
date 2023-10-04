@@ -176,6 +176,7 @@ def dec_tl_verify(session, blockName, testName, coverage):
 def dma_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
+
 @nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["ifu_compress"])
 @nox.parametrize("testName", ["test_compress"])
@@ -223,6 +224,7 @@ def exu_mul_verify(session, blockName, testName, coverage):
 def exu_div_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
+
 @nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["iccm"])
 @nox.parametrize(
@@ -235,6 +237,7 @@ def exu_div_verify(session, blockName, testName, coverage):
 def iccm_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
+
 @nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["dccm"])
 @nox.parametrize(
@@ -246,6 +249,22 @@ def iccm_verify(session, blockName, testName, coverage):
 @nox.parametrize("coverage", coverageTypes)
 def dccm_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["lib_axi4_to_ahb"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_axi",
+        "test_axi_read_channel",
+        "test_axi_write_channel",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def lib_axi4_to_ahb_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
 
 @nox.session()
 def isort(session: nox.Session) -> None:

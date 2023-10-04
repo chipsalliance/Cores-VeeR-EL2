@@ -5,6 +5,9 @@ import pyuvm
 from coordinator_seq import TestWriteChannelSeq
 from testbench import BaseTest
 
+# FIXME       : This test is expected to fail.
+# See description in `test_axi.py`
+
 
 @pyuvm.test()
 class TestAXIWriteChannel(BaseTest):

@@ -7,6 +7,31 @@ env:
   VERILATOR_VERSION: v5.010
 
 jobs:
+  lint:
+    name: Lint microarchitectural tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Setup environment
+        run: |
+          RV_ROOT=`pwd`
+          echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
+          PYTHONUNBUFFERED=1
+          echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
+
+          TEST_PATH=$RV_ROOT/verification/block
+          echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+
+          pip3 install nox
+      - name: Lint
+        run: |
+          pushd ${TEST_PATH}
+            nox -s isort flake8 black
+          popd
   tests:
     name: Microarchitectural tests
     runs-on: ubuntu-latest

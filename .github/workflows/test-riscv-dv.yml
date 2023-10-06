@@ -203,6 +203,11 @@ jobs:
         coverage: ["branch", "toggle"] #TODO: add functional coverage
         version: [ uvm ]
         include: ${{ fromJSON(needs.generate-config.outputs.test-include-run) }}
+        exclude:
+            - iss: renode
+              test: riscv_illegal_instr_test
+            - iss: renode
+              test: riscv_hint_instr_test
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"

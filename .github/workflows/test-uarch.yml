@@ -23,6 +23,7 @@ jobs:
           - "block/exu_div"
           - "block/iccm"
           - "block/dccm"
+          - "block/lib_axi4_to_ahb"
     env:
       CCACHE_DIR: "/opt/verification/.cache/"
       VERILATOR_VERSION: v5.010

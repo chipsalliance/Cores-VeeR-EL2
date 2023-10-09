@@ -208,6 +208,10 @@ jobs:
               test: riscv_illegal_instr_test
             - iss: renode
               test: riscv_hint_instr_test
+            - iss: spike
+              test: riscv_illegal_instr_test
+            - iss: whisper
+              test: riscv_illegal_instr_test
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"

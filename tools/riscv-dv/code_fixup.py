@@ -95,7 +95,7 @@ def main():
             if l.operands and l.operands[0] == dst:
                 nops = max(0, max_nops - j)
                 pad  = " " * 18
-                out_lines.append(pad + "# FIXME: Inserting {} nops not to make VeeR cancel a delayed write #\n".format(nops))
+                out_lines.append(pad + "# FIXME: Inserting {} NOPs to prevent VeeR from cancelling a delayed write #\n".format(nops))
                 for k in range(nops):
                     out_lines.append(pad + "nop\n")
                 out_lines.append(pad + "# end of nop insertion #\n")

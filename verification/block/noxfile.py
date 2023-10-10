@@ -266,6 +266,21 @@ def lib_axi4_to_ahb_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
 
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["pmp"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_xwr_access",
+        "test_address_matching",
+        "test_multiple_configs",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def pmp_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
 @nox.session()
 def isort(session: nox.Session) -> None:
     """Options are defined in pyproject.toml file"""

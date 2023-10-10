@@ -1,6 +1,11 @@
 waive --rule=module-filename    --location="design/lib/.*_lib.sv"
 waive --rule=line-length        --location="design/ifu/.*.sv"
+waive --rule=line-length        --location="design/dec/.*.sv"
+waive --rule=line-length        --location="design/lsu/.*.sv"
 waive --rule=line-length        --location="design/el2_.*_ctrl.sv"
 waive --rule=no-trailing-spaces --location="design/ifu/.*.sv"
 waive --rule=no-trailing-spaces --location="design/el2_.*_ctrl.sv"
+waive --rule=generate-label     --location="design/lsu/el2_.*.sv"
 
+waive --rule=explicit-parameter-storage-type --location="design/el2_pmp.sv"
+waive --rule=explicit-parameter-storage-type --location="design/dec/el2_dec_pmp_ctl.sv"

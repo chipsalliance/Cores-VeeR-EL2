@@ -726,6 +726,22 @@ import el2_pkg::*;
    assign        dccm_clk_override = dec_tlu_dccm_clk_override;   // dccm memory
    assign        icm_clk_override = dec_tlu_icm_clk_override;    // icache/iccm memory
 
+  // PMP Signals
+  el2_pmp_cfg_pkt_t       pmp_pmpcfg  [pt.PMP_ENTRIES];
+  logic [31:0]            pmp_pmpaddr [pt.PMP_ENTRIES];
+  logic [31:0]            pmp_chan_addr [3];
+  el2_pmp_type_pkt_t      pmp_chan_type [3];
+  logic                   pmp_chan_err  [3];
+
+  logic [31:1] ifu_pmp_addr;
+  logic        ifu_pmp_error;
+  logic [31:0] lsu_pmp_addr_start;
+  logic        lsu_pmp_error_start;
+  logic [31:0] lsu_pmp_addr_end;
+  logic        lsu_pmp_error_end;
+  logic        lsu_pmp_we;
+  logic        lsu_pmp_re;
+
    // -----------------------DEBUG  START -------------------------------
 
    logic [31:0]            dbg_cmd_addr;              // the address of the debug command to used by the core
@@ -953,6 +969,25 @@ import el2_pkg::*;
 
                                       .*
                                       );
+
+  assign pmp_chan_addr[0] = {ifu_pmp_addr, 1'b0};
+  assign pmp_chan_type[0] = EXEC;
+  assign ifu_pmp_error    = pmp_chan_err[0];
+  assign pmp_chan_addr[1] = lsu_pmp_addr_start;
+  assign pmp_chan_type[1] = lsu_pmp_we ? WRITE : (lsu_pmp_re ? READ : NONE);
+  assign lsu_pmp_error_start = pmp_chan_err[1];
+  assign pmp_chan_addr[2] = lsu_pmp_addr_end;
+  assign pmp_chan_type[2] = lsu_pmp_we ? WRITE : (lsu_pmp_re ? READ : NONE);
+  assign lsu_pmp_error_end = pmp_chan_err[2];
+
+  el2_pmp #(
+      .PMP_CHANNELS(3),
+      .pt(pt)
+  ) pmp (
+      .clk  (active_l2clk),
+      .rst_l(core_rst_l),
+      .*
+  );
 
    if (pt.BUILD_AHB_LITE == 1) begin: Gen_AXI_To_AHB
 

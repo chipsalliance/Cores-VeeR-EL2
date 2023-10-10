@@ -21,6 +21,7 @@ $RV_ROOT/design/el2_mem.sv
 $RV_ROOT/design/el2_pic_ctrl.sv
 $RV_ROOT/design/el2_veer.sv
 $RV_ROOT/design/el2_dma_ctrl.sv
+$RV_ROOT/design/el2_pmp.sv
 $RV_ROOT/design/ifu/el2_ifu_aln_ctl.sv
 $RV_ROOT/design/ifu/el2_ifu_compress_ctl.sv
 $RV_ROOT/design/ifu/el2_ifu_ifc_ctl.sv
@@ -32,6 +33,7 @@ $RV_ROOT/design/ifu/el2_ifu.sv
 $RV_ROOT/design/dec/el2_dec_decode_ctl.sv
 $RV_ROOT/design/dec/el2_dec_gpr_ctl.sv
 $RV_ROOT/design/dec/el2_dec_ib_ctl.sv
+$RV_ROOT/design/dec/el2_dec_pmp_ctl.sv
 $RV_ROOT/design/dec/el2_dec_tlu_ctl.sv
 $RV_ROOT/design/dec/el2_dec_trigger.sv
 $RV_ROOT/design/dec/el2_dec.sv

@@ -404,6 +404,32 @@ typedef struct packed {
                         logic         icache_rd_valid;
                         logic         icache_wr_valid;
             } el2_cache_debug_pkt_t;
+
+
+  typedef enum logic [2:0] {
+    NONE  = 3'b000,
+    READ  = 3'b001,
+    WRITE = 3'b010,
+    EXEC  = 3'b100
+  } el2_pmp_type_pkt_t;
+
+
+  typedef enum logic [1:0] {
+    OFF   = 2'b00,
+    TOR   = 2'b01,
+    NA4   = 2'b10,
+    NAPOT = 2'b11
+  } el2_pmp_mode_pkt_t;
+
+
+  typedef struct packed {
+    logic lock;
+    logic [1:0] reserved;
+    el2_pmp_mode_pkt_t mode;
+    logic execute;
+    logic write;
+    logic read;
+  } el2_pmp_cfg_pkt_t;
 //`endif
 
 endpackage // el2_pkg

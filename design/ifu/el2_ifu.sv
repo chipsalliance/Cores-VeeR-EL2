@@ -193,6 +193,8 @@ import el2_pkg::*;
 
    output logic [15:0] ifu_i0_cinst,
 
+    output logic [31:1] ifu_pmp_addr,
+    input  logic        ifu_pmp_error,
 
 /// Icache debug
    input  el2_cache_debug_pkt_t        dec_tlu_ic_diag_pkt ,
@@ -209,6 +211,7 @@ import el2_pkg::*;
    logic                   ifu_fb_consume1, ifu_fb_consume2;
    logic [31:1]            ifc_fetch_addr_f;
    logic [31:1]            ifc_fetch_addr_bf;
+  assign ifu_pmp_addr = ifc_fetch_addr_bf;
 
    logic [1:0]   ifu_fetch_val;  // valids on a 2B boundary, left justified [7] implies valid fetch
    logic [31:1]  ifu_fetch_pc;   // starting pc of fetch

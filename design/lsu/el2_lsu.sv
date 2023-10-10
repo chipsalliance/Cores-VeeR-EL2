@@ -177,7 +177,14 @@ import el2_pkg::*;
    input logic                             scan_mode,           // scan mode
    input logic                             clk,                 // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.
    input logic                             active_clk,          // Clock only while core active.  Through two clock headers. For flops without second clock header built in.
-   input logic                             rst_l                // reset, active low
+    input logic                             rst_l,               // reset, active low
+
+    output logic [31:0] lsu_pmp_addr_start,
+    output logic [31:0] lsu_pmp_addr_end,
+    input  logic        lsu_pmp_error_start,
+    input  logic        lsu_pmp_error_end,
+    output logic        lsu_pmp_we,
+    output logic        lsu_pmp_re
 
    );
 
@@ -209,9 +216,13 @@ import el2_pkg::*;
 
    logic [31:0] lsu_addr_d, lsu_addr_m, lsu_addr_r;
    logic [31:0] end_addr_d, end_addr_m, end_addr_r;
+  assign lsu_pmp_addr_start = lsu_addr_d;
+  assign lsu_pmp_addr_end   = end_addr_d;
 
    el2_lsu_pkt_t    lsu_pkt_d, lsu_pkt_m, lsu_pkt_r;
    logic        lsu_i0_valid_d, lsu_i0_valid_m, lsu_i0_valid_r;
+  assign lsu_pmp_we = lsu_pkt_d.store & lsu_pkt_d.valid;
+  assign lsu_pmp_re = lsu_pkt_d.load & lsu_pkt_d.valid;
 
    // Store Buffer signals
    logic        store_stbuf_reqvld_r;
@@ -306,8 +317,8 @@ import el2_pkg::*;
    // Store buffer now have only non-dma dccm stores
    // stbuf_empty not needed since it has only dccm stores
    assign lsu_idle_any = ~((lsu_pkt_m.valid & ~lsu_pkt_m.dma) |
-                           (lsu_pkt_r.valid & ~lsu_pkt_r.dma)) &
-                           lsu_bus_buffer_empty_any;
+                                                      (lsu_pkt_r.valid & ~lsu_pkt_r.dma)) &
+                                                      lsu_bus_buffer_empty_any;
 
    assign lsu_active = (lsu_pkt_m.valid | lsu_pkt_r.valid | ld_single_ecc_error_r_ff) | ~lsu_bus_buffer_empty_any;  // This includes DMA. Used for gating top clock
 

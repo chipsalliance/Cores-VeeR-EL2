@@ -111,6 +111,9 @@ import el2_pkg::*;
    output el2_lsu_pkt_t      lsu_pkt_m,
    output el2_lsu_pkt_t      lsu_pkt_r,
 
+    input logic lsu_pmp_error_start,
+    input logic lsu_pmp_error_end,
+
    input  logic               scan_mode                  // Scan mode
 
    );
@@ -256,17 +259,17 @@ import el2_pkg::*;
 
       // this is really R stage signal
       assign lsu_result_m[31:0] = ({32{ lsu_pkt_r.unsign & lsu_pkt_r.by  }} & {24'b0,lsu_ld_datafn_r[7:0]}) |
-                                  ({32{ lsu_pkt_r.unsign & lsu_pkt_r.half}} & {16'b0,lsu_ld_datafn_r[15:0]}) |
-                                  ({32{~lsu_pkt_r.unsign & lsu_pkt_r.by  }} & {{24{  lsu_ld_datafn_r[7]}}, lsu_ld_datafn_r[7:0]}) |
-                                  ({32{~lsu_pkt_r.unsign & lsu_pkt_r.half}} & {{16{  lsu_ld_datafn_r[15]}},lsu_ld_datafn_r[15:0]}) |
-                                  ({32{lsu_pkt_r.word}}                     & lsu_ld_datafn_r[31:0]);
+                                                                    ({32{ lsu_pkt_r.unsign & lsu_pkt_r.half}} & {16'b0,lsu_ld_datafn_r[15:0]}) |
+                                                                    ({32{~lsu_pkt_r.unsign & lsu_pkt_r.by  }} & {{24{  lsu_ld_datafn_r[7]}}, lsu_ld_datafn_r[7:0]}) |
+                                                                    ({32{~lsu_pkt_r.unsign & lsu_pkt_r.half}} & {{16{  lsu_ld_datafn_r[15]}},lsu_ld_datafn_r[15:0]}) |
+                                                                    ({32{lsu_pkt_r.word}}                     & lsu_ld_datafn_r[31:0]);
 
       // this signal is used for gpr update
       assign lsu_result_corr_r[31:0] = ({32{ lsu_pkt_r.unsign & lsu_pkt_r.by  }} & {24'b0,lsu_ld_datafn_corr_r[7:0]}) |
-                                       ({32{ lsu_pkt_r.unsign & lsu_pkt_r.half}} & {16'b0,lsu_ld_datafn_corr_r[15:0]}) |
-                                       ({32{~lsu_pkt_r.unsign & lsu_pkt_r.by  }} & {{24{  lsu_ld_datafn_corr_r[7]}}, lsu_ld_datafn_corr_r[7:0]}) |
-                                       ({32{~lsu_pkt_r.unsign & lsu_pkt_r.half}} & {{16{  lsu_ld_datafn_corr_r[15]}},lsu_ld_datafn_corr_r[15:0]}) |
-                                       ({32{lsu_pkt_r.word}}                     & lsu_ld_datafn_corr_r[31:0]);
+                                                                              ({32{ lsu_pkt_r.unsign & lsu_pkt_r.half}} & {16'b0,lsu_ld_datafn_corr_r[15:0]}) |
+                                                                              ({32{~lsu_pkt_r.unsign & lsu_pkt_r.by  }} & {{24{  lsu_ld_datafn_corr_r[7]}}, lsu_ld_datafn_corr_r[7:0]}) |
+                                                                              ({32{~lsu_pkt_r.unsign & lsu_pkt_r.half}} & {{16{  lsu_ld_datafn_corr_r[15]}},lsu_ld_datafn_corr_r[15:0]}) |
+                                                                              ({32{lsu_pkt_r.word}}                     & lsu_ld_datafn_corr_r[31:0]);
 
    end else begin: L2U1_Plus1_0 // block: L2U1_Plus1_1
       logic [31:0] lsu_ld_datafn_m, lsu_ld_datafn_corr_r;
@@ -276,17 +279,17 @@ import el2_pkg::*;
 
       // this result must look at prior stores and merge them in
       assign lsu_result_m[31:0] = ({32{ lsu_pkt_m.unsign & lsu_pkt_m.by  }} & {24'b0,lsu_ld_datafn_m[7:0]}) |
-                                  ({32{ lsu_pkt_m.unsign & lsu_pkt_m.half}} & {16'b0,lsu_ld_datafn_m[15:0]}) |
-                                  ({32{~lsu_pkt_m.unsign & lsu_pkt_m.by  }} & {{24{  lsu_ld_datafn_m[7]}}, lsu_ld_datafn_m[7:0]}) |
-                                  ({32{~lsu_pkt_m.unsign & lsu_pkt_m.half}} & {{16{  lsu_ld_datafn_m[15]}},lsu_ld_datafn_m[15:0]}) |
-                                  ({32{lsu_pkt_m.word}}                     & lsu_ld_datafn_m[31:0]);
+                                                                    ({32{ lsu_pkt_m.unsign & lsu_pkt_m.half}} & {16'b0,lsu_ld_datafn_m[15:0]}) |
+                                                                    ({32{~lsu_pkt_m.unsign & lsu_pkt_m.by  }} & {{24{  lsu_ld_datafn_m[7]}}, lsu_ld_datafn_m[7:0]}) |
+                                                                    ({32{~lsu_pkt_m.unsign & lsu_pkt_m.half}} & {{16{  lsu_ld_datafn_m[15]}},lsu_ld_datafn_m[15:0]}) |
+                                                                    ({32{lsu_pkt_m.word}}                     & lsu_ld_datafn_m[31:0]);
 
       // this signal is used for gpr update
       assign lsu_result_corr_r[31:0] = ({32{ lsu_pkt_r.unsign & lsu_pkt_r.by  }} & {24'b0,lsu_ld_datafn_corr_r[7:0]}) |
-                                       ({32{ lsu_pkt_r.unsign & lsu_pkt_r.half}} & {16'b0,lsu_ld_datafn_corr_r[15:0]}) |
-                                       ({32{~lsu_pkt_r.unsign & lsu_pkt_r.by  }} & {{24{  lsu_ld_datafn_corr_r[7]}}, lsu_ld_datafn_corr_r[7:0]}) |
-                                       ({32{~lsu_pkt_r.unsign & lsu_pkt_r.half}} & {{16{  lsu_ld_datafn_corr_r[15]}},lsu_ld_datafn_corr_r[15:0]}) |
-                                       ({32{lsu_pkt_r.word}}                     & lsu_ld_datafn_corr_r[31:0]);
+                                                                              ({32{ lsu_pkt_r.unsign & lsu_pkt_r.half}} & {16'b0,lsu_ld_datafn_corr_r[15:0]}) |
+                                                                              ({32{~lsu_pkt_r.unsign & lsu_pkt_r.by  }} & {{24{  lsu_ld_datafn_corr_r[7]}}, lsu_ld_datafn_corr_r[7:0]}) |
+                                                                              ({32{~lsu_pkt_r.unsign & lsu_pkt_r.half}} & {{16{  lsu_ld_datafn_corr_r[15]}},lsu_ld_datafn_corr_r[15:0]}) |
+                                                                              ({32{lsu_pkt_r.word}}                     & lsu_ld_datafn_corr_r[31:0]);
    end
 
    // Fast interrupt address

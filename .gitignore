@@ -6,12 +6,17 @@ obj_dir
 *.log
 *.exe
 *.swp
+*.sym
 verilator-build
 program.hex
 snapshots
 __pycache__
 sim_build
+sim-build*
 venv
 results.xml
 verification/sim
 verilator-cocotb-build
+*.dat
+*.xml
+*.json

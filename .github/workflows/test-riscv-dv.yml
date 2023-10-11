@@ -104,26 +104,120 @@ jobs:
 #--------------#
 #    Tests
 #--------------#
-  tests:
-    name: Run RISC-V DV tests
+  generate-config:
+    name: Generate configs
     runs-on: ubuntu-latest
-    needs: [veer-iss, renode]
+    outputs:
+      test-types: ${{ steps.test-types.outputs.tests }}
+      test-include-generate: ${{ steps.test-types.outputs.include-generate }}
+      test-include-run: ${{ steps.test-types.outputs.include-run }}
+      hash: ${{ steps.hash.outputs.files-hash }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - id: test-types
+        run: |
+          python3 -m pip install pyyaml
+          echo "tests=$(python3 .github/scripts/riscv_dv_parse_testlist.py rv32imc)" | tee -a $GITHUB_OUTPUT
+          echo "include-generate=$(python3 .github/scripts/riscv_dv_matrix_include.py generate)" | tee -a $GITHUB_OUTPUT
+          echo "include-run=$(python3 .github/scripts/riscv_dv_matrix_include.py run)" | tee -a $GITHUB_OUTPUT
+      - id: hash
+        run: |
+          echo "files-hash=$(sha256sum **/*.sv **/*.py **/*.yml **/*.yaml tools/riscv-dv/*.py | cut -d\  -f1 | sha256sum | cut -d\  -f1)" | tee -a $GITHUB_OUTPUT
+
+  generate-code:
+    name: Generate code for tests
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    needs: generate-config
     strategy:
       fail-fast: false
       matrix:
-        test:
-          - riscv_arithmetic_basic_test
+        test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
+        version: [ uvm ]
+        include: ${{ fromJSON(needs.generate-config.outputs.test-include-generate) }}
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
+      CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Setup Cache Metadata
+        id: cache_metadata
+        run: |
+          cache_code=cache_${{ matrix.test }}_${{ matrix.version }}
+          echo "cache_code=${cache_code}_${{ env.CACHE_HASH }}" | tee -a "$GITHUB_ENV"
+
+      - name: Cache Code
+        uses: actions/cache@v3
+        id: cache-code
+        timeout-minutes: 60
+        with:
+          path: tools/riscv-dv/work/test_${{ matrix.test }}/asm_test
+          key: ${{ env.cache_code }}
+
+      - name: Prepare Environment
+        if: steps.cache-code.outputs.cache-hit != 'true'
+        run: _secret_prepare_env
+
+      - name: Generate Tests
+        if: steps.cache-code.outputs.cache-hit != 'true' && matrix.version == 'uvm'
+        run: _secret_generate_code
+        env:
+          RISCV_DV_TEST: ${{ matrix.test }}
+
+      - name: Generate code
+        if: steps.cache-code.outputs.cache-hit != 'true' && matrix.version == 'pyflow'
+        run: |
+          export RV_ROOT=`realpath .`
+          pushd tools/riscv-dv
+            make -j`nproc` \
+              RISCV_DV_TEST=${{ matrix.test }} \
+              RISCV_DV_ITER=3 \
+              RISCV_DV_SEED=999 \
+              generate
+          popd
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: riscv-dv_generated_code_${{ matrix.version }}
+          path: tools/riscv-dv/work/**/asm_test/*.S
+
+  run-tests:
+    name: Run RISC-V DV tests
+    runs-on: ubuntu-latest
+    needs: [ veer-iss, renode, generate-config, generate-code ]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
         iss:
           - spike
           - whisper
           - renode
         coverage: ["branch", "toggle"] #TODO: add functional coverage
-
+        version: [ uvm ]
+        include: ${{ fromJSON(needs.generate-config.outputs.test-include-run) }}
+        exclude:
+            - iss: renode
+              test: riscv_illegal_instr_test
+            - iss: renode
+              test: riscv_hint_instr_test
+            - iss: spike
+              test: riscv_illegal_instr_test
+            - iss: whisper
+              test: riscv_illegal_instr_test
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"
       VERILATOR_VERSION: v5.010
       SPIKE_VERSION: d70ea67d
+      CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
 
     steps:
       - name: Install utils
@@ -144,6 +238,7 @@ jobs:
           cache_spike_key=${cache_spike_restore_key}${{ env.SPIKE_VERSION }}
           cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
           cache_test_key=${cache_test_restore_key}${time}
+          cache_code=cache_${{ matrix.test }}_${{ matrix.version }}
 
           echo "date=$date" | tee -a "$GITHUB_ENV"
           echo "time=$time" | tee -a "$GITHUB_ENV"
@@ -153,6 +248,7 @@ jobs:
           echo "cache_spike_key=$cache_spike_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
+          echo "cache_code=${cache_code}_${{ env.CACHE_HASH }}" | tee -a "$GITHUB_ENV"
 
       - name: Restore verilator cache
         id: cache-verilator-restore
@@ -217,6 +313,14 @@ jobs:
           key: cache_tests_${{ steps.cache_timestamp.outputs.time }}
           restore-keys: cache_tests_
 
+      - name: Cache Code Restore
+        uses: actions/cache/restore@v3
+        id: cache-code-restore
+        timeout-minutes: 60
+        with:
+          path: tools/riscv-dv/work/test_${{ matrix.test }}/asm_test
+          key: ${{ env.cache_code }}
+
       - name: Run test
         run: |
           export PATH=/opt/verilator/bin:$PATH
@@ -263,5 +367,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: artifacts-${{ matrix.test }}-${{ matrix.iss }}
+          name: artifacts-${{ matrix.test }}-${{ matrix.iss }}-${{ matrix.version }}
           path: tools/riscv-dv/work/test_*

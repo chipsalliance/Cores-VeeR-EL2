@@ -32,13 +32,15 @@ class AssemblyLine:
                 return
 
             self.mnemonic = m.group("mnemonic").lower()
-            self.operands = [op.strip() for op in m.group("operands").split()]
+            self.operands = [op.strip() for op in m.group("operands").split(",")]
 
     def __str__(self):
         return self.text
 
 # =============================================================================
 
+MNEMONICS = {"div", "divu", "rem", "remu",
+             "lb", "lbu", "lh", "lhu", "lw", "c.lw", "c.lwsp"}
 
 def main():
     parser = argparse.ArgumentParser()
@@ -75,7 +77,7 @@ def main():
             continue
 
         # Check if it is a delayed write. If not then bypass
-        is_delayed = line.mnemonic in ["div", "divu", "rem", "remu", "lw"]
+        is_delayed = line.mnemonic in MNEMONICS
         if not is_delayed:
             continue
 
@@ -92,8 +94,11 @@ def main():
         for j, l in enumerate(following):
             if l.operands and l.operands[0] == dst:
                 nops = max(0, max_nops - j)
-                for _ in range(nops):
-                    out_lines.append(" " * 18 + "nop # FIXME: A fixup not to make VeeR cancel a delayed write\n")
+                pad  = " " * 18
+                out_lines.append(pad + "# FIXME: Inserting {} NOPs to prevent VeeR from cancelling a delayed write #\n".format(nops))
+                for k in range(nops):
+                    out_lines.append(pad + "nop\n")
+                out_lines.append(pad + "# end of nop insertion #\n")
                 break
 
     # Write

@@ -16,6 +16,10 @@ NB_RE    = re.compile(r"^\s*(?P<cyc>[0-9]+)\s+:\s+"
                       r"(?P<reg>[^=;]+)=(?P<val>[0-9a-f]+)"
                       r"\s+;\s+(?P<mnemonic>(nbL|nbD))")
 
+LD_MNEMONICS = ["lb", "lbu", "lh", "lhu", "lw", "c.lw", "c.lwsp"]
+
+DIV_MNEMONICS = ["div", "divu", "rem", "remu"]
+
 # =============================================================================
 
 def parse_log(file_name):
@@ -70,7 +74,7 @@ def parse_log(file_name):
                 break
 
             # Delayed effect, search the queue
-            if gpr is None and mnemonic in ["lw", "div", "divu", "rem", "remu"]:
+            if gpr is None and mnemonic in LD_MNEMONICS + DIV_MNEMONICS:
 
                 # Skip if targets x0 (zero) which makes no sense
                 if operands[0] == "zero":
@@ -78,8 +82,8 @@ def parse_log(file_name):
 
                 for ent in reversed(queue):
 
-                    if (ent.operand == "nbL" and mnemonic in ["lw"]) or \
-                       (ent.operand == "nbD" and mnemonic in ["div", "divu", "rem", "remu"]):
+                    if (ent.operand == "nbL" and mnemonic in LD_MNEMONICS) or \
+                       (ent.operand == "nbD" and mnemonic in DIV_MNEMONICS):
 
                         assert len(operands), line
                         assert len(ent.gpr),  ent.get_trace_string()
@@ -91,7 +95,7 @@ def parse_log(file_name):
 
             # Enqueue or not
             enqueue = entry is None and (gpr is not None or mnemonic in \
-                                         ["div", "divu", "rem", "remu", "lw"])
+                                         LD_MNEMONICS + DIV_MNEMONICS)
 
             # Entry not found in the queue, create it
             if not entry:
@@ -121,6 +125,10 @@ def parse_log(file_name):
             assert groups["reg"] and groups["val"], line
             gpr = ("{}:{}".format(groups["reg"], groups["val"]))
 
+            # Skip if targets x0 (zero) which makes no sense
+            if groups["reg"] == "zero":
+                continue 
+
             # Find an existing nbL/nbD entry in the queue. Match destination GPR
             for entry in reversed(queue):
 
@@ -128,8 +136,8 @@ def parse_log(file_name):
                 mnemonic = fields[0]
                 operands = fields[1].split(",") if len(fields) > 1 else []
 
-                if (groups["mnemonic"] == "nbL" and mnemonic in ["lw"]) or \
-                   (groups["mnemonic"] == "nbD" and mnemonic in ["div", "divu", "rem", "remu"]):
+                if (groups["mnemonic"] == "nbL" and mnemonic in LD_MNEMONICS) or \
+                   (groups["mnemonic"] == "nbD" and mnemonic in DIV_MNEMONICS):
                     assert len(operands), entry
                     if groups["reg"] == operands[0]:
                         entry.gpr.append(gpr)

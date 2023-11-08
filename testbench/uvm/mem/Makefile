@@ -85,14 +85,14 @@ $(SIM_DIR)/el2_lsu_dccm_mem.sv:
 # -------------------------------------
 # Make UVM test with Verilator
 # -------------------------------------
-$(SIM_DIR)/$(SIM_NAME).mk: ${UVM_ROOT} $(RV_ROOT)/snapshots/$(SNAPSHOT)/el2_param.vh $(VERILOG_SOURCES) $(wildcard hdl/*.sv)
+verilate: ${UVM_ROOT} $(RV_ROOT)/snapshots/$(SNAPSHOT)/el2_param.vh $(VERILOG_SOURCES) $(wildcard hdl/*.sv)
 	$(VERILATOR) --cc --exe --main --timing -Mdir $(SIM_DIR) \
 	${COMPILE_ARGS} ${EXTRA_ARGS} \
 	${VERILOG_DEFINE_FILES} \
 	${VERILOG_SOURCES} \
 	${WARNING_ARGS}
 
-$(SIM_DIR)/$(SIM_NAME): $(SIM_DIR)/$(SIM_NAME).mk
+build: verilate
 	$(MAKE) -C $(SIM_DIR) $(BUILD_ARGS) -f $(SIM_NAME).mk
 
 simulate: build
@@ -107,4 +107,4 @@ clean:
 	rm -rf $(UVM_DIR)
 
 
-.PHONY: simulate clean
+.PHONY: verilate build simulate clean

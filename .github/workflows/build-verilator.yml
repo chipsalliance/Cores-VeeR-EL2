@@ -7,9 +7,20 @@ jobs:
   verilator:
     name: Build Verilator
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - version: v5.010
+            repo: verilator/verilator
+            commit: v5.010
+          - version: uvm
+            repo: antmicro/verilator-1
+            commit: df36e9ca2597aebe4b92c72461d945745b36c3e0
     env:
       TOOL_NAME: verilator
-      TOOL_VERSION: v5.010
+      TOOL_VERSION: ${{ matrix.version }}
+      TOOL_REPO: ${{ matrix.repo }}
+      TOOL_COMMIT: ${{ matrix.commit }}
       DEBIAN_FRONTEND: "noninteractive"
 
     steps:
@@ -56,9 +67,9 @@ jobs:
         run: |
           export CCACHE_DIR=/opt/verilator/.cache
           ccache --show-config | grep cache_dir
-          git clone https://github.com/verilator/verilator
+          git clone https://github.com/${{ env.TOOL_REPO }} verilator
           pushd verilator
-            git checkout ${{ env.TOOL_VERSION }}
+            git checkout ${{ env.TOOL_COMMIT }}
             autoconf
             ./configure --prefix=/opt/verilator
             make -j `nproc`

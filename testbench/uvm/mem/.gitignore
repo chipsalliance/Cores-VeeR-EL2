@@ -1,0 +1,5 @@
+*-sim
+snapshots
+*.vcd
+*.fst
+uvm

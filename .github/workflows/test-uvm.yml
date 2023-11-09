@@ -1,0 +1,84 @@
+name: VeeR-EL2 verification
+
+on:
+  workflow_call:
+
+jobs:
+  tests:
+    name: UVM tests
+    runs-on: ubuntu-latest
+    env:
+      CCACHE_DIR: "/opt/uvm/.cache/"
+      VERILATOR_VERSION: uvm
+      DEBIAN_FRONTEND: "noninteractive"
+    steps:
+      - name: Setup repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Setup Cache Metadata
+        id: cache_metadata
+        run: |
+          date=$(date +"%Y_%m_%d")
+          time=$(date +"%Y%m%d_%H%M%S_%N")
+          cache_verilator_restore_key=cache_verilator_
+          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}
+          cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
+          cache_test_key=${cache_test_restore_key}${time}
+
+          echo "date=$date" | tee -a "$GITHUB_ENV"
+          echo "time=$time" | tee -a "$GITHUB_ENV"
+          echo "cache_verilator_restore_key=$cache_verilator_restore_key" | tee -a "$GITHUB_ENV"
+          echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
+          echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
+          echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
+
+
+      - name: Restore verilator cache
+        id: cache-verilator-restore
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            /opt/verilator
+            /opt/verilator/.cache
+          key: ${{ env.cache_verilator_key }}
+          restore-keys: ${{ env.cache_verilator_restore_key }}
+
+      - name: Setup tests cache
+        uses: actions/cache@v3
+        id: cache-test-setup
+        with:
+          path: |
+            ${{ env.CCACHE_DIR }}
+          key: ${{ env.cache_test_key }}
+          restore-keys: ${{ env.cache_test_restore_key }}
+
+      - name: Install prerequisities
+        run: |
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+            git build-essential cpanminus ccache
+          sudo cpanm Bit::Vector
+
+      - name: Setup environment
+        run: |
+          echo "/opt/verilator/bin" >> $GITHUB_PATH
+          RV_ROOT=`pwd`
+          echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
+          PYTHONUNBUFFERED=1
+          echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
+
+      - name: Build UVM testbench
+        run: |
+          make -C testbench/uvm/mem build -j$(nproc)
+
+      - name: Run UVM testbench
+        run: |
+          make -C testbench/uvm/mem simulate | tee test.out
+
+      - name: Upload test output
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: uvm_test_output
+          path: test.out

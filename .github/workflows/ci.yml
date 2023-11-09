@@ -41,6 +41,11 @@ jobs:
     needs: [Build-Verilator, Build-Spike]
     uses: ./.github/workflows/test-riscof.yml
 
+  Test-UVM:
+    name: Test-UVM
+    needs: [Build-Verilator]
+    uses: ./.github/workflows/test-uvm.yml
+
   Report-Coverage:
     name: Report-Coverage
     needs: [Test-Regression, Test-Verification, Test-RISCV-DV, Test-RISCOF]

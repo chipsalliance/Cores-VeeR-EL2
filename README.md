@@ -29,7 +29,7 @@ Files under the [tools](tools/) directory may be available under a different lic
  
 ## Dependencies
 
-- Verilator **(4.102 or later)** must be installed on the system if running with Verilator
+- Verilator **(4.106 or later)** must be installed on the system if running with Verilator
 - If adding/removing instructions, `espresso` must be installed (used by `tools/coredecode`)
 - RISCV tool chain (based on gcc version 8.3 or higher) must be
 installed so that it can be used to prepare RISCV binaries to run.

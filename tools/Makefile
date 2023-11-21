@@ -17,7 +17,8 @@
 CONF_PARAMS = -set build_axi4
 
 TEST_CFLAGS = -g -O3 -funroll-all-loops
-ABI = -mabi=ilp32 -march=rv32imac
+ABI = -mabi=ilp32
+LD_ABI = $(ABI) -march=rv32imac
 
 # Check for RV_ROOT
 ifeq (,$(wildcard ${RV_ROOT}/configs/veer.config))
@@ -39,6 +40,16 @@ GCC_PREFIX = riscv64-unknown-elf
 BUILD_DIR = snapshots/${snapshot}
 TBDIR = ${RV_ROOT}/testbench
 PICOLIBC_DIR = ${RV_ROOT}/third_party/picolibc/install
+
+# Override march depending on used GCC version
+ifneq ($(shell which $(GCC_PREFIX)-gcc 2> /dev/null),)
+	GCCVERSIONGT11 := $(shell expr `$(GCC_PREFIX)-gcc -dumpversion | cut -f1 -d.` \>= 11)
+	ifeq "$(GCCVERSIONGT11)" "1"
+		CC_ABI = $(ABI) -march=rv32imc_zicsr_zifencei_zba_zbb_zbc_zbs
+	else
+		CC_ABI = $(ABI) -march=rv32imc
+	endif
+endif
 
 # Determine verilator version if possible. Set the flag accordingly. Since
 # version v5.006 -Wno-IMPLICIT was renamed to -Wno-IMPLICITSTATIC
@@ -219,7 +230,7 @@ program.hex: picolibc
 else
 program.hex: picolibc $(OFILES) ${BUILD_DIR}/defines.h
 	@echo Building $(TEST)
-	$(GCC_PREFIX)-gcc $(ABI) --verbose -Wl,-Map=$(TEST).map -T$(LINK) --specs=$(PICOLIBC_DIR)/picolibc.specs $(TEST_LIBS) -nostartfiles $(OFILES) -o $(TEST).exe
+	$(GCC_PREFIX)-gcc $(LD_ABI) --verbose -Wl,-Map=$(TEST).map -T$(LINK) --specs=$(PICOLIBC_DIR)/picolibc.specs $(TEST_LIBS) -nostartfiles $(OFILES) -o $(TEST).exe
 	$(GCC_PREFIX)-objcopy -O verilog  $(TEST).exe program.hex
 	$(GCC_PREFIX)-objdump -S  $(TEST).exe > $(TEST).dis
 	$(GCC_PREFIX)-nm -B -n $(TEST).exe > $(TEST).sym
@@ -228,11 +239,11 @@ program.hex: picolibc $(OFILES) ${BUILD_DIR}/defines.h
 
 %.o : %.s ${BUILD_DIR}/defines.h
 	$(GCC_PREFIX)-cpp -I${BUILD_DIR}  $<  > $*.cpp.s
-	$(GCC_PREFIX)-as ${ABI} $*.cpp.s -o $@
+	$(GCC_PREFIX)-as ${CC_ABI} $*.cpp.s -o $@
 
 
 %.o : %.c picolibc ${BUILD_DIR}/defines.h
-	$(GCC_PREFIX)-gcc ${includes} --specs=$(PICOLIBC_DIR)/picolibc.specs ${TEST_CFLAGS} -DCOMPILER_FLAGS="\"${TEST_CFLAGS}\"" ${ABI} -c $< -o $@
+	$(GCC_PREFIX)-gcc ${includes} --specs=$(PICOLIBC_DIR)/picolibc.specs ${TEST_CFLAGS} -DCOMPILER_FLAGS="\"${TEST_CFLAGS}\"" ${CC_ABI} -c $< -o $@
 
 endif
 endif

@@ -1487,24 +1487,23 @@ end : cam_array
 
 endmodule // el2_dec_decode_ctl
 
-
-
-
-
-// file "decode" is human readable file that has all of the instruction decodes defined and is part of git repo
-// modify this file as needed
-
-// to generate all the equations below from "decode" except legal equation:
-
-// 1) coredecode -in decode > coredecode.e
-
-// 2) espresso -Dso -oeqntott coredecode.e | addassign -pre out.  > equations
-
-// to generate the legal (32b instruction is legal) equation below:
-
-// 1) coredecode -in decode -legal > legal.e
-
-// 2) espresso -Dso -oeqntott legal.e | addassign -pre out. > legal_equation
+// file "decode" is human readable file that has all of the instruction decodes
+// defined and is part of git repo. Modify this file as needed.
+//
+// The tools needed are "coredecode", "addasign" and "espresso". The first two
+// can be found in this repo under /tools. Espresso can be found in another
+// repo (https://github.com/chipsalliance/espresso).
+//  IMPORTANT: use Espresso v2.4 (git tag v2.4)
+//
+// To generate instruction decoding equations do:
+//  1) coredecode -in decode > coredecode.e
+//  2) espresso -Dso -oeqntott < coredecode.e | addassign -pre out. > equations
+//  3) copy-paste assignments from the file "equations" and replace ones below.
+//
+// To generate instruction legality check equation do:
+//  1) coredecode -in decode -legal > legal.e
+//  2) espresso -Dso -oeqntott < legal.e | addassign -pre out. > legal
+//  3) copy-paste assignment from the file "legal" and replace the one below.
 
 module el2_dec_dec_ctl
 import el2_pkg::*;
@@ -1524,8 +1523,8 @@ assign out.alu = (i[30]&i[24]&i[23]&!i[22]&!i[21]&!i[20]&i[14]&!i[5]&i[4]) | (i[
     &!i[5]&i[4]) | (i[27]&i[25]&i[14]&i[4]) | (!i[29]&!i[25]&!i[13]&!i[12]
     &i[4]) | (i[29]&i[27]&!i[14]&i[12]&i[4]) | (!i[27]&i[14]&!i[5]&i[4]) | (
     i[30]&!i[29]&!i[13]&i[4]) | (!i[27]&!i[25]&i[5]&i[4]) | (i[13]&!i[5]
-    &i[4]) | (i[2]) | (i[6]) | (!i[30]&i[29]&!i[24]&!i[23]&i[22]&i[21]
-    &i[20]&!i[5]&i[4]) | (!i[12]&!i[5]&i[4]);
+    &i[4]) | (i[6]) | (!i[30]&i[29]&!i[24]&!i[23]&i[22]&i[21]&i[20]&!i[5]
+    &i[4]) | (i[2]) | (!i[12]&!i[5]&i[4]);
 
 assign out.rs1 = (!i[13]&i[11]&!i[2]) | (!i[13]&i[10]&!i[2]) | (i[19]&i[13]&!i[2]) | (
     !i[13]&i[9]&!i[2]) | (i[18]&i[13]&!i[2]) | (!i[13]&i[8]&!i[2]) | (
@@ -1563,7 +1562,7 @@ assign out.sub = (i[30]&!i[14]&!i[12]&!i[6]&i[5]&i[4]&!i[2]) | (!i[29]&!i[25]&!i
 assign out.land = (!i[27]&!i[25]&i[14]&i[13]&i[12]&!i[6]&!i[2]) | (i[14]&i[13]&i[12]
     &!i[5]&!i[2]);
 
-assign out.lor = (!i[6]&i[3]) | (!i[29]&!i[27]&!i[25]&i[14]&i[13]&!i[12]&!i[6]&!i[2]) | (
+assign out.lor = (!i[29]&!i[27]&!i[25]&i[14]&i[13]&!i[12]&!i[6]&!i[2]) | (!i[6]&i[3]) | (
     i[5]&i[4]&i[2]) | (!i[13]&!i[12]&i[6]&i[4]) | (i[14]&i[13]&!i[12]
     &!i[5]&!i[2]);
 
@@ -1624,7 +1623,7 @@ assign out.presync = (!i[5]&i[3]) | (!i[13]&i[7]&i[6]&i[4]) | (!i[13]&i[8]&i[6]&
     i[17]&i[13]&i[6]&i[4]) | (i[18]&i[13]&i[6]&i[4]) | (i[19]&i[13]&i[6]
     &i[4]);
 
-assign out.postsync = (i[12]&!i[5]&i[3]) | (!i[22]&!i[13]&!i[12]&i[6]&i[4]) | (
+assign out.postsync = (!i[22]&!i[13]&!i[12]&i[6]&i[4]) | (i[12]&!i[5]&i[3]) | (
     !i[13]&i[7]&i[6]&i[4]) | (!i[13]&i[8]&i[6]&i[4]) | (!i[13]&i[9]&i[6]
     &i[4]) | (!i[13]&i[10]&i[6]&i[4]) | (!i[13]&i[11]&i[6]&i[4]) | (
     i[15]&i[13]&i[6]&i[4]) | (i[16]&i[13]&i[6]&i[4]) | (i[17]&i[13]&i[6]
@@ -1816,18 +1815,15 @@ assign out.legal = (!i[31]&!i[30]&i[29]&i[28]&!i[27]&!i[26]&!i[25]&!i[24]&!i[23]
     &i[0]) | (!i[14]&!i[13]&!i[12]&i[6]&i[5]&!i[4]&!i[3]&i[1]&i[0]) | (
     i[14]&i[6]&i[5]&!i[4]&!i[3]&!i[2]&i[1]&i[0]) | (!i[14]&!i[13]&i[5]
     &!i[4]&!i[3]&!i[2]&i[1]&i[0]) | (!i[12]&!i[6]&!i[5]&i[4]&!i[3]&i[1]
-    &i[0]) | (!i[13]&i[12]&i[6]&i[5]&!i[3]&!i[2]&i[1]&i[0]) | (!i[31]
-    &!i[30]&!i[29]&!i[28]&!i[27]&!i[26]&!i[25]&!i[24]&!i[23]&!i[22]&!i[21]
-    &!i[20]&!i[19]&!i[18]&!i[17]&!i[16]&!i[15]&!i[14]&!i[13]&!i[11]&!i[10]
-    &!i[9]&!i[8]&!i[7]&!i[6]&!i[5]&!i[4]&i[3]&i[2]&i[1]&i[0]) | (!i[31]
-    &!i[30]&!i[29]&!i[28]&!i[19]&!i[18]&!i[17]&!i[16]&!i[15]&!i[14]&!i[13]
-    &!i[12]&!i[11]&!i[10]&!i[9]&!i[8]&!i[7]&!i[6]&!i[5]&!i[4]&i[3]&i[2]
-    &i[1]&i[0]) | (i[13]&i[6]&i[5]&i[4]&!i[3]&!i[2]&i[1]&i[0]) | (!i[31]
-    &!i[30]&!i[28]&!i[26]&!i[25]&i[14]&!i[12]&!i[6]&i[4]&!i[3]&i[1]&i[0]) | (
-    i[6]&i[5]&!i[4]&i[3]&i[2]&i[1]&i[0]) | (!i[14]&!i[12]&!i[6]&!i[4]
-    &!i[3]&!i[2]&i[1]&i[0]) | (!i[13]&!i[6]&!i[5]&!i[4]&!i[3]&!i[2]&i[1]
-    &i[0]) | (i[13]&!i[6]&!i[5]&i[4]&!i[3]&i[1]&i[0]) | (!i[6]&i[4]&!i[3]
-    &i[2]&i[1]&i[0]);
+    &i[0]) | (!i[13]&i[12]&i[6]&i[5]&!i[3]&!i[2]&i[1]&i[0]) | (i[13]&i[6]
+    &i[5]&i[4]&!i[3]&!i[2]&i[1]&i[0]) | (!i[30]&!i[29]&!i[28]&!i[14]
+    &!i[13]&!i[6]&!i[5]&!i[4]&i[3]&i[2]&i[1]&i[0]) | (!i[31]&!i[30]&!i[28]
+    &!i[26]&!i[25]&i[14]&!i[12]&!i[6]&i[4]&!i[3]&i[1]&i[0]) | (!i[14]
+    &!i[13]&i[12]&!i[6]&!i[5]&!i[4]&i[3]&i[2]&i[1]&i[0]) | (i[6]&i[5]
+    &!i[4]&i[3]&i[2]&i[1]&i[0]) | (!i[14]&!i[12]&!i[6]&!i[4]&!i[3]&!i[2]
+    &i[1]&i[0]) | (!i[13]&!i[6]&!i[5]&!i[4]&!i[3]&!i[2]&i[1]&i[0]) | (
+    i[13]&!i[6]&!i[5]&i[4]&!i[3]&i[1]&i[0]) | (!i[6]&i[4]&!i[3]&i[2]&i[1]
+    &i[0]);
 
 
 

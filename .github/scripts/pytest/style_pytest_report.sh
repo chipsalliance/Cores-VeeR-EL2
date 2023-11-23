@@ -15,6 +15,7 @@ style_pytest_report(){
 
     # Copy assets
 
+    mkdir -p ${DST_DIR}/assets
     cp ${SRC_DIR}/assets/* ${DST_DIR}/assets/
 
     # Add bar above h1.title
@@ -28,7 +29,8 @@ style_pytest_report(){
 
     # Copy JS script to build dir
 
-    cp -r ${SRC_DIR}/script ${DST_DIR}
+    mkdir -p ${DST_DIR}/script
+    cp -r ${SRC_DIR}/script/* ${DST_DIR}/script/
 
     echo -e "${COLOR_WHITE}Style pytest report ${COLOR_GREEN}SUCCEEDED${COLOR_CLEAR}"
     echo -e "${COLOR_WHITE}========== style_pytest_report =========${COLOR_CLEAR}"

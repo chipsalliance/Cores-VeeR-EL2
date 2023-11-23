@@ -101,3 +101,24 @@ a {
   font-size: 20px;
   font-weight: 700;
 }
+
+#environment {
+  color: #dfe1f1;
+  width: 100%;
+}
+
+#environment tr:nth-child(odd) {
+  background: none;
+}
+
+#environment td:first-child {
+  width: 25%;
+}
+
+#results-table {
+  color: #dfe1f1;
+}
+
+#yaml-table {
+  color: #dfe1f1;
+}

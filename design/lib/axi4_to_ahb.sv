@@ -255,11 +255,11 @@ import el2_pkg::*;
    assign master_wdata[63:0]  = wrbuf_data[63:0];
 
    // AXI response channel signals
-   assign axi_bvalid       = slave_valid & axi_bready & slave_opc[3];
+   assign axi_bvalid       = slave_valid & slave_opc[3];
    assign axi_bresp[1:0]   = slave_opc[0] ? 2'b10 : (slave_opc[1] ? 2'b11 : 2'b0);
    assign axi_bid[TAG-1:0] = slave_tag[TAG-1:0];
 
-   assign axi_rvalid       = slave_valid & axi_rready & (slave_opc[3:2] == 2'b0);
+   assign axi_rvalid       = slave_valid & (slave_opc[3:2] == 2'b0);
    assign axi_rresp[1:0]   = slave_opc[0] ? 2'b10 : (slave_opc[1] ? 2'b11 : 2'b0);
    assign axi_rid[TAG-1:0] = slave_tag[TAG-1:0];
    assign axi_rdata[63:0]  = slave_rdata[63:0];

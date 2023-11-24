@@ -109,9 +109,10 @@ class AXIReadChannelBFM(metaclass=utility_classes.Singleton):
                 await RisingEdge(self.rst_n)
             await RisingEdge(self.clk)
             if get_int(self.dut.axi_rvalid):
-                sigs = get_signals(AXI_R_CHAN_RSP_SIGNALS, self.dut)
-                values = tuple(sig.value for sig in sigs)
-                await self.rsp_monitor_q.put(values)
+                if get_int(self.dut.axi_rready):
+                    sigs = get_signals(AXI_R_CHAN_RSP_SIGNALS, self.dut)
+                    values = tuple(sig.value for sig in sigs)
+                    await self.rsp_monitor_q.put(values)
 
     def start_bfm(self):
         cocotb.start_soon(self.drive())

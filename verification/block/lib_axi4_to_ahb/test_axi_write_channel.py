@@ -5,11 +5,8 @@ import pyuvm
 from coordinator_seq import TestWriteChannelSeq
 from testbench import BaseTest
 
-# FIXME       : This test is expected to fail.
-# See description in `test_axi.py`
 
-
-@pyuvm.test(expect_error=TimeoutError)
+@pyuvm.test()
 class TestAXIWriteChannel(BaseTest):
     def end_of_elaboration_phase(self):
         self.seq = TestWriteChannelSeq.create("stimulus")

@@ -383,7 +383,7 @@ import el2_pkg::*;
          end
          DONE_RD: begin
                   buf_nxtstate = IDLE;
-                  buf_state_en = axi_rvalid & axi_rready & axi_rlast;
+                  buf_state_en = axi_rvalid & axi_rready; // axi_rlast == 1
                   slvbuf_error_en = 1'b1;
                   slave_valid_pre = 1'b1;
          end

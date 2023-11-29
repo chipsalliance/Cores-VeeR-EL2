@@ -3,52 +3,27 @@
 
 import os
 import random
-
+import sys
 from enum import Enum
 
 import pyuvm
+from axi import Axi4LiteMonitor, BusReadItem, BusWriteItem
 from cocotb.clock import Clock
-from cocotb.triggers import (
-    ClockCycles,
-    FallingEdge,
-    RisingEdge,
-    Combine,
-)
+from cocotb.triggers import ClockCycles, Combine, FallingEdge, RisingEdge
 from pyuvm import *
+from utils import collect_bytes, collect_signals
 
 # ==============================================================================
 
-class BusWriteItem(uvm_sequence_item):
-    """
-    A generic data bus write request / response
-    """
-
-    def __init__(self, addr, data, resp=None):
-        super().__init__("BusWriteItem")
-        self.addr = addr
-        self.data = data
-        self.resp = resp
-
-
-class BusReadItem(uvm_sequence_item):
-    """
-    A generic data bus read request / response
-    """
-
-    def __init__(self, addr, data=None, resp=None):
-        super().__init__("BusReadItem")
-        self.addr = addr
-        self.data = data
-        self.resp = resp
 
 class AXI4LiteReadyItem(uvm_sequence_item):
-    """
-    """
+    """ """
 
     def __init__(self, channels, ready=True):
         super().__init__("AXI4LiteReadyItem")
         self.channels = channels
-        self.ready    = ready
+        self.ready = ready
+
 
 class AXI4LiteResponseItem(uvm_sequence_item):
     """
@@ -59,42 +34,18 @@ class AXI4LiteResponseItem(uvm_sequence_item):
         super().__init__("AXI4LiteResponseItem")
         self.channels = channels
 
-# ==============================================================================
-
-def collect_signals(signals, uut, obj, uut_prefix="", obj_prefix="", signal_map=None):
-    """
-    Collects signal objects from UUT and attaches them to the given object.
-    Optionally UUT signals can be prefixed with the uut_prefix and object
-    signals with the obj_prefix. If signal_map is given it should be a dict
-    mapping signal names to actual UUT signal names.
-    """
-
-    for sig in signals:
-        if signal_map is not None:
-            uut_sig = signal_map.get(sig, uut_prefix + sig)
-        else:
-            uut_sig = uut_prefix + sig
-        obj_sig = obj_prefix + sig
-        if hasattr(uut, uut_sig):
-            s = getattr(uut, uut_sig)
-
-        else:
-            s = None
-            logging.error("Module {} does not have a signal '{}'".format(str(uut), sig))
-
-        setattr(obj, obj_sig, s)
 
 # ==============================================================================
+
 
 class AHBLiteManagerBFM(uvm_component):
     """
     AHB Lite bus BFM that operates as a manager.
     """
-    
+
     SIGNALS = [
         "hclk",
         "hreset",
-
         "haddr",
         "hburst",
         "hmastlock",
@@ -104,38 +55,43 @@ class AHBLiteManagerBFM(uvm_component):
         "hwrite",
         "hwdata",
         "hsel",
-
         "hrdata",
         "hreadyout",
         "hresp",
     ]
 
     class HTRANS(Enum):
-        IDLE    = 0b00
-        BUSY    = 0b01
-        NONSEQ  = 0b10
-        SEQ     = 0b11
+        IDLE = 0b00
+        BUSY = 0b01
+        NONSEQ = 0b10
+        SEQ = 0b11
 
     class HBURST(Enum):
-        SINGLE  = 0b000
-        INCR    = 0b001
-        WRAP4   = 0b010
-        INCR4   = 0b011
-        WRAP8   = 0b100
-        INCR8   = 0b101
-        WRAP16  = 0b110
-        INCR16  = 0b111
+        SINGLE = 0b000
+        INCR = 0b001
+        WRAP4 = 0b010
+        INCR4 = 0b011
+        WRAP8 = 0b100
+        INCR8 = 0b101
+        WRAP16 = 0b110
+        INCR16 = 0b111
 
     def __init__(self, name, parent, uut, signal_prefix="", signal_map=None):
         super().__init__(name, parent)
 
         # Collect signals
-        collect_signals(self.SIGNALS, uut, self, uut_prefix=signal_prefix,
-                        obj_prefix="ahb_", signal_map=signal_map)
+        collect_signals(
+            self.SIGNALS,
+            uut,
+            self,
+            uut_prefix=signal_prefix,
+            obj_prefix="ahb_",
+            signal_map=signal_map,
+        )
 
         # Determine bus parameters
         self.awidth = len(self.ahb_haddr)
-        self.dwidth = len(self.ahb_hwdata) # Assuming hrdata is the same
+        self.dwidth = len(self.ahb_hwdata)  # Assuming hrdata is the same
 
         self.logger.debug("AHB Lite manager BFM:")
         self.logger.debug(" awidth = {}".format(self.awidth))
@@ -165,21 +121,20 @@ class AHBLiteManagerBFM(uvm_component):
 
         # Address phase
         await RisingEdge(self.ahb_hclk)
-        self.ahb_hsel.value     = 1
-        self.ahb_hprot.value    = 1 # Data
-        self.ahb_hsize.value    = 3 # 64B
-        self.ahb_haddr.value    = addr
-        self.ahb_hwrite.value   = 1
-        self.ahb_htrans.value   = self.HTRANS.NONSEQ.value
-        self.ahb_hburst.value   = self.HBURST.INCR.value # TODO: Others?
+        self.ahb_hsel.value = 1
+        self.ahb_hprot.value = 1  # Data
+        self.ahb_hsize.value = 3  # 64B
+        self.ahb_haddr.value = addr
+        self.ahb_hwrite.value = 1
+        self.ahb_htrans.value = self.HTRANS.NONSEQ.value
+        self.ahb_hburst.value = self.HBURST.INCR.value  # TODO: Others?
         await self._wait(self.ahb_hreadyout)
 
         # Data phase
         for i, word in enumerate(data):
-
             if i != len(data) - 1:
                 addr += self.dwidth // 8
-                self.ahb_haddr.value  = addr
+                self.ahb_haddr.value = addr
                 self.ahb_htrans.value = self.HTRANS.SEQ.value
             else:
                 self.ahb_htrans.value = self.HTRANS.IDLE.value
@@ -195,10 +150,10 @@ class AHBLiteManagerBFM(uvm_component):
         """
 
         hsize = {
-            64   // self.dwidth: 3,
-            128  // self.dwidth: 4,
-            256  // self.dwidth: 5,
-            512  // self.dwidth: 6,
+            64 // self.dwidth: 3,
+            128 // self.dwidth: 4,
+            256 // self.dwidth: 5,
+            512 // self.dwidth: 6,
             1024 // self.dwidth: 7,
         }
         assert length in hsize
@@ -209,21 +164,20 @@ class AHBLiteManagerBFM(uvm_component):
 
         # Address phase
         await RisingEdge(self.ahb_hclk)
-        self.ahb_hsel.value     = 1
-        self.ahb_hprot.value    = 1 # Data
-        self.ahb_hsize.value    = hsize[length]
-        self.ahb_haddr.value    = addr
-        self.ahb_hwrite.value   = 0
-        self.ahb_htrans.value   = self.HTRANS.NONSEQ.value
-        self.ahb_hburst.value   = self.HBURST.INCR.value # TODO: Others?
+        self.ahb_hsel.value = 1
+        self.ahb_hprot.value = 1  # Data
+        self.ahb_hsize.value = hsize[length]
+        self.ahb_haddr.value = addr
+        self.ahb_hwrite.value = 0
+        self.ahb_htrans.value = self.HTRANS.NONSEQ.value
+        self.ahb_hburst.value = self.HBURST.INCR.value  # TODO: Others?
         await self._wait(self.ahb_hreadyout)
 
         # Data phase
         for i in range(length):
-
             if i != length - 1:
-                addr += (self.dwidth // 8)
-                self.ahb_haddr.value  = addr
+                addr += self.dwidth // 8
+                self.ahb_haddr.value = addr
                 self.ahb_htrans.value = self.HTRANS.SEQ.value
             else:
                 self.ahb_htrans.value = self.HTRANS.IDLE.value
@@ -256,38 +210,114 @@ class AHBLiteManagerDriver(uvm_driver):
 
             self.seq_item_port.item_done()
 
+
+class AHBLiteMonitor(uvm_component):
+    """
+    AHB Lite bus monitor
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.bfm = kwargs["bfm"]
+        del kwargs["bfm"]
+        super().__init__(*args, **kwargs)
+
+    def build_phase(self):
+        self.ap = uvm_analysis_port("ap", self)
+
+    async def watch(self):
+        """
+        Watches the bus
+        """
+
+        data_stage = False
+
+        hdata = bytearray()
+        haddr = None
+        htrans = None
+        hwrite = None
+
+        while True:
+            # Wait for reset deassertion if necessary
+            if self.bfm.ahb_hreset.value == 0:
+                await RisingEdge(self.bfm.ahb_hreset)
+
+            # Wait for clock edge and hready
+            await RisingEdge(self.bfm.ahb_hclk)
+            hready = int(self.bfm.ahb_hreadyout)
+
+            if hready:
+                # Sample data
+                if data_stage:
+                    if htrans in [AHBLiteManagerBFM.HTRANS.SEQ, AHBLiteManagerBFM.HTRANS.NONSEQ]:
+                        if hwrite:
+                            data = collect_bytes(self.bfm.ahb_hwdata)
+                        else:
+                            data = collect_bytes(self.bfm.ahb_hwdata)
+                        hdata += data
+
+                    # Transfer end
+                    elif htrans == AHBLiteManagerBFM.HTRANS.IDLE:
+                        self.logger.debug(
+                            "{}: 0x{:08X} {}".format(
+                                "WR" if hwrite else "RD",
+                                haddr,
+                                ["0x{:02X}".format(b) for b in hdata],
+                            )
+                        )
+
+                        data_stage = False
+
+                        # Send response
+                        if hwrite:
+                            cls = BusWriteItem
+                        else:
+                            cls = BusReadItem
+
+                        self.ap.write(cls(haddr, hdata))
+
+                # Sample bus signals
+                htrans = AHBLiteManagerBFM.HTRANS(self.bfm.ahb_htrans.value)
+                if not data_stage:
+                    if htrans in [AHBLiteManagerBFM.HTRANS.SEQ, AHBLiteManagerBFM.HTRANS.NONSEQ]:
+                        hwrite = int(self.bfm.ahb_hwrite.value)
+                        haddr = int(self.bfm.ahb_haddr.value)
+                        hdata = bytearray()
+                        data_stage = True
+
+    async def run_phase(self):
+        cocotb.start_soon(self.watch())
+
+
 # ==============================================================================
+
 
 class AXI4LiteSubordinateBFM(uvm_component):
     """
+    AXI 4 Lite subordinate BFM. Allows low-level per-channel acknowledgement
+    control.
     """
 
     SIGNALS = [
         "clk",
         "rst",
-
         "awvalid",
         "awready",
         "awid",
         "awaddr",
         "awsize",
-
         "wvalid",
         "wready",
         "wdata",
         "wstrb",
-
         "bvalid",
         "bready",
         "bresp",
         "bid",
-
         "arvalid",
         "arready",
         "arid",
         "araddr",
         "arsize",
-
         "rvalid",
         "rready",
         "rid",
@@ -300,8 +330,14 @@ class AXI4LiteSubordinateBFM(uvm_component):
         super().__init__(name, parent)
 
         # Collect signals
-        collect_signals(self.SIGNALS, uut, self, uut_prefix=signal_prefix,
-                        obj_prefix="axi_", signal_map=signal_map)
+        collect_signals(
+            self.SIGNALS,
+            uut,
+            self,
+            uut_prefix=signal_prefix,
+            obj_prefix="axi_",
+            signal_map=signal_map,
+        )
 
         # Determine bus parameters
         self.awidth = len(self.axi_awaddr)
@@ -316,9 +352,9 @@ class AXI4LiteSubordinateBFM(uvm_component):
         self.logger.debug(" swidth = {}".format(self.swidth))
 
         self.axi_awready.value = 0
-        self.axi_wready.value  = 0
+        self.axi_wready.value = 0
         self.axi_arready.value = 0
-        self.axi_rready.value  = 0
+        self.axi_rready.value = 0
 
     async def _wait(self, signal, max_cycles=200):
         """
@@ -345,120 +381,41 @@ class AXI4LiteSubordinateBFM(uvm_component):
         sig.value = int(ready)
 
     async def respond_aw(self):
-
         # Assert awready
         self.axi_awready.value = 1
         # Wait for awvalid
         await self._wait(self.axi_awvalid)
 
-        # Sample request
-        # TODO:
-
         # Deassert awready
         self.axi_awready.value = 0
 
     async def respond_w(self):
-
         # Assert wready
         self.axi_wready.value = 1
 
         # Wait for valid, receive data
         for i in range(1):
             await self._wait(self.axi_wvalid)
-            # TODO:
 
         # Deassert wready
         self.axi_wready.value = 0
 
     async def respond_b(self):
-
         # Wait for bready
         await self._wait(self.axi_bready)
 
         # Transmitt acknowledge
-        self.axi_bvalid.value   = 1
-        self.axi_bid.value      = 0 # TODO
-        self.axi_bresp.value    = 0 # TODO
+        self.axi_bvalid.value = 1
+        self.axi_bid.value = 0  # TODO
+        self.axi_bresp.value = 0  # TODO
 
         await RisingEdge(self.axi_clk)
-        self.axi_bvalid.value   = 0
+        self.axi_bvalid.value = 0
 
-#        """
-#        Write responder task (AW, W and B channels).
-#        """
-#        while True:
-#
-#            # Wait for reset deassertion if necessary
-#            if self.axi_rst.value == 0:
-#                await RisingEdge(self.axi_rst)
-#
-#            # Assert awready and wready
-#            self.axi_awready.value    = 1
-#            self.axi_wready.value     = 1
-#
-#            # Wait for AW
-#            while True:
-#                await RisingEdge(self.axi_clk)
-#                if self.axi_awvalid.value and self.axi_awready.value:
-#                    break
-#
-#            # Deassert awready
-#            self.axi_awready.value = 0
-#
-#            # Receive data
-#            for i in range(1):
-#                await self._wait(self.axi_wvalid)
-#
-#            # Wait for bready
-#            await self._wait(self.axi_bready)
-#
-#            # Transmitt acknowledge
-#            self.axi_bvalid.value   = 1
-#            self.axi_bid.value      = 0 # TODO
-#            self.axi_bresp.value    = 0 # TODO
-#
-#            await RisingEdge(self.axi_clk)
-#            self.axi_bvalid.value   = 0
-#
-#    async def respond_to_reads(self):
-#        """
-#        Read responder task (AR and R channels). Returns random data.
-#        """
-#        while True:
-#
-#            # Wait for reset deassertion if necessary
-#            if self.axi_rst.value == 0:
-#                await RisingEdge(self.axi_rst)
-#
-#            # Assert arready
-#            self.axi_arready.value = 1
-#
-#            # Wait for AR
-#            while True:
-#                await RisingEdge(self.axi_clk)
-#                if self.axi_arvalid.value and self.axi_arready.value:
-#                    break
-#
-#            # Deassert arready
-#            self.axi_arready.value = 0
-#
-#            # Dummy wait to simulate subordinate latency
-#            await ClockCycles(self.axi_clk, 5)
-#
-#            # Wait for rready
-#            await self._wait(self.axi_rready)
-#
-#            # Transmitt data
-#            self.axi_rvalid.value   = 1
-#            self.axi_rid.value      = 0 # TODO
-#            self.axi_rdata.value    = random.randrange(0, (1 << self.dwidth) - 1)
-#            self.axi_rresp.value    = 0 # TODO
-#            
-#            await RisingEdge(self.axi_clk)
-#            self.axi_rvalid.value   = 0
 
 class AXI4LiteSubordinateDriver(uvm_driver):
     """
+    PyUVM driver for AXI 4 Lite subordinate BFM
     """
 
     def __init__(self, *args, **kwargs):
@@ -467,11 +424,10 @@ class AXI4LiteSubordinateDriver(uvm_driver):
         super().__init__(*args, **kwargs)
 
     async def run_phase(self):
-
         func_map = {
-            "aw":   self.bfm.respond_aw,
-            "w":    self.bfm.respond_w,
-            "b":    self.bfm.respond_b,
+            "aw": self.bfm.respond_aw,
+            "w": self.bfm.respond_w,
+            "b": self.bfm.respond_b,
         }
 
         while True:
@@ -490,6 +446,70 @@ class AXI4LiteSubordinateDriver(uvm_driver):
 
             self.seq_item_port.item_done()
 
+
+# ==============================================================================
+
+class Scoreboard(uvm_component):
+    """
+    A scoreboard that compares AHB and AXI transfers and checks if they
+    refer to the same address and containd the same data.
+    """
+
+    def __init__(self, name, parent):
+        super().__init__(name, parent)
+
+        self.passed = None
+
+    def build_phase(self):
+        self.ahb_fifo = uvm_tlm_analysis_fifo("ahb_fifo", self)
+        self.ahb_port = uvm_get_port("ahb_port", self)
+        self.axi_fifo = uvm_tlm_analysis_fifo("axi_fifo", self)
+        self.axi_port = uvm_get_port("axi_port", self)
+
+    def connect_phase(self):
+        self.ahb_port.connect(self.ahb_fifo.get_export)
+        self.axi_port.connect(self.axi_fifo.get_export)
+
+    def check_phase(self):
+
+        # Check transactions
+        while self.ahb_port.can_get() or self.axi_port.can_get():
+
+            # A transaction is missing
+            if not self.ahb_port.can_get() or not self.axi_port.can_get():
+                self.logger.error("A transaction is missing on one of the buses")
+                self.passed = False
+                break
+
+            self.passed = True
+
+            # Get items
+            _, ahb_item = self.ahb_port.try_get()
+            _, axi_item = self.axi_port.try_get()
+
+            # Check
+            msg  = "AHB: {} A:0x{:08X} D:[{}], ".format(
+                type(ahb_item).__name__,
+                ahb_item.addr,
+                ",".join(["0x{:02X}".format(d) for d in ahb_item.data]))
+
+            msg += "AXI: {} A:0x{:08X} D:[{}]".format(
+                type(ahb_item).__name__,
+                ahb_item.addr,
+                ",".join(["0x{:02X}".format(d) for d in ahb_item.data]))
+
+            if ahb_item.addr != axi_item.addr or \
+               ahb_item.data != axi_item.data:
+                self.logger.error(msg)
+                self.passed = False
+            else:
+                self.logger.debug(msg)
+
+    def final_phase(self):
+        if not self.passed:
+            self.logger.critical("{} reports a failure".format(type(self)))
+            assert False
+
 # ==============================================================================
 
 
@@ -499,12 +519,11 @@ class BaseEnv(uvm_env):
     """
 
     def build_phase(self):
-
         # Config
         ConfigDB().set(None, "*", "TEST_CLK_PERIOD", 1)
         ConfigDB().set(None, "*", "TEST_ITERATIONS", 50)
-        ConfigDB().set(None, "*", "TEST_BURST_LEN",  10)
-        ConfigDB().set(None, "*", "TEST_BURST_GAP",  10)
+        ConfigDB().set(None, "*", "TEST_BURST_LEN", 10)
+        ConfigDB().set(None, "*", "TEST_BURST_GAP", 10)
 
         # Sequencers
         self.ahb_seqr = uvm_sequencer("ahb_seqr", self)
@@ -515,34 +534,44 @@ class BaseEnv(uvm_env):
 
         # BFM
         self.ahb_bfm = AHBLiteManagerBFM(
-            "ahb_bfm", self, uut=cocotb.top,
-            signal_prefix="ahb_", signal_map = {
-                "hclk":   "clk",
+            "ahb_bfm",
+            self,
+            uut=cocotb.top,
+            signal_prefix="ahb_",
+            signal_map={
+                "hclk": "clk",
                 "hreset": "rst_l",
-            })
+            },
+        )
 
         self.axi_bfm = AXI4LiteSubordinateBFM(
-            "axi_bfm", self, uut=cocotb.top,
-            signal_prefix="axi_", signal_map = {
-                "clk":    "clk",
-                "rst":    "rst_l",
-            })
+            "axi_bfm",
+            self,
+            uut=cocotb.top,
+            signal_prefix="axi_",
+            signal_map={
+                "clk": "clk",
+                "rst": "rst_l",
+            },
+        )
 
         # Driver
         self.ahb_drv = AHBLiteManagerDriver("ahb_drv", self, bfm=self.ahb_bfm)
         self.axi_drv = AXI4LiteSubordinateDriver("axi_drv", self, bfm=self.axi_bfm)
 
-#        # Monitor
-#        self.mem_mon = MemMonitor("mem_mon", self, dut=cocotb.top)
-#
-#        # Scoreboard
-#        self.scoreboard = Scoreboard("scoreboard", self)
+        # Monitor
+        self.ahb_mon = AHBLiteMonitor("ahb_mon", self, bfm=self.ahb_bfm)
+        self.axi_mon = Axi4LiteMonitor("axi_mon", self, bfm=self.axi_bfm)
+
+        # Scoreboard
+        self.scoreboard = Scoreboard("scoreboard", self)
 
     def connect_phase(self):
         self.ahb_drv.seq_item_port.connect(self.ahb_seqr.seq_item_export)
         self.axi_drv.seq_item_port.connect(self.axi_seqr.seq_item_export)
-#        self.mem_mon.ap.connect(self.scoreboard.fifo.analysis_export)
-        pass
+
+        self.ahb_mon.ap.connect(self.scoreboard.ahb_fifo.analysis_export)
+        self.axi_mon.ap.connect(self.scoreboard.axi_fifo.analysis_export)
 
 
 # ==============================================================================
@@ -587,7 +616,7 @@ class BaseTest(uvm_test):
         await self.do_reset()
 
         # Set common DUT signals
-        cocotb.top.bus_clk_en.value   = 1
+        cocotb.top.bus_clk_en.value = 1
         cocotb.top.ahb_hreadyin.value = 1
 
         # Wait some cycles
@@ -603,4 +632,3 @@ class BaseTest(uvm_test):
 
     async def run(self):
         raise NotImplementedError()
-

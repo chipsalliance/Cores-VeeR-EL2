@@ -17,7 +17,10 @@ from utils import collect_bytes, collect_signals
 
 
 class AXI4LiteReadyItem(uvm_sequence_item):
-    """ """
+    """
+    An item describing ready signal assertion / deassertion for an AXI4 lite
+    channel(s)
+    """
 
     def __init__(self, channels, ready=True):
         super().__init__("AXI4LiteReadyItem")
@@ -108,12 +111,23 @@ class AHBLiteManagerBFM(uvm_component):
             if signal.value != 0:
                 break
         else:
-            raise RuntimeError("{} timeout".format(str(signal)))
+            raise TimeoutError("{} timeout".format(str(signal)))
 
     async def write(self, addr, data):
         """
-        Issues a write transfer
+        Issues a write transfer. Parameter data must be a list of integers
+        where each one represents a full bus data word. The word count must be
+        one of multiplies of data bus width supported by AHB Lite.
         """
+
+        hsize = {
+            64 // self.dwidth: 3,
+            128 // self.dwidth: 4,
+            256 // self.dwidth: 5,
+            512 // self.dwidth: 6,
+            1024 // self.dwidth: 7,
+        }
+        assert len(data) in hsize
 
         # Wait for reset deassertion if necessary
         if self.ahb_hreset.value == 0:
@@ -123,7 +137,7 @@ class AHBLiteManagerBFM(uvm_component):
         await RisingEdge(self.ahb_hclk)
         self.ahb_hsel.value = 1
         self.ahb_hprot.value = 1  # Data
-        self.ahb_hsize.value = 3  # 64B
+        self.ahb_hsize.value = hsize[len(data)]
         self.ahb_haddr.value = addr
         self.ahb_hwrite.value = 1
         self.ahb_htrans.value = self.HTRANS.NONSEQ.value
@@ -144,8 +158,8 @@ class AHBLiteManagerBFM(uvm_component):
 
     async def read(self, addr, length):
         """
-        Issues an AHB read transfer for the given number of words. The word
-        count must be one of miltiplies of data bus width supported by AHB
+        Issues an AHB read transfer for the given number of bus data words. The
+        word count must be one of multiplies of data bus width supported by AHB
         Lite.
         """
 
@@ -203,6 +217,8 @@ class AHBLiteManagerDriver(uvm_driver):
                 await self.bfm.write(it.addr, it.data)
 
             elif isinstance(it, BusReadItem):
+                # TODO: Since the intended UUT does not support burst transfers
+                # here we are reading only a single data word.
                 await self.bfm.read(it.addr, 1)
 
             else:
@@ -367,7 +383,7 @@ class AXI4LiteSubordinateBFM(uvm_component):
             if signal.value != 0:
                 break
         else:
-            raise RuntimeError("{} timeout".format(str(signal)))
+            raise TimeoutError("{} timeout".format(str(signal)))
 
     async def set_ready(self, channel, ready):
         """
@@ -449,6 +465,7 @@ class AXI4LiteSubordinateDriver(uvm_driver):
 
 # ==============================================================================
 
+
 class Scoreboard(uvm_component):
     """
     A scoreboard that compares AHB and AXI transfers and checks if they
@@ -471,10 +488,8 @@ class Scoreboard(uvm_component):
         self.axi_port.connect(self.axi_fifo.get_export)
 
     def check_phase(self):
-
         # Check transactions
         while self.ahb_port.can_get() or self.axi_port.can_get():
-
             # A transaction is missing
             if not self.ahb_port.can_get() or not self.axi_port.can_get():
                 self.logger.error("A transaction is missing on one of the buses")
@@ -488,18 +503,19 @@ class Scoreboard(uvm_component):
             _, axi_item = self.axi_port.try_get()
 
             # Check
-            msg  = "AHB: {} A:0x{:08X} D:[{}], ".format(
+            msg = "AHB: {} A:0x{:08X} D:[{}], ".format(
                 type(ahb_item).__name__,
                 ahb_item.addr,
-                ",".join(["0x{:02X}".format(d) for d in ahb_item.data]))
+                ",".join(["0x{:02X}".format(d) for d in ahb_item.data]),
+            )
 
             msg += "AXI: {} A:0x{:08X} D:[{}]".format(
                 type(ahb_item).__name__,
                 ahb_item.addr,
-                ",".join(["0x{:02X}".format(d) for d in ahb_item.data]))
+                ",".join(["0x{:02X}".format(d) for d in ahb_item.data]),
+            )
 
-            if ahb_item.addr != axi_item.addr or \
-               ahb_item.data != axi_item.data:
+            if ahb_item.addr != axi_item.addr or ahb_item.data != axi_item.data:
                 self.logger.error(msg)
                 self.passed = False
             else:
@@ -509,6 +525,7 @@ class Scoreboard(uvm_component):
         if not self.passed:
             self.logger.critical("{} reports a failure".format(type(self)))
             assert False
+
 
 # ==============================================================================
 

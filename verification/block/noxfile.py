@@ -266,19 +266,19 @@ def dccm_verify(session, blockName, testName, coverage):
 def lib_axi4_to_ahb_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
+
 @nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["lib_ahb_to_axi4"])
 @nox.parametrize(
     "testName",
     [
-        "test_axi",
-#        "test_axi_read_channel",
-#        "test_axi_write_channel",
+        "test_write",
     ],
 )
 @nox.parametrize("coverage", coverageTypes)
 def lib_ahb_to_axi4_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
+
 
 @nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["pmp"])

@@ -268,7 +268,7 @@ class AHBLiteMonitor(uvm_component):
                         if hwrite:
                             data = collect_bytes(self.bfm.ahb_hwdata)
                         else:
-                            data = collect_bytes(self.bfm.ahb_hwdata)
+                            data = collect_bytes(self.bfm.ahb_hrdata)
                         hdata += data
 
                     # Transfer end
@@ -428,6 +428,26 @@ class AXI4LiteSubordinateBFM(uvm_component):
         await RisingEdge(self.axi_clk)
         self.axi_bvalid.value = 0
 
+    async def respond_ar(self):
+        # Assert arready
+        self.axi_arready.value = 1
+        # Wait for arvalid
+        await self._wait(self.axi_arvalid)
+
+        # Deassert arready
+        self.axi_arready.value = 0
+
+    async def respond_r(self):
+        # Wait for rready
+        await self._wait(self.axi_rready)
+
+        # Transmitt data
+        self.axi_rvalid.value = 1
+        self.axi_rdata.value = random.randrange(0, (1 << self.dwidth) - 1)
+
+        await RisingEdge(self.axi_clk)
+        self.axi_rvalid.value = 0
+
 
 class AXI4LiteSubordinateDriver(uvm_driver):
     """
@@ -444,6 +464,8 @@ class AXI4LiteSubordinateDriver(uvm_driver):
             "aw": self.bfm.respond_aw,
             "w": self.bfm.respond_w,
             "b": self.bfm.respond_b,
+            "ar": self.bfm.respond_ar,
+            "r": self.bfm.respond_r,
         }
 
         while True:
@@ -511,8 +533,8 @@ class Scoreboard(uvm_component):
 
             msg += "AXI: {} A:0x{:08X} D:[{}]".format(
                 type(ahb_item).__name__,
-                ahb_item.addr,
-                ",".join(["0x{:02X}".format(d) for d in ahb_item.data]),
+                axi_item.addr,
+                ",".join(["0x{:02X}".format(d) for d in axi_item.data]),
             )
 
             if ahb_item.addr != axi_item.addr or ahb_item.data != axi_item.data:

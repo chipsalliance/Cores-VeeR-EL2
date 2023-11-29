@@ -273,6 +273,7 @@ def lib_axi4_to_ahb_verify(session, blockName, testName, coverage):
     "testName",
     [
         "test_write",
+        "test_read",
     ],
 )
 @nox.parametrize("coverage", coverageTypes)

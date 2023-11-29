@@ -44,7 +44,7 @@ class Axi4LiteMonitor(uvm_component):
         def __init__(self, tid, addr=None):
             self.tid = tid
             self.addr = addr
-            self.data = None
+            self.data = bytearray()
 
     def __init__(self, *args, **kwargs):
         self.bfm = kwargs["bfm"]
@@ -85,6 +85,7 @@ class Axi4LiteMonitor(uvm_component):
         Watches the bus for writes
         """
         xfers = dict()
+        awid = None
 
         # Main loop
         while True:

@@ -19,7 +19,7 @@ from cocotb.triggers import (
     Timer,
 )
 from pyuvm import *
-from utils import collect_signals
+from utils import collect_bytes, collect_signals
 
 # ==============================================================================
 
@@ -377,24 +377,6 @@ class Axi4LiteBFM(uvm_component):
 
         self.wr_xfers = {i: self.Transfer(i) for i in range(1 << len(self.axi_awid))}
 
-    @staticmethod
-    def collect_bytes(data, strb=None):
-        """
-        Collects data bytes asserted on a data bus. Uses the strb value to
-        determine which octets are valid.
-        """
-
-        if strb is not None:
-            assert len(data) == 8 * len(strb)
-
-        res = []
-        for i in range(len(data) // 8):
-            if strb is None or strb.value & (1 << i):
-                dat = (int(data.value) >> (8 * i)) & 0xFF
-                res.append(dat)
-
-        return bytes(res)
-
     async def _wait(self, signal, max_cycles=200):
         """
         Waits for a signal to be asserted for at most max_cycles.
@@ -532,7 +514,7 @@ class Axi4LiteBFM(uvm_component):
             await self._wait(self.axi_rvalid)
 
             # Get the data
-            data.extend(self.collect_bytes(self.axi_rdata))
+            data.extend(collect_bytes(self.axi_rdata))
 
             # Last, finish reception
             if self.axi_rlast.value:

@@ -27,3 +27,22 @@ def collect_signals(signals, uut, obj, uut_prefix="", obj_prefix="", signal_map=
             logging.error("Module {} does not have a signal '{}'".format(str(uut), sig))
 
         setattr(obj, obj_sig, s)
+
+
+def collect_bytes(data, strb=None):
+    """
+    Collects data bytes asserted on a data bus. Uses the strb value to
+    determine which octets are valid. Both data and strb must be cocotb
+    signals. strb can be None.
+    """
+
+    if strb is not None:
+        assert len(data) == 8 * len(strb)
+
+    res = []
+    for i in range(len(data) // 8):
+        if strb is None or strb.value & (1 << i):
+            dat = (int(data.value) >> (8 * i)) & 0xFF
+            res.append(dat)
+
+    return bytes(res)

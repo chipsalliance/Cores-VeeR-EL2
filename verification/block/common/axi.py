@@ -3,8 +3,10 @@
 
 from cocotb.triggers import RisingEdge
 from pyuvm import *
+from utils import collect_bytes
 
 # ==============================================================================
+
 
 class BusWriteItem(uvm_sequence_item):
     """
@@ -29,7 +31,9 @@ class BusReadItem(uvm_sequence_item):
         self.data = data
         self.resp = resp
 
+
 # ==============================================================================
+
 
 class Axi4LiteMonitor(uvm_component):
     """
@@ -66,13 +70,13 @@ class Axi4LiteMonitor(uvm_component):
         return self.bfm.axi_bready.value != 0 and self.bfm.axi_bvalid.value != 0
 
     def _sample_w(self):
-        return self.bfm.collect_bytes(
+        return collect_bytes(
             self.bfm.axi_wdata,
             self.bfm.axi_wstrb,
         )
 
     def _sample_r(self):
-        return self.bfm.collect_bytes(
+        return collect_bytes(
             self.bfm.axi_rdata,
         )
 

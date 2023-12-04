@@ -124,7 +124,7 @@ jobs:
           echo "include-run=$(python3 .github/scripts/riscv_dv_matrix_include.py run)" | tee -a $GITHUB_OUTPUT
       - id: hash
         run: |
-          echo "files-hash=$(sha256sum **/*.sv **/*.py **/*.yml **/*.yaml tools/riscv-dv/*.py | cut -d\  -f1 | sha256sum | cut -d\  -f1)" | tee -a $GITHUB_OUTPUT
+          echo "files-hash=$(.github/scripts/get_code_hash.sh)" | tee -a $GITHUB_OUTPUT
 
   generate-code:
     name: Generate code for tests
@@ -157,7 +157,7 @@ jobs:
         timeout-minutes: 60
         with:
           path: tools/riscv-dv/work/test_${{ matrix.test }}/asm_test
-          key: ${{ env.cache_code }}
+          key: cache_${{ matrix.test }}_${{ matrix.version }}_${{ env.CACHE_HASH }}
 
       - name: Prepare Environment
         if: steps.cache-code.outputs.cache-hit != 'true'

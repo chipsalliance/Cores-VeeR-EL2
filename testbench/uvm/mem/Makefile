@@ -43,6 +43,7 @@ VERILOG_INCLUDE_DIRS = \
 	${RV_ROOT}/snapshots/$(SNAPSHOT)
 
 VERILOG_SOURCES = \
+    ${RV_ROOT}/design/lib/el2_mem_if.sv \
     ${RV_ROOT}/design/lib/beh_lib.sv \
     ${RV_ROOT}/design/lib/mem_lib.sv \
 	$(SIM_DIR)/el2_lsu_dccm_mem.sv \

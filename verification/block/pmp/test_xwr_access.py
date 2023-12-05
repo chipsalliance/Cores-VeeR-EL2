@@ -2,7 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from pyuvm import ConfigDB, test, uvm_sequence
-from testbench import BaseEnv, BaseTest, PMPCheckItem, PMPWriteCSRItem
+from testbench import (
+    BaseEnv,
+    BaseTest,
+    PMPCheckItem,
+    PMPWriteAddrCSRItem,
+    PMPWriteCfgCSRItem,
+)
 
 # =============================================================================
 
@@ -17,7 +23,7 @@ class TestSequence(uvm_sequence):
         pmp_entries = ConfigDB().get(None, "", "PMP_ENTRIES")
         pmp_channels = ConfigDB().get(None, "", "PMP_CHANNELS")
 
-        # Configure first 8 entries to all possible XWR configurations
+        # Configure entries to all possible XWR configurations
         # Use TOR address matching for simplicity
         # 0b10001000
         # - bit 7 - Locked status (1 is locked)
@@ -26,10 +32,16 @@ class TestSequence(uvm_sequence):
         # - bit 2 - Execute permission
         # - bit 1 - Write permission
         # - bit 0 - Read permission
-        for i in range(8):
-            cfg = 0b10001000 + i
+        MAX_XWR_CONFIGS = 8
+        for i in range(MAX_XWR_CONFIGS):
             addr = ((i + 1) * 0x1000) >> 2
-            item = PMPWriteCSRItem(index=i, pmpcfg=cfg, pmpaddr=addr)
+            item = PMPWriteAddrCSRItem(index=i, pmpaddr=addr)
+            await self.pmp_seqr.start_item(item)
+            await self.pmp_seqr.finish_item(item)
+
+        for i in range(MAX_XWR_CONFIGS):
+            cfg = 0b10001000 + i
+            item = PMPWriteCfgCSRItem(index=i, pmpcfg=cfg)
             await self.pmp_seqr.start_item(item)
             await self.pmp_seqr.finish_item(item)
 

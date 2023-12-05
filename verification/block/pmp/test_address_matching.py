@@ -4,7 +4,13 @@
 
 from common import BaseSequence
 from pyuvm import ConfigDB, test
-from testbench import BaseEnv, BaseTest, PMPWriteCSRItem, getDecodedEntryCfg
+from testbench import (
+    BaseEnv,
+    BaseTest,
+    PMPWriteAddrCSRItem,
+    PMPWriteCfgCSRItem,
+    getDecodedEntryCfg,
+)
 
 pmp_configurations = [
     {
@@ -90,7 +96,12 @@ class TestSequence(BaseSequence):
 
         # Configure PMP entries
         for i, cfg in enumerate(pmp_configurations):
-            item = PMPWriteCSRItem(index=i, pmpcfg=cfg["pmpcfg"], pmpaddr=cfg["pmpaddr"])
+            item = PMPWriteAddrCSRItem(index=i, pmpaddr=cfg["pmpaddr"])
+            await self.pmp_seqr.start_item(item)
+            await self.pmp_seqr.finish_item(item)
+
+        for i, cfg in enumerate(pmp_configurations):
+            item = PMPWriteCfgCSRItem(index=i, pmpcfg=cfg["pmpcfg"])
             await self.pmp_seqr.start_item(item)
             await self.pmp_seqr.finish_item(item)
 

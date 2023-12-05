@@ -85,12 +85,18 @@ def getDecodedEntryCfg(regs, index, range_only=False):
 
 # ==============================================================================
 
-# TODO: Split cfg and addr into 2 items
-class PMPWriteCSRItem(uvm_sequence_item):
-    def __init__(self, index, pmpcfg=None, pmpaddr=None):
-        super().__init__("PMPWriteCSRItem")
+
+class PMPWriteCfgCSRItem(uvm_sequence_item):
+    def __init__(self, index, pmpcfg):
+        super().__init__("PMPWriteCfgCSRItem")
         self.index = index
         self.pmpcfg = pmpcfg
+
+
+class PMPWriteAddrCSRItem(uvm_sequence_item):
+    def __init__(self, index, pmpaddr):
+        super().__init__("PMPWriteAddrCSRItem")
+        self.index = index
         self.pmpaddr = pmpaddr
 
 
@@ -149,11 +155,12 @@ class PMPDriver(uvm_driver):
         while True:
             it = await self.seq_item_port.get_next_item()
 
-            if isinstance(it, PMPWriteCSRItem):
-                self.pmp_pmpcfg[it.index].value = it.pmpcfg
+            if isinstance(it, PMPWriteAddrCSRItem):
                 self.pmp_pmpaddr[it.index].value = it.pmpaddr
-                self.regs.reg["pmpcfg{}".format(it.index)].integer = it.pmpcfg
                 self.regs.reg["pmpaddr{}".format(it.index)].integer = it.pmpaddr
+            elif isinstance(it, PMPWriteCfgCSRItem):
+                self.pmp_pmpcfg[it.index].value = it.pmpcfg
+                self.regs.reg["pmpcfg{}".format(it.index)].integer = it.pmpcfg
             elif isinstance(it, PMPCheckItem):
                 self.pmp_chan_addr[it.channel].value = it.addr
                 self.pmp_chan_type[it.channel].value = it.type
@@ -197,8 +204,6 @@ class PMPMonitor(uvm_component):
 
     async def run_phase(self):
         while True:
-            # Even though the signals are not sequential sample them on
-            # rising clock edge
             await RisingEdge(self.clk)
 
             # Sample signals

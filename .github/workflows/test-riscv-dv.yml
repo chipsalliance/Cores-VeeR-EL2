@@ -124,7 +124,7 @@ jobs:
           echo "include-run=$(python3 .github/scripts/riscv_dv_matrix_include.py run)" | tee -a $GITHUB_OUTPUT
       - id: hash
         run: |
-          echo "files-hash=$(sha256sum **/*.sv **/*.py **/*.yml **/*.yaml tools/riscv-dv/*.py | cut -d\  -f1 | sha256sum | cut -d\  -f1)" | tee -a $GITHUB_OUTPUT
+          echo "files-hash=$(.github/scripts/get_code_hash.sh)" | tee -a $GITHUB_OUTPUT
 
   generate-code:
     name: Generate code for tests
@@ -145,31 +145,27 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup Cache Metadata
-        id: cache_metadata
-        run: |
-          cache_code=cache_${{ matrix.test }}_${{ matrix.version }}
-          echo "cache_code=${cache_code}_${{ env.CACHE_HASH }}" | tee -a "$GITHUB_ENV"
-
       - name: Cache Code
         uses: actions/cache@v3
         id: cache-code
         timeout-minutes: 60
         with:
           path: tools/riscv-dv/work/test_${{ matrix.test }}/asm_test
-          key: ${{ env.cache_code }}
+          key: cache_${{ matrix.test }}_${{ matrix.version }}_${{ env.CACHE_HASH }}
 
       - name: Prepare Environment
         if: steps.cache-code.outputs.cache-hit != 'true'
         run: _secret_prepare_env
 
-      - name: Generate Tests
+      - name: Generate code
+        id: riscv_dv_test
         if: steps.cache-code.outputs.cache-hit != 'true' && matrix.version == 'uvm'
         run: _secret_generate_code
         env:
           RISCV_DV_TEST: ${{ matrix.test }}
+        continue-on-error: true
 
-      - name: Generate code
+      - name: Generate code (pyflow)
         if: steps.cache-code.outputs.cache-hit != 'true' && matrix.version == 'pyflow'
         run: |
           export RV_ROOT=`realpath .`
@@ -180,6 +176,12 @@ jobs:
               RISCV_DV_SEED=999 \
               generate
           popd
+
+      - name: Use fallback code
+        if: steps.cache-code.outputs.cache-hit != 'true' && steps.riscv_dv_test.outcome != 'success'
+        run: |
+          mkdir -p tools/riscv-dv/work/
+          cp -r .github/assets/riscv_dv/${{ matrix.version  }}/* tools/riscv-dv/work/
 
       - name: Pack artifacts
         if: always()

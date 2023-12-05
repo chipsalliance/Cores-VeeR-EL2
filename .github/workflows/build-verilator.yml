@@ -15,7 +15,7 @@ jobs:
             commit: v5.010
           - version: uvm
             repo: antmicro/verilator-1
-            commit: vif-trigger
+            commit: vif-trigger-ci
     env:
       TOOL_NAME: verilator
       TOOL_VERSION: ${{ matrix.version }}
@@ -28,7 +28,7 @@ jobs:
         id: cache_metadata
         run: |
           cache_date=$(date +"%Y_%m_%d")
-          cache_name=cache_${{ env.TOOL_NAME }}_${{ env.TOOL_VERSION }}
+          cache_name=cache_${{ env.TOOL_NAME }}_${{ env.TOOL_VERSION }}_${{ env.TOOL_COMMIT }}
           echo "Cache date: "$cache_date
           echo "Cache name: "$cache_name
           echo "cache_date=$cache_date" >> "$GITHUB_ENV"

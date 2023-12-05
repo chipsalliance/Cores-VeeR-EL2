@@ -67,13 +67,11 @@ class TestSequence(BaseSequence):
     async def body(self):
         pmp_entries = ConfigDB().get(None, "", "PMP_ENTRIES")
 
-        # Configure PMP entries
-        possible_configs = min(pmp_entries, len(pmp_configurations))
-        for i, cfg in enumerate(pmp_configurations):
-            # Ensure to not use more configurations than PMP entries
-            if i == possible_configs:
-                break
+        # Ensure to not use more configurations than PMP entries
+        assert len(pmp_configurations) <= pmp_entries
 
+        # Configure PMP entries
+        for i, cfg in enumerate(pmp_configurations):
             item = PMPWriteCSRItem(index=i, pmpcfg=cfg["pmpcfg"], pmpaddr=cfg["pmpaddr"])
             await self.pmp_seqr.start_item(item)
             await self.pmp_seqr.finish_item(item)

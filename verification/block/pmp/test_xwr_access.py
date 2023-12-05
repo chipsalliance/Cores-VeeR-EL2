@@ -35,13 +35,13 @@ class TestSequence(uvm_sequence):
 
         # Check all possible access variants on configured entries
         for i in range(pmp_channels):
+            channel = i
             # Set type to each of 3 available (R or W or X)
             for j in range(3):
                 type = 1 << j
                 for k in range(pmp_entries):
                     # Set address somewhere in the 0x1000 wide entry
                     addr = (0x200 + (k * 0x1000)) >> 2
-                    channel = i
 
                     item = PMPCheckItem(channel, addr, type)
                     await self.pmp_seqr.start_item(item)

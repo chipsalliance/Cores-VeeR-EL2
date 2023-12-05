@@ -40,7 +40,7 @@ def getDecodedEntryCfg(regs, index, range_only=False):
     address_matching = pmpcfg[4:3].integer
     locked = pmpcfg[7].integer
 
-    if index != 0:
+    if index:
         start_address = regs.reg["pmpaddr{}".format(index - 1)].integer << 2
     else:
         start_address = 0
@@ -75,7 +75,7 @@ def getDecodedEntryCfg(regs, index, range_only=False):
             end_address = start_address + 2**napot
 
     # PMP upper address bundary is non-inclusive
-    end_address = end_address - 1
+    end_address -= 1
 
     if range_only:
         return start_address, end_address
@@ -85,16 +85,13 @@ def getDecodedEntryCfg(regs, index, range_only=False):
 
 # ==============================================================================
 
-
+# TODO: Split cfg and addr into 2 items
 class PMPWriteCSRItem(uvm_sequence_item):
     def __init__(self, index, pmpcfg=None, pmpaddr=None):
         super().__init__("PMPWriteCSRItem")
         self.index = index
-
-        if pmpcfg is not None:
-            self.pmpcfg = pmpcfg
-        if pmpaddr is not None:
-            self.pmpaddr = pmpaddr
+        self.pmpcfg = pmpcfg
+        self.pmpaddr = pmpaddr
 
 
 class PMPCheckItem(uvm_sequence_item):
@@ -356,9 +353,9 @@ class BaseTest(uvm_test):
         super().__init__(name, parent)
         self.env_class = env_class
 
-        # Syncrhonize pyuvm logging level with cocotb logging level. Unclear
+        # Synchronize pyuvm logging level with cocotb logging level. Unclear
         # why it does not happen automatically.
-        level = logging.getLevelName(os.environ.get("COCOTB_LOG_LEVEL", "DEBUG"))
+        level = logging.getLevelName(os.environ.get("COCOTB_LOG_LEVEL", "INFO"))
         uvm_report_object.set_default_logging_level(level)
 
     def build_phase(self):

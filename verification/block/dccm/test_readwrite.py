@@ -28,12 +28,8 @@ class ReadWriteSequence(uvm_sequence):
         dwidth = ConfigDB().get(None, "", "DCCM_FDATA_WIDTH")
 
         for i in range(count):
-
             # Randomize unique addresses (aligned)
-            addrs = set([
-                random.randrange(0, 1 << awidth) & 0xFFFFFFFC
-                for i in range(burst)
-            ])
+            addrs = set([random.randrange(0, 1 << awidth) & 0xFFFFFFFC for i in range(burst)])
 
             # Issue writes, randomize data
             for addr in addrs:

@@ -5,7 +5,7 @@ import random
 import pyuvm
 from cocotb.triggers import ClockCycles
 from pyuvm import *
-from testbench import TlSequence, BaseTest
+from testbench import BaseTest, TlSequence
 
 # =============================================================================
 

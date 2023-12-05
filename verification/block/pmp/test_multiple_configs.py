@@ -65,6 +65,7 @@ class TestSequence(BaseSequence):
         super().__init__(name)
 
     async def body(self):
+        test_iterations = ConfigDB().get(None, "", "TEST_ITERATIONS")
         pmp_entries = ConfigDB().get(None, "", "PMP_ENTRIES")
 
         # Ensure to not use more configurations than PMP entries
@@ -82,7 +83,7 @@ class TestSequence(BaseSequence):
             await self.pmp_seqr.finish_item(item)
 
         self.checkRangeBoundary(LOWER_BOUNDARY)
-        for _ in range(1000):
+        for _ in range(test_iterations):
             await self.randomAccessInAddrRange(LOWER_BOUNDARY, UPPER_BOUNDARY)
         self.checkRangeBoundary(UPPER_BOUNDARY)
 

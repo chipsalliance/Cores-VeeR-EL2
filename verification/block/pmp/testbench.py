@@ -193,11 +193,6 @@ class PMPMonitor(uvm_component):
 
         self.pmp_channels = ConfigDB().get(None, "", "PMP_CHANNELS")
         self.pmp_entries = ConfigDB().get(None, "", "PMP_ENTRIES")
-        self.prev_addr = [None for _ in range(self.pmp_channels)]
-        self.prev_type = [None for _ in range(self.pmp_channels)]
-        self.prev_err = [None for _ in range(self.pmp_channels)]
-        self.prev_pmpcfg = [None for _ in range(self.pmp_entries)]
-        self.prev_pmpaddr = [None for _ in range(self.pmp_entries)]
 
     def build_phase(self):
         self.ap = uvm_analysis_port("ap", self)
@@ -206,35 +201,13 @@ class PMPMonitor(uvm_component):
         while True:
             await RisingEdge(self.clk)
 
-            # Sample signals
+            # Check all PMP channels
             for i in range(self.pmp_channels):
-                curr_addr = int(self.pmp_chan_addr[i].value)
-                curr_type = int(self.pmp_chan_type[i].value)
-                curr_err = int(self.pmp_chan_err.value[i])
+                access_addr = int(self.pmp_chan_addr[i].value)
+                access_type = int(self.pmp_chan_type[i].value)
+                access_err = int(self.pmp_chan_err.value[i])
 
-                # Send an item in case of a change
-                if (
-                    self.prev_err[i] != curr_err
-                    or self.prev_addr[i] != curr_addr
-                    or self.prev_type[i] != curr_type
-                ):
-                    self.ap.write(PMPCheckItem(i, curr_addr, curr_type, curr_err))
-
-                self.prev_err[i] = curr_err
-                self.prev_addr[i] = curr_addr
-                self.prev_type[i] = curr_type
-
-            # If any PMP entry has changed, check all PMP channels
-            for i in range(self.pmp_entries):
-                curr_pmpcfg = int(self.pmp_pmpcfg[i].value)
-                curr_pmpaddr = int(self.pmp_pmpaddr[i].value)
-
-                if (curr_pmpcfg != self.prev_pmpcfg[i]) or (curr_pmpaddr != self.prev_pmpaddr[i]):
-                    for j in range(self.pmp_channels):
-                        self.ap.write(PMPCheckItem(j, curr_addr, curr_type, curr_err))
-
-                self.prev_pmpcfg[i] = curr_pmpcfg
-                self.prev_pmpaddr[i] = curr_pmpaddr
+                self.ap.write(PMPCheckItem(i, access_addr, access_type, access_err))
 
 
 # ==============================================================================
@@ -323,7 +296,7 @@ class BaseEnv(uvm_env):
         ConfigDB().set(None, "*", "PMP_GRANULARITY", 0)
 
         ConfigDB().set(None, "*", "TEST_CLK_PERIOD", 1)
-        ConfigDB().set(None, "*", "TEST_ITERATIONS", 50)
+        ConfigDB().set(None, "*", "TEST_ITERATIONS", 100)
 
         # PMP Registers
         self.regs = RegisterMap(pmp_entries)

@@ -89,7 +89,6 @@ def isSimFailure(
 
 def verify_block(session, blockName, testName, coverage=""):
     session.install("-r", pipRequirementsPath)
-    session.env["PYTHONPATH"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "common"))
     testPath = os.path.join(blockPath, blockName)
     testNameXML = os.path.join(testName + ".xml")
     testNameXMLPath = os.path.join(testPath, testNameXML)

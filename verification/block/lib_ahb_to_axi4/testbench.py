@@ -138,7 +138,7 @@ class AHBLiteManagerBFM(uvm_component):
         # Address phase
         await RisingEdge(self.ahb_hclk)
         self.ahb_hsel.value = 1
-        self.ahb_hprot.value = 1 # Indicates a data transfer
+        self.ahb_hprot.value = 1  # Indicates a data transfer
         self.ahb_hsize.value = self.hsize[lnt]
         self.ahb_haddr.value = addr
         self.ahb_hwrite.value = 1
@@ -491,13 +491,7 @@ class Scoreboard(uvm_component):
 
     def check_phase(self):
         # Check transactions
-        while self.ahb_port.can_get() or self.axi_port.can_get():
-            # A transaction is missing
-            if not self.ahb_port.can_get() or not self.axi_port.can_get():
-                self.logger.error("A transaction is missing on one of the buses")
-                self.passed = False
-                break
-
+        while self.ahb_port.can_get() and self.axi_port.can_get():
             self.passed = True
 
             # Get items
@@ -522,6 +516,12 @@ class Scoreboard(uvm_component):
                 self.passed = False
             else:
                 self.logger.debug(msg)
+
+        # Indicate an error if there is any leftover transaction in any of the
+        # queues.
+        if self.ahb_port.can_get() or self.axi_port.can_get():
+            self.logger.error("Spurious transaction(s) on one of the buses")
+            self.passed = False
 
     def final_phase(self):
         if not self.passed:

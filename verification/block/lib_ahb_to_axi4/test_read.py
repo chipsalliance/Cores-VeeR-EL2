@@ -96,7 +96,7 @@ class NoBackpressureReadSequence(uvm_sequence):
         ahb_seq = AHBReadSequence("stimulus")
         axi_seq = AXI4LiteReadResponseSequence("response")
 
-        # Issue am AHB read and do a correct AXI response
+        # Issue an AHB read and do a correct AXI response
         await axi_rdy.start(axi_seqr)
 
         tasks = [
@@ -114,7 +114,7 @@ class BackpressureReadSequence(uvm_sequence):
         ahb_seq = AHBReadSequence("stimulus")
         axi_seq = AXI4LiteReadResponseSequence("response")
 
-        # Issue am AHB read and do a correct AXI response
+        # Issue an AHB read and do a correct AXI response
         tasks = [
             cocotb.start_soon(ahb_seq.start(ahb_seqr)),
             cocotb.start_soon(later(axi_seq.start(axi_seqr), 5)),
@@ -131,7 +131,7 @@ class NoReadDataResponseSequence(uvm_sequence):
         ahb_seq = AHBReadSequence("stimulus")
         axi_seq = AXI4LiteNoReadDataResponseSequence("response")
 
-        # Issue am AHB read and do a correct AXI response
+        # Issue an AHB read and do a correct AXI response
         await axi_rdy.start(axi_seqr)
 
         tasks = [
@@ -185,7 +185,8 @@ class TestReadBackpressure(BaseTest):
 @pyuvm.test(expect_error=TimeoutError)
 class TestReadNoDataResponse(BaseTest):
     """
-    Read test with response on AR channel but not on R channel
+    Read test with response on AR channel but not on R channel. A timeout should
+    occur due to lack of the response.
     """
 
     def end_of_elaboration_phase(self):

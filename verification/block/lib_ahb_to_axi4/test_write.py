@@ -150,7 +150,7 @@ class NoBackpressureWriteSequence(uvm_sequence):
         ahb_seq = AHBWriteSequence("stimulus")
         axi_seq = AXI4LiteWriteResponseSequence("response")
 
-        # Issue am AHB write and do a correct AXI response
+        # Issue an AHB write and do a correct AXI response
         await axi_rdy.start(axi_seqr)
         await ahb_seq.start(ahb_seqr)
         await axi_seq.start(axi_seqr)
@@ -164,7 +164,7 @@ class BackpressureWriteSequence(uvm_sequence):
         ahb_seq = AHBWriteSequence("stimulus")
         axi_seq = AXI4LiteWriteResponseSequence("response")
 
-        # Issue am AHB write and do a correct AXI response
+        # Issue an AHB write and do a correct AXI response
         await ahb_seq.start(ahb_seqr)
         await axi_seq.start(axi_seqr)
 
@@ -276,7 +276,8 @@ class TestWriteNoResponse(BaseTest):
 @pyuvm.test(expect_error=TimeoutError)
 class TestWriteNoAddrResponse(BaseTest):
     """
-    Write test with no AXI backpressure and no response on AW
+    Write test with no AXI backpressure and no response on AW. A timeout should
+    occur due to lack of the response.
     """
 
     def end_of_elaboration_phase(self):
@@ -297,7 +298,8 @@ class TestWriteNoAddrResponse(BaseTest):
 @pyuvm.test(expect_fail=True)  # FIXME: should be expect_error=Timeout
 class TestWriteNoDataResponse(BaseTest):
     """
-    Write test with no AXI backpressure and no response on W
+    Write test with no AXI backpressure and no response on W. A timeout should
+    occur due to lack of the response.
     """
 
     def end_of_elaboration_phase(self):

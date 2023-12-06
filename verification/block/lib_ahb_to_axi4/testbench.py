@@ -82,7 +82,6 @@ class AHBLiteManagerBFM(uvm_component):
     def __init__(self, name, parent, uut, signal_prefix="", signal_map=None):
         super().__init__(name, parent)
 
-        # Collect signals
         collect_signals(
             self.SIGNALS,
             uut,
@@ -136,12 +135,12 @@ class AHBLiteManagerBFM(uvm_component):
         # Address phase
         await RisingEdge(self.ahb_hclk)
         self.ahb_hsel.value = 1
-        self.ahb_hprot.value = 1  # Data
+        self.ahb_hprot.value = 1 # Indicates a data transfer
         self.ahb_hsize.value = hsize[len(data)]
         self.ahb_haddr.value = addr
         self.ahb_hwrite.value = 1
         self.ahb_htrans.value = self.HTRANS.NONSEQ.value
-        self.ahb_hburst.value = self.HBURST.INCR.value  # TODO: Others?
+        self.ahb_hburst.value = self.HBURST.INCR.value
         await self._wait(self.ahb_hreadyout)
 
         # Data phase
@@ -184,7 +183,7 @@ class AHBLiteManagerBFM(uvm_component):
         self.ahb_haddr.value = addr
         self.ahb_hwrite.value = 0
         self.ahb_htrans.value = self.HTRANS.NONSEQ.value
-        self.ahb_hburst.value = self.HBURST.INCR.value  # TODO: Others?
+        self.ahb_hburst.value = self.HBURST.INCR.value
         await self._wait(self.ahb_hreadyout)
 
         # Data phase
@@ -397,51 +396,37 @@ class AXI4LiteSubordinateBFM(uvm_component):
         sig.value = int(ready)
 
     async def respond_aw(self):
-        # Assert awready
         self.axi_awready.value = 1
-        # Wait for awvalid
         await self._wait(self.axi_awvalid)
 
-        # Deassert awready
         self.axi_awready.value = 0
 
     async def respond_w(self):
-        # Assert wready
         self.axi_wready.value = 1
-
-        # Wait for valid, receive data
         for i in range(1):
             await self._wait(self.axi_wvalid)
 
-        # Deassert wready
         self.axi_wready.value = 0
 
     async def respond_b(self):
-        # Wait for bready
         await self._wait(self.axi_bready)
 
-        # Transmitt acknowledge
         self.axi_bvalid.value = 1
-        self.axi_bid.value = 0  # TODO
-        self.axi_bresp.value = 0  # TODO
+        self.axi_bid.value = 0  # TODO: support providing different BID values
+        self.axi_bresp.value = 0  # TODO: support providing different BRESP values
 
         await RisingEdge(self.axi_clk)
         self.axi_bvalid.value = 0
 
     async def respond_ar(self):
-        # Assert arready
         self.axi_arready.value = 1
-        # Wait for arvalid
         await self._wait(self.axi_arvalid)
 
-        # Deassert arready
         self.axi_arready.value = 0
 
     async def respond_r(self):
-        # Wait for rready
         await self._wait(self.axi_rready)
 
-        # Transmitt data
         self.axi_rvalid.value = 1
         self.axi_rdata.value = random.randrange(0, (1 << self.dwidth) - 1)
 
@@ -491,7 +476,7 @@ class AXI4LiteSubordinateDriver(uvm_driver):
 class Scoreboard(uvm_component):
     """
     A scoreboard that compares AHB and AXI transfers and checks if they
-    refer to the same address and containd the same data.
+    refer to the same address and contain the same data.
     """
 
     def __init__(self, name, parent):

@@ -140,7 +140,7 @@ class AHBLiteManagerBFM(uvm_component):
         self.ahb_haddr.value = addr
         self.ahb_hwrite.value = 1
         self.ahb_htrans.value = self.HTRANS.NONSEQ.value
-        self.ahb_hburst.value = self.HBURST.INCR.value
+        self.ahb_hburst.value = self.HBURST.SINGLE.value
         await self._wait(self.ahb_hreadyout)
 
         # Data phase
@@ -183,7 +183,7 @@ class AHBLiteManagerBFM(uvm_component):
         self.ahb_haddr.value = addr
         self.ahb_hwrite.value = 0
         self.ahb_htrans.value = self.HTRANS.NONSEQ.value
-        self.ahb_hburst.value = self.HBURST.INCR.value
+        self.ahb_hburst.value = self.HBURST.SINGLE.value
         await self._wait(self.ahb_hreadyout)
 
         # Data phase

@@ -95,6 +95,15 @@ class AHBLiteManagerBFM(uvm_component):
         self.awidth = len(self.ahb_haddr)
         self.dwidth = len(self.ahb_hwdata)  # Assuming hrdata is the same
 
+        # Calculate HSIZE encoding
+        self.hsize = {
+            64 // self.dwidth: 3,
+            128 // self.dwidth: 4,
+            256 // self.dwidth: 5,
+            512 // self.dwidth: 6,
+            1024 // self.dwidth: 7,
+        }
+
         self.logger.debug("AHB Lite manager BFM:")
         self.logger.debug(" awidth = {}".format(self.awidth))
         self.logger.debug(" dwidth = {}".format(self.dwidth))
@@ -119,14 +128,8 @@ class AHBLiteManagerBFM(uvm_component):
         one of multiplies of data bus width supported by AHB Lite.
         """
 
-        hsize = {
-            64 // self.dwidth: 3,
-            128 // self.dwidth: 4,
-            256 // self.dwidth: 5,
-            512 // self.dwidth: 6,
-            1024 // self.dwidth: 7,
-        }
-        assert len(data) in hsize
+        lnt = len(data)
+        assert lnt in self.hsize
 
         # Wait for reset deassertion if necessary
         if self.ahb_hreset.value == 0:
@@ -136,7 +139,7 @@ class AHBLiteManagerBFM(uvm_component):
         await RisingEdge(self.ahb_hclk)
         self.ahb_hsel.value = 1
         self.ahb_hprot.value = 1 # Indicates a data transfer
-        self.ahb_hsize.value = hsize[len(data)]
+        self.ahb_hsize.value = self.hsize[lnt]
         self.ahb_haddr.value = addr
         self.ahb_hwrite.value = 1
         self.ahb_htrans.value = self.HTRANS.NONSEQ.value
@@ -145,7 +148,7 @@ class AHBLiteManagerBFM(uvm_component):
 
         # Data phase
         for i, word in enumerate(data):
-            if i != len(data) - 1:
+            if i != lnt - 1:
                 addr += self.dwidth // 8
                 self.ahb_haddr.value = addr
                 self.ahb_htrans.value = self.HTRANS.SEQ.value
@@ -162,14 +165,7 @@ class AHBLiteManagerBFM(uvm_component):
         Lite.
         """
 
-        hsize = {
-            64 // self.dwidth: 3,
-            128 // self.dwidth: 4,
-            256 // self.dwidth: 5,
-            512 // self.dwidth: 6,
-            1024 // self.dwidth: 7,
-        }
-        assert length in hsize
+        assert length in self.hsize
 
         # Wait for reset deassertion if necessary
         if self.ahb_hreset.value == 0:
@@ -179,7 +175,7 @@ class AHBLiteManagerBFM(uvm_component):
         await RisingEdge(self.ahb_hclk)
         self.ahb_hsel.value = 1
         self.ahb_hprot.value = 1  # Data
-        self.ahb_hsize.value = hsize[length]
+        self.ahb_hsize.value = self.hsize[length]
         self.ahb_haddr.value = addr
         self.ahb_hwrite.value = 0
         self.ahb_htrans.value = self.HTRANS.NONSEQ.value

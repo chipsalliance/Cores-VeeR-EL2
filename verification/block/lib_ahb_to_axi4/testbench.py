@@ -107,7 +107,7 @@ class AHBLiteManagerBFM(uvm_component):
 
         for i in range(max_cycles):
             await RisingEdge(self.ahb_hclk)
-            if signal.value != 0:
+            if signal.value == 1:
                 break
         else:
             raise TimeoutError("{} timeout".format(str(signal)))
@@ -338,7 +338,6 @@ class AXI4LiteSubordinateBFM(uvm_component):
         "rid",
         "rdata",
         "rresp",
-        "rlast",
     ]
 
     def __init__(self, name, parent, uut, signal_prefix="", signal_map=None):

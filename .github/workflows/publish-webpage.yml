@@ -35,6 +35,12 @@ jobs:
           name: verification_dashboard
           path: ./verification_dashboard
 
+      - name: Download RISCOF report
+        uses: actions/download-artifact@v3
+        with:
+          name: riscof-report
+          path: ./riscof_dashboard
+
       - name: Checkout gh-pages
         uses: actions/checkout@v3
         with:

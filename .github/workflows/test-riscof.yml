@@ -146,6 +146,16 @@ jobs:
           mv riscof/coverage/coverage.info \
              riscof/coverage/coverage_riscof_${{ matrix.coverage }}.info
 
+      - name: Prepare report
+        run: |
+          PYTEST_STYLE_SRC_DIR=${{ github.workspace }}/.github/scripts/pytest/
+          PYTEST_CSS=${PYTEST_STYLE_SRC_DIR}/css/styles.css
+          pushd riscof/riscof_work
+            bash ${PYTEST_STYLE_SRC_DIR}/style_pytest_report.sh ${PYTEST_STYLE_SRC_DIR} . report.html
+            echo "/* Custom CSS */" >>style.css
+            cat ${PYTEST_CSS} >>style.css
+          popd
+
       - name: Pack artifacts
         if: always()
         uses: actions/upload-artifact@v3
@@ -161,3 +171,5 @@ jobs:
           path: |
             riscof/riscof_work/report.html
             riscof/riscof_work/style.css
+            riscof/riscof_work/assets
+            riscof/riscof_work/script

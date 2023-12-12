@@ -31,7 +31,7 @@ class BaseSequence(uvm_sequence):
     # Access memory at a given address and at adjacent addresses
     async def checkRangeBoundary(self, addr):
         # Ensure access address is always aligned and doesn't extend 32 bits,
-        # address is assumed to be inclusive so increment it by 1 intially.
+        # address is assumed to be inclusive so increment it by 1 initially.
         addr = min(self.MAX_ADDR, (addr + 1) & 0xFFFFFFFC)
 
         if addr >= 4:

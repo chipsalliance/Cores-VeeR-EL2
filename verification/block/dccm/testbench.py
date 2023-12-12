@@ -5,11 +5,7 @@ import os
 
 import pyuvm
 from cocotb.clock import Clock
-from cocotb.triggers import (
-    ClockCycles,
-    FallingEdge,
-    RisingEdge,
-)
+from cocotb.triggers import ClockCycles, FallingEdge, RisingEdge
 from pyuvm import *
 
 # ==============================================================================

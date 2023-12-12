@@ -40,7 +40,7 @@ def getDecodedEntryCfg(regs, index, range_only=False):
     address_matching = pmpcfg[4:3].integer
     locked = pmpcfg[7].integer
 
-    if index != 0:
+    if index:
         start_address = regs.reg["pmpaddr{}".format(index - 1)].integer << 2
     else:
         start_address = 0
@@ -75,7 +75,7 @@ def getDecodedEntryCfg(regs, index, range_only=False):
             end_address = start_address + 2**napot
 
     # PMP upper address bundary is non-inclusive
-    end_address = end_address - 1
+    end_address -= 1
 
     if range_only:
         return start_address, end_address
@@ -86,15 +86,18 @@ def getDecodedEntryCfg(regs, index, range_only=False):
 # ==============================================================================
 
 
-class PMPWriteCSRItem(uvm_sequence_item):
-    def __init__(self, index, pmpcfg=None, pmpaddr=None):
-        super().__init__("PMPWriteCSRItem")
+class PMPWriteCfgCSRItem(uvm_sequence_item):
+    def __init__(self, index, pmpcfg):
+        super().__init__("PMPWriteCfgCSRItem")
         self.index = index
+        self.pmpcfg = pmpcfg
 
-        if pmpcfg is not None:
-            self.pmpcfg = pmpcfg
-        if pmpaddr is not None:
-            self.pmpaddr = pmpaddr
+
+class PMPWriteAddrCSRItem(uvm_sequence_item):
+    def __init__(self, index, pmpaddr):
+        super().__init__("PMPWriteAddrCSRItem")
+        self.index = index
+        self.pmpaddr = pmpaddr
 
 
 class PMPCheckItem(uvm_sequence_item):
@@ -152,11 +155,12 @@ class PMPDriver(uvm_driver):
         while True:
             it = await self.seq_item_port.get_next_item()
 
-            if isinstance(it, PMPWriteCSRItem):
-                self.pmp_pmpcfg[it.index].value = it.pmpcfg
+            if isinstance(it, PMPWriteAddrCSRItem):
                 self.pmp_pmpaddr[it.index].value = it.pmpaddr
-                self.regs.reg["pmpcfg{}".format(it.index)].integer = it.pmpcfg
                 self.regs.reg["pmpaddr{}".format(it.index)].integer = it.pmpaddr
+            elif isinstance(it, PMPWriteCfgCSRItem):
+                self.pmp_pmpcfg[it.index].value = it.pmpcfg
+                self.regs.reg["pmpcfg{}".format(it.index)].integer = it.pmpcfg
             elif isinstance(it, PMPCheckItem):
                 self.pmp_chan_addr[it.channel].value = it.addr
                 self.pmp_chan_type[it.channel].value = it.type
@@ -189,50 +193,21 @@ class PMPMonitor(uvm_component):
 
         self.pmp_channels = ConfigDB().get(None, "", "PMP_CHANNELS")
         self.pmp_entries = ConfigDB().get(None, "", "PMP_ENTRIES")
-        self.prev_addr = [None for _ in range(self.pmp_channels)]
-        self.prev_type = [None for _ in range(self.pmp_channels)]
-        self.prev_err = [None for _ in range(self.pmp_channels)]
-        self.prev_pmpcfg = [None for _ in range(self.pmp_entries)]
-        self.prev_pmpaddr = [None for _ in range(self.pmp_entries)]
 
     def build_phase(self):
         self.ap = uvm_analysis_port("ap", self)
 
     async def run_phase(self):
         while True:
-            # Even though the signals are not sequential sample them on
-            # rising clock edge
             await RisingEdge(self.clk)
 
-            # Sample signals
+            # Check all PMP channels
             for i in range(self.pmp_channels):
-                curr_addr = int(self.pmp_chan_addr[i].value)
-                curr_type = int(self.pmp_chan_type[i].value)
-                curr_err = int(self.pmp_chan_err.value[i])
+                access_addr = int(self.pmp_chan_addr[i].value)
+                access_type = int(self.pmp_chan_type[i].value)
+                access_err = int(self.pmp_chan_err.value[i])
 
-                # Send an item in case of a change
-                if (
-                    self.prev_err[i] != curr_err
-                    or self.prev_addr[i] != curr_addr
-                    or self.prev_type[i] != curr_type
-                ):
-                    self.ap.write(PMPCheckItem(i, curr_addr, curr_type, curr_err))
-
-                self.prev_err[i] = curr_err
-                self.prev_addr[i] = curr_addr
-                self.prev_type[i] = curr_type
-
-            # If any PMP entry has changed, check all PMP channels
-            for i in range(self.pmp_entries):
-                curr_pmpcfg = int(self.pmp_pmpcfg[i].value)
-                curr_pmpaddr = int(self.pmp_pmpaddr[i].value)
-
-                if (curr_pmpcfg != self.prev_pmpcfg[i]) or (curr_pmpaddr != self.prev_pmpaddr[i]):
-                    for j in range(self.pmp_channels):
-                        self.ap.write(PMPCheckItem(j, curr_addr, curr_type, curr_err))
-
-                self.prev_pmpcfg[i] = curr_pmpcfg
-                self.prev_pmpaddr[i] = curr_pmpaddr
+                self.ap.write(PMPCheckItem(i, access_addr, access_type, access_err))
 
 
 # ==============================================================================
@@ -321,7 +296,7 @@ class BaseEnv(uvm_env):
         ConfigDB().set(None, "*", "PMP_GRANULARITY", 0)
 
         ConfigDB().set(None, "*", "TEST_CLK_PERIOD", 1)
-        ConfigDB().set(None, "*", "TEST_ITERATIONS", 50)
+        ConfigDB().set(None, "*", "TEST_ITERATIONS", 100)
 
         # PMP Registers
         self.regs = RegisterMap(pmp_entries)
@@ -356,9 +331,9 @@ class BaseTest(uvm_test):
         super().__init__(name, parent)
         self.env_class = env_class
 
-        # Syncrhonize pyuvm logging level with cocotb logging level. Unclear
+        # Synchronize pyuvm logging level with cocotb logging level. Unclear
         # why it does not happen automatically.
-        level = logging.getLevelName(os.environ.get("COCOTB_LOG_LEVEL", "DEBUG"))
+        level = logging.getLevelName(os.environ.get("COCOTB_LOG_LEVEL", "INFO"))
         uvm_report_object.set_default_logging_level(level)
 
     def build_phase(self):

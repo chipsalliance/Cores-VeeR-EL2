@@ -4,7 +4,13 @@
 
 from common import BaseSequence
 from pyuvm import ConfigDB, test
-from testbench import BaseEnv, BaseTest, PMPWriteCSRItem, getDecodedEntryCfg
+from testbench import (
+    BaseEnv,
+    BaseTest,
+    PMPWriteAddrCSRItem,
+    PMPWriteCfgCSRItem,
+    getDecodedEntryCfg,
+)
 
 pmp_configurations = [
     {
@@ -83,16 +89,20 @@ class TestSequence(BaseSequence):
         super().__init__(name)
 
     async def body(self):
+        test_iterations = ConfigDB().get(None, "", "TEST_ITERATIONS")
         pmp_entries = ConfigDB().get(None, "", "PMP_ENTRIES")
 
-        # Configure PMP entries
-        possible_configs = min(pmp_entries, len(pmp_configurations))
-        for i, cfg in enumerate(pmp_configurations):
-            # Ensure to not use more configurations than PMP entries
-            if i == possible_configs:
-                break
+        # Ensure to not use more configurations than PMP entries
+        assert len(pmp_configurations) <= pmp_entries
 
-            item = PMPWriteCSRItem(index=i, pmpcfg=cfg["pmpcfg"], pmpaddr=cfg["pmpaddr"])
+        # Configure PMP entries
+        for i, cfg in enumerate(pmp_configurations):
+            item = PMPWriteAddrCSRItem(index=i, pmpaddr=cfg["pmpaddr"])
+            await self.pmp_seqr.start_item(item)
+            await self.pmp_seqr.finish_item(item)
+
+        for i, cfg in enumerate(pmp_configurations):
+            item = PMPWriteCfgCSRItem(index=i, pmpcfg=cfg["pmpcfg"])
             await self.pmp_seqr.start_item(item)
             await self.pmp_seqr.finish_item(item)
 
@@ -110,8 +120,8 @@ class TestSequence(BaseSequence):
 
             await self.checkRangeBoundary(end_addr)
 
-        # In the end check 1000 accesses at random memory locations
-        for _ in range(1000):
+        # In the end check accesses at random memory locations
+        for _ in range(test_iterations):
             await self.randomAccessInAddrRange(0x00000000, 0xFFFFFFFF)
 
 

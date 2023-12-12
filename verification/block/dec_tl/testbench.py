@@ -1,15 +1,14 @@
 # Copyright (c) 2023 Antmicro
 # SPDX-License-Identifier: Apache-2.0
 
+import copy
 import math
 import os
 import random
 import struct
-import copy
 
 import pyuvm
 from cocotb.binary import BinaryValue
-from cocotb.types import Array, Range
 from cocotb.clock import Clock
 from cocotb.triggers import (
     ClockCycles,
@@ -20,6 +19,7 @@ from cocotb.triggers import (
     RisingEdge,
     Timer,
 )
+from cocotb.types import Array, Range
 from pyuvm import *
 
 # ==============================================================================

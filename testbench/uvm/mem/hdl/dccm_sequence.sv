@@ -1,3 +1,6 @@
+// Copyright (c) 2023 Antmicro
+// SPDX-License-Identifier: Apache-2.0
+
 // this sequence wites random random data to random address, then reads it back
 class dccm_write_read_sequence extends uvm_sequence #(dccm_transaction_sequence_item);
 

@@ -1,3 +1,6 @@
+// Copyright (c) 2023 Antmicro
+// SPDX-License-Identifier: Apache-2.0
+
 `include "dccm_agent.sv"
 `include "dccm_scoreboard.sv"
 class mem_model_base_test extends uvm_test;

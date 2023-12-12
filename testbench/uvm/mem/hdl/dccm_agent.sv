@@ -1,3 +1,6 @@
+// Copyright (c) 2023 Antmicro
+// SPDX-License-Identifier: Apache-2.0
+
 `include "dccm_transaction_sequence_item.sv"
 `include "dccm_sequencer.sv"
 `include "dccm_sequence.sv"

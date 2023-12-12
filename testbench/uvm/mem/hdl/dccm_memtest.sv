@@ -1,3 +1,6 @@
+// Copyright (c) 2023 Antmicro
+// SPDX-License-Identifier: Apache-2.0
+
 class mem_wr_rd_test extends mem_model_base_test;
 
   `uvm_component_utils(mem_wr_rd_test)

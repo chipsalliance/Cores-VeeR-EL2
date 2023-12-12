@@ -1,3 +1,6 @@
+// Copyright (c) 2023 Antmicro
+// SPDX-License-Identifier: Apache-2.0
+
 class dccm_scoreboard extends uvm_scoreboard;
 
   `include "el2_param.vh"

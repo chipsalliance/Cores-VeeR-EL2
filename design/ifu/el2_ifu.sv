@@ -149,7 +149,10 @@ import el2_pkg::*;
    input  logic [63:0]               iccm_rd_data,       // Data read from ICCM.
    input  logic [77:0]               iccm_rd_data_ecc,   // Data + ECC read from ICCM.
 
-   output logic                      ifu_iccm_rd_ecc_single_err, // This fetch has a single ICCM ecc  error.
+   // ICCM ECC status
+   output logic                      ifu_iccm_dma_rd_ecc_single_err, // This fetch has a single ICCM DMA ECC error.
+   output logic                      ifu_iccm_rd_ecc_single_err,     // This fetch has a single ICCM ECC error.
+   output logic                      ifu_iccm_rd_ecc_double_err,     // This fetch has a double ICCM ECC error.
 
 // Perf counter sigs
    output logic       ifu_pmu_ic_miss, // ic miss
@@ -216,7 +219,8 @@ import el2_pkg::*;
    logic [1:0]   ifu_fetch_val;  // valids on a 2B boundary, left justified [7] implies valid fetch
    logic [31:1]  ifu_fetch_pc;   // starting pc of fetch
 
-   logic iccm_rd_ecc_single_err, ic_error_start;
+   logic iccm_rd_ecc_single_err, iccm_dma_rd_ecc_single_err, ic_error_start;
+   assign ifu_iccm_dma_rd_ecc_single_err = iccm_dma_rd_ecc_single_err;
    assign ifu_iccm_rd_ecc_single_err = iccm_rd_ecc_single_err;
    assign ifu_ic_error_start = ic_error_start;
 
@@ -249,7 +253,9 @@ import el2_pkg::*;
    logic [31:0] ifu_fetch_data_f;
    logic ifc_fetch_req_f;
    logic ifc_fetch_req_f_raw;
+   logic iccm_dma_rd_ecc_double_err;
    logic [1:0] iccm_rd_ecc_double_err;  // This fetch has an iccm double error.
+   assign ifu_iccm_rd_ecc_double_err = |iccm_rd_ecc_double_err || |iccm_dma_rd_ecc_double_err;
 
    logic ifu_async_error_start;
 

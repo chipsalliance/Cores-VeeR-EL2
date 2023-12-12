@@ -326,6 +326,12 @@ module veer_wrapper
     input logic [pt.DCCM_NUM_BANKS-1:0][pt.DCCM_DATA_WIDTH-1:0] dccm_bank_dout,
     input logic [pt.DCCM_NUM_BANKS-1:0][pt.DCCM_FDATA_WIDTH-pt.DCCM_DATA_WIDTH-1:0] dccm_bank_ecc,
 
+    // ICCM/DCCM ECC status
+    output logic iccm_ecc_single_error,
+    output logic iccm_ecc_double_error,
+    output logic dccm_ecc_single_error,
+    output logic dccm_ecc_double_error,
+
     // external MPC halt/run interface
     input  logic mpc_debug_halt_req,  // Async halt request
     input  logic mpc_debug_run_req,   // Async run request

@@ -795,6 +795,11 @@ veer_wrapper rvtop_wrapper (
     .dccm_bank_dout         (el2_mem_export.dccm_bank_dout),
     .dccm_bank_ecc          (el2_mem_export.dccm_bank_ecc),
 
+    .iccm_ecc_single_error  (),
+    .iccm_ecc_double_error  (),
+    .dccm_ecc_single_error  (),
+    .dccm_ecc_double_error  (),
+
 // remove mems DFT pins for opensource
     .ic_data_ext_in_pkt     ('0),
     .ic_tag_ext_in_pkt      ('0),

@@ -174,6 +174,10 @@ import el2_pkg::*;
    output logic [63:0]                     dccm_dma_rdata,      // lsu data for DMA dccm read
    output logic                            dccm_ready,          // lsu ready for DMA access
 
+   // DCCM ECC status
+   output logic                            lsu_dccm_rd_ecc_single_err,
+   output logic                            lsu_dccm_rd_ecc_double_err,
+
    input logic                             scan_mode,           // scan mode
    input logic                             clk,                 // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.
    input logic                             active_clk,          // Clock only while core active.  Through two clock headers. For flops without second clock header built in.
@@ -211,6 +215,8 @@ import el2_pkg::*;
    logic        lsu_single_ecc_error_r;
    logic        lsu_double_ecc_error_r;
    logic        ld_single_ecc_error_r, ld_single_ecc_error_r_ff;
+   assign lsu_dccm_rd_ecc_single_err = lsu_single_ecc_error_r;
+   assign lsu_dccm_rd_ecc_double_err = lsu_double_ecc_error_r;
 
    logic [31:0] picm_mask_data_m;
 

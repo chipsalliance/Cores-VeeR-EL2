@@ -6,11 +6,8 @@ from cocotb.queue import QueueFull
 from coordinator_seq import TestReadChannelSeq
 from testbench import BaseTest
 
-# FIXME       : This test is expected to fail.
-# See description in `test_axi.py`
 
-
-@pyuvm.test(expect_error=QueueFull)
+@pyuvm.test()
 class TestAXIReadChannel(BaseTest):
     def end_of_elaboration_phase(self):
         self.seq = TestReadChannelSeq.create("stimulus")

@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-CONF_PARAMS = -set build_axi4
+CONF_PARAMS ?= -set build_axi4
 
 TEST_CFLAGS = -g -O3 -funroll-all-loops
 ABI = -mabi=ilp32

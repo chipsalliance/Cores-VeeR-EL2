@@ -6,7 +6,7 @@ import random
 import cocotb
 from ahb_lite_pkg import AHB_LITE_NOTIFICATION
 from ahb_lite_seq import AHBLiteAcceptReadSeq, AHBLiteAcceptWriteSeq
-from axi_r_seq import AXIReadTransactionRequestSeq
+from axi_r_seq import AXIReadTransactionRequestSeq, AXIReadTransactionResponseSeq
 from axi_w_seq import (
     AXIWriteDataSeq,
     AXIWriteResponseSeq,
@@ -37,6 +37,7 @@ class CoordinatorSeq(uvm_sequence):
 
     async def axi_read(self, axi_seqr, ahb_seqr):
         axi_trq_seq = AXIReadTransactionRequestSeq()
+        axi_rresp_seq = AXIReadTransactionResponseSeq()
 
         # Read Request
         await axi_trq_seq.start(axi_seqr)
@@ -45,6 +46,9 @@ class CoordinatorSeq(uvm_sequence):
         # Handle AHB Response
         await self.ahb_response_handler(ahb_seqr=ahb_seqr, is_read=True)
         await self.delay(5)
+
+        # Read Response
+        await axi_rresp_seq.start(axi_seqr)
 
     async def delay(self, i):
         for _ in range(i):

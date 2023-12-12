@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        bus: ["axi", "ahb"]
         test: ["hello_world", "hello_world_dccm", "hello_world_iccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "pmp"]
         coverage: ["branch", "toggle"] #TODO: add functional coverage
     env:
@@ -82,7 +83,7 @@ jobs:
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
-          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.test}} ${{ matrix.coverage }}
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }}
 
       - name: Prepare coverage data
         run: |
@@ -90,7 +91,7 @@ jobs:
           echo "convert_coverage_data.sh exited with RET_CODE = "$?
           mkdir -p results
           mv ${TEST_PATH}/coverage.info \
-             results/coverage_${{ matrix.test }}_${{ matrix.coverage }}.info
+             results/coverage_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()

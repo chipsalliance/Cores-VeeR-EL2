@@ -328,8 +328,15 @@ module tb_top (
 
 `define DEC rvtop.veer.dec
 
+`ifdef RV_BUILD_AXI4
     assign mailbox_write    = lmem.awvalid && lmem.awaddr == mem_mailbox && rst_l;
     assign mailbox_data     = lmem.wdata;
+`endif
+`ifdef RV_BUILD_AHB_LITE
+    assign mailbox_write    = lmem.write   && lmem.laddr  == mem_mailbox && rst_l;
+    assign mailbox_data     = lmem.HWDATA;
+`endif
+
     assign mailbox_data_val = mailbox_data[7:0] > 8'h5 && mailbox_data[7:0] < 8'h7f;
 
     parameter MAX_CYCLES = 2_000_000;

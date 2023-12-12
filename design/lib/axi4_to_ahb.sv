@@ -88,11 +88,21 @@ import el2_pkg::*;
 
    localparam ID   = 1;
    localparam PRTY = 1;
-   typedef enum logic [2:0] {IDLE=3'b000, CMD_RD=3'b001, CMD_WR=3'b010, DATA_RD=3'b011, DATA_WR=3'b100, DONE=3'b101, STREAM_RD=3'b110, STREAM_ERR_RD=3'b111} state_t;
+   typedef enum logic [3:0] {
+        IDLE            = 4'b0000,
+        CMD_RD          = 4'b0001,
+        CMD_WR          = 4'b1001,
+        DATA_RD         = 4'b0010,
+        DATA_WR         = 4'b1010,
+        DONE_RD         = 4'b0011,
+        DONE_WR         = 4'b1011,
+        STREAM_RD       = 4'b0101,
+        STREAM_ERR_RD   = 4'b0110
+    } state_t;
+
    state_t buf_state, buf_nxtstate;
 
    logic             slave_valid;
-   logic             slave_ready;
    logic [TAG-1:0]   slave_tag;
    logic [63:0]      slave_rdata;
    logic [3:0]       slave_opc;
@@ -245,15 +255,14 @@ import el2_pkg::*;
    assign master_wdata[63:0]  = wrbuf_data[63:0];
 
    // AXI response channel signals
-   assign axi_bvalid       = slave_valid & slave_ready & slave_opc[3];
+   assign axi_bvalid       = slave_valid & slave_opc[3];
    assign axi_bresp[1:0]   = slave_opc[0] ? 2'b10 : (slave_opc[1] ? 2'b11 : 2'b0);
    assign axi_bid[TAG-1:0] = slave_tag[TAG-1:0];
 
-   assign axi_rvalid       = slave_valid & slave_ready & (slave_opc[3:2] == 2'b0);
+   assign axi_rvalid       = slave_valid & (slave_opc[3:2] == 2'b0);
    assign axi_rresp[1:0]   = slave_opc[0] ? 2'b10 : (slave_opc[1] ? 2'b11 : 2'b0);
    assign axi_rid[TAG-1:0] = slave_tag[TAG-1:0];
    assign axi_rdata[63:0]  = slave_rdata[63:0];
-   assign slave_ready        = axi_bready & axi_rready;
 
  // FIFO state machine
    always_comb begin
@@ -324,7 +333,7 @@ import el2_pkg::*;
                   ahb_htrans[1:0] = 2'b10 & {2{~buf_state_en}};
          end
          DATA_RD: begin
-                  buf_nxtstate   = DONE;
+                  buf_nxtstate   = DONE_RD;
                   buf_state_en   = (ahb_hready_q | ahb_hresp_q);
                   buf_data_wr_en = buf_state_en;
                   slvbuf_error_in= ahb_hresp_q;
@@ -345,8 +354,8 @@ import el2_pkg::*;
          end
          DATA_WR: begin
                   buf_state_en = (cmd_doneQ & ahb_hready_q) | ahb_hresp_q;
-                  master_ready = buf_state_en & ~ahb_hresp_q & slave_ready;   // Ready to accept new command if current command done and no error
-                  buf_nxtstate = (ahb_hresp_q | ~slave_ready) ? DONE :
+                  master_ready = buf_state_en & ~ahb_hresp_q & axi_bready;   // Ready to accept new command if current command done and no error
+                  buf_nxtstate = (ahb_hresp_q | ~axi_bready) ? DONE_WR :
                                   ((master_valid & master_ready) ? ((master_opc[2:1] == 2'b01) ? CMD_WR : CMD_RD) : IDLE);
                   slvbuf_error_in = ahb_hresp_q;
                   slvbuf_error_en = buf_state_en;
@@ -359,18 +368,28 @@ import el2_pkg::*;
                                  ((buf_cmd_byte_ptrQ == 3'b111) | (buf_byteen[get_nxtbyte_ptr(buf_cmd_byte_ptrQ[2:0],buf_byteen[7:0],1'b1)] == 1'b0))));
                   bypass_en       = buf_state_en & buf_write_in & (buf_nxtstate == CMD_WR);   // Only bypass for writes for the time being
                   ahb_htrans[1:0] = {2{(~(cmd_done | cmd_doneQ) | bypass_en)}} & 2'b10;
-                  slave_valid_pre  = buf_state_en & (buf_nxtstate != DONE);
+                  slave_valid_pre  = buf_state_en & (buf_nxtstate != DONE_WR);
 
                   trxn_done = ahb_hready_q & ahb_hwrite_q & (ahb_htrans_q[1:0] != 2'b0);
                   buf_cmd_byte_ptr_en = trxn_done | bypass_en;
                   buf_cmd_byte_ptr = bypass_en ? get_nxtbyte_ptr(3'b0,buf_byteen_in[7:0],1'b0) :
                                                  trxn_done ? get_nxtbyte_ptr(buf_cmd_byte_ptrQ[2:0],buf_byteen[7:0],1'b1) : buf_cmd_byte_ptrQ;
-            end
-         DONE: begin
+         end
+         DONE_WR: begin
                   buf_nxtstate = IDLE;
-                  buf_state_en = slave_ready;
+                  buf_state_en = axi_bvalid & axi_bready;
                   slvbuf_error_en = 1'b1;
                   slave_valid_pre = 1'b1;
+         end
+         DONE_RD: begin
+                  buf_nxtstate = IDLE;
+                  buf_state_en = axi_rvalid & axi_rready; // axi_rlast == 1
+                  slvbuf_error_en = 1'b1;
+                  slave_valid_pre = 1'b1;
+         end
+         default: begin
+                  buf_nxtstate = IDLE;
+                  buf_state_en = 1'b1;
          end
       endcase
    end
@@ -403,7 +422,7 @@ import el2_pkg::*;
    assign slave_valid          = slave_valid_pre;// & (~slvbuf_posted_write | slvbuf_error);
    assign slave_opc[3:2]       = slvbuf_write ? 2'b11 : 2'b00;
    assign slave_opc[1:0]       = {2{slvbuf_error}} & 2'b10;
-   assign slave_rdata[63:0]    = slvbuf_error ? {2{last_bus_addr[31:0]}} : ((buf_state == DONE) ? buf_data[63:0] : ahb_hrdata_q[63:0]);
+   assign slave_rdata[63:0]    = slvbuf_error ? {2{last_bus_addr[31:0]}} : ((buf_state == DONE_RD) ? buf_data[63:0] : ahb_hrdata_q[63:0]);
    assign slave_tag[TAG-1:0]   = slvbuf_tag[TAG-1:0];
 
    assign last_addr_en = (ahb_htrans[1:0] != 2'b0) & ahb_hready & ahb_hwrite ;

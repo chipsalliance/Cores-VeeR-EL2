@@ -442,9 +442,7 @@ module tb_top (
         abi_reg[30] = "t5";
         abi_reg[31] = "t6";
     // tie offs
-        jtag_id[31:28] = 4'b1;
-        jtag_id[27:12] = '0;
-        jtag_id[11:1]  = 11'h45;
+        jtag_id[31:1] = 31'h0;
         reset_vector = `RV_RESET_VEC;
         nmi_vector   = 32'hee000000;
         nmi_int   = 0;

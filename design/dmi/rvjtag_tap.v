@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2019 Western Digital Corporation or it's affiliates.
+// Copyright (c) 2023 Antmicro <www.antmicro.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,12 +38,8 @@ output  reg         dmi_hard_reset,
 
 input   [2:0]       idle,
 input   [1:0]       dmi_stat,
-/*
---  revisionCode        : 4'h0;
---  manufacturersIdCode : 11'h45;
---  deviceIdCode        : 16'h0001;
---  order MSB .. LSB -> [4 bit version or revision] [16 bit part number] [11 bit manufacturer id] [value of 1'b1 in LSB]
-*/
+
+// JTAG ID order MSB .. LSB -> [4 bit version or revision] [16 bit part number] [11 bit manufacturer id] [value of 1'b1 in LSB]
 input   [31:1]      jtag_id,
 input   [3:0]       version
 );
@@ -67,8 +64,11 @@ wire pause_ir ;
 wire update_ir ;
 wire capture_ir;
 wire[1:0] dr_en;
-wire devid_sel;
 wire [5:0] abits;
+
+`ifndef RV_JTAG_NO_IDCODE
+wire devid_sel;
+`endif
 
 assign abits = AWIDTH[5:0];
 
@@ -142,8 +142,9 @@ always @ (negedge tck or negedge trst) begin
    end
 end
 
-
+`ifndef RV_JTAG_NO_IDCODE
 assign devid_sel  = ir == 5'b00001;
+`endif
 assign dr_en[0]   = ir == 5'b10000;
 assign dr_en[1]   = ir == 5'b10001;
 
@@ -167,8 +168,10 @@ always_comb begin
                     case(1)
                     dr_en[1]:   nsr = {tdi, sr[USER_DR_LENGTH-1:1]};
 
-                    dr_en[0],
-                    devid_sel:  nsr = {{USER_DR_LENGTH-32{1'b0}},tdi, sr[31:1]};
+`ifndef RV_JTAG_NO_IDCODE
+                    devid_sel,
+`endif
+                    dr_en[0]:  nsr = {{USER_DR_LENGTH-32{1'b0}},tdi, sr[31:1]};
                     default:    nsr = {{USER_DR_LENGTH-1{1'b0}},tdi}; // bypass
                     endcase
                 end
@@ -177,7 +180,9 @@ always_comb begin
                     case(1)
                     dr_en[0]:   nsr = {{USER_DR_LENGTH-15{1'b0}}, idle, dmi_stat, abits, version};
                     dr_en[1]:   nsr = {{AWIDTH{1'b0}}, rd_data, rd_status};
+`ifndef RV_JTAG_NO_IDCODE
                     devid_sel:  nsr = {{USER_DR_LENGTH-32{1'b0}}, jtag_id, 1'b1};
+`endif
                     endcase
                 end
     shift_ir:   nsr = {{USER_DR_LENGTH-5{1'b0}},tdi, sr[4:1]};

@@ -101,13 +101,17 @@ import el2_pkg::*;
    assign mem_export      .iccm_wren_bank     = mem_export_local.iccm_wren_bank;
    assign mem_export      .iccm_addr_bank     = mem_export_local.iccm_addr_bank;
    assign mem_export      .iccm_bank_wr_data  = mem_export_local.iccm_bank_wr_data;
+   assign mem_export      .iccm_bank_wr_ecc   = mem_export_local.iccm_bank_wr_ecc;
    assign mem_export_local.iccm_bank_dout     = mem_export.      iccm_bank_dout;
+   assign mem_export_local.iccm_bank_ecc      = mem_export.      iccm_bank_ecc;
 
    assign mem_export      .dccm_clken         = mem_export_local.dccm_clken;
    assign mem_export      .dccm_wren_bank     = mem_export_local.dccm_wren_bank;
    assign mem_export      .dccm_addr_bank     = mem_export_local.dccm_addr_bank;
    assign mem_export      .dccm_wr_data_bank  = mem_export_local.dccm_wr_data_bank;
+   assign mem_export      .dccm_wr_ecc_bank   = mem_export_local.dccm_wr_ecc_bank;
    assign mem_export_local.dccm_bank_dout     = mem_export      .dccm_bank_dout;
+   assign mem_export_local.dccm_bank_ecc      = mem_export      .dccm_bank_ecc;
 
    // DCCM Instantiation
    if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable

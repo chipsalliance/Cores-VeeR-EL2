@@ -22,7 +22,7 @@ import el2_pkg::*;
 interface el2_mem_if #(
     `include "el2_param.vh"
 ) ();
-
+  localparam DCCM_ECC_WIDTH = pt.DCCM_FDATA_WIDTH - pt.DCCM_DATA_WIDTH;
 
   //////////////////////////////////////////
   // Clock
@@ -35,8 +35,10 @@ interface el2_mem_if #(
   logic [pt.ICCM_NUM_BANKS-1:0]                                       iccm_wren_bank;
   logic [pt.ICCM_NUM_BANKS-1:0][pt.ICCM_BITS-1:pt.ICCM_BANK_INDEX_LO] iccm_addr_bank;
 
-  logic [pt.ICCM_NUM_BANKS-1:0][                                38:0] iccm_bank_wr_data;
-  logic [pt.ICCM_NUM_BANKS-1:0][                                38:0] iccm_bank_dout;
+  logic [pt.ICCM_NUM_BANKS-1:0][                                31:0] iccm_bank_wr_data;
+  logic [pt.ICCM_NUM_BANKS-1:0][                                 6:0] iccm_bank_wr_ecc;
+  logic [pt.ICCM_NUM_BANKS-1:0][                                31:0] iccm_bank_dout;
+  logic [pt.ICCM_NUM_BANKS-1:0][                                 6:0] iccm_bank_ecc;
 
 
   //////////////////////////////////////////
@@ -44,8 +46,10 @@ interface el2_mem_if #(
   logic [pt.DCCM_NUM_BANKS-1:0]                                       dccm_clken;
   logic [pt.DCCM_NUM_BANKS-1:0]                                       dccm_wren_bank;
   logic [pt.DCCM_NUM_BANKS-1:0][pt.DCCM_BITS-1:(pt.DCCM_BANK_BITS+2)] dccm_addr_bank;
-  logic [pt.DCCM_NUM_BANKS-1:0][             pt.DCCM_FDATA_WIDTH-1:0] dccm_wr_data_bank;
-  logic [pt.DCCM_NUM_BANKS-1:0][             pt.DCCM_FDATA_WIDTH-1:0] dccm_bank_dout;
+  logic [pt.DCCM_NUM_BANKS-1:0][              pt.DCCM_DATA_WIDTH-1:0] dccm_wr_data_bank;
+  logic [pt.DCCM_NUM_BANKS-1:0][                  DCCM_ECC_WIDTH-1:0] dccm_wr_ecc_bank;
+  logic [pt.DCCM_NUM_BANKS-1:0][              pt.DCCM_DATA_WIDTH-1:0] dccm_bank_dout;
+  logic [pt.DCCM_NUM_BANKS-1:0][                  DCCM_ECC_WIDTH-1:0] dccm_bank_ecc;
 
 
   //////////////////////////////////////////
@@ -53,35 +57,35 @@ interface el2_mem_if #(
   modport veer_iccm(
       input clk,
       // ICCM
-      output iccm_clken, iccm_wren_bank, iccm_addr_bank, iccm_bank_wr_data,
-      input iccm_bank_dout
+      output iccm_clken, iccm_wren_bank, iccm_addr_bank, iccm_bank_wr_data, iccm_bank_wr_ecc,
+      input iccm_bank_dout, iccm_bank_ecc
   );
 
   modport veer_dccm(
       input clk,
       // DCCM
-      output dccm_clken, dccm_wren_bank, dccm_addr_bank, dccm_wr_data_bank,
-      input dccm_bank_dout
+      output dccm_clken, dccm_wren_bank, dccm_addr_bank, dccm_wr_data_bank, dccm_wr_ecc_bank,
+      input dccm_bank_dout, dccm_bank_ecc
   );
 
   modport veer_sram_src(
       output clk,
       // ICCM
-      output iccm_clken, iccm_wren_bank, iccm_addr_bank, iccm_bank_wr_data,
-      input iccm_bank_dout,
+      output iccm_clken, iccm_wren_bank, iccm_addr_bank, iccm_bank_wr_data, iccm_bank_wr_ecc,
+      input iccm_bank_dout, iccm_bank_ecc,
       // DCCM
-      output dccm_clken, dccm_wren_bank, dccm_addr_bank, dccm_wr_data_bank,
-      input dccm_bank_dout
+      output dccm_clken, dccm_wren_bank, dccm_addr_bank, dccm_wr_data_bank, dccm_wr_ecc_bank,
+      input dccm_bank_dout, dccm_bank_ecc
   );
 
   modport veer_sram_sink(
       input clk,
       // ICCM
-      input iccm_clken, iccm_wren_bank, iccm_addr_bank, iccm_bank_wr_data,
-      output iccm_bank_dout,
+      input iccm_clken, iccm_wren_bank, iccm_addr_bank, iccm_bank_wr_data, iccm_bank_wr_ecc,
+      output iccm_bank_dout, iccm_bank_ecc,
       // DCCM
-      input dccm_clken, dccm_wren_bank, dccm_addr_bank, dccm_wr_data_bank,
-      output dccm_bank_dout
+      input dccm_clken, dccm_wren_bank, dccm_addr_bank, dccm_wr_data_bank, dccm_wr_ecc_bank,
+      output dccm_bank_dout, dccm_bank_ecc
   );
 
 endinterface

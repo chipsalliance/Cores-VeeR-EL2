@@ -111,11 +111,13 @@ import el2_pkg::*;
                                                                                                     iccm_rw_addr[pt.ICCM_BITS-1 : pt.ICCM_BANK_INDEX_LO]);
 
     always_comb begin
-      iccm_mem_export.iccm_clken[i]              = iccm_clken[i];
-      iccm_mem_export.iccm_wren_bank[i]          = wren_bank[i];
-      iccm_mem_export.iccm_addr_bank[i]          = addr_bank[i];
-      iccm_mem_export.iccm_bank_wr_data[i][38:0] = iccm_bank_wr_data[i][38:0];
-      iccm_bank_dout[i][38:0]                    = iccm_mem_export.iccm_bank_dout[i][38:0];
+      iccm_mem_export.iccm_clken[i]        = iccm_clken[i];
+      iccm_mem_export.iccm_wren_bank[i]    = wren_bank[i];
+      iccm_mem_export.iccm_addr_bank[i]    = addr_bank[i];
+      iccm_mem_export.iccm_bank_wr_data[i] = iccm_bank_wr_data[i][31:0];
+      iccm_mem_export.iccm_bank_wr_ecc[i]  = iccm_bank_wr_data[i][38:32];
+      iccm_bank_dout[i][31:0]              = iccm_mem_export.iccm_bank_dout[i];
+      iccm_bank_dout[i][38:32]             = iccm_mem_export.iccm_bank_ecc[i];
     end
 
     // match the redundant rows

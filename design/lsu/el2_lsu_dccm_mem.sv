@@ -100,11 +100,13 @@ module el2_lsu_dccm_mem
 
       // Connect to exported RAM Banks
       always_comb begin
-         dccm_mem_export.dccm_clken[i]              = dccm_clken[i];
-         dccm_mem_export.dccm_wren_bank[i]          = wren_bank[i];
-         dccm_mem_export.dccm_addr_bank[i]          = addr_bank[i];
-         dccm_mem_export.dccm_wr_data_bank[i]       = wr_data_bank[i];
-         dccm_bank_dout[i][pt.DCCM_FDATA_WIDTH-1:0] = dccm_mem_export.dccm_bank_dout[i][pt.DCCM_FDATA_WIDTH-1:0];
+         dccm_mem_export.dccm_clken[i]                               = dccm_clken[i];
+         dccm_mem_export.dccm_wren_bank[i]                           = wren_bank[i];
+         dccm_mem_export.dccm_addr_bank[i]                           = addr_bank[i];
+         dccm_mem_export.dccm_wr_data_bank[i]                        = wr_data_bank[i][pt.DCCM_DATA_WIDTH-1:0];
+         dccm_mem_export.dccm_wr_ecc_bank[i]                         = wr_data_bank[i][pt.DCCM_FDATA_WIDTH-1:pt.DCCM_DATA_WIDTH];
+         dccm_bank_dout[i][pt.DCCM_DATA_WIDTH-1:0]                   = dccm_mem_export.dccm_bank_dout[i];
+         dccm_bank_dout[i][pt.DCCM_FDATA_WIDTH-1:pt.DCCM_DATA_WIDTH] = dccm_mem_export.dccm_bank_ecc[i];
       end
 
    end : mem_bank

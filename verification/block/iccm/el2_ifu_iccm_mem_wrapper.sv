@@ -38,15 +38,22 @@ module el2_ifu_iccm_mem_wrapper
   logic [pt.ICCM_NUM_BANKS-1:0]                                       iccm_clken;
   logic [pt.ICCM_NUM_BANKS-1:0]                                       iccm_wren_bank;
   logic [pt.ICCM_NUM_BANKS-1:0][pt.ICCM_BITS-1:pt.ICCM_BANK_INDEX_LO] iccm_addr_bank;
-  logic [pt.ICCM_NUM_BANKS-1:0][                                38:0] iccm_bank_wr_data;
-  logic [pt.ICCM_NUM_BANKS-1:0][                                38:0] iccm_bank_dout;
+  logic [pt.ICCM_NUM_BANKS-1:0][                                31:0] iccm_bank_wr_data;
+  logic [pt.ICCM_NUM_BANKS-1:0][                                 6:0] iccm_bank_wr_ecc;
+  logic [pt.ICCM_NUM_BANKS-1:0][                                31:0] iccm_bank_dout;
+  logic [pt.ICCM_NUM_BANKS-1:0][                                 6:0] iccm_bank_ecc;
+
+  logic [pt.ICCM_NUM_BANKS-1:0][                                38:0] iccm_bank_wr_fdata;
+  logic [pt.ICCM_NUM_BANKS-1:0][                                38:0] iccm_bank_fdout;
 
   el2_mem_if mem_export ();
   assign iccm_clken                = mem_export.iccm_clken;
   assign iccm_wren_bank            = mem_export.iccm_wren_bank;
   assign iccm_addr_bank            = mem_export.iccm_addr_bank;
   assign iccm_bank_wr_data         = mem_export.iccm_bank_wr_data;
+  assign iccm_bank_wr_ecc          = mem_export.iccm_bank_wr_ecc;
   assign mem_export.iccm_bank_dout = iccm_bank_dout;
+  assign mem_export.iccm_bank_ecc  = iccm_bank_ecc;
 
   // Pack el2_ccm_ext_in_pkt_t
   el2_ccm_ext_in_pkt_t [pt.ICCM_NUM_BANKS-1:0] iccm_ext_in_pkt;
@@ -65,6 +72,12 @@ module el2_ifu_iccm_mem_wrapper
 
   // The ICCM module
   for (genvar i = 0; i < pt.ICCM_NUM_BANKS; i++) begin : gen_iccm_mem
+    assign iccm_bank_wr_fdata[i] = {
+      mem_export.iccm_bank_wr_ecc[i], mem_export.iccm_bank_wr_data[i]
+    };
+    assign mem_export.iccm_bank_dout[i] = iccm_bank_fdout[i][31:0];
+    assign mem_export.iccm_bank_ecc[i] = iccm_bank_fdout[i][38:32];
+
     el2_ram #(
         .depth(1 << pt.ICCM_INDEX_BITS),
         .width(39)
@@ -74,8 +87,8 @@ module el2_ifu_iccm_mem_wrapper
         .CLK(clk),
         .WE(iccm_wren_bank[i]),
         .ADR(iccm_addr_bank[i]),
-        .D(iccm_bank_wr_data[i][38:0]),
-        .Q(iccm_bank_dout[i][38:0]),
+        .D(iccm_bank_wr_fdata[i][38:0]),
+        .Q(iccm_bank_fdout[i][38:0]),
         .ROP(),
         // These are used by SoC
         .TEST1(iccm_ext_in_pkt[i].TEST1),

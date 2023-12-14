@@ -308,19 +308,23 @@ module veer_wrapper
     input logic [31:4] core_id,
 
     // Memory Export Interface
-    output logic                                                               mem_clk,
+    output logic mem_clk,
     // ICCM
-    output logic [pt.ICCM_NUM_BANKS-1:0]                                       iccm_clken,
-    output logic [pt.ICCM_NUM_BANKS-1:0]                                       iccm_wren_bank,
+    output logic [pt.ICCM_NUM_BANKS-1:0] iccm_clken,
+    output logic [pt.ICCM_NUM_BANKS-1:0] iccm_wren_bank,
     output logic [pt.ICCM_NUM_BANKS-1:0][pt.ICCM_BITS-1:pt.ICCM_BANK_INDEX_LO] iccm_addr_bank,
-    output logic [pt.ICCM_NUM_BANKS-1:0][                                38:0] iccm_bank_wr_data,
-    input  logic [pt.ICCM_NUM_BANKS-1:0][                                38:0] iccm_bank_dout,
+    output logic [pt.ICCM_NUM_BANKS-1:0][31:0] iccm_bank_wr_data,
+    output logic [pt.ICCM_NUM_BANKS-1:0][7:0] iccm_bank_wr_ecc,
+    input logic [pt.ICCM_NUM_BANKS-1:0][31:0] iccm_bank_dout,
+    input logic [pt.ICCM_NUM_BANKS-1:0][7:0] iccm_bank_ecc,
     // DCCM
-    output logic [pt.DCCM_NUM_BANKS-1:0]                                       dccm_clken,
-    output logic [pt.DCCM_NUM_BANKS-1:0]                                       dccm_wren_bank,
+    output logic [pt.DCCM_NUM_BANKS-1:0] dccm_clken,
+    output logic [pt.DCCM_NUM_BANKS-1:0] dccm_wren_bank,
     output logic [pt.DCCM_NUM_BANKS-1:0][pt.DCCM_BITS-1:(pt.DCCM_BANK_BITS+2)] dccm_addr_bank,
-    output logic [pt.DCCM_NUM_BANKS-1:0][             pt.DCCM_FDATA_WIDTH-1:0] dccm_wr_data_bank,
-    input  logic [pt.DCCM_NUM_BANKS-1:0][             pt.DCCM_FDATA_WIDTH-1:0] dccm_bank_dout,
+    output logic [pt.DCCM_NUM_BANKS-1:0][pt.DCCM_DATA_WIDTH-1:0] dccm_wr_data_bank,
+    output logic [pt.DCCM_NUM_BANKS-1:0][pt.DCCM_FDATA_WIDTH-pt.DCCM_DATA_WIDTH-1:0] dccm_wr_ecc_bank,
+    input logic [pt.DCCM_NUM_BANKS-1:0][pt.DCCM_DATA_WIDTH-1:0] dccm_bank_dout,
+    input logic [pt.DCCM_NUM_BANKS-1:0][pt.DCCM_FDATA_WIDTH-pt.DCCM_DATA_WIDTH-1:0] dccm_bank_ecc,
 
     // external MPC halt/run interface
     input  logic mpc_debug_halt_req,  // Async halt request
@@ -346,12 +350,16 @@ module veer_wrapper
   assign dccm_wren_bank            = mem_export.dccm_wren_bank;
   assign dccm_addr_bank            = mem_export.dccm_addr_bank;
   assign dccm_wr_data_bank         = mem_export.dccm_wr_data_bank;
+  assign dccm_wr_ecc_bank          = mem_export.dccm_wr_ecc_bank;
   assign mem_export.dccm_bank_dout = dccm_bank_dout;
+  assign mem_export.dccm_bank_ecc  = dccm_bank_ecc;
   assign iccm_clken                = mem_export.iccm_clken;
   assign iccm_wren_bank            = mem_export.iccm_wren_bank;
   assign iccm_addr_bank            = mem_export.iccm_addr_bank;
   assign iccm_bank_wr_data         = mem_export.iccm_bank_wr_data;
+  assign iccm_bank_wr_ecc          = mem_export.iccm_bank_wr_ecc;
   assign mem_export.iccm_bank_dout = iccm_bank_dout;
+  assign mem_export.iccm_bank_ecc  = iccm_bank_ecc;
 
   el2_veer_wrapper rvtop (
       .el2_mem_export(mem_export.veer_sram_src),

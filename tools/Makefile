@@ -98,6 +98,10 @@ ifdef debug
  RIVIERA_DEBUG = +access +r
 endif
 
+ifdef assert
+ ASSERT_DEFINES = +define+RV_ASSERT_ON
+endif
+
 # provide specific link file
 ifeq (,$(wildcard $(TEST_DIR)/$(TEST).ld))
 	LINK = $(BUILD_DIR)/link.ld
@@ -143,7 +147,6 @@ ${BUILD_DIR}/defines.h:
 	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/veer.config -target=$(target) $(CONF_PARAMS)
 
 verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h test_tb_top.cpp
-	echo '`undef RV_ASSERT_ON' >> ${BUILD_DIR}/common_defines.vh
 	$(VERILATOR)  --cc -CFLAGS ${CFLAGS} $(defines) \
 	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist \
 	  -Wno-WIDTH -Wno-UNOPTFLAT $(VERILATOR_NOIMPLICIT) \
@@ -154,7 +157,7 @@ verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h test_tb_top.cpp
 	touch verilator-build
 
 vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
-	$(VCS) -full64 -assert svaext -sverilog +define+RV_OPENSOURCE \
+	$(VCS) -full64 -assert svaext -sverilog +define+RV_OPENSOURCE $(ASSERT_DEFINES) \
 	  +error+500 +incdir+${RV_ROOT}/design/lib \
 	  +incdir+${RV_ROOT}/design/include ${BUILD_DIR}/common_defines.vh \
 	  +incdir+$(BUILD_DIR)  +libext+.v $(defines) \
@@ -162,7 +165,7 @@ vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	touch vcs-build
 
 irun-build: ${TBFILES} ${BUILD_DIR}/defines.h
-	$(IRUN) -64bit -elaborate $(IRUN_DEBUG) -q -sv -sysv  -nowarn CUVIHR \
+	$(IRUN) -64bit -elaborate $(IRUN_DEBUG) $(ASSERT_DEFINES) -q -sv -sysv -nowarn CUVIHR \
 	  -xmlibdirpath . -xmlibdirname veer.build \
 	  -incdir ${RV_ROOT}/design/lib -incdir ${RV_ROOT}/design/include \
 	  -vlog_ext +.vh+.h $(defines) -incdir $(BUILD_DIR) \
@@ -172,7 +175,7 @@ irun-build: ${TBFILES} ${BUILD_DIR}/defines.h
 
 riviera-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	vlib work
-	vlog -work work \
+	vlog -work work ${ASSERT_DEFINES} \
 		+incdir+${RV_ROOT}/design/lib \
 		+incdir+${RV_ROOT}/design/include \
 		+incdir+${BUILD_DIR} \
@@ -205,8 +208,8 @@ vcs: program.hex vcs-build
 	./simv $(DEBUG_PLUS) +vcs+lic+wait  -l vcs.log
 
 vlog: program.hex ${TBFILES} ${BUILD_DIR}/defines.h
-	$(VLOG) -l vlog.log -sv -mfcu +incdir+${BUILD_DIR}+${RV_ROOT}/design/include+${RV_ROOT}/design/lib\
-        $(defines) -f ${RV_ROOT}/testbench/flist ${TBFILES}  -R +nowarn3829 +nowarn2583 ${DEBUG_PLUS}
+	$(VLOG) -l vlog.log -sv -mfcu +incdir+${BUILD_DIR}+${RV_ROOT}/design/include+${RV_ROOT}/design/lib \
+        $(ASSERT_DEFINES) $(defines) -f ${RV_ROOT}/testbench/flist ${TBFILES} -R +nowarn3829 +nowarn2583 ${DEBUG_PLUS}
 
 riviera: program.hex riviera-build
 	vsim -c -lib work ${DEBUG_PLUS} ${RIVIERA_DEBUG} tb_top -do "run -all; exit" -l riviera.log

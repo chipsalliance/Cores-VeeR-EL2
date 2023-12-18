@@ -151,6 +151,7 @@ where:
 <simulator> -  can be 'verilator' (by default) 'irun' - Cadence xrun, 'vcs' - Synopsys VCS, 'vlog' Mentor Questa
                'riviera'- Aldec Riviera-PRO. if not provided, 'make' cleans work directory, builds verilator executable and runs a test.
 debug=1     -  allows VCD generation for verilator and VCS and SHM waves for irun option.
+assert=1    -  enables assertions in simulation runs (with simulators other than Verilator)
 <target>    -  predefined CPU configurations 'default' ( by default), 'default_ahb', 'typical_pd', 'high_perf' 
 TEST        -  allows to run a C (<test>.c) or assembly (<test>.s) test, hello_world is run by default 
 TEST_DIR    -  alternative to test source directory testbench/asm or testbench/tests

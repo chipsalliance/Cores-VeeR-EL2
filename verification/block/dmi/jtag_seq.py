@@ -2,48 +2,22 @@
 # Copyright (c) 2023 Antmicro <www.antmicro.com>
 # SPDX-License-Identifier: BSD-2-Clause
 
+from common import BaseSeq
 from pyuvm import *
 
 
-class BaseSeq(uvm_sequence):
-    async def run_items(self, items):
-        for item in items:
-            repeat = 1
-
-            if hasattr(item, "repeat"):
-                repeat = item.repeat
-
-            for _ in range(repeat):
-                await self.start_item(item)
-                item.randomize()
-                await self.finish_item(item)
-
-
 class JTAGBaseSeqItem(uvm_sequence_item):
-    def __init__(self, name, tms=1, tdi=0, repeat=1):
+    def __init__(self, name, tms=1, tdi=0):
         super().__init__(name)
         self.name = name
         self.tms = tms
         self.tdi = tdi
-        self.repeat = repeat
-
-    def __eq__(self, other):
-        pass
 
     def __str__(self):
         return self.__class__.__name__
 
     def randomize(self):
         pass
-
-
-class BasicSequence(uvm_sequence):
-    async def body(self):
-        for i in range(10):
-            uvm_root().logger.info("BasicSequence Item")
-            item = JTAGBaseSeqItem("test_logic_reset")
-            await self.start_item(item)
-            await self.finish_item(item)
 
 
 class SetIRSequence(BaseSeq):
@@ -80,15 +54,22 @@ class CaptureDRSequence(BaseSeq):
         super().__init__(name)
 
     async def body(self):
+        shift_dr_items = []
+        for i in range(40):
+            shift_dr_items.append(JTAGBaseSeqItem("shift_dr_bit{}".format(i), 0, 0))
+
         items = [
             JTAGBaseSeqItem("switch_to_select_dr_scan", 1, 0),
             JTAGBaseSeqItem("switch_to_capture_dr", 0, 0),
             JTAGBaseSeqItem("switch_to_shift_dr", 0, 0),
-            JTAGBaseSeqItem("shift_dr_bits", 0, 0, repeat=32),
+        ]
+        items += shift_dr_items
+        items += [
             JTAGBaseSeqItem("switch_to_exit1_dr", 1, 0),
             JTAGBaseSeqItem("switch_to_update_dr", 1, 0),
             JTAGBaseSeqItem("switch_to_idle", 0, 0),
             JTAGBaseSeqItem("idle0", 0, 0),
             JTAGBaseSeqItem("idle1", 0, 0),
         ]
+
         await self.run_items(items)

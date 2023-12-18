@@ -276,7 +276,6 @@ def lib_axi4_to_ahb_verify(session, blockName, testName, coverage):
         "test_multiple_configs",
     ],
 )
-
 @nox.parametrize("coverage", coverageTypes)
 def pmp_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
@@ -287,11 +286,11 @@ def pmp_verify(session, blockName, testName, coverage):
 @nox.parametrize(
     "testName",
     [
-        "test_jtag_set_ir",
-        "test_read_idcode",
+        "test_jtag_ir",
+        "test_dmi_read_write",
     ],
 )
-@nox.parametrize("coverage", "")
+@nox.parametrize("coverage", coverageTypes)
 def dmi_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 

@@ -1,18 +1,12 @@
 # Copyright (c) 2023 Antmicro <www.antmicro.com>
 # SPDX-License-Identifier: Apache-2.0
 
-from copy import deepcopy
-
 import cocotb
 import pyuvm
-from cocotb.clock import Clock
-from cocotb.queue import Queue
-from cocotb.triggers import ClockCycles, FallingEdge, RisingEdge, ReadOnly
+from cocotb.triggers import ClockCycles, FallingEdge, ReadOnly, RisingEdge
 from common import *
-from pyuvm import *
-
 from jtag_pkg import *
-from jtag_predictor import JTAGPredictor
+from pyuvm import *
 
 # =============================================================================
 
@@ -38,18 +32,14 @@ class JTAGBfm(metaclass=utility_classes.Singleton):
     """
 
     SIGNALS = [
-        # JTAG TAP ports
+        # Inputs
         "trst_n",
         "tck",
         "tms",
         "tdi",
+        # Outputs
         "tdo",
         "tdoEnable",
-
-        # Processor ports
-        "reg_wr_data",
-        "reg_wr_addr",
-        "dmi_hard_reset",
     ]
 
     def __init__(self):
@@ -62,14 +52,9 @@ class JTAGBfm(metaclass=utility_classes.Singleton):
 
         collect_signals(self.SIGNALS, self.dut, self)
 
-    # Handle write channel
     async def req_driver_q_put(self, tms, tdi):
         item = (tms, tdi)
         await self.req_driver_q.put(item)
-
-    async def req_monitor_q_get(self):
-        item = await self.req_monitor_q.get()
-        return item
 
     async def rsp_monitor_q_get(self):
         result = await self.rsp_monitor_q.get()
@@ -123,16 +108,10 @@ class JTAGBfm(metaclass=utility_classes.Singleton):
             curr_values = [
                 get_int(self.tdo),
                 get_int(self.tdoEnable),
-                get_int(self.reg_wr_data),
-                get_int(self.reg_wr_addr),
-                get_int(self.dmi_hard_reset),
             ]
             predicted_values = [
                 get_int(self.predictor.tdo),
                 get_int(self.predictor.tdoEnable),
-                get_int(self.predictor.wr_data),
-                get_int(self.predictor.wr_addr),
-                get_int(self.predictor.dmi_hard_reset),
             ]
             self.rsp_monitor_q.put_nowait((curr_values, predicted_values))
 

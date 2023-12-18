@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
-from cocotb.types import Logic, LogicArray, concat, Range
+
+from cocotb.types import Logic, LogicArray, Range, concat
 from common import *
 from jtag_pkg import *
 
@@ -17,7 +18,7 @@ class JTAGPredictor:
         level = logging.getLevelName(os.environ.get("COCOTB_LOG_LEVEL", "INFO"))
 
         self.AWIDTH = AWIDTH = ConfigDB().get(None, "", "AWIDTH")
-        self.reg_range = Range(AWIDTH + 34, "downto", 0)
+        self.reg_range = Range(AWIDTH + 33, "downto", 0)
         self.logger = uvm_root().logger
         self.logger.setLevel(level)
         self.dut = dut
@@ -44,36 +45,47 @@ class JTAGPredictor:
         self.prev_nstate = self.state
         self.ir = LogicArray(0x1, Range(4, "downto", 0))
         self.dr = LogicArray(0x0, self.reg_range)
+        self.ndr = LogicArray(0x0, self.reg_range)
         self.sr = LogicArray(0x0, self.reg_range)
         self.nsr = LogicArray(0x0, self.reg_range)
-
 
     def __str__(self):
         str = "TAP Controller currently in state: {}\n".format(JTAGStates(self.state).name)
         str += "Expected vs actual outputs:\n"
         str += "tdo:            {} vs {}\n".format(hex(int(self.tdo)), hex(self.dut.tdo.value))
-        str += "tdoEnable:      {} vs {}\n".format(hex(int(self.tdoEnable)), hex(self.dut.tdoEnable.value))
-        str += "wr_data:        {} vs {}\n".format(hex(self.wr_data.integer), hex(self.dut.reg_wr_data.value))
-        str += "wr_addr:        {} vs {}\n".format(hex(self.wr_addr.integer), hex(self.dut.reg_wr_addr.value))
-        str += "wr_en:          {} vs {}\n".format(hex(int(self.wr_en)), hex(self.dut.reg_wr_en.value))
+        str += "tdoEnable:      {} vs {}\n".format(
+            hex(int(self.tdoEnable)), hex(self.dut.tdoEnable.value)
+        )
+        str += "wr_data:        {} vs {}\n".format(
+            hex(self.wr_data.integer), hex(self.dut.reg_wr_data.value)
+        )
+        str += "wr_addr:        {} vs {}\n".format(
+            hex(self.wr_addr.integer), hex(self.dut.reg_wr_addr.value)
+        )
+        str += "wr_en:          {} vs {}\n".format(
+            hex(int(self.wr_en)), hex(self.dut.reg_wr_en.value)
+        )
         str += "rd_en:          {} vs {}\n".format(hex(int(self.rd_en)), hex(self.dut.reg_en.value))
-        str += "dmi_hard_reset: {} vs {}\n".format(hex(int(self.dmi_hard_reset)), hex(self.dut.dmi_hard_reset.value))
+        str += "dmi_hard_reset: {} vs {}".format(
+            hex(int(self.dmi_hard_reset)), hex(self.dut.dmi_hard_reset.value)
+        )
 
         return str
 
-
     def update_state(self):
         if self.state != self.nstate:
-            self.logger.debug("Switching state {} to {}".format(
-                JTAGStates(self.state).name,
-                JTAGStates(self.nstate).name,
-            ))
+            self.logger.debug(
+                "Switching state {} to {}".format(
+                    JTAGStates(self.state).name,
+                    JTAGStates(self.nstate).name,
+                )
+            )
         self.state = self.nstate
-
 
     def update_nstate(self):
         """
         State machine compliant with TAP Controller documentation (IEEE Std 1149.1-2001)
+        and VeeR EL2 specific TAP implementation.
         """
         self.prev_nstate = self.nstate
         if self.trst_n == 0:
@@ -81,67 +93,113 @@ class JTAGPredictor:
             pass
 
         if self.state == JTAGStates.TEST_LOGIC_RESET_STATE:
-            self.nstate = JTAGStates.TEST_LOGIC_RESET_STATE if self.tms == 1 else JTAGStates.RUN_TEST_IDLE_STATE
+            self.nstate = (
+                JTAGStates.TEST_LOGIC_RESET_STATE
+                if get_int(self.tms) == 1
+                else JTAGStates.RUN_TEST_IDLE_STATE
+            )
 
         elif self.state == JTAGStates.RUN_TEST_IDLE_STATE:
-            self.nstate = JTAGStates.SELECT_DR_SCAN_STATE if self.tms == 1 else JTAGStates.RUN_TEST_IDLE_STATE
+            self.nstate = (
+                JTAGStates.SELECT_DR_SCAN_STATE
+                if get_int(self.tms) == 1
+                else JTAGStates.RUN_TEST_IDLE_STATE
+            )
 
         elif self.state == JTAGStates.SELECT_DR_SCAN_STATE:
-            self.nstate = JTAGStates.SELECT_IR_SCAN_STATE if self.tms == 1 else JTAGStates.CAPTURE_DR_STATE
+            self.nstate = (
+                JTAGStates.SELECT_IR_SCAN_STATE
+                if get_int(self.tms) == 1
+                else JTAGStates.CAPTURE_DR_STATE
+            )
 
         elif self.state == JTAGStates.CAPTURE_DR_STATE:
-            self.nstate = JTAGStates.EXIT1_DR_STATE if self.tms == 1 else JTAGStates.SHIFT_DR_STATE
+            self.nstate = (
+                JTAGStates.EXIT1_DR_STATE if get_int(self.tms) == 1 else JTAGStates.SHIFT_DR_STATE
+            )
 
         elif self.state == JTAGStates.SHIFT_DR_STATE:
-            self.nstate = JTAGStates.EXIT1_DR_STATE if self.tms == 1 else JTAGStates.SHIFT_DR_STATE
+            self.nstate = (
+                JTAGStates.EXIT1_DR_STATE if get_int(self.tms) == 1 else JTAGStates.SHIFT_DR_STATE
+            )
 
         elif self.state == JTAGStates.EXIT1_DR_STATE:
-            self.nstate = JTAGStates.UPDATE_DR_STATE if self.tms == 1 else JTAGStates.PAUSE_DR_STATE
+            self.nstate = (
+                JTAGStates.UPDATE_DR_STATE if get_int(self.tms) == 1 else JTAGStates.PAUSE_DR_STATE
+            )
 
         elif self.state == JTAGStates.PAUSE_DR_STATE:
-            self.nstate = JTAGStates.EXIT2_DR_STATE if self.tms == 1 else JTAGStates.PAUSE_DR_STATE
+            self.nstate = (
+                JTAGStates.EXIT2_DR_STATE if get_int(self.tms) == 1 else JTAGStates.PAUSE_DR_STATE
+            )
 
         elif self.state == JTAGStates.EXIT2_DR_STATE:
-            self.nstate = JTAGStates.UPDATE_DR_STATE if self.tms == 1 else JTAGStates.SHIFT_DR_STATE
+            self.nstate = (
+                JTAGStates.UPDATE_DR_STATE if get_int(self.tms) == 1 else JTAGStates.SHIFT_DR_STATE
+            )
 
         elif self.state == JTAGStates.UPDATE_DR_STATE:
-            self.nstate = JTAGStates.SELECT_DR_SCAN_STATE if self.tms == 1 else JTAGStates.RUN_TEST_IDLE_STATE
+            self.nstate = (
+                JTAGStates.SELECT_DR_SCAN_STATE
+                if get_int(self.tms) == 1
+                else JTAGStates.RUN_TEST_IDLE_STATE
+            )
 
         elif self.state == JTAGStates.SELECT_IR_SCAN_STATE:
-            self.nstate = JTAGStates.TEST_LOGIC_RESET_STATE if self.tms == 1 else JTAGStates.CAPTURE_IR_STATE
+            self.nstate = (
+                JTAGStates.TEST_LOGIC_RESET_STATE
+                if get_int(self.tms) == 1
+                else JTAGStates.CAPTURE_IR_STATE
+            )
 
         elif self.state == JTAGStates.CAPTURE_IR_STATE:
-            self.nstate = JTAGStates.EXIT1_IR_STATE if self.tms == 1 else JTAGStates.SHIFT_IR_STATE
+            self.nstate = (
+                JTAGStates.EXIT1_IR_STATE if get_int(self.tms) == 1 else JTAGStates.SHIFT_IR_STATE
+            )
 
         elif self.state == JTAGStates.SHIFT_IR_STATE:
-            self.nstate = JTAGStates.EXIT1_IR_STATE if self.tms == 1 else JTAGStates.SHIFT_IR_STATE
+            self.nstate = (
+                JTAGStates.EXIT1_IR_STATE if get_int(self.tms) == 1 else JTAGStates.SHIFT_IR_STATE
+            )
 
         elif self.state == JTAGStates.EXIT1_IR_STATE:
-            self.nstate = JTAGStates.UPDATE_IR_STATE if self.tms == 1 else JTAGStates.PAUSE_IR_STATE
+            self.nstate = (
+                JTAGStates.UPDATE_IR_STATE if get_int(self.tms) == 1 else JTAGStates.PAUSE_IR_STATE
+            )
 
         elif self.state == JTAGStates.PAUSE_IR_STATE:
-            self.nstate = JTAGStates.EXIT2_IR_STATE if self.tms == 1 else JTAGStates.PAUSE_IR_STATE
+            self.nstate = (
+                JTAGStates.EXIT2_IR_STATE if get_int(self.tms) == 1 else JTAGStates.PAUSE_IR_STATE
+            )
 
         elif self.state == JTAGStates.EXIT2_IR_STATE:
-            self.nstate = JTAGStates.UPDATE_IR_STATE if self.tms == 1 else JTAGStates.SHIFT_IR_STATE
+            self.nstate = (
+                JTAGStates.UPDATE_IR_STATE if get_int(self.tms) == 1 else JTAGStates.SHIFT_IR_STATE
+            )
 
         elif self.state == JTAGStates.UPDATE_IR_STATE:
-            self.nstate = JTAGStates.SELECT_DR_SCAN_STATE if self.tms == 1 else JTAGStates.RUN_TEST_IDLE_STATE
+            self.nstate = (
+                JTAGStates.SELECT_DR_SCAN_STATE
+                if get_int(self.tms) == 1
+                else JTAGStates.RUN_TEST_IDLE_STATE
+            )
 
         else:
             self.nstate = JTAGStates.TEST_LOGIC_RESET_STATE
 
         if self.prev_nstate != self.nstate:
-            self.logger.debug("Switching nstate {} to {}".format(
-                JTAGStates(self.prev_nstate).name,
-                JTAGStates(self.nstate).name,
-            ))
-
+            self.logger.debug(
+                "Switching nstate {} to {}".format(
+                    JTAGStates(self.prev_nstate).name,
+                    JTAGStates(self.nstate).name,
+                )
+            )
 
     def predict_regs_posedge(self):
         """
-        Calculate internal register values
+        Calculate values of internal registers IR, DR and SR
         """
+        self.dr = self.ndr
 
         if self.trst_n == 0:
             self.sr = LogicArray(0, self.reg_range)
@@ -151,32 +209,36 @@ class JTAGPredictor:
         if self.trst_n == 0:
             self.nsr = LogicArray(0, self.nsr.range)
             self.ir = LogicArray(1, self.ir.range)
-            self.dr = LogicArray(0, self.dr.range)
+            self.ndr = LogicArray(0, self.dr.range)
 
-        # Predict value of ir register
         if self.state == JTAGStates.UPDATE_IR_STATE:
-            self.ir = LogicArray(0x1f, self.ir.range) if (self.sr[4:0].integer == 0) else self.sr[4:0]
+            self.ir = (
+                LogicArray(0x1F, self.ir.range) if (self.sr[4:0].integer == 0) else self.sr[4:0]
+            )
 
-        # Predict value of dr register
         if self.state == JTAGStates.UPDATE_DR_STATE and self.ir == JTAGInstructions.DR_EN_1:
-            self.dr = LogicArray(get_int(self.sr), self.reg_range)
+            self.ndr = LogicArray(get_int(self.sr), self.reg_range)
         else:
-            self.dr = concat(self.dr[self.AWIDTH+34:2], LogicArray(0, range(2)))
+            self.ndr = concat(self.dr[self.AWIDTH + 33 : 2], LogicArray(0, range(2)))
 
         self.predict_nsr_reg()
 
-
     def predict_nsr_reg(self):
+        """
+        Calculate next value of the SR register
+        """
         tdi_lr = LogicArray(get_int(self.tdi))
         self.nsr = LogicArray(get_int(self.sr), self.reg_range)
 
         # Predict value of nsr register
         if self.state == JTAGStates.SHIFT_DR_STATE:
             if self.ir == JTAGInstructions.DR_EN_1:
-                self.nsr = concat(tdi_lr, self.sr[31:1])
+                self.nsr = concat(tdi_lr, self.sr[self.AWIDTH + 33 : 1])
 
             elif self.ir in [JTAGInstructions.DR_EN_0, JTAGInstructions.DEVICE_ID_SEL]:
-                self.nsr = concat(LogicArray(0, range(self.AWIDTH + 2)), concat(tdi_lr, self.sr[31:1]))
+                self.nsr = concat(
+                    LogicArray(0, range(self.AWIDTH + 2)), concat(tdi_lr, self.sr[31:1])
+                )
 
             else:
                 self.nsr = LogicArray(get_int(self.tdi), self.nsr.range)
@@ -184,13 +246,27 @@ class JTAGPredictor:
         elif self.state == JTAGStates.CAPTURE_DR_STATE:
             self.nsr[0] = 0
             if self.ir == JTAGInstructions.DR_EN_0:
-                self.nsr = concat(LogicArray(0, range(self.AWIDTH + 19)), concat(concat(concat(JTAGDefaults.IDLE, JTAGDefaults.DMI_STAT), self.AWIDTH), JTAGDefaults.VERSION))
+                self.nsr = concat(
+                    LogicArray(0, range(self.AWIDTH + 19)),
+                    concat(
+                        concat(concat(JTAGDefaults.IDLE, JTAGDefaults.DMI_STAT), Defaults.ABITS),
+                        JTAGDefaults.VERSION,
+                    ),
+                )
 
             elif self.ir == JTAGInstructions.DR_EN_1:
-                self.nsr = concat(LogicArray(0, range(self.AWIDTH)), concat(self.rd_data, JTAGDefaults.RD_STATUS))
+                self.nsr = concat(
+                    concat(
+                        LogicArray(0, range(self.AWIDTH)),
+                        LogicArray(self.rd_data.value, Range(31, "downto", 0)),
+                    ),
+                    JTAGDefaults.RD_STATUS,
+                )
 
             elif self.ir == JTAGInstructions.DEVICE_ID_SEL:
-                self.nsr = concat(LogicArray(0, range(self.AWIDTH + 2)), concat(CommonDefaults.JTAG_ID, LogicArray(1)))
+                self.nsr = concat(
+                    LogicArray(0, range(self.AWIDTH + 2)), concat(Defaults.JTAG_ID, LogicArray(1))
+                )
 
         elif self.state == JTAGStates.SHIFT_IR_STATE:
             self.nsr = concat(LogicArray(0, range(self.AWIDTH + 29)), concat(tdi_lr, self.sr[4:1]))
@@ -198,21 +274,27 @@ class JTAGPredictor:
         elif self.state == JTAGStates.CAPTURE_IR_STATE:
             self.nsr = LogicArray(1, self.reg_range)
 
-
     def predict_regs_negedge(self):
         self.tdo = Logic(get_int(self.sr[0]))
-        self.tdoEnable = Logic(1) if self.state in [JTAGStates.SHIFT_DR_STATE, JTAGStates.SHIFT_IR_STATE] else Logic(0)
+        self.tdoEnable = (
+            Logic(1)
+            if self.state in [JTAGStates.SHIFT_DR_STATE, JTAGStates.SHIFT_IR_STATE]
+            else Logic(0)
+        )
         self.predict_nsr_reg()
-
 
     def predict_ports(self):
         """
         Calculate JTAG TAP output ports' values
         """
 
-        self.tdoEnable = Logic(1) if self.state in [JTAGStates.SHIFT_DR_STATE, JTAGStates.SHIFT_IR_STATE] else Logic(0)
+        self.tdoEnable = (
+            Logic(1)
+            if self.state in [JTAGStates.SHIFT_DR_STATE, JTAGStates.SHIFT_IR_STATE]
+            else Logic(0)
+        )
 
-        self.wr_addr = LogicArray(get_int(self.dr[self.AWIDTH+34-1:34]))
+        self.wr_addr = LogicArray(get_int(self.dr[self.AWIDTH + 34 - 1 : 34]))
         self.wr_data = LogicArray(get_int(self.dr[33:2]))
         self.wr_en = Logic(get_int(self.dr[1]))
         self.rd_en = Logic(get_int(self.dr[0]))
@@ -223,7 +305,6 @@ class JTAGPredictor:
             self.dmi_hard_reset = Logic(get_int(self.sr[17]))
         else:
             self.dmi_hard_reset = Logic(0)
-
 
     def predict_jtag_outputs(self, edge):
         """
@@ -249,4 +330,4 @@ class JTAGPredictor:
         self.logger.debug("nsr: {}".format(self.nsr))
         self.logger.debug("sr:  {}".format(self.sr))
         self.logger.debug("dr:  {}".format(self.dr))
-        self.logger.debug("ir:  {}".format(self.ir))
+        self.logger.debug("ir:  {}\n".format(self.ir))

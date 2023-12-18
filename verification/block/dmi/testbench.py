@@ -8,37 +8,69 @@ from decimal import Decimal
 import pyuvm
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles, Timer
+from dmi_agent import DMIAgent
 from jtag_agent import JTAGAgent
 from jtag_predictor import JTAGPredictor
 from pyuvm import *
 
-from common import CommonDefaults
 
-
-class JTAGScoreboard(uvm_scoreboard):
+class Scoreboard(uvm_scoreboard):
     def build_phase(self):
-        self.rsp_fifo = uvm_tlm_analysis_fifo("rsp_fifo", self)
-        self.rsp_get_port = uvm_get_port("rsp_get_port", self)
-        self.rsp_export = self.rsp_fifo.analysis_export
+        self.jtag_rsp_fifo = uvm_tlm_analysis_fifo("jtag_rsp_fifo", self)
+        self.jtag_rsp_get_port = uvm_get_port("jtag_rsp_get_port", self)
+        self.jtag_rsp_export = self.jtag_rsp_fifo.analysis_export
+
+        self.dmi_rsp_fifo = uvm_tlm_analysis_fifo("dmi_rsp_fifo", self)
+        self.dmi_rsp_get_port = uvm_get_port("dmi_rsp_get_port", self)
+        self.dmi_rsp_export = self.dmi_rsp_fifo.analysis_export
 
     def connect_phase(self):
-        self.rsp_get_port.connect(self.rsp_fifo.get_export)
+        self.jtag_rsp_get_port.connect(self.jtag_rsp_fifo.get_export)
+        self.dmi_rsp_get_port.connect(self.dmi_rsp_fifo.get_export)
 
     def check_phase(self):
-        passed = True
-        self.logger.info("Entering Scoreboard check phase")
+        self.logger.debug("Entering Scoreboard check phase")
+        self.check_jtag()
+        self.check_dmi()
 
-        while self.rsp_get_port.can_get():
-            _, item = self.rsp_get_port.try_get()
+    def check_dmi(self):
+        passed = True
+        while self.dmi_rsp_get_port.can_get():
+            _, item = self.dmi_rsp_get_port.try_get()
+
+            values, dmi_type = item
+            rd_data, dmi_rdata, dmi_addr, dmi_en, pred_en = values
+
+            if pred_en != dmi_en:
+                self.logger.error("Unexpected state of DMI enable signal")
+                passed = False
+
+            self.logger.debug("Checking DMI {} at address {}".format(dmi_type, str(hex(dmi_addr))))
+            if dmi_en and (rd_data != dmi_rdata):
+                self.logger.error(
+                    "Read data does not match expected data ({} vs {})".format(
+                        str(hex(rd_data)), str(hex(dmi_rdata))
+                    )
+                )
+                passed = False
+
+        assert passed
+
+    def check_jtag(self):
+        passed = True
+        while self.jtag_rsp_get_port.can_get():
+            _, item = self.jtag_rsp_get_port.try_get()
 
             out_ports = item[0]
             predicted_ports = item[1]
 
-            for i, s in enumerate(["tdo", "tdoEnable", "reg_wr_data", "reg_wr_addr", "dmi_hard_reset"]):
+            for i, s in enumerate(["tdo", "tdoEnable"]):
                 out = out_ports[i]
                 predicted = predicted_ports[i]
 
-                self.logger.debug("Current check of {} (actual: {} vs expected: {})".format(s, out, predicted))
+                self.logger.debug(
+                    "Current check of {} (actual: {} vs expected: {})".format(s, out, predicted)
+                )
                 if out != predicted:
                     self.logger.error("Unexpected state of {} ({} vs {})".format(s, out, predicted))
                     passed = False
@@ -57,14 +89,16 @@ class BaseEnvironment(uvm_env):
         ConfigDB().set(None, "*", "TEST_CORE_CLK_PERIOD", 1)
         ConfigDB().set(None, "*", "AWIDTH", 7)
 
-        self.agent = JTAGAgent("jtag_agent", self)
+        self.jtag_agent = JTAGAgent("jtag_agent", self)
+        self.dmi_agent = DMIAgent("dmi_agent", self)
         self.predictor = JTAGPredictor(cocotb.top)
-        self.scoreboard = JTAGScoreboard("jtag_scoreboard", self)
+        self.scoreboard = Scoreboard("scoreboard", self)
 
         ConfigDB().set(None, "*", "JTAG_PREDICTOR", self.predictor)
 
     def connect_phase(self):
-        self.agent.monitor.ap.connect(self.scoreboard.rsp_export)
+        self.jtag_agent.monitor.ap.connect(self.scoreboard.jtag_rsp_export)
+        self.dmi_agent.monitor.ap.connect(self.scoreboard.dmi_rsp_export)
 
 
 # ==============================================================================
@@ -90,11 +124,18 @@ class BaseTest(uvm_test):
         clock = Clock(sig, period, units="ns")
         cocotb.start_soon(clock.start(start_high=False))
 
-    async def do_reset(self, signalName, timeLength="100e-9", isActiveHigh=True):
-        signal = getattr(cocotb.top, signalName)
-        signal.value = int(isActiveHigh)
+    async def do_reset(self, signals, timeLength="100e-9", isActiveHigh=True):
+        assert isinstance(signals, list)
+
+        for s in signals:
+            signal = getattr(cocotb.top, s)
+            signal.value = int(isActiveHigh)
+
         await Timer(Decimal(timeLength), units="sec")
-        signal.value = not int(isActiveHigh)
+
+        for s in signals:
+            signal = getattr(cocotb.top, s)
+            signal.value = not int(isActiveHigh)
 
     async def run_phase(self):
         self.raise_objection()
@@ -105,12 +146,12 @@ class BaseTest(uvm_test):
         self.start_clock("core_clk", core_period)
         self.start_clock("tck", jtag_period)
         clk = getattr(cocotb.top, "core_clk")
-        cocotb.top.jtag_id.value = CommonDefaults.JTAG_ID
 
         # Issue reset
         resetLength = "100e-9"
-        await self.do_reset(signalName="trst_n", timeLength=resetLength, isActiveHigh=False)
-        await self.do_reset(signalName="core_rst_n", timeLength=resetLength, isActiveHigh=False)
+        await self.do_reset(
+            signals=["trst_n", "core_rst_n"], timeLength=resetLength, isActiveHigh=False
+        )
 
         await ClockCycles(clk, 2)
         await self.run()

@@ -4,7 +4,7 @@
 module dmi_mux (
 
     // Uncore access enable
-    input  wire uncore_enable,
+    input wire uncore_enable,
 
     // DMI upstream
     input  wire        dmi_en,
@@ -27,6 +27,7 @@ module dmi_mux (
     output wire [31:0] dmi_uncore_wdata,
     input  wire [31:0] dmi_uncore_rdata
 );
+  logic is_uncore_aperture;
 
   // Uncore address decoder
   assign is_uncore_aperture = (dmi_addr[6] & (dmi_addr[5] | dmi_addr[4]));

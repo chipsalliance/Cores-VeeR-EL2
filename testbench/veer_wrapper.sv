@@ -341,7 +341,15 @@ module veer_wrapper
     input logic i_cpu_run_req,  // Async restart req to CPU
     output logic o_cpu_run_ack,  // Core response to run req
     input logic scan_mode,  // To enable scan mode
-    input logic mbist_mode  // to enable mbist
+    input logic mbist_mode,  // to enable mbist
+
+    // DMI port for uncore
+    input  logic        dmi_uncore_enable,
+    output logic        dmi_uncore_en,
+    output logic        dmi_uncore_wr_en,
+    output logic [ 6:0] dmi_uncore_addr,
+    output logic [31:0] dmi_uncore_wdata,
+    input  logic [31:0] dmi_uncore_rdata
 );
 
   el2_mem_if mem_export ();

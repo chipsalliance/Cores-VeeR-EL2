@@ -335,11 +335,12 @@ import el2_pkg::*;
    input logic                             mbist_mode,    // to enable mbist
 
    // DMI port for uncore
+   input logic                             dmi_uncore_enable,
    output logic                            dmi_uncore_en,
    output logic                            dmi_uncore_wr_en,
-   output logic                            dmi_uncore_addr,
-   output logic                            dmi_uncore_wdata,
-   input  logic                            dmi_uncore_rdata
+   output logic                     [ 6:0] dmi_uncore_addr,
+   output logic                     [31:0] dmi_uncore_wdata,
+   input logic                      [31:0] dmi_uncore_rdata
 );
 
    logic                             active_l2clk;
@@ -701,13 +702,6 @@ import el2_pkg::*;
    logic [31:0]            dmi_reg_wdata;
    logic [31:0]            dmi_reg_rdata;
 
-   // DMI (uncore)
-   logic                   dmi_uncore_en;
-   logic [6:0]             dmi_uncore_addr;
-   logic                   dmi_uncore_wr_en;
-   logic [31:0]            dmi_uncore_wdata;
-   logic [31:0]            dmi_uncore_rdata;
-
    // Instantiate the el2_veer core
    el2_veer #(.pt(pt)) veer (
                                 .clk(clk),
@@ -746,6 +740,8 @@ import el2_pkg::*;
 
    // DMI core/uncore mux
    dmi_mux dmi_mux (
+    .uncore_enable      (dmi_uncore_enable),
+
     .dmi_en             (dmi_en),
     .dmi_wr_en          (dmi_wr_en),
     .dmi_addr           (dmi_addr),
@@ -766,11 +762,11 @@ import el2_pkg::*;
    );
 
 `ifdef RV_ASSERT_ON
-// to avoid internal assertions failure at time 0
-initial begin
+  // to avoid internal assertions failure at time 0
+  initial begin
     $assertoff(0, veer);
-    @ (negedge clk) $asserton(0, veer);
-end
+    @(negedge clk) $asserton(0, veer);
+  end
 `endif
 
 endmodule

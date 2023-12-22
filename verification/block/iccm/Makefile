@@ -12,6 +12,7 @@ MODULE      ?= $(subst $(space),$(comma),$(subst .py,,$(TEST_FILES)))
 TOPLEVEL     = el2_ifu_iccm_mem_wrapper
 
 VERILOG_SOURCES  = \
+    $(SRCDIR)/lib/el2_mem_if.sv \
     $(CURDIR)/iccm/el2_ifu_iccm_mem_wrapper.sv \
     $(SRCDIR)/ifu/el2_ifu_iccm_mem.sv \
     $(SRCDIR)/lib/mem_lib.sv

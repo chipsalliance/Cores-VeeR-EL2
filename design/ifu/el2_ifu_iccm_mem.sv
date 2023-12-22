@@ -1,6 +1,7 @@
 //********************************************************************************
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2020 Western Digital Corporation or its affiliates.
+// Copyright (c) 2023 Antmicro <www.antmicro.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,7 +38,7 @@ import el2_pkg::*;
    input logic [2:0]                                  iccm_wr_size,                        // ICCM write size
    input logic [77:0]                                 iccm_wr_data,                        // ICCM write data
 
-   input el2_ccm_ext_in_pkt_t [pt.ICCM_NUM_BANKS-1:0] iccm_ext_in_pkt,                    // External packet
+   el2_mem_if.veer_iccm                               iccm_mem_export,                     // RAM repositioned in testbench and connected by this interface
 
    output logic [63:0]                                iccm_rd_data,                        // ICCM read data
    output logic [77:0]                                iccm_rd_data_ecc,                    // ICCM read ecc
@@ -108,270 +109,22 @@ import el2_pkg::*;
                                                                                       ((addr_bank_inc[pt.ICCM_BANK_HI:2] == i) ?
                                                                                                     addr_bank_inc[pt.ICCM_BITS-1 : pt.ICCM_BANK_INDEX_LO] :
                                                                                                     iccm_rw_addr[pt.ICCM_BITS-1 : pt.ICCM_BANK_INDEX_LO]);
- `ifdef VERILATOR
 
-    el2_ram #(.depth(1<<pt.ICCM_INDEX_BITS), .width(39)) iccm_bank (
-                                     // Primary ports
-                                     .ME(iccm_clken[i]),
-                                     .CLK(clk),
-                                     .WE(wren_bank[i]),
-                                     .ADR(addr_bank[i]),
-                                     .D(iccm_bank_wr_data[i][38:0]),
-                                     .Q(iccm_bank_dout[i][38:0]),
-                                     .ROP ( ),
-                                     // These are used by SoC
-                                     .TEST1(iccm_ext_in_pkt[i].TEST1),
-                                     .RME(iccm_ext_in_pkt[i].RME),
-                                     .RM(iccm_ext_in_pkt[i].RM),
-                                     .LS(iccm_ext_in_pkt[i].LS),
-                                     .DS(iccm_ext_in_pkt[i].DS),
-                                     .SD(iccm_ext_in_pkt[i].SD) ,
-                                     .TEST_RNM(iccm_ext_in_pkt[i].TEST_RNM),
-                                     .BC1(iccm_ext_in_pkt[i].BC1),
-                                     .BC2(iccm_ext_in_pkt[i].BC2)
+    always_comb begin
+      iccm_mem_export.iccm_clken[i]        = iccm_clken[i];
+      iccm_mem_export.iccm_wren_bank[i]    = wren_bank[i];
+      iccm_mem_export.iccm_addr_bank[i]    = addr_bank[i];
+      iccm_mem_export.iccm_bank_wr_data[i] = iccm_bank_wr_data[i][31:0];
+      iccm_mem_export.iccm_bank_wr_ecc[i]  = iccm_bank_wr_data[i][38:32];
+      iccm_bank_dout[i][31:0]              = iccm_mem_export.iccm_bank_dout[i];
+      iccm_bank_dout[i][38:32]             = iccm_mem_export.iccm_bank_ecc[i];
+    end
 
-                                      );
- `else
-
-     if (pt.ICCM_INDEX_BITS == 6 ) begin : iccm
-               ram_64x39 iccm_bank (
-                                     // Primary ports
-                                     .CLK(clk),
-                                     .ME(iccm_clken[i]),
-                                     .WE(wren_bank[i]),
-                                     .ADR(addr_bank[i]),
-                                     .D(iccm_bank_wr_data[i][38:0]),
-                                     .Q(iccm_bank_dout[i][38:0]),
-                                     .ROP ( ),
-                                     // These are used by SoC
-                                     .TEST1(iccm_ext_in_pkt[i].TEST1),
-                                     .RME(iccm_ext_in_pkt[i].RME),
-                                     .RM(iccm_ext_in_pkt[i].RM),
-                                     .LS(iccm_ext_in_pkt[i].LS),
-                                     .DS(iccm_ext_in_pkt[i].DS),
-                                     .SD(iccm_ext_in_pkt[i].SD) ,
-                                     .TEST_RNM(iccm_ext_in_pkt[i].TEST_RNM),
-                                     .BC1(iccm_ext_in_pkt[i].BC1),
-                                     .BC2(iccm_ext_in_pkt[i].BC2)
-
-                                      );
-     end // block: iccm
-
-   else if (pt.ICCM_INDEX_BITS == 7 ) begin : iccm
-               ram_128x39 iccm_bank (
-                                     // Primary ports
-                                     .CLK(clk),
-                                     .ME(iccm_clken[i]),
-                                     .WE(wren_bank[i]),
-                                     .ADR(addr_bank[i]),
-                                     .D(iccm_bank_wr_data[i][38:0]),
-                                     .Q(iccm_bank_dout[i][38:0]),
-                                     .ROP ( ),
-                                     // These are used by SoC
-                                     .TEST1(iccm_ext_in_pkt[i].TEST1),
-                                     .RME(iccm_ext_in_pkt[i].RME),
-                                     .RM(iccm_ext_in_pkt[i].RM),
-                                     .LS(iccm_ext_in_pkt[i].LS),
-                                     .DS(iccm_ext_in_pkt[i].DS),
-                                     .SD(iccm_ext_in_pkt[i].SD) ,
-                                     .TEST_RNM(iccm_ext_in_pkt[i].TEST_RNM),
-                                     .BC1(iccm_ext_in_pkt[i].BC1),
-                                     .BC2(iccm_ext_in_pkt[i].BC2)
-
-                                      );
-     end // block: iccm
-
-     else if (pt.ICCM_INDEX_BITS == 8 ) begin : iccm
-               ram_256x39 iccm_bank (
-                                     // Primary ports
-                                     .CLK(clk),
-                                     .ME(iccm_clken[i]),
-                                     .WE(wren_bank[i]),
-                                     .ADR(addr_bank[i]),
-                                     .D(iccm_bank_wr_data[i][38:0]),
-                                     .Q(iccm_bank_dout[i][38:0]),
-                                     .ROP ( ),
-                                     // These are used by SoC
-                                     .TEST1(iccm_ext_in_pkt[i].TEST1),
-                                     .RME(iccm_ext_in_pkt[i].RME),
-                                     .RM(iccm_ext_in_pkt[i].RM),
-                                     .LS(iccm_ext_in_pkt[i].LS),
-                                     .DS(iccm_ext_in_pkt[i].DS),
-                                     .SD(iccm_ext_in_pkt[i].SD) ,
-                                     .TEST_RNM(iccm_ext_in_pkt[i].TEST_RNM),
-                                     .BC1(iccm_ext_in_pkt[i].BC1),
-                                     .BC2(iccm_ext_in_pkt[i].BC2)
-
-                                      );
-     end // block: iccm
-     else if (pt.ICCM_INDEX_BITS == 9 ) begin : iccm
-               ram_512x39 iccm_bank (
-                                     // Primary ports
-                                     .CLK(clk),
-                                     .ME(iccm_clken[i]),
-                                     .WE(wren_bank[i]),
-                                     .ADR(addr_bank[i]),
-                                     .D(iccm_bank_wr_data[i][38:0]),
-                                     .Q(iccm_bank_dout[i][38:0]),
-                                     .ROP ( ),
-                                     // These are used by SoC
-                                     .TEST1(iccm_ext_in_pkt[i].TEST1),
-                                     .RME(iccm_ext_in_pkt[i].RME),
-                                     .RM(iccm_ext_in_pkt[i].RM),
-                                     .LS(iccm_ext_in_pkt[i].LS),
-                                     .DS(iccm_ext_in_pkt[i].DS),
-                                     .SD(iccm_ext_in_pkt[i].SD) ,
-                                     .TEST_RNM(iccm_ext_in_pkt[i].TEST_RNM),
-                                     .BC1(iccm_ext_in_pkt[i].BC1),
-                                     .BC2(iccm_ext_in_pkt[i].BC2)
-
-                                      );
-     end // block: iccm
-     else if (pt.ICCM_INDEX_BITS == 10 ) begin : iccm
-               ram_1024x39 iccm_bank (
-                                     // Primary ports
-                                     .CLK(clk),
-                                     .ME(iccm_clken[i]),
-                                     .WE(wren_bank[i]),
-                                     .ADR(addr_bank[i]),
-                                     .D(iccm_bank_wr_data[i][38:0]),
-                                     .Q(iccm_bank_dout[i][38:0]),
-                                     .ROP ( ),
-                                     // These are used by SoC
-                                     .TEST1(iccm_ext_in_pkt[i].TEST1),
-                                     .RME(iccm_ext_in_pkt[i].RME),
-                                     .RM(iccm_ext_in_pkt[i].RM),
-                                     .LS(iccm_ext_in_pkt[i].LS),
-                                     .DS(iccm_ext_in_pkt[i].DS),
-                                     .SD(iccm_ext_in_pkt[i].SD) ,
-                                     .TEST_RNM(iccm_ext_in_pkt[i].TEST_RNM),
-                                     .BC1(iccm_ext_in_pkt[i].BC1),
-                                     .BC2(iccm_ext_in_pkt[i].BC2)
-
-                                      );
-     end // block: iccm
-     else if (pt.ICCM_INDEX_BITS == 11 ) begin : iccm
-               ram_2048x39 iccm_bank (
-                                     // Primary ports
-                                     .CLK(clk),
-                                     .ME(iccm_clken[i]),
-                                     .WE(wren_bank[i]),
-                                     .ADR(addr_bank[i]),
-                                     .D(iccm_bank_wr_data[i][38:0]),
-                                     .Q(iccm_bank_dout[i][38:0]),
-                                     .ROP ( ),
-                                     // These are used by SoC
-                                     .TEST1(iccm_ext_in_pkt[i].TEST1),
-                                     .RME(iccm_ext_in_pkt[i].RME),
-                                     .RM(iccm_ext_in_pkt[i].RM),
-                                     .LS(iccm_ext_in_pkt[i].LS),
-                                     .DS(iccm_ext_in_pkt[i].DS),
-                                     .SD(iccm_ext_in_pkt[i].SD) ,
-                                     .TEST_RNM(iccm_ext_in_pkt[i].TEST_RNM),
-                                     .BC1(iccm_ext_in_pkt[i].BC1),
-                                     .BC2(iccm_ext_in_pkt[i].BC2)
-
-                                      );
-     end // block: iccm
-     else if (pt.ICCM_INDEX_BITS == 12 ) begin : iccm
-               ram_4096x39 iccm_bank (
-                                     // Primary ports
-                                     .CLK(clk),
-                                     .ME(iccm_clken[i]),
-                                     .WE(wren_bank[i]),
-                                     .ADR(addr_bank[i]),
-                                     .D(iccm_bank_wr_data[i][38:0]),
-                                     .Q(iccm_bank_dout[i][38:0]),
-                                     .ROP ( ),
-                                     // These are used by SoC
-                                     .TEST1(iccm_ext_in_pkt[i].TEST1),
-                                     .RME(iccm_ext_in_pkt[i].RME),
-                                     .RM(iccm_ext_in_pkt[i].RM),
-                                     .LS(iccm_ext_in_pkt[i].LS),
-                                     .DS(iccm_ext_in_pkt[i].DS),
-                                     .SD(iccm_ext_in_pkt[i].SD) ,
-                                     .TEST_RNM(iccm_ext_in_pkt[i].TEST_RNM),
-                                     .BC1(iccm_ext_in_pkt[i].BC1),
-                                     .BC2(iccm_ext_in_pkt[i].BC2)
-
-                                      );
-     end // block: iccm
-     else if (pt.ICCM_INDEX_BITS == 13 ) begin : iccm
-               ram_8192x39 iccm_bank (
-                                     // Primary ports
-                                     .CLK(clk),
-                                     .ME(iccm_clken[i]),
-                                     .WE(wren_bank[i]),
-                                     .ADR(addr_bank[i]),
-                                     .D(iccm_bank_wr_data[i][38:0]),
-                                     .Q(iccm_bank_dout[i][38:0]),
-                                     .ROP ( ),
-                                     // These are used by SoC
-                                     .TEST1(iccm_ext_in_pkt[i].TEST1),
-                                     .RME(iccm_ext_in_pkt[i].RME),
-                                     .RM(iccm_ext_in_pkt[i].RM),
-                                     .LS(iccm_ext_in_pkt[i].LS),
-                                     .DS(iccm_ext_in_pkt[i].DS),
-                                     .SD(iccm_ext_in_pkt[i].SD) ,
-                                     .TEST_RNM(iccm_ext_in_pkt[i].TEST_RNM),
-                                     .BC1(iccm_ext_in_pkt[i].BC1),
-                                     .BC2(iccm_ext_in_pkt[i].BC2)
-
-                                      );
-     end // block: iccm
-     else if (pt.ICCM_INDEX_BITS == 14 ) begin : iccm
-               ram_16384x39 iccm_bank (
-                                     // Primary ports
-                                     .CLK(clk),
-                                     .ME(iccm_clken[i]),
-                                     .WE(wren_bank[i]),
-                                     .ADR(addr_bank[i]),
-                                     .D(iccm_bank_wr_data[i][38:0]),
-                                     .Q(iccm_bank_dout[i][38:0]),
-                                     .ROP ( ),
-                                     // These are used by SoC
-                                     .TEST1(iccm_ext_in_pkt[i].TEST1),
-                                     .RME(iccm_ext_in_pkt[i].RME),
-                                     .RM(iccm_ext_in_pkt[i].RM),
-                                     .LS(iccm_ext_in_pkt[i].LS),
-                                     .DS(iccm_ext_in_pkt[i].DS),
-                                     .SD(iccm_ext_in_pkt[i].SD) ,
-                                     .TEST_RNM(iccm_ext_in_pkt[i].TEST_RNM),
-                                     .BC1(iccm_ext_in_pkt[i].BC1),
-                                     .BC2(iccm_ext_in_pkt[i].BC2)
-
-                                      );
-     end // block: iccm
-     else begin : iccm
-               ram_32768x39 iccm_bank (
-                                     // Primary ports
-                                     .CLK(clk),
-                                     .ME(iccm_clken[i]),
-                                     .WE(wren_bank[i]),
-                                     .ADR(addr_bank[i]),
-                                     .D(iccm_bank_wr_data[i][38:0]),
-                                     .Q(iccm_bank_dout[i][38:0]),
-                                     .ROP ( ),
-                                     // These are used by SoC
-                                     .TEST1(iccm_ext_in_pkt[i].TEST1),
-                                     .RME(iccm_ext_in_pkt[i].RME),
-                                     .RM(iccm_ext_in_pkt[i].RM),
-                                     .LS(iccm_ext_in_pkt[i].LS),
-                                     .DS(iccm_ext_in_pkt[i].DS),
-                                     .SD(iccm_ext_in_pkt[i].SD) ,
-                                     .TEST_RNM(iccm_ext_in_pkt[i].TEST_RNM),
-                                     .BC1(iccm_ext_in_pkt[i].BC1),
-                                     .BC2(iccm_ext_in_pkt[i].BC2)
-
-                                      );
-     end // block: iccm
-`endif
-
-   // match the redundant rows
-   assign sel_red1[i]  = (redundant_valid[1]  & (((iccm_rw_addr[pt.ICCM_BITS-1:2] == redundant_address[1][pt.ICCM_BITS-1:2]) & (iccm_rw_addr[3:2] == i)) |
+    // match the redundant rows
+    assign sel_red1[i]  = (redundant_valid[1]  & (((iccm_rw_addr[pt.ICCM_BITS-1:2] == redundant_address[1][pt.ICCM_BITS-1:2]) & (iccm_rw_addr[3:2] == i)) |
                                                  ((addr_bank_inc[pt.ICCM_BITS-1:2]== redundant_address[1][pt.ICCM_BITS-1:2]) & (addr_bank_inc[3:2] == i))));
 
-   assign sel_red0[i]  = (redundant_valid[0]  & (((iccm_rw_addr[pt.ICCM_BITS-1:2] == redundant_address[0][pt.ICCM_BITS-1:2]) & (iccm_rw_addr[3:2] == i)) |
+    assign sel_red0[i]  = (redundant_valid[0]  & (((iccm_rw_addr[pt.ICCM_BITS-1:2] == redundant_address[0][pt.ICCM_BITS-1:2]) & (iccm_rw_addr[3:2] == i)) |
                                                  ((addr_bank_inc[pt.ICCM_BITS-1:2]== redundant_address[0][pt.ICCM_BITS-1:2]) & (addr_bank_inc[3:2] == i))));
 
    rvdff #(1) selred0  (.*,

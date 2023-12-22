@@ -1,3 +1,6 @@
+// Copyright (c) 2023 Antmicro
+// SPDX-License-Identifier: Apache-2.0
+
 class dccm_driver extends uvm_driver #(dccm_transaction_sequence_item);
 
   virtual dccm_interface memory_vif;

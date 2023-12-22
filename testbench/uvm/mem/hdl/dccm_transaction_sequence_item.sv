@@ -1,3 +1,6 @@
+// Copyright (c) 2023 Antmicro
+// SPDX-License-Identifier: Apache-2.0
+
 class dccm_transaction_sequence_item extends uvm_sequence_item;
 
   `include "el2_param.vh"

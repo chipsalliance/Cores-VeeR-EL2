@@ -12,6 +12,7 @@ MODULE      ?= $(subst $(space),$(comma),$(subst .py,,$(TEST_FILES)))
 TOPLEVEL     = el2_lsu_dccm_mem_wrapper
 
 VERILOG_SOURCES  = \
+    $(SRCDIR)/lib/el2_mem_if.sv \
     $(CURDIR)/dccm/el2_lsu_dccm_mem_wrapper.sv \
     $(SRCDIR)/lsu/el2_lsu_dccm_mem.sv \
     $(SRCDIR)/lib/mem_lib.sv

@@ -1,6 +1,7 @@
 //********************************************************************************
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2020 Western Digital Corporation or its affiliates.
+// Copyright (c) 2023 Antmicro <www.antmicro.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,14 +42,7 @@ import el2_pkg::*;
    output logic [pt.DCCM_FDATA_WIDTH-1:0]  dccm_rd_data_lo,
    output logic [pt.DCCM_FDATA_WIDTH-1:0]  dccm_rd_data_hi,
 
-//`ifdef pt.DCCM_ENABLE
-   input el2_dccm_ext_in_pkt_t  [pt.DCCM_NUM_BANKS-1:0] dccm_ext_in_pkt,
-
-//`endif
-
    //ICCM ports
-   input el2_ccm_ext_in_pkt_t   [pt.ICCM_NUM_BANKS-1:0]  iccm_ext_in_pkt,
-
    input logic [pt.ICCM_BITS-1:1]  iccm_rw_addr,
    input logic                                        iccm_buf_correct_ecc,                    // ICCM is doing a single bit error correct cycle
    input logic                                        iccm_correction_state,               // ICCM is doing a single bit error correct cycle
@@ -89,6 +83,7 @@ import el2_pkg::*;
    output logic [pt.ICACHE_NUM_WAYS-1:0]   ic_rd_hit,
    output logic         ic_tag_perr,        // Icache Tag parity error
 
+   el2_mem_if.veer_sram_src mem_export,
 
    input  logic         scan_mode
 
@@ -97,10 +92,32 @@ import el2_pkg::*;
    logic active_clk;
    rvoclkhdr active_cg   ( .en(1'b1),         .l1clk(active_clk), .* );
 
+   el2_mem_if mem_export_local ();
+
+   assign mem_export      .clk = clk;
+   assign mem_export_local.clk = clk;
+
+   assign mem_export      .iccm_clken         = mem_export_local.iccm_clken;
+   assign mem_export      .iccm_wren_bank     = mem_export_local.iccm_wren_bank;
+   assign mem_export      .iccm_addr_bank     = mem_export_local.iccm_addr_bank;
+   assign mem_export      .iccm_bank_wr_data  = mem_export_local.iccm_bank_wr_data;
+   assign mem_export      .iccm_bank_wr_ecc   = mem_export_local.iccm_bank_wr_ecc;
+   assign mem_export_local.iccm_bank_dout     = mem_export.      iccm_bank_dout;
+   assign mem_export_local.iccm_bank_ecc      = mem_export.      iccm_bank_ecc;
+
+   assign mem_export      .dccm_clken         = mem_export_local.dccm_clken;
+   assign mem_export      .dccm_wren_bank     = mem_export_local.dccm_wren_bank;
+   assign mem_export      .dccm_addr_bank     = mem_export_local.dccm_addr_bank;
+   assign mem_export      .dccm_wr_data_bank  = mem_export_local.dccm_wr_data_bank;
+   assign mem_export      .dccm_wr_ecc_bank   = mem_export_local.dccm_wr_ecc_bank;
+   assign mem_export_local.dccm_bank_dout     = mem_export      .dccm_bank_dout;
+   assign mem_export_local.dccm_bank_ecc      = mem_export      .dccm_bank_ecc;
+
    // DCCM Instantiation
    if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable
       el2_lsu_dccm_mem #(.pt(pt)) dccm (
          .clk_override(dccm_clk_override),
+         .dccm_mem_export(mem_export_local.veer_dccm),
          .*
       );
    end else begin: Gen_dccm_disable
@@ -127,7 +144,8 @@ if (pt.ICCM_ENABLE) begin : iccm
    el2_ifu_iccm_mem  #(.pt(pt)) iccm (.*,
                   .clk_override(icm_clk_override),
                   .iccm_rw_addr(iccm_rw_addr[pt.ICCM_BITS-1:1]),
-                  .iccm_rd_data(iccm_rd_data[63:0])
+                  .iccm_rd_data(iccm_rd_data[63:0]),
+                  .iccm_mem_export(mem_export_local.veer_iccm)
                    );
 end
 else  begin

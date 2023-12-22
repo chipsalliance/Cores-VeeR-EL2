@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2020 Western Digital Corporation or its affiliates.
+# Copyright (c) 2023 Antmicro <www.antmicro.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,7 +55,7 @@ COCOTB_HDL_TIMEPRECISION ?= 1ps
 UVM_TEST ?= test_irq.test_irq
 SIM_DIR ?= sim
 
-TOP_MODULE = el2_veer_wrapper
+TOP_MODULE = veer_wrapper
 
 VERILOG_DEFINE_FILES = $(BUILD_DIR)/common_defines.vh
 VERILOG_DEFINE_FILES += ${RV_ROOT}/design/include/el2_def.sv

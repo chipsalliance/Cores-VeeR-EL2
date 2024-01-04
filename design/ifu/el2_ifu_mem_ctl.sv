@@ -162,8 +162,10 @@ import el2_pkg::*;
    output logic                      ic_hit_f,               // Hit in Icache(if Icache access) or ICCM access( ICCM always has ic_hit_f)
    output logic [1:0]                ic_access_fault_f,      // Access fault (bus error or ICCM access in region but out of offset range).
    output logic [1:0]                ic_access_fault_type_f, // Access fault types
-   output logic                      iccm_rd_ecc_single_err, // This fetch has a single ICCM ecc  error.
-   output logic [1:0]                iccm_rd_ecc_double_err, // This fetch has a double ICCM ecc  error.
+   output logic                      iccm_rd_ecc_single_err, // This fetch has a single ICCM ECC error.
+   output logic [1:0]                iccm_rd_ecc_double_err, // This fetch has a double ICCM ECC error.
+   output logic                      iccm_dma_rd_ecc_single_err, // This fetch has a single ICCM DMA ECC error.
+   output logic                      iccm_dma_rd_ecc_double_err, // This fetch has a double ICCM DMA ECC error.
    output logic                      ic_error_start,         // This has any I$ errors ( data/tag/ecc/parity )
 
    output logic                      ifu_async_error_start,  // Or of the sb iccm, and all the icache errors sent to aligner to stop
@@ -1277,6 +1279,9 @@ ifc_dma_access_ok_prev,dma_iccm_req_f})
          assign iccm_rw_addr[pt.ICCM_BITS-1:1]    = (  ifc_dma_access_q_ok & dma_iccm_req  & ~iccm_correct_ecc) ? dma_mem_addr[pt.ICCM_BITS-1:1] :
                                                  (~(ifc_dma_access_q_ok & dma_iccm_req) &  iccm_correct_ecc) ? {iccm_ecc_corr_index_ff[pt.ICCM_BITS-1:2],1'b0} : ifc_fetch_addr_bf[pt.ICCM_BITS-1:1] ;
 
+
+    assign iccm_dma_rd_ecc_single_err = iccm_dma_sb_error;
+    assign iccm_dma_rd_ecc_double_err = iccm_dma_rvalid && iccm_dma_ecc_error;
 
 
 

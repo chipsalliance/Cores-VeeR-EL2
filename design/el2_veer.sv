@@ -377,6 +377,12 @@ import el2_pkg::*;
    input logic [31:0]           dmi_reg_wdata,             // write data
    output logic [31:0]          dmi_reg_rdata,
 
+   // ICCM/DCCM ECC status
+   output logic                 iccm_ecc_single_error,
+   output logic                 iccm_ecc_double_error,
+   output logic                 dccm_ecc_single_error,
+   output logic                 dccm_ecc_double_error,
+
    input logic [pt.PIC_TOTAL_INT:1]           extintsrc_req,
    input logic                   timer_int,
    input logic                   soft_int,
@@ -393,7 +399,11 @@ import el2_pkg::*;
 
    logic                         ifu_pmu_instr_aligned;
    logic                         ifu_ic_error_start;
+   logic                         ifu_iccm_dma_rd_ecc_single_err;
    logic                         ifu_iccm_rd_ecc_single_err;
+   logic                         ifu_iccm_rd_ecc_double_err;
+   logic                         lsu_dccm_rd_ecc_single_err;
+   logic                         lsu_dccm_rd_ecc_double_err;
 
    logic                         lsu_axi_awready_ahb;
    logic                         lsu_axi_wready_ahb;
@@ -895,6 +905,9 @@ import el2_pkg::*;
                             );
 
 
+   assign iccm_ecc_single_error = ifu_iccm_rd_ecc_single_err || ifu_iccm_dma_rd_ecc_single_err;
+   assign iccm_ecc_double_error = ifu_iccm_rd_ecc_double_err;
+
    el2_dec #(.pt(pt)) dec (
                             .clk(active_l2clk),
                             .dbg_cmd_wrdata(dbg_cmd_wrdata[1:0]),
@@ -932,6 +945,8 @@ import el2_pkg::*;
 
                             );
 
+   assign dccm_ecc_single_error = lsu_dccm_rd_ecc_single_err;
+   assign dccm_ecc_double_error = lsu_dccm_rd_ecc_double_err;
 
    el2_pic_ctrl  #(.pt(pt)) pic_ctrl_inst (
                                             .clk(free_l2clk),

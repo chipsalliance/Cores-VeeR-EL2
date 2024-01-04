@@ -291,6 +291,12 @@ import el2_pkg::*;
    input logic                             dbg_bus_clk_en, // Clock ratio b/w cpu core clk & AHB master interface
    input logic                             dma_bus_clk_en, // Clock ratio b/w cpu core clk & AHB slave interface
 
+   // ICCM/DCCM ECC status
+   output logic                            iccm_ecc_single_error,
+   output logic                            iccm_ecc_double_error,
+   output logic                            dccm_ecc_single_error,
+   output logic                            dccm_ecc_double_error,
+
  // all of these test inputs are brought to top-level; must be tied off based on usage by physical design (ie. icache or not, iccm or not, dccm or not)
 
    input                                   el2_ic_data_ext_in_pkt_t  [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] ic_data_ext_in_pkt,

@@ -10,6 +10,9 @@ CURDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 CFGDIR := $(abspath $(CURDIR)/snapshots/default)
 CONFIG := $(abspath $(CURDIR)/../../configs)
 
+# Set pythonpath so that tests can access common modules
+export PYTHONPATH := $(CURDIR)/common
+
 # Common sources
 COMMON_SOURCES  = $(CFGDIR)/common_defines.vh
 COMMON_SOURCES += $(CFGDIR)/el2_pdef.vh

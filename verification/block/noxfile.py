@@ -267,6 +267,20 @@ def lib_axi4_to_ahb_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["lib_ahb_to_axi4"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_write",
+        "test_read",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def lib_ahb_to_axi4_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["pmp"])
 @nox.parametrize(
     "testName",

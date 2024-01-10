@@ -7,6 +7,7 @@ import random
 import struct
 
 import pyuvm
+from axi import Axi4LiteMonitor, BusReadItem, BusWriteItem
 from cocotb.clock import Clock
 from cocotb.triggers import (
     ClockCycles,
@@ -18,32 +19,9 @@ from cocotb.triggers import (
     Timer,
 )
 from pyuvm import *
+from utils import collect_bytes, collect_signals
 
 # ==============================================================================
-
-
-class BusWriteItem(uvm_sequence_item):
-    """
-    A generic data bus write request / response
-    """
-
-    def __init__(self, addr, data, resp=None):
-        super().__init__("BusWriteItem")
-        self.addr = addr
-        self.data = data
-        self.resp = resp
-
-
-class BusReadItem(uvm_sequence_item):
-    """
-    A generic data bus read request / response
-    """
-
-    def __init__(self, addr, data=None, resp=None):
-        super().__init__("BusReadItem")
-        self.addr = addr
-        self.data = data
-        self.resp = resp
 
 
 class MemWriteItem(uvm_sequence_item):
@@ -98,29 +76,6 @@ class DebugReadItem(uvm_sequence_item):
         self.data = data
         self.size = size
         self.fail = fail
-
-
-# ==============================================================================
-
-
-def collect_signals(signals, uut, obj, uut_prefix="", obj_prefix=""):
-    """
-    Collects signal objects from UUT and attaches them to the given object.
-    Optionally UUT signals can be prefixed with the uut_prefix and object
-    signals with the obj_prefix
-    """
-
-    for sig in signals:
-        uut_sig = uut_prefix + sig
-        obj_sig = obj_prefix + sig
-        if hasattr(uut, uut_sig):
-            s = getattr(uut, uut_sig)
-
-        else:
-            s = None
-            logging.error("Module {} does not have a signal '{}'".format(str(uut), sig))
-
-        setattr(obj, obj_sig, s)
 
 
 # ==============================================================================
@@ -358,6 +313,8 @@ class Axi4LiteBFM(uvm_component):
     """
 
     SIGNALS = [
+        "clk",
+        "rst",
         "awvalid",
         "awready",
         "awid",
@@ -396,13 +353,13 @@ class Axi4LiteBFM(uvm_component):
 
             self.pending = False
 
-    def __init__(self, name, parent, uut):
+    def __init__(self, name, parent, uut, signal_map):
         super().__init__(name, parent)
 
         # Collect signals
-        collect_signals(self.SIGNALS, uut, self, uut_prefix="dma_axi_", obj_prefix="axi_")
-
-        collect_signals(["clk", "rst_l"], uut, self)
+        collect_signals(
+            self.SIGNALS, uut, self, uut_prefix="dma_axi_", obj_prefix="axi_", signal_map=signal_map
+        )
 
         # Determine bus parameters
         self.awidth = len(self.axi_awaddr)
@@ -420,31 +377,13 @@ class Axi4LiteBFM(uvm_component):
 
         self.wr_xfers = {i: self.Transfer(i) for i in range(1 << len(self.axi_awid))}
 
-    @staticmethod
-    def collect_bytes(data, strb=None):
-        """
-        Collects data bytes asserted on a data bus. Uses the strb value to
-        determine which octets are valid.
-        """
-
-        if strb is not None:
-            assert len(data) == 8 * len(strb)
-
-        res = []
-        for i in range(len(data) // 8):
-            if strb is None or strb.value & (1 << i):
-                dat = (int(data.value) >> (8 * i)) & 0xFF
-                res.append(dat)
-
-        return bytes(res)
-
     async def _wait(self, signal, max_cycles=200):
         """
         Waits for a signal to be asserted for at most max_cycles.
         Raises an exception if it does not
         """
         for i in range(max_cycles):
-            await RisingEdge(self.clk)
+            await RisingEdge(self.axi_clk)
             if signal.value != 0:
                 break
         else:
@@ -457,7 +396,7 @@ class Axi4LiteBFM(uvm_component):
 
         # Wait for a free transfer id
         while True:
-            await RisingEdge(self.clk)
+            await RisingEdge(self.axi_clk)
 
             async with self.xfer_lock:
                 awid = None
@@ -480,7 +419,7 @@ class Axi4LiteBFM(uvm_component):
         self.axi_awid.value = awid
         self.axi_awsize.value = int(math.ceil(math.log2(self.dwidth)))
 
-        await RisingEdge(self.clk)
+        await RisingEdge(self.axi_clk)
         self.axi_awvalid.value = 0
 
         # Send data
@@ -526,7 +465,7 @@ class Axi4LiteBFM(uvm_component):
 
         while True:
             # Wait for response
-            await RisingEdge(self.clk)
+            await RisingEdge(self.axi_clk)
             if not self.axi_bvalid.value:
                 continue
 
@@ -561,7 +500,7 @@ class Axi4LiteBFM(uvm_component):
         self.axi_arid.value = 1
         self.axi_arsize.value = int(math.ceil(math.log2(self.dwidth)))
 
-        await RisingEdge(self.clk)
+        await RisingEdge(self.axi_clk)
         self.axi_arvalid.value = 0
 
         # Receive data
@@ -575,7 +514,7 @@ class Axi4LiteBFM(uvm_component):
             await self._wait(self.axi_rvalid)
 
             # Get the data
-            data.extend(self.collect_bytes(self.axi_rdata))
+            data.extend(collect_bytes(self.axi_rdata))
 
             # Last, finish reception
             if self.axi_rlast.value:
@@ -623,156 +562,6 @@ class Axi4LiteSubordinateDriver(uvm_driver):
                 raise RuntimeError("Unknown item '{}'".format(type(it)))
 
             self.seq_item_port.item_done()
-
-
-class Axi4LiteMonitor(uvm_component):
-    """
-    A monitor for AXI4 lite bus
-    """
-
-    class Transfer:
-        def __init__(self, tid, addr=None):
-            self.tid = tid
-            self.addr = addr
-            self.data = None
-
-    def __init__(self, *args, **kwargs):
-        self.bfm = kwargs["bfm"]
-        del kwargs["bfm"]
-        super().__init__(*args, **kwargs)
-
-    def build_phase(self):
-        self.ap = uvm_analysis_port("ap", self)
-
-    def _aw_active(self):
-        return self.bfm.axi_awready.value != 0 and self.bfm.axi_awvalid.value != 0
-
-    def _w_active(self):
-        return self.bfm.axi_wready.value != 0 and self.bfm.axi_wvalid.value != 0
-
-    def _ar_active(self):
-        return self.bfm.axi_arready.value != 0 and self.bfm.axi_arvalid.value != 0
-
-    def _r_active(self):
-        return self.bfm.axi_rready.value != 0 and self.bfm.axi_rvalid.value != 0
-
-    def _b_active(self):
-        return self.bfm.axi_bready.value != 0 and self.bfm.axi_bvalid.value != 0
-
-    def _sample_w(self):
-        return self.bfm.collect_bytes(
-            self.bfm.axi_wdata,
-            self.bfm.axi_wstrb,
-        )
-
-    def _sample_r(self):
-        return self.bfm.collect_bytes(
-            self.bfm.axi_rdata,
-        )
-
-    async def watch_write(self):
-        """
-        Watches the bus for writes
-        """
-        xfers = dict()
-
-        # Main loop
-        while True:
-            # Wait for clock
-            await RisingEdge(self.bfm.clk)
-
-            # A new write request
-            if self._aw_active():
-                addr = int(self.bfm.axi_awaddr.value)
-                awid = int(self.bfm.axi_awid.value)
-
-                if awid in xfers:
-                    self.logger.error(
-                        "Write request for a pending transaction, awid={}".format(awid)
-                    )
-
-                else:
-                    xfers[awid] = self.Transfer(awid, addr)
-
-            # Data (for the last seen awid)
-            if self._w_active():
-                if awid not in xfers:
-                    self.logger.error("Data write but no transaction is pending")
-
-                else:
-                    xfer = xfers[awid]
-                    xfer.data = self._sample_w()
-
-            # Write completion
-            if self._b_active():
-                bresp = int(self.bfm.axi_bresp.value)
-                bid = int(self.bfm.axi_bid.value)
-
-                if bid not in xfers:
-                    self.logger.error("Response for a non-pending transaction, bid={}".format(bid))
-
-                else:
-                    xfer = xfers[bid]
-                    del xfers[bid]
-
-                    self.ap.write(BusWriteItem(xfer.addr, xfer.data, bresp))
-
-                    self.logger.debug(
-                        "WR: 0x{:08X} {} 0b{:03b}".format(
-                            xfer.addr, ["0x{:02X}".format(b) for b in xfer.data], bresp
-                        )
-                    )
-
-    async def watch_read(self):
-        """
-        Watches the bus for reads
-        """
-        xfers = dict()
-
-        # Main loop
-        while True:
-            # Wait for clock
-            await RisingEdge(self.bfm.clk)
-
-            # A new read request
-            if self._ar_active():
-                addr = int(self.bfm.axi_araddr.value)
-                arid = int(self.bfm.axi_arid.value)
-
-                if arid in xfers:
-                    self.logger.error(
-                        "Read request for a pending transaction, arid={}".format(awid)
-                    )
-
-                else:
-                    xfers[arid] = self.Transfer(arid, addr)
-
-            # Read completion
-            if self._r_active():
-                rresp = int(self.bfm.axi_rresp.value)
-                rid = int(self.bfm.axi_rid.value)
-
-                if rid not in xfers:
-                    self.logger.error("Data read but no transaction is pending")
-
-                else:
-                    xfer = xfers[rid]
-                    xfer.data = self._sample_r()
-
-                    del xfers[rid]
-
-                    self.ap.write(BusReadItem(xfer.addr, xfer.data, rresp))
-
-                    self.logger.debug(
-                        "RD: 0x{:08X} {} 0b{:03b}".format(
-                            xfer.addr, ["0x{:02X}".format(b) for b in xfer.data], rresp
-                        )
-                    )
-
-    async def run_phase(self):
-        # Start read & write watchers
-        cocotb.start_soon(self.watch_write())
-        cocotb.start_soon(self.watch_read())
 
 
 # ==============================================================================
@@ -1040,7 +829,16 @@ class BaseEnv(uvm_env):
         self.dbg_seqr = uvm_sequencer("dbg_seqr", self)
 
         # AXI interface
-        self.axi_bfm = Axi4LiteBFM("axi_bfm", self, cocotb.top)
+        self.axi_bfm = Axi4LiteBFM(
+            "axi_bfm",
+            self,
+            uut=cocotb.top,
+            signal_map={
+                "clk": "clk",
+                "rst": "rst_l",
+            },
+        )
+
         self.axi_drv = Axi4LiteSubordinateDriver("axi_drv", self, bfm=self.axi_bfm)
         self.axi_mon = Axi4LiteMonitor("axi_mon", self, bfm=self.axi_bfm)
 

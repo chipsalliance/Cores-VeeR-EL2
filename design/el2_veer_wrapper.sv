@@ -338,7 +338,15 @@ import el2_pkg::*;
    input logic                             i_cpu_run_req, // Async restart req to CPU
    output logic                            o_cpu_run_ack, // Core response to run req
    input logic                             scan_mode,     // To enable scan mode
-   input logic                             mbist_mode     // to enable mbist
+   input logic                             mbist_mode,    // to enable mbist
+
+   // DMI port for uncore
+   input logic                             dmi_uncore_enable,
+   output logic                            dmi_uncore_en,
+   output logic                            dmi_uncore_wr_en,
+   output logic                     [ 6:0] dmi_uncore_addr,
+   output logic                     [31:0] dmi_uncore_wdata,
+   input logic                      [31:0] dmi_uncore_rdata
 );
 
    logic                             active_l2clk;
@@ -686,6 +694,14 @@ import el2_pkg::*;
 
 `endif //  `ifdef RV_BUILD_AHB_LITE
 
+   // DMI (core)
+   logic                   dmi_en;
+   logic [6:0]             dmi_addr;
+   logic                   dmi_wr_en;
+   logic [31:0]            dmi_wdata;
+   logic [31:0]            dmi_rdata;
+
+   // DMI (core)
    logic                   dmi_reg_en;
    logic [6:0]             dmi_reg_addr;
    logic                   dmi_reg_wr_en;
@@ -720,20 +736,43 @@ import el2_pkg::*;
     .core_rst_n  (dbg_rst_l),       // Debug reset, active low
     .core_clk    (clk),             // Core clock
     .jtag_id     (jtag_id),         // JTAG ID
-    .rd_data     (dmi_reg_rdata),   // Read data from  Processor
-    .reg_wr_data (dmi_reg_wdata),   // Write data to Processor
-    .reg_wr_addr (dmi_reg_addr),    // Write address to Processor
-    .reg_en      (dmi_reg_en),      // Write interface bit to Processor
-    .reg_wr_en   (dmi_reg_wr_en),   // Write enable to Processor
+    .rd_data     (dmi_rdata),       // Read data from  Processor
+    .reg_wr_data (dmi_wdata),       // Write data to Processor
+    .reg_wr_addr (dmi_addr),        // Write address to Processor
+    .reg_en      (dmi_en),          // Write interface bit to Processor
+    .reg_wr_en   (dmi_wr_en),       // Write enable to Processor
     .dmi_hard_reset   ()
    );
 
+   // DMI core/uncore mux
+   dmi_mux dmi_mux (
+    .uncore_enable      (dmi_uncore_enable),
+
+    .dmi_en             (dmi_en),
+    .dmi_wr_en          (dmi_wr_en),
+    .dmi_addr           (dmi_addr),
+    .dmi_wdata          (dmi_wdata),
+    .dmi_rdata          (dmi_rdata),
+
+    .dmi_core_en        (dmi_reg_en),
+    .dmi_core_wr_en     (dmi_reg_wr_en),
+    .dmi_core_addr      (dmi_reg_addr),
+    .dmi_core_wdata     (dmi_reg_wdata),
+    .dmi_core_rdata     (dmi_reg_rdata),
+
+    .dmi_uncore_en      (dmi_uncore_en),
+    .dmi_uncore_wr_en   (dmi_uncore_wr_en),
+    .dmi_uncore_addr    (dmi_uncore_addr),
+    .dmi_uncore_wdata   (dmi_uncore_wdata),
+    .dmi_uncore_rdata   (dmi_uncore_rdata)
+   );
+
 `ifdef RV_ASSERT_ON
-// to avoid internal assertions failure at time 0
-initial begin
+  // to avoid internal assertions failure at time 0
+  initial begin
     $assertoff(0, veer);
-    @ (negedge clk) $asserton(0, veer);
-end
+    @(negedge clk) $asserton(0, veer);
+  end
 `endif
 
 endmodule

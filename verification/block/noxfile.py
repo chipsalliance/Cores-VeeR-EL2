@@ -295,6 +295,20 @@ def pmp_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
 
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["dmi"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_jtag_ir",
+        "test_dmi_read_write",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def dmi_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
 @nox.session()
 def isort(session: nox.Session) -> None:
     """Options are defined in pyproject.toml file"""

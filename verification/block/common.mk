@@ -47,7 +47,7 @@ endif
 COCOTB_HDL_TIMEUNIT         = 1ns
 COCOTB_HDL_TIMEPRECISION    = 10ps
 
-EXTRA_ARGS += -I$(CFGDIR)
+EXTRA_ARGS += -I$(CFGDIR) -Wno-DECLFILENAME
 
 # Build directory
 ifneq ($(COVERAGE_TYPE),)

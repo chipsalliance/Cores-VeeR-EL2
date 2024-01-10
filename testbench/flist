@@ -40,6 +40,7 @@ $RV_ROOT/design/lsu/el2_lsu_dccm_mem.sv
 $RV_ROOT/design/lsu/el2_lsu_dccm_ctl.sv
 $RV_ROOT/design/lsu/el2_lsu_trigger.sv
 $RV_ROOT/design/dbg/el2_dbg.sv
+$RV_ROOT/design/dmi/dmi_mux.v
 $RV_ROOT/design/dmi/dmi_wrapper.v
 $RV_ROOT/design/dmi/dmi_jtag_to_core_sync.v
 $RV_ROOT/design/dmi/rvjtag_tap.v

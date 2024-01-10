@@ -50,6 +50,7 @@ jobs:
           - "block/dccm"
           - "block/lib_axi4_to_ahb"
           - "block/pmp"
+          - "block/dmi"
     env:
       CCACHE_DIR: "/opt/verification/.cache/"
       VERILATOR_VERSION: v5.010

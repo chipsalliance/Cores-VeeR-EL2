@@ -304,6 +304,7 @@ module veer_wrapper
     input  logic jtag_tdi,     // JTAG tdi
     input  logic jtag_trst_n,  // JTAG Reset
     output logic jtag_tdo,     // JTAG TDO
+    output logic jtag_tdoEn,   // JTAG Test Data Output enable
 
     input logic [31:4] core_id,
 

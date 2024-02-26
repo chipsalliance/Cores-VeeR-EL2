@@ -317,6 +317,7 @@ import el2_pkg::*;
    input logic                             jtag_tdi,    // JTAG tdi
    input logic                             jtag_trst_n, // JTAG Reset
    output logic                            jtag_tdo,    // JTAG TDO
+   output logic                            jtag_tdoEn,  // JTAG Test Data Output enable
 
    input logic [31:4] core_id,
 
@@ -409,7 +410,6 @@ import el2_pkg::*;
    logic [77:0]    iccm_rd_data_ecc;
 
    logic        core_rst_l;                         // Core reset including rst_l and dbg_rst_l
-   logic        jtag_tdoEn;
 
    logic        dccm_clk_override;
    logic        icm_clk_override;
@@ -790,7 +790,7 @@ import el2_pkg::*;
     .tms         (jtag_tms),        // Test mode select
     .tdi         (jtag_tdi),        // Test Data Input
     .tdo         (jtag_tdo),        // Test Data Output
-    .tdoEnable   (),
+    .tdoEnable   (jtag_tdoEn),      // Test Data Output enable
     // Processor Signals
     .core_rst_n  (dbg_rst_l),       // Debug reset, active low
     .core_clk    (clk),             // Core clock

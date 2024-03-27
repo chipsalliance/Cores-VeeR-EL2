@@ -283,11 +283,6 @@ import el2_pkg::*;
    logic           sel_mb_status_addr ;
    logic [63:0]    ic_final_data;
 
-   logic [pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] ifu_ic_rw_int_addr_ff ;
-   logic [pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] ifu_status_wr_addr_ff ;
-   logic [pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] ifu_ic_rw_int_addr_w_debug ;
-   logic [pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] ifu_status_wr_addr_w_debug ;
-
    logic [pt.ICACHE_STATUS_BITS-1:0]                              way_status_new_ff ;
    logic                                    way_status_wr_en_ff ;
    logic [pt.ICACHE_TAG_DEPTH-1:0][pt.ICACHE_STATUS_BITS-1:0]        way_status_out ;
@@ -916,17 +911,12 @@ assign ic_miss_buff_half[63:0]    = {ic_miss_buff_data[{other_tag,1'b1}],ic_miss
 /////////////////////////////////////////////////////////////////////////////////////
 
 
-assign ic_rd_parity_final_err = ic_tag_perr & ~exu_flush_final & sel_ic_data & ~(ifc_region_acc_fault_final_f | (|ifc_bus_acc_fault_f)) &
+  assign ic_rd_parity_final_err = ic_tag_perr & ~exu_flush_final & sel_ic_data & ~(ifc_region_acc_fault_final_f | (|ifc_bus_acc_fault_f)) &
                                       (fetch_req_icache_f & ~reset_all_tags & (~miss_pending | (miss_state==HIT_U_MISS)) & ~sel_mb_addr_ff);
 
-logic [pt.ICACHE_NUM_WAYS-1:0]                   perr_err_inv_way;
-logic [pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO]   perr_ic_index_ff;
-logic                                         perr_sel_invalidate;
-logic                                         perr_sb_write_status   ;
-
-
-
-   rvdffe #(.WIDTH(pt.ICACHE_INDEX_HI-pt.ICACHE_TAG_INDEX_LO+1),.OVERRIDE(1)) perr_dat_ff    (.din(ifu_ic_rw_int_addr_ff[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO]), .dout(perr_ic_index_ff[pt.ICACHE_INDEX_HI : pt.ICACHE_TAG_INDEX_LO]), .en(perr_sb_write_status),  .*);
+  logic [pt.ICACHE_NUM_WAYS-1:0] perr_err_inv_way;
+  logic                          perr_sel_invalidate;
+  logic                          perr_sb_write_status;
 
    assign perr_err_inv_way[pt.ICACHE_NUM_WAYS-1:0]   =  {pt.ICACHE_NUM_WAYS{perr_sel_invalidate}} ;
    assign iccm_correct_ecc     = (perr_state == ECC_CORR);
@@ -946,39 +936,39 @@ logic                                         perr_sb_write_status   ;
    always_comb begin  : ERROR_SM
       perr_nxtstate            = ERR_IDLE;
       perr_state_en            = 1'b0;
-      perr_sb_write_status     = 1'b0;
       perr_sel_invalidate      = 1'b0;
+      perr_sb_write_status     = 1'b0;
 
-      case (perr_state)
-         ERR_IDLE: begin : err_idle
-                  perr_nxtstate         =  iccm_dma_sb_error ? DMA_SB_ERR : (ic_error_start & ~exu_flush_final) ? IC_WFF : ECC_WFF;
-                  perr_state_en         =  (((iccm_error_start | ic_error_start) & ~dec_tlu_flush_lower_wb) | iccm_dma_sb_error) & ~dec_tlu_force_halt;
-                  perr_sb_write_status  =  perr_state_en;
-         end
-         IC_WFF: begin : icache_wff    // All the I$ data and/or Tag errors ( parity/ECC ) will come to this state
-                  perr_nxtstate       =  ERR_IDLE ;
-                  perr_state_en       =   dec_tlu_flush_lower_wb | dec_tlu_force_halt ;
-                  perr_sel_invalidate =  (dec_tlu_flush_err_wb &  dec_tlu_flush_lower_wb);
-         end
-         ECC_WFF: begin : ecc_wff
-                  perr_nxtstate       =  ((~dec_tlu_flush_err_wb &  dec_tlu_flush_lower_wb ) | dec_tlu_force_halt) ? ERR_IDLE : ECC_CORR ;
-                  perr_state_en       =   dec_tlu_flush_lower_wb | dec_tlu_force_halt  ;
-         end
-         DMA_SB_ERR : begin : dma_sb_ecc
-                 perr_nxtstate       = dec_tlu_force_halt ? ERR_IDLE : ECC_CORR;
-                 perr_state_en       = 1'b1;
-         end
-         ECC_CORR: begin : ecc_corr
-                  perr_nxtstate       =  ERR_IDLE  ;
-                  perr_state_en       =   1'b1   ;
-         end
-         default: begin : def_case
-                  perr_nxtstate            = ERR_IDLE;
-                  perr_state_en            = 1'b0;
-                  perr_sb_write_status     = 1'b0;
-                  perr_sel_invalidate      = 1'b0;
-         end
-      endcase
+    case (perr_state)
+      ERR_IDLE: begin : err_idle
+        perr_nxtstate        = iccm_dma_sb_error ? DMA_SB_ERR : (ic_error_start & ~exu_flush_final) ? IC_WFF : ECC_WFF;
+        perr_state_en        = (((iccm_error_start | ic_error_start) & ~dec_tlu_flush_lower_wb) | iccm_dma_sb_error) & ~dec_tlu_force_halt;
+        perr_sb_write_status = perr_state_en;
+      end
+      IC_WFF: begin : icache_wff    // All the I$ data and/or Tag errors ( parity/ECC ) will come to this state
+        perr_nxtstate       = ERR_IDLE;
+        perr_state_en       = dec_tlu_flush_lower_wb | dec_tlu_force_halt;
+        perr_sel_invalidate = (dec_tlu_flush_err_wb & dec_tlu_flush_lower_wb);
+      end
+      ECC_WFF: begin : ecc_wff
+        perr_nxtstate = ((~dec_tlu_flush_err_wb &  dec_tlu_flush_lower_wb ) | dec_tlu_force_halt) ? ERR_IDLE : ECC_CORR;
+        perr_state_en = dec_tlu_flush_lower_wb | dec_tlu_force_halt;
+      end
+      DMA_SB_ERR: begin : dma_sb_ecc
+        perr_nxtstate = dec_tlu_force_halt ? ERR_IDLE : ECC_CORR;
+        perr_state_en = 1'b1;
+      end
+      ECC_CORR: begin : ecc_corr
+        perr_nxtstate = ERR_IDLE;
+        perr_state_en = 1'b1;
+      end
+      default: begin : def_case
+        perr_nxtstate        = ERR_IDLE;
+        perr_state_en        = 1'b0;
+        perr_sel_invalidate  = 1'b0;
+        perr_sb_write_status = 1'b0;
+      end
+    endcase
    end
 
    rvdffs #(($bits(perr_state_t))) perr_state_ff (.clk(active_clk), .din(perr_nxtstate), .dout({perr_state}), .en(perr_state_en),   .*);
@@ -1398,9 +1388,25 @@ assign ic_write_stall                =  write_ic_16_bytes &  ~((((miss_state== C
 ///////////////////////////////////////////////////////////////
 logic [pt.ICACHE_NUM_WAYS-1:0] ic_tag_valid_unq;
 if (pt.ICACHE_ENABLE == 1 ) begin: icache_enabled
-   assign  ic_valid  = ~ifu_wr_cumulative_err_data & ~(reset_ic_in | reset_ic_ff) & ~reset_tag_valid_for_miss;
+   logic [pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] ifu_status_wr_addr_w_debug;
+   logic [pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] ifu_status_wr_addr_ff ;
+   logic [pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] ifu_ic_rw_int_addr_w_debug;
+   logic [pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] ifu_ic_rw_int_addr_ff;
+   logic [pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] perr_ic_index_ff;
 
-   assign ifu_status_wr_addr_w_debug[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] = ((ic_debug_rd_en | ic_debug_wr_en ) & ic_debug_tag_array) ?
+    rvdffe #(
+        .WIDTH(pt.ICACHE_INDEX_HI - pt.ICACHE_TAG_INDEX_LO + 1),
+        .OVERRIDE(1)
+    ) perr_dat_ff (
+        .din (ifu_ic_rw_int_addr_ff[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO]),
+        .dout(perr_ic_index_ff[pt.ICACHE_INDEX_HI : pt.ICACHE_TAG_INDEX_LO]),
+        .en  (perr_sb_write_status),
+        .*
+    );
+
+    assign ic_valid = ~ifu_wr_cumulative_err_data & ~(reset_ic_in | reset_ic_ff) & ~reset_tag_valid_for_miss;
+
+    assign ifu_status_wr_addr_w_debug[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] = ((ic_debug_rd_en | ic_debug_wr_en ) & ic_debug_tag_array) ?
                                                                            ic_debug_addr[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] :
                                                                            ifu_status_wr_addr[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO];
 

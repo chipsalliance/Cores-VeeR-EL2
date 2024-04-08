@@ -265,7 +265,7 @@ import el2_pkg::*;
    logic [9:0] tdata_wrdata_r;
    logic [1:0] mtsel_ns, mtsel;
    logic tlu_i0_kill_writeb_r;
-   logic [1:0]  mstatus_ns, mstatus;
+   logic [2:0]  mstatus_ns, mstatus; // MPP (1-M, 0-U), MPIE, MIE
    logic [1:0] mfdhs_ns, mfdhs;
    logic [31:0] force_halt_ctr, force_halt_ctr_f;
    logic        force_halt;
@@ -1159,7 +1159,7 @@ end
 
    // ----------------------------------------------------------------------
    // MSTATUS (RW)
-   // [12:11] MPP  : Prior priv level, always 2'b11, not flopped
+   // [12:11] MPP  : Prior priv level, either 2'b11 (machine) or 2'b00 (user)
    // [7]     MPIE : Int enable previous [1]
    // [3]     MIE  : Int enable          [0]
    localparam MSTATUS       = 12'h300;
@@ -1174,12 +1174,12 @@ end
    // set this even if we don't go to fwhalt due to debug halt. We committed the inst, so ...
    assign set_mie_pmu_fw_halt = ~mpmc_b_ns[1] & fw_halt_req;
 
-   assign mstatus_ns[1:0] = ( ({2{~wr_mstatus_r & exc_or_int_valid_r}} & {mstatus[MSTATUS_MIE], 1'b0}) |
-                              ({2{ wr_mstatus_r & exc_or_int_valid_r}} & {dec_csr_wrdata_r[3], 1'b0}) |
-                              ({2{mret_r & ~exc_or_int_valid_r}} & {1'b1, mstatus[1]}) |
-                              ({2{set_mie_pmu_fw_halt}} & {mstatus[1], 1'b1}) |
-                              ({2{wr_mstatus_r & ~exc_or_int_valid_r}} & {dec_csr_wrdata_r[7], dec_csr_wrdata_r[3]}) |
-                              ({2{~wr_mstatus_r & ~exc_or_int_valid_r & ~mret_r & ~set_mie_pmu_fw_halt}} & mstatus[1:0]) );
+   assign mstatus_ns[2:0] = ( ({3{~wr_mstatus_r & exc_or_int_valid_r}} & {mstatus[2], mstatus[MSTATUS_MIE], 1'b0}) |
+                              ({3{ wr_mstatus_r & exc_or_int_valid_r}} & {mstatus[2], dec_csr_wrdata_r[3], 1'b0}) |
+                              ({3{mret_r & ~exc_or_int_valid_r}}       & {mstatus[2], 1'b1, mstatus[1]}) |
+                              ({3{set_mie_pmu_fw_halt}}                & {mstatus[2], mstatus[1], 1'b1}) |
+                              ({3{wr_mstatus_r & ~exc_or_int_valid_r}} & {dec_csr_wrdata_r[12], dec_csr_wrdata_r[7], dec_csr_wrdata_r[3]}) |
+                              ({3{~wr_mstatus_r & ~exc_or_int_valid_r & ~mret_r & ~set_mie_pmu_fw_halt}} & mstatus[2:0]) );
 
    // gate MIE if we are single stepping and DCSR[STEPIE] is off
    assign mstatus_mie_ns = mstatus[MSTATUS_MIE] & (~dcsr_single_step_running_f | dcsr[DCSR_STEPIE]);
@@ -2187,13 +2187,13 @@ else
                                    mip_ns[5:0], mcyclel_cout & ~wr_mcycleh_r & mcyclel_cout_in,
                                    minstret_enable, minstretl_cout_ns, fw_halted_ns,
                                    meicidpl_ns[3:0], icache_rd_valid, icache_wr_valid, mhpmc_inc_r[3:0], perfcnt_halted,
-                                   mstatus_ns[1:0]}),
+                                   mstatus_ns[2:0]}),
                              .dout({mdseac_locked_f, lsu_single_ecc_error_r_d1, lsu_exc_valid_r_d1, lsu_i0_exc_r_d1,
                                     take_ext_int_start_d1, take_ext_int_start_d2, take_ext_int_start_d3, ext_int_freeze_d1,
                                     mip[5:0], mcyclel_cout_f, minstret_enable_f, minstretl_cout_f,
                                     fw_halted, meicidpl[3:0], icache_rd_valid_f, icache_wr_valid_f,
                                     mhpmc_inc_r_d1[3:0], perfcnt_halted_d1,
-                                    mstatus[1:0]}));
+                                    mstatus[2:0]}));
 
    end
    else begin : genblock2
@@ -2202,7 +2202,7 @@ else
                                    mip_ns[5:0], mcyclel_cout & ~wr_mcycleh_r & mcyclel_cout_in,
                                    minstret_enable, minstretl_cout_ns, fw_halted_ns,
                                    meicidpl_ns[3:0], icache_rd_valid, icache_wr_valid, mhpmc_inc_r[3:0], perfcnt_halted,
-                                   mstatus_ns[1:0]}),
+                                   mstatus_ns[2:0]}),
                              .dout({mdseac_locked_f, lsu_single_ecc_error_r_d1, lsu_exc_valid_r_d1, lsu_i0_exc_r_d1,
                                     mip[5:0], mcyclel_cout_f, minstret_enable_f, minstretl_cout_f,
                                     fw_halted, meicidpl[3:0], icache_rd_valid_f, icache_wr_valid_f,
@@ -2783,7 +2783,7 @@ assign dec_csr_rddata_d[31:0] = ( ({32{csr_misa}}      & 32'h40101104) |
                                   ({32{csr_marchid}}   & 32'h00000010) |
                                   ({32{csr_mimpid}}    & 32'h4) |
                                   ({32{csr_mhartid}}   & {core_id[31:4], 4'b0}) |
-                                  ({32{csr_mstatus}}   & {19'b0, 2'b11, 3'b0, mstatus[1], 3'b0, mstatus[0], 3'b0}) |
+                                  ({32{csr_mstatus}}   & {19'b0, mstatus[2] ? 2'b11 : 2'b00, 3'b0, mstatus[1], 3'b0, mstatus[0], 3'b0}) |
                                   ({32{csr_mtvec}}     & {mtvec[30:1], 1'b0, mtvec[0]}) |
                                   ({32{csr_mip}}       & {1'b0, mip[5:3], 16'b0, mip[2], 3'b0, mip[1], 3'b0, mip[0], 3'b0}) |
                                   ({32{csr_mie}}       & {1'b0, mie[5:3], 16'b0, mie[2], 3'b0, mie[1], 3'b0, mie[0], 3'b0}) |

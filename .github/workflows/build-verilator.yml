@@ -14,8 +14,8 @@ jobs:
             repo: verilator/verilator
             commit: v5.010
           - version: uvm
-            repo: antmicro/verilator-1
-            commit: vif-trigger-ci
+            repo: verilator/verilator
+            commit: 7ca2d6470a
     env:
       TOOL_NAME: verilator
       TOOL_VERSION: ${{ matrix.version }}

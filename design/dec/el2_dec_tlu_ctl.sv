@@ -1144,6 +1144,7 @@ end
    // ----------------------------------------------------------------------
    // MISA (RO)
    //  [31:30] XLEN - implementation width, 2'b01 - 32 bits
+   //  [20]    U    - user mode support
    //  [12]    M    - integer mul/div
    //  [8]     I    - RV32I
    //  [2]     C    - Compressed extension
@@ -2777,7 +2778,7 @@ assign dec_csr_legal_d = ( dec_csr_any_unq_d &
                            ~(dec_csr_wen_unq_d & (csr_mvendorid | csr_marchid | csr_mimpid | csr_mhartid | csr_mdseac | csr_meihap)) // that's not a write to a RO CSR
                            );
    // CSR read mux
-assign dec_csr_rddata_d[31:0] = ( ({32{csr_misa}}      & 32'h40001104) |
+assign dec_csr_rddata_d[31:0] = ( ({32{csr_misa}}      & 32'h40101104) |
                                   ({32{csr_mvendorid}} & 32'h00000045) |
                                   ({32{csr_marchid}}   & 32'h00000010) |
                                   ({32{csr_mimpid}}    & 32'h4) |

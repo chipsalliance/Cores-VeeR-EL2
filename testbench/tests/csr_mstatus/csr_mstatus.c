@@ -65,5 +65,35 @@ int main () {
         res = -1; // error
     }
 
+    // Test the MPRV bit
+
+    printf("MPRV\n");
+
+    prv  = read_csr(mstatus);
+    prv |= (1 << 17); // MPRV=1
+    printf(" 0x%08X\n", prv);
+    write_csr(mstatus, prv);
+    cur  = read_csr(mstatus);
+    printf(" 0x%08X\n", cur);
+    if (((prv ^ cur) & (3 << 17)) != 0) {
+        printf(" cannot set!\n");
+        res = -1;
+    } else {
+        printf(" ok.\n");
+    }
+
+    prv  = read_csr(mstatus);
+    prv &= ~(1 << 17); // MPRV=0
+    printf(" 0x%08X\n", prv);
+    write_csr(mstatus, prv);
+    cur  = read_csr(mstatus);
+    printf(" 0x%08X\n", cur);
+    if (((prv ^ cur) & (3 << 17)) != 0) {
+        printf(" cannot clear!\n");
+        res = -1;
+    } else {
+        printf(" ok.\n");
+    }
+
     return res;
 }

@@ -237,7 +237,11 @@ import el2_pkg::*;
 
    // pmp
    output el2_pmp_cfg_pkt_t pmp_pmpcfg  [pt.PMP_ENTRIES],
-   output logic [31:0]      pmp_pmpaddr [pt.PMP_ENTRIES]
+   output logic [31:0]      pmp_pmpaddr [pt.PMP_ENTRIES],
+
+   // Privilege mode
+   output logic  priv_mode,
+   output logic  priv_mode_eff
 
    );
 
@@ -557,6 +561,9 @@ import el2_pkg::*;
 
 
 localparam MSTATUS_MIE   = 0;
+localparam MSTATUS_MPP   = 2;
+localparam MSTATUS_MPRV  = 3;
+
 localparam MIP_MCEIP     = 5;
 localparam MIP_MITIP0    = 4;
 localparam MIP_MITIP1    = 3;
@@ -1133,6 +1140,20 @@ end
                                  .dout({interrupt_valid_r_d1, i0_exception_valid_r_d1, exc_or_int_valid_r_d1,
                                         exc_cause_wb[4:0], i0_valid_wb, trigger_hit_r_d1,
                                         take_nmi_r_d1, pause_expired_wb}));
+   //
+   // Privilege mode
+   //
+   logic  priv_mode_ns; // 0 - machine, 1 - user
+   assign priv_mode_ns = (mret_r & mstatus[MSTATUS_MPP]) |
+                         (exc_or_int_valid_r & 1'b0 ) |
+                         ((~mret_r & ~exc_or_int_valid_r) & priv_mode);
+
+   rvdff #(1) priv_ff (
+        .clk    (free_l2clk),
+        .rst_l  (rst_l),
+        .din    (priv_mode_ns),
+        .dout   (priv_mode)
+   );
 
    //----------------------------------------------------------------------
    //
@@ -1184,6 +1205,10 @@ end
 
    // gate MIE if we are single stepping and DCSR[STEPIE] is off
    assign mstatus_mie_ns = mstatus[MSTATUS_MIE] & (~dcsr_single_step_running_f | dcsr[DCSR_STEPIE]);
+
+   // set effective privilege mode according to MPRV and MPP
+   assign priv_mode_eff = ( mstatus[MSTATUS_MPRV] & mstatus[MSTATUS_MPP]) | // MPRV=1, use MPP
+                          (~mstatus[MSTATUS_MPRV] & priv_mode);             // MPRV=0, use current operating mode
 
    // ----------------------------------------------------------------------
    // MTVEC (RW)

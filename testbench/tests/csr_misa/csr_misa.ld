@@ -7,7 +7,7 @@ SECTIONS {
   . = 0x80000000;
   .text : { *(.text.init*) *(.text*) }
   _end = .;
-  .data :  { *(.*data) *(.rodata*) *(.sbss) STACK = ALIGN(16) + 0x1000; FAULTSTACK = ALIGN(16) + 0x200;}
+  .data :  { *(.*data) *(.rodata*) *(.sbss) STACK = ALIGN(16) + 0x1000;}
   .bss : { *(.bss) }
   . = 0xd0580000;
   .data.io . : { *(.data.io) }

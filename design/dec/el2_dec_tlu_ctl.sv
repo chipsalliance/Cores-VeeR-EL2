@@ -265,7 +265,7 @@ import el2_pkg::*;
    logic [9:0] tdata_wrdata_r;
    logic [1:0] mtsel_ns, mtsel;
    logic tlu_i0_kill_writeb_r;
-   logic [3:0]  mstatus_ns, mstatus; // MPRV, MPP (1-M, 0-U), MPIE, MIE
+   logic [3:0]  mstatus_ns, mstatus; // MPRV, MPP (inverted! 0-M, 1-U), MPIE, MIE
    logic [1:0] mfdhs_ns, mfdhs;
    logic [31:0] force_halt_ctr, force_halt_ctr_f;
    logic        force_halt;
@@ -1179,7 +1179,7 @@ end
                               ({4{ wr_mstatus_r & exc_or_int_valid_r}} & {mstatus[3:2], dec_csr_wrdata_r[3], 1'b0}) |
                               ({4{mret_r & ~exc_or_int_valid_r}}       & {mstatus[3:2], 1'b1, mstatus[1]}) |
                               ({4{set_mie_pmu_fw_halt}}                & {mstatus[3:2], mstatus[1], 1'b1}) |
-                              ({4{wr_mstatus_r & ~exc_or_int_valid_r}} & {dec_csr_wrdata_r[17], dec_csr_wrdata_r[12], dec_csr_wrdata_r[7], dec_csr_wrdata_r[3]}) |
+                              ({4{wr_mstatus_r & ~exc_or_int_valid_r}} & {dec_csr_wrdata_r[17], ~dec_csr_wrdata_r[12], dec_csr_wrdata_r[7], dec_csr_wrdata_r[3]}) |
                               ({4{~wr_mstatus_r & ~exc_or_int_valid_r & ~mret_r & ~set_mie_pmu_fw_halt}} & mstatus[3:0]) );
 
    // gate MIE if we are single stepping and DCSR[STEPIE] is off
@@ -2784,7 +2784,7 @@ assign dec_csr_rddata_d[31:0] = ( ({32{csr_misa}}      & 32'h40101104) |
                                   ({32{csr_marchid}}   & 32'h00000010) |
                                   ({32{csr_mimpid}}    & 32'h4) |
                                   ({32{csr_mhartid}}   & {core_id[31:4], 4'b0}) |
-                                  ({32{csr_mstatus}}   & {14'b0, mstatus[3], 4'b0, mstatus[2] ? 2'b11 : 2'b00, 3'b0, mstatus[1], 3'b0, mstatus[0], 3'b0}) |
+                                  ({32{csr_mstatus}}   & {14'b0, mstatus[3], 4'b0, ~mstatus[2], ~mstatus[2], 3'b0, mstatus[1], 3'b0, mstatus[0], 3'b0}) |
                                   ({32{csr_mtvec}}     & {mtvec[30:1], 1'b0, mtvec[0]}) |
                                   ({32{csr_mip}}       & {1'b0, mip[5:3], 16'b0, mip[2], 3'b0, mip[1], 3'b0, mip[0], 3'b0}) |
                                   ({32{csr_mie}}       & {1'b0, mie[5:3], 16'b0, mie[2], 3'b0, mie[1], 3'b0, mie[0], 3'b0}) |

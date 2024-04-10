@@ -984,18 +984,20 @@ end // else: !if(pt.BTB_ENABLE==1)
    //
    // 0x2 : illegal
    // 0x3 : breakpoint
+   // 0x8 : Environment call U-mode
    // 0xb : Environment call M-mode
 
 
-   assign exc_cause_r[4:0] =  ( ({5{take_ext_int}}        & 5'h0b) |
-                                ({5{take_timer_int}}      & 5'h07) |
-                                ({5{take_soft_int}}       & 5'h03) |
-                                ({5{take_int_timer0_int}} & 5'h1d) |
-                                ({5{take_int_timer1_int}} & 5'h1c) |
-                                ({5{take_ce_int}}         & 5'h1e) |
-                                ({5{illegal_r}}           & 5'h02) |
-                                ({5{ecall_r}}             & 5'h0b) |
-                                ({5{inst_acc_r}}          & 5'h01) |
+   assign exc_cause_r[4:0] =  ( ({5{take_ext_int}}         & 5'h0b) |
+                                ({5{take_timer_int}}       & 5'h07) |
+                                ({5{take_soft_int}}        & 5'h03) |
+                                ({5{take_int_timer0_int}}  & 5'h1d) |
+                                ({5{take_int_timer1_int}}  & 5'h1c) |
+                                ({5{take_ce_int}}          & 5'h1e) |
+                                ({5{illegal_r}}            & 5'h02) |
+                                ({5{ecall_r & priv_mode}}  & 5'h08) |
+                                ({5{ecall_r & ~priv_mode}} & 5'h0b) |
+                                ({5{inst_acc_r}}           & 5'h01) |
                                 ({5{ebreak_r | i0_trigger_hit_r}}   & 5'h03) |
                                 ({5{lsu_exc_ma_r & ~lsu_exc_st_r}}  & 5'h04) |
                                 ({5{lsu_exc_acc_r & ~lsu_exc_st_r}} & 5'h05) |

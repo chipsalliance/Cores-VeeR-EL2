@@ -106,7 +106,7 @@ typedef struct packed {
                        logic i0div;
                        logic csrwen;
                        logic csrwonly;
-                       logic [11:0] csrwaddr;
+                       logic [11:0] csraddr;
                        // likely to change
                        logic [4:0] i0rd;
                        logic i0load;

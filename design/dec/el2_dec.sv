@@ -342,6 +342,7 @@ module el2_dec
   logic dec_i0_wen_r;
   logic [31:0] dec_i0_wdata_r;
   logic dec_csr_wen_r;  // csr write enable at wb
+  logic [11:0] dec_csr_rdaddr_r;  // read address for csrs
   logic [11:0] dec_csr_wraddr_r;  // write address for csryes
   logic [31:0] dec_csr_wrdata_r;  // csr write data at wb
 

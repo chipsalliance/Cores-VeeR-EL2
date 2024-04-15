@@ -91,6 +91,7 @@ import el2_pkg::*;
    input logic [11:0] dec_csr_rdaddr_d,      // read address for csr
 
    input logic        dec_csr_wen_r,      // csr write enable at wb
+   input logic [11:0] dec_csr_rdaddr_r,      // read address for csr
    input logic [11:0] dec_csr_wraddr_r,      // write address for csr
    input logic [31:0] dec_csr_wrdata_r,   // csr write data at wb
 
@@ -510,6 +511,10 @@ import el2_pkg::*;
 
    logic  [3:0] ifu_mscause ;
    logic        ifu_ic_error_start_f, ifu_iccm_rd_ecc_single_err_f;
+
+   logic  csr_acc_r;    // CSR access error
+   logic  csr_wr_usr_r; // Write to an unprivileged/user-level CSR
+   logic  csr_rd_usr_r; // REad from an unprivileged/user-level CSR
 
    el2_dec_timer_ctl  #(.pt(pt)) int_timers(.*);
    // end of internal timers
@@ -968,6 +973,17 @@ end // else: !if(pt.BTB_ENABLE==1)
                                 .dout(ebreak_to_debug_mode_r_d1));
 
    assign dec_tlu_fence_i_r = fence_i_r;
+
+   // CSR access
+   // Address bits 9:8 == 2'b00 indicate unprivileged / user-level CSR
+   assign csr_wr_usr_r = ~|dec_csr_wraddr_r[9:8];
+   assign csr_rd_usr_r = ~|dec_csr_rdaddr_r[9:8];
+
+   assign csr_acc_r = priv_mode_eff & (
+                        (dec_tlu_packet_r.pmu_i0_itype == CSRREAD)  & ~csr_rd_usr_r |
+                        (dec_tlu_packet_r.pmu_i0_itype == CSRWRITE) & ~csr_wr_usr_r |
+                        (dec_tlu_packet_r.pmu_i0_itype == CSRRW)    & ~csr_rd_usr_r & ~csr_wr_usr_r);
+
    //
    // Exceptions
    //
@@ -979,7 +995,7 @@ end // else: !if(pt.BTB_ENABLE==1)
    // - MPIE <- MIE
    // - MIE <- 0
    //
-   assign i0_exception_valid_r = (ebreak_r | ecall_r | illegal_r | inst_acc_r) & ~rfpc_i0_r & ~dec_tlu_dbg_halted;
+   assign i0_exception_valid_r = (ebreak_r | ecall_r | illegal_r | inst_acc_r | csr_acc_r) & ~rfpc_i0_r & ~dec_tlu_dbg_halted;
 
    // Cause:
    //
@@ -995,7 +1011,7 @@ end // else: !if(pt.BTB_ENABLE==1)
                                 ({5{take_int_timer0_int}}  & 5'h1d) |
                                 ({5{take_int_timer1_int}}  & 5'h1c) |
                                 ({5{take_ce_int}}          & 5'h1e) |
-                                ({5{illegal_r}}            & 5'h02) |
+                                ({5{illegal_r| csr_acc_r}} & 5'h02) |
                                 ({5{ecall_r & priv_mode}}  & 5'h08) |
                                 ({5{ecall_r & ~priv_mode}} & 5'h0b) |
                                 ({5{inst_acc_r}}           & 5'h01) |

@@ -561,6 +561,7 @@ import el2_pkg::*;
 
 
 localparam MSTATUS_MIE   = 0;
+localparam MSTATUS_MPIE  = 1;
 localparam MSTATUS_MPP   = 2;
 localparam MSTATUS_MPRV  = 3;
 
@@ -1199,10 +1200,10 @@ end
    assign set_mie_pmu_fw_halt = ~mpmc_b_ns[1] & fw_halt_req;
 
    // mstatus[3] / mstatus_ns[3] actually stores inverse of the MPP field !
-   assign mstatus_ns[3:0] = ( ({4{~wr_mstatus_r & exc_or_int_valid_r}} & {mstatus[3], priv_mode, mstatus[MSTATUS_MIE], 1'b0}) |
-                              ({4{ wr_mstatus_r & exc_or_int_valid_r}} & {mstatus[3], priv_mode, dec_csr_wrdata_r[3],  1'b0}) | // TODO: Double check. mstatus being written during exception/interrupt.
-                              ({4{mret_r & ~exc_or_int_valid_r}}       & {3'b000, mstatus[1]}) |
-                              ({4{set_mie_pmu_fw_halt}}                & {mstatus[3:2], mstatus[1], 1'b1}) |
+   assign mstatus_ns[3:0] = ( ({4{~wr_mstatus_r & exc_or_int_valid_r}} & {mstatus[MSTATUS_MPRV], priv_mode, mstatus[MSTATUS_MIE], 1'b0}) |
+                              ({4{ wr_mstatus_r & exc_or_int_valid_r}} & {mstatus[MSTATUS_MPRV], priv_mode, dec_csr_wrdata_r[3],  1'b0}) |
+                              ({4{mret_r & ~exc_or_int_valid_r}}       & {3'b000, mstatus[MSTATUS_MPIE]}) |
+                              ({4{set_mie_pmu_fw_halt}}                & {mstatus[3:2], mstatus[MSTATUS_MPIE], 1'b1}) |
                               ({4{wr_mstatus_r & ~exc_or_int_valid_r}} & {dec_csr_wrdata_r[17], ~dec_csr_wrdata_r[12], dec_csr_wrdata_r[7], dec_csr_wrdata_r[3]}) |
                               ({4{~wr_mstatus_r & ~exc_or_int_valid_r  & ~mret_r & ~set_mie_pmu_fw_halt}} & mstatus[3:0]) );
 
@@ -2812,7 +2813,7 @@ assign dec_csr_rddata_d[31:0] = ( ({32{csr_misa}}      & 32'h40101104) |
                                   ({32{csr_marchid}}   & 32'h00000010) |
                                   ({32{csr_mimpid}}    & 32'h4) |
                                   ({32{csr_mhartid}}   & {core_id[31:4], 4'b0}) |
-                                  ({32{csr_mstatus}}   & {14'b0, mstatus[3], 4'b0, ~mstatus[2], ~mstatus[2], 3'b0, mstatus[1], 3'b0, mstatus[0], 3'b0}) |
+                                  ({32{csr_mstatus}}   & {14'b0, mstatus[MSTATUS_MPRV], 4'b0, ~mstatus[MSTATUS_MPP], ~mstatus[MSTATUS_MPP], 3'b0, mstatus[MSTATUS_MPIE], 3'b0, mstatus[MSTATUS_MIE], 3'b0}) |
                                   ({32{csr_mtvec}}     & {mtvec[30:1], 1'b0, mtvec[0]}) |
                                   ({32{csr_mip}}       & {1'b0, mip[5:3], 16'b0, mip[2], 3'b0, mip[1], 3'b0, mip[0], 3'b0}) |
                                   ({32{csr_mie}}       & {1'b0, mie[5:3], 16'b0, mie[2], 3'b0, mie[1], 3'b0, mie[0], 3'b0}) |

@@ -1,2 +1,2 @@
-OFILES = crt0.o main.o pmp.o veer.o trap.o fault.o
+OFILES = crt0.o main.o pmp.o veer.o fault.o
 TEST_CFLAGS = -g -O3 -falign-functions=16

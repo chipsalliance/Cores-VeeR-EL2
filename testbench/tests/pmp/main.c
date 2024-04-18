@@ -17,110 +17,77 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "veer.h"
-#include "trap.h"
 #include "fault.h"
 #include "pmp.h"
 
-#define TEST_NUMBER 3
+#define CSR_MSTATUS 0x300
+#define CSR_MISA    0x301
+#define CSR_MEPC    0x341
 
-int test_load(int);
-int test_store(int);
-int test_exec(int);
+extern int ucall (void* ptr, ...);
 
-int (*tests[TEST_NUMBER]) (int) = {test_load, test_store, test_exec};
-const char *const test_names[TEST_NUMBER] = {"test_load", "test_store", "test_exec"};
+// ============================================================================
 
-volatile int temp_load;
-volatile int temp_store;
+volatile uint32_t test_area_1 [16] __attribute__((section(".area1")));
+volatile uint32_t test_area_2 [16] __attribute__((section(".area2")));
 
-#define PATTERN_A 0xaaaaaaaa
-#define PATTERN_B 0x55555555
+void test_hello () {
+    printf(" hello\n");
+}
 
-int test_load(int id)
-{
-    int temp = PATTERN_B;
-    struct fault ret;
+// ============================================================================
+
+int trap_handler (const struct fault* fault) {
+    printf("Trap! mcause=0x%08x\n", fault->mcause);
+
+    // If setjmp-based try-catch was used return to the program
+    fault_return(fault);
+    return 0;
+}
+
+// ============================================================================
+
+int main () {
+    printf("Hello VeeR (M mode)\n");
+
+    struct pmp_entry_s entry;
+    int res = 0;
+
+    // .......................................................................
+    // Check if user mode has access to everything by default when PMP is not
+    // configured. Just call a simple function.
 
     TRY {
-        struct pmp_entry_s entry = {
-            .addr = ((uintptr_t)(&temp_load)) >> 2,
-            .cfg = PMP_LOCK | PMP_NA4 | PMP_X | PMP_W
-        };
-        pmp_entry_write(id, &entry);
-        temp_load = PATTERN_A;
-        temp = temp_load;
+        ucall(test_hello);
+        printf(" pass\n");
     }
     CATCH {
-        if ((temp != PATTERN_B) && (temp == PATTERN_A)) return 3;
-        ret = fault_last_get();
-        return (ret.mcause == EXC_LOAD_ACC_FAULT) ? 0 : 1;
+        printf(" fail\n");
+        res = 1;
     }
     END_TRY;
-    return 2;
-}
 
-int test_store(int id)
-{
-    struct fault ret;
+    // .......................................................................
+    // Configure a single region in PMP and call user mode function. It shoud
+    // not have access to code and stack hence it should not execute
+
+    // Allow area1 user access
+    entry.addr = (uint32_t)(&test_area_1);
+    entry.addr = (entry.addr & 0xFFFFFF00) | 0x0000007F; // NAPOT, 2^11
+    entry.cfg  = PMP_NAPOT | PMP_R | PMP_W | PMP_X;
+    pmp_entry_write(0, &entry);
 
     TRY {
-        temp_store = PATTERN_A;
-        struct pmp_entry_s entry = {
-            .addr = ((uintptr_t)(&temp_store)) >> 2,
-            .cfg = PMP_LOCK | PMP_NA4 | PMP_X | PMP_R
-        };
-        pmp_entry_write(id, &entry);
-        temp_store = PATTERN_B;
+        ucall(test_hello);
+        printf(" fail\n");
+        res = 1;
     }
     CATCH {
-        if (temp_store == PATTERN_B) return 3;
-        ret = fault_last_get();
-        return (ret.mcause == EXC_STORE_ACC_FAULT) ? 0 : 1;
+        printf(" pass\n");
     }
     END_TRY;
-    return 2;
+
+    printf("Goodbye VeeR (M mode)\n");
+    return res;
 }
 
-void __attribute__ ((noinline)) test_exec_1(void)
-{
-    puts(__func__);
-    return;
-}
-
-int test_exec(int id)
-{
-    struct fault ret;
-
-    TRY {
-        struct pmp_entry_s entry = {
-            .addr = ((uintptr_t)(test_exec_1)) >> 2,
-            .cfg = PMP_LOCK | PMP_NA4 | PMP_W | PMP_R
-        };
-        pmp_entry_write(id, &entry);
-        test_exec_1();
-    }
-    CATCH {
-        ret = fault_last_get();
-        return (ret.mcause == EXC_INSTRUCTION_ACC_FAULT) ? 0 : 1;
-    }
-    END_TRY;
-    return 2;
-}
-
-void main(void)
-{
-    int results[TEST_NUMBER];
-    int sum = 0;
-
-    puts("PMP/exception test program");
-    fault_install();
-
-    for (int i = 0; i < TEST_NUMBER; i++) {
-        printf(":: %s\n", test_names[i]);
-        results[i] = tests[i](i);
-        printf(":: %s: %s (%d)\n", test_names[i], (results[i] ? "failed" : "passed"), results[i]);
-        sum += results[i];
-    }
-
-    exit(sum);
-}

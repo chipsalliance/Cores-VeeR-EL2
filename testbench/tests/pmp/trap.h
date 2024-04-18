@@ -40,28 +40,11 @@
 #ifndef _TRAP_H
 #define _TRAP_H
 
-#ifdef __riscv_32e
-#define NUM_REG 16
-#else
-#define NUM_REG 32
-#endif
-
-#if __riscv_xlen == 32
-#define FMT     "%08lx"
-#define SD      "sw"
-#else
-#define FMT     "%016lx"
-#define SD      "sd"
-#endif
-
-#define _PASTE(r) #r
-#define PASTE(r) _PASTE(r)
-
 struct fault {
-        unsigned long   r[NUM_REG];
-        unsigned long   mepc;
-        unsigned long   mcause;
-        unsigned long   mtval;
+    unsigned long   r[32];
+    unsigned long   mepc;
+    unsigned long   mcause;
+    unsigned long   mtval;
 };
 
 #endif

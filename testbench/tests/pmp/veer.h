@@ -17,11 +17,18 @@
 #ifndef __VEER_H
 #define __VEER_H
 
-#include <setjmp.h>
+struct rv_jmp_buf {
+    long            pc;
+    unsigned long   regs[31];
+    long            exitcode;
+};
 
-#define TRY do { jmp_buf try_buf; if(!setjmp(try_buf)){ fault_setjmp(try_buf);
+extern long rv_setjmp_m   (struct rv_jmp_buf*);
+extern void rv_longjmp_m  (struct rv_jmp_buf*, long exitcode);
+
+#define TRY do { struct rv_jmp_buf try_buf = {0}; if(!rv_setjmp_m(&try_buf)) { fault_setjmp(&try_buf);
 #define CATCH } else {
 #define END_TRY } } while(0)
-#define THROW longjmp(try_buf, 1)
+//#define THROW longjmp(try_buf, 1)
 
 #endif

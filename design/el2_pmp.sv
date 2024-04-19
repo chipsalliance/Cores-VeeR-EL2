@@ -27,6 +27,9 @@ module el2_pmp
     input logic rst_l,     // Reset
     input logic scan_mode, // Scan mode
 
+    input logic priv_mode,      // operating privilege mode
+    input logic priv_mode_eff,  // operating effective privilege mode
+
     input el2_pmp_cfg_pkt_t        pmp_pmpcfg [pt.PMP_ENTRIES],
     input logic             [31:0] pmp_pmpaddr[pt.PMP_ENTRIES],
 
@@ -47,6 +50,8 @@ module el2_pmp
   logic [    PMP_CHANNELS-1:0][pt.PMP_ENTRIES-1:0] region_basic_perm_check;
   logic [    PMP_CHANNELS-1:0][pt.PMP_ENTRIES-1:0] region_perm_check;
 
+  logic any_region_enabled;
+
   ///////////////////////
   // Functions for PMP //
   ///////////////////////
@@ -61,26 +66,31 @@ module el2_pmp
 
   // A wrapper function in which it is decided which form of permission check function gets called
   function automatic logic perm_check_wrapper(el2_pmp_cfg_pkt_t csr_pmp_cfg,
+                                              logic priv_mode,
                                               logic permission_check);
-    return orig_perm_check(csr_pmp_cfg.lock, permission_check);
+    return orig_perm_check(csr_pmp_cfg.lock, priv_mode, permission_check);
   endfunction
 
   // Compute permissions checks that apply when MSECCFG.MML is unset. This is the original PMP
   // behaviour before Smepmp was added.
-  function automatic logic orig_perm_check(logic pmp_cfg_lock, logic permission_check);
-    return (~pmp_cfg_lock | permission_check);
+  function automatic logic orig_perm_check(logic pmp_cfg_lock,
+                                           logic priv_mode,
+                                           logic permission_check);
     // For M-mode, any region which matches with the L-bit clear, or with sufficient
-    // access permissions will be allowed
+    // access permissions will be allowed.
+    // For other modes, the lock bit doesn't matter
+    return priv_mode ? (permission_check) : (~pmp_cfg_lock | permission_check);
   endfunction
 
   // Access fault determination / prioritization
   function automatic logic access_fault_check(logic [pt.PMP_ENTRIES-1:0] match_all,
+                                              logic any_region_enabled,
+                                              logic priv_mode,
                                               logic [pt.PMP_ENTRIES-1:0] final_perm_check);
 
-
-    // When MSECCFG.MMWP is set default deny always, otherwise allow for M-mode, deny for other
-    // modes. Also deny unmatched for M-mode whe MSECCFG.MML is set and request type is EXEC.
-    logic access_fail = 1'b0;
+    // When in user mode and at leas one PMP region is enabled deny access by
+    // default.
+    logic access_fail = any_region_enabled & priv_mode;
     logic matched = 1'b0;
 
     // PMP entries are statically prioritized, from 0 to N-1
@@ -97,6 +107,12 @@ module el2_pmp
   // ---------------
   // Access checking
   // ---------------
+
+  logic [pt.PMP_ENTRIES-1:0] region_enabled;
+  for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : g_reg_ena
+    assign region_enabled[r] = pmp_pmpcfg[r].mode != OFF;
+  end
+  assign any_region_enabled = |region_enabled;
 
   for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : g_addr_exp
     assign csr_pmp_addr_i[r] = {
@@ -129,6 +145,13 @@ module el2_pmp
         end
       end
     end
+  end
+
+  logic [PMP_CHANNELS-1:0] pmp_priv_mode_eff;
+  for (genvar c = 0; c < PMP_CHANNELS; c++) begin : g_priv_mode_eff
+    assign pmp_priv_mode_eff[c] = (
+      ((pmp_chan_type[c] == EXEC) & priv_mode) |
+      ((pmp_chan_type[c] != EXEC) & priv_mode_eff)); // RW affected by mstatus.MPRV
   end
 
   for (genvar c = 0; c < PMP_CHANNELS; c++) begin : g_access_check
@@ -167,7 +190,7 @@ module el2_pmp
       // Check specific required permissions since the behaviour is different
       // between Smepmp implementation and original PMP.
       assign region_perm_check[c][r] = perm_check_wrapper(
-          pmp_pmpcfg[r], region_basic_perm_check[c][r]
+          pmp_pmpcfg[r], pmp_priv_mode_eff[c], region_basic_perm_check[c][r]
       );
 
       // Address bits below PMP granularity (which starts at 4 byte) are deliberately unused.
@@ -178,7 +201,10 @@ module el2_pmp
 
     // Once the permission checks of the regions are done, decide if the access is
     // denied by figuring out the matching region and its permission check.
-    assign pmp_chan_err[c] = access_fault_check(region_match_all[c], region_perm_check[c]);
+    assign pmp_chan_err[c] = access_fault_check(region_match_all[c],
+                                                any_region_enabled,
+                                                priv_mode,
+                                                region_perm_check[c]);
   end
 
 endmodule  // el2_pmp

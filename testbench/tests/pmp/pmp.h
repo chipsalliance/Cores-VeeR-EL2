@@ -35,6 +35,7 @@ struct pmp_entry_s {
     uint8_t cfg;
 };
 
+int pmp_clear();
 int pmp_read_pmpcfg(unsigned int offset, uintptr_t * dest);
 int pmp_read_pmpaddr(unsigned int offset, uintptr_t * dest);
 int pmp_write_pmpcfg(unsigned int offset, uintptr_t * src);

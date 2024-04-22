@@ -36,11 +36,11 @@ struct fault fault_last_get(void)
 void fault_return(const struct fault *fault)
 {
     // Save register state for later usage
-    memcpy(&fault_last, fault, sizeof(fault_last));
+    memcpy((struct fault*)&fault_last, fault, sizeof(fault_last));
 
     // Return to program if setjmp-based try-catch was used
     if (fault_jmp_env != NULL) {
-        struct rv_jmp_buf* env = fault_jmp_env;
+        struct rv_jmp_buf* env = (struct rv_jmp_buf*)fault_jmp_env;
         fault_jmp_env = NULL;
         rv_longjmp_m(env, 1);
     }

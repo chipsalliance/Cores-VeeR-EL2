@@ -4,6 +4,7 @@ ENTRY(_start)
 SECTIONS {
 
   . = 0x80000000;
+  _text = .;
   .text : { *(.text.init*) *(.text*) }
   _text_end = .;
   _end = .;
@@ -16,10 +17,16 @@ SECTIONS {
 
   . = ALIGN(4096);
   .area1 : { *(.area1*) }
-  .area2 : { *(.area2*) }
-
   . = ALIGN(4096);
-  STACK = .;
+  .area2 : { *(.area2*) }
+  . = ALIGN(4096);
+  .area2 : { *(.area3*) }
+
+  . = ALIGN(8192);
+  _stack_lo = .;
+  . += 8192;
+  _stack_hi = .;
+
   . = 0xd0580000;
-  .data.io . : { *(.data.io) }
+  .data.io . (NOLOAD) : { *(.data.io) }
 }

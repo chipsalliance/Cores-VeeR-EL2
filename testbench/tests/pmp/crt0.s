@@ -9,7 +9,7 @@
 _start:
 
         # Setup stack
-        la sp, STACK
+        la sp, _stack_hi
 
         # Setup trap handler
         la t0, _trap_entry
@@ -306,6 +306,6 @@ rv_longjmp_m:
 
 .section .data.io
 .global tohost
-tohost: .word 0
-#.global fromhost
-#fromhost: .word 0
+tohost: .dword 0
+.global fromhost
+fromhost: .dword 0

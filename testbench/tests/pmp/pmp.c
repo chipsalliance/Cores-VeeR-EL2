@@ -1,6 +1,25 @@
 #include <stdint.h>
 #include "pmp.h"
 
+int pmp_clear ()
+{
+    uintptr_t zero = 0;
+    int res = 0;
+
+    for (int i=0; i<=0xF; ++i) {
+        if (pmp_write_pmpcfg(i, &zero)) {
+            res = -1;
+        }
+    }
+    for (int i=0; i<=0x3F; ++i) {
+        if (pmp_write_pmpaddr(i, &zero)) {
+            res = -1;
+        }
+    }
+
+    return res;
+}
+
 int pmp_read_pmpcfg(unsigned int offset, uintptr_t * dest)
 {
     uintptr_t csr_value;

@@ -17,6 +17,11 @@
 #ifndef __VEER_H
 #define __VEER_H
 
+// Set to 1 if using HTIF interface eg. in Spike
+#define USE_HTIF 0
+
+#include <stdint.h>
+
 struct rv_jmp_buf {
     long            pc;
     unsigned long   regs[31];
@@ -29,6 +34,14 @@ extern void rv_longjmp_m  (struct rv_jmp_buf*, long exitcode);
 #define TRY do { struct rv_jmp_buf try_buf = {0}; if(!rv_setjmp_m(&try_buf)) { fault_setjmp(&try_buf);
 #define CATCH } else {
 #define END_TRY } } while(0)
-//#define THROW longjmp(try_buf, 1)
+
+__attribute__((__noreturn__)) void _exit (int status);
+
+#if USE_HTIF
+#define HTIF_SYSCALL_WRITE  64
+#define HTIF_SYSCALL_EXIT   93
+
+int64_t veer_syscall (int64_t a0, int64_t a1, int64_t a2, int64_t a3);
+#endif
 
 #endif

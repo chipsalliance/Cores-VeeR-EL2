@@ -28,7 +28,9 @@ struct rv_jmp_buf {
     long            exitcode;
 };
 
+// RISC-V specific setjmp() variant. Must be called from M-mode
 extern long rv_setjmp_m   (struct rv_jmp_buf*);
+// RISC-V specific longjmp() variant. Must be called from M-mode
 extern void rv_longjmp_m  (struct rv_jmp_buf*, long exitcode);
 
 #define TRY do { struct rv_jmp_buf try_buf = {0}; if(!rv_setjmp_m(&try_buf)) { fault_setjmp(&try_buf);

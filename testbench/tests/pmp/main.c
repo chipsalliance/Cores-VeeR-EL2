@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "veer.h"
 #include "fault.h"
 #include "pmp.h"
@@ -39,30 +40,77 @@ extern int ucall (void* ptr, ...);
 volatile uint32_t test_area_1 [16] __attribute__((section(".area1")));
 volatile uint32_t test_area_2 [16] __attribute__((section(".area2")));
 
+const uint32_t test_pattern_a [] = {
+    0xE8C50A2E,
+    0x017F84CA,
+    0xFB8A3138,
+    0xFDF0F930,
+    0xA5F12034,
+    0x4A67B7B6,
+    0xD03C9377,
+    0xD124A11C,
+    0xAB319961,
+    0xF94AF557,
+    0xDD743AE6,
+    0xAAB99BC3,
+    0xE992D7FA,
+    0x5C6A76FA,
+    0xD8D63FE2,
+    0x8616CFC6
+};
+
+const uint32_t test_pattern_b [] = {
+    0x2B0B56F2,
+    0x6B78B6FF,
+    0xE7B61C7A,
+    0x66FB04DB,
+    0xC2F2BE9D,
+    0x2D569A89,
+    0x905BF8E6,
+    0x2798E7CE,
+    0x509BA997,
+    0xBF0147EB,
+    0x09065BEF,
+    0x04146267,
+    0xC421C6E3,
+    0xD6C76040,
+    0x773AA931,
+    0x01C01BDE
+};
+
 void test_hello () {
-    printf("hello\n");
+    printf("  hello\n");
 }
 
-void test_read () {
-    printf("reading from area1...\n");
+int test_read (const uint32_t* pattern) {
+    printf("  reading from area1...\n");
 
-    volatile uint32_t arr[16];
+    uint32_t arr[16];
     for (size_t i=0; i<16; ++i) {
         arr[i] = test_area_1[i];
     }
+
+    if (memcmp(arr, pattern, sizeof(arr))) {
+        printf("  data mismatch\n");
+        return -1;
+    }
+    else {
+        printf("  data match\n");
+    }
+
+    return 0;
 }
 
-void test_write () {
-    printf("writing to area1...\n");
+void test_write (const uint32_t* pattern) {
+    printf("  writing to area1...\n");
 
-    volatile uint32_t arr[16] = {0};
     for (size_t i=0; i<16; ++i) {
-        test_area_1[i] = arr[i];
+        test_area_1[i] = pattern[i];
     }
 }
 
 void __attribute__((section(".area3"))) test_exec () {
-    printf("hello from .area3\n");
+    printf("  hello from .area3\n");
 }
 
 // ============================================================================
@@ -70,10 +118,10 @@ void __attribute__((section(".area3"))) test_exec () {
 volatile unsigned long trap_count = 0;
 
 int trap_handler (const struct fault* fault) {
-    printf("Trap! mcause=0x%08x, mepc=0x%08X\n", fault->mcause, fault->mepc);
+    printf(" Trap! mcause=0x%08x, mepc=0x%08X, sp=0x%08X\n", fault->mcause, fault->mepc, fault->r[2]);
 
     // Terminate the simulation if too many traps got triggered
-    if (++trap_count > 50) {
+    if (++trap_count > 100) {
         printf("Too many traps, aborting...\n");
         _exit(-1);
     }
@@ -85,12 +133,37 @@ int trap_handler (const struct fault* fault) {
 
 // ============================================================================
 
+// Convert byte address for PMP. Effectively does "ceil(x / 4)"
+#define ADDR2PMP(x) ((((uint32_t)(x)) & 3) ? ((((uint32_t)(x)) >> 2) + 1) : \
+                                              (((uint32_t)(x)) >> 2))
+
 int main () {
     printf("Hello VeeR (M mode)\n");
 
+//    // Set MSECCFG
+//    uint32_t mseccfg = 0;
+//    CSRR_WRITE(mseccfg, 0x747);
+
+    // .......................................................................
+    // Determine PMP granularity
+    uintptr_t tmp = 0;
+    pmp_write_pmpcfg (0, &tmp);
+    tmp = 0xFFFFFFFF;
+    pmp_write_pmpaddr(0, &tmp);
+    pmp_read_pmpaddr (0, &tmp);
+
+    int g = 0;
+    for (; g < 32; ++g) {
+        if (tmp & 1) break;
+        tmp >>= 1;
+    }
+
+    printf("PMP G=%d, granularity is %d\n", g, 1 << (g + 2));
+
+    // .......................................................................
     struct pmp_entry_s entry;
-    int res = 0;
     int tid = 0;
+    int failed = 0;
 
     // .......................................................................
     // Check if user mode has access to everything by default when PMP is not
@@ -106,7 +179,7 @@ int main () {
     }
     CATCH {
         printf(" fail\n");
-        res = -1;
+        failed++;
     }
     END_TRY;
 
@@ -117,15 +190,15 @@ int main () {
 
     // Allow area1 user access
     entry.addr = (uint32_t)(&test_area_1) >> 2;
-    entry.addr = (entry.addr & 0xFFFFFF00) | 0x0000007F; // NAPOT, 2^11
+    entry.addr = (entry.addr & 0xFFFFFC00) | 0x000001FF; // NAPOT, 2^12
     entry.cfg  = PMP_NAPOT | PMP_R | PMP_W | PMP_X;
-    pmp_entry_write(6, &entry);
+    pmp_entry_write(5, &entry);
 
-    printf("testing...\n");
+    printf(" testing...\n");
     TRY {
         ucall(test_hello);
         printf(" fail\n");
-        res = -1;
+        failed++;
     }
     CATCH {
         printf(" pass\n");
@@ -136,41 +209,41 @@ int main () {
     // Configure PMP to allow user mode access to code and stack
     printf("%02d - User mode RWX with code, data and stack access allowed\n", tid++);
 
-    // Allow user access to "tohost"
+    // Allow user access to "tohost" and "fromhost"
     entry.addr = (uint32_t)(&tohost) >> 2;
-    entry.cfg  = PMP_NA4 | PMP_R | PMP_W | PMP_X;
+    entry.addr = (entry.addr & 0xFFFFFFFC) | 1; // NAPOT 2^4
+    entry.cfg  = PMP_NAPOT | PMP_R | PMP_W;
     pmp_entry_write(0, &entry);
 
     // Allow user access to code
-    entry.addr = (uint32_t)(&_text) >> 2;
+    entry.addr = ADDR2PMP(&_text);
     entry.cfg  = 0;
     pmp_entry_write(1, &entry);
-    entry.addr = (uint32_t)(&_text_end) >> 2;
+    entry.addr = ADDR2PMP(&_text_end) + 1; // upper bound is not inclusive
     entry.cfg  = PMP_TOR | PMP_R | PMP_X;
     pmp_entry_write(2, &entry);
 
     // Allow user access to data
-    entry.addr = (uint32_t)(&_data) >> 2;
-    entry.cfg  = 0;
+    entry.addr = ADDR2PMP(&_data);
+    entry.addr = (entry.addr & 0xFFFFFC00) | 0x000001FF; // NAPOT, 2^12
+    entry.cfg  = PMP_NAPOT | PMP_R | PMP_W;
     pmp_entry_write(3, &entry);
-    entry.addr = (uint32_t)(&_data_end) >> 2;
-    entry.cfg  = PMP_TOR | PMP_R | PMP_W;
-    pmp_entry_write(4, &entry);
+    entry.addr = ADDR2PMP(&_data);
 
     // Allow user access to stack
-    entry.addr = (uint32_t)(&STACK) >> 2;
-    entry.addr = (entry.addr & 0xFFFFFF00) | 0x0000007F; // NAPOT, 2^11
+    entry.addr = ADDR2PMP(&_stack_lo);
+    entry.addr = (entry.addr & 0xFFFFF800) | 0x000003FF; // NAPOT, 2^13
     entry.cfg  = PMP_NAPOT | PMP_R | PMP_W;
-    pmp_entry_write(5, &entry);
+    pmp_entry_write(4, &entry);
 
-    printf("testing...\n");
+    printf(" testing...\n");
     TRY {
         ucall(test_hello);
         printf(" pass\n");
     }
     CATCH {
         printf(" fail\n");
-        res = -1;
+        failed++;
     }
     END_TRY;
 
@@ -191,80 +264,105 @@ int main () {
 
         printf("%02d - User mode %s from designated areas\n", tid++, pstr);
 
+        // Prepare data
+        const uint32_t* pattern = (i & 1) ? test_pattern_b : test_pattern_a;
+        const uint32_t* other   = (i & 1) ? test_pattern_a : test_pattern_b;
+
+        memcpy((void*)test_area_1, other, sizeof(test_area_1));
+
         // Configure .area1 access
-        entry.addr = (uint32_t)(&test_area_1) >> 2;
-        entry.addr = (entry.addr & 0xFFFFFF00) | 0x0000007F; // NAPOT, 2^11
-        entry.cfg  = PMP_NAPOT | r | w;
-        pmp_entry_write(6, &entry);
+        entry.addr = ADDR2PMP(&test_area_1);
+        entry.addr = (entry.addr & 0xFFFFFC00) | 0x000001FF; // NAPOT, 2^12
+        entry.cfg  = PMP_NAPOT | r | w | x;
+        pmp_entry_write(5, &entry);
 
         // Configure .area3 access
-        entry.addr = (uint32_t)(&test_exec) >> 2;
-        entry.addr = (entry.addr & 0xFFFFFF00) | 0x0000007F; // NAPOT, 2^11
-        entry.cfg  = PMP_NAPOT | PMP_R | x;
-        pmp_entry_write(7, &entry);
+        entry.addr = ADDR2PMP(&test_exec);
+        entry.addr = (entry.addr & 0xFFFFFC00) | 0x000001FF; // NAPOT, 2^12
+        entry.cfg  = PMP_NAPOT | r | w | x;
+        pmp_entry_write(6, &entry);
 
-        printf("testing R...\n");
-        TRY {
-            ucall(test_read);
-            if (r) {
-                printf(" pass\n");
-            } else {
-                printf(" fail\n");
-                res = -1;
-            }
-        }
-        CATCH {
-            if (r) {
-                printf(" fail\n");
-                res = -1;
-            } else {
-                printf(" pass\n");
-            }
-        }
+        int exc;
+        int cmp;
+        int any_fail = 0;
+
+        // Test writing. Write pattern from user mode and check if it was
+        // successfully written.
+        printf(" testing W...\n");
+        exc = 0;
+        TRY { ucall(test_write, pattern); }
+        CATCH { exc = 1; }
         END_TRY;
 
-        printf("testing W...\n");
-        TRY {
-            ucall(test_write);
-            if (w) {
-                printf(" pass\n");
-            } else {
-                printf(" fail\n");
-                res = -1;
-            }
+        cmp = memcmp((void*)test_area_1, pattern, sizeof(test_area_1));
+        if (cmp) {
+            printf("  data mismatch\n");
+        } else {
+            printf("  data match\n");
         }
-        CATCH {
-            if (w) {
-                printf(" fail\n");
-                res = -1;
-            } else {
-                printf(" pass\n");
-            }
+
+        if ((!w && exc && cmp) || (w && !exc && !cmp)) {
+            printf(" pass\n");
+        } else {
+            printf(" fail\n");
+            any_fail = 1;
         }
+
+        // Test reading. Read area from user mode and compare agains the
+        // pattern
+        printf(" testing R...\n");
+
+        // Write pattern
+        if (!w) {
+            memcpy((void*)test_area_1, pattern, sizeof(test_area_1));
+        }
+
+        exc = 0;
+        TRY { cmp = ucall(test_read, pattern); }
+        CATCH { exc = 1; }
         END_TRY;
 
-        printf("testing X...\n");
+        if ((!r && exc) || (r && !exc && !cmp)) {
+            printf(" pass\n");
+        } else {
+            printf(" fail\n");
+            any_fail = 1;
+        }
+
+        // Call a function placed in the designated area
+        printf(" testing X...\n");
         TRY {
             ucall(test_exec);
             if (x) {
                 printf(" pass\n");
             } else {
                 printf(" fail\n");
-                res = -1;
+                any_fail = 1;
             }
         }
         CATCH {
             if (x) {
                 printf(" fail\n");
-                res = -1;
+                any_fail = 1;
             } else {
                 printf(" pass\n");
             }
         }
         END_TRY;
+
+        // Count fails
+        failed += any_fail;
     }
 
+    printf(" %d/%d passed\n", tid - failed, tid);
+    int res = (failed == 0) ? 0 : -1;
+
+    if (!res) printf("*** PASSED ***\n");
+    else      printf("*** FAILED ***\n");
+
     printf("Goodbye VeeR (M mode)\n");
+
+    _exit(res);
     return res;
 }
 

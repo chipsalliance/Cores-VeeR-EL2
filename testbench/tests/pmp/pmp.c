@@ -3,15 +3,17 @@
 
 int pmp_clear ()
 {
+    const int pmp_entries = 16; // FIXME: Parametrize that
+
     uintptr_t zero = 0;
     int res = 0;
 
-    for (int i=0; i<=0xF; ++i) {
+    for (int i=0; i<(pmp_entries + 3)/4; ++i) {
         if (pmp_write_pmpcfg(i, &zero)) {
             res = -1;
         }
     }
-    for (int i=0; i<=0x3F; ++i) {
+    for (int i=0; i<pmp_entries; ++i) {
         if (pmp_write_pmpaddr(i, &zero)) {
             res = -1;
         }

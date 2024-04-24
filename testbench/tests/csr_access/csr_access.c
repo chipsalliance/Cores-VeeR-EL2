@@ -35,6 +35,7 @@ static const struct csr_t g_read_csrs[] = {
     {0x341, "mepc"},
     {0x342, "mcause"},
     {0x343, "mtval"},
+    {0x344, "mip"},
 
     {0xB00, "mcycle"},
     {0xB02, "minstret"},
@@ -69,6 +70,7 @@ static const struct csr_t g_read_csrs[] = {
     {0x7A0, "mtsel"},
     {0x7A1, "mtdata1"},
     {0x7A2, "mtdata2"},
+    {0x7C0, "mrac"},
     {0xB03, "mhpmc3"},
     {0xB04, "mhpmc4"},
     {0xB05, "mhpmc5"},
@@ -104,18 +106,14 @@ static const struct csr_t g_read_csrs[] = {
     {0x328, "perfvh"},
     {0x330, "perfvi"},
     {0x7CE, "mfdht"},
-    {0x7CF, "mfdhs"},
-
-    {0,     NULL},
+    {0x7CF, "mfdhs"}
 };
 
 static const struct csr_t g_write_csrs[] = {
 
     // Test write only for a few CSRs not to cause unwanted effects
     {0x304, "mie"},
-    {0x340, "mscratch"},
-
-    {0,     NULL},
+    {0x340, "mscratch"}
 };
 
 unsigned long read_csr (uint32_t addr) {
@@ -141,6 +139,7 @@ unsigned long read_csr (uint32_t addr) {
         case 0x341: return _read_csr(0x341);
         case 0x342: return _read_csr(0x342);
         case 0x343: return _read_csr(0x343);
+        case 0x344: return _read_csr(0x344);
 
         case 0xB00: return _read_csr(0xB00);
         case 0xB02: return _read_csr(0xB02);
@@ -235,13 +234,13 @@ void write_csr (uint32_t addr, uint32_t val) {
 volatile unsigned long last_trap  = 0xFFFFFFFF;
 volatile unsigned long fail_count = 0;
 
-void test_csr_read_access (const struct csr_t* csrs, uint8_t user_mode) {
+void test_csr_read_access (uint8_t user_mode) {
 
     int  ok;
 
     // Loop over all implemented CSRs and try reading them.
-    for (size_t i=0; csrs[i].addr != 0; ++i) {
-        const struct csr_t* csr = &csrs[i];
+    for (size_t i=0; i < sizeof(g_read_csrs) / sizeof(g_read_csrs[0]); ++i) {
+        const struct csr_t* csr = &g_read_csrs[i];
 
         // Attempt CSR read
         last_trap = 0xFFFFFFFF;
@@ -268,13 +267,13 @@ void test_csr_read_access (const struct csr_t* csrs, uint8_t user_mode) {
 
 }
 
-void test_csr_write_access (const struct csr_t* csrs, uint8_t user_mode) {
+void test_csr_write_access (uint8_t user_mode) {
 
     int  ok = 1;
 
     // Loop over all implemented CSRs and try reading them.
-    for (size_t i=0; csrs[i].addr != 0; ++i) {
-        const struct csr_t* csr = &csrs[i];
+    for (size_t i=0; i < sizeof(g_write_csrs) / sizeof(g_write_csrs[0]); ++i) {
+        const struct csr_t* csr = &g_write_csrs[i];
 
         // Attempt CSR write
         last_trap = 0xFFFFFFFF;
@@ -317,9 +316,9 @@ __attribute__((noreturn)) void main () {
  
     // Test CSR access assuming machine mode
     printf("Testing CSR read...\n");
-    test_csr_read_access(g_read_csrs, 0);
+    test_csr_read_access(0);
     printf("Testing CSR write...\n");
-    test_csr_write_access(g_write_csrs, 0);
+    test_csr_write_access(0);
 
     // Go to user mode
     unsigned long mstatus = _read_csr(mstatus);
@@ -337,9 +336,9 @@ __attribute__((noreturn)) void user_main () {
 
     // Test CSR access assuming user mode
     printf("Testing CSR read...\n");
-    test_csr_read_access(g_read_csrs, 1);
+    test_csr_read_access(1);
     printf("Testing CSR write...\n");
-    test_csr_write_access(g_write_csrs, 1);
+    test_csr_write_access(1);
     printf("\n");
 
     // Terminate the simulation

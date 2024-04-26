@@ -979,7 +979,7 @@ end // else: !if(pt.BTB_ENABLE==1)
    assign csr_wr_usr_r = ~|dec_csr_wraddr_r[9:8];
    assign csr_rd_usr_r = ~|dec_csr_rdaddr_r[9:8];
 
-   assign csr_acc_r = priv_mode_eff & (
+   assign csr_acc_r = priv_mode & (
                         (dec_tlu_packet_r.pmu_i0_itype == CSRREAD)  & ~csr_rd_usr_r |
                         (dec_tlu_packet_r.pmu_i0_itype == CSRWRITE) & ~csr_wr_usr_r |
                         (dec_tlu_packet_r.pmu_i0_itype == CSRRW)    & ~csr_rd_usr_r & ~csr_wr_usr_r);

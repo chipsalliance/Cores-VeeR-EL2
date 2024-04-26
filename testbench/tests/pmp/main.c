@@ -31,14 +31,14 @@ extern uint32_t _data;
 extern uint32_t _data_end;
 extern uint32_t _stack_lo;
 extern uint32_t _stack_hi;
+extern uint32_t _area;
 extern uint32_t tohost;
 
 extern int ucall (void* ptr, ...);
 
 // ============================================================================
 
-volatile uint32_t test_area_1 [16] __attribute__((section(".area1")));
-volatile uint32_t test_area_2 [16] __attribute__((section(".area2")));
+volatile uint32_t test_area [16] __attribute__((section(".area.bufr")));
 
 const uint32_t test_pattern_a [] = {
     0xE8C50A2E,
@@ -78,16 +78,20 @@ const uint32_t test_pattern_b [] = {
     0x01C01BDE
 };
 
+volatile unsigned long did_execute = 0;
+
 void test_hello () {
+    did_execute = 1;
     printf("  hello\n");
 }
 
 int test_read (const uint32_t* pattern) {
-    printf("  reading from area1...\n");
+    did_execute = 1;
+    printf("  reading from .area...\n");
 
     uint32_t arr[16];
     for (size_t i=0; i<16; ++i) {
-        arr[i] = test_area_1[i];
+        arr[i] = test_area[i];
     }
 
     if (memcmp(arr, pattern, sizeof(arr))) {
@@ -102,15 +106,16 @@ int test_read (const uint32_t* pattern) {
 }
 
 void test_write (const uint32_t* pattern) {
-    printf("  writing to area1...\n");
+    did_execute = 1;
+    printf("  writing to .area...\n");
 
     for (size_t i=0; i<16; ++i) {
-        test_area_1[i] = pattern[i];
+        test_area[i] = pattern[i];
     }
 }
 
-void __attribute__((section(".area3"))) test_exec () {
-    printf("  hello from .area3\n");
+void __attribute__((section(".area.code"))) test_exec () {
+    printf("  hello from .area\n");
 }
 
 // ============================================================================
@@ -201,7 +206,7 @@ int main () {
     printf("%02d - User mode RWX with one (any) PMP region enabled\n", tid++);
 
     // Allow area1 user access
-    entry.addr = (uint32_t)(&test_area_1) >> 2;
+    entry.addr = ADDR2PMP(&_area);
     entry.addr = (entry.addr & 0xFFFFFC00) | 0x000001FF; // NAPOT, 2^12
     entry.cfg  = PMP_NAPOT | PMP_R | PMP_W | PMP_X;
     pmp_entry_write(5, &entry);
@@ -222,7 +227,7 @@ int main () {
     printf("%02d - User mode RWX with code, data and stack access allowed\n", tid++);
 
     // Allow user access to "tohost" and "fromhost"
-    entry.addr = (uint32_t)(&tohost) >> 2;
+    entry.addr = ADDR2PMP(&tohost);
     entry.addr = (entry.addr & 0xFFFFFFFC) | 1; // NAPOT 2^4
     entry.cfg  = PMP_NAPOT | PMP_R | PMP_W;
     pmp_entry_write(0, &entry);
@@ -289,19 +294,13 @@ int main () {
         const uint32_t* pattern = (i & 1) ? test_pattern_b : test_pattern_a;
         const uint32_t* other   = (i & 1) ? test_pattern_a : test_pattern_b;
 
-        memcpy((void*)test_area_1, other, sizeof(test_area_1));
+        memcpy((void*)test_area, other, sizeof(test_area));
 
         // Configure .area1 access
-        entry.addr = ADDR2PMP(&test_area_1);
+        entry.addr = ADDR2PMP(&_area);
         entry.addr = (entry.addr & 0xFFFFFC00) | 0x000001FF; // NAPOT, 2^12
         entry.cfg  = PMP_NAPOT | r | w | x;
         pmp_entry_write(5, &entry);
-
-        // Configure .area3 access
-        entry.addr = ADDR2PMP(&test_exec);
-        entry.addr = (entry.addr & 0xFFFFFC00) | 0x000001FF; // NAPOT, 2^12
-        entry.cfg  = PMP_NAPOT | r | w | x;
-        pmp_entry_write(6, &entry);
 
         int exc;
         int cmp;
@@ -310,6 +309,7 @@ int main () {
         // Test writing. Write pattern from user mode and check if it was
         // successfully written.
         printf(" testing W...\n");
+        did_execute = 0;
         exc = 0;
         set_mprv(mprv);
         TRY { if (m) test_write(pattern); else ucall(test_write, pattern); }
@@ -317,14 +317,14 @@ int main () {
         END_TRY;
         set_mprv(0);
 
-        cmp = memcmp((void*)test_area_1, pattern, sizeof(test_area_1));
+        cmp = memcmp((void*)test_area, pattern, sizeof(test_area));
         if (cmp) {
             printf("  data mismatch\n");
         } else {
             printf("  data match\n");
         }
 
-        if ((!w_eff && exc && cmp) || (w_eff && !exc && !cmp)) {
+        if (did_execute && ((!w_eff && exc && cmp) || (w_eff && !exc && !cmp))) {
             printf(" pass\n");
         } else {
             printf(" fail\n");
@@ -337,9 +337,10 @@ int main () {
 
         // Write pattern
         if (!w_eff) {
-            memcpy((void*)test_area_1, pattern, sizeof(test_area_1));
+            memcpy((void*)test_area, pattern, sizeof(test_area));
         }
 
+        did_execute = 0;
         exc = 0;
         set_mprv(mprv);
         TRY { if (m) cmp = test_read(pattern); else cmp = ucall(test_read, pattern); }
@@ -347,7 +348,7 @@ int main () {
         END_TRY;
         set_mprv(0);
 
-        if ((!r_eff && exc) || (r_eff && !exc && !cmp)) {
+        if (did_execute && ((!r_eff && exc) || (r_eff && !exc && !cmp))) {
             printf(" pass\n");
         } else {
             printf(" fail\n");

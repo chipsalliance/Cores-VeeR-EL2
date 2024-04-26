@@ -16,11 +16,9 @@ SECTIONS {
   _data_end = .;
 
   . = ALIGN(4096);
-  .area1 : { *(.area1*) }
+  _area = .;
+  .area : { *(.area.bufr) *(.area.code) }
   . = ALIGN(4096);
-  .area2 : { *(.area2*) }
-  . = ALIGN(4096);
-  .area2 : { *(.area3*) }
 
   . = ALIGN(8192);
   _stack_lo = .;

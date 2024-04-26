@@ -907,10 +907,11 @@ localparam MTDATA1_LD    = 0;
                               ~inst_acc_r &
                               ~dec_tlu_dbg_halted &
                               ~request_debug_mode_r_d1 &
-                              ~i0_trigger_hit_r;
+                              ~i0_trigger_hit_r &
+                              ~csr_acc_r;
 
    // unified place to manage the killing of arch state writebacks
-   assign tlu_i0_kill_writeb_r = rfpc_i0_r | lsu_i0_exc_r | inst_acc_r | (illegal_r & dec_tlu_dbg_halted) | i0_trigger_hit_r;
+   assign tlu_i0_kill_writeb_r = rfpc_i0_r | lsu_i0_exc_r | inst_acc_r | (illegal_r & dec_tlu_dbg_halted) | i0_trigger_hit_r | csr_acc_r;
    assign dec_tlu_i0_commit_cmt = tlu_i0_commit_cmt;
 
 
@@ -1208,8 +1209,7 @@ end
 
    //When executing a MRET instruction, supposing MPP holds the value 3, MIE
    //is set to MPIE; the privilege mode is changed to 3; MPIE is set to 1; and MPP is set to 3
-
-   assign dec_csr_wen_r_mod = dec_csr_wen_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
+   assign dec_csr_wen_r_mod = dec_csr_wen_r & ~i0_trigger_hit_r & ~rfpc_i0_r & ~csr_acc_r;
    assign wr_mstatus_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MSTATUS);
 
    // set this even if we don't go to fwhalt due to debug halt. We committed the inst, so ...

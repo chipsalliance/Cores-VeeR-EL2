@@ -12,6 +12,8 @@
     asm volatile ("csrw " #csr ", %0" : : "r"(val)); \
 }
 
+#define MAGIC 0xDEADBEEF
+
 struct csr_t {
     uint32_t    addr;
     const char* name;
@@ -118,101 +120,104 @@ static const struct csr_t g_write_csrs[] = {
 
 unsigned long read_csr (uint32_t addr) {
 
+    // Define the result to be explicitly in register a0 - the return value
+    // by the calling convention. Preset it to a magic value so that when
+    // a CSR access fails the value stays there.
+    volatile register uint32_t val asm("a0") = MAGIC;
+
     // Since RISC-V does not allow indirect CSR addressing there's a big
     // 'switch' to handle that.
-
     switch (addr) {
 
-        case 0xF11: return _read_csr(0xF11);
-        case 0xF12: return _read_csr(0xF12);
-        case 0xF13: return _read_csr(0xF13);
-        case 0xF14: return _read_csr(0xF14);
+        case 0xF11: val = _read_csr(0xF11); break;
+        case 0xF12: val = _read_csr(0xF12); break;
+        case 0xF13: val = _read_csr(0xF13); break;
+        case 0xF14: val = _read_csr(0xF14); break;
 
-        case 0x300: return _read_csr(0x300);
-        case 0x301: return _read_csr(0x301);
-        case 0x304: return _read_csr(0x304);
-        case 0x305: return _read_csr(0x305);
+        case 0x300: val = _read_csr(0x300); break;
+        case 0x301: val = _read_csr(0x301); break;
+        case 0x304: val = _read_csr(0x304); break;
+        case 0x305: val = _read_csr(0x305); break;
 
-        case 0x320: return _read_csr(0x320);
+        case 0x320: val = _read_csr(0x320); break;
 
-        case 0x340: return _read_csr(0x340);
-        case 0x341: return _read_csr(0x341);
-        case 0x342: return _read_csr(0x342);
-        case 0x343: return _read_csr(0x343);
-        case 0x344: return _read_csr(0x344);
+        case 0x340: val = _read_csr(0x340); break;
+        case 0x341: val = _read_csr(0x341); break;
+        case 0x342: val = _read_csr(0x342); break;
+        case 0x343: val = _read_csr(0x343); break;
+        case 0x344: val = _read_csr(0x344); break;
 
-        case 0xB00: return _read_csr(0xB00);
-        case 0xB02: return _read_csr(0xB02);
-        case 0xB80: return _read_csr(0xB80);
-        case 0xB82: return _read_csr(0xB82);
+        case 0xB00: val = _read_csr(0xB00); break;
+        case 0xB02: val = _read_csr(0xB02); break;
+        case 0xB80: val = _read_csr(0xB80); break;
+        case 0xB82: val = _read_csr(0xB82); break;
 
-        case 0x3A0: return _read_csr(0x3A0);
-        case 0x3B0: return _read_csr(0x3B0);
-        case 0x3C0: return _read_csr(0x3C0);
-        case 0x3D0: return _read_csr(0x3D0);
-        case 0x3E0: return _read_csr(0x3E0);
+        case 0x3A0: val = _read_csr(0x3A0); break;
+        case 0x3B0: val = _read_csr(0x3B0); break;
+        case 0x3C0: val = _read_csr(0x3C0); break;
+        case 0x3D0: val = _read_csr(0x3D0); break;
+        case 0x3E0: val = _read_csr(0x3E0); break;
 
-        case 0x7FF: return _read_csr(0x7FF);
-        case 0x7C0: return _read_csr(0x7C0);
-        case 0x7C4: return _read_csr(0x7C4);
-        case 0xBC0: return _read_csr(0xBC0);
-        case 0xFC0: return _read_csr(0xFC0);
-        case 0xBC8: return _read_csr(0xBC8);
-        case 0xFC8: return _read_csr(0xFC8);
-        case 0xBC9: return _read_csr(0xBC9);
-        case 0xBCA: return _read_csr(0xBCA);
-        case 0xBCC: return _read_csr(0xBCC);
-        case 0xBCB: return _read_csr(0xBCB);
-        case 0x7B0: return _read_csr(0x7B0);
-        case 0x7B1: return _read_csr(0x7B1);
-        case 0x7C8: return _read_csr(0x7C8);
-        case 0x7CC: return _read_csr(0x7CC);
-        case 0x7C9: return _read_csr(0x7C9);
-        case 0x7CA: return _read_csr(0x7CA);
-        case 0x7CB: return _read_csr(0x7CB);
-        case 0x7A0: return _read_csr(0x7A0);
-        case 0x7A1: return _read_csr(0x7A1);
-        case 0x7A2: return _read_csr(0x7A2);
-        case 0xB03: return _read_csr(0xB03);
-        case 0xB04: return _read_csr(0xB04);
-        case 0xB05: return _read_csr(0xB05);
-        case 0xB06: return _read_csr(0xB06);
-        case 0xB83: return _read_csr(0xB83);
-        case 0xB84: return _read_csr(0xB84);
-        case 0xB85: return _read_csr(0xB85);
-        case 0xB86: return _read_csr(0xB86);
-        case 0x323: return _read_csr(0x323);
-        case 0x324: return _read_csr(0x324);
-        case 0x325: return _read_csr(0x325);
-        case 0x326: return _read_csr(0x326);
-        case 0x7F0: return _read_csr(0x7F0);
-        case 0x7F1: return _read_csr(0x7F1);
-        case 0x7F2: return _read_csr(0x7F2);
-        case 0x7C6: return _read_csr(0x7C6);
-        case 0x7F8: return _read_csr(0x7F8);
-        case 0x7C2: return _read_csr(0x7C2);
-        case 0x7F9: return _read_csr(0x7F9);
-        case 0x7D4: return _read_csr(0x7D4);
-        case 0x7D7: return _read_csr(0x7D7);
-        case 0x7D3: return _read_csr(0x7D3);
-        case 0x7D6: return _read_csr(0x7D6);
-        case 0x7D2: return _read_csr(0x7D2);
-        case 0x7D5: return _read_csr(0x7D5);
-        case 0xB07: return _read_csr(0xB07);
-        case 0xB08: return _read_csr(0xB08);
-        case 0xB10: return _read_csr(0xB10);
-        case 0xB87: return _read_csr(0xB87);
-        case 0xB88: return _read_csr(0xB88);
-        case 0xB90: return _read_csr(0xB90);
-        case 0x327: return _read_csr(0x327);
-        case 0x328: return _read_csr(0x328);
-        case 0x330: return _read_csr(0x330);
-        case 0x7CE: return _read_csr(0x7CE);
-        case 0x7CF: return _read_csr(0x7CF);
+        case 0x7FF: val = _read_csr(0x7FF); break;
+        case 0x7C0: val = _read_csr(0x7C0); break;
+        case 0x7C4: val = _read_csr(0x7C4); break;
+        case 0xBC0: val = _read_csr(0xBC0); break;
+        case 0xFC0: val = _read_csr(0xFC0); break;
+        case 0xBC8: val = _read_csr(0xBC8); break;
+        case 0xFC8: val = _read_csr(0xFC8); break;
+        case 0xBC9: val = _read_csr(0xBC9); break;
+        case 0xBCA: val = _read_csr(0xBCA); break;
+        case 0xBCC: val = _read_csr(0xBCC); break;
+        case 0xBCB: val = _read_csr(0xBCB); break;
+        case 0x7B0: val = _read_csr(0x7B0); break;
+        case 0x7B1: val = _read_csr(0x7B1); break;
+        case 0x7C8: val = _read_csr(0x7C8); break;
+        case 0x7CC: val = _read_csr(0x7CC); break;
+        case 0x7C9: val = _read_csr(0x7C9); break;
+        case 0x7CA: val = _read_csr(0x7CA); break;
+        case 0x7CB: val = _read_csr(0x7CB); break;
+        case 0x7A0: val = _read_csr(0x7A0); break;
+        case 0x7A1: val = _read_csr(0x7A1); break;
+        case 0x7A2: val = _read_csr(0x7A2); break;
+        case 0xB03: val = _read_csr(0xB03); break;
+        case 0xB04: val = _read_csr(0xB04); break;
+        case 0xB05: val = _read_csr(0xB05); break;
+        case 0xB06: val = _read_csr(0xB06); break;
+        case 0xB83: val = _read_csr(0xB83); break;
+        case 0xB84: val = _read_csr(0xB84); break;
+        case 0xB85: val = _read_csr(0xB85); break;
+        case 0xB86: val = _read_csr(0xB86); break;
+        case 0x323: val = _read_csr(0x323); break;
+        case 0x324: val = _read_csr(0x324); break;
+        case 0x325: val = _read_csr(0x325); break;
+        case 0x326: val = _read_csr(0x326); break;
+        case 0x7F0: val = _read_csr(0x7F0); break;
+        case 0x7F1: val = _read_csr(0x7F1); break;
+        case 0x7F2: val = _read_csr(0x7F2); break;
+        case 0x7C6: val = _read_csr(0x7C6); break;
+        case 0x7F8: val = _read_csr(0x7F8); break;
+        case 0x7C2: val = _read_csr(0x7C2); break;
+        case 0x7F9: val = _read_csr(0x7F9); break;
+        case 0x7D4: val = _read_csr(0x7D4); break;
+        case 0x7D7: val = _read_csr(0x7D7); break;
+        case 0x7D3: val = _read_csr(0x7D3); break;
+        case 0x7D6: val = _read_csr(0x7D6); break;
+        case 0x7D2: val = _read_csr(0x7D2); break;
+        case 0x7D5: val = _read_csr(0x7D5); break;
+        case 0xB07: val = _read_csr(0xB07); break;
+        case 0xB08: val = _read_csr(0xB08); break;
+        case 0xB10: val = _read_csr(0xB10); break;
+        case 0xB87: val = _read_csr(0xB87); break;
+        case 0xB88: val = _read_csr(0xB88); break;
+        case 0xB90: val = _read_csr(0xB90); break;
+        case 0x327: val = _read_csr(0x327); break;
+        case 0x328: val = _read_csr(0x328); break;
+        case 0x330: val = _read_csr(0x330); break;
+        case 0x7CE: val = _read_csr(0x7CE); break;
+        case 0x7CF: val = _read_csr(0x7CF); break;
     }
 
-    // Unknown address
-    return _read_csr(0xFFF);
+    return val;
 }
 
 void write_csr (uint32_t addr, uint32_t val) {
@@ -225,6 +230,9 @@ void write_csr (uint32_t addr, uint32_t val) {
         case 0x306: _write_csr(0x306, val); return;
 
         case 0x340: _write_csr(0x340, val); return;
+
+        // The test verifies writes to just a handful of CSRs so not all of
+        // them are mentioned here
     }
 
     // Unknown address
@@ -244,7 +252,7 @@ void test_csr_read_access (uint8_t user_mode) {
 
         // Attempt CSR read
         last_trap = 0xFFFFFFFF;
-        unsigned long val = read_csr(csr->addr);
+        volatile unsigned long val = read_csr(csr->addr);
 
         // In user mode only unprivileged / user CSRs should be readable.
         // Accessing others should yield in illegal instruction exception
@@ -253,6 +261,12 @@ void test_csr_read_access (uint8_t user_mode) {
                 ok = (last_trap == 0xFFFFFFFF);
             } else {
                 ok = (last_trap == 0x2);
+
+                // If the access failed check if the read was actually terminated
+                if (ok && val != MAGIC) {
+                    printf("0x%08X\n", val);
+                    ok = 0;
+                }
             }
         }
         // In machine mode all CSRs should be readable
@@ -271,7 +285,7 @@ void test_csr_write_access (uint8_t user_mode) {
 
     int  ok = 1;
 
-    // Loop over all implemented CSRs and try reading them.
+    // Loop over all implemented CSRs and try writing them.
     for (size_t i=0; i < sizeof(g_write_csrs) / sizeof(g_write_csrs[0]); ++i) {
         const struct csr_t* csr = &g_write_csrs[i];
 
@@ -279,7 +293,7 @@ void test_csr_write_access (uint8_t user_mode) {
         last_trap = 0xFFFFFFFF;
         write_csr(csr->addr, 0);
 
-        // In user mode only unprivileged / user CSRs should be readable.
+        // In user mode only unprivileged / user CSRs should be writable.
         // Accessing others should yield in illegal instruction exception
         if (user_mode) {
             if ((csr->addr & 0x300) == 0) { // Unprivileged / user
@@ -299,6 +313,9 @@ void test_csr_write_access (uint8_t user_mode) {
     }
 }
 
+void user_main ();
+void machine_main ();
+
 void trap_handler () {
 
     unsigned long mstatus = _read_csr(mstatus);
@@ -307,9 +324,14 @@ void trap_handler () {
 
     // Store trap cause
     last_trap = mcause;
-}
 
-void user_main ();
+    // If the trap cause is ECALL.U return to machine_main()
+    if (mcause == 0x08) {
+        void* ptr = (void*)machine_main;
+        _write_csr(mepc, (unsigned long)ptr - 4); // -4 as the trap handler advances mepc
+        _write_csr(mstatus, mstatus | (3 << 11)); // MPP=11 (M-mode)
+    }
+}
 
 __attribute__((noreturn)) void main () {
     printf("\nHello VeeR\n");
@@ -319,6 +341,9 @@ __attribute__((noreturn)) void main () {
     test_csr_read_access(0);
     printf("Testing CSR write...\n");
     test_csr_write_access(0);
+
+    // Clear mscratch
+    _write_csr(mscratch, 0);
 
     // Go to user mode
     unsigned long mstatus = _read_csr(mstatus);
@@ -339,6 +364,28 @@ __attribute__((noreturn)) void user_main () {
     test_csr_read_access(1);
     printf("Testing CSR write...\n");
     test_csr_write_access(1);
+
+    // Try writing something to mscratch. Ignore exception, later the CSR is
+    // to be read back from machine mode
+    printf("Attempting to write mscratch...\n");
+    _write_csr(mscratch, MAGIC);
+
+    // Trigger an ECALL to go to machine mode again
+    asm volatile ("ecall");
+}
+
+__attribute__((noreturn)) void machine_main () {
+    printf("\nHello from machine_main()\n");
+
+    // Check mscratch. It should not contain the pattern written from user mode
+    printf("Reading mscratch...\n");
+    unsigned long mscratch = _read_csr(mscratch);
+    if (mscratch == MAGIC) {
+        fail_count++;
+        printf("[ FAIL ] previous write succeeded while it shouldn't\n");
+    } else {
+        printf("[  OK  ]\n");
+    }
     printf("\n");
 
     // Terminate the simulation

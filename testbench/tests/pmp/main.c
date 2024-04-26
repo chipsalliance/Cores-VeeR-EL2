@@ -137,6 +137,18 @@ int trap_handler (const struct fault* fault) {
 #define ADDR2PMP(x) ((((uint32_t)(x)) & 3) ? ((((uint32_t)(x)) >> 2) + 1) : \
                                               (((uint32_t)(x)) >> 2))
 
+// Set mstatus MPRV to x and MPP to 00
+#define set_mprv(x) {                   \
+    uint32_t mstatus;                   \
+    CSRR_READ(mstatus, CSR_MSTATUS);    \
+    mstatus &= ~(3 << 11);              \
+    if (x) mstatus |=  (1 << 17);       \
+    else   mstatus &= ~(1 << 17);       \
+    CSRR_WRITE(mstatus, CSR_MSTATUS);   \
+}
+
+// ============================================================================
+
 int main () {
     printf("Hello VeeR (M mode)\n");
 
@@ -250,10 +262,17 @@ int main () {
     // .......................................................................
     // 
 
-    for (size_t i=0; i<8; ++i) {
+    for (size_t i=0; i<24; ++i) {
         uint32_t r = (i & 1) ? PMP_R : 0;
         uint32_t w = (i & 2) ? PMP_W : 0;
         uint32_t x = (i & 4) ? PMP_X : 0;
+        uint32_t m = (i >= 8);
+        uint32_t mprv = (i >= 16);
+
+        // Effective mode
+        uint32_t r_eff = (m && !mprv) ? 1 : r;
+        uint32_t w_eff = (m && !mprv) ? 1 : w;
+        uint32_t x_eff = (m)          ? 1 : x; // MPRV affects load/store only
 
         char pstr[4] = {
             r ? 'R' : '-',
@@ -262,7 +281,9 @@ int main () {
             0x00
         };
 
-        printf("%02d - User mode %s from designated areas\n", tid++, pstr);
+        const char* mstr = m ? "Machine" : "User";
+
+        printf("%02d - %s mode (mstatus.MPRV=%d) %s from designated areas\n", tid++, mstr, mprv, pstr);
 
         // Prepare data
         const uint32_t* pattern = (i & 1) ? test_pattern_b : test_pattern_a;
@@ -290,9 +311,11 @@ int main () {
         // successfully written.
         printf(" testing W...\n");
         exc = 0;
-        TRY { ucall(test_write, pattern); }
+        set_mprv(mprv);
+        TRY { if (m) test_write(pattern); else ucall(test_write, pattern); }
         CATCH { exc = 1; }
         END_TRY;
+        set_mprv(0);
 
         cmp = memcmp((void*)test_area_1, pattern, sizeof(test_area_1));
         if (cmp) {
@@ -301,7 +324,7 @@ int main () {
             printf("  data match\n");
         }
 
-        if ((!w && exc && cmp) || (w && !exc && !cmp)) {
+        if ((!w_eff && exc && cmp) || (w_eff && !exc && !cmp)) {
             printf(" pass\n");
         } else {
             printf(" fail\n");
@@ -313,16 +336,18 @@ int main () {
         printf(" testing R...\n");
 
         // Write pattern
-        if (!w) {
+        if (!w_eff) {
             memcpy((void*)test_area_1, pattern, sizeof(test_area_1));
         }
 
         exc = 0;
-        TRY { cmp = ucall(test_read, pattern); }
+        set_mprv(mprv);
+        TRY { if (m) cmp = test_read(pattern); else cmp = ucall(test_read, pattern); }
         CATCH { exc = 1; }
         END_TRY;
+        set_mprv(0);
 
-        if ((!r && exc) || (r && !exc && !cmp)) {
+        if ((!r_eff && exc) || (r_eff && !exc && !cmp)) {
             printf(" pass\n");
         } else {
             printf(" fail\n");
@@ -332,8 +357,8 @@ int main () {
         // Call a function placed in the designated area
         printf(" testing X...\n");
         TRY {
-            ucall(test_exec);
-            if (x) {
+            if (m) test_exec(); else ucall(test_exec);
+            if (x_eff) {
                 printf(" pass\n");
             } else {
                 printf(" fail\n");
@@ -341,7 +366,7 @@ int main () {
             }
         }
         CATCH {
-            if (x) {
+            if (x_eff) {
                 printf(" fail\n");
                 any_fail = 1;
             } else {

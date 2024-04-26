@@ -17,7 +17,7 @@ typedef struct packed {
 
 
 typedef enum logic [3:0] {
-                          NULL     = 4'b0000,
+                          NULL_OP  = 4'b0000,
                           MUL      = 4'b0001,
                           LOAD     = 4'b0010,
                           STORE    = 4'b0011,

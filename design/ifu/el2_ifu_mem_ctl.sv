@@ -848,7 +848,7 @@ assign two_byte_instr    =  (ic_data_f[1:0] != 2'b11 )  ;
                                  ((ic_miss_buff_data_valid_in[bypass_index[pt.ICACHE_BEAT_ADDR_HI:3]]                                                      & ~bypass_index[2] &  bypass_index[1])) |
                                  ((ic_miss_buff_data_valid_in[bypass_index[pt.ICACHE_BEAT_ADDR_HI:3]]                                                      &  bypass_index[2] & ~bypass_index[1])) |
                                  ((ic_miss_buff_data_valid_in[bypass_index[pt.ICACHE_BEAT_ADDR_HI:3]] & ic_miss_buff_data_valid_in[bypass_index_5_3_inc[pt.ICACHE_BEAT_ADDR_HI:3]] &  bypass_index[2] & bypass_index[1])) |
-                                 ((ic_miss_buff_data_valid_in[bypass_index[pt.ICACHE_BEAT_ADDR_HI:3]] & (bypass_index[pt.ICACHE_BEAT_ADDR_HI:3] == {pt.ICACHE_BEAT_ADDR_HI{1'b1}})))   ;
+                                 ((ic_miss_buff_data_valid_in[bypass_index[pt.ICACHE_BEAT_ADDR_HI:3]] & (bypass_index[pt.ICACHE_BEAT_ADDR_HI:3] == {pt.ICACHE_BEAT_BITS{1'b1}})))   ;
 
 
 
@@ -914,9 +914,11 @@ assign ic_miss_buff_half[63:0]    = {ic_miss_buff_data[{other_tag,1'b1}],ic_miss
   assign ic_rd_parity_final_err = ic_tag_perr & ~exu_flush_final & sel_ic_data & ~(ifc_region_acc_fault_final_f | (|ifc_bus_acc_fault_f)) &
                                       (fetch_req_icache_f & ~reset_all_tags & (~miss_pending | (miss_state==HIT_U_MISS)) & ~sel_mb_addr_ff);
 
-  logic [pt.ICACHE_NUM_WAYS-1:0] perr_err_inv_way;
-  logic                          perr_sel_invalidate;
-  logic                          perr_sb_write_status;
+  logic [pt.ICACHE_NUM_WAYS-1:0]                    perr_err_inv_way;
+  logic [pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] perr_ic_index_ff;
+  logic                                             perr_sel_invalidate;
+  logic                                             perr_sb_write_status;
+
 
    assign perr_err_inv_way[pt.ICACHE_NUM_WAYS-1:0]   =  {pt.ICACHE_NUM_WAYS{perr_sel_invalidate}} ;
    assign iccm_correct_ecc     = (perr_state == ECC_CORR);
@@ -1121,7 +1123,7 @@ assign ic_miss_buff_half[63:0]    = {ic_miss_buff_data[{other_tag,1'b1}],ic_miss
    assign bus_reset_data_beat_cnt    =  ic_act_miss_f | (bus_ifu_wr_en_ff &  bus_last_data_beat) | dec_tlu_force_halt;
    assign bus_hold_data_beat_cnt     = ~bus_inc_data_beat_cnt & ~bus_reset_data_beat_cnt ;
 
-   assign bus_new_data_beat_count[pt.ICACHE_BEAT_BITS-1:0] = ({pt.ICACHE_BEAT_BITS{bus_reset_data_beat_cnt}} & (pt.ICACHE_BEAT_BITS)'(0)) |
+   assign bus_new_data_beat_count[pt.ICACHE_BEAT_BITS-1:0] = ({pt.ICACHE_BEAT_BITS{bus_reset_data_beat_cnt}} & (pt.ICACHE_BEAT_BITS)'(unsigned'(0))) |
                                                           ({pt.ICACHE_BEAT_BITS{bus_inc_data_beat_cnt}}   & (bus_data_beat_count[pt.ICACHE_BEAT_BITS-1:0] + {{pt.ICACHE_BEAT_BITS-1{1'b0}},1'b1})) |
                                                           ({pt.ICACHE_BEAT_BITS{bus_hold_data_beat_cnt}}  &  bus_data_beat_count[pt.ICACHE_BEAT_BITS-1:0]);
 
@@ -1147,7 +1149,7 @@ assign ic_miss_buff_half[63:0]    = {ic_miss_buff_data[{other_tag,1'b1}],ic_miss
    assign bus_hold_cmd_beat_cnt             = ~bus_inc_cmd_beat_cnt & ~(ic_act_miss_f | scnd_miss_req | dec_tlu_force_halt) ;
    assign bus_cmd_beat_en                   =  bus_inc_cmd_beat_cnt | ic_act_miss_f | dec_tlu_force_halt;
 
-   assign bus_new_cmd_beat_count[pt.ICACHE_BEAT_BITS-1:0] =  ({pt.ICACHE_BEAT_BITS{bus_reset_cmd_beat_cnt_0}}       & (pt.ICACHE_BEAT_BITS)'(0) ) |
+   assign bus_new_cmd_beat_count[pt.ICACHE_BEAT_BITS-1:0] =  ({pt.ICACHE_BEAT_BITS{bus_reset_cmd_beat_cnt_0}}       & (pt.ICACHE_BEAT_BITS)'(unsigned'(0)) ) |
                                                           ({pt.ICACHE_BEAT_BITS{bus_reset_cmd_beat_cnt_secondlast}} & (pt.ICACHE_BEAT_BITS)'(pt.ICACHE_SCND_LAST)) |
                                                           ({pt.ICACHE_BEAT_BITS{bus_inc_cmd_beat_cnt}}              & (bus_cmd_beat_count[pt.ICACHE_BEAT_BITS-1:0] + {{pt.ICACHE_BEAT_BITS-1{1'b0}}, 1'b1})) |
                                                           ({pt.ICACHE_BEAT_BITS{bus_hold_cmd_beat_cnt}}             &  bus_cmd_beat_count[pt.ICACHE_BEAT_BITS-1:0]) ;
@@ -1274,7 +1276,6 @@ ifc_dma_access_ok_prev,dma_iccm_req_f})
     assign iccm_dma_rd_ecc_double_err = iccm_dma_rvalid && iccm_dma_ecc_error;
 
 
-
 /////////////////////////////////////////////////////////////////////////////////////
 // ECC checking logic for ICCM data.                                               //
 /////////////////////////////////////////////////////////////////////////////////////
@@ -1394,16 +1395,6 @@ if (pt.ICACHE_ENABLE == 1 ) begin: icache_enabled
    logic [pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] ifu_ic_rw_int_addr_ff;
    logic [pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] perr_ic_index_ff;
 
-    rvdffe #(
-        .WIDTH(pt.ICACHE_INDEX_HI - pt.ICACHE_TAG_INDEX_LO + 1),
-        .OVERRIDE(1)
-    ) perr_dat_ff (
-        .din (ifu_ic_rw_int_addr_ff[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO]),
-        .dout(perr_ic_index_ff[pt.ICACHE_INDEX_HI : pt.ICACHE_TAG_INDEX_LO]),
-        .en  (perr_sb_write_status),
-        .*
-    );
-
     assign ic_valid = ~ifu_wr_cumulative_err_data & ~(reset_ic_in | reset_ic_ff) & ~reset_tag_valid_for_miss;
 
     assign ifu_status_wr_addr_w_debug[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO] = ((ic_debug_rd_en | ic_debug_wr_en ) & ic_debug_tag_array) ?
@@ -1417,6 +1408,8 @@ if (pt.ICACHE_ENABLE == 1 ) begin: icache_enabled
          assign way_status_new_w_debug[pt.ICACHE_STATUS_BITS-1:0]  = (ic_debug_wr_en  & ic_debug_tag_array) ? (pt.ICACHE_STATUS_BITS == 1) ? ic_debug_wr_data[4] : ic_debug_wr_data[6:4] :
                                                 way_status_new[pt.ICACHE_STATUS_BITS-1:0] ;
 
+   rvdffe #(.WIDTH(pt.ICACHE_INDEX_HI-pt.ICACHE_TAG_INDEX_LO+1),.OVERRIDE(1)) perr_dat_ff    (.din(ifu_ic_rw_int_addr_ff[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO]), .dout(perr_ic_index_ff[pt.ICACHE_INDEX_HI : pt.ICACHE_TAG_INDEX_LO]), .en(perr_sb_write_status),  .*);
+                                          
    rvdffie #(.WIDTH(pt.ICACHE_TAG_LO-pt.ICACHE_TAG_INDEX_LO+1+pt.ICACHE_STATUS_BITS),.OVERRIDE(1))  status_misc_ff
      (.*,
       .clk(free_l2clk),
@@ -1593,6 +1586,7 @@ end else begin: icache_disabled
    assign way_status_new[pt.ICACHE_STATUS_BITS-1:0]     = '0;
    assign way_status_wr_en                           = '0;
    assign bus_wren[pt.ICACHE_NUM_WAYS-1:0]              = '0;
+   assign bus_ic_wr_en[pt.ICACHE_NUM_WAYS-1:0]              = '0;
 
 end
 
@@ -1638,10 +1632,8 @@ assign ic_debug_rd_en           = dec_tlu_ic_diag_pkt.icache_rd_valid ;
 assign ic_debug_wr_en           = dec_tlu_ic_diag_pkt.icache_wr_valid ;
 
 
-assign ic_debug_way[pt.ICACHE_NUM_WAYS-1:0]        = {(ic_debug_way_enc[1:0] == 2'b11),
-                                                      (ic_debug_way_enc[1:0] == 2'b10),
-                                                      (ic_debug_way_enc[1:0] == 2'b01),
-                                                      (ic_debug_way_enc[1:0] == 2'b00) };
+assign ic_debug_way[pt.ICACHE_NUM_WAYS-1:0]        = {(ic_debug_way_enc[0] == 1'b1),
+                                                      (ic_debug_way_enc[0] == 1'b0) };
 
 assign ic_debug_tag_wr_en[pt.ICACHE_NUM_WAYS-1:0] = {pt.ICACHE_NUM_WAYS{ic_debug_wr_en & ic_debug_tag_array}} & ic_debug_way[pt.ICACHE_NUM_WAYS-1:0] ;
 
@@ -1662,6 +1654,23 @@ rvdff_fpga #(01+pt.ICACHE_NUM_WAYS) ifu_debug_sel_ff (.*, .clk (debug_c1_clk),
 assign debug_data_clken  =  ic_debug_rd_en_ff;
 
 
+logic ACCESS0_okay;
+logic ACCESS1_okay;
+logic ACCESS2_okay;
+logic ACCESS3_okay;
+logic ACCESS4_okay;
+logic ACCESS5_okay;
+logic ACCESS6_okay;
+logic ACCESS7_okay;
+
+assign ACCESS0_okay = pt.INST_ACCESS_ENABLE0 & ((({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK0)) == (pt.INST_ACCESS_ADDR0 | pt.INST_ACCESS_MASK0)); 
+assign ACCESS1_okay = pt.INST_ACCESS_ENABLE1 & ((({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK1)) == (pt.INST_ACCESS_ADDR1 | pt.INST_ACCESS_MASK1));
+assign ACCESS2_okay = pt.INST_ACCESS_ENABLE2 & ((({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK2)) == (pt.INST_ACCESS_ADDR2 | pt.INST_ACCESS_MASK2));
+assign ACCESS3_okay = pt.INST_ACCESS_ENABLE3 & ((({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK3)) == (pt.INST_ACCESS_ADDR3 | pt.INST_ACCESS_MASK3));
+assign ACCESS4_okay = pt.INST_ACCESS_ENABLE4 & ((({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK4)) == (pt.INST_ACCESS_ADDR4 | pt.INST_ACCESS_MASK4));
+assign ACCESS5_okay = pt.INST_ACCESS_ENABLE5 & ((({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK5)) == (pt.INST_ACCESS_ADDR5 | pt.INST_ACCESS_MASK5));
+assign ACCESS6_okay = pt.INST_ACCESS_ENABLE6 & ((({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK6)) == (pt.INST_ACCESS_ADDR6 | pt.INST_ACCESS_MASK6));
+assign ACCESS7_okay = pt.INST_ACCESS_ENABLE7 & ((({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK7)) == (pt.INST_ACCESS_ADDR7 | pt.INST_ACCESS_MASK7));
 
 
 // memory protection  - equation to look identical to the LSU equation
@@ -1670,21 +1679,20 @@ assign debug_data_clken  =  ic_debug_rd_en_ff;
       assign ifc_region_acc_fault_memory_bf = ~ifc_region_acc_okay & ifc_fetch_req_bf;
    end
    else begin : g_ifc_access_check
-      assign ifc_region_acc_okay = (~(|{pt.INST_ACCESS_ENABLE0,pt.INST_ACCESS_ENABLE1,pt.INST_ACCESS_ENABLE2,pt.INST_ACCESS_ENABLE3,pt.INST_ACCESS_ENABLE4,pt.INST_ACCESS_ENABLE5,pt.INST_ACCESS_ENABLE6,pt.INST_ACCESS_ENABLE7})) |
-                                 (pt.INST_ACCESS_ENABLE0 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK0)) == (pt.INST_ACCESS_ADDR0 | pt.INST_ACCESS_MASK0)) |
-                                 (pt.INST_ACCESS_ENABLE1 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK1)) == (pt.INST_ACCESS_ADDR1 | pt.INST_ACCESS_MASK1)) |
-                                 (pt.INST_ACCESS_ENABLE2 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK2)) == (pt.INST_ACCESS_ADDR2 | pt.INST_ACCESS_MASK2)) |
-                                 (pt.INST_ACCESS_ENABLE3 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK3)) == (pt.INST_ACCESS_ADDR3 | pt.INST_ACCESS_MASK3)) |
-                                 (pt.INST_ACCESS_ENABLE4 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK4)) == (pt.INST_ACCESS_ADDR4 | pt.INST_ACCESS_MASK4)) |
-                                 (pt.INST_ACCESS_ENABLE5 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK5)) == (pt.INST_ACCESS_ADDR5 | pt.INST_ACCESS_MASK5)) |
-                                 (pt.INST_ACCESS_ENABLE6 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK6)) == (pt.INST_ACCESS_ADDR6 | pt.INST_ACCESS_MASK6)) |
-                                 (pt.INST_ACCESS_ENABLE7 & (({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK7)) == (pt.INST_ACCESS_ADDR7 | pt.INST_ACCESS_MASK7));
+      assign ifc_region_acc_okay = (~(|{pt.INST_ACCESS_ENABLE0,pt.INST_ACCESS_ENABLE1,pt.INST_ACCESS_ENABLE2,pt.INST_ACCESS_ENABLE3,pt.INST_ACCESS_ENABLE4,pt.INST_ACCESS_ENABLE5,pt.INST_ACCESS_ENABLE6,pt.INST_ACCESS_ENABLE7}))
+                                 | ACCESS0_okay
+                                 | ACCESS1_okay
+                                 | ACCESS2_okay
+                                 | ACCESS3_okay
+                                 | ACCESS4_okay
+                                 | ACCESS5_okay
+                                 | ACCESS6_okay
+                                 | ACCESS7_okay
+                               ;
+
       assign ifc_region_acc_fault_memory_bf = ~ifc_iccm_access_bf & ~ifc_region_acc_okay & ifc_fetch_req_bf;
    end
 
    assign ifc_region_acc_fault_final_bf = ifc_region_acc_fault_bf | ifc_region_acc_fault_memory_bf;
-
-
-
 
 endmodule  // el2_ifu_mem_ctl

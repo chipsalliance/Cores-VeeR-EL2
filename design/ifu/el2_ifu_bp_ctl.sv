@@ -835,8 +835,8 @@ end // block: fa
 
    for ( i=0; i<2; i++) begin : BANKS
      wire[pt.BHT_ARRAY_DEPTH-1:0] wr0, wr1;
-     assign wr0 = bht_wr_en0[i] << bht_wr_addr0;
-     assign wr1 = bht_wr_en2[i] << bht_wr_addr2;
+     assign wr0 = pt.BHT_ARRAY_DEPTH'(bht_wr_en0[i] << bht_wr_addr0);
+     assign wr1 = pt.BHT_ARRAY_DEPTH'(bht_wr_en2[i] << bht_wr_addr2);
      for (genvar k=0 ; k < (pt.BHT_ARRAY_DEPTH)/NUM_BHT_LOOP ; k++) begin : BHT_CLK_GROUP
      assign bht_bank_clken[i][k]  = (bht_wr_en0[i] & ((bht_wr_addr0[pt.BHT_ADDR_HI: NUM_BHT_LOOP_OUTER_LO]==k) |  BHT_NO_ADDR_MATCH)) |
                                     (bht_wr_en2[i] & ((bht_wr_addr2[pt.BHT_ADDR_HI: NUM_BHT_LOOP_OUTER_LO]==k) |  BHT_NO_ADDR_MATCH));
@@ -890,8 +890,8 @@ function [1:0] countones;
 
       begin
 
-countones[1:0] = {2'b0, valid[1]} +
-                 {2'b0, valid[0]};
+countones[1:0] = {1'b0, valid[1]} +
+                 {1'b0, valid[0]};
       end
    endfunction
 endmodule // el2_ifu_bp_ctl

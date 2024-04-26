@@ -219,7 +219,7 @@ import el2_pkg::*;
       logic [2:0] start_ptr;
       logic       found;
       found = '0;
-      //get_nxtbyte_ptr[2:0] = current_byte_ptr[2:0];
+      get_nxtbyte_ptr[2:0] = 3'd0; 
       start_ptr[2:0] = get_next ? (current_byte_ptr[2:0] + 3'b1) : current_byte_ptr[2:0];
       for (int j=0; j<8; j++) begin
          if (~found) begin

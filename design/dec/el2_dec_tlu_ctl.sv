@@ -2123,7 +2123,6 @@ else
              ({1{(mhpme_vec[i][9:0] == MHPME_INST_COMMIT_32B )}} & {tlu_i0_commit_cmt &  exu_pmu_i0_pc4 & ~illegal_r}) |
              ({1{(mhpme_vec[i][9:0] == MHPME_INST_ALIGNED    )}} & ifu_pmu_instr_aligned)  |
              ({1{(mhpme_vec[i][9:0] == MHPME_INST_DECODED    )}} & dec_pmu_instr_decoded)  |
-             ({1{(mhpme_vec[i][9:0] == MHPME_DECODE_STALL    )}} & {dec_pmu_decode_stall}) |
              ({1{(mhpme_vec[i][9:0] == MHPME_INST_MUL        )}} & {(pmu_i0_itype_qual == MUL)})     |
              ({1{(mhpme_vec[i][9:0] == MHPME_INST_DIV        )}} & {dec_tlu_packet_r.pmu_divide  & tlu_i0_commit_cmt & ~illegal_r})     |
              ({1{(mhpme_vec[i][9:0] == MHPME_INST_LOAD       )}} & {(pmu_i0_itype_qual == LOAD)})    |
@@ -2768,7 +2767,7 @@ assign dec_tlu_presync_d = presync & dec_csr_any_unq_d & ~dec_csr_wen_unq_d;
 assign dec_tlu_postsync_d = postsync & dec_csr_any_unq_d;
 
    // allow individual configuration of these features
-assign conditionally_illegal = ((csr_mitcnt0 | csr_mitcnt1 | csr_mitb0 | csr_mitb1 | csr_mitctl0 | csr_mitctl1) & !pt.TIMER_LEGAL_EN);
+assign conditionally_illegal = ((csr_mitcnt0 | csr_mitcnt1 | csr_mitb0 | csr_mitb1 | csr_mitctl0 | csr_mitctl1) & ~|pt.TIMER_LEGAL_EN);
 
 assign valid_csr = ( legal & (~(csr_dcsr | csr_dpc | csr_dmst | csr_dicawics | csr_dicad0 | csr_dicad0h | csr_dicad1 | csr_dicago) | dbg_tlu_halted_f)
                      & ~fast_int_meicpct & ~conditionally_illegal);

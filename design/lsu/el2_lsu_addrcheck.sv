@@ -119,7 +119,7 @@ import el2_pkg::*;
    );
 
    assign start_addr_dccm_or_pic  = start_addr_in_dccm_region_d | start_addr_in_pic_region_d;
-   assign base_reg_dccm_or_pic    = ((rs1_region_d[3:0] == pt.DCCM_REGION) & pt.DCCM_ENABLE) | (rs1_region_d[3:0] == pt.PIC_REGION);
+   assign base_reg_dccm_or_pic    = (|((rs1_region_d[3:0] == pt.DCCM_REGION) & pt.DCCM_ENABLE)) | (rs1_region_d[3:0] == pt.PIC_REGION);
    assign addr_in_dccm_d          = (start_addr_in_dccm_d & end_addr_in_dccm_d);
    assign addr_in_pic_d           = (start_addr_in_pic_d & end_addr_in_pic_d);
 
@@ -130,24 +130,58 @@ import el2_pkg::*;
                                                             (lsu_pkt_d.half & (start_addr_d[0] == 1'b0)) |
                                                             lsu_pkt_d.by;
 
+   logic ACCESS0_STARTOK;
+   logic ACCESS1_STARTOK;
+   logic ACCESS2_STARTOK;
+   logic ACCESS3_STARTOK;
+   logic ACCESS4_STARTOK;
+   logic ACCESS5_STARTOK;
+   logic ACCESS6_STARTOK;
+   logic ACCESS7_STARTOK;
+   logic ACCESS0_ENDOK;
+   logic ACCESS1_ENDOK;
+   logic ACCESS2_ENDOK;
+   logic ACCESS3_ENDOK;
+   logic ACCESS4_ENDOK;
+   logic ACCESS5_ENDOK;
+   logic ACCESS6_ENDOK;
+   logic ACCESS7_ENDOK;
+
+   assign ACCESS0_STARTOK = pt.DATA_ACCESS_ENABLE0 & ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK0)) == (pt.DATA_ACCESS_ADDR0 | pt.DATA_ACCESS_MASK0);
+   assign ACCESS1_STARTOK = pt.DATA_ACCESS_ENABLE1 & ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK1)) == (pt.DATA_ACCESS_ADDR1 | pt.DATA_ACCESS_MASK1);
+   assign ACCESS2_STARTOK = pt.DATA_ACCESS_ENABLE2 & ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK2)) == (pt.DATA_ACCESS_ADDR2 | pt.DATA_ACCESS_MASK2);
+   assign ACCESS3_STARTOK = pt.DATA_ACCESS_ENABLE3 & ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK3)) == (pt.DATA_ACCESS_ADDR3 | pt.DATA_ACCESS_MASK3);
+   assign ACCESS4_STARTOK = pt.DATA_ACCESS_ENABLE4 & ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK4)) == (pt.DATA_ACCESS_ADDR4 | pt.DATA_ACCESS_MASK4);
+   assign ACCESS5_STARTOK = pt.DATA_ACCESS_ENABLE5 & ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK5)) == (pt.DATA_ACCESS_ADDR5 | pt.DATA_ACCESS_MASK5);
+   assign ACCESS6_STARTOK = pt.DATA_ACCESS_ENABLE6 & ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK6)) == (pt.DATA_ACCESS_ADDR6 | pt.DATA_ACCESS_MASK6);
+   assign ACCESS7_STARTOK = pt.DATA_ACCESS_ENABLE7 & ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK7)) == (pt.DATA_ACCESS_ADDR7 | pt.DATA_ACCESS_MASK7);
+   assign ACCESS0_ENDOK   = pt.DATA_ACCESS_ENABLE0 & ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK0)) == (pt.DATA_ACCESS_ADDR0 | pt.DATA_ACCESS_MASK0);
+   assign ACCESS1_ENDOK   = pt.DATA_ACCESS_ENABLE1 & ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK1)) == (pt.DATA_ACCESS_ADDR1 | pt.DATA_ACCESS_MASK1);
+   assign ACCESS2_ENDOK   = pt.DATA_ACCESS_ENABLE2 & ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK2)) == (pt.DATA_ACCESS_ADDR2 | pt.DATA_ACCESS_MASK2);
+   assign ACCESS3_ENDOK   = pt.DATA_ACCESS_ENABLE3 & ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK3)) == (pt.DATA_ACCESS_ADDR3 | pt.DATA_ACCESS_MASK3);
+   assign ACCESS4_ENDOK   = pt.DATA_ACCESS_ENABLE4 & ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK4)) == (pt.DATA_ACCESS_ADDR4 | pt.DATA_ACCESS_MASK4);
+   assign ACCESS5_ENDOK   = pt.DATA_ACCESS_ENABLE5 & ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK5)) == (pt.DATA_ACCESS_ADDR5 | pt.DATA_ACCESS_MASK5);
+   assign ACCESS6_ENDOK   = pt.DATA_ACCESS_ENABLE6 & ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK6)) == (pt.DATA_ACCESS_ADDR6 | pt.DATA_ACCESS_MASK6);
+   assign ACCESS7_ENDOK   = pt.DATA_ACCESS_ENABLE7 & ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK7)) == (pt.DATA_ACCESS_ADDR7 | pt.DATA_ACCESS_MASK7);
+
   if (pt.PMP_ENTRIES == 0) begin
    assign non_dccm_access_ok = (~(|{pt.DATA_ACCESS_ENABLE0,pt.DATA_ACCESS_ENABLE1,pt.DATA_ACCESS_ENABLE2,pt.DATA_ACCESS_ENABLE3,pt.DATA_ACCESS_ENABLE4,pt.DATA_ACCESS_ENABLE5,pt.DATA_ACCESS_ENABLE6,pt.DATA_ACCESS_ENABLE7})) |
-                               (((pt.DATA_ACCESS_ENABLE0 & ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK0)) == (pt.DATA_ACCESS_ADDR0 | pt.DATA_ACCESS_MASK0)) |
-                                 (pt.DATA_ACCESS_ENABLE1 & ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK1)) == (pt.DATA_ACCESS_ADDR1 | pt.DATA_ACCESS_MASK1)) |
-                                 (pt.DATA_ACCESS_ENABLE2 & ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK2)) == (pt.DATA_ACCESS_ADDR2 | pt.DATA_ACCESS_MASK2)) |
-                                 (pt.DATA_ACCESS_ENABLE3 & ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK3)) == (pt.DATA_ACCESS_ADDR3 | pt.DATA_ACCESS_MASK3)) |
-                                 (pt.DATA_ACCESS_ENABLE4 & ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK4)) == (pt.DATA_ACCESS_ADDR4 | pt.DATA_ACCESS_MASK4)) |
-                                 (pt.DATA_ACCESS_ENABLE5 & ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK5)) == (pt.DATA_ACCESS_ADDR5 | pt.DATA_ACCESS_MASK5)) |
-                                 (pt.DATA_ACCESS_ENABLE6 & ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK6)) == (pt.DATA_ACCESS_ADDR6 | pt.DATA_ACCESS_MASK6)) |
-                                 (pt.DATA_ACCESS_ENABLE7 & ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK7)) == (pt.DATA_ACCESS_ADDR7 | pt.DATA_ACCESS_MASK7)))   &
-                                ((pt.DATA_ACCESS_ENABLE0 & ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK0)) == (pt.DATA_ACCESS_ADDR0 | pt.DATA_ACCESS_MASK0)) |
-                                 (pt.DATA_ACCESS_ENABLE1 & ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK1)) == (pt.DATA_ACCESS_ADDR1 | pt.DATA_ACCESS_MASK1)) |
-                                 (pt.DATA_ACCESS_ENABLE2 & ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK2)) == (pt.DATA_ACCESS_ADDR2 | pt.DATA_ACCESS_MASK2)) |
-                                 (pt.DATA_ACCESS_ENABLE3 & ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK3)) == (pt.DATA_ACCESS_ADDR3 | pt.DATA_ACCESS_MASK3)) |
-                                 (pt.DATA_ACCESS_ENABLE4 & ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK4)) == (pt.DATA_ACCESS_ADDR4 | pt.DATA_ACCESS_MASK4)) |
-                                 (pt.DATA_ACCESS_ENABLE5 & ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK5)) == (pt.DATA_ACCESS_ADDR5 | pt.DATA_ACCESS_MASK5)) |
-                                 (pt.DATA_ACCESS_ENABLE6 & ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK6)) == (pt.DATA_ACCESS_ADDR6 | pt.DATA_ACCESS_MASK6)) |
-                                 (pt.DATA_ACCESS_ENABLE7 & ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK7)) == (pt.DATA_ACCESS_ADDR7 | pt.DATA_ACCESS_MASK7))));
+                               (( ACCESS0_STARTOK|
+                                  ACCESS1_STARTOK|
+                                  ACCESS2_STARTOK|
+                                  ACCESS3_STARTOK|
+                                  ACCESS4_STARTOK|
+                                  ACCESS5_STARTOK|
+                                  ACCESS6_STARTOK|
+                                 ACCESS7_STARTOK)   &
+                                ( ACCESS0_ENDOK|
+                                  ACCESS1_ENDOK|
+                                  ACCESS2_ENDOK|
+                                  ACCESS3_ENDOK|
+                                  ACCESS4_ENDOK|
+                                  ACCESS5_ENDOK|
+                                  ACCESS6_ENDOK|
+                                 ACCESS7_ENDOK));
   end
 
    // Access fault logic

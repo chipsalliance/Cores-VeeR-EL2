@@ -21,6 +21,10 @@
 #include "fault.h"
 #include "pmp.h"
 
+// Set to one to make the tests assume Smepmp behavior of PMP with
+// MSECCFG = 0x00000000
+#define HAVE_SMEPMP 0
+
 #define CSR_MSTATUS 0x300
 #define CSR_MISA    0x301
 #define CSR_MEPC    0x341
@@ -157,9 +161,11 @@ int trap_handler (const struct fault* fault) {
 int main () {
     printf("Hello VeeR (M mode)\n");
 
-//    // Set MSECCFG
-//    uint32_t mseccfg = 0;
-//    CSRR_WRITE(mseccfg, 0x747);
+#if HAVE_SMEPMP
+    // Set MSECCFG
+    uint32_t mseccfg = 0;
+    CSRR_WRITE(mseccfg, 0x747);
+#endif
 
     // .......................................................................
     // Determine PMP granularity
@@ -190,6 +196,17 @@ int main () {
     pmp_clear();
 
     printf(" testing...\n");
+#if HAVE_SMEPMP
+    TRY {
+        ucall(test_hello);
+        printf(" fail\n");
+        failed++;
+    }
+    CATCH {
+        printf(" pass\n");
+    }
+    END_TRY;
+#else
     TRY {
         ucall(test_hello);
         printf(" pass\n");
@@ -199,6 +216,7 @@ int main () {
         failed++;
     }
     END_TRY;
+#endif
 
     // .......................................................................
     // Configure a single region in PMP and call user mode function. It shoud
@@ -273,6 +291,12 @@ int main () {
         uint32_t x = (i & 4) ? PMP_X : 0;
         uint32_t m = (i >= 8);
         uint32_t mprv = (i >= 16);
+
+#if HAVE_SMEPMP
+        // Skip -W- and -WX combinations
+        if (!r &&  w && !x) continue;
+        if (!r &&  w &&  x) continue;
+#endif
 
         // Effective mode
         uint32_t r_eff = (m && !mprv) ? 1 : r;

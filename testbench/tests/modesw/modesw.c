@@ -19,7 +19,8 @@ void trap_handler () {
 
     unsigned long mstatus = read_csr(mstatus);
     unsigned long mcause  = read_csr(mcause);
-    printf("trap! mstatus=0x%08X, mcause=0x%08X\n", mstatus, mcause);
+    unsigned long mepc    = read_csr(mepc);
+    printf("trap! mstatus=0x%08X, mcause=0x%08X, mepc=0x%08X\n", mstatus, mcause, mepc);
 
     // Store cause
     if (trap_count < (sizeof(trap_causes) / sizeof(trap_causes[0]))) {
@@ -36,7 +37,7 @@ __attribute__((noreturn)) void main () {
     // make an ECALL which should set mcause to 11 (0xB)
     printf("doing ECALL...\n");
     do_ecall();
-    printf("mstatus=0x%08X, continuing.\n", read_csr(mstatus));
+    printf("continuing...\n");
 
     // Go to user mode
     unsigned long mstatus = read_csr(mstatus);
@@ -50,13 +51,13 @@ __attribute__((noreturn)) void main () {
 }
 
 __attribute__((noreturn)) void user_main () {
-    printf("Hello from user_main(), mstatus=0x%08X\n", read_csr(mstatus));
+    printf("Hello from user_main()\n");
 
     // We should be now in user mode
     // make an ECALL which should set mcause to 8 (0x8)
     printf("doing ECALL...\n");
     do_ecall();
-    printf("mstatus=0x%08X, continuing.\n", read_csr(mstatus));
+    printf("continuing...\n");
 
     // Verify trap causes
     unsigned char res = 0xFF; // success

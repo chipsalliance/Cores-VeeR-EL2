@@ -377,10 +377,12 @@ module tb_top #(
         // data[7:0] == 0x90 - clear all interrupt request signals
         if(mailbox_write && (mailbox_data[7:0] >= 8'h80 && mailbox_data[7:0] < 8'h84)) begin
             if (mailbox_data[7:0] == 8'h80) begin
-                ext_int[mailbox_data[15:8]] <= 1'b0;
+                if (mailbox_data[15:8] > 0 && mailbox_data[15:8] < pt.PIC_TOTAL_INT)
+                    ext_int[mailbox_data[15:8]] <= 1'b0;
             end
             if (mailbox_data[7:0] == 8'h81) begin
-                ext_int[mailbox_data[15:8]] <= 1'b1;
+                if (mailbox_data[15:8] > 0 && mailbox_data[15:8] < pt.PIC_TOTAL_INT)
+                    ext_int[mailbox_data[15:8]] <= 1'b1;
             end
             if (mailbox_data[7:0] == 8'h82) begin
                 nmi_int   <= nmi_int   & ~mailbox_data[8];

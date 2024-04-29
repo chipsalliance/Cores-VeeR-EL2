@@ -372,8 +372,8 @@ module tb_top #(
         // Interrupt signals control
         // data[7:0] == 0x80 - clear ext irq line index given by data[15:8]
         // data[7:0] == 0x81 - set ext irq line index given by data[15:8]
-        // data[7:0] == 0x82 - set NMI, timer and soft irq lines to bits data[8:10]
-        // data[7:0] == 0x83 - clean NMI, timer and soft irq lines to bits data[8:10]
+        // data[7:0] == 0x82 - clean NMI, timer and soft irq lines to bits data[8:10]
+        // data[7:0] == 0x83 - set NMI, timer and soft irq lines to bits data[8:10]
         // data[7:0] == 0x90 - clear all interrupt request signals
         if(mailbox_write && (mailbox_data[7:0] >= 8'h80 && mailbox_data[7:0] < 8'h84)) begin
             if (mailbox_data[7:0] == 8'h80) begin

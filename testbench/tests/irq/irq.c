@@ -15,30 +15,40 @@
 
 // ============================================================================
 
+#define CMD_EXT_IRQ_CLR     0x80
+#define CMD_EXT_IRQ_SET     0x81
+#define CMD_CORE_IRQ_CLR    0x82
+#define CMD_CORE_IRQ_SET    0x83
+#define CMD_IRQ_CLR_ALL     0x90
+
+#define CORE_IRQ_NMI        (1 << 8)
+#define CORE_IRQ_TIMER      (2 << 8)
+#define CORE_IRQ_SOFT       (4 << 8)
+
 extern uint32_t tohost;
 
 void trigger_nmi_irq (int state) {
-    uint32_t cmd = (state) ? (0x83 | (1 << 8)) : (0x82 | (1 << 8));
-    tohost = cmd;
+    uint32_t cmd = (state) ? CMD_CORE_IRQ_SET : CMD_CORE_IRQ_CLR;
+    tohost = cmd | CORE_IRQ_NMI;
 }
 
 void trigger_timer_irq (int state) {
-    uint32_t cmd = (state) ? (0x83 | (2 << 8)) : (0x82 | (2 << 8));
-    tohost = cmd;
+    uint32_t cmd = (state) ? CMD_CORE_IRQ_SET : CMD_CORE_IRQ_CLR;
+    tohost = cmd | CORE_IRQ_TIMER;
 }
 
 void trigger_soft_irq (int state) {
-    uint32_t cmd = (state) ? (0x83 | (4 << 8)) : (0x82 | (4 << 8));
-    tohost = cmd;
+    uint32_t cmd = (state) ? CMD_CORE_IRQ_SET : CMD_CORE_IRQ_CLR;
+    tohost = cmd | CORE_IRQ_SOFT;
 }
 
 void trigger_ext_irq (int state, int irq) {
-    uint32_t cmd = (state) ? (0x81 | (irq << 8)) : (0x80 | (irq << 8));
-    tohost = cmd;
+    uint32_t cmd = (state) ? CMD_EXT_IRQ_SET : CMD_EXT_IRQ_CLR;
+    tohost = cmd | (irq << 8);
 }
 
 void release_all_irqs () {
-    tohost = 0x90;
+    tohost = CMD_IRQ_CLR_ALL;
 }
 
 // ============================================================================
@@ -176,10 +186,10 @@ __attribute__((noreturn)) void user_main () {
     }
 
     // Check traps. Should be:
-    //  M timer
-    //  M soft int
-    //  M timer
-    //  M soft int
+    //  M timer    (0x80000007)
+    //  M soft int (0x80000003)
+    //  M timer    (0x80000007)
+    //  M soft int (0x80000003)
     const uint32_t golden_trap_causes[] = {0x80000007, 0x80000003, 0x80000007, 0x80000003};
     const uint32_t golden_trap_count    = sizeof(golden_trap_causes) / sizeof(golden_trap_causes[0]);
 

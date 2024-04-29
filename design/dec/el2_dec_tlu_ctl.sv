@@ -1224,7 +1224,7 @@ end
                               ({4{~wr_mstatus_r & ~exc_or_int_valid_r  & ~mret_r & ~set_mie_pmu_fw_halt}} & mstatus[3:0]) );
 
    // gate MIE if we are single stepping and DCSR[STEPIE] is off
-   // in user mode machine interrupts are always enabled as per RISC-V privilege spec.
+   // in user mode machine interrupts are always enabled as per RISC-V privilege spec (chapter 3.1.6.1).
    assign mstatus_mie_ns = (priv_mode | mstatus[MSTATUS_MIE]) & (~dcsr_single_step_running_f | dcsr[DCSR_STEPIE]);
 
    // set effective privilege mode according to MPRV and MPP

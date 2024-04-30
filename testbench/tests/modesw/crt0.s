@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+.option norvc
+.option nopic
+
 .section .text.init
+.align 4
 .global _start
 _start:
 
@@ -29,6 +33,7 @@ _finish:
         nop
         .endr
 
+.align 4
 _trap:
 
         # Push stuff
@@ -65,6 +70,21 @@ _trap:
 
 _is_irq:
 
+        # If it is an ecall store the return code (a0) to the stack so that
+        # it gets populated during context restoring
+        csrr t0, mcause
+        addi t1, t1, -8 # ECALL.U
+        beqz t1, _is_ecall
+        addi t1, t1, -3 # ECALL.M - ECALL.U
+        beqz t1, _is_ecall
+        j _trap_return
+
+_is_ecall:
+
+        sw a0, 1*4(sp)
+
+_trap_return:
+
         # Pop stuff
         lw ra, 0*4(sp)
         lw a0, 1*4(sp)
@@ -86,6 +106,11 @@ _is_irq:
         addi sp, sp, 17*4
 
         mret
+
+.global do_ecall
+do_ecall:
+        ecall
+        ret
 
 .section .data.io
 .global tohost

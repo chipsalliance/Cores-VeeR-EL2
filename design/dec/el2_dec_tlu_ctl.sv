@@ -1215,10 +1215,10 @@ end
    // set this even if we don't go to fwhalt due to debug halt. We committed the inst, so ...
    assign set_mie_pmu_fw_halt = ~mpmc_b_ns[1] & fw_halt_req;
 
-   // mstatus[3] / mstatus_ns[3] actually stores inverse of the MPP field !
+   // mstatus[2] / mstatus_ns[2] actually stores inverse of the MPP field !
    assign mstatus_ns[3:0] = ( ({4{~wr_mstatus_r & exc_or_int_valid_r}} & {mstatus[MSTATUS_MPRV], priv_mode, mstatus[MSTATUS_MIE], 1'b0}) |
                               ({4{ wr_mstatus_r & exc_or_int_valid_r}} & {mstatus[MSTATUS_MPRV], priv_mode, dec_csr_wrdata_r[3],  1'b0}) |
-                              ({4{mret_r & ~exc_or_int_valid_r}}       & {3'b001, mstatus[MSTATUS_MPIE]}) |
+                              ({4{mret_r & ~exc_or_int_valid_r}}       & {mstatus[MSTATUS_MPRV] & ~mstatus[MSTATUS_MPP], 1'b1, 1'b1, mstatus[MSTATUS_MPIE]}) |
                               ({4{set_mie_pmu_fw_halt}}                & {mstatus[3:2], mstatus[MSTATUS_MPIE], 1'b1}) |
                               ({4{wr_mstatus_r & ~exc_or_int_valid_r}} & {dec_csr_wrdata_r[17], ~dec_csr_wrdata_r[12], dec_csr_wrdata_r[7], dec_csr_wrdata_r[3]}) |
                               ({4{~wr_mstatus_r & ~exc_or_int_valid_r  & ~mret_r & ~set_mie_pmu_fw_halt}} & mstatus[3:0]) );

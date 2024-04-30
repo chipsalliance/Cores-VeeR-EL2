@@ -99,10 +99,6 @@ __attribute__((noreturn)) void main () {
     trigger_soft_irq(1);
     printf(" soft IRQ triggered\n");
 
-//    // Ext IRQ
-//    trigger_ext_irq(1, 1);
-//    printf(" ext IRQ triggered\n");
-
     // No exceptions should have occurred
     // Release interrupt lines
     release_all_irqs();
@@ -122,10 +118,6 @@ __attribute__((noreturn)) void main () {
     // Soft IRQ
     trigger_soft_irq(1);
     printf(" soft IRQ triggered\n");
-
-//    // Ext IRQ
-//    trigger_ext_irq(1, 1);
-//    printf(" ext IRQ triggered\n");
 
     // Exceptions should have occurred and got recorded.
     // Release interrupt lines
@@ -166,10 +158,6 @@ __attribute__((noreturn)) void user_main () {
     // Soft IRQ
     trigger_soft_irq(1);
     printf(" soft IRQ triggered\n");
-
-//    // Ext IRQ
-//    trigger_ext_irq(1, 1);
-//    printf(" ext IRQ triggered\n");
 
     // Exceptions should have occurred and got recorded.
     // Release interrupt lines

@@ -957,8 +957,8 @@ end // else: !if(pt.BTB_ENABLE==1)
    // only expect these in pipe 0
    assign       ebreak_r     =  (dec_tlu_packet_r.pmu_i0_itype == EBREAK)  & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~dcsr[DCSR_EBREAKM] & ~rfpc_i0_r;
    assign       ecall_r      =  (dec_tlu_packet_r.pmu_i0_itype == ECALL)   & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
-   assign       illegal_r    =  ~dec_tlu_packet_r.legal   & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
-   assign       mret_r       =  (dec_tlu_packet_r.pmu_i0_itype == MRET)    & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
+   assign       illegal_r    =  (((dec_tlu_packet_r.pmu_i0_itype == MRET) &  priv_mode) | ~dec_tlu_packet_r.legal) & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
+   assign       mret_r       =  ( (dec_tlu_packet_r.pmu_i0_itype == MRET) & ~priv_mode                           ) & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
    // fence_i includes debug only fence_i's
    assign       fence_i_r    =  (dec_tlu_packet_r.fence_i & dec_tlu_i0_valid_r & ~i0_trigger_hit_r) & ~rfpc_i0_r;
    assign       ic_perr_r    =  ifu_ic_error_start_f & ~ext_int_freeze_d1 & (~internal_dbg_halt_mode_f | dcsr_single_step_running) & ~internal_pmu_fw_halt_mode_f;

@@ -13,6 +13,10 @@
     asm volatile ("csrw " #csr ", %0" : : "r"(val)); \
 }
 
+#define MSTATUS_MPP_MASK    (3 << 11)
+#define MSTATUS_MPP_MACHINE (3 << 11)
+#define MSTATUS_MPP_USER    (0 << 11)
+
 // ============================================================================
 
 #define CMD_EXT_IRQ_CLR     0x80
@@ -53,22 +57,36 @@ void release_all_irqs () {
 
 // ============================================================================
 
-volatile uint32_t trap_causes[32];
+struct trap_data_t {
+    uint32_t    mcause;
+    uint32_t    mstatus;
+};
+
+volatile struct trap_data_t trap_data[32];
 volatile uint32_t trap_count = 0;
 
 void trap_handler () {
 
     uint32_t mstatus = read_csr(mstatus);
     uint32_t mcause  = read_csr(mcause);
-    printf("trap! mstatus=0x%08X, mcause=0x%08X\n", mstatus, mcause);
+    uint32_t mepc    = read_csr(mepc);
 
     // Release interrupt lines
     release_all_irqs();
 
-    // Store cause
-    if (trap_count < (sizeof(trap_causes) / sizeof(trap_causes[0]))) {
-        trap_causes[trap_count++] = mcause;
+    printf("trap! mstatus=0x%08X, mcause=0x%08X, mepc=0x%08X\n", mstatus, mcause, mepc);
+
+    // Store trap data
+    if (trap_count < (sizeof(trap_data) / sizeof(trap_data[0]))) {
+        trap_data[trap_count].mcause  = mcause;
+        trap_data[trap_count].mstatus = mstatus;
+        trap_count++;
     }
+}
+
+void nmi_handler () {
+    // Handle NMIs as regular traps. For purpose of this test it is sufficient
+    trap_handler();
 }
 
 // ============================================================================
@@ -91,6 +109,10 @@ __attribute__((noreturn)) void main () {
     mstatus &= ~0x08; // MIE = 0
     write_csr(mstatus, mstatus);
 
+    // NMI
+    trigger_nmi_irq(1);
+    printf(" NMI triggered\n");
+
     // Timer IRQ
     trigger_timer_irq(1);
     printf(" timer irq triggered\n");
@@ -110,6 +132,10 @@ __attribute__((noreturn)) void main () {
     mstatus  = read_csr(mstatus);
     mstatus |= 0x08; // MIE = 1
     write_csr(mstatus, mstatus);
+
+    // NMI
+    trigger_nmi_irq(1);
+    printf(" NMI triggered\n");
 
     // Timer IRQ
     trigger_timer_irq(1);
@@ -142,6 +168,9 @@ __attribute__((noreturn)) void main () {
     void* ptr = (void*)user_main;
     write_csr(mepc, (unsigned long)ptr);
     asm volatile ("mret");
+
+    // Make the compiler not complain
+    while (1);
 }
 
 __attribute__((noreturn)) void user_main () {
@@ -150,6 +179,10 @@ __attribute__((noreturn)) void user_main () {
     // ..............................
     // mstatus.MIE should be 0 (we can't check it from user mode) but interrupts
     // should trigger.
+
+    // NMI
+    trigger_nmi_irq(1);
+    printf(" NMI triggered\n");
 
     // Timer IRQ
     trigger_timer_irq(1);
@@ -168,25 +201,41 @@ __attribute__((noreturn)) void user_main () {
     unsigned char res = 0xFF; // success
 
     // Report traps
-    printf("traps taken: %d\n", trap_count);
-    for (uint32_t i=0; i<trap_count; ++i) {
-        printf(" %d. 0x%08X\n", i, trap_causes[i]);
+    printf("traps taken:\n");
+    for (unsigned long i=0; i<trap_count; ++i) {
+        printf(" %d. mcause=0x%08X mstatus=0x%08X\n", i, trap_data[i].mcause, trap_data[i].mstatus);
     }
 
     // Check traps. Should be:
-    //  M timer    (0x80000007)
-    //  M soft int (0x80000003)
-    //  M timer    (0x80000007)
-    //  M soft int (0x80000003)
-    const uint32_t golden_trap_causes[] = {0x80000007, 0x80000003, 0x80000007, 0x80000003};
-    const uint32_t golden_trap_count    = sizeof(golden_trap_causes) / sizeof(golden_trap_causes[0]);
+    const uint32_t golden_trap_causes[] = {
+        0x00000000, // NMI
+        0x00000000, // NMI
+        0x80000007, // M timer
+        0x80000003, // M soft int
+        0x00000000, // NMI
+        0x80000007, // M timer
+        0x80000003, // M soft int
+    };
+    const uint32_t golden_trap_count = sizeof(golden_trap_causes) /
+                                       sizeof(golden_trap_causes[0]);
 
     if (trap_count == golden_trap_count) {
         for (uint32_t i=0; i<trap_count; ++i) {
-            if (trap_causes[i] != golden_trap_causes[i]) {
+
+            // Check causes
+            if (trap_data[i].mcause != golden_trap_causes[i]) {
                 res = 1;
                 break;
             }
+
+            // Check modes
+            if ((trap_data[0].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_MACHINE) res = 1;
+            if ((trap_data[1].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_MACHINE) res = 1;
+            if ((trap_data[2].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_MACHINE) res = 1;
+            if ((trap_data[3].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_MACHINE) res = 1;
+            if ((trap_data[4].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_USER)    res = 1;
+            if ((trap_data[5].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_USER)    res = 1;
+            if ((trap_data[6].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_USER)    res = 1;
         }
     }
     else {
@@ -200,4 +249,7 @@ __attribute__((noreturn)) void user_main () {
         "j  _finish\n"
         : : "r"(res)
     );
+
+    // Make the compiler not complain
+    while (1);
 }

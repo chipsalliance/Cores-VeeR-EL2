@@ -32,10 +32,9 @@ _start:
     csrw minstret, zero
     csrw minstreth, zero
 
-    // Set up MTVEC - not expecting to use it though
-    li x1, RV_ICCM_SADR
+    // Set trap handler
+    la x1, _trap
     csrw mtvec, x1
-
 
     // Enable Caches in MRAC
     li x1, 0x5f555555
@@ -52,16 +51,21 @@ loop:
    sb x5, 0(x3)
    addi x4, x4, 1
    bnez x5, loop
+   li a0, 0xff # success
 
-// Write 0xff to STDOUT for TB to termiate test.
+// Write return value (a0) from printf to STDOUT for TB to termiate test.
 _finish:
     li x3, STDOUT
-    addi x5, x0, 0xff
-    sb x5, 0(x3)
+    sb a0, 0(x3)
     beq x0, x0, _finish
 .rept 100
     nop
 .endr
+
+.align 4
+_trap:
+    li a0, 1 # failure
+    j _finish
 
 .data
 hw_data:

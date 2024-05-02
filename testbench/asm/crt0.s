@@ -18,8 +18,13 @@
 #include "defines.h"
 
 .section .text.init
+.align 4
 .global _start
 _start:
+
+        // Set trap handler
+        la x1, _trap
+        csrw mtvec, x1
 
 // enable caching, except region 0xd
         li t0, 0x59555555
@@ -29,18 +34,25 @@ _start:
 
         call main
 
+        // TODO: Check all tests that use this crt0.s and make their main()
+        // return meaningful code. For now assume success
+        li a0, 0xff
 
 .global _finish
 _finish:
         la t0, tohost
-        li t1, 0xff
-        sb t1, 0(t0) // DemoTB test termination
-        li t1, 1
-        sw t1, 0(t0) // Whisper test termination
+        sb a0, 0(t0) // DemoTB test termination
+        li a0, 1
+        sw a0, 0(t0) // Whisper test termination
         beq x0, x0, _finish
         .rept 10
         nop
         .endr
+
+.align 4
+_trap:
+    li a0, 1 # failure
+    j _finish
 
 .section .data.io
 .global tohost

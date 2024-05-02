@@ -4,7 +4,7 @@ The test is intended to verify switching of operating privilege mode. This inclu
 
 Flow of the test:
 
-- Core resets to M mode. Check if both `MPP` and `MPRV` are cleared.
+- Core resets to M mode. Check if `MPRV` is cleared and `MPP` indicated machine mode (2'b11).
 
 - Returning from an exception via `mret` should set `MPP` to the least privileged mode and not affect `MPRV` when returning to M mode. Do the following:
 
@@ -23,3 +23,4 @@ Flow of the test:
     - To check if indeed the previous `mret` cleared `MPRV` issue `ECALL_GET_MSTATUS` syscall which just returns the captured `mstatus` CSR value. Check if `MPRV` is cleared there.
     
 - Finally verify the sequence of traps taken by comparing recorded `mcause` and `mstatus` values against a golden reference.
+

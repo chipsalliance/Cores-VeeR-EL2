@@ -95,11 +95,11 @@ __attribute__((noreturn)) void main () {
     if (!(mstatus & MSTATUS_MPRV)) {
         printf("[  OK  ] MPRV cleared\n");
     } else {
-        printf("[ FAIL ] MRRV is set!\n");
+        printf("[ FAIL ] MPRV is set!\n");
         global_fail = 1;
     }
 
-    // Check if MPP is set to 00
+    // Check if MPP is set to 11
     if ((mstatus & MSTATUS_MPP_MASK) == MSTATUS_MPP_MACHINE) {
         printf("[  OK  ] MPP is 11\n");
     } else {
@@ -121,7 +121,7 @@ __attribute__((noreturn)) void main () {
     if (!(mstatus & MSTATUS_MPRV)) {
         printf("[  OK  ] MPRV cleared\n");
     } else {
-        printf("[ FAIL ] MRRV is set!\n");
+        printf("[ FAIL ] MPRV is set!\n");
         global_fail = 1;
     }
 
@@ -146,7 +146,7 @@ __attribute__((noreturn)) void main () {
     if (mstatus & MSTATUS_MPRV) {
         printf("[  OK  ] MPRV is set\n");
     } else {
-        printf("[ FAIL ] MRRV is cleared!\n");
+        printf("[ FAIL ] MPRV is cleared!\n");
         global_fail = 1;
     }
 
@@ -199,7 +199,7 @@ __attribute__((noreturn)) void user_main () {
     if (!(mstatus & MSTATUS_MPRV)) {
         printf("[  OK  ] MPRV was cleared\n");
     } else {
-        printf("[ FAIL ] MRRV was set!\n");
+        printf("[ FAIL ] MPRV was set!\n");
         global_fail = 1;
     }
 
@@ -224,7 +224,7 @@ __attribute__((noreturn)) void user_main () {
     if (!(mstatus & MSTATUS_MPRV)) {
         printf("[  OK  ] MPRV was cleared\n");
     } else {
-        printf("[ FAIL ] MRRV was set!\n");
+        printf("[ FAIL ] MPRV was set!\n");
         global_fail = 1;
     }
 

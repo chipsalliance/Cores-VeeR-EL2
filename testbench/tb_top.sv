@@ -1344,7 +1344,8 @@ if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable
     for (genvar i=0; i<pt.DCCM_NUM_BANKS; i++) begin: dccm_loop
         assign dccm_wr_fdata_bank[i][pt.DCCM_DATA_WIDTH-1:0] = el2_mem_export.dccm_wr_data_bank[i];
         assign dccm_wr_fdata_bank[i][pt.DCCM_FDATA_WIDTH-1:pt.DCCM_DATA_WIDTH] = el2_mem_export.dccm_wr_ecc_bank[i];
-        assign {el2_mem_export.dccm_bank_ecc[i], el2_mem_export.dccm_bank_dout[i]} = dccm_bank_fdout[i];
+        assign el2_mem_export.dccm_bank_dout[i] = dccm_bank_fdout[i][31:0];
+        assign el2_mem_export.dccm_bank_ecc[i] = dccm_bank_fdout[i][38:32];
 
     `ifdef VERILATOR
 

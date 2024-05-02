@@ -1523,8 +1523,9 @@ end :Gen_dccm_enable
 if (pt.ICCM_ENABLE) begin : Gen_iccm_enable
 for (genvar i=0; i<pt.ICCM_NUM_BANKS; i++) begin: iccm_loop
     assign iccm_bank_wr_fdata[i][31:0] = el2_mem_export.iccm_bank_wr_data[i];
-    assign iccm_bank_wr_fdata[i][37:32] = el2_mem_export.iccm_bank_wr_ecc[i];
-    assign {el2_mem_export.iccm_bank_ecc[i], el2_mem_export.iccm_bank_dout[i]} = iccm_bank_fdout[i];
+    assign iccm_bank_wr_fdata[i][38:32] = el2_mem_export.iccm_bank_wr_ecc[i];
+    assign el2_mem_export.iccm_bank_dout[i] = iccm_bank_fdout[i][31:0];
+    assign el2_mem_export.iccm_bank_ecc[i] = iccm_bank_fdout[i][38:32];
 
  `ifdef VERILATOR
 

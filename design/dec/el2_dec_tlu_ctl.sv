@@ -1833,7 +1833,7 @@ end
    rvdffe #(32)  dicad0h_ff (.*, .en(wr_dicad0h_r | ifu_ic_debug_rd_data_valid), .din(dicad0h_ns[31:0]), .dout(dicad0h[31:0]));
 
 
-if (pt.ICACHE_ECC == 1) begin
+if (pt.ICACHE_ECC == 1) begin : genblock1
    // ----------------------------------------------------------------------
    // DICAD1 (R/W) (Only accessible in debug mode)
    // [6:0]     : ECC
@@ -1848,7 +1848,7 @@ if (pt.ICACHE_ECC == 1) begin
    assign dicad1[31:0] = {25'b0, dicad1_raw[6:0]};
 
 end
-else begin
+else begin : genblock1
    // ----------------------------------------------------------------------
    // DICAD1 (R/W) (Only accessible in debug mode)
    // [3:0]     : Parity
@@ -2180,7 +2180,7 @@ else
    end
 
 
-   if(pt.FAST_INTERRUPT_REDIRECT)
+   if(pt.FAST_INTERRUPT_REDIRECT) begin : genblock2
    rvdffie #(31)  mstatus_ff (.*, .clk(free_l2clk),
                              .din({mdseac_locked_ns, lsu_single_ecc_error_r, lsu_exc_valid_r, lsu_i0_exc_r,
                                    take_ext_int_start,    take_ext_int_start_d1, take_ext_int_start_d2, ext_int_freeze,
@@ -2195,7 +2195,8 @@ else
                                     mhpmc_inc_r_d1[3:0], perfcnt_halted_d1,
                                     mstatus[1:0]}));
 
-   else
+   end
+   else begin : genblock2
    rvdffie #(27)  mstatus_ff (.*, .clk(free_l2clk),
                              .din({mdseac_locked_ns, lsu_single_ecc_error_r, lsu_exc_valid_r, lsu_i0_exc_r,
                                    mip_ns[5:0], mcyclel_cout & ~wr_mcycleh_r & mcyclel_cout_in,
@@ -2207,7 +2208,8 @@ else
                                     fw_halted, meicidpl[3:0], icache_rd_valid_f, icache_wr_valid_f,
                                     mhpmc_inc_r_d1[3:0], perfcnt_halted_d1,
                                     mstatus[1:0]}));
-
+   end
+   
    assign perfcnt_halted = ((dec_tlu_dbg_halted & dcsr[DCSR_STOPC]) | dec_tlu_pmu_fw_halted);
    assign perfcnt_during_sleep[3:0] = {4{~(dec_tlu_dbg_halted & dcsr[DCSR_STOPC])}} & {mhpme_vec[3][9],mhpme_vec[2][9],mhpme_vec[1][9],mhpme_vec[0][9]};
 

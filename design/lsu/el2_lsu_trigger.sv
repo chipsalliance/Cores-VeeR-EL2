@@ -53,7 +53,7 @@ import el2_pkg::*;
    assign ldst_addr_trigger_m[31:0]  = lsu_addr_m[31:0] & {32{trigger_enable}};
 
 
-   for (genvar i=0; i<4; i++) begin
+   for (genvar i=0; i<4; i++) begin : genblock
       assign lsu_match_data[i][31:0] = ({32{~trigger_pkt_any[i].select}} & ldst_addr_trigger_m[31:0]) |
                                        ({32{trigger_pkt_any[i].select & trigger_pkt_any[i].store}} & store_data_trigger_m[31:0]);
 

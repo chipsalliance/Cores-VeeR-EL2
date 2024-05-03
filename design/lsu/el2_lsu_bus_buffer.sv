@@ -623,7 +623,7 @@ import el2_pkg::*;
    //------------------------------------------------------------------------------
    // Buffer logic
    //------------------------------------------------------------------------------
-   for (genvar i=0; i<DEPTH; i++) begin
+   for (genvar i=0; i<DEPTH; i++) begin : genblock
 
       assign ibuf_drainvec_vld[i] = (ibuf_drain_vld & (i == ibuf_tag));
       assign buf_byteen_in[i]     = ibuf_drainvec_vld[i] ? ibuf_byteen_out[3:0] : ((ibuf_byp & ldst_dual_r & (i == WrPtr1_r)) ? ldst_byteen_hi_r[3:0] : ldst_byteen_lo_r[3:0]);

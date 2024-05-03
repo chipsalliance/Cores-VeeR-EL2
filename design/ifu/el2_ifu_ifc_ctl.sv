@@ -101,7 +101,7 @@ import el2_pkg::*;
    // - Miss *or* flush during WFM (icache miss buffer is blocking)
    // - Sequential
 
-if(pt.BTB_ENABLE==1) begin
+if(pt.BTB_ENABLE==1) begin : genblock1
    logic sel_btb_addr_bf;
 
    assign sel_last_addr_bf = ~exu_flush_final & (~ifc_fetch_req_f | ~ic_hit_f);
@@ -214,7 +214,7 @@ end
    rvdffpcie #(31) faddrf1_ff  (.*, .en(fetch_bf_en), .din(fetch_addr_bf[31:1]), .dout(ifc_fetch_addr_f[31:1]));
 
 
- if (pt.ICCM_ENABLE)  begin
+ if (pt.ICCM_ENABLE)  begin : genblock2
    logic iccm_acc_in_region_bf;
    logic iccm_acc_in_range_bf;
    rvrangecheck #( .CCM_SADR    (pt.ICCM_SADR),

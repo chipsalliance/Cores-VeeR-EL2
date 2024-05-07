@@ -68,7 +68,7 @@ int veer_tb_putc(char c, FILE *stream)
     (void) stream;
 
 #if USE_HTIF
-    // Do putc() via hitif "bcd" device in Spike
+    // Do putc() via htif "bcd" device in Spike
     tohost = (1LL << 56) | (1LL << 48) | c;
     while (tohost != 0); // wait for reply
 #else

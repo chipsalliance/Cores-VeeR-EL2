@@ -22,7 +22,7 @@ endif
 
 CONF_PARAMS ?= -set build_axi4 $(USER_MODE_OPTS)
 
-TEST_CFLAGS = -g -O3 -funroll-all-loops
+TEST_CFLAGS = -g -gdwarf -O3 -funroll-all-loops
 ABI = -mabi=ilp32
 LD_ABI = $(ABI) -march=rv32imac
 

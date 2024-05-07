@@ -15,6 +15,13 @@ _start:
         la t0, _trap_entry
         csrw mtvec, t0
 
+        # Clear .bss
+        la t0, _bss
+        la t1, _data_end
+bss:    sw x0, 0(t0)
+        addi t0, t0, 4
+        bne t0, t1, bss
+
         # Call main()
         call main
 
@@ -170,9 +177,9 @@ ucall:
         sw s0, 1*4(sp)
         sw s1, 2*4(sp)
 
-        # Clear mstatus MPP and MPRV
+        # Clear mstatus MPP
         csrr s0, mstatus
-        li s1, 0xFFFDE7FF
+        li s1, 0xFFFFE7FF
         and s0, s0, s1
         csrw mstatus, s0
         # Set the call vector (first arg)
@@ -215,7 +222,7 @@ rv_setjmp_m:
         lw s0, -4(sp)
 
         # Save context to the buffer pointed by a0
-        # the first word is the status word
+        # the first word is the PC
         sw x1 ,  1*4(a0)
         sw x2 ,  2*4(a0)
         sw x3 ,  3*4(a0)

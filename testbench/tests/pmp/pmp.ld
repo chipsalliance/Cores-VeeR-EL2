@@ -12,6 +12,7 @@ SECTIONS {
   . = ALIGN(4096);
   _data = .;
   .data :  { *(.*data) *(.rodata*) *(.sbss) }
+  _bss = .;
   .bss : { *(.bss) }
   _data_end = .;
 
@@ -26,5 +27,5 @@ SECTIONS {
   _stack_hi = .;
 
   . = 0xd0580000;
-  .data.io . (NOLOAD) : { *(.data.io) }
+  .data.io . (NOLOAD) : { KEEP( *(.data.io) ) }
 }

@@ -2450,6 +2450,8 @@ assign dec_csr_rddata_d[31:0] = ( ({32{csr_misa}}      & 32'h40101104) |
                                   ({32{csr_mhpme4}}    & {22'b0,mhpme4[9:0]}) |
                                   ({32{csr_mhpme5}}    & {22'b0,mhpme5[9:0]}) |
                                   ({32{csr_mhpme6}}    & {22'b0,mhpme6[9:0]}) |
+                                  ({32{csr_menvcfg}}   & 32'd0) |
+                                  ({32{csr_menvcfgh}}  & 32'd0) |
                                   ({32{csr_mcountinhibit}} & {25'b0, mcountinhibit[6:0]}) |
                                   ({32{csr_mpmc}}      & {30'b0, mpmc[1], 1'b0}) |
                                   ({32{dec_timer_read_d}} & dec_timer_rddata_d[31:0]) |

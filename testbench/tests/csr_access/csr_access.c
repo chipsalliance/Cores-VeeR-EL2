@@ -44,6 +44,9 @@ static const struct csr_t g_read_csrs[] = {
     {0xB80, "mcycleh"},
     {0xB82, "minstreth"},
 
+    {0x30A, "menvcfg"},
+    {0x31A, "menvcfgh"},
+
     // PMP
     {0x3A0, "pmpcfg0"},
     {0x3B0, "pmpaddr0"},
@@ -115,7 +118,9 @@ static const struct csr_t g_write_csrs[] = {
 
     // Test write only for a few CSRs not to cause unwanted effects
     {0x304, "mie"},
-    {0x340, "mscratch"}
+    {0x340, "mscratch"},
+    {0x30A, "menvcfg"},
+    {0x31A, "menvcfgh"},
 };
 
 unsigned long read_csr (uint32_t addr) {
@@ -138,6 +143,9 @@ unsigned long read_csr (uint32_t addr) {
         case 0x301: val = _read_csr(0x301); break;
         case 0x304: val = _read_csr(0x304); break;
         case 0x305: val = _read_csr(0x305); break;
+
+        case 0x30A: val = _read_csr(0x30A); break;
+        case 0x31A: val = _read_csr(0x31A); break;
 
         case 0x320: val = _read_csr(0x320); break;
 
@@ -228,6 +236,9 @@ void write_csr (uint32_t addr, uint32_t val) {
     switch (addr) {
         case 0x304: _write_csr(0x304, val); return;
         case 0x306: _write_csr(0x306, val); return;
+
+        case 0x30A: _write_csr(0x30A, val); return;
+        case 0x31A: _write_csr(0x31A, val); return;
 
         case 0x340: _write_csr(0x340, val); return;
 

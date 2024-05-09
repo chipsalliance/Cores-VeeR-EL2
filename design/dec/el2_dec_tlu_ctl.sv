@@ -931,10 +931,24 @@ end // else: !if(pt.BTB_ENABLE==1)
    assign csr_wr_usr_r = ~|dec_csr_wraddr_r[9:8];
    assign csr_rd_usr_r = ~|dec_csr_rdaddr_r[9:8];
 
-   assign csr_acc_r = priv_mode & (
-                        (dec_tlu_packet_r.pmu_i0_itype == CSRREAD)  & ~csr_rd_usr_r |
-                        (dec_tlu_packet_r.pmu_i0_itype == CSRWRITE) & ~csr_wr_usr_r |
-                        (dec_tlu_packet_r.pmu_i0_itype == CSRRW)    & ~csr_rd_usr_r & ~csr_wr_usr_r);
+   // CSR access error
+   // cycle and instret CSR unprivileged access is controller by bits in mcounteren CSR
+   logic csr_wr_acc_r  = csr_wr_usr_r & (
+                             ((dec_csr_wraddr_r[11:0] == CYCLEL)   & mcounteren[0]) |
+                             ((dec_csr_wraddr_r[11:0] == CYCLEH)   & mcounteren[0]) |
+                             ((dec_csr_wraddr_r[11:0] == INSTRETL) & mcounteren[1]) |
+                             ((dec_csr_wraddr_r[11:0] == INSTRETH) & mcounteren[1]));
+
+   logic csr_rd_acc_r  = csr_rd_usr_r & (
+                             ((dec_csr_rdaddr_r[11:0] == CYCLEL)   & mcounteren[0]) |
+                             ((dec_csr_rdaddr_r[11:0] == CYCLEH)   & mcounteren[0]) |
+                             ((dec_csr_rdaddr_r[11:0] == INSTRETL) & mcounteren[1]) |
+                             ((dec_csr_rdaddr_r[11:0] == INSTRETH) & mcounteren[1]));
+
+   assign csr_acc_r = priv_mode & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r & (
+                        (dec_tlu_packet_r.pmu_i0_itype == CSRREAD)  & ~csr_rd_acc_r |
+                        (dec_tlu_packet_r.pmu_i0_itype == CSRWRITE) & ~csr_wr_acc_r |
+                        (dec_tlu_packet_r.pmu_i0_itype == CSRRW)    & ~csr_rd_acc_r & ~csr_wr_acc_r);
 
    //
    // Exceptions
@@ -1228,6 +1242,7 @@ end
    // [31:0] : Lower Cycle count
 
    localparam MCYCLEL       = 12'hb00;
+   localparam CYCLEL        = 12'hc00;
 
    assign kill_ebreak_count_r = ebreak_to_debug_mode_r & dcsr[DCSR_STOPC];
 
@@ -1250,6 +1265,7 @@ end
    // Chained with mcyclel. Note: mcyclel overflow due to a mcycleh write gets ignored.
 
    localparam MCYCLEH       = 12'hb80;
+   localparam CYCLEH        = 12'hc80;
 
    assign wr_mcycleh_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MCYCLEH);
 
@@ -1268,6 +1284,7 @@ end
    // one instruction will be the value read by the following instruction (i.e., the increment of instret
    // caused by the first instruction retiring happens before the write of the new value)."
    localparam MINSTRETL     = 12'hb02;
+   localparam INSTRETL      = 12'hc02;
 
    assign i0_valid_no_ebreak_ecall_r = dec_tlu_i0_valid_r & ~(ebreak_r | ecall_r | ebreak_to_debug_mode_r | illegal_r | mcountinhibit[2]);
 
@@ -1294,6 +1311,7 @@ end
    // Chained with minstretl. Note: minstretl overflow due to a minstreth write gets ignored.
 
    localparam MINSTRETH     = 12'hb82;
+   localparam INSTRETH      = 12'hc82;
 
    assign wr_minstreth_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MINSTRETH);
 

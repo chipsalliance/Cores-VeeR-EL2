@@ -34,9 +34,10 @@ _start:
 
         call main
 
-        // TODO: Check all tests that use this crt0.s and make their main()
-        // return meaningful code. For now assume success
-        li a0, 0xff
+        # Map exit code of main() to command to be written to tohost
+        snez a0, a0
+        bnez a0, _finish
+        li   a0, 0xFF
 
 .global _finish
 _finish:

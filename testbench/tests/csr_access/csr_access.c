@@ -31,6 +31,7 @@ static const struct csr_t g_read_csrs[] = {
     {0x304, "mie"},
     {0x305, "mtvec"},
 
+    {0x306, "mcounteren"},
     {0x320, "mcountinhibit"},
 
     {0x340, "mscratch"},
@@ -53,6 +54,11 @@ static const struct csr_t g_read_csrs[] = {
     {0x3C0, "pmpaddr16"},
     {0x3D0, "pmpaddr32"},
     {0x3E0, "pmpaddr48"},
+
+    {0xC00, "cycle"},
+    {0xC80, "cycleh"},
+    {0xC02, "instret"},
+    {0xC82, "instreth"},
 
     // VeeR specific CSRs
     {0x7FF, "mscause"},
@@ -143,6 +149,7 @@ unsigned long read_csr (uint32_t addr) {
         case 0x301: val = _read_csr(0x301); break;
         case 0x304: val = _read_csr(0x304); break;
         case 0x305: val = _read_csr(0x305); break;
+        case 0x306: val = _read_csr(0x306); break;
 
         case 0x30A: val = _read_csr(0x30A); break;
         case 0x31A: val = _read_csr(0x31A); break;
@@ -159,6 +166,11 @@ unsigned long read_csr (uint32_t addr) {
         case 0xB02: val = _read_csr(0xB02); break;
         case 0xB80: val = _read_csr(0xB80); break;
         case 0xB82: val = _read_csr(0xB82); break;
+
+        case 0xC00: val = _read_csr(0xC00); break;
+        case 0xC80: val = _read_csr(0xC80); break;
+        case 0xC02: val = _read_csr(0xC02); break;
+        case 0xC82: val = _read_csr(0xC82); break;
 
         case 0x3A0: val = _read_csr(0x3A0); break;
         case 0x3B0: val = _read_csr(0x3B0); break;
@@ -346,12 +358,16 @@ void trap_handler () {
 
 __attribute__((noreturn)) void main () {
     printf("\nHello VeeR\n");
- 
+
     // Test CSR access assuming machine mode
     printf("Testing CSR read...\n");
     test_csr_read_access(0);
     printf("Testing CSR write...\n");
     test_csr_write_access(0);
+
+    // Write mcounteren.CY and mcounteren.IR to allow access cycle and instret
+    // from user mode
+    _write_csr(0x306, 0x5);
 
     // Clear mscratch
     _write_csr(mscratch, 0);
@@ -365,6 +381,8 @@ __attribute__((noreturn)) void main () {
     void* ptr = (void*)user_main;
     _write_csr(mepc, (unsigned long)ptr);
     asm volatile ("mret");
+
+    while (1); // Make compiler not complain
 }
 
 __attribute__((noreturn)) void user_main () {
@@ -383,6 +401,8 @@ __attribute__((noreturn)) void user_main () {
 
     // Trigger an ECALL to go to machine mode again
     asm volatile ("ecall");
+
+    while (1); // Make compiler not complain
 }
 
 __attribute__((noreturn)) void machine_main () {
@@ -407,4 +427,6 @@ __attribute__((noreturn)) void machine_main () {
         "j  _finish\n"
         : : "r"(res)
     );
+
+    while (1); // Make compiler not complain
 }

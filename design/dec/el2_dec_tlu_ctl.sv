@@ -262,7 +262,9 @@ import el2_pkg::*;
    logic wr_mpmc_r;
    logic [1:1] mpmc_b_ns, mpmc, mpmc_b;
    logic set_mie_pmu_fw_halt, fw_halted_ns, fw_halted;
+   logic wr_mcounteren_r;
    logic wr_mcountinhibit_r;
+   logic [1:0] mcounteren;
    logic [6:0] mcountinhibit;
    logic wr_mtsel_r, wr_mtdata1_t0_r, wr_mtdata1_t1_r, wr_mtdata1_t2_r, wr_mtdata1_t3_r, wr_mtdata2_t0_r, wr_mtdata2_t1_r, wr_mtdata2_t2_r, wr_mtdata2_t3_r;
    logic [31:0] mtdata2_t0, mtdata2_t1, mtdata2_t2, mtdata2_t3, mtdata2_tsel_out, mtdata1_tsel_out;
@@ -2331,6 +2333,18 @@ else
    //----------------------------------------------------------------------
    // ----------------------------------------------------------------------
 
+   // ----------------------------------------------------------------------
+   // MCOUNTEREN
+   // [31:3] : Reserved, read 0x0
+   // [2]    : INSTRET user-mode access disable
+   // [1]    : reserved, read 0x0
+   // [0]    : CYCLE user-mode access disable
+
+   localparam MCOUNTEREN                = 12'h306;
+
+   assign wr_mcounteren_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MCOUNTEREN);
+   rvdffs #(2) mcounteren_ff (.*, .clk(csr_wr_clk), .en(wr_mcounteren_r), .din({dec_csr_wrdata_r[2], dec_csr_wrdata_r[0]}), .dout({mcounteren[1], mcounteren[0]}));
+
    // MCOUNTINHIBIT(RW)
    // [31:7] : Reserved, read 0x0
    // [6]    : HPM6 disable
@@ -2452,10 +2466,15 @@ assign dec_csr_rddata_d[31:0] = ( ({32{csr_misa}}      & 32'h40101104) |
                                   ({32{csr_mhpme6}}    & {22'b0,mhpme6[9:0]}) |
                                   ({32{csr_menvcfg}}   & 32'd0) |
                                   ({32{csr_menvcfgh}}  & 32'd0) |
+                                  ({32{csr_mcounteren}}    & {29'b0, mcounteren[1], 1'b0, mcounteren[0]}) |
                                   ({32{csr_mcountinhibit}} & {25'b0, mcountinhibit[6:0]}) |
                                   ({32{csr_mpmc}}      & {30'b0, mpmc[1], 1'b0}) |
                                   ({32{dec_timer_read_d}} & dec_timer_rddata_d[31:0]) |
-                                  ({32{dec_pmp_read_d}} & dec_pmp_rddata_d[31:0])
+                                  ({32{dec_pmp_read_d}} & dec_pmp_rddata_d[31:0]) |
+                                  ({32{csr_cyclel}}    & mcyclel[31:0]) |
+                                  ({32{csr_cycleh}}    & mcycleh_inc[31:0]) |
+                                  ({32{csr_instretl}}  & minstretl_read[31:0]) |
+                                  ({32{csr_instreth}}  & minstreth_read[31:0])
                                   );
 
 

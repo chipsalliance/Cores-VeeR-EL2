@@ -72,6 +72,7 @@ csr_perfvf =        [10111001....]
 csr_perfvg =        [001100100111]
 csr_perfvh =        [001100101...]
 csr_perfvi =        [00110011....]
+csr_mcounteren =    [001100000110]
 csr_mcountinhibit = [001100100000]
 csr_mfdht =         [011111001110]
 csr_mfdhs =         [011111001111]
@@ -82,6 +83,10 @@ csr_pmpaddr0 =      [00111011....]
 csr_pmpaddr16 =     [00111100....]
 csr_pmpaddr32 =     [00111101....]
 csr_pmpaddr48 =     [00111110....]
+csr_cyclel =        [110000000000]
+csr_cycleh =        [110010000000]
+csr_instretl =      [110000000010]
+csr_instreth =      [110010000010]
 
 .input
 
@@ -148,6 +153,7 @@ csr = {
      csr_mhpme4
      csr_mhpme5
      csr_mhpme6
+     csr_mcounteren
      csr_mcountinhibit
      csr_mitctl0
      csr_mitctl1
@@ -185,6 +191,10 @@ csr_dicago
      csr_pmpaddr16
      csr_pmpaddr32
      csr_pmpaddr48
+     csr_cyclel
+     csr_cycleh
+     csr_instretl
+     csr_instreth
      valid_only
      presync
      postsync
@@ -260,6 +270,7 @@ csr[ csr_mfdht     ] = {  csr_mfdht }
 csr[ csr_mfdhs     ] = {  csr_mfdhs }
 csr[ csr_menvcfg   ] = {  csr_menvcfg }
 csr[ csr_menvcfgh  ] = {  csr_menvcfgh }
+csr[ csr_mcounteren ] = { csr_mcounteren }
 csr[ csr_mcountinhibit] = {  csr_mcountinhibit presync postsync }
 
 csr[ csr_perfva    ] = { valid_only }
@@ -277,5 +288,10 @@ csr[ csr_pmpaddr0  ] = { csr_pmpaddr0  }
 csr[ csr_pmpaddr16 ] = { csr_pmpaddr16 }
 csr[ csr_pmpaddr32 ] = { csr_pmpaddr32 }
 csr[ csr_pmpaddr48 ] = { csr_pmpaddr48 }
+
+csr[ csr_cyclel    ] = {  csr_cyclel   }
+csr[ csr_cycleh    ] = {  csr_cycleh   }
+csr[ csr_instretl  ] = {  csr_instretl }
+csr[ csr_instreth  ] = {  csr_instreth }
 
 .end

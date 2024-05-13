@@ -11,6 +11,8 @@
     asm volatile ("csrw " #csr ", %0" : : "r"(val)); \
 }
 
+#define MISA_U              (1 << 20)
+
 #define MSTATUS_MPRV        (1 << 17)
 
 #define MSTATUS_MPP_MASK    (3 << 11)
@@ -84,7 +86,13 @@ int32_t trap_handler (uint32_t cmd, uint32_t arg) {
 
 void user_main ();
 
-__attribute__((noreturn)) void main () {
+int main () {
+
+    // The test requires user mode support
+    if ((read_csr(misa) & MISA_U) == 0) {
+        printf("ERROR: The test requires user mode support. Aborting.\n");
+        return -1;
+    }
 
     uint32_t mstatus = read_csr(mstatus);
 
@@ -168,7 +176,7 @@ __attribute__((noreturn)) void main () {
     write_csr(mepc, (unsigned long)ptr);
     asm volatile ("mret");
 
-    while (1); // Make the compiler not complain
+    return 0;
 }
 
 __attribute__((noreturn)) void user_main () {

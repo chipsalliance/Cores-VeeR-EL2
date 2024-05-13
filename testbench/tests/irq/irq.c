@@ -13,6 +13,8 @@
     asm volatile ("csrw " #csr ", %0" : : "r"(val)); \
 }
 
+#define MISA_U (1 << 20)
+
 #define MSTATUS_MPP_MASK    (3 << 11)
 #define MSTATUS_MPP_MACHINE (3 << 11)
 #define MSTATUS_MPP_USER    (0 << 11)
@@ -107,7 +109,7 @@ void nmi_handler () {
 
 void user_main ();
 
-__attribute__((noreturn)) void main () {
+int main () {
     printf("Hello VeeR\n");
 
     // Enable interrupts
@@ -164,6 +166,37 @@ __attribute__((noreturn)) void main () {
     release_all_irqs();
 
     // ..............................
+    // User mode not supported
+    if ((read_csr(misa) & MISA_U) == 0) {
+        printf("WARNING: User mode not supported\n");
+
+        // Report traps
+        printf("traps taken: %d\n", trap_count);
+        for (uint32_t i=0; i<trap_count; ++i) {
+            printf(" %d. 0x%08X\n", i, trap_causes[i]);
+        }
+
+        // Check traps. Should be:
+        //  M timer    (0x80000007)
+        //  M soft int (0x80000003)
+        const uint32_t golden_trap_causes[] = {0x80000007, 0x80000003};
+        const uint32_t golden_trap_count    = sizeof(golden_trap_causes) / sizeof(golden_trap_causes[0]);
+
+        if (trap_count == golden_trap_count) {
+            for (uint32_t i=0; i<trap_count; ++i) {
+                if (trap_causes[i] != golden_trap_causes[i]) {
+                    return -1;
+                }
+            }
+        }
+        else {
+            return -1;
+        }
+
+        return 0;
+    }
+
+    // ..............................
     // Set mstatus.MPIE to 0 and go to user mode. On the mode change MPIE
     // should be copied to MIE. This should not prevent interrupts from
     // occurring.
@@ -183,8 +216,7 @@ __attribute__((noreturn)) void main () {
     write_csr(mepc, (unsigned long)ptr);
     asm volatile ("mret");
 
-    // Make the compiler not complain
-    while (1);
+    return 0;
 }
 
 __attribute__((noreturn)) void user_main () {

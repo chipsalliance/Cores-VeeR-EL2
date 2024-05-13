@@ -10,6 +10,8 @@
     asm volatile ("csrw " #csr ", %0" : : "r"(val)); \
 }
 
+#define MISA_U  (1 << 20)
+
 #define do_ecall()  asm volatile ("ecall")
 #define do_ebreak() asm volatile ("ebreak\nnop") // EBREAK can translate to C.EBREAK. Insert a nop to align to 4
 #define do_wfi()    asm volatile ("wfi")
@@ -59,8 +61,14 @@ void check (int cond) {
 
 void user_main ();
 
-__attribute__((noreturn)) void main () {
+int main () {
     printf("Hello VeeR\n");
+
+    // The test requires user mode support
+    if ((read_csr(misa) & MISA_U) == 0) {
+        printf("ERROR: The test requires user mode support. Aborting.\n");
+        return -1;
+    }
 
     // Do EBREAK
     printf("testing EBREAK\n");
@@ -99,7 +107,7 @@ __attribute__((noreturn)) void main () {
     write_csr(mepc, (unsigned long)ptr);
     asm volatile ("mret");
 
-    while (1); // Make compiler not complain
+    return 0;
 }
 
 __attribute__((noreturn)) void user_main () {

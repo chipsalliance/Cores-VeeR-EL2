@@ -289,9 +289,13 @@ module el2_dec
     output el2_pmp_cfg_pkt_t        pmp_pmpcfg [pt.PMP_ENTRIES],
     output logic             [31:0] pmp_pmpaddr[pt.PMP_ENTRIES],
 
+`ifdef RV_USER_MODE
+
     // Privilege mode
     output logic priv_mode,
     output logic priv_mode_eff,
+
+`endif
 
     // feature disable from mfdc
     output logic dec_tlu_external_ldfwd_disable,  // disable external load forwarding

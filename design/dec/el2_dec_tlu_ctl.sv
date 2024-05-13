@@ -236,14 +236,17 @@ import el2_pkg::*;
    output logic  dec_tlu_dccm_clk_override, // override DCCM clock domain gating
    output logic  dec_tlu_icm_clk_override,  // override ICCM clock domain gating
 
-   // pmp
-   output el2_pmp_cfg_pkt_t pmp_pmpcfg  [pt.PMP_ENTRIES],
-   output logic [31:0]      pmp_pmpaddr [pt.PMP_ENTRIES],
+`ifdef RV_USER_MODE
 
    // Privilege mode
    output logic  priv_mode,
-   output logic  priv_mode_eff
+   output logic  priv_mode_eff,
 
+`endif
+
+   // pmp
+   output el2_pmp_cfg_pkt_t pmp_pmpcfg  [pt.PMP_ENTRIES],
+   output logic [31:0]      pmp_pmpaddr [pt.PMP_ENTRIES]
    );
 
    logic         clk_override, e4e5_int_clk, nmi_fir_type, nmi_lsu_load_type, nmi_lsu_store_type, nmi_int_detected_f, nmi_lsu_load_type_f,
@@ -272,7 +275,11 @@ import el2_pkg::*;
    logic [9:0] tdata_wrdata_r;
    logic [1:0] mtsel_ns, mtsel;
    logic tlu_i0_kill_writeb_r;
+`ifdef RV_USER_MODE
    logic [3:0]  mstatus_ns, mstatus; // MPRV, MPP (inverted! 0-M, 1-U), MPIE, MIE
+`else
+   logic [1:0]  mstatus_ns, mstatus;
+`endif
    logic [1:0] mfdhs_ns, mfdhs;
    logic [31:0] force_halt_ctr, force_halt_ctr_f;
    logic        force_halt;
@@ -460,12 +467,19 @@ import el2_pkg::*;
 
 // coredecode -in csrdecode > corecsrdecode.e; espresso -Dso -oeqntott < corecsrdecode.e | addassign > csrequations; coredecode -in csrdecode -legal > csrlegal.e; espresso -Dso -oeqntott csrlegal.e | addassign > csrlegal_equation
 
-   // TODO: When user mode is disabled in config include "el2_dec_csr_equ_m.svh" instead.
+`ifdef RV_USER_MODE
+
    `include "el2_dec_csr_equ_mu.svh"
 
    logic  csr_acc_r;    // CSR access error
    logic  csr_wr_usr_r; // Write to an unprivileged/user-level CSR
    logic  csr_rd_usr_r; // REad from an unprivileged/user-level CSR
+
+`else
+
+   `include "el2_dec_csr_equ_m.svh"
+
+`endif
 
    el2_dec_timer_ctl  #(.pt(pt)) int_timers(.*);
    // end of internal timers
@@ -518,8 +532,10 @@ import el2_pkg::*;
 
 localparam MSTATUS_MIE   = 0;
 localparam MSTATUS_MPIE  = 1;
+`ifdef RV_USER_MODE
 localparam MSTATUS_MPP   = 2;
 localparam MSTATUS_MPRV  = 3;
+`endif
 
 localparam MIP_MCEIP     = 5;
 localparam MIP_MITIP0    = 4;
@@ -852,6 +868,7 @@ localparam MTDATA1_LD    = 0;
                            (~lsu_error_pkt_r.inst_type & lsu_error_pkt_r.single_ecc_error);
 
    //  Final commit valids
+`ifdef RV_USER_MODE
    assign tlu_i0_commit_cmt = dec_tlu_i0_valid_r &
                               ~rfpc_i0_r &
                               ~lsu_i0_exc_r &
@@ -860,9 +877,22 @@ localparam MTDATA1_LD    = 0;
                               ~request_debug_mode_r_d1 &
                               ~i0_trigger_hit_r &
                               ~csr_acc_r;
+`else
+   assign tlu_i0_commit_cmt = dec_tlu_i0_valid_r &
+                              ~rfpc_i0_r &
+                              ~lsu_i0_exc_r &
+                              ~inst_acc_r &
+                              ~dec_tlu_dbg_halted &
+                              ~request_debug_mode_r_d1 &
+                              ~i0_trigger_hit_r;
+`endif
 
    // unified place to manage the killing of arch state writebacks
+`ifdef RV_USER_MODE
    assign tlu_i0_kill_writeb_r = rfpc_i0_r | lsu_i0_exc_r | inst_acc_r | (illegal_r & dec_tlu_dbg_halted) | i0_trigger_hit_r | csr_acc_r;
+`else
+   assign tlu_i0_kill_writeb_r = rfpc_i0_r | lsu_i0_exc_r | inst_acc_r | (illegal_r & dec_tlu_dbg_halted) | i0_trigger_hit_r;
+`endif
    assign dec_tlu_i0_commit_cmt = tlu_i0_commit_cmt;
 
 
@@ -908,8 +938,13 @@ end // else: !if(pt.BTB_ENABLE==1)
    // only expect these in pipe 0
    assign       ebreak_r     =  (dec_tlu_packet_r.pmu_i0_itype == EBREAK)  & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~dcsr[DCSR_EBREAKM] & ~rfpc_i0_r;
    assign       ecall_r      =  (dec_tlu_packet_r.pmu_i0_itype == ECALL)   & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
+`ifdef RV_USER_MODE
    assign       illegal_r    =  (((dec_tlu_packet_r.pmu_i0_itype == MRET) &  priv_mode) | ~dec_tlu_packet_r.legal) & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
    assign       mret_r       =  ( (dec_tlu_packet_r.pmu_i0_itype == MRET) & ~priv_mode                           ) & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
+`else
+   assign       illegal_r    =  ~dec_tlu_packet_r.legal   & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
+   assign       mret_r       =  (dec_tlu_packet_r.pmu_i0_itype == MRET)    & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
+`endif
    // fence_i includes debug only fence_i's
    assign       fence_i_r    =  (dec_tlu_packet_r.fence_i & dec_tlu_i0_valid_r & ~i0_trigger_hit_r) & ~rfpc_i0_r;
    assign       ic_perr_r    =  ifu_ic_error_start_f & ~ext_int_freeze_d1 & (~internal_dbg_halt_mode_f | dcsr_single_step_running) & ~internal_pmu_fw_halt_mode_f;
@@ -925,6 +960,8 @@ end // else: !if(pt.BTB_ENABLE==1)
                                 .dout(ebreak_to_debug_mode_r_d1));
 
    assign dec_tlu_fence_i_r = fence_i_r;
+
+`ifdef RV_USER_MODE
 
    // CSR access
    // Address bits 9:8 == 2'b00 indicate unprivileged / user-level CSR
@@ -950,6 +987,8 @@ end // else: !if(pt.BTB_ENABLE==1)
                         (dec_tlu_packet_r.pmu_i0_itype == CSRWRITE) & ~csr_wr_acc_r |
                         (dec_tlu_packet_r.pmu_i0_itype == CSRRW)    & ~csr_rd_acc_r & ~csr_wr_acc_r);
 
+`endif
+
    //
    // Exceptions
    //
@@ -961,13 +1000,17 @@ end // else: !if(pt.BTB_ENABLE==1)
    // - MPIE <- MIE
    // - MIE <- 0
    //
+`ifdef RV_USER_MODE
    assign i0_exception_valid_r = (ebreak_r | ecall_r | illegal_r | inst_acc_r | csr_acc_r) & ~rfpc_i0_r & ~dec_tlu_dbg_halted;
+`else
+   assign i0_exception_valid_r = (ebreak_r | ecall_r | illegal_r | inst_acc_r) & ~rfpc_i0_r & ~dec_tlu_dbg_halted;
+`endif
 
    // Cause:
    //
    // 0x2 : illegal
    // 0x3 : breakpoint
-   // 0x8 : Environment call U-mode
+   // 0x8 : Environment call U-mode (if U-mode is enabled)
    // 0xb : Environment call M-mode
 
 
@@ -977,9 +1020,14 @@ end // else: !if(pt.BTB_ENABLE==1)
                                 ({5{take_int_timer0_int}}  & 5'h1d) |
                                 ({5{take_int_timer1_int}}  & 5'h1c) |
                                 ({5{take_ce_int}}          & 5'h1e) |
+`ifdef RV_USER_MODE
                                 ({5{illegal_r| csr_acc_r}} & 5'h02) |
                                 ({5{ecall_r & priv_mode}}  & 5'h08) |
                                 ({5{ecall_r & ~priv_mode}} & 5'h0b) |
+`else
+                                ({5{illegal_r}}            & 5'h02) |
+                                ({5{ecall_r}}              & 5'h0b) |
+`endif
                                 ({5{inst_acc_r}}           & 5'h01) |
                                 ({5{ebreak_r | i0_trigger_hit_r}}   & 5'h03) |
                                 ({5{lsu_exc_ma_r & ~lsu_exc_st_r}}  & 5'h04) |
@@ -1125,6 +1173,8 @@ end
                                  .dout({interrupt_valid_r_d1, i0_exception_valid_r_d1, exc_or_int_valid_r_d1,
                                         exc_cause_wb[4:0], i0_valid_wb, trigger_hit_r_d1,
                                         take_nmi_r_d1, pause_expired_wb}));
+`ifdef RV_USER_MODE
+
    //
    // Privilege mode
    //
@@ -1140,6 +1190,8 @@ end
         .dout   (priv_mode)
    );
 
+`endif
+
    //----------------------------------------------------------------------
    //
    // CSRs
@@ -1150,7 +1202,7 @@ end
    // ----------------------------------------------------------------------
    // MISA (RO)
    //  [31:30] XLEN - implementation width, 2'b01 - 32 bits
-   //  [20]    U    - user mode support
+   //  [20]    U    - user mode support (if enabled in config)
    //  [12]    M    - integer mul/div
    //  [8]     I    - RV32I
    //  [2]     C    - Compressed extension
@@ -1165,7 +1217,7 @@ end
 
    // ----------------------------------------------------------------------
    // MSTATUS (RW)
-   // [17]    MPRV : Modify PRiVilege
+   // [17]    MPRV : Modify PRiVilege (if enabled in config)
    // [12:11] MPP  : Prior priv level, either 2'b11 (machine) or 2'b00 (user)
    // [7]     MPIE : Int enable previous [1]
    // [3]     MIE  : Int enable          [0]
@@ -1174,12 +1226,18 @@ end
 
    //When executing a MRET instruction, supposing MPP holds the value 3, MIE
    //is set to MPIE; the privilege mode is changed to 3; MPIE is set to 1; and MPP is set to 3
+`ifdef RV_USER_MODE
    assign dec_csr_wen_r_mod = dec_csr_wen_r & ~i0_trigger_hit_r & ~rfpc_i0_r & ~csr_acc_r;
+`else
+   assign dec_csr_wen_r_mod = dec_csr_wen_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
+`endif
+
    assign wr_mstatus_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MSTATUS);
 
    // set this even if we don't go to fwhalt due to debug halt. We committed the inst, so ...
    assign set_mie_pmu_fw_halt = ~mpmc_b_ns[1] & fw_halt_req;
 
+`ifdef RV_USER_MODE
    // mstatus[2] / mstatus_ns[2] actually stores inverse of the MPP field !
    assign mstatus_ns[3:0] = ( ({4{~wr_mstatus_r & exc_or_int_valid_r}} & {mstatus[MSTATUS_MPRV], priv_mode, mstatus[MSTATUS_MIE], 1'b0}) |
                               ({4{ wr_mstatus_r & exc_or_int_valid_r}} & {mstatus[MSTATUS_MPRV], priv_mode, dec_csr_wrdata_r[3],  1'b0}) |
@@ -1195,6 +1253,19 @@ end
    // set effective privilege mode according to MPRV and MPP
    assign priv_mode_eff = ( mstatus[MSTATUS_MPRV] & mstatus[MSTATUS_MPP]) | // MPRV=1, use MPP
                           (~mstatus[MSTATUS_MPRV] & priv_mode);             // MPRV=0, use current operating mode
+
+`else
+
+   assign mstatus_ns[1:0] = ( ({2{~wr_mstatus_r & exc_or_int_valid_r}} & {mstatus[MSTATUS_MIE], 1'b0}) |
+                              ({2{ wr_mstatus_r & exc_or_int_valid_r}} & {dec_csr_wrdata_r[3], 1'b0}) |
+                              ({2{mret_r & ~exc_or_int_valid_r}} & {1'b1, mstatus[1]}) |
+                              ({2{set_mie_pmu_fw_halt}} & {mstatus[1], 1'b1}) |
+                              ({2{wr_mstatus_r & ~exc_or_int_valid_r}} & {dec_csr_wrdata_r[7], dec_csr_wrdata_r[3]}) |
+                              ({2{~wr_mstatus_r & ~exc_or_int_valid_r & ~mret_r & ~set_mie_pmu_fw_halt}} & mstatus[1:0]) );
+
+   assign mstatus_mie_ns = mstatus[MSTATUS_MIE] & (~dcsr_single_step_running_f | dcsr[DCSR_STEPIE]);
+
+`endif
 
    // ----------------------------------------------------------------------
    // MTVEC (RW)
@@ -2197,7 +2268,9 @@ else
 
 
    if(pt.FAST_INTERRUPT_REDIRECT) begin : genblock2
-   rvdffie #(31)  mstatus_ff (.*, .clk(free_l2clk),
+
+`ifdef RV_USER_MODE
+   rvdffie #(33)  mstatus_ff (.*, .clk(free_l2clk),
                              .din({mdseac_locked_ns, lsu_single_ecc_error_r, lsu_exc_valid_r, lsu_i0_exc_r,
                                    take_ext_int_start,    take_ext_int_start_d1, take_ext_int_start_d2, ext_int_freeze,
                                    mip_ns[5:0], mcyclel_cout & ~wr_mcycleh_r & mcyclel_cout_in,
@@ -2210,10 +2283,27 @@ else
                                     fw_halted, meicidpl[3:0], icache_rd_valid_f, icache_wr_valid_f,
                                     mhpmc_inc_r_d1[3:0], perfcnt_halted_d1,
                                     mstatus[3:0]}));
+`else
+   rvdffie #(31)  mstatus_ff (.*, .clk(free_l2clk),
+                             .din({mdseac_locked_ns, lsu_single_ecc_error_r, lsu_exc_valid_r, lsu_i0_exc_r,
+                                   take_ext_int_start,    take_ext_int_start_d1, take_ext_int_start_d2, ext_int_freeze,
+                                   mip_ns[5:0], mcyclel_cout & ~wr_mcycleh_r & mcyclel_cout_in,
+                                   minstret_enable, minstretl_cout_ns, fw_halted_ns,
+                                   meicidpl_ns[3:0], icache_rd_valid, icache_wr_valid, mhpmc_inc_r[3:0], perfcnt_halted,
+                                   mstatus_ns[1:0]}),
+                             .dout({mdseac_locked_f, lsu_single_ecc_error_r_d1, lsu_exc_valid_r_d1, lsu_i0_exc_r_d1,
+                                    take_ext_int_start_d1, take_ext_int_start_d2, take_ext_int_start_d3, ext_int_freeze_d1,
+                                    mip[5:0], mcyclel_cout_f, minstret_enable_f, minstretl_cout_f,
+                                    fw_halted, meicidpl[3:0], icache_rd_valid_f, icache_wr_valid_f,
+                                    mhpmc_inc_r_d1[3:0], perfcnt_halted_d1,
+                                    mstatus[1:0]}));
+
+`endif
 
    end
    else begin : genblock2
-   rvdffie #(27)  mstatus_ff (.*, .clk(free_l2clk),
+`ifdef RV_USER_MODE
+   rvdffie #(29)  mstatus_ff (.*, .clk(free_l2clk),
                              .din({mdseac_locked_ns, lsu_single_ecc_error_r, lsu_exc_valid_r, lsu_i0_exc_r,
                                    mip_ns[5:0], mcyclel_cout & ~wr_mcycleh_r & mcyclel_cout_in,
                                    minstret_enable, minstretl_cout_ns, fw_halted_ns,
@@ -2223,9 +2313,22 @@ else
                                     mip[5:0], mcyclel_cout_f, minstret_enable_f, minstretl_cout_f,
                                     fw_halted, meicidpl[3:0], icache_rd_valid_f, icache_wr_valid_f,
                                     mhpmc_inc_r_d1[3:0], perfcnt_halted_d1,
+                                    mstatus[3:0]}));
+`else
+   rvdffie #(27)  mstatus_ff (.*, .clk(free_l2clk),
+                             .din({mdseac_locked_ns, lsu_single_ecc_error_r, lsu_exc_valid_r, lsu_i0_exc_r,
+                                   mip_ns[5:0], mcyclel_cout & ~wr_mcycleh_r & mcyclel_cout_in,
+                                   minstret_enable, minstretl_cout_ns, fw_halted_ns,
+                                   meicidpl_ns[3:0], icache_rd_valid, icache_wr_valid, mhpmc_inc_r[3:0], perfcnt_halted,
+                                   mstatus_ns[1:0]}),
+                             .dout({mdseac_locked_f, lsu_single_ecc_error_r_d1, lsu_exc_valid_r_d1, lsu_i0_exc_r_d1,
+                                    mip[5:0], mcyclel_cout_f, minstret_enable_f, minstretl_cout_f,
+                                    fw_halted, meicidpl[3:0], icache_rd_valid_f, icache_wr_valid_f,
+                                    mhpmc_inc_r_d1[3:0], perfcnt_halted_d1,
                                     mstatus[1:0]}));
+`endif
    end
-   
+
    assign perfcnt_halted = ((dec_tlu_dbg_halted & dcsr[DCSR_STOPC]) | dec_tlu_pmu_fw_halted);
    assign perfcnt_during_sleep[3:0] = {4{~(dec_tlu_dbg_halted & dcsr[DCSR_STOPC])}} & {mhpme_vec[3][9],mhpme_vec[2][9],mhpme_vec[1][9],mhpme_vec[0][9]};
 
@@ -2429,12 +2532,21 @@ assign dec_csr_legal_d = ( dec_csr_any_unq_d &
                            ~(dec_csr_wen_unq_d & (csr_mvendorid | csr_marchid | csr_mimpid | csr_mhartid | csr_mdseac | csr_meihap)) // that's not a write to a RO CSR
                            );
    // CSR read mux
-assign dec_csr_rddata_d[31:0] = ( ({32{csr_misa}}      & 32'h40101104) |
+assign dec_csr_rddata_d[31:0] = (
+`ifdef RV_USER_MODE
+                                  ({32{csr_misa}}      & 32'h40101104) |
+`else
+                                  ({32{csr_misa}}      & 32'h40001104) |
+`endif
                                   ({32{csr_mvendorid}} & 32'h00000045) |
                                   ({32{csr_marchid}}   & 32'h00000010) |
                                   ({32{csr_mimpid}}    & 32'h4) |
                                   ({32{csr_mhartid}}   & {core_id[31:4], 4'b0}) |
+`ifdef RV_USER_MODE
                                   ({32{csr_mstatus}}   & {14'b0, mstatus[MSTATUS_MPRV], 4'b0, ~mstatus[MSTATUS_MPP], ~mstatus[MSTATUS_MPP], 3'b0, mstatus[MSTATUS_MPIE], 3'b0, mstatus[MSTATUS_MIE], 3'b0}) |
+`else
+                                  ({32{csr_mstatus}}   & {19'b0, 2'b11, 3'b0, mstatus[1], 3'b0, mstatus[0], 3'b0}) |
+`endif
                                   ({32{csr_mtvec}}     & {mtvec[30:1], 1'b0, mtvec[0]}) |
                                   ({32{csr_mip}}       & {1'b0, mip[5:3], 16'b0, mip[2], 3'b0, mip[1], 3'b0, mip[0], 3'b0}) |
                                   ({32{csr_mie}}       & {1'b0, mie[5:3], 16'b0, mie[2], 3'b0, mie[1], 3'b0, mie[0], 3'b0}) |
@@ -2482,17 +2594,19 @@ assign dec_csr_rddata_d[31:0] = ( ({32{csr_misa}}      & 32'h40101104) |
                                   ({32{csr_mhpme4}}    & {22'b0,mhpme4[9:0]}) |
                                   ({32{csr_mhpme5}}    & {22'b0,mhpme5[9:0]}) |
                                   ({32{csr_mhpme6}}    & {22'b0,mhpme6[9:0]}) |
+`ifdef RV_USER_MODE
                                   ({32{csr_menvcfg}}   & 32'd0) |
                                   ({32{csr_menvcfgh}}  & 32'd0) |
                                   ({32{csr_mcounteren}}    & {29'b0, mcounteren[1], 1'b0, mcounteren[0]}) |
-                                  ({32{csr_mcountinhibit}} & {25'b0, mcountinhibit[6:0]}) |
-                                  ({32{csr_mpmc}}      & {30'b0, mpmc[1], 1'b0}) |
-                                  ({32{dec_timer_read_d}} & dec_timer_rddata_d[31:0]) |
-                                  ({32{dec_pmp_read_d}} & dec_pmp_rddata_d[31:0]) |
                                   ({32{csr_cyclel}}    & mcyclel[31:0]) |
                                   ({32{csr_cycleh}}    & mcycleh_inc[31:0]) |
                                   ({32{csr_instretl}}  & minstretl_read[31:0]) |
-                                  ({32{csr_instreth}}  & minstreth_read[31:0])
+                                  ({32{csr_instreth}}  & minstreth_read[31:0]) |
+`endif
+                                  ({32{csr_mcountinhibit}} & {25'b0, mcountinhibit[6:0]}) |
+                                  ({32{csr_mpmc}}      & {30'b0, mpmc[1], 1'b0}) |
+                                  ({32{dec_timer_read_d}} & dec_timer_rddata_d[31:0]) |
+                                  ({32{dec_pmp_read_d}} & dec_pmp_rddata_d[31:0])
                                   );
 
 

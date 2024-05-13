@@ -264,7 +264,7 @@ import el2_pkg::*;
    logic set_mie_pmu_fw_halt, fw_halted_ns, fw_halted;
    logic wr_mcounteren_r;
    logic wr_mcountinhibit_r;
-   logic [1:0] mcounteren;
+   logic [1:0] mcounteren; // IR, CY
    logic [6:0] mcountinhibit;
    logic wr_mtsel_r, wr_mtdata1_t0_r, wr_mtdata1_t1_r, wr_mtdata1_t2_r, wr_mtdata1_t3_r, wr_mtdata2_t0_r, wr_mtdata2_t1_r, wr_mtdata2_t2_r, wr_mtdata2_t3_r;
    logic [31:0] mtdata2_t0, mtdata2_t1, mtdata2_t2, mtdata2_t3, mtdata2_tsel_out, mtdata1_tsel_out;

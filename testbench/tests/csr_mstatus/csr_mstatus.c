@@ -10,7 +10,15 @@
     asm volatile ("csrw " #csr ", %0" : : "r"(val)); \
 }
 
+#define MISA_U (1 << 20)
+
 int main () {
+
+    // The test requires user mode support
+    if ((read_csr(misa) & MISA_U) == 0) {
+        printf("ERROR: The test requires user mode support. Aborting.\n");
+        return -1;
+    }
 
     unsigned long prv, cur;
     int res = 0;

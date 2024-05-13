@@ -12,6 +12,8 @@
     asm volatile ("csrw " #csr ", %0" : : "r"(val)); \
 }
 
+#define MISA_U (1 << 20)
+
 #define MAGIC 0xDEADBEEF
 
 struct csr_t {
@@ -356,9 +358,15 @@ void trap_handler () {
     }
 }
 
-__attribute__((noreturn)) void main () {
+int main () {
     printf("\nHello VeeR\n");
 
+    // The test requires user mode support
+    if ((_read_csr(misa) & MISA_U) == 0) {
+        printf("ERROR: The test requires user mode support. Aborting.\n");
+        return -1;
+    }
+ 
     // Test CSR access assuming machine mode
     printf("Testing CSR read...\n");
     test_csr_read_access(0);
@@ -382,7 +390,7 @@ __attribute__((noreturn)) void main () {
     _write_csr(mepc, (unsigned long)ptr);
     asm volatile ("mret");
 
-    while (1); // Make compiler not complain
+    return 0;
 }
 
 __attribute__((noreturn)) void user_main () {

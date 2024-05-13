@@ -16,6 +16,20 @@
 #define MSTATUS_MPP_MASK    (3 << 11)
 #define MSTATUS_MPP_MACHINE (3 << 11)
 #define MSTATUS_MPP_USER    (0 << 11)
+#define MSTATUS_MPP_MPRV    (1 << 17)
+#define MSTATUS_MIE         (1 << 3)
+#define MSTATUS_MPIE        (1 << 7)
+
+#define MIE_MEIE            (1 << 11)
+#define MIE_MTIE            (1 << 7)
+#define MIE_MSIE            (1 << 3)
+
+#define MCAUSE_NMI          0x0
+#define MCAUSE_TIMER_M      0x80000007
+#define MCAUSE_SOFTINT_M    0x80000003
+
+#define TEST_RESULT_SUCCESS 0xFF
+#define TEST_RESULT_FAILURE 1
 
 // ============================================================================
 
@@ -98,7 +112,7 @@ __attribute__((noreturn)) void main () {
 
     // Enable interrupts
     unsigned long mie = read_csr(mie);
-    mie |= 0x888; // MEIE, MTIE, MSIE = 1
+    mie |= MIE_MEIE | MIE_MTIE | MIE_MSIE;
     write_csr(mie, mie);
 
     // ..............................
@@ -106,7 +120,7 @@ __attribute__((noreturn)) void main () {
     printf("Machine mode, MIE=0\n");
 
     unsigned long mstatus = read_csr(mstatus);
-    mstatus &= ~0x08; // MIE = 0
+    mstatus &= ~MSTATUS_MIE;
     write_csr(mstatus, mstatus);
 
     // NMI
@@ -130,7 +144,7 @@ __attribute__((noreturn)) void main () {
     printf("Machine mode, MIE=1\n");
 
     mstatus  = read_csr(mstatus);
-    mstatus |= 0x08; // MIE = 1
+    mstatus |= MSTATUS_MIE;
     write_csr(mstatus, mstatus);
 
     // NMI
@@ -156,13 +170,13 @@ __attribute__((noreturn)) void main () {
     printf("Going to user mode, MPIE=0\n");
 
     mstatus  = read_csr(mstatus);
-    mstatus &= ~0x80; // MPIE = 0
+    mstatus &= ~MSTATUS_MPIE;
     write_csr(mstatus, mstatus);
 
     // Go to user mode
     mstatus = read_csr(mstatus);
-    mstatus &= ~(3 << 11);  // MPP  = 00 (user)
-    mstatus &= ~(1 << 17);  // MPRV = 0
+    mstatus &= ~MSTATUS_MPP_MASK; // MPP  = 00 (user)
+    mstatus &= ~MSTATUS_MPP_MPRV; // MPRV = 0
     write_csr(mstatus, mstatus);
 
     void* ptr = (void*)user_main;
@@ -198,7 +212,7 @@ __attribute__((noreturn)) void user_main () {
 
     // ..............................
     // Verify trap causes
-    unsigned char res = 0xFF; // success
+    unsigned char res = TEST_RESULT_SUCCESS; // success
 
     // Report traps
     printf("traps taken:\n");
@@ -208,13 +222,13 @@ __attribute__((noreturn)) void user_main () {
 
     // Check traps. Should be:
     const uint32_t golden_trap_causes[] = {
-        0x00000000, // NMI
-        0x00000000, // NMI
-        0x80000007, // M timer
-        0x80000003, // M soft int
-        0x00000000, // NMI
-        0x80000007, // M timer
-        0x80000003, // M soft int
+        MCAUSE_NMI,         // NMI
+        MCAUSE_NMI,         // NMI
+        MCAUSE_TIMER_M,     // M timer
+        MCAUSE_SOFTINT_M,   // M soft int
+        MCAUSE_NMI,         // NMI
+        MCAUSE_TIMER_M,     // M timer
+        MCAUSE_SOFTINT_M,   // M soft int
     };
     const uint32_t golden_trap_count = sizeof(golden_trap_causes) /
                                        sizeof(golden_trap_causes[0]);
@@ -224,22 +238,22 @@ __attribute__((noreturn)) void user_main () {
 
             // Check causes
             if (trap_data[i].mcause != golden_trap_causes[i]) {
-                res = 1;
+                res = TEST_RESULT_FAILURE;
                 break;
             }
 
             // Check modes
-            if ((trap_data[0].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_MACHINE) res = 1;
-            if ((trap_data[1].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_MACHINE) res = 1;
-            if ((trap_data[2].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_MACHINE) res = 1;
-            if ((trap_data[3].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_MACHINE) res = 1;
-            if ((trap_data[4].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_USER)    res = 1;
-            if ((trap_data[5].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_USER)    res = 1;
-            if ((trap_data[6].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_USER)    res = 1;
+            if ((trap_data[0].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_MACHINE) res = TEST_RESULT_FAILURE;
+            if ((trap_data[1].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_MACHINE) res = TEST_RESULT_FAILURE;
+            if ((trap_data[2].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_MACHINE) res = TEST_RESULT_FAILURE;
+            if ((trap_data[3].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_MACHINE) res = TEST_RESULT_FAILURE;
+            if ((trap_data[4].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_USER)    res = TEST_RESULT_FAILURE;
+            if ((trap_data[5].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_USER)    res = TEST_RESULT_FAILURE;
+            if ((trap_data[6].mstatus & MSTATUS_MPP_MASK) != MSTATUS_MPP_USER)    res = TEST_RESULT_FAILURE;
         }
     }
     else {
-        res = 1; // failure
+        res = TEST_RESULT_FAILURE; // failure
     }
 
     // Terminate the simulation

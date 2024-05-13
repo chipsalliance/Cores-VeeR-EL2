@@ -25,6 +25,19 @@
 #define ECALL_GET_MCOUNTEREN    0x10
 #define ECALL_SET_MCOUNTEREN    0x20
 
+#define MSTATUS_MPP_MASK        (3 << 11)
+#define MSTATUS_MPRV            (1 << 17)
+
+#define MCAUSE_ILLEGAL_INSTR    0x2
+#define MCAUSE_ECALL_U          0x8
+#define MCAUSE_ECALL_M          0xb
+
+#define MCOUNTEREN_CY           (1 << 0)
+#define MCOUNTEREN_IR           (1 << 2)
+
+#define TEST_RESULT_SUCCESS     0xFF
+#define TEST_RESULT_FAILURE     1
+
 volatile int32_t  global_result = 0;
 volatile uint32_t last_trap     = 0xFFFFFFFF;
 
@@ -54,7 +67,7 @@ int32_t trap_handler (uint32_t a0, uint32_t a1) {
     printf("trap! mstatus=0x%08X, mcause=0x%08X\n", mstatus, mcause);
 
     // Handle ECALL
-    if (mcause == 0x8 || mcause == 0xb) {
+    if (mcause == MCAUSE_ECALL_U || mcause == MCAUSE_ECALL_M) {
         return ecall_handler(a0, a1);
     }
 
@@ -71,12 +84,12 @@ __attribute__((noreturn)) void main () {
 
     // Write mcounteren.CY and mcounteren.IR to allow access cycle and instret
     // from user mode
-    write_csr(CSR_MCOUNTEREN, 0x5);
+    write_csr(CSR_MCOUNTEREN, MCOUNTEREN_IR | MCOUNTEREN_CY);
 
     // Go to user mode
     uint32_t mstatus = read_csr(CSR_MSTATUS);
-    mstatus &= ~(3 << 11);  // MPP  = 00 (user)
-    mstatus &= ~(1 << 17);  // MPRV = 0
+    mstatus &= ~MSTATUS_MPP_MASK; // MPP  = 00 (user)
+    mstatus &= ~MSTATUS_MPRV;     // MPRV = 0
     write_csr(CSR_MSTATUS, mstatus);
 
     void* ptr = (void*)user_main;
@@ -123,7 +136,7 @@ uint32_t read_and_check (int32_t csr, int should_succeed) {
         }
     }
     else {
-        if (last_trap != 0x2) { // Illegal instruction
+        if (last_trap != MCAUSE_ILLEGAL_INSTR) { // Illegal instruction
             printf("[ FAILED ] %s\n", get_csr_name(csr));
             global_result = -1;
             return 0;
@@ -190,7 +203,8 @@ __attribute__((noreturn)) void user_main () {
 
         // Set access rights. Do that by calling ECALL handler which does the
         // actual job since the CSR is not writable from user mode.
-        do_ecall(ECALL_SET_MCOUNTEREN, (ir << 2) | cy);
+        printf("setting CY=%d, IR=%d in mcounteren\n", cy, ir);
+        do_ecall(ECALL_SET_MCOUNTEREN, ir * MCOUNTEREN_IR | cy * MCOUNTEREN_CY);
 
         // Test access, ignore values
         cycle_h   = read_and_check(CSR_CYCLEH,   cy);
@@ -201,7 +215,8 @@ __attribute__((noreturn)) void user_main () {
 
     // Terminate the simulation
     // set the exit code to 0xFF / 0x01 and jump to _finish.
-    uint32_t res = (global_result == 0) ? 0xFF : 0x01;
+    uint32_t res = (global_result == 0) ? TEST_RESULT_SUCCESS :
+                                          TEST_RESULT_FAILURE;
     asm volatile (
         "mv a0, %0\n"
         "j  _finish\n"

@@ -267,7 +267,9 @@ import el2_pkg::*;
    logic set_mie_pmu_fw_halt, fw_halted_ns, fw_halted;
    logic wr_mcounteren_r;
    logic wr_mcountinhibit_r;
+`ifdef RV_USER_MODE
    logic [1:0] mcounteren; // IR, CY
+`endif
    logic [6:0] mcountinhibit;
    logic wr_mtsel_r, wr_mtdata1_t0_r, wr_mtdata1_t1_r, wr_mtdata1_t2_r, wr_mtdata1_t3_r, wr_mtdata2_t0_r, wr_mtdata2_t1_r, wr_mtdata2_t2_r, wr_mtdata2_t3_r;
    logic [31:0] mtdata2_t0, mtdata2_t1, mtdata2_t2, mtdata2_t3, mtdata2_tsel_out, mtdata1_tsel_out;
@@ -2461,10 +2463,14 @@ else
    // [1]    : reserved, read 0x0
    // [0]    : CYCLE user-mode access disable
 
+`ifdef RV_USER_MODE
+
    localparam MCOUNTEREN                = 12'h306;
 
    assign wr_mcounteren_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MCOUNTEREN);
    rvdffs #(2) mcounteren_ff (.*, .clk(csr_wr_clk), .en(wr_mcounteren_r), .din({dec_csr_wrdata_r[2], dec_csr_wrdata_r[0]}), .dout({mcounteren[1], mcounteren[0]}));
+
+`endif
 
    // MCOUNTINHIBIT(RW)
    // [31:7] : Reserved, read 0x0

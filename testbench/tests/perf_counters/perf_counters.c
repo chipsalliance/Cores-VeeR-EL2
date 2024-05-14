@@ -130,14 +130,18 @@ uint32_t read_and_check (int32_t csr, int should_succeed) {
     // Check
     if (should_succeed) {
         if (last_trap != 0xFFFFFFFF) {
-            printf("[ FAILED ] %s\n", get_csr_name(csr));
+            printf("[ FAILED ] %s access should succeed, but trap encountered\n", get_csr_name(csr));
             global_result = -1;
             return 0;
         }
     }
     else {
         if (last_trap != MCAUSE_ILLEGAL_INSTR) { // Illegal instruction
-            printf("[ FAILED ] %s\n", get_csr_name(csr));
+            if (last_trap == 0xFFFFFFFF) {
+                printf("[ FAILED ] %s access should fail, but no trap encountered\n", get_csr_name(csr));
+            } else {
+                printf("[ FAILED ] %s access should fail, but with different mcause code\n", get_csr_name(csr));
+            }
             global_result = -1;
             return 0;
         }

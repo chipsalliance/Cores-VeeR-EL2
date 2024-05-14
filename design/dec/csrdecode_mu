@@ -291,7 +291,7 @@ csr[ csr_pmpaddr48 ] = { csr_pmpaddr48 }
 
 csr[ csr_cyclel    ] = {  csr_cyclel   }
 csr[ csr_cycleh    ] = {  csr_cycleh   }
-csr[ csr_instretl  ] = {  csr_instretl }
-csr[ csr_instreth  ] = {  csr_instreth }
+csr[ csr_instretl  ] = {  csr_instretl presync }
+csr[ csr_instreth  ] = {  csr_instreth presync }
 
 .end

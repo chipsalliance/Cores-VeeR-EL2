@@ -172,19 +172,23 @@ int main () {
 
         // Report traps
         printf("traps taken: %d\n", trap_count);
-        for (uint32_t i=0; i<trap_count; ++i) {
-            printf(" %d. 0x%08X\n", i, trap_causes[i]);
+        for (unsigned long i=0; i<trap_count; ++i) {
+            printf(" %d. mcause=0x%08X mstatus=0x%08X\n", i, trap_data[i].mcause, trap_data[i].mstatus);
         }
 
         // Check traps. Should be:
-        //  M timer    (0x80000007)
-        //  M soft int (0x80000003)
-        const uint32_t golden_trap_causes[] = {0x80000007, 0x80000003};
-        const uint32_t golden_trap_count    = sizeof(golden_trap_causes) / sizeof(golden_trap_causes[0]);
+        const uint32_t golden_trap_causes[] = {
+            MCAUSE_NMI,         // NMI
+            MCAUSE_NMI,         // NMI
+            MCAUSE_TIMER_M,     // M timer
+            MCAUSE_SOFTINT_M,   // M soft int
+        };
+        const uint32_t golden_trap_count = sizeof(golden_trap_causes) / 
+                                           sizeof(golden_trap_causes[0]);
 
         if (trap_count == golden_trap_count) {
             for (uint32_t i=0; i<trap_count; ++i) {
-                if (trap_causes[i] != golden_trap_causes[i]) {
+                if (trap_data[i].mcause != golden_trap_causes[i]) {
                     return -1;
                 }
             }

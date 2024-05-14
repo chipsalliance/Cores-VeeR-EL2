@@ -97,7 +97,7 @@ _is_irq:
 _nmi:
 
         # Push stuff
-        addi sp, sp, -16*4
+        addi sp, sp, -17*4
 
         sw ra, 0(sp)
         sw a0, 1*4(sp)

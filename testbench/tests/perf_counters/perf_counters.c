@@ -12,6 +12,9 @@
     asm volatile ("csrw %0, %1" : : "i"(csr), "r"(val)); \
 }
 
+#define MISA_U          (1 << 20)
+
+#define CSR_MISA        0x301
 #define CSR_MSTATUS     0x300
 #define CSR_MCAUSE      0x342
 #define CSR_MEPC        0x341
@@ -79,8 +82,14 @@ int32_t trap_handler (uint32_t a0, uint32_t a1) {
 
 void user_main ();
 
-__attribute__((noreturn)) void main () {
+int main () {
     printf("\nHello VeeR\n");
+
+    // The test requires user mode support
+    if ((read_csr(CSR_MISA) & MISA_U) == 0) {
+        printf("ERROR: The test requires user mode support. Aborting.\n");
+        return -1;
+    }
 
     // Write mcounteren.CY and mcounteren.IR to allow access cycle and instret
     // from user mode
@@ -96,7 +105,7 @@ __attribute__((noreturn)) void main () {
     write_csr(CSR_MEPC, (unsigned long)ptr);
     asm volatile ("mret");
 
-    while (1); // Make compiler not complain
+    return 0;
 }
 
 const char* get_csr_name (int32_t csr) {

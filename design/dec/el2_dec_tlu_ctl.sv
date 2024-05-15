@@ -268,7 +268,7 @@ import el2_pkg::*;
    logic wr_mcounteren_r;
    logic wr_mcountinhibit_r;
 `ifdef RV_USER_MODE
-   logic [1:0] mcounteren; // IR, CY
+   logic [5:0] mcounteren; // HPM6, HPM5, HPM4, HPM3, IR, CY
 `endif
    logic [6:0] mcountinhibit;
    logic wr_mtsel_r, wr_mtdata1_t0_r, wr_mtdata1_t1_r, wr_mtdata1_t2_r, wr_mtdata1_t3_r, wr_mtdata2_t0_r, wr_mtdata2_t1_r, wr_mtdata2_t2_r, wr_mtdata2_t3_r;
@@ -558,6 +558,14 @@ localparam DCSR_STEPIE   = 11;
 localparam DCSR_STOPC    = 10;
 localparam DCSR_STEP     = 2;
 
+`ifdef RV_USER_MODE
+localparam MCOUNTEREN_CY   = 0;
+localparam MCOUNTEREN_IR   = 1;
+localparam MCOUNTEREN_HPM3 = 2;
+localparam MCOUNTEREN_HPM4 = 3;
+localparam MCOUNTEREN_HPM5 = 4;
+localparam MCOUNTEREN_HPM6 = 5;
+`endif
 
    assign reset_delayed = reset_detect ^ reset_detected;
 
@@ -972,17 +980,36 @@ end // else: !if(pt.BTB_ENABLE==1)
 
    // CSR access error
    // cycle and instret CSR unprivileged access is controller by bits in mcounteren CSR
-   logic csr_wr_acc_r  = csr_wr_usr_r & (
-                             ((dec_csr_wraddr_r[11:0] == CYCLEL)   & mcounteren[0]) |
-                             ((dec_csr_wraddr_r[11:0] == CYCLEH)   & mcounteren[0]) |
-                             ((dec_csr_wraddr_r[11:0] == INSTRETL) & mcounteren[1]) |
-                             ((dec_csr_wraddr_r[11:0] == INSTRETH) & mcounteren[1]));
+   logic csr_wr_acc_r;
+   logic csr_rd_acc_r;
 
-   logic csr_rd_acc_r  = csr_rd_usr_r & (
-                             ((dec_csr_rdaddr_r[11:0] == CYCLEL)   & mcounteren[0]) |
-                             ((dec_csr_rdaddr_r[11:0] == CYCLEH)   & mcounteren[0]) |
-                             ((dec_csr_rdaddr_r[11:0] == INSTRETL) & mcounteren[1]) |
-                             ((dec_csr_rdaddr_r[11:0] == INSTRETH) & mcounteren[1]));
+   assign csr_wr_acc_r = csr_wr_usr_r & (
+                             ((dec_csr_wraddr_r[11:0] == CYCLEL)   & mcounteren[MCOUNTEREN_CY]) |
+                             ((dec_csr_wraddr_r[11:0] == CYCLEH)   & mcounteren[MCOUNTEREN_CY]) |
+                             ((dec_csr_wraddr_r[11:0] == INSTRETL) & mcounteren[MCOUNTEREN_IR]) |
+                             ((dec_csr_wraddr_r[11:0] == INSTRETH) & mcounteren[MCOUNTEREN_IR]) |
+                             ((dec_csr_wraddr_r[11:0] == HPMC3)    & mcounteren[MCOUNTEREN_HPM3]) |
+                             ((dec_csr_wraddr_r[11:0] == HPMC3H)   & mcounteren[MCOUNTEREN_HPM3]) |
+                             ((dec_csr_wraddr_r[11:0] == HPMC4)    & mcounteren[MCOUNTEREN_HPM4]) |
+                             ((dec_csr_wraddr_r[11:0] == HPMC4H)   & mcounteren[MCOUNTEREN_HPM4]) |
+                             ((dec_csr_wraddr_r[11:0] == HPMC5)    & mcounteren[MCOUNTEREN_HPM5]) |
+                             ((dec_csr_wraddr_r[11:0] == HPMC5H)   & mcounteren[MCOUNTEREN_HPM5]) |
+                             ((dec_csr_wraddr_r[11:0] == HPMC6)    & mcounteren[MCOUNTEREN_HPM6]) |
+                             ((dec_csr_wraddr_r[11:0] == HPMC6H)   & mcounteren[MCOUNTEREN_HPM6]));
+
+   assign csr_rd_acc_r = csr_rd_usr_r & (
+                             ((dec_csr_rdaddr_r[11:0] == CYCLEL)   & mcounteren[MCOUNTEREN_CY]) |
+                             ((dec_csr_rdaddr_r[11:0] == CYCLEH)   & mcounteren[MCOUNTEREN_CY]) |
+                             ((dec_csr_rdaddr_r[11:0] == INSTRETL) & mcounteren[MCOUNTEREN_IR]) |
+                             ((dec_csr_rdaddr_r[11:0] == INSTRETH) & mcounteren[MCOUNTEREN_IR]) |
+                             ((dec_csr_rdaddr_r[11:0] == HPMC3)    & mcounteren[MCOUNTEREN_HPM3]) |
+                             ((dec_csr_rdaddr_r[11:0] == HPMC3H)   & mcounteren[MCOUNTEREN_HPM3]) |
+                             ((dec_csr_rdaddr_r[11:0] == HPMC4)    & mcounteren[MCOUNTEREN_HPM4]) |
+                             ((dec_csr_rdaddr_r[11:0] == HPMC4H)   & mcounteren[MCOUNTEREN_HPM4]) |
+                             ((dec_csr_rdaddr_r[11:0] == HPMC5)    & mcounteren[MCOUNTEREN_HPM5]) |
+                             ((dec_csr_rdaddr_r[11:0] == HPMC5H)   & mcounteren[MCOUNTEREN_HPM5]) |
+                             ((dec_csr_rdaddr_r[11:0] == HPMC6)    & mcounteren[MCOUNTEREN_HPM6]) |
+                             ((dec_csr_rdaddr_r[11:0] == HPMC6H)   & mcounteren[MCOUNTEREN_HPM6]));
 
    assign csr_acc_r = priv_mode & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r & (
                         (dec_tlu_packet_r.pmu_i0_itype == CSRREAD)  & ~csr_rd_acc_r |
@@ -2344,6 +2371,10 @@ else
    // [63:32][31:0] : Hardware Performance Monitor Counter 3
    localparam MHPMC3        = 12'hB03;
    localparam MHPMC3H       = 12'hB83;
+`ifdef RV_USER_MODE
+   localparam HPMC3         = 12'hC03;
+   localparam HPMC3H        = 12'hC83;
+`endif
 
    assign mhpmc3_wr_en0 = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MHPMC3);
    assign mhpmc3_wr_en1 = (~perfcnt_halted | perfcnt_during_sleep[0]) & (|(mhpmc_inc_r[0]));
@@ -2362,6 +2393,10 @@ else
    // [63:32][31:0] : Hardware Performance Monitor Counter 4
    localparam MHPMC4        = 12'hB04;
    localparam MHPMC4H       = 12'hB84;
+`ifdef RV_USER_MODE
+   localparam HPMC4         = 12'hC04;
+   localparam HPMC4H        = 12'hC84;
+`endif
 
    assign mhpmc4_wr_en0 = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MHPMC4);
    assign mhpmc4_wr_en1 = (~perfcnt_halted | perfcnt_during_sleep[1]) & (|(mhpmc_inc_r[1]));
@@ -2380,6 +2415,10 @@ else
    // [63:32][31:0] : Hardware Performance Monitor Counter 5
    localparam MHPMC5        = 12'hB05;
    localparam MHPMC5H       = 12'hB85;
+`ifdef RV_USER_MODE
+   localparam HPMC5         = 12'hC05;
+   localparam HPMC5H        = 12'hC85;
+`endif
 
    assign mhpmc5_wr_en0 = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MHPMC5);
    assign mhpmc5_wr_en1 = (~perfcnt_halted | perfcnt_during_sleep[2]) & (|(mhpmc_inc_r[2]));
@@ -2398,6 +2437,10 @@ else
    // [63:32][31:0] : Hardware Performance Monitor Counter 6
    localparam MHPMC6        = 12'hB06;
    localparam MHPMC6H       = 12'hB86;
+`ifdef RV_USER_MODE
+   localparam HPMC6         = 12'hC06;
+   localparam HPMC6H        = 12'hC86;
+`endif
 
    assign mhpmc6_wr_en0 = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MHPMC6);
    assign mhpmc6_wr_en1 = (~perfcnt_halted | perfcnt_during_sleep[3]) & (|(mhpmc_inc_r[3]));
@@ -2468,7 +2511,7 @@ else
    localparam MCOUNTEREN                = 12'h306;
 
    assign wr_mcounteren_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MCOUNTEREN);
-   rvdffs #(2) mcounteren_ff (.*, .clk(csr_wr_clk), .en(wr_mcounteren_r), .din({dec_csr_wrdata_r[2], dec_csr_wrdata_r[0]}), .dout({mcounteren[1], mcounteren[0]}));
+   rvdffs #(6) mcounteren_ff (.*, .clk(csr_wr_clk), .en(wr_mcounteren_r), .din({dec_csr_wrdata_r[6:2], dec_csr_wrdata_r[0]}), .dout(mcounteren));
 
 `endif
 
@@ -2603,11 +2646,19 @@ assign dec_csr_rddata_d[31:0] = (
 `ifdef RV_USER_MODE
                                   ({32{csr_menvcfg}}   & 32'd0) |
                                   ({32{csr_menvcfgh}}  & 32'd0) |
-                                  ({32{csr_mcounteren}}    & {29'b0, mcounteren[1], 1'b0, mcounteren[0]}) |
+                                  ({32{csr_mcounteren}}    & {25'b0, mcounteren[5:1], 1'b0, mcounteren[0]}) |
                                   ({32{csr_cyclel}}    & mcyclel[31:0]) |
                                   ({32{csr_cycleh}}    & mcycleh_inc[31:0]) |
                                   ({32{csr_instretl}}  & minstretl_read[31:0]) |
                                   ({32{csr_instreth}}  & minstreth_read[31:0]) |
+                                  ({32{csr_hpmc3}}     & mhpmc3[31:0]) |
+                                  ({32{csr_hpmc4}}     & mhpmc4[31:0]) |
+                                  ({32{csr_hpmc5}}     & mhpmc5[31:0]) |
+                                  ({32{csr_hpmc6}}     & mhpmc6[31:0]) |
+                                  ({32{csr_hpmc3h}}    & mhpmc3h[31:0]) |
+                                  ({32{csr_hpmc4h}}    & mhpmc4h[31:0]) |
+                                  ({32{csr_hpmc5h}}    & mhpmc5h[31:0]) |
+                                  ({32{csr_hpmc6h}}    & mhpmc6h[31:0]) |
 `endif
                                   ({32{csr_mcountinhibit}} & {25'b0, mcountinhibit[6:0]}) |
                                   ({32{csr_mpmc}}      & {30'b0, mpmc[1], 1'b0}) |

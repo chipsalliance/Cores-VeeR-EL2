@@ -87,6 +87,14 @@ csr_cyclel =        [110000000000]
 csr_cycleh =        [110010000000]
 csr_instretl =      [110000000010]
 csr_instreth =      [110010000010]
+csr_hpmc3 =         [110000000011]
+csr_hpmc4 =         [110000000100]
+csr_hpmc5 =         [110000000101]
+csr_hpmc6 =         [110000000110]
+csr_hpmc3h =        [110010000011]
+csr_hpmc4h =        [110010000100]
+csr_hpmc5h =        [110010000101]
+csr_hpmc6h =        [110010000110]
 
 .input
 
@@ -195,6 +203,14 @@ csr_dicago
      csr_cycleh
      csr_instretl
      csr_instreth
+     csr_hpmc3
+     csr_hpmc4
+     csr_hpmc5
+     csr_hpmc6
+     csr_hpmc3h
+     csr_hpmc4h
+     csr_hpmc5h
+     csr_hpmc6h
      valid_only
      presync
      postsync
@@ -293,5 +309,13 @@ csr[ csr_cyclel    ] = {  csr_cyclel   }
 csr[ csr_cycleh    ] = {  csr_cycleh   }
 csr[ csr_instretl  ] = {  csr_instretl presync }
 csr[ csr_instreth  ] = {  csr_instreth presync }
+csr[ csr_hpmc3     ] = {  csr_hpmc3    presync }
+csr[ csr_hpmc4     ] = {  csr_hpmc4    presync }
+csr[ csr_hpmc5     ] = {  csr_hpmc5    presync }
+csr[ csr_hpmc6     ] = {  csr_hpmc6    presync }
+csr[ csr_hpmc3h    ] = {  csr_hpmc3h   presync }
+csr[ csr_hpmc4h    ] = {  csr_hpmc4h   presync }
+csr[ csr_hpmc5h    ] = {  csr_hpmc5h   presync }
+csr[ csr_hpmc6h    ] = {  csr_hpmc6h   presync }
 
 .end

@@ -2,9 +2,15 @@
 #include <stdint.h>
 #include <string.h>
 
+// Clear the destination reg before reading so that when the read fails the
+// returned value is 0
 #define read_csr(csr) ({ \
     unsigned long res; \
-    asm volatile ("csrr %0, %1" : "=r"(res) : "i"(csr)); \
+    asm volatile ( \
+        "li %0, 0\n" \
+        "csrr %0, %1" \
+        : "=r"(res) : "i"(csr) \
+    ); \
     res; \
 })
 
@@ -25,6 +31,20 @@
 #define CSR_INSTRET     0xC02
 #define CSR_INSTRETH    0xC82
 
+#define CSR_HPMCOUNTER3         0xC03
+#define CSR_HPMCOUNTER3H        0xC83
+#define CSR_HPMCOUNTER4         0xC04
+#define CSR_HPMCOUNTER4H        0xC84
+#define CSR_HPMCOUNTER5         0xC05
+#define CSR_HPMCOUNTER5H        0xC85
+#define CSR_HPMCOUNTER6         0xC06
+#define CSR_HPMCOUNTER6H        0xC86
+
+#define CSR_MHPMEVENT3          0x323
+#define CSR_MHPMEVENT4          0x324
+#define CSR_MHPMEVENT5          0x325
+#define CSR_MHPMEVENT6          0x326
+
 #define ECALL_GET_MCOUNTEREN    0x10
 #define ECALL_SET_MCOUNTEREN    0x20
 
@@ -37,6 +57,11 @@
 
 #define MCOUNTEREN_CY           (1 << 0)
 #define MCOUNTEREN_IR           (1 << 2)
+#define MCOUNTEREN_HPM3         (1 << 3)
+#define MCOUNTEREN_HPM4         (1 << 4)
+#define MCOUNTEREN_HPM5         (1 << 5)
+#define MCOUNTEREN_HPM6         (1 << 6)
+#define MCOUNTEREN_ALL          0x7D
 
 #define TEST_RESULT_SUCCESS     0xFF
 #define TEST_RESULT_FAILURE     1
@@ -91,9 +116,15 @@ int main () {
         return -1;
     }
 
-    // Write mcounteren.CY and mcounteren.IR to allow access cycle and instret
-    // from user mode
-    write_csr(CSR_MCOUNTEREN, MCOUNTEREN_IR | MCOUNTEREN_CY);
+    // Setup VeeR performance counter events. See VeeR EL2 manual table 7-1
+    // for the complete event list and their codes.
+    write_csr(CSR_MHPMEVENT3, 5);   // instr committed - 16b
+    write_csr(CSR_MHPMEVENT4, 6);   // instr committed - 32b
+    write_csr(CSR_MHPMEVENT5, 24);  // loads commited
+    write_csr(CSR_MHPMEVENT6, 25);  // stores commited
+
+    // Write mcounteren to allow counter access from user_mode
+    write_csr(CSR_MCOUNTEREN, MCOUNTEREN_ALL);
 
     // Go to user mode
     uint32_t mstatus = read_csr(CSR_MSTATUS);
@@ -112,10 +143,18 @@ const char* get_csr_name (int32_t csr) {
 
     switch (csr)
     {
-    case CSR_CYCLE:     return "cycle";
-    case CSR_CYCLEH:    return "cycleh";
-    case CSR_INSTRET:   return "instret";
-    case CSR_INSTRETH:  return "instreth";
+    case CSR_CYCLE:         return "cycle";
+    case CSR_CYCLEH:        return "cycleh";
+    case CSR_INSTRET:       return "instret";
+    case CSR_INSTRETH:      return "instreth";
+    case CSR_HPMCOUNTER3:   return "hpmcounter3";
+    case CSR_HPMCOUNTER3H:  return "hpmcounter3h";
+    case CSR_HPMCOUNTER4:   return "hpmcounter4";
+    case CSR_HPMCOUNTER4H:  return "hpmcounter4h";
+    case CSR_HPMCOUNTER5:   return "hpmcounter5";
+    case CSR_HPMCOUNTER5H:  return "hpmcounter5h";
+    case CSR_HPMCOUNTER6:   return "hpmcounter6";
+    case CSR_HPMCOUNTER6H:  return "hpmcounter6h";
     }
 
     return "";
@@ -130,10 +169,18 @@ uint32_t read_and_check (int32_t csr, int should_succeed) {
     uint32_t val = 0;
     switch (csr)
     {
-    case CSR_CYCLE:     val = read_csr(CSR_CYCLE);      break;
-    case CSR_CYCLEH:    val = read_csr(CSR_CYCLEH);     break;
-    case CSR_INSTRET:   val = read_csr(CSR_INSTRET);    break;
-    case CSR_INSTRETH:  val = read_csr(CSR_INSTRETH);   break;
+    case CSR_CYCLE:         val = read_csr(CSR_CYCLE);        break;
+    case CSR_CYCLEH:        val = read_csr(CSR_CYCLEH);       break;
+    case CSR_INSTRET:       val = read_csr(CSR_INSTRET);      break;
+    case CSR_INSTRETH:      val = read_csr(CSR_INSTRETH);     break;
+    case CSR_HPMCOUNTER3:   val = read_csr(CSR_HPMCOUNTER3);  break;
+    case CSR_HPMCOUNTER3H:  val = read_csr(CSR_HPMCOUNTER3H); break;
+    case CSR_HPMCOUNTER4:   val = read_csr(CSR_HPMCOUNTER4);  break;
+    case CSR_HPMCOUNTER4H:  val = read_csr(CSR_HPMCOUNTER4H); break;
+    case CSR_HPMCOUNTER5:   val = read_csr(CSR_HPMCOUNTER5);  break;
+    case CSR_HPMCOUNTER5H:  val = read_csr(CSR_HPMCOUNTER5H); break;
+    case CSR_HPMCOUNTER6:   val = read_csr(CSR_HPMCOUNTER6);  break;
+    case CSR_HPMCOUNTER6H:  val = read_csr(CSR_HPMCOUNTER6H); break;
     }
 
     // Check
@@ -160,70 +207,105 @@ uint32_t read_and_check (int32_t csr, int should_succeed) {
     return val;
 }
 
-void check_counters (uint64_t cur_cycle, uint64_t cur_instret) {
+uint64_t read_and_check64(int32_t csr_base, int should_succeed) {
+    uint32_t hi = read_and_check(csr_base | 0x80, should_succeed);
+    uint32_t lo = read_and_check(csr_base,        should_succeed);
+    return (((uint64_t)hi) << 32) | lo;
+}
 
-    static uint64_t prv_cycle   = 0;
-    static uint64_t prv_instret = 0;
+void check_counters (const uint64_t* cur_counters) {
+
+    const char* counter_names[6] = {
+        "cycle  ",
+        "instret",
+        "hpm3   ",
+        "hpm4   ",
+        "hpm5   ",
+        "hpm6   "
+    };
+
+    static uint64_t prv_counters [6] = {0};
 
     // Compute and print diffs
-    printf("cycle:   cur %lld, prv %lld, diff %lld\n", cur_cycle,   prv_cycle,   cur_cycle   - prv_cycle);
-    printf("instret: cur %lld, prv %lld, diff %lld\n", cur_instret, prv_instret, cur_instret - prv_instret);
+    int counters_ok = 1;
+    for (int i=0; i<6; ++i) {
+
+        int64_t diff = cur_counters[i] - prv_counters[i];
+        if (diff < 0) counters_ok = 0;
+
+        printf("%s: cur %lld, prv %lld, diff %lld\n",
+            counter_names[i], cur_counters[i], prv_counters[i], diff);
+    }
 
     // Check diffs, counters should always increase monotonically
-    if (cur_cycle > prv_cycle && cur_instret > prv_instret) {
+    if (counters_ok) {
         printf("[   OK   ] counters ok\n");
     } else {
-        printf("[ FAILED ] counters do not increase!\n");
+        printf("[ FAILED ] counter(s) do not increase!\n");
         global_result = -1;
     }
 
-    // Store previous value
-    prv_cycle   = cur_cycle;
-    prv_instret = cur_instret;
+    // Store previous values
+    memcpy(prv_counters, cur_counters, sizeof(uint64_t) * 6);
 }
 
 __attribute__((noreturn)) void user_main () {
     printf("\nHello from user_main()\n");
 
-    uint32_t cycle_l;
-    uint32_t cycle_h;
-    uint32_t instret_l;
-    uint32_t instret_h;
+    uint32_t cnt_l;
+    uint32_t cnt_h;
+    uint64_t counters[6];
 
-    uint64_t cycle;
-    uint64_t instret;
+    const int32_t base_csrs [] = {
+        CSR_CYCLE,
+        CSR_INSTRET,
+        CSR_HPMCOUNTER3,
+        CSR_HPMCOUNTER4,
+        CSR_HPMCOUNTER5,
+        CSR_HPMCOUNTER6
+    };
+
+    const uint32_t access_cases [] = {
+        0,
+        MCOUNTEREN_CY,
+        MCOUNTEREN_IR,
+        MCOUNTEREN_HPM3,
+        MCOUNTEREN_HPM4,
+        MCOUNTEREN_HPM5,
+        MCOUNTEREN_HPM6
+    };
 
     // User-mode perf counters should be accessible. Read them and check if
     // they operate correctly
-    printf("Testing counters operation...\n");
     for (int i=0; i<2; ++i) {
-        cycle_h   = read_and_check(CSR_CYCLEH,   1);
-        cycle_l   = read_and_check(CSR_CYCLE,    1);
-        instret_h = read_and_check(CSR_INSTRETH, 1);
-        instret_l = read_and_check(CSR_INSTRET,  1);
+        printf("Testing counters operation (round %d)...\n", i + 1);
 
-        cycle   = (((uint64_t)cycle_h)   << 32) | cycle_l;
-        instret = (((uint64_t)instret_h) << 32) | instret_l;
-        check_counters(cycle, instret);
+        for (int j=0; j<6; ++j) {
+            counters[j] = read_and_check64(base_csrs[j], 1);
+        }
+        check_counters(counters);
+
+        printf("\n");
     }
 
-    // For all combinations of mcounteren CY and IR set their value and check
-    // if counter accesses are allowed / denied accordingly.
+    // Check if individual bits of mcounteren control CSR access correctly
     printf("Testing counters access...\n");
-    for (int i=0; i<4; ++i) {
-        int cy = (i & 1) != 0;
-        int ir = (i & 2) != 0;
+    for (int i=0; i < sizeof(access_cases) / sizeof(access_cases[0]); ++i) {
 
         // Set access rights. Do that by calling ECALL handler which does the
         // actual job since the CSR is not writable from user mode.
-        printf("setting CY=%d, IR=%d in mcounteren\n", cy, ir);
-        do_ecall(ECALL_SET_MCOUNTEREN, ir * MCOUNTEREN_IR | cy * MCOUNTEREN_CY);
+        uint32_t access = access_cases[i];
+        do_ecall(ECALL_SET_MCOUNTEREN, access);
 
         // Test access, ignore values
-        cycle_h   = read_and_check(CSR_CYCLEH,   cy);
-        cycle_l   = read_and_check(CSR_CYCLE,    cy);
-        instret_h = read_and_check(CSR_INSTRETH, ir);
-        instret_l = read_and_check(CSR_INSTRET,  ir);
+        read_and_check64(CSR_CYCLE,       (access & MCOUNTEREN_CY)   != 0);
+        read_and_check64(CSR_INSTRET,     (access & MCOUNTEREN_IR)   != 0);
+        read_and_check64(CSR_HPMCOUNTER3, (access & MCOUNTEREN_HPM3) != 0);
+        read_and_check64(CSR_HPMCOUNTER4, (access & MCOUNTEREN_HPM4) != 0);
+        read_and_check64(CSR_HPMCOUNTER5, (access & MCOUNTEREN_HPM5) != 0);
+        read_and_check64(CSR_HPMCOUNTER6, (access & MCOUNTEREN_HPM6) != 0);
+
+        printf("\n");
     }
 
     // Terminate the simulation

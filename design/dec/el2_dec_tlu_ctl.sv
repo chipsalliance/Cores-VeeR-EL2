@@ -1260,8 +1260,8 @@ end
 
    assign mstatus_ns[1:0] = ( ({2{~wr_mstatus_r & exc_or_int_valid_r}} & {mstatus[MSTATUS_MIE], 1'b0}) |
                               ({2{ wr_mstatus_r & exc_or_int_valid_r}} & {dec_csr_wrdata_r[3], 1'b0}) |
-                              ({2{mret_r & ~exc_or_int_valid_r}} & {1'b1, mstatus[1]}) |
-                              ({2{set_mie_pmu_fw_halt}} & {mstatus[1], 1'b1}) |
+                              ({2{mret_r & ~exc_or_int_valid_r}} & {1'b1, mstatus[MSTATUS_MPIE]}) |
+                              ({2{set_mie_pmu_fw_halt}} & {mstatus[MSTATUS_MPIE], 1'b1}) |
                               ({2{wr_mstatus_r & ~exc_or_int_valid_r}} & {dec_csr_wrdata_r[7], dec_csr_wrdata_r[3]}) |
                               ({2{~wr_mstatus_r & ~exc_or_int_valid_r & ~mret_r & ~set_mie_pmu_fw_halt}} & mstatus[1:0]) );
 
@@ -2551,7 +2551,7 @@ assign dec_csr_rddata_d[31:0] = (
 `ifdef RV_USER_MODE
                                   ({32{csr_mstatus}}   & {14'b0, mstatus[MSTATUS_MPRV], 4'b0, ~mstatus[MSTATUS_MPP], ~mstatus[MSTATUS_MPP], 3'b0, mstatus[MSTATUS_MPIE], 3'b0, mstatus[MSTATUS_MIE], 3'b0}) |
 `else
-                                  ({32{csr_mstatus}}   & {19'b0, 2'b11, 3'b0, mstatus[1], 3'b0, mstatus[0], 3'b0}) |
+                                  ({32{csr_mstatus}}   & {19'b0, 2'b11, 3'b0, mstatus[MSTATUS_MPIE], 3'b0, mstatus[MSTATUS_MIE], 3'b0}) |
 `endif
                                   ({32{csr_mtvec}}     & {mtvec[30:1], 1'b0, mtvec[0]}) |
                                   ({32{csr_mip}}       & {1'b0, mip[5:3], 16'b0, mip[2], 3'b0, mip[1], 3'b0, mip[0], 3'b0}) |

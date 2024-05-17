@@ -27,8 +27,10 @@ module el2_pmp
     input logic rst_l,     // Reset
     input logic scan_mode, // Scan mode
 
+`ifdef RV_USER_MODE
     input logic priv_mode,      // operating privilege mode
     input logic priv_mode_eff,  // operating effective privilege mode
+`endif
 
     input el2_pmp_cfg_pkt_t        pmp_pmpcfg [pt.PMP_ENTRIES],
     input logic             [31:0] pmp_pmpaddr[pt.PMP_ENTRIES],
@@ -50,7 +52,9 @@ module el2_pmp
   logic [    PMP_CHANNELS-1:0][pt.PMP_ENTRIES-1:0] region_basic_perm_check;
   logic [    PMP_CHANNELS-1:0][pt.PMP_ENTRIES-1:0] region_perm_check;
 
+`ifdef RV_USER_MODE
   logic any_region_enabled;
+`endif
 
   ///////////////////////
   // Functions for PMP //
@@ -90,7 +94,12 @@ module el2_pmp
 
     // When in user mode and at leas one PMP region is enabled deny access by
     // default.
+`ifdef RV_USER_MODE
     logic access_fail = any_region_enabled & priv_mode;
+`else
+    logic access_fail = 1'b0;
+`endif
+
     logic matched = 1'b0;
 
     // PMP entries are statically prioritized, from 0 to N-1
@@ -108,11 +117,13 @@ module el2_pmp
   // Access checking
   // ---------------
 
+`ifdef RV_USER_MODE
   logic [pt.PMP_ENTRIES-1:0] region_enabled;
   for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : g_reg_ena
     assign region_enabled[r] = pmp_pmpcfg[r].mode != OFF;
   end
   assign any_region_enabled = |region_enabled;
+`endif
 
   for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : g_addr_exp
     assign csr_pmp_addr_i[r] = {
@@ -147,12 +158,14 @@ module el2_pmp
     end
   end
 
+`ifdef RV_USER_MODE
   logic [PMP_CHANNELS-1:0] pmp_priv_mode_eff;
   for (genvar c = 0; c < PMP_CHANNELS; c++) begin : g_priv_mode_eff
     assign pmp_priv_mode_eff[c] = (
       ((pmp_chan_type[c] == EXEC) & priv_mode) |
       ((pmp_chan_type[c] != EXEC) & priv_mode_eff)); // RW affected by mstatus.MPRV
   end
+`endif
 
   for (genvar c = 0; c < PMP_CHANNELS; c++) begin : g_access_check
     assign pmp_req_addr_i[c] = {2'b00, pmp_chan_addr[c]};  // addr. widening: 32-bit -> 34-bit
@@ -190,7 +203,13 @@ module el2_pmp
       // Check specific required permissions since the behaviour is different
       // between Smepmp implementation and original PMP.
       assign region_perm_check[c][r] = perm_check_wrapper(
-          pmp_pmpcfg[r], pmp_priv_mode_eff[c], region_basic_perm_check[c][r]
+          pmp_pmpcfg[r],
+`ifdef RV_USER_MODE
+          pmp_priv_mode_eff[c],
+`else
+          1'b0,
+`endif
+          region_basic_perm_check[c][r]
       );
 
       // Address bits below PMP granularity (which starts at 4 byte) are deliberately unused.
@@ -202,8 +221,13 @@ module el2_pmp
     // Once the permission checks of the regions are done, decide if the access is
     // denied by figuring out the matching region and its permission check.
     assign pmp_chan_err[c] = access_fault_check(region_match_all[c],
+`ifdef RV_USER_MODE
                                                 any_region_enabled,
                                                 priv_mode,
+`else
+                                                1'b0,
+                                                1'b0,
+`endif
                                                 region_perm_check[c]);
   end
 

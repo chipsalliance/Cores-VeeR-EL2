@@ -29,6 +29,8 @@
 #define CSR_MISA    0x301
 #define CSR_MEPC    0x341
 
+#define MISA_U      (1 << 20)
+
 extern uint32_t _text;
 extern uint32_t _text_end;
 extern uint32_t _data;
@@ -84,12 +86,12 @@ const uint32_t test_pattern_b [] = {
 
 volatile unsigned long did_execute = 0;
 
-void test_hello () {
+void __attribute__((noinline)) test_hello () {
     did_execute = 1;
     printf("  hello\n");
 }
 
-int test_read (const uint32_t* pattern) {
+int __attribute__((noinline)) test_read (const uint32_t* pattern) {
     did_execute = 1;
     printf("  reading from .area...\n");
 
@@ -109,7 +111,7 @@ int test_read (const uint32_t* pattern) {
     return 0;
 }
 
-void test_write (const uint32_t* pattern) {
+void __attribute__((noinline)) test_write (const uint32_t* pattern) {
     did_execute = 1;
     printf("  writing to .area...\n");
 
@@ -118,7 +120,7 @@ void test_write (const uint32_t* pattern) {
     }
 }
 
-void __attribute__((section(".area.code"))) test_exec () {
+void __attribute__((noinline, section(".area.code"))) test_exec () {
     printf("  hello from .area\n");
 }
 
@@ -161,6 +163,11 @@ int trap_handler (const struct fault* fault) {
 int main () {
     printf("Hello VeeR (M mode)\n");
 
+    // Check if we have user mode support
+    uint32_t misa = 0;
+    CSRR_READ(misa, CSR_MISA);
+    int have_user_mode = (misa & MISA_U) != 0;
+
 #if HAVE_SMEPMP
     // Set MSECCFG
     uint32_t mseccfg = 0;
@@ -188,115 +195,175 @@ int main () {
     int tid = 0;
     int failed = 0;
 
+    pmp_clear();
+
     // .......................................................................
     // Check if user mode has access to everything by default when PMP is not
     // configured. Just call a simple function.
-    printf("%02d - User mode RWX in default state\n", tid++);
+    if (have_user_mode) {
+        printf("%02d - User mode RWX in default state\n", tid++);
 
-    pmp_clear();
-
-    printf(" testing...\n");
+        printf(" testing...\n");
 #if HAVE_SMEPMP
-    TRY {
-        ucall(test_hello);
-        printf(" fail\n");
-        failed++;
-    }
-    CATCH {
-        printf(" pass\n");
-    }
-    END_TRY;
+        TRY {
+            ucall(test_hello);
+            printf(" fail\n");
+            failed++;
+        }
+        CATCH {
+            printf(" pass\n");
+        }
+        END_TRY;
 #else
-    TRY {
-        ucall(test_hello);
-        printf(" pass\n");
-    }
-    CATCH {
-        printf(" fail\n");
-        failed++;
-    }
-    END_TRY;
+        TRY {
+            ucall(test_hello);
+            printf(" pass\n");
+        }
+        CATCH {
+            printf(" fail\n");
+            failed++;
+        }
+        END_TRY;
 #endif
+    }
 
     // .......................................................................
     // Configure a single region in PMP and call user mode function. It shoud
     // not have access to code and stack hence it should not execute
-    printf("%02d - User mode RWX with one (any) PMP region enabled\n", tid++);
+    if (have_user_mode) {
+        printf("%02d - User mode RWX with one (any) PMP region enabled\n", tid++);
 
-    // Allow area1 user access
-    entry.addr = ADDR2PMP(&_area);
-    entry.addr = (entry.addr & 0xFFFFFC00) | 0x000001FF; // NAPOT, 2^12
-    entry.cfg  = PMP_NAPOT | PMP_R | PMP_W | PMP_X;
-    pmp_entry_write(5, &entry);
+        // Allow area1 user access
+        entry.addr = ADDR2PMP(&_area);
+        entry.addr = (entry.addr & 0xFFFFFC00) | 0x000001FF; // NAPOT, 2^12
+        entry.cfg  = PMP_NAPOT | PMP_R | PMP_W | PMP_X;
+        pmp_entry_write(5, &entry);
 
-    printf(" testing...\n");
-    TRY {
-        ucall(test_hello);
-        printf(" fail\n");
-        failed++;
+        printf(" testing...\n");
+        TRY {
+            ucall(test_hello);
+            printf(" fail\n");
+            failed++;
+        }
+        CATCH {
+            printf(" pass\n");
+        }
+        END_TRY;
     }
-    CATCH {
-        printf(" pass\n");
-    }
-    END_TRY;
 
     // .......................................................................
     // Configure PMP to allow user mode access to code and stack
-    printf("%02d - User mode RWX with code, data and stack access allowed\n", tid++);
+    if (have_user_mode) {
+        printf("%02d - User mode RWX with code, data and stack access allowed\n", tid++);
 
-    // Allow user access to "tohost" and "fromhost"
-    entry.addr = ADDR2PMP(&tohost);
-    entry.addr = (entry.addr & 0xFFFFFFFC) | 1; // NAPOT 2^4
-    entry.cfg  = PMP_NAPOT | PMP_R | PMP_W;
-    pmp_entry_write(0, &entry);
+        // Allow user access to "tohost" and "fromhost"
+        entry.addr = ADDR2PMP(&tohost);
+        entry.addr = (entry.addr & 0xFFFFFFFC) | 1; // NAPOT 2^4
+        entry.cfg  = PMP_NAPOT | PMP_R | PMP_W;
+        pmp_entry_write(0, &entry);
 
-    // Allow user access to code
-    entry.addr = ADDR2PMP(&_text);
-    entry.cfg  = 0;
-    pmp_entry_write(1, &entry);
-    entry.addr = ADDR2PMP(&_text_end) + 1; // upper bound is not inclusive
-    entry.cfg  = PMP_TOR | PMP_R | PMP_X;
-    pmp_entry_write(2, &entry);
+        // Allow user access to code
+        entry.addr = ADDR2PMP(&_text);
+        entry.cfg  = 0;
+        pmp_entry_write(1, &entry);
+        entry.addr = ADDR2PMP(&_text_end) + 1; // upper bound is not inclusive
+        entry.cfg  = PMP_TOR | PMP_R | PMP_X;
+        pmp_entry_write(2, &entry);
 
-    // Allow user access to data
-    entry.addr = ADDR2PMP(&_data);
-    entry.addr = (entry.addr & 0xFFFFFC00) | 0x000001FF; // NAPOT, 2^12
-    entry.cfg  = PMP_NAPOT | PMP_R | PMP_W;
-    pmp_entry_write(3, &entry);
-    entry.addr = ADDR2PMP(&_data);
+        // Allow user access to data
+        entry.addr = ADDR2PMP(&_data);
+        entry.addr = (entry.addr & 0xFFFFFC00) | 0x000001FF; // NAPOT, 2^12
+        entry.cfg  = PMP_NAPOT | PMP_R | PMP_W;
+        pmp_entry_write(3, &entry);
+        entry.addr = ADDR2PMP(&_data);
 
-    // Allow user access to stack
-    entry.addr = ADDR2PMP(&_stack_lo);
-    entry.addr = (entry.addr & 0xFFFFF800) | 0x000003FF; // NAPOT, 2^13
-    entry.cfg  = PMP_NAPOT | PMP_R | PMP_W;
-    pmp_entry_write(4, &entry);
+        // Allow user access to stack
+        entry.addr = ADDR2PMP(&_stack_lo);
+        entry.addr = (entry.addr & 0xFFFFF800) | 0x000003FF; // NAPOT, 2^13
+        entry.cfg  = PMP_NAPOT | PMP_R | PMP_W;
+        pmp_entry_write(4, &entry);
 
-    printf(" testing...\n");
-    TRY {
-        ucall(test_hello);
-        printf(" pass\n");
+        printf(" testing...\n");
+        TRY {
+            ucall(test_hello);
+            printf(" pass\n");
+        }
+        CATCH {
+            printf(" fail\n");
+            failed++;
+        }
+        END_TRY;
     }
-    CATCH {
-        printf(" fail\n");
-        failed++;
-    }
-    END_TRY;
 
     // .......................................................................
-    // 
+    // Test PMP operation for all possible RWX combinations in U and M mode.
 
-    for (size_t i=0; i<24; ++i) {
+    // Generate test cases. A test case is encoded on a byte:
+    // bit 0: R
+    // bit 1: W
+    // bit 2: X
+    // bit 4: 0-user, 1-machine
+    // bit 5: mstatus.MPRV
+    uint8_t  test_cases [32];
+    uint32_t test_count = 0;
+
+    // Test cases for all RWX combinations in user mode
+    if (have_user_mode) {
+        for (size_t i=0; i<8; ++i) {
+            uint32_t r = (i & 1) ? PMP_R : 0;
+            uint32_t w = (i & 2) ? PMP_W : 0;
+            uint32_t x = (i & 4) ? PMP_X : 0;
+
+#if HAVE_SMEPMP
+            // Skip -W- and -WX combinations
+            if (!r &&  w && !x) continue;
+            if (!r &&  w &&  x) continue;
+#endif
+            test_cases[test_count++] = i;
+        }
+    }
+
+    // Test cases for all RWX combinations in machine mode
+    for (size_t i=0; i<8; ++i) {
         uint32_t r = (i & 1) ? PMP_R : 0;
         uint32_t w = (i & 2) ? PMP_W : 0;
         uint32_t x = (i & 4) ? PMP_X : 0;
-        uint32_t m = (i >= 8);
-        uint32_t mprv = (i >= 16);
 
 #if HAVE_SMEPMP
         // Skip -W- and -WX combinations
         if (!r &&  w && !x) continue;
         if (!r &&  w &&  x) continue;
 #endif
+        test_cases[test_count++] = 0x10 | i;
+    }
+
+    // Test cases for all RWX combinations in machine mode with MPRV set
+    if (have_user_mode) {
+        for (size_t i=0; i<8; ++i) {
+            uint32_t r = (i & 1) ? PMP_R : 0;
+            uint32_t w = (i & 2) ? PMP_W : 0;
+            uint32_t x = (i & 4) ? PMP_X : 0;
+
+#if HAVE_SMEPMP
+            // Skip -W- and -WX combinations
+            if (!r &&  w && !x) continue;
+            if (!r &&  w &&  x) continue;
+#endif
+            test_cases[test_count++] = 0x30 | i;
+        }
+    }
+
+    // ................................
+    // Do the tests
+
+    for (size_t i=0; i<test_count; ++i) {
+        uint32_t bits = test_cases[i];
+
+        uint32_t r = (bits & 1) ? PMP_R : 0;
+        uint32_t w = (bits & 2) ? PMP_W : 0;
+        uint32_t x = (bits & 4) ? PMP_X : 0;
+        uint32_t m = (bits & 16) != 0;
+        uint32_t mprv = (bits & 32) != 0;
 
         // Effective mode
         uint32_t r_eff = (m && !mprv) ? 1 : r;
@@ -311,7 +378,6 @@ int main () {
         };
 
         const char* mstr = m ? "Machine" : "User";
-
         printf("%02d - %s mode (mstatus.MPRV=%d) %s from designated areas\n", tid++, mstr, mprv, pstr);
 
         // Prepare data
@@ -403,6 +469,84 @@ int main () {
         // Count fails
         failed += any_fail;
     }
+
+    // .......................................................................
+    // Test PMP region lock feature.
+
+    // Since unlocking a region requires core reset this test does only X
+    // permission check. Testing different possibilities would require either
+    // a set of tests of a form of persistent storage in the testbench / SoC
+    // RTL.
+
+    printf("%02d - Testing execution from a locked region in U and M mode\n", tid++);
+
+    // Prevent both U and M modes form executing from .area1
+    entry.addr = ADDR2PMP(&_area);
+    entry.addr = (entry.addr & 0xFFFFFC00) | 0x000001FF; // NAPOT, 2^12
+    entry.cfg  = PMP_NAPOT | PMP_R | PMP_W | PMP_LOCK;
+    pmp_entry_write(5, &entry);
+
+    // Execute from U
+    if (have_user_mode) {
+        printf(" testing from U mode...\n");
+        TRY {
+            ucall(test_exec);
+            printf(" fail\n");
+            failed++;
+        }
+        CATCH {
+            printf(" pass\n");
+        }
+        END_TRY;
+    }
+
+    // Execute from M
+    printf(" testing from M mode...\n");
+    TRY {
+        test_exec();
+        printf(" fail\n");
+        failed++;
+    }
+    CATCH {
+        printf(" pass\n");
+    }
+    END_TRY;
+
+    // Check if the region can be un-locked
+    printf(" attempting to unlock region...\n");
+
+    entry.addr = ADDR2PMP(&_area);
+    entry.addr = (entry.addr & 0xFFFFFC00) | 0x000001FF; // NAPOT, 2^12
+    entry.cfg  = PMP_NAPOT | PMP_R | PMP_W | PMP_X;
+    pmp_entry_write(5, &entry);
+
+    // Execute from U
+    if (have_user_mode) {
+        printf(" testing from U mode...\n");
+        TRY {
+            ucall(test_exec);
+            printf(" fail\n");
+            failed++;
+        }
+        CATCH {
+            printf(" pass\n");
+        }
+        END_TRY;
+    }
+
+    // Execute from M
+    printf(" testing from M mode...\n");
+    TRY {
+        test_exec();
+        printf(" fail\n");
+        failed++;
+    }
+    CATCH {
+        printf(" pass\n");
+    }
+    END_TRY;
+
+    // .......................................................................
 
     printf(" %d/%d passed\n", tid - failed, tid);
     int res = (failed == 0) ? 0 : -1;

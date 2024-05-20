@@ -18,7 +18,7 @@
 #define __VEER_H
 
 // Set to 1 if using HTIF interface eg. in Spike
-#define USE_HTIF 1
+#define USE_HTIF 0
 
 #include <stdint.h>
 

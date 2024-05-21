@@ -62,9 +62,17 @@
 #define MCOUNTEREN_HPM5         (1 << 5)
 #define MCOUNTEREN_HPM6         (1 << 6)
 #define MCOUNTEREN_ALL          0x7D
+#define MCOUNTEREN_NONE         0x00
 
 #define TEST_RESULT_SUCCESS     0xFF
 #define TEST_RESULT_FAILURE     1
+
+#define VEER_EVT_INSTR_COMMITTED_16      5
+#define VEER_EVT_INSTR_COMMITTED_32      6
+#define VEER_EVT_BRANCHES_COMMITTED      24
+#define VEER_EVT_BRANCHES_MISPREDICTED   25
+
+#define COUNTER_COUNT           6
 
 volatile int32_t  global_result = 0;
 volatile uint32_t last_trap     = 0xFFFFFFFF;
@@ -118,10 +126,10 @@ int main () {
 
     // Setup VeeR performance counter events. See VeeR EL2 manual table 7-1
     // for the complete event list and their codes.
-    write_csr(CSR_MHPMEVENT3, 5);   // instr committed - 16b
-    write_csr(CSR_MHPMEVENT4, 6);   // instr committed - 32b
-    write_csr(CSR_MHPMEVENT5, 24);  // loads commited
-    write_csr(CSR_MHPMEVENT6, 25);  // stores commited
+    write_csr(CSR_MHPMEVENT3, VEER_EVT_INSTR_COMMITTED_16);
+    write_csr(CSR_MHPMEVENT4, VEER_EVT_INSTR_COMMITTED_32);
+    write_csr(CSR_MHPMEVENT5, VEER_EVT_BRANCHES_COMMITTED);
+    write_csr(CSR_MHPMEVENT6, VEER_EVT_BRANCHES_MISPREDICTED);
 
     // Write mcounteren to allow counter access from user_mode
     write_csr(CSR_MCOUNTEREN, MCOUNTEREN_ALL);
@@ -208,6 +216,8 @@ uint32_t read_and_check (int32_t csr, int should_succeed) {
 }
 
 uint64_t read_and_check64(int32_t csr_base, int should_succeed) {
+    // CSRs for high 32-bit parts of counters have the same addresses but
+    // logically or-ed with 0x80.
     uint32_t hi = read_and_check(csr_base | 0x80, should_succeed);
     uint32_t lo = read_and_check(csr_base,        should_succeed);
     return (((uint64_t)hi) << 32) | lo;
@@ -215,7 +225,7 @@ uint64_t read_and_check64(int32_t csr_base, int should_succeed) {
 
 void check_counters (const uint64_t* cur_counters) {
 
-    const char* counter_names[6] = {
+    const char* counter_names[COUNTER_COUNT] = {
         "cycle  ",
         "instret",
         "hpm3   ",
@@ -224,11 +234,11 @@ void check_counters (const uint64_t* cur_counters) {
         "hpm6   "
     };
 
-    static uint64_t prv_counters [6] = {0};
+    static uint64_t prv_counters [COUNTER_COUNT] = {0};
 
     // Compute and print diffs
     int counters_ok = 1;
-    for (int i=0; i<6; ++i) {
+    for (int i=0; i<COUNTER_COUNT; ++i) {
 
         int64_t diff = cur_counters[i] - prv_counters[i];
         if (diff < 0) counters_ok = 0;
@@ -246,7 +256,7 @@ void check_counters (const uint64_t* cur_counters) {
     }
 
     // Store previous values
-    memcpy(prv_counters, cur_counters, sizeof(uint64_t) * 6);
+    memcpy(prv_counters, cur_counters, sizeof(uint64_t) * COUNTER_COUNT);
 }
 
 __attribute__((noreturn)) void user_main () {
@@ -254,7 +264,7 @@ __attribute__((noreturn)) void user_main () {
 
     uint32_t cnt_l;
     uint32_t cnt_h;
-    uint64_t counters[6];
+    uint64_t counters[COUNTER_COUNT];
 
     const int32_t base_csrs [] = {
         CSR_CYCLE,
@@ -266,7 +276,7 @@ __attribute__((noreturn)) void user_main () {
     };
 
     const uint32_t access_cases [] = {
-        0,
+        MCOUNTEREN_NONE,
         MCOUNTEREN_CY,
         MCOUNTEREN_IR,
         MCOUNTEREN_HPM3,
@@ -280,7 +290,7 @@ __attribute__((noreturn)) void user_main () {
     for (int i=0; i<2; ++i) {
         printf("Testing counters operation (round %d)...\n", i + 1);
 
-        for (int j=0; j<6; ++j) {
+        for (int j=0; j<COUNTER_COUNT; ++j) {
             counters[j] = read_and_check64(base_csrs[j], 1);
         }
         check_counters(counters);

@@ -92,8 +92,7 @@ module el2_pmp
                                               logic priv_mode,
                                               logic [pt.PMP_ENTRIES-1:0] final_perm_check);
 
-    // When in user mode and at leas one PMP region is enabled deny access by
-    // default.
+    // When in user mode and at least one PMP region is enabled deny access by default.
 `ifdef RV_USER_MODE
     logic access_fail = any_region_enabled & priv_mode;
 `else

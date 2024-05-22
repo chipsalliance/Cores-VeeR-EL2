@@ -889,7 +889,7 @@ import el2_pkg::*;
    logic priv_mode;         // Operating privilege mode, 0 - machine, 1 - user
    logic priv_mode_eff;     // Effective privilege mode, 0 - machine, 1 - user (driven in el2_dec_tlu_ctl.sv)
 
-   logic [2:0] mseccfg;     // mseccfg CSR for PMP
+   el2_mseccfg_pkt_t mseccfg; // mseccfg CSR for PMP
 
 `endif
 

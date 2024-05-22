@@ -296,7 +296,7 @@ module el2_dec
     output logic priv_mode_eff,
 
     // mseccfg CSR content for PMP
-    output logic [2:0] mseccfg,
+    output el2_mseccfg_pkt_t mseccfg,
 
 `endif
 

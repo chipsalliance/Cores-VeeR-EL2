@@ -51,7 +51,7 @@ import el2_pkg::*;
    input logic internal_dbg_halt_timers, // debug halted
 
 `ifdef RV_SMEPMP
-   input logic [2:0] mseccfg_rlb, // RLB bit of mseccfg CSR
+   input el2_mseccfg_pkt_t mseccfg,
 `endif
 
    output logic [31:0] dec_pmp_rddata_d, // pmp CSR read data
@@ -83,7 +83,7 @@ import el2_pkg::*;
    for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : pmpcfg_lock
 `ifdef RV_SMEPMP
      // Smepmp allow modifying locked entries when mseccfg.RLB is set
-     assign entry_lock_eff[r] = pmp_pmpcfg[r].lock & ~mseccfg_rlb;
+     assign entry_lock_eff[r] = pmp_pmpcfg[r].lock & ~mseccfg.RLB;
 `else
      assign entry_lock_eff[r] = pmp_pmpcfg[r].lock;
 `endif

@@ -23,6 +23,7 @@
 //
 //********************************************************************************
 
+`define RV_SMEPMP 1 // TODO: Move to veer.config
 
 module el2_dec_pmp_ctl
 import el2_pkg::*;
@@ -49,6 +50,10 @@ import el2_pkg::*;
    input logic dec_tlu_pmu_fw_halted, // pmu/fw halted
    input logic internal_dbg_halt_timers, // debug halted
 
+`ifdef RV_SMEPMP
+   input logic [2:0] mseccfg_rlb, // RLB bit of mseccfg CSR
+`endif
+
    output logic [31:0] dec_pmp_rddata_d, // pmp CSR read data
    output logic        dec_pmp_read_d, // pmp CSR address match
 
@@ -73,6 +78,18 @@ import el2_pkg::*;
    logic [31:0] pmp_pmpcfg_rddata;
 
    // ----------------------------------------------------------------------
+
+   logic [pt.PMP_ENTRIES-1:0] entry_lock_eff; // Effective entry lock
+   for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : pmpcfg_lock
+`ifdef RV_SMEPMP
+     // Smepmp allow modifying locked entries when mseccfg.RLB is set
+     assign entry_lock_eff[r] = pmp_pmpcfg[r].lock & ~mseccfg_rlb;
+`else
+     assign entry_lock_eff[r] = pmp_pmpcfg[r].lock;
+`endif
+   end
+
+   // ----------------------------------------------------------------------
    // PMPCFGx (RW)
    // [31:24] : PMP entry (x*4 + 3) configuration
    // [23:16] : PMP entry (x*4 + 2) configuration
@@ -94,7 +111,7 @@ import el2_pkg::*;
       assign csr_wdata = (raw_wdata & 8'b00000001) ? (raw_wdata & 8'b10011111) : (raw_wdata & 8'b10011101);
 
       rvdffe #(8) pmpcfg_ff (.*, .clk(free_l2clk),
-                          .en(wr_pmpcfg_r & (wr_pmpcfg_group == entry_idx[5:2]) & (~pmp_pmpcfg[entry_idx].lock)),
+                          .en(wr_pmpcfg_r & (wr_pmpcfg_group == entry_idx[5:2]) & (~entry_lock_eff[entry_idx])),
                           .din(csr_wdata),
                           .dout(pmp_pmpcfg[entry_idx]));
    end
@@ -125,10 +142,10 @@ import el2_pkg::*;
       logic pmpaddr_lock;
       logic pmpaddr_lock_next;
       assign pmpaddr_lock_next = ((entry_idx+1 < pt.PMP_ENTRIES)
-                                  ? (pmp_pmpcfg[entry_idx+1].lock
+                                  ? (entry_lock_eff[entry_idx+1]
                                      & pmp_pmpcfg[entry_idx+1].mode == TOR)
                                   : 1'b0);
-      assign pmpaddr_lock = pmp_pmpcfg[entry_idx].lock | pmpaddr_lock_next;
+      assign pmpaddr_lock = entry_lock_eff[entry_idx] | pmpaddr_lock_next;
       assign pmp_pmpaddr[entry_idx][31:30] = 2'b00;
       rvdffe #(30) pmpaddr_ff (.*, .clk(free_l2clk),
                           .en(wr_pmpaddr_r & (wr_pmpaddr_address == entry_idx)

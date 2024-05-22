@@ -95,6 +95,8 @@ csr_hpmc3h =        [110010000011]
 csr_hpmc4h =        [110010000100]
 csr_hpmc5h =        [110010000101]
 csr_hpmc6h =        [110010000110]
+csr_mseccfgl =      [011101000111]
+csr_mseccfgh =      [011101010111]
 
 .input
 
@@ -211,6 +213,8 @@ csr_dicago
      csr_hpmc4h
      csr_hpmc5h
      csr_hpmc6h
+     csr_mseccfgl
+     csr_mseccfgh
      valid_only
      presync
      postsync
@@ -317,5 +321,8 @@ csr[ csr_hpmc3h    ] = {  csr_hpmc3h   presync }
 csr[ csr_hpmc4h    ] = {  csr_hpmc4h   presync }
 csr[ csr_hpmc5h    ] = {  csr_hpmc5h   presync }
 csr[ csr_hpmc6h    ] = {  csr_hpmc6h   presync }
+
+csr[ csr_mseccfgl  ] = {  csr_mseccfgl }
+csr[ csr_mseccfgh  ] = {  csr_mseccfgh }
 
 .end

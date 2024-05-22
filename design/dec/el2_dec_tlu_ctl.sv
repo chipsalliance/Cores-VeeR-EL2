@@ -23,8 +23,6 @@
 //
 //********************************************************************************
 
-`define RV_SMEPMP 1 // TODO: Move to veer.config
-
 module el2_dec_tlu_ctl
 import el2_pkg::*;
 #(
@@ -270,12 +268,12 @@ import el2_pkg::*;
    logic wr_mpmc_r;
    logic [1:1] mpmc_b_ns, mpmc, mpmc_b;
    logic set_mie_pmu_fw_halt, fw_halted_ns, fw_halted;
-   logic wr_mcounteren_r;
    logic wr_mcountinhibit_r;
 `ifdef RV_USER_MODE
+   logic wr_mcounteren_r;
    logic [5:0] mcounteren; // HPM6, HPM5, HPM4, HPM3, IR, CY
-   logic [2:0] mseccfg_ns;
    logic wr_mseccfg_r;
+   logic [2:0] mseccfg_ns;
 `endif
    logic [6:0] mcountinhibit;
    logic wr_mtsel_r, wr_mtdata1_t0_r, wr_mtdata1_t1_r, wr_mtdata1_t2_r, wr_mtdata1_t3_r, wr_mtdata2_t0_r, wr_mtdata2_t1_r, wr_mtdata2_t2_r, wr_mtdata2_t3_r;

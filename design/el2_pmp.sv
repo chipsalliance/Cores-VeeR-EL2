@@ -31,7 +31,7 @@ module el2_pmp
 
 `ifdef RV_USER_MODE
 `ifdef RV_SMEPMP
-    input logic [2:0] mseccfg,  // mseccfg CSR content, RLM, MMWP and MML bits
+    input el2_mseccfg_pkt_t mseccfg, // mseccfg CSR content, RLM, MMWP and MML bits
 `endif
 
     input logic priv_mode,      // operating privilege mode
@@ -62,10 +62,6 @@ module el2_pmp
  `ifndef RV_SMEPMP
   logic any_region_enabled;
  `endif
-
-  localparam MSECCFG_RLB  = 2;
-  localparam MSECCFG_MMWP = 1;
-  localparam MSECCFG_MML  = 0;
 `endif
 
   ///////////////////////
@@ -81,13 +77,13 @@ module el2_pmp
   //                                             \--> pmp_chan_err
 
   // A wrapper function in which it is decided which form of permission check function gets called
-  function automatic logic perm_check_wrapper(logic csr_pmp_mseccfg_mml,
+  function automatic logic perm_check_wrapper(el2_mseccfg_pkt_t csr_pmp_mseccfg,
                                               el2_pmp_cfg_pkt_t csr_pmp_cfg,
                                               el2_pmp_type_pkt_t req_type,
                                               logic priv_mode,
                                               logic permission_check);
 
-    return csr_pmp_mseccfg_mml ? mml_perm_check(csr_pmp_cfg,
+    return csr_pmp_mseccfg.MML ? mml_perm_check(csr_pmp_cfg,
                                                 req_type,
                                                 priv_mode,
                                                 permission_check) :
@@ -148,8 +144,7 @@ module el2_pmp
   endfunction
 
   // Access fault determination / prioritization
-  function automatic logic access_fault_check(logic                      csr_pmp_mseccfg_mmwp,
-                                              logic                      csr_pmp_mseccfg_mml,
+  function automatic logic access_fault_check(el2_mseccfg_pkt_t          csr_pmp_mseccfg,
                                               el2_pmp_type_pkt_t         req_type,
                                               logic [pt.PMP_ENTRIES-1:0] match_all,
                                               logic any_region_enabled,
@@ -160,8 +155,8 @@ module el2_pmp
   `ifdef RV_SMEPMP
     // When MSECCFG.MMWP is set default deny always, otherwise allow for M-mode, deny for other
     // modes. Also deny unmatched for M-mode whe MSECCFG.MML is set and request type is EXEC.
-    logic access_fail = csr_pmp_mseccfg_mmwp | priv_mode |
-                       (csr_pmp_mseccfg_mml && (req_type == EXEC));
+    logic access_fail = csr_pmp_mseccfg.MMWP | priv_mode |
+                       (csr_pmp_mseccfg.MML && (req_type == EXEC));
   `else
     // When in user mode and at least one PMP region is enabled deny access by default.
     logic access_fail = any_region_enabled & priv_mode;
@@ -275,7 +270,7 @@ module el2_pmp
       // Check specific required permissions since the behaviour is different
       // between Smepmp implementation and original PMP.
       assign region_perm_check[c][r] = perm_check_wrapper(
-          mseccfg[MSECCFG_MML],
+          mseccfg,
           pmp_pmpcfg[r],
           pmp_chan_type[c],
 `ifdef RV_USER_MODE
@@ -296,16 +291,14 @@ module el2_pmp
     // denied by figuring out the matching region and its permission check.
 `ifdef RV_USER_MODE
  `ifdef RV_SMEPMP
-    assign pmp_chan_err[c] = access_fault_check(mseccfg[MSECCFG_MMWP],
-                                                mseccfg[MSECCFG_MML],
+    assign pmp_chan_err[c] = access_fault_check(mseccfg,
                                                 pmp_chan_type[c],
                                                 region_match_all[c],
                                                 1'b0,
                                                 priv_mode,
                                                 region_perm_check[c]);
  `else
-    assign pmp_chan_err[c] = access_fault_check(1'b0,
-                                                1'b0,
+    assign pmp_chan_err[c] = access_fault_check(3'b000,
                                                 pmp_chan_type[c],
                                                 region_match_all[c],
                                                 any_region_enabled,
@@ -313,8 +306,7 @@ module el2_pmp
                                                 region_perm_check[c]);
  `endif
 `else
-    assign pmp_chan_err[c] = access_fault_check(1'b0,
-                                                1'b0,
+    assign pmp_chan_err[c] = access_fault_check(3'b000,
                                                 pmp_chan_type[c],
                                                 region_match_all[c],
                                                 1'b0,

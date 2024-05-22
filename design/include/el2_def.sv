@@ -430,6 +430,13 @@ typedef struct packed {
     logic write;
     logic read;
   } el2_pmp_cfg_pkt_t;
+
+  typedef struct packed {
+    logic RLB;
+    logic MMWP;
+    logic MML;
+  } el2_mseccfg_pkt_t;
+
 //`endif
 
 endpackage // el2_pkg

@@ -493,14 +493,7 @@ import el2_pkg::*;
    el2_dec_timer_ctl  #(.pt(pt)) int_timers(.*);
    // end of internal timers
 
-   el2_dec_pmp_ctl  #(.pt(pt)) pmp(
-`ifdef RV_USER_MODE
-  `ifdef RV_SMEPMP
-      .mseccfg_rlb (mseccfg[MSECCFG_RLB]),
-  `endif
-`endif
-      .*
-   );
+   el2_dec_pmp_ctl  #(.pt(pt)) pmp(.*);
    // end of pmp
 
    assign clk_override = dec_tlu_dec_clk_override;

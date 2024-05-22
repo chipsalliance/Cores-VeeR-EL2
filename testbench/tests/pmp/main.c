@@ -23,7 +23,7 @@
 
 // Set to one to make the tests assume Smepmp behavior of PMP with
 // MSECCFG = 0x00000000
-#define HAVE_SMEPMP 0
+#define HAVE_SMEPMP 1
 
 #define CSR_MSTATUS 0x300
 #define CSR_MISA    0x301
@@ -228,7 +228,7 @@ int main () {
     }
 
     // .......................................................................
-    // Configure a single region in PMP and call user mode function. It shoud
+    // Configure a single region in PMP and call user mode function. It should
     // not have access to code and stack hence it should not execute
     if (have_user_mode) {
         printf("%02d - User mode RWX with one (any) PMP region enabled\n", tid++);
@@ -421,7 +421,7 @@ int main () {
             any_fail = 1;
         }
 
-        // Test reading. Read area from user mode and compare agains the
+        // Test reading. Read area from user mode and compare against the
         // pattern
         printf(" testing R...\n");
 

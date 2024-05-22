@@ -50,6 +50,9 @@ static const struct csr_t g_read_csrs[] = {
     {0x30A, "menvcfg"},
     {0x31A, "menvcfgh"},
 
+    {0x747, "mseccfg"},
+    {0x757, "mseccfgh"},
+
     // PMP
     {0x3A0, "pmpcfg0"},
     {0x3B0, "pmpaddr0"},
@@ -179,6 +182,9 @@ unsigned long read_csr (uint32_t addr) {
         case 0x3C0: val = _read_csr(0x3C0); break;
         case 0x3D0: val = _read_csr(0x3D0); break;
         case 0x3E0: val = _read_csr(0x3E0); break;
+
+        case 0x747: val = _read_csr(0x747); break;
+        case 0x757: val = _read_csr(0x757); break;
 
         case 0x7FF: val = _read_csr(0x7FF); break;
         case 0x7C0: val = _read_csr(0x7C0); break;

@@ -242,6 +242,9 @@ import el2_pkg::*;
    output logic  priv_mode,
    output logic  priv_mode_eff,
 
+   // mseccfg CSR content for PMP
+   output logic [2:0] mseccfg,
+
 `endif
 
    // pmp
@@ -269,6 +272,8 @@ import el2_pkg::*;
    logic wr_mcountinhibit_r;
 `ifdef RV_USER_MODE
    logic [5:0] mcounteren; // HPM6, HPM5, HPM4, HPM3, IR, CY
+   logic [2:0] mseccfg_ns;
+   logic wr_mseccfg_r;
 `endif
    logic [6:0] mcountinhibit;
    logic wr_mtsel_r, wr_mtdata1_t0_r, wr_mtdata1_t1_r, wr_mtdata1_t2_r, wr_mtdata1_t3_r, wr_mtdata2_t0_r, wr_mtdata2_t1_r, wr_mtdata2_t2_r, wr_mtdata2_t3_r;
@@ -565,6 +570,10 @@ localparam MCOUNTEREN_HPM3 = 2;
 localparam MCOUNTEREN_HPM4 = 3;
 localparam MCOUNTEREN_HPM5 = 4;
 localparam MCOUNTEREN_HPM6 = 5;
+
+localparam MSECCFG_RLB   = 2;
+localparam MSECCFG_MMWP  = 1;
+localparam MSECCFG_MML   = 0;
 `endif
 
    assign reset_delayed = reset_detect ^ reset_detected;
@@ -1535,6 +1544,29 @@ end
 
 
    rvdffe #(32)  mtval_ff (.*, .en(tlu_flush_lower_r | wr_mtval_r), .din(mtval_ns[31:0]), .dout(mtval[31:0]));
+
+   // ----------------------------------------------------------------------
+   // MSECCFG
+   // [31:3] : Reserved, read 0x0
+   // [2]    : RLB
+   // [1]    : MMWP
+   // [0]    : MML
+
+`ifdef RV_USER_MODE
+
+   localparam MSECCFG  = 12'h747;
+   localparam MSECCFGH = 12'h757;
+
+   assign wr_mseccfg_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MSECCFG);
+   rvdffs #(3) mseccfg_ff (.*, .clk(csr_wr_clk), .en(wr_mseccfg_r), .din(mseccfg_ns), .dout(mseccfg));
+
+   assign mseccfg_ns = {
+     dec_csr_wrdata_r[MSECCFG_RLB],                              // TODO: sticky 0 in a specific case.
+     dec_csr_wrdata_r[MSECCFG_MMWP] | mseccfg[MSECCFG_MMWP],     // Sticky bit, can only be set but not cleared
+     dec_csr_wrdata_r[MSECCFG_MML ] | mseccfg[MSECCFG_MML ]      // Sticky bit, can only be set but never cleared
+   };
+
+`endif
 
    // ----------------------------------------------------------------------
    // MCGC (RW) Clock gating control
@@ -2659,6 +2691,8 @@ assign dec_csr_rddata_d[31:0] = (
                                   ({32{csr_hpmc4h}}    & mhpmc4h[31:0]) |
                                   ({32{csr_hpmc5h}}    & mhpmc5h[31:0]) |
                                   ({32{csr_hpmc6h}}    & mhpmc6h[31:0]) |
+                                  ({32{csr_mseccfgl}}  & {29'd0, mseccfg}) |
+                                  ({32{csr_mseccfgh}}  & 32'd0) | // All bits are WPRI
 `endif
                                   ({32{csr_mcountinhibit}} & {25'b0, mcountinhibit[6:0]}) |
                                   ({32{csr_mpmc}}      & {30'b0, mpmc[1], 1'b0}) |

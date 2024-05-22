@@ -14,8 +14,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-`define RV_SMEPMP 1 // TODO: Move to veer.config
-
 module el2_pmp
   import el2_pkg::*;
 #(
@@ -29,11 +27,11 @@ module el2_pmp
     input logic rst_l,     // Reset
     input logic scan_mode, // Scan mode
 
-`ifdef RV_USER_MODE
 `ifdef RV_SMEPMP
     input el2_mseccfg_pkt_t mseccfg, // mseccfg CSR content, RLM, MMWP and MML bits
 `endif
 
+`ifdef RV_USER_MODE
     input logic priv_mode,      // operating privilege mode
     input logic priv_mode_eff,  // operating effective privilege mode
 `endif
@@ -59,9 +57,7 @@ module el2_pmp
   logic [    PMP_CHANNELS-1:0][pt.PMP_ENTRIES-1:0] region_perm_check;
 
 `ifdef RV_USER_MODE
- `ifndef RV_SMEPMP
   logic any_region_enabled;
- `endif
 `endif
 
   ///////////////////////
@@ -183,13 +179,11 @@ module el2_pmp
   // ---------------
 
 `ifdef RV_USER_MODE
- `ifndef RV_SMEPMP
-   logic [pt.PMP_ENTRIES-1:0] region_enabled;
-   for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : g_reg_ena
-     assign region_enabled[r] = pmp_pmpcfg[r].mode != OFF;
-   end
-   assign any_region_enabled = |region_enabled;
- `endif
+  logic [pt.PMP_ENTRIES-1:0] region_enabled;
+  for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : g_reg_ena
+    assign region_enabled[r] = pmp_pmpcfg[r].mode != OFF;
+  end
+  assign any_region_enabled = |region_enabled;
 `endif
 
   for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : g_addr_exp
@@ -270,7 +264,11 @@ module el2_pmp
       // Check specific required permissions since the behaviour is different
       // between Smepmp implementation and original PMP.
       assign region_perm_check[c][r] = perm_check_wrapper(
+`ifdef RV_SMEPMP
           mseccfg,
+`else
+          3'b000,
+`endif
           pmp_pmpcfg[r],
           pmp_chan_type[c],
 `ifdef RV_USER_MODE
@@ -289,30 +287,23 @@ module el2_pmp
 
     // Once the permission checks of the regions are done, decide if the access is
     // denied by figuring out the matching region and its permission check.
-`ifdef RV_USER_MODE
- `ifdef RV_SMEPMP
-    assign pmp_chan_err[c] = access_fault_check(mseccfg,
-                                                pmp_chan_type[c],
-                                                region_match_all[c],
-                                                1'b0,
-                                                priv_mode,
-                                                region_perm_check[c]);
- `else
-    assign pmp_chan_err[c] = access_fault_check(3'b000,
-                                                pmp_chan_type[c],
-                                                region_match_all[c],
-                                                any_region_enabled,
-                                                priv_mode,
-                                                region_perm_check[c]);
- `endif
+    assign pmp_chan_err[c] = access_fault_check(
+`ifdef RV_SMEPMP
+        mseccfg,
 `else
-    assign pmp_chan_err[c] = access_fault_check(3'b000,
-                                                pmp_chan_type[c],
-                                                region_match_all[c],
-                                                1'b0,
-                                                1'b0,
-                                                region_perm_check[c]);
+        3'b000,
 `endif
+        pmp_chan_type[c],
+        region_match_all[c],
+`ifdef RV_USER_MODE
+        any_region_enabled,
+        priv_mode,
+`else
+        1'b0,
+        1'b0,
+`endif
+        region_perm_check[c]);
+
   end
 
 endmodule  // el2_pmp

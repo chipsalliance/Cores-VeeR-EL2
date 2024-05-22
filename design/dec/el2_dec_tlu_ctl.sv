@@ -23,6 +23,8 @@
 //
 //********************************************************************************
 
+`define RV_SMEPMP 1 // TODO: Move to veer.config
+
 module el2_dec_tlu_ctl
 import el2_pkg::*;
 #(
@@ -491,7 +493,14 @@ import el2_pkg::*;
    el2_dec_timer_ctl  #(.pt(pt)) int_timers(.*);
    // end of internal timers
 
-   el2_dec_pmp_ctl  #(.pt(pt)) pmp(.*);
+   el2_dec_pmp_ctl  #(.pt(pt)) pmp(
+`ifdef RV_USER_MODE
+  `ifdef RV_SMEPMP
+      .mseccfg_rlb (mseccfg[MSECCFG_RLB]),
+  `endif
+`endif
+      .*
+   );
    // end of pmp
 
    assign clk_override = dec_tlu_dec_clk_override;

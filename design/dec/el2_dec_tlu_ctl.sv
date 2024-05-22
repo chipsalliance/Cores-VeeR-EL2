@@ -1557,13 +1557,26 @@ end
    localparam MSECCFG  = 12'h747;
    localparam MSECCFGH = 12'h757;
 
+   // Detect if any PMP region is locked regardless of being enabled. This is
+   // neccessary for mseccfg.RLB bit write behavior
+   logic [pt.PMP_ENTRIES-1:0] pmp_region_locked;
+   for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : g_regions
+     assign pmp_region_locked[r] = pmp_pmpcfg[r].lock;
+   end
+
+   logic  pmp_any_region_locked;
+   assign pmp_any_region_locked = |pmp_region_locked;
+
+   // mseccfg
    assign wr_mseccfg_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MSECCFG);
    rvdffs #(3) mseccfg_ff (.*, .clk(csr_wr_clk), .en(wr_mseccfg_r), .din(mseccfg_ns), .dout(mseccfg));
 
    assign mseccfg_ns = {
-     dec_csr_wrdata_r[MSECCFG_RLB],                              // TODO: sticky 0 in a specific case.
-     dec_csr_wrdata_r[MSECCFG_MMWP] | mseccfg[MSECCFG_MMWP],     // Sticky bit, can only be set but not cleared
-     dec_csr_wrdata_r[MSECCFG_MML ] | mseccfg[MSECCFG_MML ]      // Sticky bit, can only be set but never cleared
+     pmp_any_region_locked ?
+        (dec_csr_wrdata_r[MSECCFG_RLB] & mseccfg[MSECCFG_RLB]) :  // When any PMP region is locked this bit can only be cleared
+         dec_csr_wrdata_r[MSECCFG_RLB],                           // Otherwise regularly writeable
+     dec_csr_wrdata_r[MSECCFG_MMWP] |  mseccfg[MSECCFG_MMWP],     // Sticky bit, can only be set but not cleared
+     dec_csr_wrdata_r[MSECCFG_MML ] |  mseccfg[MSECCFG_MML ]      // Sticky bit, can only be set but never cleared
    };
 
 `endif

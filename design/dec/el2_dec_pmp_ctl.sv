@@ -85,9 +85,17 @@ import el2_pkg::*;
    assign wr_pmpcfg_group = dec_csr_wraddr_r[3:0]; // selects group of 4 pmpcfg entries (group 1 -> entries 4-7; up to 16 groups)
 
    for (genvar entry_idx = 0; entry_idx < pt.PMP_ENTRIES; entry_idx++) begin : gen_pmpcfg_ff
+      logic [7:0] raw_wdata;
+      logic [7:0] csr_wdata;
+
+      // PMPCFG fields are WARL. Mask out bits 6:5 during write. Since R=0 and
+      // W=1 combination is illegal mask out W when R is cleared.
+      assign raw_wdata = dec_csr_wrdata_r[(entry_idx[1:0]*8)+7:(entry_idx[1:0]*8)+0];
+      assign csr_wdata = (raw_wdata & 8'b00000001) ? (raw_wdata & 8'b10011111) : (raw_wdata & 8'b10011101);
+
       rvdffe #(8) pmpcfg_ff (.*, .clk(free_l2clk),
                           .en(wr_pmpcfg_r & (wr_pmpcfg_group == entry_idx[5:2]) & (~pmp_pmpcfg[entry_idx].lock)),
-                          .din(dec_csr_wrdata_r[(entry_idx[1:0]*8)+7:(entry_idx[1:0]*8)+0] & 8'b10011111),
+                          .din(csr_wdata),
                           .dout(pmp_pmpcfg[entry_idx]));
    end
 

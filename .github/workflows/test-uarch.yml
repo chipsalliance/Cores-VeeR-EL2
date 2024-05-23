@@ -43,6 +43,7 @@ jobs:
           - "block/dma"
           - "block/ifu_compress"
           - "block/dec_tl"
+          - "block/dec_ib"
           - "block/exu_alu"
           - "block/exu_mul"
           - "block/exu_div"

@@ -10,8 +10,9 @@ from ahb_lite_pkg import (
 )
 from cocotb.queue import QueueEmpty
 from cocotb.triggers import RisingEdge
-from common import get_int, get_signals
 from pyuvm import UVMQueue, utility_classes
+
+from common import get_int, get_signals
 
 
 class AHBLiteBFM(metaclass=utility_classes.Singleton):

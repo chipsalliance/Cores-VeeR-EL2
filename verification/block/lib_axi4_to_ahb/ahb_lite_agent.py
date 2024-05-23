@@ -5,8 +5,9 @@ import cocotb
 from ahb_lite_bfm import AHBLiteBFM
 from cocotb.queue import QueueEmpty
 from cocotb.triggers import RisingEdge
-from common import BaseMonitor, get_int
 from pyuvm import ConfigDB, uvm_agent, uvm_analysis_port, uvm_driver, uvm_sequencer
+
+from common import BaseMonitor, get_int
 
 
 class AHBLiteAgent(uvm_agent):

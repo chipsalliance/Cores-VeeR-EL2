@@ -1,6 +1,7 @@
-from common import *
 from dmi_bfm import DMITestBfm as BFM
 from pyuvm import *
+
+from common import *
 
 
 class DMIAgent(uvm_agent):

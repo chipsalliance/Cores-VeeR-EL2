@@ -4,8 +4,9 @@
 import os
 
 from cocotb.types import Logic, LogicArray, Range, concat
-from common import *
 from jtag_pkg import *
+
+from common import *
 
 
 class JTAGPredictor:

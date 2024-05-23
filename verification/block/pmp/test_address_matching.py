@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-from common import BaseSequence
 from pyuvm import ConfigDB, test
 from testbench import (
     BaseEnv,
@@ -11,6 +10,8 @@ from testbench import (
     PMPWriteCfgCSRItem,
     getDecodedEntryCfg,
 )
+
+from common import BaseSequence
 
 pmp_configurations = [
     {

@@ -2,8 +2,9 @@
 # Copyright (c) 2023 Antmicro <www.antmicro.com>
 # SPDX-License-Identifier: BSD-2-Clause
 
-from common import BaseSeq
 from pyuvm import *
+
+from common import BaseSeq
 
 
 class JTAGBaseSeqItem(uvm_sequence_item):

@@ -5,8 +5,9 @@ import random
 
 from axi_pkg import AXI_AXSIZE_ENCODING
 from cocotb.types import LogicArray
-from common import BaseSeq
 from pyuvm import ConfigDB, uvm_sequence_item
+
+from common import BaseSeq
 
 
 class AXIWriteBaseSeqItem(uvm_sequence_item):

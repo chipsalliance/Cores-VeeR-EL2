@@ -4,8 +4,9 @@
 import random
 
 from axi_pkg import AXI_AXSIZE_ENCODING
-from common import BaseSeq
 from pyuvm import ConfigDB, uvm_sequence_item
+
+from common import BaseSeq
 
 
 class AXIReadBaseSeqItem(uvm_sequence_item):

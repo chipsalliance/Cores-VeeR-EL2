@@ -23,7 +23,7 @@
 
 // Set to one to make the tests assume Smepmp behavior of PMP with
 // MSECCFG = 0x00000000
-#define HAVE_SMEPMP 1
+#define HAVE_SMEPMP 0
 
 #define CSR_MSTATUS 0x300
 #define CSR_MISA    0x301
@@ -387,10 +387,34 @@ int main () {
         memcpy((void*)test_area, other, sizeof(test_area));
 
         // Configure .area1 access
+        printf(" configuring PMP...\n");
         entry.addr = ADDR2PMP(&_area);
         entry.addr = (entry.addr & 0xFFFFFC00) | 0x000001FF; // NAPOT, 2^12
         entry.cfg  = PMP_NAPOT | r | w | x;
         pmp_entry_write(5, &entry);
+
+        // Check
+        struct pmp_entry_s readback;
+        pmp_entry_read(5, &readback);
+
+        // An illegal PMP region configuration has been written and readback
+        // this is an error
+        //
+        // -W- and -WX combinations are reserved except for when Smepmp is
+        // present and mseccfg.MML=1. This test does not enable the latter
+        // so the combinations are not legal.
+        if (!pmp_is_cfg_legal(readback.cfg)) {
+            printf("  error, an illegal PMP configuration accepted by the core\n", readback.cfg);
+            failed++;
+            continue;
+        }
+
+        // R,W and X fields are WARL which means that the readback does not
+        // need to match what was written. In such a case skip the test but
+        // not mark it as an error.
+        if (readback.cfg != entry.cfg) {
+            continue;
+        }
 
         int exc;
         int cmp;

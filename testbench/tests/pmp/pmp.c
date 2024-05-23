@@ -304,3 +304,17 @@ int pmp_entry_write(unsigned int id, struct pmp_entry_s * entry)
 
     return 0;
 }
+
+int pmp_is_cfg_legal (unsigned int cfg) {
+    // Check if RWX combination is legal according to
+    // RISC-V privilege spec v1.12 chapter 3.7.1
+
+    cfg &= (PMP_R | PMP_W | PMP_X);
+
+    if (cfg == (PMP_W))
+        return 0;
+    if (cfg == (PMP_W | PMP_X))
+        return 0;
+
+    return 1;
+}

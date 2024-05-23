@@ -23,6 +23,13 @@ coverageTypes = [
     "toggle",
 ]
 
+# Used lint tools
+lintTools = [
+    "isort",  # config in pyproject.toml
+    "black",  # config in pyproject.toml
+    "flake8",  # config in .flake8
+]
+
 
 def isSimFailure(
     resultsFile="results.xml", testsuites_name="results", verbose=False, suppress_rc=False
@@ -310,22 +317,18 @@ def dmi_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
 
-@nox.session()
-def isort(session: nox.Session) -> None:
-    """Options are defined in pyproject.toml file"""
-    session.install("isort")
+@nox.session(reuse_venv=True)
+def lint(session: nox.Session) -> None:
+    """Options are defined in pyproject.toml and .flake8 files"""
+    session.install(*lintTools)
     session.run("isort", ".")
-
-
-@nox.session()
-def flake8(session: nox.Session) -> None:
-    """Options are defined in .flake8 file."""
-    session.install("flake8")
+    session.run("black", ".")
     session.run("flake8", ".")
 
 
 @nox.session()
-def black(session: nox.Session) -> None:
-    """Options are defined in pyproject.toml file"""
-    session.install("black")
-    session.run("black", ".")
+def test_lint(session: nox.Session) -> None:
+    session.install(*lintTools)
+    session.run("isort", "--check", ".")
+    session.run("black", "--check", ".")
+    session.run("flake8", ".")

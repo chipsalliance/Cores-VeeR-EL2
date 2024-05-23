@@ -148,15 +148,30 @@ int trap_handler (const struct fault* fault) {
 #define ADDR2PMP(x) ((((uint32_t)(x)) & 3) ? ((((uint32_t)(x)) >> 2) + 1) : \
                                               (((uint32_t)(x)) >> 2))
 
-// Set mstatus MPRV to x and MPP to 00
+// Set mstatus MPRV
 #define set_mprv(x) {                   \
     uint32_t mstatus;                   \
     CSRR_READ(mstatus, CSR_MSTATUS);    \
-    mstatus &= ~(3 << 11);              \
     if (x) mstatus |=  (1 << 17);       \
     else   mstatus &= ~(1 << 17);       \
     CSRR_WRITE(mstatus, CSR_MSTATUS);   \
 }
+
+// Set mstatus MPP to 00 or 11
+#define set_mpp(x)  {                   \
+    uint32_t mstatus;                   \
+    CSRR_READ(mstatus, CSR_MSTATUS);    \
+    if (x) mstatus |=  (3 << 11);       \
+    else   mstatus &= ~(3 << 11);       \
+    CSRR_WRITE(mstatus, CSR_MSTATUS);   \
+}
+
+#define TST_R       1
+#define TST_W       2
+#define TST_X       4
+#define TST_M       16
+#define TST_MPRV    32
+#define TST_MPP     64
 
 // ============================================================================
 
@@ -304,6 +319,7 @@ int main () {
     // bit 2: X
     // bit 4: 0-user, 1-machine
     // bit 5: mstatus.MPRV
+    // bit 6: mstatus.MPP (0 for 00, 1 for 11)
     uint8_t  test_cases [32];
     uint32_t test_count = 0;
 
@@ -334,22 +350,23 @@ int main () {
         if (!r &&  w && !x) continue;
         if (!r &&  w &&  x) continue;
 #endif
-        test_cases[test_count++] = 0x10 | i;
+        test_cases[test_count++] = TST_M | i;
     }
 
     // Test cases for all RWX combinations in machine mode with MPRV set
     if (have_user_mode) {
-        for (size_t i=0; i<8; ++i) {
+        for (size_t i=0; i<16; ++i) {
             uint32_t r = (i & 1) ? PMP_R : 0;
             uint32_t w = (i & 2) ? PMP_W : 0;
             uint32_t x = (i & 4) ? PMP_X : 0;
+            uint32_t mpp = (i & 8) != 0;
 
 #if HAVE_SMEPMP
             // Skip -W- and -WX combinations
             if (!r &&  w && !x) continue;
             if (!r &&  w &&  x) continue;
 #endif
-            test_cases[test_count++] = 0x30 | i;
+            test_cases[test_count++] = (TST_MPP * mpp) | TST_MPRV | TST_M | i;
         }
     }
 
@@ -359,16 +376,17 @@ int main () {
     for (size_t i=0; i<test_count; ++i) {
         uint32_t bits = test_cases[i];
 
-        uint32_t r = (bits & 1) ? PMP_R : 0;
-        uint32_t w = (bits & 2) ? PMP_W : 0;
-        uint32_t x = (bits & 4) ? PMP_X : 0;
-        uint32_t m = (bits & 16) != 0;
-        uint32_t mprv = (bits & 32) != 0;
+        uint32_t r = (bits & TST_R) ? PMP_R : 0;
+        uint32_t w = (bits & TST_W) ? PMP_W : 0;
+        uint32_t x = (bits & TST_X) ? PMP_X : 0;
+        uint32_t m = (bits & TST_M) != 0;
+        uint32_t mprv = (bits & TST_MPRV) != 0;
+        uint32_t mpp  = (bits & TST_MPP ) != 0;
 
         // Effective mode
-        uint32_t r_eff = (m && !mprv) ? 1 : r;
-        uint32_t w_eff = (m && !mprv) ? 1 : w;
-        uint32_t x_eff = (m)          ? 1 : x; // MPRV affects load/store only
+        uint32_t r_eff = (m && !(mprv && !mpp)) ? 1 : r;
+        uint32_t w_eff = (m && !(mprv && !mpp)) ? 1 : w;
+        uint32_t x_eff = (m)                    ? 1 : x; // MPRV affects load/store only
 
         char pstr[4] = {
             r ? 'R' : '-',
@@ -378,7 +396,7 @@ int main () {
         };
 
         const char* mstr = m ? "Machine" : "User";
-        printf("%02d - %s mode (mstatus.MPRV=%d) %s from designated areas\n", tid++, mstr, mprv, pstr);
+        printf("%02d - %s mode (MPRV=%d, MPP=%d) %s from designated areas\n", tid++, mstr, mprv, mpp, pstr);
 
         // Prepare data
         const uint32_t* pattern = (i & 1) ? test_pattern_b : test_pattern_a;
@@ -425,6 +443,7 @@ int main () {
         printf(" testing W...\n");
         did_execute = 0;
         exc = 0;
+        set_mpp(mpp);
         set_mprv(mprv);
         TRY { if (m) test_write(pattern); else ucall(test_write, pattern); }
         CATCH { exc = 1; }
@@ -456,6 +475,7 @@ int main () {
 
         did_execute = 0;
         exc = 0;
+        set_mpp(mpp);
         set_mprv(mprv);
         TRY { if (m) cmp = test_read(pattern); else cmp = ucall(test_read, pattern); }
         CATCH { exc = 1; }

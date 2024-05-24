@@ -48,7 +48,7 @@ jobs:
 
   Report-Coverage:
     name: Report-Coverage
-    needs: [Test-Regression, Test-Verification, Test-RISCV-DV, Test-RISCOF]
+    needs: [Test-Regression, Test-Verification, Test-Microarchitectural, Test-RISCV-DV, Test-RISCOF]
     uses: ./.github/workflows/report-coverage.yml
 
   Publish-to-GH-Pages:

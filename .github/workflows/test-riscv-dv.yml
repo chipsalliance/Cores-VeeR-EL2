@@ -202,7 +202,7 @@ jobs:
           - spike
           - whisper
           - renode
-        coverage: ["branch", "toggle"] #TODO: add functional coverage
+        coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
         version: [ uvm ]
         include: ${{ fromJSON(needs.generate-config.outputs.test-include-run) }}
         exclude:

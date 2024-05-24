@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         test: ["test_pyuvm"]
-        coverage: ["branch", "toggle"] #TODO: add functional coverage
+        coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
     env:
       CCACHE_DIR: "/opt/verification/.cache/"
       VERILATOR_VERSION: v5.010

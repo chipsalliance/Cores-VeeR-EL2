@@ -17,13 +17,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <defines.h>
 #include "veer.h"
 #include "fault.h"
 #include "pmp.h"
 
-// Set to one to make the tests assume Smepmp behavior of PMP with
-// MSECCFG = 0x00000000
-#define HAVE_SMEPMP 0
+#ifndef RV_SMEPMP
+#define RV_SMEPMP 0
+#endif
 
 #define CSR_MSTATUS 0x300
 #define CSR_MISA    0x301
@@ -178,12 +179,18 @@ int trap_handler (const struct fault* fault) {
 int main () {
     printf("Hello VeeR (M mode)\n");
 
+#if RV_SMEPMP
+    printf("VeeR has Smepmp\n");
+#else
+    printf("VeeR does not have Smepmp\n");
+#endif
+
     // Check if we have user mode support
     uint32_t misa = 0;
     CSRR_READ(misa, CSR_MISA);
     int have_user_mode = (misa & MISA_U) != 0;
 
-#if HAVE_SMEPMP
+#if RV_SMEPMP
     // Set MSECCFG
     uint32_t mseccfg = 0;
     CSRR_WRITE(mseccfg, 0x747);
@@ -219,7 +226,7 @@ int main () {
         printf("%02d - User mode RWX in default state\n", tid++);
 
         printf(" testing...\n");
-#if HAVE_SMEPMP
+#if RV_SMEPMP
         TRY {
             ucall(test_hello);
             printf(" fail\n");
@@ -330,7 +337,7 @@ int main () {
             uint32_t w = (i & 2) ? PMP_W : 0;
             uint32_t x = (i & 4) ? PMP_X : 0;
 
-#if HAVE_SMEPMP
+#if RV_SMEPMP
             // Skip -W- and -WX combinations
             if (!r &&  w && !x) continue;
             if (!r &&  w &&  x) continue;
@@ -345,7 +352,7 @@ int main () {
         uint32_t w = (i & 2) ? PMP_W : 0;
         uint32_t x = (i & 4) ? PMP_X : 0;
 
-#if HAVE_SMEPMP
+#if RV_SMEPMP
         // Skip -W- and -WX combinations
         if (!r &&  w && !x) continue;
         if (!r &&  w &&  x) continue;
@@ -361,7 +368,7 @@ int main () {
             uint32_t x = (i & 4) ? PMP_X : 0;
             uint32_t mpp = (i & 8) != 0;
 
-#if HAVE_SMEPMP
+#if RV_SMEPMP
             // Skip -W- and -WX combinations
             if (!r &&  w && !x) continue;
             if (!r &&  w &&  x) continue;

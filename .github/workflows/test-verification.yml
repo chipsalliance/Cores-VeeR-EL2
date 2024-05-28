@@ -119,6 +119,8 @@ jobs:
           mkdir -p results
           mv ${TEST_PATH}/coverage.info \
              results/coverage_${{ matrix.test }}_${{ matrix.coverage }}.info
+          mv ${TEST_PATH}/coverage.dat \
+             results/coverage_${{ matrix.test }}_${{ matrix.coverage }}.dat
 
       - name: Upload pytest-html artifacts
         if: always()
@@ -133,4 +135,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: verification_tests_coverage_data
-          path: results/*.info
+          path: |
+            results/*.info
+            results/*.dat

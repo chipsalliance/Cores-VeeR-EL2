@@ -145,6 +145,8 @@ jobs:
           echo "convert_coverage_data.sh exited with RET_CODE = "$?
           mv riscof/coverage/coverage.info \
              riscof/coverage/coverage_riscof_${{ matrix.coverage }}.info
+          mv riscof/coverage/coverage.dat \
+             riscof/coverage/coverage_riscof_${{ matrix.coverage }}.dat
 
       - name: Prepare report
         run: |
@@ -161,7 +163,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: riscof_coverage_data
-          path: riscof/coverage/*.info
+          path: |
+            riscof/coverage/*.info
+            riscof/coverage/*.dat
 
       - name: Pack artifacts
         if: always()

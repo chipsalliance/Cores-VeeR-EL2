@@ -294,6 +294,7 @@ module el2_dec
     // Privilege mode
     output logic priv_mode,
     output logic priv_mode_eff,
+    output logic priv_mode_ns,
 
     // mseccfg CSR content for PMP
     output el2_mseccfg_pkt_t mseccfg,

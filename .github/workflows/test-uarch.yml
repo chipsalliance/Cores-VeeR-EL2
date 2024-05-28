@@ -148,6 +148,7 @@ jobs:
           echo "convert_coverage_data.sh exited with RET_CODE = "$?
           mkdir -p results
           mv ${TEST_PATH}/${TEST_NAME}/*.info results/
+          mv ${TEST_PATH}/${TEST_NAME}/*.dat results/
 
           # Prefix coverage results
           pushd results
@@ -163,7 +164,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: uarch_tests_coverage_data
-          path: ./results/*.info
+          path: |
+            ./results/*.info
+            ./results/*.dat
 
       - name: Upload test logs
         if: always()

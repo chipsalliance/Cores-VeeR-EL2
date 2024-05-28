@@ -371,8 +371,8 @@ jobs:
           mkdir -p results
           mv ${RV_ROOT}/tools/riscv-dv/work/coverage.info \
              results/coverage_riscv-dv_${{ matrix.test }}_${{ matrix.coverage }}.info
-          mv ${TEST_PATH}/coverage.dat \
-             results/coverage_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.coverage }}.dat
+          mv ${RV_ROOT}/tools/riscv-dv/work/coverage.dat \
+             results/coverage_riscv-dv_${{ matrix.test }}_${{ matrix.coverage }}.dat
 
       - name: Pack artifacts
         if: always()

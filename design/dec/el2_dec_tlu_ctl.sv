@@ -239,8 +239,10 @@ import el2_pkg::*;
 `ifdef RV_USER_MODE
 
    // Privilege mode
+   // 0 - machine, 1 - user
    output logic  priv_mode,
    output logic  priv_mode_eff,
+   output logic  priv_mode_ns,
 
    // mseccfg CSR content for PMP
    output logic [2:0] mseccfg,
@@ -1216,7 +1218,6 @@ end
    //
    // Privilege mode
    //
-   logic  priv_mode_ns; // 0 - machine, 1 - user
    assign priv_mode_ns = (mret_r & mstatus[MSTATUS_MPP]) |
                          (exc_or_int_valid_r & 1'b0 ) |
                          ((~mret_r & ~exc_or_int_valid_r) & priv_mode);

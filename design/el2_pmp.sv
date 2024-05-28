@@ -32,7 +32,7 @@ module el2_pmp
 `endif
 
 `ifdef RV_USER_MODE
-    input logic priv_mode,      // operating privilege mode
+    input logic priv_mode_ns,   // operating privilege mode (next clock cycle)
     input logic priv_mode_eff,  // operating effective privilege mode
 `endif
 
@@ -223,7 +223,7 @@ module el2_pmp
   logic [PMP_CHANNELS-1:0] pmp_priv_mode_eff;
   for (genvar c = 0; c < PMP_CHANNELS; c++) begin : g_priv_mode_eff
     assign pmp_priv_mode_eff[c] = (
-      ((pmp_chan_type[c] == EXEC) & priv_mode) |
+      ((pmp_chan_type[c] == EXEC) & priv_mode_ns) |
       ((pmp_chan_type[c] != EXEC) & priv_mode_eff)); // RW affected by mstatus.MPRV
   end
 `endif
@@ -297,7 +297,7 @@ module el2_pmp
         region_match_all[c],
 `ifdef RV_USER_MODE
         any_region_enabled,
-        priv_mode,
+        pmp_priv_mode_eff[c],
 `else
         1'b0,
         1'b0,

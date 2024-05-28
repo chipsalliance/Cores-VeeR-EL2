@@ -11,6 +11,13 @@ _start:
         la t0, _trap
         csrw mtvec, t0
 
+        # Setup PMP
+        # Region 0 TOR 0x00000000-0xFFFFFFFF RWX
+        li t0, 0xFFFFFFFF
+        csrw pmpaddr0, t0
+        li t0, 0x0000000F
+        csrw pmpcfg0, t0
+
         # Call main()
         call main
 

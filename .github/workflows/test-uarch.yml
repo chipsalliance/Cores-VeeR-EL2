@@ -152,7 +152,7 @@ jobs:
 
           # Prefix coverage results
           pushd results
-            for OLD_NAME in *.info; do
+            for OLD_NAME in *.info *.dat; do
               NEW_NAME=${OLD_NAME/coverage_/coverage_${TEST_NAME}_}
               echo "renaming '${OLD_NAME}' to '${NEW_NAME}'"
               mv ${OLD_NAME} ${NEW_NAME}

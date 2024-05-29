@@ -28,7 +28,7 @@ else ifneq ("$(COVERAGE)", "")
 endif
 
 VERILATOR       = verilator
-VERILATOR_CFLAGS= "-std=c++11"
+VERILATOR_CFLAGS= "-std=c++14"
 VERILATOR_INC   = -I$(WORK_DIR) -I$(RV_ROOT)/testbench 
 VERILATOR_EXE   = $(RV_ROOT)/testbench/test_tb_top.cpp
 

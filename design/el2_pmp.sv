@@ -28,7 +28,7 @@ module el2_pmp
     input logic scan_mode, // Scan mode
 
 `ifdef RV_SMEPMP
-    input el2_mseccfg_pkt_t mseccfg, // mseccfg CSR content, RLM, MMWP and MML bits
+    input el2_mseccfg_pkt_t mseccfg, // mseccfg CSR content, RLB, MMWP and MML bits
 `endif
 
 `ifdef RV_USER_MODE
@@ -150,7 +150,7 @@ module el2_pmp
 `ifdef RV_USER_MODE
   `ifdef RV_SMEPMP
     // When MSECCFG.MMWP is set default deny always, otherwise allow for M-mode, deny for other
-    // modes. Also deny unmatched for M-mode whe MSECCFG.MML is set and request type is EXEC.
+    // modes. Also deny unmatched for M-mode when MSECCFG.MML is set and request type is EXEC.
     logic access_fail = csr_pmp_mseccfg.MMWP | priv_mode |
                        (csr_pmp_mseccfg.MML && (req_type == EXEC));
   `else

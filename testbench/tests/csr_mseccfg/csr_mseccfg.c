@@ -140,7 +140,7 @@ int main () {
     printf("Checking if mseccfg.MML cannot be cleared...\n");
 
     // Lock region 3. Region 1 is already locked. This is necessary for the
-    // test as when MML=1 non-locked regions alwaus deny access in M mode
+    // test as when MML=1 non-locked regions always deny access in M mode
     write_csr(CSR_PMPCFG0, pmpcfg | (PMPCFG_L << (8 * 3)));
 
     reg = read_csr(CSR_MSECCFG);

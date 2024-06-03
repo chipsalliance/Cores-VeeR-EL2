@@ -1,4 +1,11 @@
 #include <stdio.h>
+#include <defines.h>
+
+// Check if VeeR is configured for Smepmp
+#if !RV_SMEPMP
+#error "The mseccfg CSR test requires Smepmp to be enabled"    
+#endif
+
 
 // ============================================================================
 

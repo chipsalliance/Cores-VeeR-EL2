@@ -1558,7 +1558,7 @@ end
    localparam MSECCFGH = 12'h757;
 
    // Detect if any PMP region is locked regardless of being enabled. This is
-   // neccessary for mseccfg.RLB bit write behavior
+   // necessary for mseccfg.RLB bit write behavior
    logic [pt.PMP_ENTRIES-1:0] pmp_region_locked;
    for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : g_regions
      assign pmp_region_locked[r] = pmp_pmpcfg[r].lock;

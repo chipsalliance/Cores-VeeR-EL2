@@ -39,7 +39,12 @@ extern uint32_t _code_end;
 extern uint32_t _data_begin;
 extern uint32_t _data_end;
 
+// Takes an address of a symbol
 #define A(x) ((uint32_t)(&(x)))
+// Converts an address for PMP by shifting it 2 bits to the right
+#define PMPADDR(x) ((x) >> 2)
+// Shifts PMP region config bits to appropriate position give the region index
+#define PMPREGION(cfg,idx) ((cfg) << (8 * ((idx) % 4)))
 
 // ============================================================================
 
@@ -80,14 +85,14 @@ int main () {
     // Configure PMP
     // region 1: _code_begin - _code_end, --X
     // region 3: _data_begin - _data_end, RW-
-    write_csr(CSR_PMPADDR0, A(_code_begin) >> 2); // PMPADDRx stores address bits 33:2
-    write_csr(CSR_PMPADDR1, A(_code_end)   >> 2);
-    write_csr(CSR_PMPADDR2, A(_data_begin) >> 2);
-    write_csr(CSR_PMPADDR3, A(_data_end)   >> 2);
+    write_csr(CSR_PMPADDR0, PMPADDR(A(_code_begin))); // PMPADDRx stores address bits 33:2
+    write_csr(CSR_PMPADDR1, PMPADDR(A(_code_end)));
+    write_csr(CSR_PMPADDR2, PMPADDR(A(_data_begin)));
+    write_csr(CSR_PMPADDR3, PMPADDR(A(_data_end)));
 
     uint32_t pmpcfg;
-    pmpcfg = ((PMPCFG_TOR | PMPCFG_X)            << (8 * 1)) | // region 1
-             ((PMPCFG_TOR | PMPCFG_R | PMPCFG_W) << (8 * 3));  // region 3
+    pmpcfg = PMPREGION((PMPCFG_TOR | PMPCFG_X)           , 1) |
+             PMPREGION((PMPCFG_TOR | PMPCFG_R | PMPCFG_W), 3);
 
     write_csr(CSR_PMPCFG0, pmpcfg);
 
@@ -98,9 +103,9 @@ int main () {
     write_csr(CSR_MSECCFG, reg |  MSECCFG_RLB);
 
     // Lock region 1 and check
-    write_csr(CSR_PMPCFG0, pmpcfg | (PMPCFG_L << (8 * 1)));
+    write_csr(CSR_PMPCFG0, pmpcfg | PMPREGION(PMPCFG_L, 1));
     reg = read_csr(CSR_PMPCFG0);
-    if (!(reg & (PMPCFG_L << (8 * 1)))) {
+    if (!(reg & PMPREGION(PMPCFG_L, 1))) {
         printf("ERROR: cannot lock PMP region 0\n");
         return -1;
     }
@@ -108,7 +113,7 @@ int main () {
     // Unlock region 1 and check
     write_csr(CSR_PMPCFG0, pmpcfg);
     reg = read_csr(CSR_PMPCFG0);
-    if (reg & (PMPCFG_L << (8 * 1))) {
+    if (reg & PMPREGION(PMPCFG_L, 1)) {
         printf("ERROR: cannot unlock PMP region 0\n");
         return -1;
     }
@@ -123,7 +128,7 @@ int main () {
     write_csr(CSR_MSECCFG, reg & ~MSECCFG_RLB);
 
     // Lock region 1
-    write_csr(CSR_PMPCFG0, pmpcfg | (PMPCFG_L << (8 * 1)));
+    write_csr(CSR_PMPCFG0, pmpcfg | PMPREGION(PMPCFG_L, 1));
 
     // Try setting RLB and check
     reg = read_csr(CSR_MSECCFG);
@@ -141,7 +146,7 @@ int main () {
 
     // Lock region 3. Region 1 is already locked. This is necessary for the
     // test as when MML=1 non-locked regions always deny access in M mode
-    write_csr(CSR_PMPCFG0, pmpcfg | (PMPCFG_L << (8 * 3)));
+    write_csr(CSR_PMPCFG0, pmpcfg | PMPREGION(PMPCFG_L, 3));
 
     reg = read_csr(CSR_MSECCFG);
     write_csr(CSR_MSECCFG, reg |  MSECCFG_MML);

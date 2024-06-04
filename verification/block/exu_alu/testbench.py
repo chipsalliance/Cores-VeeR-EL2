@@ -91,7 +91,7 @@ class AluDriver(uvm_driver):
                 # Zbp
                 self.dut.ap_pack.value = it.op in ["pack"]
                 self.dut.ap_packu.value = 0
-                self.dut.ap_packh.value = 0
+                self.dut.ap_packh.value = it.op in ["packh"]
 
                 # Zba
                 self.dut.ap_sh1add.value = it.op in ["sh1add"]
@@ -154,6 +154,7 @@ class AluInputMonitor(uvm_component):
                 ap_or = int(self.dut.ap_lor.value)
                 ap_xor = int(self.dut.ap_lxor.value)
                 ap_pack = int(self.dut.ap_pack.value)
+                ap_packh = int(self.dut.ap_packh.value)
                 ap_sh1add = int(self.dut.ap_sh1add.value)
                 ap_sh2add = int(self.dut.ap_sh2add.value)
                 ap_sh3add = int(self.dut.ap_sh3add.value)
@@ -172,6 +173,8 @@ class AluInputMonitor(uvm_component):
                     op = "xor"
                 elif ap_pack:
                     op = "pack"
+                elif ap_packh:
+                    op = "packh"
                 elif ap_sh1add:
                     op = "sh1add"
                 elif ap_sh2add:
@@ -278,6 +281,8 @@ class AluScoreboard(uvm_component):
                 result = item_inp.a ^ item_inp.b
             elif item_inp.op == "pack":
                 result = (((item_inp.a << 16) & INT_MASK) >> 16) | (item_inp.b << 16) & INT_MASK
+            elif item_inp.op == "packh":
+                result = (item_inp.a & 0xFF) | ((item_inp.b & 0xFF) << 8)
             elif item_inp.op == "sh1add":
                 result = ((item_inp.a << 1) + item_inp.b) & INT_MASK
             elif item_inp.op == "sh2add":

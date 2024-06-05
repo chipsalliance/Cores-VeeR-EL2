@@ -264,7 +264,7 @@ class AluScoreboard(uvm_component):
             elif item_inp.op == "xor":
                 result = item_inp.a ^ item_inp.b
             else:
-                self.logger.error("Unknown ALU operation '{}'".format(item_in.op))
+                self.logger.error("Unknown ALU operation '{}'".format(item_inp.op))
                 self.passed = False
 
             self.logger.debug(
@@ -277,16 +277,14 @@ class AluScoreboard(uvm_component):
             )
 
             # Check result
-            if item_inp.op in ["add", "sub", "and", "or", "xor"]:
-                if item_out.out != result:
-                    self.logger.error(
-                        "{} {} {} != {} (should be {})".format(
-                            item_inp.a, item_inp.op, item_inp.b, item_out.out, result
-                        )
+            assert (result is not None)
+            if item_out.out != result:
+                self.logger.error(
+                    "{} {} {} != {} (should be {})".format(
+                        item_inp.a, item_inp.op, item_inp.b, item_out.out, result
                     )
-                    self.passed = False
-            else:
-                assert False
+                )
+                self.passed = False
 
     def final_phase(self):
         if not self.passed:

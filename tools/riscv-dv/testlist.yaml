@@ -1,0 +1,28 @@
+- import: <riscv_dv_root>/target/rv32imc/testlist.yaml
+
+- test: riscv_pmp_disable_all_regions_veer
+  desc: >
+    Disable all PMP regions
+  iterations: 2
+  gen_test: riscv_rand_instr_test
+  gen_opts: >
+    +set_mstatus_mprv=1
+    +enable_write_pmp_csr=1
+    +mseccfg=MML:0,MMWP:0,RLB:0
+    +pmp_region_0=L:1,X:0,W:0,R:0
+    +pmp_region_1=L:1,X:0,W:0,R:0
+    +pmp_region_2=L:1,X:0,W:0,R:0
+    +pmp_region_3=L:1,X:0,W:0,R:0
+    +pmp_region_4=L:1,X:0,W:0,R:0
+    +pmp_region_5=L:1,X:0,W:0,R:0
+    +pmp_region_6=L:1,X:0,W:0,R:0
+    +pmp_region_7=L:1,X:0,W:0,R:0
+    +pmp_region_8=L:1,X:0,W:0,R:0
+    +pmp_region_9=L:1,X:0,W:0,R:0
+    +pmp_region_10=L:1,X:0,W:0,R:0
+    +pmp_region_11=L:1,X:0,W:0,R:0
+    +pmp_region_12=L:1,X:0,W:0,R:0
+    +pmp_region_13=L:1,X:0,W:0,R:0
+    +pmp_region_14=L:1,X:0,W:0,R:0
+    +pmp_region_15=L:1,X:0,W:0,R:0
+  rtl_test: core_base_test

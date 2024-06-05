@@ -83,10 +83,10 @@ class AluDriver(uvm_driver):
                 self.dut.ap_zbb.value = 0
 
                 # Zbs
-                self.dut.ap_bset.value = 0
-                self.dut.ap_bclr.value = 0
-                self.dut.ap_binv.value = 0
-                self.dut.ap_bext.value = 0
+                self.dut.ap_bset.value = it.op in ["bset"]
+                self.dut.ap_bclr.value = it.op in ["bclr"]
+                self.dut.ap_binv.value = it.op in ["binv"]
+                self.dut.ap_bext.value = it.op in ["bext"]
 
                 # Zbp
                 self.dut.ap_pack.value = it.op in ["pack"]
@@ -153,6 +153,10 @@ class AluInputMonitor(uvm_component):
                 ap_and = int(self.dut.ap_land.value)
                 ap_or = int(self.dut.ap_lor.value)
                 ap_xor = int(self.dut.ap_lxor.value)
+                ap_bset = int(self.dut.ap_bset.value)
+                ap_bclr = int(self.dut.ap_bclr.value)
+                ap_binv = int(self.dut.ap_binv.value)
+                ap_bext = int(self.dut.ap_bext.value)
                 ap_pack = int(self.dut.ap_pack.value)
                 ap_packh = int(self.dut.ap_packh.value)
                 ap_sh1add = int(self.dut.ap_sh1add.value)
@@ -171,6 +175,14 @@ class AluInputMonitor(uvm_component):
                     op = "or"
                 elif ap_xor:
                     op = "xor"
+                elif ap_bset:
+                    op = "bset"
+                elif ap_bclr:
+                    op = "bclr"
+                elif ap_binv:
+                    op = "binv"
+                elif ap_bext:
+                    op = "bext"
                 elif ap_pack:
                     op = "pack"
                 elif ap_packh:
@@ -279,6 +291,14 @@ class AluScoreboard(uvm_component):
                 result = item_inp.a | item_inp.b
             elif item_inp.op == "xor":
                 result = item_inp.a ^ item_inp.b
+            elif item_inp.op == "bset":
+                result = item_inp.a | (1 << (item_inp.b & 31))
+            elif item_inp.op == "bclr":
+                result = item_inp.a & ~(1 << (item_inp.b & 31))
+            elif item_inp.op == "binv":
+                result = item_inp.a ^ (1 << (item_inp.b & 31))
+            elif item_inp.op == "bext":
+                result = 1 & (item_inp.a >> (item_inp.b & 31))
             elif item_inp.op == "pack":
                 result = (((item_inp.a << 16) & INT_MASK) >> 16) | (item_inp.b << 16) & INT_MASK
             elif item_inp.op == "packh":

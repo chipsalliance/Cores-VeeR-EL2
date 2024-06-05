@@ -69,18 +69,13 @@ class AluDriver(uvm_driver):
                 self.dut.valid_in.value = 1
 
                 # Zbb
-                self.dut.ap_clz.value = 0
-                self.dut.ap_ctz.value = 0
-                self.dut.ap_cpop.value = 0
-                self.dut.ap_sext_b.value = 0
-                self.dut.ap_sext_h.value = 0
-                self.dut.ap_min.value = 0
-                self.dut.ap_max.value = 0
-                self.dut.ap_rol.value = 0
-                self.dut.ap_ror.value = 0
-                self.dut.ap_grev.value = 0
-                self.dut.ap_gorc.value = 0
-                self.dut.ap_zbb.value = 0
+                self.dut.ap_clz.value = it.op in ["clz"]
+                self.dut.ap_ctz.value = it.op in ["ctz"]
+                self.dut.ap_cpop.value = it.op in ["cpop"]
+                self.dut.ap_sext_b.value = it.op in ["sext_b"]
+                self.dut.ap_sext_h.value = it.op in ["sext_h"]
+                self.dut.ap_rol.value = it.op in ["rol"]
+                self.dut.ap_ror.value = it.op in ["ror"]
 
                 # Zbs
                 self.dut.ap_bset.value = it.op in ["bset"]
@@ -90,7 +85,6 @@ class AluDriver(uvm_driver):
 
                 # Zbp
                 self.dut.ap_pack.value = it.op in ["pack"]
-                self.dut.ap_packu.value = 0
                 self.dut.ap_packh.value = it.op in ["packh"]
 
                 # Zba
@@ -148,50 +142,48 @@ class AluInputMonitor(uvm_component):
                 b = int(self.dut.b_in.value)
 
                 # Decode operation
-                ap_add = int(self.dut.ap_add.value)
-                ap_sub = int(self.dut.ap_sub.value)
-                ap_and = int(self.dut.ap_land.value)
-                ap_or = int(self.dut.ap_lor.value)
-                ap_xor = int(self.dut.ap_lxor.value)
-                ap_bset = int(self.dut.ap_bset.value)
-                ap_bclr = int(self.dut.ap_bclr.value)
-                ap_binv = int(self.dut.ap_binv.value)
-                ap_bext = int(self.dut.ap_bext.value)
-                ap_pack = int(self.dut.ap_pack.value)
-                ap_packh = int(self.dut.ap_packh.value)
-                ap_sh1add = int(self.dut.ap_sh1add.value)
-                ap_sh2add = int(self.dut.ap_sh2add.value)
-                ap_sh3add = int(self.dut.ap_sh3add.value)
-
                 op = None
-
-                if ap_add:
+                if int(self.dut.ap_add.value):
                     op = "add"
-                elif ap_sub:
+                elif int(self.dut.ap_sub.value):
                     op = "sub"
-                elif ap_and:
+                elif int(self.dut.ap_land.value):
                     op = "and"
-                elif ap_or:
+                elif int(self.dut.ap_lor.value):
                     op = "or"
-                elif ap_xor:
+                elif int(self.dut.ap_lxor.value):
                     op = "xor"
-                elif ap_bset:
+                elif int(self.dut.ap_clz.value):
+                    op = "clz"
+                elif int(self.dut.ap_ctz.value):
+                    op = "ctz"
+                elif int(self.dut.ap_cpop.value):
+                    op = "cpop"
+                elif int(self.dut.ap_sext_b.value):
+                    op = "sext_b"
+                elif int(self.dut.ap_sext_h.value):
+                    op = "sext_h"
+                elif int(self.dut.ap_rol.value):
+                    op = "rol"
+                elif int(self.dut.ap_ror.value):
+                    op = "ror"
+                elif int(self.dut.ap_bset.value):
                     op = "bset"
-                elif ap_bclr:
+                elif int(self.dut.ap_bclr.value):
                     op = "bclr"
-                elif ap_binv:
+                elif int(self.dut.ap_binv.value):
                     op = "binv"
-                elif ap_bext:
+                elif int(self.dut.ap_bext.value):
                     op = "bext"
-                elif ap_pack:
+                elif int(self.dut.ap_pack.value):
                     op = "pack"
-                elif ap_packh:
+                elif int(self.dut.ap_packh.value):
                     op = "packh"
-                elif ap_sh1add:
+                elif int(self.dut.ap_sh1add.value):
                     op = "sh1add"
-                elif ap_sh2add:
+                elif int(self.dut.ap_sh2add.value):
                     op = "sh2add"
-                elif ap_sh3add:
+                elif int(self.dut.ap_sh3add.value):
                     op = "sh3add"
 
                 # Write item
@@ -291,6 +283,26 @@ class AluScoreboard(uvm_component):
                 result = item_inp.a | item_inp.b
             elif item_inp.op == "xor":
                 result = item_inp.a ^ item_inp.b
+            elif item_inp.op == "clz":
+                result = next((i for i in range(32) if ((item_inp.a << i) & INT_MASK) >> 31), 32)
+            elif item_inp.op == "ctz":
+                result = next((i for i in range(32) if (item_inp.a >> i) & 1), 32)
+            elif item_inp.op == "cpop":
+                result = item_inp.a.bit_count()
+            elif item_inp.op == "sext_b":
+                last_byte = item_inp.a & 0xFF
+                sign = (item_inp.a & 0x00000080) >> 7
+                result = (0xFFFFFF00 * sign) | last_byte
+            elif item_inp.op == "sext_h":
+                last_2_bytes = item_inp.a & 0xFFFF
+                sign = (item_inp.a & 0x00008000) >> 15
+                result = (0xFFFF0000 * sign) | last_2_bytes
+            elif item_inp.op == "rol":
+                shamt = item_inp.b & 31
+                result = (item_inp.a << shamt) & INT_MASK | (item_inp.a >> ((32 - shamt) & 31))
+            elif item_inp.op == "ror":
+                shamt = item_inp.b & 31
+                result = (item_inp.a >> shamt) | (item_inp.a << ((32 - shamt) & 31)) & INT_MASK
             elif item_inp.op == "bset":
                 result = item_inp.a | (1 << (item_inp.b & 31))
             elif item_inp.op == "bclr":
@@ -303,12 +315,9 @@ class AluScoreboard(uvm_component):
                 result = (((item_inp.a << 16) & INT_MASK) >> 16) | (item_inp.b << 16) & INT_MASK
             elif item_inp.op == "packh":
                 result = (item_inp.a & 0xFF) | ((item_inp.b & 0xFF) << 8)
-            elif item_inp.op == "sh1add":
-                result = ((item_inp.a << 1) + item_inp.b) & INT_MASK
-            elif item_inp.op == "sh2add":
-                result = ((item_inp.a << 2) + item_inp.b) & INT_MASK
-            elif item_inp.op == "sh3add":
-                result = ((item_inp.a << 3) + item_inp.b) & INT_MASK
+            elif item_inp.op in ["sh1add", "sh2add", "sh3add"]:
+                shift = int(item_inp.op[2])
+                result = ((item_inp.a << shift) + item_inp.b) & INT_MASK
             else:
                 self.logger.error("Unknown ALU operation '{}'".format(item_inp.op))
                 self.passed = False

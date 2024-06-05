@@ -94,10 +94,11 @@ class AluDriver(uvm_driver):
                 self.dut.ap_packh.value = 0
 
                 # Zba
-                self.dut.ap_sh1add.value = 0
-                self.dut.ap_sh2add.value = 0
-                self.dut.ap_sh3add.value = 0
-                self.dut.ap_zba.value = 0
+                self.dut.ap_sh1add.value = it.op in ["sh1add"]
+                self.dut.ap_sh2add.value = it.op in ["sh2add"]
+                self.dut.ap_sh3add.value = it.op in ["sh3add"]
+                # ap_zba has to be set to 1 to use sh??add instructions
+                self.dut.ap_zba.value = it.op in ["sh1add", "sh2add", "sh3add"]
 
                 # Arith
                 self.dut.ap_add.value = it.op in ["add"]
@@ -152,20 +153,28 @@ class AluInputMonitor(uvm_component):
                 ap_and = int(self.dut.ap_land.value)
                 ap_or = int(self.dut.ap_lor.value)
                 ap_xor = int(self.dut.ap_lxor.value)
+                ap_sh1add = int(self.dut.ap_sh1add.value)
+                ap_sh2add = int(self.dut.ap_sh2add.value)
+                ap_sh3add = int(self.dut.ap_sh3add.value)
 
-                vec = (ap_add, ap_sub, ap_and, ap_or, ap_xor)
                 op = None
 
-                if vec == (1, 0, 0, 0, 0):
+                if ap_add:
                     op = "add"
-                if vec == (0, 1, 0, 0, 0):
+                elif ap_sub:
                     op = "sub"
-                if vec == (0, 0, 1, 0, 0):
+                elif ap_and:
                     op = "and"
-                if vec == (0, 0, 0, 1, 0):
+                elif ap_or:
                     op = "or"
-                if vec == (0, 0, 0, 0, 1):
+                elif ap_xor:
                     op = "xor"
+                elif ap_sh1add:
+                    op = "sh1add"
+                elif ap_sh2add:
+                    op = "sh2add"
+                elif ap_sh3add:
+                    op = "sh3add"
 
                 # Write item
                 self.ap.write(
@@ -253,16 +262,23 @@ class AluScoreboard(uvm_component):
             # Predict result
             result = None
 
+            INT_MASK = 0xFFFFFFFF
             if item_inp.op == "add":
-                result = (item_inp.a + item_inp.b) & 0xFFFFFFFF
+                result = (item_inp.a + item_inp.b) & INT_MASK
             elif item_inp.op == "sub":
-                result = (item_inp.a - item_inp.b) & 0xFFFFFFFF
+                result = (item_inp.a - item_inp.b) & INT_MASK
             elif item_inp.op == "and":
                 result = item_inp.a & item_inp.b
             elif item_inp.op == "or":
                 result = item_inp.a | item_inp.b
             elif item_inp.op == "xor":
                 result = item_inp.a ^ item_inp.b
+            elif item_inp.op == "sh1add":
+                result = ((item_inp.a << 1) + item_inp.b) & INT_MASK
+            elif item_inp.op == "sh2add":
+                result = ((item_inp.a << 2) + item_inp.b) & INT_MASK
+            elif item_inp.op == "sh3add":
+                result = ((item_inp.a << 3) + item_inp.b) & INT_MASK
             else:
                 self.logger.error("Unknown ALU operation '{}'".format(item_inp.op))
                 self.passed = False

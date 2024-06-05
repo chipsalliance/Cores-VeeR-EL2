@@ -192,6 +192,7 @@ def ifu_compress_verify(session, blockName, testName, coverage):
     [
         "test_arith",
         "test_logic",
+        "test_zba",
     ],
 )
 @nox.parametrize("coverage", coverageTypes)

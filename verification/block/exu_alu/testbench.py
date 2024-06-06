@@ -368,8 +368,8 @@ class BaseSequence(uvm_sequence):
         count = ConfigDB().get(None, "", "TEST_ITERATIONS")
 
         for i in range(count):
-            a = random.randrange(1, 1 << 32)
-            b = random.randrange(1, 1 << 32)
+            a = random.randrange(-(1 << 31), 1 << 31)
+            b = random.randrange(-(1 << 31), 1 << 31)
             op = random.choice(self.ops)
 
             item = AluInputItem(op, a, b)

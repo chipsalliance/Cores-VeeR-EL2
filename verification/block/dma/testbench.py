@@ -413,7 +413,8 @@ class Axi4LiteBFM(uvm_component):
                     break
 
         # Send write request
-        await self._wait(self.axi_awready)
+        # timeout needs to be fairly high to allow requests to complete in all randomized scenarios
+        await self._wait(self.axi_awready, max_cycles=300)
         self.axi_awvalid.value = 1
         self.axi_awaddr.value = addr
         self.axi_awid.value = awid
@@ -921,7 +922,8 @@ class BaseTest(uvm_test):
         await self.run()
 
         # Wait some cycles
-        await ClockCycles(cocotb.top.clk, 10)
+        # this needs to be fairly high to allow the last AXI requests to complete in all randomized scenarios
+        await ClockCycles(cocotb.top.clk, 50)
 
         self.drop_objection()
 

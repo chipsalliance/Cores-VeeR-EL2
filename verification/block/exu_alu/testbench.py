@@ -332,7 +332,7 @@ class AluScoreboard(uvm_component):
             )
 
             # Check result
-            assert (result is not None)
+            assert result is not None
             if item_out.out != result:
                 self.logger.error(
                     "{} {} {} != {} (should be {})".format(

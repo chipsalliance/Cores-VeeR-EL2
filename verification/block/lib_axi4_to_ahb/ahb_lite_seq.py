@@ -4,8 +4,9 @@
 import random
 
 from ahb_lite_pkg import AHB_LITE_RESPONSE_CODES
-from common import BaseSeq
 from pyuvm import uvm_sequence_item
+
+from common import BaseSeq
 
 
 class AHBLiteBaseSeqItem(uvm_sequence_item):

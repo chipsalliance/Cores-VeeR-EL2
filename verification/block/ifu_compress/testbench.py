@@ -72,11 +72,11 @@ def generate_assembly_pair():
             (f"c.xor x{dreg}, x{sreg}", f"xor x{dreg}, x{dreg}, x{sreg}"),
             (f"c.sub x{dreg}, x{sreg}", f"sub x{dreg}, x{dreg}, x{sreg}"),
             (f"c.mv x{dreg}, x{sreg}", f"add x{dreg}, x0, x{sreg}"),
-            (f"c.andi x{dreg}, {sgn}{imm%5}", f"andi x{dreg}, x{dreg}, {sgn}{imm%5}"),
-            (f"c.addi x{dreg}, {sgn}{imm%5}", f"addi x{dreg}, x{dreg}, {sgn}{imm%5}"),
-            (f"c.srli x{dreg}, {imm%5 or 1}", f"srli x{dreg}, x{dreg}, {imm%5 or 1}"),
-            (f"c.srai x{dreg}, {imm%5 or 1}", f"srai x{dreg}, x{dreg}, {imm%5 or 1}"),
-            (f"c.slli x{dreg}, {imm%5 or 1}", f"slli x{dreg}, x{dreg}, {imm%5 or 1}"),
+            (f"c.andi x{dreg}, {sgn}{imm % 5}", f"andi x{dreg}, x{dreg}, {sgn}{imm % 5}"),
+            (f"c.addi x{dreg}, {sgn}{imm % 5}", f"addi x{dreg}, x{dreg}, {sgn}{imm % 5}"),
+            (f"c.srli x{dreg}, {imm % 5 or 1}", f"srli x{dreg}, x{dreg}, {imm % 5 or 1}"),
+            (f"c.srai x{dreg}, {imm % 5 or 1}", f"srai x{dreg}, x{dreg}, {imm % 5 or 1}"),
+            (f"c.slli x{dreg}, {imm % 5 or 1}", f"slli x{dreg}, x{dreg}, {imm % 5 or 1}"),
             ("c.ebreak", "ebreak"),
         ]
     )

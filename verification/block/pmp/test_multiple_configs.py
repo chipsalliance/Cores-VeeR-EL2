@@ -1,9 +1,10 @@
 # Copyright (c) 2023 Antmicro <www.antmicro.com>
 # SPDX-License-Identifier: Apache-2.0
 
-from common import BaseSequence
 from pyuvm import ConfigDB, test
 from testbench import BaseEnv, BaseTest, PMPWriteAddrCSRItem, PMPWriteCfgCSRItem
+
+from common import BaseSequence
 
 LOWER_BOUNDARY = 0x00000
 UPPER_BOUNDARY = 0x20000

@@ -1,6 +1,7 @@
-from common import *
 from jtag_bfm import JTAGBfm as BFM
 from pyuvm import *
+
+from common import *
 
 
 class JTAGAgent(uvm_agent):

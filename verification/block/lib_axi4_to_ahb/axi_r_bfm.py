@@ -5,8 +5,9 @@ import cocotb
 from axi_pkg import AXI_NOTIFICATION, AXI_R_CHAN_RSP_SIGNALS
 from cocotb.queue import QueueEmpty
 from cocotb.triggers import RisingEdge
-from common import get_int, get_signals
 from pyuvm import UVMQueue, utility_classes, uvm_root
+
+from common import get_int, get_signals
 
 
 class AXIReadChannelBFM(metaclass=utility_classes.Singleton):

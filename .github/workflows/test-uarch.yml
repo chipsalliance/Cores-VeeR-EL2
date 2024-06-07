@@ -30,7 +30,7 @@ jobs:
       - name: Lint
         run: |
           pushd ${TEST_PATH}
-            nox -s isort flake8 black
+            nox -s test_lint
           popd
   tests:
     name: Microarchitectural tests

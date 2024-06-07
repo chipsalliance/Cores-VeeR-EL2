@@ -8,8 +8,9 @@ import pyuvm
 from axi_r_bfm import AXIReadChannelBFM
 from cocotb.queue import QueueEmpty
 from cocotb.triggers import RisingEdge
-from common import BaseMonitor
 from pyuvm import ConfigDB, uvm_agent, uvm_analysis_port, uvm_driver, uvm_sequencer
+
+from common import BaseMonitor
 
 
 class AXIReadChannelAgent(uvm_agent):

@@ -4,9 +4,10 @@
 
 import pyuvm
 from cocotb.triggers import FallingEdge, RisingEdge
-from common import Defaults, collect_signals, get_int
 from dmi_seq import SetUncoreEnableSeqItem
 from pyuvm import *
+
+from common import Defaults, collect_signals, get_int
 
 
 class MemoryModel:

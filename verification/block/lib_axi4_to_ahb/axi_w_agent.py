@@ -11,8 +11,9 @@ from axi_w_seq import (
 )
 from cocotb.queue import QueueEmpty
 from cocotb.triggers import RisingEdge
-from common import BaseMonitor
 from pyuvm import ConfigDB, uvm_agent, uvm_driver, uvm_sequencer
+
+from common import BaseMonitor
 
 
 class AXIWriteChannelAgent(uvm_agent):

@@ -4,9 +4,10 @@
 import cocotb
 import pyuvm
 from cocotb.triggers import ClockCycles, FallingEdge, ReadOnly, RisingEdge
-from common import *
 from jtag_pkg import *
 from pyuvm import *
+
+from common import *
 
 # =============================================================================
 

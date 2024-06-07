@@ -778,8 +778,9 @@ else  begin : ECC0_MUX
      assign ic_eccerr [i] = '0 ;
   end
 
-     assign ic_parerr[1] = (|ic_parerr_bank[1][3:0]) & bank_check_en[1];
-     assign ic_parerr[0] = (|ic_parerr_bank[0][3:0]) & bank_check_en[0];
+   assign ic_parerr = {
+     (|ic_parerr_bank[1][3:0]) & bank_check_en[1], (|ic_parerr_bank[0][3:0]) & bank_check_en[0]
+   };
 
 end // else: !if( pt.ICACHE_ECC )
 

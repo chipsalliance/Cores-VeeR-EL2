@@ -185,6 +185,7 @@ import el2_pkg::*;
       logic [3:0]   stbuf_fwdbyteen_lo_r, stbuf_fwdbyteen_hi_r;
       logic [31:0]  lsu_rdata_lo_r, lsu_rdata_hi_r;
       logic [63:0]  picm_rd_data_r;
+      logic [63:0]  lsu_ld_data_r_shift;
       logic [63:32] lsu_ld_data_r_nc, lsu_ld_data_corr_r_nc;
       logic [2:0]   dma_mem_tag_r;
       logic         stbuf_fwddata_en;
@@ -193,7 +194,9 @@ import el2_pkg::*;
       assign dccm_dma_ecc_error   = lsu_double_ecc_error_r;
       assign dccm_dma_rtag[2:0]   = dma_mem_tag_r[2:0];
       assign dccm_dma_rdata[63:0] = ldst_dual_r ? lsu_rdata_corr_r[63:0] : {2{lsu_rdata_corr_r[31:0]}};
-      assign {lsu_ld_data_r_nc[63:32], lsu_ld_data_r[31:0]}           = lsu_rdata_r[63:0] >> 8*lsu_addr_r[1:0];
+      assign lsu_ld_data_r_shift[63:0] = lsu_rdata_r[63:0] >> 8*lsu_addr_r[1:0];
+      assign lsu_ld_data_r_nc[63:32]   = lsu_ld_data_r_shift[63:32];
+      assign lsu_ld_data_r[31:0]       = lsu_ld_data_r_shift[31:0];
       assign {lsu_ld_data_corr_r_nc[63:32], lsu_ld_data_corr_r[31:0]} = lsu_rdata_corr_r[63:0] >> 8*lsu_addr_r[1:0];
 
       assign picm_rd_data_r[63:32]   = picm_rd_data_r[31:0];

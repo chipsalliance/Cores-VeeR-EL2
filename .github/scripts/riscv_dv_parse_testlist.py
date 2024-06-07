@@ -1,4 +1,5 @@
 import sys
+import os
 from json import dumps
 from yaml import load, Loader
 from typing import Generator
@@ -19,8 +20,15 @@ def parse_yaml(path: str) -> Generator[str, None, None]:
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
-        testlist = parse_yaml(
-            RISCV_DV_HOME + f'target/{sys.argv[1]}/testlist.yaml')
+        testlist = RISCV_DV_HOME + f'target/{sys.argv[1]}/testlist.yaml'
+
+        # check if testlist.yaml is provided by RISCV-DV; if not - it's a
+        # custom testlist file not provided by RISCV-DV by default; treat the
+        # script argument as full a path
+        if not os.path.isdir(testlist):
+            testlist = sys.argv[1]
+
+        testlist = parse_yaml(testlist)
     else:
         testlist = parse_yaml(RISCV_DV_HOME + 'yaml/base_testlist.yaml')
     testlist = list(testlist)

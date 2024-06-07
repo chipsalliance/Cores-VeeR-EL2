@@ -48,6 +48,8 @@ RISCV_DV_ARGS = \
     --iterations $(RISCV_DV_ITER) \
     --batch_size $(RISCV_DV_BATCH) \
     --isa rv32imc --mabi ilp32 \
+    --custom_target $(PWD) \
+    --testlist $(PWD)/testlist.yaml \
     -v -o $(TEST_DIR)
 
 MAKEFILE  = $(abspath $(MAKEFILE_LIST))
@@ -141,7 +143,13 @@ $(WORK_DIR)/coverage.dat:
 		touch $@ ; \
 	fi
 
+%.sv: %.py
+	./$< $(RISCV_DV_PATH) $(RV_ROOT) > $@
+
 generate:
+	# Generate *.sv configuration
+	#$(MAKE) -f $(MAKEFILE) riscv_core_setting.sv
+	
 	# Run RISC-V DV code generation
 	$(MAKE) -f $(MAKEFILE) $(TEST_DIR)/generate.log
 

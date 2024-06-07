@@ -119,7 +119,7 @@ jobs:
       - id: test-types
         run: |
           python3 -m pip install pyyaml
-          echo "tests=$(python3 .github/scripts/riscv_dv_parse_testlist.py rv32imc)" | tee -a $GITHUB_OUTPUT
+          echo "tests=$(python3 .github/scripts/riscv_dv_parse_testlist.py tools/riscv-dv/testlist.yaml)" | tee -a $GITHUB_OUTPUT
           echo "include-generate=$(python3 .github/scripts/riscv_dv_matrix_include.py generate)" | tee -a $GITHUB_OUTPUT
           echo "include-run=$(python3 .github/scripts/riscv_dv_matrix_include.py run)" | tee -a $GITHUB_OUTPUT
       - id: hash

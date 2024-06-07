@@ -192,6 +192,8 @@ def ifu_compress_verify(session, blockName, testName, coverage):
     [
         "test_arith",
         "test_logic",
+        "test_zbb",
+        "test_zbs",
         "test_zbp",
         "test_zba",
     ],

@@ -26,3 +26,13 @@
     +pmp_region_14=L:1,X:0,W:0,R:0
     +pmp_region_15=L:1,X:0,W:0,R:0
   rtl_test: core_base_test
+
+- test: riscv_user_mode_rand_test
+  desc: >
+    User mode random instruction test
+  iterations: 10
+  gen_test: riscv_instr_base_test
+  gen_opts: >
+    +instr_cnt=10000
+    +boot_mode=u
+  rtl_test: core_base_test

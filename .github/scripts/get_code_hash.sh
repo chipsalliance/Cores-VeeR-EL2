@@ -6,6 +6,7 @@ HASHES=()
 HASHES+=($(git submodule status third_party/riscv-dv | cut -d\  -f2))
 HASHES+=($(sha256sum tools/riscv-dv/code_fixup.py | cut -d\  -f1))
 HASHES+=($(sha256sum tools/riscv-dv/testlist.yaml | cut -d\  -f1))
+HASHES+=($(sha256sum tools/riscv-dv/riscv_core_setting.sv | cut -d\  -f1))
 HASHES+=($(sha256sum tools/riscv-dv/Makefile | cut -d\  -f1))
 
 echo ${HASHES[@]} | sha256sum | cut -d\  -f1

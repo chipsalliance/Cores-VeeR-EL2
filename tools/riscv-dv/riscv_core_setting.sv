@@ -192,7 +192,7 @@ const interrupt_cause_t implemented_interrupt[] = {
 `endif
     M_SOFTWARE_INTR,
     M_TIMER_INTR,
-    M_EXTERNAL_INT
+    M_EXTERNAL_INTR
     //0x1c custom interrupt used
     //0x1d custom interrupt used
     //0x1e custom interrupt used

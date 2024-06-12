@@ -21,14 +21,18 @@ run_regression_test(){
     echo -e "${COLOR_WHITE} NAME        = ${NAME}${COLOR_CLEAR}"
     echo -e "${COLOR_WHITE} COVERAGE    = ${COVERAGE}${COLOR_CLEAR}"
 
+    COMMON_PARAMS="-set=user_mode=1 -set=smepmp=1"
+
     if [[ "${BUS}" == "axi" ]]; then
-        PARAMS="-set build_axi4"
+        PARAMS="-set build_axi4 ${COMMON_PARAMS}"
     elif [[ "${BUS}" == "ahb" ]]; then
-        PARAMS="-set build_ahb_lite"
+        PARAMS="-set build_ahb_lite ${COMMON_PARAMS}"
     else
         echo -e "${COLOR_RED}Unknown system bus type '${BUS}'${COLOR_CLEAR}"
         exit 1
     fi
+
+    echo -e "${COLOR_WHITE} CONF PARAMS = ${PARAMS}${COLOR_CLEAR}"
 
     mkdir -p ${RESULTS_DIR}
     LOG="${RESULTS_DIR}/test_${NAME}_${COVERAGE}.log"

@@ -16,9 +16,10 @@ generate_coverage_reports(){
     echo -e "${COLOR_WHITE}GENHTML_OPTS    = ${GENHTML_OPTS}${COLOR_CLEAR}"
 
     for info_file in `find . -name '*.info'`; do
-        for dir in verification testbench snapshots; do
+        for dir in verification testbench; do
             lcov -r ${info_file} \*${dir}\* -o ${info_file}
         done
+        lcov -r ${info_file} pic_map_auto.h -o ${info_file}
     done
 
     for COVERAGE in branch toggle all functional; do

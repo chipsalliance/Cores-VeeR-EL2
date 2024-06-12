@@ -49,6 +49,7 @@ jobs:
           - "block/iccm"
           - "block/dccm"
           - "block/lib_axi4_to_ahb"
+          - "block/lib_ahb_to_axi4"
           - "block/pmp"
           - "block/dmi"
     env:

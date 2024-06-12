@@ -21,7 +21,7 @@ jobs:
         id: download-artifact
         uses: dawidd6/action-download-artifact@v2
         with:
-          name: pr_deployment
+          name: webpage
           path: ./public.new
           run_id: ${{ github.event.workflow_run.id }}
 

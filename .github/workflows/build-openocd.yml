@@ -1,0 +1,54 @@
+name: OpenOCD Build
+
+on:
+  workflow_call:
+
+jobs:
+  openOCD:
+    name: Build OpenOCD
+    runs-on: ubuntu-latest
+    env:
+      # A custom fork is needed to allow bypassing core examination and accessing
+      # peripherals regardless of core state.
+      OPENOCD_REPO: https://github.com/antmicro/openocd
+      OPENOCD_VERSION: riscv-nohalt
+
+    steps:
+      - name: Setup Cache Metadata
+        id: cache_metadata
+        run: |
+          cache_date=$(date +"%Y_%m_%d")
+          cache_name=cache_openocd
+          echo "Cache date: "$cache_date
+          echo "Cache name: "$cache_name
+          echo "cache_date=$cache_date" >> "$GITHUB_ENV"
+          echo "cache_name=$cache_name" >> "$GITHUB_ENV"
+
+      - name: Setup cache
+        uses: actions/cache@v3
+        id: cache
+        timeout-minutes: 60
+        with:
+          path: |
+            /opt/openocd
+            /opt/openocd/.cache
+          key: ${{ env.cache_name }}_${{ env.cache_date }}
+          restore-keys: ${{ env.cache_name }}_
+
+      - name: Install prerequisities
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+        run: |
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+          make libtool pkg-config autoconf automake texinfo
+
+      - name: Build and install OpenOCD
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+        run: |
+          git clone -b "${OPENOCD_VERSION}" "${OPENOCD_REPO}"
+          pushd openocd
+            ./bootstrap
+            ./configure --prefix=/opt/openocd --enable-remote-bitbang \
+            CFLAGS="-Wno-error=misleading-indentation -Wno-error=stringop-overflow"
+            make -j`nproc`
+            sudo make install
+          popd

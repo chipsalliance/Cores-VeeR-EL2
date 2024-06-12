@@ -99,6 +99,11 @@ module tb_top
 
 
     logic                       jtag_tdo;
+    logic                       jtag_tck;
+    logic                       jtag_tms;
+    logic                       jtag_tdi;
+    logic                       jtag_trst_n;
+
     logic                       o_cpu_halt_ack;
     logic                       o_cpu_halt_status;
     logic                       o_cpu_run_ack;
@@ -820,11 +825,11 @@ veer_wrapper rvtop_wrapper (
     .trace_rv_i_interrupt_ip(trace_rv_i_interrupt_ip),
     .trace_rv_i_tval_ip     (trace_rv_i_tval_ip),
 
-    .jtag_tck               ( 1'b0  ),
-    .jtag_tms               ( 1'b0  ),
-    .jtag_tdi               ( 1'b0  ),
-    .jtag_trst_n            ( 1'b0  ),
-    .jtag_tdo               ( jtag_tdo ),
+    .jtag_tck               (jtag_tck),
+    .jtag_tms               (jtag_tms),
+    .jtag_tdi               (jtag_tdi),
+    .jtag_trst_n            (jtag_trst_n),
+    .jtag_tdo               (jtag_tdo),
     .jtag_tdoEn             (),
 
     .mpc_debug_halt_ack     ( mpc_debug_halt_ack),
@@ -1836,6 +1841,20 @@ for (genvar i=0; i<pt.ICCM_NUM_BANKS; i++) begin: iccm_loop
 `endif
 end : iccm_loop
 end : Gen_iccm_enable
+
+jtagdpi #(
+    .Name           ("jtag0"),
+    .ListenPort     (5000)
+) jtagdpi (
+    .clk_i          (core_clk),
+    .rst_ni         (rst_l),
+    .jtag_tck       (jtag_tck),
+    .jtag_tms       (jtag_tms),
+    .jtag_tdi       (jtag_tdi),
+    .jtag_tdo       (jtag_tdo),
+    .jtag_trst_n    (jtag_trst_n),
+    .jtag_srst_n    ()
+);
 
 /* verilator lint_off CASEINCOMPLETE */
 `include "dasm.svi"

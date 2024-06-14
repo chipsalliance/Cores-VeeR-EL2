@@ -15,6 +15,10 @@ generate_coverage_reports(){
     echo -e "${COLOR_WHITE}OUTPUT_DIR      = ${OUTPUT_DIR}${COLOR_CLEAR}"
     echo -e "${COLOR_WHITE}GENHTML_OPTS    = ${GENHTML_OPTS}${COLOR_CLEAR}"
 
+    for info_file in `find . -name '*.info'`; do
+        lcov --extract ${info_file} \*design\* -o ${info_file}
+    done
+
     for COVERAGE in branch toggle all functional; do
         DIR=${OUTPUT_DIR}/${COVERAGE}
         # Summary

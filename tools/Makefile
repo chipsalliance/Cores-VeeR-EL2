@@ -146,7 +146,7 @@ ${BUILD_DIR}/defines.h:
 	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/veer.config -target=$(target) $(CONF_PARAMS)
 
 verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h test_tb_top.cpp
-	$(VERILATOR)  --cc -CFLAGS ${CFLAGS} $(defines) \
+	$(VERILATOR)  --cc -CFLAGS "${CFLAGS}" $(defines) \
 	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist \
 	  -Wno-WIDTH -Wno-UNOPTFLAT $(VERILATOR_NOIMPLICIT) \
 	  ${TBFILES} --top-module tb_top \

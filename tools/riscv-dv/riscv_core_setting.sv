@@ -4,7 +4,7 @@
 //
 parameter int XLEN = 32;
 parameter satp_mode_t SATP_MODE = BARE;
-privileged_mode_t supported_privileged_mode[] = {MACHINE_MODE};
+privileged_mode_t supported_privileged_mode[] = {MACHINE_MODE, USER_MODE};
 
 // NOTE: To get supported and unsupported instructions compare
 // riscv-dv/src/riscv_instr_pkg.sv and Cores-VeeR-EL2/design/dec/decode files

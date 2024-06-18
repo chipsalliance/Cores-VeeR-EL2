@@ -1301,9 +1301,9 @@ if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable
     localparam DCCM_INDEX_DEPTH = ((pt.DCCM_SIZE)*1024)/((pt.DCCM_BYTE_WIDTH)*(pt.DCCM_NUM_BANKS));  // Depth of memory bank
     // 8 Banks, 16KB each (2048 x 72)
     for (genvar i=0; i<pt.DCCM_NUM_BANKS; i++) begin: dccm_loop
-        assign el2_mem_export.dccm_wr_data_bank[i] = dccm_wr_fdata_bank[i][pt.DCCM_DATA_WIDTH-1:0];
-        assign el2_mem_export.dccm_wr_ecc_bank[i] = dccm_wr_fdata_bank[i][pt.DCCM_FDATA_WIDTH-1:pt.DCCM_DATA_WIDTH];
-        assign dccm_bank_fdout[i] = {el2_mem_export.dccm_bank_ecc[i], el2_mem_export.dccm_bank_dout[i]};
+        assign dccm_wr_fdata_bank[i][pt.DCCM_DATA_WIDTH-1:0] = el2_mem_export.dccm_wr_data_bank[i];
+        assign dccm_wr_fdata_bank[i][pt.DCCM_FDATA_WIDTH-1:pt.DCCM_DATA_WIDTH] = el2_mem_export.dccm_wr_ecc_bank[i];
+        assign {el2_mem_export.dccm_bank_ecc[i], el2_mem_export.dccm_bank_dout[i]} = dccm_bank_fdout[i];
 
     `ifdef VERILATOR
 
@@ -1481,9 +1481,9 @@ end :Gen_dccm_enable
 //
 if (pt.ICCM_ENABLE) begin : Gen_iccm_enable
 for (genvar i=0; i<pt.ICCM_NUM_BANKS; i++) begin: iccm_loop
-    assign el2_mem_export.iccm_bank_wr_data[i] = iccm_bank_wr_fdata[i][31:0];
-    assign el2_mem_export.iccm_bank_wr_ecc[i] = iccm_bank_wr_fdata[i][37:32];
-    assign iccm_bank_fdout[i] = {el2_mem_export.iccm_bank_ecc[i], el2_mem_export.iccm_bank_dout[i]};
+    assign iccm_bank_wr_fdata[i][31:0] = el2_mem_export.iccm_bank_wr_data[i];
+    assign iccm_bank_wr_fdata[i][37:32] = el2_mem_export.iccm_bank_wr_ecc[i];
+    assign {el2_mem_export.iccm_bank_ecc[i], el2_mem_export.iccm_bank_dout[i]} = iccm_bank_fdout[i];
 
  `ifdef VERILATOR
 

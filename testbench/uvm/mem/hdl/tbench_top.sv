@@ -41,9 +41,9 @@ module tbench_top #(
 
   // 8 Banks, 16KB each (2048 x 72)
   for (genvar i = 0; i < pt.DCCM_NUM_BANKS; i++) begin : gen_dccm_mem
-    assign mem_export.dccm_wr_data_bank[i] = dccm_wr_fdata_bank[i][pt.DCCM_DATA_WIDTH-1:0];
-    assign mem_export.dccm_wr_ecc_bank[i] = dccm_wr_fdata_bank[i][pt.DCCM_FDATA_WIDTH-1:pt.DCCM_DATA_WIDTH];
-    assign dccm_bank_fdout[i] = {mem_export.dccm_bank_ecc[i], mem_export.dccm_bank_dout[i]};
+    assign dccm_wr_fdata_bank[i][pt.DCCM_DATA_WIDTH-1:0] = mem_export.dccm_wr_data_bank[i];
+    assign dccm_wr_fdata_bank[i][pt.DCCM_FDATA_WIDTH-1:pt.DCCM_DATA_WIDTH] = mem_export.dccm_wr_ecc_bank[i];
+    assign {mem_export.dccm_bank_ecc[i], mem_export.dccm_bank_dout[i]} = dccm_bank_fdout[i];
 
     el2_ram #(DCCM_INDEX_DEPTH, 39) ram (
         // Primary ports

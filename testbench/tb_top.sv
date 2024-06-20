@@ -74,6 +74,20 @@ module tb_top
     logic                       lsu_hready      ;
     logic                       lsu_hresp        ;
 
+    logic        [31:0]         mux_haddr       ;
+    logic        [2:0]          mux_hburst      ;
+    logic                       mux_hmastlock   ;
+    logic        [3:0]          mux_hprot       ;
+    logic        [2:0]          mux_hsize       ;
+    logic        [1:0]          mux_htrans      ;
+    logic                       mux_hwrite      ;
+    logic                       mux_hsel       ;
+    logic        [63:0]         mux_hrdata      ;
+    logic        [63:0]         mux_hwdata      ;
+    logic                       mux_hready      ;
+    logic                       mux_hresp       ;
+   logic                        mux_hreadyout   ;
+
     logic        [31:0]         sb_haddr        ;
     logic        [2:0]          sb_hburst       ;
     logic                       sb_hmastlock    ;
@@ -136,6 +150,52 @@ module tb_top
     logic                       wb_csr_valid;
     logic [11:0]                wb_csr_dest;
     logic [31:0]                wb_csr_data;
+
+    // SB and LSU AHB master mux
+    ahb_lite_2to1_mux #(
+        .AHB_LITE_ADDR_WIDTH (32),
+        .AHB_LITE_DATA_WIDTH (64),
+        .AHB_NO_OPT(1) //Prevent address and data phase overlap between initiators
+    ) u_sb_lsu_ahb_mux (
+        .hclk                (core_clk),
+        .hreset_n            (rst_l),
+        .force_bus_idle      (),
+        // Initiator 0
+        .hsel_i_0            (1'b1      ),
+        .haddr_i_0           (lsu_haddr ),
+        .hwdata_i_0          (lsu_hwdata),
+        .hwrite_i_0          (lsu_hwrite),
+        .htrans_i_0          (lsu_htrans),
+        .hsize_i_0           (lsu_hsize ),
+        .hready_i_0          (lsu_hready),
+        .hresp_o_0           (lsu_hresp ),
+        .hready_o_0          (lsu_hready),
+        .hrdata_o_0          (lsu_hrdata),
+
+        // Initiator 1
+        .hsel_i_1            (1'b1      ),
+        .haddr_i_1           (sb_haddr  ),
+        .hwdata_i_1          (sb_hwdata ),
+        .hwrite_i_1          (sb_hwrite ),
+        .htrans_i_1          (sb_htrans ),
+        .hsize_i_1           (sb_hsize  ),
+        .hready_i_1          (sb_hready ),
+        .hresp_o_1           (sb_hresp  ),
+        .hready_o_1          (sb_hready ),
+        .hrdata_o_1          (sb_hrdata ),
+
+        // Responder
+        .hsel_o              (mux_hsel),
+        .haddr_o             (mux_haddr ),
+        .hwdata_o            (mux_hwdata),
+        .hwrite_o            (mux_hwrite),
+        .htrans_o            (mux_htrans),
+        .hsize_o             (mux_hsize ),
+        .hready_o            (mux_hready),
+        .hresp_i             (mux_hresp ),
+        .hreadyout_i         (mux_hreadyout),
+        .hrdata_i            (mux_hrdata)
+    );
 
 `ifdef RV_BUILD_AXI4
    //-------------------------- LSU AXI signals--------------------------
@@ -920,22 +980,22 @@ ahb_sif imem (
 
 ahb_sif lmem (
      // Inputs
-     .HWDATA(lsu_hwdata),
+     .HWDATA(mux_hwdata),
      .HCLK(core_clk),
-     .HSEL(1'b1),
-     .HPROT(lsu_hprot),
-     .HWRITE(lsu_hwrite),
-     .HTRANS(lsu_htrans),
-     .HSIZE(lsu_hsize),
-     .HREADY(lsu_hready),
+     .HSEL(mux_hsel),
+     .HPROT(mux_hprot),
+     .HWRITE(mux_hwrite),
+     .HTRANS(mux_htrans),
+     .HSIZE(mux_hsize),
+     .HREADY(mux_hready),
      .HRESETn(rst_l),
-     .HADDR(lsu_haddr),
-     .HBURST(lsu_hburst),
+     .HADDR(mux_haddr),
+     .HBURST(mux_hburst),
 
      // Outputs
-     .HREADYOUT(lsu_hready),
-     .HRESP(lsu_hresp),
-     .HRDATA(lsu_hrdata[63:0])
+     .HREADYOUT(mux_hreadyout),
+     .HRESP(mux_hresp),
+     .HRDATA(mux_hrdata[63:0])
 );
 
 `endif

@@ -14,9 +14,15 @@
 # limitations under the License.
 #
 
-CONF_PARAMS ?= -set build_axi4
+ifeq ($(USER_MODE),1)
+USER_MODE_OPTS = -set=user_mode=1
+else
+USER_MODE_OPTS =
+endif
 
-TEST_CFLAGS = -g -O3 -funroll-all-loops
+CONF_PARAMS ?= -set build_axi4 $(USER_MODE_OPTS)
+
+TEST_CFLAGS = -g -gdwarf -O3 -funroll-all-loops
 ABI = -mabi=ilp32
 LD_ABI = $(ABI) -march=rv32imac
 

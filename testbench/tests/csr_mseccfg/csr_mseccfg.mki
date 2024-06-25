@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
+
+OFILES = crt0.o csr_mseccfg.o printf.o
+TEST_CFLAGS = -g -O0 -falign-functions=16

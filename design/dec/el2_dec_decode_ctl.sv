@@ -921,9 +921,9 @@ end : cam_array
    assign dec_csr_any_unq_d = any_csr_d & i0_valid_d;
 
 
-   assign dec_csr_rdaddr_d[11:0] =  {12{dec_csr_any_unq_d}} & i0[31:20];
-   assign dec_csr_rdaddr_r[11:0] =  {12{~r_d.csrwen & r_d.i0valid}} & r_d.csraddr[11:0];
-   assign dec_csr_wraddr_r[11:0] =  {12{ r_d.csrwen & r_d.i0valid}} & r_d.csraddr[11:0];
+   assign dec_csr_rdaddr_d[11:0] = {12{dec_csr_any_unq_d}} & i0[31:20];
+   assign dec_csr_rdaddr_r[11:0] = {12{~r_d.csrwen & r_d.i0valid}} & r_d.csraddr[11:0];
+   assign dec_csr_wraddr_r[11:0] = {12{r_d.csrwen & r_d.i0valid}} & r_d.csraddr[11:0];
 
 
    // make sure csr doesn't write same cycle as dec_tlu_flush_lower_wb
@@ -1309,9 +1309,9 @@ end : cam_array
    assign d_d.i0div                 =  i0_dp.div   & i0_legal_decode_d;
 
 
-   assign d_d.csrwen                =  dec_csr_wen_unq_d   & i0_legal_decode_d;
-   assign d_d.csrwonly              =  i0_csr_write_only_d & dec_i0_decode_d;
-   assign d_d.csraddr[11:0]         =  i0[31:20]; // csr read/write address
+   assign d_d.csrwen        =  dec_csr_wen_unq_d   & i0_legal_decode_d;
+   assign d_d.csrwonly      =  i0_csr_write_only_d & dec_i0_decode_d;
+   assign d_d.csraddr[11:0] =  i0[31:20]; // csr read/write address
 
 
    rvdff  #(3) i0cgff               (.*, .clk(active_clk),            .din(i0_pipe_en[3:1]), .dout(i0_pipe_en[2:0]));

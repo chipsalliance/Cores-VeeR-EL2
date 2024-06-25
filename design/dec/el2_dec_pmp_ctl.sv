@@ -24,7 +24,7 @@
 //********************************************************************************
 
 module el2_dec_pmp_ctl
-import el2_pkg::*;
+  import el2_pkg::*;
 #(
 `include "el2_param.vh"
  )
@@ -52,8 +52,8 @@ import el2_pkg::*;
    input el2_mseccfg_pkt_t mseccfg,
 `endif
 
-   output logic [31:0] dec_pmp_rddata_d, // pmp CSR read data
-   output logic        dec_pmp_read_d, // pmp CSR address match
+   output logic [31:0] dec_pmp_rddata_d,  // pmp CSR read data
+   output logic        dec_pmp_read_d,    // pmp CSR address match
 
    output el2_pmp_cfg_pkt_t pmp_pmpcfg  [pt.PMP_ENTRIES],
    output logic [31:0]      pmp_pmpaddr [pt.PMP_ENTRIES],
@@ -72,18 +72,18 @@ import el2_pkg::*;
    logic [1:0] wr_pmpaddr_quarter;
    logic [5:0] wr_pmpaddr_address;
 
-   logic  [3:0] pmp_quarter_rdaddr;
+   logic [3:0] pmp_quarter_rdaddr;
    logic [31:0] pmp_pmpcfg_rddata;
 
    // ----------------------------------------------------------------------
 
-   logic [pt.PMP_ENTRIES-1:0] entry_lock_eff; // Effective entry lock
-   for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : pmpcfg_lock
+   logic [pt.PMP_ENTRIES-1:0] entry_lock_eff;  // Effective entry lock
+   for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : g_pmpcfg_lock
 `ifdef RV_SMEPMP
-     // Smepmp allow modifying locked entries when mseccfg.RLB is set
-     assign entry_lock_eff[r] = pmp_pmpcfg[r].lock & ~mseccfg.RLB;
+   // Smepmp allow modifying locked entries when mseccfg.RLB is set
+   assign entry_lock_eff[r] = pmp_pmpcfg[r].lock & ~mseccfg.RLB;
 `else
-     assign entry_lock_eff[r] = pmp_pmpcfg[r].lock;
+   assign entry_lock_eff[r] = pmp_pmpcfg[r].lock;
 `endif
    end
 
@@ -103,7 +103,7 @@ import el2_pkg::*;
       logic [7:0] raw_wdata;
       logic [7:0] csr_wdata;
 
-      // PMPCFG fields are WARL. Mask out bits 6:5 during write. 
+      // PMPCFG fields are WARL. Mask out bits 6:5 during write.
       // When Smepmp is disabled R=0 and W=1 combination is illegal mask out W
       // when R is cleared.
       assign raw_wdata = dec_csr_wrdata_r[(entry_idx[1:0]*8)+7:(entry_idx[1:0]*8)+0];

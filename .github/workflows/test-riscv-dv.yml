@@ -214,6 +214,8 @@ jobs:
               test: riscv_illegal_instr_test
             - iss: whisper
               test: riscv_illegal_instr_test
+            - iss: whisper
+              test: riscv_full_interrupt_test
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"
@@ -339,6 +341,12 @@ jobs:
           echo "PATH=${PATH}"       >> ${GITHUB_ENV}
 
           ${RISCV_GCC} --version
+
+          # Enable U mode only in simulators.
+          # Change the command line of spike to execute with '--priv=mu'. The default is 'msu'.
+          sed -i '/spike/s/--isa=<variant> /--isa=<variant> --priv=mu /g' third_party/riscv-dv/yaml/iss.yaml
+          # Change the command line of whisper to execute with '--isa <variant>u'.
+          sed -i '/whisper/s/--isa <variant>/--isa <variant>u/g' third_party/riscv-dv/yaml/iss.yaml
 
           pushd tools/riscv-dv
             make -j`nproc` \

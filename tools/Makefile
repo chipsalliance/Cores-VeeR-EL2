@@ -69,6 +69,8 @@ ifeq ("$(.SHELLSTATUS)", "0")
     endif
 endif
 
+VERILATOR_SKIP_WARNINGS = $(VERILATOR_NOIMPLICIT) -Wno-TIMESCALEMOD
+
 # Define test name
 TEST = hello_world
 TEST_DIR = ${TBDIR}/asm
@@ -141,7 +143,7 @@ TBFILES = $(TBDIR)/tb_top_pkg.sv \
 defines  = $(BUILD_DIR)/common_defines.vh
 defines += ${RV_ROOT}/design/include/el2_def.sv
 defines += $(BUILD_DIR)/el2_pdef.vh
-includes = -I${BUILD_DIR}
+includes = -I${BUILD_DIR} -I$(TBDIR)/axi4_mux
 
 # Verilator supports only C++14 and newer
 CFLAGS += -std=c++14
@@ -170,7 +172,7 @@ ${BUILD_DIR}/defines.h:
 verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	$(VERILATOR)  --cc -CFLAGS "${CFLAGS}" $(defines) \
 	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist \
-	  -Wno-WIDTH -Wno-UNOPTFLAT $(VERILATOR_NOIMPLICIT) \
+	  -Wno-WIDTH -Wno-UNOPTFLAT $(VERILATOR_SKIP_WARNINGS) \
 	  ${TBFILES} --top-module tb_top \
 	  -exe $(TB_VERILATOR_SRCS) --autoflush $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE)
 	cp ${RV_ROOT}/testbench/test_tb_top.cpp obj_dir/

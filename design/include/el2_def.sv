@@ -106,7 +106,7 @@ typedef struct packed {
                        logic i0div;
                        logic csrwen;
                        logic csrwonly;
-                       logic [11:0] csrwaddr;
+                       logic [11:0] csraddr;
                        // likely to change
                        logic [4:0] i0rd;
                        logic i0load;
@@ -430,6 +430,13 @@ typedef struct packed {
     logic write;
     logic read;
   } el2_pmp_cfg_pkt_t;
+
+  typedef struct packed {
+    logic RLB;
+    logic MMWP;
+    logic MML;
+  } el2_mseccfg_pkt_t;
+
 //`endif
 
 endpackage // el2_pkg

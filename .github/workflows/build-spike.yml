@@ -50,6 +50,7 @@ jobs:
           export CXX="ccache g++"
           pushd spike
             git checkout ${{ env.TOOL_VERSION }}
+            sed -i 's/(MAX_PADDR_BITS - PMP_SHIFT)/30/g' riscv/csrs.cc
             mkdir build
             cd build
             ../configure --prefix=/opt/spike

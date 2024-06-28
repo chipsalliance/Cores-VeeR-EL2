@@ -2,6 +2,7 @@
 //-y $SYNOPSYS_SYN_ROOT/dw/sim_ver
 +define+RV_OPENSOURCE
 +incdir+$RV_ROOT/testbench
++incdir+$RV_ROOT/design/include
 $RV_ROOT/testbench/veer_wrapper.sv
 $RV_ROOT/design/el2_veer_wrapper.sv
 $RV_ROOT/design/el2_mem.sv

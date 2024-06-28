@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
+
+OFILES = crt0.o modesw.o printf.o
+TEST_CFLAGS = -g -O3 -falign-functions=16

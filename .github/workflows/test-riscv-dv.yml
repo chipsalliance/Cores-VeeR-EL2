@@ -214,6 +214,8 @@ jobs:
               test: riscv_illegal_instr_test
             - iss: whisper
               test: riscv_illegal_instr_test
+            - iss: whisper
+              test: riscv_full_interrupt_test
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"

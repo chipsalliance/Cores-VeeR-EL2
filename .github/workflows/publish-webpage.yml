@@ -29,6 +29,12 @@ jobs:
           name: coverage_report
           path: ./coverage_dashboard
 
+      - name: Download docs
+        uses: actions/download-artifact@v3
+        with:
+          name: docs
+          path: ./docs_rendered
+
       - name: Download verification reports
         uses: actions/download-artifact@v3
         with:

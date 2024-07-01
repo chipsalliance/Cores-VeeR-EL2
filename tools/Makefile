@@ -69,7 +69,8 @@ ifeq ("$(.SHELLSTATUS)", "0")
     endif
 endif
 
-VERILATOR_SKIP_WARNINGS = $(VERILATOR_NOIMPLICIT) -Wno-TIMESCALEMOD
+VERILATOR_SKIP_WARNINGS = $(VERILATOR_NOIMPLICIT) -Wno-TIMESCALEMOD -Wno-ASCRANGE \
+	-Wno-CASEINCOMPLETE -Wno-INITIALDLY -Wno-WIDTH -Wno-UNOPTFLAT
 
 # Define test name
 TEST = hello_world
@@ -172,8 +173,7 @@ ${BUILD_DIR}/defines.h:
 verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	$(VERILATOR)  --cc -CFLAGS "${CFLAGS}" $(defines) \
 	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist \
-	  -Wno-WIDTH -Wno-UNOPTFLAT $(VERILATOR_SKIP_WARNINGS) \
-	  ${TBFILES} --top-module tb_top \
+	  $(VERILATOR_SKIP_WARNINGS) ${TBFILES} --top-module tb_top \
 	  -exe $(TB_VERILATOR_SRCS) --autoflush $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE)
 	cp ${RV_ROOT}/testbench/test_tb_top.cpp obj_dir/
 	$(MAKE) -e -C obj_dir/ -f Vtb_top.mk $(VERILATOR_MAKE_FLAGS)

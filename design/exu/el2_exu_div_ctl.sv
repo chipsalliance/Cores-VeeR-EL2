@@ -43,7 +43,7 @@ import el2_pkg::*;
 
 
    if (pt.DIV_NEW == 0)
-      begin
+      begin : genblock1
         el2_exu_div_existing_1bit_cheapshortq   i_existing_1bit_div_cheapshortq (
             .clk              ( clk                      ),   // I
             .rst_l            ( rst_l                    ),   // I
@@ -60,7 +60,7 @@ import el2_pkg::*;
 
 
    if ( (pt.DIV_NEW == 1) & (pt.DIV_BIT == 1) )
-      begin
+      begin : genblock2
         el2_exu_div_new_1bit_fullshortq         i_new_1bit_div_fullshortq       (
             .clk              ( clk                      ),   // I
             .rst_l            ( rst_l                    ),   // I
@@ -77,7 +77,7 @@ import el2_pkg::*;
 
 
    if ( (pt.DIV_NEW == 1) & (pt.DIV_BIT == 2) )
-      begin
+      begin : genblock3
         el2_exu_div_new_2bit_fullshortq         i_new_2bit_div_fullshortq       (
             .clk              ( clk                      ),   // I
             .rst_l            ( rst_l                    ),   // I
@@ -94,7 +94,7 @@ import el2_pkg::*;
 
 
    if ( (pt.DIV_NEW == 1) & (pt.DIV_BIT == 3) )
-      begin
+      begin : genblock4
         el2_exu_div_new_3bit_fullshortq         i_new_3bit_div_fullshortq       (
             .clk              ( clk                      ),   // I
             .rst_l            ( rst_l                    ),   // I
@@ -111,7 +111,7 @@ import el2_pkg::*;
 
 
    if ( (pt.DIV_NEW == 1) & (pt.DIV_BIT == 4) )
-      begin
+      begin : genblock5
         el2_exu_div_new_4bit_fullshortq         i_new_4bit_div_fullshortq       (
             .clk              ( clk                      ),   // I
             .rst_l            ( rst_l                    ),   // I

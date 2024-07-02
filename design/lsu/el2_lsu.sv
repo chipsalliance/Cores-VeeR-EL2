@@ -310,7 +310,7 @@ import el2_pkg::*;
 
    assign dma_dccm_wen = dma_dccm_req & dma_mem_write & addr_in_dccm_d & dma_mem_sz[1];   // Perform DMA writes only for word/dword
    assign dma_pic_wen  = dma_dccm_req & dma_mem_write & addr_in_pic_d;
-   assign {dma_dccm_wdata_hi[31:0], dma_dccm_wdata_lo[31:0]} = dma_mem_wdata[63:0] >> {dma_mem_addr[2:0], 3'b000};   // Shift the dma data to lower bits to make it consistent to lsu stores
+   assign {dma_dccm_wdata_hi[31:0], dma_dccm_wdata_lo[31:0]} = 64'(dma_mem_wdata[63:0] >> {dma_mem_addr[2:0], 3'b000});   // Shift the dma data to lower bits to make it consistent to lsu stores
 
 
    // Generate per cycle flush signals

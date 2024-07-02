@@ -256,7 +256,7 @@ import el2_pkg::*;
    // This will be high if all the bytes of load hit the stores in pipe/write buffer (m/r/wrbuf)
    assign ld_full_hit_m = ld_full_hit_lo_m & ld_full_hit_hi_m & lsu_busreq_m & lsu_pkt_m.load & ~is_sideeffects_m;
 
-   assign ld_fwddata_m[63:0] = {ld_fwddata_hi[31:0], ld_fwddata_lo[31:0]} >> (8*lsu_addr_m[1:0]);
+   assign ld_fwddata_m[63:0] = 64'({ld_fwddata_hi[31:0], ld_fwddata_lo[31:0]} >> (8*lsu_addr_m[1:0]));
    assign bus_read_data_m[31:0]                        = ld_fwddata_m[31:0];
 
    // Fifo flops

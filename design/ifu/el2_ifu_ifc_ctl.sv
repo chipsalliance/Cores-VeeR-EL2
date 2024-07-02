@@ -101,7 +101,7 @@ import el2_pkg::*;
    // - Miss *or* flush during WFM (icache miss buffer is blocking)
    // - Sequential
 
-if(pt.BTB_ENABLE==1) begin
+if(pt.BTB_ENABLE==1) begin : genblock1
    logic sel_btb_addr_bf;
 
    assign sel_last_addr_bf = ~exu_flush_final & (~ifc_fetch_req_f | ~ic_hit_f);
@@ -126,7 +126,7 @@ end // if (pt.BTB_ENABLE=1)
                   ({31{sel_next_addr_bf}} & {fetch_addr_next[31:1]})); // SEQ path
 
 end
-   assign fetch_addr_next[31:1] = {({ifc_fetch_addr_f[31:2]} + 31'b1), fetch_addr_next_1 };
+   assign fetch_addr_next[31:1] = {({ifc_fetch_addr_f[31:2]} + 30'b1), fetch_addr_next_1 };
    assign line_wrap = (fetch_addr_next[pt.ICACHE_TAG_INDEX_LO] ^ ifc_fetch_addr_f[pt.ICACHE_TAG_INDEX_LO]);
 
    assign fetch_addr_next_1 = line_wrap ? 1'b0 : ifc_fetch_addr_f[1];
@@ -214,7 +214,7 @@ end
    rvdffpcie #(31) faddrf1_ff  (.*, .en(fetch_bf_en), .din(fetch_addr_bf[31:1]), .dout(ifc_fetch_addr_f[31:1]));
 
 
- if (pt.ICCM_ENABLE)  begin
+ if (pt.ICCM_ENABLE)  begin : genblock2
    logic iccm_acc_in_region_bf;
    logic iccm_acc_in_range_bf;
    rvrangecheck #( .CCM_SADR    (pt.ICCM_SADR),

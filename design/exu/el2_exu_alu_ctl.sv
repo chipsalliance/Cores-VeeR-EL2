@@ -302,7 +302,7 @@ import el2_pkg::*;
                                          ( {31{ap_ror}} &     a_in[30:0] );
 
 
-   assign shift_long[62:0]    = ( shift_extend[62:0] >> shift_amount[4:0] );   // 62-32 unused
+   assign shift_long[62:0]    = 63'( shift_extend[62:0] >> shift_amount[4:0] );   // 62-32 unused
 
    assign sout[31:0]          =   shift_long[31:0] & shift_mask[31:0];
 

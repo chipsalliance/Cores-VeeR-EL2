@@ -246,7 +246,7 @@ import el2_pkg::*;
 
 logic exu_flush_final_d1;
 
- if(!pt.BTB_FULLYA) begin
+ if(!pt.BTB_FULLYA) begin : genblock1
    assign fetch_mp_collision_f = ( (exu_mp_btag[pt.BTB_BTAG_SIZE-1:0] == fetch_rd_tag_f[pt.BTB_BTAG_SIZE-1:0]) &
                                     exu_mp_valid & ifc_fetch_req_f &
                                     (exu_mp_addr[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] == btb_rd_addr_f[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO])
@@ -591,7 +591,7 @@ assign use_fa_plus = (~bht_dir_f[0] & ~fetch_start_f[0] & ~btb_rd_pc4_f);
          el2_btb_tag_hash_fold #(.pt(pt)) rdtagp1f(.hash(fetch_rd_tag_p1_f[pt.BTB_BTAG_SIZE-1:0]),
                                                     .pc({fetch_addr_p1_f[ pt.BTB_ADDR_HI+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE:pt.BTB_ADDR_HI+1]}));
       end
-      else begin
+      else begin : btbfold
          el2_btb_tag_hash #(.pt(pt)) rdtagf(.hash(fetch_rd_tag_f[pt.BTB_BTAG_SIZE-1:0]),
                                              .pc({ifc_fetch_addr_f[pt.BTB_ADDR_HI+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE:pt.BTB_ADDR_HI+1]}));
          el2_btb_tag_hash #(.pt(pt)) rdtagp1f(.hash(fetch_rd_tag_p1_f[pt.BTB_BTAG_SIZE-1:0]),
@@ -835,8 +835,8 @@ end // block: fa
 
    for ( i=0; i<2; i++) begin : BANKS
      wire[pt.BHT_ARRAY_DEPTH-1:0] wr0, wr1;
-     assign wr0 = bht_wr_en0[i] << bht_wr_addr0;
-     assign wr1 = bht_wr_en2[i] << bht_wr_addr2;
+     assign wr0 = pt.BHT_ARRAY_DEPTH'(bht_wr_en0[i] << bht_wr_addr0);
+     assign wr1 = pt.BHT_ARRAY_DEPTH'(bht_wr_en2[i] << bht_wr_addr2);
      for (genvar k=0 ; k < (pt.BHT_ARRAY_DEPTH)/NUM_BHT_LOOP ; k++) begin : BHT_CLK_GROUP
      assign bht_bank_clken[i][k]  = (bht_wr_en0[i] & ((bht_wr_addr0[pt.BHT_ADDR_HI: NUM_BHT_LOOP_OUTER_LO]==k) |  BHT_NO_ADDR_MATCH)) |
                                     (bht_wr_en2[i] & ((bht_wr_addr2[pt.BHT_ADDR_HI: NUM_BHT_LOOP_OUTER_LO]==k) |  BHT_NO_ADDR_MATCH));
@@ -890,8 +890,8 @@ function [1:0] countones;
 
       begin
 
-countones[1:0] = {2'b0, valid[1]} +
-                 {2'b0, valid[0]};
+countones[1:0] = {1'b0, valid[1]} +
+                 {1'b0, valid[0]};
       end
    endfunction
 endmodule // el2_ifu_bp_ctl

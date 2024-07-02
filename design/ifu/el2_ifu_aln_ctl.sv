@@ -215,7 +215,7 @@ import el2_pkg::*;
                                                  .dout({error_stall,   f2val[1:0],   f1val[1:0],   f0val[1:0]   })
                                                  );
 
-if(pt.BTB_ENABLE==1) begin
+if(pt.BTB_ENABLE==1) begin : genblock1
    rvdffe #(BRDATA_SIZE)  brdata2ff   (.*, .clk(clk), .en(qwen[2]),        .din(brdata_in[BRDATA_SIZE-1:0]), .dout(brdata2[BRDATA_SIZE-1:0]));
    rvdffe #(BRDATA_SIZE)  brdata1ff   (.*, .clk(clk), .en(qwen[1]),        .din(brdata_in[BRDATA_SIZE-1:0]), .dout(brdata1[BRDATA_SIZE-1:0]));
    rvdffe #(BRDATA_SIZE)  brdata0ff   (.*, .clk(clk), .en(qwen[0]),        .din(brdata_in[BRDATA_SIZE-1:0]), .dout(brdata0[BRDATA_SIZE-1:0]));
@@ -223,7 +223,7 @@ if(pt.BTB_ENABLE==1) begin
    rvdffe #(MSIZE)        misc1ff     (.*, .clk(clk), .en(qwen[1]),        .din(misc_data_in[MHI:0]),        .dout(misc1[MHI:0]));
    rvdffe #(MSIZE)        misc0ff     (.*, .clk(clk), .en(qwen[0]),        .din(misc_data_in[MHI:0]),        .dout(misc0[MHI:0]));
 end
-else begin
+else begin : genblock1
 
    rvdffie #((MSIZE*3)+(BRDATA_SIZE*3))    miscff      (.*,
                                                         .din({qwen[2] ? {misc_data_in[MHI:0], brdata_in[BRDATA_SIZE-1:0]} : {misc2[MHI:0], brdata2[BRDATA_SIZE-1:0]},
@@ -573,7 +573,7 @@ end
    assign ifu_i0_instr[31:0] = ({32{first4B & alignval[1]}} & ifirst[31:0]) |
                                ({32{first2B & alignval[0]}} & uncompress0[31:0]);
 
-if(pt.BTB_ENABLE==1) begin
+if(pt.BTB_ENABLE==1) begin : genblock2
 
    // if you detect br does not start on instruction boundary
 
@@ -593,7 +593,7 @@ if(pt.BTB_ENABLE==1) begin
          el2_btb_tag_hash_fold #(.pt(pt)) second_brhash(.pc(secondpc[pt.BTB_ADDR_HI+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE:pt.BTB_ADDR_HI+1]),
                                                          .hash(secondbrtag_hash[pt.BTB_BTAG_SIZE-1:0]));
       end
-      else begin
+      else begin : btbfold
          el2_btb_tag_hash #(.pt(pt)) first_brhash (.pc(firstpc [pt.BTB_ADDR_HI+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE:pt.BTB_ADDR_HI+1]),
                                                     .hash(firstbrtag_hash [pt.BTB_BTAG_SIZE-1:0]));
          el2_btb_tag_hash #(.pt(pt)) second_brhash(.pc(secondpc[pt.BTB_ADDR_HI+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE+pt.BTB_BTAG_SIZE:pt.BTB_ADDR_HI+1]),

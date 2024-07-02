@@ -76,10 +76,10 @@ module rvdffsc #( parameter WIDTH=1, SHORT=0 )
      );
 
    logic [WIDTH-1:0]          din_new;
-if (SHORT == 1) begin
+if (SHORT == 1) begin : genblock
    assign dout = din;
 end
-else begin
+else begin : genblock
    assign din_new = {WIDTH{~clear}} & (en ? din[WIDTH-1:0] : dout[WIDTH-1:0]);
    rvdff #(WIDTH) dffsc (.din(din_new[WIDTH-1:0]), .*);
 end
@@ -97,10 +97,10 @@ module rvdff_fpga #( parameter WIDTH=1, SHORT=0 )
      output logic [WIDTH-1:0] dout
      );
 
-if (SHORT == 1) begin
+if (SHORT == 1) begin : genblock
    assign dout = din;
 end
-else begin
+else begin : genblock
    `ifdef RV_FPGA_OPTIMIZE
     rvdffs #(WIDTH) dffs (.clk(rawclk), .en(clken), .*);
 `else
@@ -150,10 +150,10 @@ module rvdffsc_fpga #( parameter WIDTH=1, SHORT=0 )
      );
 
    logic [WIDTH-1:0]          din_new;
-if (SHORT == 1) begin
+if (SHORT == 1) begin : genblock
    assign dout = din;
 end
-else begin
+else begin : genblock
 `ifdef RV_FPGA_OPTIMIZE
    rvdffs  #(WIDTH)   dffs  (.clk(rawclk), .din(din[WIDTH-1:0] & {WIDTH{~clear}}),.en((en | clear) & clken), .*);
 `else

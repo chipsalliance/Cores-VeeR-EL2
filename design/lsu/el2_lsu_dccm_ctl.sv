@@ -232,8 +232,8 @@ import el2_pkg::*;
       assign dccm_dma_ecc_error   = lsu_double_ecc_error_m;
       assign dccm_dma_rtag[2:0]   = dma_mem_tag_m[2:0];
       assign dccm_dma_rdata[63:0] = ldst_dual_m ? lsu_rdata_corr_m[63:0] : {2{lsu_rdata_corr_m[31:0]}};
-      assign {lsu_ld_data_m_nc[63:32], lsu_ld_data_m[31:0]} = lsu_rdata_m[63:0] >> 8*lsu_addr_m[1:0];
-      assign {lsu_ld_data_corr_m_nc[63:32], lsu_ld_data_corr_m[31:0]} = lsu_rdata_corr_m[63:0] >> 8*lsu_addr_m[1:0];
+      assign {lsu_ld_data_m_nc[63:32], lsu_ld_data_m[31:0]} = 64'(lsu_rdata_m[63:0] >> 8*lsu_addr_m[1:0]);
+      assign {lsu_ld_data_corr_m_nc[63:32], lsu_ld_data_corr_m[31:0]} = 64'(lsu_rdata_corr_m[63:0] >> 8*lsu_addr_m[1:0]);
 
       assign dccm_rdata_m[63:0]      = {dccm_rdata_hi_m[31:0],dccm_rdata_lo_m[31:0]};
       assign dccm_rdata_corr_m[63:0] = {sec_data_hi_m[31:0],sec_data_lo_m[31:0]};

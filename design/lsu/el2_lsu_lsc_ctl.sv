@@ -301,7 +301,7 @@ import el2_pkg::*;
    // Interrupt as a flush source allows the WB to occur
    assign lsu_commit_r = lsu_pkt_r.valid & (lsu_pkt_r.store | lsu_pkt_r.load) & ~flush_r & ~lsu_pkt_r.dma;
 
-   assign dma_mem_wdata_shifted[63:0] = dma_mem_wdata[63:0] >> {dma_mem_addr[2:0], 3'b000};   // Shift the dma data to lower bits to make it consistent to lsu stores
+   assign dma_mem_wdata_shifted[63:0] = 64'(dma_mem_wdata[63:0] >> {dma_mem_addr[2:0], 3'b000});   // Shift the dma data to lower bits to make it consistent to lsu stores
    assign store_data_d[31:0] = dma_dccm_req ? dma_mem_wdata_shifted[31:0] : exu_lsu_rs2_d[31:0];  // Write to PIC still happens in r stage
 
    assign store_data_m_in[31:0] = (lsu_pkt_d.store_data_bypass_d) ? lsu_result_m[31:0] : store_data_d[31:0];

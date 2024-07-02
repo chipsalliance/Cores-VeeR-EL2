@@ -71,6 +71,7 @@ int main(int argc, char** argv) {
   tb->mem_signature_begin = 0x00000000;
   tb->mem_signature_end   = 0x00000000;
   tb->mem_mailbox         = 0xD0580000;
+  tb->mem_mailbox_testcmd = 0xD0580004;
 
   std::map<std::string, uint64_t> symbols;
 
@@ -127,6 +128,8 @@ int main(int argc, char** argv) {
     std::uppercase << tb->mem_signature_end   << std::endl;
   std::cout << "mem_mailbox         = " << std::hex << std::setw(8) <<
     std::uppercase << tb->mem_mailbox         << std::endl;
+  std::cout << "mem_mailbox_testcmd = " << std::hex << std::setw(8) <<
+    std::uppercase << tb->mem_mailbox_testcmd << std::endl;
   std::cout << std::flush;
 
   // init trace dump

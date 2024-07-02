@@ -30,7 +30,8 @@ module tb_top
     input bit                   core_clk,
     input bit [31:0]            mem_signature_begin,
     input bit [31:0]            mem_signature_end,
-    input bit [31:0]            mem_mailbox
+    input bit [31:0]            mem_mailbox,
+    input bit [31:0]            mem_mailbox_testcmd
 );
 `endif
 
@@ -39,6 +40,7 @@ module tb_top
     bit          [31:0]         mem_signature_begin = 32'd0; // TODO:
     bit          [31:0]         mem_signature_end   = 32'd0;
     bit          [31:0]         mem_mailbox         = 32'hD0580000;
+    bit          [31:0]         mem_mailbox_testcmd = 32'hD0580004;
 `endif
     logic                       rst_l;
     logic                       porst_l;
@@ -124,6 +126,10 @@ module tb_top
 
     logic                       mailbox_write;
     logic        [63:0]         mailbox_data;
+
+    // note: written value is in bits [63:32] (not in [31:0]!)
+    logic                       mailbox_test_write;
+    logic        [63:0]         mailbox_test_data;
 
     logic        [63:0]         dma_hrdata       ;
     logic        [63:0]         dma_hwdata       ;
@@ -692,12 +698,16 @@ module tb_top
 `define DEC rvtop_wrapper.rvtop.veer.dec
 
 `ifdef RV_BUILD_AXI4
-    assign mailbox_write    = lmem.awvalid && lmem.awaddr == mem_mailbox && rst_l;
-    assign mailbox_data     = lmem.wdata;
+    assign mailbox_write      = lmem.awvalid && lmem.awaddr == mem_mailbox         && rst_l;
+    assign mailbox_data       = lmem.wdata;
+    assign mailbox_test_write = lmem.awvalid && lmem.awaddr == mem_mailbox_testcmd && rst_l;
+    assign mailbox_test_data  = lmem.wdata;
 `endif
 `ifdef RV_BUILD_AHB_LITE
-    assign mailbox_write    = lmem.write   && lmem.laddr  == mem_mailbox && rst_l;
-    assign mailbox_data     = lmem.HWDATA;
+    assign mailbox_write      = lmem.write   && lmem.laddr  == mem_mailbox         && rst_l;
+    assign mailbox_data       = lmem.HWDATA;
+    assign mailbox_test_write = lmem.write   && lmem.laddr  == mem_mailbox_testcmd && rst_l;
+    assign mailbox_data       = lmem.HWDATA;
 `endif
 
     assign mailbox_data_val = mailbox_data[7:0] > 8'h5 && mailbox_data[7:0] < 8'h7f;
@@ -790,6 +800,19 @@ module tb_top
         else if(mailbox_write && mailbox_data[7:0] == 8'h1) begin
             $display("TEST_FAILED");
             $finish;
+        end
+
+        // Custom test commands
+        // Available commands (that can be written into address mem_mailbox_testcmd) are:
+        // 8'h00 - trigger NMI
+        // 8'h01 - set NMI handler address (mailbox_data[63:40] is the address of a handler,
+        //         i.e. it must be 256 byte-aligned)
+        nmi_int <= 0;
+        if (mailbox_test_write && mailbox_data[39:32] == 8'h00) begin
+            nmi_int <= 1;
+        end
+        if (mailbox_test_write && mailbox_data[39:32] == 8'h01) begin
+            nmi_vector[31:1] <= {mailbox_data[63:40], 7'h00};
         end
     end
 

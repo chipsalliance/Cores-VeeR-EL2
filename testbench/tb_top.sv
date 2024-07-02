@@ -757,6 +757,7 @@ veer_wrapper rvtop_wrapper (
     .jtag_tdi               ( 1'b0  ),
     .jtag_trst_n            ( 1'b0  ),
     .jtag_tdo               ( jtag_tdo ),
+    .jtag_tdoEn             (),
 
     .mpc_debug_halt_ack     ( mpc_debug_halt_ack),
     .mpc_debug_halt_req     ( 1'b0),

@@ -50,6 +50,19 @@ jobs:
           export CXX="ccache g++"
           pushd spike
             git checkout ${{ env.TOOL_VERSION }}
+
+            # FIXME: these replaces should be done in a VeeR-specific Spike fork
+            #
+            # Rationale: VeeR pulls down bits 31 and 30 of pmpaddrn CSRs to 0.
+            # This change is required so that we don't get mismatches related
+            # to read/write operations on PMP CSRs:
+            #
+            #   Mismatch[1]:
+            #   ISS[23] : pc[80000068] csrrw   a1, pmpaddr0, a1: a1:f75f83f1 c944_pmpaddr0:2000044f
+            #   HDL[23] : pc[80000068] : a1:375f83f1 c3b0:2000044f
+            sed -i 's/((reg_t(1) << (MAX_PADDR_BITS - PMP_SHIFT)) - 1);/0x3fffffff;/g' riscv/csrs.cc
+            sed -i 's/return (addr >> MAX_PADDR_BITS) == 0;/return (addr >> 32) == 0;/g' riscv/sim.cc
+
             mkdir build
             cd build
             ../configure --prefix=/opt/spike

@@ -805,11 +805,14 @@ module tb_top
 
         // Custom test commands
         // Available commands (that can be written into address mem_mailbox_testcmd) are:
-        // 8'h00 - trigger NMI (with mailbox_test_data[31:8] being the address of a handler,
-        //         i.e. it must be 256 byte-aligned))
+        // 8'h00 - trigger NMI
+        // 8'h01 - set NMI handler address (mailbox_test_data[31:8] is the address of a handler,
+        //         i.e. it must be 256 byte-aligned)
         nmi_assert_int <= nmi_assert_int >> 1;
         if (mailbox_test_write && mailbox_test_data[7:0] == 8'h00 && |{nmi_assert_int[3:0]} == 0) begin
             nmi_assert_int <= 4'b1111;
+        end
+        if (mailbox_test_write && mailbox_test_data[7:0] == 8'h01) begin
             // NMI handler address is in the upper 24 bits of mailbox data
             nmi_vector[31:1] <= {mailbox_test_data[31:8], 7'h00};
         end

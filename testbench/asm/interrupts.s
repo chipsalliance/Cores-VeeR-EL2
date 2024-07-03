@@ -22,6 +22,8 @@
 #define STDOUT 0xd0580000
 #define TEST_CMD 0xd0580004
 #define TRIGGER_NMI 0x00
+#define LOAD_NMI_ADDR 0x01
+
 
 
 // Code to execute
@@ -43,14 +45,19 @@ _start:
     csrw 0x7c0, x1
 
 trigger_nmi:
+    // Set up NMI handler's address
     li x6, TEST_CMD
     la x7, _handler
-    ori x7, x7, TRIGGER_NMI
+    ori x7, x7, LOAD_NMI_ADDR
+    sw x7, 0(x6)
+
+    // trigger NMI
+    li x7, TRIGGER_NMI
     sw x7, 0(x6)
 .rept 10
     nop
 .endr
-    // fail if we didn't service the NMI
+    // fail if we didn't service the interrupt
     j fail
 
 // Write 0xff to STDOUT for TB to termiate test.
@@ -63,8 +70,8 @@ _finish:
     nop
 .endr
 
-// NMI handler must be aligned to 256 bytes to fit in the upper 24 bits
-// of trigger nmi command
+// NMI handler must be aligned to 256 bytes since it has to fit
+// in the upper 24 bits of nmi handler address set command
 .balign 256
 _handler:
     csrr x7, mcause

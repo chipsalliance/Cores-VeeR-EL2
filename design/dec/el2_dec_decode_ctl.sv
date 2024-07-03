@@ -480,7 +480,7 @@ if(pt.BTB_ENABLE==1) begin
    assign dec_i0_predict_p_d.way                            =  dec_i0_brp.way;
 
 
-   if(pt.BTB_FULLYA) begin
+   if(pt.BTB_FULLYA) begin : genblock
       logic btb_error_found, btb_error_found_f;
       logic [$clog2(pt.BTB_SIZE)-1:0] fa_error_index_ns;
 
@@ -740,7 +740,7 @@ end : cam_array
    // the classes must be mutually exclusive with one another
 
    always_comb begin
-      i0_itype = NULL;
+      i0_itype = NULL_OP;
 
       if (i0_legal_decode_d) begin
          if (i0_dp.mul)                  i0_itype = MUL;

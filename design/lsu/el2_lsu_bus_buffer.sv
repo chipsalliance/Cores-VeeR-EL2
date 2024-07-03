@@ -150,9 +150,9 @@ import el2_pkg::*;
 
 );
 
-   // For Ld: IDLE -> WAIT -> CMD -> RESP -> DONE_PARTIAL(?) -> DONE_WAIT(?) -> DONE -> IDLE
-   // For St: IDLE -> WAIT -> CMD -> RESP(?) -> IDLE
-   typedef enum logic [2:0] {IDLE=3'b000, WAIT=3'b001, CMD=3'b010, RESP=3'b011, DONE_PARTIAL=3'b100, DONE_WAIT=3'b101, DONE=3'b110} state_t;
+   // For Ld: IDLE -> START_WAIT -> CMD -> RESP -> DONE_PARTIAL(?) -> DONE_WAIT(?) -> DONE -> IDLE
+   // For St: IDLE -> START_WAIT -> CMD -> RESP(?) -> IDLE
+   typedef enum logic [2:0] {IDLE=3'b000, START_WAIT=3'b001, CMD=3'b010, RESP=3'b011, DONE_PARTIAL=3'b100, DONE_WAIT=3'b101, DONE=3'b110} state_t;
 
    localparam DEPTH     = pt.LSU_NUM_NBLOAD;
    localparam DEPTH_LOG2 = pt.LSU_NUM_NBLOAD_WIDTH;
@@ -595,7 +595,7 @@ import el2_pkg::*;
    for (genvar i=0; i<DEPTH; i++) begin: GenAgeVec
       for (genvar j=0; j<DEPTH; j++) begin
          assign buf_age_in[i][j] = (((buf_state[i] == IDLE) & buf_state_en[i]) &
-                                    (((buf_state[j] == WAIT) | ((buf_state[j] == CMD) & ~buf_cmd_state_bus_en[j]))                   |       // Set age bit for older entries
+                                    (((buf_state[j] == START_WAIT) | ((buf_state[j] == CMD) & ~buf_cmd_state_bus_en[j]))                   |       // Set age bit for older entries
                                      (ibuf_drain_vld & lsu_busreq_r & (ibuf_byp | ldst_dual_r) & (i == WrPtr0_r) & (j == ibuf_tag))  |       // Set case for dual lo
                                      (ibuf_byp & lsu_busreq_r & ldst_dual_r & (i == WrPtr1_r) & (j == WrPtr0_r))))                      |     // ibuf bypass case
                                    buf_age[i][j];
@@ -623,7 +623,7 @@ import el2_pkg::*;
    //------------------------------------------------------------------------------
    // Buffer logic
    //------------------------------------------------------------------------------
-   for (genvar i=0; i<DEPTH; i++) begin
+   for (genvar i=0; i<DEPTH; i++) begin : genblock
 
       assign ibuf_drainvec_vld[i] = (ibuf_drain_vld & (i == ibuf_tag));
       assign buf_byteen_in[i]     = ibuf_drainvec_vld[i] ? ibuf_byteen_out[3:0] : ((ibuf_byp & ldst_dual_r & (i == WrPtr1_r)) ? ldst_byteen_hi_r[3:0] : ldst_byteen_lo_r[3:0]);
@@ -655,7 +655,7 @@ import el2_pkg::*;
 
          case (buf_state[i])
             IDLE: begin
-                     buf_nxtstate[i] = lsu_bus_clk_en ? CMD : WAIT;
+                     buf_nxtstate[i] = lsu_bus_clk_en ? CMD : START_WAIT;
                      buf_state_en[i] = (lsu_busreq_r & lsu_commit_r & (((ibuf_byp | ldst_dual_r) & ~ibuf_merge_en & (i == WrPtr0_r)) | (ibuf_byp & ldst_dual_r & (i == WrPtr1_r)))) |
                                        (ibuf_drain_vld & (i == ibuf_tag));
                      buf_wr_en[i]    = buf_state_en[i];
@@ -663,7 +663,7 @@ import el2_pkg::*;
                      buf_data_in[i]   = (ibuf_drain_vld & (i == ibuf_tag)) ? ibuf_data_out[31:0] : store_data_lo_r[31:0];
                      buf_cmd_state_bus_en[i]  = '0;
             end
-            WAIT: begin
+            START_WAIT: begin
                      buf_nxtstate[i] = dec_tlu_force_halt ? IDLE : CMD;
                      buf_state_en[i] = lsu_bus_clk_en | dec_tlu_force_halt;
                      buf_cmd_state_bus_en[i]  = '0;
@@ -707,7 +707,7 @@ import el2_pkg::*;
                      buf_state_en[i]           = (buf_state_bus_en[i] & lsu_bus_clk_en) | dec_tlu_force_halt;
                      buf_cmd_state_bus_en[i]  = '0;
             end
-            DONE_WAIT: begin  // WAIT state if there are multiple outstanding nb returns
+            DONE_WAIT: begin  // START_WAIT state if there are multiple outstanding nb returns
                       buf_nxtstate[i]           = dec_tlu_force_halt ? IDLE : DONE;
                       buf_state_en[i]           = ((RspPtr == DEPTH_LOG2'(i)) | (buf_dual[i] & (buf_dualtag[i] == RspPtr))) | dec_tlu_force_halt;
                       buf_cmd_state_bus_en[i]  = '0;
@@ -758,9 +758,9 @@ import el2_pkg::*;
 
    // buffer full logic
    always_comb begin
-      buf_numvld_any[3:0] =  ({1'b0,lsu_busreq_m} << ldst_dual_m) +
-                             ({1'b0,lsu_busreq_r} << ldst_dual_r) +
-                             ibuf_valid;
+      buf_numvld_any[3:0] =  4'(({1'b0,lsu_busreq_m} << ldst_dual_m) +
+                                ({1'b0,lsu_busreq_r} << ldst_dual_r) +
+                                ibuf_valid);
       buf_numvld_wrcmd_any[3:0] = 4'b0;
       buf_numvld_cmd_any[3:0] = 4'b0;
       buf_numvld_pend_any[3:0] = 4'b0;
@@ -769,7 +769,7 @@ import el2_pkg::*;
          buf_numvld_any[3:0] += {3'b0, (buf_state[i] != IDLE)};
          buf_numvld_wrcmd_any[3:0] += {3'b0, (buf_write[i] & (buf_state[i] == CMD) & ~buf_cmd_state_bus_en[i])};
          buf_numvld_cmd_any[3:0]   += {3'b0, ((buf_state[i] == CMD) & ~buf_cmd_state_bus_en[i])};
-         buf_numvld_pend_any[3:0]   += {3'b0, ((buf_state[i] == WAIT) | ((buf_state[i] == CMD) & ~buf_cmd_state_bus_en[i]))};
+         buf_numvld_pend_any[3:0]   += {3'b0, ((buf_state[i] == START_WAIT) | ((buf_state[i] == CMD) & ~buf_cmd_state_bus_en[i]))};
          any_done_wait_state |= (buf_state[i] == DONE_WAIT);
       end
    end
@@ -885,7 +885,7 @@ import el2_pkg::*;
       end
    end
    assign lsu_imprecise_error_load_any       = lsu_nonblock_load_data_error & ~lsu_imprecise_error_store_any;   // This is to make sure we send only one imprecise error for load/store
-   assign lsu_imprecise_error_addr_any[31:0] = lsu_imprecise_error_store_any ? buf_addr[lsu_imprecise_error_store_tag] : buf_addr[lsu_nonblock_load_data_tag];
+   assign lsu_imprecise_error_addr_any[31:0] = lsu_imprecise_error_store_any ? buf_addr[lsu_imprecise_error_store_tag[DEPTH_LOG2-1:0]] : buf_addr[lsu_nonblock_load_data_tag[DEPTH_LOG2-1:0]];
 
    // PMU signals
    assign lsu_pmu_bus_trxn  = (lsu_axi_awvalid & lsu_axi_awready) | (lsu_axi_wvalid & lsu_axi_wready) | (lsu_axi_arvalid & lsu_axi_arready);

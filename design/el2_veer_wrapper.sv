@@ -317,6 +317,7 @@ import el2_pkg::*;
    input logic                             jtag_tdi,    // JTAG tdi
    input logic                             jtag_trst_n, // JTAG Reset
    output logic                            jtag_tdo,    // JTAG TDO
+   output logic                            jtag_tdoEn,  // JTAG Test Data Output enable
 
    input logic [31:4] core_id,
 
@@ -409,7 +410,6 @@ import el2_pkg::*;
    logic [77:0]    iccm_rd_data_ecc;
 
    logic        core_rst_l;                         // Core reset including rst_l and dbg_rst_l
-   logic        jtag_tdoEn;
 
    logic        dccm_clk_override;
    logic        icm_clk_override;
@@ -519,6 +519,7 @@ import el2_pkg::*;
    wire [2:0]                      lsu_axi_awprot;
    wire [3:0]                      lsu_axi_awqos;
 
+
    wire                            lsu_axi_wvalid;
    wire                            lsu_axi_wready;
    wire [63:0]                     lsu_axi_wdata;
@@ -551,6 +552,17 @@ import el2_pkg::*;
    wire [1:0]                      lsu_axi_rresp;
    wire                            lsu_axi_rlast;
 
+   assign                          lsu_axi_awready = '0;
+   assign                          lsu_axi_wready = '0;
+   assign                          lsu_axi_bvalid = '0;
+   assign                          lsu_axi_bresp = '0;
+   assign                          lsu_axi_bid = {pt.LSU_BUS_TAG{1'b0}};
+   assign                          lsu_axi_arready = '0;
+   assign                          lsu_axi_rvalid = '0;
+   assign                          lsu_axi_rid = {pt.LSU_BUS_TAG{1'b0}};
+   assign                          lsu_axi_rdata = '0;
+   assign                          lsu_axi_rresp = '0;
+   assign                          lsu_axi_rlast = '0;
    //-------------------------- IFU AXI signals--------------------------
    // AXI Write Channels
    wire                            ifu_axi_awvalid;
@@ -598,6 +610,15 @@ import el2_pkg::*;
    wire [1:0]                      ifu_axi_rresp;
    wire                            ifu_axi_rlast;
 
+   assign                          ifu_axi_bvalid = '0;
+   assign                          ifu_axi_bresp = '0;
+   assign                          ifu_axi_bid = {pt.IFU_BUS_TAG{1'b0}};
+   assign                          ifu_axi_arready = '0;
+   assign                          ifu_axi_rvalid = '0;
+   assign                          ifu_axi_rid = {pt.IFU_BUS_TAG{1'b0}};
+   assign                          ifu_axi_rdata = 0;
+   assign                          ifu_axi_rresp = '0;
+   assign                          ifu_axi_rlast = '0;
    //-------------------------- SB AXI signals--------------------------
    // AXI Write Channels
    wire                            sb_axi_awvalid;
@@ -645,6 +666,17 @@ import el2_pkg::*;
    wire [1:0]                      sb_axi_rresp;
    wire                            sb_axi_rlast;
 
+   assign                          sb_axi_awready = '0;
+   assign                          sb_axi_wready = '0;
+   assign                          sb_axi_bvalid = '0;
+   assign                          sb_axi_bresp = '0;
+   assign                          sb_axi_bid = {pt.SB_BUS_TAG{1'b0}};
+   assign                          sb_axi_arready = '0;
+   assign                          sb_axi_rvalid = '0;
+   assign                          sb_axi_rid = {pt.SB_BUS_TAG{1'b0}};
+   assign                          sb_axi_rdata = '0;
+   assign                          sb_axi_rresp = '0;
+   assign                          sb_axi_rlast = '0;
    //-------------------------- DMA AXI signals--------------------------
    // AXI Write Channels
    wire                         dma_axi_awvalid;
@@ -663,11 +695,27 @@ import el2_pkg::*;
    wire [7:0]                   dma_axi_wstrb;
    wire                         dma_axi_wlast;
 
+   assign                       dma_axi_awvalid = 1'b0;
+   assign                       dma_axi_awid = {pt.DMA_BUS_TAG{1'b0}};
+   assign                       dma_axi_awaddr = 32'd0;
+   assign                       dma_axi_awsize = 3'd0;
+   assign                       dma_axi_awprot = 3'd0;
+   assign                       dma_axi_awlen = 8'd0;
+   assign                       dma_axi_awburst = 2'd0;
+
+
+   assign                       dma_axi_wvalid = 1'b0;
+   assign                       dma_axi_wdata = 64'd0;
+   assign                       dma_axi_wstrb = 8'd0;
+   assign                       dma_axi_wlast = 1'b0;
+
+
    wire                         dma_axi_bvalid;
    wire                         dma_axi_bready;
    wire [1:0]                   dma_axi_bresp;
    wire [pt.DMA_BUS_TAG-1:0]    dma_axi_bid;
 
+   assign                       dma_axi_bready = 1'b0;
    // AXI Read Channels
    wire                         dma_axi_arvalid;
    wire                         dma_axi_arready;
@@ -678,6 +726,16 @@ import el2_pkg::*;
    wire [7:0]                   dma_axi_arlen;
    wire [1:0]                   dma_axi_arburst;
 
+   assign                       dma_axi_arvalid = 1'b0;
+   assign                       dma_axi_arid = {pt.DMA_BUS_TAG{1'b0}};
+   assign                       dma_axi_araddr = 32'd0;
+   assign                       dma_axi_arsize = 3'd0;
+   assign                       dma_axi_arprot = 3'd0;
+   assign                       dma_axi_arlen = 8'd0;
+   assign                       dma_axi_arburst = 2'd0;
+
+
+
    wire                         dma_axi_rvalid;
    wire                         dma_axi_rready;
    wire [pt.DMA_BUS_TAG-1:0]    dma_axi_rid;
@@ -685,6 +743,7 @@ import el2_pkg::*;
    wire [1:0]                   dma_axi_rresp;
    wire                         dma_axi_rlast;
 
+   assign                       dma_axi_rready = 1'b0;
    // AXI
    assign ifu_axi_awready = 1'b1;
    assign ifu_axi_wready = 1'b1;
@@ -731,7 +790,7 @@ import el2_pkg::*;
     .tms         (jtag_tms),        // Test mode select
     .tdi         (jtag_tdi),        // Test Data Input
     .tdo         (jtag_tdo),        // Test Data Output
-    .tdoEnable   (),
+    .tdoEnable   (jtag_tdoEn),      // Test Data Output enable
     // Processor Signals
     .core_rst_n  (dbg_rst_l),       // Debug reset, active low
     .core_clk    (clk),             // Core clock

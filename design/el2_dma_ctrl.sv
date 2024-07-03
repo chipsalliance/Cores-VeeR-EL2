@@ -308,12 +308,13 @@ import el2_pkg::*;
    // Error logic
    assign dma_address_error = fifo_valid[RdPtr] & ~fifo_done[RdPtr] & ~fifo_dbg[RdPtr] & (~(dma_mem_addr_in_dccm | dma_mem_addr_in_iccm));    // request not for ICCM or DCCM
    assign dma_alignment_error = fifo_valid[RdPtr] & ~fifo_done[RdPtr] & ~fifo_dbg[RdPtr] & ~dma_address_error &
-                                (((dma_mem_sz_int[2:0] == 3'h1) & dma_mem_addr_int[0])                                                       |    // HW size but unaligned
-                                 ((dma_mem_sz_int[2:0] == 3'h2) & (|dma_mem_addr_int[1:0]))                                                  |    // W size but unaligned
-                                 ((dma_mem_sz_int[2:0] == 3'h3) & (|dma_mem_addr_int[2:0]))                                                  |    // DW size but unaligned
-                                 (dma_mem_addr_in_iccm & ~((dma_mem_sz_int[1:0] == 2'b10) | (dma_mem_sz_int[1:0] == 2'b11)))                 |    // ICCM access not word size
-                                 (dma_mem_addr_in_dccm & dma_mem_write & ~((dma_mem_sz_int[1:0] == 2'b10) | (dma_mem_sz_int[1:0] == 2'b11))) |    // DCCM write not word size
-                                 (dma_mem_write & (dma_mem_sz_int[2:0] == 3'h2) & (dma_mem_byteen[dma_mem_addr_int[2:0]+:4] != 4'hf))        |    // Write byte enables not aligned for word store
+                                (((dma_mem_sz_int[2:0] == 3'h1) & dma_mem_addr_int[0])                                                             |    // HW size but unaligned
+                                 ((dma_mem_sz_int[2:0] == 3'h2) & (|dma_mem_addr_int[1:0]))                                                        |    // W size but unaligned
+                                 ((dma_mem_sz_int[2:0] == 3'h3) & (|dma_mem_addr_int[2:0]))                                                        |    // DW size but unaligned
+                                 (dma_mem_addr_in_iccm & ~((dma_mem_sz_int[1:0] == 2'b10) | (dma_mem_sz_int[1:0] == 2'b11)))                       |    // ICCM access not word size
+                                 (dma_mem_addr_in_dccm & dma_mem_write & ~((dma_mem_sz_int[1:0] == 2'b10) | (dma_mem_sz_int[1:0] == 2'b11)))       |    // DCCM write not word size
+                                 (dma_mem_write & (dma_mem_sz_int[2:0] == 3'h2) & (dma_mem_addr_int[2:0] == 3'h0) & (dma_mem_byteen[3:0] != 4'hf)) |    // Write byte enables not aligned for word store
+                                 (dma_mem_write & (dma_mem_sz_int[2:0] == 3'h2) & (dma_mem_addr_int[2:0] == 3'h4) & (dma_mem_byteen[7:4] != 4'hf)) |    // Write byte enables not aligned for word store
                                  (dma_mem_write & (dma_mem_sz_int[2:0] == 3'h3) & ~((dma_mem_byteen[7:0] == 8'h0f) | (dma_mem_byteen[7:0] == 8'hf0) | (dma_mem_byteen[7:0] == 8'hff)))); // Write byte enables not aligned for dword store
 
 

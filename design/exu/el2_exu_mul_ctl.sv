@@ -523,22 +523,22 @@ import el2_pkg::*;
    logic        [31:0]    xperm_b;
    logic        [31:0]    xperm_h;
 
-   assign xperm_n[03:00]         =  { 4{    ~rs2_in[03]     }} & ( (rs1_in[31:0] >> {rs2_in[02:00],2'b0}) &     4'hf );   // This is a 8:1 mux with qualified selects
-   assign xperm_n[07:04]         =  { 4{    ~rs2_in[07]     }} & ( (rs1_in[31:0] >> {rs2_in[06:04],2'b0}) &     4'hf );
-   assign xperm_n[11:08]         =  { 4{    ~rs2_in[11]     }} & ( (rs1_in[31:0] >> {rs2_in[10:08],2'b0}) &     4'hf );
-   assign xperm_n[15:12]         =  { 4{    ~rs2_in[15]     }} & ( (rs1_in[31:0] >> {rs2_in[14:12],2'b0}) &     4'hf );
-   assign xperm_n[19:16]         =  { 4{    ~rs2_in[19]     }} & ( (rs1_in[31:0] >> {rs2_in[18:16],2'b0}) &     4'hf );
-   assign xperm_n[23:20]         =  { 4{    ~rs2_in[23]     }} & ( (rs1_in[31:0] >> {rs2_in[22:20],2'b0}) &     4'hf );
-   assign xperm_n[27:24]         =  { 4{    ~rs2_in[27]     }} & ( (rs1_in[31:0] >> {rs2_in[26:24],2'b0}) &     4'hf );
-   assign xperm_n[31:28]         =  { 4{    ~rs2_in[31]     }} & ( (rs1_in[31:0] >> {rs2_in[30:28],2'b0}) &     4'hf );
+   assign xperm_n[03:00]         =  { 4{    ~rs2_in[03]     }} & 4'( (rs1_in[31:0] >> {rs2_in[02:00],2'b0}) &     4'hf );   // This is a 8:1 mux with qualified selects
+   assign xperm_n[07:04]         =  { 4{    ~rs2_in[07]     }} & 4'( (rs1_in[31:0] >> {rs2_in[06:04],2'b0}) &     4'hf );
+   assign xperm_n[11:08]         =  { 4{    ~rs2_in[11]     }} & 4'( (rs1_in[31:0] >> {rs2_in[10:08],2'b0}) &     4'hf );
+   assign xperm_n[15:12]         =  { 4{    ~rs2_in[15]     }} & 4'( (rs1_in[31:0] >> {rs2_in[14:12],2'b0}) &     4'hf );
+   assign xperm_n[19:16]         =  { 4{    ~rs2_in[19]     }} & 4'( (rs1_in[31:0] >> {rs2_in[18:16],2'b0}) &     4'hf );
+   assign xperm_n[23:20]         =  { 4{    ~rs2_in[23]     }} & 4'( (rs1_in[31:0] >> {rs2_in[22:20],2'b0}) &     4'hf );
+   assign xperm_n[27:24]         =  { 4{    ~rs2_in[27]     }} & 4'( (rs1_in[31:0] >> {rs2_in[26:24],2'b0}) &     4'hf );
+   assign xperm_n[31:28]         =  { 4{    ~rs2_in[31]     }} & 4'( (rs1_in[31:0] >> {rs2_in[30:28],2'b0}) &     4'hf );
 
-   assign xperm_b[07:00]         =  { 8{ ~(| rs2_in[07:02]) }} & ( (rs1_in[31:0] >> {rs2_in[01:00],3'b0}) &    8'hff );   // This is a 4:1 mux with qualified selects
-   assign xperm_b[15:08]         =  { 8{ ~(| rs2_in[15:10]) }} & ( (rs1_in[31:0] >> {rs2_in[09:08],3'b0}) &    8'hff );
-   assign xperm_b[23:16]         =  { 8{ ~(| rs2_in[23:18]) }} & ( (rs1_in[31:0] >> {rs2_in[17:16],3'b0}) &    8'hff );
-   assign xperm_b[31:24]         =  { 8{ ~(| rs2_in[31:26]) }} & ( (rs1_in[31:0] >> {rs2_in[25:24],3'b0}) &    8'hff );
+   assign xperm_b[07:00]         =  { 8{ ~(| rs2_in[07:02]) }} & 8'( (rs1_in[31:0] >> {rs2_in[01:00],3'b0}) &    8'hff );   // This is a 4:1 mux with qualified selects
+   assign xperm_b[15:08]         =  { 8{ ~(| rs2_in[15:10]) }} & 8'( (rs1_in[31:0] >> {rs2_in[09:08],3'b0}) &    8'hff );
+   assign xperm_b[23:16]         =  { 8{ ~(| rs2_in[23:18]) }} & 8'( (rs1_in[31:0] >> {rs2_in[17:16],3'b0}) &    8'hff );
+   assign xperm_b[31:24]         =  { 8{ ~(| rs2_in[31:26]) }} & 8'( (rs1_in[31:0] >> {rs2_in[25:24],3'b0}) &    8'hff );
 
-   assign xperm_h[15:00]         =  {16{ ~(| rs2_in[15:01]) }} & ( (rs1_in[31:0] >> {rs2_in[00]   ,4'b0}) & 16'hffff );   // This is a 2:1 mux with qualified selects
-   assign xperm_h[31:16]         =  {16{ ~(| rs2_in[31:17]) }} & ( (rs1_in[31:0] >> {rs2_in[16]   ,4'b0}) & 16'hffff );
+   assign xperm_h[15:00]         =  {16{ ~(| rs2_in[15:01]) }} & 16'( (rs1_in[31:0] >> {rs2_in[00]   ,4'b0}) & 16'hffff );   // This is a 2:1 mux with qualified selects
+   assign xperm_h[31:16]         =  {16{ ~(| rs2_in[31:17]) }} & 16'( (rs1_in[31:0] >> {rs2_in[16]   ,4'b0}) & 16'hffff );
 
 
 

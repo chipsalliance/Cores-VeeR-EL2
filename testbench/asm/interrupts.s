@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2019 Western Digital Corporation or its affiliates.
+// Copyright (c) 2024 Antmicro <www.antmicro.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,12 +19,7 @@
 
 
 #include "defines.h"
-
-#define STDOUT 0xd0580000
-#define TEST_CMD 0xd0580004
-#define TRIGGER_NMI 0x00
-#define LOAD_NMI_ADDR 0x01
-
+#include "tb.h"
 
 
 // Code to execute
@@ -85,10 +81,3 @@ fail:
     addi x5, x0, 0x01
     sb x5, 0(x3)
     j fail
-
-.data
-hw_data:
-.ascii "-------------------------\n"
-.ascii "Hello World from VeeR EL2\n"
-.ascii "-------------------------\n"
-.byte 0

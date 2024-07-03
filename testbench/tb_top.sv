@@ -716,6 +716,9 @@ module tb_top
     parameter MAX_CYCLES = 2_000_000;
 
     integer fd, tp, el;
+    logic next_load_error;
+    logic [1:0] lsu_axi_rresp_override;
+    logic [1:0] lsu_axi_rvalid_hist;
 
     always @(negedge core_clk) begin
         cycleCnt <= cycleCnt+1;
@@ -808,6 +811,7 @@ module tb_top
         // 8'h00 - trigger NMI
         // 8'h01 - set NMI handler address (mailbox_test_data[31:8] is the address of a handler,
         //         i.e. it must be 256 byte-aligned)
+        // 8'h02 - trigger data load bus error on the next load
         nmi_assert_int <= nmi_assert_int >> 1;
         if (mailbox_test_write && mailbox_test_data[7:0] == 8'h00 && |{nmi_assert_int[3:0]} == 0) begin
             nmi_assert_int <= 4'b1111;
@@ -816,6 +820,20 @@ module tb_top
             // NMI handler address is in the upper 24 bits of mailbox data
             nmi_vector[31:1] <= {mailbox_test_data[31:8], 7'h00};
         end
+        if (mailbox_test_write && mailbox_test_data[7:0] == 8'h02) begin
+            next_load_error <= 1;
+        end
+
+        lsu_axi_rvalid_hist <= {lsu_axi_rvalid_hist[1], lsu_axi_rvalid};
+        if (next_load_error && lsu_axi_rvalid_hist == 2'b10)
+            next_load_error <= 0;
+    end
+
+    always_comb begin
+        lsu_axi_rresp_override = lsu_axi_rresp;
+        if (next_load_error && lsu_axi_rvalid)
+            // force slave bus error
+            lsu_axi_rresp_override = 2'b10;
     end
 
     // nmi_int must be asserted for at least two clock cycles and then deasserted for
@@ -1041,7 +1059,7 @@ veer_wrapper rvtop_wrapper (
     .lsu_axi_rready         (lsu_axi_rready),
     .lsu_axi_rid            (lsu_axi_rid),
     .lsu_axi_rdata          (lsu_axi_rdata),
-    .lsu_axi_rresp          (lsu_axi_rresp),
+    .lsu_axi_rresp          (lsu_axi_rresp_override),
     .lsu_axi_rlast          (lsu_axi_rlast),
 
     //-------------------------- IFU AXI signals--------------------------

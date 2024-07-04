@@ -39,9 +39,9 @@ module el2_ifu_iccm_mem_wrapper
   logic [pt.ICCM_NUM_BANKS-1:0]                                       iccm_wren_bank;
   logic [pt.ICCM_NUM_BANKS-1:0][pt.ICCM_BITS-1:pt.ICCM_BANK_INDEX_LO] iccm_addr_bank;
   logic [pt.ICCM_NUM_BANKS-1:0][                                31:0] iccm_bank_wr_data;
-  logic [pt.ICCM_NUM_BANKS-1:0][                                 6:0] iccm_bank_wr_ecc;
+  logic [pt.ICCM_NUM_BANKS-1:0][               pt.ICCM_ECC_WIDTH-1:0] iccm_bank_wr_ecc;
   logic [pt.ICCM_NUM_BANKS-1:0][                                31:0] iccm_bank_dout;
-  logic [pt.ICCM_NUM_BANKS-1:0][                                 6:0] iccm_bank_ecc;
+  logic [pt.ICCM_NUM_BANKS-1:0][               pt.ICCM_ECC_WIDTH-1:0] iccm_bank_ecc;
 
   logic [pt.ICCM_NUM_BANKS-1:0][                                38:0] iccm_bank_wr_fdata;
   logic [pt.ICCM_NUM_BANKS-1:0][                                38:0] iccm_bank_fdout;
@@ -76,7 +76,7 @@ module el2_ifu_iccm_mem_wrapper
       mem_export.iccm_bank_wr_ecc[i], mem_export.iccm_bank_wr_data[i]
     };
     assign mem_export.iccm_bank_dout[i] = iccm_bank_fdout[i][31:0];
-    assign mem_export.iccm_bank_ecc[i] = iccm_bank_fdout[i][38:32];
+    assign mem_export.iccm_bank_ecc[i] = iccm_bank_fdout[i][32+pt.ICCM_ECC_WIDTH-1:32];
 
     el2_ram #(
         .depth(1 << pt.ICCM_INDEX_BITS),

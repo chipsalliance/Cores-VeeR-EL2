@@ -315,9 +315,9 @@ module veer_wrapper
     output logic [pt.ICCM_NUM_BANKS-1:0] iccm_wren_bank,
     output logic [pt.ICCM_NUM_BANKS-1:0][pt.ICCM_BITS-1:pt.ICCM_BANK_INDEX_LO] iccm_addr_bank,
     output logic [pt.ICCM_NUM_BANKS-1:0][31:0] iccm_bank_wr_data,
-    output logic [pt.ICCM_NUM_BANKS-1:0][7:0] iccm_bank_wr_ecc,
+    output logic [pt.ICCM_NUM_BANKS-1:0][pt.ICCM_ECC_WIDTH-1:0] iccm_bank_wr_ecc,
     input logic [pt.ICCM_NUM_BANKS-1:0][31:0] iccm_bank_dout,
-    input logic [pt.ICCM_NUM_BANKS-1:0][7:0] iccm_bank_ecc,
+    input logic [pt.ICCM_NUM_BANKS-1:0][pt.ICCM_ECC_WIDTH-1:0] iccm_bank_ecc,
     // DCCM
     output logic [pt.DCCM_NUM_BANKS-1:0] dccm_clken,
     output logic [pt.DCCM_NUM_BANKS-1:0] dccm_wren_bank,

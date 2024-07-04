@@ -36,9 +36,9 @@ interface el2_mem_if #(
   logic [pt.ICCM_NUM_BANKS-1:0][pt.ICCM_BITS-1:pt.ICCM_BANK_INDEX_LO] iccm_addr_bank;
 
   logic [pt.ICCM_NUM_BANKS-1:0][                                31:0] iccm_bank_wr_data;
-  logic [pt.ICCM_NUM_BANKS-1:0][                                 6:0] iccm_bank_wr_ecc;
+  logic [pt.ICCM_NUM_BANKS-1:0][               pt.ICCM_ECC_WIDTH-1:0] iccm_bank_wr_ecc;
   logic [pt.ICCM_NUM_BANKS-1:0][                                31:0] iccm_bank_dout;
-  logic [pt.ICCM_NUM_BANKS-1:0][                                 6:0] iccm_bank_ecc;
+  logic [pt.ICCM_NUM_BANKS-1:0][               pt.ICCM_ECC_WIDTH-1:0] iccm_bank_ecc;
 
 
   //////////////////////////////////////////

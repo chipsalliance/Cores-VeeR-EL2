@@ -115,9 +115,9 @@ import el2_pkg::*;
       iccm_mem_export.iccm_wren_bank[i]    = wren_bank[i];
       iccm_mem_export.iccm_addr_bank[i]    = addr_bank[i];
       iccm_mem_export.iccm_bank_wr_data[i] = iccm_bank_wr_data[i][31:0];
-      iccm_mem_export.iccm_bank_wr_ecc[i]  = iccm_bank_wr_data[i][38:32];
+      iccm_mem_export.iccm_bank_wr_ecc[i]  = iccm_bank_wr_data[i][32+pt.ICCM_ECC_WIDTH-1:32];
       iccm_bank_dout[i][31:0]              = iccm_mem_export.iccm_bank_dout[i];
-      iccm_bank_dout[i][38:32]             = iccm_mem_export.iccm_bank_ecc[i];
+      iccm_bank_dout[i][32+pt.ICCM_ECC_WIDTH-1:32] = iccm_mem_export.iccm_bank_ecc[i];
     end
 
     // match the redundant rows

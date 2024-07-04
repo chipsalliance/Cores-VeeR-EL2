@@ -382,3 +382,92 @@ jobs:
         with:
           name: artifacts-${{ matrix.test }}-${{ matrix.iss }}-${{ matrix.version }}
           path: tools/riscv-dv/work/test_*
+
+  run-custom-tests:
+    name: Run custom RISC-V DV tests
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    needs: [ veer-iss, renode, generate-config, generate-code ]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
+        coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
+        version: [ uvm ]
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/riscv-dv/.cache/"
+      VERILATOR_VERSION: v5.010
+      SPIKE_VERSION: d70ea67d
+      GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
+      CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Prepare Environment
+        run: _secret_prepare_env
+
+      - name: Install Python deps
+        run: |
+          pip3 install -r third_party/riscv-dv/requirements.txt
+
+      - name: Setup Cache Metadata
+        id: cache_metadata
+        run: |
+          date=$(date +"%Y_%m_%d")
+          time=$(date +"%Y%m%d_%H%M%S_%N")
+          cache_verilator_restore_key=cache_verilator_
+          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}
+          cache_spike_restore_key=cache_spike_
+          cache_spike_key=${cache_spike_restore_key}${{ env.SPIKE_VERSION }}
+          cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
+          cache_test_key=${cache_test_restore_key}${time}
+          cache_code=cache_${{ matrix.test }}_${{ matrix.version }}
+
+          echo "date=$date" | tee -a "$GITHUB_ENV"
+          echo "time=$time" | tee -a "$GITHUB_ENV"
+          echo "cache_verilator_restore_key=$cache_verilator_restore_key" | tee -a "$GITHUB_ENV"
+          echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
+          echo "cache_spike_restore_key=$cache_spike_restore_key" | tee -a "$GITHUB_ENV"
+          echo "cache_spike_key=$cache_spike_key" | tee -a "$GITHUB_ENV"
+          echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
+          echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
+          echo "cache_code=${cache_code}_${{ env.CACHE_HASH }}" | tee -a "$GITHUB_ENV"
+
+      - name: Restore verilator cache
+        id: cache-verilator-restore
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            /opt/verilator
+            /opt/verilator/.cache
+          key: ${{ env.cache_verilator_key }}
+          restore-keys: ${{ env.cache_verilator_restore_key }}
+
+      - name: Restore Spike cache
+        id: cache-spike-restore
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            /opt/spike
+            /opt/spike/.cache
+          key: ${{ env.cache_spike_key }}
+          restore-keys: ${{ env.cache_spike_restore_key }}
+
+      - name: Cache Code Restore
+        uses: actions/cache/restore@v3
+        id: cache-code-restore
+        timeout-minutes: 60
+        with:
+          path: tools/riscv-dv/work/test_${{ matrix.test }}/asm_test
+          key: ${{ env.cache_code }}
+
+      - name: Perform custom tests
+        run: _secret_custom_run
+        env:
+          RISCV_DV_TEST: ${{ matrix.test }}
+        continue-on-error: true

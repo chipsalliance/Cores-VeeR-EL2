@@ -458,7 +458,7 @@ jobs:
 
       - name: Install Python deps
         run: |
-          pip install -r third_party/riscv-dv/requirements.txt
+          pip3 install -r third_party/riscv-dv/requirements.txt
 
       - name: Check presence
         run: |

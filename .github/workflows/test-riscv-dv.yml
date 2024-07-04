@@ -456,53 +456,10 @@ jobs:
           key: ${{ env.cache_spike_key }}
           restore-keys: ${{ env.cache_spike_restore_key }}
 
-      - name: Download Renode binaries
-        uses: actions/download-artifact@v3
-        with:
-          name: renode
-          path: /opt
-
-      - name: Download VeeR-ISS binaries
-        uses: actions/download-artifact@v3
-        with:
-          name: veer-iss
-          path: /opt
-
-      - name: Unpack binaries
-        run: |
-          pushd /opt
-            tar -zxvf veer-iss.tar.gz
-            tar -zxvf renode.tar.gz --strip-components=1
-          popd
-
-      - name: Setup repository
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
       - name: Install Python deps
         run: |
           pip install -r third_party/riscv-dv/requirements.txt
 
-      - name: Create Cache Timestamp
-        id: cache_timestamp
-        uses: nanzm/get-time-action@v2.0
-        with:
-          format: 'YYYY-MM-DD-HH-mm-ss'
-
-      - name: Setup cache
-        uses: actions/cache@v3
-        timeout-minutes: 60
-        continue-on-error: true
-        with:
-          path: "/opt/veer-el2/.cache/"
-          key: cache_tests_${{ steps.cache_timestamp.outputs.time }}
-          restore-keys: cache_tests_
-
-      - name: Cache Code Restore
-        uses: actions/cache/restore@v3
-        id: cache-code-restore
-        timeout-minutes: 60
-        with:
-          path: tools/riscv-dv/work/test_${{ matrix.test }}/asm_test
-          key: ${{ env.cache_code }}
+      - name: Check presence
+        run: |
+          ls tools/riscv-dv/work/test_${{ matrix.test }}

@@ -23,6 +23,7 @@
 
 
 // Code to execute
+.option norvc
 .section .text
 .global _start
 _start:
@@ -47,12 +48,6 @@ _start:
 
 
 dbus_store_error:
-    # li x1, 0xe0000000
-    # jalr x0, x1, 0
-
-    # li x1, 0xfffffffc
-    # lw x3, 0(x1)
-
     la x31, fail
     // load expected mcause and mscause values for exception handler
     li x4, 0xF0000000   // mcause
@@ -80,7 +75,30 @@ dbus_nonblocking_load_error:
     lw x2, 0(zero)
     j fail_if_not_serviced
 
+iside_fetch_precise_bus_error:
+    la x31, fail
+    li x4, 0x1
+    li x5, 0x9
+    li x2, TRIGGER_BUS_FAULT
+    li x3, STDOUT
+    sw x2, 0(x3)
+    // ibus fault is triggered on this instruction
+    nop
+    j fail_if_not_serviced
+
+iside_core_local_unmapped_address_error:
+    la x31, fail
+    li x4, 0x5
+    li x5, 0x2
+    li x1, 0xfffffffc
+    // make sure to not use x2 as the base address so that lw instruction
+    // doesn't get compressed into 2 bytes
+    lw x3, 0(x1)
+    j fail_if_not_serviced
+
 main:
+    call iside_core_local_unmapped_address_error
+    call iside_fetch_precise_bus_error
     call dbus_store_error
     call dbus_nonblocking_load_error
 
@@ -100,6 +118,12 @@ _finish:
 _handler:
     // reenable signaling of NMIs for subsequent NMIs
     csrw 0xBC0, x0 // mdeau
+    // jump past the excepting instruction (if it's access to some unmapped address) -
+    // should be okay as long as we are inside the nop sled in fail_if_not_serviced
+    csrr x2, mepc
+    addi x2, x2, 4
+    csrw mepc, x2
+
     csrr x2, mcause
     bne x2, x4, fail
     csrr x2, 0x7FF // mscause
@@ -109,7 +133,7 @@ _handler:
 
 // used for making sure we fail if we didn't jump to the exception/NMI handler
 fail_if_not_serviced:
-.rept 10
+.rept 20
     nop
 .endr
     // control flow goes to 'fail' if interrupt wasn't serviced (x31 set by the handler)

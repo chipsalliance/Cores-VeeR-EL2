@@ -60,7 +60,7 @@ fi
 set -e
 OUTPUT_DIR=report
 mkdir -p ${OUTPUT_DIR}
-GENHTML_OPTS="--no-function-coverage --no-source"
+GENHTML_OPTS="--no-function-coverage"
 
 echo -e "${COLOR_WHITE}========== gen_coverage_reports ==============${COLOR_CLEAR}"
 

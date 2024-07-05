@@ -31,39 +31,60 @@ _start:
     csrw minstreth, zero
 
     // Enable Caches in MRAC
-    li x1, 0x5f555555
-    csrw 0x7c0, x1
+    li x2, 0x5f555555
+    csrw 0x7c0, x2
 
     // Set up MTVEC at _handler address
-    la x1, _handler
-    csrw mtvec, x1
+    la x2, _handler
+    csrw mtvec, x2
 
     // Set up NMI handler at _handler address
-    li x2, TEST_CMD
-    ori x1, x1, LOAD_NMI_ADDR
-    sw x1, 0(x2)
+    li x3, TEST_CMD
+    ori x2, x2, LOAD_NMI_ADDR
+    sw x2, 0(x3)
 
-trigger_exc:
+    j main
+
+
+dbus_store_error:
     # li x1, 0xe0000000
     # jalr x0, x1, 0
 
     # li x1, 0xfffffffc
     # lw x3, 0(x1)
 
-    // trigger bus fault at next load
-    li x1, TRIGGER_BUS_FAULT
-    li x2, TEST_CMD
-    sw x1, 0(x2)
-    la x2, trigger_exc
+    la x31, fail
+    // load expected mcause and mscause values for exception handler
+    li x4, 0xF0000000   // mcause
+    li x5, 0x0          // mscause
+    // address of some data that resides in memory (and not in iccm/dccm)
+    lw x6, _start
+    // trigger bus fault at next store
+    li x2, TRIGGER_BUS_FAULT
+    li x3, TEST_CMD
+    sw x2, 0(x3)
     // bus fault is triggered on this instruction
-    lw x1, 0(x2)
-.rept 10
-    nop
-.endr
-    // fail if we didn't service the interrupt
-    j fail
+    sw x2, 0(x6)
+    j fail_if_not_serviced
 
-// Write 0xff to STDOUT for TB to termiate test.
+dbus_nonblocking_load_error:
+    la x31, fail
+    // load expected mcause and mscause values for exception handler
+    li x4, 0xF0000001   // mcause
+    li x5, 0x0          // mscause
+    // trigger bus fault at next load
+    li x2, TRIGGER_BUS_FAULT
+    li x3, TEST_CMD
+    sw x2, 0(x3)
+    // bus fault is triggered on this instruction
+    lw x2, 0(zero)
+    j fail_if_not_serviced
+
+main:
+    call dbus_store_error
+    call dbus_nonblocking_load_error
+
+// Write 0xff to STDOUT for TB to terminate test.
 _finish:
     li x3, STDOUT
     addi x5, x0, 0xff
@@ -77,19 +98,30 @@ _finish:
 // in the upper 24 bits of nmi handler address set command
 .balign 256
 _handler:
-    csrr x7, mcause
-    li x8, 0xF0000001
-    bne x7, x8, fail
-    csrr x7, 0x7FF // mscause
-    bne x7, zero, fail
-    j _finish
+    // reenable signaling of NMIs for subsequent NMIs
+    csrw 0xBC0, x0 // mdeau
+    csrr x2, mcause
+    bne x2, x4, fail
+    csrr x2, 0x7FF // mscause
+    bne x2, x5, fail
+    la x31, ok
+    mret
+
+// used for making sure we fail if we didn't jump to the exception/NMI handler
+fail_if_not_serviced:
+.rept 10
+    nop
+.endr
+    // control flow goes to 'fail' if interrupt wasn't serviced (x31 set by the handler)
+    // or goes to 'ok' and returns to the calling function
+    jr x31
 
 fail:
+    // write 0x01 to STDOUT for TB to fail the test
     li x3, STDOUT
     addi x5, x0, 0x01
     sb x5, 0(x3)
     j fail
 
-.data
-testdata:
-    .word 0xdeadbeef
+ok:
+    ret

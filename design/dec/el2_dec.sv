@@ -289,6 +289,18 @@ module el2_dec
     output el2_pmp_cfg_pkt_t        pmp_pmpcfg [pt.PMP_ENTRIES],
     output logic             [31:0] pmp_pmpaddr[pt.PMP_ENTRIES],
 
+`ifdef RV_USER_MODE
+
+    // Privilege mode
+    output logic priv_mode,
+    output logic priv_mode_eff,
+    output logic priv_mode_ns,
+
+    // mseccfg CSR content for PMP
+    output el2_mseccfg_pkt_t mseccfg,
+
+`endif
+
     // feature disable from mfdc
     output logic dec_tlu_external_ldfwd_disable,  // disable external load forwarding
     output logic dec_tlu_sideeffect_posted_disable,  // disable posted stores to side-effect address
@@ -338,6 +350,7 @@ module el2_dec
   logic dec_i0_wen_r;
   logic [31:0] dec_i0_wdata_r;
   logic dec_csr_wen_r;  // csr write enable at wb
+  logic [11:0] dec_csr_rdaddr_r;  // read address for csrs
   logic [11:0] dec_csr_wraddr_r;  // write address for csryes
   logic [31:0] dec_csr_wrdata_r;  // csr write data at wb
 

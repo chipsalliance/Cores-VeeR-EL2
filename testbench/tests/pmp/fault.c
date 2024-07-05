@@ -16,24 +16,16 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <setjmp.h>
+#include "veer.h"
 #include "trap.h"
 #include "fault.h"
 
-int fault_jmp_env_set = 0;
-jmp_buf fault_jmp_env;
-struct fault fault_last;
+volatile struct rv_jmp_buf* fault_jmp_env = NULL;
+volatile struct fault       fault_last;
 
-void fault_install(void)
+void fault_setjmp(struct rv_jmp_buf* env)
 {
-    __asm__("la t0, _trap");
-    __asm__("csrw mtvec, t0");
-}
-
-void fault_setjmp(jmp_buf env)
-{
-    memcpy(fault_jmp_env, env, sizeof(fault_jmp_env));
-    fault_jmp_env_set = 1;
+    fault_jmp_env = env;
 }
 
 struct fault fault_last_get(void)
@@ -41,17 +33,15 @@ struct fault fault_last_get(void)
     return fault_last;
 }
 
-void fault_return(struct fault *fault)
+void fault_return(const struct fault *fault)
 {
     // Save register state for later usage
-    memcpy(&fault_last, fault, sizeof(fault_last));
+    memcpy((struct fault*)&fault_last, fault, sizeof(fault_last));
 
     // Return to program if setjmp-based try-catch was used
-    if (fault_jmp_env_set) {
-        fault_jmp_env_set = 0;
-        longjmp(fault_jmp_env, 1);
-    }
-    else {
-        exit(1);
+    if (fault_jmp_env != NULL) {
+        struct rv_jmp_buf* env = (struct rv_jmp_buf*)fault_jmp_env;
+        fault_jmp_env = NULL;
+        rv_longjmp_m(env, 1);
     }
 }

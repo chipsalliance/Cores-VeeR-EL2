@@ -1,6 +1,27 @@
 #include <stdint.h>
 #include "pmp.h"
 
+int pmp_clear ()
+{
+    const int pmp_entries = 16; // FIXME: Parametrize that
+
+    uintptr_t zero = 0;
+    int res = 0;
+
+    for (int i=0; i<(pmp_entries + 3)/4; ++i) {
+        if (pmp_write_pmpcfg(i, &zero)) {
+            res = -1;
+        }
+    }
+    for (int i=0; i<pmp_entries; ++i) {
+        if (pmp_write_pmpaddr(i, &zero)) {
+            res = -1;
+        }
+    }
+
+    return res;
+}
+
 int pmp_read_pmpcfg(unsigned int offset, uintptr_t * dest)
 {
     uintptr_t csr_value;
@@ -282,4 +303,18 @@ int pmp_entry_write(unsigned int id, struct pmp_entry_s * entry)
     if (pmp_write_pmpcfg(pmpcfg_id_coarse, &pmpcfg_csr) != 0) return 5;
 
     return 0;
+}
+
+int pmp_is_cfg_legal (unsigned int cfg) {
+    // Check if RWX combination is legal according to
+    // RISC-V privilege spec v1.12 chapter 3.7.1
+
+    cfg &= (PMP_R | PMP_W | PMP_X);
+
+    if (cfg == (PMP_W))
+        return 0;
+    if (cfg == (PMP_W | PMP_X))
+        return 0;
+
+    return 1;
 }

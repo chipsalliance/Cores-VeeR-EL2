@@ -17,16 +17,15 @@
 #ifndef _FAULT_H
 #define _FAULT_H
 
-#include <setjmp.h>
+#include "veer.h"
 #include "trap.h"
 
 #define EXC_INSTRUCTION_ACC_FAULT 1
 #define EXC_LOAD_ACC_FAULT 5
 #define EXC_STORE_ACC_FAULT 7
 
-void fault_install(void);
-void fault_setjmp(jmp_buf env);
+void fault_setjmp(struct rv_jmp_buf* env);
 struct fault fault_last_get(void);
-void fault_return(struct fault *fault);
+void fault_return(const struct fault *fault);
 
 #endif

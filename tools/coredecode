@@ -15,7 +15,7 @@ if (!defined($out)) { $out="${in}.out"; }
 
 if ($in eq "decode")       { $view="rv32i";  }
 elsif ($in eq "cdecode")   { $view="rv32c";  }
-elsif ($in eq "csrdecode") { $view="csr";  }
+elsif (rindex($in,"csrdecode",0) == 0) { $view="csr";  }
 
 if (defined($in)) { printf("in=$in\n"); }
 if (defined($out)) { printf("out=$out\n"); }

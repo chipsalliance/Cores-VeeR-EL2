@@ -91,6 +91,7 @@ import el2_pkg::*;
    input logic [11:0] dec_csr_rdaddr_d,      // read address for csr
 
    input logic        dec_csr_wen_r,      // csr write enable at wb
+   input logic [11:0] dec_csr_rdaddr_r,      // read address for csr
    input logic [11:0] dec_csr_wraddr_r,      // write address for csr
    input logic [31:0] dec_csr_wrdata_r,   // csr write data at wb
 
@@ -235,10 +236,22 @@ import el2_pkg::*;
    output logic  dec_tlu_dccm_clk_override, // override DCCM clock domain gating
    output logic  dec_tlu_icm_clk_override,  // override ICCM clock domain gating
 
+`ifdef RV_USER_MODE
+
+   // Privilege mode
+   // 0 - machine, 1 - user
+   output logic  priv_mode,
+   output logic  priv_mode_eff,
+   output logic  priv_mode_ns,
+
+   // mseccfg CSR content for PMP
+   output logic [2:0] mseccfg,
+
+`endif
+
    // pmp
    output el2_pmp_cfg_pkt_t pmp_pmpcfg  [pt.PMP_ENTRIES],
    output logic [31:0]      pmp_pmpaddr [pt.PMP_ENTRIES]
-
    );
 
    logic         clk_override, e4e5_int_clk, nmi_fir_type, nmi_lsu_load_type, nmi_lsu_store_type, nmi_int_detected_f, nmi_lsu_load_type_f,
@@ -258,6 +271,12 @@ import el2_pkg::*;
    logic [1:1] mpmc_b_ns, mpmc, mpmc_b;
    logic set_mie_pmu_fw_halt, fw_halted_ns, fw_halted;
    logic wr_mcountinhibit_r;
+`ifdef RV_USER_MODE
+   logic wr_mcounteren_r;
+   logic [5:0] mcounteren; // HPM6, HPM5, HPM4, HPM3, IR, CY
+   logic wr_mseccfg_r;
+   logic [2:0] mseccfg_ns;
+`endif
    logic [6:0] mcountinhibit;
    logic wr_mtsel_r, wr_mtdata1_t0_r, wr_mtdata1_t1_r, wr_mtdata1_t2_r, wr_mtdata1_t3_r, wr_mtdata2_t0_r, wr_mtdata2_t1_r, wr_mtdata2_t2_r, wr_mtdata2_t3_r;
    logic [31:0] mtdata2_t0, mtdata2_t1, mtdata2_t2, mtdata2_t3, mtdata2_tsel_out, mtdata1_tsel_out;
@@ -265,7 +284,11 @@ import el2_pkg::*;
    logic [9:0] tdata_wrdata_r;
    logic [1:0] mtsel_ns, mtsel;
    logic tlu_i0_kill_writeb_r;
+`ifdef RV_USER_MODE
+   logic [3:0]  mstatus_ns, mstatus; // MPRV, MPP (inverted! 0-M, 1-U), MPIE, MIE
+`else
    logic [1:0]  mstatus_ns, mstatus;
+`endif
    logic [1:0] mfdhs_ns, mfdhs;
    logic [31:0] force_halt_ctr, force_halt_ctr_f;
    logic        force_halt;
@@ -363,7 +386,7 @@ import el2_pkg::*;
          mpc_debug_halt_ack_f, mpc_debug_run_ack_f, dbg_run_state_f, mpc_debug_halt_req_sync_pulse,
          mpc_debug_run_req_sync_pulse, debug_brkpt_valid, debug_halt_req, debug_resume_req, dec_tlu_mpc_halted_only_ns;
    logic take_ext_int_start, ext_int_freeze, take_ext_int_start_d1, take_ext_int_start_d2,
-         take_ext_int_start_d3, ext_int_freeze_d1, csr_meicpct, ignore_ext_int_due_to_lsu_stall;
+         take_ext_int_start_d3, ext_int_freeze_d1, ignore_ext_int_due_to_lsu_stall;
    logic mcause_sel_nmi_store, mcause_sel_nmi_load, mcause_sel_nmi_ext, fast_int_meicpct;
    logic [1:0] mcause_fir_error_type;
    logic dbg_halt_req_held_ns, dbg_halt_req_held, dbg_halt_req_final;
@@ -373,21 +396,10 @@ import el2_pkg::*;
    // internal timer, isolated for size reasons
    logic [31:0] dec_timer_rddata_d;
    logic dec_timer_read_d, dec_timer_t0_pulse, dec_timer_t1_pulse;
-   logic csr_mitctl0;
-   logic csr_mitctl1;
-   logic csr_mitb0;
-   logic csr_mitb1;
-   logic csr_mitcnt0;
-   logic csr_mitcnt1;
 
    // PMP unit, isolated for size reasons
    logic [31:0] dec_pmp_rddata_d;
    logic dec_pmp_read_d;
-   logic csr_pmpcfg;
-   logic csr_pmpaddr0;
-   logic csr_pmpaddr16;
-   logic csr_pmpaddr32;
-   logic csr_pmpaddr48;
 
    logic nmi_int_sync, timer_int_sync, soft_int_sync, i_cpu_halt_req_sync, i_cpu_run_req_sync, mpc_debug_halt_req_sync, mpc_debug_run_req_sync, mpc_debug_halt_req_sync_raw;
    logic csr_wr_clk;
@@ -425,69 +437,6 @@ import el2_pkg::*;
 
    el2_inst_pkt_t pmu_i0_itype_qual;
 
-   logic csr_misa;
-   logic csr_mvendorid;
-   logic csr_marchid;
-   logic csr_mimpid;
-   logic csr_mhartid;
-   logic csr_mstatus;
-   logic csr_mtvec;
-   logic csr_mip;
-   logic csr_mie;
-   logic csr_mcyclel;
-   logic csr_mcycleh;
-   logic csr_minstretl;
-   logic csr_minstreth;
-   logic csr_mscratch;
-   logic csr_mepc;
-   logic csr_mcause;
-   logic csr_mscause;
-   logic csr_mtval;
-   logic csr_mrac;
-   logic csr_dmst;
-   logic csr_mdseac;
-   logic csr_meihap;
-   logic csr_meivt;
-   logic csr_meipt;
-   logic csr_meicurpl;
-   logic csr_meicidpl;
-   logic csr_dcsr;
-   logic csr_mcgc;
-   logic csr_mfdc;
-   logic csr_dpc;
-   logic csr_mtsel;
-   logic csr_mtdata1;
-   logic csr_mtdata2;
-   logic csr_mhpmc3;
-   logic csr_mhpmc4;
-   logic csr_mhpmc5;
-   logic csr_mhpmc6;
-   logic csr_mhpmc3h;
-   logic csr_mhpmc4h;
-   logic csr_mhpmc5h;
-   logic csr_mhpmc6h;
-   logic csr_mhpme3;
-   logic csr_mhpme4;
-   logic csr_mhpme5;
-   logic csr_mhpme6;
-   logic csr_mcountinhibit;
-   logic csr_mpmc;
-   logic csr_mcpc;
-   logic csr_mdeau;
-   logic csr_micect;
-   logic csr_miccmect;
-   logic csr_mdccmect;
-   logic csr_mfdht;
-   logic csr_mfdhs;
-   logic csr_dicawics;
-   logic csr_dicad0h;
-   logic csr_dicad0;
-   logic csr_dicad1;
-   logic csr_dicago;
-   logic valid_only;
-   logic presync;
-   logic postsync;
-   logic legal;
    logic dec_csr_wen_r_mod;
 
    logic flush_clkvalid;
@@ -506,6 +455,40 @@ import el2_pkg::*;
 
    logic  [3:0] ifu_mscause ;
    logic        ifu_ic_error_start_f, ifu_iccm_rd_ecc_single_err_f;
+
+   // CSR address decoder
+
+// files "csrdecode_m" (machine mode only) and "csrdecode_mu" (machine mode plus
+// user mode) are human readable that have all of the CSR decodes defined and
+// are part of the git repo. Modify these files as needed.
+
+// to generate all the equations below from "csrdecode" except legal equation:
+
+// 1) coredecode -in csrdecode > corecsrdecode.e
+
+// 2) espresso -Dso -oeqntott < corecsrdecode.e | addassign > csrequations
+
+// to generate the legal CSR equation below:
+
+// 1) coredecode -in csrdecode -legal > csrlegal.e
+
+// 2) espresso -Dso -oeqntott < csrlegal.e | addassign > csrlegal_equation
+
+// coredecode -in csrdecode > corecsrdecode.e; espresso -Dso -oeqntott < corecsrdecode.e | addassign > csrequations; coredecode -in csrdecode -legal > csrlegal.e; espresso -Dso -oeqntott csrlegal.e | addassign > csrlegal_equation
+
+`ifdef RV_USER_MODE
+
+   `include "el2_dec_csr_equ_mu.svh"
+
+   logic  csr_acc_r;    // CSR access error
+   logic  csr_wr_usr_r; // Write to an unprivileged/user-level CSR
+   logic  csr_rd_usr_r; // REad from an unprivileged/user-level CSR
+
+`else
+
+   `include "el2_dec_csr_equ_m.svh"
+
+`endif
 
    el2_dec_timer_ctl  #(.pt(pt)) int_timers(.*);
    // end of internal timers
@@ -557,6 +540,12 @@ import el2_pkg::*;
 
 
 localparam MSTATUS_MIE   = 0;
+localparam int MSTATUS_MPIE  = 1;
+`ifdef RV_USER_MODE
+localparam MSTATUS_MPP   = 2;
+localparam MSTATUS_MPRV  = 3;
+`endif
+
 localparam MIP_MCEIP     = 5;
 localparam MIP_MITIP0    = 4;
 localparam MIP_MITIP1    = 3;
@@ -576,6 +565,18 @@ localparam DCSR_STEPIE   = 11;
 localparam DCSR_STOPC    = 10;
 localparam DCSR_STEP     = 2;
 
+`ifdef RV_USER_MODE
+localparam MCOUNTEREN_CY   = 0;
+localparam MCOUNTEREN_IR   = 1;
+localparam MCOUNTEREN_HPM3 = 2;
+localparam MCOUNTEREN_HPM4 = 3;
+localparam MCOUNTEREN_HPM5 = 4;
+localparam MCOUNTEREN_HPM6 = 5;
+
+localparam MSECCFG_RLB   = 2;
+localparam MSECCFG_MMWP  = 1;
+localparam MSECCFG_MML   = 0;
+`endif
 
    assign reset_delayed = reset_detect ^ reset_detected;
 
@@ -888,6 +889,16 @@ localparam MTDATA1_LD    = 0;
                            (~lsu_error_pkt_r.inst_type & lsu_error_pkt_r.single_ecc_error);
 
    //  Final commit valids
+`ifdef RV_USER_MODE
+   assign tlu_i0_commit_cmt = dec_tlu_i0_valid_r &
+                              ~rfpc_i0_r &
+                              ~lsu_i0_exc_r &
+                              ~inst_acc_r &
+                              ~dec_tlu_dbg_halted &
+                              ~request_debug_mode_r_d1 &
+                              ~i0_trigger_hit_r &
+                              ~csr_acc_r;
+`else
    assign tlu_i0_commit_cmt = dec_tlu_i0_valid_r &
                               ~rfpc_i0_r &
                               ~lsu_i0_exc_r &
@@ -895,9 +906,14 @@ localparam MTDATA1_LD    = 0;
                               ~dec_tlu_dbg_halted &
                               ~request_debug_mode_r_d1 &
                               ~i0_trigger_hit_r;
+`endif
 
    // unified place to manage the killing of arch state writebacks
+`ifdef RV_USER_MODE
+   assign tlu_i0_kill_writeb_r = rfpc_i0_r | lsu_i0_exc_r | inst_acc_r | (illegal_r & dec_tlu_dbg_halted) | i0_trigger_hit_r | csr_acc_r;
+`else
    assign tlu_i0_kill_writeb_r = rfpc_i0_r | lsu_i0_exc_r | inst_acc_r | (illegal_r & dec_tlu_dbg_halted) | i0_trigger_hit_r;
+`endif
    assign dec_tlu_i0_commit_cmt = tlu_i0_commit_cmt;
 
 
@@ -943,8 +959,13 @@ end // else: !if(pt.BTB_ENABLE==1)
    // only expect these in pipe 0
    assign       ebreak_r     =  (dec_tlu_packet_r.pmu_i0_itype == EBREAK)  & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~dcsr[DCSR_EBREAKM] & ~rfpc_i0_r;
    assign       ecall_r      =  (dec_tlu_packet_r.pmu_i0_itype == ECALL)   & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
+`ifdef RV_USER_MODE
+   assign       illegal_r    =  (((dec_tlu_packet_r.pmu_i0_itype == MRET) &  priv_mode) | ~dec_tlu_packet_r.legal) & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
+   assign       mret_r       =  ( (dec_tlu_packet_r.pmu_i0_itype == MRET) & ~priv_mode                           ) & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
+`else
    assign       illegal_r    =  ~dec_tlu_packet_r.legal   & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
    assign       mret_r       =  (dec_tlu_packet_r.pmu_i0_itype == MRET)    & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
+`endif
    // fence_i includes debug only fence_i's
    assign       fence_i_r    =  (dec_tlu_packet_r.fence_i & dec_tlu_i0_valid_r & ~i0_trigger_hit_r) & ~rfpc_i0_r;
    assign       ic_perr_r    =  ifu_ic_error_start_f & ~ext_int_freeze_d1 & (~internal_dbg_halt_mode_f | dcsr_single_step_running) & ~internal_pmu_fw_halt_mode_f;
@@ -960,6 +981,54 @@ end // else: !if(pt.BTB_ENABLE==1)
                                 .dout(ebreak_to_debug_mode_r_d1));
 
    assign dec_tlu_fence_i_r = fence_i_r;
+
+`ifdef RV_USER_MODE
+
+   // CSR access
+   // Address bits 9:8 == 2'b00 indicate unprivileged / user-level CSR
+   assign csr_wr_usr_r = ~|dec_csr_wraddr_r[9:8];
+   assign csr_rd_usr_r = ~|dec_csr_rdaddr_r[9:8];
+
+   // CSR access error
+   // cycle and instret CSR unprivileged access is controller by bits in mcounteren CSR
+   logic csr_wr_acc_r;
+   logic csr_rd_acc_r;
+
+   assign csr_wr_acc_r = csr_wr_usr_r & (
+                             ((dec_csr_wraddr_r[11:0] == CYCLEL)   & mcounteren[MCOUNTEREN_CY]) |
+                             ((dec_csr_wraddr_r[11:0] == CYCLEH)   & mcounteren[MCOUNTEREN_CY]) |
+                             ((dec_csr_wraddr_r[11:0] == INSTRETL) & mcounteren[MCOUNTEREN_IR]) |
+                             ((dec_csr_wraddr_r[11:0] == INSTRETH) & mcounteren[MCOUNTEREN_IR]) |
+                             ((dec_csr_wraddr_r[11:0] == HPMC3)    & mcounteren[MCOUNTEREN_HPM3]) |
+                             ((dec_csr_wraddr_r[11:0] == HPMC3H)   & mcounteren[MCOUNTEREN_HPM3]) |
+                             ((dec_csr_wraddr_r[11:0] == HPMC4)    & mcounteren[MCOUNTEREN_HPM4]) |
+                             ((dec_csr_wraddr_r[11:0] == HPMC4H)   & mcounteren[MCOUNTEREN_HPM4]) |
+                             ((dec_csr_wraddr_r[11:0] == HPMC5)    & mcounteren[MCOUNTEREN_HPM5]) |
+                             ((dec_csr_wraddr_r[11:0] == HPMC5H)   & mcounteren[MCOUNTEREN_HPM5]) |
+                             ((dec_csr_wraddr_r[11:0] == HPMC6)    & mcounteren[MCOUNTEREN_HPM6]) |
+                             ((dec_csr_wraddr_r[11:0] == HPMC6H)   & mcounteren[MCOUNTEREN_HPM6]));
+
+   assign csr_rd_acc_r = csr_rd_usr_r & (
+                             ((dec_csr_rdaddr_r[11:0] == CYCLEL)   & mcounteren[MCOUNTEREN_CY]) |
+                             ((dec_csr_rdaddr_r[11:0] == CYCLEH)   & mcounteren[MCOUNTEREN_CY]) |
+                             ((dec_csr_rdaddr_r[11:0] == INSTRETL) & mcounteren[MCOUNTEREN_IR]) |
+                             ((dec_csr_rdaddr_r[11:0] == INSTRETH) & mcounteren[MCOUNTEREN_IR]) |
+                             ((dec_csr_rdaddr_r[11:0] == HPMC3)    & mcounteren[MCOUNTEREN_HPM3]) |
+                             ((dec_csr_rdaddr_r[11:0] == HPMC3H)   & mcounteren[MCOUNTEREN_HPM3]) |
+                             ((dec_csr_rdaddr_r[11:0] == HPMC4)    & mcounteren[MCOUNTEREN_HPM4]) |
+                             ((dec_csr_rdaddr_r[11:0] == HPMC4H)   & mcounteren[MCOUNTEREN_HPM4]) |
+                             ((dec_csr_rdaddr_r[11:0] == HPMC5)    & mcounteren[MCOUNTEREN_HPM5]) |
+                             ((dec_csr_rdaddr_r[11:0] == HPMC5H)   & mcounteren[MCOUNTEREN_HPM5]) |
+                             ((dec_csr_rdaddr_r[11:0] == HPMC6)    & mcounteren[MCOUNTEREN_HPM6]) |
+                             ((dec_csr_rdaddr_r[11:0] == HPMC6H)   & mcounteren[MCOUNTEREN_HPM6]));
+
+   assign csr_acc_r = priv_mode & dec_tlu_i0_valid_r & ~i0_trigger_hit_r & ~rfpc_i0_r & (
+                        (dec_tlu_packet_r.pmu_i0_itype == CSRREAD)  & ~csr_rd_acc_r |
+                        (dec_tlu_packet_r.pmu_i0_itype == CSRWRITE) & ~csr_wr_acc_r |
+                        (dec_tlu_packet_r.pmu_i0_itype == CSRRW)    & ~csr_rd_acc_r & ~csr_wr_acc_r);
+
+`endif
+
    //
    // Exceptions
    //
@@ -971,24 +1040,35 @@ end // else: !if(pt.BTB_ENABLE==1)
    // - MPIE <- MIE
    // - MIE <- 0
    //
+`ifdef RV_USER_MODE
+   assign i0_exception_valid_r = (ebreak_r | ecall_r | illegal_r | inst_acc_r | csr_acc_r) & ~rfpc_i0_r & ~dec_tlu_dbg_halted;
+`else
    assign i0_exception_valid_r = (ebreak_r | ecall_r | illegal_r | inst_acc_r) & ~rfpc_i0_r & ~dec_tlu_dbg_halted;
+`endif
 
    // Cause:
    //
    // 0x2 : illegal
    // 0x3 : breakpoint
+   // 0x8 : Environment call U-mode (if U-mode is enabled)
    // 0xb : Environment call M-mode
 
 
-   assign exc_cause_r[4:0] =  ( ({5{take_ext_int}}        & 5'h0b) |
-                                ({5{take_timer_int}}      & 5'h07) |
-                                ({5{take_soft_int}}       & 5'h03) |
-                                ({5{take_int_timer0_int}} & 5'h1d) |
-                                ({5{take_int_timer1_int}} & 5'h1c) |
-                                ({5{take_ce_int}}         & 5'h1e) |
-                                ({5{illegal_r}}           & 5'h02) |
-                                ({5{ecall_r}}             & 5'h0b) |
-                                ({5{inst_acc_r}}          & 5'h01) |
+   assign exc_cause_r[4:0] =  ( ({5{take_ext_int}}         & 5'h0b) |
+                                ({5{take_timer_int}}       & 5'h07) |
+                                ({5{take_soft_int}}        & 5'h03) |
+                                ({5{take_int_timer0_int}}  & 5'h1d) |
+                                ({5{take_int_timer1_int}}  & 5'h1c) |
+                                ({5{take_ce_int}}          & 5'h1e) |
+`ifdef RV_USER_MODE
+                                ({5{illegal_r| csr_acc_r}} & 5'h02) |
+                                ({5{ecall_r & priv_mode}}  & 5'h08) |
+                                ({5{ecall_r & ~priv_mode}} & 5'h0b) |
+`else
+                                ({5{illegal_r}}            & 5'h02) |
+                                ({5{ecall_r}}              & 5'h0b) |
+`endif
+                                ({5{inst_acc_r}}           & 5'h01) |
                                 ({5{ebreak_r | i0_trigger_hit_r}}   & 5'h03) |
                                 ({5{lsu_exc_ma_r & ~lsu_exc_st_r}}  & 5'h04) |
                                 ({5{lsu_exc_acc_r & ~lsu_exc_st_r}} & 5'h05) |
@@ -1133,6 +1213,23 @@ end
                                  .dout({interrupt_valid_r_d1, i0_exception_valid_r_d1, exc_or_int_valid_r_d1,
                                         exc_cause_wb[4:0], i0_valid_wb, trigger_hit_r_d1,
                                         take_nmi_r_d1, pause_expired_wb}));
+`ifdef RV_USER_MODE
+
+   //
+   // Privilege mode
+   //
+   assign priv_mode_ns = (mret_r & mstatus[MSTATUS_MPP]) |
+                         (exc_or_int_valid_r & 1'b0 ) |
+                         ((~mret_r & ~exc_or_int_valid_r) & priv_mode);
+
+   rvdff #(1) priv_ff (
+        .clk    (free_l2clk),
+        .rst_l  (rst_l),
+        .din    (priv_mode_ns),
+        .dout   (priv_mode)
+   );
+
+`endif
 
    //----------------------------------------------------------------------
    //
@@ -1144,6 +1241,7 @@ end
    // ----------------------------------------------------------------------
    // MISA (RO)
    //  [31:30] XLEN - implementation width, 2'b01 - 32 bits
+   //  [20]    U    - user mode support (if enabled in config)
    //  [12]    M    - integer mul/div
    //  [8]     I    - RV32I
    //  [2]     C    - Compressed extension
@@ -1158,7 +1256,8 @@ end
 
    // ----------------------------------------------------------------------
    // MSTATUS (RW)
-   // [12:11] MPP  : Prior priv level, always 2'b11, not flopped
+   // [17]    MPRV : Modify PRiVilege (if enabled in config)
+   // [12:11] MPP  : Prior priv level, either 2'b11 (machine) or 2'b00 (user)
    // [7]     MPIE : Int enable previous [1]
    // [3]     MIE  : Int enable          [0]
    localparam MSTATUS       = 12'h300;
@@ -1166,22 +1265,46 @@ end
 
    //When executing a MRET instruction, supposing MPP holds the value 3, MIE
    //is set to MPIE; the privilege mode is changed to 3; MPIE is set to 1; and MPP is set to 3
-
+`ifdef RV_USER_MODE
+   assign dec_csr_wen_r_mod = dec_csr_wen_r & ~i0_trigger_hit_r & ~rfpc_i0_r & ~csr_acc_r;
+`else
    assign dec_csr_wen_r_mod = dec_csr_wen_r & ~i0_trigger_hit_r & ~rfpc_i0_r;
+`endif
+
    assign wr_mstatus_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MSTATUS);
 
    // set this even if we don't go to fwhalt due to debug halt. We committed the inst, so ...
    assign set_mie_pmu_fw_halt = ~mpmc_b_ns[1] & fw_halt_req;
 
+`ifdef RV_USER_MODE
+   // mstatus[2] / mstatus_ns[2] actually stores inverse of the MPP field !
+   assign mstatus_ns[3:0] = ( ({4{~wr_mstatus_r & exc_or_int_valid_r}} & {mstatus[MSTATUS_MPRV], priv_mode, mstatus[MSTATUS_MIE], 1'b0}) |
+                              ({4{ wr_mstatus_r & exc_or_int_valid_r}} & {mstatus[MSTATUS_MPRV], priv_mode, dec_csr_wrdata_r[3],  1'b0}) |
+                              ({4{mret_r & ~exc_or_int_valid_r}}       & {mstatus[MSTATUS_MPRV] & ~mstatus[MSTATUS_MPP], 1'b1, 1'b1, mstatus[MSTATUS_MPIE]}) |
+                              ({4{set_mie_pmu_fw_halt}}                & {mstatus[3:2], mstatus[MSTATUS_MPIE], 1'b1}) |
+                              ({4{wr_mstatus_r & ~exc_or_int_valid_r}} & {dec_csr_wrdata_r[17], ~dec_csr_wrdata_r[12], dec_csr_wrdata_r[7], dec_csr_wrdata_r[3]}) |
+                              ({4{~wr_mstatus_r & ~exc_or_int_valid_r  & ~mret_r & ~set_mie_pmu_fw_halt}} & mstatus[3:0]) );
+
+   // gate MIE if we are single stepping and DCSR[STEPIE] is off
+   // in user mode machine interrupts are always enabled as per RISC-V privilege spec (chapter 3.1.6.1).
+   assign mstatus_mie_ns = (priv_mode | mstatus[MSTATUS_MIE]) & (~dcsr_single_step_running_f | dcsr[DCSR_STEPIE]);
+
+   // set effective privilege mode according to MPRV and MPP
+   assign priv_mode_eff = ( mstatus[MSTATUS_MPRV] & mstatus[MSTATUS_MPP]) | // MPRV=1, use MPP
+                          (~mstatus[MSTATUS_MPRV] & priv_mode);             // MPRV=0, use current operating mode
+
+`else
+
    assign mstatus_ns[1:0] = ( ({2{~wr_mstatus_r & exc_or_int_valid_r}} & {mstatus[MSTATUS_MIE], 1'b0}) |
                               ({2{ wr_mstatus_r & exc_or_int_valid_r}} & {dec_csr_wrdata_r[3], 1'b0}) |
-                              ({2{mret_r & ~exc_or_int_valid_r}} & {1'b1, mstatus[1]}) |
-                              ({2{set_mie_pmu_fw_halt}} & {mstatus[1], 1'b1}) |
+                              ({2{mret_r & ~exc_or_int_valid_r}} & {1'b1, mstatus[MSTATUS_MPIE]}) |
+                              ({2{set_mie_pmu_fw_halt}} & {mstatus[MSTATUS_MPIE], 1'b1}) |
                               ({2{wr_mstatus_r & ~exc_or_int_valid_r}} & {dec_csr_wrdata_r[7], dec_csr_wrdata_r[3]}) |
                               ({2{~wr_mstatus_r & ~exc_or_int_valid_r & ~mret_r & ~set_mie_pmu_fw_halt}} & mstatus[1:0]) );
 
-   // gate MIE if we are single stepping and DCSR[STEPIE] is off
    assign mstatus_mie_ns = mstatus[MSTATUS_MIE] & (~dcsr_single_step_running_f | dcsr[DCSR_STEPIE]);
+
+`endif
 
    // ----------------------------------------------------------------------
    // MTVEC (RW)
@@ -1229,6 +1352,7 @@ end
    // [31:0] : Lower Cycle count
 
    localparam MCYCLEL       = 12'hb00;
+   localparam logic [11:0] CYCLEL  = 12'hc00;
 
    assign kill_ebreak_count_r = ebreak_to_debug_mode_r & dcsr[DCSR_STOPC];
 
@@ -1251,6 +1375,7 @@ end
    // Chained with mcyclel. Note: mcyclel overflow due to a mcycleh write gets ignored.
 
    localparam MCYCLEH       = 12'hb80;
+   localparam logic [11:0] CYCLEH  = 12'hc80;
 
    assign wr_mcycleh_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MCYCLEH);
 
@@ -1269,6 +1394,7 @@ end
    // one instruction will be the value read by the following instruction (i.e., the increment of instret
    // caused by the first instruction retiring happens before the write of the new value)."
    localparam MINSTRETL     = 12'hb02;
+   localparam logic [11:0] INSTRETL  = 12'hc02;
 
    assign i0_valid_no_ebreak_ecall_r = dec_tlu_i0_valid_r & ~(ebreak_r | ecall_r | ebreak_to_debug_mode_r | illegal_r | mcountinhibit[2]);
 
@@ -1295,6 +1421,7 @@ end
    // Chained with minstretl. Note: minstretl overflow due to a minstreth write gets ignored.
 
    localparam MINSTRETH     = 12'hb82;
+   localparam logic [11:0] INSTRETH  = 12'hc82;
 
    assign wr_minstreth_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MINSTRETH);
 
@@ -1418,6 +1545,42 @@ end
 
 
    rvdffe #(32)  mtval_ff (.*, .en(tlu_flush_lower_r | wr_mtval_r), .din(mtval_ns[31:0]), .dout(mtval[31:0]));
+
+   // ----------------------------------------------------------------------
+   // MSECCFG
+   // [31:3] : Reserved, read 0x0
+   // [2]    : RLB
+   // [1]    : MMWP
+   // [0]    : MML
+
+`ifdef RV_USER_MODE
+
+   localparam MSECCFG  = 12'h747;
+   localparam MSECCFGH = 12'h757;
+
+   // Detect if any PMP region is locked regardless of being enabled. This is
+   // necessary for mseccfg.RLB bit write behavior
+   logic [pt.PMP_ENTRIES-1:0] pmp_region_locked;
+   for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : g_regions
+     assign pmp_region_locked[r] = pmp_pmpcfg[r].lock;
+   end
+
+   logic  pmp_any_region_locked;
+   assign pmp_any_region_locked = |pmp_region_locked;
+
+   // mseccfg
+   assign wr_mseccfg_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MSECCFG);
+   rvdffs #(3) mseccfg_ff (.*, .clk(csr_wr_clk), .en(wr_mseccfg_r), .din(mseccfg_ns), .dout(mseccfg));
+
+   assign mseccfg_ns = {
+     pmp_any_region_locked ?
+        (dec_csr_wrdata_r[MSECCFG_RLB] & mseccfg[MSECCFG_RLB]) :  // When any PMP region is locked this bit can only be cleared
+         dec_csr_wrdata_r[MSECCFG_RLB],                           // Otherwise regularly writeable
+     dec_csr_wrdata_r[MSECCFG_MMWP] |  mseccfg[MSECCFG_MMWP],     // Sticky bit, can only be set but not cleared
+     dec_csr_wrdata_r[MSECCFG_MML ] |  mseccfg[MSECCFG_MML ]      // Sticky bit, can only be set but never cleared
+   };
+
+`endif
 
    // ----------------------------------------------------------------------
    // MCGC (RW) Clock gating control
@@ -2180,6 +2343,22 @@ else
 
 
    if(pt.FAST_INTERRUPT_REDIRECT) begin : genblock2
+
+`ifdef RV_USER_MODE
+   rvdffie #(33)  mstatus_ff (.*, .clk(free_l2clk),
+                             .din({mdseac_locked_ns, lsu_single_ecc_error_r, lsu_exc_valid_r, lsu_i0_exc_r,
+                                   take_ext_int_start,    take_ext_int_start_d1, take_ext_int_start_d2, ext_int_freeze,
+                                   mip_ns[5:0], mcyclel_cout & ~wr_mcycleh_r & mcyclel_cout_in,
+                                   minstret_enable, minstretl_cout_ns, fw_halted_ns,
+                                   meicidpl_ns[3:0], icache_rd_valid, icache_wr_valid, mhpmc_inc_r[3:0], perfcnt_halted,
+                                   mstatus_ns[3:0]}),
+                             .dout({mdseac_locked_f, lsu_single_ecc_error_r_d1, lsu_exc_valid_r_d1, lsu_i0_exc_r_d1,
+                                    take_ext_int_start_d1, take_ext_int_start_d2, take_ext_int_start_d3, ext_int_freeze_d1,
+                                    mip[5:0], mcyclel_cout_f, minstret_enable_f, minstretl_cout_f,
+                                    fw_halted, meicidpl[3:0], icache_rd_valid_f, icache_wr_valid_f,
+                                    mhpmc_inc_r_d1[3:0], perfcnt_halted_d1,
+                                    mstatus[3:0]}));
+`else
    rvdffie #(31)  mstatus_ff (.*, .clk(free_l2clk),
                              .din({mdseac_locked_ns, lsu_single_ecc_error_r, lsu_exc_valid_r, lsu_i0_exc_r,
                                    take_ext_int_start,    take_ext_int_start_d1, take_ext_int_start_d2, ext_int_freeze,
@@ -2194,8 +2373,23 @@ else
                                     mhpmc_inc_r_d1[3:0], perfcnt_halted_d1,
                                     mstatus[1:0]}));
 
+`endif
+
    end
    else begin : genblock2
+`ifdef RV_USER_MODE
+   rvdffie #(29)  mstatus_ff (.*, .clk(free_l2clk),
+                             .din({mdseac_locked_ns, lsu_single_ecc_error_r, lsu_exc_valid_r, lsu_i0_exc_r,
+                                   mip_ns[5:0], mcyclel_cout & ~wr_mcycleh_r & mcyclel_cout_in,
+                                   minstret_enable, minstretl_cout_ns, fw_halted_ns,
+                                   meicidpl_ns[3:0], icache_rd_valid, icache_wr_valid, mhpmc_inc_r[3:0], perfcnt_halted,
+                                   mstatus_ns[3:0]}),
+                             .dout({mdseac_locked_f, lsu_single_ecc_error_r_d1, lsu_exc_valid_r_d1, lsu_i0_exc_r_d1,
+                                    mip[5:0], mcyclel_cout_f, minstret_enable_f, minstretl_cout_f,
+                                    fw_halted, meicidpl[3:0], icache_rd_valid_f, icache_wr_valid_f,
+                                    mhpmc_inc_r_d1[3:0], perfcnt_halted_d1,
+                                    mstatus[3:0]}));
+`else
    rvdffie #(27)  mstatus_ff (.*, .clk(free_l2clk),
                              .din({mdseac_locked_ns, lsu_single_ecc_error_r, lsu_exc_valid_r, lsu_i0_exc_r,
                                    mip_ns[5:0], mcyclel_cout & ~wr_mcycleh_r & mcyclel_cout_in,
@@ -2207,8 +2401,9 @@ else
                                     fw_halted, meicidpl[3:0], icache_rd_valid_f, icache_wr_valid_f,
                                     mhpmc_inc_r_d1[3:0], perfcnt_halted_d1,
                                     mstatus[1:0]}));
+`endif
    end
-   
+
    assign perfcnt_halted = ((dec_tlu_dbg_halted & dcsr[DCSR_STOPC]) | dec_tlu_pmu_fw_halted);
    assign perfcnt_during_sleep[3:0] = {4{~(dec_tlu_dbg_halted & dcsr[DCSR_STOPC])}} & {mhpme_vec[3][9],mhpme_vec[2][9],mhpme_vec[1][9],mhpme_vec[0][9]};
 
@@ -2222,6 +2417,10 @@ else
    // [63:32][31:0] : Hardware Performance Monitor Counter 3
    localparam MHPMC3        = 12'hB03;
    localparam MHPMC3H       = 12'hB83;
+`ifdef RV_USER_MODE
+   localparam HPMC3         = 12'hC03;
+   localparam HPMC3H        = 12'hC83;
+`endif
 
    assign mhpmc3_wr_en0 = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MHPMC3);
    assign mhpmc3_wr_en1 = (~perfcnt_halted | perfcnt_during_sleep[0]) & (|(mhpmc_inc_r[0]));
@@ -2240,6 +2439,10 @@ else
    // [63:32][31:0] : Hardware Performance Monitor Counter 4
    localparam MHPMC4        = 12'hB04;
    localparam MHPMC4H       = 12'hB84;
+`ifdef RV_USER_MODE
+   localparam HPMC4         = 12'hC04;
+   localparam HPMC4H        = 12'hC84;
+`endif
 
    assign mhpmc4_wr_en0 = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MHPMC4);
    assign mhpmc4_wr_en1 = (~perfcnt_halted | perfcnt_during_sleep[1]) & (|(mhpmc_inc_r[1]));
@@ -2258,6 +2461,10 @@ else
    // [63:32][31:0] : Hardware Performance Monitor Counter 5
    localparam MHPMC5        = 12'hB05;
    localparam MHPMC5H       = 12'hB85;
+`ifdef RV_USER_MODE
+   localparam HPMC5         = 12'hC05;
+   localparam HPMC5H        = 12'hC85;
+`endif
 
    assign mhpmc5_wr_en0 = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MHPMC5);
    assign mhpmc5_wr_en1 = (~perfcnt_halted | perfcnt_during_sleep[2]) & (|(mhpmc_inc_r[2]));
@@ -2276,6 +2483,10 @@ else
    // [63:32][31:0] : Hardware Performance Monitor Counter 6
    localparam MHPMC6        = 12'hB06;
    localparam MHPMC6H       = 12'hB86;
+`ifdef RV_USER_MODE
+   localparam HPMC6         = 12'hC06;
+   localparam HPMC6H        = 12'hC86;
+`endif
 
    assign mhpmc6_wr_en0 = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MHPMC6);
    assign mhpmc6_wr_en1 = (~perfcnt_halted | perfcnt_during_sleep[3]) & (|(mhpmc_inc_r[3]));
@@ -2334,6 +2545,22 @@ else
    //----------------------------------------------------------------------
    // ----------------------------------------------------------------------
 
+   // ----------------------------------------------------------------------
+   // MCOUNTEREN
+   // [31:3] : Reserved, read 0x0
+   // [2]    : INSTRET user-mode access disable
+   // [1]    : reserved, read 0x0
+   // [0]    : CYCLE user-mode access disable
+
+`ifdef RV_USER_MODE
+
+   localparam MCOUNTEREN                = 12'h306;
+
+   assign wr_mcounteren_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MCOUNTEREN);
+   rvdffs #(6) mcounteren_ff (.*, .clk(csr_wr_clk), .en(wr_mcounteren_r), .din({dec_csr_wrdata_r[6:2], dec_csr_wrdata_r[0]}), .dout(mcounteren));
+
+`endif
+
    // MCOUNTINHIBIT(RW)
    // [31:7] : Reserved, read 0x0
    // [6]    : HPM6 disable
@@ -2386,383 +2613,6 @@ else
    // CSR read mux
    // ----------------------------------------------------------------------
 
-// file "csrdecode" is human readable file that has all of the CSR decodes defined and is part of git repo
-// modify this file as needed
-
-// to generate all the equations below from "csrdecode" except legal equation:
-
-// 1) coredecode -in csrdecode > corecsrdecode.e
-
-// 2) espresso -Dso -oeqntott < corecsrdecode.e | addassign > csrequations
-
-// to generate the legal CSR equation below:
-
-// 1) coredecode -in csrdecode -legal > csrlegal.e
-
-// 2) espresso -Dso -oeqntott < csrlegal.e | addassign > csrlegal_equation
-// coredecode -in csrdecode > corecsrdecode.e; espresso -Dso -oeqntott < corecsrdecode.e | addassign > csrequations; coredecode -in csrdecode -legal > csrlegal.e; espresso -Dso -oeqntott csrlegal.e | addassign > csrlegal_equation
-
-assign csr_misa = (!dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[6]
-    &!dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[2]&dec_csr_rdaddr_d[0]);
-
-assign csr_mvendorid = (dec_csr_rdaddr_d[10]&!dec_csr_rdaddr_d[7]
-    &!dec_csr_rdaddr_d[1]&dec_csr_rdaddr_d[0]);
-
-assign csr_marchid = (dec_csr_rdaddr_d[10]&!dec_csr_rdaddr_d[7]
-    &dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_mimpid = (dec_csr_rdaddr_d[10]&!dec_csr_rdaddr_d[6]
-    &dec_csr_rdaddr_d[1]&dec_csr_rdaddr_d[0]);
-
-assign csr_mhartid = (dec_csr_rdaddr_d[10]&!dec_csr_rdaddr_d[7]
-    &dec_csr_rdaddr_d[2]);
-
-assign csr_mstatus = (!dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[6]
-    &!dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[2]&!dec_csr_rdaddr_d[0]);
-
-assign csr_mtvec = (!dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[6]
-    &!dec_csr_rdaddr_d[5]&dec_csr_rdaddr_d[2]&dec_csr_rdaddr_d[0]);
-
-assign csr_mip = (!dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[6]&dec_csr_rdaddr_d[2]);
-
-assign csr_mie = (!dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]
-    &dec_csr_rdaddr_d[2]&!dec_csr_rdaddr_d[0]);
-
-assign csr_mcyclel = (dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[7]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]
-    &!dec_csr_rdaddr_d[1]);
-
-assign csr_mcycleh = (dec_csr_rdaddr_d[7]&!dec_csr_rdaddr_d[6]
-    &!dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]
-    &!dec_csr_rdaddr_d[2]&!dec_csr_rdaddr_d[1]);
-
-assign csr_minstretl = (!dec_csr_rdaddr_d[7]&!dec_csr_rdaddr_d[6]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]
-    &dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_minstreth = (dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[7]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]
-    &dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_mscratch = (!dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[6]
-    &!dec_csr_rdaddr_d[2]&!dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_mepc = (!dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[1]
-    &dec_csr_rdaddr_d[0]);
-
-assign csr_mcause = (!dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[6]
-    &dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_mscause = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[5]
-    &dec_csr_rdaddr_d[2]);
-
-assign csr_mtval = (!dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[6]&dec_csr_rdaddr_d[1]
-    &dec_csr_rdaddr_d[0]);
-
-assign csr_mrac = (!dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[10]
-    &!dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]
-    &!dec_csr_rdaddr_d[1]);
-
-assign csr_dmst = (dec_csr_rdaddr_d[10]&!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]
-    &dec_csr_rdaddr_d[2]&!dec_csr_rdaddr_d[1]);
-
-assign csr_mdseac = (dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[10]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]);
-
-assign csr_meihap = (dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[10]
-    &dec_csr_rdaddr_d[3]);
-
-assign csr_meivt = (dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[10]
-    &dec_csr_rdaddr_d[6]&dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]
-    &!dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_meipt = (dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[1]
-    &dec_csr_rdaddr_d[0]);
-
-assign csr_meicurpl = (dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[6]
-    &dec_csr_rdaddr_d[2]);
-
-assign csr_meicidpl = (dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[6]
-    &dec_csr_rdaddr_d[1]&dec_csr_rdaddr_d[0]);
-
-assign csr_dcsr = (dec_csr_rdaddr_d[10]&!dec_csr_rdaddr_d[6]&dec_csr_rdaddr_d[5]
-    &dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[0]);
-
-assign csr_mcgc = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[4]&dec_csr_rdaddr_d[3]
-    &!dec_csr_rdaddr_d[0]);
-
-assign csr_mfdc = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[4]&dec_csr_rdaddr_d[3]
-    &!dec_csr_rdaddr_d[1]&dec_csr_rdaddr_d[0]);
-
-assign csr_dpc = (dec_csr_rdaddr_d[10]&!dec_csr_rdaddr_d[6]&dec_csr_rdaddr_d[5]
-    &dec_csr_rdaddr_d[4]&dec_csr_rdaddr_d[0]);
-
-assign csr_mtsel = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[4]
-    &!dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_mtdata1 = (dec_csr_rdaddr_d[10]&!dec_csr_rdaddr_d[4]
-    &!dec_csr_rdaddr_d[3]&dec_csr_rdaddr_d[0]);
-
-assign csr_mtdata2 = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[5]
-    &!dec_csr_rdaddr_d[4]&dec_csr_rdaddr_d[1]);
-
-assign csr_mhpmc3 = (dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[7]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]
-    &dec_csr_rdaddr_d[0]);
-
-assign csr_mhpmc4 = (dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[7]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&dec_csr_rdaddr_d[2]
-    &!dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_mhpmc5 = (dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[7]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[1]
-    &dec_csr_rdaddr_d[0]);
-
-assign csr_mhpmc6 = (!dec_csr_rdaddr_d[7]&!dec_csr_rdaddr_d[5]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&dec_csr_rdaddr_d[2]
-    &dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_mhpmc3h = (dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[7]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]
-    &dec_csr_rdaddr_d[0]);
-
-assign csr_mhpmc4h = (dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[7]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&dec_csr_rdaddr_d[2]
-    &!dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_mhpmc5h = (dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[7]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[1]
-    &dec_csr_rdaddr_d[0]);
-
-assign csr_mhpmc6h = (dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[7]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&dec_csr_rdaddr_d[2]
-    &dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_mhpme3 = (!dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[5]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]
-    &dec_csr_rdaddr_d[0]);
-
-assign csr_mhpme4 = (!dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[5]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&dec_csr_rdaddr_d[2]
-    &!dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_mhpme5 = (!dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[5]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[1]
-    &dec_csr_rdaddr_d[0]);
-
-assign csr_mhpme6 = (!dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[5]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&dec_csr_rdaddr_d[1]
-    &!dec_csr_rdaddr_d[0]);
-
-assign csr_mcountinhibit = (!dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[5]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]
-    &!dec_csr_rdaddr_d[0]);
-
-assign csr_mitctl0 = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[6]
-    &dec_csr_rdaddr_d[4]&dec_csr_rdaddr_d[2]&!dec_csr_rdaddr_d[1]
-    &!dec_csr_rdaddr_d[0]);
-
-assign csr_mitctl1 = (dec_csr_rdaddr_d[10]&!dec_csr_rdaddr_d[3]
-    &dec_csr_rdaddr_d[2]&dec_csr_rdaddr_d[1]&dec_csr_rdaddr_d[0]);
-
-assign csr_mitb0 = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[3]
-    &!dec_csr_rdaddr_d[2]&dec_csr_rdaddr_d[1]&dec_csr_rdaddr_d[0]);
-
-assign csr_mitb1 = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[4]&dec_csr_rdaddr_d[2]
-    &dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_mitcnt0 = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[6]
-    &!dec_csr_rdaddr_d[5]&dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[2]
-    &!dec_csr_rdaddr_d[0]);
-
-assign csr_mitcnt1 = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[2]
-    &!dec_csr_rdaddr_d[1]&dec_csr_rdaddr_d[0]);
-
-assign csr_mpmc = (dec_csr_rdaddr_d[10]&!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]
-    &dec_csr_rdaddr_d[2]&dec_csr_rdaddr_d[1]);
-
-assign csr_mcpc = (dec_csr_rdaddr_d[10]&!dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[4]
-    &!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]&dec_csr_rdaddr_d[1]);
-
-assign csr_meicpct = (dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[6]
-    &dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_mdeau = (dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[10]
-    &dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[3]);
-
-assign csr_micect = (dec_csr_rdaddr_d[6]&dec_csr_rdaddr_d[5]&dec_csr_rdaddr_d[4]
-    &!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_miccmect = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[6]
-    &dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[3]&dec_csr_rdaddr_d[0]);
-
-assign csr_mdccmect = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[5]
-    &dec_csr_rdaddr_d[4]&dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_mfdht = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[3]&dec_csr_rdaddr_d[2]
-    &dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_mfdhs = (dec_csr_rdaddr_d[10]&!dec_csr_rdaddr_d[4]
-    &dec_csr_rdaddr_d[2]&dec_csr_rdaddr_d[0]);
-
-assign csr_dicawics = (!dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[10]
-    &!dec_csr_rdaddr_d[4]&dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]
-    &!dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_dicad0h = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[3]
-    &dec_csr_rdaddr_d[2]&!dec_csr_rdaddr_d[1]);
-
-assign csr_dicad0 = (dec_csr_rdaddr_d[10]&!dec_csr_rdaddr_d[4]
-    &dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[1]&dec_csr_rdaddr_d[0]);
-
-assign csr_dicad1 = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[3]
-    &!dec_csr_rdaddr_d[2]&dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign csr_dicago = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[3]
-    &!dec_csr_rdaddr_d[2]&dec_csr_rdaddr_d[1]&dec_csr_rdaddr_d[0]);
-
-assign csr_pmpcfg = (!dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[7]
-    &!dec_csr_rdaddr_d[6]&dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[4]);
-
-assign csr_pmpaddr0 = (!dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[7]
-    &dec_csr_rdaddr_d[5]&dec_csr_rdaddr_d[4]);
-
-assign csr_pmpaddr16 = (!dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[10]
-    &dec_csr_rdaddr_d[7]&!dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[4]);
-
-assign csr_pmpaddr32 = (!dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[6]
-    &dec_csr_rdaddr_d[4]);
-
-assign csr_pmpaddr48 = (dec_csr_rdaddr_d[6]&dec_csr_rdaddr_d[5]
-    &!dec_csr_rdaddr_d[4]);
-
-assign valid_only = (dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[2]
-    &dec_csr_rdaddr_d[1]&dec_csr_rdaddr_d[0]) | (dec_csr_rdaddr_d[7]
-    &!dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]&dec_csr_rdaddr_d[4]) | (
-    !dec_csr_rdaddr_d[10]&!dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[4]) | (
-    !dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]&dec_csr_rdaddr_d[3]) | (
-    !dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[2]&dec_csr_rdaddr_d[1]
-    &dec_csr_rdaddr_d[0]) | (!dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[3]);
-
-assign presync = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[4]&dec_csr_rdaddr_d[3]
-    &!dec_csr_rdaddr_d[1]&dec_csr_rdaddr_d[0]) | (dec_csr_rdaddr_d[10]
-    &!dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]
-    &!dec_csr_rdaddr_d[2]&dec_csr_rdaddr_d[1]) | (!dec_csr_rdaddr_d[7]
-    &dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]
-    &!dec_csr_rdaddr_d[2]&!dec_csr_rdaddr_d[0]) | (dec_csr_rdaddr_d[10]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&dec_csr_rdaddr_d[0]) | (
-    dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]
-    &!dec_csr_rdaddr_d[2]&dec_csr_rdaddr_d[0]) | (dec_csr_rdaddr_d[11]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&dec_csr_rdaddr_d[2]
-    &!dec_csr_rdaddr_d[1]) | (dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[4]
-    &!dec_csr_rdaddr_d[3]&dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]);
-
-assign postsync = (dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[4]&dec_csr_rdaddr_d[3]
-    &!dec_csr_rdaddr_d[1]&dec_csr_rdaddr_d[0]) | (!dec_csr_rdaddr_d[11]
-    &!dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]&dec_csr_rdaddr_d[2]
-    &dec_csr_rdaddr_d[0]) | (!dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[7]
-    &!dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]
-    &!dec_csr_rdaddr_d[2]&!dec_csr_rdaddr_d[0]) | (dec_csr_rdaddr_d[10]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&dec_csr_rdaddr_d[0]) | (
-    !dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[10]&!dec_csr_rdaddr_d[5]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[1]) | (
-    dec_csr_rdaddr_d[10]&!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]
-    &!dec_csr_rdaddr_d[2]&dec_csr_rdaddr_d[1]) | (!dec_csr_rdaddr_d[7]
-    &dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[1]&dec_csr_rdaddr_d[0]);
-
-assign legal = (!dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[9]
-    &dec_csr_rdaddr_d[8]&dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[6]
-    &dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]
-    &dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]) | (!dec_csr_rdaddr_d[10]
-    &dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]&dec_csr_rdaddr_d[7]
-    &dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[4]
-    &dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]) | (
-    !dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[9]
-    &dec_csr_rdaddr_d[8]&dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[1]
-    &!dec_csr_rdaddr_d[0]) | (!dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[10]
-    &dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]&!dec_csr_rdaddr_d[7]
-    &!dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[4]
-    &!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[1]) | (dec_csr_rdaddr_d[11]
-    &!dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]
-    &!dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[0]) | (
-    !dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]
-    &dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]
-    &!dec_csr_rdaddr_d[4]&dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]) | (
-    !dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[9]
-    &dec_csr_rdaddr_d[8]&!dec_csr_rdaddr_d[7]&!dec_csr_rdaddr_d[6]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[1]
-    &!dec_csr_rdaddr_d[0]) | (!dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[10]
-    &dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]&dec_csr_rdaddr_d[7]
-    &dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[4]) | (!dec_csr_rdaddr_d[11]
-    &dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]
-    &dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[6]&dec_csr_rdaddr_d[5]
-    &dec_csr_rdaddr_d[4]&dec_csr_rdaddr_d[3]&dec_csr_rdaddr_d[2]
-    &dec_csr_rdaddr_d[1]&dec_csr_rdaddr_d[0]) | (!dec_csr_rdaddr_d[11]
-    &dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]
-    &dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[6]&dec_csr_rdaddr_d[5]
-    &dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[2]&!dec_csr_rdaddr_d[1]) | (
-    dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]
-    &!dec_csr_rdaddr_d[7]&!dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]
-    &dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]
-    &dec_csr_rdaddr_d[0]) | (dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[9]
-    &dec_csr_rdaddr_d[8]&!dec_csr_rdaddr_d[7]&!dec_csr_rdaddr_d[6]
-    &!dec_csr_rdaddr_d[5]&dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]
-    &dec_csr_rdaddr_d[2]&!dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]) | (
-    dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]
-    &!dec_csr_rdaddr_d[7]&!dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]
-    &dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]
-    &dec_csr_rdaddr_d[1]) | (!dec_csr_rdaddr_d[11]&dec_csr_rdaddr_d[9]
-    &dec_csr_rdaddr_d[8]&dec_csr_rdaddr_d[7]&!dec_csr_rdaddr_d[6]
-    &dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]
-    &!dec_csr_rdaddr_d[1]) | (!dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[10]
-    &dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]&!dec_csr_rdaddr_d[6]
-    &dec_csr_rdaddr_d[5]&dec_csr_rdaddr_d[2]) | (!dec_csr_rdaddr_d[11]
-    &dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]&dec_csr_rdaddr_d[7]
-    &dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]&dec_csr_rdaddr_d[4]
-    &!dec_csr_rdaddr_d[3]&dec_csr_rdaddr_d[2]) | (!dec_csr_rdaddr_d[11]
-    &dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]&dec_csr_rdaddr_d[7]
-    &dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[4]
-    &dec_csr_rdaddr_d[3]&dec_csr_rdaddr_d[1]) | (!dec_csr_rdaddr_d[11]
-    &!dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]
-    &!dec_csr_rdaddr_d[6]&dec_csr_rdaddr_d[5]&dec_csr_rdaddr_d[1]
-    &dec_csr_rdaddr_d[0]) | (dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[10]
-    &dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]&!dec_csr_rdaddr_d[6]
-    &!dec_csr_rdaddr_d[5]&dec_csr_rdaddr_d[2]) | (!dec_csr_rdaddr_d[11]
-    &dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]&dec_csr_rdaddr_d[7]
-    &dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]&dec_csr_rdaddr_d[4]
-    &!dec_csr_rdaddr_d[3]&dec_csr_rdaddr_d[1]) | (dec_csr_rdaddr_d[9]
-    &dec_csr_rdaddr_d[8]&dec_csr_rdaddr_d[7]&dec_csr_rdaddr_d[6]
-    &!dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[2]
-    &!dec_csr_rdaddr_d[1]&!dec_csr_rdaddr_d[0]) | (!dec_csr_rdaddr_d[11]
-    &dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]&dec_csr_rdaddr_d[7]
-    &dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[4]
-    &!dec_csr_rdaddr_d[0]) | (dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[10]
-    &dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]&!dec_csr_rdaddr_d[6]
-    &!dec_csr_rdaddr_d[5]&dec_csr_rdaddr_d[1]) | (!dec_csr_rdaddr_d[11]
-    &dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]&dec_csr_rdaddr_d[7]
-    &dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[4]
-    &dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]) | (!dec_csr_rdaddr_d[11]
-    &dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]&dec_csr_rdaddr_d[7]
-    &!dec_csr_rdaddr_d[6]&dec_csr_rdaddr_d[5]&!dec_csr_rdaddr_d[4]
-    &!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]&!dec_csr_rdaddr_d[0]) | (
-    !dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[9]
-    &dec_csr_rdaddr_d[8]&dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]
-    &!dec_csr_rdaddr_d[4]&!dec_csr_rdaddr_d[3]&!dec_csr_rdaddr_d[2]) | (
-    !dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[9]
-    &dec_csr_rdaddr_d[8]&!dec_csr_rdaddr_d[6]&dec_csr_rdaddr_d[5]
-    &dec_csr_rdaddr_d[3]) | (dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[10]
-    &dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]&!dec_csr_rdaddr_d[6]
-    &!dec_csr_rdaddr_d[5]&dec_csr_rdaddr_d[3]) | (!dec_csr_rdaddr_d[11]
-    &!dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]
-    &!dec_csr_rdaddr_d[6]&dec_csr_rdaddr_d[5]&dec_csr_rdaddr_d[4]) | (
-    dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[10]&dec_csr_rdaddr_d[9]
-    &dec_csr_rdaddr_d[8]&!dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]
-    &dec_csr_rdaddr_d[4]) | (!dec_csr_rdaddr_d[11]&!dec_csr_rdaddr_d[10]
-    &dec_csr_rdaddr_d[9]&dec_csr_rdaddr_d[8]&dec_csr_rdaddr_d[7]
-    &dec_csr_rdaddr_d[6]&!dec_csr_rdaddr_d[5]);
-
-
 assign dec_tlu_presync_d = presync & dec_csr_any_unq_d & ~dec_csr_wen_unq_d;
 assign dec_tlu_postsync_d = postsync & dec_csr_any_unq_d;
 
@@ -2777,12 +2627,21 @@ assign dec_csr_legal_d = ( dec_csr_any_unq_d &
                            ~(dec_csr_wen_unq_d & (csr_mvendorid | csr_marchid | csr_mimpid | csr_mhartid | csr_mdseac | csr_meihap)) // that's not a write to a RO CSR
                            );
    // CSR read mux
-assign dec_csr_rddata_d[31:0] = ( ({32{csr_misa}}      & 32'h40001104) |
+assign dec_csr_rddata_d[31:0] = (
+`ifdef RV_USER_MODE
+                                  ({32{csr_misa}}      & 32'h40101104) |
+`else
+                                  ({32{csr_misa}}      & 32'h40001104) |
+`endif
                                   ({32{csr_mvendorid}} & 32'h00000045) |
                                   ({32{csr_marchid}}   & 32'h00000010) |
                                   ({32{csr_mimpid}}    & 32'h4) |
                                   ({32{csr_mhartid}}   & {core_id[31:4], 4'b0}) |
-                                  ({32{csr_mstatus}}   & {19'b0, 2'b11, 3'b0, mstatus[1], 3'b0, mstatus[0], 3'b0}) |
+`ifdef RV_USER_MODE
+                                  ({32{csr_mstatus}}   & {14'b0, mstatus[MSTATUS_MPRV], 4'b0, ~mstatus[MSTATUS_MPP], ~mstatus[MSTATUS_MPP], 3'b0, mstatus[MSTATUS_MPIE], 3'b0, mstatus[MSTATUS_MIE], 3'b0}) |
+`else
+                                  ({32{csr_mstatus}}   & {19'b0, 2'b11, 3'b0, mstatus[MSTATUS_MPIE], 3'b0, mstatus[MSTATUS_MIE], 3'b0}) |
+`endif
                                   ({32{csr_mtvec}}     & {mtvec[30:1], 1'b0, mtvec[0]}) |
                                   ({32{csr_mip}}       & {1'b0, mip[5:3], 16'b0, mip[2], 3'b0, mip[1], 3'b0, mip[0], 3'b0}) |
                                   ({32{csr_mie}}       & {1'b0, mie[5:3], 16'b0, mie[2], 3'b0, mie[1], 3'b0, mie[0], 3'b0}) |
@@ -2830,6 +2689,25 @@ assign dec_csr_rddata_d[31:0] = ( ({32{csr_misa}}      & 32'h40001104) |
                                   ({32{csr_mhpme4}}    & {22'b0,mhpme4[9:0]}) |
                                   ({32{csr_mhpme5}}    & {22'b0,mhpme5[9:0]}) |
                                   ({32{csr_mhpme6}}    & {22'b0,mhpme6[9:0]}) |
+`ifdef RV_USER_MODE
+                                  ({32{csr_menvcfg}}   & 32'd0) |
+                                  ({32{csr_menvcfgh}}  & 32'd0) |
+                                  ({32{csr_mcounteren}}    & {25'b0, mcounteren[5:1], 1'b0, mcounteren[0]}) |
+                                  ({32{csr_cyclel}}    & mcyclel[31:0]) |
+                                  ({32{csr_cycleh}}    & mcycleh_inc[31:0]) |
+                                  ({32{csr_instretl}}  & minstretl_read[31:0]) |
+                                  ({32{csr_instreth}}  & minstreth_read[31:0]) |
+                                  ({32{csr_hpmc3}}     & mhpmc3[31:0]) |
+                                  ({32{csr_hpmc4}}     & mhpmc4[31:0]) |
+                                  ({32{csr_hpmc5}}     & mhpmc5[31:0]) |
+                                  ({32{csr_hpmc6}}     & mhpmc6[31:0]) |
+                                  ({32{csr_hpmc3h}}    & mhpmc3h[31:0]) |
+                                  ({32{csr_hpmc4h}}    & mhpmc4h[31:0]) |
+                                  ({32{csr_hpmc5h}}    & mhpmc5h[31:0]) |
+                                  ({32{csr_hpmc6h}}    & mhpmc6h[31:0]) |
+                                  ({32{csr_mseccfgl}}  & {29'd0, mseccfg}) |
+                                  ({32{csr_mseccfgh}}  & 32'd0) | // All bits are WPRI
+`endif
                                   ({32{csr_mcountinhibit}} & {25'b0, mcountinhibit[6:0]}) |
                                   ({32{csr_mpmc}}      & {30'b0, mpmc[1], 1'b0}) |
                                   ({32{dec_timer_read_d}} & dec_timer_rddata_d[31:0]) |

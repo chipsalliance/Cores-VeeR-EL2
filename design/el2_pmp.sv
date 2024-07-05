@@ -27,6 +27,15 @@ module el2_pmp
     input logic rst_l,     // Reset
     input logic scan_mode, // Scan mode
 
+`ifdef RV_SMEPMP
+    input el2_mseccfg_pkt_t mseccfg, // mseccfg CSR content, RLB, MMWP and MML bits
+`endif
+
+`ifdef RV_USER_MODE
+    input logic priv_mode_ns,   // operating privilege mode (next clock cycle)
+    input logic priv_mode_eff,  // operating effective privilege mode
+`endif
+
     input el2_pmp_cfg_pkt_t        pmp_pmpcfg [pt.PMP_ENTRIES],
     input logic             [31:0] pmp_pmpaddr[pt.PMP_ENTRIES],
 
@@ -47,6 +56,10 @@ module el2_pmp
   logic [    PMP_CHANNELS-1:0][pt.PMP_ENTRIES-1:0] region_basic_perm_check;
   logic [    PMP_CHANNELS-1:0][pt.PMP_ENTRIES-1:0] region_perm_check;
 
+`ifdef RV_USER_MODE
+  logic any_region_enabled;
+`endif
+
   ///////////////////////
   // Functions for PMP //
   ///////////////////////
@@ -60,27 +73,94 @@ module el2_pmp
   //                                             \--> pmp_chan_err
 
   // A wrapper function in which it is decided which form of permission check function gets called
-  function automatic logic perm_check_wrapper(el2_pmp_cfg_pkt_t csr_pmp_cfg,
+  function automatic logic perm_check_wrapper(el2_mseccfg_pkt_t csr_pmp_mseccfg,
+                                              el2_pmp_cfg_pkt_t csr_pmp_cfg,
+                                              el2_pmp_type_pkt_t req_type,
+                                              logic priv_mode,
                                               logic permission_check);
-    return orig_perm_check(csr_pmp_cfg.lock, permission_check);
+
+    return csr_pmp_mseccfg.MML ? mml_perm_check(csr_pmp_cfg,
+                                                req_type,
+                                                priv_mode,
+                                                permission_check) :
+                                 orig_perm_check(csr_pmp_cfg.lock,
+                                                 priv_mode,
+                                                 permission_check);
+  endfunction
+
+  // Compute permissions checks that apply when MSECCFG.MML is set. Added for Smepmp support.
+  function automatic logic mml_perm_check(el2_pmp_cfg_pkt_t   csr_pmp_cfg,
+                                          el2_pmp_type_pkt_t  pmp_req_type,
+                                          logic               priv_mode,
+                                          logic               permission_check);
+    logic result = 1'b0;
+    logic unused_cfg = |csr_pmp_cfg.mode;
+
+    if (!csr_pmp_cfg.read && csr_pmp_cfg.write) begin
+      // Special-case shared regions where R = 0, W = 1
+      unique case ({csr_pmp_cfg.lock, csr_pmp_cfg.execute})
+        // Read/write in M, read only in U
+        2'b00: result =
+             (pmp_req_type == READ) |
+            ((pmp_req_type == WRITE) & ~priv_mode);
+        // Read/write in M/U
+        2'b01: result =
+             (pmp_req_type == READ) |
+             (pmp_req_type == WRITE);
+        // Execute only on M/U
+        2'b10: result = (pmp_req_type == EXEC);
+        // Read/execute in M, execute only on U
+        2'b11: result =
+             (pmp_req_type == EXEC) |
+            ((pmp_req_type == READ) & ~priv_mode);
+        default: ;
+      endcase
+    end else begin
+      if (csr_pmp_cfg.read & csr_pmp_cfg.write & csr_pmp_cfg.execute & csr_pmp_cfg.lock) begin
+        // Special-case shared read only region when R = 1, W = 1, X = 1, L = 1
+        result = (pmp_req_type == READ);
+      end else begin
+        // Otherwise use basic permission check. Permission is always denied if in U mode and
+        // L is set or if in M mode and L is unset.
+        result = permission_check & (priv_mode ? ~csr_pmp_cfg.lock : csr_pmp_cfg.lock);
+      end
+    end
+    return result;
   endfunction
 
   // Compute permissions checks that apply when MSECCFG.MML is unset. This is the original PMP
   // behaviour before Smepmp was added.
-  function automatic logic orig_perm_check(logic pmp_cfg_lock, logic permission_check);
-    return (~pmp_cfg_lock | permission_check);
+  function automatic logic orig_perm_check(logic pmp_cfg_lock,
+                                           logic priv_mode,
+                                           logic permission_check);
     // For M-mode, any region which matches with the L-bit clear, or with sufficient
-    // access permissions will be allowed
+    // access permissions will be allowed.
+    // For other modes, the lock bit doesn't matter
+    return priv_mode ? (permission_check) : (~pmp_cfg_lock | permission_check);
   endfunction
 
   // Access fault determination / prioritization
-  function automatic logic access_fault_check(logic [pt.PMP_ENTRIES-1:0] match_all,
+  function automatic logic access_fault_check(el2_mseccfg_pkt_t          csr_pmp_mseccfg,
+                                              el2_pmp_type_pkt_t         req_type,
+                                              logic [pt.PMP_ENTRIES-1:0] match_all,
+                                              logic any_region_enabled,
+                                              logic priv_mode,
                                               logic [pt.PMP_ENTRIES-1:0] final_perm_check);
 
-
+`ifdef RV_USER_MODE
+  `ifdef RV_SMEPMP
     // When MSECCFG.MMWP is set default deny always, otherwise allow for M-mode, deny for other
-    // modes. Also deny unmatched for M-mode whe MSECCFG.MML is set and request type is EXEC.
+    // modes. Also deny unmatched for M-mode when MSECCFG.MML is set and request type is EXEC.
+    logic access_fail = csr_pmp_mseccfg.MMWP | priv_mode |
+                       (csr_pmp_mseccfg.MML && (req_type == EXEC));
+  `else
+    // When in user mode and at least one PMP region is enabled deny access by default.
+    logic access_fail = any_region_enabled & priv_mode;
+  `endif
+`else
     logic access_fail = 1'b0;
+`endif
+
     logic matched = 1'b0;
 
     // PMP entries are statically prioritized, from 0 to N-1
@@ -97,6 +177,14 @@ module el2_pmp
   // ---------------
   // Access checking
   // ---------------
+
+`ifdef RV_USER_MODE
+  logic [pt.PMP_ENTRIES-1:0] region_enabled;
+  for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : g_reg_ena
+    assign region_enabled[r] = pmp_pmpcfg[r].mode != OFF;
+  end
+  assign any_region_enabled = |region_enabled;
+`endif
 
   for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : g_addr_exp
     assign csr_pmp_addr_i[r] = {
@@ -130,6 +218,15 @@ module el2_pmp
       end
     end
   end
+
+`ifdef RV_USER_MODE
+  logic [PMP_CHANNELS-1:0] pmp_priv_mode_eff;
+  for (genvar c = 0; c < PMP_CHANNELS; c++) begin : g_priv_mode_eff
+    assign pmp_priv_mode_eff[c] = (
+      ((pmp_chan_type[c] == EXEC) & priv_mode_ns) |
+      ((pmp_chan_type[c] != EXEC) & priv_mode_eff)); // RW affected by mstatus.MPRV
+  end
+`endif
 
   for (genvar c = 0; c < PMP_CHANNELS; c++) begin : g_access_check
     assign pmp_req_addr_i[c] = {2'b00, pmp_chan_addr[c]};  // addr. widening: 32-bit -> 34-bit
@@ -167,7 +264,19 @@ module el2_pmp
       // Check specific required permissions since the behaviour is different
       // between Smepmp implementation and original PMP.
       assign region_perm_check[c][r] = perm_check_wrapper(
-          pmp_pmpcfg[r], region_basic_perm_check[c][r]
+`ifdef RV_SMEPMP
+          mseccfg,
+`else
+          3'b000,
+`endif
+          pmp_pmpcfg[r],
+          pmp_chan_type[c],
+`ifdef RV_USER_MODE
+          pmp_priv_mode_eff[c],
+`else
+          1'b0,
+`endif
+          region_basic_perm_check[c][r]
       );
 
       // Address bits below PMP granularity (which starts at 4 byte) are deliberately unused.
@@ -178,7 +287,23 @@ module el2_pmp
 
     // Once the permission checks of the regions are done, decide if the access is
     // denied by figuring out the matching region and its permission check.
-    assign pmp_chan_err[c] = access_fault_check(region_match_all[c], region_perm_check[c]);
+    assign pmp_chan_err[c] = access_fault_check(
+`ifdef RV_SMEPMP
+        mseccfg,
+`else
+        3'b000,
+`endif
+        pmp_chan_type[c],
+        region_match_all[c],
+`ifdef RV_USER_MODE
+        any_region_enabled,
+        pmp_priv_mode_eff[c],
+`else
+        1'b0,
+        1'b0,
+`endif
+        region_perm_check[c]);
+
   end
 
 endmodule  // el2_pmp

@@ -38,7 +38,10 @@ module tb_top #(
 `endif
     logic                       rst_l;
     logic                       porst_l;
+    logic [pt.PIC_TOTAL_INT:1]  ext_int;
     logic                       nmi_int;
+    logic                       timer_int;
+    logic                       soft_int;
 
     logic        [31:0]         reset_vector;
     logic        [31:0]         nmi_vector;
@@ -366,6 +369,38 @@ module tb_top #(
             $fwrite(fd,"%c", mailbox_data[7:0]);
             $write("%c", mailbox_data[7:0]);
         end
+        // Interrupt signals control
+        // data[7:0] == 0x80 - clear ext irq line index given by data[15:8]
+        // data[7:0] == 0x81 - set ext irq line index given by data[15:8]
+        // data[7:0] == 0x82 - clean NMI, timer and soft irq lines to bits data[8:10]
+        // data[7:0] == 0x83 - set NMI, timer and soft irq lines to bits data[8:10]
+        // data[7:0] == 0x90 - clear all interrupt request signals
+        if(mailbox_write && (mailbox_data[7:0] >= 8'h80 && mailbox_data[7:0] < 8'h84)) begin
+            if (mailbox_data[7:0] == 8'h80) begin
+                if (mailbox_data[15:8] > 0 && mailbox_data[15:8] < pt.PIC_TOTAL_INT)
+                    ext_int[mailbox_data[15:8]] <= 1'b0;
+            end
+            if (mailbox_data[7:0] == 8'h81) begin
+                if (mailbox_data[15:8] > 0 && mailbox_data[15:8] < pt.PIC_TOTAL_INT)
+                    ext_int[mailbox_data[15:8]] <= 1'b1;
+            end
+            if (mailbox_data[7:0] == 8'h82) begin
+                nmi_int   <= nmi_int   & ~mailbox_data[8];
+                timer_int <= timer_int & ~mailbox_data[9];
+                soft_int  <= soft_int  & ~mailbox_data[10];
+            end
+            if (mailbox_data[7:0] == 8'h83) begin
+                nmi_int   <= nmi_int   |  mailbox_data[8];
+                timer_int <= timer_int |  mailbox_data[9];
+                soft_int  <= soft_int  |  mailbox_data[10];
+            end
+        end
+        if(mailbox_write && (mailbox_data[7:0] == 8'h90)) begin
+            ext_int   <= {pt.PIC_TOTAL_INT-1{1'b0}};
+            nmi_int   <= 1'b0;
+            timer_int <= 1'b0;
+            soft_int  <= 1'b0;
+        end
         // Memory signature dump
         if(mailbox_write && (mailbox_data[7:0] == 8'hFF || mailbox_data[7:0] == 8'h01)) begin
             if (mem_signature_begin < mem_signature_end) begin
@@ -452,13 +487,18 @@ module tb_top #(
         abi_reg[29] = "t4";
         abi_reg[30] = "t5";
         abi_reg[31] = "t6";
+
+        ext_int     = {pt.PIC_TOTAL_INT-1{1'b0}};
+        nmi_int     = 0;
+        timer_int   = 0;
+        soft_int    = 0;
+
     // tie offs
         jtag_id[31:28] = 4'b1;
         jtag_id[27:12] = '0;
         jtag_id[11:1]  = 11'h45;
         reset_vector = `RV_RESET_VEC;
         nmi_vector   = 32'hee000000;
-        nmi_int   = 0;
 
         $readmemh("program.hex",  lmem.mem);
         $readmemh("program.hex",  imem.mem);
@@ -736,8 +776,9 @@ veer_wrapper rvtop_wrapper (
     .dma_axi_rresp          (dma_axi_rresp),
     .dma_axi_rlast          (dma_axi_rlast),
 `endif
-    .timer_int              ( 1'b0     ),
-    .extintsrc_req          ( '0  ),
+    .timer_int              ( timer_int ),
+    .soft_int               ( soft_int ),
+    .extintsrc_req          ( ext_int ),
 
     .lsu_bus_clk_en         ( 1'b1  ),// Clock ratio b/w cpu core clk & AHB master interface
     .ifu_bus_clk_en         ( 1'b1  ),// Clock ratio b/w cpu core clk & AHB master interface
@@ -805,7 +846,6 @@ veer_wrapper rvtop_wrapper (
     .ic_data_ext_in_pkt     ('0),
     .ic_tag_ext_in_pkt      ('0),
 
-    .soft_int               ('0),
     .core_id                ('0),
     .scan_mode              ( 1'b0 ),         // To enable scan mode
     .mbist_mode             ( 1'b0 ),        // to enable mbist
@@ -1304,7 +1344,8 @@ if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable
     for (genvar i=0; i<pt.DCCM_NUM_BANKS; i++) begin: dccm_loop
         assign dccm_wr_fdata_bank[i][pt.DCCM_DATA_WIDTH-1:0] = el2_mem_export.dccm_wr_data_bank[i];
         assign dccm_wr_fdata_bank[i][pt.DCCM_FDATA_WIDTH-1:pt.DCCM_DATA_WIDTH] = el2_mem_export.dccm_wr_ecc_bank[i];
-        assign {el2_mem_export.dccm_bank_ecc[i], el2_mem_export.dccm_bank_dout[i]} = dccm_bank_fdout[i];
+        assign el2_mem_export.dccm_bank_dout[i] = dccm_bank_fdout[i][31:0];
+        assign el2_mem_export.dccm_bank_ecc[i] = dccm_bank_fdout[i][38:32];
 
     `ifdef VERILATOR
 
@@ -1483,8 +1524,9 @@ end :Gen_dccm_enable
 if (pt.ICCM_ENABLE) begin : Gen_iccm_enable
 for (genvar i=0; i<pt.ICCM_NUM_BANKS; i++) begin: iccm_loop
     assign iccm_bank_wr_fdata[i][31:0] = el2_mem_export.iccm_bank_wr_data[i];
-    assign iccm_bank_wr_fdata[i][37:32] = el2_mem_export.iccm_bank_wr_ecc[i];
-    assign {el2_mem_export.iccm_bank_ecc[i], el2_mem_export.iccm_bank_dout[i]} = iccm_bank_fdout[i];
+    assign iccm_bank_wr_fdata[i][38:32] = el2_mem_export.iccm_bank_wr_ecc[i];
+    assign el2_mem_export.iccm_bank_dout[i] = iccm_bank_fdout[i][31:0];
+    assign el2_mem_export.iccm_bank_ecc[i] = iccm_bank_fdout[i][38:32];
 
  `ifdef VERILATOR
 

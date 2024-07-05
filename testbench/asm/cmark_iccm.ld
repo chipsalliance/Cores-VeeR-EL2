@@ -2,6 +2,7 @@ OUTPUT_ARCH( "riscv" )
 ENTRY(_start)
 
 SECTIONS {
+  . = 0x80000000 ;
   .text   : { crt0.o (.text*) }
  _end = .;
   . = 0xee000000 ;

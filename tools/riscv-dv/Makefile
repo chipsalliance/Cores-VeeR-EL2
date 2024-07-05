@@ -12,7 +12,9 @@ SIM_DIR         = $(TEST_DIR)/hdl_sim
 
 VEER_TARGET     = default
 VEER_CONF       = -set build_axi4 \
-                  -set reset_vec=0x80000000
+                  -set reset_vec=0x80000000 \
+                  -set=user_mode=1 \
+                  -set=smepmp=1
 
 # Coverage reporting
 ifeq ("$(COVERAGE)", "all")

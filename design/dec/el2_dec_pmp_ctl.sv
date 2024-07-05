@@ -23,9 +23,8 @@
 //
 //********************************************************************************
 
-
 module el2_dec_pmp_ctl
-import el2_pkg::*;
+  import el2_pkg::*;
 #(
 `include "el2_param.vh"
  )
@@ -49,8 +48,12 @@ import el2_pkg::*;
    input logic dec_tlu_pmu_fw_halted, // pmu/fw halted
    input logic internal_dbg_halt_timers, // debug halted
 
-   output logic [31:0] dec_pmp_rddata_d, // pmp CSR read data
-   output logic        dec_pmp_read_d, // pmp CSR address match
+`ifdef RV_SMEPMP
+   input el2_mseccfg_pkt_t mseccfg,
+`endif
+
+   output logic [31:0] dec_pmp_rddata_d,  // pmp CSR read data
+   output logic        dec_pmp_read_d,    // pmp CSR address match
 
    output el2_pmp_cfg_pkt_t pmp_pmpcfg  [pt.PMP_ENTRIES],
    output logic [31:0]      pmp_pmpaddr [pt.PMP_ENTRIES],
@@ -69,8 +72,20 @@ import el2_pkg::*;
    logic [1:0] wr_pmpaddr_quarter;
    logic [5:0] wr_pmpaddr_address;
 
-   logic  [3:0] pmp_quarter_rdaddr;
+   logic [3:0] pmp_quarter_rdaddr;
    logic [31:0] pmp_pmpcfg_rddata;
+
+   // ----------------------------------------------------------------------
+
+   logic [pt.PMP_ENTRIES-1:0] entry_lock_eff;  // Effective entry lock
+   for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : g_pmpcfg_lock
+`ifdef RV_SMEPMP
+   // Smepmp allow modifying locked entries when mseccfg.RLB is set
+   assign entry_lock_eff[r] = pmp_pmpcfg[r].lock & ~mseccfg.RLB;
+`else
+   assign entry_lock_eff[r] = pmp_pmpcfg[r].lock;
+`endif
+   end
 
    // ----------------------------------------------------------------------
    // PMPCFGx (RW)
@@ -85,9 +100,22 @@ import el2_pkg::*;
    assign wr_pmpcfg_group = dec_csr_wraddr_r[3:0]; // selects group of 4 pmpcfg entries (group 1 -> entries 4-7; up to 16 groups)
 
    for (genvar entry_idx = 0; entry_idx < pt.PMP_ENTRIES; entry_idx++) begin : gen_pmpcfg_ff
+      logic [7:0] raw_wdata;
+      logic [7:0] csr_wdata;
+
+      // PMPCFG fields are WARL. Mask out bits 6:5 during write.
+      // When Smepmp is disabled R=0 and W=1 combination is illegal mask out W
+      // when R is cleared.
+      assign raw_wdata = dec_csr_wrdata_r[(entry_idx[1:0]*8)+7:(entry_idx[1:0]*8)+0];
+`ifdef RV_SMEPMP
+      assign csr_wdata = raw_wdata & 8'b10011111;
+`else
+      assign csr_wdata = (raw_wdata & 8'b00000001) ? (raw_wdata & 8'b10011111) : (raw_wdata & 8'b10011101);
+`endif
+
       rvdffe #(8) pmpcfg_ff (.*, .clk(free_l2clk),
-                          .en(wr_pmpcfg_r & (wr_pmpcfg_group == entry_idx[5:2]) & (~pmp_pmpcfg[entry_idx].lock)),
-                          .din(dec_csr_wrdata_r[(entry_idx[1:0]*8)+7:(entry_idx[1:0]*8)+0] & 8'b10011111),
+                          .en(wr_pmpcfg_r & (wr_pmpcfg_group == entry_idx[5:2]) & (~entry_lock_eff[entry_idx])),
+                          .din(csr_wdata),
                           .dout(pmp_pmpcfg[entry_idx]));
    end
 
@@ -117,10 +145,10 @@ import el2_pkg::*;
       logic pmpaddr_lock;
       logic pmpaddr_lock_next;
       assign pmpaddr_lock_next = ((entry_idx+1 < pt.PMP_ENTRIES)
-                                  ? (pmp_pmpcfg[entry_idx+1].lock
+                                  ? (entry_lock_eff[entry_idx+1]
                                      & pmp_pmpcfg[entry_idx+1].mode == TOR)
                                   : 1'b0);
-      assign pmpaddr_lock = pmp_pmpcfg[entry_idx].lock | pmpaddr_lock_next;
+      assign pmpaddr_lock = entry_lock_eff[entry_idx] | pmpaddr_lock_next;
       assign pmp_pmpaddr[entry_idx][31:30] = 2'b00;
       rvdffe #(30) pmpaddr_ff (.*, .clk(free_l2clk),
                           .en(wr_pmpaddr_r & (wr_pmpaddr_address == entry_idx)

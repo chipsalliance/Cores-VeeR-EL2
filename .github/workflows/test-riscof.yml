@@ -126,7 +126,7 @@ jobs:
           export RV_ROOT=`pwd`
           pushd riscof
             $RV_ROOT/configs/veer.config
-            make -f $RV_ROOT/tools/Makefile verilator-build COVERAGE=${{ matrix.coverage }}
+            make -f $RV_ROOT/tools/Makefile verilator-build CONF_PARAMS="-set build_axi4 -set=user_mode=1 -set=smepmp=1" COVERAGE=${{ matrix.coverage }}
           popd
 
       - name: Run tests, collect coverage

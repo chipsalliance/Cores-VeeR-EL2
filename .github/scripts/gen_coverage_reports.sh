@@ -39,7 +39,7 @@ generate_coverage_reports(){
 
                 mkdir -p ${DIR}_${TEST}
                 # genhtml -o ${DIR}_${TEST} -t ${TEST} ${GENHTML_OPTS} ${FILE}
-                genhtml -o ${DIR}_${TEST} -t ${TEST} --header-title "RTL ${COVERAGE} coverage report" ${GENHTML_OPTS} ${FILE}
+                genhtml -o ${DIR}_${TEST} -t ${TEST} --header-title "RTL ${COVERAGE} coverage report" ${GENHTML_OPTS} --no-source ${FILE}
                 find ${DIR}_${TEST}/ -name "*.html" -exec sed -i "s/Line Coverage/${COVERAGE^} Coverage/g" {} +
             done
         fi

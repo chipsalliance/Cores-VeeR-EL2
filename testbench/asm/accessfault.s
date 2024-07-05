@@ -39,7 +39,7 @@ _start:
     csrw mtvec, x2
 
     // Set up NMI handler at _handler address
-    li x3, TEST_CMD
+    li x3, STDOUT
     ori x2, x2, LOAD_NMI_ADDR
     sw x2, 0(x3)
 
@@ -61,7 +61,7 @@ dbus_store_error:
     lw x6, _start
     // trigger bus fault at next store
     li x2, TRIGGER_BUS_FAULT
-    li x3, TEST_CMD
+    li x3, STDOUT
     sw x2, 0(x3)
     // bus fault is triggered on this instruction
     sw x2, 0(x6)
@@ -74,7 +74,7 @@ dbus_nonblocking_load_error:
     li x5, 0x0          // mscause
     // trigger bus fault at next load
     li x2, TRIGGER_BUS_FAULT
-    li x3, TEST_CMD
+    li x3, STDOUT
     sw x2, 0(x3)
     // bus fault is triggered on this instruction
     lw x2, 0(zero)

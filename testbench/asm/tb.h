@@ -1,0 +1,5 @@
+#define STDOUT 0xd0580000
+
+#define TRIGGER_NMI 0x80
+#define LOAD_NMI_ADDR 0x81
+#define TRIGGER_BUS_FAULT 0x82

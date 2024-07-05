@@ -30,8 +30,7 @@ module tb_top
     input bit                   core_clk,
     input bit [31:0]            mem_signature_begin,
     input bit [31:0]            mem_signature_end,
-    input bit [31:0]            mem_mailbox,
-    input bit [31:0]            mem_mailbox_testcmd
+    input bit [31:0]            mem_mailbox
 );
 `endif
 
@@ -40,7 +39,6 @@ module tb_top
     bit          [31:0]         mem_signature_begin = 32'd0; // TODO:
     bit          [31:0]         mem_signature_end   = 32'd0;
     bit          [31:0]         mem_mailbox         = 32'hD0580000;
-    bit          [31:0]         mem_mailbox_testcmd = 32'hD0580004;
 `endif
     logic                       rst_l;
     logic                       porst_l;
@@ -126,9 +124,6 @@ module tb_top
 
     logic                       mailbox_write;
     logic        [63:0]         mailbox_data;
-
-    logic                       mailbox_test_write;
-    logic        [31:0]         mailbox_test_data;
 
     logic        [63:0]         dma_hrdata       ;
     logic        [63:0]         dma_hwdata       ;
@@ -699,19 +694,15 @@ module tb_top
 `define DEC rvtop_wrapper.rvtop.veer.dec
 
 `ifdef RV_BUILD_AXI4
-    assign mailbox_write      = lmem.awvalid && lmem.awaddr == mem_mailbox         && rst_l;
-    assign mailbox_test_write = lmem.awvalid && lmem.awaddr == mem_mailbox_testcmd && rst_l;
-    assign mailbox_data       = lmem.wdata;
+    assign mailbox_write = lmem.awvalid && lmem.awaddr == mem_mailbox && rst_l;
+    assign mailbox_data  = lmem.wdata;
 `endif
 `ifdef RV_BUILD_AHB_LITE
-    assign mailbox_write      = lmem.write   && lmem.laddr  == mem_mailbox         && rst_l;
-    assign mailbox_test_write = lmem.write   && lmem.laddr  == mem_mailbox_testcmd && rst_l;
-    assign mailbox_data       = lmem.HWDATA;
+    assign mailbox_write = lmem.write   && lmem.laddr  == mem_mailbox && rst_l;
+    assign mailbox_data  = lmem.HWDATA;
 `endif
 
     assign mailbox_data_val = mailbox_data[7:0] > 8'h5 && mailbox_data[7:0] < 8'h7f;
-    // note: data written by the core is in bits [63:32] (not in [31:0]!)
-    assign mailbox_test_data = mailbox_data[63:32];
 
     parameter MAX_CYCLES = 5_000;
 
@@ -810,20 +801,24 @@ module tb_top
 
         // Custom test commands
         // Available commands (that can be written into address mem_mailbox_testcmd) are:
-        // 8'h00 - trigger NMI
-        // 8'h01 - set NMI handler address (mailbox_test_data[31:8] is the address of a handler,
+        // 8'h80 - trigger NMI
+        // 8'h81 - set NMI handler address (mailbox_data[31:8] is the address of a handler,
         //         i.e. it must be 256 byte-aligned)
-        // 8'h02 - trigger data bus error on the next load/store
+        // 8'h82 - trigger data bus error on the next load/store
         nmi_assert_int <= nmi_assert_int >> 1;
-        if (mailbox_test_write && mailbox_test_data[7:0] == 8'h00 && |{nmi_assert_int[3:0]} == 0) begin
+        if (mailbox_write && mailbox_data[7:0] == 8'h80 && nmi_assert_int == 4'b0000) begin
             nmi_assert_int <= 4'b1111;
         end
-        if (mailbox_test_write && mailbox_test_data[7:0] == 8'h01) begin
+        else if (mailbox_write && mailbox_data[7:0] == 8'h81) begin
             // NMI handler address is in the upper 24 bits of mailbox data
-            nmi_vector[31:1] <= {mailbox_test_data[31:8], 7'h00};
+            nmi_vector[31:1] <= {mailbox_data[31:8], 7'h00};
         end
+    end
+
+    // this needs to be a separate block due to sensitivity to lsu_axi_bvalid signal
+    always @(negedge core_clk or lsu_axi_bvalid) begin
         `ifdef RV_BUILD_AXI4
-        if (mailbox_test_write && mailbox_test_data[7:0] == 8'h02) begin
+        if (mailbox_write && mailbox_data[7:0] == 8'h82) begin
             @(negedge lsu_axi_bvalid) next_dbus_error <= 1;
         end
         lsu_axi_rvalid_hist <= {lsu_axi_rvalid_hist[0], lsu_axi_rvalid};

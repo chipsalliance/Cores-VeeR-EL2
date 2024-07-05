@@ -42,7 +42,7 @@ _start:
 
 trigger_nmi:
     // Set up NMI handler's address
-    li x6, TEST_CMD
+    li x6, STDOUT
     la x7, _handler
     ori x7, x7, LOAD_NMI_ADDR
     sw x7, 0(x6)

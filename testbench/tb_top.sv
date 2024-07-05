@@ -710,8 +710,7 @@ module tb_top
     logic next_dbus_error;
     logic [1:0] lsu_axi_rresp_override;
     logic [1:0] lsu_axi_bresp_override;
-    logic [1:0] lsu_axi_rvalid_hist;
-    logic [1:0] lsu_axi_bvalid_hist;
+    logic [1:0] ifu_axi_rresp_override;
 
     always @(negedge core_clk) begin
         cycleCnt <= cycleCnt+1;
@@ -815,17 +814,15 @@ module tb_top
         end
     end
 
-    // this needs to be a separate block due to sensitivity to lsu_axi_bvalid signal
-    always @(negedge core_clk or lsu_axi_bvalid) begin
+    // this needs to be a separate block due to sensitivity to other signals
+    always @(negedge core_clk or lsu_axi_bvalid or lsu_axi_rvalid or ifu_axi_rvalid) begin
         `ifdef RV_BUILD_AXI4
-        if (mailbox_write && mailbox_data[7:0] == 8'h82) begin
+        if (mailbox_write && mailbox_data[7:0] == 8'h82)
+            // wait for current transaction that to complete to not trigger error on it
             @(negedge lsu_axi_bvalid) next_dbus_error <= 1;
-        end
-        lsu_axi_rvalid_hist <= {lsu_axi_rvalid_hist[0], lsu_axi_rvalid};
-        lsu_axi_bvalid_hist <= {lsu_axi_bvalid_hist[0], lsu_axi_bvalid};
-        // turn off forcing dbus error at rvalid or bvalid falling edge
-        if (next_dbus_error && ((lsu_axi_rvalid_hist == 2'b10) || (lsu_axi_bvalid_hist == 2'b10)))
-            next_dbus_error <= 0;
+        // turn off forcing dbus error after a transaction
+        if (next_dbus_error)
+            @(negedge lsu_axi_bvalid or negedge lsu_axi_rvalid or negedge ifu_axi_rvalid) next_dbus_error <= 0;
         `endif
     end
 
@@ -833,12 +830,15 @@ module tb_top
         `ifdef RV_BUILD_AXI4
         lsu_axi_rresp_override = lsu_axi_rresp;
         lsu_axi_bresp_override = lsu_axi_bresp;
+        ifu_axi_rresp_override = ifu_axi_rresp;
         if (next_dbus_error) begin
             // force slave bus error
             if (lsu_axi_rvalid)
                 lsu_axi_rresp_override = 2'b10;
             if (lsu_axi_bvalid)
                 lsu_axi_bresp_override = 2'b10;
+            if (ifu_axi_rvalid)
+                ifu_axi_rresp_override = 2'b10;
         end
         `endif
     end
@@ -1112,7 +1112,7 @@ veer_wrapper rvtop_wrapper (
     .ifu_axi_rready         (ifu_axi_rready),
     .ifu_axi_rid            (ifu_axi_rid),
     .ifu_axi_rdata          (ifu_axi_rdata),
-    .ifu_axi_rresp          (ifu_axi_rresp),
+    .ifu_axi_rresp          (ifu_axi_rresp_override),
     .ifu_axi_rlast          (ifu_axi_rlast),
 
     //-------------------------- SB AXI signals--------------------------

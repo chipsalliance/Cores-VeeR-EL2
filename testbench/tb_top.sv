@@ -708,6 +708,7 @@ module tb_top
 
     integer fd, tp, el;
     logic next_dbus_error;
+    logic next_ibus_error;
     logic [1:0] lsu_axi_rresp_override;
     logic [1:0] lsu_axi_bresp_override;
     logic [1:0] ifu_axi_rresp_override;
@@ -815,14 +816,18 @@ module tb_top
     end
 
     // this needs to be a separate block due to sensitivity to other signals
-    always @(negedge core_clk or lsu_axi_bvalid or lsu_axi_rvalid or ifu_axi_rvalid) begin
+    always @(negedge core_clk or lsu_axi_bvalid or lsu_axi_rvalid or ifu_axi_rvalid or ifu_axi_rid) begin
         `ifdef RV_BUILD_AXI4
         if (mailbox_write && mailbox_data[7:0] == 8'h82)
             // wait for current transaction that to complete to not trigger error on it
             @(negedge lsu_axi_bvalid) next_dbus_error <= 1;
+        if (mailbox_write && mailbox_data[7:0] == 8'h83)
+            @(negedge ifu_axi_rvalid or ifu_axi_rid) next_ibus_error <= 1;
         // turn off forcing dbus error after a transaction
         if (next_dbus_error)
-            @(negedge lsu_axi_bvalid or negedge lsu_axi_rvalid or negedge ifu_axi_rvalid) next_dbus_error <= 0;
+            @(negedge lsu_axi_bvalid or negedge lsu_axi_rvalid) next_dbus_error <= 0;
+        if (next_ibus_error)
+            @(negedge ifu_axi_rvalid or ifu_axi_rid) next_ibus_error <= 0;
         `endif
     end
 
@@ -837,6 +842,8 @@ module tb_top
                 lsu_axi_rresp_override = 2'b10;
             if (lsu_axi_bvalid)
                 lsu_axi_bresp_override = 2'b10;
+        end
+        if (next_ibus_error) begin
             if (ifu_axi_rvalid)
                 ifu_axi_rresp_override = 2'b10;
         end

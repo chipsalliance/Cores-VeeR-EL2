@@ -23,7 +23,6 @@
 
 
 // Code to execute
-.option norvc
 .section .text
 .global _start
 _start:
@@ -34,15 +33,6 @@ _start:
     // Enable Caches in MRAC
     li x2, 0x5f555555
     csrw 0x7c0, x2
-
-    // Set up MTVEC at _handler address
-    la x2, _handler
-    csrw mtvec, x2
-
-    // Set up NMI handler at _handler address
-    li x3, STDOUT
-    ori x2, x2, LOAD_NMI_ADDR
-    sw x2, 0(x3)
 
     j main
 
@@ -55,7 +45,7 @@ dbus_store_error:
     // address of some data that resides in memory (and not in iccm/dccm)
     lw x6, _start
     // trigger bus fault at next store
-    li x2, TRIGGER_BUS_FAULT
+    li x2, TRIGGER_DBUS_FAULT
     li x3, STDOUT
     sw x2, 0(x3)
     // bus fault is triggered on this instruction
@@ -68,7 +58,7 @@ dbus_nonblocking_load_error:
     li x4, 0xF0000001   // mcause
     li x5, 0x0          // mscause
     // trigger bus fault at next load
-    li x2, TRIGGER_BUS_FAULT
+    li x2, TRIGGER_DBUS_FAULT
     li x3, STDOUT
     sw x2, 0(x3)
     // bus fault is triggered on this instruction
@@ -79,26 +69,42 @@ iside_fetch_precise_bus_error:
     la x31, fail
     li x4, 0x1
     li x5, 0x9
-    li x2, TRIGGER_BUS_FAULT
+    li x2, TRIGGER_IBUS_FAULT
     li x3, STDOUT
     sw x2, 0(x3)
     // ibus fault is triggered on this instruction
-    nop
+    fence.i
     j fail_if_not_serviced
 
 iside_core_local_unmapped_address_error:
     la x31, fail
-    li x4, 0x5
+    li x4, 0x1
     li x5, 0x2
-    li x1, 0xfffffffc
-    // make sure to not use x2 as the base address so that lw instruction
-    // doesn't get compressed into 2 bytes
-    lw x3, 0(x1)
+    // jump to address that's only halfway inside ICCM
+    li x2, 0xee000000-2
+    jalr x2, 0(x2)
     j fail_if_not_serviced
 
 main:
+    // fetch can only trigger regular exceptions so it suffices to set up mtvec
+    la x2, ibus_exc_handler
+    csrw mtvec, x2
+
     call iside_core_local_unmapped_address_error
     call iside_fetch_precise_bus_error
+    
+    // dbus can trigger both NMIs and regular exceptions so we set up both mtvec and
+    // set NMI handler address via testbench
+
+    // set up mtvec
+    la x2, dbus_exc_handler
+    csrw mtvec, x2
+
+    // Set up NMI handler address
+    li x3, STDOUT
+    ori x2, x2, LOAD_NMI_ADDR
+    sw x2, 0(x3)
+
     call dbus_store_error
     call dbus_nonblocking_load_error
 
@@ -112,18 +118,17 @@ _finish:
     nop
 .endr
 
-// NMI handler must be aligned to 256 bytes since it has to fit
-// in the upper 24 bits of nmi handler address set command
-.balign 256
-_handler:
-    // reenable signaling of NMIs for subsequent NMIs
-    csrw 0xBC0, x0 // mdeau
-    // jump past the excepting instruction (if it's access to some unmapped address) -
-    // should be okay as long as we are inside the nop sled in fail_if_not_serviced
-    csrr x2, mepc
-    addi x2, x2, 4
+// exception handler must be aligned to 4-byte boundary
+.balign 4
+ibus_exc_handler:
+    // fetch exceptions trigger functions would return back to the faulting
+    // instruction on mret so we override the address to go to the nop sled instead
+    la x2, ok
     csrw mepc, x2
+    j handler_compare_csrs
 
+// test whether the values in relevant csrs are as expected
+handler_compare_csrs:
     csrr x2, mcause
     bne x2, x4, fail
     csrr x2, 0x7FF // mscause
@@ -131,9 +136,17 @@ _handler:
     la x31, ok
     mret
 
+// NMI handler must be aligned to 256 bytes since it has to fit
+// in the upper 24 bits of nmi handler address set testbench command
+.balign 256
+dbus_exc_handler:
+    // reenable signaling of NMIs for subsequent NMIs
+    csrw 0xBC0, x0 // mdeau
+    j handler_compare_csrs
+
 // used for making sure we fail if we didn't jump to the exception/NMI handler
 fail_if_not_serviced:
-.rept 20
+.rept 10
     nop
 .endr
     // control flow goes to 'fail' if interrupt wasn't serviced (x31 set by the handler)

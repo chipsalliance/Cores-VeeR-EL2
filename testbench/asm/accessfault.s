@@ -72,7 +72,8 @@ iside_fetch_precise_bus_error:
     li x2, TRIGGER_IBUS_FAULT
     li x3, STDOUT
     sw x2, 0(x3)
-    // ibus fault is triggered on this instruction
+    // ibus fault is triggered on subsequent instruction - force refetch from memory
+    // since testbench relies on bus transaction happening to trigger bus error
     fence.i
     j fail_if_not_serviced
 
@@ -83,6 +84,71 @@ iside_core_local_unmapped_address_error:
     // jump to address that's only halfway inside ICCM
     li x2, 0xee000000-2
     jalr x2, 0(x2)
+    j fail_if_not_serviced
+
+dside_load_across_region_boundary:
+    la x31, fail
+    li x4, 0x4
+    li x5, 0x2
+    // load from across region boundary
+    li x2, 0xe0000000-2
+    lw x2, 0(x2)
+    j fail_if_not_serviced
+
+dside_size_misaligned_load_to_non_idempotent_address:
+    la x31, fail
+    li x4, 0x4
+    li x5, 0x1
+    // load from across non-idempotent address (with side effects)
+    // we take advantage of the fact that STDOUT is such an address
+    li x2, STDOUT-2
+    lw x2, 0(x2)
+    j fail_if_not_serviced
+
+dside_store_across_region_boundary:
+    la x31, fail
+    li x4, 0x6
+    li x5, 0x2
+    // store across region boundary
+    li x2, 0xe0000000-2
+    sw x2, 0(x2)
+    j fail_if_not_serviced
+
+dside_size_misaligned_store_to_non_idempotent_address:
+    la x31, fail
+    li x4, 0x6
+    li x5, 0x1
+    // store to across non-idempotent address (with side effect)
+    // we take advantage of the fact that STDOUT is such an address
+    li x2, STDOUT-2
+    sw x2, 0(x2)
+    j fail_if_not_serviced
+
+dside_core_local_store_unmapped_address_error:
+    la x31, fail
+    li x4, 0x7
+    li x5, 0x2
+    // store DCCM upper boundary (this also triggers unmapped address error)
+    li x2, RV_DCCM_EADR - 1
+    sw x2, 0(x2)
+    j fail_if_not_serviced
+
+dside_pic_load_access_error:
+    la x31, fail
+    li x4, 0x5
+    li x5, 0x6
+    // perform not word-sized load from PIC
+    li x2, RV_PIC_BASE_ADDR
+    lb x2, 0(x2)
+    j fail_if_not_serviced
+
+dside_pic_store_access_error:
+    la x31, fail
+    li x4, 0x7
+    li x5, 0x6
+    // perform not word-sized store to PIC
+    li x2, RV_PIC_BASE_ADDR
+    sb x2, 0(x2)
     j fail_if_not_serviced
 
 main:
@@ -107,6 +173,12 @@ main:
 
     call dbus_store_error
     call dbus_nonblocking_load_error
+    call dside_size_misaligned_load_to_non_idempotent_address
+    call dside_store_across_region_boundary
+    call dside_size_misaligned_store_to_non_idempotent_address
+    call dside_core_local_store_unmapped_address_error
+    call dside_pic_load_access_error
+    call dside_pic_store_access_error
 
 // Write 0xff to STDOUT for TB to terminate test.
 _finish:

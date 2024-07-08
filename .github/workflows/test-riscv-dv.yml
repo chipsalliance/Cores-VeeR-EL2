@@ -192,7 +192,7 @@ jobs:
 
   run-tests:
     name: Run RISC-V DV tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-devel
     needs: [ veer-iss, renode, generate-config, generate-code ]
     strategy:
       fail-fast: false
@@ -239,6 +239,7 @@ jobs:
             git cpanminus ccache device-tree-compiler python3-minimal python3-pip \
             libboost-all-dev gcc-riscv64-unknown-elf
           sudo cpanm Bit::Vector
+          riscv64-unknown-elf-gcc --version
 
       - name: Setup Cache Metadata
         id: cache_metadata

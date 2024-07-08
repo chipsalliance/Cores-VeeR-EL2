@@ -13,7 +13,11 @@ privileged_mode_t supported_privileged_mode[] = {MACHINE_MODE};
 riscv_instr_name_t unsupported_instr[] = {
     NOP, // RV32I
     CLZ, // RV32ZBB
-    SROI, CMIX, FSRI, FSR, CMOV, SRO, SLO, FSL, SLOI // RV32B
+    SROI, CMIX, FSRI, FSR, CMOV, SRO, SLO, FSL, SLOI, // RV32B
+    // FIXME: these exclusions are needed for the GCC version we use
+    BFP, CRC32C_W, CRC32C_B, UNSHFL, UNSHFLI, GREV, GREVI, SHFL, GORC,
+    BDECOMPRESS, XPERM_B, CRC32_H, CRC32C_H, GORCI, XPERM_N, SHFLI, CRC32_B,
+    CRC32_W, BCOMPRESS, XPERM_H, CRC32_W
 };
 
 // ISA supported by the processor

@@ -138,8 +138,27 @@ const privileged_reg_t implemented_csr[] = {
     MHPMEVENT8,
     MHPMEVENT16,
     MCOUNTINHIBIT,
+    MSECCFG,
     PMPCFG0,
-    PMPADDR0
+    PMPCFG1,
+    PMPCFG2,
+    PMPCFG3,
+    PMPADDR0,
+    PMPADDR1,
+    PMPADDR2,
+    PMPADDR3,
+    PMPADDR4,
+    PMPADDR5,
+    PMPADDR6,
+    PMPADDR7,
+    PMPADDR8,
+    PMPADDR9,
+    PMPADDR10,
+    PMPADDR11,
+    PMPADDR12,
+    PMPADDR13,
+    PMPADDR14,
+    PMPADDR15
 };
 
 // Implementation-specific custom CSRs

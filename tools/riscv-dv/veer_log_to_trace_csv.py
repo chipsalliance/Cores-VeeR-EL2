@@ -165,7 +165,7 @@ def parse_log(file_name):
             queue = queue[1:]
 
         # Safeguard
-        if len(queue) >= 10:
+        if len(queue) >= 1000:
             print("ERROR: Malformed trace, the queue grew too much")
             for entry in reversed(queue):
                 print("", entry.get_trace_string())

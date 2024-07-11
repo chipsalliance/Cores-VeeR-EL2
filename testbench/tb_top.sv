@@ -812,6 +812,7 @@ module tb_top
         nmi_assert_int <= nmi_assert_int >> 1;
         soft_int <= 0;
         timer_int <= 0;
+        extintsrc_req[1] <= 0;
         if (mailbox_write && mailbox_data[7:0] == 8'h80 && nmi_assert_int == 4'b0000) begin
             nmi_assert_int <= 4'b1111;
         end
@@ -824,6 +825,9 @@ module tb_top
         end
         else if (mailbox_write && mailbox_data[7:0] == 8'h85) begin
             timer_int <= 1;
+        end
+        else if (mailbox_write && mailbox_data[7:0] == 8'h86) begin
+            extintsrc_req[1] <= 1;
         end
     end
 
@@ -944,6 +948,10 @@ module tb_top
         jtag_id[11:1]  = 11'h45;
         reset_vector = `RV_RESET_VEC;
         nmi_vector   = 32'hee000000;
+        nmi_int   = 0;
+        soft_int  = 0;
+        timer_int = 0;
+        extintsrc_req = 0;
 
         $readmemh("program.hex",  lmem.mem);
         $readmemh("program.hex",  imem.mem);

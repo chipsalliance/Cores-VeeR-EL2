@@ -78,5 +78,5 @@ jobs:
           make -C run -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop
           cd run
           ${RV_ROOT}/.github/scripts/openocd_test.sh \
-            -f ${RV_ROOT}/tools/openocd/verilator-rst.cfg \
-            -f ${RV_ROOT}/tools/openocd/jtag_cg.tcl
+            -f ${RV_ROOT}/testbench/openocd_scripts/verilator-rst.cfg \
+            -f ${RV_ROOT}/testbench/openocd_scripts/jtag_cg.tcl

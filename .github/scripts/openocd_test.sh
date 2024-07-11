@@ -59,7 +59,7 @@ sleep 2s
 
 # Run the test
 echo -e "${COLOR_WHITE}======== Running OpenOCD test '$@' ========${COLOR_OFF}"
-cd ${RV_ROOT}/tools/openocd && openocd -d2 ${OPENOCD_ARGS} >"${OPENOCD_LOG}" 2>&1
+cd ${RV_ROOT}/testbench/openocd_scripts && openocd -d2 ${OPENOCD_ARGS} >"${OPENOCD_LOG}" 2>&1
 EXITCODE=$?
 
 if [ ${EXITCODE} -eq 0 ]; then

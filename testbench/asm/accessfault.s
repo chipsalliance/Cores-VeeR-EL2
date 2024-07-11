@@ -26,10 +26,12 @@
 // - D-side load across region boundary
 // - D-side size-misaligned load to non-idempotent address
 // - D-side core-local load unmapped address error
+// - D-side load region prediction error
 // - D-side PIC load access error
 // - D-side store across region boundary
 // - D-side size-misaligned store to non-idempotent address
 // - D-side core-local store unmapped address error
+// - D-side store region prediction error
 // - D-side PIC store access error
 // - Environment call from M-mode
 // 
@@ -185,6 +187,27 @@ dside_pic_store_access_error:
     // perform not word-sized store to PIC
     li x2, RV_PIC_BASE_ADDR
     sb x2, 0(x2)
+    j fail_if_not_serviced
+
+dside_load_region_prediction_error:
+    la x31, fail
+    li x4, 0x5
+    li x5, 0x5
+    // this assumes that RV_PIC_BASE_ADDR is as high in the region
+    // as realistically allowed, e.g. 0xffff8000, this allows us
+    // to construct an address that will overflow to another region
+    // when offset is used in an 'lw' instruction: 0xfffffffc + 0x4
+    li x2, RV_PIC_BASE_ADDR + 0x7ffc
+    lw x2, 0x4(x2)
+    j fail_if_not_serviced
+
+dside_store_region_prediction_error:
+    la x31, fail
+    li x4, 0x7
+    li x5, 0x5
+    // same as in load region prediction error
+    li x2, RV_PIC_BASE_ADDR + 0x7ffc
+    sw x2, 0x4(x2)
     j fail_if_not_serviced
 
 machine_internal_timer0_local_interrupt:
@@ -405,6 +428,8 @@ main:
     call dside_core_local_load_unmapped_address_error
     call dside_pic_load_access_error
     call dside_pic_store_access_error
+    call dside_load_region_prediction_error
+    call dside_store_region_prediction_error
     call machine_internal_timer0_local_interrupt
     call machine_internal_timer1_local_interrupt
     call nmi_pin_assertion

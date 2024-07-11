@@ -17,6 +17,29 @@
 
 // Assembly code for testing instruction access faults
 
+// Tested exceptions as per the table 2-10 in VeeR programmer's manual:
+// - I-side fetch precise bus error
+// - I-side core-local unmapped address error
+// - Illegal instruction
+// - ebreak (not to Debug Mode)
+// - D-side load across region boundary
+// - D-side size-misaligned load to non-idempotent address
+// - D-side core-local load unmapped address error
+// - D-side PIC load access error
+// - D-side store across region boundary
+// - D-side size-misaligned store to non-idempotent address
+// - D-side core-local store unmapped address error
+// - D-side PIC store access error
+// - Environment call from M-mode
+// 
+// Tested interrupts:
+// - Machine software interrupt
+// - Machine timer interrupt
+// - Machine internal timer 1 local interrupt
+// - Machine internal timer 0 local interrupt
+// - NMI pin assertion
+// - D-bus store error
+// - D-bus non-blocking load error
 
 #include "defines.h"
 #include "tb.h"

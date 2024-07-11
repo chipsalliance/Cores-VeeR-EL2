@@ -50,6 +50,7 @@ RISCV_DV_ARGS = \
     --iterations $(RISCV_DV_ITER) \
     --batch_size $(RISCV_DV_BATCH) \
     --isa rv32imc --mabi ilp32 \
+    --priv u \
     --custom_target $(PWD) \
     --testlist $(PWD)/testlist.yaml \
     -v -o $(TEST_DIR)

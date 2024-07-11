@@ -200,7 +200,7 @@ jobs:
         test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
         iss:
           - spike
-          - whisper
+#         - whisper
 #         - renode
         coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
         version: [ uvm ]

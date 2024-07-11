@@ -22,6 +22,7 @@
 // - I-side core-local unmapped address error
 // - Illegal instruction
 // - ebreak (not to Debug Mode)
+// - Trigger hit (not to Debug Mode)
 // - D-side load across region boundary
 // - D-side size-misaligned load to non-idempotent address
 // - D-side core-local load unmapped address error
@@ -264,6 +265,20 @@ machine_timer_interrupt:
     sw x2, 0(x3)
     j fail_if_not_serviced
 
+trigger_hit:
+    la x31, fail
+    la x4, 0x3
+    la x5, 0x1
+    // set up address to trigger on
+    li x2, 0xdeadbeef
+    csrw tdata2, x2
+    // enable trigger in M-mode, fire on address of a load
+    li x3, 0x41
+    csrw mcontrol, x3
+    // load from that address
+    lw x2, 0(x2)
+    j fail_if_not_serviced
+
 main:
     // global interrupt enable
     csrr x2, mstatus
@@ -306,6 +321,7 @@ main:
     call nmi_pin_assertion
     call machine_software_interrupt
     call machine_timer_interrupt
+    call trigger_hit
 
 // Write 0xff to STDOUT for TB to terminate test.
 _finish:

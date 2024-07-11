@@ -51,6 +51,10 @@ module tb_top
     logic        [31:0]         nmi_vector;
     logic        [31:1]         jtag_id;
 
+    logic                       soft_int;
+    logic                       timer_int;
+    logic [pt.PIC_TOTAL_INT:1]  extintsrc_req;
+
     logic        [31:0]         ic_haddr        ;
     logic        [2:0]          ic_hburst       ;
     logic                       ic_hmastlock    ;
@@ -806,12 +810,20 @@ module tb_top
         //         i.e. it must be 256 byte-aligned)
         // 8'h82 - trigger data bus error on the next load/store
         nmi_assert_int <= nmi_assert_int >> 1;
+        soft_int <= 0;
+        timer_int <= 0;
         if (mailbox_write && mailbox_data[7:0] == 8'h80 && nmi_assert_int == 4'b0000) begin
             nmi_assert_int <= 4'b1111;
         end
         else if (mailbox_write && mailbox_data[7:0] == 8'h81) begin
             // NMI handler address is in the upper 24 bits of mailbox data
             nmi_vector[31:1] <= {mailbox_data[31:8], 7'h00};
+        end
+        else if (mailbox_write && mailbox_data[7:0] == 8'h84) begin
+            soft_int <= 1;
+        end
+        else if (mailbox_write && mailbox_data[7:0] == 8'h85) begin
+            timer_int <= 1;
         end
     end
 
@@ -1279,6 +1291,7 @@ veer_wrapper rvtop_wrapper (
     .ic_data_ext_in_pkt     ('0),
     .ic_tag_ext_in_pkt      ('0),
 
+    .soft_int               (soft_int),
     .core_id                ('0),
     .scan_mode              ( 1'b0 ),         // To enable scan mode
     .mbist_mode             ( 1'b0 ),        // to enable mbist

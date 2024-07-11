@@ -128,9 +128,18 @@ dside_core_local_store_unmapped_address_error:
     la x31, fail
     li x4, 0x7
     li x5, 0x2
-    // store DCCM upper boundary (this also triggers unmapped address error)
+    // store to DCCM upper boundary (this also triggers unmapped address error)
     li x2, RV_DCCM_EADR - 1
     sw x2, 0(x2)
+    j fail_if_not_serviced
+
+dside_core_local_load_unmapped_address_error:
+    la x31, fail
+    li x4, 0x5
+    li x5, 0x2
+    // load from DCCM upper boundary (this also triggers unmapped address error)
+    li x2, RV_DCCM_EADR - 1
+    lw x2, 0(x2)
     j fail_if_not_serviced
 
 dside_pic_load_access_error:
@@ -151,14 +160,103 @@ dside_pic_store_access_error:
     sb x2, 0(x2)
     j fail_if_not_serviced
 
+machine_internal_timer0_local_interrupt:
+    la x31, fail
+    li x4, 0x8000001d
+    li x5, 0x0
+    csrw 0x7D4, 0x0 // disable incrementing timer0
+    csrw 0x7D2, 0x0 // reset timer0 count value
+    csrw 0x7D3, 0x8 // set timer0 threshold to 8
+    li x2, 0x20000000
+    csrw mie, x2    // enable timer0 local interrupt
+    csrw 0x7D4, 0x1 // reenable incrementing timer0
+    j fail_if_not_serviced
+
+machine_internal_timer1_local_interrupt:
+    la x31, fail
+    li x4, 0x8000001c
+    li x5, 0x0
+    csrw 0x7D7, 0x0 // disable incrementing timer0
+    csrw 0x7D5, 0x0 // reset timer0 count value
+    csrw 0x7D6, 0x8 // set timer0 threshold to 8
+    li x2, 0x10000000
+    csrw mie, x2    // enable timer0 local interrupt
+    csrw 0x7D7, 0x1 // reenable incrementing timer0
+    j fail_if_not_serviced
+
+illegal_instruction:
+    la x31, fail
+    li x4, 0x2
+    li x5, 0x0
+    .word 0
+    j fail_if_not_serviced
+
+breakpoint_ebreak:
+    la x31, fail
+    li x4, 0x3
+    li x5, 0x2
+    ebreak
+    j fail_if_not_serviced
+
+environment_call_from_m_mode:
+    la x31, fail
+    li x4, 0xB
+    li x5, 0x0
+    ecall
+    j fail_if_not_serviced
+
+nmi_pin_assertion:
+    la x31, fail
+    li x4, 0x0
+    li x5, 0x0 
+    // trigger NMI
+    li x2, TRIGGER_NMI
+    li x3, STDOUT
+    sw x2, 0(x3)
+    j fail_if_not_serviced
+
+machine_software_interrupt:
+    la x31, fail
+    la x4, 0x80000003
+    li x5, 0x0
+    // enable software interrupt
+    li x2, 0x8
+    csrw mie, x2
+    // trigger soft interrupt
+    li x2, TRIGGER_SOFT_INT
+    li x3, STDOUT
+    sw x2, 0(x3)
+    j fail_if_not_serviced
+
+machine_timer_interrupt:
+    la x31, fail
+    la x4, 0x80000007
+    li x5, 0x0
+    // enable machine timer interrupt
+    li x2, 0x80
+    csrw mie, x2
+    // trigger timer interrupt
+    li x2, TRIGGER_TIMER_INT
+    li x3, STDOUT
+    sw x2, 0(x3)
+    j fail_if_not_serviced
+
 main:
+    // global interrupt enable
+    csrr x2, mstatus
+    ori x2, x2, 0x8
+    csrw mstatus, x2
+
     // fetch can only trigger regular exceptions so it suffices to set up mtvec
     la x2, ibus_exc_handler
     csrw mtvec, x2
 
     call iside_core_local_unmapped_address_error
     call iside_fetch_precise_bus_error
-    
+    call illegal_instruction
+    call breakpoint_ebreak
+    call environment_call_from_m_mode
+
     // dbus can trigger both NMIs and regular exceptions so we set up both mtvec and
     // set NMI handler address via testbench
 
@@ -177,8 +275,14 @@ main:
     call dside_store_across_region_boundary
     call dside_size_misaligned_store_to_non_idempotent_address
     call dside_core_local_store_unmapped_address_error
+    call dside_core_local_load_unmapped_address_error
     call dside_pic_load_access_error
     call dside_pic_store_access_error
+    call machine_internal_timer0_local_interrupt
+    call machine_internal_timer1_local_interrupt
+    call nmi_pin_assertion
+    call machine_software_interrupt
+    call machine_timer_interrupt
 
 // Write 0xff to STDOUT for TB to terminate test.
 _finish:
@@ -193,7 +297,7 @@ _finish:
 // exception handler must be aligned to 4-byte boundary
 .balign 4
 ibus_exc_handler:
-    // fetch exceptions trigger functions would return back to the faulting
+    // instruction/fetch related exceptions would return back to the faulting
     // instruction on mret so we override the address to go to the nop sled instead
     la x2, ok
     csrw mepc, x2
@@ -212,8 +316,10 @@ handler_compare_csrs:
 // in the upper 24 bits of nmi handler address set testbench command
 .balign 256
 dbus_exc_handler:
+    // disable all interrupt sources
+    csrw mie, zero
     // reenable signaling of NMIs for subsequent NMIs
-    csrw 0xBC0, x0 // mdeau
+    csrw 0xBC0, zero // mdeau
     j handler_compare_csrs
 
 // used for making sure we fail if we didn't jump to the exception/NMI handler

@@ -147,6 +147,7 @@ int main(int argc, char** argv) {
       tb->core_clk = !tb->core_clk;
       tb->eval();
   }
+  tb->final();
 
 #if VM_TRACE
   tfp->close();

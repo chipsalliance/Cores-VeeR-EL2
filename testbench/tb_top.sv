@@ -726,6 +726,9 @@ module tb_top
             $display("TEST_PASSED");
             $display("\nFinished : minstret = %0d, mcycle = %0d", `DEC.tlu.minstretl[31:0],`DEC.tlu.mcyclel[31:0]);
             $display("See \"exec.log\" for execution trace with register updates..\n");
+            // OpenOCD test breaks if simulation closes the TCP connection first.
+            // This delay allows OpenOCD to close the connection before the #finish.
+            #15000;
             $finish;
         end
         else if(mailbox_write && mailbox_data[7:0] == 8'h1) begin

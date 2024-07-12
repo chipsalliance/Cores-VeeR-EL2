@@ -14,10 +14,16 @@ riscv_instr_name_t unsupported_instr[] = {
     NOP, // RV32I
     CLZ, // RV32ZBB
     SROI, CMIX, FSRI, FSR, CMOV, SRO, SLO, FSL, SLOI, // RV32B
-    // FIXME: these exclusions are needed for the GCC version we use
-    BFP, CRC32C_W, CRC32C_B, UNSHFL, UNSHFLI, GREV, GREVI, SHFL, GORC,
-    BDECOMPRESS, XPERM_B, CRC32_H, CRC32C_H, GORCI, XPERM_N, SHFLI, CRC32_B,
-    CRC32_W, BCOMPRESS, XPERM_H, CRC32_W
+    // FIXME: As of date, the decision on which bitmanip extensions should go
+    // into the `B` collection is not yet ratified.
+    //
+    // To stay on the safe side, let's assume here that *all of them* are
+    // enabled by the `B` extension collection.
+    CRC32C_B, CRC32C_H, CRC32C_W, CRC32_B, CRC32_H, CRC32_W, // RV32ZBR
+    GORC, GORCI, GREV, GREVI, SHFL, SHFLI, UNSHFL, UNSHFLI, // RV32ZBP
+    BCOMPRESS, BDECOMPRESS, // RV32ZBE
+    BFP, // RV32ZBF
+    XPERM_B, XPERM_H, XPERM_N // RV32ZBP
 };
 
 // ISA supported by the processor

@@ -77,3 +77,15 @@ jobs:
         with:
           name: coverage_report
           path: ./report
+
+  custom-coverage-report:
+    name: Custom coverage report
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
+
+    steps:
+      - name: Generate custom report
+        run: _secret_custom_report

@@ -403,6 +403,7 @@ jobs:
       VERILATOR_VERSION: v5.010
       SPIKE_VERSION: d70ea67d
       GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
       CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
 
     steps:

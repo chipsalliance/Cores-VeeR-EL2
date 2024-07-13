@@ -64,6 +64,7 @@ update_webpage(){
 
     replace_dir ./coverage_dashboard ${PUBLIC_DIR}/html/${DIR}/coverage_dashboard
     replace_dir ./verification_dashboard ${PUBLIC_DIR}/html/${DIR}/verification_dashboard
+    replace_dir ./docs_rendered ${PUBLIC_DIR}/html/${DIR}/docs_rendered
     replace_dir ./riscof_dashboard ${PUBLIC_DIR}/html/${DIR}/verification_dashboard/riscof
 
     pushd .github/scripts/indexgen

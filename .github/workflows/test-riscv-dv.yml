@@ -214,6 +214,8 @@ jobs:
               test: riscv_illegal_instr_test
             - iss: whisper
               test: riscv_illegal_instr_test
+            - iss: whisper
+              test: riscv_full_interrupt_test
 
             # FIXME: VeeR specific WARL CSRs behavior in PMP is not implemented
             # in whisper, hence this exclusion list for PMP tests

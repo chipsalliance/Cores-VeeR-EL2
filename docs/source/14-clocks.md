@@ -37,7 +37,7 @@ Figure 14-1 Conceptual Clock, Clock-Enable, and Data Timing Relationship
 Note that the clock net is not explicitly buffered, as the clock tree is expected to be synthesized during place-androute.
 The achievable clock frequency depends on the configuration, the sizes and configuration of I-cache and I/DCCMs, and the silicon implementation technology.
 
-### 14.2.2 System Bus-To-Core Clock Ratios
+### 14.2.2 System Bus-to-Core Clock Ratios
 
 Figure 14-2 to Figure 14-9 depict the timing relationships of clock, clock-enable, and data for the supported system bus clock ratios from 1:1 (i.e. the system bus and core run at the same rate) to 1:8 (i.e. the system bus runs eight times slower than the core).
 
@@ -126,7 +126,7 @@ Shorter pulses might be dropped by the synchronizer circuit.
 
 The VeeR EL2 core complex provides two reset signals, the core complex reset (see Section 14.3.1) and the Debug Module reset (see Section 14.3.2).
 
-### 14.3.1 Core Complex Reset (Rst_L)
+### 14.3.1 Core Complex Reset (rst_l)
 
 As shown in Figure 14-10, the core complex reset signal (rst_l) is active-low, may be asynchronously asserted, but must be synchronously deasserted to avoid any glitches.
 The rst_l input signal is not synchronized to the core clock (clk) inside the core complex logic.
@@ -148,7 +148,7 @@ From a backend perspective, care should be taken during place-and-route optimiza
 The core complex reset signal resets the entire VeeR EL2 core complex, except the Debug Module.
 :::
 
-### 14.3.2 Debug Module Reset (Dbg_Rst_L)
+### 14.3.2 Debug Module Reset (dbg_rst_l)
 
 The Debug Module reset signal (dbg_rst_l) is an active-low signal which resets the VeeR EL2 core complex's Debug Module as well as the synchronizers between the JTAG interface and the core complex.
 The Debug Module reset signal may be connected to the power-on reset signal of the SoC.
@@ -156,14 +156,14 @@ This allows an external debugger to interact with the Debug Module when the core
 
 If this layered reset functionality is not required, the dbg_rst_l signal may be tied to the rst_l signal outside the core complex.
 
-### 14.3.3 Debugger Initiating Reset Via Jtag Interface
+### 14.3.3 Debugger Initiating Reset via JTAG Interface
 
 A debugger may also initiate a reset of the core complex logic via the JTAG interface.
 Note that such a reset assertion is not visible to the SoC.
 Resetting the core complex while the core is accessing any SoC memory locations may result in unpredictable behavior.
 Recovery may require an assertion of the SoC master reset.
 
-### 14.3.4 Core Complex Reset To Debug Mode
+### 14.3.4 Core Complex Reset to Debug Mode
 
 The RISC-V Debug specification [3] states a requirement that the debugger must be able to be in control from the first executed instruction of a program after a reset.
 

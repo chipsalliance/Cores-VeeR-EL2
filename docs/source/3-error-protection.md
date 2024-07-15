@@ -10,7 +10,7 @@ For even parity, the data is deemed to be correct if the total count is an even 
 
 Similarly, for odd parity if the total count is an odd number. Note that double-bit errors cannot be detected.
 
-### 3.1.2 Error Correcting Code (Ecc)
+### 3.1.2 Error Correcting Code (ECC)
 
 A robust memory hierarchy design often includes ECC functions to detect and, if possible, correct corrupted data.
 
@@ -36,7 +36,7 @@ Figure 3-1 Conceptual Block Diagram – ECC in a Memory System
 :::
 
 
-## 3.2 Selecting The Proper Error Protection Level
+## 3.2 Selecting the Proper Error Protection Level
 
 Choosing a protection level that is too weak might lead to loss of data or silent data corrupted, choosing a level that is too strong incurs additional chip die area (i.e., cost) and power dissipation.
 Supporting multiple protection schemes for the same design increases the design and verification effort.
@@ -81,7 +81,7 @@ Table 3-1 summarizes the components of the VeeR EL2 memory hierarchy and their r
 protection. Therefore, SEDDED ECC protection is optionally provided in VeeR EL2 as well, selectable as a core build argument.
 Note that the I-cache area increases significantly if ECC protection is used.
 
-## 3.4 Error Detection And Handling
+## 3.4 Error Detection and Handling
 
 Table 3-2 summarizes the detection of errors, the recovery steps taken, and the logging of error events for each of the VeeR EL2 memories.
 
@@ -143,7 +143,7 @@ A summary of platform-specific core error counter/threshold control/status regis
 
 All read/write control/status registers must have WARL (Write Any value, Read Legal value) behavior.
 
-### 3.5.1 I-Cache Error Counter/Threshold Register (Micect)
+### 3.5.1 I-Cache Error Counter/Threshold Register (micect)
 
 The micect register holds the I-cache error counter and its threshold.
 The *count* field of the micect register is incremented, if a parity/ECC error is detected on any of the cache line tags of the set or the instructions fetched from the I-cache.
@@ -175,7 +175,7 @@ This register is mapped to the non-standard read/write CSR address space.
 | count   | 26:0   | Counter incremented if I-cache parity/ECC error(s) detected.  If count[thresh] transitions from '0' to '1', signal correctable error local  interrupt (see Section 2.7.2). | R/W      | 0       |
 
 :::
-### 3.5.2 Iccm Correctable Error Counter/Threshold Register (Miccmect)
+### 3.5.2 Iccm Correctable Error Counter/Threshold Register (miccmect)
 
 The miccmect register holds the ICCM correctable error counter and its threshold.
 The *count* field of the miccmect register is incremented, if a correctable ECC error is detected on either an instruction fetch or a DMA read from the ICCM.
@@ -213,7 +213,7 @@ This register is mapped to the non-standard read/write CSR address space.
 
 :::
 
-### 3.5.3 Dccm Correctable Error Counter/Threshold Register (Mdccmect)
+### 3.5.3 Dccm Correctable Error Counter/Threshold Register (mdccmect)
 
 The mdccmect register holds the DCCM correctable error counter and its threshold.
 The *count* field of the mdccmect register is incremented, if a correctable ECC error is detected on either a retired load/store instruction or a DMA read access to the DCCM.

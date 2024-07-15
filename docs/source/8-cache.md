@@ -68,7 +68,7 @@ The following steps must be performed to read a 64-bit chunk of instruction data
 2. Read the dicago register which causes a read access from the I-cache data array at the location selected by the dicawics register.
 3. Read the dicad0 and dicad0h registers to get the selected 64-bit cache line chunk (instr fields), and read the dicad1 register to get the associated parity/ECC bits (parity0/1/2/3 / ecc fields).
 
-### 8.4.2 Write A Chunk Of An I-Cache Cache Line
+### 8.4.2 Write a Chunk of an I-Cache Cache Line
 
 The following steps must be performed to write a 64-bit chunk of instruction data and its associated 4 parity / 7 ECC bits in an I-cache cache line:
 1. Write array/way/address information which location to access in the I-cache to the dicawics register:
@@ -78,7 +78,7 @@ The following steps must be performed to write a 64-bit chunk of instruction dat
 2. Write the new instruction data to the *instr* fields of the dicad0 and dicad0h registers, and write the calculated correct instruction parity/ECC bits (unless error injection should be performed) to the *parity0/1/2/3* / *ecc* and fields of the dicad1 register.
 3. Write a '1' to the go field of the dicago register which causes a write access to the I-cache data array copying the information stored in the dicad0/0h/1 registers to the location selected by the dicawics register.
 
-### 8.4.3 Read Or Write A Full I-Cache Cache Line
+### 8.4.3 Read or Write a Full I-Cache Cache Line
 
 The following steps must be performed to read or write instruction data and associated parity/ECC bits of a full Icache cache line:
 
@@ -97,7 +97,7 @@ The following steps must be performed to read the tag, tag's parity/ECC bit(s), 
 2. Read the dicago register which causes a read access from the I-cache tag array and status bits at the location selected by the dicawics register.
 3. Read the dicad0 register to get the selected cache line's tag (tag field) and valid bit (valid field) as well as the set's LRU bits (lru field), and read the dicad1 register to get the tag's parity/ECC bit(s) (parity0 / ecc field).
 
-### 8.4.5 Write A Tag And Status Information Of An I-Cache Cache Line
+### 8.4.5 Write a Tag and Status Information of an I-Cache Cache Line
 
 The following steps must be performed to write the tag, tag's parity/ECC bit, and status information of an I-cache cache line:
 
@@ -120,7 +120,7 @@ A summary of the I-cache control/status registers in CSR address space:
 All reserved and unused bits in these control/status registers must be hardwired to '0'.
 Unless otherwise noted, all read/write control/status registers must have WARL (Write Any value, Read Legal value) behavior.
 
-### 8.5.1 I-Cache Array/Way/Index Selection Register (Dicawics)
+### 8.5.1 I-Cache Array/Way/Index Selection Register (dicawics)
 
 The dicawics register is used to select a specific location in either the data array or the tag array / status of the Icache.
 In addition to selecting the array, the location in the array must be specified by providing the way, and index.
@@ -155,7 +155,7 @@ This register is mapped to the non-standard read-write CSR address space.
 Each way is subdivided into 2 banks, and each bank is 8 bytes wide.
 A bank is selected by index[3], and index[2:0] address a byte of the 8-byte wide bank.
 
-### 8.5.2 I-Cache Array Data 0 Register (Dicad0)
+### 8.5.2 I-Cache Array Data 0 Register (dicad0)
 
 The dicad0 register, in combination with the dicad0h/1 registers (see Sections 8.5.3 and 8.5.4), is used to store information read from or to be written to the I-cache array location specified with the dicawics register (see Section 8.5.1).
 Triggering a read or write access of the I-cache array is controlled by the dicago register (see Section 8.5.5).
@@ -189,7 +189,7 @@ This register is mapped to the non-standard read-write CSR address space.
 
 :::
 
-### 8.5.3 I-Cache Array Data 0 High Register (Dicad0H)
+### 8.5.3 I-Cache Array Data 0 High Register (dicad0h)
 
 The dicad0h register, in combination with the dicad0 and dicad1 registers (see Sections 8.5.2 and 8.5.4), is used to store information read from or to be written to the I-cache array location specified with the dicawics register (see Section 8.5.1).
 Triggering a read or write access of the I-cache array is controlled by the dicago register (see Section 8.5.5).
@@ -214,7 +214,7 @@ This register is mapped to the non-standard read-write CSR address space.
 | instr   | 31:0   | Instruction data  31:16: instruction data bytes 7/6 (protected by parity3 / ecc)  15:0: instruction data bytes 5/4 (protected by parity2 / ecc) | R/W      | 0       |
 
 :::
-### 8.5.4 I-Cache Array Data 1 Register (Dicad1)
+### 8.5.4 I-Cache Array Data 1 Register (dicad1)
 
 The dicad1 register, in combination with the dicad0/0h registers (see Section 8.5.2 and 8.5.3), is used to store information read from or to be written to the I-cache array location specified with the dicawics register (see Section 8.5.1).
 Triggering a read or write access of the I-cache array is controlled by the dicago register (see Section 8.5.5).
@@ -257,7 +257,7 @@ This register is mapped to the non-standard read-write CSR address space.
 
 :::
 
-### 8.5.5 I-Cache Array Go Register (Dicago)
+### 8.5.5 I-Cache Array Go Register (dicago)
 
 The dicago register is used to trigger a read from or write to the I-cache array location specified with the dicawics register (see Section 8.5.1).
 Reading the dicago register populates the dicad0/dicad0h/dicad1 registers (see Sections 8.5.2, 8.5.3, and 8.5.4) with the information read from the I-cache array.

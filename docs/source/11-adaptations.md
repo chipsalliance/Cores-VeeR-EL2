@@ -1,4 +1,4 @@
-# 11 Standard Risc-V Csrs With Core-Specific Adaptations
+# 11 Standard RISC-V CSRs with Core-Specific Adaptations
 
 A summary of standard RISC-V control/status registers in CSR space with platform-specific adaptations:
 
@@ -9,7 +9,7 @@ A summary of standard RISC-V control/status registers in CSR space with platform
 All reserved and unused bits in these control/status registers must be hardwired to '0'.
 Unless otherwise noted, all read/write control/status registers must have WARL (Write Any value, Read Legal value) behavior.
 
-## 11.1 Machine Interrupt Enable (Mie) And Machine Interrupt Pending (Mip) Registers
+## 11.1 Machine Interrupt Enable (mie) and Machine Interrupt Pending (mip) Registers
 
 The standard RISC-V mie and mip registers hold the machine interrupt enable and interrupt pending bits, respectively.
 Since VeeR EL2 only supports machine mode, all supervisor- and user-specific bits are not implemented.
@@ -59,7 +59,7 @@ All M-mode interrupt pending bits of the read/write mip register are read-only.
 
 :::
 
-## 11.2 Machine Cause Register (Mcause)
+## 11.2 Machine Cause Register (mcause)
 
 The standard RISC-V mcause register indicates the cause for a trap as shown in Table 11-3, including standard exceptions/interrupts, platform-specific local interrupts (with light gray background), and NMI causes (with dark gray background).
 
@@ -102,7 +102,7 @@ This register is a standard read/write CSR.
 All other values are reserved.
 :::
 
-## 11.3 Machine Hardware Thread Id Register (Mhartid)
+## 11.3 Machine Hardware Thread ID Register (mhartid)
 
 The standard RISC-V mhartid register provides the integer ID of the hardware thread running the code.
 Hart IDs must be unique.

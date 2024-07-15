@@ -1,5 +1,5 @@
 
-# 16 Veer El2 Core Build Arguments
+# 16 VeeR EL2 Core Build Arguments
 ## 16.1 Memory Protection Build Arguments
 
 ### 16.1.1 Memory Protection Build Argument Rules
@@ -26,7 +26,7 @@ The rules for valid memory protection address (INST/DATA_ACCESS_ADDRx) and mask 
 
 ## 16.2 Core Memory-Related Build Arguments
 
-### 16.2.1 Core Memories And Memory-Mapped Register Blocks Alignment Rules
+### 16.2.1 Core Memories and Memory-Mapped Register Blocks Alignment Rules
 
 Placement of VeeR EL2's core memories and memory-mapped register blocks in the 32-bit address range is very flexible.
 Each memory or register block may be assigned to any region and within the region's 28-bit address range to any start address on a naturally aligned power-of-two address boundary relative to its own size (i.e., *start_address* = *n × size*, whereas n is a positive integer number).
@@ -42,7 +42,7 @@ The start address of the memory or register block is specified with an offset re
 This offset must follow the rules described above.
 
 ### 16.2.2 Memory-Related Build Arguments
-* **ICCM **
+* **ICCM**
   * Enable (RV_ICCM_ENABLE): 0, 1 (0 = no ICCM; 1 = ICCM enabled)
   * Region (RV_ICCM_REGION): 0..15
   * Offset (RV_ICCM_OFFSET): (offset in bytes from start of region satisfying rules in Section 16.2.1)
@@ -52,10 +52,12 @@ This offset must follow the rules described above.
   * Offset (RV_DCCM_OFFSET): *(offset in bytes from start of region satisfying rules in Section 16.2.1)*
   * Size (RV_DCCM_SIZE): 4, 8, 16, 32, 48, 64, 128, 256, 512 *(in KB)*
 * **I-Cache**
-  * Enable (RV_ICACHE_ENABLE): 0, 1 *(0 = no I-cache; 1 = I-cache enabled)* o Size (RV_ICACHE_SIZE): 16, 32, 64, 128, 256 *(in KB)*
+  * Enable (RV_ICACHE_ENABLE): 0, 1 *(0 = no I-cache; 1 = I-cache enabled)*
+  * Size (RV_ICACHE_SIZE): 16, 32, 64, 128, 256 *(in KB)*
   * Protection (RV_ICACHE_ECC): 0, 1 *(0 = parity; 1 = ECC)*
 * **PIC Memory-mapped Control Registers**
-  * Region (RV_PIC_REGION): 0..15 o Offset (RV_PIC_OFFSET): *(offset in bytes from start of region satisfying rules in Section 16.2.1)*
+  * Region (RV_PIC_REGION): 0..15
+  * Offset (RV_PIC_OFFSET): *(offset in bytes from start of region satisfying rules in Section 16.2.1)*
   * Size (RV_PIC_SIZE): 32, 64, 128, 256 (in KB)
 
 

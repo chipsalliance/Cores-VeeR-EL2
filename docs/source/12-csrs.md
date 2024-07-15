@@ -1,6 +1,6 @@
-# 12 Csr Address Map
+# 12 CSR Address Map
 
-## 12.1 Standard Risc-V Csrs
+## 12.1 Standard RISC-V CSRs
 
 Table 12-1 lists the VeeR EL2 core-specific standard RISC-V Machine Information CSRs.
 
@@ -55,7 +55,7 @@ Table 12-2 lists the VeeR EL2 standard RISC-V CSR address map.
 
 :::
 
-## 12.2 Non-Standard Risc-V Csrs
+## 12.2 Non-Standard RISC-V CSRs
 
 Table 12-3 summarizes the VeeR EL2 non-standard RISC-V CSR address map.
 

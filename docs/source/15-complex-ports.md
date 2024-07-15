@@ -1,4 +1,4 @@
-# 15 Veer El2 Core Complex Port List
+# 15 VeeR EL2 Core Complex Port List
 
 Table 15-1 lists the core complex signals.
 Not all signals are present in a given instantiation.

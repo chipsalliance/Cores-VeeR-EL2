@@ -22,7 +22,9 @@ The PIC provides these core-level external interrupt features:
 * Support for interrupt chaining and nested interrupts
 * Power reduction feature for disabled external interrupts
 
-## 6.2 Naming Convention 6.2.1 Unit, Signal, And Register Naming
+## 6.2 Naming Convention
+
+### 6.2.1 Unit, Signal, and Register Naming
 
 **S suffix:** Unit, signal, and register names which have an S suffix indicate an entity specific to an interrupt source.
 
@@ -36,7 +38,9 @@ The PIC provides these core-level external interrupt features:
 
 **Register in CSR address space:** Register which is mapped to RISC-V's 12-bit CSR address space.
 
-## 6.3 Overview Of Major Functional Units 6.3.1 External Interrupt Source
+## 6.3 Overview of Major Functional Units
+
+### 6.3.1 External Interrupt Source
 
 All functional units on the chip which generate interrupts to be handled by the RISC-V core are referred to as external interrupt sources.
 External interrupt sources indicate an interrupt request by sending an asynchronous signal to the PIC.
@@ -88,7 +92,7 @@ Different levels in the evaluation tree may be staged wherever necessary to meet
 
 The interrupt target is a specific RISC-V hart context. For the VeeR EL2 core, the interrupt target is the M privilege mode of the hart.
 
-## 6.4 Pic Block Diagram
+## 6.4 PIC Block Diagram
 
 Figure 6-1 depicts a high-level view of the PIC.
 A simple gateway for asynchronous, level-triggered interrupt sources is shown in Figure 6-2, whereas Figure 6-3 depicts conceptually the internal functional blocks of a configurable gateway.
@@ -181,7 +185,7 @@ A step-by-step description of interrupt control and delivery:
     1. If there are no further interrupts pending, enabled, and with a priority level higher than prithresh field of the meipt and currpri field of the meicurpl registers, mexintirq is deasserted.
 21. Firmware may update the content of the meihap and meicidpl registers by writing to the meicpct register to trigger a new capture.
 
-## 6.6 Support For Vectored External Interrupts
+## 6.6 Support for Vectored External Interrupts
 
 :::{note}
 The RISC-V standard defines support for vectored interrupts down to an interrupt class level (i.e., timer, software, and external interrupts for each privilege level), but not to the granularity of individual external interrupt sources (as described in this section).
@@ -387,7 +391,7 @@ For approximately every halving of the number of interrupt sources, it would be 
 However, the overall reduction in logic is quite small, so it might not be worth the effort.
 
 
-## 6.12 Pic Control/Status Registers
+## 6.12 PIC Control/Status Registers
 
 A summary of the PIC control/status registers in CSR address space:
 
@@ -419,7 +423,7 @@ All memory-mapped control/status register accesses must be word-sized and word-a
 Accessing unused addresses within the 32KB PIC address range do not trigger an unmapped address exception. Reads to unmapped addresses return 0, writes to unmapped addresses are silently dropped.
 :::
 
-### 6.12.1 Pic Configuration Register (Mpiccfg)
+### 6.12.1 PIC Configuration Register (mpiccfg)
 
 The PIC configuration register is used to select the operational parameters of the PIC.
 
@@ -434,7 +438,7 @@ This 32-bit register is an idempotent memory-mapped control register.
 
 :::
 
-### 6.12.2 External Interrupt Priority Level Registers (Meipls)
+### 6.12.2 External Interrupt Priority Level Registers (meipls)
 
 There are 255 priority level registers, one for each external interrupt source.
 Implementing individual priority level registers allows a debugger to autonomously discover how many priority level bits are supported for this interrupt source.
@@ -457,7 +461,7 @@ These 32-bit registers are idempotent memory-mapped control registers.
 
 :::
 
-### 6.12.3 External Interrupt Pending Registers (Meipx)
+### 6.12.3 External Interrupt Pending Registers (meipx)
 
 Eight external interrupt pending registers are needed to report the current status of up to 255 independent external interrupt sources.
 Each bit of these registers corresponds to an interrupt pending indication of a single external interrupt source.
@@ -484,7 +488,7 @@ These 32-bit registers are idempotent memory-mapped status registers.
 |Reserved|0|Reserved|R|0|
 :::
 
-### 6.12.4 External Interrupt Enable Registers (Meies)
+### 6.12.4 External Interrupt Enable Registers (meies)
 
 Each of the up to 255 independently controlled external interrupt sources has a dedicated interrupt enable register.
 
@@ -504,7 +508,7 @@ These 32-bit registers are idempotent memory-mapped control registers.
 | inten    | 0      | External interrupt enable for interrupt source ID S:  0: Interrupt disabled  1: Interrupt enabled | R/W      | 0       |
 
 :::
-### 6.12.5 External Interrupt Priority Threshold Register (Meipt)
+### 6.12.5 External Interrupt Priority Threshold Register (meipt)
 
 The meipt register is used to set the interrupt target's priority threshold.
 Interrupt notifications are sent to a target only for external interrupt sources with a priority level strictly higher than this target's threshold.
@@ -525,7 +529,7 @@ This 32-bit register is mapped to the non-standard read/write CSR address space.
 | prithresh | 3:0    | External interrupt priority threshold:  RISC-V standard compliant priority order:  0: No interrupts masked  1..14: Mask interrupts with priority strictly lower than or equal to this  threshold  15: Mask all interrupts  Reverse priority order:  15: No interrupts masked  14..1: Mask interrupts with priority strictly lower than or equal to this  threshold  0: Mask all interrupts | R/W      | 0       |
 
 :::
-### 6.12.6 External Interrupt Vector Table Register (Meivt)
+### 6.12.6 External Interrupt Vector Table Register (meivt)
 
 The meivt register is used to set the base address of the external vectored interrupt address table.
 The value written to the *base* field of the meivt register appears in the *base* field of the meihap register.
@@ -540,7 +544,7 @@ This 32-bit register is mapped to the non-standard read-write CSR address space.
 | Reserved | 9:0    | Reserved                                        | R        | 0       |
 
 :::
-### 6.12.7 External Interrupt Handler Address Pointer Register (Meihap)
+### 6.12.7 External Interrupt Handler Address Pointer Register (meihap)
 
 The meihap register provides a pointer into the vectored external interrupt table for the highest-priority pending external interrupt.
 The winning claim ID is captured in the *claimid* field of the meihap register when firmware writes to the meicpct register to claim an external interrupt.
@@ -569,7 +573,7 @@ This 32-bit register is mapped to the non-standard read-only CSR address space.
 | 00      | 1:0    | Must read as '00'                                                                                                  | R        | 0       |
 
 :::
-### 6.12.8 External Interrupt Claim Id / Priority Level Capture Trigger Register (Meicpct)
+### 6.12.8 External Interrupt Claim ID / Priority Level Capture Trigger Register (meicpct)
 
 The meicpct register is used to trigger the simultaneous capture of the currently highest-priority interrupt source ID (in the *claimid* field of the meihap register) and its corresponding priority level (in the *clidpri* field of the meicidpl register) by writing to this register.
 Since the PIC core is constantly evaluating the currently highest-priority pending interrupt, this mechanism provides a consistent snapshot of the highest-priority source requesting an interrupt and its associated priority level.
@@ -596,7 +600,7 @@ This 32-bit register is mapped to the non-standard read/write CSR address space.
 |Reserved|31:0|Reserved|R0/WA|0|
 
 :::
-### 6.12.9 External Interrupt Claim Id'S Priority Level Register (Meicidpl)
+### 6.12.9 External Interrupt Claim ID's Priority Level Register (meicidpl)
 
 The meicidpl register captures the priority level corresponding to the interrupt source indicated in the *claimid* field of the meihap register when firmware writes to the meicpct register.
 Since the PIC core is constantly evaluating the currently highest-priority pending interrupt, this mechanism provides a consistent snapshot of the highest-priority source requesting an interrupt and its associated priority level.
@@ -617,7 +621,7 @@ This 32-bit register is mapped to the non-standard read/write CSR address space.
 |clidpri|3:0|Priority level of preempting external interrupt source (corresponding to source ID read from claimid field of meihap register)|R/W|0|
 
 :::
-### 6.12.10 External Interrupt Current Priority Level Register (Meicurpl)
+### 6.12.10 External Interrupt Current Priority Level Register (meicurpl)
 
 The meicurpl register is used to set the interrupt target's priority threshold for nested interrupts.
 Interrupt notifications are signaled to the core only for external interrupt sources with a priority level strictly higher than the thresholds indicated in this register and the meipt register.
@@ -691,7 +695,7 @@ These 32-bit registers are idempotent memory-mapped control registers.
 
 :::
 
-## 6.13 Pic Csr Address Map
+## 6.13 PIC CSR Address Map
 
 Table 6-13 summarizes the PIC non-standard RISC-V CSR address map.
 
@@ -708,7 +712,7 @@ Table 6-13 summarizes the PIC non-standard RISC-V CSR address map.
 
 :::
 
-## 6.14 Pic Memory-Mapped Register Address Map
+## 6.14 PIC Memory-Mapped Register Address Map
 
 :::{table} Table 6-14 summarizes the PIC memory-mapped register address map.
 

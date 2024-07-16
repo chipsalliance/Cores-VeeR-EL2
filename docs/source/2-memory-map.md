@@ -34,13 +34,14 @@ Their respective sizes (4, 8, 16, 32, 48[9], 64, 128, 256, or 512KB) are set as 
 To provide control for regular operation, the core requires a number of memory-mapped control/status registers.
 For example, some external interrupt functions are controlled and serviced with accesses to various registers while the system is running.
 
-### 2.3.2 Accessed Via System Bus
+### 2.3.2 Accessed via System Bus
 
-#### 2.3.2.1 System ROMs The SoC may host ROMs which are mapped to the core's memory address range and accessed via the system bus.
-
+#### 2.3.2.1 System ROMs
+The SoC may host ROMs which are mapped to the core's memory address range and accessed via the system bus.
 Both instruction and data accesses are supported to system ROMs.
 
-#### 2.3.2.2 System SRAMs The SoC hosts a variety of SRAMs which are mapped to the core's memory address range and accessed via the system bus.
+#### 2.3.2.2 System SRAMs
+The SoC hosts a variety of SRAMs which are mapped to the core's memory address range and accessed via the system bus.
 
 #### 2.3.2.3 System Memory-Mapped I/O
 
@@ -82,7 +83,7 @@ Some memory-mapped I/O and control/status registers may have no side effects (i.
 Loads and stores to system bus-attached memory (i.e. accesses with no side effects, idempotent) and devices (i.e. accesses with potential side effects, non-idempotent) pass through a unified read/write buffer.
 The buffer is implemented as a FIFO.
 
-### 2.5.1 Load-To-Load And Store-To-Store Ordering
+### 2.5.1 Load-To-Load and Store-To-Store Ordering
 
 All loads are sent to the system bus interface in program order. Also, all stores are sent to the system bus interface in program order.
 
@@ -203,7 +204,7 @@ A local-to-the-core interrupt for correctable errors has pending (*mceip*) and e
 The priority is lower than the RISC-V External interrupt, but higher than the RISC-V Software and Timer interrupts (see Table 13-1).
 The correctable error local interrupt has an mcause value of 0x8000_001E (see Table 11-3).
 
-### 2.7.3 Rules For Core-Local Memory Accesses
+### 2.7.3 Rules for Core-Local Memory Accesses
 
 The rules for instruction fetch and load/store accesses to core-local memories are:
 
@@ -260,8 +261,9 @@ A mismatch of the predicted and the actual destination (i.e., a core-local or a 
 
 14: AMO refers to the RISC-V "A" (atomics) extension, which is not implemented in VeeR EL2.
 
-### 2.7.6 Misaligned Accesses General notes:
+### 2.7.6 Misaligned Accesses
 
+General notes:
 * The core performs a misalignment check during the address calculation.
 * Accesses across region boundaries always cause a misaligned exception.
 * Splitting a load/store from/to an address with no side effects (i.e., idempotent) is not of concern for VeeR EL2.
@@ -361,7 +363,7 @@ A summary of platform-specific control/status registers in CSR space:
 
 All reserved and unused bits in these control/status registers must be hardwired to '0'. Unless otherwise noted, all read/write control/status registers must have WARL (Write Any value, Read Legal value) behavior.
 
-### 2.8.1 Region Access Control Register (Mrac)
+### 2.8.1 Region Access Control Register (mrac)
 
 A single region access control register is sufficient to provide independent control for 16 address regions.
 
@@ -389,7 +391,7 @@ This register is mapped to the non-standard read/write CSR address space.
 |cacheableY|Y*2|Caching control for region Y: 0: Caching not allowed 1: Caching allowed|R/W|0|
 :::
 
-### 2.8.2 Memory Synchronization Trigger Register (Dmst)
+### 2.8.2 Memory Synchronization Trigger Register (dmst)
 
 The dmst register provides triggers to force the synchronization of memory accesses. Specifically, it allows a debugger to initiate operations that are equivalent to the fence.i (see Section 2.5.3.1) and fence (see Section 2.5.3.2) instructions.
 
@@ -412,7 +414,7 @@ This register is mapped to the non-standard read/write CSR address space.
 
 :::
 
-### 2.8.3 D-Bus First Error Address Capture Register (Mdseac)
+### 2.8.3 D-Bus First Error Address Capture Register (mdseac)
 
 The address of the first occurrence of a store or non-blocking load error on the D-bus is captured in the mdseac register. Latching the address also locks the register. While the mdseac register is locked, subsequent D-bus errors are gated (i.e., they do not cause another NMI), but NMI requests originating external to the core are still honored.
 
@@ -442,7 +444,7 @@ This register is mapped to the non-standard read-only CSR address space.
 | erraddr | 31:0   | Address of first occurrence of D-bus store or non-blocking load error | R        | 0       |
 
 :::
-### 2.8.4 D-Bus Error Address Unlock Register (Mdeau)
+### 2.8.4 D-Bus Error Address Unlock Register (mdeau)
 
 Writing to the mdeau register unlocks the mdseac register (see Section 2.8.3) after a D-bus error address has been captured.
 This write access also reenables the signaling of an NMI for a subsequent D-bus error.
@@ -464,7 +466,7 @@ This register is mapped to the non-standard read/write CSR address space.
 |erraddr|31:0|Address of first occurrence of D-bus store or non-blocking load error|R|0|
 
 :::
-### 2.8.5 Machine Secondary Cause Register (Mscause)
+### 2.8.5 Machine Secondary Cause Register (mscause)
 
 The mscause register, in conjunction with the standard RISC-V mcause register (see Section 11.2), allows the determination of the exact cause of a trap for cases where multiple, different conditions share a single trap code.
 The standard RISC-V mcause register provides the trap code and the mscause register provides supporting information about the trap to disambiguate different sources.
@@ -568,7 +570,7 @@ Table 2-11 summarizes an example of the VeeR EL2 memory address map, including r
 |0xF|0xF000_0000|0xFFFF_FFFF||
 
 :::
-## 2.10 Behavior Of Loads To Side-Effect Addresses
+## 2.10 Behavior of Loads to Side-Effect Addresses
 
 Loads with potential side-effects do not stall the pipeline and may be committed before the data is returned from the system bus.
 Other loads and stores in the pipeline continue to be executed unless an instruction uses data from a pending side-effect load.
@@ -582,7 +584,7 @@ Rules for partial writes handling are:
 * **SoC addresses:** The core indicates the valid bytes for each bus write transaction.
   The addressed SoC memory or device performs a read-modify-write operation and updates its ECC.
 
-## 2.12 Expected Soc Behavior For Accesses
+## 2.12 Expected SoC Behavior for Accesses
 
 The VeeR EL2 core expects that the SoC responds to all system bus access requests it receives from the core.
 System bus accesses include instruction fetches, load/store data accesses as well as debug system bus accesses.
@@ -615,7 +617,7 @@ Writing a '1' to the *bpd* bit in the mfdc register (see Table 10-1) disables br
 
 The VeeR EL2 core does not issue any speculative data accesses on the LSU bus interface.
 
-## 2.14 Dma Slave Port
+## 2.14 DMA Slave Port
 
 The Direct Memory Access (DMA) slave port is used for read/write accesses to core-local memories initiated by external masters.
 For example, external masters could be DMA controllers or other CPU cores located in the SoC.
@@ -642,12 +644,12 @@ For example, if *dqc* is 0, a DMA access requests a bubble immediately (i.e., in
 For a DMA access to the ICCM, it may take up to 3 additional cycles25 before the access is granted.
 Similarly, for a DMA access to the DCCM, it may take up to 4 additional cycles before the access is granted.
 
-### 2.14.4 Ordering Of Core And Dma Accesses
+### 2.14.4 Ordering Of Core and DMA Accesses
 
 Accesses to the DCCM or ICCM by the core and the DMA slave port are asynchronous events relative to one another.
 There are no ordering guarantees between the core and the DMA slave port accessing the same or different addresses.
 
-## 2.15 Reset Signal And Vector
+## 2.15 Reset Signal and Vector
 
 The core provides a 31-bit wide input bus at its periphery for a reset vector.
 The SoC must provide the reset vector on the rst_vec[31:1] bus, which could be hardwired or from a register.
@@ -659,7 +661,7 @@ Note that the applied reset vector must be pointing to the ICCM, if enabled, or 
 The core's 31 general-purpose registers (x1 - x31) are cleared on reset.
 :::
 
-## 2.16 Non-Maskable Interrupt (Nmi) Signal And Vector
+## 2.16 Non-Maskable Interrupt (NMI) Signal and Vector
 
 The core provides a 31-bit wide input bus at its periphery for a non-maskable interrupt (NMI) vector.
 The SoC must provide the NMI vector on the nmi_vec[31:1] bus, either hardwired or sourced from a register.

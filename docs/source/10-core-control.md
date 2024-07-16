@@ -12,7 +12,7 @@ A summary of platform-specific control/status registers in CSR space:
 All reserved and unused bits in these control/status registers must be hardwired to '0'.
 Unless otherwise noted, all read/write control/status registers must have WARL (Write Any value, Read Legal value) behavior.
 
-### 10.1.1 Feature Disable Control Register (Mfdc)
+### 10.1.1 Feature Disable Control Register (mfdc)
 
 The mfdc register hosts low-level core control bits to disable specific features.
 This may be useful in case a feature intended to increase core performance should prove to have problems.
@@ -48,7 +48,7 @@ This register is mapped to the non-standard read/write CSR address space.
 
 :::
 
-### 10.1.2 Clock Gating Control Register (Mcgc)
+### 10.1.2 Clock Gating Control Register (mcgc)
 
 The mcgc register hosts low-level core control bits to override clock gating for specific units.
 This may be useful in case a unit intended to be clock gated should prove to have problems when in lower power mode.

@@ -1,4 +1,4 @@
-# 9 Veer El2 Debug Support
+# 9 VeeR EL2 Debug Support
 
 The VeeR EL2 core conforms to the "RISC-V Debug Specification 0.13.2, with JTAG DTM" document [3].
 This chapter provides a description of the implemented debug-related control and status register definitions.
@@ -12,7 +12,7 @@ The registers associated with these three address spaces are described in the fo
 * Control/Status Registers in Debug Module Interface Address Space (see Section 9.1.2)
 * Control/Status Registers in RISC-V CSR Address Space (see Section 9.1.3)
 
-### 9.1.1 Control/Status Registers In Jtag Address Space
+### 9.1.1 Control/Status Registers in JTAG Address Space
 
 Table 9-1 summarizes the control/status registers in the JTAG Debug Transport Module address space.
 
@@ -33,7 +33,7 @@ The core complex clock (clk) frequency must be at least twice the JTAG clock (jt
 | 0x1F         | BYPASS | JTAG BYPASS                   | 9.1.1.4   |
 
 :::
-#### 9.1.1.1 Idcode Register (Idcode)
+#### 9.1.1.1 IDCODE Register (IDCODE)
 
 The IDCODE register is a standard JTAG register.
 It is selected in the JTAG TAP controller's IR register when the TAP state machine is reset.
@@ -53,7 +53,7 @@ This register is mapped to the 5-bit JTAG address space.
 | 1       | 0      | Must be '1'                                    | R        | 1              |
 
 :::
-#### 9.1.1.2 Dtm Control And Status Register (Dtmcs)
+#### 9.1.1.2 DTM Control and Status Register (dtmcs)
 
 The dtmcs register controls and provides status of the Debug Transport Module (DTM).
 
@@ -73,7 +73,7 @@ This register is mapped to the 5-bit JTAG address space.
 |version|3:0|Conforming to RISC-V Debug specification Version 0.13.2|R|1|
 
 :::
-#### 9.1.1.3 Debug Module Interface Access Register (Dmi)
+#### 9.1.1.3 Debug Module Interface Access Register (dmi)
 
 The dmi register allows access to the Debug Module Interface (DMI).
 In the JTAG TAP controller's Update-DR state, the DTM starts the operation specified in the op field.
@@ -94,7 +94,7 @@ This register is mapped to the 5-bit JTAG address space.
 |op|1:0|For write: <br> 0: Ignore data and address (nop) <br>1: Read from address (read) <br>2: Write data to address (write) <br>3: Not implemented (do not use) <br>For read: <br>0: Previous operation completed successfully <br>1..3: Not implemented (DMI accesses always succeed)|R/W|0|
 
 :::
-#### 9.1.1.4 Bypass Register (Bypass)
+#### 9.1.1.4 BYPASS Register (BYPASS)
 
 The BYPASS register is a standard JTAG register.
 It is implemented as a 1-bit register which has no functional effect, except adding a 1-bit delay.
@@ -114,7 +114,7 @@ This register is mapped to the 5-bit JTAG address space.
 
 :::
 
-### 9.1.2 Control/Status Registers In Debug Module Interface Address Space
+### 9.1.2 Control/Status Registers in Debug Module Interface Address Space
 
 Table 9-6 Summarizes The Control/Status Registers In The Debug Module Interface Address Space.
 
@@ -146,7 +146,7 @@ Addresses shown below are offsets relative to the Debug Module base address. Vee
 ICCM, DCCM, and PIC memory ranges are only accessible using the access memory abstract command.
 :::
 
-### 9.1.2.1 Debug Module Control Register (Dmcontrol)
+### 9.1.2.1 Debug Module Control Register (dmcontrol)
 
 The dmcontrol register controls the overall Debug Module as well as the hart.
 
@@ -175,7 +175,7 @@ This register is mapped to the Debug Module Interface address space.
 |dmactive|0|Reset signal for Debug Module (DM): 0:<br> Module's state takes its reset values <br>Note: Only dmactive bit may be written to value other than its reset value. Writes to all other bits of this register are ignored. <br>1: Module functions normally <br>Debugger may pulse this bit low to get Debug Module into known state. <br>Note: The core complex’s dbg_rst_l signal (see Table 15-1) resets the Debug Module. It should only be used to reset the Debug Module at power up or possibly with a global reset signal which resets the entire platform.|R/W|0|
 
 :::
-#### 9.1.2.2 Debug Module Status Register (Dmstatus)
+#### 9.1.2.2 Debug Module Status Register (dmstatus)
 
 The dmstatus register reports status for the overall Debug Module as well as the hart.
 
@@ -209,7 +209,7 @@ This register is mapped to the Debug Module Interface address space.
 | version         | 3:0    | Debug Module present, conforming to RISC-V Debug specification Version 0.13.2                                    | R        | 2       |
 
 :::
-#### 9.1.2.3 Halt Summary 0 Register (Haltsum0)
+#### 9.1.2.3 Halt Summary 0 Register (haltsum0)
 
 Each bit in the haltsum0 register indicates whether a specific hart is halted or not.
 Since VeeR EL2 is singlethreaded, only one bit is implemented.
@@ -230,7 +230,7 @@ This register is mapped to the Debug Module Interface address space.
 | halted   | 0      | '1' when hart halted | R        | 0       |
 
 :::
-#### 9.1.2.4 Abstract Control And Status Register (Abstractcs)
+#### 9.1.2.4 Abstract Control and Status Register (abstractcs)
 
 The abstractcs register provides status information of the abstract command interface and enables clearing of detected command errors.
 
@@ -254,7 +254,7 @@ This register is mapped to the Debug Module Interface address space.
 |datacount|3:0|2 data registers implemented as part of abstract command interface|R|2|
 
 :::
-### 9.1.2.5 Abstract Command Register (Command)
+### 9.1.2.5 Abstract Command Register (command)
 
 Writes to the command register cause the corresponding abstract command to be executed.
 
@@ -302,7 +302,7 @@ This register is mapped to the Debug Module Interface address space.
 41 The RISC-V Debug specification [3] states that an implementation must fail accesses that it does not support.
 However, the Debug Task Group community agreed in an email exchange on the group’s reflector as well as in a group meeting that not reporting an error is acceptable for implementations without address translation (i.e., the physical address equals the virtual address).
 
-#### 9.1.2.6 Abstract Command Autoexec Register (Abstractauto)
+#### 9.1.2.6 Abstract Command Autoexec Register (abstractauto)
 
 The abstractauto register controls if reading or writing the data0/1 registers (see Section 9.1.2.7) automatically triggers the next execution of the abstract command in the command register (see Section 9.1.2.5).
 This feature allows more efficient burst accesses.
@@ -320,7 +320,7 @@ This register is mapped to the Debug Module Interface address space.
 |autoexecdata0|0|Auto-execution control for data0 register: 0: No automatic triggering of abstract command execution 1: Reading or writing data0 causes abstract command to be executed again|R/W|0|                                                                                                                                                                            |          |         |
 
 :::
-### 9.1.2.7 Abstract Data 0 / 1 Registers (Data0/1)
+### 9.1.2.7 Abstract Data 0 / 1 Registers (data0/1)
 
 The data0/1 registers are basic read/write registers which may be read or changed by abstract commands.
 
@@ -352,7 +352,7 @@ These registers are mapped to the Debug Module Interface address space.
 | data    | 31:0   | Abstract command data:  data0: data value (access register and access memory command)  data1: address (access memory command) | R/W      | 0       |
 
 :::
-#### 9.1.2.8 System Bus Access Control And Status Register (Sbcs)
+#### 9.1.2.8 System Bus Access Control and Status Register (sbcs)
 
 The sbcs register provides controls and status information of the system bus access interface.
 
@@ -388,7 +388,7 @@ This register is mapped to the Debug Module Interface address space.
 
 :::
 
-#### 9.1.2.9 System Bus Address 31:0 Register (Sbaddress0)
+#### 9.1.2.9 System Bus Address 31:0 Register (sbaddress0)
 
 The sbaddress0 register provides the address of the system bus access.
 
@@ -412,7 +412,7 @@ This register is mapped to the Debug Module Interface address space.
 
 :::
 
-#### 9.1.2.10 System Bus Data 31:0 Register (Sbdata0)
+#### 9.1.2.10 System Bus Data 31:0 Register (sbdata0)
 
 The sbdata0 register holds the right-justified lower bits for system bus read and write accesses.
 
@@ -446,7 +446,7 @@ This register is mapped to the Debug Module Interface address space.
 |data|31:0|System bus data[31:0] for system bus read and write accesses|R/W|0|
 
 :::
-#### 9.1.2.11 System Bus Data 63:32 Register (Sbdata1)
+#### 9.1.2.11 System Bus Data 63:32 Register (sbdata1)
 
 The sbdata1 register holds the upper 32 bits of the 64-bit wide system bus for read and write accesses.
 
@@ -463,7 +463,9 @@ This register is mapped to the Debug Module Interface address space.
 |data|31:0|System bus data[63:32] for system bus read and write accesses|R/W|0|
 
 :::
-### 9.1.3 Control/Status Registers in RISC-V CSR Address Space A summary of standard RISC-V control/status registers with platform-specific adaptations in CSR space:
+### 9.1.3 Control/Status Registers in RISC-V CSR Address Space
+
+A summary of standard RISC-V control/status registers with platform-specific adaptations in CSR space:
 
 * Trigger Select Register (tselect) (see Section 9.1.3.1)
 * Trigger Data 1 Register (tdata1) (see Section 9.1.3.2)
@@ -491,7 +493,7 @@ This register is mapped to the standard read/write CSR address space.
 | index    | 1:0    | Index of trigger 0..3  Note: Triggers 0 and 2 may be chained, triggers 1 and 3 not. | R/W      | 0       |
 
 :::
-#### 9.1.3.2 Trigger Data 1 Register (Tdata1)
+#### 9.1.3.2 Trigger Data 1 Register (tdata1)
 
 This register is mapped to the standard read/write CSR address space.
 
@@ -503,7 +505,7 @@ This register is mapped to the standard read/write CSR address space.
 | dmode   | 27     | See Table 9-20, "Match Control Register (mcontrol, at CSR 0x7A1)" below. | See Table 9-20, "Match Control Register (mcontrol, at CSR 0x7A1)" below.         | See Table 9-20, "Match Control Register (mcontrol, at CSR 0x7A1)" below.        |
 
 :::
-#### 9.1.3.3 Match Control Register (Mcontrol)
+#### 9.1.3.3 Match Control Register (mcontrol)
 
 :::{note}
 VeeR EL2 does not support triggering on the data of a load or on the opcode of an executed instruction.
@@ -540,7 +542,7 @@ This register is mapped to the standard read/write CSR address space.
 43 Bit 0 of tdata2 register is ignored for instruction address matches.
 
 
-#### 9.1.3.4 Trigger Data 2 Register (Tdata2)
+#### 9.1.3.4 Trigger Data 2 Register (tdata2)
 
 This register is mapped to the standard read/write CSR address space.
 
@@ -551,7 +553,7 @@ This register is mapped to the standard read/write CSR address space.
 | value   | 31:0   | Match value:  <br>- Address or data value for match:  <br>- Address of load, store, or executed instruction43 <br>- Data value of store  <br>- Match mask  (see match field of mcontrol register (Table 9-20) set to '1') | R/W      | 0       |
 
 :::
-#### 9.1.3.5 Debug Control And Status Register (Dcsr)
+#### 9.1.3.5 Debug Control and Status Register (dcsr)
 
 The dcsr register controls the behavior and provides status of the hart in Debug Mode.
 
@@ -586,7 +588,7 @@ This register is mapped to the standard read/write CSR address space.
 | prv                  | 1:0    | Indicates privilege level hart was operating in when Debug Mode was entered (3 = M-mode)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | R        | 3       |
 
 :::
-#### 9.1.3.6 Debug Pc Register (Dpc)
+#### 9.1.3.6 Debug PC Register (dpc)
 
 The dpc register provides the debugger information about the program counter (PC) when entering Debug Mode and control where to resume (RISC-V Debug specification [3], Section 4.8.2).
 

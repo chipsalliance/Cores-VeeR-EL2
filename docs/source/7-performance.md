@@ -14,7 +14,9 @@ VeeR EL2 provides these performance monitoring features:
 * Standard retired instructions counter
 * Support for standard SoC-based machine timer registers
 
-## 7.2 Control/Status Registers 7.2.1 Standard Risc-V Registers
+## 7.2 Control/Status Registers
+
+### 7.2.1 Standard RISC-V Registers
 
 A list of performance monitoring-related standard RISC-V CSRs with references to their definitions:
 

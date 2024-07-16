@@ -65,7 +65,7 @@ A summary of platform-specific internal timer control/status registers in CSR sp
 All reserved and unused bits in these control/status registers must be hardwired to '0'.
 Unless otherwise noted, all read/write control/status registers must have WARL (Write Any value, Read Legal value) behavior.
 
-### 4.4.1 Internal Timer Counter 0 / 1 Register (Mitcnt0/1)
+### 4.4.1 Internal Timer Counter 0 / 1 Register (mitcnt0/1)
 
 The mitcnt0 and mitcnt1 registers are the counters of the internal timer 0 and 1, respectively.
 
@@ -91,7 +91,7 @@ These registers are mapped to the non-standard read/write CSR address space.
 | count   | 31:0   | Counter       | R/W      | 0       |
 :::
 
-### 4.4.2 Internal Timer Bound 0 / 1 Register (Mitb0/1)
+### 4.4.2 Internal Timer Bound 0 / 1 Register (mitb0/1)
 
 The mitb0 and mitb1 registers hold the upper bounds of the internal timer 0 and 1, respectively.
 
@@ -105,7 +105,7 @@ These registers are mapped to the non-standard read/write CSR address space.
 
 :::
 
-### 4.4.3 Internal Timer Control 0 / 1 Register (Mitctl0/1)
+### 4.4.3 Internal Timer Control 0 / 1 Register (mitctl0/1)
 
 The mitctl0 and mitctl1 registers provide the control bits of the internal timer 0 and 1, respectively.
 

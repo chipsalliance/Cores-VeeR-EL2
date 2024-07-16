@@ -1,4 +1,4 @@
-# 5 Power Management And Multi-Core Debug Control
+# 5 Power Management and Multi-Core Debug Control
 
 This chapter specifies the power management and multi-core debug control functionality provided or supported by the VeeR EL2 core. Also documented in this chapter is how debug may interfere with core power management.
 
@@ -178,7 +178,7 @@ Once the debugger has control of the core, it may read a status register (see Se
  This feature is targeted at allowing a debugger to take control of a hung core. Therefore, the timeout period should be set high enough to cover any reasonable delay incurred by any access to SoC memory locations and devices. This should include potential additional delays due to congestion in the interconnect and other possible temporary conditions. If the timeout period is long enough for all outstanding transactions to gracefully finish, program execution may be resumed after debugging has been performed. However, if any outstanding transactions are prematurely forced to terminate, successfully resuming program execution after debug should not be expected because the data of terminated transactions may have been lost and possibly even a reset of the SoC might be necessary to bring the system back into a consistent state.
 :::
 
-### 5.4.2 Core Power And Multi-Core Debug Control And Status Signals
+### 5.4.2 Core Power and Multi-Core Debug Control and Status Signals
 
 Figure 5-2 depicts the power and multi-core debug control and status signals which connect the VeeR EL2 core to the PMU and MPC IPs.
 Signals from the PMU and MPC to the core are asynchronous and must be synchronized to the core clock domain.
@@ -194,7 +194,7 @@ The synchronizer of the cpu_run_req signal may not be clock-gated. Otherwise, th
 Figure 5-2 VeeR EL2 Power and Multi-Core Debug Control and Status Signals
 :::
 
-#### 5.4.2.1 Power Control And Status Signals
+#### 5.4.2.1 Power Control and Status Signals
 
 There are three types of signals between the Power Management Unit and the VeeR EL2 core, as described in Table 5-3. All signals are active-high.
 
@@ -221,7 +221,7 @@ Figure 5-3 depicts conceptual timing diagrams of a halt and a run request. Note 
 Figure 5-3 VeeR EL2 Power Control and Status Interface Timing Diagrams
 :::
 
-#### 5.4.2.2 Multi-Core Debug Control And Status Signals
+#### 5.4.2.2 Multi-Core Debug Control and Status Signals
 
 There are five types of signals between the Multi-Processor Controller and the VeeR EL2 core, as described in Table 5-4. All signals are active-high.
 
@@ -344,7 +344,7 @@ If desired, these signals can be routed through the PMU and further qualified th
 The firmware running on the core may also initiate a halt by writing a '1' to the *halt* field of the mpmc register (see Section 5.5.1).
 The core is quiesced before indicating that it has gracefully halted.
 
-### 5.4.6 Dma Operations While Halted
+### 5.4.6 DMA Operations While Halted
 
 When the core is halted in the 'pmu/fw-halt' or the 'db-halt' state, DMA operations are supported.
 
@@ -365,7 +365,7 @@ A summary of platform-specific control/status registers in CSR space:
 All reserved and unused bits in these control/status registers must be hardwired to '0'.
 Unless otherwise noted, all read/write control/status registers must have WARL (Write Any value, Read Legal value) behavior.
 
-### 5.5.1 Power Management Control Register (Mpmc)
+### 5.5.1 Power Management Control Register (mpmc)
 
 The mpmc register provides core power management control functionality.
 It allows the firmware running on the core to initiate a transition to the Halted (pmu/fw-halt) state.
@@ -398,7 +398,7 @@ This register is mapped to the non-standard read/write CSR address space.
 | halt     | 0      | Initiate core halt (i.e., transition to Halted (pmu/fw-halt) state)  Note: Write ignored if in Debug Mode                                                                                                                                                       | R0/W1    | 0       |
 
 :::
-### 5.5.2 Core Pause Control Register (Mcpc)
+### 5.5.2 Core Pause Control Register (mcpc)
 
 The mcpc register supports functions to temporarily stop the core from executing instructions.
 This helps to save core power since busy-waiting loops can be avoided in the firmware.
@@ -441,7 +441,7 @@ This register is mapped to the non-standard read/write CSR address space.
 | pause   | 31:0   | Pause execution for number of core clock cycles specified  Note: pause is decremented by 1 for each core clock cycle. Execution  continues either when pause is 0 or any interrupt is received. | R0/W     | 0       |
 
 :::
-### 5.5.3 Forced Debug Halt Threshold Register (Mfdht)
+### 5.5.3 Forced Debug Halt Threshold Register (mfdht)
 
 The mfdht register hosts the enable bit of the forced debug halt mechanism as well as the power-of-two exponent of the timeout threshold.
 When enabled, if a debug halt request is received and LSU and/or IFU bus transactions are pending, an internal timeout counter starts incrementing with each core clock and keeps incrementing until the Debug Halt *(db-halt)* state is entered.
@@ -468,7 +468,7 @@ This register is mapped to the non-standard read/write CSR address space.
 | enable   | 0      | Enable/disable forced debug halt timeout:  0: Timeout mechanism disabled (default)  1: Timeout mechanism enabled | R/W      | 0       |
 
 :::
-### 5.5.4 Forced Debug Halt Status Register (Mfdhs)
+### 5.5.4 Forced Debug Halt Status Register (mfdhs)
 
 The mfdhs register provides status information if any LSU and/or IFU bus transactions have been prematurely terminated when the Debug Halt (db-halt) state has been entered.
 A debugger may read this register to inquire if any bus transactions have been terminated and data may have been lost while entering the Debug Halt state.

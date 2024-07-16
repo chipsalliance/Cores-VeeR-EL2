@@ -354,6 +354,8 @@ jobs:
           # FIXME: supported privilege levels should be configurable in RISCV-DV
           sed -i '/spike/s/--isa=<variant> /--isa=<variant> --priv=m /g' third_party/riscv-dv/yaml/iss.yaml
 
+          ls -R
+
           pushd tools/riscv-dv
             make -j`nproc` \
               RISCV_DV_TEST=${{ matrix.test }} \

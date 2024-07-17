@@ -283,6 +283,7 @@ jobs:
             /opt/verilator/.cache
           key: ${{ env.cache_verilator_key }}
           restore-keys: ${{ env.cache_verilator_restore_key }}
+          fail-on-cache-miss: true
 
       - name: Restore Spike cache
         id: cache-spike-restore
@@ -293,6 +294,7 @@ jobs:
             /opt/spike/.cache
           key: ${{ env.cache_spike_key }}
           restore-keys: ${{ env.cache_spike_restore_key }}
+          fail-on-cache-miss: true
 
       - name: Download Renode binaries
         uses: actions/download-artifact@v3
@@ -344,6 +346,7 @@ jobs:
         with:
           path: tools/riscv-dv/work/test_${{ matrix.test }}/asm_test
           key: ${{ env.cache_code }}
+          fail-on-cache-miss: true
 
       - name: Run test
         run: |

@@ -151,6 +151,7 @@ module tb_top
     logic [11:0]                wb_csr_dest;
     logic [31:0]                wb_csr_data;
 
+   `ifdef RV_OPENOCD_TEST
     // SB and LSU AHB master mux
     ahb_lite_2to1_mux #(
         .AHB_LITE_ADDR_WIDTH (32),
@@ -196,6 +197,19 @@ module tb_top
         .hreadyout_i         (mux_hreadyout),
         .hrdata_i            (mux_hrdata)
     );
+   `else
+   assign mux_hsel = 1'b1;
+   assign mux_haddr = lsu_haddr;
+   assign mux_hwdata = lsu_hwdata;
+   assign mux_hwrite = lsu_hwrite;
+   assign mux_htrans = lsu_htrans;
+   assign mux_hsize = lsu_hsize;
+   assign mux_hready = lsu_hready;
+
+   assign lsu_hresp = mux_hresp;
+   assign lsu_hrdata = mux_hrdata;
+   assign lsu_hready = mux_hreadyout;
+   `endif
 
 `ifdef RV_BUILD_AXI4
    //-------------------------- LSU AXI signals--------------------------
@@ -466,6 +480,7 @@ module tb_top
     wire                        mux_axi_awregion;
     wire                        mux_axi_arregion;
 
+`ifdef RV_OPENOCD_TEST
    axi_crossbar_wrap_2x1 #(
         .ADDR_WIDTH (32),
         .DATA_WIDTH (64),
@@ -621,6 +636,52 @@ module tb_top
                       .m00_axi_awregion(mux_axi_awregion),
                       .m00_axi_arregion(mux_axi_arregion)
     );
+`else
+   assign mux_axi_arvalid = lsu_axi_arvalid;
+   assign lsu_axi_arready = mux_axi_arready;
+   assign mux_axi_araddr = lsu_axi_araddr;
+   assign mux_axi_arid = lsu_axi_arid;
+   assign mux_axi_arlen = lsu_axi_arlen;
+   assign mux_axi_arburst = lsu_axi_arburst;
+   assign mux_axi_arsize = lsu_axi_arsize;
+   assign lsu_axi_rvalid = mux_axi_rvalid;
+   assign mux_axi_rready = lsu_axi_rready;
+   assign lsu_axi_rdata = mux_axi_rdata;
+   assign lsu_axi_rresp = mux_axi_rresp;
+   assign lsu_axi_rid = mux_axi_rid;
+   assign lsu_axi_rlast = mux_axi_rlast;
+   assign mux_axi_awvalid = lsu_axi_awvalid;
+   assign lsu_axi_awready = mux_axi_awready;
+   assign mux_axi_awaddr = lsu_axi_awaddr;
+   assign mux_axi_awid = lsu_axi_awid;
+   assign mux_axi_awlen = lsu_axi_awlen;
+   assign mux_axi_awburst = lsu_axi_awburst;
+   assign mux_axi_awlock = lsu_axi_awlock;
+   assign mux_axi_awcache = lsu_axi_awcache;
+   assign mux_axi_awprot = lsu_axi_awprot;
+   assign mux_axi_awqos = lsu_axi_awqos;
+   assign mux_axi_awuser = lsu_axi_awuser;
+   assign mux_axi_wlast = lsu_axi_wlast;
+   assign mux_axi_wuser = lsu_axi_wuser;
+   assign lsu_axi_buser = mux_axi_buser;
+   assign mux_axi_arlock = lsu_axi_arlock;
+   assign mux_axi_arcache = lsu_axi_arcache;
+   assign mux_axi_arprot = lsu_axi_arprot;
+   assign mux_axi_arqos = lsu_axi_arqos;
+   assign mux_axi_aruser = lsu_axi_aruser;
+   assign lsu_axi_ruser = mux_axi_ruser;
+   assign mux_axi_awsize = lsu_axi_awsize;
+   assign mux_axi_wdata = lsu_axi_wdata;
+   assign mux_axi_wstrb = lsu_axi_wstrb;
+   assign mux_axi_wvalid = lsu_axi_wvalid;
+   assign lsu_axi_wready = mux_axi_wready;
+   assign lsu_axi_bvalid = mux_axi_bvalid;
+   assign mux_axi_bready = lsu_axi_bready;
+   assign lsu_axi_bresp = mux_axi_bresp;
+   assign lsu_axi_bid = mux_axi_bid;
+   assign mux_axi_awregion = lsu_axi_awregion;
+   assign mux_axi_arregion = lsu_axi_arregion;
+`endif
 
 `endif
     string                      abi_reg[32]; // ABI register names
@@ -2126,6 +2187,7 @@ for (genvar i=0; i<pt.ICCM_NUM_BANKS; i++) begin: iccm_loop
 end : iccm_loop
 end : Gen_iccm_enable
 
+`ifdef RV_OPENOCD_TEST
 jtagdpi #(
     .Name           ("jtag0"),
     .ListenPort     (5000)
@@ -2139,6 +2201,7 @@ jtagdpi #(
     .jtag_trst_n    (jtag_trst_n),
     .jtag_srst_n    ()
 );
+`endif
 
 /* verilator lint_off CASEINCOMPLETE */
 `include "dasm.svi"

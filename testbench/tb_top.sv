@@ -72,7 +72,7 @@ module tb_top
     logic        [63:0]         lsu_hrdata      ;
     logic        [63:0]         lsu_hwdata      ;
     logic                       lsu_hready      ;
-    logic                       lsu_hresp        ;
+    logic                       lsu_hresp       ;
 
     logic        [31:0]         mux_haddr       ;
     logic        [2:0]          mux_hburst      ;
@@ -81,12 +81,12 @@ module tb_top
     logic        [2:0]          mux_hsize       ;
     logic        [1:0]          mux_htrans      ;
     logic                       mux_hwrite      ;
-    logic                       mux_hsel       ;
+    logic                       mux_hsel        ;
     logic        [63:0]         mux_hrdata      ;
     logic        [63:0]         mux_hwdata      ;
     logic                       mux_hready      ;
     logic                       mux_hresp       ;
-   logic                        mux_hreadyout   ;
+    logic                        mux_hreadyout  ;
 
     logic        [31:0]         sb_haddr        ;
     logic        [2:0]          sb_hburst       ;

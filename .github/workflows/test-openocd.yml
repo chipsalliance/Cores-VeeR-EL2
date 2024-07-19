@@ -76,8 +76,25 @@ jobs:
           export RV_ROOT=$(pwd)
           mkdir run
           make -C run -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
-            CONF_PARAMS="-set build_axi4 -set openocd_test"
+            CONF_PARAMS="-set build_axi4 -set openocd_test" COVERAGE=${{ matrix.coverage }}
           cd run
           ${RV_ROOT}/.github/scripts/openocd_test.sh \
             -f ${RV_ROOT}/testbench/openocd_scripts/verilator-rst.cfg \
             -f ${RV_ROOT}/testbench/openocd_scripts/jtag_cg.tcl
+
+      - name: Prepare coverage data
+        run: |
+          export PATH=/opt/verilator/bin:$PATH
+          export RV_ROOT=$(pwd)
+          .github/scripts/convert_coverage_data.sh ${RV_ROOT}/run
+          echo "convert_coverage_data.sh exited with RET_CODE = "$?
+          mkdir -p results
+          mv ${RV_ROOT}/run/coverage.info \
+             results/coverage_openocd_${{ matrix.coverage }}.info
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: openocd_coverage_data
+          path: results/*.info

@@ -91,8 +91,11 @@ jobs:
           .github/scripts/convert_coverage_data.sh ${TEST_PATH}/
           echo "convert_coverage_data.sh exited with RET_CODE = "$?
           mkdir -p results
-          mv ${TEST_PATH}/coverage.info \
-             results/coverage_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.coverage }}.info
+          for cov_file in ${TEST_PATH}/*.info
+          do
+              base_name=$(basename "$cov_file" .info)
+              mv "$cov_file" results/$base_name_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.coverage }}.info
+          done
 
       - name: Pack artifacts
         if: always()

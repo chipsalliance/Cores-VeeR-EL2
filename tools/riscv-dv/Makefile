@@ -155,9 +155,13 @@ generate:
 	# Run RISC-V DV code generation
 	$(MAKE) -f $(MAKEFILE) $(TEST_DIR)/generate.log
 
-run:
+compile:
 	# Run RISC-V DV compilation and simulation
 	$(MAKE) -f $(MAKEFILE) $(TEST_DIR)/iss_sim.log
+
+run:
+	# Run RISC-V DV compilation and simulation
+	$(MAKE) -f $(MAKEFILE) compile
 	# Run HDL simulation(s) and trace comparison
 	find $(TEST_DIR)/$(RISCV_DV_ISS)_sim -name "*.log" | sed 's|sim/|sim/../comp_|g' | xargs realpath --relative-to=$(PWD) | xargs $(MAKE) -f $(MAKEFILE)
 	# Check for errors

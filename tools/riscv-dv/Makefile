@@ -102,12 +102,16 @@ $(TEST_DIR)/iss_sim.log: $(TEST_DIR)/compile.log | $(TEST_DIR)
 	PYTHONPATH=$(RISCV_DV_PATH)/pygen python3 $(RISCV_DV_PATH)/run.py $(RISCV_DV_ARGS) \
     --steps iss_sim 2>&1 | tee $@
 
-$(TEST_DIR)/asm_test/%.hex: $(TEST_DIR)/asm_test/%.o
-	$(RISCV_NM) -B -n $< > $(basename $@).sym
+# Generate symbols of executables
+%.sym: %.o
+	$(RISCV_NM) -B -n $< > $@
+
+# Convert executables
+%.hex: %.o
 	$(RISCV_OBJCOPY) -O verilog $< $@
 
 # HDL simulation
-$(SIM_DIR)/%.log: $(TEST_DIR)/asm_test/%.hex $(WORK_DIR)/verilator/Vtb_top
+$(SIM_DIR)/%.log: $(TEST_DIR)/asm_test/%.hex $(TEST_DIR)/asm_test/%.sym $(WORK_DIR)/verilator/Vtb_top
 	mkdir -p $(basename $@)
 	cp $< $(basename $@)/program.hex
 	cp $(basename $<).sym $(basename $@)/program.sym
@@ -154,6 +158,9 @@ generate:
 	
 	# Run RISC-V DV code generation
 	$(MAKE) -f $(MAKEFILE) $(TEST_DIR)/generate.log
+
+compile: $(TEST_DIR)/compile.log | $(TEST_DIR)
+	find $(TEST_DIR)/asm_test -name "*.S" | sed 's|\.S|.hex|g' | xargs $(MAKE) -f $(MAKEFILE)
 
 run:
 	# Run RISC-V DV compilation and simulation

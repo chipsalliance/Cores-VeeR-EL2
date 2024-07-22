@@ -1632,8 +1632,9 @@ assign ic_debug_rd_en           = dec_tlu_ic_diag_pkt.icache_rd_valid ;
 assign ic_debug_wr_en           = dec_tlu_ic_diag_pkt.icache_wr_valid ;
 
 
-assign ic_debug_way[pt.ICACHE_NUM_WAYS-1:0]        = {(ic_debug_way_enc[0] == 1'b1),
-                                                      (ic_debug_way_enc[0] == 1'b0) };
+for (genvar i = 0; i < pt.ICACHE_NUM_WAYS; i = i + 1) begin : ic_debug_way_loop
+   assign ic_debug_way[i] = (ic_debug_way_enc == i[1:0]);
+end
 
 assign ic_debug_tag_wr_en[pt.ICACHE_NUM_WAYS-1:0] = {pt.ICACHE_NUM_WAYS{ic_debug_wr_en & ic_debug_tag_array}} & ic_debug_way[pt.ICACHE_NUM_WAYS-1:0] ;
 

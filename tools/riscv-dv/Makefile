@@ -1,3 +1,5 @@
+GCC_PREFIX     ?= riscv64-unknown-elf
+
 RISCV_DV_PATH   = $(RV_ROOT)/third_party/riscv-dv
 RISCV_DV_SIM   ?= pyflow
 RISCV_DV_ISS   ?= spike
@@ -5,6 +7,10 @@ RISCV_DV_TEST  ?= riscv_arithmetic_basic_test
 RISCV_DV_SEED  ?= 999
 RISCV_DV_ITER  ?= 1
 RISCV_DV_BATCH ?= 1
+
+export RISCV_GCC ?=     $(GCC_PREFIX)-gcc
+export RISCV_OBJCOPY ?= $(GCC_PREFIX)-objcopy
+export RISCV_NM ?=      $(GCC_PREFIX)-nm
 
 WORK_DIR       ?= work
 TEST_DIR        = $(WORK_DIR)/test_$(RISCV_DV_TEST)

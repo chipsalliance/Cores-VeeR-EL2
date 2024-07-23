@@ -46,6 +46,18 @@ HDL_FILES = $(WORK_DIR)/common_defines.vh \
             $(RV_ROOT)/testbench/ahb_sif.sv \
             $(RV_ROOT)/design/include/el2_def.sv
 
+# Determine verilator version if possible. Set the flag accordingly. Since
+# version v5.006 -Wno-IMPLICIT was renamed to -Wno-IMPLICITSTATIC
+VERILATOR_NOIMPLICIT := -Wno-IMPLICITSTATIC
+VERILATOR_VERSION    := $(subst .,,$(word 2,$(shell $(VERILATOR) --version)))
+
+ifeq ("$(.SHELLSTATUS)", "0")
+    $(shell test $(VERILATOR_VERSION) -lt 5006)
+    ifeq ("$(.SHELLSTATUS)", "0")
+        VERILATOR_NOIMPLICIT := -Wno-IMPLICIT
+    endif
+endif
+
 # riscv-dv args
 RISCV_DV_ARGS = \
     --simulator $(RISCV_DV_SIM) \
@@ -81,7 +93,7 @@ $(WORK_DIR)/defines.h: | $(WORK_DIR)
 $(WORK_DIR)/verilator/Vtb_top.mk: $(WORK_DIR)/defines.h
 	$(VERILATOR) --cc -CFLAGS $(VERILATOR_CFLAGS) $(VERILATOR_INC) \
         $(HDL_FILES) -f $(RV_ROOT)/testbench/flist --top-module tb_top \
-		-exe $(VERILATOR_EXE) -Wno-WIDTH -Wno-UNOPTFLAT -Wno-IMPLICITSTATIC --autoflush \
+		-exe $(VERILATOR_EXE) -Wno-WIDTH -Wno-UNOPTFLAT $(VERILATOR_NOIMPLICIT) --autoflush \
 		$(VERILATOR_COVERAGE) \
 		-Mdir $(WORK_DIR)/verilator
 

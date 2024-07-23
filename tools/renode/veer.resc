@@ -1,0 +1,40 @@
+:name: VeeR
+$name?="VeeR"
+
+# Set to path of the ELF program to run
+$bin?=$ORIGIN/csr_access.elf
+
+using sysbus
+mach create $name
+
+machine LoadPlatformDescription $ORIGIN/veer.repl
+
+macro reset
+"""
+	sysbus LoadELF $bin
+"""
+
+runMacro $reset
+
+machine CreateVirtualConsole "htif"
+
+python """
+from Antmicro.Renode.Peripherals.Bus import Access, SysbusAccessWidth
+htif = monitor.Machine["sysbus.htif"]
+bus = monitor.Machine.SystemBus
+
+def store_char(_, __, ___, value):
+    if(value not in (0x1, 0xFF) and value < 0xFF):
+        htif.DisplayChar(value)
+    else:
+        for x in [ord(c) for c in "\nFinished: " + ("FAILED\n" if value == 0x1 else "PASSED\n")]:
+            htif.DisplayChar(x)
+        htif.DebugLog("TEST FINISHED")
+        monitor.Machine.Pause()
+
+bus.AddWatchpointHook(bus.GetSymbolAddress("tohost"), SysbusAccessWidth.DoubleWord, Access.Write, store_char)
+bus.AddWatchpointHook(bus.GetSymbolAddress("tohost"), SysbusAccessWidth.Byte, Access.Write, store_char)
+"""
+
+cpu WfiAsNop true
+showAnalyzer htif

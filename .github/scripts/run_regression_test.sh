@@ -53,7 +53,7 @@ run_regression_test(){
         echo -e "${COLOR_WHITE}Test '${NAME}' ${COLOR_RED}FAILED${COLOR_CLEAR}"
         exit 1
     else
-        mv ${DIR}/coverage.dat ${RESULTS_DIR}/coverage.dat
+        mv ${DIR}/coverage.dat ${RESULTS_DIR}/
         echo -e "${COLOR_WHITE}Test '${NAME}' ${COLOR_GREEN}SUCCEEDED${COLOR_CLEAR}"
         exit 0
     fi

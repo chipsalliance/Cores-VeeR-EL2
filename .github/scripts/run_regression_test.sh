@@ -53,7 +53,7 @@ run_regression_test(){
         echo -e "${COLOR_WHITE}Test '${NAME}' ${COLOR_RED}FAILED${COLOR_CLEAR}"
         exit 1
     else
-        mv ${DIR}/coverage.dat ${RESULTS_DIR}/coverage_${USER_MODE}.dat
+        mv ${DIR}/coverage.dat ${RESULTS_DIR}/coverage.dat
         echo -e "${COLOR_WHITE}Test '${NAME}' ${COLOR_GREEN}SUCCEEDED${COLOR_CLEAR}"
         exit 0
     fi
@@ -64,8 +64,8 @@ run_regression_test(){
 # BUS=axi
 # NAME=hello_world
 # COVERAGE=branch
-# run_regression_test.sh $RESULTS_DIR $BUS $NAME $COVERAGE
+# USER_MODE=1
+# run_regression_test.sh $RESULTS_DIR $BUS $NAME $COVERAGE $USER_MODE
 
-check_args_count $# 4
-run_regression_test "$@" "1"
-run_regression_test "$@" "0"
+check_args_count $# 5
+run_regression_test "$@"

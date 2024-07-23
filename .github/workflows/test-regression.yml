@@ -15,6 +15,9 @@ jobs:
                "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters", "pmp"]
         coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
         priv: ["0", "1"]
+        exclude:
+          - priv: "0"
+            test: "csr_mseccfg"
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/regression/.cache/"

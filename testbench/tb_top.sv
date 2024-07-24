@@ -16,11 +16,15 @@
 //
 
 `ifndef VERILATOR
-module tb_top #(
+module tb_top
+    import tb_top_pkg::*;
+#(
     `include "el2_param.vh"
 );
 `else
-module tb_top #(
+module tb_top
+    import tb_top_pkg::*;
+#(
     `include "el2_param.vh"
 ) (
     input bit                   core_clk,
@@ -340,6 +344,8 @@ module tb_top #(
     logic [pt.DCCM_NUM_BANKS-1:0][pt.DCCM_FDATA_WIDTH-1:0] dccm_wr_fdata_bank;
     logic [pt.DCCM_NUM_BANKS-1:0][pt.DCCM_FDATA_WIDTH-1:0] dccm_bank_fdout;
 
+    tb_top_pkg::veer_sram_error_injection_mode_t error_injection_mode;
+
 `define DEC rvtop_wrapper.rvtop.veer.dec
 
 `ifdef RV_BUILD_AXI4
@@ -400,6 +406,27 @@ module tb_top #(
             nmi_int   <= 1'b0;
             timer_int <= 1'b0;
             soft_int  <= 1'b0;
+        end
+        // ECC error injection
+        if(mailbox_write && (mailbox_data[7:0] == 8'he0)) begin
+            $display("Injecting single bit ICCM error");
+            error_injection_mode.iccm_single_bit_error <= 1'b1;
+        end
+        else if(mailbox_write && (mailbox_data[7:0] == 8'he1)) begin
+            $display("Injecting double bit ICCM error");
+            error_injection_mode.iccm_double_bit_error <= 1'b1;
+        end
+        else if(mailbox_write && (mailbox_data[7:0] == 8'he2)) begin
+            $display("Injecting single bit DCCM error");
+            error_injection_mode.dccm_single_bit_error <= 1'b1;
+        end
+        else if(mailbox_write && (mailbox_data[7:0] == 8'he3)) begin
+            $display("Injecting double bit DCCM error");
+            error_injection_mode.dccm_double_bit_error <= 1'b1;
+        end
+        else if(mailbox_write && (mailbox_data[7:0] == 8'he4)) begin
+            $display("Disable ECC error injection");
+            error_injection_mode <= '0;
         end
         // Memory signature dump
         if(mailbox_write && (mailbox_data[7:0] == 8'hFF || mailbox_data[7:0] == 8'h01)) begin
@@ -1339,11 +1366,21 @@ if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable
                                             .BC1     (1'b0   ), \
                                             .BC2     (1'b0   ), \
 
+    logic [pt.DCCM_NUM_BANKS-1:0] [pt.DCCM_FDATA_WIDTH-1:0] dccm_wdata_bitflip;
+    int ii;
     localparam DCCM_INDEX_DEPTH = ((pt.DCCM_SIZE)*1024)/((pt.DCCM_BYTE_WIDTH)*(pt.DCCM_NUM_BANKS));  // Depth of memory bank
     // 8 Banks, 16KB each (2048 x 72)
+    always_ff @(el2_mem_export.clk) begin : inject_dccm_ecc_error
+        if (~error_injection_mode.dccm_single_bit_error && ~error_injection_mode.dccm_double_bit_error) begin
+            dccm_wdata_bitflip <= '{default:0};
+        end else if (el2_mem_export.dccm_clken & el2_mem_export.dccm_wren_bank) begin
+            for (ii=0; ii<pt.DCCM_NUM_BANKS; ii++) begin: dccm_bitflip_injection_loop
+                dccm_wdata_bitflip[ii] <= get_bitflip_mask(error_injection_mode.dccm_double_bit_error);
+            end
+        end
+    end
     for (genvar i=0; i<pt.DCCM_NUM_BANKS; i++) begin: dccm_loop
-        assign dccm_wr_fdata_bank[i][pt.DCCM_DATA_WIDTH-1:0] = el2_mem_export.dccm_wr_data_bank[i];
-        assign dccm_wr_fdata_bank[i][pt.DCCM_FDATA_WIDTH-1:pt.DCCM_DATA_WIDTH] = el2_mem_export.dccm_wr_ecc_bank[i];
+        assign dccm_wr_fdata_bank[i][pt.DCCM_FDATA_WIDTH-1:0] = {el2_mem_export.dccm_wr_ecc_bank[i], el2_mem_export.dccm_wr_data_bank[i]} ^ dccm_wdata_bitflip[i];
         assign el2_mem_export.dccm_bank_dout[i] = dccm_bank_fdout[i][31:0];
         assign el2_mem_export.dccm_bank_ecc[i] = dccm_bank_fdout[i][38:32];
 
@@ -1522,9 +1559,20 @@ end :Gen_dccm_enable
 // ICCM
 //
 if (pt.ICCM_ENABLE) begin : Gen_iccm_enable
+
+logic [pt.ICCM_NUM_BANKS-1:0] [38:0] iccm_wdata_bitflip;
+int jj;
+always_ff @(el2_mem_export.clk) begin : inject_iccm_ecc_error
+    if (~error_injection_mode.iccm_single_bit_error && ~error_injection_mode.iccm_double_bit_error) begin
+        iccm_wdata_bitflip <= '{default:0};
+    end else if (el2_mem_export.iccm_clken & el2_mem_export.iccm_wren_bank) begin
+        for (jj=0; jj<pt.ICCM_NUM_BANKS; jj++) begin: iccm_bitflip_injection_loop
+            iccm_wdata_bitflip[jj] <= get_bitflip_mask(error_injection_mode.iccm_double_bit_error);
+        end
+    end
+end
 for (genvar i=0; i<pt.ICCM_NUM_BANKS; i++) begin: iccm_loop
-    assign iccm_bank_wr_fdata[i][31:0] = el2_mem_export.iccm_bank_wr_data[i];
-    assign iccm_bank_wr_fdata[i][38:32] = el2_mem_export.iccm_bank_wr_ecc[i];
+    assign iccm_bank_wr_fdata[i][38:0] = {el2_mem_export.iccm_bank_wr_ecc[i], el2_mem_export.iccm_bank_wr_data[i]} ^ iccm_wdata_bitflip[i];
     assign el2_mem_export.iccm_bank_dout[i] = iccm_bank_fdout[i][31:0];
     assign el2_mem_export.iccm_bank_ecc[i] = iccm_bank_fdout[i][38:32];
 

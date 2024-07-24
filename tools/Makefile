@@ -120,7 +120,7 @@ VPATH = $(TEST_DIR) $(BUILD_DIR) $(TBDIR)
 -include $(TEST_DIR)/$(TEST).mki
 
 
-TBFILES = $(TBDIR)/tb_top.sv $(TBDIR)/ahb_sif.sv
+TBFILES = $(TBDIR)/tb_top_pkg.sv $(TBDIR)/tb_top.sv $(TBDIR)/ahb_sif.sv
 
 defines  = $(BUILD_DIR)/common_defines.vh
 defines += ${RV_ROOT}/design/include/el2_def.sv

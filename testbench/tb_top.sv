@@ -1572,9 +1572,9 @@ always_ff @(el2_mem_export.clk) begin : inject_iccm_ecc_error
     end
 end
 for (genvar i=0; i<pt.ICCM_NUM_BANKS; i++) begin: iccm_loop
-    assign iccm_bank_wr_fdata[i][38:0] = {el2_mem_export.iccm_bank_wr_ecc[i], el2_mem_export.iccm_bank_wr_data[i]} ^ iccm_wdata_bitflip[i];
+    assign iccm_bank_wr_fdata[i][32+pt.ICCM_ECC_WIDTH-1:0] = {el2_mem_export.iccm_bank_wr_ecc[i], el2_mem_export.iccm_bank_wr_data[i]} ^ iccm_wdata_bitflip[i];
     assign el2_mem_export.iccm_bank_dout[i] = iccm_bank_fdout[i][31:0];
-    assign el2_mem_export.iccm_bank_ecc[i] = iccm_bank_fdout[i][38:32];
+    assign el2_mem_export.iccm_bank_ecc[i] = iccm_bank_fdout[i][32+pt.ICCM_ECC_WIDTH-1:32];
 
  `ifdef VERILATOR
 

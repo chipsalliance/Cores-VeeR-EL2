@@ -260,7 +260,6 @@ module tb_top
     wire [1:0]                  lsu_axi_rresp;
     wire                        lsu_axi_rlast;
     wire                        lsu_axi_awuser;
-    wire                        lsu_axi_wlast;
     wire                        lsu_axi_wuser;
     wire                        lsu_axi_buser;
     wire                        lsu_axi_aruser;
@@ -360,7 +359,6 @@ module tb_top
     wire [1:0]                  sb_axi_rresp;
     wire                        sb_axi_rlast;
     wire                        sb_axi_awuser;
-    wire                        sb_axi_wlast;
     wire                        sb_axi_wuser;
     wire                        sb_axi_buser;
     wire                        sb_axi_aruser;
@@ -472,13 +470,10 @@ module tb_top
     wire [1:0]                  mux_axi_rresp;
     wire                        mux_axi_rlast;
     wire                        mux_axi_awuser;
-    wire                        mux_axi_wlast;
     wire                        mux_axi_wuser;
     wire                        mux_axi_buser;
     wire                        mux_axi_aruser;
     wire                        mux_axi_ruser;
-    wire                        mux_axi_awregion;
-    wire                        mux_axi_arregion;
 
 `ifdef RV_OPENOCD_TEST
    axi_crossbar_wrap_2x1 #(

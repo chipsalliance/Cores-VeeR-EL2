@@ -387,6 +387,7 @@ jobs:
     name: Run custom RISC-V DV tests
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: centos:8
+    if: github.event.pull_request.merged == true
     needs: [ veer-iss, renode, generate-config, generate-code ]
     strategy:
       fail-fast: false

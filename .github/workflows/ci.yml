@@ -46,6 +46,10 @@ jobs:
     needs: [Build-Verilator]
     uses: ./.github/workflows/test-uvm.yml
 
+  Test-Renode:
+    name: Test-Renode
+    uses: ./.github/workflows/test-renode.yml
+
   Report-Coverage:
     name: Report-Coverage
     needs: [Test-Regression, Test-Verification, Test-Microarchitectural, Test-RISCV-DV, Test-RISCOF]

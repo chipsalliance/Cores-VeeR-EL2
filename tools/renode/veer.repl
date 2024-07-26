@@ -1,0 +1,11 @@
+mem: Memory.MappedMemory @sysbus 0x80000000
+    size: 0x10000000
+
+htif_mem: Memory.MappedMemory @sysbus 0xD0580000
+    size: 0x1000
+
+cpu: CPU.VeeR_EL2 @ sysbus
+    hartId: 0
+
+dhry_mem: Memory.MappedMemory @sysbus 0xF0040000
+    size: 0x10000

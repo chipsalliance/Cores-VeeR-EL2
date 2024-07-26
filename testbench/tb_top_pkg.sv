@@ -42,11 +42,11 @@ package tb_top_pkg;
     endfunction
 
   endclass
-`else
+`endif
+
   function static logic [39:0] get_bitflip_mask(bit do_double_bit = 1'b0);
     return 2 << ($urandom % (37)) | 39'(do_double_bit);
   endfunction
-`endif
 
   typedef struct packed {
     //  [3] - Double bit, DCCM Error Injection

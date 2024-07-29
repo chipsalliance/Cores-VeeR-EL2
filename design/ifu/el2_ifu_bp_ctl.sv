@@ -799,8 +799,7 @@ end // if (!pt.BTB_FULLYA)
                                    .dout(btbdata[j]));
    end // block: BTB_FAFLOPS
 
-   assign ifu_bp_fa_index_f[1] = hit1 ? hit1_index : '0;
-   assign ifu_bp_fa_index_f[0] = hit0 ? hit0_index : '0;
+   assign ifu_bp_fa_index_f = {hit1 ? hit1_index : '0, hit0 ? hit0_index : '0};
 
    assign btb_used_reset = &btb_used[pt.BTB_SIZE-1:0];
    assign btb_used_ns[pt.BTB_SIZE-1:0] = ({pt.BTB_SIZE{vwayhit_f[1]}} & (32'b1 << hit1_index[BTB_FA_INDEX:0])) |

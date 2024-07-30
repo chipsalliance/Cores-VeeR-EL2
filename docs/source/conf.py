@@ -22,7 +22,7 @@ release = ''
 # fixed
 sphinx_immaterial_override_builtin_admonitions = False
 
-numfig = False
+numfig = True
 
 # If you need to add extensions just add to those lists
 extensions = default_extensions

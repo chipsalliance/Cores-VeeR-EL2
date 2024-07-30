@@ -1,6 +1,6 @@
-# 19 Physical Memory Protection
+# Physical Memory Protection
 
-The Physical Memory Protection unit implemented in the VeeR EL2 Core is compliant with "Section 3.7 Physical Memory Protection" of [The RISC-V Instruction Set Manual Volume II: Privileged Architecture Document Version 20211203](https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-1239329-2023-05-23/riscv-privileged.pdf) (RV-PA).
+The Physical Memory Protection unit implemented in the VeeR EL2 Core is compliant with "Section 3.7 Physical Memory Protection" of [[5]](intro.md#ref-5).
 
 RISC-V introduces additional regulatory documents regarding memory protection:
 
@@ -22,9 +22,9 @@ CSR address decoding is generated from either [*csrdecode_m*](../../design/dec/c
 The number of *pmpcfgX* registers is always 4 times smaller than the number of PMP entries, which are configurable using the *-set=pmp_entires=N* option, where *N* can be 0, 16 or 64.
 
 :::{list-table} CSR configurations for RV-32
-:name: riscv-pmp-csr-configuration-table
+:name: tab-riscv-pmp-csr-configuration-table
 :header-rows: 1
-:align: center
+:align: left
 * - Number of PMP entries
   - Number of *pmpcfgX* CSRs
   - Number of *pmpaddrX* CSRs
@@ -44,10 +44,10 @@ The number of *pmpcfgX* registers is always 4 times smaller than the number of P
 Each *pmpcfgX* register holds a configuration for four PMP entries, with a byte used for each entry.
 
 :::{list-table} Decoding of the *pmpcfgX* register
-:name: riscv-pmpcfgx-register
+:name: tab-riscv-pmpcfgx-register
 :header-rows: 1
-:align: center
-* - Bit
+:align: left
+* - **Bit**
   - 7
   - 6
   - 5
@@ -56,7 +56,7 @@ Each *pmpcfgX* register holds a configuration for four PMP entries, with a byte 
   - 2
   - 1
   - 0
-* - Flag
+* - **Flag**
   - *L*
   - *0*
   - *0*
@@ -90,12 +90,12 @@ This address defines protected memory region boundaries, further interpreted acc
 In case of impermissible memory access, an exception is raised and the exception code is stored in the *mcause* CSR register (*0x342*).
 
 :::{list-table} PMP related exception codes
-:name: riscv-pmp-exceptions
+:name: tab-riscv-pmp-exceptions
 :header-rows: 1
 :widths: 14 14 36
-* - Interrupt flag (*mcause[MXLEN-1]*)
-  - Exception Code (*mcause[MXLEN-2:0]*)
-  - Exception description
+* - **Interrupt flag (*mcause[MXLEN-1]*)**
+  - **Exception Code (*mcause[MXLEN-2:0]*)**
+  - **Exception description**
 * - *0*
   - *1*
   - Instruction access fault (cannot read instruction from protected region)

@@ -1,6 +1,6 @@
-# 17 VeeR EL2 Compliance Test Suite Failures
+# Compliance Test Suite Failures
 
-## 17.1 I-MISALIGN_LDST-01
+## I-MISALIGN_LDST-01
 
 * **Test Location**: [https://github.com/riscv/riscv-compliance/blob/master/riscv-test-suite/rv32i/src/I-MISALIGN_LDST-01.S](https://github.com/riscv/riscv-compliance/blob/master/riscv-test-suite/rv32i/src/I-MISALIGN_LDST-01.S)
 * **Reason for Failure**:
@@ -10,7 +10,7 @@
 * **Workaround**:
   * Configure the address range used by this test to "non-idempotent" in the mrac register.
 
-## 17.2 I-MISALIGN_JMP-01
+## I-MISALIGN_JMP-01
 
 * **Test location**: [https://github.com/riscv/riscv-compliance/blob/master/riscv-test-suite/rv32i/src/I-MISALIGN_JMP-01.S](https://github.com/riscv/riscv-compliance/blob/master/riscv-test-suite/rv32i/src/I-MISALIGN_JMP-01.S)
 * **Reason for Failure**:
@@ -21,7 +21,7 @@
 * **Workaround**:
   * None.
 
-## 17.3 I-FENCE.I-01 and fence_i
+## I-FENCE.I-01 and fence_i
 
 * **Test location**:
   * [https://github.com/riscv/riscv-compliance/blob/master/riscv-test-suite/rv32Zifencei/src/I-FENCE.I-01.S](https://github.com/riscv/riscv-compliance/blob/master/riscv-test-suite/rv32Zifencei/src/I-FENCE.I-01.S) and
@@ -33,12 +33,12 @@
   * Configuring the address range used by this test to "non-idempotent" in the mrac register forces the core to wait for a write response before fetching the updated line.
     Alternatively, the system interconnect could provide ordering guarantees between requests sent to the instruction fetch and load/store bus interfaces (e.g., matching latencies through the interconnect).
 
-## 17.4 Breakpoint
+## Breakpoint
 
 * **Test Location**:
   * [https://github.com/riscv/riscv-compliance/blob/master/riscv-test-suite/rv32mi/src/breakpoint.S](https://github.com/riscv/riscv-compliance/blob/master/riscv-test-suite/rv32mi/src/breakpoint.S)
 * **Reason for Failure**:
   * The VeeR EL2 core disables breakpoints when the *mie* bit in the standard mstatus register is cleared.
-  * Note that this behavior is compliant with the RISC-V External Debug Support specification, Version 0.13.2. See Section 5.1, 'Native M-Mode Triggers' in [3] for more details.
+  * Note that this behavior is compliant with the RISC-V External Debug Support specification, Version 0.13.2. See Section 5.1, 'Native M-Mode Triggers' in [[3]](intro.md#ref-3) for more details.
 * **Workaround**:
   * None.

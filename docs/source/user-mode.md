@@ -1,4 +1,4 @@
-# 20 User Mode
+# User Mode
 
 Originally, VeeR EL2 only implemented machine mode, and user mode support was added for the Caliptra project.
 By default the VeeR EL2 Core is configured in machine mode only, so to enable user mode, use the *-set* option in [the config script](../../configs/veer.config):
@@ -60,7 +60,7 @@ The introduction of user mode adds 2 new *mcause* codes for a trap caused by the
 
 ## PMP Enhancements for Memory Access and Execution Prevention on Machine Mode
 
-The [PMP Enhancements for memory access and execution prevention on Machine mode (Smepmp)](https://github.com/riscvarchive/riscv-tee/blob/main/Smepmp/Smepmp.pdf) document defines an extension to PMP's behavior.
+Document [[6]](intro.md#ref-6) defines an extension to PMP's behavior.
 
 Smepmp (extended PMP) support is enabled with the *-set=smepmp=1* option:
 

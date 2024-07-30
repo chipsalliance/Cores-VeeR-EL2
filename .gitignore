@@ -24,3 +24,4 @@ tools/renode/renode_run
 tools/renode/build
 tools/renode/*.elf
 tools/renode/.venv
+docs/build

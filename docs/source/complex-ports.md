@@ -3,7 +3,7 @@
 {numref}`tab-core-complex-signals` lists the core complex signals.
 Not all signals are present in a given instantiation.
 For example, a core complex can only have one bus interface type (AXI4 or AHB-Lite).
-Signals which are asynchronous to the core complex clock (clk) are marked with "(async)" in the 'Description' column.
+Signals which are asynchronous to the core complex clock (`clk`) are marked with "(async)" in the 'Description' column.
 
 :::{list-table} Core Complex Signals
 :name: tab-core-complex-signals
@@ -64,7 +64,7 @@ Signals which are asynchronous to the core complex clock (clk) are marked with "
   -
 * - core_id[31:4]
   - in
-  - Core ID (mapped to mhartid[31:4])
+  - Core ID (mapped to `mhartid[31:4]`)
 * - **System Bus Interfaces**
   -
   -

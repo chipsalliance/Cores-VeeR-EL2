@@ -67,10 +67,10 @@ Therefore, the bits of each codeword should be physically spread in the array as
 
 :::{list-table} Memory Hierarchy Components and Protection
 :name: tab-memory-hierarchy-components-and-protection
-* - Memory Type
-  - Abbreviation
-  - Protection
-  - Reason/Justification
+* - **Memory Type**
+  - **Abbreviation**
+  - **Protection**
+  - **Reason/Justification**
 * - Instruction Cache
   - I-cache
   - Parity or  SEDDED  ECC (data  and tag) [^fn-error-protection-1]
@@ -116,18 +116,18 @@ Empty fields shall be ignored as they provide structure information for the tabl
 :::{list-table} Error Detection, Recovery, and Logging
 :name: tab-error-detection-recovery-logging
 
-* - Memory Type
-  - Detection
-  - Recovery
-  - Recovery
-  - Logging
-  - Logging
+* - **Memory Type**
+  - **Detection**
+  - **Recovery**
+  - **Recovery**
+  - **Logging**
+  - **Logging**
 * -
   -
-  - Single-bit Error
-  - Double-bit Error
-  - Single-bit Error
-  - Double-bit Error
+  - **Single-bit Error**
+  - **Double-bit Error**
+  - **Single-bit Error**
+  - **Double-bit Error**
 * - I-cache
   -
     - Each 64-bit chunk of instructions protected with 4 parity bits (one per 16 consecutive bits) or 7 ECC bits
@@ -261,24 +261,24 @@ All read/write control/status registers must have WARL (Write Any value, Read Le
 
 ### I-Cache Error Counter/Threshold Register (micect)
 
-The micect register holds the I-cache error counter and its threshold.
-The *count* field of the micect register is incremented, if a parity/ECC error is detected on any of the cache line tags of the set or the instructions fetched from the I-cache.
-The *thresh* field of the micect register holds a pointer to a bit position of the *count* field.
+The `micect` register holds the I-cache error counter and its threshold.
+The *count* field of the `micect` register is incremented, if a parity/ECC error is detected on any of the cache line tags of the set or the instructions fetched from the I-cache.
+The *thresh* field of the `micect` register holds a pointer to a bit position of the *count* field.
 If the selected bit of the *count* field transitions from '0' to '1', the threshold is reached, and a correctable error local interrupt (see [](memory-map.md#correctable-error-local-interrupt)) is signaled.
 
 Hardware increments the *count* field on a detected error.
-Firmware can non-destructively read the current *count* and thresh values or write to both these fields (e.g., to change the threshold and reset the counter).
+Firmware can non-destructively read the current *count* and *thresh* values or write to both these fields (e.g., to change the threshold and reset the counter).
 
 :::{note}
 The counter may overflow if not serviced and reset by firmware.
 :::
 
 :::{note}
-The correctable error local interrupt is not latched (i.e., "sticky"), but it stays pending until the counter overflows (i.e., as long as the *count* value is equal to or greater than the threshold value (= 2*thresh*)). When firmware resets the counter, the correctable error local interrupt condition is cleared.
+The correctable error local interrupt is not latched (i.e., "sticky"), but it stays pending until the counter overflows (i.e., as long as the *count* value is equal to or greater than the threshold value (= {math}`2^{thresh}`)). When firmware resets the counter, the correctable error local interrupt condition is cleared.
 :::
 
 :::{note}
-The micect register is instantiated, accessible, and has the same functional behavior even if the core is built without an I-cache.
+The `micect` register is instantiated, accessible, and has the same functional behavior even if the core is built without an I-cache.
 :::
 
 This register is mapped to the non-standard read/write CSR address space.
@@ -286,30 +286,30 @@ This register is mapped to the non-standard read/write CSR address space.
 :::{list-table} I-Cache Error Counter/Threshold Register (micect, at CSR 0x7F0)
 :name: tab-i-cache-error-counter-threshold-register
 
-* - Field
-  - Bits
-  - Description
-  - Access
-  - Reset
+* - **Field**
+  - **Bits**
+  - **Description**
+  - **Access**
+  - **Reset**
 * - thresh
   - 31:27
   - I-cache parity/ECC error threshold:
-    - 0..26: Value i selects count[i] bit
+    - 0..26: Value i selects *count[i]* bit
     - 27..31: Invalid (when written, mapped by hardware to 26)
   - R/W
   - 0
 * - count
   - 26:0
-  - Counter incremented if I-cache parity/ECC error(s) detected. If count[thresh] transitions from '0' to '1', signal correctable error local  interrupt (see [](memory-map.md#correctable-error-local-interrupt)).
+  - Counter incremented if I-cache parity/ECC error(s) detected. If *count[thresh]* transitions from '0' to '1', signal correctable error local  interrupt (see [](memory-map.md#correctable-error-local-interrupt)).
   - R/W
   - 0
 :::
 
 ### ICCM Correctable Error Counter/Threshold Register (miccmect)
 
-The miccmect register holds the ICCM correctable error counter and its threshold.
-The *count* field of the miccmect register is incremented, if a correctable ECC error is detected on either an instruction fetch or a DMA read from the ICCM.
-The *thresh* field of the miccmect register holds a pointer to a bit position of the *count* field.
+The `miccmect` register holds the ICCM correctable error counter and its threshold.
+The *count* field of the `miccmect` register is incremented, if a correctable ECC error is detected on either an instruction fetch or a DMA read from the ICCM.
+The *thresh* field of the `miccmect` register holds a pointer to a bit position of the *count* field.
 If the selected bit of the *count* field transitions from '0' to '1', the threshold is reached, and a correctable error local interrupt (see [](memory-map.md#correctable-error-local-interrupt)) is signaled.
 
 Hardware increments the *count* field on a detected single-bit error.
@@ -320,15 +320,19 @@ The counter may overflow if not serviced and reset by firmware.
 :::
 
 :::{note}
-The correctable error local interrupt is not latched (i.e., "sticky"), but it stays pending until the counter overflows (i.e., as long as the *count* value is equal to or greater than the threshold value (= 2*thresh*)). When firmware resets the counter, the correctable error local interrupt condition is cleared.
+The correctable error local interrupt is not latched (i.e., "sticky"), but it stays pending until the counter overflows (i.e., as long as the *count* value is equal to or greater than the threshold value (= {math}`2^{thresh}`)). When firmware resets the counter, the correctable error local interrupt condition is cleared.
 :::
 
 :::{note}
-DMA accesses while in power management Sleep (pmu/fw-halt) or debug halt (db-halt) state may encounter ICCM single-bit errors. Correctable errors are counted in the miccmect error counter irrespective of the core's power state.
+DMA accesses while in power management Sleep (pmu/fw-halt) or debug halt (db-halt) state may encounter ICCM single-bit errors. Correctable errors are counted in the `miccmect` error counter irrespective of the core's power state.
 :::
 
 :::{note}
-In the unlikely case of a persistent single-bit error in the ICCM on a location needed for execution of the beginning of the ICCM correctable error local interrupt handler and the counter threshold is set to lower than 16 errors, forward progress may not be guaranteed. Note: The miccmect register is instantiated, accessible, and has the same functional behavior even if the core is built without an ICCM.
+In the unlikely case of a persistent single-bit error in the ICCM on a location needed for execution of the beginning of the ICCM correctable error local interrupt handler and the counter threshold is set to lower than 16 errors, forward progress may not be guaranteed.
+:::
+
+:::{note}
+The `miccmect` register is instantiated, accessible, and has the same functional behavior even if the core is built without an ICCM.
 :::
 
 This register is mapped to the non-standard read/write CSR address space.
@@ -336,51 +340,51 @@ This register is mapped to the non-standard read/write CSR address space.
 :::{list-table} ICCM Correctable Error Counter/Threshold Register (miccmect, at CSR 0x7F1)
 :name: tab-iccm-correctable-error-counter-threshold-register
 
-* - Field
-  - Bits
-  - Description
-  - Access
-  - Reset
+* - **Field**
+  - **Bits**
+  - **Description**
+  - **Access**
+  - **Reset**
 * - thresh
   - 31:27
   - ICCM correctable ECC error threshold:
-    - 0..26: Value i selects count[i] bit
+    - 0..26: Value i selects *count[i]* bit
     - 27..31: Invalid (when written, mapped by hardware to 26)
   - R/W
   - 0
 * - count
   - 26:0
-  - Counter incremented for each detected ICCM correctable ECC error.  If count[thresh] transitions from '0' to '1', signal correctable error local  interrupt (see [](memory-map.md#correctable-error-local-interrupt)).
+  - Counter incremented for each detected ICCM correctable ECC error.  If *count[thresh]* transitions from '0' to '1', signal correctable error local  interrupt (see [](memory-map.md#correctable-error-local-interrupt)).
   - R/W
   - 0
 :::
 
 ### DCCM Correctable Error Counter/Threshold Register (mdccmect)
 
-The mdccmect register holds the DCCM correctable error counter and its threshold.
-The *count* field of the mdccmect register is incremented, if a correctable ECC error is detected on either a retired load/store instruction or a DMA read access to the DCCM.
-The *thresh* field of the mdccmect register holds a pointer to a bit position of the count field.
+The `mdccmect` register holds the DCCM correctable error counter and its threshold.
+The *count* field of the `mdccmect` register is incremented, if a correctable ECC error is detected on either a retired load/store instruction or a DMA read access to the DCCM.
+The *thresh* field of the `mdccmect` register holds a pointer to a bit position of the *count* field.
 If the selected bit of the *count* field transitions from '0' to '1', the threshold is reached, and a correctable error local interrupt (see [](memory-map.md#correctable-error-local-interrupt)) is signaled.
 
 Hardware increments the *count* field on a detected single-bit error for a retired load or store instruction (i.e., a nonspeculative access with no exception) or a DMA read.
-Firmware can non-destructively read the current *count* and thresh values or write to both these fields (e.g., to change the threshold and reset the counter).
+Firmware can non-destructively read the current *count* and *thresh* values or write to both these fields (e.g., to change the threshold and reset the counter).
 
 :::{note}
 The counter may overflow if not serviced and reset by firmware.
 :::
 
 :::{note}
-The correctable error local interrupt is not latched (i.e., "sticky"), but it stays pending until the counter overflows (i.e., as long as the *count* value is equal to or greater than the threshold value (= 2*thresh*)).
+The correctable error local interrupt is not latched (i.e., "sticky"), but it stays pending until the counter overflows (i.e., as long as the *count* value is equal to or greater than the threshold value (= {math}`2^{thresh}`)).
 When firmware resets the counter, the correctable error local interrupt condition is cleared.
 :::
 
 :::{note}
 DMA accesses while in power management Sleep (pmu/fw-halt) or debug halt (db-halt) state may encounter DCCM single-bit errors.
-Correctable errors are counted in the mdccmect error counter irrespective of the core's power state.
+Correctable errors are counted in the `mdccmect` error counter irrespective of the core's power state.
 :::
 
 :::{note}
-The mdccmect register is instantiated, accessible, and has the same functional behavior even if the core is built without a DCCM.
+The `mdccmect` register is instantiated, accessible, and has the same functional behavior even if the core is built without a DCCM.
 :::
 
 This register is mapped to the non-standard read/write CSR address space.
@@ -388,21 +392,21 @@ This register is mapped to the non-standard read/write CSR address space.
 :::{list-table} DCCM Correctable Error Counter/Threshold Register (mdccmect, at CSR 0x7F2)
 :name: tab-mdccmect
 
-* - Field
-  - Bits
-  - Description
-  - Access
-  - Reset
+* - **Field**
+  - **Bits**
+  - **Description**
+  - **Access**
+  - **Reset**
 * - thresh
   - 31:27
   - DCCM correctable ECC error threshold:
-    - 0..26: Value i selects count[i] bit
+    - 0..26: Value i selects *count[i]* bit
     - 27..31: Invalid (when written, mapped by hardware to 26)
   - R/W
   - 0
 * - count
   - 26:0
-  - Counter incremented for each detected DCCM correctable ECC error.  If count[thresh] transitions from '0' to '1', signal correctable error local  interrupt (see [](memory-map.md#correctable-error-local-interrupt)).
+  - Counter incremented for each detected DCCM correctable ECC error.  If *count[thresh]* transitions from '0' to '1', signal correctable error local interrupt (see [](memory-map.md#correctable-error-local-interrupt)).
   - R/W
   - 0
 :::

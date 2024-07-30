@@ -1,6 +1,6 @@
 # Core Overview
 
-This chapter provides a high-level overview of the VeeR EL2 core and core complex. VeeR EL2 is a machinemode (M-mode) only, 32-bit CPU small core which supports RISC-V's integer (I), compressed instruction \(C\), multiplication and division (M), and instruction-fetch fence, CSR, and subset of bit manipulation instructions (Z) extensions. The core contains a 4-stage, scalar, in-order pipeline.
+This chapter provides a high-level overview of the VeeR EL2 core and core complex. VeeR EL2 is a machinemode (M-mode) only, 32-bit CPU small core which supports RISC-V's integer (I), compressed instruction (C), multiplication and division (M), and instruction-fetch fence, CSR, and subset of bit manipulation instructions (Z) extensions. The core contains a 4-stage, scalar, in-order pipeline.
 
 ## Features
 

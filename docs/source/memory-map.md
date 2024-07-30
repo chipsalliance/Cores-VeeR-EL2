@@ -132,10 +132,10 @@ Loads with no side effects (i.e., idempotent) are always issued as double-words 
 
 #### Ordering of Store - Load with No Side Effects (i.e., Idempotent)
 
-A fence instruction is required to order an older store before a younger load with no side effects (i.e., idempotent).
+A `fence` instruction is required to order an older store before a younger load with no side effects (i.e., idempotent).
 
 :::{note}
- All memory-mapped register writes must be followed by a fence instruction to enforce ordering and synchronization.
+ All memory-mapped register writes must be followed by a `fence` instruction to enforce ordering and synchronization.
 :::
 
 ### Fencing
@@ -145,15 +145,15 @@ A fence instruction is required to order an older store before a younger load wi
 The `fence.i` instruction operates on the instruction memory and/or I-cache.
 This instruction causes a flush, a flash invalidation of the I-cache, and a refetch of the next program counter (RFNPC).
 The refetch is guaranteed to miss the I-cache.
-Note that since the fence.i instruction is used to synchronize the instruction and data streams, it also includes the functionality of the fence instruction (see [](memory-map.md#data)).
+Note that since the `fence.i` instruction is used to synchronize the instruction and data streams, it also includes the functionality of the `fence` instruction (see [](memory-map.md#data)).
 
 #### Data
 
 The `fence` instruction is implemented conservatively in VeeR EL2 to keep the implementation simple.
 It always performs the most conservative fencing, independent of the instruction's arguments.
-The fence instruction is presynced to make sure that there are no instructions in the LSU pipe.
+The `fence` instruction is presynced to make sure that there are no instructions in the LSU pipe.
 It stalls until the LSU indicates that the store buffer and unified buffer have been fully drained (i.e., are empty).
-The fence instruction is only committed after all LSU buffers are idle and all outstanding bus transactions are completed.
+The `fence` instruction is only committed after all LSU buffers are idle and all outstanding bus transactions are completed.
 
 ### Imprecise Data Bus Errors
 
@@ -196,21 +196,21 @@ See [](build-args.md#memory-protection-build-arguments) for more information.
 ## Exception Handling
 
 Capturing the faulting effective address causing an exception helps assist firmware in handling the exception and/or provides additional information for firmware debugging.
-For precise exceptions, the faulting effective address is captured in the standard RISC-V mtval register (see Section 3.1.17 in [[2]](intro.md#ref-2)).
+For precise exceptions, the faulting effective address is captured in the standard RISC-V `mtval` register (see Section 3.1.17 in [[2]](intro.md#ref-2)).
 For imprecise exceptions, the address of the first occurrence of the error is captured in a platform-specific error address capture register (see [](memory-map.md#d-bus-first-error-address-capture-register-mdseac)).
 
 ### Imprecise Bus Error Non-Maskable Interrupt
 
 Store bus errors are fatal and cause a non-maskable interrupt (NMI).
-The store bus error NMI has an mcause value of 0xF000_0000.
+The store bus error NMI has an `mcause` value of 0xF000_0000.
 
 Likewise, non-blocking load bus errors are fatal and cause a non-maskable interrupt (NMI).
-The non-blocking load bus error NMI has an mcause value of 0xF000_0001.
+The non-blocking load bus error NMI has an `mcause` value of 0xF000_0001.
 
 :::{note}
-The address of the first store or non-blocking load error on the D-bus is captured in the mdseac register (see [](memory-map.md#d-bus-first-error-address-capture-register-mdseac)).
-The register is unlocked either by resetting the core after the NMI has been handled or by a write to the mdeau register (see [](memory-map.md#d-bus-error-address-unlock-register-mdeau)).
-While the mdseac register is locked, subsequent D-bus errors are gated (i.e., they do not cause another NMI), but NMI requests originating external to the core are still honored.
+The address of the first store or non-blocking load error on the D-bus is captured in the `mdseac` register (see [](memory-map.md#d-bus-first-error-address-capture-register-mdseac)).
+The register is unlocked either by resetting the core after the NMI has been handled or by a write to the `mdeau` register (see [](memory-map.md#d-bus-error-address-unlock-register-mdeau)).
+While the `mdseac` register is locked, subsequent D-bus errors are gated (i.e., they do not cause another NMI), but NMI requests originating external to the core are still honored.
 :::
 
 :::{note}
@@ -225,9 +225,9 @@ Each counter also has its separate programmable error threshold.
 If any of these counters has reached its threshold, a correctable error local interrupt is signaled.
 Firmware should determine which of the counters has reached the threshold and reset that counter.
 
-A local-to-the-core interrupt for correctable errors has pending (*mceip*) and enable (*mceie*) bits in bit position 30 of the standard RISC-V mip (see {numref}`tab-machine-interrupt-pending-register`) and mie (see {numref}`tab-machine-interrupt-enable-register`) registers, respectively.
+A local-to-the-core interrupt for correctable errors has pending (*mceip*) and enable (*mceie*) bits in bit position 30 of the standard RISC-V `mip` (see {numref}`tab-machine-interrupt-pending-register`) and `mie` (see {numref}`tab-machine-interrupt-enable-register`) registers, respectively.
 The priority is lower than the RISC-V External interrupt, but higher than the RISC-V Software and Timer interrupts, (see {numref}`tab-veer-el2-platform-specific-and-std-risc-v-interrupt-priorities`).
-The correctable error local interrupt has an mcause value of 0x8000_001E (see {numref}`tab-machine-cause-register`).
+The correctable error local interrupt has an `mcause` value of 0x8000_001E (see {numref}`tab-machine-cause-register`).
 
 ### Rules for Core-Local Memory Accesses
 
@@ -250,7 +250,7 @@ The rules for instruction fetch and load/store accesses to core-local memories a
 ### Core-Local / D-Bus Access Prediction
 
 In VeeR EL2, a prediction is made early in the pipeline if the access is to a core-local address (i.e., DCCM or PIC memory-mapped register) or to the D-bus (i.e., a memory or register address of the SoC).
-The prediction is based on the base address (i.e., value of register rs1) of the load/store instruction.
+The prediction is based on the base address (i.e., value of register *rs1*) of the load/store instruction.
 Later in the pipeline, the actual address is calculated also taking the offset into account (i.e., value of register *rs1 + offset*).
 A mismatch of the predicted and the actual destination (i.e., a core-local or a D-bus access) results in a load/store access fault exception.
 
@@ -673,8 +673,8 @@ All reserved and unused bits in these control/status registers must be hardwired
 A single region access control register is sufficient to provide independent control for 16 address regions.
 
 :::{note}
-To guarantee that updates to the mrac register are in effect, if a region being updated is in the load/store space, a fence instruction is required.
-Likewise, if a region being updated is in the instruction space, a fence.i instruction (which flushes the I-cache) is required.
+To guarantee that updates to the `mrac` register are in effect, if a region being updated is in the load/store space, a `fence` instruction is required.
+Likewise, if a region being updated is in the instruction space, a `fence.i` instruction (which flushes the I-cache) is required.
 :::
 
 :::{note}
@@ -720,13 +720,13 @@ This register is mapped to the non-standard read/write CSR address space.
 
 ### Memory Synchronization Trigger Register (dmst)
 
-The dmst register provides triggers to force the synchronization of memory accesses. Specifically, it allows a debugger to initiate operations that are equivalent to the fence.i (see [](memory-map.md#instructions)) and fence (see [](memory-map.md#data)) instructions.
+The `dmst` register provides triggers to force the synchronization of memory accesses. Specifically, it allows a debugger to initiate operations that are equivalent to the `fence.i` (see [](memory-map.md#instructions)) and `fence` (see [](memory-map.md#data)) instructions.
 
 :::{note}
  This register is accessible in **Debug Mode only**. Attempting to access this register in machine mode raises an illegal instruction exception.
 :::
 
-The *fence_i* and *fence* fields of the dmst register have W1R0 (Write 1, Read 0) behavior, as also indicated in the
+The *fence_i* and *fence* fields of the `dmst` register have W1R0 (Write 1, Read 0) behavior, as also indicated in the
 'Access' column.
 
 This register is mapped to the non-standard read/write CSR address space.
@@ -747,33 +747,34 @@ This register is mapped to the non-standard read/write CSR address space.
   - 0
 * - fence
   - 1
-  - Trigger operation equivalent to fence instruction
+  - Trigger operation equivalent to `fence` instruction
   - R0/W1
   - 0
 * - fence_i
   - 0
-  - Trigger operation equivalent to fence.i instruction
+  - Trigger operation equivalent to `fence.i` instruction
   - R0/W1
   - 0
 :::
 
 ### D-Bus First Error Address Capture Register (mdseac)
 
-The address of the first occurrence of a store or non-blocking load error on the D-bus is captured in the mdseac register. Latching the address also locks the register. While the mdseac register is locked, subsequent D-bus errors are gated (i.e., they do not cause another NMI), but NMI requests originating external to the core are still honored.
+The address of the first occurrence of a store or non-blocking load error on the D-bus is captured in the `mdseac` register. Latching the address also locks the register. 
+While the `mdseac` register is locked, subsequent D-bus errors are gated (i.e., they do not cause another NMI), but NMI requests originating external to the core are still honored.
 
-The mdseac register is unlocked by either a core reset (which is the safer option) or by writing to the mdeau register (see [](memory-map.md#d-bus-error-address-unlock-register-mdeau)).
+The `mdseac` register is unlocked by either a core reset (which is the safer option) or by writing to the `mdeau` register (see [](memory-map.md#d-bus-error-address-unlock-register-mdeau)).
 
 :::{note}
 The address captured in this register is the target (i.e., base) address of the store or non-blocking load which experienced an error.
 :::
 
 :::{note}
-The NMI handler may use the value stored in the mcause register to differentiate between a D-bus store error, a D-bus non-blocking load error, and a core-external event triggering an NMI.
+The NMI handler may use the value stored in the `mcause` register to differentiate between a D-bus store error, a D-bus non-blocking load error, and a core-external event triggering an NMI.
 :::
 
 :::{note}
-Capturing an address of a store or non-blocking load D-bus error in the mdseac register is independent of the actual taking of an NMI due to the bus error.
-For example, if a request on the NMI pin arrives just prior to the detection of a store or non-blocking load error on the D-bus, the address of the bus error may still be logged in the mdseac register.
+Capturing an address of a store or non-blocking load D-bus error in the `mdseac` register is independent of the actual taking of an NMI due to the bus error.
+For example, if a request on the NMI pin arrives just prior to the detection of a store or non-blocking load error on the D-bus, the address of the bus error may still be logged in the `mdseac` register.
 :::
 
 This register is mapped to the non-standard read-only CSR address space.
@@ -796,7 +797,7 @@ This register is mapped to the non-standard read-only CSR address space.
 
 ### D-Bus Error Address Unlock Register (mdeau)
 
-Writing to the mdeau register unlocks the mdseac register (see [](memory-map.md#d-bus-first-error-address-capture-register-mdseac)) after a D-bus error address has been captured.
+Writing to the `mdeau` register unlocks the `mdseac` register (see [](memory-map.md#d-bus-first-error-address-capture-register-mdseac)) after a D-bus error address has been captured.
 This write access also reenables the signaling of an NMI for a subsequent D-bus error.
 
 :::{note}
@@ -804,7 +805,7 @@ Nested NMIs might destroy core state and, therefore, receiving an NMI should sti
 Issuing a core reset is a safer option to deal with a D-bus error.
 :::
 
-The mdeau register has WAR0 (Write Any value, Read 0) behavior.
+The `mdeau` register has WAR0 (Write Any value, Read 0) behavior.
 Writing '0' is recommended.
 
 This register is mapped to the non-standard read/write CSR address space.
@@ -827,15 +828,15 @@ This register is mapped to the non-standard read/write CSR address space.
 
 ### Machine Secondary Cause Register (mscause)
 
-The mscause register, in conjunction with the standard RISC-V mcause register (see [](adaptations.md#machine-cause-register-mcause)), allows the determination of the exact cause of a trap for cases where multiple, different conditions share a single trap code.
-The standard RISC-V mcause register provides the trap code and the mscause register provides supporting information about the trap to disambiguate different sources.
+The `mscause` register, in conjunction with the standard RISC-V `mcause` register (see [](adaptations.md#machine-cause-register-mcause)), allows the determination of the exact cause of a trap for cases where multiple, different conditions share a single trap code.
+The standard RISC-V mcause register provides the trap code and the `mscause` register provides supporting information about the trap to disambiguate different sources.
 A value of '0' indicates that there is no additional information available.
 {numref}`tab-machine-secondary-cause-register` lists VeeR EL2's standard exceptions/interrupts (regular text), platform-specific local interrupts (italic text), and NMI causes (bold text).
 
-The mscause register has WLRL (Write Legal value, Read Legal value) behavior.
+The `mscause` register has WLRL (Write Legal value, Read Legal value) behavior.
 
 :::{note}
-VeeR EL2 implements only the 4 least-significant bits of the mscause register (i.e., mscause[3:0]).
+VeeR EL2 implements only the 4 least-significant bits of the mscause register (i.e., `mscause[3:0]`).
 Writes to all higher bits are ignored, reads return 0 for those bits.
 :::
 
@@ -1179,7 +1180,7 @@ Issuing speculative accesses on the IFU bus interface is benign as long as the p
 The decision of which addresses are unimplemented and which addresses with potential side effects need to be protected is left to the platform.
 
 Instruction fetch speculation can be limited, though not entirely avoided, by turning off the core's branch predictor including the return address stack.
-Writing a '1' to the *bpd* bit in the mfdc register (see {numref}`tab-feature-disable-cr`) disables branch prediction including RAS.
+Writing a '1' to the *bpd* bit in the `mfdc` register (see {numref}`tab-feature-disable-cr`) disables branch prediction including RAS.
 
 ### Data
 
@@ -1207,7 +1208,7 @@ The only write byte enable values allowed for AXI4 are 0x0F, 0xF0, and 0xFF.
 Accesses to the ICCM and DCCM by the core have higher priority if the DMA FIFO is not full.
 However, to avoid starvation, the DMA slave port's DMA controller may periodically request a stall to get access to the pipe if a DMA request is continuously blocked.
 
-The *dqc* field in the mfdc register (see {numref}`tab-feature-disable-cr`) specifies the maximum number of clock cycles a DMA access request waits at the head of the DMA FIFO before requesting a bubble to access the pipe.
+The *dqc* field in the `mfdc` register (see {numref}`tab-feature-disable-cr`) specifies the maximum number of clock cycles a DMA access request waits at the head of the DMA FIFO before requesting a bubble to access the pipe.
 For example, if *dqc* is 0, a DMA access requests a bubble immediately (i.e., in the same cycle); if *dqc* is 7 (the default value), a waiting DMA access requests a bubble on the 8th cycle.
 For a DMA access to the ICCM, it may take up to 3 additional cycles25 before the access is granted.
 Similarly, for a DMA access to the DCCM, it may take up to 4 additional cycles before the access is granted.
@@ -1220,33 +1221,33 @@ There are no ordering guarantees between the core and the DMA slave port accessi
 ## Reset Signal and Vector
 
 The core provides a 31-bit wide input bus at its periphery for a reset vector.
-The SoC must provide the reset vector on the rst_vec[31:1] bus, which could be hardwired or from a register.
-The rst_l input signal is active-low, asynchronously asserted, and synchronously deasserted (see also [](clocks.md#reset)).
+The SoC must provide the reset vector on the `rst_vec[31:1]` bus, which could be hardwired or from a register.
+The `rst_l` input signal is active-low, asynchronously asserted, and synchronously deasserted (see also [](clocks.md#reset)).
 When the core is reset, it fetches the first instruction to be executed from the address provided on the reset vector bus.
 Note that the applied reset vector must be pointing to the ICCM, if enabled, or a valid memory address, which is within an enabled instruction access window if the memory protection mechanism (see [](memory-map.md#memory-protection)) is used.
 
 :::{note}
-The core's 31 general-purpose registers (x1 - x31) are cleared on reset.
+The core's 31 general-purpose registers (`x1 - x31`) are cleared on reset.
 :::
 
 ## Non-Maskable Interrupt (NMI) Signal and Vector
 
 The core provides a 31-bit wide input bus at its periphery for a non-maskable interrupt (NMI) vector.
-The SoC must provide the NMI vector on the nmi_vec[31:1] bus, either hardwired or sourced from a register.
+The SoC must provide the NMI vector on the `nmi_vec[31:1]` bus, either hardwired or sourced from a register.
 
 :::{note}
 NMI is entirely separate from the other interrupts and not affected by the selection of Direct vs Vectored mode.
 :::
 
-The SoC may trigger an NMI by asserting the low-to-high edge-triggered, asynchronous nmi_int input signal.
+The SoC may trigger an NMI by asserting the low-to-high edge-triggered, `asynchronous nmi_int` input signal.
 This signal must be asserted for at least two full core clock cycles to guarantee it is detected by the core since shorter pulses might be dropped by the synchronizer circuit.
-Furthermore, the nmi_int signal must be deasserted for a minimum of two full core clock cycles and then reasserted to signal the next NMI request to the core.
-If the SoC does not use the pin-asserted NMI feature, it must hardwire the nmi_int input signal to 0.
+Furthermore, the `nmi_int` signal must be deasserted for a minimum of two full core clock cycles and then reasserted to signal the next NMI request to the core.
+If the SoC does not use the pin-asserted NMI feature, it must hardwire the `nmi_int` input signal to 0.
 
 In addition to NMIs triggered by the SoC, a core-internal NMI request is signaled when a D-bus store or non-blocking load error has been detected.
 
 When the core receives either an SoC-triggered or a core-internal NMI request, it fetches the next instruction to be executed from the address provided on the NMI vector bus.
-The reason for the NMI request is reported in the mcause register according to {numref}`tab-summary-nmi-mcause-values`.
+The reason for the NMI request is reported in the `mcause` register according to {numref}`tab-summary-nmi-mcause-values`.
 
 :::{list-table} Summary of NMI mcause Values
 :name: tab-summary-nmi-mcause-values
@@ -1256,7 +1257,7 @@ The reason for the NMI request is reported in the mcause register according to {
   - **Description**
   - **Section**
 * - 0x0000_0000
-  - NMI pin assertion (nmi_int input signal)
+  - NMI pin assertion (`nmi_int` input signal)
   - see above
 * - 0xF000_0000
   - Machine D-bus store error NMI
@@ -1281,13 +1282,13 @@ The reason for the NMI request is reported in the mcause register according to {
 
 ## Software Interrupts
 
-The VeeR EL2 core provides a software-interrupt input signal for its hart (see soft_int in {numref}`tab-core-complex-signals`).
-The soft_int signal is an active-high, level-sensitive, asynchronous input signal which feeds the *msip* (machine software-interrupt pending) bit of the standard RISC-V mip register (see {numref}`tab-machine-interrupt-pending-register`).
-When the *msie* (machine software-interrupt enable) bit of the standard RISC-V mie register (see {numref}`tab-machine-interrupt-enable-register`) is set, a machine software interrupt occurs if the *msip* bit of the mip register is asserted.
+The VeeR EL2 core provides a software-interrupt input signal for its hart (see `soft_int` in {numref}`tab-core-complex-signals`).
+The `soft_int` signal is an active-high, level-sensitive, asynchronous input signal which feeds the *msip* (machine software-interrupt pending) bit of the standard RISC-V `mip` register (see {numref}`tab-machine-interrupt-pending-register`).
+When the *msie* (machine software-interrupt enable) bit of the standard RISC-V `mie` register (see {numref}`tab-machine-interrupt-enable-register`) is set, a machine software interrupt occurs if the *msip* bit of the `mip` register is asserted.
 
 The SoC must implement Machine Software Interrupt (MSI) memory-mapped I/O registers.
-These registers provide interrupt control bits which are directly connected to the respective soft_int pins of each core.
+These registers provide interrupt control bits which are directly connected to the respective `soft_int` pins of each core.
 Writing to the corresponding bit of one of these registers enables remote harts to trigger machine-mode interprocessor interrupts.
 
-Each hart can read its own mhartid register (see [](adaptations.md#machine-hardware-thread-id-register-mhartid)) to determine the memory address of the associated memory-mapped MSI register within the platform.
+Each hart can read its own `mhartid` register (see [](adaptations.md#machine-hardware-thread-id-register-mhartid)) to determine the memory address of the associated memory-mapped MSI register within the platform.
 In this manner, an interrupt service routine can reset the corresponding memory-mapped MSI register bit before returning from a software interrupt.

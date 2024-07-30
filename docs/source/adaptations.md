@@ -11,11 +11,11 @@ Unless otherwise noted, all read/write control/status registers must have WARL (
 
 ## Machine Interrupt Enable (mie) and Machine Interrupt Pending (mip) Registers
 
-The standard RISC-V mie and mip registers hold the machine interrupt enable and interrupt pending bits, respectively.
+The standard RISC-V `mie` and `mip` registers hold the machine interrupt enable and interrupt pending bits, respectively.
 Since VeeR EL2 only supports machine mode, all supervisor- and user-specific bits are not implemented.
-In addition, the mie/mip registers also host the platform-specific local interrupt enable/pending bits (shown with a gray background in {numref}`tab-machine-interrupt-enable-register` and {numref}`tab-machine-interrupt-pending-register` below).
+In addition, the `mie/mip` registers also host the platform-specific local interrupt enable/pending bits (shown with a gray background in {numref}`tab-machine-interrupt-enable-register` and {numref}`tab-machine-interrupt-pending-register` below).
 
-The mie register is a standard read/write CSR.
+The `mie` register is a standard read/write CSR.
 
 :::{list-table} Machine Interrupt Enable Register (mie, at CSR 0x304)
 :name: tab-machine-interrupt-enable-register
@@ -83,10 +83,10 @@ The mie register is a standard read/write CSR.
   - 0
 :::
 
-The mip register is a standard read/write CSR.
+The `mip` register is a standard read/write CSR.
 
 :::{note}
-All M-mode interrupt pending bits of the read/write mip register are read-only.
+All M-mode interrupt pending bits of the read/write `mip` register are read-only.
 :::
 
 :::{list-table} Machine Interrupt Pending Register (mip, at CSR 0x344)
@@ -161,7 +161,7 @@ The standard RISC-V mcause register indicates the cause for a trap as shown in {
 
 Additional trap information is provided in the mscause register, see [](memory-map.md#machine-secondary-cause-register-mscause) which allows the determination of the exact cause of a trap for cases where multiple, different conditions share a single trap code.
 
-The mcause register has WLRL (Write Legal value, Read Legal value) behavior.
+The `mcause` register has WLRL (Write Legal value, Read Legal value) behavior.
 
 This register is a standard read/write CSR.
 
@@ -284,7 +284,7 @@ All other values are reserved.
 
 ## Machine Hardware Thread ID Register (mhartid)
 
-The standard RISC-V mhartid register provides the integer ID of the hardware thread running the code.
+The standard RISC-V `mhartid` register provides the integer ID of the hardware thread running the code.
 Hart IDs must be unique.
 Hart IDs might not necessarily be numbered contiguously in a multiprocessor system, but at least one hart must have a hart ID of zero.
 
@@ -292,11 +292,11 @@ Hart IDs might not necessarily be numbered contiguously in a multiprocessor syst
 In certain cases, it must be ensured that exactly one hart runs some code (e.g., at reset), hence the requirement for one hart to have a known hart ID of zero.
 :::
 
-The mhartid register is split into two fixed-sized fields.
-The SoC must provide a hardwired core ID on the core_id[31:4] bus.
-The value provided on that bus sources the mhartid register's *coreid* field.
-If the SoC hosts more than one RISC-V core, each core must have its own unique core_id value.
-Each hardware thread of the core has a unique, hardwired thread ID which is reflected in the mhartid register's *hartid* field starting at 0x0 up to 0xF.
+The `mhartid` register is split into two fixed-sized fields.
+The SoC must provide a hardwired core ID on the `core_id[31:4]` bus.
+The value provided on that bus sources the `mhartid` register's *coreid* field.
+If the SoC hosts more than one RISC-V core, each core must have its own unique `core_id` value.
+Each hardware thread of the core has a unique, hardwired thread ID which is reflected in the `mhartid` register's *hartid* field starting at 0x0 up to 0xF.
 
 VeeR EL2 implements a single hardware thread with thread ID 0x0.
 
@@ -315,7 +315,7 @@ This register is a standard read-only CSR.
   - 31:4
   - Core ID of this VeeR EL2
   - R
-  - core_id[31:4] bus value  (see {numref}`tab-core-complex-signals`)
+  - `core_id[31:4]` bus value  (see {numref}`tab-core-complex-signals`)
 * - hartid
   - 3:0
   - Hardwired per-core hart ID:  0x0: thread 0 (master thread)

@@ -19,14 +19,14 @@ The VeeR EL2 core complex's clock and reset features are:
 
 ### Regular Operation
 
-The VeeR EL2 core complex is driven by a single clock (clk).
-All input and output signals, except those listed in {numref}`tab-core-complex-async-signals`, are synchronous to clk.
+The VeeR EL2 core complex is driven by a single clock (`clk`).
+All input and output signals, except those listed in {numref}`tab-core-complex-async-signals`, are synchronous to `clk`.
 
 The core complex provides three master system bus interfaces (for instruction fetch, load/store data, and debug) as well as one slave (DMA) system bus interface.
-The SoC controls the clock ratio for each system bus interface via the clock enable signal (*_bus_clk_en).
+The SoC controls the clock ratio for each system bus interface via the clock enable signal (`*_bus_clk_en`).
 The clock ratios selected by the SoC may be the same or different for each system bus.
 
-{numref}`fig-data-timing-relationship` depicts the conceptual relationship of the clock (clk), system bus enable (*_bus_clk_en) used to select the clock ratio for each system bus, and the data (*data) of the respective system bus.
+{numref}`fig-data-timing-relationship` depicts the conceptual relationship of the clock (`clk`), system bus enable (`*_bus_clk_en`) used to select the clock ratio for each system bus, and the data (`*data`) of the respective system bus.
 
 :::{figure-md} fig-data-timing-relationship
 ![Data Timing Relationship](img/clock_timing.png)
@@ -91,12 +91,12 @@ The achievable clock frequency depends on the configuration, the sizes and confi
 
 ### Asynchronous Signals
 
-{numref}`tab-core-complex-async-signals` provides a list of signals which are asynchronous to the core clock (clk).
-Signals which are inputs to the core complex are synchronized to clk in the core complex logic.
-Signals which are outputs of the core complex must be synchronized outside of the core complex logic if the respective receiving clock domain is driven by a different clock than clk.
+{numref}`tab-core-complex-async-signals` provides a list of signals which are asynchronous to the core clock (`clk`).
+Signals which are inputs to the core complex are synchronized to `clk` in the core complex logic.
+Signals which are outputs of the core complex must be synchronized outside of the core complex logic if the respective receiving clock domain is driven by a different clock than `clk`.
 
 Note that each asynchronous input passes through a two-stage synchronizer.
-The signal must be asserted for at least two full clk cycles to guarantee it is detected by the core complex logic.
+The signal must be asserted for at least two full `clk` cycles to guarantee it is detected by the core complex logic.
 Shorter pulses might be dropped by the synchronizer circuit.
 
 :::{list-table} Core Complex Asynchronous Signals
@@ -165,8 +165,8 @@ The VeeR EL2 core complex provides two reset signals, the core complex reset, se
 
 ### Core Complex Reset (rst_l)
 
-As shown in {numref}`fig-clock-reset-timing`, the core complex reset signal (rst_l) is active-low, may be asynchronously asserted, but must be synchronously deasserted to avoid any glitches.
-The rst_l input signal is not synchronized to the core clock (clk) inside the core complex logic.
+As shown in {numref}`fig-clock-reset-timing`, the core complex reset signal (`rst_l`) is active-low, may be asynchronously asserted, but must be synchronously deasserted to avoid any glitches.
+The `rst_l` input signal is not synchronized to the core clock (`clk`) inside the core complex logic.
 All core complex flops are reset asynchronously.
 
 :::{figure-md} fig-clock-reset-timing
@@ -175,10 +175,10 @@ All core complex flops are reset asynchronously.
 Conceptual Clock and Reset Timing Relationship
 :::
 
-Note that the core complex clock (clk) must be stable before the core complex reset (rst_l) is deasserted.
+Note that the core complex clock (`clk`) must be stable before the core complex reset (`rst_l`) is deasserted.
 
 :::{note}
-From a backend perspective, care should be taken during place-and-route optimization steps to adequately build buffer tree and distribution network of the rst_l signal. Slew (transition time) targets should be in the same range as functional signals and distribution delays should be closely matched to clock delays, to maintain reasonable latencies and skews. Further, rst_l specific timing checks can be performed during final signoff timing to ensure proper functionality, though they are more complex and challenging to model through static timing analysis.
+From a backend perspective, care should be taken during place-and-route optimization steps to adequately build buffer tree and distribution network of the `rst_l` signal. Slew (transition time) targets should be in the same range as functional signals and distribution delays should be closely matched to clock delays, to maintain reasonable latencies and skews. Further, `rst_l` specific timing checks can be performed during final signoff timing to ensure proper functionality, though they are more complex and challenging to model through static timing analysis.
 :::
 
 :::{note}
@@ -187,11 +187,11 @@ The core complex reset signal resets the entire VeeR EL2 core complex, except th
 
 ### Debug Module Reset (dbg_rst_l)
 
-The Debug Module reset signal (dbg_rst_l) is an active-low signal which resets the VeeR EL2 core complex's Debug Module as well as the synchronizers between the JTAG interface and the core complex.
+The Debug Module reset signal (`dbg_rst_l`) is an active-low signal which resets the VeeR EL2 core complex's Debug Module as well as the synchronizers between the JTAG interface and the core complex.
 The Debug Module reset signal may be connected to the power-on reset signal of the SoC.
-This allows an external debugger to interact with the Debug Module when the core complex reset signal (rst_l) is still asserted.
+This allows an external debugger to interact with the Debug Module when the core complex reset signal (`rst_l`) is still asserted.
 
-If this layered reset functionality is not required, the dbg_rst_l signal may be tied to the rst_l signal outside the core complex.
+If this layered reset functionality is not required, the `dbg_rst_l` signal may be tied to the `rst_l` signal outside the core complex.
 
 ### Debugger Initiating Reset via JTAG Interface
 
@@ -204,15 +204,15 @@ Recovery may require an assertion of the SoC master reset.
 
 The RISC-V Debug specification [[3]](intro.md#ref-3) states a requirement that the debugger must be able to be in control from the first executed instruction of a program after a reset.
 
-The dmcontrol register, see [](debugging.md#debug-module-control-register-dmcontrol), of the Debug Module controls the core-complex-internal ndmreset (non-debug module reset) signal.
+The `dmcontrol` register, see [](debugging.md#debug-module-control-register-dmcontrol), of the Debug Module controls the core-complex-internal ndmreset (non-debug module reset) signal.
 This signal resets the core complex (except for the Debug Module and Debug Transport Module).
 
 The following sequence is used to reset the core and execute the first instruction in Debug Mode (i.e., db-halt state):
 1. Take Debug Module out of reset
-    * Set *dmactive* bit of dmcontrol register (dmcontrol = 0x0000_0001)
+    * Set *dmactive* bit of `dmcontrol` register (`dmcontrol` = 0x0000_0001)
 2. Reset core complex
-    * Set *ndmreset* bit of dmcontrol register (dmcontrol = 0x0000_0003)
+    * Set *ndmreset* bit of `dmcontrol` register (`dmcontrol` = 0x0000_0003)
 3. While in reset, assert halt request with ndmreset still asserted
-    * Set *haltreq* bit of dmcontrol register (dmcontrol = 0x8000_0003)
+    * Set *haltreq* bit of `dmcontrol` register (`dmcontrol` = 0x8000_0003)
 4. Take core complex out of reset with halt request still asserted
-    * Clear *ndmreset* bit of dmcontrol register (dmcontrol = 0x8000_0001)
+    * Clear *ndmreset* bit of `dmcontrol` register (`dmcontrol` = 0x8000_0001)

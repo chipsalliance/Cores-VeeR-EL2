@@ -10,23 +10,23 @@ The VeeR EL2's internal timer features are:
   * Dedicated counter
   * Dedicated bound
   * Dedicated control to enable/disable incrementing generally, during power management Sleep, and while executing PAUSE
-  * Enable/disable local interrupts (in standard RISC-V mie register)
+  * Enable/disable local interrupts (in standard RISC-V `mie` register)
 * Cascade mode to form a single 64-bit timer
 
 ## Description
 
 The VeeR EL2 core implements two internal timers.
-The mitcnt0 and mitcnt1 registers (see [Internal Timer Counter 0 / 1 Register (mitcnt0/1)](timers.md#internal-timer-counter-0-1-register-mitcnt0-1)) are 32-bit unsigned counters.
-Each counter also has a corresponding 32-bit unsigned bound register (i.e., mitb0 and mitb1, see [Internal Timer Bound 0 / 1 Register (mitb0/1)](timers.md#internal-timer-bound-0-1-register-mitb0-1)) and control register (i.e., mitctl0 and mitctl1, see [Internal Timer Control 0 / 1 Register (mitctl0/1)](timers.md#internal-timer-control-0-1-register-mitctl0-1)).
+The `mitcnt0` and `mitcnt1` registers (see [Internal Timer Counter 0 / 1 Register (mitcnt0/1)](timers.md#internal-timer-counter-0-1-register-mitcnt0-1)) are 32-bit unsigned counters.
+Each counter also has a corresponding 32-bit unsigned bound register (i.e., `mitb0` and `mitb1`, see [Internal Timer Bound 0 / 1 Register (mitb0/1)](timers.md#internal-timer-bound-0-1-register-mitb0-1)) and control register (i.e., `mitctl0` and `mitctl1`, see [Internal Timer Control 0 / 1 Register (mitctl0/1)](timers.md#internal-timer-control-0-1-register-mitctl0-1)).
 
 All registers are cleared at reset unless otherwise noted.
 After reset, the counters start incrementing the next clock cycle if the increment conditions are met.
 All registers can be read as well as written at any time.
-The mitcnt0/1 and mitb0/1 registers may be written to any 32-bit value.
-If the conditions to increment are met, the corresponding counter mitcnt0/1 increments every clock cycle.
+The `mitcnt0/1` and `mitb0/1` registers may be written to any 32-bit value.
+If the conditions to increment are met, the corresponding counter `mitcnt0/1` increments every clock cycle.
 
 Cascade mode (see [Internal Timer Control 0 / 1 Register (mitctl0/1)](timers.md#internal-timer-control-0-1-register-mitctl0-1)) links the two counters together.
-The mitcnt1 register is only incremented when the conditions to increment mitcnt1 are met and the mitcnt0 register is greater than or equal to the bound in its mitb0 register.
+The `mitcnt1` register is only incremented when the conditions to increment `mitcnt1` are met and the `mitcnt0` register is greater than or equal to the bound in its `mitb0` register.
 
 For each timer, a local interrupt (see [](timers.md#internal-timer-local-interrupts)) is triggered when that counter is at or above its bound.
 When a counter is at or above its bound, it gets cleared the next clock cycle (i.e., the interrupt condition is not sticky).
@@ -41,7 +41,7 @@ If the core is in the Debug Mode's Halted (i.e., db-halt) state, an internal tim
 
 ## Internal Timer Local Interrupts
 
-Local-to-the-core interrupts for internal timer 0 and 1 have pending [^fn-timers-1] (*mitip0/1*) and enable (*mitie0/1*) bits in bit positions 29 (for internal timer 0) and 28 (for internal timer 1) of the standard RISC-V mip (see {numref}`tab-machine-interrupt-pending-register`) and mie (see {numref}`tab-machine-interrupt-enable-register`) registers, respectively.
+Local-to-the-core interrupts for internal timer 0 and 1 have pending [^fn-timers-1] (*mitip0/1*) and enable (*mitie0/1*) bits in bit positions 29 (for internal timer 0) and 28 (for internal timer 1) of the standard RISC-V `mip` (see {numref}`tab-machine-interrupt-pending-register`) and `mie` (see {numref}`tab-machine-interrupt-enable-register`) registers, respectively.
 The priority is lower than the RISC-V External, Software, and Timer interrupts (see {numref}`tab-veer-el2-platform-specific-and-std-risc-v-interrupt-priorities`).
 The internal timer 0 and 1 local interrupts have an mcause value of 0x8000_001D (for internal timer 0) and 0x8000_001C (for internal timer 1) (see {numref}`tab-machine-cause-register`).
 
@@ -51,10 +51,10 @@ If both internal timer interrupts occur in the same cycle, internal timer 0's in
 
 :::{note}
 A common interrupt service routine may be used for both interrupts.
-The mcause register value differentiates the two local interrupts.
+The `mcause` register value differentiates the two local interrupts.
 :::
 
-[^fn-timers-1]: Since internal timer interrupts are not latched (i.e., not “sticky”) and these local interrupts are only signaled for one core clock cycle, it is unlikely that they are detected by firmware in the mip register.
+[^fn-timers-1]: Since internal timer interrupts are not latched (i.e., not “sticky”) and these local interrupts are only signaled for one core clock cycle, it is unlikely that they are detected by firmware in the `mip` register.
 
 ## Control/Status Registers
 
@@ -69,19 +69,19 @@ Unless otherwise noted, all read/write control/status registers must have WARL (
 
 ### Internal Timer Counter 0 / 1 Register (mitcnt0/1)
 
-The mitcnt0 and mitcnt1 registers are the counters of the internal timer 0 and 1, respectively.
+The `mitcnt0` and `mitcnt1` registers are the counters of the internal timer 0 and 1, respectively.
 
 The conditions to increment a counter are:
 
 - The *enable* bit in the corresponding mitctl0/1 register is '1',
-- if the core is in Sleep (i.e., pmu/fw-halt) state, the *halt_en* bit in the corresponding mitctl0/1 register is '1',
-- if the core is paused, the *pause_en* bit in the corresponding mitctl0/1 register is '1', and
+- if the core is in Sleep (i.e., pmu/fw-halt) state, the *halt_en* bit in the corresponding `mitctl0/1` register is '1',
+- if the core is paused, the *pause_en* bit in the corresponding `mitctl0/1` register is '1', and
 - the core is not in Debug Mode, except while executing a single-stepped instruction.
 
 A counter is cleared if its value is greater than or equal to its corresponding mitb0/1 register.
 
 :::{note}
-If a write to the mitcnt0/1 register is committed in the same clock cycle as the timer interrupt condition is met, the internal timer local interrupt is triggered, if enabled, but the counter is not cleared in this case. Instead, the counter is set to the written value.
+If a write to the `mitcnt0/1` register is committed in the same clock cycle as the timer interrupt condition is met, the internal timer local interrupt is triggered, if enabled, but the counter is not cleared in this case. Instead, the counter is set to the written value.
 :::
 
 These registers are mapped to the non-standard read/write CSR address space.
@@ -105,7 +105,7 @@ These registers are mapped to the non-standard read/write CSR address space.
 
 ### Internal Timer Bound 0 / 1 Register (mitb0/1)
 
-The mitb0 and mitb1 registers hold the upper bounds of the internal timer 0 and 1, respectively.
+The `mitb0` and `mitb1` registers hold the upper bounds of the internal timer 0 and 1, respectively.
 
 These registers are mapped to the non-standard read/write CSR address space.
 
@@ -128,10 +128,10 @@ These registers are mapped to the non-standard read/write CSR address space.
 
 ### Internal Timer Control 0 / 1 Register (mitctl0/1)
 
-The mitctl0 and mitctl1 registers provide the control bits of the internal timer 0 and 1, respectively.
+The `mitctl0` and `mitctl1` registers provide the control bits of the internal timer 0 and 1, respectively.
 
 :::{note}
-When in cascade mode, it is highly recommended to program the enable, *halt_en*, and *pause_en* control bits of the mitctl1 register the same as the mitctl0 register.
+When in cascade mode, it is highly recommended to program the enable, *halt_en*, and *pause_en* control bits of the `mitctl1` register the same as the `mitctl0` register.
 :::
 
 These registers are mapped to the non-standard read/write CSR address space.
@@ -151,7 +151,7 @@ These registers are mapped to the non-standard read/write CSR address space.
   - Reserved
   - R
   - 0
-* - cascade (mitctl1 only)
+* - cascade **(mitctl1 only)**
   - 3
   - Cascade mode:
     - 0: Disable cascading (i.e., both internal timers operate independently) (default)

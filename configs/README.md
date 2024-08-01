@@ -1,4 +1,4 @@
-# VeeR RISC-V EL2 core from Western Digital
+# VeeR EL2 RISC-V Core
 
 ## Configuration
 

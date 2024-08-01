@@ -16,10 +16,10 @@ The PMP distinguishes 3 types of memory accesses: instruction fetch, data load a
 
 ## Physical Memory Protection CSRs
 
-The *pmpcfgX* and *pmpaddrX* CSRs are implemented in the [*el2_dec_tlu_ctl* module](../../design/dec/el2_dec_tlu_ctl.sv).
+The `pmpcfgX` and `pmpaddrX` CSRs are implemented in the [*el2_dec_tlu_ctl* module](../../design/dec/el2_dec_tlu_ctl.sv).
 CSR address decoding is generated from either [*csrdecode_m*](../../design/dec/csrdecode_m) (Machine mode) or [*csrdecode_mu*](../../design/dec/csrdecode_mu) (Machine and User mode) description file.
 
-The number of *pmpcfgX* registers is always 4 times smaller than the number of PMP entries, which are configurable using the *-set=pmp_entires=N* option, where *N* can be 0, 16 or 64.
+The number of `pmpcfgX` registers is always 4 times smaller than the number of PMP entries, which are configurable using the `-set=pmp_entires=N` option, where *N* can be 0, 16 or 64.
 
 :::{list-table} CSR configurations for RV-32
 :name: tab-riscv-pmp-csr-configuration-table
@@ -41,7 +41,7 @@ The number of *pmpcfgX* registers is always 4 times smaller than the number of P
 
 ### Configuration Registers (pmpcfgX)
 
-Each *pmpcfgX* register holds a configuration for four PMP entries, with a byte used for each entry.
+Each `pmpcfgX` register holds a configuration for four PMP entries, with a byte used for each entry.
 
 :::{list-table} Decoding of the *pmpcfgX* register
 :name: tab-riscv-pmpcfgx-register
@@ -77,8 +77,8 @@ Meaning of bit flags:
 
 ### Address Registers (pmpaddrX)
 
-PMP address registers (*pmpaddrX*) encode bits 33 to 2 (*address[33:2]*) in physical memory.
-This address defines protected memory region boundaries, further interpreted according to address matching values encoded by bits 4 and 3 of the *pmpcfgX* register:
+PMP address registers (`pmpaddrX`) encode bits 33 to 2 (`address[33:2]`) in physical memory.
+This address defines protected memory region boundaries, further interpreted according to address matching values encoded by bits 4 and 3 of the `pmpcfgX` register:
 
 - *00* OFF Null region (disabled)
 - *01* TOR Top of range
@@ -87,7 +87,7 @@ This address defines protected memory region boundaries, further interpreted acc
 
 ## Exceptions
 
-In case of impermissible memory access, an exception is raised and the exception code is stored in the *mcause* CSR register (*0x342*).
+In case of impermissible memory access, an exception is raised and the exception code is stored in the `mcause` CSR register (*0x342*).
 
 :::{list-table} PMP related exception codes
 :name: tab-riscv-pmp-exceptions
@@ -107,7 +107,7 @@ In case of impermissible memory access, an exception is raised and the exception
   - Store/Atomic Memory Operation access fault (cannot store data to protected region)
 :::
 
-Whenever a PMP access fault exception is raised, the machine secondary cause register (*mscause*) value is *0x03* indicating "access out of MPU range".
+Whenever a PMP access fault exception is raised, the machine secondary cause register (`mscause`) value is *0x03* indicating "access out of MPU range".
 
 ## PMP module
 
@@ -149,21 +149,21 @@ In this example we enforce the following permissions:
 - *0x00000000* - *0x00000FFF* - deny reads, writes, execution
 - *0x00001000* - *0x00001FFF* - allow reads, writes, execution
 
-First, let's configure the 2 address regions by writing 2 bytes to the lower 16 bits of the *pmpcfg0* register (each region configuration uses a byte)
+First, let's configure the 2 address regions by writing 2 bytes to the lower 16 bits of the `pmpcfg0` register (each region configuration uses a byte)
 PMP configuration registers should be set to:
 
-- *pmpcfg0[7:0]* = *0b00001000* - non-locked entry, top-of-range address matching, all memory access denied.
-- *pmpcfg0[15:8]* = *0b00001111* - non-locked entry, top-of-range address matching, all memory access permitted.
+- `pmpcfg0[7:0]` = *0b00001000* - non-locked entry, top-of-range address matching, all memory access denied.
+- `pmpcfg0[15:8]` = *0b00001111* - non-locked entry, top-of-range address matching, all memory access permitted.
 
-To select top-of-range matching, bits 3 and 4 of the configuration field are set to *0b01*, which creates a region starting with the address from the previous entry *pmpaddrX-1* and ending at an address in the*pmpaddrX* register, decremented by one.
+To select top-of-range matching, bits 3 and 4 of the configuration field are set to *0b01*, which creates a region starting with the address from the previous entry `pmpaddrX-1` and ending at an address in the `pmpaddrX` register, decremented by one.
 In case of the first entry on the list, the *0x00000000* address is used as boundary.
 
-After selecting the addressing mode, we can calculate values of *pmpaddr0* and *pmpaddr1* registers, which will define boundaries of regions.
-Addresses stored in *pmpaddrX* CSRs contain bits *[33:2]* of the memory address.
+After selecting the addressing mode, we can calculate values of `pmpaddr0` and `pmpaddr1` registers, which will define boundaries of regions.
+Addresses stored in `pmpaddrX` CSRs contain bits *[33:2]* of the memory address.
 Thus to select a specific address, it must be shifted by 2 bits to the right before writing the value to the register:
 
-* *pmpaddr0* should be `(0x00001000 >> 2) = 0x00000400` , so that it matches the memory region from *0x00000000* to *0x00000FFF*.
-* *pmpaddr1* should be `(0x00002000 >> 2) = 0x00000800` , so that it matches the memory region from *0x00001000* (which is the top address of the previous entry) to *0x00001FFF*.
+* `pmpaddr0` should be `(0x00001000 >> 2) = 0x00000400`, so that it matches the memory region from *0x00000000* to *0x00000FFF*.
+* `pmpaddr1` should be `(0x00002000 >> 2) = 0x00000800`, so that it matches the memory region from *0x00001000* (which is the top address of the previous entry) to *0x00001FFF*.
 
 With this configuration, all memory accesses to the first region (*0x00000000* - *0x00000FFF*) will fail and trigger an exception.
 The exception code can be read to determine the type of the failed operation (instruction fetch, data load or data store).

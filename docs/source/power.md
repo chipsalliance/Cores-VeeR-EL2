@@ -242,26 +242,26 @@ An MPC Debug Halt request may only be signaled when the core is either not in De
   - DMA accesses allowed
 * - **State Indication**
   -
-    - cpu_halt_status is low
-    - debug_mode_status is low (except for Core Debug Resume request with Single Step action)
+    - `cpu_halt_status` is low
+    - `debug_mode_status` is low (except for Core Debug Resume request with Single Step action)
   -
-    - cpu_halt_status is low
-    - debug_mode_status is high
+    - `cpu_halt_status` is low
+    - `debug_mode_status` is high
   -
-    - cpu_halt_status is high
-    - debug_mode_status is low
+    - `cpu_halt_status` is high
+    - `debug_mode_status` is low
 * - **Internal Timer Counters**
-  - mitcnt0/1 incremented every core clock cycle (also during execution of instructions while single-stepping in Debug Mode)
-  - mitcnt0/1 not incremented
-  - Depends on halt_en bit in mitctl0/1 registers:
-    - 0: mitcnt0/1 not incremented
-    - 1: mitcnt0/1 incremented every core clock cycle
+  - `mitcnt0/1` incremented every core clock cycle (also during execution of instructions while single-stepping in Debug Mode)
+  - `mitcnt0/1` not incremented
+  - Depends on *halt_en* bit in `mitctl0/1` registers:
+    - 0: `mitcnt0/1` not incremented
+    - 1: `mitcnt0/1` incremented every core clock cycle
 * - **Machine Cycle Performance- Monitoring Counter**
-  - mcycle incremented every core clock cycle
-  - Depends on stopcount bit of dcsr register (see [](debugging.md#debug-control-and-status-register-dcsr)):
-    - 0: mcycle incremented every core clock cycle
-    - 1: mcycle not incremented
-  - mcycle not incremented
+  - `mcycle` incremented every core clock cycle
+  - Depends on *stopcount* bit of `dcsr` register (see [](debugging.md#debug-control-and-status-register-dcsr)):
+    - 0: `mcycle` incremented every core clock cycle
+    - 1: `mcycle` not incremented
+  - `mcycle` not incremented
 :::
 
 ## Power Control
@@ -307,7 +307,7 @@ The state 'db-halt' is the only halt state allowed while in Debug Mode.
 #### Single Stepping
 
 A few notes about executing single-stepped instructions:
-* Executing instructions which attempt to exit Debug Mode are ignored (e.g., writing to the mpmc register requesting to halt the core does not transition the core to the pmu/fw-halt state).
+* Executing instructions which attempt to exit Debug Mode are ignored (e.g., writing to the `mpmc` register requesting to halt the core does not transition the core to the pmu/fw-halt state).
 * Accesses to D-mode registers are illegal, even though the core is in Debug Mode.
 * A core debug single-step action initiated in the time period between an MPC Debug Halt request and an MPC Debug Run request is stalled but stays pending until an MPC Debug Run request is issued.
 
@@ -330,7 +330,7 @@ Signals from the PMU and MPC to the core are asynchronous and must be synchroniz
 Similarly, signals from the core are asynchronous to the PMU and MPC clock domains and must be synchronized to the PMU's or MPC's clock, respectively.
 
 :::{note}
-The synchronizer of the cpu_run_req signal may not be clock-gated. Otherwise, the core may not be woken up again via the PMU interface.
+The synchronizer of the `cpu_run_req` signal may not be clock-gated. Otherwise, the core may not be woken up again via the PMU interface.
 :::
 
 :::{figure-md} fig-debug-csrs
@@ -348,19 +348,19 @@ There are three types of signals between the Power Management Unit and the VeeR 
 
 * - **Signal(s)**
   - **Description**
-* - cpu_halt_req and cpu_halt_ack
+* - `cpu_halt_req` and `cpu_halt_ack`
   - Full handshake to request the core to halt.
     
-    The PMU requests the core to halt (i.e., enter pmu/fw-halt) by asserting the cpu_halt_req signal. The core is quiesced before halting. The core then asserts the *cpu_halt_ack* signal. When the PMU detects the asserted cpu_halt_ack signal, it deasserts the *cpu_halt_req* signal. Finally, when the core detects the deasserted cpu_halt_req signal, it deasserts the cpu_halt_ack signal.
+    The PMU requests the core to halt (i.e., enter pmu/fw-halt) by asserting the `cpu_halt_req` signal. The core is quiesced before halting. The core then asserts the `cpu_halt_ack` signal. When the PMU detects the asserted `cpu_halt_ack` signal, it deasserts the `cpu_halt_req` signal. Finally, when the core detects the deasserted `cpu_halt_req` signal, it deasserts the `cpu_halt_ack` signal.
     
-    **Note:** *cpu_halt_req* must be tied to '0' if PMU interface is not used.
-* - cpu_run_req and cpu_run_ack
+    **Note:** `cpu_halt_req` must be tied to '0' if PMU interface is not used.
+* - `cpu_run_req` and `cpu_run_ack`
   - Full handshake to request the core to run.
     
-    The PMU requests the core to run by asserting the cpu_run_req signal. The core exits the halt state and starts execution again. The core then asserts the *cpu_run_ack* signal. When the PMU detects the asserted cpu_run_ack signal, it deasserts the *cpu_run_req* signal. Finally, when the core detects the deasserted cpu_run_req signal, it deasserts the cpu_run_ack signal.
+    The PMU requests the core to run by asserting the `cpu_run_req` signal. The core exits the halt state and starts execution again. The core then asserts the `cpu_run_ack` signal. When the PMU detects the asserted `cpu_run_ack` signal, it deasserts the `cpu_run_req` signal. Finally, when the core detects the deasserted `cpu_run_req` signal, it deasserts the `cpu_run_ack` signal.
     
-    **Note:** *cpu_run_req* must be tied to '0' if PMU interface is not used.
-* - cpu_halt_status
+    **Note:** `cpu_run_req` must be tied to '0' if PMU interface is not used.
+* - `cpu_halt_status`
   - Indication from the core to the PMU that the core has been gracefully halted.
 :::
 
@@ -385,41 +385,41 @@ There are five types of signals between the Multi-Processor Controller and the V
 
 * - **Signal(s)**
   - **Description**
-* - mpc_debug_halt_req and mpc_debug_halt_ack
+* - `mpc_debug_halt_req` and `mpc_debug_halt_ack`
   - Full handshake to request the core to debug halt.
     
-    The MPC requests the core to halt (i.e., enter ‘db-halt’) by asserting the mpc_debug_halt_req signal. The core is quiesced before halting. The core then asserts the mpc_debug_halt_ack signal. When the MPC detects the asserted mpc_debug_halt_ack signal, it deasserts the mpc_debug_halt_req signal. Finally, when the core detects the deasserted mpc_debug_halt_req signal, it deasserts the mpc_debug_halt_ack signal.
+    The MPC requests the core to halt (i.e., enter ‘db-halt’) by asserting the `mpc_debug_halt_req` signal. The core is quiesced before halting. The core then asserts the `mpc_debug_halt_ack` signal. When the MPC detects the asserted `mpc_debug_halt_ack` signal, it deasserts the `mpc_debug_halt_req` signal. Finally, when the core detects the deasserted `mpc_debug_halt_req` signal, it deasserts the `mpc_debug_halt_ack` signal.
     
-    For as long as the mpc_debug_halt_req signal is asserted, the core must assert and hold the mpc_debug_halt_ack signal whether it was already in ‘db-halt’ or just transitioned into ‘db-halt’ state.
+    For as long as the `mpc_debug_halt_req` signal is asserted, the core must assert and hold the `mpc_debug_halt_ack` signal whether it was already in ‘db-halt’ or just transitioned into ‘db-halt’ state.
     
-    **Note:** The cause field of the core’s dcsr register (see [](debugging.md#debug-control-and-status-register-dcsr)) is set to 3 (i.e., the same value as a debugger-requested entry to Debug Mode due to a Core Debug Halt request). Similarly, the dpc register (see [](debugging.md#debug-pc-register-dpc)) is updated with the address of the next instruction to be executed at the time that Debug Mode was entered.
+    **Note:** The *cause* field of the core’s `dcsr` register (see [](debugging.md#debug-control-and-status-register-dcsr)) is set to 3 (i.e., the same value as a debugger-requested entry to Debug Mode due to a Core Debug Halt request). Similarly, the `dpc` register (see [](debugging.md#debug-pc-register-dpc)) is updated with the address of the next instruction to be executed at the time that Debug Mode was entered.
     
     **Note:** Signaling more than one MPC Debug Halt request in succession is a protocol violation.
     
-    **Note:** mpc_debug_halt_req must be tied to ‘0’ if MPC interface is not used.
-* - mpc_debug_run_req and mpc_debug_run_ack
+    **Note:** `mpc_debug_halt_req` must be tied to ‘0’ if MPC interface is not used.
+* - `mpc_debug_run_req` and `mpc_debug_run_ack`
   - Full handshake to request the core to run.
     
-    The MPC requests the core to run by asserting the mpc_debug_run_req signal. The core exits the halt state and starts execution again. The core then asserts the mpc_debug_run_ack signal. When the MPC detects the asserted mpc_debug_run_ack signal, it deasserts the mpc_debug_run_req signal. Finally, when the core detects the deasserted mpc_debug_run_req signal, it deasserts the mpc_debug_run_ack signal.
+    The MPC requests the core to run by asserting the `mpc_debug_run_req` signal. The core exits the halt state and starts execution again. The core then asserts the `mpc_debug_run_ack` signal. When the MPC detects the asserted `mpc_debug_run_ack` signal, it deasserts the `mpc_debug_run_req` signal. Finally, when the core detects the deasserted `mpc_debug_run_req` signal, it deasserts the `mpc_debug_run_ack` signal.
     
-    For as long as the mpc_debug_run_req signal is asserted, the core must assert and hold the mpc_debug_run_ack signal whether it was already in ‘Running’ or after transitioning into ‘Running’ state.
+    For as long as the `mpc_debug_run_req` signal is asserted, the core must assert and hold the `mpc_debug_run_ack` signal whether it was already in ‘Running’ or after transitioning into ‘Running’ state.
     
     **Note:** The core remains in the ‘db-halt’ state if a core debug request is also still active.
     
     **Note:** Signaling more than one MPC Debug Run request in succession is a protocol violation.
     
-    **Note:** mpc_debug_run_req must be tied to ‘0’ if MPC interface is not used.
-* - mpc_reset_run_req
+    **Note:** `mpc_debug_run_req` must be tied to ‘0’ if MPC interface is not used.
+* - `mpc_reset_run_req`
   - Core start state control out of reset:
     - 1: Normal Mode (‘Running’ or ‘pmu/fw-halt’ state)
     - 0: Debug Mode halted (‘db-halt’ state)
     
     **Note:** The core complex does not implement a synchronizer for this signal because the timing of the first clock is critical. It must be synchronized to the core clock domain outside the core in the SoC.
     
-    **Note:** mpc_reset_run_req must be tied to ‘1’ if MPC interface is not used.
-* - debug_mode_status
+    **Note:** `mpc_reset_run_req` must be tied to ‘1’ if MPC interface is not used.
+* - `debug_mode_status`
   - Indication from the core to the MPC that it is currently transitioning to or already in Debug Mode.
-* - debug_brkpt_status
+* - `debug_brkpt_status`
   - Indication from the core to the MPC that a software (i.e., ebreak instruction) or hardware (i.e., trigger hit) breakpoint has been triggered in the core. The breakpoint signal is only asserted for breakpoints and triggers with debug halt action. The signal is deasserted on exiting Debug Mode.
 :::
 
@@ -428,15 +428,15 @@ Multi-core debug control protocol violations (e.g., simultaneously sending a run
 :::
 
 :::{note}
-If the core is either not in the db-halt state (i.e., debug_mode_status indication is not asserted) or is already in the db-halt state due to a previous Core Debug Halt request or a debug breakpoint or trigger (i.e., debug_mode_status indication is already asserted), asserting the mpc_debug_halt_req signal is allowed and acknowledged with the assertion of the mpc_debug_halt_ack signal. Also, asserting the mpc_debug_run_req signal is only allowed if the core is in the db-halt state (i.e., debug_mode_status indication is asserted), but the core asserts the mpc_debug_run_ack signal only after the cpu_run_req signal on the PMU interface has been asserted as well, if a PMU Halt request was still pending.
+If the core is either not in the db-halt state (i.e., `debug_mode_status` indication is not asserted) or is already in the db-halt state due to a previous Core Debug Halt request or a debug breakpoint or trigger (i.e., `debug_mode_status` indication is already asserted), asserting the `mpc_debug_halt_req` signal is allowed and acknowledged with the assertion of the `mpc_debug_halt_ack` signal. Also, asserting the `mpc_debug_run_req` signal is only allowed if the core is in the db-halt state (i.e., `debug_mode_status` indication is asserted), but the core asserts the `mpc_debug_run_ack` signal only after the `cpu_run_req` signal on the PMU interface has been asserted as well, if a PMU Halt request was still pending.
 :::
 
 :::{note}
-If the MPC is requesting the core to enter Debug Mode out of reset by activating the mpc_reset_run_req signal, the mpc_debug_run_req signal may not be asserted until the core is out of reset and has entered Debug Mode. Violating this rule may lead to unexpected core behavior.
+If the MPC is requesting the core to enter Debug Mode out of reset by activating the `mpc_reset_run_req` signal, the `mpc_debug_run_req` signal may not be asserted until the core is out of reset and has entered Debug Mode. Violating this rule may lead to unexpected core behavior.
 :::
 
 :::{note}
-If Debug Mode is entered at reset by setting the mpc_reset_run_req signal to '0', only a run request issued on the mpc_debug_run_req/ack interface allows the core to exit Debug Mode. A core debug resume request issued by the debugger does not transition the core out of Debug Mode.
+If Debug Mode is entered at reset by setting the `mpc_reset_run_req` signal to '0', only a run request issued on the `mpc_debug_run_req/ack` interface allows the core to exit Debug Mode. A core debug resume request issued by the debugger does not transition the core out of Debug Mode.
 :::
 
 {numref}`fig-multicore-csr-timing` depicts conceptual timing diagrams of a halt and a run request.
@@ -465,7 +465,7 @@ The following mixed core debug and MPC debug scenarios are supported by the core
 3. Core acknowledges this Debug Halt request as it is already in Debug Halt state (db-halt).
 4. MPC signals a Debug Run request, but core is in the middle of a core debugger operation (e.g., an Abstract Command-based access) which requires it to remain in Debug Halt state.
 5. Core completes debugger operation and waits for Core Debug Resume request from the core debugger.
-6. When core debugger sends a Debug Resume request, the core then transitions to the Running state and deasserts the debug_mode_status signal.
+6. When core debugger sends a Debug Resume request, the core then transitions to the Running state and deasserts the `debug_mode_status` signal.
 7. Finally, core acknowledges MPC Debug Run request.
 
 #### Scenario 2: Core Halt → MPC Halt → Core Resume → MPC Run
@@ -474,8 +474,8 @@ The following mixed core debug and MPC debug scenarios are supported by the core
 3. Core acknowledges this Debug Halt request as it is already in Debug Halt state (db-halt).
 4. Core debugger completes its operations and sends a Debug Resume request to the core.
 5. Core remains in Halted state as MPC has not yet asserted its Debug Run request.
-   The debug_mode_status signal remains asserted.
-6. When MPC signals a Debug Run request, the core then transitions to the Running state and deasserts the debug_mode_status signal.
+   The `debug_mode_status` signal remains asserted.
+6. When MPC signals a Debug Run request, the core then transitions to the Running state and deasserts the `debug_mode_status` signal.
 7. Finally, core acknowledges MPC Debug Run request.
 
 #### Scenario 3: Mpc Halt → Core Halt → Core Resume → Mpc Run
@@ -484,8 +484,8 @@ The following mixed core debug and MPC debug scenarios are supported by the core
 2. Core acknowledges this Debug Halt request.
 3. Core debugger signals a Debug Halt request to the core. Core is already in Debug Halt state (db-halt).
 4. Core debugger completes its operations and sends a Debug Resume request to the core.
-5. Core remains in Halted state as MPC has not yet asserted its Debug Run request. The debug_mode_status signal remains asserted.
-6. When MPC signals a Debug Run request, the core then transitions to the Running state and deasserts the debug_mode_status signal.
+5. Core remains in Halted state as MPC has not yet asserted its Debug Run request. The `debug_mode_status` signal remains asserted.
+6. When MPC signals a Debug Run request, the core then transitions to the Running state and deasserts the `debug_mode_status` signal.
 7. Finally, core acknowledges MPC Debug Run request.
 
 #### Scenario 4: MPC Halt → Core Halt → MPC Run → Core Resume
@@ -493,34 +493,34 @@ The following mixed core debug and MPC debug scenarios are supported by the core
 1. MPC asserts a Debug Halt request which results in the core transitioning into Debug Halt state (db-halt).
 2. Core acknowledges this Debug Halt request.
 3. Core debugger signals a Debug Halt request to the core. Core is already in Debug Halt state (db-halt).
-4. MPC signals a Debug Run request, but core debugger operations are still in progress. Core remains in Halted state. The debug_mode_status signal remains asserted.
+4. MPC signals a Debug Run request, but core debugger operations are still in progress. Core remains in Halted state. The `debug_mode_status` signal remains asserted.
 5. Core debugger completes operations and signals a Debug Resume request to the core.
-6. The core then transitions to the Running state and deasserts the debug_mode_status signal.
+6. The core then transitions to the Running state and deasserts the `debug_mode_status` signal.
 7. Finally, core acknowledges MPC Debug Run request.
 
 #### Summary
 
 For the core to exit out of Debug Halt state (db-halt) in cases where it has received debug halt requests from both core debugger and MPC, it must receive debug run requests from both the core debugger as well as the MPC, irrespective of the order in which debug halt requests came from both sources.
-Until then, the core remains halted and the debug_mode_status signal remains asserted.
+Until then, the core remains halted and the `debug_mode_status` signal remains asserted.
 
 ### Core Wake-Up Events
 
 When not in Debug Mode (i.e., the core is in pmu/fw-halt state), the core is woken up on several events:
 * PMU run request
-* Highest-priority external interrupt (mhwakeup signal from PIC) and core interrupts are enabled
+* Highest-priority external interrupt (`mhwakeup` signal from PIC) and core interrupts are enabled
 * Software interrupt
 * Timer interrupt
 * Internal timer interrupt
-* Non-maskable interrupt (NMI) (nmi_int signal)
+* Non-maskable interrupt (NMI) (`nmi_int` signal)
 
-The PIC is part of the core logic and the mhwakeup signal is connected directly inside the core.
+The PIC is part of the core logic and the `mhwakeup` signal is connected directly inside the core.
 The internal timers are part of the core and internally connected as well.
 The standard RISC-V software and timer interrupt as well as NMI signals are external to the core and originate in the SoC.
 If desired, these signals can be routed through the PMU and further qualified there.
 
 ### Core Firmware-Initiated Halt
 
-The firmware running on the core may also initiate a halt by writing a '1' to the *halt* field of the mpmc register (see [](power.md#power-management-control-register-mpmc)).
+The firmware running on the core may also initiate a halt by writing a '1' to the *halt* field of the `mpmc` register (see [](power.md#power-management-control-register-mpmc)).
 The core is quiesced before indicating that it has gracefully halted.
 
 ### DMA Operations While Halted
@@ -530,7 +530,7 @@ When the core is halted in the 'pmu/fw-halt' or the 'db-halt' state, DMA operati
 ### External Interrupts While Halted
 
 All non-highest-priority external interrupts are temporarily ignored while halted.
-Only external interrupts which activate the mhwakeup signal (see [](interrupts.md#regular-operation), Steps 13 and 14) are honored, if the core is enabled to service external interrupts (i.e., the *mie* bit of the mstatus and the *meie* bit of the mie standard RISC-V registers are both set, otherwise the core remains in the 'pmu/fw-halt' state).
+Only external interrupts which activate the `mhwakeup` signal (see [](interrupts.md#regular-operation), Steps 13 and 14) are honored, if the core is enabled to service external interrupts (i.e., the *mie* bit of the `mstatus` and the *meie* bit of the `mie` standard RISC-V registers are both set, otherwise the core remains in the 'pmu/fw-halt' state).
 External interrupts which are still pending and have a sufficiently high priority to be signaled to the core are serviced once the core is back in the Running state.
 
 ## Control/Status Registers
@@ -546,24 +546,24 @@ Unless otherwise noted, all read/write control/status registers must have WARL (
 
 ### Power Management Control Register (mpmc)
 
-The mpmc register provides core power management control functionality.
+The `mpmc` register provides core power management control functionality.
 It allows the firmware running on the core to initiate a transition to the Halted (pmu/fw-halt) state.
 While entering the Halted state, interrupts may optionally be enabled atomically.
 
-The *halt* field of the mpmc register has W1R0 (Write 1, Read 0) behavior, as also indicated in the 'Access' column.
+The *halt* field of the `mpmc` register has W1R0 (Write 1, Read 0) behavior, as also indicated in the 'Access' column.
 
 :::{note}
-Writing a '1' to the *haltie* field of the mpmc register without also setting the *halt* field has no immediate effect on the *mie* bit of the mstatus register.
-However, the *haltie* field of the mpmc register is updated accordingly.
+Writing a '1' to the *haltie* field of the `mpmc` register without also setting the *halt* field has no immediate effect on the *mie* bit of the `mstatus` register.
+However, the *haltie* field of the `mpmc` register is updated accordingly.
 :::
 
 :::{note}
-Once the *mie* bit of the mstatus register is set via the *haltie* field of the mpmc register, it remains set until other operations clear it.
-Exiting the Halted (pmu/fw-halt) state does not clear the *mie* bit of the mstatus register set by entering the Halted state.
+Once the *mie* bit of the `mstatus` register is set via the *haltie* field of the `mpmc` register, it remains set until other operations clear it.
+Exiting the Halted (pmu/fw-halt) state does not clear the *mie* bit of the `mstatus` register set by entering the Halted state.
 :::
 
 :::{note}
-In Debug Mode, writing (i.e., setting or clearing) *haltie* has no effect on the mstatus register's *mie* bit since the core does not transition to the Halted (pmu/fw-halt) state.
+In Debug Mode, writing (i.e., setting or clearing) *haltie* has no effect on the `mstatus` register's *mie* bit since the core does not transition to the Halted (pmu/fw-halt) state.
 :::
 
 This register is mapped to the non-standard read/write CSR address space.
@@ -583,9 +583,9 @@ This register is mapped to the non-standard read/write CSR address space.
   - 0
 * - haltie
   - 1
-  - Control interrupt enable (i.e., mie bit of mstatus register) when transitioning to Halted (pmu/fw-halt) state by setting halt bit below:
-    - 0: Don't change mie bit of mstatus register
-    - 1: Set mie bit of mstatus register (i.e., atomically enable interrupts)
+  - Control interrupt enable (i.e., *mie* bit of `mstatus` register) when transitioning to Halted (pmu/fw-halt) state by setting halt bit below:
+    - 0: Don't change *mie* bit of `mstatus` register
+    - 1: Set *mie* bit of `mstatus` register (i.e., atomically enable interrupts)
   - R/W
   - 1
 * - halt
@@ -599,10 +599,12 @@ This register is mapped to the non-standard read/write CSR address space.
 
 ### Core Pause Control Register (mcpc)
 
-The mcpc register supports functions to temporarily stop the core from executing instructions.
+The `mcpc` register supports functions to temporarily stop the core from executing instructions.
 This helps to save core power since busy-waiting loops can be avoided in the firmware.
 
-PAUSE stops the core from executing instructions for a specified number34 of clock ticks or until an interrupt is received.
+PAUSE stops the core from executing instructions for a specified number [^fn-power-1] of clock ticks or until an interrupt is received.
+
+[^fn-power-1]: The field width provided by the mcpc register allows to pause execution for about 4 seconds at a 1 GHz core clock.
 
 :::{note}
 PAUSE is a long-latency, interruptible instruction and does not change the core's activity state (i.e., the core remains in the Running state).
@@ -616,7 +618,7 @@ However, this is acceptable for the intended use case of this function.
 :::
 
 :::{note}
-Depending on the *pause_en* bit of the mitctl0/1 registers, the internal timers might be incremented while executing PAUSE.
+Depending on the *pause_en* bit of the `mitctl0/1` registers, the internal timers might be incremented while executing PAUSE.
 If an internal timer interrupt is signaled, PAUSE is terminated and normal execution resumes.
 :::
 
@@ -629,7 +631,7 @@ WFI is another candidate for a function that stops the core temporarily.
 Currently, the WFI instruction is implemented as NOP, which is a fully RISC-V-compliant option.
 :::
 
-The *pause* field of the mcpc register has WAR0 (Write Any value, Read 0) behavior, as also indicated in the 'Access' column.
+The *pause* field of the `mcpc` register has WAR0 (Write Any value, Read 0) behavior, as also indicated in the 'Access' column.
 
 This register is mapped to the non-standard read/write CSR address space.
 
@@ -645,25 +647,25 @@ This register is mapped to the non-standard read/write CSR address space.
   - 31:0
   - Pause execution for number of core clock cycles specified
     
-    **Note:** pause is decremented by 1 for each core clock cycle. Execution continues either when pause is 0 or any interrupt is received.
+    **Note:** *pause* is decremented by 1 for each core clock cycle. Execution continues either when *pause* is 0 or any interrupt is received.
   - R0/W
   - 0
 :::
 
 ### Forced Debug Halt Threshold Register (mfdht)
 
-The mfdht register hosts the enable bit of the forced debug halt mechanism as well as the power-of-two exponent of the timeout threshold.
+The `mfdht` register hosts the enable bit of the forced debug halt mechanism as well as the power-of-two exponent of the timeout threshold.
 When enabled, if a debug halt request is received and LSU and/or IFU bus transactions are pending, an internal timeout counter starts incrementing with each core clock and keeps incrementing until the Debug Halt *(db-halt)* state is entered.
 If all ongoing bus transactions complete within the timeout period and the core is quiesced, the Debug Halt state is entered as usual.
 However, if the timeout counter *value* is equal to or greater than the threshold value (= {math}`2^{thresh}` core clocks), all in-progress LSU and IFU bus transactions are terminated and the Debug Halt state is entered (i.e. the core may be forced to the Debug Halt state before it is fully quiesced).
-In addition, when entering the Debug Halt state in either case, the mfdhs register (see [](power.md#forced-debug-halt-status-register-mfdhs) below) latches the status if any LSU or IFU bus transactions have been prematurely terminated.
+In addition, when entering the Debug Halt state in either case, the `mfdhs` register (see [](power.md#forced-debug-halt-status-register-mfdhs) below) latches the status if any LSU or IFU bus transactions have been prematurely terminated.
 
 :::{note}
 The internal timeout counter is cleared at reset as well as when the Debug Halt (db-halt) state is exited.
 :::
 
 :::{note}
-The 5-bit threshold (*thresh* field) allows a timeout period of up to 231 core clock cycles (i.e., about 2.1 seconds at a 1GHz core clock frequency).
+The 5-bit threshold (*thresh* field) allows a timeout period of up to {math}`2^{31}` core clock cycles (i.e., about 2.1 seconds at a 1GHz core clock frequency).
 :::
 
 This register is mapped to the non-standard read/write CSR address space.

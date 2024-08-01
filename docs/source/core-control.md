@@ -14,11 +14,11 @@ Unless otherwise noted, all read/write control/status registers must have WARL (
 
 ### Feature Disable Control Register (mfdc)
 
-The mfdc register hosts low-level core control bits to disable specific features.
+The `mfdc` register hosts low-level core control bits to disable specific features.
 This may be useful in case a feature intended to increase core performance should prove to have problems.
 
 :::{note}
-fence.i instructions are required before and after writes to the mfdc register.
+`fence.i` instructions are required before and after writes to the `mfdc` register.
 :::
 
 :::{note}
@@ -90,7 +90,7 @@ This register is mapped to the non-standard read/write CSR address space.
 
       **Note**: Reset value depends on selected bus core build argument
   - R/W
-  - 0 (AHB-Lite) / 1 (AXI4)
+  - 0 (*AHB-Lite*) / 1 (*AXI4*)
 * - Reserved
   - 5:4
   - Reserved
@@ -126,7 +126,7 @@ This register is mapped to the non-standard read/write CSR address space.
 
 ### Clock Gating Control Register (mcgc)
 
-The mcgc register hosts low-level core control bits to override clock gating for specific units.
+The `mcgc` register hosts low-level core control bits to override clock gating for specific units.
 This may be useful in case a unit intended to be clock gated should prove to have problems when in lower power mode.
 
 :::{note}

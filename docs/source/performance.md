@@ -20,29 +20,31 @@ VeeR EL2 provides these performance monitoring features:
 
 A list of performance monitoring-related standard RISC-V CSRs with references to their definitions:
 
-* Machine Hardware Performance Monitor (mcycle{|h}, minstret{|h}, mhpmcounter3{|h}- mhpmcounter31{|h}, and mhpmevent3-mhpmevent31) (see Section 3.1.11 in [[2]](intro.md#ref-2))
-* Machine Counter-Inhibit Register36 (mcountinhibit) (see Section 3.1.13 in [[2]](intro.md#ref-2))
-* Machine Timer Registers (mtime and mtimecmp) (see Section 3.1.10 in [[2]](intro.md#ref-2))
+* Machine Hardware Performance Monitor (`mcycle{|h}`, `minstret{|h}`, `mhpmcounter3{|h}`- `mhpmcounter31{|h}`, and `mhpmevent3`-`mhpmevent31`) (see Section 3.1.11 in [[2]](intro.md#ref-2))
+* Machine Counter-Inhibit Register [^fn-performance-1] (`mcountinhibit`) (see Section 3.1.13 in [[2]](intro.md#ref-2))
+* Machine Timer Registers (`mtime` and `mtimecmp`) (see Section 3.1.10 in [[2]](intro.md#ref-2))
 
 :::{note}
-mtime and mtimecmp are memory-mapped registers which must be provided by the SoC.
+`mtime` and `mtimecmp` are memory-mapped registers which must be provided by the SoC.
 :::
+
+[^fn-performance-1]: The standard `mcountinhibit` register which was recently added to [[2]](intro.md#ref-2) replaces the non-standard mgpmc register of the previous VeeR generation. The `mcountinhibit` register provides the same functionality as the `mgpmc` register did, but at a much finer granularity (i.e., an enable/disable control bit per standard hardware performance counter instead of a single control bit for the `mhpmcounter3` - `mhpmcounter6` counters).
 
 ## Counters
 
-Only event counters 3 to 6 (mhpmcounter3{|h}-mhpmcounter6{|h}) and their corresponding event selectors (mhpmevent3-mhpmevent6) are functional on VeeR EL2.
+Only event counters 3 to 6 (`mhpmcounter3{|h}`-`mhpmcounter6{|h}`) and their corresponding event selectors (`mhpmevent3`-`mhpmevent6`) are functional on VeeR EL2.
 
-Event counters 7 to 31 ( mhpmcounter7{|h}-mhpmcounter31{|h}) and their corresponding event selectors (mhpmevent7-mhpmevent31) are hardwired to '0'.
+Event counters 7 to 31 (`mhpmcounter7{|h}`-`mhpmcounter31{|h}`) and their corresponding event selectors (`mhpmevent7`-`mhpmevent31`) are hardwired to '0'.
 
 ## Count-Impacting Conditions
 
 A few comments to consider on conditions that have an impact on the performance monitor counting:
-* While in the pmu/fw-halt power management state, performance counters (including the mcycle counter) are disabled.
-* While in debug halt (db-halt) state, the stopcount bit of the dcsr register (see [](debugging.md#debug-control-and-status-register-dcsr)) determines if performance counters are enabled.
+* While in the pmu/fw-halt power management state, performance counters (including the `mcycle` counter) are disabled.
+* While in debug halt (db-halt) state, the *stopcount* bit of the `dcsr` register (see [](debugging.md#debug-control-and-status-register-dcsr)) determines if performance counters are enabled.
 * While in the pmu/fw-halt power management state or the debug halt (db-halt) state with the stopcount bit set, DMA accesses are allowed, but not counted by the performance counters. It would be up to the bus master to count accesses while the core is in a halt state.
 * While executing PAUSE, performance counters are enabled.
 
-Also, it is recommended that the performance counters are disabled (using the mcountinhibit register) before the counters and event selectors are modified, and then reenabled again.
+Also, it is recommended that the performance counters are disabled (using the `mcountinhibit` register) before the counters and event selectors are modified, and then reenabled again.
 This minimizes the impact of reading and writing the counter and event selector CSRs on the event count values, specifically for the CSR read/write events (i.e., events #16 and #17).
 In general, performance counters are incremented after a read access to the counter CSRs, but before a write access to the counter CSRs.
 
@@ -51,7 +53,7 @@ In general, performance counters are incremented after a read access to the coun
 {numref}`tab-list-of-countable-events` provides a list of the countable events.
 
 :::{note}
-The event selector registers mhpmevent3-mhpmevent6 have WARL behavior. When writing either a value marked as 'Reserved' or larger than the highest supported event number, the event selector is set to '0' (i.e., no event counted).
+The event selector registers `mhpmevent3`-`mhpmevent6` have WARL behavior. When writing either a value marked as 'Reserved' or larger than the highest supported event number, the event selector is set to '0' (i.e., no event counted).
 :::
 
 :::{list-table} List of Countable Events
@@ -113,7 +115,7 @@ The event selector registers mhpmevent3-mhpmevent6 have WARL behavior. When writ
   - Number of misaligned stores (IP, 0/1)
 * - 15
   - alus committed
-  - Number of ALU37 operations committed (IP, 0/1)
+  - Number of ALU [^fn-performance-2] operations committed (IP, 0/1)
 * - 16
   - CSR read
   - Number of CSR read instructions committed (IP, 0/1)
@@ -124,19 +126,19 @@ The event selector registers mhpmevent3-mhpmevent6 have WARL behavior. When writ
   - CSR write rd==0
   - Number of CSR write rd==0 instructions committed (IP, 0/1)
 * - 19
-  - ebreak
+  - `ebreak`
   - Number of ebreak instructions committed (IP, 0/1)
 * - 20
-  - ecall
+  - `ecall`
   - Number of ecall instructions committed (IP, 0/1)
 * - 21
-  - fence
+  - `fence`
   - Number of fence instructions committed (IP, 0/1)
 * - 22
-  - fence.i
+  - `fence.i`
   - Number of fence.i instructions committed (IP, 0/1)
 * - 23
-  - mret
+  - `mret`
   - Number of mret instructions committed (IP, 0/1)
 * - 24
   - branches committed
@@ -182,7 +184,7 @@ The event selector registers mhpmevent3-mhpmevent6 have WARL behavior. When writ
   - Number of exceptions taken (IP)
 * - 38
   - timer interrupts taken
-  - Number of timer38 interrupts taken (IP)
+  - Number of timer [^fn-performance-3] interrupts taken (IP)
 * - 39
   - external interrupts taken
   - Number of external interrupts taken (IP)
@@ -257,3 +259,6 @@ The event selector registers mhpmevent3-mhpmevent6 have WARL behavior. When writ
 :::{note}
 If an event shown as 'Reserved' is selected, no error is reported but counter is not incrementing.
 :::
+
+[^fn-performance-2]: NOP is an ALU operation. WFI is implemented as a NOP in VeeR EL2 and, hence, counted as an ALU operation was well.
+[^fn-performance-3]: Events counted include interrupts triggered by the standard RISC-V platform-level timer as well as by the two internal timers.

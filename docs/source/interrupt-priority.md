@@ -7,15 +7,15 @@
 
 * - **Interrupt**
   - **Section**
-* - Non-Maskable Interrupt (standard RISC-V)
+* - *Non-Maskable Interrupt (standard RISC-V)*
   - [](memory-map.md#non-maskable-interrupt-nmi-signal-and-vector)
-* - External interrupt (standard RISC-V)
+* - *External interrupt (standard RISC-V)*
   - [](interrupts.md)
 * - Correctable error (local interrupt)
   - [](memory-map.md#correctable-error-local-interrupt)
-* - Software interrupt (standard RISC-V)
+* - *Software interrupt (standard RISC-V)*
   - [](memory-map.md#software-interrupts)
-* - Timer interrupt (standard RISC-V)
+* - *Timer interrupt (standard RISC-V)*
   - [](performance.md#standard-risc-v-registers)
 * - Internal timer 0 (local interrupt)
   - [](timers.md#internal-timer-local-interrupts)

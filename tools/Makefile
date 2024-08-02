@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2020 Western Digital Corporation or its affiliates.
+# Copyright 2024 Antmicro <www.antmicro.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -69,6 +70,9 @@ ifeq ("$(.SHELLSTATUS)", "0")
     endif
 endif
 
+VERILATOR_SKIP_WARNINGS = $(VERILATOR_NOIMPLICIT) -Wno-TIMESCALEMOD -Wno-ASCRANGE \
+	-Wno-CASEINCOMPLETE -Wno-INITIALDLY -Wno-WIDTH -Wno-UNOPTFLAT
+
 # Define test name
 TEST = hello_world
 TEST_DIR = ${TBDIR}/asm
@@ -119,13 +123,29 @@ VPATH = $(TEST_DIR) $(BUILD_DIR) $(TBDIR)
 
 -include $(TEST_DIR)/$(TEST).mki
 
+# Testbench DPI sources
+TB_DPI_SRCS = jtagdpi/jtagdpi.c \
+              tcp_server/tcp_server.c
 
-TBFILES = $(TBDIR)/tb_top_pkg.sv $(TBDIR)/tb_top.sv $(TBDIR)/ahb_sif.sv
+TB_DPI_INCS := $(addprefix -I$(TBDIR)/,$(dir $(TB_DPI_SRCS)))
+# Add testbench include paths
+CFLAGS += $(TB_DPI_INCS)
+
+TB_DPI_SRCS := $(addprefix $(TBDIR)/,$(TB_DPI_SRCS))
+
+# Testbench sources
+TB_VERILATOR_SRCS = $(TBDIR)/test_tb_top.cpp $(TB_DPI_SRCS)
+
+TBFILES = $(TBDIR)/tb_top_pkg.sv \
+          $(TBDIR)/tb_top.sv \
+          $(TBDIR)/ahb_sif.sv \
+          $(TBDIR)/jtagdpi/jtagdpi.sv \
+          $(TBDIR)/ahb_lite_2to1_mux.sv
 
 defines  = $(BUILD_DIR)/common_defines.vh
 defines += ${RV_ROOT}/design/include/el2_def.sv
 defines += $(BUILD_DIR)/el2_pdef.vh
-includes = -I${BUILD_DIR}
+includes = -I${BUILD_DIR} -I$(TBDIR)/axi4_mux
 
 # Verilator supports only C++14 and newer
 CFLAGS += -std=c++14
@@ -151,12 +171,11 @@ clean:
 ${BUILD_DIR}/defines.h:
 	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/veer.config -target=$(target) $(CONF_PARAMS)
 
-verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h test_tb_top.cpp
+verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	$(VERILATOR)  --cc -CFLAGS "${CFLAGS}" $(defines) \
 	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist \
-	  -Wno-WIDTH -Wno-UNOPTFLAT $(VERILATOR_NOIMPLICIT) \
-	  ${TBFILES} --top-module tb_top \
-	  -exe test_tb_top.cpp --autoflush $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE)
+	  $(VERILATOR_SKIP_WARNINGS) ${TBFILES} --top-module tb_top \
+	  -exe $(TB_VERILATOR_SRCS) --autoflush --timing $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE)
 	cp ${RV_ROOT}/testbench/test_tb_top.cpp obj_dir/
 	$(MAKE) -e -C obj_dir/ -f Vtb_top.mk $(VERILATOR_MAKE_FLAGS)
 	touch verilator-build

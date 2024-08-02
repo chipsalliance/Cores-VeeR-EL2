@@ -1,0 +1,101 @@
+name: Test-OpenOCD
+
+on:
+  workflow_call:
+
+jobs:
+
+  tests:
+    name: Run OpenOCD tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
+        bus: ["axi4", "ahb_lite"]
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/openocd-tests/.cache/"
+      VERILATOR_VERSION: v5.010
+
+    steps:
+      - name: Install utils
+        run: |
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+             cpanminus ccache ninja-build gcc-riscv64-unknown-elf
+          pip3 install meson
+          sudo cpanm Bit::Vector
+
+      - name: Setup Cache Metadata
+        id: cache_metadata
+        run: |
+          date=$(date +"%Y_%m_%d")
+          time=$(date +"%Y%m%d_%H%M%S_%N")
+          cache_verilator_restore_key=cache_verilator_
+          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}
+          cache_openocd_restore_key=cache_openocd_
+          cache_openocd_key=${cache_openocd_restore_key}
+          cache_test_restore_key=${{ matrix.coverage }}_
+          cache_test_key=${cache_test_restore_key}${time}
+          echo "date=$date" | tee -a "$GITHUB_ENV"
+          echo "time=$time" | tee -a "$GITHUB_ENV"
+          echo "cache_verilator_restore_key=$cache_verilator_restore_key" | tee -a "$GITHUB_ENV"
+          echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
+          echo "cache_openocd_restore_key=$cache_openocd_restore_key" | tee -a "$GITHUB_ENV"
+          echo "cache_openocd_key=$cache_openocd_key" | tee -a "$GITHUB_ENV"
+          echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
+          echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
+
+      - name: Restore Verilator cache
+        id: cache-verilator-restore
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            /opt/verilator
+            /opt/verilator/.cache
+          key: ${{ env.cache_verilator_key }}
+          restore-keys: ${{ env.cache_verilator_restore_key }}
+
+      - name: Restore OpenOCD cache
+        id: cache-openocd-restore
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            /opt/openocd
+            /opt/openocd/.cache
+          key: ${{ env.cache_openocd_key }}
+          restore-keys: ${{ env.cache_openocd_restore_key }}
+
+      - name: Setup repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Build verilated simulation
+        run: |
+          export PATH=/opt/verilator/bin:/opt/openocd/bin:$PATH
+          export RV_ROOT=$(pwd)
+          mkdir run
+          make -C run -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
+            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }}
+          cd run
+          ${RV_ROOT}/.github/scripts/openocd_test.sh \
+            -f ${RV_ROOT}/testbench/openocd_scripts/verilator-rst.cfg \
+            -f ${RV_ROOT}/testbench/openocd_scripts/jtag_cg.tcl
+
+      - name: Prepare coverage data
+        run: |
+          export PATH=/opt/verilator/bin:$PATH
+          export RV_ROOT=$(pwd)
+          .github/scripts/convert_coverage_data.sh ${RV_ROOT}/run
+          echo "convert_coverage_data.sh exited with RET_CODE = "$?
+          mkdir -p results
+          mv ${RV_ROOT}/run/coverage.info \
+             results/coverage_openocd_${{ matrix.bus }}_${{ matrix.coverage }}.info
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: openocd_coverage_data
+          path: results/*.info

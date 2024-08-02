@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2019 Western Digital Corporation or its affiliates.
-//
+// Copyright 2024 Antmicro <www.antmicro.com>
+// //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -179,28 +180,20 @@ module axi_slv #(
     output reg [TAGW-1:0] bid
 );
 
-  parameter MAILBOX_ADDR = 32'hD0580000;
-  parameter MEM_SIZE_DW = 8192;
-
   bit [7:0] mem[bit [31:0]];
-  bit [63:0] memdata;
+  bit [31:0] write_address;
 
-  always @(posedge aclk or negedge rst_l) begin
-    if (!rst_l) begin
-      rvalid <= 0;
-      bvalid <= 0;
-    end else begin
-      bid    <= awid;
-      rid    <= arid;
-      rvalid <= arvalid;
-      bvalid <= awvalid;
-      rdata  <= memdata;
-    end
+  initial begin
+    wready  = 1;
+    awready = 1;
+    arready = 1'b1;
+    rlast   = 1'b0;
+    rvalid  = 0;
   end
 
-  always @(negedge aclk) begin
-    if (arvalid)
-      memdata <= {
+  always @(posedge aclk) begin
+    if (arvalid && arready) begin
+       rdata <= {
         mem[araddr+7],
         mem[araddr+6],
         mem[araddr+5],
@@ -210,26 +203,40 @@ module axi_slv #(
         mem[araddr+1],
         mem[araddr]
       };
-    if (awvalid) begin
-      if (wstrb[7]) mem[awaddr+7] = wdata[63:56];
-      if (wstrb[6]) mem[awaddr+6] = wdata[55:48];
-      if (wstrb[5]) mem[awaddr+5] = wdata[47:40];
-      if (wstrb[4]) mem[awaddr+4] = wdata[39:32];
-      if (wstrb[3]) mem[awaddr+3] = wdata[31:24];
-      if (wstrb[2]) mem[awaddr+2] = wdata[23:16];
-      if (wstrb[1]) mem[awaddr+1] = wdata[15:08];
-      if (wstrb[0]) mem[awaddr+0] = wdata[07:00];
+       arready <= 0;
+       rvalid <= 1;
+       rid <= arid;
+       rlast <= 1;
+       rresp <= 0;
+    end else if (rready) begin
+       rvalid <= 0;
+       arready <= 1;
+       rlast <= 0;
     end
+
+    if (awvalid) begin
+       write_address = awaddr;
+       awready <= 0;
+    end
+     if (wvalid) begin
+        bid    <= awid;
+        bvalid <= 1;
+        wready <= 0;
+        bresp <= 0;
+      if (wstrb[7]) mem[write_address+7] = wdata[63:56];
+      if (wstrb[6]) mem[write_address+6] = wdata[55:48];
+      if (wstrb[5]) mem[write_address+5] = wdata[47:40];
+      if (wstrb[4]) mem[write_address+4] = wdata[39:32];
+      if (wstrb[3]) mem[write_address+3] = wdata[31:24];
+      if (wstrb[2]) mem[write_address+2] = wdata[23:16];
+      if (wstrb[1]) mem[write_address+1] = wdata[15:08];
+      if (wstrb[0]) mem[write_address+0] = wdata[07:00];
+     end if (bready && bvalid) begin
+        bvalid <= 0;
+        awready <= 1;
+        wready <= 1;
+     end
   end
-
-
-  assign arready = 1'b1;
-  assign awready = 1'b1;
-  assign wready  = 1'b1;
-  assign rresp   = 2'b0;
-  assign bresp   = 2'b0;
-  assign rlast   = 1'b1;
-
 endmodule
 `endif
 

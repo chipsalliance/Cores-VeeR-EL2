@@ -68,7 +68,8 @@ RISCV_DV_ARGS = \
     --start_seed $(RISCV_DV_SEED) \
     --iterations $(RISCV_DV_ITER) \
     --batch_size $(RISCV_DV_BATCH) \
-    --isa rv32imc --mabi ilp32 \
+    --isa rv32imc_zicsr_zifencei_zba_zbb_zbc_zbs \
+    --mabi ilp32 \
     --custom_target $(PWD) \
     --testlist $(PWD)/testlist.yaml \
     -v -o $(TEST_DIR)

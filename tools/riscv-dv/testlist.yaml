@@ -97,3 +97,32 @@
     +is_timeout_s_fatal=0
     +enable_bad_intg_on_uninit_access=0
   rtl_test: core_base_test
+
+- test: riscv_bitmanip_full_test_veer
+  desc: >
+    Random instruction test with supported B extension instructions in full
+    configuration.
+  iterations: 10
+  gen_test: riscv_rand_instr_test
+  gen_opts: >
+    +enable_zba_extension=1
+    +enable_zbb_extension=1
+    +enable_zbc_extension=1
+    +enable_zbs_extension=1
+    +enable_b_extension=1
+    +enable_bitmanip_groups=zbe,zbf,zbp,zbr,zbt
+  rtl_test: core_base_test
+
+- test: riscv_bitmanip_balanced_test_veer
+  desc: >
+    Random instruction test with supported B extension instructions in
+    balanced configuration.
+  iterations: 10
+  gen_test: riscv_rand_instr_test
+  gen_opts: >
+    +enable_zba_extension=1
+    +enable_zbb_extension=1
+    +enable_zbs_extension=1
+    +enable_b_extension=1
+    +enable_bitmanip_groups=zbf,zbt
+  rtl_test: core_base_test

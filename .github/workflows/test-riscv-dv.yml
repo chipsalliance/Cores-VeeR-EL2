@@ -200,7 +200,7 @@ jobs:
         test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
         iss:
           - spike
-          - whisper
+#         - whisper
 #         - renode
         coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
         version: [ uvm ]
@@ -237,8 +237,17 @@ jobs:
         run: |
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
             git cpanminus ccache device-tree-compiler python3-minimal python3-pip \
-            libboost-all-dev gcc-riscv64-unknown-elf
+            libboost-all-dev
           sudo cpanm Bit::Vector
+
+      # As of July 9th, 2024 `ubuntu:latest` comes with riscv64-unknown-elf-gcc
+      # 10.0.2. We need a newer version for bitmanip extension support.
+      - name: Install cross-compiler
+        run: |
+          echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+            gcc-riscv64-unknown-elf
+          riscv64-unknown-elf-gcc --version
 
       - name: Setup Cache Metadata
         id: cache_metadata

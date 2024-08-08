@@ -204,6 +204,8 @@ jobs:
 #         - renode
         coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
         version: [ uvm ]
+        # TODO use separate privilege modes configurations for generating the VeeR model
+        priv: ["", "u"]
         include: ${{ fromJSON(needs.generate-config.outputs.test-include-run) }}
         exclude:
             - iss: renode
@@ -283,6 +285,7 @@ jobs:
             /opt/verilator/.cache
           key: ${{ env.cache_verilator_key }}
           restore-keys: ${{ env.cache_verilator_restore_key }}
+          fail-on-cache-miss: true
 
       - name: Restore Spike cache
         id: cache-spike-restore
@@ -293,6 +296,7 @@ jobs:
             /opt/spike/.cache
           key: ${{ env.cache_spike_key }}
           restore-keys: ${{ env.cache_spike_restore_key }}
+          fail-on-cache-miss: true
 
       - name: Download Renode binaries
         uses: actions/download-artifact@v3
@@ -344,6 +348,7 @@ jobs:
         with:
           path: tools/riscv-dv/work/test_${{ matrix.test }}/asm_test
           key: ${{ env.cache_code }}
+          fail-on-cache-miss: true
 
       - name: Run test
         run: |
@@ -363,12 +368,15 @@ jobs:
           ${RISCV_GCC} --version
 
           pushd tools/riscv-dv
+            # TODO use privilege mode from matrix,
+            # find a way to structure the files with `u` and `mu` properly
             make -j`nproc` \
               RISCV_DV_TEST=${{ matrix.test }} \
               RISCV_DV_ISS=${{ matrix.iss }} \
               RISCV_DV_ITER=3 \
               RISCV_DV_SEED=999 \
               COVERAGE=${{ matrix.coverage }} \
+              RISCV_DV_PRIV=${{ matrix.priv }} \
               run
           popd
 
@@ -378,7 +386,7 @@ jobs:
           echo "convert_coverage_data.sh exited with RET_CODE = "$?
           mkdir -p results
           mv ${RV_ROOT}/tools/riscv-dv/work/coverage.info \
-             results/coverage_riscv-dv_${{ matrix.test }}_${{ matrix.coverage }}.info
+             results/coverage_riscv-dv_${{matrix.priv}}_${{ matrix.test }}_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()
@@ -391,7 +399,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: artifacts-${{ matrix.test }}-${{ matrix.iss }}-${{ matrix.version }}
+          name: artifacts-${{matrix.priv}}_${{ matrix.test }}-${{ matrix.iss }}-${{ matrix.version }}
           path: tools/riscv-dv/work/test_*
 
   run-custom-tests:

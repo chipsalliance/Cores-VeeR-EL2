@@ -12,6 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
+        priv: ["", "u"]
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscof/.cache/"
@@ -126,7 +127,11 @@ jobs:
           export RV_ROOT=`pwd`
           pushd riscof
             $RV_ROOT/configs/veer.config
-            make -f $RV_ROOT/tools/Makefile verilator-build CONF_PARAMS="-set build_axi4 -set=user_mode=1 -set=smepmp=1" COVERAGE=${{ matrix.coverage }}
+            VEER_OPTS=""
+            if  [[ "${{ matrix.priv }}" == *"u"* ]]; then
+              VEER_OPTS="-set=user_mode=1 -set=smepmp=1"
+            fi
+            make -f $RV_ROOT/tools/Makefile verilator-build CONF_PARAMS="-set build_axi4 $VEER_OPTS" COVERAGE=${{ matrix.coverage }}
           popd
 
       - name: Run tests, collect coverage
@@ -144,7 +149,7 @@ jobs:
           .github/scripts/convert_coverage_data.sh riscof/coverage/
           echo "convert_coverage_data.sh exited with RET_CODE = "$?
           mv riscof/coverage/coverage.info \
-             riscof/coverage/coverage_riscof_${{ matrix.coverage }}.info
+             riscof/coverage/coverage_riscof_${{matrix.priv}}_${{ matrix.coverage }}.info
 
       - name: Prepare report
         run: |

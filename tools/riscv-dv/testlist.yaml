@@ -125,4 +125,13 @@
     +enable_zbs_extension=1
     +enable_b_extension=1
     +enable_bitmanip_groups=zbf,zbt
+
+- test: riscv_user_mode_rand_test
+  desc: >
+    User mode random instruction test
+  iterations: 100
+  gen_test: riscv_instr_base_test
+  gen_opts: >
+    +instr_cnt=10000
+    +boot_mode=u
   rtl_test: core_base_test

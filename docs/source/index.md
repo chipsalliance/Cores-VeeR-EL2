@@ -26,4 +26,5 @@ errata
 physical-memory-protection
 user-mode
 verification
+simulation-debugging
 ```

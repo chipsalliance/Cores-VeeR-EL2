@@ -16,11 +16,16 @@ WORK_DIR       ?= work
 TEST_DIR        = $(WORK_DIR)/test_$(RISCV_DV_TEST)
 SIM_DIR         = $(TEST_DIR)/hdl_sim
 
+ifeq ($(findstring u, $(RISCV_DV_PRIV)), u)
+	VEER_EXTRA_CONF = "-set=user_mode=1 -set=smepmp=1"
+else
+	VEER_EXTRA_CONF = ""
+endif
+
 VEER_TARGET     = default
 VEER_CONF       = -set build_axi4 \
                   -set reset_vec=0x80000000 \
-                  -set=user_mode=1 \
-                  -set=smepmp=1
+                  $(VEER_EXTRA_CONF)
 
 # Coverage reporting
 ifeq ("$(COVERAGE)", "all")
@@ -75,6 +80,9 @@ RISCV_DV_ARGS = \
     --testlist $(PWD)/testlist.yaml \
     -v -o $(TEST_DIR)
 
+RISCV_DV_SIM_ARGS= \
+    --priv "$(RISCV_DV_PRIV)"
+
 MAKEFILE  = $(abspath $(MAKEFILE_LIST))
 
 all:
@@ -120,7 +128,7 @@ $(TEST_DIR)/compile.log: $(TEST_DIR)
 # ISS simulation
 $(TEST_DIR)/iss_sim.log: $(TEST_DIR)/compile.log | $(TEST_DIR)
 	# Compile, simulate
-	PYTHONPATH=$(RISCV_DV_PATH)/pygen python3 $(RISCV_DV_PATH)/run.py $(RISCV_DV_ARGS) \
+	PYTHONPATH=$(RISCV_DV_PATH)/pygen python3 $(RISCV_DV_PATH)/run.py $(RISCV_DV_ARGS) $(RISCV_DV_SIM_ARGS) \
     --steps iss_sim 2>&1 | tee $@
 
 # Generate symbols of executables

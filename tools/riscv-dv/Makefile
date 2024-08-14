@@ -131,6 +131,10 @@ $(TEST_DIR)/iss_sim.log: $(TEST_DIR)/compile.log | $(TEST_DIR)
 	PYTHONPATH=$(RISCV_DV_PATH)/pygen python3 $(RISCV_DV_PATH)/run.py $(RISCV_DV_ARGS) $(RISCV_DV_SIM_ARGS) \
     --steps iss_sim 2>&1 | tee $@
 
+# Tests are built by `run.py` script, they shouldn't be constructed by this Makefile directly
+%.o:
+	$(warning There are additional test files ($@), which will not be compiled. Hint: you might need to set "RISCV_DV_ITER" to a higher value)
+
 # Generate symbols of executables
 %.sym: %.o
 	$(RISCV_NM) -B -n $< > $@
@@ -209,3 +213,5 @@ fullclean:
 
 .PHONY: all generate run clean fullclean
 .SECONDARY:
+# Disable any default actions Makefile might invoke for suffix rules (e.g. invoking CC for our tests)
+.SUFFIXES:

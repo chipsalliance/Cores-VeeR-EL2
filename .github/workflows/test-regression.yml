@@ -21,7 +21,7 @@ jobs:
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/regression/.cache/"
-      VERILATOR_VERSION: v5.010
+      VERILATOR_VERSION: v5.024
 
     steps:
       - name: Install utils

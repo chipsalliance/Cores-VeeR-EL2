@@ -4,7 +4,7 @@ on:
   workflow_call:
 
 env:
-  VERILATOR_VERSION: v5.010
+  VERILATOR_VERSION: v5.024
 
 jobs:
   tests:
@@ -16,7 +16,7 @@ jobs:
         coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
     env:
       CCACHE_DIR: "/opt/verification/.cache/"
-      VERILATOR_VERSION: v5.010
+      VERILATOR_VERSION: v5.024
       DEBIAN_FRONTEND: "noninteractive"
     steps:
       - name: Setup repository

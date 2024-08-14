@@ -4,7 +4,7 @@ on:
   workflow_call:
 
 env:
-  VERILATOR_VERSION: v5.010
+  VERILATOR_VERSION: v5.024
 
 jobs:
   lint:
@@ -56,7 +56,7 @@ jobs:
           - "block/lsu_tl"
     env:
       CCACHE_DIR: "/opt/verification/.cache/"
-      VERILATOR_VERSION: v5.010
+      VERILATOR_VERSION: v5.024
       DEBIAN_FRONTEND: "noninteractive"
     steps:
       - name: Setup repository

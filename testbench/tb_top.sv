@@ -1496,13 +1496,8 @@ endtask
 
 
 
-`ifdef VERILATOR
-`define DRAM(bk) Gen_dccm_enable.dccm_loop[bk].ram.ram_core
-`define IRAM(bk) Gen_iccm_enable.iccm_loop[bk].iccm_bank.ram_core
-`else
 `define DRAM(bk) Gen_dccm_enable.dccm_loop[bk].dccm.dccm_bank.ram_core
 `define IRAM(bk) Gen_iccm_enable.iccm_loop[bk].iccm.iccm_bank.ram_core
-`endif
 
 
 task slam_dccm_ram(input [31:0] addr, input[38:0] data);
@@ -1729,23 +1724,6 @@ if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable
         assign el2_mem_export.dccm_bank_dout[i] = dccm_bank_fdout[i][31:0];
         assign el2_mem_export.dccm_bank_ecc[i] = dccm_bank_fdout[i][38:32];
 
-    `ifdef VERILATOR
-
-            el2_ram #(DCCM_INDEX_DEPTH,39)  ram (
-                                    // Primary ports
-                                    .ME(el2_mem_export.dccm_clken[i]),
-                                    .CLK(el2_mem_export.clk),
-                                    .WE(el2_mem_export.dccm_wren_bank[i]),
-                                    .ADR(el2_mem_export.dccm_addr_bank[i]),
-                                    .D(dccm_wr_fdata_bank[i][pt.DCCM_FDATA_WIDTH-1:0]),
-                                    .Q(dccm_bank_fdout[i][pt.DCCM_FDATA_WIDTH-1:0]),
-                                    .ROP ( ),
-                                    // These are used by SoC
-                                    `EL2_LOCAL_DCCM_RAM_TEST_PORTS
-                                    .*
-                                    );
-    `else
-
         if (DCCM_INDEX_DEPTH == 32768) begin : dccm
             ram_32768x39  dccm_bank (
                                     // Primary ports
@@ -1896,7 +1874,6 @@ if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable
                                     .*
                                     );
         end
-    `endif
     end : dccm_loop
 end :Gen_dccm_enable
 
@@ -1920,31 +1897,6 @@ for (genvar i=0; i<pt.ICCM_NUM_BANKS; i++) begin: iccm_loop
     assign iccm_bank_wr_fdata[i][32+pt.ICCM_ECC_WIDTH-1:0] = {el2_mem_export.iccm_bank_wr_ecc[i], el2_mem_export.iccm_bank_wr_data[i]} ^ iccm_wdata_bitflip[i];
     assign el2_mem_export.iccm_bank_dout[i] = iccm_bank_fdout[i][31:0];
     assign el2_mem_export.iccm_bank_ecc[i] = iccm_bank_fdout[i][32+pt.ICCM_ECC_WIDTH-1:32];
-
- `ifdef VERILATOR
-
-    el2_ram #(.depth(1<<pt.ICCM_INDEX_BITS), .width(39)) iccm_bank (
-                                     // Primary ports
-                                     .ME(el2_mem_export.iccm_clken[i]),
-                                     .CLK(el2_mem_export.clk),
-                                     .WE(el2_mem_export.iccm_wren_bank[i]),
-                                     .ADR(el2_mem_export.iccm_addr_bank[i]),
-                                     .D(iccm_bank_wr_fdata[i][38:0]),
-                                     .Q(iccm_bank_fdout[i][38:0]),
-                                     .ROP ( ),
-                                     // These are used by SoC
-                                     .TEST1    (1'b0   ),
-                                     .RME      (1'b0   ),
-                                     .RM       (4'b0000),
-                                     .LS       (1'b0   ),
-                                     .DS       (1'b0   ),
-                                     .SD       (1'b0   ) ,
-                                     .TEST_RNM (1'b0   ),
-                                     .BC1      (1'b0   ),
-                                     .BC2      (1'b0   )
-
-                                      );
- `else
 
      if (pt.ICCM_INDEX_BITS == 6 ) begin : iccm
                ram_64x39 iccm_bank (
@@ -2178,7 +2130,6 @@ for (genvar i=0; i<pt.ICCM_NUM_BANKS; i++) begin: iccm_loop
 
                                       );
      end // block: iccm
-`endif
 end : iccm_loop
 end : Gen_iccm_enable
 

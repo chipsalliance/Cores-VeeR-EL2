@@ -25,5 +25,5 @@ tests
 errata
 physical-memory-protection
 user-mode
+verification
 ```
-

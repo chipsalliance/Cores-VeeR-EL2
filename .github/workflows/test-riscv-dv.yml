@@ -31,13 +31,9 @@ jobs:
           key: cache_renode_${{ steps.cache_timestamp.outputs.time }}
           restore-keys: cache_renode_
 
-      - name: Get latest release
-        uses: robinraju/release-downloader@v1.8
-        with:
-          repository: "renode/renode"
-          latest: true
-          fileName: "renode-*.linux-portable.tar.gz"
-          extract: false
+      - name: Get latest nightly release
+        run: |
+          wget https://builds.renode.io/renode-latest.linux-portable.tar.gz
 
       - name: Rename the archive
         run: |

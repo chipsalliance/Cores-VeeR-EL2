@@ -22,6 +22,14 @@ jobs:
       - name: Setup repository
         uses: actions/checkout@v3
 
+      - name: install SiteSpawner package
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python3 -m pip install tools/SiteSpawner
+          source .venv/bin/activate
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          python3 -m pip install tools/SiteSpawner
+
         # This step is needed to have the same VeeR codebase as used in tests
       - name: Configure VeeR
         run: |
@@ -32,7 +40,7 @@ jobs:
         run: |
           git clone https://github.com/linux-test-project/lcov
           pushd lcov
-            git checkout v1.16
+            git checkout v2.1
             echo "LCOV_PATH=`realpath bin`" >> "$GITHUB_ENV"
           popd
 
@@ -75,7 +83,7 @@ jobs:
       - name: Generate reports
         run: |
           export PATH=${{ env.LCOV_PATH }}:${PATH}
-          bash .github/scripts/gen_coverage_reports.sh
+          sis -d reports . --report-dir report --src-pattern \*design\*
 
       - name: Pack artifacts
         if: always()

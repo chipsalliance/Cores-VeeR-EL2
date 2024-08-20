@@ -74,6 +74,14 @@ jobs:
         with:
           submodules: recursive
 
+      - name: install SiteSpawner package
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python3 -m pip install tools/SiteSpawner
+          source .venv/bin/activate
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          python3 -m pip install tools/SiteSpawner
+
       - name: Setup environment
         run: |
           echo "/opt/verilator/bin" >> $GITHUB_PATH
@@ -92,8 +100,7 @@ jobs:
 
       - name: Prepare coverage data
         run: |
-          .github/scripts/convert_coverage_data.sh ${TEST_PATH}/
-          echo "convert_coverage_data.sh exited with RET_CODE = "$?
+          sis -d convert --dat-dir ${TEST_PATH}/
           mkdir -p results
           mv ${TEST_PATH}/coverage.info \
              results/coverage_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.coverage }}.info

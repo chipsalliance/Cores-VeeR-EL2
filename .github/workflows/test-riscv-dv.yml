@@ -204,6 +204,13 @@ jobs:
         priv: ["", "u"]
         include: ${{ fromJSON(needs.generate-config.outputs.test-include-run) }}
         exclude:
+            # Bitmanip tests are temporarily disabled in Renode
+            # until the extension implementation is complete
+            - iss: renode
+              test: riscv_bitmanip_full_test_veer
+            - iss: renode
+              test: riscv_bitmanip_balanced_test_veer
+
             - iss: renode
               test: riscv_hint_instr_test
             - iss: whisper

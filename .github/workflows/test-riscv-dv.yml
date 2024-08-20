@@ -209,13 +209,7 @@ jobs:
         include: ${{ fromJSON(needs.generate-config.outputs.test-include-run) }}
         exclude:
             - iss: renode
-              test: riscv_illegal_instr_test
-            - iss: renode
               test: riscv_hint_instr_test
-            - iss: spike
-              test: riscv_illegal_instr_test
-            - iss: whisper
-              test: riscv_illegal_instr_test
             - iss: whisper
               test: riscv_full_interrupt_test
 

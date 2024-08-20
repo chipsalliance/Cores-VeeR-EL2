@@ -50,7 +50,7 @@ sed -i -E "s/module ([A-Za-z0-9_]+)/module "$PREFIX"\1/g" $DESIGN_FILES
 
 # add prefix to all module instantiations
 for MODULE in $MODULES; do
-    sed -i -E "s/[^A-Za-z0-9_]$MODULE[^A-Za-z0-9_]/"$PREFIX"$MODULE /g" $DESIGN_FILES
+    sed -i -E "s/([^A-Za-z0-9_])$MODULE([^A-Za-z0-9_])/\1"$PREFIX"$MODULE\2/g" $DESIGN_FILES
 done
 
 # remove old header files to avoid redefining their contents during elaboration

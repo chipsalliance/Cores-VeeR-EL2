@@ -99,7 +99,12 @@ c.lui29 =               [011.....1....101]
 c.lw =          [010...........00]
 
 
-c.lwsp =        [010...........10]
+# invalid if rd=x0
+c.lwsp0 =       [010.....1.....10]
+c.lwsp1 =       [010....1......10]
+c.lwsp2 =       [010...1.......10]
+c.lwsp3 =       [010..1........10]
+c.lwsp4 =       [010.1.........10]
 
 c.or =          [100011...10...01]
 
@@ -234,7 +239,7 @@ rv32c[c.li] =                   { rdrd simm5_0                                  
 
 rv32c[c.lui{0-29}] =            { rdrd sluimm17_12                                                o[5] o[4]      o[2] o[1] o[0] }
 rv32c[c.lw] =                   { rs2prd rdprs1 ulwimm6_2                    o[13]                                 o[1] o[0] }
-rv32c[c.lwsp] =                 { rdrd rs1eq2 ulwspimm7_2                    o[13]                                 o[1] o[0] }
+rv32c[c.lwsp{0-4}] =            { rdrd rs1eq2 ulwspimm7_2                    o[13]                                 o[1] o[0] }
 
 
 rv32c[c.or] =                   { rdprd rdprs1 rs2prs2               o[14] o[13]             o[5] o[4] o[1] o[0] }

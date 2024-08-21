@@ -17,7 +17,7 @@ DEFINES_REGEX="s/((\`define)|(\`ifndef)|(\`undef)) ([A-Z0-9_]+).*/\5/p"
 DEFINES_REPLACE_REGEX="s/((\`define)|(\`ifndef)|(\`undef)) ([A-Z0-9_]+)/\1 "$PREFIX"\5/"
 DEFINES="$(sed -nr "$DEFINES_REGEX" $COMMON_DEFINES $PD_DEFINES | sort -ur)"
 SKIP_DESIGN_FILES="el2_param.vh\|el2_pdef.vh\|common_defines.vh\|pd_defines.vh"
-DESIGN_FILES="$(find $DESIGN_DIR -name "*.sv" -o -name "*.vh" | grep -v $SKIP_DESIGN_FILES)"
+DESIGN_FILES="$(find $DESIGN_DIR -name "*.sv" -o -name "*.vh" -o -name "*.v" | grep -v $SKIP_DESIGN_FILES)"
 
 # add prefix to macro names
 sed -E "$DEFINES_REPLACE_REGEX" $COMMON_DEFINES > $DEFINES_PATH/"$PREFIX"common_defines.vh
@@ -42,11 +42,11 @@ sed -i "s/include \"el2_pdef.vh\"/include \""$PREFIX"el2_pdef.vh\"/g" $DESIGN_FI
 sed -i "s/import el2_pkg/import "$PREFIX"el2_pkg/g" $DESIGN_FILES
 sed -i "s/package el2_pkg/package "$PREFIX"el2_pkg/g" $EL2_DEF
 
-MODULES_REGEX="s/^module ([A-Za-z0-9_]+).*/\1/p"
+MODULES_REGEX="s/^module ([\`A-Za-z0-9_]+).*/\1/p"
 MODULES="$(sed -nr "$MODULES_REGEX" $DESIGN_FILES | sort -ur)"
 
 # add prefix to all module names
-sed -i -E "s/module ([A-Za-z0-9_]+)/module "$PREFIX"\1/g" $DESIGN_FILES
+sed -i -E "s/module ([\`A-Za-z0-9_]+)/module "$PREFIX"\1/g" $DESIGN_FILES
 
 # add prefix to all module instantiations
 for MODULE in $MODULES; do

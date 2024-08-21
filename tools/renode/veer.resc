@@ -7,7 +7,8 @@ $bin?=$ORIGIN/csr_access.elf
 using sysbus
 mach create $name
 
-machine LoadPlatformDescription $ORIGIN/veer.repl
+$platform?=$ORIGIN/veer.repl
+machine LoadPlatformDescription $platform
 
 macro reset
 """

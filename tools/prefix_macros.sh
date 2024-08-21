@@ -12,10 +12,11 @@ EL2_PARAM="$DEFINES_PATH/el2_param.vh"
 EL2_PDEF="$DEFINES_PATH/el2_pdef.vh"
 PD_DEFINES="$DEFINES_PATH/pd_defines.vh"
 EL2_DEF="$DESIGN_DIR/include/el2_def.sv"
+EL2_IFU_IC_MEM="$DESIGN_DIR/ifu/el2_ifu_ic_mem.sv"
 
 DEFINES_REGEX="s/((\`define)|(\`ifndef)|(\`undef)) ([A-Z0-9_]+).*/\5/p"
 DEFINES_REPLACE_REGEX="s/((\`define)|(\`ifndef)|(\`undef)) ([A-Z0-9_]+)/\1 "$PREFIX"\5/"
-DEFINES="$(sed -nr "$DEFINES_REGEX" $COMMON_DEFINES $PD_DEFINES | sort -ur)"
+DEFINES="$(sed -nr "$DEFINES_REGEX" $COMMON_DEFINES $PD_DEFINES $EL2_IFU_IC_MEM | sort -ur)"
 SKIP_DESIGN_FILES="el2_param.vh\|el2_pdef.vh\|common_defines.vh\|pd_defines.vh"
 DESIGN_FILES="$(find $DESIGN_DIR -name "*.sv" -o -name "*.vh" -o -name "*.v" | grep -v $SKIP_DESIGN_FILES)"
 
@@ -58,3 +59,9 @@ rm $COMMON_DEFINES $EL2_PARAM $EL2_PDEF $PD_DEFINES
 
 # add prefix to el2_mem_if interface
 sed -i -E "s/el2_mem_if/"$PREFIX"el2_mem_if/g" $DESIGN_FILES
+
+# prefix memory macro names in el2_ifu_ic_mem.sv
+sed -i "s/EL2_IC_TAG_PACKED_SRAM/"$PREFIX"EL2_IC_TAG_PACKED_SRAM/g" $EL2_IFU_IC_MEM
+sed -i "s/EL2_IC_TAG_SRAM/"$PREFIX"EL2_IC_TAG_SRAM/g" $EL2_IFU_IC_MEM
+sed -i "s/EL2_PACKED_IC_DATA_SRAM/"$PREFIX"EL2_PACKED_IC_DATA_SRAM/g" $EL2_IFU_IC_MEM
+sed -i "s/EL2_IC_DATA_SRAM/"$PREFIX"EL2_IC_DATA_SRAM/g" $EL2_IFU_IC_MEM

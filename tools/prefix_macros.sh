@@ -55,3 +55,6 @@ done
 
 # remove old header files to avoid redefining their contents during elaboration
 rm $COMMON_DEFINES $EL2_PARAM $EL2_PDEF $PD_DEFINES
+
+# add prefix to el2_mem_if interface
+sed -i -E "s/el2_mem_if/"$PREFIX"el2_mem_if/g" $DESIGN_FILES

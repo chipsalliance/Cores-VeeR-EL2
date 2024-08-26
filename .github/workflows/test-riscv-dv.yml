@@ -210,6 +210,10 @@ jobs:
               test: riscv_bitmanip_full_test_veer
             - iss: renode
               test: riscv_bitmanip_balanced_test_veer
+            # Disable illegal instr test, until illegal instruction handling is improved
+            # since there remain few edge cases to be resolved here
+            - iss: renode
+              test: riscv_illegal_instr_test
 
             - iss: renode
               test: riscv_hint_instr_test

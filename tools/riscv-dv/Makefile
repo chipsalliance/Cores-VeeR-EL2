@@ -86,7 +86,7 @@ RISCV_DV_ARGS = \
     --simulator $(RISCV_DV_SIM) \
     --test $(RISCV_DV_TEST) \
     --iss $(RISCV_DV_ISS) \
-    --iss_timeout 60 \
+    --iss_timeout 120 \
     --start_seed $(RISCV_DV_SEED) \
     --iterations $(RISCV_DV_ITER) \
     --batch_size $(RISCV_DV_BATCH) \

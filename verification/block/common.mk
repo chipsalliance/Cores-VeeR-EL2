@@ -1,6 +1,8 @@
 # Copyright (c) 2023 Antmicro <www.antmicro.com>
 # SPDX-License-Identifier: Apache-2.0
 
+$(info $(shell cocotb-config --makefiles))
+
 TOPLEVEL_LANG    = verilog
 SIM             ?= verilator
 WAVES           ?= 1

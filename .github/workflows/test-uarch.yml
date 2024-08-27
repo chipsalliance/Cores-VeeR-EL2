@@ -53,6 +53,7 @@ jobs:
           - "block/lib_ahb_to_axi4"
           - "block/pmp"
           - "block/dmi"
+          - "block/lsu_tl"
     env:
       CCACHE_DIR: "/opt/verification/.cache/"
       VERILATOR_VERSION: v5.010

@@ -328,6 +328,14 @@ def dmi_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
 
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["lsu_tl"])
+@nox.parametrize("testName", ["test_lsu_tl"])
+@nox.parametrize("coverage", "toggle")
+def lsu_tl_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
 @nox.session(reuse_venv=True)
 def lint(session: nox.Session) -> None:
     """Options are defined in pyproject.toml and .flake8 files"""

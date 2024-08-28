@@ -92,7 +92,6 @@ RISCV_DV_ARGS = \
     --batch_size $(RISCV_DV_BATCH) \
     --isa ${ISA_STRING} \
     --mabi ilp32 \
-    --priv u \
     --custom_target $(PWD) \
     --testlist $(PWD)/testlist.yaml \
     -v -o $(TEST_DIR)

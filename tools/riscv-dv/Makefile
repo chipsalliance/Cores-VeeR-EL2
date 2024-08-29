@@ -170,9 +170,6 @@ $(SIM_DIR)/%.log: $(TEST_DIR)/asm_test/%.hex $(TEST_DIR)/asm_test/%.sym $(WORK_D
 $(TEST_DIR)/spike_sim/%.csv: $(TEST_DIR)/spike_sim/%.log
 	python3 $(RISCV_DV_PATH)/scripts/spike_log_to_trace_csv.py --log $< --csv $@
 
-$(TEST_DIR)/whisper_sim/%.csv: $(TEST_DIR)/whisper_sim/%.log
-	python3 $(RISCV_DV_PATH)/scripts/whisper_log_trace_csv.py --log $< --csv $@
-
 $(TEST_DIR)/renode_sim/%.csv: $(TEST_DIR)/renode_sim/%.log
 	python3 $(RISCV_DV_PATH)/scripts/renode_log_to_trace_csv.py --log $< --csv $@
 

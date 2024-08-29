@@ -151,10 +151,9 @@ The comparison itself is done by `instr_trace_compare.py` in RISCV-DV.
 The flow currently supports three ISSs:
 
 * [Spike](https://github.com/riscv-software-src/riscv-isa-sim)
-* [VeeR-ISS (a.k.a. whisper)](https://github.com/chipsalliance/VeeR-ISS)
 * [Renode](https://renode.io/)
 
-The CI workflow for RISCV-DV builds or downloads the prerequisites (Verilator, Spike, VeeR-ISS, Renode) and invokes the test flow.
+The CI workflow for RISCV-DV builds or downloads the prerequisites (Verilator, Spike, Renode) and invokes the test flow.
 A failure of any of RISCV-DV tests is reported as CI failure.
 
 ### Renode integration

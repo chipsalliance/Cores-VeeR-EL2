@@ -36,10 +36,6 @@ RISCV-DV tests require a reference RISC-V program executor in a form of instruct
   
      Follow the instruction from the [documentation](https://github.com/riscv-software-src/riscv-isa-sim#build-steps). After installation make sure that the spike binary is visible in the current path.
   
-   - VeeR ISS (previously known as "whisper")
-  
-     VeeR ISS (previously known as "whisper") is a simulator designed specifically for VeeR. To build and install VeeR ISS follow the instructions in its [documentation](https://github.com/chipsalliance/VeeR-ISS#compiling-whisper).
-  
    - Renode
   
      [Renode](www.renode.io) is a full-fledged embedded system simulator developed at Antmicro. Its capabilities go beyond simulating a RISC-V core. In configuration for RISCV-DV only basic features are used just to be able to produce execution trace log.

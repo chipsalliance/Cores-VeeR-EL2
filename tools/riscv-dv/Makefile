@@ -64,24 +64,37 @@ ifeq ("$(.SHELLSTATUS)", "0")
     endif
 endif
 
+ISA_STRING = rv32imc_zicsr_zifencei_zba_zbb_zbc_zbs
+# If compiled with U-mode we implicitly also compile with Smepmp in these tests
+ifeq ($(findstring u, $(RISCV_DV_PRIV)), u)
+	ISA_STRING := "${ISA_STRING}"_smepmp
+endif
+
+RISCV_DV_SIM_ARGS= \
+    --priv m${RISCV_DV_PRIV}
+
+# Append Renode-specific options
+ifeq ("$(RISCV_DV_ISS)", "renode")
+    ISS_OPTS += --cpu-type='VeeR_EL2'
+    ISS_OPTS += --additional-cpu-parameters=''
+    RISCV_DV_SIM_ARGS += \
+        --iss_opts=" ${ISS_OPTS} "
+endif
+
 # riscv-dv args
 RISCV_DV_ARGS = \
     --simulator $(RISCV_DV_SIM) \
     --test $(RISCV_DV_TEST) \
     --iss $(RISCV_DV_ISS) \
-    --iss_timeout 60 \
+    --iss_timeout 120 \
     --start_seed $(RISCV_DV_SEED) \
     --iterations $(RISCV_DV_ITER) \
     --batch_size $(RISCV_DV_BATCH) \
-    --isa rv32imc_zicsr_zifencei_zba_zbb_zbc_zbs \
+    --isa ${ISA_STRING} \
     --mabi ilp32 \
-    --priv u \
     --custom_target $(PWD) \
     --testlist $(PWD)/testlist.yaml \
     -v -o $(TEST_DIR)
-
-RISCV_DV_SIM_ARGS= \
-    --priv "$(RISCV_DV_PRIV)"
 
 MAKEFILE  = $(abspath $(MAKEFILE_LIST))
 
@@ -118,11 +131,12 @@ $(TEST_DIR)/generate.log: | $(TEST_DIR)
 	@touch $@
 
 # Code patching & compilation
+# remove _smepmp from ISA string, as it's not recognized by GCC
 $(TEST_DIR)/compile.log: $(TEST_DIR)
 	# Patch the code
 	find $(TEST_DIR)/asm_test -name "*.S" -exec python3 code_fixup.py -i {} -o {} \;
 	# Compile, simulate
-	PYTHONPATH=$(RISCV_DV_PATH)/pygen python3 $(RISCV_DV_PATH)/run.py $(RISCV_DV_ARGS) \
+	PYTHONPATH=$(RISCV_DV_PATH)/pygen python3 $(RISCV_DV_PATH)/run.py $(subst _smepmp,,$(RISCV_DV_ARGS)) \
     --steps gcc_compile 2>&1 | tee $@
 
 # ISS simulation
@@ -130,6 +144,10 @@ $(TEST_DIR)/iss_sim.log: $(TEST_DIR)/compile.log | $(TEST_DIR)
 	# Compile, simulate
 	PYTHONPATH=$(RISCV_DV_PATH)/pygen python3 $(RISCV_DV_PATH)/run.py $(RISCV_DV_ARGS) $(RISCV_DV_SIM_ARGS) \
     --steps iss_sim 2>&1 | tee $@
+
+# Tests are built by `run.py` script, they shouldn't be constructed by this Makefile directly
+%.o:
+	$(warning There are additional test files ($@), which will not be compiled. Hint: you might need to set "RISCV_DV_ITER" to a higher value)
 
 # Generate symbols of executables
 %.sym: %.o
@@ -209,3 +227,5 @@ fullclean:
 
 .PHONY: all generate run clean fullclean
 .SECONDARY:
+# Disable any default actions Makefile might invoke for suffix rules (e.g. invoking CC for our tests)
+.SUFFIXES:

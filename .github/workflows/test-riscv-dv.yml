@@ -31,13 +31,9 @@ jobs:
           key: cache_renode_${{ steps.cache_timestamp.outputs.time }}
           restore-keys: cache_renode_
 
-      - name: Get latest release
-        uses: robinraju/release-downloader@v1.8
-        with:
-          repository: "renode/renode"
-          latest: true
-          fileName: "renode-*.linux-portable.tar.gz"
-          extract: false
+      - name: Get latest nightly release
+        run: |
+          wget https://builds.renode.io/renode-latest.linux-portable.tar.gz
 
       - name: Rename the archive
         run: |
@@ -201,13 +197,24 @@ jobs:
         iss:
           - spike
 #         - whisper
-#         - renode
+          - renode
         coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
         version: [ uvm ]
         # TODO use separate privilege modes configurations for generating the VeeR model
         priv: ["", "u"]
         include: ${{ fromJSON(needs.generate-config.outputs.test-include-run) }}
         exclude:
+            # Bitmanip tests are temporarily disabled in Renode
+            # until the extension implementation is complete
+            - iss: renode
+              test: riscv_bitmanip_full_test_veer
+            - iss: renode
+              test: riscv_bitmanip_balanced_test_veer
+            # Disable illegal instr test, until illegal instruction handling is improved
+            # since there remain few edge cases to be resolved here
+            - iss: renode
+              test: riscv_illegal_instr_test
+
             - iss: renode
               test: riscv_hint_instr_test
             - iss: whisper

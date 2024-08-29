@@ -25,6 +25,8 @@ Check CSR Access
 
 *** Test Cases ***
 Should Have All CSRs
+    # We are testing SMEPMP registers here, so make sure the extension is active (mseccfg, mseccfgh)
+    Execute Command                 $platform=@${CURDIR}/veer_smepmp.repl
     Prepare Machine                 ${CURDIR}/csr_access.elf
 
     Wait For Line On Uart           ${EMPTY}
@@ -222,7 +224,7 @@ Should Have Correct MStatus
     Wait For Line On Uart           ok.
     Wait For Line On Uart           S mode:
     Wait For Line On Uart           0x800
-    Wait For Line On Uart           0x0
+    Wait For Line On Uart           0x1800
     Wait For Line On Uart           not supported.
     Wait For Line On Uart           U mode:
     Wait For Line On Uart           0x0
@@ -238,7 +240,7 @@ Should Have Correct MStatus
 
     Wait For Line On Uart           Finished: PASSED  matchNextLine=false
 
-Should Have Correcr MISA
+Should Have Correct MISA
     Prepare Machine                 ${CURDIR}/csr_misa.elf
 
     Wait For Line On Uart           misa = 0x40101104 vs. 0x40101104

@@ -1,0 +1,57 @@
+name: Get Renode
+
+on:
+  workflow_call:
+
+jobs:
+
+#--------------#
+#    Renode
+#--------------#
+  renode:
+    name: Get Renode
+    runs-on: ubuntu-latest
+    env:
+      TOOL_NAME: renode
+      TOOL_VERSION: latest
+      DEBIAN_FRONTEND: "noninteractive"
+
+    steps:
+      - name: Setup Cache Metadata
+        id: cache_metadata
+        run: |
+          cache_date=$(date +"%Y_%m_%d")
+          cache_name=cache_${{ env.TOOL_NAME }}_${{ env.TOOL_VERSION }}
+          echo "Cache date: "$cache_date
+          echo "Cache name: "$cache_name
+          echo "cache_date=$cache_date" >> "$GITHUB_ENV"
+          echo "cache_name=$cache_name" >> "$GITHUB_ENV"
+
+      - name: Setup cache
+        uses: actions/cache@v3
+        id: cache
+        timeout-minutes: 60
+        with:
+          path: |
+            /opt/renode
+          key: ${{ env.cache_name }}_${{ env.cache_date }}
+          restore-keys: ${{ env.cache_name }}_
+
+      - name: Get latest nightly release
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+        run: |
+          wget https://builds.renode.io/renode-latest.linux-portable.tar.gz
+
+      - name: Rename the archive
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+        run: |
+          mv ${{ github.workspace }}/renode-*.tar.gz ${{ github.workspace }}/renode.tar.gz
+
+      - name: Unpack binaries
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+        run: |
+          pushd /opt
+            mv ${{ github.workspace }}/renode.tar.gz .
+            mkdir renode
+            tar -zxvf renode.tar.gz --strip-components=1 -C renode/
+          popd

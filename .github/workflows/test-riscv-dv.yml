@@ -6,47 +6,6 @@ on:
 jobs:
 
 #--------------#
-#    Renode
-#--------------#
-  renode:
-    name: Download Renode
-    runs-on: ubuntu-latest
-    env:
-      CCACHE_DIR: "/opt/veer-el2/.cache/"
-      DEBIAN_FRONTEND: "noninteractive"
-
-    steps:
-      - name: Create Cache Timestamp
-        id: cache_timestamp
-        uses: nanzm/get-time-action@v2.0
-        with:
-          format: 'YYYY-MM-DD-HH-mm-ss'
-
-      - name: Setup cache
-        uses: actions/cache@v3
-        timeout-minutes: 60
-        continue-on-error: true
-        with:
-          path: "/opt/veer-el2/.cache/"
-          key: cache_renode_${{ steps.cache_timestamp.outputs.time }}
-          restore-keys: cache_renode_
-
-      - name: Get latest nightly release
-        run: |
-          wget https://builds.renode.io/renode-latest.linux-portable.tar.gz
-
-      - name: Rename the archive
-        run: |
-          mv ${{ github.workspace }}/renode-*.tar.gz ${{ github.workspace }}/renode.tar.gz
-
-      - name: Store Renode binaries
-        uses: actions/upload-artifact@v3
-        with:
-          name: renode
-          path: ${{ github.workspace }}/renode.tar.gz
-          retention-days: 1
-
-#--------------#
 #    Tests
 #--------------#
   generate-config:
@@ -138,7 +97,7 @@ jobs:
   run-tests:
     name: Run RISC-V DV tests
     runs-on: ubuntu-latest
-    needs: [ renode, generate-config, generate-code ]
+    needs: [ generate-config, generate-code ]
     strategy:
       fail-fast: false
       matrix:
@@ -170,6 +129,7 @@ jobs:
       CCACHE_DIR: "/opt/riscv-dv/.cache/"
       VERILATOR_VERSION: v5.010
       SPIKE_VERSION: d70ea67d
+      RENODE_VERSION: latest
       CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
 
     steps:
@@ -198,6 +158,8 @@ jobs:
           cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}
           cache_spike_restore_key=cache_spike_
           cache_spike_key=${cache_spike_restore_key}${{ env.SPIKE_VERSION }}
+          cache_renode_restore_key=cache_renode_
+          cache_renode_key=${cache_renode_restore_key}${{ env.RENODE_VERSION }}
           cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
           cache_test_key=${cache_test_restore_key}${time}
           cache_code=cache_${{ matrix.test }}_${{ matrix.version }}
@@ -208,6 +170,8 @@ jobs:
           echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
           echo "cache_spike_restore_key=$cache_spike_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_spike_key=$cache_spike_key" | tee -a "$GITHUB_ENV"
+          echo "cache_renode_restore_key=$cache_renode_restore_key" | tee -a "$GITHUB_ENV"
+          echo "cache_renode_key=$cache_renode_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
           echo "cache_code=${cache_code}_${{ env.CACHE_HASH }}" | tee -a "$GITHUB_ENV"
@@ -234,17 +198,15 @@ jobs:
           restore-keys: ${{ env.cache_spike_restore_key }}
           fail-on-cache-miss: true
 
-      - name: Download Renode binaries
-        uses: actions/download-artifact@v3
+      - name: Restore Renode cache
+        id: cache-renode-restore
+        uses: actions/cache/restore@v3
         with:
-          name: renode
-          path: /opt
-
-      - name: Unpack binaries
-        run: |
-          pushd /opt
-            tar -zxvf renode.tar.gz --strip-components=1
-          popd
+          path: |
+            /opt/renode
+          key: ${{ env.cache_renode_key }}
+          restore-keys: ${{ env.cache_renode_restore_key }}
+          fail-on-cache-miss: true
 
       - name: Setup repository
         uses: actions/checkout@v3
@@ -287,7 +249,7 @@ jobs:
           export RISCV_OBJCOPY=riscv64-unknown-elf-objcopy
           export RISCV_NM=riscv64-unknown-elf-nm
           export SPIKE_PATH=/opt/spike/bin
-          export RENODE_PATH=/opt/renode
+          export RENODE_PATH=/opt/renode/renode
 
           echo "RV_ROOT=${RV_ROOT}" >> ${GITHUB_ENV}
           echo "PATH=${PATH}"       >> ${GITHUB_ENV}
@@ -334,7 +296,7 @@ jobs:
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: centos:8
     if: github.event.pull_request.merged == true
-    needs: [ renode, generate-config, generate-code ]
+    needs: [ generate-config, generate-code ]
     strategy:
       fail-fast: false
       matrix:
@@ -371,6 +333,8 @@ jobs:
           cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}
           cache_spike_restore_key=cache_spike_
           cache_spike_key=${cache_spike_restore_key}${{ env.SPIKE_VERSION }}
+          cache_renode_restore_key=cache_renode_
+          cache_renode_key=${cache_renode_restore_key}${{ env.RENODE_VERSION }}
           cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
           cache_test_key=${cache_test_restore_key}${time}
           cache_code=cache_${{ matrix.test }}_${{ matrix.version }}
@@ -381,6 +345,8 @@ jobs:
           echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
           echo "cache_spike_restore_key=$cache_spike_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_spike_key=$cache_spike_key" | tee -a "$GITHUB_ENV"
+          echo "cache_renode_restore_key=$cache_renode_restore_key" | tee -a "$GITHUB_ENV"
+          echo "cache_renode_key=$cache_renode_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
           echo "cache_code=${cache_code}_${{ env.CACHE_HASH }}" | tee -a "$GITHUB_ENV"

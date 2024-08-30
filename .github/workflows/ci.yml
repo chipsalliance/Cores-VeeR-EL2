@@ -16,6 +16,10 @@ jobs:
     name: Build-Spike
     uses: ./.github/workflows/build-spike.yml
 
+  Get-Renode:
+    name: Get-Renode
+    uses: ./.github/workflows/get-renode.yml
+
   Build-OpenOCD:
     name: Build-OpenOCD
     uses: ./.github/workflows/build-openocd.yml
@@ -37,7 +41,7 @@ jobs:
 
   Test-RISCV-DV:
     name: Test-RISCV-DV
-    needs: [Build-Verilator, Build-Spike]
+    needs: [Build-Verilator, Build-Spike, Get-Renode]
     uses: ./.github/workflows/test-riscv-dv.yml
 
   Test-RISCOF:
@@ -52,6 +56,7 @@ jobs:
 
   Test-Renode:
     name: Test-Renode
+    needs: [Get-Renode]
     uses: ./.github/workflows/test-renode.yml
 
   Test-OpenOCD:

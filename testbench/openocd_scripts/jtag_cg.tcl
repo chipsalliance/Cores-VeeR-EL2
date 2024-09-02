@@ -27,8 +27,6 @@ if {($val & 0x00000c00) == 0} {
 }
 puts ""
 
-riscv set_mem_access sysbus
-
 set addr1 0xFFFF0000
 set addr2 0x0000FFF0
 set addr3 0x0000FFFF

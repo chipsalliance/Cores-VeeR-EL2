@@ -4,18 +4,41 @@ on:
   workflow_call:
 
 jobs:
-
   tests:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
     env:
+      RENODE_VERSION: latest
       DEBIAN_FRONTEND: "noninteractive"
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Setup Cache Metadata
+        id: cache_metadata
+        run: |
+          date=$(date +"%Y_%m_%d")
+          time=$(date +"%Y%m%d_%H%M%S_%N")
+          cache_renode_restore_key=cache_renode_
+          cache_renode_key=${cache_renode_restore_key}${{ env.RENODE_VERSION }}
+
+          echo "date=$date" | tee -a "$GITHUB_ENV"
+          echo "time=$time" | tee -a "$GITHUB_ENV"
+          echo "cache_renode_restore_key=$cache_renode_restore_key" | tee -a "$GITHUB_ENV"
+          echo "cache_renode_key=$cache_renode_key" | tee -a "$GITHUB_ENV"
+
+      - name: Restore Renode cache
+        id: cache-renode-restore
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            /opt/renode
+          key: ${{ env.cache_renode_key }}
+          restore-keys: ${{ env.cache_renode_restore_key }}
+          fail-on-cache-miss: true
 
       - name: Install dependencies
         run: |
@@ -34,7 +57,8 @@ jobs:
       - name: Run tests
         run: |
           cd ./tools/renode
-          ./run-tests.sh
+          pip install -r /opt/renode/tests/requirements.txt
+          /opt/renode/renode-test veer.robot
 
       - name: Upload artifacts
         if: always()

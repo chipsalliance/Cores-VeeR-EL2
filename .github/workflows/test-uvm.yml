@@ -10,6 +10,7 @@ jobs:
     env:
       CCACHE_DIR: "/opt/uvm/.cache/"
       VERILATOR_VERSION: uvm
+      VERILATOR_COMMIT: 7ca2d6470a
       DEBIAN_FRONTEND: "noninteractive"
     steps:
       - name: Setup repository
@@ -23,7 +24,7 @@ jobs:
           date=$(date +"%Y_%m_%d")
           time=$(date +"%Y%m%d_%H%M%S_%N")
           cache_verilator_restore_key=cache_verilator_
-          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}
+          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}_${{ env.VERILATOR_COMMIT }}
           cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
           cache_test_key=${cache_test_restore_key}${time}
 
@@ -43,7 +44,6 @@ jobs:
             /opt/verilator
             /opt/verilator/.cache
           key: ${{ env.cache_verilator_key }}
-          restore-keys: ${{ env.cache_verilator_restore_key }}
 
       - name: Setup tests cache
         uses: actions/cache@v3

@@ -52,6 +52,6 @@ jobs:
         run: |
           pushd /opt
             mv ${{ github.workspace }}/renode.tar.gz .
-            mkdir renode
+            mkdir -p renode
             tar -zxvf renode.tar.gz --strip-components=1 -C renode/
           popd

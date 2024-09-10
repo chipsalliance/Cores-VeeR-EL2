@@ -159,10 +159,10 @@ module axi_slv #(
     output reg [    63:0] rdata,
     output reg [     1:0] rresp,
     output reg [TAGW-1:0] rid,
-    output                rlast,
+    output reg            rlast,
 
     input             awvalid,
-    output            awready,
+    output reg        awready,
     input  [    31:0] awaddr,
     input  [TAGW-1:0] awid,
     input  [     7:0] awlen,
@@ -172,7 +172,7 @@ module axi_slv #(
     input  [63:0] wdata,
     input  [ 7:0] wstrb,
     input         wvalid,
-    output        wready,
+    output reg    wready,
 
     output reg            bvalid,
     input                 bready,

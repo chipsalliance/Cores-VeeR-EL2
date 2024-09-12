@@ -53,6 +53,8 @@ jobs:
         run: |
           rm -rf ${{ env.ROOT_DIR }}/html/dev/${{ steps.PR.outputs.number }}
           rm -rf ${{ env.ROOT_DIR }}/doctrees/dev/${{ steps.PR.outputs.number }}
+          mkdir -p public.new/html/dev/${{ steps.PR.outputs.number }}/docs_rendered
+          cp -arf ./docs_rendered/* public.new/html/dev/${{ steps.PR.outputs.number }}/docs_rendered
           sis -d webpage --loc-github-ref-name ${{ github.ref_name }} --loc-github-event-name ${{ github.event_name }} --pr-number ${{ steps.PR.outputs.number }}
 
       - name: Add redirect index page

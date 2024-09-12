@@ -70,11 +70,15 @@ jobs:
       - name: Update webpage
         if: github.event_name != 'pull_request'
         run: |
+          mkdir -p public.new/html/main/docs_rendered
+          cp -arf ./docs_rendered/* public.new/html/main/docs_rendered
           sis -d webpage --loc-github-ref-name ${{ github.ref_name }} --loc-github-event-name ${{ github.event_name }} --pr-number 0
 
       - name: Update webpage PR
         if: github.event_name == 'pull_request'
         run: |
+          mkdir -p public.new/html/dev/${{ github.event.number }}/docs_rendered
+          cp -arf ./docs_rendered/* public.new/html/dev/${{ github.event.number }}/docs_rendered
           sis -d webpage --loc-github-ref-name ${{ github.ref_name }} --loc-github-event-name ${{ github.event_name }} --pr-number ${{ github.event.number }}
 
       - name: Add redirect index page

@@ -45,7 +45,7 @@ numfig = True
 extensions = default_extensions
 myst_enable_extensions = default_myst_enable_extensions
 
-myst_substitutions = {"project": project}
+myst_substitutions = {}
 
 myst_url_schemes = {
     "http": None,
@@ -80,9 +80,14 @@ html_theme_options["palette"][0].update(
 # html_theme_options = {
 #     "palette": []
 # }
-
 html_title = project
 
 
 def setup(app):
+    project_name = app.config.project
+    project_words = project_name.split()
+
+    app.config.basic_filename = f"{'-'.join(project_words)}-coverage-reports"
+    app.config.html_title = project_name
+    myst_substitutions["project"] = project_name
     app.add_css_file("main.css")

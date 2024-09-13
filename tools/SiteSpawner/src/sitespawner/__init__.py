@@ -56,7 +56,12 @@ def reports_handler(args):
 
 def webpage_handler(args):
     update_webpage(
-        args.loc_github_ref_name, args.loc_github_event_name, args.pr_number, args.page_url
+        args.loc_github_ref_name,
+        args.loc_github_event_name,
+        args.pr_number,
+        args.doc_project_name,
+        args.include_documentation,
+        args.page_url,
     )
 
 
@@ -203,6 +208,15 @@ def setup_parser():
             ),
         },
     }
+    src_project_name = {
+        "name": "--src-project-name",
+        "options": {
+            "metavar": "src_project_name",
+            "type": str,
+            "default": "Project",
+            "help": ("Name of the project that is displayed in the webpage for sources."),
+        },
+    }
     reports_args = [
         logo_src,
         logo_href,
@@ -211,6 +225,7 @@ def setup_parser():
         src_path,
         info_report_dir,
         src_remove_pattern,
+        src_project_name,
     ]
     create_subparser(
         subparsers=subparsers,
@@ -256,7 +271,31 @@ def setup_parser():
             "help": "Base URL of the website. Otherwise, will apply relative reference for redirect.",
         },
     }
-    webpage_args = [ref_name, event_name, pr_number, page_url]
+    doc_project_name = {
+        "name": "--doc-project-name",
+        "options": {
+            "metavar": "doc_project_name",
+            "type": str,
+            "default": "Project",
+            "help": ("Name of the project used in documentation."),
+        },
+    }
+    include_documentation = {
+        "name": "--include-documentation",
+        "options": {
+            "action": "store_true",
+            "dest": "include_documentation",
+            "help": "Whethet to include documentation in the built webpage",
+        },
+    }
+    webpage_args = [
+        ref_name,
+        event_name,
+        pr_number,
+        page_url,
+        doc_project_name,
+        include_documentation,
+    ]
     create_subparser(
         subparsers=subparsers,
         name="webpage",

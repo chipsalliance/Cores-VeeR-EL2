@@ -18,7 +18,7 @@ def render_template(src, dst, **kwargs):
 
 
 @args_on_debug_logger(logger)
-def make_coverage_report_index(branch, root, output, templates):
+def make_coverage_report_index(branch, root, output, templates, include_documentation):
     """Prepares coverage report index page."""
     # Coverage types individual dashboards accumulate
     # Coverage dashboard displays coverage types side-by-side
@@ -69,20 +69,22 @@ def make_coverage_report_index(branch, root, output, templates):
 
 
 @args_on_debug_logger(logger)
-def make_dev_index(branches, output, templates):
+def make_dev_index(branches, output, templates, include_documentation):
     """Prepares the branch/pr index page."""
-    params = {"branches": branches}
+    params = {"branches": branches, "include_documentation": include_documentation}
     render_template(templates / "dev.md", output / "dev.md", **params)
 
 
-def generate(template, root, output):
+def generate(template, root, output, include_documentation):
     """Processes webpage *.md templates."""
     template = Path(template)
     root = Path(root)
     output = Path(output)
 
     # Reports for the main branch
-    make_coverage_report_index("main", root / "main", output / "main", template)
+    make_coverage_report_index(
+        "main", root / "main", output / "main", template, include_documentation
+    )
 
     # Reports for development branches / pull requests
     branches = []
@@ -97,13 +99,16 @@ def generate(template, root, output):
             fname = filepath.name
             branches.append(fname)
             make_coverage_report_index(
-                fname, root / "dev" / fname, output / "dev" / fname, template
+                fname, root / "dev" / fname, output / "dev" / fname, template, include_documentation
             )
 
     # Prepare the branch/pr index page
-    make_dev_index(branches, output, template)
+    make_dev_index(branches, output, template, include_documentation)
+    render_template(
+        template / "main.md", output / "main.md", **{"include_documentation": include_documentation}
+    )
 
     # Copy other files/pages
-    files = ["conf.py", "main.md", "index.md"]
+    files = ["conf.py", "index.md"]
     for file in files:
         copy(template / file, output / file)

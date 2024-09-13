@@ -50,7 +50,7 @@ def lcov_genhtml(
             stdout=obtain_stdout(log_output_path),
         )
     else:
-        command += ["--prefix", str(path_prefix)]
+        command += ["--prefix", str(Path(path_prefix).resolve())]
         subprocess.run(
             command,
             stdout=obtain_stdout(log_output_path),
@@ -66,6 +66,7 @@ def generate_coverage_reports(
     logo_src=None,
     logo_href=None,
     info_report_dir=None,
+    project_name="Project",
     info_pattern="coverage*.info",
 ):
     """Iterates over available *.info files, merges them & generates summaries
@@ -87,7 +88,7 @@ def generate_coverage_reports(
         logger.debug(f"Preprocessing {info_file}")
         lcov_extract_command = ["lcov", "--extract", info_file, src_pattern, "-o", info_file]
 
-        data, _ = parse_infos([str(info_file)])
+        data = parse_infos([str(info_file)])
         if len(data.keys()) == 0:
             logger.warning(f"No data found in .info file: {info_file}")
             continue
@@ -166,6 +167,8 @@ def generate_coverage_reports(
         genhtml(
             input_files=input_files,
             output_dir=test_output_dir,
+            src_path=src_path,
+            project_name=project_name,
             test_name=test_name,
             logo_src=logo_src,
             logo_href=logo_href,
@@ -204,6 +207,8 @@ def generate_coverage_reports(
     genhtml(
         input_files=merged_input_files,
         output_dir=final_output_dir,
+        src_path=src_path,
+        project_name=project_name,
         test_name="all",
         logo_src=logo_src,
         logo_href=logo_href,
@@ -232,4 +237,5 @@ def main(args):
         logo_src=args.logo_src,
         logo_href=args.logo_href,
         info_report_dir=args.info_report_dir,
+        project_name=args.src_project_name,
     )

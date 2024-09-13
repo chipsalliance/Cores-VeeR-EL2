@@ -39,7 +39,14 @@ def replace_dir(src_dir, dst_dir):
 
 @main_func_log(logger, "Update webpage")
 @args_on_debug_logger(logger)
-def update_webpage(loc_github_ref_name, loc_github_event_name, pr_number, page_url=None):
+def update_webpage(
+    loc_github_ref_name,
+    loc_github_event_name,
+    pr_number,
+    project_name,
+    include_documentation,
+    page_url=None,
+):
     """Updates the public part of the gh-pages based on git refs, github events, and PR numbers."""
     # Determine the directory based on the GitHub ref and event
     if loc_github_ref_name == "main":
@@ -78,14 +85,27 @@ def update_webpage(loc_github_ref_name, loc_github_event_name, pr_number, page_u
             dst_file = dst_dir / fname
             copy2(src_file, dst_file)
 
-    generate(webpage_template_dir, str(legacy_page_dir / "html"), str(md_source_dir))
+    generate(
+        webpage_template_dir,
+        str(legacy_page_dir / "html"),
+        str(md_source_dir),
+        include_documentation=include_documentation,
+    )
 
     SPHINXBUILD = os.getenv("SPHINXBUILD", "sphinx-build")
     SPHINXOPTS = os.getenv("SPHINXOPTS")
 
     logger.info("Building the HTML documentation using Sphinx...")
 
-    cmd = [SPHINXBUILD, "-M", "html", str(md_source_dir), str(new_page_dir)]
+    cmd = [
+        SPHINXBUILD,
+        "-M",
+        "html",
+        str(md_source_dir),
+        str(new_page_dir),
+        "-D",
+        f"project={project_name}",
+    ]
 
     if SPHINXOPTS:
         cmd.append(SPHINXOPTS)

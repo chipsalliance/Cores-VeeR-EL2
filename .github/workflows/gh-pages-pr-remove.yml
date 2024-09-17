@@ -56,6 +56,7 @@ jobs:
           mkdir -p public.new/html/dev/${{ steps.PR.outputs.number }}/docs_rendered
           cp -arf ./docs_rendered/* public.new/html/dev/${{ steps.PR.outputs.number }}/docs_rendered
           sis -d webpage \
+            --include-documentation \
             --doc-project-name "Cores VeeR EL2" \
             --loc-github-ref-name ${{ github.ref_name }} \
             --loc-github-event-name ${{ github.event_name }} \

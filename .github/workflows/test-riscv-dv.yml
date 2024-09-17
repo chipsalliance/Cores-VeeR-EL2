@@ -213,6 +213,14 @@ jobs:
         with:
           submodules: recursive
 
+      - name: install SiteSpawner package
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python3 -m pip install tools/SiteSpawner
+          source .venv/bin/activate
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          python3 -m pip install tools/SiteSpawner
+
       - name: Install Python deps
         run: |
           pip install -r third_party/riscv-dv/requirements.txt
@@ -271,8 +279,7 @@ jobs:
 
       - name: Prepare coverage data
         run: |
-          .github/scripts/convert_coverage_data.sh ${RV_ROOT}/tools/riscv-dv/work/
-          echo "convert_coverage_data.sh exited with RET_CODE = "$?
+          sis -d convert --dat-dir ${RV_ROOT}/tools/riscv-dv/work/
           mkdir -p results
           mv ${RV_ROOT}/tools/riscv-dv/work/coverage.info \
              results/coverage_riscv-dv_${{matrix.priv}}_${{ matrix.test }}_${{ matrix.coverage }}.info

@@ -96,6 +96,14 @@ jobs:
         with:
           submodules: recursive
 
+      - name: install SiteSpawner package
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python3 -m pip install tools/SiteSpawner
+          source .venv/bin/activate
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          python3 -m pip install tools/SiteSpawner
+
       - name: Install RISCOF
         run: |
           pip3 install git+https://github.com/riscv/riscof@a25e315
@@ -146,8 +154,7 @@ jobs:
       - name: Prepare coverage data
         run: |
           export PATH=/opt/verilator/bin:$PATH
-          .github/scripts/convert_coverage_data.sh riscof/coverage/
-          echo "convert_coverage_data.sh exited with RET_CODE = "$?
+          sis -d convert --dat-dir riscof/coverage/
           mv riscof/coverage/coverage.info \
              riscof/coverage/coverage_riscof_${{matrix.priv}}_${{ matrix.coverage }}.info
 

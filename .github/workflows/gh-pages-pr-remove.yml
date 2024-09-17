@@ -21,6 +21,14 @@ jobs:
       - name: Setup repository
         uses: actions/checkout@v3
 
+      - name: install SiteSpawner package
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python3 -m pip install tools/SiteSpawner
+          source .venv/bin/activate
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          python3 -m pip install tools/SiteSpawner
+
       - name: Download deployment
         uses: actions/checkout@v3
         with:
@@ -45,7 +53,14 @@ jobs:
         run: |
           rm -rf ${{ env.ROOT_DIR }}/html/dev/${{ steps.PR.outputs.number }}
           rm -rf ${{ env.ROOT_DIR }}/doctrees/dev/${{ steps.PR.outputs.number }}
-          .github/scripts/update_webpage.sh ${{ github.ref_name }} ${{ github.event_name }} ${{ steps.PR.outputs.number }}
+          mkdir -p public.new/html/dev/${{ steps.PR.outputs.number }}/docs_rendered
+          cp -arf ./docs_rendered/* public.new/html/dev/${{ steps.PR.outputs.number }}/docs_rendered
+          sis -d webpage \
+            --include-documentation \
+            --doc-project-name "Cores VeeR EL2" \
+            --loc-github-ref-name ${{ github.ref_name }} \
+            --loc-github-event-name ${{ github.event_name }} \
+            --pr-number ${{ steps.PR.outputs.number }}
 
       - name: Add redirect index page
         run: |

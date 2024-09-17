@@ -18,6 +18,14 @@ jobs:
       - name: Setup python
         uses: actions/setup-python@v4
 
+      - name: install SiteSpawner package
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python3 -m pip install tools/SiteSpawner
+          source .venv/bin/activate
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          python3 -m pip install tools/SiteSpawner
+
       - name: Print metadata
         run: |
           run_information="Repository: ${{ github.repository }} Commit SHA:${{ github.sha }} Workflow: ${{ github.workflow }} Run:${{ github.run_id }}"
@@ -62,12 +70,26 @@ jobs:
       - name: Update webpage
         if: github.event_name != 'pull_request'
         run: |
-          .github/scripts/update_webpage.sh ${{ github.ref_name }} ${{ github.event_name }} 0
+          mkdir -p public.new/html/main/docs_rendered
+          cp -arf ./docs_rendered/* public.new/html/main/docs_rendered
+          sis -d webpage \
+            --include-documentation \
+            --doc-project-name "Cores VeeR EL2" \
+            --loc-github-ref-name ${{ github.ref_name }} \
+            --loc-github-event-name ${{ github.event_name }} \
+            --pr-number 0
 
       - name: Update webpage PR
         if: github.event_name == 'pull_request'
         run: |
-          .github/scripts/update_webpage.sh ${{ github.ref_name }} ${{ github.event_name }} ${{ github.event.number }}
+          mkdir -p public.new/html/dev/${{ github.event.number }}/docs_rendered
+          cp -arf ./docs_rendered/* public.new/html/dev/${{ github.event.number }}/docs_rendered
+          sis -d webpage \
+            --include-documentation \
+            --doc-project-name "Cores VeeR EL2" \
+            --loc-github-ref-name ${{ github.ref_name }} \
+            --loc-github-event-name ${{ github.event_name }} \
+            --pr-number ${{ github.event.number }}
 
       - name: Add redirect index page
         run: |

@@ -71,6 +71,14 @@ jobs:
         with:
           submodules: recursive
 
+      - name: install SiteSpawner package
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python3 -m pip install tools/SiteSpawner
+          source .venv/bin/activate
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          python3 -m pip install tools/SiteSpawner
+
       - name: Build verilated simulation
         run: |
           export PATH=/opt/verilator/bin:/opt/openocd/bin:$PATH
@@ -87,8 +95,7 @@ jobs:
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=$(pwd)
-          .github/scripts/convert_coverage_data.sh ${RV_ROOT}/run
-          echo "convert_coverage_data.sh exited with RET_CODE = "$?
+          sis -d convert --dat-dir ${RV_ROOT}/run
           mkdir -p results
           mv ${RV_ROOT}/run/coverage.info \
              results/coverage_openocd_${{ matrix.bus }}_${{ matrix.coverage }}.info

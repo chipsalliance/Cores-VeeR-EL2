@@ -89,7 +89,6 @@ jobs:
             /opt/verilator
             /opt/verilator/.cache
           key: ${{ env.cache_verilator_key }}
-          restore-keys: ${{ env.cache_verilator_restore_key }}
 
       - name: Setup tests cache
         uses: actions/cache@v3

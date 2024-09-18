@@ -55,7 +55,6 @@ jobs:
             /opt/verilator
             /opt/verilator/.cache
           key: ${{ env.cache_verilator_key }}
-          restore-keys: ${{ env.cache_verilator_restore_key }}
 
       - name: Restore Spike cache
         id: cache-spike-restore

@@ -93,7 +93,7 @@ module el2_pmp
                                           el2_pmp_type_pkt_t  pmp_req_type,
                                           logic               priv_mode,
                                           logic               permission_check);
-    logic result = 1'b0;
+    logic result;
     logic unused_cfg = |csr_pmp_cfg.mode;
 
     if (!csr_pmp_cfg.read && csr_pmp_cfg.write) begin

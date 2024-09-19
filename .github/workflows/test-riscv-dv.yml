@@ -127,7 +127,7 @@ jobs:
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"
-      VERILATOR_VERSION: v5.010
+      VERILATOR_VERSION: v5.024
       SPIKE_VERSION: d70ea67d
       RENODE_VERSION: latest
       CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
@@ -155,7 +155,7 @@ jobs:
           date=$(date +"%Y_%m_%d")
           time=$(date +"%Y%m%d_%H%M%S_%N")
           cache_verilator_restore_key=cache_verilator_
-          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}
+          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}_${{ env.VERILATOR_COMMIT }}
           cache_spike_restore_key=cache_spike_
           cache_spike_key=${cache_spike_restore_key}${{ env.SPIKE_VERSION }}
           cache_renode_restore_key=cache_renode_
@@ -313,7 +313,7 @@ jobs:
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"
-      VERILATOR_VERSION: v5.010
+      VERILATOR_VERSION: v5.024
       SPIKE_VERSION: d70ea67d
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader

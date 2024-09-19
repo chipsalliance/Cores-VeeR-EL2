@@ -10,9 +10,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - version: v5.010
+          - version: v5.024
             repo: verilator/verilator
-            commit: v5.010
+            commit: v5.024
           - version: uvm
             repo: verilator/verilator
             commit: 7ca2d6470a

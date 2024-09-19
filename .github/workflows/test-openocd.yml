@@ -16,7 +16,7 @@ jobs:
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/openocd-tests/.cache/"
-      VERILATOR_VERSION: v5.010
+      VERILATOR_VERSION: v5.024
 
     steps:
       - name: Install utils
@@ -32,7 +32,7 @@ jobs:
           date=$(date +"%Y_%m_%d")
           time=$(date +"%Y%m%d_%H%M%S_%N")
           cache_verilator_restore_key=cache_verilator_
-          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}
+          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}_${{ env.VERILATOR_COMMIT }}
           cache_openocd_restore_key=cache_openocd_
           cache_openocd_key=${cache_openocd_restore_key}
           cache_test_restore_key=${{ matrix.coverage }}_
@@ -54,7 +54,6 @@ jobs:
             /opt/verilator
             /opt/verilator/.cache
           key: ${{ env.cache_verilator_key }}
-          restore-keys: ${{ env.cache_verilator_restore_key }}
 
       - name: Restore OpenOCD cache
         id: cache-openocd-restore

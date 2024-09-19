@@ -16,7 +16,7 @@ jobs:
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscof/.cache/"
-      VERILATOR_VERSION: v5.010
+      VERILATOR_VERSION: v5.024
       SPIKE_VERSION: d70ea67d
 
     steps:
@@ -33,7 +33,7 @@ jobs:
           date=$(date +"%Y_%m_%d")
           time=$(date +"%Y%m%d_%H%M%S_%N")
           cache_verilator_restore_key=cache_verilator_
-          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}
+          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}_${{ env.VERILATOR_COMMIT }}
           cache_spike_restore_key=cache_spike_
           cache_spike_key=${cache_spike_restore_key}${{ env.SPIKE_VERSION }}
           cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
@@ -55,7 +55,6 @@ jobs:
             /opt/verilator
             /opt/verilator/.cache
           key: ${{ env.cache_verilator_key }}
-          restore-keys: ${{ env.cache_verilator_restore_key }}
 
       - name: Restore Spike cache
         id: cache-spike-restore

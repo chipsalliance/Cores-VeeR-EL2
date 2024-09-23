@@ -1334,12 +1334,12 @@ This register is mapped to the standard read/write CSR address space.
   - 0
 * - s
   - 4
-  - Not implemented (VeeR EL2 is M-mode only)
+  - Not implemented
   - R
   - 0
 * - u
   - 3
-  - Not implemented (VeeR EL2 is M-mode only)
+  - Not implemented
   - R
   - 0
 * - execute
@@ -1437,12 +1437,12 @@ This register is mapped to the standard read/write CSR address space.
   - 0
 * - ebreaks
   - 13
-  - Not implemented (VeeR EL2 is M-mode only)
+  - Not implemented
   - R
   - 0
 * - ebreaku
   - 12
-  - Not implemented (VeeR EL2 is M-mode only)
+  - Not implemented
   - R
   - 0
 * - stepie

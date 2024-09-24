@@ -144,10 +144,10 @@ module el2_dec_pmp_ctl
    for (genvar entry_idx = 0; entry_idx < pt.PMP_ENTRIES; entry_idx++) begin : gen_pmpaddr_ff
       logic pmpaddr_lock;
       logic pmpaddr_lock_next;
-      assign pmpaddr_lock_next = ((entry_idx+1 < pt.PMP_ENTRIES)
-                                  ? (entry_lock_eff[entry_idx+1]
-                                     & pmp_pmpcfg[entry_idx+1].mode == TOR)
-                                  : 1'b0);
+      if (entry_idx+1 < pt.PMP_ENTRIES)
+         assign pmpaddr_lock_next = entry_lock_eff[entry_idx+1] & pmp_pmpcfg[entry_idx+1].mode == TOR;
+      else
+         assign pmpaddr_lock_next = 1'b0;
       assign pmpaddr_lock = entry_lock_eff[entry_idx] | pmpaddr_lock_next;
       assign pmp_pmpaddr[entry_idx][31:30] = 2'b00;
       rvdffe #(30) pmpaddr_ff (.*, .clk(free_l2clk),

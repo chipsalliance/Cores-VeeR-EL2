@@ -12,7 +12,7 @@ Unless otherwise noted, all read/write control/status registers must have WARL (
 ## Machine Interrupt Enable (mie) and Machine Interrupt Pending (mip) Registers
 
 The standard RISC-V `mie` and `mip` registers hold the machine interrupt enable and interrupt pending bits, respectively.
-Since VeeR EL2 only supports machine mode, all supervisor- and user-specific bits are not implemented.
+Since VeeR EL2 only supports machine and user mode, all supervisor-specific bits are not implemented.
 In addition, the `mie/mip` registers also host the platform-specific local interrupt enable/pending bits (shown with a gray background in {numref}`tab-machine-interrupt-enable-register` and {numref}`tab-machine-interrupt-pending-register` below).
 
 The `mie` register is a standard read/write CSR.

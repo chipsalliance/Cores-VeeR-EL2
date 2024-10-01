@@ -42,7 +42,7 @@ source `dirname ${BASH_SOURCE[0]}`/utils.sh
 
 terminate_all () {
     terminate ${OPENOCD_PID}
-    echo "waiting for the simulation to end"
+    echo "waiting for the simulation to end: $SIM_PID"
     wait ${SIM_PID}
     # terminate ${SIM_PID}
 }
@@ -63,6 +63,8 @@ SIM_PID=$!
 
 # Wait
 wait_for_phrase "${SIM_LOG}" "Start of sim"
+# TODO handle proper string in the output instead of waiting
+sleep 5s
 retcode=$?
 if [ $retcode -ne 0 ]; then
     echo -e "${COLOR_RED}Failed to start the simulation: $retcode ${COLOR_OFF}"

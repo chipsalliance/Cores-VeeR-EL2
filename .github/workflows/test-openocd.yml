@@ -90,14 +90,42 @@ jobs:
             -f ${RV_ROOT}/testbench/openocd_scripts/verilator-rst.cfg \
             -f ${RV_ROOT}/testbench/openocd_scripts/jtag_cg.tcl
 
+      - name: Test with GDB-test (register access)
+        run: |
+          export PATH=/opt/verilator/bin:/opt/openocd/bin:$PATH
+          export RV_ROOT=$(pwd)
+          mkdir reg_test
+          make -C reg_test -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
+            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }}
+          cd reg_test
+          ${RV_ROOT}/.github/scripts/gdb_test.sh \
+            /bin/bash -c 'cd ${RV_ROOT}/.github/scripts && ./dump_and_compare.sh'
+
+      - name: Test with GDB-test (memory access)
+        run: |
+          export PATH=/opt/verilator/bin:/opt/openocd/bin:$PATH
+          export RV_ROOT=$(pwd)
+          mkdir mem_test
+          make -C mem_test -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
+            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }}
+          cd mem_test
+          ${RV_ROOT}/.github/scripts/gdb_test.sh \
+            /bin/bash -c 'cd ${RV_ROOT}/.github/scripts && ./mem_access.sh'
+
       - name: Prepare coverage data
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=$(pwd)
           sis -d convert --dat-dir ${RV_ROOT}/run
+          sis -d convert --dat-dir ${RV_ROOT}/reg_test
+          sis -d convert --dat-dir ${RV_ROOT}/mem_test
           mkdir -p results
           mv ${RV_ROOT}/run/coverage.info \
              results/coverage_openocd_${{ matrix.bus }}_${{ matrix.coverage }}.info
+          mv ${RV_ROOT}/reg_test/coverage.info \
+             results/coverage_openocd_reg_test_${{ matrix.bus }}_${{ matrix.coverage }}.info
+          mv ${RV_ROOT}/mem_test/coverage.info \
+             results/coverage_openocd__mem_test_${{ matrix.bus }}_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()

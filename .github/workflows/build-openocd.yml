@@ -11,7 +11,7 @@ jobs:
       # A custom fork is needed to allow bypassing core examination and accessing
       # peripherals regardless of core state.
       OPENOCD_REPO: https://github.com/antmicro/openocd
-      OPENOCD_VERSION: riscv-nohalt
+      OPENOCD_VERSION: riscv-nohalt-change-module
 
     steps:
       - name: Setup Cache Metadata

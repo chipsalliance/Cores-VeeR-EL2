@@ -58,9 +58,7 @@ terminate () {
     local PID=$1
 
     # Gently interrupt, wait some time and then kill
-    echo "killing with INT"
     /bin/kill -s SIGINT  ${PID} || true
     sleep 10s
-    echo "killing with KILL"
     /bin/kill -s SIGKILL ${PID} || true
 }

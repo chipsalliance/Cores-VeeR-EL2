@@ -22,7 +22,7 @@ jobs:
       - name: Install utils
         run: |
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-             cpanminus ccache ninja-build gcc-riscv64-unknown-elf
+             cpanminus ccache ninja-build gcc-riscv64-unknown-elf gdb-multiarch
           pip3 install meson
           sudo cpanm Bit::Vector
 

@@ -16,7 +16,7 @@
 set -ex
 
 # Invoke GDB and dump core registers
-${GCC_PREFIX}-gdb -n --batch -x dump_registers.gdb >gdb.log
+gdb -n --batch -x dump_registers.gdb >gdb.log
 # Parse the log, extract register values. Skip those which change as the
 # program executes since we don't know at which point we tap in.
 cat gdb.log | grep -E '^ra |^sp |^gp |^tp |^t[01256] |^s[0-9]+ |^a[0-9]+ |^\$[0-9]+' >regdump.txt

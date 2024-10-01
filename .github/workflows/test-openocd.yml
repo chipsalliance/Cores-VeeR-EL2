@@ -25,6 +25,9 @@ jobs:
              cpanminus ccache ninja-build gcc-riscv64-unknown-elf
           pip3 install meson
           sudo cpanm Bit::Vector
+          wget https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2024.09.03/riscv64-elf-ubuntu-22.04-gcc-nightly-2024.09.03-nightly.tar.gz
+          tar -xzf riscv64-elf-ubuntu-22.04-gcc-nightly-2024.09.03-nightly.tar.gz
+          mv riscv /opt/
 
       - name: Setup Cache Metadata
         id: cache_metadata
@@ -92,7 +95,8 @@ jobs:
 
       - name: Test with GDB-test (register access)
         run: |
-          export PATH=/opt/verilator/bin:/opt/openocd/bin:$PATH
+          # TODO GDB is in /opt/riscv and a separate toolchain is installed with apt. Make this better.
+          export PATH=/opt/riscv/bin:/opt/verilator/bin:/opt/openocd/bin:$PATH
           export RV_ROOT=$(pwd)
           mkdir reg_test
           make -C reg_test -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
@@ -103,7 +107,8 @@ jobs:
 
       - name: Test with GDB-test (memory access)
         run: |
-          export PATH=/opt/verilator/bin:/opt/openocd/bin:$PATH
+          # TODO GDB is in /opt/riscv and a separate toolchain is installed with apt. Make this better.
+          export PATH=/opt/riscv/bin:/opt/verilator/bin:/opt/openocd/bin:$PATH
           export RV_ROOT=$(pwd)
           mkdir mem_test
           make -C mem_test -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \

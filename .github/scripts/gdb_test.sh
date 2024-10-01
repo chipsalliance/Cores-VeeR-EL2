@@ -42,7 +42,9 @@ source `dirname ${BASH_SOURCE[0]}`/utils.sh
 
 terminate_all () {
     terminate ${OPENOCD_PID}
-    terminate ${SIM_PID}
+    echo "waiting for the simulation to end"
+    wait ${SIM_PID}
+    # terminate ${SIM_PID}
 }
 
 print_logs () {

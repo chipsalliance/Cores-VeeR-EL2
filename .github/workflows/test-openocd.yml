@@ -25,6 +25,9 @@ jobs:
              cpanminus ccache ninja-build gcc-riscv64-unknown-elf
           pip3 install meson
           sudo cpanm Bit::Vector
+          wget https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2024.09.03/riscv64-elf-ubuntu-22.04-gcc-nightly-2024.09.03-nightly.tar.gz
+          tar -xzf riscv64-elf-ubuntu-22.04-gcc-nightly-2024.09.03-nightly.tar.gz
+          mv riscv /opt/
 
       - name: Setup Cache Metadata
         id: cache_metadata
@@ -89,15 +92,83 @@ jobs:
           ${RV_ROOT}/.github/scripts/openocd_test.sh \
             -f ${RV_ROOT}/testbench/openocd_scripts/verilator-rst.cfg \
             -f ${RV_ROOT}/testbench/openocd_scripts/jtag_cg.tcl
+          pkill openocd || true
+
+      - name: Test with GDB-test (register access)
+        run: |
+          # TODO GDB is in /opt/riscv and a separate toolchain is installed with apt. Make this better.
+          export PATH=/opt/riscv/bin:/opt/verilator/bin:/opt/openocd/bin:$PATH
+          export RV_ROOT=$(pwd)
+          mkdir reg_test
+          make -C reg_test -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
+            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }}
+          cd reg_test
+          ${RV_ROOT}/.github/scripts/gdb_test.sh \
+            /bin/bash -c 'cd ${RV_ROOT}/.github/scripts && ./dump_and_compare.sh' || true
+          pkill openocd || true
+
+      - name: Test with GDB-test (memory access)
+        run: |
+          # TODO GDB is in /opt/riscv and a separate toolchain is installed with apt. Make this better.
+          export PATH=/opt/riscv/bin:/opt/verilator/bin:/opt/openocd/bin:$PATH
+          export RV_ROOT=$(pwd)
+          mkdir mem_test
+          make -C mem_test -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
+            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }}
+          cd mem_test
+          ${RV_ROOT}/.github/scripts/gdb_test.sh \
+            /bin/bash -c 'cd ${RV_ROOT}/.github/scripts && ./mem_access.sh' || true
+          pkill openocd || true
+
+      - name: Test with GDB-test (peripheral access)
+        run: |
+          # TODO REMOVE THIS TEST, as we aim to target all possible memory regions in the test above this,
+          # and there are no actual peripherals in the tesbench.
+
+          # TODO GDB is in /opt/riscv and a separate toolchain is installed with apt. Make this better.
+          export PATH=/opt/riscv/bin:/opt/verilator/bin:/opt/openocd/bin:$PATH
+          export RV_ROOT=$(pwd)
+          mkdir periph_test
+          make -C periph_test -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
+            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }}
+          cd periph_test
+          ${RV_ROOT}/.github/scripts/gdb_test.sh \
+            /bin/bash -c 'cd ${RV_ROOT}/.github/scripts && ./peripheral_access.sh' || true
+          pkill openocd || true
+
+      - name: Test with GDB-test (breakpoints)
+        run: |
+          # TODO GDB is in /opt/riscv and a separate toolchain is installed with apt. Make this better.
+          export PATH=/opt/riscv/bin:/opt/verilator/bin:/opt/openocd/bin:$PATH
+          export RV_ROOT=$(pwd)
+          mkdir breakpoint_test
+          make -C breakpoint_test -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
+            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }}
+          cd breakpoint_test
+          ${RV_ROOT}/.github/scripts/gdb_test.sh \
+            /bin/bash -c 'cd ${RV_ROOT}/.github/scripts && ./breakpoint.sh' || true
+          pkill openocd || true
 
       - name: Prepare coverage data
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=$(pwd)
           sis -d convert --dat-dir ${RV_ROOT}/run
+          sis -d convert --dat-dir ${RV_ROOT}/reg_test
+          sis -d convert --dat-dir ${RV_ROOT}/mem_test
+          sis -d convert --dat-dir ${RV_ROOT}/periph_test
+          sis -d convert --dat-dir ${RV_ROOT}/breakpoint_test
           mkdir -p results
           mv ${RV_ROOT}/run/coverage.info \
              results/coverage_openocd_${{ matrix.bus }}_${{ matrix.coverage }}.info
+          mv ${RV_ROOT}/reg_test/coverage.info \
+             results/coverage_openocd_reg_test_${{ matrix.bus }}_${{ matrix.coverage }}.info
+          mv ${RV_ROOT}/mem_test/coverage.info \
+             results/coverage_openocd__mem_test_${{ matrix.bus }}_${{ matrix.coverage }}.info
+          mv ${RV_ROOT}/periph_test/coverage.info \
+             results/coverage_openocd_periph_test_${{ matrix.bus }}_${{ matrix.coverage }}.info
+          mv ${RV_ROOT}/breakpoint_test/coverage.info \
+             results/coverage_openocd_breakpoint_test_${{ matrix.bus }}_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()

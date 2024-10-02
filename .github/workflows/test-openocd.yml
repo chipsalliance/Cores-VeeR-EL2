@@ -120,6 +120,19 @@ jobs:
             /bin/bash -c 'cd ${RV_ROOT}/.github/scripts && ./mem_access.sh' || true
           pkill openocd || true
 
+      - name: Test with GDB-test (peripheral access)
+        run: |
+          # TODO GDB is in /opt/riscv and a separate toolchain is installed with apt. Make this better.
+          export PATH=/opt/riscv/bin:/opt/verilator/bin:/opt/openocd/bin:$PATH
+          export RV_ROOT=$(pwd)
+          mkdir periph_test
+          make -C periph_test -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
+            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }}
+          cd periph_test
+          ${RV_ROOT}/.github/scripts/gdb_test.sh \
+            /bin/bash -c 'cd ${RV_ROOT}/.github/scripts && ./peripheral_access.sh' || true
+          pkill openocd || true
+
       - name: Prepare coverage data
         run: |
           export PATH=/opt/verilator/bin:$PATH
@@ -134,6 +147,8 @@ jobs:
              results/coverage_openocd_reg_test_${{ matrix.bus }}_${{ matrix.coverage }}.info
           mv ${RV_ROOT}/mem_test/coverage.info \
              results/coverage_openocd__mem_test_${{ matrix.bus }}_${{ matrix.coverage }}.info
+          mv ${RV_ROOT}/periph_test/coverage.info \
+             results/coverage_openocd_periph_test_${{ matrix.bus }}_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()

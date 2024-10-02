@@ -92,6 +92,7 @@ jobs:
           ${RV_ROOT}/.github/scripts/openocd_test.sh \
             -f ${RV_ROOT}/testbench/openocd_scripts/verilator-rst.cfg \
             -f ${RV_ROOT}/testbench/openocd_scripts/jtag_cg.tcl
+          pkill openocd
 
       - name: Test with GDB-test (register access)
         run: |
@@ -104,6 +105,7 @@ jobs:
           cd reg_test
           ${RV_ROOT}/.github/scripts/gdb_test.sh \
             /bin/bash -c 'cd ${RV_ROOT}/.github/scripts && ./dump_and_compare.sh'
+          pkill openocd
 
       - name: Test with GDB-test (memory access)
         run: |
@@ -116,6 +118,7 @@ jobs:
           cd mem_test
           ${RV_ROOT}/.github/scripts/gdb_test.sh \
             /bin/bash -c 'cd ${RV_ROOT}/.github/scripts && ./mem_access.sh'
+          pkill openocd
 
       - name: Prepare coverage data
         run: |

@@ -12,7 +12,7 @@ jobs:
       # peripherals regardless of core state.
       OPENOCD_REPO: https://github.com/antmicro/openocd
       OPENOCD_VERSION: riscv-nohalt-change-module
-    
+
     steps:
       - name: Setup Cache Metadata
         id: cache_metadata

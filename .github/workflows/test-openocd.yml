@@ -140,6 +140,7 @@ jobs:
           sis -d convert --dat-dir ${RV_ROOT}/run
           sis -d convert --dat-dir ${RV_ROOT}/reg_test
           sis -d convert --dat-dir ${RV_ROOT}/mem_test
+          sis -d convert --dat-dir ${RV_ROOT}/periph_test
           mkdir -p results
           mv ${RV_ROOT}/run/coverage.info \
              results/coverage_openocd_${{ matrix.bus }}_${{ matrix.coverage }}.info

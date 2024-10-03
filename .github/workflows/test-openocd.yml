@@ -133,6 +133,19 @@ jobs:
             /bin/bash -c 'cd ${RV_ROOT}/.github/scripts && ./peripheral_access.sh' || true
           pkill openocd || true
 
+      - name: Test with GDB-test (breakpoints)
+        run: |
+          # TODO GDB is in /opt/riscv and a separate toolchain is installed with apt. Make this better.
+          export PATH=/opt/riscv/bin:/opt/verilator/bin:/opt/openocd/bin:$PATH
+          export RV_ROOT=$(pwd)
+          mkdir breakpoint_test
+          make -C breakpoint_test -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
+            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }}
+          cd breakpoint_test
+          ${RV_ROOT}/.github/scripts/gdb_test.sh \
+            /bin/bash -c 'cd ${RV_ROOT}/.github/scripts && ./breakpoint.sh' || true
+          pkill openocd || true
+
       - name: Prepare coverage data
         run: |
           export PATH=/opt/verilator/bin:$PATH
@@ -141,6 +154,7 @@ jobs:
           sis -d convert --dat-dir ${RV_ROOT}/reg_test
           sis -d convert --dat-dir ${RV_ROOT}/mem_test
           sis -d convert --dat-dir ${RV_ROOT}/periph_test
+          sis -d convert --dat-dir ${RV_ROOT}/breakpoint_test
           mkdir -p results
           mv ${RV_ROOT}/run/coverage.info \
              results/coverage_openocd_${{ matrix.bus }}_${{ matrix.coverage }}.info
@@ -150,6 +164,8 @@ jobs:
              results/coverage_openocd__mem_test_${{ matrix.bus }}_${{ matrix.coverage }}.info
           mv ${RV_ROOT}/periph_test/coverage.info \
              results/coverage_openocd_periph_test_${{ matrix.bus }}_${{ matrix.coverage }}.info
+          mv ${RV_ROOT}/breakpoint_test/coverage.info \
+             results/coverage_openocd_breakpoint_test_${{ matrix.bus }}_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()

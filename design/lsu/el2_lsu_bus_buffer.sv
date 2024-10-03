@@ -121,7 +121,10 @@ import el2_pkg::*;
    output logic                            lsu_axi_wlast,
 
    input  logic                            lsu_axi_bvalid,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic                            lsu_axi_bready,
+   /*verilator coverage_on*/
    input  logic [1:0]                      lsu_axi_bresp,
    input  logic [pt.LSU_BUS_TAG-1:0]       lsu_axi_bid,
 
@@ -140,7 +143,10 @@ import el2_pkg::*;
    output logic [3:0]                      lsu_axi_arqos,
 
    input  logic                            lsu_axi_rvalid,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic                            lsu_axi_rready,
+   /*verilator coverage_on*/
    input  logic [pt.LSU_BUS_TAG-1:0]       lsu_axi_rid,
    input  logic [63:0]                     lsu_axi_rdata,
    input  logic [1:0]                      lsu_axi_rresp,

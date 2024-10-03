@@ -27,6 +27,7 @@ sed -E "$DEFINES_REPLACE_REGEX" $PD_DEFINES > $DEFINES_PATH/"$PREFIX"pd_defines.
 # replace renamed macros in RTL sources
 for DEFINE in $DEFINES; do
     sed -i "s/\`$DEFINE/\`"$PREFIX"$DEFINE/g" $DESIGN_FILES
+    sed -i -E "s/((\`ifdef)|(\`ifndef)) $DEFINE/\1 "$PREFIX"$DEFINE/g" $DESIGN_FILES
 done
 
 # add prefix to VeeR config struct

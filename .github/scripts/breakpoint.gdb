@@ -26,4 +26,4 @@ hbreak *0x1c
 echo Continuing...\n
 continue
 
-clear
+delete

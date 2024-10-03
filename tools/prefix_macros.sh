@@ -1,11 +1,11 @@
 # !/bin/bash
 
 # Prefix that will be added to all required macro/struct/module names
-PREFIX="veer0_"
+PREFIX="${PREFIX:-veer0_}"
 # Path to directory where common_defines.vh, el2_param.vh, el2_pdef.vh and pd_defines.vh reside
-DEFINES_PATH="."
+DEFINES_PATH="${DEFINES_PATH:-.}"
 # Path to directory hierarchy where RTL sources reside
-DESIGN_DIR="."
+DESIGN_DIR="${DESIGN_DIR:-.}"
 
 COMMON_DEFINES="$DEFINES_PATH/common_defines.vh"
 EL2_PARAM="$DEFINES_PATH/el2_param.vh"

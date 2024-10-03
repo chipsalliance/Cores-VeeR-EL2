@@ -64,20 +64,25 @@ import el2_pkg::*;
    // AXI Write Channels
    output logic                        sb_axi_awvalid,
    input  logic                        sb_axi_awready,
+   /* exclude signals that are tied to constant value in this file */
    /*verilator coverage_off*/
    output logic [pt.SB_BUS_TAG-1:0]    sb_axi_awid,
    /*verilator coverage_on*/
    output logic [31:0]                 sb_axi_awaddr,
    output logic [3:0]                  sb_axi_awregion,
+   /* exclude signals that are tied to constant value in this file */
    /*verilator coverage_off*/
    output logic [7:0]                  sb_axi_awlen,
+   /*verilator coverage_on*/
    output logic [2:0]                  sb_axi_awsize,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic [1:0]                  sb_axi_awburst,
    output logic                        sb_axi_awlock,
-   /*verilator coverage_on*/
    output logic [3:0]                  sb_axi_awcache,
    output logic [2:0]                  sb_axi_awprot,
    output logic [3:0]                  sb_axi_awqos,
+   /*verilator coverage_on*/
 
    output logic                        sb_axi_wvalid,
    input  logic                        sb_axi_wready,
@@ -92,19 +97,31 @@ import el2_pkg::*;
    // AXI Read Channels
    output logic                        sb_axi_arvalid,
    input  logic                        sb_axi_arready,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic [pt.SB_BUS_TAG-1:0]    sb_axi_arid,
+   /*verilator coverage_on*/
    output logic [31:0]                 sb_axi_araddr,
    output logic [3:0]                  sb_axi_arregion,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic [7:0]                  sb_axi_arlen,
+   /*verilator coverage_on*/
    output logic [2:0]                  sb_axi_arsize,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic [1:0]                  sb_axi_arburst,
    output logic                        sb_axi_arlock,
    output logic [3:0]                  sb_axi_arcache,
    output logic [2:0]                  sb_axi_arprot,
    output logic [3:0]                  sb_axi_arqos,
+   /*verilator coverage_on*/
 
    input  logic                        sb_axi_rvalid,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic                        sb_axi_rready,
+   /*verilator coverage_on*/
    input  logic [63:0]                 sb_axi_rdata,
    input  logic [1:0]                  sb_axi_rresp,
 

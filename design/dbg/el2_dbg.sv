@@ -64,13 +64,17 @@ import el2_pkg::*;
    // AXI Write Channels
    output logic                        sb_axi_awvalid,
    input  logic                        sb_axi_awready,
+   /*verilator coverage_off*/
    output logic [pt.SB_BUS_TAG-1:0]    sb_axi_awid,
+   /*verilator coverage_on*/
    output logic [31:0]                 sb_axi_awaddr,
    output logic [3:0]                  sb_axi_awregion,
+   /*verilator coverage_off*/
    output logic [7:0]                  sb_axi_awlen,
    output logic [2:0]                  sb_axi_awsize,
    output logic [1:0]                  sb_axi_awburst,
    output logic                        sb_axi_awlock,
+   /*verilator coverage_on*/
    output logic [3:0]                  sb_axi_awcache,
    output logic [2:0]                  sb_axi_awprot,
    output logic [3:0]                  sb_axi_awqos,

@@ -64,6 +64,7 @@ import el2_pkg::*;
 
   //-------------------------- IFU AXI signals--------------------------
    // AXI Write Channels
+   /*verilator coverage_off*/
    output logic                            ifu_axi_awvalid,
    output logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_awid,
    output logic [31:0]                     ifu_axi_awaddr,
@@ -75,6 +76,7 @@ import el2_pkg::*;
    output logic [3:0]                      ifu_axi_awcache,
    output logic [2:0]                      ifu_axi_awprot,
    output logic [3:0]                      ifu_axi_awqos,
+   /*verilator coverage_on*/
 
    output logic                            ifu_axi_wvalid,
    output logic [63:0]                     ifu_axi_wdata,

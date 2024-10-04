@@ -64,6 +64,7 @@ import el2_pkg::*;
 
   //-------------------------- IFU AXI signals--------------------------
    // AXI Write Channels
+   /* exclude signals that are tied to constant value in this file */
    /*verilator coverage_off*/
    output logic                            ifu_axi_awvalid,
    output logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_awid,
@@ -76,7 +77,6 @@ import el2_pkg::*;
    output logic [3:0]                      ifu_axi_awcache,
    output logic [2:0]                      ifu_axi_awprot,
    output logic [3:0]                      ifu_axi_awqos,
-   /*verilator coverage_on*/
 
    output logic                            ifu_axi_wvalid,
    output logic [63:0]                     ifu_axi_wdata,
@@ -84,6 +84,7 @@ import el2_pkg::*;
    output logic                            ifu_axi_wlast,
 
    output logic                            ifu_axi_bready,
+   /*verilator coverage_on*/
 
    // AXI Read Channels
    output logic                            ifu_axi_arvalid,
@@ -91,6 +92,8 @@ import el2_pkg::*;
    output logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_arid,
    output logic [31:0]                     ifu_axi_araddr,
    output logic [3:0]                      ifu_axi_arregion,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic [7:0]                      ifu_axi_arlen,
    output logic [2:0]                      ifu_axi_arsize,
    output logic [1:0]                      ifu_axi_arburst,
@@ -98,9 +101,13 @@ import el2_pkg::*;
    output logic [3:0]                      ifu_axi_arcache,
    output logic [2:0]                      ifu_axi_arprot,
    output logic [3:0]                      ifu_axi_arqos,
+   /*verilator coverage_on*/
 
    input  logic                            ifu_axi_rvalid,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic                            ifu_axi_rready,
+   /*verilator coverage_on*/
    input  logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_rid,
    input  logic [63:0]                     ifu_axi_rdata,
    input  logic [1:0]                      ifu_axi_rresp,

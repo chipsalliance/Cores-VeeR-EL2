@@ -200,8 +200,13 @@ import el2_pkg::*;
 
    //-------------------------- IFU AXI signals--------------------------
    // AXI Write Channels
+   /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */
+   /*verilator coverage_off*/
    output logic                            ifu_axi_awvalid,
+   /*verilator coverage_on*/
    input  logic                            ifu_axi_awready,
+   /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */
+   /*verilator coverage_off*/
    output logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_awid,
    output logic [31:0]                     ifu_axi_awaddr,
    output logic [3:0]                      ifu_axi_awregion,
@@ -214,13 +219,20 @@ import el2_pkg::*;
    output logic [3:0]                      ifu_axi_awqos,
 
    output logic                            ifu_axi_wvalid,
+   /*verilator coverage_on*/
    input  logic                            ifu_axi_wready,
+   /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */
+   /*verilator coverage_off*/
    output logic [63:0]                     ifu_axi_wdata,
    output logic [7:0]                      ifu_axi_wstrb,
    output logic                            ifu_axi_wlast,
+   /*verilator coverage_on*/
 
    input  logic                            ifu_axi_bvalid,
+   /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */
+   /*verilator coverage_off*/
    output logic                            ifu_axi_bready,
+   /*verilator coverage_on*/
    input  logic [1:0]                      ifu_axi_bresp,
    input  logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_bid,
 
@@ -230,6 +242,8 @@ import el2_pkg::*;
    output logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_arid,
    output logic [31:0]                     ifu_axi_araddr,
    output logic [3:0]                      ifu_axi_arregion,
+   /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */
+   /*verilator coverage_off*/
    output logic [7:0]                      ifu_axi_arlen,
    output logic [2:0]                      ifu_axi_arsize,
    output logic [1:0]                      ifu_axi_arburst,
@@ -237,9 +251,13 @@ import el2_pkg::*;
    output logic [3:0]                      ifu_axi_arcache,
    output logic [2:0]                      ifu_axi_arprot,
    output logic [3:0]                      ifu_axi_arqos,
+   /*verilator coverage_on*/
 
    input  logic                            ifu_axi_rvalid,
+   /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */
+   /*verilator coverage_off*/
    output logic                            ifu_axi_rready,
+   /*verilator coverage_on*/
    input  logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_rid,
    input  logic [63:0]                     ifu_axi_rdata,
    input  logic [1:0]                      ifu_axi_rresp,

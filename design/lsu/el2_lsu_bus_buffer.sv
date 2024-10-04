@@ -106,13 +106,22 @@ import el2_pkg::*;
    output logic [pt.LSU_BUS_TAG-1:0]       lsu_axi_awid,
    output logic [31:0]                     lsu_axi_awaddr,
    output logic [3:0]                      lsu_axi_awregion,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic [7:0]                      lsu_axi_awlen,
+   /*verilator coverage_on*/
    output logic [2:0]                      lsu_axi_awsize,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic [1:0]                      lsu_axi_awburst,
    output logic                            lsu_axi_awlock,
+   /*verilator coverage_on*/
    output logic [3:0]                      lsu_axi_awcache,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic [2:0]                      lsu_axi_awprot,
    output logic [3:0]                      lsu_axi_awqos,
+   /*verilator coverage_on*/
 
    output logic                            lsu_axi_wvalid,
    input  logic                            lsu_axi_wready,
@@ -134,13 +143,22 @@ import el2_pkg::*;
    output logic [pt.LSU_BUS_TAG-1:0]       lsu_axi_arid,
    output logic [31:0]                     lsu_axi_araddr,
    output logic [3:0]                      lsu_axi_arregion,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic [7:0]                      lsu_axi_arlen,
+   /*verilator coverage_on*/
    output logic [2:0]                      lsu_axi_arsize,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic [1:0]                      lsu_axi_arburst,
    output logic                            lsu_axi_arlock,
+   /*verilator coverage_on*/
    output logic [3:0]                      lsu_axi_arcache,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic [2:0]                      lsu_axi_arprot,
    output logic [3:0]                      lsu_axi_arqos,
+   /*verilator coverage_on*/
 
    input  logic                            lsu_axi_rvalid,
    /* exclude signals that are tied to constant value in this file */

@@ -551,6 +551,8 @@ import el2_pkg::*;
                      dbg_nxtstate            = IDLE;
                      dbg_state_en            = dmstatus_reg[17];             // resume ack has been updated in the dmstatus register
            end
+           /* All legal values are handled above. Exclude the default part from coverage. */
+           /*verilator coverage_off*/
            default : begin
                      dbg_nxtstate            = IDLE;
                      dbg_state_en            = 1'b0;
@@ -565,6 +567,7 @@ import el2_pkg::*;
                      sb_abmem_cmd_done_en    = 1'b0;
                      sb_abmem_data_done_en   = 1'b0;
           end
+          /*verilator coverage_on*/
          endcase
    end // always_comb begin
 
@@ -677,6 +680,8 @@ import el2_pkg::*;
                      sbcs_sbbusy_din        = 1'b0;
                      sbaddress0_reg_wren1   = sbcs_reg[16] & (sbcs_reg[14:12] == 3'b0);    // auto increment was set and no error. Update to new address after completing the current command
             end
+            /* All legal values are handled above. Exclude the default part from coverage. */
+            /*verilator coverage_off*/
             default : begin
                      sb_nxtstate            = SBIDLE;
                      sb_state_en            = 1'b0;
@@ -686,6 +691,7 @@ import el2_pkg::*;
                      sbcs_sberror_din[2:0]  = 3'b0;
                      sbaddress0_reg_wren1   = 1'b0;
            end
+            /*verilator coverage_on*/
          endcase
    end // always_comb begin
 

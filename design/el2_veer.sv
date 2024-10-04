@@ -550,25 +550,40 @@ import el2_pkg::*;
    logic                         sb_axi_rlast_int;
 
    logic                         dma_axi_awvalid_ahb;
+   /* exclude signals that are tied to constant value in ahb_to_axi4.sv */
+   /*verilator coverage_off*/
    logic [pt.DMA_BUS_TAG-1:0]    dma_axi_awid_ahb;
+   /*verilator coverage_on*/
    logic [31:0]                  dma_axi_awaddr_ahb;
    logic [2:0]                   dma_axi_awsize_ahb;
+   /* exclude signals that are tied to constant value in ahb_to_axi4.sv */
+   /*verilator coverage_off*/
    logic [2:0]                   dma_axi_awprot_ahb;
    logic [7:0]                   dma_axi_awlen_ahb;
    logic [1:0]                   dma_axi_awburst_ahb;
+   /*verilator coverage_on*/
    logic                         dma_axi_wvalid_ahb;
    logic [63:0]                  dma_axi_wdata_ahb;
    logic [7:0]                   dma_axi_wstrb_ahb;
+   /* exclude signals that are tied to constant value in ahb_to_axi4.sv */
+   /*verilator coverage_off*/
    logic                         dma_axi_wlast_ahb;
    logic                         dma_axi_bready_ahb;
+   /*verilator coverage_on*/
    logic                         dma_axi_arvalid_ahb;
+   /* exclude signals that are tied to constant value in ahb_to_axi4.sv */
+   /*verilator coverage_off*/
    logic [pt.DMA_BUS_TAG-1:0]    dma_axi_arid_ahb;
+   /*verilator coverage_on*/
    logic [31:0]                  dma_axi_araddr_ahb;
    logic [2:0]                   dma_axi_arsize_ahb;
+   /* exclude signals that are tied to constant value in ahb_to_axi4.sv */
+   /*verilator coverage_off*/
    logic [2:0]                   dma_axi_arprot_ahb;
    logic [7:0]                   dma_axi_arlen_ahb;
    logic [1:0]                   dma_axi_arburst_ahb;
    logic                         dma_axi_rready_ahb;
+   /*verilator coverage_on*/
 
    logic                         dma_axi_awvalid_int;
    logic [pt.DMA_BUS_TAG-1:0]    dma_axi_awid_int;

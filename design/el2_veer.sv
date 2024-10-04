@@ -374,8 +374,11 @@ import el2_pkg::*;
 
  //// AHB LITE BUS
    output logic [31:0]           haddr,
+   /* exclude signals that are tied to constant value in axi4_to_ahb.sv */
+   /*verilator coverage_off*/
    output logic [2:0]            hburst,
    output logic                  hmastlock,
+   /*verilator coverage_on*/
    output logic [3:0]            hprot,
    output logic [2:0]            hsize,
    output logic [1:0]            htrans,
@@ -404,8 +407,11 @@ import el2_pkg::*;
 
    //System Bus Debug Master
    output logic [31:0]          sb_haddr,
+   /* exclude signals that are tied to constant value in axi4_to_ahb.sv */
+   /*verilator coverage_off*/
    output logic [2:0]           sb_hburst,
    output logic                 sb_hmastlock,
+   /*verilator coverage_on*/
    output logic [3:0]           sb_hprot,
    output logic [2:0]           sb_hsize,
    output logic [1:0]           sb_htrans,

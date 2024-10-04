@@ -294,8 +294,11 @@ import el2_pkg::*;
 `ifdef RV_BUILD_AHB_LITE
  //// AHB LITE BUS
    output logic [31:0]                     haddr,
+   /* exclude signals that are tied to constant value in axi4_to_ahb.sv */
+   /*verilator coverage_off*/
    output logic [2:0]                      hburst,
    output logic                            hmastlock,
+   /*verilator coverage_on*/
    output logic [3:0]                      hprot,
    output logic [2:0]                      hsize,
    output logic [1:0]                      htrans,
@@ -307,8 +310,11 @@ import el2_pkg::*;
 
    // LSU AHB Master
    output logic [31:0]                     lsu_haddr,
+   /* exclude signals that are tied to constant value in axi4_to_ahb.sv */
+   /*verilator coverage_off*/
    output logic [2:0]                      lsu_hburst,
    output logic                            lsu_hmastlock,
+   /*verilator coverage_on*/
    output logic [3:0]                      lsu_hprot,
    output logic [2:0]                      lsu_hsize,
    output logic [1:0]                      lsu_htrans,
@@ -320,8 +326,11 @@ import el2_pkg::*;
    input logic                             lsu_hresp,
    // Debug Syster Bus AHB
    output logic [31:0]                     sb_haddr,
+   /* exclude signals that are tied to constant value in axi4_to_ahb.sv */
+   /*verilator coverage_off*/
    output logic [2:0]                      sb_hburst,
    output logic                            sb_hmastlock,
+   /*verilator coverage_on*/
    output logic [3:0]                      sb_hprot,
    output logic [2:0]                      sb_hsize,
    output logic [1:0]                      sb_htrans,

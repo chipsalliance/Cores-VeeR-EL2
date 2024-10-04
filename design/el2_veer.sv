@@ -387,8 +387,11 @@ import el2_pkg::*;
 
    // LSU AHB Master
    output logic [31:0]          lsu_haddr,
+   /* exclude signals that are tied to constant value in axi4_to_ahb.sv */
+   /*verilator coverage_off*/
    output logic [2:0]           lsu_hburst,
    output logic                 lsu_hmastlock,
+   /*verilator coverage_on*/
    output logic [3:0]           lsu_hprot,
    output logic [2:0]           lsu_hsize,
    output logic [1:0]           lsu_htrans,

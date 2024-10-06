@@ -490,6 +490,8 @@ import el2_pkg::*;
 
    // zero out the signals not presented at the wrapper instantiation level
 `ifdef RV_BUILD_AXI4
+   // Since all the signals in this block are tied to constant, we exclude this from coverage analysis
+   /*verilator coverage_off*/
 
  //// AHB LITE BUS
    logic [31:0]              haddr;
@@ -573,6 +575,8 @@ import el2_pkg::*;
    assign  dma_hwrite                             = '0;
    assign  dma_hwdata[63:0]                       = '0;
    assign  dma_hreadyin                           = '0;
+
+   /*verilator coverage_on*/
 
 `endif //  `ifdef RV_BUILD_AXI4
 

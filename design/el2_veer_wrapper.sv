@@ -582,6 +582,8 @@ import el2_pkg::*;
 
 
 `ifdef RV_BUILD_AHB_LITE
+   // Since all the signals in this block are tied to constant, we exclude this from coverage analysis
+   /*verilator coverage_off*/
    wire                            lsu_axi_awvalid;
    wire                            lsu_axi_awready;
    wire [pt.LSU_BUS_TAG-1:0]       lsu_axi_awid;
@@ -832,6 +834,8 @@ import el2_pkg::*;
    assign ifu_axi_bvalid = '0;
    assign ifu_axi_bresp[1:0] = '0;
    assign ifu_axi_bid[pt.IFU_BUS_TAG-1:0] = '0;
+ 
+   /*verilator coverage_on*/
 
 `endif //  `ifdef RV_BUILD_AHB_LITE
 

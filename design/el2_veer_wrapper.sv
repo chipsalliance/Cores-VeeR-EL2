@@ -410,10 +410,10 @@ import el2_pkg::*;
    output logic                            o_debug_mode_status, // Core to the PMU that core is in debug mode. When core is in debug mode, the PMU should refrain from sendng a halt or run request
    input logic                             i_cpu_run_req, // Async restart req to CPU
    output logic                            o_cpu_run_ack, // Core response to run req
+  /* verilator coverage_off */
    input logic                             scan_mode,     // To enable scan mode
    input logic                             mbist_mode,    // to enable mbist
 
-  /* verilator coverage off */
    // DMI port for uncore
    input logic                             dmi_uncore_enable,
    output logic                            dmi_uncore_en,
@@ -421,7 +421,7 @@ import el2_pkg::*;
    output logic                     [ 6:0] dmi_uncore_addr,
    output logic                     [31:0] dmi_uncore_wdata,
    input logic                      [31:0] dmi_uncore_rdata
-  /* verilator coverage on */
+  /* verilator coverage_on */
 );
 
    logic                             active_l2clk;

@@ -218,9 +218,9 @@ verilator: program.hex verilator-build
 	if [ $$? -eq 0 ]; then \
 		BEG=`grep "begin_signature" $(TEST).sym | cut -d\  -f 1`;\
 		END=`grep "end_signature"   $(TEST).sym | cut -d\  -f 1`;\
-		./obj_dir/Vtb_top --mem-signature $${BEG} $${END}; \
+		./obj_dir/Vtb_top --test-halt --mem-signature $${BEG} $${END}; \
 	else \
-		./obj_dir/Vtb_top; \
+		./obj_dir/Vtb_top --test-halt; \
 	fi
 
 irun: program.hex irun-build

@@ -30,7 +30,17 @@ module tb_top
     input bit                   core_clk,
     input bit [31:0]            mem_signature_begin,
     input bit [31:0]            mem_signature_end,
-    input bit [31:0]            mem_mailbox
+    input bit [31:0]            mem_mailbox,
+    input bit                   i_cpu_halt_req,    // Async halt req to CPU
+    output bit                  o_cpu_halt_ack,    // core response to halt
+    output bit                  o_cpu_halt_status, // 1'b1 indicates core is halted
+    input bit                   i_cpu_run_req,     // Async restart req to CPU
+    output bit                  o_cpu_run_ack,     // Core response to run req
+    input bit                   mpc_debug_halt_req,
+    output bit                  mpc_debug_halt_ack,
+    input bit                   mpc_debug_run_req,
+    output bit                  mpc_debug_run_ack,
+    output bit                  o_debug_mode_status
 );
 `endif
 
@@ -111,7 +121,6 @@ module tb_top
     logic                       trace_rv_i_interrupt_ip;
     logic        [31:0]         trace_rv_i_tval_ip;
 
-    logic                       o_debug_mode_status;
 
 
     logic                       jtag_tdo;
@@ -119,10 +128,6 @@ module tb_top
     logic                       jtag_tms;
     logic                       jtag_tdi;
     logic                       jtag_trst_n;
-
-    logic                       o_cpu_halt_ack;
-    logic                       o_cpu_halt_status;
-    logic                       o_cpu_run_ack;
 
     logic                       mailbox_write;
     logic        [63:0]         mailbox_data;
@@ -132,11 +137,7 @@ module tb_top
     logic                       dma_hready       ;
     logic                       dma_hresp        ;
 
-    logic                       mpc_debug_halt_req;
-    logic                       mpc_debug_run_req;
     logic                       mpc_reset_run_req;
-    logic                       mpc_debug_halt_ack;
-    logic                       mpc_debug_run_ack;
     logic                       debug_brkpt_status;
 
     int                         cycleCnt;
@@ -1251,17 +1252,17 @@ veer_wrapper rvtop_wrapper (
     .jtag_tdoEn             (),
 
     .mpc_debug_halt_ack     ( mpc_debug_halt_ack),
-    .mpc_debug_halt_req     ( 1'b0),
+    .mpc_debug_halt_req     ( mpc_debug_halt_req),
     .mpc_debug_run_ack      ( mpc_debug_run_ack),
-    .mpc_debug_run_req      ( 1'b1),
+    .mpc_debug_run_req      ( mpc_debug_run_req),
     .mpc_reset_run_req      ( 1'b1),             // Start running after reset
-     .debug_brkpt_status    (debug_brkpt_status),
+    .debug_brkpt_status     (debug_brkpt_status),
 
-    .i_cpu_halt_req         ( 1'b0  ),    // Async halt req to CPU
+    .i_cpu_halt_req         ( i_cpu_halt_req ),    // Async halt req to CPU
     .o_cpu_halt_ack         ( o_cpu_halt_ack ),    // core response to halt
     .o_cpu_halt_status      ( o_cpu_halt_status ), // 1'b1 indicates core is halted
-    .i_cpu_run_req          ( 1'b0  ),     // Async restart req to CPU
-    .o_debug_mode_status    (o_debug_mode_status),
+    .i_cpu_run_req          ( i_cpu_run_req ),     // Async restart req to CPU
+    .o_debug_mode_status    ( o_debug_mode_status),
     .o_cpu_run_ack          ( o_cpu_run_ack ),     // Core response to run req
 
     .dec_tlu_perfcnt0       (),

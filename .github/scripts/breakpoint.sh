@@ -18,7 +18,7 @@ set -ex
 # Invoke GDB
 ${GCC_PREFIX}-gdb -n --batch -x breakpoint.gdb >gdb.log
 # Parse the log
-cat gdb.log | grep 'Breakpoint 1' >breakpoint.txt
+cat gdb.log | grep 'Breakpoint 1,' >breakpoint.txt
 
 # Compare the dumps
 diff -E -y breakpoint.txt breakpoint_golden.txt || true

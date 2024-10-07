@@ -254,7 +254,10 @@ import el2_pkg::*;
    // AXI Write Channels
    input  logic                            dma_axi_awvalid,
    output logic                            dma_axi_awready,
+   /* exclude signals that are tied to constant value in tb_top.sv */
+   /*verilator coverage_off*/
    input  logic [pt.DMA_BUS_TAG-1:0]       dma_axi_awid,
+   /*verilator coverage_on*/
    input  logic [31:0]                     dma_axi_awaddr,
    input  logic [2:0]                      dma_axi_awsize,
    input  logic [2:0]                      dma_axi_awprot,
@@ -276,7 +279,10 @@ import el2_pkg::*;
    // AXI Read Channels
    input  logic                            dma_axi_arvalid,
    output logic                            dma_axi_arready,
+   /* exclude signals that are tied to constant value in tb_top.sv */
+   /*verilator coverage_off*/
    input  logic [pt.DMA_BUS_TAG-1:0]       dma_axi_arid,
+   /*verilator coverage_on*/
    input  logic [31:0]                     dma_axi_araddr,
    input  logic [2:0]                      dma_axi_arsize,
    input  logic [2:0]                      dma_axi_arprot,
@@ -351,6 +357,8 @@ import el2_pkg::*;
    /*verilator coverage_on*/
 
    // DMA Slave
+   /* exclude signals that are tied to constant value in tb_top.sv */
+   /*verilator coverage_off*/
    input logic                             dma_hsel,
    input logic [31:0]                      dma_haddr,
    input logic [2:0]                       dma_hburst,
@@ -360,6 +368,7 @@ import el2_pkg::*;
    input logic [1:0]                       dma_htrans,
    input logic                             dma_hwrite,
    input logic [63:0]                      dma_hwdata,
+   /*verilator coverage_on*/
    input logic                             dma_hreadyin,
 
    output logic [63:0]                     dma_hrdata,
@@ -419,7 +428,9 @@ import el2_pkg::*;
    output logic                            o_debug_mode_status, // Core to the PMU that core is in debug mode. When core is in debug mode, the PMU should refrain from sendng a halt or run request
    input logic                             i_cpu_run_req, // Async restart req to CPU
    output logic                            o_cpu_run_ack, // Core response to run req
-  /* verilator coverage_off */
+
+   /* exclude signals that are tied to constant value or left unconnected in tb_top.sv */
+   /* verilator coverage_off */
    input logic                             scan_mode,     // To enable scan mode
    input logic                             mbist_mode,    // to enable mbist
 
@@ -430,7 +441,7 @@ import el2_pkg::*;
    output logic                     [ 6:0] dmi_uncore_addr,
    output logic                     [31:0] dmi_uncore_wdata,
    input logic                      [31:0] dmi_uncore_rdata
-  /* verilator coverage_on */
+   /* verilator coverage_on */
 );
 
    logic                             active_l2clk;

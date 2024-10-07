@@ -87,8 +87,7 @@ jobs:
           export RV_ROOT=$(pwd)
           mkdir run
           make -C run -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
-            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }} \
-            VERILATOR_EXTRA_ARGS='-fno-table'
+            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }}
           cd run
           ${RV_ROOT}/.github/scripts/openocd_test.sh \
             -f ${RV_ROOT}/testbench/openocd_scripts/verilator-rst.cfg \
@@ -102,8 +101,7 @@ jobs:
           export RV_ROOT=$(pwd)
           mkdir reg_test
           make -C reg_test -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
-            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }} \
-            VERILATOR_EXTRA_ARGS='-fno-table'
+            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }}
           cd reg_test
           ${RV_ROOT}/.github/scripts/gdb_test.sh \
             /bin/bash -c 'cd ${RV_ROOT}/.github/scripts && ./dump_and_compare.sh' || true
@@ -116,8 +114,7 @@ jobs:
           export RV_ROOT=$(pwd)
           mkdir mem_test
           make -C mem_test -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
-            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }} \
-            VERILATOR_EXTRA_ARGS='-fno-table'
+            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }}
           cd mem_test
           ${RV_ROOT}/.github/scripts/gdb_test.sh \
             /bin/bash -c 'cd ${RV_ROOT}/.github/scripts && ./mem_access.sh' || true
@@ -133,8 +130,7 @@ jobs:
           export RV_ROOT=$(pwd)
           mkdir periph_test
           make -C periph_test -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
-            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }} \
-            VERILATOR_EXTRA_ARGS='-fno-table'
+            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }}
           cd periph_test
           ${RV_ROOT}/.github/scripts/gdb_test.sh \
             /bin/bash -c 'cd ${RV_ROOT}/.github/scripts && ./peripheral_access.sh' || true
@@ -147,8 +143,7 @@ jobs:
           export RV_ROOT=$(pwd)
           mkdir breakpoint_test
           make -C breakpoint_test -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
-            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }} \
-            VERILATOR_EXTRA_ARGS='-fno-table'
+            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }}
           cd breakpoint_test
           ${RV_ROOT}/.github/scripts/gdb_test.sh \
             /bin/bash -c 'cd ${RV_ROOT}/.github/scripts && ./breakpoint.sh' || true

@@ -20,19 +20,115 @@ target extended-remote :3333
 echo Connected, waiting...\n
 shell sleep 5s
 
+echo Accessing ICCM...\n
+set *(0x00040000) = 0x01234567
+set *(0x00040004) = 0x89ABCDEF
+set *(0x00040008) = 0x55555555
+set *(0x0004000C) = 0xAAAAAAAA
+print/x *0x00040000@4
+
 echo Accessing DCCM...\n
-set *(0x50000000) = 0xCAFEBABA
-set *(0x50000004) = 0xDEADBEEF
-set *(0x50000008) = 0xFEEDBACA
-set *(0x5000000C) = 0xA5A5A5A5
+set *(0x00080000) = 0x01234567
+set *(0x00080004) = 0x89ABCDEF
+set *(0x00080008) = 0x55555555
+set *(0x0008000C) = 0xAAAAAAAA
+print/x *0x00080000@4
+
+echo Accessing region at 0x20000000...\n
+set *(0x20000000) = 0x01234567
+set *(0x20000004) = 0x89ABCDEF
+set *(0x20000008) = 0x55555555
+set *(0x2000000C) = 0xAAAAAAAA
+print/x *0x20000000@4
+
+echo Accessing region at 0x30000000...\n
+set *(0x30000000) = 0x01234567
+set *(0x30000004) = 0x89ABCDEF
+set *(0x30000008) = 0x55555555
+set *(0x3000000C) = 0xAAAAAAAA
+print/x *0x30000000@4
+
+echo Accessing region at 0x40000000...\n
+set *(0x40000000) = 0x01234567
+set *(0x40000004) = 0x89ABCDEF
+set *(0x40000008) = 0x55555555
+set *(0x4000000C) = 0xAAAAAAAA
+print/x *0x40000000@4
+
+echo Accessing region at 0x50000000...\n
+set *(0x50000000) = 0x01234567
+set *(0x50000004) = 0x89ABCDEF
+set *(0x50000008) = 0x55555555
+set *(0x5000000C) = 0xAAAAAAAA
 print/x *0x50000000@4
 
-echo Accessing ICCM...\n
-set *(0x40000100) = 0x01234567
-set *(0x40000104) = 0x89ABCDEF
-set *(0x40000108) = 0x55555555
-set *(0x4000010C) = 0xAAAAAAAA
-print/x *0x40000100@4
+echo Accessing region at 0x60000000...\n
+set *(0x60000000) = 0x01234567
+set *(0x60000004) = 0x89ABCDEF
+set *(0x60000008) = 0x55555555
+set *(0x6000000C) = 0xAAAAAAAA
+print/x *0x60000000@4
 
-echo Accessing ROM...\n
-print/x *0x00000000@8
+echo Accessing region at 0x70000000...\n
+set *(0x70000000) = 0x01234567
+set *(0x70000004) = 0x89ABCDEF
+set *(0x70000008) = 0x55555555
+set *(0x7000000C) = 0xAAAAAAAA
+print/x *0x70000000@4
+
+echo Accessing region at 0x80000000...\n
+set *(0x80000000) = 0x01234567
+set *(0x80000004) = 0x89ABCDEF
+set *(0x80000008) = 0x55555555
+set *(0x8000000C) = 0xAAAAAAAA
+print/x *0x80000000@4
+
+echo Accessing region at 0x90000000...\n
+set *(0x90000000) = 0x01234567
+set *(0x90000004) = 0x89ABCDEF
+set *(0x90000008) = 0x55555555
+set *(0x9000000C) = 0xAAAAAAAA
+print/x *0x90000000@4
+
+echo Accessing region at 0xa0000000...\n
+set *(0xa0000000) = 0x01234567
+set *(0xa0000004) = 0x89ABCDEF
+set *(0xa0000008) = 0x55555555
+set *(0xa000000C) = 0xAAAAAAAA
+print/x *0xa0000000@4
+
+echo Accessing region at 0xb0000000...\n
+set *(0xb0000000) = 0x01234567
+set *(0xb0000004) = 0x89ABCDEF
+set *(0xb0000008) = 0x55555555
+set *(0xb000000C) = 0xAAAAAAAA
+print/x *0xb0000000@4
+
+echo Accessing region at 0xc0000000...\n
+set *(0xc0000000) = 0x01234567
+set *(0xc0000004) = 0x89ABCDEF
+set *(0xc0000008) = 0x55555555
+set *(0xc000000C) = 0xAAAAAAAA
+print/x *0xc0000000@4
+
+echo Accessing region at 0xd0000000...\n
+set *(0xd0000000) = 0x01234567
+set *(0xd0000004) = 0x89ABCDEF
+set *(0xd0000008) = 0x55555555
+set *(0xd000000C) = 0xAAAAAAAA
+print/x *0xd0000000@4
+
+echo Accessing region at 0xe0000000...\n
+set *(0xe0000000) = 0x01234567
+set *(0xe0000004) = 0x89ABCDEF
+set *(0xe0000008) = 0x55555555
+set *(0xe000000C) = 0xAAAAAAAA
+print/x *0xe0000000@4
+
+echo Accessing region at 0xf0000000...\n
+set *(0xf0000000) = 0x01234567
+set *(0xf0000004) = 0x89ABCDEF
+set *(0xf0000008) = 0x55555555
+set *(0xf000000C) = 0xAAAAAAAA
+print/x *0xf0000000@4
+

@@ -67,6 +67,7 @@ int main(int argc, char** argv) {
   Verilated::commandArgs(argc, argv);
 
   Vtb_top* tb = new Vtb_top;
+  bool test_halt = false;
 
   tb->mem_signature_begin = 0x00000000;
   tb->mem_signature_end   = 0x00000000;
@@ -118,6 +119,14 @@ int main(int argc, char** argv) {
     }
   }
 
+  // run halt start procedure if requested with
+  // "--test-halt"
+  for (int i=1; i<argc; ++i) {
+    if (!strcmp(argv[i], "--test-halt")) {
+      test_halt = true;
+    }
+  }
+
   // Report memory addresses
   std::cout << std::setfill('0');
 
@@ -139,6 +148,77 @@ int main(int argc, char** argv) {
   tfp->open ("sim.vcd");
 #endif
   // Simulate
+  if(test_halt) {
+    // Test halt/start first (if requested)
+    tb->i_cpu_halt_req = 1;
+    // wait for ack
+    std::cout<<"Waiting for halt"<<std::endl;
+    while(!tb->o_cpu_halt_ack) {
+      main_time += 5;
+      tb->core_clk = !tb->core_clk;
+      tb->eval();
+    }
+    tb->i_cpu_halt_req = 0;
+    // wait for halt signal
+    while(!tb->o_cpu_halt_status) {
+      main_time += 5;
+      tb->core_clk = !tb->core_clk;
+      tb->eval();
+    }
+    // restart the CPU
+    tb->i_cpu_run_req = 1;
+    // wait for ack
+    while(!tb->o_cpu_run_ack) {
+      main_time += 5;
+      tb->core_clk = !tb->core_clk;
+      tb->eval();
+    }
+    tb->i_cpu_run_req = 0;
+    // wait for run signal
+    std::cout<<"Waiting for restart"<<std::endl;
+    while(tb->o_cpu_halt_status) {
+      main_time += 5;
+      tb->core_clk = !tb->core_clk;
+      tb->eval();
+    }
+    // test mpc halt
+    tb->mpc_debug_halt_req = 1;
+    // wait for ack
+    std::cout<<"Waiting for mpc halt"<<std::endl;
+    while(!tb->mpc_debug_halt_ack) {
+      main_time += 5;
+      tb->core_clk = !tb->core_clk;
+      tb->eval();
+    }
+    tb->mpc_debug_halt_req = 0;
+    // wait for halt signal
+    while(!tb->o_debug_mode_status) {
+      main_time += 5;
+      tb->core_clk = !tb->core_clk;
+      tb->eval();
+    }
+    // restart the CPU
+    tb->mpc_debug_run_req = 1;
+    // wait for ack
+    while(!tb->mpc_debug_run_ack) {
+      main_time += 5;
+      tb->core_clk = !tb->core_clk;
+      tb->eval();
+    }
+    tb->mpc_debug_run_req = 0;
+    // wait for run signal
+    std::cout<<"Waiting for mpc restart"<<std::endl;
+    while(tb->o_debug_mode_status) {
+      main_time += 5;
+      tb->core_clk = !tb->core_clk;
+      tb->eval();
+    }
+  } else {
+    tb->i_cpu_halt_req = 0;
+    tb->i_cpu_run_req = 0;
+    tb->mpc_debug_halt_req = 0;
+    tb->mpc_debug_run_req = 0;
+  }
   while(!Verilated::gotFinish()){
 #if VM_TRACE
       tfp->dump (main_time);

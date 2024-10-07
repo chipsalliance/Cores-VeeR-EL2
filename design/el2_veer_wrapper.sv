@@ -304,9 +304,12 @@ import el2_pkg::*;
    output logic [1:0]                      htrans,
    output logic                            hwrite,
 
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    input logic [63:0]                      hrdata,
    input logic                             hready,
    input logic                             hresp,
+   /*verilator coverage_on*/
 
    // LSU AHB Master
    output logic [31:0]                     lsu_haddr,
@@ -321,9 +324,12 @@ import el2_pkg::*;
    output logic                            lsu_hwrite,
    output logic [63:0]                     lsu_hwdata,
 
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    input logic [63:0]                      lsu_hrdata,
    input logic                             lsu_hready,
    input logic                             lsu_hresp,
+   /*verilator coverage_on*/
    // Debug Syster Bus AHB
    output logic [31:0]                     sb_haddr,
    /* exclude signals that are tied to constant value in axi4_to_ahb.sv */
@@ -337,9 +343,12 @@ import el2_pkg::*;
    output logic                            sb_hwrite,
    output logic [63:0]                     sb_hwdata,
 
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    input  logic [63:0]                     sb_hrdata,
    input  logic                            sb_hready,
    input  logic                            sb_hresp,
+   /*verilator coverage_on*/
 
    // DMA Slave
    input logic                             dma_hsel,
@@ -703,16 +712,10 @@ import el2_pkg::*;
    // AXI Write Channels
    wire                            sb_axi_awvalid;
    wire                            sb_axi_awready;
-   /* exclude signals that are tied to constant value in dbg/el2_dbg.sv */
-   /*verilator coverage_off*/
    wire [pt.SB_BUS_TAG-1:0]        sb_axi_awid;
-   /*verilator coverage_on*/
    wire [31:0]                     sb_axi_awaddr;
    wire [3:0]                      sb_axi_awregion;
-   /* exclude signals that are tied to constant value in dbg/el2_dbg.sv */
-   /*verilator coverage_off*/
    wire [7:0]                      sb_axi_awlen;
-   /*verilator coverage_on*/
    wire [2:0]                      sb_axi_awsize;
    wire [1:0]                      sb_axi_awburst;
    wire                            sb_axi_awlock;

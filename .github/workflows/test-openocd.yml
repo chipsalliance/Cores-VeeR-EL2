@@ -125,6 +125,9 @@ jobs:
 
       - name: Test with GDB-test (peripheral access)
         run: |
+          # TODO REMOVE THIS TEST, as we aim to target all possible memory regions in the test above this,
+          # and there are no actual peripherals in the tesbench.
+
           # TODO GDB is in /opt/riscv and a separate toolchain is installed with apt. Make this better.
           export PATH=/opt/riscv/bin:/opt/verilator/bin:/opt/openocd/bin:$PATH
           export RV_ROOT=$(pwd)

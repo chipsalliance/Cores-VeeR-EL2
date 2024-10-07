@@ -413,6 +413,7 @@ import el2_pkg::*;
    input logic                             scan_mode,     // To enable scan mode
    input logic                             mbist_mode,    // to enable mbist
 
+  /* verilator coverage off */
    // DMI port for uncore
    input logic                             dmi_uncore_enable,
    output logic                            dmi_uncore_en,
@@ -420,6 +421,7 @@ import el2_pkg::*;
    output logic                     [ 6:0] dmi_uncore_addr,
    output logic                     [31:0] dmi_uncore_wdata,
    input logic                      [31:0] dmi_uncore_rdata
+  /* verilator coverage on */
 );
 
    logic                             active_l2clk;

@@ -8,6 +8,7 @@ intro
 overview
 memory-map
 error-protection
+dual-core-lock-step
 timers
 power
 interrupts

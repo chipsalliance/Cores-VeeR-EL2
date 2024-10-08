@@ -13,7 +13,7 @@ jobs:
       matrix:
         bus: ["axi", "ahb"]
         test: ["hello_world", "hello_world_dccm", "hello_world_iccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
-               "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters", "pmp"]
+               "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters", "pmp", "write_unaligned"]
         coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
         priv: ["0", "1"]
         exclude:

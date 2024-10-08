@@ -51,8 +51,6 @@ module tb_top
     logic        [31:0]         nmi_vector;
     logic        [31:1]         jtag_id;
 
-    logic                       soft_int;
-    logic                       timer_int;
     logic [pt.PIC_TOTAL_INT:1]  extintsrc_req;
 
     logic        [31:0]         ic_haddr        ;
@@ -831,9 +829,9 @@ module tb_top
         end
     end
 
+    `ifdef RV_BUILD_AXI4
     // this needs to be a separate block due to sensitivity to other signals
     always @(negedge core_clk or lsu_axi_bvalid or lsu_axi_rvalid or ifu_axi_rvalid or ifu_axi_rid) begin
-        `ifdef RV_BUILD_AXI4
         if (mailbox_write && mailbox_data[7:0] == 8'h82)
             // wait for current transaction that to complete to not trigger error on it
             @(negedge lsu_axi_bvalid) next_dbus_error <= 1;
@@ -844,8 +842,8 @@ module tb_top
             @(negedge lsu_axi_bvalid or negedge lsu_axi_rvalid) next_dbus_error <= 0;
         if (next_ibus_error)
             @(negedge ifu_axi_rvalid or ifu_axi_rid) next_ibus_error <= 0;
-        `endif
     end
+    `endif
 
     always_comb begin
         `ifdef RV_BUILD_AXI4
@@ -1230,7 +1228,6 @@ veer_wrapper rvtop_wrapper (
     .dma_axi_rlast          (dma_axi_rlast),
 `endif
     .timer_int              ( timer_int ),
-    .soft_int               ( soft_int ),
     .extintsrc_req          ( ext_int ),
 
     .lsu_bus_clk_en         ( 1'b1  ),// Clock ratio b/w cpu core clk & AHB master interface

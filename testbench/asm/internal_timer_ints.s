@@ -1,4 +1,4 @@
-#include "asm/excs_ints/common.s"
+#include "common.s"
 
 machine_internal_timer0_local_interrupt:
     li x4, 0x8000001d

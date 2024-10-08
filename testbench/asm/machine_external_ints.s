@@ -1,4 +1,4 @@
-#include "asm/excs_ints/common.s"
+#include "common.s"
 
 machine_software_interrupt:
     la x4, 0x80000003

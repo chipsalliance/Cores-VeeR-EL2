@@ -1,4 +1,4 @@
-#include "asm/excs_ints/common.s"
+#include "common.s"
 
 dside_size_misaligned_load_to_non_idempotent_address:
     li x4, 0x4

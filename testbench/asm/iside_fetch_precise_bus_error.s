@@ -1,4 +1,4 @@
-#include "asm/excs_ints/common.s"
+#include "common.s"
 
 iside_fetch_precise_bus_error:
     li x4, 0x1

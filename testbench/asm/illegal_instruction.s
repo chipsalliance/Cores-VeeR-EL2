@@ -1,4 +1,4 @@
-#include "asm/excs_ints/common.s"
+#include "common.s"
 
 illegal_instruction:
     li x4, 0x2

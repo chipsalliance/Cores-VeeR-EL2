@@ -1,4 +1,4 @@
-#include "asm/excs_ints/common.s"
+#include "common.s"
 
 dside_pic_load_access_error:
     li x4, 0x5

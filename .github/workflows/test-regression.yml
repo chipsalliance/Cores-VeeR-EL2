@@ -12,7 +12,11 @@ jobs:
       matrix:
         bus: ["axi", "ahb"]
         test: ["hello_world", "hello_world_dccm", "hello_world_iccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
-               "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters", "pmp"]
+               "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters", "pmp",
+               "machine_external_ints", "dbus_store_error", "lsu_trigger_hit", "machine_external_vec_ints", "dside_pic_access_error",
+               "iside_fetch_precise_bus_error", "dside_access_region_prediction_error", "cmark", "iside_core_local_unmapped_address_error",
+               "dside_access_across_region_boundary", "nmi_pin_assertion", "dside_size_misaligned_access_to_non_idempotent_address",
+               "dside_core_local_access_unmapped_address_error", "dbus_nonblocking_load_error", "internal_timer_ints", "ebreak_ecall", "illegal_instruction"]
         coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
         priv: ["0", "1"]
         exclude:

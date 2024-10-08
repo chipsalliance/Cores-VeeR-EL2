@@ -1,4 +1,4 @@
-#include "asm/excs_ints/common.s"
+#include "common.s"
 
 dbus_store_error:
     li x4, 0xF0000000

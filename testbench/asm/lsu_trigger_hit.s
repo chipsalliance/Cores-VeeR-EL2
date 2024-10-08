@@ -1,4 +1,4 @@
-#include "asm/excs_ints/common.s"
+#include "common.s"
 
 lsu_trigger_hit:
     la x4, 0x3

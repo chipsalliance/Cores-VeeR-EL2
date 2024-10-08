@@ -1,4 +1,4 @@
-#include "asm/excs_ints/common.s"
+#include "common.s"
 
 dside_core_local_load_unmapped_address_error:
     li x4, 0x5

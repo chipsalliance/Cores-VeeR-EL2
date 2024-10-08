@@ -1,4 +1,4 @@
-#include "asm/excs_ints/common.s"
+#include "common.s"
 
 dside_load_across_region_boundary:
     li x4, 0x4

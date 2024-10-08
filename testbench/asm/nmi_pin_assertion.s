@@ -1,4 +1,4 @@
-#include "asm/excs_ints/common.s"
+#include "common.s"
 
 nmi_pin_assertion:
     li x4, 0x0

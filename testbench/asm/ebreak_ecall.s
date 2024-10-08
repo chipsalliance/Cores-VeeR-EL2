@@ -1,4 +1,4 @@
-#include "asm/excs_ints/common.s"
+#include "common.s"
 
 breakpoint_ebreak:
     li x4, 0x3

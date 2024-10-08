@@ -1,4 +1,4 @@
-#include "asm/excs_ints/common.s"
+#include "common.s"
 
 enable_ext_int1:
     // set up gateway configuration - level triggered active high

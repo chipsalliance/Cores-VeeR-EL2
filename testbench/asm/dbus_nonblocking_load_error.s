@@ -1,4 +1,4 @@
-#include "asm/excs_ints/common.s"
+#include "common.s"
 
 dbus_nonblocking_load_error:
     li x4, 0xF0000001

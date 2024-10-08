@@ -1,4 +1,4 @@
-#include "asm/excs_ints/common.s"
+#include "common.s"
 
 dside_load_region_prediction_error:
     li x4, 0x5

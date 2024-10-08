@@ -12,6 +12,10 @@ jobs:
     name: Test-Regression
     uses: ./.github/workflows/test-regression.yml
 
+  Test-Exceptions-Regression:
+    name: Test-Exceptions-Regression
+    uses: ./.github/workflows/test-regression-exceptions.yml
+
   Test-Verification:
     name: Test-Verification
     uses: ./.github/workflows/test-verification.yml

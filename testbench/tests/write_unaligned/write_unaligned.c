@@ -16,5 +16,11 @@ int main () {
     printf("jumping to 0xe000001\n");
     func = 0xe000001;
     func();
+    printf("jumping to 0x3fffffff\n");
+    func = 0x3fffffff;
+    func();
+    printf("jumping to 0xa001\n");
+    func = 0xa001;
+    func();
     return 0;
 }

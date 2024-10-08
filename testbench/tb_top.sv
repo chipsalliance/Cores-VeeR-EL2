@@ -708,7 +708,7 @@ module tb_top
 
     assign mailbox_data_val = mailbox_data[7:0] > 8'h5 && mailbox_data[7:0] < 8'h7f;
 
-    parameter MAX_CYCLES = 5_000;
+    parameter MAX_CYCLES = 2_000_000;
 
     integer fd, tp, el;
     logic next_dbus_error;

@@ -535,10 +535,12 @@ import el2_pkg::*;
                                      exu_flush_final ?  ((bus_ifu_wr_en_ff & last_beat) ? IDLE : HIT_U_MISS) : IDLE;
                   miss_state_en   = (bus_ifu_wr_en_ff & last_beat) | exu_flush_final | dec_tlu_force_halt;
          end
+         /*verilator coverage_off*/
          default: begin : def_case
                   miss_nxtstate   = IDLE;
                   miss_state_en   = 1'b0;
          end
+         /*verilator coverage_on*/
       endcase
    end
    rvdffs #(($bits(miss_state_t))) miss_state_ff (.clk(active_clk), .din(miss_nxtstate), .dout({miss_state}), .en(miss_state_en),   .*);
@@ -1021,6 +1023,7 @@ assign ic_miss_buff_half[63:0]    = {ic_miss_buff_data[{other_tag,1'b1}],ic_miss
                   iccm_correction_state   = 1'b1;
 
          end
+         /*verilator coverage_off*/
          default: begin : def_case
                   err_stop_nxtstate            = ERR_STOP_IDLE;
                   err_stop_state_en            = 1'b0;
@@ -1028,6 +1031,7 @@ assign ic_miss_buff_half[63:0]    = {ic_miss_buff_data[{other_tag,1'b1}],ic_miss
                   iccm_correction_state   = 1'b1;
 
          end
+         /*verilator coverage_on*/
       endcase
    end
    rvdffs #(($bits(err_stop_state_t))) err_stop_state_ff (.clk(active_clk), .din(err_stop_nxtstate), .dout({err_stop_state}), .en(err_stop_state_en),   .*);

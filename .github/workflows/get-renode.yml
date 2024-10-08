@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TOOL_NAME: renode
-      TOOL_VERSION: 1.15.3+20240924gitc7bc336bb
+      TOOL_VERSION: latest
       DEBIAN_FRONTEND: "noninteractive"
 
     steps:
@@ -37,10 +37,10 @@ jobs:
           key: ${{ env.cache_name }}_${{ env.cache_date }}
           restore-keys: ${{ env.cache_name }}_
 
-      - name: Get Renode
+      - name: Get latest nightly release
         if: ${{ steps.cache.outputs.cache-hit != 'true' }}
         run: |
-          wget https://builds.renode.io/renode-${{ env.TOOL_VERSION}}.linux-portable.tar.gz
+          wget https://builds.renode.io/renode-latest.linux-portable.tar.gz
 
       - name: Rename the archive
         if: ${{ steps.cache.outputs.cache-hit != 'true' }}

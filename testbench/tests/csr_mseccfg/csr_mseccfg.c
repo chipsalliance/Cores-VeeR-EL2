@@ -98,7 +98,8 @@ int main () {
     write_csr(CSR_PMPADDR3, PMPADDR(A(_data_end)));
 
     uint32_t pmpcfg;
-    pmpcfg = PMPREGION((PMPCFG_TOR | PMPCFG_X)           , 1) |
+    pmpcfg = PMPREGION((PMPCFG_TOR | PMPCFG_W | PMPCFG_X), 1) |
+             PMPREGION((PMPCFG_TOR | PMPCFG_W),            2) |
              PMPREGION((PMPCFG_TOR | PMPCFG_R | PMPCFG_W), 3);
 
     write_csr(CSR_PMPCFG0, pmpcfg);

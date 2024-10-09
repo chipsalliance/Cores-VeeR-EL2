@@ -3,13 +3,11 @@ name: VeeR-EL2 Microarchitectural tests
 on:
   workflow_call:
 
-env:
-  VERILATOR_VERSION: v5.024
-
 jobs:
   lint:
     name: Lint microarchitectural tests
     runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:latest
     steps:
       - name: Setup repository
         uses: actions/checkout@v3
@@ -35,6 +33,7 @@ jobs:
   tests:
     name: Microarchitectural tests
     runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:latest
     strategy:
       matrix:
         test:
@@ -56,7 +55,6 @@ jobs:
           - "block/lsu_tl"
     env:
       CCACHE_DIR: "/opt/verification/.cache/"
-      VERILATOR_VERSION: v5.024
       DEBIAN_FRONTEND: "noninteractive"
     steps:
       - name: Setup repository
@@ -77,26 +75,13 @@ jobs:
         run: |
           date=$(date +"%Y_%m_%d")
           time=$(date +"%Y%m%d_%H%M%S_%N")
-          cache_verilator_restore_key=cache_verilator_
-          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}_${{ env.VERILATOR_COMMIT }}
           cache_test_restore_key=uarch_${{ matrix.test }}_${{ matrix.coverage }}_
           cache_test_key=${cache_test_restore_key}${time}
 
           echo "date=$date" | tee -a "$GITHUB_ENV"
           echo "time=$time" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_restore_key=$cache_verilator_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
-
-      - name: Restore verilator cache
-        id: cache-verilator-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/verilator
-            /opt/verilator/.cache
-          key: ${{ env.cache_verilator_key }}
 
       - name: Setup tests cache
         uses: actions/cache@v3

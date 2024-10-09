@@ -3,21 +3,18 @@ name: VeeR-EL2 verification
 on:
   workflow_call:
 
-env:
-  VERILATOR_VERSION: v5.024
-
 jobs:
   tests:
     name: Verification tests
     runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:latest
     strategy:
       matrix:
         test: ["test_pyuvm"]
         coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
     env:
-      CCACHE_DIR: "/opt/verification/.cache/"
-      VERILATOR_VERSION: v5.024
       DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/regression/.cache/"
     steps:
       - name: Setup repository
         uses: actions/checkout@v3
@@ -37,27 +34,13 @@ jobs:
         run: |
           date=$(date +"%Y_%m_%d")
           time=$(date +"%Y%m%d_%H%M%S_%N")
-          cache_verilator_restore_key=cache_verilator_
-          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}_${{ env.VERILATOR_COMMIT }}
           cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
           cache_test_key=${cache_test_restore_key}${time}
 
           echo "date=$date" | tee -a "$GITHUB_ENV"
           echo "time=$time" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_restore_key=$cache_verilator_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
-
-
-      - name: Restore verilator cache
-        id: cache-verilator-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/verilator
-            /opt/verilator/.cache
-          key: ${{ env.cache_verilator_key }}
 
       - name: Setup tests cache
         uses: actions/cache@v3

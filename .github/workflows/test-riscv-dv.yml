@@ -97,6 +97,7 @@ jobs:
   run-tests:
     name: Run RISC-V DV tests
     runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:latest
     needs: [ generate-config, generate-code ]
     strategy:
       fail-fast: false
@@ -127,9 +128,6 @@ jobs:
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"
-      VERILATOR_VERSION: v5.024
-      SPIKE_VERSION: d70ea67d
-      RENODE_VERSION: latest
       CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
 
     steps:
@@ -154,59 +152,15 @@ jobs:
         run: |
           date=$(date +"%Y_%m_%d")
           time=$(date +"%Y%m%d_%H%M%S_%N")
-          cache_verilator_restore_key=cache_verilator_
-          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}_${{ env.VERILATOR_COMMIT }}
-          cache_spike_restore_key=cache_spike_
-          cache_spike_key=${cache_spike_restore_key}${{ env.SPIKE_VERSION }}
-          cache_renode_restore_key=cache_renode_
-          cache_renode_key=${cache_renode_restore_key}${{ env.RENODE_VERSION }}
           cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
           cache_test_key=${cache_test_restore_key}${time}
           cache_code=cache_${{ matrix.test }}_${{ matrix.version }}
 
           echo "date=$date" | tee -a "$GITHUB_ENV"
           echo "time=$time" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_restore_key=$cache_verilator_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
-          echo "cache_spike_restore_key=$cache_spike_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_spike_key=$cache_spike_key" | tee -a "$GITHUB_ENV"
-          echo "cache_renode_restore_key=$cache_renode_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_renode_key=$cache_renode_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
           echo "cache_code=${cache_code}_${{ env.CACHE_HASH }}" | tee -a "$GITHUB_ENV"
-
-      - name: Restore verilator cache
-        id: cache-verilator-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/verilator
-            /opt/verilator/.cache
-          key: ${{ env.cache_verilator_key }}
-          restore-keys: ${{ env.cache_verilator_restore_key }}
-          fail-on-cache-miss: true
-
-      - name: Restore Spike cache
-        id: cache-spike-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/spike
-            /opt/spike/.cache
-          key: ${{ env.cache_spike_key }}
-          restore-keys: ${{ env.cache_spike_restore_key }}
-          fail-on-cache-miss: true
-
-      - name: Restore Renode cache
-        id: cache-renode-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/renode
-          key: ${{ env.cache_renode_key }}
-          restore-keys: ${{ env.cache_renode_restore_key }}
-          fail-on-cache-miss: true
 
       - name: Setup repository
         uses: actions/checkout@v3
@@ -313,8 +267,6 @@ jobs:
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"
-      VERILATOR_VERSION: v5.024
-      SPIKE_VERSION: d70ea67d
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader
       CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
@@ -336,47 +288,15 @@ jobs:
         run: |
           date=$(date +"%Y_%m_%d")
           time=$(date +"%Y%m%d_%H%M%S_%N")
-          cache_verilator_restore_key=cache_verilator_
-          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}
-          cache_spike_restore_key=cache_spike_
-          cache_spike_key=${cache_spike_restore_key}${{ env.SPIKE_VERSION }}
-          cache_renode_restore_key=cache_renode_
-          cache_renode_key=${cache_renode_restore_key}${{ env.RENODE_VERSION }}
           cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
           cache_test_key=${cache_test_restore_key}${time}
           cache_code=cache_${{ matrix.test }}_${{ matrix.version }}
 
           echo "date=$date" | tee -a "$GITHUB_ENV"
           echo "time=$time" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_restore_key=$cache_verilator_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
-          echo "cache_spike_restore_key=$cache_spike_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_spike_key=$cache_spike_key" | tee -a "$GITHUB_ENV"
-          echo "cache_renode_restore_key=$cache_renode_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_renode_key=$cache_renode_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
           echo "cache_code=${cache_code}_${{ env.CACHE_HASH }}" | tee -a "$GITHUB_ENV"
-
-      - name: Restore verilator cache
-        id: cache-verilator-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/verilator
-            /opt/verilator/.cache
-          key: ${{ env.cache_verilator_key }}
-          restore-keys: ${{ env.cache_verilator_restore_key }}
-
-      - name: Restore Spike cache
-        id: cache-spike-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/spike
-            /opt/spike/.cache
-          key: ${{ env.cache_spike_key }}
-          restore-keys: ${{ env.cache_spike_restore_key }}
 
       - name: Cache Code Restore
         uses: actions/cache/restore@v3

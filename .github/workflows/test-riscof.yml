@@ -8,6 +8,7 @@ jobs:
   tests:
     name: Run RISCOF tests
     runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:latest
     strategy:
       fail-fast: false
       matrix:
@@ -16,8 +17,6 @@ jobs:
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscof/.cache/"
-      VERILATOR_VERSION: v5.024
-      SPIKE_VERSION: d70ea67d
 
     steps:
       - name: Install utils
@@ -32,39 +31,12 @@ jobs:
         run: |
           date=$(date +"%Y_%m_%d")
           time=$(date +"%Y%m%d_%H%M%S_%N")
-          cache_verilator_restore_key=cache_verilator_
-          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}_${{ env.VERILATOR_COMMIT }}
-          cache_spike_restore_key=cache_spike_
-          cache_spike_key=${cache_spike_restore_key}${{ env.SPIKE_VERSION }}
           cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
           cache_test_key=${cache_test_restore_key}${time}
           echo "date=$date" | tee -a "$GITHUB_ENV"
           echo "time=$time" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_restore_key=$cache_verilator_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
-          echo "cache_spike_restore_key=$cache_spike_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_spike_key=$cache_spike_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
-
-      - name: Restore Verilator cache
-        id: cache-verilator-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/verilator
-            /opt/verilator/.cache
-          key: ${{ env.cache_verilator_key }}
-
-      - name: Restore Spike cache
-        id: cache-spike-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/spike
-            /opt/spike/.cache
-          key: ${{ env.cache_spike_key }}
-          restore-keys: ${{ env.cache_spike_restore_key }}
 
       - name: Setup tests cache
         uses: actions/cache@v3
@@ -96,6 +68,7 @@ jobs:
           submodules: recursive
 
       - name: install SiteSpawner package
+        shell: bash
         run: |
           python3 -m venv .venv
           .venv/bin/python3 -m pip install tools/SiteSpawner
@@ -108,6 +81,7 @@ jobs:
           pip3 install git+https://github.com/riscv/riscof@a25e315
 
       - name: Clone tests
+        shell: bash
         run: |
           mkdir -p riscof
           pushd riscof
@@ -118,6 +92,7 @@ jobs:
           popd
 
       - name: Configure RISCOF
+        shell: bash
         run: |
           pushd riscof
             # Copy RISCOF configuration
@@ -129,6 +104,7 @@ jobs:
           popd
 
       - name: Build VeeR model
+        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
@@ -142,6 +118,7 @@ jobs:
           popd
 
       - name: Run tests, collect coverage
+        shell: bash
         run: |
           export PATH=/opt/verilator/bin:/opt/spike/bin:$PATH
           pushd riscof
@@ -151,6 +128,7 @@ jobs:
           popd
 
       - name: Prepare coverage data
+        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
           sis -d convert --dat-dir riscof/coverage/
@@ -158,8 +136,9 @@ jobs:
              riscof/coverage/coverage_riscof_${{matrix.priv}}_${{ matrix.coverage }}.info
 
       - name: Prepare report
+        shell: bash
         run: |
-          PYTEST_STYLE_SRC_DIR=${{ github.workspace }}/.github/scripts/pytest/
+          PYTEST_STYLE_SRC_DIR=$(pwd)/.github/scripts/pytest/
           PYTEST_CSS=${PYTEST_STYLE_SRC_DIR}/css/styles.css
           pushd riscof/riscof_work
             bash ${PYTEST_STYLE_SRC_DIR}/style_pytest_report.sh ${PYTEST_STYLE_SRC_DIR} . report.html

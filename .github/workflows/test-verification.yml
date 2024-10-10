@@ -3,21 +3,18 @@ name: VeeR-EL2 verification
 on:
   workflow_call:
 
-env:
-  VERILATOR_VERSION: v5.024
-
 jobs:
   tests:
     name: Verification tests
     runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:latest
     strategy:
       matrix:
         test: ["test_pyuvm"]
         coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
     env:
-      CCACHE_DIR: "/opt/verification/.cache/"
-      VERILATOR_VERSION: v5.024
       DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/regression/.cache/"
     steps:
       - name: Setup repository
         uses: actions/checkout@v3
@@ -25,39 +22,25 @@ jobs:
           submodules: recursive
 
       - name: install SiteSpawner package
+        shell: bash
         run: |
           python3 -m venv .venv
-          .venv/bin/python3 -m pip install tools/SiteSpawner
           source .venv/bin/activate
-          echo "PATH=$PATH" >> $GITHUB_ENV
           python3 -m pip install tools/SiteSpawner
 
       - name: Setup Cache Metadata
         id: cache_metadata
+        shell: bash
         run: |
           date=$(date +"%Y_%m_%d")
           time=$(date +"%Y%m%d_%H%M%S_%N")
-          cache_verilator_restore_key=cache_verilator_
-          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}_${{ env.VERILATOR_COMMIT }}
           cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
           cache_test_key=${cache_test_restore_key}${time}
 
           echo "date=$date" | tee -a "$GITHUB_ENV"
           echo "time=$time" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_restore_key=$cache_verilator_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
-
-
-      - name: Restore verilator cache
-        id: cache-verilator-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/verilator
-            /opt/verilator/.cache
-          key: ${{ env.cache_verilator_key }}
 
       - name: Setup tests cache
         uses: actions/cache@v3
@@ -86,6 +69,7 @@ jobs:
           sudo cpanm Bit::Vector
 
       - name: Setup environment
+        shell: bash
         run: |
           echo "/opt/verilator/bin" >> $GITHUB_PATH
           RV_ROOT=`pwd`
@@ -95,11 +79,14 @@ jobs:
           TEST_PATH=$RV_ROOT/verification/top/${{ matrix.test }}
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
 
+
       - name: Run ${{ matrix.test }}
+        shell: bash
         run: |
+          source .venv/bin/activate
           pip3 install meson
           pip3 install -r $RV_ROOT/verification/top/requirements.txt
-          PYTEST_STYLE_SRC_DIR=${{ github.workspace }}/.github/scripts/pytest/
+          PYTEST_STYLE_SRC_DIR=$RV_ROOT/.github/scripts/pytest/
           PYTEST_CSS=${PYTEST_STYLE_SRC_DIR}/css/styles.css
           HTML_FILE=${{ matrix.test }}_${{ matrix.COVERAGE }}.html
           pushd ${TEST_PATH}
@@ -108,18 +95,22 @@ jobs:
           popd
 
       - name: Prepare pytest-html data
+        shell: bash
         run: |
-          pushd ${{ github.workspace }}
+          source .venv/bin/activate
+          pushd $RV_ROOT
             WEBPAGE_DIR=webpage_${{ matrix.test }}_${{ matrix.COVERAGE }}
             mkdir -p $WEBPAGE_DIR
             mv ${TEST_PATH}/${{ matrix.test }}_${{ matrix.COVERAGE }}.html $WEBPAGE_DIR
             mv ${TEST_PATH}/assets $WEBPAGE_DIR
-            JS_SCRIPT_DIR=${{ github.workspace }}/.github/scripts/pytest/script
+            JS_SCRIPT_DIR=$RV_ROOT/.github/scripts/pytest/script
             mv $JS_SCRIPT_DIR $WEBPAGE_DIR
           popd
 
       - name: Prepare coverage data
+        shell: bash
         run: |
+          source .venv/bin/activate
           export PATH=/opt/verilator/bin:$PATH
           sis -d convert --dat-dir ${TEST_PATH}
           mkdir -p results

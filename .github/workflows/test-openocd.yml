@@ -8,6 +8,7 @@ jobs:
   tests:
     name: Run OpenOCD tests
     runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:latest
     strategy:
       fail-fast: false
       matrix:
@@ -16,7 +17,6 @@ jobs:
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/openocd-tests/.cache/"
-      VERILATOR_VERSION: v5.024
 
     steps:
       - name: Install utils
@@ -31,39 +31,12 @@ jobs:
         run: |
           date=$(date +"%Y_%m_%d")
           time=$(date +"%Y%m%d_%H%M%S_%N")
-          cache_verilator_restore_key=cache_verilator_
-          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}_${{ env.VERILATOR_COMMIT }}
-          cache_openocd_restore_key=cache_openocd_
-          cache_openocd_key=${cache_openocd_restore_key}
           cache_test_restore_key=${{ matrix.coverage }}_
           cache_test_key=${cache_test_restore_key}${time}
           echo "date=$date" | tee -a "$GITHUB_ENV"
           echo "time=$time" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_restore_key=$cache_verilator_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
-          echo "cache_openocd_restore_key=$cache_openocd_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_openocd_key=$cache_openocd_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
-
-      - name: Restore Verilator cache
-        id: cache-verilator-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/verilator
-            /opt/verilator/.cache
-          key: ${{ env.cache_verilator_key }}
-
-      - name: Restore OpenOCD cache
-        id: cache-openocd-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/openocd
-            /opt/openocd/.cache
-          key: ${{ env.cache_openocd_key }}
-          restore-keys: ${{ env.cache_openocd_restore_key }}
 
       - name: Setup repository
         uses: actions/checkout@v3
@@ -71,6 +44,7 @@ jobs:
           submodules: recursive
 
       - name: install SiteSpawner package
+        shell: bash
         run: |
           python3 -m venv .venv
           .venv/bin/python3 -m pip install tools/SiteSpawner
@@ -79,6 +53,7 @@ jobs:
           python3 -m pip install tools/SiteSpawner
 
       - name: Build verilated simulation
+        shell: bash
         run: |
           export PATH=/opt/verilator/bin:/opt/openocd/bin:$PATH
           export RV_ROOT=$(pwd)
@@ -91,6 +66,7 @@ jobs:
             -f ${RV_ROOT}/testbench/openocd_scripts/jtag_cg.tcl
 
       - name: Prepare coverage data
+        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=$(pwd)

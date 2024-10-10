@@ -3,13 +3,11 @@ name: VeeR-EL2 Microarchitectural tests
 on:
   workflow_call:
 
-env:
-  VERILATOR_VERSION: v5.024
-
 jobs:
   lint:
     name: Lint microarchitectural tests
     runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:latest
     steps:
       - name: Setup repository
         uses: actions/checkout@v3
@@ -17,6 +15,7 @@ jobs:
           submodules: recursive
 
       - name: Setup environment
+        shell: bash
         run: |
           RV_ROOT=`pwd`
           echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
@@ -26,15 +25,20 @@ jobs:
           TEST_PATH=$RV_ROOT/verification/block
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
 
-          pip3 install nox
+          python3 -m venv .venv
+          source .venv/bin/activate
+          python3 -m pip install nox
       - name: Lint
+        shell: bash
         run: |
+          source .venv/bin/activate
           pushd ${TEST_PATH}
             nox -s test_lint
           popd
   tests:
     name: Microarchitectural tests
     runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:latest
     strategy:
       matrix:
         test:
@@ -56,7 +60,6 @@ jobs:
           - "block/lsu_tl"
     env:
       CCACHE_DIR: "/opt/verification/.cache/"
-      VERILATOR_VERSION: v5.024
       DEBIAN_FRONTEND: "noninteractive"
     steps:
       - name: Setup repository
@@ -65,38 +68,26 @@ jobs:
           submodules: recursive
 
       - name: install SiteSpawner package
+        shell: bash
         run: |
           python3 -m venv .venv
-          .venv/bin/python3 -m pip install tools/SiteSpawner
           source .venv/bin/activate
-          echo "PATH=$PATH" >> $GITHUB_ENV
           python3 -m pip install tools/SiteSpawner
+          python3 -m pip install meson nox
 
       - name: Setup Cache Metadata
         id: cache_metadata
+        shell: bash
         run: |
           date=$(date +"%Y_%m_%d")
           time=$(date +"%Y%m%d_%H%M%S_%N")
-          cache_verilator_restore_key=cache_verilator_
-          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}_${{ env.VERILATOR_COMMIT }}
           cache_test_restore_key=uarch_${{ matrix.test }}_${{ matrix.coverage }}_
           cache_test_key=${cache_test_restore_key}${time}
 
           echo "date=$date" | tee -a "$GITHUB_ENV"
           echo "time=$time" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_restore_key=$cache_verilator_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
-
-      - name: Restore verilator cache
-        id: cache-verilator-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/verilator
-            /opt/verilator/.cache
-          key: ${{ env.cache_verilator_key }}
 
       - name: Setup tests cache
         uses: actions/cache@v3
@@ -125,6 +116,7 @@ jobs:
           sudo cpanm Bit::Vector
 
       - name: Setup environment
+        shell: bash
         run: |
           echo "/opt/verilator/bin" >> $GITHUB_PATH
           RV_ROOT=`pwd`
@@ -143,17 +135,19 @@ jobs:
           # Fix random generator seed
           echo "RANDOM_SEED=1377424946" >> $GITHUB_ENV
 
-          pip3 install meson nox
-
       - name: Run ${{ matrix.test }}
+        shell: bash
         run: |
+          source .venv/bin/activate
           pushd ${TEST_PATH}
             nox -s ${TEST_NAME}_verify
           popd
 
       - name: Prepare coverage data
+        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
+          source .venv/bin/activate
           sis -d convert --dat-dir ${TEST_PATH}/${TEST_NAME}/
           mkdir -p results
           mv ${TEST_PATH}/${TEST_NAME}/*.info results/

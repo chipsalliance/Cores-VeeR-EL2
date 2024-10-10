@@ -25,9 +25,7 @@ jobs:
         shell: bash
         run: |
           python3 -m venv .venv
-          .venv/bin/python3 -m pip install tools/SiteSpawner
           source .venv/bin/activate
-          echo "PATH=$PATH" >> $GITHUB_ENV
           python3 -m pip install tools/SiteSpawner
 
       - name: Setup Cache Metadata
@@ -84,6 +82,7 @@ jobs:
       - name: Run ${{ matrix.test }}
         shell: bash
         run: |
+          source .venv/bin/activate
           pip3 install meson
           pip3 install -r $RV_ROOT/verification/top/requirements.txt
           PYTEST_STYLE_SRC_DIR=${{ github.workspace }}/.github/scripts/pytest/
@@ -97,6 +96,7 @@ jobs:
       - name: Prepare pytest-html data
         shell: bash
         run: |
+          source .venv/bin/activate
           pushd ${{ github.workspace }}
             WEBPAGE_DIR=webpage_${{ matrix.test }}_${{ matrix.COVERAGE }}
             mkdir -p $WEBPAGE_DIR
@@ -109,6 +109,7 @@ jobs:
       - name: Prepare coverage data
         shell: bash
         run: |
+          source .venv/bin/activate
           export PATH=/opt/verilator/bin:$PATH
           sis -d convert --dat-dir ${TEST_PATH}
           mkdir -p results

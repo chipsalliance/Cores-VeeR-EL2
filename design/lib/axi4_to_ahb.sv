@@ -72,9 +72,12 @@ import el2_pkg::*;
 
    // AHB-Lite signals
    output logic [31:0]     ahb_haddr,       // ahb bus address
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic [2:0]      ahb_hburst,      // tied to 0
    output logic            ahb_hmastlock,   // tied to 0
-   output logic [3:0]      ahb_hprot,       // tied to 4'b0011
+   /*verilator coverage_on*/
+   output logic [3:0]      ahb_hprot,       // [3:1] are tied to 3'b001
    output logic [2:0]      ahb_hsize,       // size of bus transaction (possible values 0,1,2,3)
    output logic [1:0]      ahb_htrans,      // Transaction type (possible values 0,2 only right now)
    output logic            ahb_hwrite,      // ahb bus write

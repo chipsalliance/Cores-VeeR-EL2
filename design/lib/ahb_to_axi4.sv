@@ -38,36 +38,57 @@ import el2_pkg::*;
    // AXI Write Channels
    output logic            axi_awvalid,
    input  logic            axi_awready,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic [TAG-1:0]  axi_awid,
+   /*verilator coverage_on*/
    output logic [31:0]     axi_awaddr,
    output logic [2:0]      axi_awsize,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic [2:0]      axi_awprot,
    output logic [7:0]      axi_awlen,
    output logic [1:0]      axi_awburst,
+   /*verilator coverage_on*/
 
    output logic            axi_wvalid,
    input  logic            axi_wready,
    output logic [63:0]     axi_wdata,
    output logic [7:0]      axi_wstrb,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic            axi_wlast,
+   /*verilator coverage_on*/
 
    input  logic            axi_bvalid,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic            axi_bready,
+   /*verilator coverage_on*/
    input  logic [1:0]      axi_bresp,
    input  logic [TAG-1:0]  axi_bid,
 
    // AXI Read Channels
    output logic            axi_arvalid,
    input  logic            axi_arready,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic [TAG-1:0]  axi_arid,
+   /*verilator coverage_on*/
    output logic [31:0]     axi_araddr,
    output logic [2:0]      axi_arsize,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic [2:0]      axi_arprot,
    output logic [7:0]      axi_arlen,
    output logic [1:0]      axi_arburst,
+   /*verilator coverage_on*/
 
    input  logic            axi_rvalid,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic            axi_rready,
+   /*verilator coverage_on*/
    input  logic [TAG-1:0]  axi_rid,
    input  logic [63:0]     axi_rdata,
    input  logic [1:0]      axi_rresp,

@@ -159,7 +159,7 @@ VERILATOR_MAKE_FLAGS = OPT_FAST="-Os"
 all: clean verilator
 
 clean:
-	rm -rf *.log *.s *.hex *.dis *.tbl irun* vcs* simv* *.map snapshots veer* \
+	rm -rf *.log *.s *.hex *.dis *.tbl irun* vcs* simv* *.map snapshots \
 	verilator* *.exe obj* *.o *.sym ucli.key vc_hdrs.h csrc *.csv work \
 	dataset.asdb library.cfg vsimsa.cfg riviera-build wave.asdb
 
@@ -175,7 +175,7 @@ verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	$(VERILATOR)  --cc -CFLAGS "${CFLAGS}" $(defines) \
 	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist \
 	  $(VERILATOR_SKIP_WARNINGS) ${TBFILES} --top-module tb_top \
-	  -exe $(TB_VERILATOR_SRCS) --autoflush --timing $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE)
+	  -exe $(TB_VERILATOR_SRCS) --autoflush --timing $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE) -fno-table
 	cp ${RV_ROOT}/testbench/test_tb_top.cpp obj_dir/
 	$(MAKE) -e -C obj_dir/ -f Vtb_top.mk $(VERILATOR_MAKE_FLAGS)
 	touch verilator-build
@@ -218,9 +218,9 @@ verilator: program.hex verilator-build
 	if [ $$? -eq 0 ]; then \
 		BEG=`grep "begin_signature" $(TEST).sym | cut -d\  -f 1`;\
 		END=`grep "end_signature"   $(TEST).sym | cut -d\  -f 1`;\
-		./obj_dir/Vtb_top --mem-signature $${BEG} $${END}; \
+		./obj_dir/Vtb_top --test-halt --mem-signature $${BEG} $${END}; \
 	else \
-		./obj_dir/Vtb_top; \
+		./obj_dir/Vtb_top --test-halt; \
 	fi
 
 irun: program.hex irun-build

@@ -60,6 +60,7 @@ jobs:
           submodules: recursive
 
       - name: install SiteSpawner package
+        shell: bash
         run: |
           python3 -m venv .venv
           .venv/bin/python3 -m pip install tools/SiteSpawner
@@ -68,6 +69,7 @@ jobs:
           python3 -m pip install tools/SiteSpawner
 
       - name: Setup environment
+        shell: bash
         run: |
           echo "/opt/verilator/bin" >> $GITHUB_PATH
           RV_ROOT=`pwd`
@@ -78,12 +80,14 @@ jobs:
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
 
       - name: Run tests
+        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }}
 
       - name: Prepare coverage data
+        shell: bash
         run: |
           sis -d convert --dat-dir ${TEST_PATH}/
           mkdir -p results

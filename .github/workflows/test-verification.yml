@@ -22,6 +22,7 @@ jobs:
           submodules: recursive
 
       - name: install SiteSpawner package
+        shell: bash
         run: |
           python3 -m venv .venv
           .venv/bin/python3 -m pip install tools/SiteSpawner
@@ -31,6 +32,7 @@ jobs:
 
       - name: Setup Cache Metadata
         id: cache_metadata
+        shell: bash
         run: |
           date=$(date +"%Y_%m_%d")
           time=$(date +"%Y%m%d_%H%M%S_%N")
@@ -69,6 +71,7 @@ jobs:
           sudo cpanm Bit::Vector
 
       - name: Setup environment
+        shell: bash
         run: |
           echo "/opt/verilator/bin" >> $GITHUB_PATH
           RV_ROOT=`pwd`
@@ -79,6 +82,7 @@ jobs:
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
 
       - name: Run ${{ matrix.test }}
+        shell: bash
         run: |
           pip3 install meson
           pip3 install -r $RV_ROOT/verification/top/requirements.txt
@@ -91,6 +95,7 @@ jobs:
           popd
 
       - name: Prepare pytest-html data
+        shell: bash
         run: |
           pushd ${{ github.workspace }}
             WEBPAGE_DIR=webpage_${{ matrix.test }}_${{ matrix.COVERAGE }}
@@ -102,6 +107,7 @@ jobs:
           popd
 
       - name: Prepare coverage data
+        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
           sis -d convert --dat-dir ${TEST_PATH}

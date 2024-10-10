@@ -71,6 +71,7 @@ jobs:
 
       - name: Generate code (pyflow)
         if: steps.cache-code.outputs.cache-hit != 'true' && matrix.version == 'pyflow'
+        shell: bash
         run: |
           export RV_ROOT=`realpath .`
           pushd tools/riscv-dv
@@ -141,6 +142,7 @@ jobs:
       # As of July 9th, 2024 `ubuntu:latest` comes with riscv64-unknown-elf-gcc
       # 10.0.2. We need a newer version for bitmanip extension support.
       - name: Install cross-compiler
+        shell: bash
         run: |
           echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
@@ -168,6 +170,7 @@ jobs:
           submodules: recursive
 
       - name: install SiteSpawner package
+        shell: bash
         run: |
           python3 -m venv .venv
           .venv/bin/python3 -m pip install tools/SiteSpawner
@@ -204,6 +207,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: Run test
+        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`realpath .`

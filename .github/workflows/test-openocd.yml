@@ -44,6 +44,7 @@ jobs:
           submodules: recursive
 
       - name: install SiteSpawner package
+        shell: bash
         run: |
           python3 -m venv .venv
           .venv/bin/python3 -m pip install tools/SiteSpawner
@@ -52,6 +53,7 @@ jobs:
           python3 -m pip install tools/SiteSpawner
 
       - name: Build verilated simulation
+        shell: bash
         run: |
           export PATH=/opt/verilator/bin:/opt/openocd/bin:$PATH
           export RV_ROOT=$(pwd)
@@ -64,6 +66,7 @@ jobs:
             -f ${RV_ROOT}/testbench/openocd_scripts/jtag_cg.tcl
 
       - name: Prepare coverage data
+        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=$(pwd)

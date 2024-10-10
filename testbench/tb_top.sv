@@ -30,7 +30,17 @@ module tb_top
     input bit                   core_clk,
     input bit [31:0]            mem_signature_begin,
     input bit [31:0]            mem_signature_end,
-    input bit [31:0]            mem_mailbox
+    input bit [31:0]            mem_mailbox,
+    input bit                   i_cpu_halt_req,    // Async halt req to CPU
+    output bit                  o_cpu_halt_ack,    // core response to halt
+    output bit                  o_cpu_halt_status, // 1'b1 indicates core is halted
+    input bit                   i_cpu_run_req,     // Async restart req to CPU
+    output bit                  o_cpu_run_ack,     // Core response to run req
+    input bit                   mpc_debug_halt_req,
+    output bit                  mpc_debug_halt_ack,
+    input bit                   mpc_debug_run_req,
+    output bit                  mpc_debug_run_ack,
+    output bit                  o_debug_mode_status
 );
 `endif
 
@@ -50,6 +60,8 @@ module tb_top
     logic        [31:0]         reset_vector;
     logic        [31:0]         nmi_vector;
     logic        [31:1]         jtag_id;
+
+    logic [pt.PIC_TOTAL_INT:1]  extintsrc_req;
 
     logic        [31:0]         ic_haddr        ;
     logic        [2:0]          ic_hburst       ;
@@ -109,7 +121,6 @@ module tb_top
     logic                       trace_rv_i_interrupt_ip;
     logic        [31:0]         trace_rv_i_tval_ip;
 
-    logic                       o_debug_mode_status;
 
 
     logic                       jtag_tdo;
@@ -117,10 +128,6 @@ module tb_top
     logic                       jtag_tms;
     logic                       jtag_tdi;
     logic                       jtag_trst_n;
-
-    logic                       o_cpu_halt_ack;
-    logic                       o_cpu_halt_status;
-    logic                       o_cpu_run_ack;
 
     logic                       mailbox_write;
     logic        [63:0]         mailbox_data;
@@ -130,11 +137,7 @@ module tb_top
     logic                       dma_hready       ;
     logic                       dma_hresp        ;
 
-    logic                       mpc_debug_halt_req;
-    logic                       mpc_debug_run_req;
     logic                       mpc_reset_run_req;
-    logic                       mpc_debug_halt_ack;
-    logic                       mpc_debug_run_ack;
     logic                       debug_brkpt_status;
 
     int                         cycleCnt;
@@ -142,6 +145,8 @@ module tb_top
 
     wire                        dma_hready_out;
     int                         commit_count;
+
+    logic [3:0]                 nmi_assert_int;
 
     logic                       wb_valid;
     logic [4:0]                 wb_dest;
@@ -692,12 +697,12 @@ module tb_top
 `define DEC rvtop_wrapper.rvtop.veer.dec
 
 `ifdef RV_BUILD_AXI4
-    assign mailbox_write    = lmem.awvalid && lmem.awaddr == mem_mailbox && rst_l;
-    assign mailbox_data     = lmem.wdata;
+    assign mailbox_write = lmem.awvalid && lmem.awaddr == mem_mailbox && rst_l;
+    assign mailbox_data  = lmem.wdata;
 `endif
 `ifdef RV_BUILD_AHB_LITE
-    assign mailbox_write    = lmem.write   && lmem.laddr  == mem_mailbox && rst_l;
-    assign mailbox_data     = lmem.HWDATA;
+    assign mailbox_write = lmem.write   && lmem.laddr  == mem_mailbox && rst_l;
+    assign mailbox_data  = lmem.HWDATA;
 `endif
 
     assign mailbox_data_val = mailbox_data[7:0] > 8'h5 && mailbox_data[7:0] < 8'h7f;
@@ -705,6 +710,11 @@ module tb_top
     parameter MAX_CYCLES = 2_000_000;
 
     integer fd, tp, el;
+    logic next_dbus_error;
+    logic next_ibus_error;
+    logic [1:0] lsu_axi_rresp_override;
+    logic [1:0] lsu_axi_bresp_override;
+    logic [1:0] ifu_axi_rresp_override;
 
     always @(negedge core_clk) begin
         cycleCnt <= cycleCnt+1;
@@ -791,7 +801,73 @@ module tb_top
             $display("TEST_FAILED");
             $finish;
         end
+
+        // Custom test commands
+        // Available commands (that can be written into address mem_mailbox_testcmd) are:
+        // 8'h80 - trigger NMI
+        // 8'h81 - set NMI handler address (mailbox_data[31:8] is the address of a handler,
+        //         i.e. it must be 256 byte-aligned)
+        // 8'h82 - trigger data bus error on the next load/store
+        nmi_assert_int <= nmi_assert_int >> 1;
+        soft_int <= 0;
+        timer_int <= 0;
+        extintsrc_req[1] <= 0;
+        if (mailbox_write && mailbox_data[7:0] == 8'h80 && nmi_assert_int == 4'b0000) begin
+            nmi_assert_int <= 4'b1111;
+        end
+        else if (mailbox_write && mailbox_data[7:0] == 8'h81) begin
+            // NMI handler address is in the upper 24 bits of mailbox data
+            nmi_vector[31:1] <= {mailbox_data[31:8], 7'h00};
+        end
+        else if (mailbox_write && mailbox_data[7:0] == 8'h84) begin
+            soft_int <= 1;
+        end
+        else if (mailbox_write && mailbox_data[7:0] == 8'h85) begin
+            timer_int <= 1;
+        end
+        else if (mailbox_write && mailbox_data[7:0] == 8'h86) begin
+            extintsrc_req[1] <= 1;
+        end
     end
+
+    `ifdef RV_BUILD_AXI4
+    // this needs to be a separate block due to sensitivity to other signals
+    always @(negedge core_clk or lsu_axi_bvalid or lsu_axi_rvalid or ifu_axi_rvalid or ifu_axi_rid) begin
+        if (mailbox_write && mailbox_data[7:0] == 8'h82)
+            // wait for current transaction that to complete to not trigger error on it
+            @(negedge lsu_axi_bvalid) next_dbus_error <= 1;
+        if (mailbox_write && mailbox_data[7:0] == 8'h83)
+            @(negedge ifu_axi_rvalid or ifu_axi_rid) next_ibus_error <= 1;
+        // turn off forcing dbus error after a transaction
+        if (next_dbus_error)
+            @(negedge lsu_axi_bvalid or negedge lsu_axi_rvalid) next_dbus_error <= 0;
+        if (next_ibus_error)
+            @(negedge ifu_axi_rvalid or ifu_axi_rid) next_ibus_error <= 0;
+    end
+    `endif
+
+    always_comb begin
+        `ifdef RV_BUILD_AXI4
+        lsu_axi_rresp_override = lsu_axi_rresp;
+        lsu_axi_bresp_override = lsu_axi_bresp;
+        ifu_axi_rresp_override = ifu_axi_rresp;
+        if (next_dbus_error) begin
+            // force slave bus error
+            if (lsu_axi_rvalid)
+                lsu_axi_rresp_override = 2'b10;
+            if (lsu_axi_bvalid)
+                lsu_axi_bresp_override = 2'b10;
+        end
+        if (next_ibus_error) begin
+            if (ifu_axi_rvalid)
+                ifu_axi_rresp_override = 2'b10;
+        end
+        `endif
+    end
+
+    // nmi_int must be asserted for at least two clock cycles and then deasserted for
+    // at least two clock cycles - see RISC-V VeeR EL2 Programmer's Reference Manual section 2.16
+    assign nmi_int = |{nmi_assert_int[3:2]};
 
     // trace monitor
     always @(posedge core_clk) begin
@@ -871,6 +947,10 @@ module tb_top
         jtag_id[11:1]  = 11'h45;
         reset_vector = `RV_RESET_VEC;
         nmi_vector   = 32'hee000000;
+        nmi_int   = 0;
+        soft_int  = 0;
+        timer_int = 0;
+        extintsrc_req = 0;
 
         $readmemh("program.hex",  lmem.mem);
         $readmemh("program.hex",  imem.mem);
@@ -991,7 +1071,7 @@ veer_wrapper rvtop_wrapper (
 
     .lsu_axi_bvalid         (lsu_axi_bvalid),
     .lsu_axi_bready         (lsu_axi_bready),
-    .lsu_axi_bresp          (lsu_axi_bresp),
+    .lsu_axi_bresp          (lsu_axi_bresp_override),
     .lsu_axi_bid            (lsu_axi_bid),
 
 
@@ -1012,7 +1092,7 @@ veer_wrapper rvtop_wrapper (
     .lsu_axi_rready         (lsu_axi_rready),
     .lsu_axi_rid            (lsu_axi_rid),
     .lsu_axi_rdata          (lsu_axi_rdata),
-    .lsu_axi_rresp          (lsu_axi_rresp),
+    .lsu_axi_rresp          (lsu_axi_rresp_override),
     .lsu_axi_rlast          (lsu_axi_rlast),
 
     //-------------------------- IFU AXI signals--------------------------
@@ -1058,7 +1138,7 @@ veer_wrapper rvtop_wrapper (
     .ifu_axi_rready         (ifu_axi_rready),
     .ifu_axi_rid            (ifu_axi_rid),
     .ifu_axi_rdata          (ifu_axi_rdata),
-    .ifu_axi_rresp          (ifu_axi_rresp),
+    .ifu_axi_rresp          (ifu_axi_rresp_override),
     .ifu_axi_rlast          (ifu_axi_rlast),
 
     //-------------------------- SB AXI signals--------------------------
@@ -1149,7 +1229,6 @@ veer_wrapper rvtop_wrapper (
     .dma_axi_rlast          (dma_axi_rlast),
 `endif
     .timer_int              ( timer_int ),
-    .soft_int               ( soft_int ),
     .extintsrc_req          ( ext_int ),
 
     .lsu_bus_clk_en         ( 1'b1  ),// Clock ratio b/w cpu core clk & AHB master interface
@@ -1173,17 +1252,17 @@ veer_wrapper rvtop_wrapper (
     .jtag_tdoEn             (),
 
     .mpc_debug_halt_ack     ( mpc_debug_halt_ack),
-    .mpc_debug_halt_req     ( 1'b0),
+    .mpc_debug_halt_req     ( mpc_debug_halt_req),
     .mpc_debug_run_ack      ( mpc_debug_run_ack),
-    .mpc_debug_run_req      ( 1'b1),
+    .mpc_debug_run_req      ( mpc_debug_run_req),
     .mpc_reset_run_req      ( 1'b1),             // Start running after reset
-     .debug_brkpt_status    (debug_brkpt_status),
+    .debug_brkpt_status     (debug_brkpt_status),
 
-    .i_cpu_halt_req         ( 1'b0  ),    // Async halt req to CPU
+    .i_cpu_halt_req         ( i_cpu_halt_req ),    // Async halt req to CPU
     .o_cpu_halt_ack         ( o_cpu_halt_ack ),    // core response to halt
     .o_cpu_halt_status      ( o_cpu_halt_status ), // 1'b1 indicates core is halted
-    .i_cpu_run_req          ( 1'b0  ),     // Async restart req to CPU
-    .o_debug_mode_status    (o_debug_mode_status),
+    .i_cpu_run_req          ( i_cpu_run_req ),     // Async restart req to CPU
+    .o_debug_mode_status    ( o_debug_mode_status),
     .o_cpu_run_ack          ( o_cpu_run_ack ),     // Core response to run req
 
     .dec_tlu_perfcnt0       (),
@@ -1218,6 +1297,7 @@ veer_wrapper rvtop_wrapper (
     .ic_data_ext_in_pkt     ('0),
     .ic_tag_ext_in_pkt      ('0),
 
+    .soft_int               (soft_int),
     .core_id                ('0),
     .scan_mode              ( 1'b0 ),         // To enable scan mode
     .mbist_mode             ( 1'b0 ),        // to enable mbist

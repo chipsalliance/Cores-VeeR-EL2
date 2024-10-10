@@ -118,7 +118,7 @@ $(WORK_DIR)/verilator/Vtb_top.mk: $(WORK_DIR)/defines.h
 	$(VERILATOR) --cc -CFLAGS $(VERILATOR_CFLAGS) $(VERILATOR_INC) \
         $(HDL_FILES) -f $(RV_ROOT)/testbench/flist --top-module tb_top \
 		-exe $(VERILATOR_EXE) -Wno-WIDTH -Wno-UNOPTFLAT $(VERILATOR_NOIMPLICIT) --autoflush \
-		--timing $(VERILATOR_COVERAGE) \
+		--timing $(VERILATOR_COVERAGE) -fno-table \
 		-Mdir $(WORK_DIR)/verilator
 
 $(WORK_DIR)/verilator/Vtb_top: $(WORK_DIR)/verilator/Vtb_top.mk

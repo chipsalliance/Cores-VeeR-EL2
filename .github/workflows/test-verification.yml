@@ -79,13 +79,14 @@ jobs:
           TEST_PATH=$RV_ROOT/verification/top/${{ matrix.test }}
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
 
+
       - name: Run ${{ matrix.test }}
         shell: bash
         run: |
           source .venv/bin/activate
           pip3 install meson
           pip3 install -r $RV_ROOT/verification/top/requirements.txt
-          PYTEST_STYLE_SRC_DIR=${{ github.workspace }}/.github/scripts/pytest/
+          PYTEST_STYLE_SRC_DIR=$RV_ROOT/.github/scripts/pytest/
           PYTEST_CSS=${PYTEST_STYLE_SRC_DIR}/css/styles.css
           HTML_FILE=${{ matrix.test }}_${{ matrix.COVERAGE }}.html
           pushd ${TEST_PATH}
@@ -97,12 +98,12 @@ jobs:
         shell: bash
         run: |
           source .venv/bin/activate
-          pushd ${{ github.workspace }}
+          pushd $RV_ROOT
             WEBPAGE_DIR=webpage_${{ matrix.test }}_${{ matrix.COVERAGE }}
             mkdir -p $WEBPAGE_DIR
             mv ${TEST_PATH}/${{ matrix.test }}_${{ matrix.COVERAGE }}.html $WEBPAGE_DIR
             mv ${TEST_PATH}/assets $WEBPAGE_DIR
-            JS_SCRIPT_DIR=${{ github.workspace }}/.github/scripts/pytest/script
+            JS_SCRIPT_DIR=$RV_ROOT/.github/scripts/pytest/script
             mv $JS_SCRIPT_DIR $WEBPAGE_DIR
           popd
 

@@ -138,7 +138,7 @@ jobs:
       - name: Prepare report
         shell: bash
         run: |
-          PYTEST_STYLE_SRC_DIR=${{ github.workspace }}/.github/scripts/pytest/
+          PYTEST_STYLE_SRC_DIR=$(pwd)/.github/scripts/pytest/
           PYTEST_CSS=${PYTEST_STYLE_SRC_DIR}/css/styles.css
           pushd riscof/riscof_work
             bash ${PYTEST_STYLE_SRC_DIR}/style_pytest_report.sh ${PYTEST_STYLE_SRC_DIR} . report.html

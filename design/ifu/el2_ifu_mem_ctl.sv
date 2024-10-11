@@ -64,6 +64,8 @@ import el2_pkg::*;
 
   //-------------------------- IFU AXI signals--------------------------
    // AXI Write Channels
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic                            ifu_axi_awvalid,
    output logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_awid,
    output logic [31:0]                     ifu_axi_awaddr,
@@ -82,6 +84,7 @@ import el2_pkg::*;
    output logic                            ifu_axi_wlast,
 
    output logic                            ifu_axi_bready,
+   /*verilator coverage_on*/
 
    // AXI Read Channels
    output logic                            ifu_axi_arvalid,
@@ -89,6 +92,8 @@ import el2_pkg::*;
    output logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_arid,
    output logic [31:0]                     ifu_axi_araddr,
    output logic [3:0]                      ifu_axi_arregion,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic [7:0]                      ifu_axi_arlen,
    output logic [2:0]                      ifu_axi_arsize,
    output logic [1:0]                      ifu_axi_arburst,
@@ -96,9 +101,13 @@ import el2_pkg::*;
    output logic [3:0]                      ifu_axi_arcache,
    output logic [2:0]                      ifu_axi_arprot,
    output logic [3:0]                      ifu_axi_arqos,
+   /*verilator coverage_on*/
 
    input  logic                            ifu_axi_rvalid,
+   /* exclude signals that are tied to constant value in this file */
+   /*verilator coverage_off*/
    output logic                            ifu_axi_rready,
+   /*verilator coverage_on*/
    input  logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_rid,
    input  logic [63:0]                     ifu_axi_rdata,
    input  logic [1:0]                      ifu_axi_rresp,
@@ -526,10 +535,12 @@ import el2_pkg::*;
                                      exu_flush_final ?  ((bus_ifu_wr_en_ff & last_beat) ? IDLE : HIT_U_MISS) : IDLE;
                   miss_state_en   = (bus_ifu_wr_en_ff & last_beat) | exu_flush_final | dec_tlu_force_halt;
          end
+         /*verilator coverage_off*/
          default: begin : def_case
                   miss_nxtstate   = IDLE;
                   miss_state_en   = 1'b0;
          end
+         /*verilator coverage_on*/
       endcase
    end
    rvdffs #(($bits(miss_state_t))) miss_state_ff (.clk(active_clk), .din(miss_nxtstate), .dout({miss_state}), .en(miss_state_en),   .*);
@@ -1012,6 +1023,7 @@ assign ic_miss_buff_half[63:0]    = {ic_miss_buff_data[{other_tag,1'b1}],ic_miss
                   iccm_correction_state   = 1'b1;
 
          end
+         /*verilator coverage_off*/
          default: begin : def_case
                   err_stop_nxtstate            = ERR_STOP_IDLE;
                   err_stop_state_en            = 1'b0;
@@ -1019,6 +1031,7 @@ assign ic_miss_buff_half[63:0]    = {ic_miss_buff_data[{other_tag,1'b1}],ic_miss
                   iccm_correction_state   = 1'b1;
 
          end
+         /*verilator coverage_on*/
       endcase
    end
    rvdffs #(($bits(err_stop_state_t))) err_stop_state_ff (.clk(active_clk), .din(err_stop_nxtstate), .dout({err_stop_state}), .en(err_stop_state_en),   .*);

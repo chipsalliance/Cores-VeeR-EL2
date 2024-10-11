@@ -71,6 +71,7 @@ jobs:
 
       - name: Generate code (pyflow)
         if: steps.cache-code.outputs.cache-hit != 'true' && matrix.version == 'pyflow'
+        shell: bash
         run: |
           export RV_ROOT=`realpath .`
           pushd tools/riscv-dv
@@ -97,6 +98,7 @@ jobs:
   run-tests:
     name: Run RISC-V DV tests
     runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:latest
     needs: [ generate-config, generate-code ]
     strategy:
       fail-fast: false
@@ -127,9 +129,6 @@ jobs:
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"
-      VERILATOR_VERSION: v5.024
-      SPIKE_VERSION: d70ea67d
-      RENODE_VERSION: latest
       CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
 
     steps:
@@ -143,6 +142,7 @@ jobs:
       # As of July 9th, 2024 `ubuntu:latest` comes with riscv64-unknown-elf-gcc
       # 10.0.2. We need a newer version for bitmanip extension support.
       - name: Install cross-compiler
+        shell: bash
         run: |
           echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
@@ -154,59 +154,15 @@ jobs:
         run: |
           date=$(date +"%Y_%m_%d")
           time=$(date +"%Y%m%d_%H%M%S_%N")
-          cache_verilator_restore_key=cache_verilator_
-          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}_${{ env.VERILATOR_COMMIT }}
-          cache_spike_restore_key=cache_spike_
-          cache_spike_key=${cache_spike_restore_key}${{ env.SPIKE_VERSION }}
-          cache_renode_restore_key=cache_renode_
-          cache_renode_key=${cache_renode_restore_key}${{ env.RENODE_VERSION }}
           cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
           cache_test_key=${cache_test_restore_key}${time}
           cache_code=cache_${{ matrix.test }}_${{ matrix.version }}
 
           echo "date=$date" | tee -a "$GITHUB_ENV"
           echo "time=$time" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_restore_key=$cache_verilator_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
-          echo "cache_spike_restore_key=$cache_spike_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_spike_key=$cache_spike_key" | tee -a "$GITHUB_ENV"
-          echo "cache_renode_restore_key=$cache_renode_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_renode_key=$cache_renode_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
           echo "cache_code=${cache_code}_${{ env.CACHE_HASH }}" | tee -a "$GITHUB_ENV"
-
-      - name: Restore verilator cache
-        id: cache-verilator-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/verilator
-            /opt/verilator/.cache
-          key: ${{ env.cache_verilator_key }}
-          restore-keys: ${{ env.cache_verilator_restore_key }}
-          fail-on-cache-miss: true
-
-      - name: Restore Spike cache
-        id: cache-spike-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/spike
-            /opt/spike/.cache
-          key: ${{ env.cache_spike_key }}
-          restore-keys: ${{ env.cache_spike_restore_key }}
-          fail-on-cache-miss: true
-
-      - name: Restore Renode cache
-        id: cache-renode-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/renode
-          key: ${{ env.cache_renode_key }}
-          restore-keys: ${{ env.cache_renode_restore_key }}
-          fail-on-cache-miss: true
 
       - name: Setup repository
         uses: actions/checkout@v3
@@ -214,6 +170,7 @@ jobs:
           submodules: recursive
 
       - name: install SiteSpawner package
+        shell: bash
         run: |
           python3 -m venv .venv
           .venv/bin/python3 -m pip install tools/SiteSpawner
@@ -240,17 +197,16 @@ jobs:
           key: cache_tests_${{ steps.cache_timestamp.outputs.time }}
           restore-keys: cache_tests_
 
-      - name: Cache Code Restore
-        uses: actions/cache/restore@v3
-        id: cache-code-restore
-        timeout-minutes: 60
+      - name: Download Code Artifact
+        uses: actions/download-artifact@v3
         with:
-          path: tools/riscv-dv/work/test_${{ matrix.test }}/asm_test
-          key: ${{ env.cache_code }}
-          fail-on-cache-miss: true
+          name: riscv-dv_generated_code_${{ matrix.version }}
+          path: tools/riscv-dv/work/
 
       - name: Run test
+        shell: bash
         run: |
+          ls tools/riscv-dv/work
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`realpath .`
           export RISCV_GCC=riscv64-unknown-elf-gcc
@@ -313,8 +269,6 @@ jobs:
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"
-      VERILATOR_VERSION: v5.024
-      SPIKE_VERSION: d70ea67d
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader
       CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
@@ -336,47 +290,15 @@ jobs:
         run: |
           date=$(date +"%Y_%m_%d")
           time=$(date +"%Y%m%d_%H%M%S_%N")
-          cache_verilator_restore_key=cache_verilator_
-          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}
-          cache_spike_restore_key=cache_spike_
-          cache_spike_key=${cache_spike_restore_key}${{ env.SPIKE_VERSION }}
-          cache_renode_restore_key=cache_renode_
-          cache_renode_key=${cache_renode_restore_key}${{ env.RENODE_VERSION }}
           cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
           cache_test_key=${cache_test_restore_key}${time}
           cache_code=cache_${{ matrix.test }}_${{ matrix.version }}
 
           echo "date=$date" | tee -a "$GITHUB_ENV"
           echo "time=$time" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_restore_key=$cache_verilator_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
-          echo "cache_spike_restore_key=$cache_spike_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_spike_key=$cache_spike_key" | tee -a "$GITHUB_ENV"
-          echo "cache_renode_restore_key=$cache_renode_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_renode_key=$cache_renode_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
           echo "cache_code=${cache_code}_${{ env.CACHE_HASH }}" | tee -a "$GITHUB_ENV"
-
-      - name: Restore verilator cache
-        id: cache-verilator-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/verilator
-            /opt/verilator/.cache
-          key: ${{ env.cache_verilator_key }}
-          restore-keys: ${{ env.cache_verilator_restore_key }}
-
-      - name: Restore Spike cache
-        id: cache-spike-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/spike
-            /opt/spike/.cache
-          key: ${{ env.cache_spike_key }}
-          restore-keys: ${{ env.cache_spike_restore_key }}
 
       - name: Cache Code Restore
         uses: actions/cache/restore@v3

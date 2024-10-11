@@ -8,60 +8,40 @@ on:
 
 jobs:
 
-  Build-Verilator:
-    name: Build-Verilator
-    uses: ./.github/workflows/build-verilator.yml
-
-  Build-Spike:
-    name: Build-Spike
-    uses: ./.github/workflows/build-spike.yml
-
-  Get-Renode:
-    name: Get-Renode
-    uses: ./.github/workflows/get-renode.yml
-
-  Build-OpenOCD:
-    name: Build-OpenOCD
-    uses: ./.github/workflows/build-openocd.yml
-
   Test-Regression:
     name: Test-Regression
-    needs: [Build-Verilator]
     uses: ./.github/workflows/test-regression.yml
+
+  Test-Exceptions-Regression:
+    name: Test-Exceptions-Regression
+    uses: ./.github/workflows/test-regression-exceptions.yml
 
   Test-Verification:
     name: Test-Verification
-    needs: [Build-Verilator]
     uses: ./.github/workflows/test-verification.yml
 
   Test-Microarchitectural:
     name: Test-Microarchitectural
-    needs: [Build-Verilator]
     uses: ./.github/workflows/test-uarch.yml
 
   Test-RISCV-DV:
     name: Test-RISCV-DV
-    needs: [Build-Verilator, Build-Spike, Get-Renode]
     uses: ./.github/workflows/test-riscv-dv.yml
 
   Test-RISCOF:
     name: Test-RISCOF
-    needs: [Build-Verilator, Build-Spike]
     uses: ./.github/workflows/test-riscof.yml
 
   Test-UVM:
     name: Test-UVM
-    needs: [Build-Verilator]
     uses: ./.github/workflows/test-uvm.yml
 
   Test-Renode:
     name: Test-Renode
-    needs: [Get-Renode]
     uses: ./.github/workflows/test-renode.yml
 
   Test-OpenOCD:
     name: Test-OpenOCD
-    needs: [Build-Verilator, Build-OpenOCD]
     uses: ./.github/workflows/test-openocd.yml
 
   Report-Coverage:

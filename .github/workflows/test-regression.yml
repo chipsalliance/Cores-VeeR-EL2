@@ -8,11 +8,12 @@ jobs:
   regression-tests:
     name: Regression tests
     runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:latest
     strategy:
       matrix:
         bus: ["axi", "ahb"]
         test: ["hello_world", "hello_world_dccm", "hello_world_iccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
-               "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters", "pmp"]
+               "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters", "pmp", "write_unaligned"]
         coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
         priv: ["0", "1"]
         exclude:
@@ -21,7 +22,6 @@ jobs:
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/regression/.cache/"
-      VERILATOR_VERSION: v5.024
 
     steps:
       - name: Install utils
@@ -37,27 +37,13 @@ jobs:
         run: |
           date=$(date +"%Y_%m_%d")
           time=$(date +"%Y%m%d_%H%M%S_%N")
-          cache_verilator_restore_key=cache_verilator_
-          cache_verilator_key=${cache_verilator_restore_key}${{ env.VERILATOR_VERSION }}_${{ env.VERILATOR_COMMIT }}
           cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
           cache_test_key=${cache_test_restore_key}${time}
 
           echo "date=$date" | tee -a "$GITHUB_ENV"
           echo "time=$time" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_restore_key=$cache_verilator_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_verilator_key=$cache_verilator_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
           echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
-
-
-      - name: Restore verilator cache
-        id: cache-verilator-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            /opt/verilator
-            /opt/verilator/.cache
-          key: ${{ env.cache_verilator_key }}
 
       - name: Setup tests cache
         uses: actions/cache@v3
@@ -74,6 +60,7 @@ jobs:
           submodules: recursive
 
       - name: install SiteSpawner package
+        shell: bash
         run: |
           python3 -m venv .venv
           .venv/bin/python3 -m pip install tools/SiteSpawner
@@ -82,6 +69,7 @@ jobs:
           python3 -m pip install tools/SiteSpawner
 
       - name: Setup environment
+        shell: bash
         run: |
           echo "/opt/verilator/bin" >> $GITHUB_PATH
           RV_ROOT=`pwd`
@@ -92,13 +80,16 @@ jobs:
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
 
       - name: Run tests
+        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }}
 
       - name: Prepare coverage data
+        shell: bash
         run: |
+          source .venv/bin/activate
           sis -d convert --dat-dir ${TEST_PATH}/
           mkdir -p results
           mv ${TEST_PATH}/coverage.info \

@@ -143,7 +143,6 @@ import el2_pkg::*;
    logic [2:0]              ahb_hsize_q;
    logic                    ahb_hwrite_q;
    logic [31:0]             ahb_haddr_q;
-   logic [63:0]             ahb_hwdata_q;
    logic                    ahb_hresp_q;
 
     //Miscellaneous signals

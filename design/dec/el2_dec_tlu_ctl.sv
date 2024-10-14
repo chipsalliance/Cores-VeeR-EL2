@@ -33,7 +33,10 @@ import el2_pkg::*;
    input logic free_clk,
    input logic free_l2clk,
    input logic rst_l,
+   // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+   /*verilator coverage_off*/
    input logic scan_mode,
+   /*verilator coverage_on*/
 
    input logic [31:1] rst_vec, // reset vector, from core pins
    input logic        nmi_int, // nmi pin
@@ -2749,7 +2752,10 @@ import el2_pkg::*;
    output logic        dec_timer_t0_pulse, // timer0 int
    output logic        dec_timer_t1_pulse, // timer1 int
 
+   // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+   /*verilator coverage_off*/
    input  logic        scan_mode
+   /*verilator coverage_on*/
    );
    localparam MITCTL_ENABLE             = 0;
    localparam MITCTL_ENABLE_HALTED      = 1;

@@ -30,7 +30,10 @@ import el2_pkg::*;
    input logic free_l2clk,                  // Clock always.                  Through one clock header.  For flops with    second header built in.
 
    input logic rst_l, // reset enable, from core pin
+   // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+   /*verilator coverage_off*/
    input logic scan_mode, // scan
+   /*verilator coverage_on*/
 
    input logic ic_hit_f,      // Icache hit
    input logic ifu_ic_mb_empty, // Miss buffer empty

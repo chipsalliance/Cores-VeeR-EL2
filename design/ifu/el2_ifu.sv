@@ -214,7 +214,10 @@ import el2_pkg::*;
    output logic                                iccm_buf_correct_ecc,
    output logic                                iccm_correction_state,
 
+   // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+   /*verilator coverage_off*/
    input logic scan_mode
+   /*verilator coverage_on*/
    );
 
    localparam TAGWIDTH = 2 ;

@@ -54,7 +54,10 @@ import el2_pkg::*;
 
       output logic [pt.ICACHE_NUM_WAYS-1:0]         ic_rd_hit,          // ic_rd_hit[3:0]
       output logic                                  ic_tag_perr,        // Tag Parity error
+      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+      /*verilator coverage_off*/
       input  logic                                  scan_mode           // Flop scan mode control
+      /*verilator coverage_on*/
       ) ;
 
 
@@ -113,7 +116,10 @@ import el2_pkg::*;
 
       input logic [pt.ICACHE_NUM_WAYS-1:0]ic_rd_hit,
       input el2_ic_data_ext_in_pkt_t  [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] ic_data_ext_in_pkt,   // this is being driven by the top level for soc testing/etc
+      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+      /*verilator coverage_off*/
       input  logic                         scan_mode
+      /*verilator coverage_on*/
 
       ) ;
 
@@ -824,7 +830,10 @@ import el2_pkg::*;
 
       output logic [pt.ICACHE_NUM_WAYS-1:0]                        ic_rd_hit,
       output logic                                                 ic_tag_perr,
+      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+      /*verilator coverage_off*/
       input  logic                                                 scan_mode
+      /*verilator coverage_on*/
    ) ;
 
    logic [pt.ICACHE_NUM_WAYS-1:0] [25:0]                           ic_tag_data_raw;

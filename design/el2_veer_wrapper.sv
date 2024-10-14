@@ -429,7 +429,7 @@ import el2_pkg::*;
    input logic                             i_cpu_run_req, // Async restart req to CPU
    output logic                            o_cpu_run_ack, // Core response to run req
 
-   /* exclude signals that are tied to constant value or left unconnected in tb_top.sv */
+   // Excluding scan_mode and mbist_mode from coverage as their usage is determined by the integrator of the VeeR core.
    /* verilator coverage_off */
    input logic                             scan_mode,     // To enable scan mode
    input logic                             mbist_mode,    // to enable mbist

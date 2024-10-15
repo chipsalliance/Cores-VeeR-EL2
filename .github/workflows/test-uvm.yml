@@ -42,8 +42,7 @@ jobs:
       - name: Install prerequisities
         run: |
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            git build-essential cpanminus ccache
-          sudo cpanm Bit::Vector
+            git build-essential ccache
 
       - name: Setup environment
         run: |

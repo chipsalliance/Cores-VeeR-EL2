@@ -135,9 +135,8 @@ jobs:
       - name: Install utils
         run: |
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            git cpanminus ccache device-tree-compiler python3-minimal python3-pip \
+            git ccache device-tree-compiler python3-minimal python3-pip \
             libboost-all-dev
-          sudo cpanm Bit::Vector
 
       # As of July 9th, 2024 `ubuntu:latest` comes with riscv64-unknown-elf-gcc
       # 10.0.2. We need a newer version for bitmanip extension support.

@@ -56,7 +56,7 @@ jobs:
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
             autoconf automake autotools-dev \
             bc bison build-essential \
-            ccache cpanminus curl \
+            ccache curl \
             flex \
             gawk gcc-riscv64-unknown-elf git gperf \
             help2man \
@@ -66,7 +66,6 @@ jobs:
             patchutils python3 python3-dev python3-pip \
             texinfo \
             zlib1g zlib1g-dev
-          sudo cpanm Bit::Vector
 
       - name: Setup environment
         shell: bash

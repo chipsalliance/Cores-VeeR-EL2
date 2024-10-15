@@ -22,9 +22,8 @@ jobs:
       - name: Install utils
         run: |
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-             cpanminus ccache ninja-build gcc-riscv64-unknown-elf
+             ccache ninja-build gcc-riscv64-unknown-elf
           pip3 install meson
-          sudo cpanm Bit::Vector
           wget https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2024.09.03/riscv64-elf-ubuntu-22.04-gcc-nightly-2024.09.03-nightly.tar.gz
           tar -xzf riscv64-elf-ubuntu-22.04-gcc-nightly-2024.09.03-nightly.tar.gz
           mv riscv /opt/

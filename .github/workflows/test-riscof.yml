@@ -23,8 +23,7 @@ jobs:
         run: |
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
             git ccache python3-minimal python3-pip device-tree-compiler \
-            gcc-riscv64-unknown-elf cpanminus build-essential ninja-build
-          sudo cpanm Bit::Vector
+            gcc-riscv64-unknown-elf build-essential ninja-build
 
       - name: Setup Cache Metadata
         id: cache_metadata

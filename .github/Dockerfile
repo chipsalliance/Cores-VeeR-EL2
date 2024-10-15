@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     ccache \
     curl \
+    cpanminus \
     device-tree-compiler \
     flex \
     gawk \
@@ -55,6 +56,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     zlib1g \
     zlib1g-dev
+
+RUN cpanm Bit::Vector
 
 # Clone and build Verilator
 RUN git clone https://github.com/verilator/verilator verilator && \

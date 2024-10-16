@@ -103,13 +103,12 @@ The DCLS feature is not supported in Debug Mode.
 Entering Debug Mode with DCLS enabled will disable DCLS until the next reset.
 ```
 
-The DCLS feature can be enabled via: `--set=dcls_enable` option.
+The DCLS feature can be enabled via `-set lockstep_enable=1` option.
+There are two configuration options:
+* `-set lockstep_delay={2, 3, 4}` - the delay applied on the Shadow Core between 2 and 4 cycles,
+* `-set lockstep_regfile_enable=1` - enable exposing the VeeR Register File so the Shadow Core will have an internal copy to compare with the Main Core Register File.
 
-The delay can be specified with `--set=dcls_delay = { 2, 3, 4 }`, with the delay between 2 and 4 cycles.
-
-```{note}
-The range of allowed delays can be discussed in detail and adjusted later.
-```
+The configuration options are ignored and their macros are not generated if the Dual Core Lockstep feature is disabled.
 
 ## Validation Plan
 

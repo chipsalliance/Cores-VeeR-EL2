@@ -7,7 +7,7 @@
    * [Verification tests](external:dev/{{ branch }}/verification_dashboard.html)
 
    {% if include_documentation %}
-   * [Documentation](external:main/docs_rendered/html/index.html)
+   * [Documentation](external:dev/{{ branch }}/docs_rendered/html/index.html)
    {% endif %}
 
 {%- endfor %}

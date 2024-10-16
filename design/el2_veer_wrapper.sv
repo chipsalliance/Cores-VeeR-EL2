@@ -869,9 +869,19 @@ import el2_pkg::*;
    logic [31:0]            dmi_reg_wdata;
    logic [31:0]            dmi_reg_rdata;
 
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+   el2_regfile_if regfile ();
+   initial begin
+      $display("Dual Core Lockstep enabled!\n");
+   end
+`endif
+
    // Instantiate the el2_veer core
    el2_veer #(.pt(pt)) veer (
                                 .clk(clk),
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+                                .regfile(regfile.veer_rf_src),
+`endif
                                 .*
                                 );
 

@@ -455,6 +455,11 @@ import el2_pkg::*;
    output logic                 dccm_ecc_single_error,
    output logic                 dccm_ecc_double_error,
 
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+   // Register file
+   el2_regfile_if.veer_rf_src regfile,
+`endif
+
    input logic [pt.PIC_TOTAL_INT:1]           extintsrc_req,
    input logic                   timer_int,
    input logic                   soft_int,

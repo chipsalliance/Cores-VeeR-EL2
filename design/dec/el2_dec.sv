@@ -320,7 +320,10 @@ module el2_dec
     output logic dec_tlu_icm_clk_override,    // override ICCM clock domain gating
 
     output logic dec_tlu_i0_commit_cmt,  // committed i0 instruction
+    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+    /*verilator coverage_off*/
     input  logic scan_mode               // Flop scan mode control
+    /*verilator coverage_on*/
 
 );
 

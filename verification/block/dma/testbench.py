@@ -810,7 +810,7 @@ class BaseEnv(uvm_env):
         # Config
         ConfigDB().set(None, "*", "TEST_CLK_PERIOD", 1)
         ConfigDB().set(None, "*", "TEST_ITERATIONS", 10)
-        ConfigDB().set(None, "*", "TEST_BURST_LEN", 10)
+        ConfigDB().set(None, "*", "TEST_BURST_LEN", 300)
         ConfigDB().set(None, "*", "TEST_BURST_GAP", 10)
 
         # ICCM and DCCM addresses / sizes are taken from the default VeeR

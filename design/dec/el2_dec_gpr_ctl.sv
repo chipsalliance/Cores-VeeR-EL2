@@ -39,7 +39,10 @@ import el2_pkg::*;
     output logic [31:0] rd0,         // read data
     output logic [31:0] rd1,
 
+   // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+   /*verilator coverage_off*/
     input  logic        scan_mode
+   /*verilator coverage_on*/
 );
 
    logic [31:1] [31:0] gpr_out;      // 31 x 32 bit GPRs

@@ -133,7 +133,10 @@ import el2_pkg::*;
    input logic                         rst_l,        // This includes both top rst and debug rst
    input logic                         dbg_rst_l,
    input logic                         clk_override,
+   // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+   /*verilator coverage_off*/
    input logic                         scan_mode
+   /*verilator coverage_on*/
 );
 
 

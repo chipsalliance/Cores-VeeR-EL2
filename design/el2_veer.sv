@@ -458,7 +458,10 @@ import el2_pkg::*;
    input logic [pt.PIC_TOTAL_INT:1]           extintsrc_req,
    input logic                   timer_int,
    input logic                   soft_int,
+   // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+   /*verilator coverage_off*/
    input logic                   scan_mode
+   /*verilator coverage_on*/
 );
 
 

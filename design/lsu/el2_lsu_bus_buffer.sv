@@ -31,7 +31,10 @@ import el2_pkg::*;
    input logic                          clk,                                // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.
    input logic                          clk_override,                       // Override non-functional clock gating
    input logic                          rst_l,                              // reset, active low
+   // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+   /*verilator coverage_off*/
    input logic                          scan_mode,                          // scan mode
+   /*verilator coverage_on*/
    input logic                          dec_tlu_external_ldfwd_disable,     // disable load to load forwarding for externals
    input logic                          dec_tlu_wb_coalescing_disable,      // disable write buffer coalescing
    input logic                          dec_tlu_sideeffect_posted_disable,  // Don't block the sideeffect load store to the bus

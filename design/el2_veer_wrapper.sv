@@ -254,10 +254,7 @@ import el2_pkg::*;
    // AXI Write Channels
    input  logic                            dma_axi_awvalid,
    output logic                            dma_axi_awready,
-   /* exclude signals that are tied to constant value in tb_top.sv */
-   /*verilator coverage_off*/
    input  logic [pt.DMA_BUS_TAG-1:0]       dma_axi_awid,
-   /*verilator coverage_on*/
    input  logic [31:0]                     dma_axi_awaddr,
    input  logic [2:0]                      dma_axi_awsize,
    input  logic [2:0]                      dma_axi_awprot,
@@ -279,10 +276,7 @@ import el2_pkg::*;
    // AXI Read Channels
    input  logic                            dma_axi_arvalid,
    output logic                            dma_axi_arready,
-   /* exclude signals that are tied to constant value in tb_top.sv */
-   /*verilator coverage_off*/
    input  logic [pt.DMA_BUS_TAG-1:0]       dma_axi_arid,
-   /*verilator coverage_on*/
    input  logic [31:0]                     dma_axi_araddr,
    input  logic [2:0]                      dma_axi_arsize,
    input  logic [2:0]                      dma_axi_arprot,
@@ -357,7 +351,7 @@ import el2_pkg::*;
    /*verilator coverage_on*/
 
    // DMA Slave
-   /* exclude signals that are tied to constant value in tb_top.sv */
+   /* exclude signals that are tied to constant value in this file */
    /*verilator coverage_off*/
    input logic                             dma_hsel,
    input logic [31:0]                      dma_haddr,
@@ -429,9 +423,10 @@ import el2_pkg::*;
    input logic                             i_cpu_run_req, // Async restart req to CPU
    output logic                            o_cpu_run_ack, // Core response to run req
 
-   /* exclude signals that are tied to constant value or left unconnected in tb_top.sv */
-   /* verilator coverage_off */
+   // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+   /*verilator coverage_off*/
    input logic                             scan_mode,     // To enable scan mode
+   /*verilator coverage_on*/
    input logic                             mbist_mode,    // to enable mbist
 
    // DMI port for uncore
@@ -441,7 +436,6 @@ import el2_pkg::*;
    output logic                     [ 6:0] dmi_uncore_addr,
    output logic                     [31:0] dmi_uncore_wdata,
    input logic                      [31:0] dmi_uncore_rdata
-   /* verilator coverage_on */
 );
 
    logic                             active_l2clk;

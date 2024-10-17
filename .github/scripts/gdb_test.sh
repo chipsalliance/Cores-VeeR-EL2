@@ -75,7 +75,7 @@ echo -e "Simulation running and ready (pid=${SIM_PID})"
 
 # Launch OpenOCD
 echo -e "Launching OpenOCD..."
-cd ${RV_ROOT}/.github/scripts/openocd && openocd --debug --file board/caliptra-verilator.cfg >"${OPENOCD_LOG}" 2>&1 &
+cd ${RV_ROOT}/.github/scripts/openocd && openocd -d2 --file board/caliptra-verilator.cfg >"${OPENOCD_LOG}" 2>&1 &
 OPENOCD_PID=$!
 
 # Wait

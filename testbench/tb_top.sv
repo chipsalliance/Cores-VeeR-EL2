@@ -858,8 +858,7 @@ module tb_top
             $finish;
         end
         else if(mailbox_write && mailbox_data[7:0] == 8'h1) begin
-            $display("TEST_FAILED");
-            $finish;
+            $error("TEST_FAILED");
         end
 
         // Custom test commands

@@ -202,7 +202,10 @@ import el2_pkg::*;
    output logic                            lsu_dccm_rd_ecc_single_err,
    output logic                            lsu_dccm_rd_ecc_double_err,
 
+   // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+   /*verilator coverage_off*/
    input logic                             scan_mode,           // scan mode
+   /*verilator coverage_on*/
    input logic                             clk,                 // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.
    input logic                             active_clk,          // Clock only while core active.  Through two clock headers. For flops without second clock header built in.
     input logic                             rst_l,               // reset, active low

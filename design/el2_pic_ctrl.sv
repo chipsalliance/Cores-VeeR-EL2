@@ -47,7 +47,10 @@ import el2_pkg::*;
                      output logic [3:0]             pl,                   // Priority level of the requested interrupt
                      output logic [31:0]            picm_rd_data,         // Read data of the register
                      output logic                   mhwakeup,             // Wake-up interrupt request
+                     // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+                     /*verilator coverage_off*/
                      input  logic                   scan_mode             // scan mode
+                     /*verilator coverage_on*/
 
 );
 

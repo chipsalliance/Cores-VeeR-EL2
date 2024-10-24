@@ -50,7 +50,10 @@ module el2_lsu_dccm_mem
    output logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_rd_data_lo,              // read data from the lo bank
    output logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_rd_data_hi,              // read data from the hi bank
 
+   // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+   /*verilator coverage_off*/
    input  logic         scan_mode
+   /*verilator coverage_on*/
 );
 
 

@@ -195,8 +195,6 @@ module tb_top
     wire                        dma_hready_out;
     int                         commit_count;
 
-    logic [3:0]                 nmi_assert_int;
-
     logic                       wb_valid;
     logic [4:0]                 wb_dest;
     logic [31:0]                wb_data;
@@ -872,45 +870,6 @@ module tb_top
         timer_int <= 0;
         extintsrc_req[1] <= 0;
     end
-
-    `ifdef RV_BUILD_AXI4
-    // this needs to be a separate block due to sensitivity to other signals
-    always @(negedge core_clk or lsu_axi_bvalid or lsu_axi_rvalid or ifu_axi_rvalid or ifu_axi_rid) begin
-        if (mailbox_write && mailbox_data[7:0] == 8'h82)
-            // wait for current transaction that to complete to not trigger error on it
-            @(negedge lsu_axi_bvalid) next_dbus_error <= 1;
-        if (mailbox_write && mailbox_data[7:0] == 8'h83)
-            @(negedge ifu_axi_rvalid or ifu_axi_rid) next_ibus_error <= 1;
-        // turn off forcing dbus error after a transaction
-        if (next_dbus_error)
-            @(negedge lsu_axi_bvalid or negedge lsu_axi_rvalid) next_dbus_error <= 0;
-        if (next_ibus_error)
-            @(negedge ifu_axi_rvalid or ifu_axi_rid) next_ibus_error <= 0;
-    end
-    `endif
-
-    always_comb begin
-        `ifdef RV_BUILD_AXI4
-        lsu_axi_rresp_override = lsu_axi_rresp;
-        lsu_axi_bresp_override = lsu_axi_bresp;
-        ifu_axi_rresp_override = ifu_axi_rresp;
-        if (next_dbus_error) begin
-            // force slave bus error
-            if (lsu_axi_rvalid)
-                lsu_axi_rresp_override = 2'b10;
-            if (lsu_axi_bvalid)
-                lsu_axi_bresp_override = 2'b10;
-        end
-        if (next_ibus_error) begin
-            if (ifu_axi_rvalid)
-                ifu_axi_rresp_override = 2'b10;
-        end
-        `endif
-    end
-
-    // nmi_int must be asserted for at least two clock cycles and then deasserted for
-    // at least two clock cycles - see RISC-V VeeR EL2 Programmer's Reference Manual section 2.16
-    assign nmi_int = |{nmi_assert_int[3:2]};
 
     // trace monitor
     always @(posedge core_clk) begin

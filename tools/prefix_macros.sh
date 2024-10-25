@@ -105,9 +105,9 @@ perl -pi -e "s/(?<!${PREFIX})el2_mem_if/"$PREFIX"el2_mem_if/g" $DESIGN_FILES
 
 # prefix memory macro names in el2_ifu_ic_mem.sv
 echo "Prefixing memory macro names in $EL2_IFU_IC_MEM"
-sed -i "s/EL2_IC_TAG_PACKED_SRAM/"$PREFIX"EL2_IC_TAG_PACKED_SRAM/g" $EL2_IFU_IC_MEM
-sed -i "s/EL2_IC_TAG_SRAM/"$PREFIX"EL2_IC_TAG_SRAM/g" $EL2_IFU_IC_MEM
-sed -i "s/EL2_PACKED_IC_DATA_SRAM/"$PREFIX"EL2_PACKED_IC_DATA_SRAM/g" $EL2_IFU_IC_MEM
-sed -i "s/EL2_IC_DATA_SRAM/"$PREFIX"EL2_IC_DATA_SRAM/g" $EL2_IFU_IC_MEM
+perl -pi -e "s/(?<!${PREFIX})EL2_IC_TAG_PACKED_SRAM/${PREFIX}EL2_IC_TAG_PACKED_SRAM/g" $EL2_IFU_IC_MEM
+perl -pi -e "s/(?<!${PREFIX})EL2_IC_TAG_SRAM/${PREFIX}EL2_IC_TAG_SRAM/g" $EL2_IFU_IC_MEM
+perl -pi -e "s/(?<!${PREFIX})EL2_PACKED_IC_DATA_SRAM/${PREFIX}EL2_PACKED_IC_DATA_SRAM/g" $EL2_IFU_IC_MEM
+perl -pi -e "s/(?<!${PREFIX})EL2_IC_DATA_SRAM/${PREFIX}EL2_IC_DATA_SRAM/g" $EL2_IFU_IC_MEM
 
 echo "Script finished successfully"

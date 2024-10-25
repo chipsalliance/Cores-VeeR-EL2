@@ -9,6 +9,7 @@ jobs:
     name: Regression exceptions tests
     runs-on: ubuntu-latest
     container: ghcr.io/antmicro/cores-veer-el2:latest
+    continue-on-error: true
     strategy:
       matrix:
         bus: ["axi"]

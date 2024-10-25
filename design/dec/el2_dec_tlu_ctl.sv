@@ -3027,21 +3027,21 @@ assign dec_csr_rddata_d[31:0] = (
 
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
    // Expose the register file
-   assign regfile.pc = pc_r;
-   assign regfile.npc = npc_r;
-   assign regfile.mstatus = mstatus_rf;
-   assign regfile.mie = mie_rf;
-   assign regfile.mtvec = mtvec_rf;
-   assign regfile.mscratch = mscratch_rf;
-   assign regfile.mepc = mepc_rf;
-   assign regfile.mcause = mcause_rf;
-   assign regfile.mtval = mtval_rf;
-   assign regfile.mip = mip_rf;
-   assign regfile.mcyclel = mcyclel_rf;
-   assign regfile.mcycleh = mcycleh_rf;
-   assign regfile.minstretl = minstretl_rf;
-   assign regfile.minstreth = minstreth_rf;
-   assign regfile.mrac = mrac_rf;
+   assign regfile.tlu.pc = pc_r;
+   assign regfile.tlu.npc = npc_r;
+   assign regfile.tlu.mstatus = mstatus_rf;
+   assign regfile.tlu.mie = mie_rf;
+   assign regfile.tlu.mtvec = mtvec_rf;
+   assign regfile.tlu.mscratch = mscratch_rf;
+   assign regfile.tlu.mepc = mepc_rf;
+   assign regfile.tlu.mcause = mcause_rf;
+   assign regfile.tlu.mtval = mtval_rf;
+   assign regfile.tlu.mip = mip_rf;
+   assign regfile.tlu.mcyclel = mcyclel_rf;
+   assign regfile.tlu.mcycleh = mcycleh_rf;
+   assign regfile.tlu.minstretl = minstretl_rf;
+   assign regfile.tlu.minstreth = minstreth_rf;
+   assign regfile.tlu.mrac = mrac_rf;
 `endif
 
 endmodule // el2_dec_tlu_ctl

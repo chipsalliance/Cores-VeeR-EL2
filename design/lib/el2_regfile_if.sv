@@ -18,45 +18,42 @@
 
 import el2_pkg::*;
 interface el2_regfile_if ();
-  // General Purpose Registers
-  logic [31:0] ra; // Return address
-  logic [31:0] sp; // Stack pointer
-  logic [31:0] fp; // Frame pointer
-  logic [31:0] a0, a1; // Function arguments 0-1 / Return values 0-1
-  logic [31:0] a2, a3, a4, a5, a6, a7; // Function arguments 2-7
+  typedef struct packed {
+    // General Purpose Registers
+    logic [31:0] ra; // Return address
+    logic [31:0] sp; // Stack pointer
+    logic [31:0] fp; // Frame pointer
+    logic [31:0] a0, a1; // Function arguments 0-1 / Return values 0-1
+    logic [31:0] a2, a3, a4, a5, a6, a7; // Function arguments 2-7
+  } el2_regfile_gpr_pkt_t;
 
-  // Important registers chosen for exposure
-  logic [31:0] pc, npc; // (Next) Program Counter
-  logic [31:0] mstatus; // Machine status
-  logic [31:0] mie; // Machine interrupt enable
-  logic [31:0] mtvec; // Machine trap-handler base address
-  logic [31:0] mscratch; // Scratch register for machine trap handlers
-  logic [31:0] mepc; // Machine exception program counter
-  logic [31:0] mcause; // Machine trap cause
-  logic [31:0] mtval; // Machine bad address or instruction
-  logic [31:0] mip; // Machine interrupt pending
-  logic [31:0] mcyclel; // Machine cycle counter
-  logic [31:0] mcycleh; // Machine cycle counter
-  logic [31:0] minstretl; // Machine instructions-retired counter
-  logic [31:0] minstreth; // Machine instructions-retired counter
-  logic [31:0] mrac; // Region access control
+  typedef struct packed {
+    // Important registers chosen for exposure
+    logic [31:0] pc, npc; // (Next) Program Counter
+    logic [31:0] mstatus; // Machine status
+    logic [31:0] mie; // Machine interrupt enable
+    logic [31:0] mtvec; // Machine trap-handler base address
+    logic [31:0] mscratch; // Scratch register for machine trap handlers
+    logic [31:0] mepc; // Machine exception program counter
+    logic [31:0] mcause; // Machine trap cause
+    logic [31:0] mtval; // Machine bad address or instruction
+    logic [31:0] mip; // Machine interrupt pending
+    logic [31:0] mcyclel; // Machine cycle counter
+    logic [31:0] mcycleh; // Machine cycle counter
+    logic [31:0] minstretl; // Machine instructions-retired counter
+    logic [31:0] minstreth; // Machine instructions-retired counter
+    logic [31:0] mrac; // Region access control
+  } el2_regfile_tlu_pkt_t;
 
-  modport veer_gpr_rf(
-      output ra, sp, fp, a0, a1, a2, a3, a4, a5, a6, a7
-  );
+  el2_regfile_gpr_pkt_t gpr;
+  el2_regfile_tlu_pkt_t tlu;
 
-  modport veer_tlu_rf(
-      output pc, npc, mstatus, mie, mtvec, mscratch, mepc, mcause, mtval, mip, mcyclel, mcycleh, minstretl, minstreth, mrac
-  );
+  modport veer_gpr_rf(output gpr);
 
-  modport veer_rf_src(
-      output ra, sp, fp, a0, a1, a2, a3, a4, a5, a6, a7,
-      output pc, npc, mstatus, mie, mtvec, mscratch, mepc, mcause, mtval, mip, mcyclel, mcycleh, minstretl, minstreth, mrac
-  );
+  modport veer_tlu_rf(output tlu);
 
-  modport veer_rf_sink(
-      input ra, sp, fp, a0, a1, a2, a3, a4, a5, a6, a7,
-      input pc, npc, mstatus, mie, mtvec, mscratch, mepc, mcause, mtval, mip, mcyclel, mcycleh, minstretl, minstreth, mrac
-  );
+  modport veer_rf_src(output gpr, output tlu);
+
+  modport veer_rf_sink(input gpr, input tlu);
 
 endinterface

@@ -435,33 +435,33 @@ module el2_dec
 
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
       el2_regfile_if regfile_if ();
-      assign regfile.ra = regfile_if.ra;
-      assign regfile.sp = regfile_if.sp;
-      assign regfile.fp = regfile_if.fp;
-      assign regfile.a0 = regfile_if.a0;
-      assign regfile.a1 = regfile_if.a1;
-      assign regfile.a2 = regfile_if.a2;
-      assign regfile.a3 = regfile_if.a3;
-      assign regfile.a4 = regfile_if.a4;
-      assign regfile.a5 = regfile_if.a5;
-      assign regfile.a6 = regfile_if.a6;
-      assign regfile.a7 = regfile_if.a7;
+      assign regfile.gpr.ra = regfile_if.gpr.ra;
+      assign regfile.gpr.sp = regfile_if.gpr.sp;
+      assign regfile.gpr.fp = regfile_if.gpr.fp;
+      assign regfile.gpr.a0 = regfile_if.gpr.a0;
+      assign regfile.gpr.a1 = regfile_if.gpr.a1;
+      assign regfile.gpr.a2 = regfile_if.gpr.a2;
+      assign regfile.gpr.a3 = regfile_if.gpr.a3;
+      assign regfile.gpr.a4 = regfile_if.gpr.a4;
+      assign regfile.gpr.a5 = regfile_if.gpr.a5;
+      assign regfile.gpr.a6 = regfile_if.gpr.a6;
+      assign regfile.gpr.a7 = regfile_if.gpr.a7;
 
-      assign regfile.pc        = regfile_if.pc;
-      assign regfile.npc       = regfile_if.npc;
-      assign regfile.mstatus   = regfile_if.mstatus;
-      assign regfile.mie       = regfile_if.mie;
-      assign regfile.mtvec     = regfile_if.mtvec;
-      assign regfile.mscratch  = regfile_if.mscratch;
-      assign regfile.mepc      = regfile_if.mepc;
-      assign regfile.mcause    = regfile_if.mcause;
-      assign regfile.mtval     = regfile_if.mtval;
-      assign regfile.mip       = regfile_if.mip;
-      assign regfile.mcyclel   = regfile_if.mcyclel;
-      assign regfile.mcycleh   = regfile_if.mcycleh;
-      assign regfile.minstretl = regfile_if.minstretl;
-      assign regfile.minstreth = regfile_if.minstreth;
-      assign regfile.mrac      = regfile_if.mrac;
+      assign regfile.tlu.pc        = regfile_if.tlu.pc;
+      assign regfile.tlu.npc       = regfile_if.tlu.npc;
+      assign regfile.tlu.mstatus   = regfile_if.tlu.mstatus;
+      assign regfile.tlu.mie       = regfile_if.tlu.mie;
+      assign regfile.tlu.mtvec     = regfile_if.tlu.mtvec;
+      assign regfile.tlu.mscratch  = regfile_if.tlu.mscratch;
+      assign regfile.tlu.mepc      = regfile_if.tlu.mepc;
+      assign regfile.tlu.mcause    = regfile_if.tlu.mcause;
+      assign regfile.tlu.mtval     = regfile_if.tlu.mtval;
+      assign regfile.tlu.mip       = regfile_if.tlu.mip;
+      assign regfile.tlu.mcyclel   = regfile_if.tlu.mcyclel;
+      assign regfile.tlu.mcycleh   = regfile_if.tlu.mcycleh;
+      assign regfile.tlu.minstretl = regfile_if.tlu.minstretl;
+      assign regfile.tlu.minstreth = regfile_if.tlu.minstreth;
+      assign regfile.tlu.mrac      = regfile_if.tlu.mrac;
 `endif
 
   el2_dec_tlu_ctl #(.pt(pt)

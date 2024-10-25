@@ -885,6 +885,19 @@ import el2_pkg::*;
                                 .*
                                 );
 
+`ifdef RV_LOCKSTEP_ENABLE
+   logic lockstep_corruption_detected;
+
+   el2_veer_lockstep #(.pt(pt)) lockstep (
+                                .clk(clk),
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+                                .main_core_regfile(regfile.veer_rf_sink),
+`endif // `ifdef RV_LOCKSTEP_REGFILE_ENABLE
+                                .corruption_detected(lockstep_corruption_detected),
+                                .*
+                                );
+`endif // `ifdef RV_LOCKSTEP_ENABLE
+
    // Instantiate the mem
    el2_mem  #(.pt(pt)) mem (
                              .clk(active_l2clk),

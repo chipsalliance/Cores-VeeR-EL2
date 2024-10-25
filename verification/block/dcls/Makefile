@@ -8,13 +8,17 @@ SRCDIR := $(abspath $(CURDIR)../../../../design)
 TEST_FILES   = $(sort $(wildcard test_*.py))
 
 MODULE      ?= $(subst $(space),$(comma),$(subst .py,,$(TEST_FILES)))
-TOPLEVEL     = el2_veer_lockstep
+TOPLEVEL     = el2_veer_lockstep_wrapper
+
+EXTRA_VEER_CONFIG = -set lockstep_enable=1 -set lockstep_regfile_enable=1
 
 VERILOG_INCLUDE_DIRS += \
 	${RV_ROOT}/testbench \
 	${RV_ROOT}/design/include
 
 VERILOG_SOURCES  = \
+	${SRCDIR}/lib/el2_mem_if.sv \
+	${SRCDIR}/lib/el2_regfile_if.sv \
 	${SRCDIR}/el2_veer_wrapper.sv \
 	${SRCDIR}/el2_mem.sv \
 	${SRCDIR}/el2_pic_ctrl.sv \
@@ -57,6 +61,7 @@ VERILOG_SOURCES  = \
 	${SRCDIR}/dmi/dmi_jtag_to_core_sync.v \
 	${SRCDIR}/dmi/rvjtag_tap.v \
 	${SRCDIR}/lib/el2_lib.sv \
-	$(SRCDIR)/el2_veer_lockstep.sv
+	$(SRCDIR)/el2_veer_lockstep.sv \
+	$(CURDIR)/dcls/el2_veer_lockstep_wrapper.sv
 
 include $(CURDIR)/../common.mk

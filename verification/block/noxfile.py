@@ -276,7 +276,7 @@ def dccm_verify(session, blockName, testName, coverage):
 @nox.parametrize(
     "testName",
     [
-        "test_reset",
+        "test_lockstep",
     ],
 )
 @nox.parametrize("coverage", coverageTypes)

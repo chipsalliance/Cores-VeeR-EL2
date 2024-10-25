@@ -67,5 +67,4 @@ endif
 
 # Rules for generating VeeR config
 $(CFGDIR)/common_defines.vh:
-	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0 $(EXTRA_CONFIG_OPTS)
-
+	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0 $(EXTRA_CONFIG_OPTS) $(EXTRA_VEER_CONFIG)

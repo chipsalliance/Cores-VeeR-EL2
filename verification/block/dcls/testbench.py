@@ -5,7 +5,7 @@ import os
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, FallingEdge
+from cocotb.triggers import ClockCycles, FallingEdge, RisingEdge
 from pyuvm import ConfigDB, uvm_env, uvm_report_object, uvm_test
 
 
@@ -16,13 +16,8 @@ class BaseEnv(uvm_env):
 
     def build_phase(self):
         # Config
-        pmp_entries = 16
-        ConfigDB().set(None, "*", "PMP_ENTRIES", pmp_entries)
-        ConfigDB().set(None, "*", "PMP_CHANNELS", 3)
-        ConfigDB().set(None, "*", "PMP_GRANULARITY", 0)
-
         ConfigDB().set(None, "*", "TEST_CLK_PERIOD", 1)
-        ConfigDB().set(None, "*", "TEST_ITERATIONS", 100)
+        ConfigDB().set(None, "*", "LOCKSTEP_DELAY", 3)
 
     def connect_phase(self):
         pass
@@ -39,6 +34,8 @@ class BaseTest(uvm_test):
     def __init__(self, name, parent, env_class=BaseEnv):
         super().__init__(name, parent)
         self.env_class = env_class
+        self.dut = cocotb.top
+        self.clk = self.dut.clk
 
         # Synchronize pyuvm logging level with cocotb logging level. Unclear
         # why it does not happen automatically.
@@ -50,15 +47,17 @@ class BaseTest(uvm_test):
 
     def start_clock(self, name):
         period = ConfigDB().get(None, "", "TEST_CLK_PERIOD")
-        sig = getattr(cocotb.top, name)
+        sig = getattr(self.dut, name)
         clock = Clock(sig, period, units="ns")
         cocotb.start_soon(clock.start(start_high=False))
 
     async def do_reset(self):
-        cocotb.top.rst_l.value = 0
-        await ClockCycles(cocotb.top.clk, 2)
-        await FallingEdge(cocotb.top.clk)
-        cocotb.top.rst_l.value = 1
+        self.dut.rst_l.value = 0
+        self.dut.dbg_rst_l.value = 0
+        await ClockCycles(self.dut.clk, 2)
+        await FallingEdge(self.dut.clk)
+        self.dut.rst_l.value = 1
+        self.dut.dbg_rst_l.value = 1
 
     async def run_phase(self):
         self.raise_objection()
@@ -68,15 +67,13 @@ class BaseTest(uvm_test):
 
         # Issue reset
         await self.do_reset()
-
-        # Wait some cycles
-        await ClockCycles(cocotb.top.clk, 2)
+        await RisingEdge(self.clk)
 
         # Run the actual test
         await self.run()
 
         # Wait some cycles
-        await ClockCycles(cocotb.top.clk, 10)
+        await ClockCycles(self.clk, 10)
 
         self.drop_objection()
 

@@ -84,13 +84,15 @@ sed -i "s/package el2_pkg/package "$PREFIX"el2_pkg/g" $EL2_DEF
 
 # Add prefix to all module names
 echo "Adding prefix to all module names"
-perl -pi -e "s/module (?!${PREFIX})([\`A-Za-z0-9_]+)/module ${PREFIX}\1/g" $DESIGN_FILES
+perl -pi -e "s/module \`?(?!${PREFIX})([A-Za-z0-9_]+)/module ${PREFIX}\1/g" $DESIGN_FILES
 
 # Add prefix to all module instantiations
 echo "Adding prefix to all module instantiations"
 for MODULE in $MODULES; do
-	echo "Processing MODULE=$MODULE"
-	perl -pi -e "s/(^|[^A-Za-z0-9_])(?<!${PREFIX})${MODULE}([^A-Za-z0-9_])/\1${PREFIX}${MODULE}\2/g" $DESIGN_FILES
+    # Exclude the prefix from the MODULE name if it already contains the prefix
+    MODULE=$(echo $MODULE | perl -pe "s/${PREFIX}//")
+    echo "Processing MODULE=$MODULE"
+    perl -pi -e "s/(^|[^A-Za-z0-9_])(?<!${PREFIX})${MODULE}([^A-Za-z0-9_]+)/\1${PREFIX}${MODULE}\2/g" $DESIGN_FILES
 done
 
 # Remove old header files to avoid redefining their contents during elaboration
@@ -99,7 +101,7 @@ rm -f $COMMON_DEFINES $EL2_PARAM $EL2_PDEF $PD_DEFINES
 
 # Add prefix to el2_mem_if interface
 echo "Adding prefix to el2_mem_if interface"
-sed -i -E "s/el2_mem_if/"$PREFIX"el2_mem_if/g" $DESIGN_FILES
+perl -pi -e "s/(?<!${PREFIX})el2_mem_if/"$PREFIX"el2_mem_if/g" $DESIGN_FILES
 
 # prefix memory macro names in el2_ifu_ic_mem.sv
 echo "Prefixing memory macro names in $EL2_IFU_IC_MEM"

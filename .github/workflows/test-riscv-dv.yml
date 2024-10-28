@@ -48,7 +48,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Cache Code
+      - name: Fetch code
         uses: actions/cache@v3
         id: cache-code
         timeout-minutes: 60
@@ -65,7 +65,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: riscv-dv_generated_code_${{ matrix.version }}
-          path: tools/riscv-dv/work/**/asm_test/*.S
+          path: tools/riscv-dv/work/
 
   generate-code:
     name: Generate code for tests
@@ -118,6 +118,37 @@ jobs:
         with:
           name: riscv-dv_generated_code_${{ matrix.version }}
           path: tools/riscv-dv/work/**/asm_test/*.S
+
+  cache-code:
+    name: Cache generated testcases
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8  # TODO: use something newer
+    needs: [generate-config, fetch-code, generate-code]
+    if: needs.fetch-code.outputs.cache-hit != 'true'
+    strategy:
+      matrix:
+        version: [ uvm ]
+        include: ${{ fromJSON(needs.generate-config.outputs.test-include-generate) }}
+    env:
+      CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
+    steps:
+      - uses: actions/checkout@v3  # The job is just cache interaction, is this really needed here?
+        with:
+          submodules: recursive
+
+      - name: Download artifacts with tests
+        uses: actions/download-artifact@v3
+        with:
+          name: riscv-dv_generated_code_${{ matrix.version }}
+          path: tools/riscv-dv/work/
+
+      - name: Cache code
+        uses: actions/cache@v3
+        id: cache-code
+        timeout-minutes: 60
+        with:
+          path: tools/riscv-dv/work/
+          key: cache_${{ matrix.version }}_${{ env.CACHE_HASH }}
 
   run-tests:
     name: Run RISC-V DV tests

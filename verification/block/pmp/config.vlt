@@ -1,0 +1,5 @@
+`verilator_config
+
+lint_off -rule ASCRANGE -file "*/el2_pmp_wrapper.sv"
+
+lint_off -rule WIDTHTRUNC -file "*/el2_pmp_wrapper.sv"

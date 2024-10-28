@@ -1,0 +1,5 @@
+`verilator_config
+
+lint_off -rule WIDTHTRUNC -file "*/dmi_test_wrapper.sv"
+
+lint_off -rule UNUSEDPARAM -file "*/dmi_test_wrapper.sv"

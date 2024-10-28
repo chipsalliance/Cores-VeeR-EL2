@@ -376,7 +376,7 @@ module el2_veer_lockstep
     output logic corruption_detected
 );
 
-  localparam int unsigned LockstepDelay = pt.LOCKSTEP_DELAY;  // Delay I/O; in clock cycles
+  localparam int unsigned LockstepDelay = int'(pt.LOCKSTEP_DELAY);  // Delay I/O; in clock cycles
 
   // Outputs
   typedef struct packed {
@@ -1029,6 +1029,8 @@ module el2_veer_lockstep
   end
 `endif
 
+  logic unused_active_l2clk, unused_free_l2clk;
+
   // Instantiate the el2_veer core
   el2_veer #(
       .pt(pt)
@@ -1044,8 +1046,8 @@ module el2_veer_lockstep
       .nmi_vec(shadow_core_inputs.nmi_vec),
       .core_rst_l(shadow_core_outputs.core_rst_l),
 
-      .active_l2clk(),
-      .free_l2clk  (),
+      .active_l2clk(unused_active_l2clk),
+      .free_l2clk  (unused_free_l2clk),
 
       .trace_rv_i_insn_ip(shadow_core_outputs.trace_rv_i_insn_ip),
       .trace_rv_i_address_ip(shadow_core_outputs.trace_rv_i_address_ip),

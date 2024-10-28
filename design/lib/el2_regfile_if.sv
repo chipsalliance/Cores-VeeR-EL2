@@ -16,7 +16,6 @@
 //********************************************************************************
 
 
-import el2_pkg::*;
 interface el2_regfile_if ();
   typedef struct packed {
     // General Purpose Registers

@@ -2,8 +2,8 @@ null  :=
 space := $(null) #
 comma := ,
 
-CURDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-SRCDIR := $(abspath $(CURDIR)../../../../design)
+TEST_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+SRCDIR := $(abspath $(TEST_DIR)../../../../design)
 
 TEST_FILES   = $(sort $(wildcard test_*.py))
 
@@ -62,6 +62,10 @@ VERILOG_SOURCES  = \
 	${SRCDIR}/dmi/rvjtag_tap.v \
 	${SRCDIR}/lib/el2_lib.sv \
 	$(SRCDIR)/el2_veer_lockstep.sv \
-	$(CURDIR)/dcls/el2_veer_lockstep_wrapper.sv
+	$(TEST_DIR)/el2_veer_lockstep_wrapper.sv
 
-include $(CURDIR)/../common.mk
+# Use multiple threads since the design in this test is pretty complex
+THREADS = $(shell echo $$(( $(shell nproc) - 1 )))
+BUILD_ARGS += -j$(THREADS)
+
+include $(TEST_DIR)/../common.mk

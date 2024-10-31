@@ -50,18 +50,18 @@ jobs:
 
       - name: Fetch code
         uses: actions/cache@v3
-        id: cache-code
+        id: fetch-code
         timeout-minutes: 60
         with:
           path: tools/riscv-dv/work
           key: cache_${{ matrix.version }}_${{ env.CACHE_HASH }}
 
-      - name: Report cache miss
-        if: steps.cache-code.outputs.cache-hit != 'true'
-        run: echo "cache-hit=false" | tee -a $GITHUB_OUTPUT
+      - name: Report cache hit or miss
+        id: test-cache
+        run: echo cache-hit=${{ steps.fetch-code.outputs.cache-hit }} | tee -a $GITHUB_OUTPUT
 
       - name: Upload cached tests as artifacts
-        if: steps.cache-code.outputs.cache-hit == 'true'
+        if: steps.fetch-code.outputs.cache-hit == 'true'
         uses: actions/upload-artifact@v3
         with:
           name: riscv-dv_generated_code_${{ matrix.version }}

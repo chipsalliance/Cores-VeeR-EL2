@@ -148,21 +148,6 @@ jobs:
             gcc-riscv64-unknown-elf
           riscv64-unknown-elf-gcc --version
 
-      - name: Setup Cache Metadata
-        id: cache_metadata
-        run: |
-          date=$(date +"%Y_%m_%d")
-          time=$(date +"%Y%m%d_%H%M%S_%N")
-          cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
-          cache_test_key=${cache_test_restore_key}${time}
-          cache_code=cache_${{ matrix.test }}_${{ matrix.version }}
-
-          echo "date=$date" | tee -a "$GITHUB_ENV"
-          echo "time=$time" | tee -a "$GITHUB_ENV"
-          echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
-          echo "cache_code=${cache_code}_${{ env.CACHE_HASH }}" | tee -a "$GITHUB_ENV"
-
       - name: Setup repository
         uses: actions/checkout@v3
         with:
@@ -180,21 +165,6 @@ jobs:
       - name: Install Python deps
         run: |
           pip install -r third_party/riscv-dv/requirements.txt
-
-      - name: Create Cache Timestamp
-        id: cache_timestamp
-        uses: nanzm/get-time-action@v2.0
-        with:
-          format: 'YYYY-MM-DD-HH-mm-ss'
-
-      - name: Setup cache
-        uses: actions/cache@v3
-        timeout-minutes: 60
-        continue-on-error: true
-        with:
-          path: "/opt/veer-el2/.cache/"
-          key: cache_tests_${{ steps.cache_timestamp.outputs.time }}
-          restore-keys: cache_tests_
 
       - name: Download Code Artifact
         uses: actions/download-artifact@v3
@@ -283,29 +253,6 @@ jobs:
       - name: Install Python deps
         run: |
           pip3 install -r third_party/riscv-dv/requirements.txt
-
-      - name: Setup Cache Metadata
-        id: cache_metadata
-        run: |
-          date=$(date +"%Y_%m_%d")
-          time=$(date +"%Y%m%d_%H%M%S_%N")
-          cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
-          cache_test_key=${cache_test_restore_key}${time}
-          cache_code=cache_${{ matrix.test }}_${{ matrix.version }}
-
-          echo "date=$date" | tee -a "$GITHUB_ENV"
-          echo "time=$time" | tee -a "$GITHUB_ENV"
-          echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
-          echo "cache_code=${cache_code}_${{ env.CACHE_HASH }}" | tee -a "$GITHUB_ENV"
-
-      - name: Cache Code Restore
-        uses: actions/cache/restore@v3
-        id: cache-code-restore
-        timeout-minutes: 60
-        with:
-          path: tools/riscv-dv/work/test_${{ matrix.test }}/asm_test
-          key: ${{ env.cache_code }}
 
       - name: Perform custom tests
         run: _secret_custom_run

@@ -25,42 +25,6 @@ jobs:
             git ccache python3-minimal python3-pip device-tree-compiler \
             gcc-riscv64-unknown-elf build-essential ninja-build
 
-      - name: Setup Cache Metadata
-        id: cache_metadata
-        run: |
-          date=$(date +"%Y_%m_%d")
-          time=$(date +"%Y%m%d_%H%M%S_%N")
-          cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
-          cache_test_key=${cache_test_restore_key}${time}
-          echo "date=$date" | tee -a "$GITHUB_ENV"
-          echo "time=$time" | tee -a "$GITHUB_ENV"
-          echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
-
-      - name: Setup tests cache
-        uses: actions/cache@v3
-        id: cache-test-setup
-        with:
-          path: |
-            ${{ env.CCACHE_DIR }}
-          key: ${{ env.cache_test_key }}
-          restore-keys: ${{ env.cache_test_restore_key }}
-
-      - name: Create Cache Timestamp
-        id: cache_timestamp
-        uses: nanzm/get-time-action@v1.1
-        with:
-          format: 'YYYY-MM-DD-HH-mm-ss'
-
-      - name: Setup cache
-        uses: actions/cache@v2
-        timeout-minutes: 60
-        continue-on-error: true
-        with:
-          path: "/opt/veer-el2/.cache/"
-          key: cache_riscof_tests_${{ steps.cache_timestamp.outputs.time }}
-          restore-keys: cache_riscof_tests_
-
       - name: Setup repository
         uses: actions/checkout@v2
         with:

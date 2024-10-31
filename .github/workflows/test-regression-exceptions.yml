@@ -31,28 +31,6 @@ jobs:
             gcc-riscv64-unknown-elf
           pip3 install meson
 
-      - name: Setup Cache Metadata
-        id: cache_metadata
-        run: |
-          date=$(date +"%Y_%m_%d")
-          time=$(date +"%Y%m%d_%H%M%S_%N")
-          cache_test_restore_key=${{ matrix.test }}_${{ matrix.coverage }}_
-          cache_test_key=${cache_test_restore_key}${time}
-
-          echo "date=$date" | tee -a "$GITHUB_ENV"
-          echo "time=$time" | tee -a "$GITHUB_ENV"
-          echo "cache_test_restore_key=$cache_test_restore_key" | tee -a "$GITHUB_ENV"
-          echo "cache_test_key=$cache_test_key" | tee -a "$GITHUB_ENV"
-
-      - name: Setup tests cache
-        uses: actions/cache@v3
-        id: cache-test-setup
-        with:
-          path: |
-            ${{ env.CCACHE_DIR }}
-          key: ${{ env.cache_test_key }}
-          restore-keys: ${{ env.cache_test_restore_key }}
-
       - name: Setup repository
         uses: actions/checkout@v3
         with:

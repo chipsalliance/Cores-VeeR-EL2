@@ -24,6 +24,8 @@ jobs:
             test: "csr_access"
           - priv: "0"
             test: "csr_mstatus"
+          - priv: "0"
+            test: "modesw"
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/regression/.cache/"

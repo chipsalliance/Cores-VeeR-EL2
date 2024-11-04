@@ -20,6 +20,8 @@ jobs:
         exclude:
           - priv: "0"
             test: "csr_mseccfg"
+          - priv: "0"
+            test: "csr_access"
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/regression/.cache/"

@@ -21,11 +21,6 @@ _start:
     la x2, exc_int_handler
     csrw mtvec, x2
 
-    // Set up NMI handler address
-    li x3, STDOUT
-    ori x2, x2, LOAD_NMI_ADDR
-    sw x2, 0(x3)
-
     j main
 
 // Write 0xff to STDOUT for TB to terminate test.

@@ -1,9 +1,6 @@
 #define STDOUT 0xd0580000
 
-/* TODO remove this. It's not supported by the testbench mailbox logic */
-#define LOAD_NMI_ADDR 0x81
 /* helper macros that define messages to be written to `STDOUT` to trigger and clear interrupts */
-
 #define CLEAR 0x82
 #define TRIGGER 0x83
 

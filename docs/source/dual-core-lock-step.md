@@ -25,13 +25,13 @@ Outputs and the register file from the main core are delayed by `DELAY` cycles a
 
 ### Error Policy
 
-Depending on the application and its security requirements, one of the following error policies can be configured:
-
-* Detected error will be reported using the detection bit and the cores' execution flow will proceed.
-* Detected error will trigger an interrupt and halt the execution until the interrupt is handled.
-* Detected error will escalate the problem to the external controller and await the reset of the system.
-
-It is up to the integrator to choose the error policy and provide a handler logic (e.g. external reset block).
+The Dual Core Lockstep module will report an error when detected by asserting a single bit output signal.
+It is up to the integrator to provide a logic to handle the detected error.
+The error can be artifficially injected by using [Shadow Core Control](#shadow-core-control) capabilities.
+The corruption error will be reported always when all of the following requirements are met:
+* Input and Output signals of both Main Core and Shadow Core differ OR an error injection feature is enabled,
+* The Shadow Core is out of reset,
+* The Shadow Core is not disabled.
 
 ### Monitored Registers
 

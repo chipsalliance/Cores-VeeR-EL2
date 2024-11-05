@@ -15,3 +15,7 @@
 #define CLEAR_NMI_INT (CLEAR | NMI_INT)
 #define CLEAR_TIMER_INT (CLEAR | TIMER_INT)
 #define CLEAR_SOFT_INT (CLEAR | SOFT_INT)
+
+/* TODO these are not supported but used anyway. Remove them. */
+#define TRIGGER_DBUS_FAULT 0
+#define TRIGGER_IBUS_FAULT 0

@@ -1,7 +1,9 @@
 #include "common.s"
 
 machine_software_interrupt:
+    // put expected mcause in x4
     la x4, 0x80000003
+    // put expected mscause in x5
     li x5, 0x0
     // enable software interrupt
     li x2, 0x8
@@ -10,6 +12,7 @@ machine_software_interrupt:
     li x2, TRIGGER_SOFT_INT
     li x3, STDOUT
     sw x2, 0(x3)
+    li x12, 0x8
     j fail_if_not_serviced
 
 machine_timer_interrupt:

@@ -162,9 +162,7 @@ $(SIM_DIR)/%.log: $(TEST_DIR)/asm_test/%.hex $(TEST_DIR)/asm_test/%.sym $(WORK_D
 	mkdir -p $(basename $@)
 	cp $< $(basename $@)/program.hex
 	cp $(basename $<).sym $(basename $@)/program.sym
-	# The exit code from Vtb_top is ignored because riscv-dv tests are not designed to write pass/fail messages
-	# to the mailbox after the test is done.
-	cd $(basename $@) && $(abspath $(WORK_DIR)/verilator/Vtb_top) --symbols program.sym --mailbox-sym tohost || true
+	cd $(basename $@) && $(abspath $(WORK_DIR)/verilator/Vtb_top) --symbols program.sym --mailbox-sym tohost
 	mv $(basename $@)/exec.log $@
 	if [ -f "$(basename $@)/coverage.dat" ]; then mv $(basename $@)/coverage.dat $(basename $@)-coverage.dat; fi
 

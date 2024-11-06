@@ -987,15 +987,20 @@ module el2_veer_lockstep
 
   // Delay the inputs and outputs
   always_ff @(posedge clk or negedge rst_l) begin
-    if (!rst_l) begin
-      for (int unsigned i = 0; i <= LockstepDelay; i++) begin
-        delay_input_d[i]  <= veer_inputs_t'('0);
-        delay_output_d[i] <= veer_outputs_t'('0);
+      if (~rst_l) begin
+        delay_input_d[0]  <= veer_inputs_t'(0);
+        delay_output_d[0] <= veer_outputs_t'(0);
+      end else begin
+        delay_input_d[0]  <= main_core_inputs;
+        delay_output_d[0] <= main_core_outputs;
       end
-    end else begin
-      delay_input_d[0]  <= main_core_inputs;
-      delay_output_d[0] <= main_core_outputs;
-      for (int unsigned i = 0; i <= LockstepDelay; i++) begin
+    end
+  for (genvar i = 0; i < LockstepDelay; i++) begin
+    always_ff @(posedge clk or negedge rst_l) begin
+      if (!rst_l) begin
+          delay_input_d[i+1]  <= veer_inputs_t'(0);
+          delay_output_d[i+1] <= veer_outputs_t'(0);
+      end else begin
         delay_input_d[i+1]  <= delay_input_d[i];
         delay_output_d[i+1] <= delay_output_d[i];
       end

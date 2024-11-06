@@ -716,9 +716,6 @@ module tb_top
     integer fd, tp, el;
     logic next_dbus_error;
     logic next_ibus_error;
-    logic [1:0] lsu_axi_rresp_override;
-    logic [1:0] lsu_axi_bresp_override;
-    logic [1:0] ifu_axi_rresp_override;
 
     always @(negedge core_clk) begin
         cycleCnt <= cycleCnt+1;
@@ -745,8 +742,10 @@ module tb_top
                 nmi_assert_int <= 4'b1111;
             end
             if (mailbox_data[7:0] == 8'h81) begin
-                if (mailbox_data[15:8] > 0 && mailbox_data[15:8] < pt.PIC_TOTAL_INT)
+                if (mailbox_data[15:8] > 0 && mailbox_data[15:8] < pt.PIC_TOTAL_INT) begin
+                    $display("Triggering external interrupt at id %0d", mailbox_data[15:8]);
                     ext_int[mailbox_data[15:8]] <= 1'b1;
+                end
                 nmi_vector[31:1] <= {mailbox_data[31:8], 7'h00};
             end
             if (mailbox_data[7:0] == 8'h82 && nmi_assert_int == 4'b0000) begin
@@ -1027,7 +1026,7 @@ veer_wrapper rvtop_wrapper (
 
     .lsu_axi_bvalid         (lsu_axi_bvalid),
     .lsu_axi_bready         (lsu_axi_bready),
-    .lsu_axi_bresp          (lsu_axi_bresp_override),
+    .lsu_axi_bresp          (lsu_axi_bresp),
     .lsu_axi_bid            (lsu_axi_bid),
 
 
@@ -1048,7 +1047,7 @@ veer_wrapper rvtop_wrapper (
     .lsu_axi_rready         (lsu_axi_rready),
     .lsu_axi_rid            (lsu_axi_rid),
     .lsu_axi_rdata          (lsu_axi_rdata),
-    .lsu_axi_rresp          (lsu_axi_rresp_override),
+    .lsu_axi_rresp          (lsu_axi_rresp),
     .lsu_axi_rlast          (lsu_axi_rlast),
 
     //-------------------------- IFU AXI signals--------------------------
@@ -1094,7 +1093,7 @@ veer_wrapper rvtop_wrapper (
     .ifu_axi_rready         (ifu_axi_rready),
     .ifu_axi_rid            (ifu_axi_rid),
     .ifu_axi_rdata          (ifu_axi_rdata),
-    .ifu_axi_rresp          (ifu_axi_rresp_override),
+    .ifu_axi_rresp          (ifu_axi_rresp),
     .ifu_axi_rlast          (ifu_axi_rlast),
 
     //-------------------------- SB AXI signals--------------------------

@@ -156,6 +156,10 @@ module tb_top
     logic [11:0]                wb_csr_dest;
     logic [31:0]                wb_csr_data;
 
+    logic dmi_core_enable;
+
+    always_comb dmi_core_enable = ~(o_cpu_halt_status);
+
    `ifdef RV_OPENOCD_TEST
     // SB and LSU AHB master mux
     ahb_lite_2to1_mux #(
@@ -1302,6 +1306,7 @@ veer_wrapper rvtop_wrapper (
     .scan_mode              ( 1'b0 ),         // To enable scan mode
     .mbist_mode             ( 1'b0 ),        // to enable mbist
 
+    .dmi_core_enable        (dmi_core_enable),
     .dmi_uncore_enable      (),
     .dmi_uncore_en          (),
     .dmi_uncore_wr_en       (),

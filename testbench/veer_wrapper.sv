@@ -350,6 +350,7 @@ module veer_wrapper
     input logic scan_mode,  // To enable scan mode
     input logic mbist_mode,  // to enable mbist
 
+    input  logic        dmi_core_enable,
     // DMI port for uncore
     input  logic        dmi_uncore_enable,
     output logic        dmi_uncore_en,
@@ -378,6 +379,7 @@ module veer_wrapper
 
   el2_veer_wrapper rvtop (
       .el2_mem_export(mem_export.veer_sram_src),
+      .dmi_core_enable(dmi_core_enable),
       .*
   );
 

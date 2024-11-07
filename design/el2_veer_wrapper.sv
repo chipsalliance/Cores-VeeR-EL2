@@ -441,7 +441,8 @@ import el2_pkg::*;
    output logic                            dmi_uncore_wr_en,
    output logic                     [ 6:0] dmi_uncore_addr,
    output logic                     [31:0] dmi_uncore_wdata,
-   input logic                      [31:0] dmi_uncore_rdata
+   input logic                      [31:0] dmi_uncore_rdata,
+   output logic                            dmi_active
    /* verilator coverage_on */
 );
 
@@ -929,6 +930,8 @@ import el2_pkg::*;
     .dmi_uncore_wdata   (dmi_uncore_wdata),
     .dmi_uncore_rdata   (dmi_uncore_rdata)
    );
+
+   always_comb dmi_active = dmi_en;
 
 `ifdef RV_ASSERT_ON
   // to avoid internal assertions failure at time 0

@@ -1312,7 +1312,8 @@ veer_wrapper rvtop_wrapper (
     .dmi_uncore_wr_en       (),
     .dmi_uncore_addr        (),
     .dmi_uncore_wdata       (),
-    .dmi_uncore_rdata       ()
+    .dmi_uncore_rdata       (),
+    .dmi_active             ()
 
 );
 

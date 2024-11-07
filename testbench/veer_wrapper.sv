@@ -357,7 +357,9 @@ module veer_wrapper
     output logic        dmi_uncore_wr_en,
     output logic [ 6:0] dmi_uncore_addr,
     output logic [31:0] dmi_uncore_wdata,
-    input  logic [31:0] dmi_uncore_rdata
+    input  logic [31:0] dmi_uncore_rdata,
+
+    output logic        dmi_active
 );
 
   el2_mem_if mem_export ();
@@ -380,6 +382,7 @@ module veer_wrapper
   el2_veer_wrapper rvtop (
       .el2_mem_export(mem_export.veer_sram_src),
       .dmi_core_enable(dmi_core_enable),
+      .dmi_active(dmi_active),
       .*
   );
 

@@ -16,7 +16,8 @@
 #define CLEAR_TIMER_INT (CLEAR | TIMER_INT)
 #define CLEAR_SOFT_INT (CLEAR | SOFT_INT)
 
-#define TRIGGER_EXT_INT1 0x86
+#define TRIGGER_EXT_INT1 (0x81 | 1<<8)
+#define CLEAR_EXT_INT1 (0x80 | 1<<8)
 /* TODO these are not supported but used anyway. Remove them. */
 #define TRIGGER_DBUS_FAULT 0
 #define TRIGGER_IBUS_FAULT 0

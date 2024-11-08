@@ -865,10 +865,6 @@ module tb_top
         `endif
     end
 
-    // nmi_int must be asserted for at least two clock cycles and then deasserted for
-    // at least two clock cycles - see RISC-V VeeR EL2 Programmer's Reference Manual section 2.16
-    assign nmi_int = |{nmi_assert_int[3:2]};
-
     // trace monitor
     always @(posedge core_clk) begin
         wb_valid      <= `DEC.dec_i0_wen_r;
@@ -938,8 +934,8 @@ module tb_top
 
         ext_int     = {pt.PIC_TOTAL_INT-1{1'b0}};
         nmi_int     = 0;
-        timer_int   = 0;
         soft_int    = 0;
+        timer_int   = 0;
 
     // tie offs
         jtag_id[31:28] = 4'b1;
@@ -947,9 +943,6 @@ module tb_top
         jtag_id[11:1]  = 11'h45;
         reset_vector = `RV_RESET_VEC;
         nmi_vector   = 32'hee000000;
-        nmi_int   = 0;
-        soft_int  = 0;
-        timer_int = 0;
         extintsrc_req = 0;
 
         $readmemh("program.hex",  lmem.mem);

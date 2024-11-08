@@ -387,6 +387,8 @@ import el2_pkg::*;
    output logic                            dccm_ecc_single_error,
    output logic                            dccm_ecc_double_error,
 
+   // ICache export interface
+   el2_mem_if.veer_icache_src              el2_icache_export,
  // all of these test inputs are brought to top-level; must be tied off based on usage by physical design (ie. icache or not, iccm or not, dccm or not)
 
    input                                   el2_ic_data_ext_in_pkt_t  [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] ic_data_ext_in_pkt,
@@ -882,6 +884,7 @@ import el2_pkg::*;
                              .clk(active_l2clk),
                              .rst_l(core_rst_l),
                              .mem_export(el2_mem_export),
+                             .icache_export(el2_icache_export),
                              .*
                              );
 

@@ -327,6 +327,25 @@ module veer_wrapper
     input logic [pt.DCCM_NUM_BANKS-1:0][pt.DCCM_DATA_WIDTH-1:0] dccm_bank_dout,
     input logic [pt.DCCM_NUM_BANKS-1:0][pt.DCCM_FDATA_WIDTH-pt.DCCM_DATA_WIDTH-1:0] dccm_bank_ecc,
 
+    // ICache Export Interface
+    // ICache Data
+    output logic [pt.ICACHE_BANKS_WAY-1:0][pt.ICACHE_NUM_WAYS-1:0]                        ic_b_sb_wren,
+    output logic [pt.ICACHE_BANKS_WAY-1:0][(71*pt.ICACHE_NUM_WAYS)-1:0]                   ic_b_sb_bit_en_vec,
+    output logic [pt.ICACHE_BANKS_WAY-1:0][70:0]                                          ic_sb_wr_data,
+    output logic [pt.ICACHE_BANKS_WAY-1:0][pt.ICACHE_INDEX_HI : pt.ICACHE_DATA_INDEX_LO]  ic_rw_addr_bank_q,
+    output logic [pt.ICACHE_BANKS_WAY-1:0]                                                ic_bank_way_clken_final,
+    output logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0]                        ic_bank_way_clken_final_up,
+    input logic [pt.ICACHE_BANKS_WAY-1:0][(71*pt.ICACHE_NUM_WAYS)-1:0]                    wb_packeddout_pre,
+    input logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0][71-1:0]                 wb_dout_pre_up,
+    // ICache Tag
+    output logic [pt.ICACHE_NUM_WAYS-1:0]                ic_tag_clken_final,
+    output logic [pt.ICACHE_NUM_WAYS-1:0]                ic_tag_wren_q,
+    output logic [(26*pt.ICACHE_NUM_WAYS)-1 :0]           ic_tag_wren_biten_vec,
+    output logic [25:0]                                       ic_tag_wr_data,
+    output logic [pt.ICACHE_INDEX_HI: pt.ICACHE_TAG_INDEX_LO] ic_rw_addr_q,
+    input logic [pt.ICACHE_NUM_WAYS-1:0] [25:0]               ic_tag_data_raw_pre,
+    input logic [(26*pt.ICACHE_NUM_WAYS)-1 :0]           ic_tag_data_raw_packed_pre,
+
     // ICCM/DCCM ECC status
     output logic iccm_ecc_single_error,
     output logic iccm_ecc_double_error,
@@ -378,9 +397,27 @@ module veer_wrapper
   assign iccm_bank_wr_ecc          = mem_export.iccm_bank_wr_ecc;
   assign mem_export.iccm_bank_dout = iccm_bank_dout;
   assign mem_export.iccm_bank_ecc  = iccm_bank_ecc;
+  // ICache Data
+  assign ic_b_sb_wren = mem_export.ic_b_sb_wren;
+  assign ic_b_sb_bit_en_vec = mem_export.ic_b_sb_bit_en_vec;
+  assign ic_sb_wr_data = mem_export.ic_sb_wr_data;
+  assign ic_rw_addr_bank_q = mem_export.ic_rw_addr_bank_q;
+  assign ic_bank_way_clken_final = mem_export.ic_bank_way_clken_final;
+  assign ic_bank_way_clken_final_up = mem_export.ic_bank_way_clken_final_up;
+  assign mem_export.wb_packeddout_pre = wb_packeddout_pre;
+  assign mem_export.wb_dout_pre_up = wb_dout_pre_up;
+  // ICache Data
+  assign ic_tag_clken_final = mem_export.ic_tag_clken_final;
+  assign ic_tag_wren_q = mem_export.ic_tag_wren_q;
+  assign ic_tag_wren_biten_vec = mem_export.ic_tag_wren_biten_vec;
+  assign ic_tag_wr_data = mem_export.ic_tag_wr_data;
+  assign ic_rw_addr_q = mem_export.ic_rw_addr_q;
+  assign mem_export.ic_tag_data_raw_packed_pre = ic_tag_data_raw_packed_pre;
+  assign mem_export.ic_tag_data_raw_pre = ic_tag_data_raw_pre;
 
   el2_veer_wrapper rvtop (
       .el2_mem_export(mem_export.veer_sram_src),
+      .el2_icache_export(mem_export.veer_icache),
       .dmi_core_enable(dmi_core_enable),
       .dmi_active(dmi_active),
       .*

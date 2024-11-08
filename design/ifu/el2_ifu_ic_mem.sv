@@ -17,6 +17,7 @@
 ////////////////////////////////////////////////////
 //   ICACHE DATA & TAG MODULE WRAPPER              //
 /////////////////////////////////////////////////////
+`include "el2_ifu_ic_macros.svh"
 module el2_ifu_ic_mem
 import el2_pkg::*;
  #(
@@ -49,6 +50,8 @@ import el2_pkg::*;
       output logic [pt.ICACHE_BANKS_WAY-1:0]        ic_eccerr,          // ecc error per bank
       output logic [pt.ICACHE_BANKS_WAY-1:0]        ic_parerr,          // ecc error per bank
       input logic [pt.ICACHE_NUM_WAYS-1:0]          ic_tag_valid,       // Valid from the I$ tag valid outside (in flops).
+
+      el2_mem_if.veer_icache_src icache_export,
       input el2_ic_data_ext_in_pkt_t [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] ic_data_ext_in_pkt,   // this is being driven by the top level for soc testing/etc
       input el2_ic_tag_ext_in_pkt_t  [pt.ICACHE_NUM_WAYS-1:0]                          ic_tag_ext_in_pkt,    // this is being driven by the top level for soc testing/etc
 
@@ -66,6 +69,7 @@ import el2_pkg::*;
    EL2_IC_TAG #(.pt(pt)) ic_tag_inst
           (
            .*,
+           .icache_export(icache_export),
            .ic_wr_en     (ic_wr_en[pt.ICACHE_NUM_WAYS-1:0]),
            .ic_debug_addr(ic_debug_addr[pt.ICACHE_INDEX_HI:3]),
            .ic_rw_addr   (ic_rw_addr[31:3])
@@ -74,6 +78,7 @@ import el2_pkg::*;
    EL2_IC_DATA #(.pt(pt)) ic_data_inst
           (
            .*,
+           .icache_export(icache_export),
            .ic_wr_en     (ic_wr_en[pt.ICACHE_NUM_WAYS-1:0]),
            .ic_debug_addr(ic_debug_addr[pt.ICACHE_INDEX_HI:3]),
            .ic_rw_addr   (ic_rw_addr[31:1])
@@ -115,6 +120,7 @@ import el2_pkg::*;
       input logic                            ic_sel_premux_data,  // Select the pre_muxed data
 
       input logic [pt.ICACHE_NUM_WAYS-1:0]ic_rd_hit,
+      el2_mem_if.veer_icache_src             icache_export,
       input el2_ic_data_ext_in_pkt_t  [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] ic_data_ext_in_pkt,   // this is being driven by the top level for soc testing/etc
       // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
       /*verilator coverage_off*/
@@ -191,6 +197,15 @@ import el2_pkg::*;
    logic                                                                          ic_rw_addr_wrap, ic_cacheline_wrap_ff;
    logic                                                                          ic_debug_rd_en_ff;
 
+   // Use exported ICache interface. Some signals are assigned here, some in the blocks below.
+   always_comb begin
+      icache_export.ic_b_sb_wren = ic_b_sb_wren;
+      icache_export.ic_sb_wr_data = ic_sb_wr_data;
+      icache_export.ic_rw_addr_bank_q = ic_rw_addr_bank_q;
+      icache_export.ic_bank_way_clken_final =ic_bank_way_clken_final_up;
+      icache_export.ic_bank_way_clken_final_up =ic_bank_way_clken_final_up;
+   end
+
 
 //-----------------------------------------------------------
 // ----------- Logic section starts here --------------------
@@ -255,134 +270,75 @@ import el2_pkg::*;
     logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0]                                 any_bypass_up;
     logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0]                                 any_addr_match_up;
 
-`define EL2_IC_DATA_SRAM(depth,width)                                                                               \
-           ram_``depth``x``width ic_bank_sb_way_data (                                                               \
-                                     .ME(ic_bank_way_clken_final_up[i][k]),                                          \
-                                     .WE (ic_b_sb_wren[k][i]),                                                       \
-                                     .D  (ic_sb_wr_data[k][``width-1:0]),                                            \
-                                     .ADR(ic_rw_addr_bank_q[k][pt.ICACHE_INDEX_HI:pt.ICACHE_DATA_INDEX_LO]),         \
-                                     .Q  (wb_dout_pre_up[i][k]),                                                     \
-                                     .CLK (clk),                                                                     \
-                                     .ROP ( ),                                                                       \
-                                     .TEST1(ic_data_ext_in_pkt[i][k].TEST1),                                         \
-                                     .RME(ic_data_ext_in_pkt[i][k].RME),                                             \
-                                     .RM(ic_data_ext_in_pkt[i][k].RM),                                               \
-                                                                                                                     \
-                                     .LS(ic_data_ext_in_pkt[i][k].LS),                                               \
-                                     .DS(ic_data_ext_in_pkt[i][k].DS),                                               \
-                                     .SD(ic_data_ext_in_pkt[i][k].SD),                                               \
-                                                                                                                     \
-                                     .TEST_RNM(ic_data_ext_in_pkt[i][k].TEST_RNM),                                   \
-                                     .BC1(ic_data_ext_in_pkt[i][k].BC1),                                             \
-                                     .BC2(ic_data_ext_in_pkt[i][k].BC2)                                              \
-                                    );  \
-if (pt.ICACHE_BYPASS_ENABLE == 1) begin \
-                 assign wrptr_in_up[i][k] = (wrptr_up[i][k] == (pt.ICACHE_NUM_BYPASS-1)) ? '0 : (wrptr_up[i][k] + 1'd1);                                    \
-                 rvdffs  #(pt.ICACHE_NUM_BYPASS_WIDTH)  wrptr_ff(.*, .clk(active_clk),  .en(|write_bypass_en_up[i][k]), .din (wrptr_in_up[i][k]), .dout(wrptr_up[i][k])) ;     \
-                 assign ic_b_sram_en_up[i][k]              = ic_bank_way_clken[k][i];                             \
-                 assign ic_b_read_en_up[i][k]              =  ic_b_sram_en_up[i][k] &   ic_b_sb_rden[k][i];       \
-                 assign ic_b_write_en_up[i][k]             =  ic_b_sram_en_up[i][k] &   ic_b_sb_wren[k][i];       \
-                 assign ic_bank_way_clken_final_up[i][k]   =  ic_b_sram_en_up[i][k] &    ~(|sel_bypass_up[i][k]); \
-                 assign ic_b_rw_addr_up[i][k] = {ic_rw_addr[31:pt.ICACHE_INDEX_HI+1],ic_rw_addr_bank_q[k]};       \
-                 assign ic_b_rw_addr_index_only_up[i][k] = ic_rw_addr_bank_q[k];                                  \
-                 always_comb begin                                                                                \
-                    any_addr_match_up[i][k] = '0;                                                                 \
-                    for (int l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin                                              \
-                       any_addr_match_up[i][k] |= ic_b_addr_match_up[i][k][l];                                    \
-                    end                                                                                           \
-                 end                                                                                              \
-                // it is an error to ever have 2 entries with the same index and both valid                       \
-                for (genvar l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin: BYPASS                                       \
-                   // full match up to bit 31                                                                     \
-                   assign ic_b_addr_match_up[i][k][l] = (wb_index_hold_up[i][k][l] ==  ic_b_rw_addr_up[i][k]) & index_valid_up[i][k][l];            \
-                   assign ic_b_addr_match_index_only_up[i][k][l] = (wb_index_hold_up[i][k][l][pt.ICACHE_INDEX_HI:pt.ICACHE_DATA_INDEX_LO] ==  ic_b_rw_addr_index_only_up[i][k]) & index_valid_up[i][k][l];            \
-                                                                                                                                                    \
-                   assign ic_b_clear_en_up[i][k][l]   = ic_b_write_en_up[i][k] &   ic_b_addr_match_index_only_up[i][k][l];                                     \
-                                                                                                                                                    \
-                   assign sel_bypass_up[i][k][l]      = ic_b_read_en_up[i][k]  &   ic_b_addr_match_up[i][k][l] ;                                    \
-                                                                                                                                                    \
-                   assign write_bypass_en_up[i][k][l] = ic_b_read_en_up[i][k]  &  ~any_addr_match_up[i][k] & (wrptr_up[i][k] == l);                 \
-                                                                                                                                                    \
-                   rvdff  #(1)  write_bypass_ff (.*, .clk(active_clk),                                                                 .din(write_bypass_en_up[i][k][l]), .dout(write_bypass_en_ff_up[i][k][l])) ; \
-                   rvdffs #(1)  index_val_ff    (.*, .clk(active_clk), .en(write_bypass_en_up[i][k][l] | ic_b_clear_en_up[i][k][l]),   .din(~ic_b_clear_en_up[i][k][l]),  .dout(index_valid_up[i][k][l])) ;       \
-                   rvdff  #(1)  sel_hold_ff     (.*, .clk(active_clk),                                                                 .din(sel_bypass_up[i][k][l]),      .dout(sel_bypass_ff_up[i][k][l])) ;     \
-                   rvdffe #((31-pt.ICACHE_DATA_INDEX_LO+1)) ic_addr_index    (.*, .en(write_bypass_en_up[i][k][l]),    .din (ic_b_rw_addr_up[i][k]), .dout(wb_index_hold_up[i][k][l]));         \
-                   rvdffe #(``width)                             rd_data_hold_ff  (.*, .en(write_bypass_en_ff_up[i][k][l]), .din (wb_dout_pre_up[i][k]),  .dout(wb_dout_hold_up[i][k][l]));     \
-                end                                                                                                                       \
-                always_comb begin                                                                                                         \
-                 any_bypass_up[i][k] = '0;                                                                                                \
-                 sel_bypass_data_up[i][k] = '0;                                                                                           \
-                 for (int l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin                                                                         \
-                    any_bypass_up[i][k]      |=  sel_bypass_ff_up[i][k][l];                                                               \
-                    sel_bypass_data_up[i][k] |= (sel_bypass_ff_up[i][k][l]) ? wb_dout_hold_up[i][k][l] : '0;                              \
-                 end                                                                                                                      \
-                 wb_dout[i][k]   =   any_bypass_up[i][k] ?  sel_bypass_data_up[i][k] :  wb_dout_pre_up[i][k] ;                            \
-                 end                                                                                                                      \
-             end                                                                                                                          \
-             else begin                                                                                                                   \
-                 assign wb_dout[i][k]                      =   wb_dout_pre_up[i][k] ;                                                     \
-                 assign ic_bank_way_clken_final_up[i][k]   =  ic_bank_way_clken[k][i];                                                    \
-             end
-
-
    for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: WAYS
       for (genvar k=0; k<pt.ICACHE_BANKS_WAY; k++) begin: BANKS_WAY   // 16B subbank
       if (pt.ICACHE_ECC) begin : ECC1
         logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] [71-1:0]        wb_dout_pre_up;           // data and its bit enables
         logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] [pt.ICACHE_NUM_BYPASS-1:0] [71-1:0]  wb_dout_hold_up;
 
+        // Use exported ICache interface.
+        always_comb begin
+           wb_dout_pre_up = icache_export.wb_dout_pre_up;
+        end
+
         if ($clog2(pt.ICACHE_DATA_DEPTH) == 13 )   begin : size_8192
-           `EL2_IC_DATA_SRAM(8192,71)
+           `EL2_IC_DATA_SRAM_LOGIC(8192,71)
         end
         else if ($clog2(pt.ICACHE_DATA_DEPTH) == 12 )   begin : size_4096
-           `EL2_IC_DATA_SRAM(4096,71)
+           `EL2_IC_DATA_SRAM_LOGIC(4096,71)
         end
         else if ($clog2(pt.ICACHE_DATA_DEPTH) == 11 ) begin : size_2048
-           `EL2_IC_DATA_SRAM(2048,71)
+           `EL2_IC_DATA_SRAM_LOGIC(2048,71)
         end
         else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 10 ) begin : size_1024
-           `EL2_IC_DATA_SRAM(1024,71)
+           `EL2_IC_DATA_SRAM_LOGIC(1024,71)
         end
         else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 9 ) begin : size_512
-           `EL2_IC_DATA_SRAM(512,71)
+           `EL2_IC_DATA_SRAM_LOGIC(512,71)
         end
          else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 8 ) begin : size_256
-           `EL2_IC_DATA_SRAM(256,71)
+           `EL2_IC_DATA_SRAM_LOGIC(256,71)
          end
          else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 7 ) begin : size_128
-           `EL2_IC_DATA_SRAM(128,71)
+           `EL2_IC_DATA_SRAM_LOGIC(128,71)
          end
          else  begin : size_64
-           `EL2_IC_DATA_SRAM(64,71)
+           `EL2_IC_DATA_SRAM_LOGIC(64,71)
          end
       end // if (pt.ICACHE_ECC)
 
      else  begin  : ECC0
         logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] [68-1:0]        wb_dout_pre_up;           // data and its bit enables
         logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] [pt.ICACHE_NUM_BYPASS-1:0] [68-1:0]  wb_dout_hold_up;
+
+        // Use exported ICache interface.
+        always_comb begin
+           wb_dout_pre_up = icache_export.wb_dout_pre_up;
+        end
+
         if ($clog2(pt.ICACHE_DATA_DEPTH) == 13 )   begin : size_8192
-           `EL2_IC_DATA_SRAM(8192,68)
+           `EL2_IC_DATA_SRAM_LOGIC(8192,68)
         end
         else if ($clog2(pt.ICACHE_DATA_DEPTH) == 12 )   begin : size_4096
-           `EL2_IC_DATA_SRAM(4096,68)
+           `EL2_IC_DATA_SRAM_LOGIC(4096,68)
         end
         else if ($clog2(pt.ICACHE_DATA_DEPTH) == 11 ) begin : size_2048
-           `EL2_IC_DATA_SRAM(2048,68)
+           `EL2_IC_DATA_SRAM_LOGIC(2048,68)
         end
         else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 10 ) begin : size_1024
-           `EL2_IC_DATA_SRAM(1024,68)
+           `EL2_IC_DATA_SRAM_LOGIC(1024,68)
         end
         else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 9 ) begin : size_512
-           `EL2_IC_DATA_SRAM(512,68)
+           `EL2_IC_DATA_SRAM_LOGIC(512,68)
         end
          else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 8 ) begin : size_256
-           `EL2_IC_DATA_SRAM(256,68)
+           `EL2_IC_DATA_SRAM_LOGIC(256,68)
          end
          else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 7 ) begin : size_128
-           `EL2_IC_DATA_SRAM(128,68)
+           `EL2_IC_DATA_SRAM_LOGIC(128,68)
          end
          else  begin : size_64
-           `EL2_IC_DATA_SRAM(64,68)
+           `EL2_IC_DATA_SRAM_LOGIC(64,68)
          end
       end // else: !if(pt.ICACHE_ECC)
       end // block: BANKS_WAY
@@ -403,102 +359,18 @@ if (pt.ICACHE_BYPASS_ENABLE == 1) begin \
     logic [pt.ICACHE_BANKS_WAY-1:0]                               any_bypass;
     logic [pt.ICACHE_BANKS_WAY-1:0]                               any_addr_match;
 
-
-// SRAM macros
-
-`define EL2_PACKED_IC_DATA_SRAM(depth,width,waywidth)                                                                                                 \
-            ram_be_``depth``x``width  ic_bank_sb_way_data (                                                                                           \
-                            .CLK   (clk),                                                                                                             \
-                            .WE    (|ic_b_sb_wren[k]),                                                    // OR of all the ways in the bank           \
-                            .WEM   (ic_b_sb_bit_en_vec[k]),                                               // 284 bits of bit enables                  \
-                            .D     ({pt.ICACHE_NUM_WAYS{ic_sb_wr_data[k][``waywidth-1:0]}}),                                                          \
-                            .ADR   (ic_rw_addr_bank_q[k][pt.ICACHE_INDEX_HI:pt.ICACHE_DATA_INDEX_LO]),                                                \
-                            .Q     (wb_packeddout_pre[k]),                                                                                            \
-                            .ME    (|ic_bank_way_clken_final[k]),                                                                                     \
-                            .ROP   ( ),                                                                                                               \
-                            .TEST1  (ic_data_ext_in_pkt[0][k].TEST1),                                                                                 \
-                            .RME   (ic_data_ext_in_pkt[0][k].RME),                                                                                    \
-                            .RM    (ic_data_ext_in_pkt[0][k].RM),                                                                                     \
-                                                                                                                                                      \
-                            .LS    (ic_data_ext_in_pkt[0][k].LS),                                                                                     \
-                            .DS    (ic_data_ext_in_pkt[0][k].DS),                                                                                     \
-                            .SD    (ic_data_ext_in_pkt[0][k].SD),                                                                                     \
-                                                                                                                                                      \
-                            .TEST_RNM (ic_data_ext_in_pkt[0][k].TEST_RNM),                                                                            \
-                            .BC1      (ic_data_ext_in_pkt[0][k].BC1),                                                                                 \
-                            .BC2      (ic_data_ext_in_pkt[0][k].BC2)                                                                                  \
-                           );                                                                                                                         \
-                                                                                                                                                      \
-              if (pt.ICACHE_BYPASS_ENABLE == 1) begin                                                                                                                                                 \
-                                                                                                                                                                                                      \
-                 assign wrptr_in[k] = (wrptr[k] == (pt.ICACHE_NUM_BYPASS-1)) ? '0 : (wrptr[k] + 1'd1);                                                                                                \
-                                                                                                                                                                                                      \
-                 rvdffs  #(pt.ICACHE_NUM_BYPASS_WIDTH)  wrptr_ff(.*, .clk(active_clk), .en(|write_bypass_en[k]), .din (wrptr_in[k]), .dout(wrptr[k])) ;                                                                       \
-                                                                                                                                                                                                      \
-                 assign ic_b_sram_en[k]              = |ic_bank_way_clken[k];                                                                                                                         \
-                                                                                                                                                                                                      \
-                                                                                                                                                                                                      \
-                 assign ic_b_read_en[k]              =  ic_b_sram_en[k]  &  (|ic_b_sb_rden[k]) ;                                                                                                              \
-                 assign ic_b_write_en[k]             =  ic_b_sram_en[k] &   (|ic_b_sb_wren[k]);                                                                                                       \
-                 assign ic_bank_way_clken_final[k]   =  ic_b_sram_en[k] &    ~(|sel_bypass[k]);                                                                                                       \
-                                                                                                                                                                                                      \
-                 assign ic_b_rw_addr[k] = {ic_rw_addr[31:pt.ICACHE_INDEX_HI+1],ic_rw_addr_bank_q[k]};                                                                                                 \
-                 assign ic_b_rw_addr_index_only[k] = ic_rw_addr_bank_q[k];                                                                                                    \
-                                                                                                                                                                                                      \
-                 always_comb begin                                                                                                                                                                    \
-                    any_addr_match[k] = '0;                                                                                                                                                           \
-                                                                                                                                                                                                      \
-                    for (int l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin                                                                                                                                  \
-                       any_addr_match[k] |= ic_b_addr_match[k][l];                                                                                                                                    \
-                    end                                                                                                                                                                               \
-                 end                                                                                                                                                                                  \
-                                                                                                                                                                                                      \
-                // it is an error to ever have 2 entries with the same index and both valid                                                                                                           \
-                for (genvar l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin: BYPASS                                                                                                                           \
-                                                                                                                                                                                                      \
-                   // full match up to bit 31                                                                                                                                                         \
-                   assign ic_b_addr_match[k][l] = (wb_index_hold[k][l] ==  ic_b_rw_addr[k]) & index_valid[k][l];                                                                                      \
-                   assign ic_b_addr_match_index_only[k][l] = (wb_index_hold[k][l][pt.ICACHE_INDEX_HI:pt.ICACHE_DATA_INDEX_LO] ==  ic_b_rw_addr_index_only[k]) & index_valid[k][l];                    \
-                                                                                                                                                                                                      \
-                   assign ic_b_clear_en[k][l]   = ic_b_write_en[k] &   ic_b_addr_match_index_only[k][l];                                                                                                              \
-                                                                                                                                                                                                      \
-                   assign sel_bypass[k][l]      = ic_b_read_en[k]  &   ic_b_addr_match[k][l] ;                                                                                                        \
-                                                                                                                                                                                                      \
-                   assign write_bypass_en[k][l] = ic_b_read_en[k]  &  ~any_addr_match[k] & (wrptr[k] == l);                                                                                           \
-                                                                                                                                                                                                      \
-                   rvdff  #(1)  write_bypass_ff (.*, .clk(active_clk),                                                     .din(write_bypass_en[k][l]), .dout(write_bypass_en_ff[k][l])) ;                            \
-                   rvdffs #(1)  index_val_ff    (.*, .clk(active_clk), .en(write_bypass_en[k][l] | ic_b_clear_en[k][l]),   .din(~ic_b_clear_en[k][l]),  .dout(index_valid[k][l])) ;                                   \
-                   rvdff  #(1)  sel_hold_ff     (.*, .clk(active_clk),                                                     .din(sel_bypass[k][l]),      .dout(sel_bypass_ff[k][l])) ;                                 \
-                                                                                                                                                                                                      \
-                   rvdffe #((31-pt.ICACHE_DATA_INDEX_LO+1)) ic_addr_index    (.*, .en(write_bypass_en[k][l]),    .din (ic_b_rw_addr[k]),      .dout(wb_index_hold[k][l]));                            \
-                   rvdffe #((``waywidth*pt.ICACHE_NUM_WAYS))        rd_data_hold_ff  (.*, .en(write_bypass_en_ff[k][l]), .din (wb_packeddout_pre[k]), .dout(wb_packeddout_hold[k][l]));                       \
-                                                                                                                                                                                                      \
-                end // block: BYPASS                                                                                                                                                                  \
-                                                                                                                                                                                                      \
-                always_comb begin                                                                                                                                                                     \
-                 any_bypass[k] = '0;                                                                                                                                                                  \
-                 sel_bypass_data[k] = '0;                                                                                                                                                             \
-                                                                                                                                                                                                      \
-                 for (int l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin                                                                                                                                     \
-                    any_bypass[k]      |=  sel_bypass_ff[k][l];                                                                                                                                       \
-                      sel_bypass_data[k] |= (sel_bypass_ff[k][l]) ? wb_packeddout_hold[k][l] : '0;                                                                                                    \
-                 end                                                                                                                                                                                  \
-                                                                                                                                                                                                      \
-                   wb_packeddout[k]   =   any_bypass[k] ?  sel_bypass_data[k] :  wb_packeddout_pre[k] ;                                                                                               \
-                end // always_comb begin                                                                                                                                                              \
-                                                                                                                                                                                                      \
-             end // if (pt.ICACHE_BYPASS_ENABLE == 1)                                                                                                                                                 \
-             else begin                                                                                                                                                                               \
-                 assign wb_packeddout[k]   =   wb_packeddout_pre[k] ;                                                                                                                                 \
-                 assign ic_bank_way_clken_final[k]   =  |ic_bank_way_clken[k] ;                                                                                                                       \
-             end
-
  // generate IC DATA PACKED SRAMS for 2/4 ways
   for (genvar k=0; k<pt.ICACHE_BANKS_WAY; k++) begin: BANKS_WAY   // 16B subbank
      if (pt.ICACHE_ECC) begin : ECC1
         logic [pt.ICACHE_BANKS_WAY-1:0] [(71*pt.ICACHE_NUM_WAYS)-1:0]        wb_packeddout, ic_b_sb_bit_en_vec, wb_packeddout_pre;           // data and its bit enables
 
         logic [pt.ICACHE_BANKS_WAY-1:0] [pt.ICACHE_NUM_BYPASS-1:0] [(71*pt.ICACHE_NUM_WAYS)-1:0]  wb_packeddout_hold;
+
+        // Use exported ICache interface.
+        always_comb begin
+           icache_export.ic_b_sb_bit_en_vec = ic_b_sb_bit_en_vec;
+           wb_packeddout_pre = icache_export.wb_packeddout_pre;
+        end
 
         for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: BITEN
            assign ic_b_sb_bit_en_vec[k][(71*i)+70:71*i] = {71{ic_b_sb_wren[k][i]}};
@@ -507,73 +379,73 @@ if (pt.ICACHE_BYPASS_ENABLE == 1) begin \
         // SRAMS with ECC (single/double detect; no correct)
         if ($clog2(pt.ICACHE_DATA_DEPTH) == 13 )   begin : size_8192
            if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(8192,284,71)    // 64b data + 7b ecc
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(8192,284,71)    // 64b data + 7b ecc
            end // block: WAYS
            else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(8192,142,71)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(8192,142,71)
            end // block: WAYS
         end // block: size_8192
 
         else if ($clog2(pt.ICACHE_DATA_DEPTH) == 12 )   begin : size_4096
            if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(4096,284,71)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(4096,284,71)
            end // block: WAYS
            else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(4096,142,71)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(4096,142,71)
            end // block: WAYS
         end // block: size_4096
 
         else if ($clog2(pt.ICACHE_DATA_DEPTH) == 11 ) begin : size_2048
            if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(2048,284,71)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(2048,284,71)
            end // block: WAYS
            else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(2048,142,71)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(2048,142,71)
            end // block: WAYS
         end // block: size_2048
 
         else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 10 ) begin : size_1024
            if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(1024,284,71)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(1024,284,71)
            end // block: WAYS
            else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(1024,142,71)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(1024,142,71)
            end // block: WAYS
         end // block: size_1024
 
         else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 9 ) begin : size_512
            if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(512,284,71)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(512,284,71)
            end // block: WAYS
            else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(512,142,71)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(512,142,71)
            end // block: WAYS
         end // block: size_512
 
         else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 8 ) begin : size_256
            if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(256,284,71)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(256,284,71)
            end // block: WAYS
            else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(256,142,71)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(256,142,71)
            end // block: WAYS
         end // block: size_256
 
         else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 7 ) begin : size_128
            if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(128,284,71)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(128,284,71)
            end // block: WAYS
            else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(128,142,71)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(128,142,71)
            end // block: WAYS
         end // block: size_128
 
         else  begin : size_64
            if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(64,284,71)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(64,284,71)
            end // block: WAYS
            else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(64,142,71)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(64,142,71)
            end // block: WAYS
         end // block: size_64
 
@@ -590,6 +462,12 @@ if (pt.ICACHE_BYPASS_ENABLE == 1) begin \
 
         logic [pt.ICACHE_BANKS_WAY-1:0] [pt.ICACHE_NUM_BYPASS-1:0] [(68*pt.ICACHE_NUM_WAYS)-1:0]  wb_packeddout_hold;
 
+        // Use exported ICache interface.
+        always_comb begin
+           icache_export.ic_b_sb_bit_en_vec = ic_b_sb_bit_en_vec;
+           wb_packeddout_pre = icache_export.wb_packeddout_pre;
+        end
+
         for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: BITEN
            assign ic_b_sb_bit_en_vec[k][(68*i)+67:68*i] = {68{ic_b_sb_wren[k][i]}};
         end
@@ -597,73 +475,73 @@ if (pt.ICACHE_BYPASS_ENABLE == 1) begin \
         // SRAMs with parity
         if ($clog2(pt.ICACHE_DATA_DEPTH) == 13 )   begin : size_8192
            if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(8192,272,68)    // 64b data + 4b parity
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(8192,272,68)    // 64b data + 4b parity
            end // block: WAYS
            else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(8192,136,68)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(8192,136,68)
            end // block: WAYS
         end // block: size_8192
 
         else if ($clog2(pt.ICACHE_DATA_DEPTH) == 12 )   begin : size_4096
            if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(4096,272,68)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(4096,272,68)
            end // block: WAYS
            else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(4096,136,68)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(4096,136,68)
            end // block: WAYS
         end // block: size_4096
 
         else if ($clog2(pt.ICACHE_DATA_DEPTH) == 11 ) begin : size_2048
            if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(2048,272,68)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(2048,272,68)
            end // block: WAYS
            else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(2048,136,68)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(2048,136,68)
            end // block: WAYS
         end // block: size_2048
 
         else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 10 ) begin : size_1024
            if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(1024,272,68)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(1024,272,68)
            end // block: WAYS
            else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(1024,136,68)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(1024,136,68)
            end // block: WAYS
         end // block: size_1024
 
         else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 9 ) begin : size_512
            if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(512,272,68)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(512,272,68)
            end // block: WAYS
            else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(512,136,68)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(512,136,68)
            end // block: WAYS
         end // block: size_512
 
         else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 8 ) begin : size_256
            if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(256,272,68)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(256,272,68)
            end // block: WAYS
            else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(256,136,68)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(256,136,68)
            end // block: WAYS
         end // block: size_256
 
         else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 7 ) begin : size_128
            if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(128,272,68)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(128,272,68)
            end // block: WAYS
            else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(128,136,68)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(128,136,68)
            end // block: WAYS
         end // block: size_128
 
         else  begin : size_64
            if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(64,272,68)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(64,272,68)
            end // block: WAYS
            else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM(64,136,68)
+              `EL2_PACKED_IC_DATA_SRAM_LOGIC(64,136,68)
            end // block: WAYS
         end // block: size_64
 
@@ -823,6 +701,8 @@ import el2_pkg::*;
       input logic                                                  ic_debug_wr_en,       // Icache debug wr
       input logic                                                  ic_debug_tag_array,   // Debug tag array
       input logic [pt.ICACHE_NUM_WAYS-1:0]                         ic_debug_way,         // Debug way. Rd or Wr.
+
+      el2_mem_if.veer_icache_src                                   icache_export,
       input el2_ic_tag_ext_in_pkt_t   [pt.ICACHE_NUM_WAYS-1:0]    ic_tag_ext_in_pkt,
 
       output logic [25:0]                                          ictag_debug_rd_data,
@@ -860,6 +740,13 @@ import el2_pkg::*;
    logic                                                           ic_rd_en_ff;
    logic                                                           ic_tag_parity;
 
+   // Use exported ICache interface. Some signals are assigned here, some in the blocks below.
+   always_comb begin
+      icache_export.ic_tag_wren_q = ic_tag_wren_q;
+      icache_export.ic_tag_wr_data = ic_tag_wr_data;
+      icache_export.ic_rw_addr_q = ic_rw_addr_q;
+      ic_tag_data_raw_pre = icache_export.ic_tag_data_raw_pre;
+   end
 
    assign  ic_tag_wren [pt.ICACHE_NUM_WAYS-1:0]  = ic_wr_en[pt.ICACHE_NUM_WAYS-1:0] & {pt.ICACHE_NUM_WAYS{(ic_rw_addr[pt.ICACHE_BEAT_ADDR_HI:4] == {pt.ICACHE_BEAT_BITS-1{1'b1}})}} ;
    assign  ic_tag_clken[pt.ICACHE_NUM_WAYS-1:0]  = {pt.ICACHE_NUM_WAYS{ic_rd_en | clk_override}} | ic_wr_en[pt.ICACHE_NUM_WAYS-1:0] | ic_debug_wr_way_en[pt.ICACHE_NUM_WAYS-1:0] | ic_debug_rd_way_en[pt.ICACHE_NUM_WAYS-1:0];
@@ -967,173 +854,90 @@ end // block: OTHERS
     logic [pt.ICACHE_NUM_WAYS-1:0]        any_addr_match;
     logic [pt.ICACHE_NUM_WAYS-1:0]        ic_tag_clken_final;
 
-      `define EL2_IC_TAG_SRAM(depth,width)                                                                                                      \
-                                  ram_``depth``x``width  ic_way_tag (                                                                           \
-                                .ME(ic_tag_clken_final[i]),                                                                                     \
-                                .WE (ic_tag_wren_q[i]),                                                                                         \
-                                .D  (ic_tag_wr_data[``width-1:0]),                                                                              \
-                                .ADR(ic_rw_addr_q[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO]),                                                  \
-                                .Q  (ic_tag_data_raw_pre[i][``width-1:0]),                                                                      \
-                                .CLK (clk),                                                                                                     \
-                                .ROP ( ),                                                                                                       \
-                                                                                                                                                \
-                                .TEST1(ic_tag_ext_in_pkt[i].TEST1),                                                                             \
-                                .RME(ic_tag_ext_in_pkt[i].RME),                                                                                 \
-                                .RM(ic_tag_ext_in_pkt[i].RM),                                                                                   \
-                                                                                                                                                \
-                                .LS(ic_tag_ext_in_pkt[i].LS),                                                                                   \
-                                .DS(ic_tag_ext_in_pkt[i].DS),                                                                                   \
-                                .SD(ic_tag_ext_in_pkt[i].SD),                                                                                   \
-                                                                                                                                                \
-                                .TEST_RNM(ic_tag_ext_in_pkt[i].TEST_RNM),                                                                       \
-                                .BC1(ic_tag_ext_in_pkt[i].BC1),                                                                                 \
-                                .BC2(ic_tag_ext_in_pkt[i].BC2)                                                                                  \
-                                                                                                                                                \
-                               );                                                                                                               \
-                                                                                                                                                \
-                                                                                                                                                \
-                                                                                                                                                \
-                                                                                                                                                \
-              if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin                                                                                                                                             \
-                                                                                                                                                                                                      \
-                 assign wrptr_in[i] = (wrptr[i] == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr[i] + 1'd1);                                                                                            \
-                                                                                                                                                                                                      \
-                 rvdffs  #(pt.ICACHE_TAG_NUM_BYPASS_WIDTH)  wrptr_ff(.*, .clk(active_clk), .en(|write_bypass_en[i]), .din (wrptr_in[i]), .dout(wrptr[i])) ;                                           \
-                                                                                                                                                                                                      \
-                 assign ic_b_sram_en[i]              = ic_tag_clken[i];                                                                                                                               \
-                                                                                                                                                                                                      \
-                 assign ic_b_read_en[i]              =  ic_b_sram_en[i] &   (ic_tag_rden_q[i]);                                                                                                       \
-                 assign ic_b_write_en[i]             =  ic_b_sram_en[i] &   (ic_tag_wren_q[i]);                                                                                                       \
-                 assign ic_tag_clken_final[i]        =  ic_b_sram_en[i] &    ~(|sel_bypass[i]);                                                                                                       \
-                                                                                                                                                                                                      \
-                 // LSB is pt.ICACHE_TAG_INDEX_LO]                                                                                                                                                    \
-                 assign ic_b_rw_addr[i] = {ic_rw_addr_q};                                                                                                                                             \
-                                                                                                                                                                                                      \
-                 always_comb begin                                                                                                                                                                    \
-                    any_addr_match[i] = '0;                                                                                                                                                           \
-                                                                                                                                                                                                      \
-                    for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin                                                                                                                              \
-                       any_addr_match[i] |= (ic_b_addr_match[i][l] & index_valid[i][l]);                                                                                                              \
-                    end                                                                                                                                                                               \
-                 end                                                                                                                                                                                  \
-                                                                                                                                                                                                      \
-                // it is an error to ever have 2 entries with the same index and both valid                                                                                                           \
-                for (genvar l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin: BYPASS                                                                                                                       \
-                                                                                                                                                                                                      \
-                   assign ic_b_addr_match[i][l] = (wb_index_hold[i][l] ==  ic_b_rw_addr[i]) & index_valid[i][l];                                                                                      \
-                                                                                                                                                                                                      \
-                   assign ic_b_clear_en[i][l]   = ic_b_write_en[i] &   ic_b_addr_match[i][l];                                                                                                         \
-                                                                                                                                                                                                      \
-                   assign sel_bypass[i][l]      = ic_b_read_en[i]  &   ic_b_addr_match[i][l] ;                                                                                                        \
-                                                                                                                                                                                                      \
-                   assign write_bypass_en[i][l] = ic_b_read_en[i]  &  ~any_addr_match[i] & (wrptr[i] == l);                                                                                           \
-                                                                                                                                                                                                      \
-                   rvdff  #(1)  write_bypass_ff (.*, .clk(active_clk),                                                     .din(write_bypass_en[i][l]), .dout(write_bypass_en_ff[i][l])) ;                            \
-                   rvdffs #(1)  index_val_ff    (.*, .clk(active_clk), .en(write_bypass_en[i][l] | ic_b_clear_en[i][l]),         .din(~ic_b_clear_en[i][l]),  .dout(index_valid[i][l])) ;                             \
-                   rvdff  #(1)  sel_hold_ff     (.*, .clk(active_clk),                                                     .din(sel_bypass[i][l]),      .dout(sel_bypass_ff[i][l])) ;                                 \
-                                                                                                                                                                                                      \
-                   rvdffe #(.WIDTH(pt.ICACHE_INDEX_HI-pt.ICACHE_TAG_INDEX_LO+1),.OVERRIDE(1))  ic_addr_index   (.*, .en(write_bypass_en[i][l]),    .din (ic_b_rw_addr[i]),        .dout(wb_index_hold[i][l]));   \
-                   rvdffe #(``width)                                                           rd_data_hold_ff (.*, .en(write_bypass_en_ff[i][l]), .din (ic_tag_data_raw_pre[i][``width-1:0]), .dout(wb_dout_hold[i][l]));            \
-                                                                                                                                                                                                      \
-                end // block: BYPASS                                                                                                                                                                  \
-                                                                                                                                                                                                      \
-                always_comb begin                                                                                                                                                                     \
-                 any_bypass[i] = '0;                                                                                                                                                                  \
-                 sel_bypass_data[i] = '0;                                                                                                                                                             \
-                                                                                                                                                                                                      \
-                 for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin                                                                                                                                 \
-                    any_bypass[i]      |=  sel_bypass_ff[i][l];                                                                                                                                       \
-                    sel_bypass_data[i] |= (sel_bypass_ff[i][l]) ? wb_dout_hold[i][l] : '0;                                                                                                            \
-                 end                                                                                                                                                                                  \
-                                                                                                                                                                                                      \
-                   ic_tag_data_raw[i]   =   any_bypass[i] ?  sel_bypass_data[i] :  ic_tag_data_raw_pre[i] ;                                                                                           \
-                end // always_comb begin                                                                                                                                                              \
-                                                                                                                                                                                                      \
-             end // if (pt.ICACHE_BYPASS_ENABLE == 1)                                                                                                                                                 \
-             else begin                                                                                                                                                                               \
-                 assign ic_tag_data_raw[i]   =   ic_tag_data_raw_pre[i] ;                                                                                                                             \
-                 assign ic_tag_clken_final[i]       =   ic_tag_clken[i];                                                                                                                              \
-             end
-   for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: WAYS
+    // Use exported ICache interface.
+    always_comb begin
+      icache_export.ic_tag_clken_final = ic_tag_clken_final;
+    end
+    for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: WAYS
 
-   if (pt.ICACHE_ECC) begin  : ECC1
-      logic [pt.ICACHE_NUM_WAYS-1:0] [pt.ICACHE_TAG_NUM_BYPASS-1:0][25 :0] wb_dout_hold;
+      if (pt.ICACHE_ECC) begin  : ECC1
+        logic [pt.ICACHE_NUM_WAYS-1:0] [pt.ICACHE_TAG_NUM_BYPASS-1:0][25 :0] wb_dout_hold;
 
-      if (pt.ICACHE_TAG_DEPTH == 32)   begin : size_32
-                 `EL2_IC_TAG_SRAM(32,26)
-      end // if (pt.ICACHE_TAG_DEPTH == 32)
-      if (pt.ICACHE_TAG_DEPTH == 64)   begin : size_64
-                 `EL2_IC_TAG_SRAM(64,26)
-      end // if (pt.ICACHE_TAG_DEPTH == 64)
-      if (pt.ICACHE_TAG_DEPTH == 128)   begin : size_128
-                 `EL2_IC_TAG_SRAM(128,26)
-      end // if (pt.ICACHE_TAG_DEPTH == 128)
-       if (pt.ICACHE_TAG_DEPTH == 256)   begin : size_256
-                 `EL2_IC_TAG_SRAM(256,26)
-       end // if (pt.ICACHE_TAG_DEPTH == 256)
-       if (pt.ICACHE_TAG_DEPTH == 512)   begin : size_512
-                 `EL2_IC_TAG_SRAM(512,26)
-       end // if (pt.ICACHE_TAG_DEPTH == 512)
-       if (pt.ICACHE_TAG_DEPTH == 1024)   begin : size_1024
-                 `EL2_IC_TAG_SRAM(1024,26)
-       end // if (pt.ICACHE_TAG_DEPTH == 1024)
-       if (pt.ICACHE_TAG_DEPTH == 2048)   begin : size_2048
-                 `EL2_IC_TAG_SRAM(2048,26)
-       end // if (pt.ICACHE_TAG_DEPTH == 2048)
-       if (pt.ICACHE_TAG_DEPTH == 4096)   begin  : size_4096
-                 `EL2_IC_TAG_SRAM(4096,26)
-       end // if (pt.ICACHE_TAG_DEPTH == 4096)
+        if (pt.ICACHE_TAG_DEPTH == 32)   begin : size_32
+          `EL2_IC_TAG_SRAM_LOGIC(32,26)
+        end // if (pt.ICACHE_TAG_DEPTH == 32)
+        if (pt.ICACHE_TAG_DEPTH == 64)   begin : size_64
+          `EL2_IC_TAG_SRAM_LOGIC(64,26)
+        end // if (pt.ICACHE_TAG_DEPTH == 64)
+        if (pt.ICACHE_TAG_DEPTH == 128)   begin : size_128
+          `EL2_IC_TAG_SRAM_LOGIC(128,26)
+        end // if (pt.ICACHE_TAG_DEPTH == 128)
+        if (pt.ICACHE_TAG_DEPTH == 256)   begin : size_256
+          `EL2_IC_TAG_SRAM_LOGIC(256,26)
+        end // if (pt.ICACHE_TAG_DEPTH == 256)
+        if (pt.ICACHE_TAG_DEPTH == 512)   begin : size_512
+          `EL2_IC_TAG_SRAM_LOGIC(512,26)
+        end // if (pt.ICACHE_TAG_DEPTH == 512)
+        if (pt.ICACHE_TAG_DEPTH == 1024)   begin : size_1024
+          `EL2_IC_TAG_SRAM_LOGIC(1024,26)
+        end // if (pt.ICACHE_TAG_DEPTH == 1024)
+        if (pt.ICACHE_TAG_DEPTH == 2048)   begin : size_2048
+          `EL2_IC_TAG_SRAM_LOGIC(2048,26)
+        end // if (pt.ICACHE_TAG_DEPTH == 2048)
+        if (pt.ICACHE_TAG_DEPTH == 4096)   begin  : size_4096
+          `EL2_IC_TAG_SRAM_LOGIC(4096,26)
+        end // if (pt.ICACHE_TAG_DEPTH == 4096)
 
-         assign w_tout[i][31:pt.ICACHE_TAG_LO] = ic_tag_data_raw[i][31-pt.ICACHE_TAG_LO:0] ;
-         assign w_tout[i][36:32]              = ic_tag_data_raw[i][25:21] ;
+        assign w_tout[i][31:pt.ICACHE_TAG_LO] = ic_tag_data_raw[i][31-pt.ICACHE_TAG_LO:0] ;
+        assign w_tout[i][36:32]              = ic_tag_data_raw[i][25:21] ;
 
-         rvecc_decode  ecc_decode (
-                           .en(~dec_tlu_core_ecc_disable & ic_rd_en_ff),
-                           .sed_ded ( 1'b1 ),    // 1 : means only detection
-                           .din({11'b0,ic_tag_data_raw[i][20:0]}),
-                           .ecc_in({2'b0, ic_tag_data_raw[i][25:21]}),
-                           .dout(ic_tag_corrected_data_unc[i][31:0]),
-                           .ecc_out(ic_tag_corrected_ecc_unc[i][6:0]),
-                           .single_ecc_error(ic_tag_single_ecc_error[i]),
-                           .double_ecc_error(ic_tag_double_ecc_error[i]));
+        rvecc_decode  ecc_decode (
+                         .en(~dec_tlu_core_ecc_disable & ic_rd_en_ff),
+                         .sed_ded ( 1'b1 ),    // 1 : means only detection
+                         .din({11'b0,ic_tag_data_raw[i][20:0]}),
+                         .ecc_in({2'b0, ic_tag_data_raw[i][25:21]}),
+                         .dout(ic_tag_corrected_data_unc[i][31:0]),
+                         .ecc_out(ic_tag_corrected_ecc_unc[i][6:0]),
+                         .single_ecc_error(ic_tag_single_ecc_error[i]),
+                         .double_ecc_error(ic_tag_double_ecc_error[i]));
 
-          assign ic_tag_way_perr[i]= ic_tag_single_ecc_error[i] | ic_tag_double_ecc_error[i]  ;
+        assign ic_tag_way_perr[i]= ic_tag_single_ecc_error[i] | ic_tag_double_ecc_error[i]  ;
       end
       else  begin : ECC0
-      logic [pt.ICACHE_NUM_WAYS-1:0] [pt.ICACHE_TAG_NUM_BYPASS-1:0][21 :0] wb_dout_hold;
-      assign ic_tag_data_raw_pre[i][25:22] = '0 ;
+        logic [pt.ICACHE_NUM_WAYS-1:0] [pt.ICACHE_TAG_NUM_BYPASS-1:0][21 :0] wb_dout_hold;
+        assign ic_tag_data_raw_pre[i][25:22] = '0 ;
 
-      if (pt.ICACHE_TAG_DEPTH == 32)   begin : size_32
-                 `EL2_IC_TAG_SRAM(32,22)
-      end // if (pt.ICACHE_TAG_DEPTH == 32)
-      if (pt.ICACHE_TAG_DEPTH == 64)   begin : size_64
-                 `EL2_IC_TAG_SRAM(64,22)
-      end // if (pt.ICACHE_TAG_DEPTH == 64)
-      if (pt.ICACHE_TAG_DEPTH == 128)   begin : size_128
-                 `EL2_IC_TAG_SRAM(128,22)
-      end // if (pt.ICACHE_TAG_DEPTH == 128)
-       if (pt.ICACHE_TAG_DEPTH == 256)   begin : size_256
-                 `EL2_IC_TAG_SRAM(256,22)
-       end // if (pt.ICACHE_TAG_DEPTH == 256)
-       if (pt.ICACHE_TAG_DEPTH == 512)   begin : size_512
-                 `EL2_IC_TAG_SRAM(512,22)
-       end // if (pt.ICACHE_TAG_DEPTH == 512)
-       if (pt.ICACHE_TAG_DEPTH == 1024)   begin : size_1024
-                 `EL2_IC_TAG_SRAM(1024,22)
-       end // if (pt.ICACHE_TAG_DEPTH == 1024)
-       if (pt.ICACHE_TAG_DEPTH == 2048)   begin : size_2048
-                 `EL2_IC_TAG_SRAM(2048,22)
-       end // if (pt.ICACHE_TAG_DEPTH == 2048)
-       if (pt.ICACHE_TAG_DEPTH == 4096)   begin  : size_4096
-                 `EL2_IC_TAG_SRAM(4096,22)
-       end // if (pt.ICACHE_TAG_DEPTH == 4096)
+        if (pt.ICACHE_TAG_DEPTH == 32)   begin : size_32
+          `EL2_IC_TAG_SRAM_LOGIC(32,22)
+        end // if (pt.ICACHE_TAG_DEPTH == 32)
+        if (pt.ICACHE_TAG_DEPTH == 64)   begin : size_64
+          `EL2_IC_TAG_SRAM_LOGIC(64,22)
+        end // if (pt.ICACHE_TAG_DEPTH == 64)
+        if (pt.ICACHE_TAG_DEPTH == 128)   begin : size_128
+          `EL2_IC_TAG_SRAM_LOGIC(128,22)
+        end // if (pt.ICACHE_TAG_DEPTH == 128)
+        if (pt.ICACHE_TAG_DEPTH == 256)   begin : size_256
+          `EL2_IC_TAG_SRAM_LOGIC(256,22)
+        end // if (pt.ICACHE_TAG_DEPTH == 256)
+        if (pt.ICACHE_TAG_DEPTH == 512)   begin : size_512
+          `EL2_IC_TAG_SRAM_LOGIC(512,22)
+        end // if (pt.ICACHE_TAG_DEPTH == 512)
+        if (pt.ICACHE_TAG_DEPTH == 1024)   begin : size_1024
+          `EL2_IC_TAG_SRAM_LOGIC(1024,22)
+        end // if (pt.ICACHE_TAG_DEPTH == 1024)
+        if (pt.ICACHE_TAG_DEPTH == 2048)   begin : size_2048
+          `EL2_IC_TAG_SRAM_LOGIC(2048,22)
+        end // if (pt.ICACHE_TAG_DEPTH == 2048)
+        if (pt.ICACHE_TAG_DEPTH == 4096)   begin  : size_4096
+          `EL2_IC_TAG_SRAM_LOGIC(4096,22)
+        end // if (pt.ICACHE_TAG_DEPTH == 4096)
 
-         assign w_tout[i][31:pt.ICACHE_TAG_LO] = ic_tag_data_raw[i][31-pt.ICACHE_TAG_LO:0] ;
-         assign w_tout[i][32]                 = ic_tag_data_raw[i][21] ;
+        assign w_tout[i][31:pt.ICACHE_TAG_LO] = ic_tag_data_raw[i][31-pt.ICACHE_TAG_LO:0] ;
+        assign w_tout[i][32]                 = ic_tag_data_raw[i][21] ;
 
-         rveven_paritycheck #(32-pt.ICACHE_TAG_LO) parcheck(.data_in   (w_tout[i][31:pt.ICACHE_TAG_LO]),
-                                                   .parity_in (w_tout[i][32]),
-                                                   .parity_err(ic_tag_way_perr[i]));
+        rveven_paritycheck #(32-pt.ICACHE_TAG_LO) parcheck(.data_in   (w_tout[i][31:pt.ICACHE_TAG_LO]),
+                                                 .parity_in (w_tout[i][32]),
+                                                 .parity_err(ic_tag_way_perr[i]));
       end // else: !if(pt.ICACHE_ECC)
 
    end // block: WAYS
@@ -1169,169 +973,94 @@ end // block: OTHERS
     logic                                any_addr_match;
     logic                                ic_tag_clken_final;
 
-`define EL2_IC_TAG_PACKED_SRAM(depth,width)                                                               \
-                  ram_be_``depth``x``width  ic_way_tag (                                                   \
-                                .ME  ( ic_tag_clken_final),                                                \
-                                .WE  (|ic_tag_wren_q[pt.ICACHE_NUM_WAYS-1:0]),                             \
-                                .WEM (ic_tag_wren_biten_vec[``width-1:0]),                                 \
-                                                                                                           \
-                                .D   ({pt.ICACHE_NUM_WAYS{ic_tag_wr_data[``width/pt.ICACHE_NUM_WAYS-1:0]}}), \
-                                .ADR (ic_rw_addr_q[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO]),            \
-                                .Q   (ic_tag_data_raw_packed_pre[``width-1:0]),                            \
-                                .CLK (clk),                                                                \
-                                .ROP ( ),                                                                  \
-                                                                                                           \
-                                .TEST1     (ic_tag_ext_in_pkt[0].TEST1),                                   \
-                                .RME      (ic_tag_ext_in_pkt[0].RME),                                      \
-                                .RM       (ic_tag_ext_in_pkt[0].RM),                                       \
-                                                                                                           \
-                                .LS       (ic_tag_ext_in_pkt[0].LS),                                       \
-                                .DS       (ic_tag_ext_in_pkt[0].DS),                                       \
-                                .SD       (ic_tag_ext_in_pkt[0].SD),                                       \
-                                                                                                           \
-                                .TEST_RNM (ic_tag_ext_in_pkt[0].TEST_RNM),                                 \
-                                .BC1      (ic_tag_ext_in_pkt[0].BC1),                                      \
-                                .BC2      (ic_tag_ext_in_pkt[0].BC2)                                       \
-                                                                                                           \
-                               );                                                                          \
-                                                                                                           \
-              if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin                                                                                                                                             \
-                                                                                                                                                                                                      \
-                 assign wrptr_in = (wrptr == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr + 1'd1);                                                                                                     \
-                                                                                                                                                                                                      \
-                 rvdffs  #(pt.ICACHE_TAG_NUM_BYPASS_WIDTH)  wrptr_ff(.*, .clk(active_clk), .en(|write_bypass_en), .din (wrptr_in), .dout(wrptr)) ;                                                    \
-                                                                                                                                                                                                      \
-                 assign ic_b_sram_en              = |ic_tag_clken;                                                                                                                                    \
-                                                                                                                                                                                                      \
-                 assign ic_b_read_en              =  ic_b_sram_en &   (|ic_tag_rden_q);                                                                                                               \
-                 assign ic_b_write_en             =  ic_b_sram_en &   (|ic_tag_wren_q);                                                                                                               \
-                 assign ic_tag_clken_final        =  ic_b_sram_en &    ~(|sel_bypass);                                                                                                                \
-                                                                                                                                                                                                      \
-                 // LSB is pt.ICACHE_TAG_INDEX_LO]                                                                                                                                                    \
-                 assign ic_b_rw_addr = {ic_rw_addr_q};                                                                                                                                                \
-                                                                                                                                                                                                      \
-                 always_comb begin                                                                                                                                                                    \
-                    any_addr_match = '0;                                                                                                                                                              \
-                                                                                                                                                                                                      \
-                    for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin                                                                                                                              \
-                       any_addr_match |= ic_b_addr_match[l];                                                                                                                                          \
-                    end                                                                                                                                                                               \
-                 end                                                                                                                                                                                  \
-                                                                                                                                                                                                      \
-                // it is an error to ever have 2 entries with the same index and both valid                                                                                                           \
-                for (genvar l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin: BYPASS                                                                                                                       \
-                                                                                                                                                                                                      \
-                   assign ic_b_addr_match[l] = (wb_index_hold[l] ==  ic_b_rw_addr) & index_valid[l];                                                                                                  \
-                                                                                                                                                                                                      \
-                   assign ic_b_clear_en[l]   = ic_b_write_en &   ic_b_addr_match[l];                                                                                                                  \
-                                                                                                                                                                                                      \
-                   assign sel_bypass[l]      = ic_b_read_en  &   ic_b_addr_match[l] ;                                                                                                                 \
-                                                                                                                                                                                                      \
-                   assign write_bypass_en[l] = ic_b_read_en  &  ~any_addr_match & (wrptr == l);                                                                                                       \
-                                                                                                                                                                                                      \
-                   rvdff  #(1)  write_bypass_ff (.*, .clk(active_clk),                                                     .din(write_bypass_en[l]), .dout(write_bypass_en_ff[l])) ;                                  \
-                   rvdffs #(1)  index_val_ff    (.*, .clk(active_clk), .en(write_bypass_en[l] | ic_b_clear_en[l]),         .din(~ic_b_clear_en[l]),  .dout(index_valid[l])) ;                                         \
-                   rvdff  #(1)  sel_hold_ff     (.*, .clk(active_clk),                                                     .din(sel_bypass[l]),      .dout(sel_bypass_ff[l])) ;                                               \
-                                                                                                                                                                                                      \
-                   rvdffe #(.WIDTH(pt.ICACHE_INDEX_HI-pt.ICACHE_TAG_INDEX_LO+1),.OVERRIDE(1)) ic_addr_index    (.*, .en(write_bypass_en[l]),    .din (ic_b_rw_addr),               .dout(wb_index_hold[l]));          \
-                   rvdffe #(``width)                                                          rd_data_hold_ff  (.*, .en(write_bypass_en_ff[l]), .din (ic_tag_data_raw_packed_pre[``width-1:0]), .dout(wb_packeddout_hold[l]));        \
-                                                                                                                                                                                                      \
-                end // block: BYPASS                                                                                                                                                                  \
-                                                                                                                                                                                                      \
-                always_comb begin                                                                                                                                                                     \
-                 any_bypass = '0;                                                                                                                                                                     \
-                 sel_bypass_data = '0;                                                                                                                                                                \
-                                                                                                                                                                                                      \
-                 for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin                                                                                                                                 \
-                    any_bypass      |=  sel_bypass_ff[l];                                                                                                                                             \
-                    sel_bypass_data |= (sel_bypass_ff[l]) ? wb_packeddout_hold[l] : '0;                                                                                                               \
-                 end                                                                                                                                                                                  \
-                                                                                                                                                                                                      \
-                   ic_tag_data_raw_packed   =   any_bypass ?  sel_bypass_data :  ic_tag_data_raw_packed_pre ;                                                                                         \
-                end // always_comb begin                                                                                                                                                              \
-                                                                                                                                                                                                      \
-             end // if (pt.ICACHE_BYPASS_ENABLE == 1)                                                                                                                                                 \
-             else begin                                                                                                                                                                               \
-                 assign ic_tag_data_raw_packed   =   ic_tag_data_raw_packed_pre ;                                                                                                                     \
-                 assign ic_tag_clken_final       =   |ic_tag_clken;                                                                                                                                   \
-             end
+    // Use exported ICache interface.
+    always_comb begin
+      icache_export.ic_tag_clken_final = ic_tag_clken_final;
+    end
 
    if (pt.ICACHE_ECC) begin  : ECC1
     logic [(26*pt.ICACHE_NUM_WAYS)-1 :0]  ic_tag_data_raw_packed, ic_tag_wren_biten_vec, ic_tag_data_raw_packed_pre;           // data and its bit enables
     logic [pt.ICACHE_TAG_NUM_BYPASS-1:0][(26*pt.ICACHE_NUM_WAYS)-1 :0] wb_packeddout_hold;
+
+    // Use exported ICache interface.
+    always_comb begin
+      icache_export.ic_tag_wren_biten_vec = ic_tag_wren_biten_vec;
+      ic_tag_data_raw_packed_pre = icache_export.ic_tag_data_raw_packed_pre;
+    end
+
     for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: BITEN
         assign ic_tag_wren_biten_vec[(26*i)+25:26*i] = {26{ic_tag_wren_q[i]}};
      end
       if (pt.ICACHE_TAG_DEPTH == 32)   begin : size_32
         if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(32,104)
+          `EL2_IC_TAG_PACKED_SRAM_LOGIC(32,104)
         end // block: WAYS
       else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(32,52)
+          `EL2_IC_TAG_PACKED_SRAM_LOGIC(32,52)
         end // block: WAYS
       end // if (pt.ICACHE_TAG_DEPTH == 32
 
       if (pt.ICACHE_TAG_DEPTH == 64)   begin : size_64
         if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(64,104)
+          `EL2_IC_TAG_PACKED_SRAM_LOGIC(64,104)
         end // block: WAYS
       else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(64,52)
+          `EL2_IC_TAG_PACKED_SRAM_LOGIC(64,52)
         end // block: WAYS
       end // block: size_64
 
       if (pt.ICACHE_TAG_DEPTH == 128)   begin : size_128
        if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(128,104)
+          `EL2_IC_TAG_PACKED_SRAM_LOGIC(128,104)
       end // block: WAYS
       else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(128,52)
+          `EL2_IC_TAG_PACKED_SRAM_LOGIC(128,52)
       end // block: WAYS
 
       end // block: size_128
 
       if (pt.ICACHE_TAG_DEPTH == 256)   begin : size_256
        if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(256,104)
+          `EL2_IC_TAG_PACKED_SRAM_LOGIC(256,104)
         end // block: WAYS
        else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(256,52)
+          `EL2_IC_TAG_PACKED_SRAM_LOGIC(256,52)
         end // block: WAYS
       end // block: size_256
 
       if (pt.ICACHE_TAG_DEPTH == 512)   begin : size_512
        if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(512,104)
+          `EL2_IC_TAG_PACKED_SRAM_LOGIC(512,104)
         end // block: WAYS
        else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(512,52)
+          `EL2_IC_TAG_PACKED_SRAM_LOGIC(512,52)
         end // block: WAYS
       end // block: size_512
 
       if (pt.ICACHE_TAG_DEPTH == 1024)   begin : size_1024
          if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(1024,104)
+          `EL2_IC_TAG_PACKED_SRAM_LOGIC(1024,104)
         end // block: WAYS
        else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(1024,52)
+          `EL2_IC_TAG_PACKED_SRAM_LOGIC(1024,52)
         end // block: WAYS
       end // block: size_1024
 
       if (pt.ICACHE_TAG_DEPTH == 2048)   begin : size_2048
        if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(2048,104)
+          `EL2_IC_TAG_PACKED_SRAM_LOGIC(2048,104)
         end // block: WAYS
        else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(2048,52)
+          `EL2_IC_TAG_PACKED_SRAM_LOGIC(2048,52)
         end // block: WAYS
       end // block: size_2048
 
       if (pt.ICACHE_TAG_DEPTH == 4096)   begin  : size_4096
        if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(4096,104)
+          `EL2_IC_TAG_PACKED_SRAM_LOGIC(4096,104)
         end // block: WAYS
        else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(4096,52)
+          `EL2_IC_TAG_PACKED_SRAM_LOGIC(4096,52)
         end // block: WAYS
       end // block: size_4096
 
@@ -1363,74 +1092,74 @@ end // block: OTHERS
      end
       if (pt.ICACHE_TAG_DEPTH == 32)   begin : size_32
         if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(32,88)
+                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(32,88)
         end // block: WAYS
       else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(32,44)
+                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(32,44)
         end // block: WAYS
       end // if (pt.ICACHE_TAG_DEPTH == 32
 
       if (pt.ICACHE_TAG_DEPTH == 64)   begin : size_64
         if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(64,88)
+                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(64,88)
         end // block: WAYS
       else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(64,44)
+                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(64,44)
         end // block: WAYS
       end // block: size_64
 
       if (pt.ICACHE_TAG_DEPTH == 128)   begin : size_128
        if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(128,88)
+                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(128,88)
       end // block: WAYS
       else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(128,44)
+                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(128,44)
       end // block: WAYS
 
       end // block: size_128
 
       if (pt.ICACHE_TAG_DEPTH == 256)   begin : size_256
        if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(256,88)
+                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(256,88)
         end // block: WAYS
        else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(256,44)
+                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(256,44)
         end // block: WAYS
       end // block: size_256
 
       if (pt.ICACHE_TAG_DEPTH == 512)   begin : size_512
        if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(512,88)
+                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(512,88)
         end // block: WAYS
        else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(512,44)
+                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(512,44)
         end // block: WAYS
       end // block: size_512
 
       if (pt.ICACHE_TAG_DEPTH == 1024)   begin : size_1024
          if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(1024,88)
+                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(1024,88)
         end // block: WAYS
        else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(1024,44)
+                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(1024,44)
         end // block: WAYS
       end // block: size_1024
 
       if (pt.ICACHE_TAG_DEPTH == 2048)   begin : size_2048
        if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(2048,88)
+                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(2048,88)
         end // block: WAYS
        else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(2048,44)
+                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(2048,44)
         end // block: WAYS
       end // block: size_2048
 
       if (pt.ICACHE_TAG_DEPTH == 4096)   begin  : size_4096
        if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(4096,88)
+                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(4096,88)
         end // block: WAYS
        else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM(4096,44)
+                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(4096,44)
         end // block: WAYS
       end // block: size_4096
 

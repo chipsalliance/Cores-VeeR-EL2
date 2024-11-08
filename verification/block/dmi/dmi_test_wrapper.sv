@@ -49,6 +49,9 @@ module dmi_test_wrapper
   logic [ 6:0] dmi_addr;
   logic [31:0] dmi_wdata;
   logic [31:0] dmi_rdata;
+  logic        core_enable;
+
+  assign core_enable = '1;
 
   assign dmi_en = reg_en;
   assign dmi_wr_en = reg_wr_en;

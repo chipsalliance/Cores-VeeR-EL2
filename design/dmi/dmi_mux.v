@@ -3,6 +3,8 @@
 
 module dmi_mux (
 
+    // Core access enable
+    input wire core_enable,
     // Uncore access enable
     input wire uncore_enable,
 
@@ -33,8 +35,8 @@ module dmi_mux (
   assign is_uncore_aperture = (dmi_addr[6] & (dmi_addr[5] | dmi_addr[4]));
 
   // Core signals
-  assign dmi_core_en        = dmi_en & ~is_uncore_aperture;
-  assign dmi_core_wr_en     = dmi_wr_en & ~is_uncore_aperture;
+  assign dmi_core_en        = dmi_en & ~is_uncore_aperture & core_enable;
+  assign dmi_core_wr_en     = dmi_wr_en & ~is_uncore_aperture & core_enable;
   assign dmi_core_addr      = dmi_addr;
   assign dmi_core_wdata     = dmi_wdata;
 

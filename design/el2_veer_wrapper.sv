@@ -412,6 +412,11 @@ import el2_pkg::*;
    // Memory Export Interface
    el2_mem_if.veer_sram_src                el2_mem_export,
 
+`ifdef RV_LOCKSTEP_ENABLE
+   input logic                             disable_corruption_detection_i,
+   output logic                            corruption_detected_o,
+`endif
+
    // external MPC halt/run interface
    input logic                             mpc_debug_halt_req, // Async halt request
    input logic                             mpc_debug_run_req,  // Async run request
@@ -871,9 +876,6 @@ import el2_pkg::*;
 
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
    el2_regfile_if regfile ();
-   initial begin
-      $display("Dual Core Lockstep enabled!\n");
-   end
 `endif
 
    // Instantiate the el2_veer core
@@ -886,14 +888,15 @@ import el2_pkg::*;
                                 );
 
 `ifdef RV_LOCKSTEP_ENABLE
-   logic lockstep_corruption_detected;
+   initial begin
+      $display("Dual Core Lockstep enabled!\n");
+   end
 
    el2_veer_lockstep #(.pt(pt)) lockstep (
                                 .clk(clk),
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
                                 .main_core_regfile(regfile.veer_rf_sink),
 `endif // `ifdef RV_LOCKSTEP_REGFILE_ENABLE
-                                .corruption_detected(lockstep_corruption_detected),
                                 .*
                                 );
 `endif // `ifdef RV_LOCKSTEP_ENABLE

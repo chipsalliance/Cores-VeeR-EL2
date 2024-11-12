@@ -13,8 +13,11 @@ module el2_veer_lockstep_wrapper
     output logic shadow_reset,
     output logic shadow_dbg_reset,
 
+    // Disable the Shadow Core
+    input logic disable_corruption_detection_i,
+
     // Equivalency Checker
-    output logic corruption_detected
+    output logic corruption_detected_o
 );
   logic core_rst_l;   // This is "rst_l | dbg_rst_l"
 
@@ -378,7 +381,9 @@ module el2_veer_lockstep_wrapper
 
   logic scan_mode;
 
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
   el2_regfile_if regfile ();
+`endif // `ifdef RV_LOCKSTEP_REGFILE_ENABLE
 
   el2_veer #(.pt(pt)) veer (
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
@@ -391,7 +396,6 @@ module el2_veer_lockstep_wrapper
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
       .main_core_regfile(regfile.veer_rf_sink),
 `endif // `ifdef RV_LOCKSTEP_REGFILE_ENABLE
-      .corruption_detected(corruption_detected),
       .*
   );
 

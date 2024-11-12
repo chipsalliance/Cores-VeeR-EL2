@@ -78,3 +78,20 @@ jobs:
         with:
           name: regression_tests_coverage_data
           path: results/*.info
+
+  custom-regression-tests:
+    name: Custom regression tests
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Prepare Environment
+        run: _secret_prepare_env
+
+      - name: Run tests
+        run: _secret_custom_test

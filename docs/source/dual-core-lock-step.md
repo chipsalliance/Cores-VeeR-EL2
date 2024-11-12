@@ -1129,6 +1129,34 @@ Signals not compared due to their special meaning:
 * `rst_l` - [core complex reset](clocks.md#core-complex-reset-rst-l),
 * `dbg_rst_l` - [debug module reset](clocks.md#debug-module-reset-dbg-rst-l).
 
+## Shadow Core Control
+
+The DCLS module exposes control logic that can be potentially connected to the external CSR.
+Specific signals available as the module ports are described in the {ref}`tab-shadow-core-control-signals`.
+The error injection logic is a part of the Shadow Core and its purpose is to test whether the lockstep module operates correctly and to disable it if needed.
+Error is injected by asserting the `corruption_detected_o` output signal even if there is no corruption error detected between the Shadow Core and the Main Core.
+
+:::{list-table} Shadow Core Control Signals
+:name: tab-shadow-core-control-signals
+
+* - **Signal**
+  - **Direction**
+  - **Width**
+  - **Description**
+* - disable_corruption_detection_i
+  - input
+  - 1
+  - Disable all error injection features
+* - lockstep_err_injection_en_i
+  - input
+  - 1
+  - Activate an error injection to the Shadow Core
+* - corruption_detected_o
+  - output
+  - 1
+  - Indicate that a Shadow Core detected an error (corruption in comparison to the Main Core)
+:::
+
 ## Configuration
 
 ```{warning}

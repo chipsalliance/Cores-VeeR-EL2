@@ -413,8 +413,10 @@ import el2_pkg::*;
    el2_mem_if.veer_sram_src                el2_mem_export,
 
 `ifdef RV_LOCKSTEP_ENABLE
-   input logic                             disable_corruption_detection_i,
-   output logic                            corruption_detected_o,
+   // Shadow Core control
+   input logic  disable_corruption_detection_i,
+   input logic  lockstep_err_injection_en_i,
+   output logic corruption_detected_o,
 `endif
 
    // external MPC halt/run interface

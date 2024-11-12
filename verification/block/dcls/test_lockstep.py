@@ -4,7 +4,7 @@
 from random import randrange
 
 import pyuvm
-from cocotb.triggers import ReadOnly, RisingEdge
+from cocotb.triggers import ClockCycles, ReadOnly, RisingEdge
 from cocotb.utils import get_sim_time
 from pyuvm import ConfigDB
 from testbench import BaseTest
@@ -36,7 +36,7 @@ class TestReset(BaseTest):
         signals = {
             "shadow_reset": 0,
             "shadow_dbg_reset": 0,
-            "corruption_detected": 0,
+            "corruption_detected_o": 0,
         }
         # The shadow core should go into the reset regardless of the delay
         for _ in range(lockstep_delay):
@@ -52,3 +52,37 @@ class TestReset(BaseTest):
 
     async def run(self):
         await self.test_reset()
+
+
+@pyuvm.test()
+class TestErrorInjection(TestReset):
+    """
+    A test that ensures the Shadow Core reports a corruption after enabling an error injection.
+    """
+
+    async def run(self):
+        # Get out of reset
+        await self.test_reset()
+
+        # Await few cycles (arbitrary number)
+        await ClockCycles(self.clk, 10)
+
+        # Enable error injection
+        self.dut.lockstep_err_injection_en_i.value = 1
+        await RisingEdge(self.clk)
+
+        # Assert that an error is detected
+        signals = {
+            "shadow_reset": 1,
+            "shadow_dbg_reset": 1,
+            "corruption_detected_o": 1,
+        }
+        self.assert_signals(signals)
+
+        # Disable the Shadow Core
+        self.dut.disable_corruption_detection_i.value = 1
+        await RisingEdge(self.clk)
+
+        # Assert that an error is not detected
+        signals.update({"corruption_detected_o": 0})
+        self.assert_signals(signals)

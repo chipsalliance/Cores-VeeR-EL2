@@ -740,31 +740,42 @@ module tb_top
         // data[7:0] == 0x82 - clean NMI, timer and soft irq lines to bits data[8:10]
         // data[7:0] == 0x83 - set NMI, timer and soft irq lines to bits data[8:10]
         // data[7:0] == 0x90 - clear all interrupt request signals
-        if(mailbox_write && (mailbox_data[7:0] >= 8'h80 && mailbox_data[7:0] < 8'h84)) begin
+        if(mailbox_write && (mailbox_data[7:0] >= 8'h80 && mailbox_data[7:0] < 8'h87)) begin
             if (mailbox_data[7:0] == 8'h80) begin
-                if (mailbox_data[15:8] > 0 && mailbox_data[15:8] < pt.PIC_TOTAL_INT)
+                if (mailbox_data[15:8] > 0 && mailbox_data[15:8] < pt.PIC_TOTAL_INT && nmi_assert_int == 4'b0000)
                     ext_int[mailbox_data[15:8]] <= 1'b0;
+                nmi_assert_int <= 4'b1111;
             end
             if (mailbox_data[7:0] == 8'h81) begin
                 if (mailbox_data[15:8] > 0 && mailbox_data[15:8] < pt.PIC_TOTAL_INT)
                     ext_int[mailbox_data[15:8]] <= 1'b1;
+                nmi_vector[31:1] <= {mailbox_data[31:8], 7'h00};
             end
-            if (mailbox_data[7:0] == 8'h82) begin
-                nmi_int   <= nmi_int   & ~mailbox_data[8];
+            if (mailbox_data[7:0] == 8'h82 && nmi_assert_int == 4'b0000) begin
+                nmi_assert_int   <= {4{nmi_int & ~mailbox_data[8]}};
                 timer_int <= timer_int & ~mailbox_data[9];
                 soft_int  <= soft_int  & ~mailbox_data[10];
             end
-            if (mailbox_data[7:0] == 8'h83) begin
-                nmi_int   <= nmi_int   |  mailbox_data[8];
+            if (mailbox_data[7:0] == 8'h83 && nmi_assert_int == 4'b0000) begin
+                nmi_assert_int   <= {4{nmi_int |  mailbox_data[8]}};
                 timer_int <= timer_int |  mailbox_data[9];
                 soft_int  <= soft_int  |  mailbox_data[10];
             end
+            if (mailbox_data[7:0] == 8'h84) begin
+                soft_int <= 1;
+            end
+            if (mailbox_data[7:0] == 8'h85) begin
+                timer_int <= 1;
+            end
+            if (mailbox_data[7:0] == 8'h86) begin
+                extintsrc_req[1] <= 1;
+            end
         end
         if(mailbox_write && (mailbox_data[7:0] == 8'h90)) begin
-            ext_int   <= {pt.PIC_TOTAL_INT-1{1'b0}};
-            nmi_int   <= 1'b0;
-            timer_int <= 1'b0;
-            soft_int  <= 1'b0;
+            ext_int        <= {pt.PIC_TOTAL_INT-1{1'b0}};
+            nmi_assert_int <= 4'b0000;
+            timer_int      <= 1'b0;
+            soft_int       <= 1'b0;
         end
         // ECC error injection
         if(mailbox_write && (mailbox_data[7:0] == 8'he0)) begin
@@ -818,22 +829,6 @@ module tb_top
         soft_int <= 0;
         timer_int <= 0;
         extintsrc_req[1] <= 0;
-        if (mailbox_write && mailbox_data[7:0] == 8'h80 && nmi_assert_int == 4'b0000) begin
-            nmi_assert_int <= 4'b1111;
-        end
-        else if (mailbox_write && mailbox_data[7:0] == 8'h81) begin
-            // NMI handler address is in the upper 24 bits of mailbox data
-            nmi_vector[31:1] <= {mailbox_data[31:8], 7'h00};
-        end
-        else if (mailbox_write && mailbox_data[7:0] == 8'h84) begin
-            soft_int <= 1;
-        end
-        else if (mailbox_write && mailbox_data[7:0] == 8'h85) begin
-            timer_int <= 1;
-        end
-        else if (mailbox_write && mailbox_data[7:0] == 8'h86) begin
-            extintsrc_req[1] <= 1;
-        end
     end
 
     `ifdef RV_BUILD_AXI4
@@ -943,7 +938,6 @@ module tb_top
         abi_reg[31] = "t6";
 
         ext_int     = {pt.PIC_TOTAL_INT-1{1'b0}};
-        nmi_int     = 0;
         timer_int   = 0;
         soft_int    = 0;
 
@@ -951,12 +945,10 @@ module tb_top
         jtag_id[31:28] = 4'b1;
         jtag_id[27:12] = '0;
         jtag_id[11:1]  = 11'h45;
-        reset_vector = `RV_RESET_VEC;
-        nmi_vector   = 32'hee000000;
-        nmi_int   = 0;
-        soft_int  = 0;
-        timer_int = 0;
-        extintsrc_req = 0;
+        reset_vector   = `RV_RESET_VEC;
+        nmi_assert_int = 0;
+        nmi_vector     = 32'hee000000;
+        extintsrc_req  = 0;
 
         $readmemh("program.hex",  lmem.mem);
         $readmemh("program.hex",  imem.mem);

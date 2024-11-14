@@ -22,7 +22,10 @@ import el2_pkg::*;
   (
    input logic          clk,                                           // Top level clock
    input logic          rst_l,                                         // Reset
+   // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+   /*verilator coverage_off*/
    input logic          scan_mode,                                     // Scan control
+   /*verilator coverage_on*/
 
    input logic  [1:0]   dec_data_en,                                   // Clock enable {x,r}, one cycle pulse
    input logic  [1:0]   dec_ctl_en,                                    // Clock enable {x,r}, two cycle pulse

@@ -30,7 +30,10 @@ import el2_pkg::*;
    input                   clk,
    input                   free_clk,
    input                   rst_l,
+   // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+   /*verilator coverage_off*/
    input                   scan_mode,
+   /*verilator coverage_on*/
    input                   bus_clk_en,
    input                   clk_override,
    input                   dec_tlu_force_halt,

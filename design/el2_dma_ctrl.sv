@@ -31,7 +31,10 @@ import el2_pkg::*;
    input logic         rst_l,
    input logic         dma_bus_clk_en, // slave bus clock enable
    input logic         clk_override,
+   // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
+   /*verilator coverage_off*/
    input logic         scan_mode,
+   /*verilator coverage_on*/
 
    // Debug signals
    input logic [31:0]  dbg_cmd_addr,

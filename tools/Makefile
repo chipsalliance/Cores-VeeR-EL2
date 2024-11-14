@@ -184,8 +184,8 @@ vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	$(VCS) -full64 -assert svaext -sverilog +define+RV_OPENSOURCE $(ASSERT_DEFINES) \
 	  +error+500 +incdir+${RV_ROOT}/design/lib \
 	  +incdir+${RV_ROOT}/design/include ${BUILD_DIR}/common_defines.vh \
-	  +incdir+$(BUILD_DIR)  +libext+.v $(defines) \
-	  -f ${RV_ROOT}/testbench/flist ${TBFILES} -l vcs.log
+	  +incdir+$(BUILD_DIR)  +libext+.v $(defines) -CFLAGS "${CFLAGS}" \
+	  -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -l vcs.log
 	touch vcs-build
 
 irun-build: ${TBFILES} ${BUILD_DIR}/defines.h

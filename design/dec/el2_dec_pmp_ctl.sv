@@ -110,7 +110,7 @@ module el2_dec_pmp_ctl
 `ifdef RV_SMEPMP
       assign csr_wdata = raw_wdata & 8'b10011111;
 `else
-      assign csr_wdata = (raw_wdata & 8'b00000001) ? (raw_wdata & 8'b10011111) : (raw_wdata & 8'b10011101);
+      assign csr_wdata = raw_wdata[0] ? (raw_wdata & 8'b10011111) : (raw_wdata & 8'b10011101);
 `endif
 
       rvdffe #(8) pmpcfg_ff (.*, .clk(free_l2clk),

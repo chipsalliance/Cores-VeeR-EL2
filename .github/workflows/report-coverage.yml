@@ -93,7 +93,7 @@ jobs:
   custom-coverage-report:
     name: Custom coverage report
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    if: github.event.pull_request.merged == true
+    if: github.ref == 'refs/heads/main'
     container: centos:8
     env:
       GHA_EXTERNAL_DISK: additional-tools

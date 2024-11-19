@@ -28,7 +28,7 @@ jobs:
           echo "include-run=$(python3 .github/scripts/riscv_dv_matrix_include.py run)" | tee -a $GITHUB_OUTPUT
       - id: hash
         run: |
-          echo "files-hash=$(.github/scripts/get_code_hash.sh)" | tee -a $GITHUB_OUTPUT
+          echo "files-hash=$(.github/scripts/get_config_hash.sh)" | tee -a $GITHUB_OUTPUT
 
   generate-code:
     name: Generate code for tests

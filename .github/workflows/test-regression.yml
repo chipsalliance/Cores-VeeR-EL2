@@ -20,7 +20,9 @@ jobs:
         exclude:
           # TODO these require AHB-related fixes. Bring them back.
           - test: "ecc"
+            bus: "ahb"
           - test: "hello_world_iccm"
+            bus: "ahb"
           # These tests require user mode
           - priv: "0"
             test: "csr_mseccfg"

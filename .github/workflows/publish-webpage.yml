@@ -113,10 +113,3 @@ jobs:
         with:
           name: pr_number
           path: ./pr_number.txt
-
-      - name: Pack webpage as an artifact
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: webpage
-          path: ./public.new

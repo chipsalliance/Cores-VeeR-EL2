@@ -62,13 +62,36 @@ import el2_pkg::*;
       /*verilator coverage_on*/
       ) ;
 
+   // split the veer_icache_src interface into veer_icache_data and veer_icache_tag
+   el2_mem_if local_icache_export();
 
+   always_comb begin
+      // data
+      icache_export.ic_b_sb_wren = local_icache_export.ic_b_sb_wren;
+      icache_export.ic_b_sb_bit_en_vec = local_icache_export.ic_b_sb_bit_en_vec;
+      icache_export.ic_sb_wr_data = local_icache_export.ic_sb_wr_data;
+      icache_export.ic_rw_addr_bank_q = local_icache_export.ic_rw_addr_bank_q;
+      icache_export.ic_bank_way_clken_final = local_icache_export.ic_bank_way_clken_final_up;
+      icache_export.ic_bank_way_clken_final_up = local_icache_export.ic_bank_way_clken_final_up;
 
+      local_icache_export.wb_packeddout_pre = icache_export.wb_packeddout_pre;
+      local_icache_export.wb_dout_pre_up = icache_export.wb_dout_pre_up;
+
+      // tag
+      icache_export.ic_tag_clken_final = local_icache_export.ic_tag_clken_final;
+      icache_export.ic_tag_wren_q = local_icache_export.ic_tag_wren_q;
+      icache_export.ic_tag_wren_biten_vec = local_icache_export.ic_tag_wren_biten_vec;
+      icache_export.ic_tag_wr_data = local_icache_export.ic_tag_wr_data;
+      icache_export.ic_rw_addr_q = local_icache_export.ic_rw_addr_q;
+
+      local_icache_export.ic_tag_data_raw_pre = icache_export.ic_tag_data_raw_pre;
+      local_icache_export.ic_tag_data_raw_packed_pre = icache_export.ic_tag_data_raw_packed_pre;
+   end
 
    EL2_IC_TAG #(.pt(pt)) ic_tag_inst
           (
            .*,
-           .icache_export(icache_export),
+           .icache_export(local_icache_export.veer_icache_tag),
            .ic_wr_en     (ic_wr_en[pt.ICACHE_NUM_WAYS-1:0]),
            .ic_debug_addr(ic_debug_addr[pt.ICACHE_INDEX_HI:3]),
            .ic_rw_addr   (ic_rw_addr[31:3])
@@ -77,7 +100,7 @@ import el2_pkg::*;
    EL2_IC_DATA #(.pt(pt)) ic_data_inst
           (
            .*,
-           .icache_export(icache_export),
+           .icache_export(local_icache_export.veer_icache_data),
            .ic_wr_en     (ic_wr_en[pt.ICACHE_NUM_WAYS-1:0]),
            .ic_debug_addr(ic_debug_addr[pt.ICACHE_INDEX_HI:3]),
            .ic_rw_addr   (ic_rw_addr[31:1])
@@ -119,7 +142,7 @@ import el2_pkg::*;
       input logic                            ic_sel_premux_data,  // Select the pre_muxed data
 
       input logic [pt.ICACHE_NUM_WAYS-1:0]ic_rd_hit,
-      el2_mem_if.veer_icache_src             icache_export,
+      el2_mem_if.veer_icache_data         icache_export,
       input el2_ic_data_ext_in_pkt_t  [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] ic_data_ext_in_pkt,   // this is being driven by the top level for soc testing/etc
       // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
       /*verilator coverage_off*/
@@ -722,7 +745,7 @@ import el2_pkg::*;
       input logic                                                  ic_debug_tag_array,   // Debug tag array
       input logic [pt.ICACHE_NUM_WAYS-1:0]                         ic_debug_way,         // Debug way. Rd or Wr.
 
-      el2_mem_if.veer_icache_src                                   icache_export,
+      el2_mem_if.veer_icache_tag                                  icache_export,
       input el2_ic_tag_ext_in_pkt_t   [pt.ICACHE_NUM_WAYS-1:0]    ic_tag_ext_in_pkt,
 
       output logic [25:0]                                          ictag_debug_rd_data,

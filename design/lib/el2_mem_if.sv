@@ -108,6 +108,18 @@ interface el2_mem_if #(
       output dccm_bank_dout, dccm_bank_ecc
   );
 
+  modport veer_icache_data(
+      // data
+      output ic_b_sb_wren, ic_b_sb_bit_en_vec, ic_sb_wr_data, ic_rw_addr_bank_q, ic_bank_way_clken_final, ic_bank_way_clken_final_up,
+      input wb_packeddout_pre, wb_dout_pre_up
+  );
+
+  modport veer_icache_tag(
+      // tag
+      output ic_tag_clken_final, ic_tag_wren_q, ic_tag_wren_biten_vec, ic_tag_wr_data, ic_rw_addr_q,
+      input ic_tag_data_raw_packed_pre,ic_tag_data_raw_pre
+  );
+
   modport veer_icache_src(
       output clk,
       // data

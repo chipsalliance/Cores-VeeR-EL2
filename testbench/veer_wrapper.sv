@@ -417,7 +417,7 @@ module veer_wrapper
 
   el2_veer_wrapper rvtop (
       .el2_mem_export(mem_export.veer_sram_src),
-      .el2_icache_export(mem_export.veer_icache),
+      .el2_icache_export(mem_export.veer_icache_src),
       .dmi_core_enable(dmi_core_enable),
       .dmi_active(dmi_active),
       .*

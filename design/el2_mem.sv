@@ -152,7 +152,7 @@ import el2_pkg::*;
 if ( pt.ICACHE_ENABLE ) begin: icache
    el2_ifu_ic_mem #(.pt(pt)) icm  (
       .clk_override(icm_clk_override),
-      .icache_export(mem_export_local.veer_icache),
+      .icache_export(mem_export_local.veer_icache_src),
       .*
    );
 end

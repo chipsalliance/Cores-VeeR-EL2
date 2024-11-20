@@ -17,7 +17,6 @@
 ////////////////////////////////////////////////////
 //   ICACHE DATA & TAG MODULE WRAPPER              //
 /////////////////////////////////////////////////////
-`include "el2_ifu_ic_macros.svh"
 module el2_ifu_ic_mem
 import el2_pkg::*;
  #(
@@ -278,33 +277,59 @@ import el2_pkg::*;
 
         // Use exported ICache interface.
         always_comb begin
-           wb_dout_pre_up = icache_export.wb_dout_pre_up;
+          wb_dout_pre_up = icache_export.wb_dout_pre_up;
+        end
+        if (pt.ICACHE_BYPASS_ENABLE == 1) begin
+          assign wrptr_in_up[i][k] = (wrptr_up[i][k] == (pt.ICACHE_NUM_BYPASS-1)) ? '0 : (wrptr_up[i][k] + 1'd1);
+          rvdffs  #(pt.ICACHE_NUM_BYPASS_WIDTH)  wrptr_ff(
+              .*, .clk(active_clk),  .en(|write_bypass_en_up[i][k]), .din (wrptr_in_up[i][k]), .dout(wrptr_up[i][k])
+          );
+          assign ic_b_sram_en_up[i][k]              = ic_bank_way_clken[k][i];
+          assign ic_b_read_en_up[i][k]              =  ic_b_sram_en_up[i][k] &   ic_b_sb_rden[k][i];
+          assign ic_b_write_en_up[i][k]             =  ic_b_sram_en_up[i][k] &   ic_b_sb_wren[k][i];
+          assign ic_bank_way_clken_final_up[i][k]   =  ic_b_sram_en_up[i][k] &    ~(|sel_bypass_up[i][k]);
+          assign ic_b_rw_addr_up[i][k] = {ic_rw_addr[31:pt.ICACHE_INDEX_HI+1],ic_rw_addr_bank_q[k]};
+          assign ic_b_rw_addr_index_only_up[i][k] = ic_rw_addr_bank_q[k];
+          always_comb begin
+            any_addr_match_up[i][k] = '0;
+            for (int l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin
+              any_addr_match_up[i][k] |= ic_b_addr_match_up[i][k][l];
+            end
+          end
+          // it is an error to ever have 2 entries with the same index and both valid
+          for (genvar l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin: BYPASS
+            // full match up to bit 31
+            assign ic_b_addr_match_up[i][k][l] = (wb_index_hold_up[i][k][l] ==  ic_b_rw_addr_up[i][k]) & index_valid_up[i][k][l];
+            assign ic_b_addr_match_index_only_up[i][k][l] = (wb_index_hold_up[i][k][l][pt.ICACHE_INDEX_HI:pt.ICACHE_DATA_INDEX_LO] ==  ic_b_rw_addr_index_only_up[i][k]) & index_valid_up[i][k][l];
+            assign ic_b_clear_en_up[i][k][l]   = ic_b_write_en_up[i][k] &   ic_b_addr_match_index_only_up[i][k][l];
+            assign sel_bypass_up[i][k][l]      = ic_b_read_en_up[i][k]  &   ic_b_addr_match_up[i][k][l];
+            assign write_bypass_en_up[i][k][l] = ic_b_read_en_up[i][k]  &  ~any_addr_match_up[i][k] & (wrptr_up[i][k] == l);
+            rvdff  #(1)  write_bypass_ff (.*, .clk(active_clk), .din(write_bypass_en_up[i][k][l]), .dout(write_bypass_en_ff_up[i][k][l]));
+            rvdffs #(1)  index_val_ff    (.*, .clk(active_clk), .en(write_bypass_en_up[i][k][l] | ic_b_clear_en_up[i][k][l]),
+                                          .din(~ic_b_clear_en_up[i][k][l]), .dout(index_valid_up[i][k][l]));
+            rvdff  #(1)  sel_hold_ff     (.*, .clk(active_clk), .din(sel_bypass_up[i][k][l]), .dout(sel_bypass_ff_up[i][k][l]));
+            rvdffe #((31-pt.ICACHE_DATA_INDEX_LO+1)) ic_addr_index (
+               .*, .en(write_bypass_en_up[i][k][l]), .din(ic_b_rw_addr_up[i][k]), .dout(wb_index_hold_up[i][k][l])
+            );
+            rvdffe #(71) rd_data_hold_ff (
+               .*, .en(write_bypass_en_ff_up[i][k][l]), .din(wb_dout_pre_up[i][k]), .dout(wb_dout_hold_up[i][k][l])
+            );
+          end
+          always_comb begin
+            any_bypass_up[i][k] = '0;
+            sel_bypass_data_up[i][k] = '0;
+            for (int l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin
+              any_bypass_up[i][k]      |=  sel_bypass_ff_up[i][k][l];
+              sel_bypass_data_up[i][k] |= (sel_bypass_ff_up[i][k][l]) ? wb_dout_hold_up[i][k][l] : '0;
+            end
+            wb_dout[i][k]   =   any_bypass_up[i][k] ?  sel_bypass_data_up[i][k] :  wb_dout_pre_up[i][k];
+          end
+        end
+        else begin
+          assign wb_dout[i][k]                      =   wb_dout_pre_up[i][k];
+          assign ic_bank_way_clken_final_up[i][k]   =  ic_bank_way_clken[k][i];
         end
 
-        if ($clog2(pt.ICACHE_DATA_DEPTH) == 13 )   begin : size_8192
-           `EL2_IC_DATA_SRAM_LOGIC(8192,71)
-        end
-        else if ($clog2(pt.ICACHE_DATA_DEPTH) == 12 )   begin : size_4096
-           `EL2_IC_DATA_SRAM_LOGIC(4096,71)
-        end
-        else if ($clog2(pt.ICACHE_DATA_DEPTH) == 11 ) begin : size_2048
-           `EL2_IC_DATA_SRAM_LOGIC(2048,71)
-        end
-        else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 10 ) begin : size_1024
-           `EL2_IC_DATA_SRAM_LOGIC(1024,71)
-        end
-        else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 9 ) begin : size_512
-           `EL2_IC_DATA_SRAM_LOGIC(512,71)
-        end
-         else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 8 ) begin : size_256
-           `EL2_IC_DATA_SRAM_LOGIC(256,71)
-         end
-         else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 7 ) begin : size_128
-           `EL2_IC_DATA_SRAM_LOGIC(128,71)
-         end
-         else  begin : size_64
-           `EL2_IC_DATA_SRAM_LOGIC(64,71)
-         end
       end // if (pt.ICACHE_ECC)
 
      else  begin  : ECC0
@@ -315,31 +340,57 @@ import el2_pkg::*;
         always_comb begin
            wb_dout_pre_up = icache_export.wb_dout_pre_up;
         end
+        if (pt.ICACHE_BYPASS_ENABLE == 1) begin
+          assign wrptr_in_up[i][k] = (wrptr_up[i][k] == (pt.ICACHE_NUM_BYPASS-1)) ? '0 : (wrptr_up[i][k] + 1'd1);
+          rvdffs  #(pt.ICACHE_NUM_BYPASS_WIDTH)  wrptr_ff(
+              .*, .clk(active_clk),  .en(|write_bypass_en_up[i][k]), .din (wrptr_in_up[i][k]), .dout(wrptr_up[i][k])
+          );
+          assign ic_b_sram_en_up[i][k]              = ic_bank_way_clken[k][i];
+          assign ic_b_read_en_up[i][k]              =  ic_b_sram_en_up[i][k] &   ic_b_sb_rden[k][i];
+          assign ic_b_write_en_up[i][k]             =  ic_b_sram_en_up[i][k] &   ic_b_sb_wren[k][i];
+          assign ic_bank_way_clken_final_up[i][k]   =  ic_b_sram_en_up[i][k] &    ~(|sel_bypass_up[i][k]);
+          assign ic_b_rw_addr_up[i][k] = {ic_rw_addr[31:pt.ICACHE_INDEX_HI+1],ic_rw_addr_bank_q[k]};
+          assign ic_b_rw_addr_index_only_up[i][k] = ic_rw_addr_bank_q[k];
+          always_comb begin
+            any_addr_match_up[i][k] = '0;
+            for (int l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin
+              any_addr_match_up[i][k] |= ic_b_addr_match_up[i][k][l];
+            end
+          end
+          // it is an error to ever have 2 entries with the same index and both valid
+          for (genvar l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin: BYPASS
+            // full match up to bit 31
+            assign ic_b_addr_match_up[i][k][l] = (wb_index_hold_up[i][k][l] ==  ic_b_rw_addr_up[i][k]) & index_valid_up[i][k][l];
+            assign ic_b_addr_match_index_only_up[i][k][l] = (wb_index_hold_up[i][k][l][pt.ICACHE_INDEX_HI:pt.ICACHE_DATA_INDEX_LO] ==  ic_b_rw_addr_index_only_up[i][k]) & index_valid_up[i][k][l];
+            assign ic_b_clear_en_up[i][k][l]   = ic_b_write_en_up[i][k] &   ic_b_addr_match_index_only_up[i][k][l];
+            assign sel_bypass_up[i][k][l]      = ic_b_read_en_up[i][k]  &   ic_b_addr_match_up[i][k][l];
+            assign write_bypass_en_up[i][k][l] = ic_b_read_en_up[i][k]  &  ~any_addr_match_up[i][k] & (wrptr_up[i][k] == l);
+            rvdff  #(1)  write_bypass_ff (.*, .clk(active_clk), .din(write_bypass_en_up[i][k][l]), .dout(write_bypass_en_ff_up[i][k][l]));
+            rvdffs #(1)  index_val_ff    (.*, .clk(active_clk), .en(write_bypass_en_up[i][k][l] | ic_b_clear_en_up[i][k][l]),
+                                          .din(~ic_b_clear_en_up[i][k][l]), .dout(index_valid_up[i][k][l]));
+            rvdff  #(1)  sel_hold_ff     (.*, .clk(active_clk), .din(sel_bypass_up[i][k][l]), .dout(sel_bypass_ff_up[i][k][l]));
+            rvdffe #((31-pt.ICACHE_DATA_INDEX_LO+1)) ic_addr_index (
+               .*, .en(write_bypass_en_up[i][k][l]), .din(ic_b_rw_addr_up[i][k]), .dout(wb_index_hold_up[i][k][l])
+            );
+            rvdffe #(68) rd_data_hold_ff (
+               .*, .en(write_bypass_en_ff_up[i][k][l]), .din(wb_dout_pre_up[i][k]), .dout(wb_dout_hold_up[i][k][l])
+            );
+          end
+          always_comb begin
+            any_bypass_up[i][k] = '0;
+            sel_bypass_data_up[i][k] = '0;
+            for (int l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin
+              any_bypass_up[i][k]      |=  sel_bypass_ff_up[i][k][l];
+              sel_bypass_data_up[i][k] |= (sel_bypass_ff_up[i][k][l]) ? wb_dout_hold_up[i][k][l] : '0;
+            end
+            wb_dout[i][k]   =   any_bypass_up[i][k] ?  sel_bypass_data_up[i][k] :  wb_dout_pre_up[i][k];
+          end
+        end
+        else begin
+          assign wb_dout[i][k]                      =   wb_dout_pre_up[i][k];
+          assign ic_bank_way_clken_final_up[i][k]   =  ic_bank_way_clken[k][i];
+        end
 
-        if ($clog2(pt.ICACHE_DATA_DEPTH) == 13 )   begin : size_8192
-           `EL2_IC_DATA_SRAM_LOGIC(8192,68)
-        end
-        else if ($clog2(pt.ICACHE_DATA_DEPTH) == 12 )   begin : size_4096
-           `EL2_IC_DATA_SRAM_LOGIC(4096,68)
-        end
-        else if ($clog2(pt.ICACHE_DATA_DEPTH) == 11 ) begin : size_2048
-           `EL2_IC_DATA_SRAM_LOGIC(2048,68)
-        end
-        else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 10 ) begin : size_1024
-           `EL2_IC_DATA_SRAM_LOGIC(1024,68)
-        end
-        else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 9 ) begin : size_512
-           `EL2_IC_DATA_SRAM_LOGIC(512,68)
-        end
-         else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 8 ) begin : size_256
-           `EL2_IC_DATA_SRAM_LOGIC(256,68)
-         end
-         else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 7 ) begin : size_128
-           `EL2_IC_DATA_SRAM_LOGIC(128,68)
-         end
-         else  begin : size_64
-           `EL2_IC_DATA_SRAM_LOGIC(64,68)
-         end
       end // else: !if(pt.ICACHE_ECC)
       end // block: BANKS_WAY
    end // block: WAYS
@@ -368,8 +419,8 @@ import el2_pkg::*;
 
         // Use exported ICache interface.
         always_comb begin
-           icache_export.ic_b_sb_bit_en_vec = ic_b_sb_bit_en_vec;
-           wb_packeddout_pre = icache_export.wb_packeddout_pre;
+          icache_export.ic_b_sb_bit_en_vec = ic_b_sb_bit_en_vec;
+          wb_packeddout_pre = icache_export.wb_packeddout_pre;
         end
 
         for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: BITEN
@@ -377,84 +428,68 @@ import el2_pkg::*;
         end
 
         // SRAMS with ECC (single/double detect; no correct)
-        if ($clog2(pt.ICACHE_DATA_DEPTH) == 13 )   begin : size_8192
-           if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(8192,284,71)    // 64b data + 7b ecc
-           end // block: WAYS
-           else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(8192,142,71)
-           end // block: WAYS
-        end // block: size_8192
+        if (pt.ICACHE_BYPASS_ENABLE == 1) begin
+          assign wrptr_in[k] = (wrptr[k] == (pt.ICACHE_NUM_BYPASS-1)) ? '0 : (wrptr[k] + 1'd1);
 
-        else if ($clog2(pt.ICACHE_DATA_DEPTH) == 12 )   begin : size_4096
-           if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(4096,284,71)
-           end // block: WAYS
-           else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(4096,142,71)
-           end // block: WAYS
-        end // block: size_4096
+          rvdffs  #(pt.ICACHE_NUM_BYPASS_WIDTH)  wrptr_ff(
+              .*, .clk(active_clk), .en(|write_bypass_en[k]), .din (wrptr_in[k]), .dout(wrptr[k])
+          );
+          assign ic_b_sram_en[k]              = |ic_bank_way_clken[k];
+          assign ic_b_read_en[k]              =  ic_b_sram_en[k]  &  (|ic_b_sb_rden[k]);
+          assign ic_b_write_en[k]             =  ic_b_sram_en[k] &   (|ic_b_sb_wren[k]);
+          assign ic_bank_way_clken_final[k]   =  ic_b_sram_en[k] &    ~(|sel_bypass[k]);
+          assign ic_b_rw_addr[k] = {ic_rw_addr[31:pt.ICACHE_INDEX_HI+1],ic_rw_addr_bank_q[k]};
+          assign ic_b_rw_addr_index_only[k] = ic_rw_addr_bank_q[k];
 
-        else if ($clog2(pt.ICACHE_DATA_DEPTH) == 11 ) begin : size_2048
-           if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(2048,284,71)
-           end // block: WAYS
-           else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(2048,142,71)
-           end // block: WAYS
-        end // block: size_2048
+          always_comb begin
+            any_addr_match[k] = '0;
+            for (int l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin
+              any_addr_match[k] |= ic_b_addr_match[k][l];
+            end
+          end
 
-        else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 10 ) begin : size_1024
-           if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(1024,284,71)
-           end // block: WAYS
-           else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(1024,142,71)
-           end // block: WAYS
-        end // block: size_1024
+          // it is an error to ever have 2 entries with the same index and both valid
+          for (genvar l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin: BYPASS
+            // full match up to bit 31
+            assign ic_b_addr_match[k][l] = (wb_index_hold[k][l] ==  ic_b_rw_addr[k]) & index_valid[k][l];
+            assign ic_b_addr_match_index_only[k][l] = (wb_index_hold[k][l][pt.ICACHE_INDEX_HI:pt.ICACHE_DATA_INDEX_LO] ==  ic_b_rw_addr_index_only[k]) & index_valid[k][l];
+            assign ic_b_clear_en[k][l]   = ic_b_write_en[k] &   ic_b_addr_match_index_only[k][l];
+            assign sel_bypass[k][l]      = ic_b_read_en[k]  &   ic_b_addr_match[k][l];
+            assign write_bypass_en[k][l] = ic_b_read_en[k]  &  ~any_addr_match[k] & (wrptr[k] == l);
 
-        else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 9 ) begin : size_512
-           if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(512,284,71)
-           end // block: WAYS
-           else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(512,142,71)
-           end // block: WAYS
-        end // block: size_512
+            rvdff  #(1)  write_bypass_ff (.*, .clk(active_clk), .din(write_bypass_en[k][l]), .dout(write_bypass_en_ff[k][l]));
+            rvdffs #(1)  index_val_ff    (.*, .clk(active_clk), .en(write_bypass_en[k][l] | ic_b_clear_en[k][l]),
+                                          .din(~ic_b_clear_en[k][l]),  .dout(index_valid[k][l]));
+            rvdff  #(1)  sel_hold_ff     (.*, .clk(active_clk), .din(sel_bypass[k][l]),      .dout(sel_bypass_ff[k][l]));
+            rvdffe #((31-pt.ICACHE_DATA_INDEX_LO+1)) ic_addr_index (
+                .*, .en(write_bypass_en[k][l]), .din (ic_b_rw_addr[k]), .dout(wb_index_hold[k][l])
+            );
+            rvdffe #((71*pt.ICACHE_NUM_WAYS)) rd_data_hold_ff (
+                .*, .en(write_bypass_en_ff[k][l]), .din (wb_packeddout_pre[k]), .dout(wb_packeddout_hold[k][l])
+            );
+          end // block: BYPASS
 
-        else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 8 ) begin : size_256
-           if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(256,284,71)
-           end // block: WAYS
-           else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(256,142,71)
-           end // block: WAYS
-        end // block: size_256
+          always_comb begin
+            any_bypass[k] = '0;
+            sel_bypass_data[k] = '0;
 
-        else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 7 ) begin : size_128
-           if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(128,284,71)
-           end // block: WAYS
-           else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(128,142,71)
-           end // block: WAYS
-        end // block: size_128
+            for (int l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin
+              any_bypass[k]      |=  sel_bypass_ff[k][l];
+              sel_bypass_data[k] |= (sel_bypass_ff[k][l]) ? wb_packeddout_hold[k][l] : '0;
+            end
+              wb_packeddout[k]   =   any_bypass[k] ?  sel_bypass_data[k] :  wb_packeddout_pre[k];
+          end // always_comb begin
+        end // if (pt.ICACHE_BYPASS_ENABLE == 1)
+        else begin
+            assign wb_packeddout[k]   =   wb_packeddout_pre[k];
+            assign ic_bank_way_clken_final[k]   =  |ic_bank_way_clken[k];
+        end
 
-        else  begin : size_64
-           if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(64,284,71)
-           end // block: WAYS
-           else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(64,142,71)
-           end // block: WAYS
-        end // block: size_64
+        for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: WAYS
+           assign wb_dout[i][k][70:0]  = wb_packeddout[k][(71*i)+70:71*i];
+        end : WAYS
 
-
-       for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: WAYS
-          assign wb_dout[i][k][70:0]  = wb_packeddout[k][(71*i)+70:71*i];
-       end : WAYS
-
-       end // if (pt.ICACHE_ECC)
+     end // if (pt.ICACHE_ECC)
 
 
      else  begin  : ECC0
@@ -473,81 +508,66 @@ import el2_pkg::*;
         end
 
         // SRAMs with parity
-        if ($clog2(pt.ICACHE_DATA_DEPTH) == 13 )   begin : size_8192
-           if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(8192,272,68)    // 64b data + 4b parity
-           end // block: WAYS
-           else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(8192,136,68)
-           end // block: WAYS
-        end // block: size_8192
+        if (pt.ICACHE_BYPASS_ENABLE == 1) begin
+          assign wrptr_in[k] = (wrptr[k] == (pt.ICACHE_NUM_BYPASS-1)) ? '0 : (wrptr[k] + 1'd1);
 
-        else if ($clog2(pt.ICACHE_DATA_DEPTH) == 12 )   begin : size_4096
-           if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(4096,272,68)
-           end // block: WAYS
-           else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(4096,136,68)
-           end // block: WAYS
-        end // block: size_4096
+          rvdffs  #(pt.ICACHE_NUM_BYPASS_WIDTH)  wrptr_ff(
+              .*, .clk(active_clk), .en(|write_bypass_en[k]), .din (wrptr_in[k]), .dout(wrptr[k])
+          );
+          assign ic_b_sram_en[k]              = |ic_bank_way_clken[k];
+          assign ic_b_read_en[k]              =  ic_b_sram_en[k]  &  (|ic_b_sb_rden[k]);
+          assign ic_b_write_en[k]             =  ic_b_sram_en[k] &   (|ic_b_sb_wren[k]);
+          assign ic_bank_way_clken_final[k]   =  ic_b_sram_en[k] &    ~(|sel_bypass[k]);
+          assign ic_b_rw_addr[k] = {ic_rw_addr[31:pt.ICACHE_INDEX_HI+1],ic_rw_addr_bank_q[k]};
+          assign ic_b_rw_addr_index_only[k] = ic_rw_addr_bank_q[k];
 
-        else if ($clog2(pt.ICACHE_DATA_DEPTH) == 11 ) begin : size_2048
-           if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(2048,272,68)
-           end // block: WAYS
-           else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(2048,136,68)
-           end // block: WAYS
-        end // block: size_2048
+          always_comb begin
+            any_addr_match[k] = '0;
+            for (int l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin
+              any_addr_match[k] |= ic_b_addr_match[k][l];
+            end
+          end
 
-        else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 10 ) begin : size_1024
-           if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(1024,272,68)
-           end // block: WAYS
-           else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(1024,136,68)
-           end // block: WAYS
-        end // block: size_1024
+          // it is an error to ever have 2 entries with the same index and both valid
+          for (genvar l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin: BYPASS
+            // full match up to bit 31
+            assign ic_b_addr_match[k][l] = (wb_index_hold[k][l] ==  ic_b_rw_addr[k]) & index_valid[k][l];
+            assign ic_b_addr_match_index_only[k][l] = (wb_index_hold[k][l][pt.ICACHE_INDEX_HI:pt.ICACHE_DATA_INDEX_LO] ==  ic_b_rw_addr_index_only[k]) & index_valid[k][l];
+            assign ic_b_clear_en[k][l]   = ic_b_write_en[k] &   ic_b_addr_match_index_only[k][l];
+            assign sel_bypass[k][l]      = ic_b_read_en[k]  &   ic_b_addr_match[k][l];
+            assign write_bypass_en[k][l] = ic_b_read_en[k]  &  ~any_addr_match[k] & (wrptr[k] == l);
 
-        else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 9 ) begin : size_512
-           if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(512,272,68)
-           end // block: WAYS
-           else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(512,136,68)
-           end // block: WAYS
-        end // block: size_512
+            rvdff  #(1)  write_bypass_ff (.*, .clk(active_clk), .din(write_bypass_en[k][l]), .dout(write_bypass_en_ff[k][l]));
+            rvdffs #(1)  index_val_ff    (.*, .clk(active_clk), .en(write_bypass_en[k][l] | ic_b_clear_en[k][l]),
+                                          .din(~ic_b_clear_en[k][l]),  .dout(index_valid[k][l]));
+            rvdff  #(1)  sel_hold_ff     (.*, .clk(active_clk), .din(sel_bypass[k][l]),      .dout(sel_bypass_ff[k][l]));
+            rvdffe #((31-pt.ICACHE_DATA_INDEX_LO+1)) ic_addr_index (
+                .*, .en(write_bypass_en[k][l]), .din (ic_b_rw_addr[k]), .dout(wb_index_hold[k][l])
+            );
+            rvdffe #((68*pt.ICACHE_NUM_WAYS)) rd_data_hold_ff (
+                .*, .en(write_bypass_en_ff[k][l]), .din (wb_packeddout_pre[k]), .dout(wb_packeddout_hold[k][l])
+            );
+          end // block: BYPASS
 
-        else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 8 ) begin : size_256
-           if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(256,272,68)
-           end // block: WAYS
-           else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(256,136,68)
-           end // block: WAYS
-        end // block: size_256
+          always_comb begin
+            any_bypass[k] = '0;
+            sel_bypass_data[k] = '0;
 
-        else if ( $clog2(pt.ICACHE_DATA_DEPTH) == 7 ) begin : size_128
-           if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(128,272,68)
-           end // block: WAYS
-           else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(128,136,68)
-           end // block: WAYS
-        end // block: size_128
+            for (int l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin
+              any_bypass[k]      |=  sel_bypass_ff[k][l];
+              sel_bypass_data[k] |= (sel_bypass_ff[k][l]) ? wb_packeddout_hold[k][l] : '0;
+            end
+              wb_packeddout[k]   =   any_bypass[k] ?  sel_bypass_data[k] :  wb_packeddout_pre[k];
+          end // always_comb
+        end // if (pt.ICACHE_BYPASS_ENABLE == 1)
+        else begin
+            assign wb_packeddout[k]   =   wb_packeddout_pre[k];
+            assign ic_bank_way_clken_final[k]   =  |ic_bank_way_clken[k];
+        end
 
-        else  begin : size_64
-           if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(64,272,68)
-           end // block: WAYS
-           else   begin : WAYS
-              `EL2_PACKED_IC_DATA_SRAM_LOGIC(64,136,68)
-           end // block: WAYS
-        end // block: size_64
-
-       for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: WAYS
-          assign wb_dout[i][k][67:0]  = wb_packeddout[k][(68*i)+67:68*i];
-       end
+        for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: WAYS
+           assign wb_dout[i][k][67:0]  = wb_packeddout[k][(68*i)+67:68*i];
+        end
      end // block: ECC0
      end // block: BANKS_WAY
  end // block: PACKED_1
@@ -863,30 +883,62 @@ end // block: OTHERS
       if (pt.ICACHE_ECC) begin  : ECC1
         logic [pt.ICACHE_NUM_WAYS-1:0] [pt.ICACHE_TAG_NUM_BYPASS-1:0][25 :0] wb_dout_hold;
 
-        if (pt.ICACHE_TAG_DEPTH == 32)   begin : size_32
-          `EL2_IC_TAG_SRAM_LOGIC(32,26)
-        end // if (pt.ICACHE_TAG_DEPTH == 32)
-        if (pt.ICACHE_TAG_DEPTH == 64)   begin : size_64
-          `EL2_IC_TAG_SRAM_LOGIC(64,26)
-        end // if (pt.ICACHE_TAG_DEPTH == 64)
-        if (pt.ICACHE_TAG_DEPTH == 128)   begin : size_128
-          `EL2_IC_TAG_SRAM_LOGIC(128,26)
-        end // if (pt.ICACHE_TAG_DEPTH == 128)
-        if (pt.ICACHE_TAG_DEPTH == 256)   begin : size_256
-          `EL2_IC_TAG_SRAM_LOGIC(256,26)
-        end // if (pt.ICACHE_TAG_DEPTH == 256)
-        if (pt.ICACHE_TAG_DEPTH == 512)   begin : size_512
-          `EL2_IC_TAG_SRAM_LOGIC(512,26)
-        end // if (pt.ICACHE_TAG_DEPTH == 512)
-        if (pt.ICACHE_TAG_DEPTH == 1024)   begin : size_1024
-          `EL2_IC_TAG_SRAM_LOGIC(1024,26)
-        end // if (pt.ICACHE_TAG_DEPTH == 1024)
-        if (pt.ICACHE_TAG_DEPTH == 2048)   begin : size_2048
-          `EL2_IC_TAG_SRAM_LOGIC(2048,26)
-        end // if (pt.ICACHE_TAG_DEPTH == 2048)
-        if (pt.ICACHE_TAG_DEPTH == 4096)   begin  : size_4096
-          `EL2_IC_TAG_SRAM_LOGIC(4096,26)
-        end // if (pt.ICACHE_TAG_DEPTH == 4096)
+        if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin
+          assign wrptr_in[i] = (wrptr[i] == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr[i] + 1'd1);
+          rvdffs #(pt.ICACHE_TAG_NUM_BYPASS_WIDTH) wrptr_ff(
+              .*, .clk(active_clk), .en(|write_bypass_en[i]), .din (wrptr_in[i]), .dout(wrptr[i])
+          );
+
+          assign ic_b_sram_en[i]              = ic_tag_clken[i];
+          assign ic_b_read_en[i]              =  ic_b_sram_en[i] &   (ic_tag_rden_q[i]);
+          assign ic_b_write_en[i]             =  ic_b_sram_en[i] &   (ic_tag_wren_q[i]);
+          assign ic_tag_clken_final[i]        =  ic_b_sram_en[i] &    ~(|sel_bypass[i]);
+
+          // LSB is pt.ICACHE_TAG_INDEX_LO]
+          assign ic_b_rw_addr[i] = {ic_rw_addr_q};
+
+          always_comb begin
+            any_addr_match[i] = '0;
+            for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin
+              any_addr_match[i] |= (ic_b_addr_match[i][l] & index_valid[i][l]);
+            end
+          end
+
+          // it is an error to ever have 2 entries with the same index and both valid
+          for (genvar l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin: BYPASS
+            assign ic_b_addr_match[i][l] = (wb_index_hold[i][l] ==  ic_b_rw_addr[i]) & index_valid[i][l];
+            assign ic_b_clear_en[i][l]   = ic_b_write_en[i] &   ic_b_addr_match[i][l];
+            assign sel_bypass[i][l]      = ic_b_read_en[i]  &   ic_b_addr_match[i][l];
+            assign write_bypass_en[i][l] = ic_b_read_en[i]  &  ~any_addr_match[i] & (wrptr[i] == l);
+
+            rvdff  #(1)  write_bypass_ff (.*, .clk(active_clk), .din(write_bypass_en[i][l]), .dout(write_bypass_en_ff[i][l]));
+            rvdffs #(1)  index_val_ff    (.*, .clk(active_clk), .en(write_bypass_en[i][l] | ic_b_clear_en[i][l]),
+                                          .din(~ic_b_clear_en[i][l]), .dout(index_valid[i][l]));
+            rvdff  #(1)  sel_hold_ff     (.*, .clk(active_clk), .din(sel_bypass[i][l]), .dout(sel_bypass_ff[i][l]));
+            rvdffe #(.WIDTH(pt.ICACHE_INDEX_HI-pt.ICACHE_TAG_INDEX_LO+1),.OVERRIDE(1))  ic_addr_index   (
+                  .*, .en(write_bypass_en[i][l]), .din (ic_b_rw_addr[i]), .dout(wb_index_hold[i][l])
+            );
+            rvdffe #(26) rd_data_hold_ff (
+                  .*, .en(write_bypass_en_ff[i][l]), .din (ic_tag_data_raw_pre[i][26-1:0]), .dout(wb_dout_hold[i][l])
+            );
+          end // block: BYPASS
+
+          always_comb begin
+            any_bypass[i] = '0;
+            sel_bypass_data[i] = '0;
+
+            for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin
+              any_bypass[i]      |=  sel_bypass_ff[i][l];
+              sel_bypass_data[i] |= (sel_bypass_ff[i][l]) ? wb_dout_hold[i][l] : '0;
+            end
+            ic_tag_data_raw[i]   =   any_bypass[i] ?  sel_bypass_data[i] :  ic_tag_data_raw_pre[i];
+          end // always_comb
+
+        end // if (pt.ICACHE_BYPASS_ENABLE == 1)
+        else begin
+          assign ic_tag_data_raw[i]   =   ic_tag_data_raw_pre[i];
+          assign ic_tag_clken_final[i]       =   ic_tag_clken[i];
+        end
 
         assign w_tout[i][31:pt.ICACHE_TAG_LO] = ic_tag_data_raw[i][31-pt.ICACHE_TAG_LO:0] ;
         assign w_tout[i][36:32]              = ic_tag_data_raw[i][25:21] ;
@@ -907,30 +959,62 @@ end // block: OTHERS
         logic [pt.ICACHE_NUM_WAYS-1:0] [pt.ICACHE_TAG_NUM_BYPASS-1:0][21 :0] wb_dout_hold;
         assign ic_tag_data_raw_pre[i][25:22] = '0 ;
 
-        if (pt.ICACHE_TAG_DEPTH == 32)   begin : size_32
-          `EL2_IC_TAG_SRAM_LOGIC(32,22)
-        end // if (pt.ICACHE_TAG_DEPTH == 32)
-        if (pt.ICACHE_TAG_DEPTH == 64)   begin : size_64
-          `EL2_IC_TAG_SRAM_LOGIC(64,22)
-        end // if (pt.ICACHE_TAG_DEPTH == 64)
-        if (pt.ICACHE_TAG_DEPTH == 128)   begin : size_128
-          `EL2_IC_TAG_SRAM_LOGIC(128,22)
-        end // if (pt.ICACHE_TAG_DEPTH == 128)
-        if (pt.ICACHE_TAG_DEPTH == 256)   begin : size_256
-          `EL2_IC_TAG_SRAM_LOGIC(256,22)
-        end // if (pt.ICACHE_TAG_DEPTH == 256)
-        if (pt.ICACHE_TAG_DEPTH == 512)   begin : size_512
-          `EL2_IC_TAG_SRAM_LOGIC(512,22)
-        end // if (pt.ICACHE_TAG_DEPTH == 512)
-        if (pt.ICACHE_TAG_DEPTH == 1024)   begin : size_1024
-          `EL2_IC_TAG_SRAM_LOGIC(1024,22)
-        end // if (pt.ICACHE_TAG_DEPTH == 1024)
-        if (pt.ICACHE_TAG_DEPTH == 2048)   begin : size_2048
-          `EL2_IC_TAG_SRAM_LOGIC(2048,22)
-        end // if (pt.ICACHE_TAG_DEPTH == 2048)
-        if (pt.ICACHE_TAG_DEPTH == 4096)   begin  : size_4096
-          `EL2_IC_TAG_SRAM_LOGIC(4096,22)
-        end // if (pt.ICACHE_TAG_DEPTH == 4096)
+        if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin
+          assign wrptr_in[i] = (wrptr[i] == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr[i] + 1'd1);
+          rvdffs #(pt.ICACHE_TAG_NUM_BYPASS_WIDTH) wrptr_ff(
+              .*, .clk(active_clk), .en(|write_bypass_en[i]), .din (wrptr_in[i]), .dout(wrptr[i])
+          );
+
+          assign ic_b_sram_en[i]              = ic_tag_clken[i];
+          assign ic_b_read_en[i]              =  ic_b_sram_en[i] &   (ic_tag_rden_q[i]);
+          assign ic_b_write_en[i]             =  ic_b_sram_en[i] &   (ic_tag_wren_q[i]);
+          assign ic_tag_clken_final[i]        =  ic_b_sram_en[i] &    ~(|sel_bypass[i]);
+
+          // LSB is pt.ICACHE_TAG_INDEX_LO]
+          assign ic_b_rw_addr[i] = {ic_rw_addr_q};
+
+          always_comb begin
+            any_addr_match[i] = '0;
+            for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin
+              any_addr_match[i] |= (ic_b_addr_match[i][l] & index_valid[i][l]);
+            end
+          end
+
+          // it is an error to ever have 2 entries with the same index and both valid
+          for (genvar l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin: BYPASS
+            assign ic_b_addr_match[i][l] = (wb_index_hold[i][l] ==  ic_b_rw_addr[i]) & index_valid[i][l];
+            assign ic_b_clear_en[i][l]   = ic_b_write_en[i] &   ic_b_addr_match[i][l];
+            assign sel_bypass[i][l]      = ic_b_read_en[i]  &   ic_b_addr_match[i][l];
+            assign write_bypass_en[i][l] = ic_b_read_en[i]  &  ~any_addr_match[i] & (wrptr[i] == l);
+
+            rvdff  #(1)  write_bypass_ff (.*, .clk(active_clk), .din(write_bypass_en[i][l]), .dout(write_bypass_en_ff[i][l]));
+            rvdffs #(1)  index_val_ff    (.*, .clk(active_clk), .en(write_bypass_en[i][l] | ic_b_clear_en[i][l]),
+                                          .din(~ic_b_clear_en[i][l]), .dout(index_valid[i][l]));
+            rvdff  #(1)  sel_hold_ff     (.*, .clk(active_clk), .din(sel_bypass[i][l]), .dout(sel_bypass_ff[i][l]));
+            rvdffe #(.WIDTH(pt.ICACHE_INDEX_HI-pt.ICACHE_TAG_INDEX_LO+1),.OVERRIDE(1))  ic_addr_index   (
+                  .*, .en(write_bypass_en[i][l]), .din (ic_b_rw_addr[i]), .dout(wb_index_hold[i][l])
+            );
+            rvdffe #(22) rd_data_hold_ff (
+                  .*, .en(write_bypass_en_ff[i][l]), .din (ic_tag_data_raw_pre[i][22-1:0]), .dout(wb_dout_hold[i][l])
+            );
+          end // block: BYPASS
+
+          always_comb begin
+            any_bypass[i] = '0;
+            sel_bypass_data[i] = '0;
+
+            for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin
+              any_bypass[i]      |=  sel_bypass_ff[i][l];
+              sel_bypass_data[i] |= (sel_bypass_ff[i][l]) ? wb_dout_hold[i][l] : '0;
+            end
+            ic_tag_data_raw[i]   =   any_bypass[i] ?  sel_bypass_data[i] :  ic_tag_data_raw_pre[i];
+          end // always_comb
+
+        end // if (pt.ICACHE_BYPASS_ENABLE == 1)
+        else begin
+          assign ic_tag_data_raw[i]   =   ic_tag_data_raw_pre[i];
+          assign ic_tag_clken_final[i]       =   ic_tag_clken[i];
+        end
 
         assign w_tout[i][31:pt.ICACHE_TAG_LO] = ic_tag_data_raw[i][31-pt.ICACHE_TAG_LO:0] ;
         assign w_tout[i][32]                 = ic_tag_data_raw[i][21] ;
@@ -989,80 +1073,128 @@ end // block: OTHERS
     end
 
     for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: BITEN
-        assign ic_tag_wren_biten_vec[(26*i)+25:26*i] = {26{ic_tag_wren_q[i]}};
-     end
-      if (pt.ICACHE_TAG_DEPTH == 32)   begin : size_32
-        if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-          `EL2_IC_TAG_PACKED_SRAM_LOGIC(32,104)
-        end // block: WAYS
-      else begin : WAYS
-          `EL2_IC_TAG_PACKED_SRAM_LOGIC(32,52)
-        end // block: WAYS
-      end // if (pt.ICACHE_TAG_DEPTH == 32
+      assign ic_tag_wren_biten_vec[(26*i)+25:26*i] = {26{ic_tag_wren_q[i]}};
+    end
 
-      if (pt.ICACHE_TAG_DEPTH == 64)   begin : size_64
-        if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-          `EL2_IC_TAG_PACKED_SRAM_LOGIC(64,104)
-        end // block: WAYS
-      else begin : WAYS
-          `EL2_IC_TAG_PACKED_SRAM_LOGIC(64,52)
-        end // block: WAYS
-      end // block: size_64
+    if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
+      if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin
+        assign wrptr_in = (wrptr == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr + 1'd1);
+        rvdffs  #(pt.ICACHE_TAG_NUM_BYPASS_WIDTH)  wrptr_ff(
+             .*, .clk(active_clk), .en(|write_bypass_en), .din (wrptr_in), .dout(wrptr)
+        );
 
-      if (pt.ICACHE_TAG_DEPTH == 128)   begin : size_128
-       if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-          `EL2_IC_TAG_PACKED_SRAM_LOGIC(128,104)
-      end // block: WAYS
-      else begin : WAYS
-          `EL2_IC_TAG_PACKED_SRAM_LOGIC(128,52)
-      end // block: WAYS
+        assign ic_b_sram_en              = |ic_tag_clken;
+        assign ic_b_read_en              =  ic_b_sram_en &   (|ic_tag_rden_q);
+        assign ic_b_write_en             =  ic_b_sram_en &   (|ic_tag_wren_q);
+        assign ic_tag_clken_final        =  ic_b_sram_en &    ~(|sel_bypass);
 
-      end // block: size_128
+        // LSB is pt.ICACHE_TAG_INDEX_LO]
+        assign ic_b_rw_addr = {ic_rw_addr_q};
 
-      if (pt.ICACHE_TAG_DEPTH == 256)   begin : size_256
-       if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-          `EL2_IC_TAG_PACKED_SRAM_LOGIC(256,104)
-        end // block: WAYS
-       else begin : WAYS
-          `EL2_IC_TAG_PACKED_SRAM_LOGIC(256,52)
-        end // block: WAYS
-      end // block: size_256
+        always_comb begin
+           any_addr_match = '0;
 
-      if (pt.ICACHE_TAG_DEPTH == 512)   begin : size_512
-       if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-          `EL2_IC_TAG_PACKED_SRAM_LOGIC(512,104)
-        end // block: WAYS
-       else begin : WAYS
-          `EL2_IC_TAG_PACKED_SRAM_LOGIC(512,52)
-        end // block: WAYS
-      end // block: size_512
+           for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin
+              any_addr_match |= ic_b_addr_match[l];
+           end
+        end
 
-      if (pt.ICACHE_TAG_DEPTH == 1024)   begin : size_1024
-         if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-          `EL2_IC_TAG_PACKED_SRAM_LOGIC(1024,104)
-        end // block: WAYS
-       else begin : WAYS
-          `EL2_IC_TAG_PACKED_SRAM_LOGIC(1024,52)
-        end // block: WAYS
-      end // block: size_1024
+        // it is an error to ever have 2 entries with the same index and both valid
+        for (genvar l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin: BYPASS
+           assign ic_b_addr_match[l] = (wb_index_hold[l] ==  ic_b_rw_addr) & index_valid[l];
+           assign ic_b_clear_en[l]   = ic_b_write_en &   ic_b_addr_match[l];
+           assign sel_bypass[l]      = ic_b_read_en  &   ic_b_addr_match[l];
+           assign write_bypass_en[l] = ic_b_read_en  &  ~any_addr_match & (wrptr == l);
 
-      if (pt.ICACHE_TAG_DEPTH == 2048)   begin : size_2048
-       if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-          `EL2_IC_TAG_PACKED_SRAM_LOGIC(2048,104)
-        end // block: WAYS
-       else begin : WAYS
-          `EL2_IC_TAG_PACKED_SRAM_LOGIC(2048,52)
-        end // block: WAYS
-      end // block: size_2048
+           rvdff  #(1)  write_bypass_ff (.*, .clk(active_clk),
+                                         .din(write_bypass_en[l]), .dout(write_bypass_en_ff[l]));
+           rvdffs #(1)  index_val_ff    (.*, .clk(active_clk), .en(write_bypass_en[l] | ic_b_clear_en[l]),
+                                         .din(~ic_b_clear_en[l]), .dout(index_valid[l]));
+           rvdff  #(1)  sel_hold_ff     (.*, .clk(active_clk), .din(sel_bypass[l]), .dout(sel_bypass_ff[l]));
+           rvdffe #(.WIDTH(pt.ICACHE_INDEX_HI-pt.ICACHE_TAG_INDEX_LO+1),.OVERRIDE(1)) ic_addr_index (
+                 .*, .en(write_bypass_en[l]), .din(ic_b_rw_addr), .dout(wb_index_hold[l]));
+           rvdffe #(104) rd_data_hold_ff (
+                 .*, .en(write_bypass_en_ff[l]), .din (ic_tag_data_raw_packed_pre[104-1:0]), .dout(wb_packeddout_hold[l]));
 
-      if (pt.ICACHE_TAG_DEPTH == 4096)   begin  : size_4096
-       if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-          `EL2_IC_TAG_PACKED_SRAM_LOGIC(4096,104)
-        end // block: WAYS
-       else begin : WAYS
-          `EL2_IC_TAG_PACKED_SRAM_LOGIC(4096,52)
-        end // block: WAYS
-      end // block: size_4096
+        end // block: BYPASS
+
+        always_comb begin
+          any_bypass = '0;
+          sel_bypass_data = '0;
+
+          for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin
+            any_bypass      |=  sel_bypass_ff[l];
+            sel_bypass_data |= (sel_bypass_ff[l]) ? wb_packeddout_hold[l] : '0;
+          end
+          ic_tag_data_raw_packed   =   any_bypass ?  sel_bypass_data :  ic_tag_data_raw_packed_pre;
+        end // always_comb
+      end // if (pt.ICACHE_BYPASS_ENABLE == 1)
+      else begin
+          assign ic_tag_data_raw_packed   =   ic_tag_data_raw_packed_pre;
+          assign ic_tag_clken_final       =   |ic_tag_clken;
+      end
+
+
+    end // block: WAYS
+    else begin : WAYS
+      if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin
+        assign wrptr_in = (wrptr == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr + 1'd1);
+        rvdffs  #(pt.ICACHE_TAG_NUM_BYPASS_WIDTH)  wrptr_ff(
+             .*, .clk(active_clk), .en(|write_bypass_en), .din (wrptr_in), .dout(wrptr)
+        );
+
+        assign ic_b_sram_en              = |ic_tag_clken;
+        assign ic_b_read_en              =  ic_b_sram_en &   (|ic_tag_rden_q);
+        assign ic_b_write_en             =  ic_b_sram_en &   (|ic_tag_wren_q);
+        assign ic_tag_clken_final        =  ic_b_sram_en &    ~(|sel_bypass);
+
+        // LSB is pt.ICACHE_TAG_INDEX_LO]
+        assign ic_b_rw_addr = {ic_rw_addr_q};
+
+        always_comb begin
+           any_addr_match = '0;
+
+           for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin
+              any_addr_match |= ic_b_addr_match[l];
+           end
+        end
+
+        // it is an error to ever have 2 entries with the same index and both valid
+        for (genvar l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin: BYPASS
+           assign ic_b_addr_match[l] = (wb_index_hold[l] ==  ic_b_rw_addr) & index_valid[l];
+           assign ic_b_clear_en[l]   = ic_b_write_en &   ic_b_addr_match[l];
+           assign sel_bypass[l]      = ic_b_read_en  &   ic_b_addr_match[l];
+           assign write_bypass_en[l] = ic_b_read_en  &  ~any_addr_match & (wrptr == l);
+
+           rvdff  #(1)  write_bypass_ff (.*, .clk(active_clk),
+                                         .din(write_bypass_en[l]), .dout(write_bypass_en_ff[l]));
+           rvdffs #(1)  index_val_ff    (.*, .clk(active_clk), .en(write_bypass_en[l] | ic_b_clear_en[l]),
+                                         .din(~ic_b_clear_en[l]), .dout(index_valid[l]));
+           rvdff  #(1)  sel_hold_ff     (.*, .clk(active_clk), .din(sel_bypass[l]), .dout(sel_bypass_ff[l]));
+           rvdffe #(.WIDTH(pt.ICACHE_INDEX_HI-pt.ICACHE_TAG_INDEX_LO+1),.OVERRIDE(1)) ic_addr_index (
+                 .*, .en(write_bypass_en[l]), .din(ic_b_rw_addr), .dout(wb_index_hold[l]));
+           rvdffe #(52) rd_data_hold_ff (
+                 .*, .en(write_bypass_en_ff[l]), .din (ic_tag_data_raw_packed_pre[52-1:0]), .dout(wb_packeddout_hold[l]));
+
+        end // block: BYPASS
+
+        always_comb begin
+          any_bypass = '0;
+          sel_bypass_data = '0;
+
+          for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin
+            any_bypass      |=  sel_bypass_ff[l];
+            sel_bypass_data |= (sel_bypass_ff[l]) ? wb_packeddout_hold[l] : '0;
+          end
+          ic_tag_data_raw_packed   =   any_bypass ?  sel_bypass_data :  ic_tag_data_raw_packed_pre;
+        end // always_comb
+      end // if (pt.ICACHE_BYPASS_ENABLE == 1)
+      else begin
+          assign ic_tag_data_raw_packed   =   ic_tag_data_raw_packed_pre;
+          assign ic_tag_clken_final       =   |ic_tag_clken;
+      end
+
+    end // block: WAYS
 
         for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin
           assign ic_tag_data_raw[i]  = ic_tag_data_raw_packed[(26*i)+25:26*i];
@@ -1090,78 +1222,123 @@ end // block: OTHERS
     for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: BITEN
         assign ic_tag_wren_biten_vec[(22*i)+21:22*i] = {22{ic_tag_wren_q[i]}};
      end
-      if (pt.ICACHE_TAG_DEPTH == 32)   begin : size_32
-        if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(32,88)
-        end // block: WAYS
-      else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(32,44)
-        end // block: WAYS
-      end // if (pt.ICACHE_TAG_DEPTH == 32
+      if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
+        if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin
+          assign wrptr_in = (wrptr == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr + 1'd1);
+          rvdffs  #(pt.ICACHE_TAG_NUM_BYPASS_WIDTH)  wrptr_ff(
+               .*, .clk(active_clk), .en(|write_bypass_en), .din (wrptr_in), .dout(wrptr)
+          );
 
-      if (pt.ICACHE_TAG_DEPTH == 64)   begin : size_64
-        if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(64,88)
-        end // block: WAYS
-      else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(64,44)
-        end // block: WAYS
-      end // block: size_64
+          assign ic_b_sram_en              = |ic_tag_clken;
+          assign ic_b_read_en              =  ic_b_sram_en &   (|ic_tag_rden_q);
+          assign ic_b_write_en             =  ic_b_sram_en &   (|ic_tag_wren_q);
+          assign ic_tag_clken_final        =  ic_b_sram_en &    ~(|sel_bypass);
 
-      if (pt.ICACHE_TAG_DEPTH == 128)   begin : size_128
-       if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(128,88)
+          // LSB is pt.ICACHE_TAG_INDEX_LO]
+          assign ic_b_rw_addr = {ic_rw_addr_q};
+
+          always_comb begin
+             any_addr_match = '0;
+
+             for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin
+                any_addr_match |= ic_b_addr_match[l];
+             end
+          end
+
+          // it is an error to ever have 2 entries with the same index and both valid
+          for (genvar l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin: BYPASS
+             assign ic_b_addr_match[l] = (wb_index_hold[l] ==  ic_b_rw_addr) & index_valid[l];
+             assign ic_b_clear_en[l]   = ic_b_write_en &   ic_b_addr_match[l];
+             assign sel_bypass[l]      = ic_b_read_en  &   ic_b_addr_match[l];
+             assign write_bypass_en[l] = ic_b_read_en  &  ~any_addr_match & (wrptr == l);
+
+             rvdff  #(1)  write_bypass_ff (.*, .clk(active_clk),
+                                           .din(write_bypass_en[l]), .dout(write_bypass_en_ff[l]));
+             rvdffs #(1)  index_val_ff    (.*, .clk(active_clk), .en(write_bypass_en[l] | ic_b_clear_en[l]),
+                                           .din(~ic_b_clear_en[l]), .dout(index_valid[l]));
+             rvdff  #(1)  sel_hold_ff     (.*, .clk(active_clk), .din(sel_bypass[l]), .dout(sel_bypass_ff[l]));
+             rvdffe #(.WIDTH(pt.ICACHE_INDEX_HI-pt.ICACHE_TAG_INDEX_LO+1),.OVERRIDE(1)) ic_addr_index (
+                   .*, .en(write_bypass_en[l]), .din(ic_b_rw_addr), .dout(wb_index_hold[l]));
+             rvdffe #(88) rd_data_hold_ff (
+                   .*, .en(write_bypass_en_ff[l]), .din (ic_tag_data_raw_packed_pre[88-1:0]), .dout(wb_packeddout_hold[l]));
+
+          end // block: BYPASS
+
+          always_comb begin
+            any_bypass = '0;
+            sel_bypass_data = '0;
+
+            for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin
+              any_bypass      |=  sel_bypass_ff[l];
+              sel_bypass_data |= (sel_bypass_ff[l]) ? wb_packeddout_hold[l] : '0;
+            end
+            ic_tag_data_raw_packed   =   any_bypass ?  sel_bypass_data :  ic_tag_data_raw_packed_pre;
+          end // always_comb
+        end // if (pt.ICACHE_BYPASS_ENABLE == 1)
+        else begin
+            assign ic_tag_data_raw_packed   =   ic_tag_data_raw_packed_pre;
+            assign ic_tag_clken_final       =   |ic_tag_clken;
+        end
+
       end // block: WAYS
       else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(128,44)
+        if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin
+          assign wrptr_in = (wrptr == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr + 1'd1);
+          rvdffs  #(pt.ICACHE_TAG_NUM_BYPASS_WIDTH)  wrptr_ff(
+               .*, .clk(active_clk), .en(|write_bypass_en), .din (wrptr_in), .dout(wrptr)
+          );
+
+          assign ic_b_sram_en              = |ic_tag_clken;
+          assign ic_b_read_en              =  ic_b_sram_en &   (|ic_tag_rden_q);
+          assign ic_b_write_en             =  ic_b_sram_en &   (|ic_tag_wren_q);
+          assign ic_tag_clken_final        =  ic_b_sram_en &    ~(|sel_bypass);
+
+          // LSB is pt.ICACHE_TAG_INDEX_LO]
+          assign ic_b_rw_addr = {ic_rw_addr_q};
+
+          always_comb begin
+             any_addr_match = '0;
+
+             for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin
+                any_addr_match |= ic_b_addr_match[l];
+             end
+          end
+
+          // it is an error to ever have 2 entries with the same index and both valid
+          for (genvar l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin: BYPASS
+             assign ic_b_addr_match[l] = (wb_index_hold[l] ==  ic_b_rw_addr) & index_valid[l];
+             assign ic_b_clear_en[l]   = ic_b_write_en &   ic_b_addr_match[l];
+             assign sel_bypass[l]      = ic_b_read_en  &   ic_b_addr_match[l];
+             assign write_bypass_en[l] = ic_b_read_en  &  ~any_addr_match & (wrptr == l);
+
+             rvdff  #(1)  write_bypass_ff (.*, .clk(active_clk),
+                                           .din(write_bypass_en[l]), .dout(write_bypass_en_ff[l]));
+             rvdffs #(1)  index_val_ff    (.*, .clk(active_clk), .en(write_bypass_en[l] | ic_b_clear_en[l]),
+                                           .din(~ic_b_clear_en[l]), .dout(index_valid[l]));
+             rvdff  #(1)  sel_hold_ff     (.*, .clk(active_clk), .din(sel_bypass[l]), .dout(sel_bypass_ff[l]));
+             rvdffe #(.WIDTH(pt.ICACHE_INDEX_HI-pt.ICACHE_TAG_INDEX_LO+1),.OVERRIDE(1)) ic_addr_index (
+                   .*, .en(write_bypass_en[l]), .din(ic_b_rw_addr), .dout(wb_index_hold[l]));
+             rvdffe #(44) rd_data_hold_ff (
+                   .*, .en(write_bypass_en_ff[l]), .din (ic_tag_data_raw_packed_pre[44-1:0]), .dout(wb_packeddout_hold[l]));
+
+          end // block: BYPASS
+
+          always_comb begin
+            any_bypass = '0;
+            sel_bypass_data = '0;
+
+            for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin
+              any_bypass      |=  sel_bypass_ff[l];
+              sel_bypass_data |= (sel_bypass_ff[l]) ? wb_packeddout_hold[l] : '0;
+            end
+            ic_tag_data_raw_packed   =   any_bypass ?  sel_bypass_data :  ic_tag_data_raw_packed_pre;
+          end // always_comb
+        end // if (pt.ICACHE_BYPASS_ENABLE == 1)
+        else begin
+            assign ic_tag_data_raw_packed   =   ic_tag_data_raw_packed_pre;
+            assign ic_tag_clken_final       =   |ic_tag_clken;
+        end
       end // block: WAYS
-
-      end // block: size_128
-
-      if (pt.ICACHE_TAG_DEPTH == 256)   begin : size_256
-       if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(256,88)
-        end // block: WAYS
-       else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(256,44)
-        end // block: WAYS
-      end // block: size_256
-
-      if (pt.ICACHE_TAG_DEPTH == 512)   begin : size_512
-       if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(512,88)
-        end // block: WAYS
-       else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(512,44)
-        end // block: WAYS
-      end // block: size_512
-
-      if (pt.ICACHE_TAG_DEPTH == 1024)   begin : size_1024
-         if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(1024,88)
-        end // block: WAYS
-       else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(1024,44)
-        end // block: WAYS
-      end // block: size_1024
-
-      if (pt.ICACHE_TAG_DEPTH == 2048)   begin : size_2048
-       if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(2048,88)
-        end // block: WAYS
-       else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(2048,44)
-        end // block: WAYS
-      end // block: size_2048
-
-      if (pt.ICACHE_TAG_DEPTH == 4096)   begin  : size_4096
-       if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(4096,88)
-        end // block: WAYS
-       else begin : WAYS
-                 `EL2_IC_TAG_PACKED_SRAM_LOGIC(4096,44)
-        end // block: WAYS
-      end // block: size_4096
 
       for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin
           assign ic_tag_data_raw[i]  = ic_tag_data_raw_packed[(22*i)+21:22*i];

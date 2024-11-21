@@ -17,4 +17,5 @@ jobs:
       - uses: chipsalliance/verible-formatter-action@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          reviewdog_reporter: 'local'
           fail_on_formatting_suggestions: ${{ github.event_name != 'pull_request_target' }}

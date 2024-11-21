@@ -140,7 +140,6 @@ module ahb_sif (
 endmodule
 `endif
 
-`ifdef RV_BUILD_AXI4
 module axi_slv #(
     TAGW = 1
 ) (
@@ -238,5 +237,4 @@ module axi_slv #(
      end
   end
 endmodule
-`endif
 

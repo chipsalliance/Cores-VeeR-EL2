@@ -16,7 +16,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
       - uses: chipsalliance/verible-linter-action@main
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          log_file: 'verible-verilog-lint.log'
           extra_args: '--waiver_files=./violations.waiver'
           paths: |
             ./design

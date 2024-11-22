@@ -48,7 +48,11 @@ run_regression_test(){
 
     # Run the test
     mkdir -p ${DIR}
-    make -j`nproc` -C ${DIR} -f $RV_ROOT/tools/Makefile verilator CONF_PARAMS="${PARAMS}" TEST=${NAME} COVERAGE=${COVERAGE} 2>&1 | tee ${LOG}
+    if [ -z "$COMMON_PARAMS" ]; then
+        make -j`nproc` -C ${DIR} -f $RV_ROOT/tools/Makefile verilator TEST=${NAME} COVERAGE=${COVERAGE} 2>&1 | tee ${LOG}
+    else
+        make -j`nproc` -C ${DIR} -f $RV_ROOT/tools/Makefile verilator CONF_PARAMS="${PARAMS}" TEST=${NAME} COVERAGE=${COVERAGE} 2>&1 | tee ${LOG}
+    fi
     if [ ! -f "${DIR}/coverage.dat" ]; then
         echo -e "${COLOR_WHITE}Test '${NAME}' ${COLOR_RED}FAILED${COLOR_CLEAR}"
         exit 1

@@ -71,7 +71,7 @@ import el2_pkg::*;
       icache_export.ic_b_sb_bit_en_vec = local_icache_export.ic_b_sb_bit_en_vec;
       icache_export.ic_sb_wr_data = local_icache_export.ic_sb_wr_data;
       icache_export.ic_rw_addr_bank_q = local_icache_export.ic_rw_addr_bank_q;
-      icache_export.ic_bank_way_clken_final = local_icache_export.ic_bank_way_clken_final_up;
+      icache_export.ic_bank_way_clken_final = local_icache_export.ic_bank_way_clken_final;
       icache_export.ic_bank_way_clken_final_up = local_icache_export.ic_bank_way_clken_final_up;
 
       local_icache_export.wb_packeddout_pre = icache_export.wb_packeddout_pre;
@@ -224,7 +224,7 @@ import el2_pkg::*;
       icache_export.ic_b_sb_wren = ic_b_sb_wren;
       icache_export.ic_sb_wr_data = ic_sb_wr_data;
       icache_export.ic_rw_addr_bank_q = ic_rw_addr_bank_q;
-      icache_export.ic_bank_way_clken_final =ic_bank_way_clken_final_up;
+      icache_export.ic_bank_way_clken_final =ic_bank_way_clken_final;
       icache_export.ic_bank_way_clken_final_up =ic_bank_way_clken_final_up;
    end
 

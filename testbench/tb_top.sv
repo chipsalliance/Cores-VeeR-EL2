@@ -1307,10 +1307,6 @@ veer_wrapper rvtop_wrapper (
     .dccm_ecc_single_error  (),
     .dccm_ecc_double_error  (),
 
-// remove mems DFT pins for opensource
-    .ic_data_ext_in_pkt     ('0),
-    .ic_tag_ext_in_pkt      ('0),
-
     .soft_int               (soft_int),
     .core_id                ('0),
     .scan_mode              ( 1'b0 ),         // To enable scan mode

@@ -62,8 +62,6 @@ import el2_pkg::*;
    input  logic         ic_rd_en,
    input  logic [63:0] ic_premux_data,      // Premux data to be muxed with each way of the Icache.
    input  logic         ic_sel_premux_data, // Premux data sel
-   input el2_ic_data_ext_in_pkt_t   [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0]         ic_data_ext_in_pkt,
-   input el2_ic_tag_ext_in_pkt_t    [pt.ICACHE_NUM_WAYS-1:0]           ic_tag_ext_in_pkt,
 
    input  logic [pt.ICACHE_BANKS_WAY-1:0][70:0]               ic_wr_data,         // Data to fill to the Icache. With ECC
    input  logic [70:0]               ic_debug_wr_data,   // Debug wr cache.

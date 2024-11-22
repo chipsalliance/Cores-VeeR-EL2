@@ -389,10 +389,6 @@ import el2_pkg::*;
 
    // ICache export interface
    el2_mem_if.veer_icache_src              el2_icache_export,
- // all of these test inputs are brought to top-level; must be tied off based on usage by physical design (ie. icache or not, iccm or not, dccm or not)
-
-   input                                   el2_ic_data_ext_in_pkt_t  [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] ic_data_ext_in_pkt,
-   input                                   el2_ic_tag_ext_in_pkt_t  [pt.ICACHE_NUM_WAYS-1:0] ic_tag_ext_in_pkt,
 
    input logic                             timer_int,
    input logic                             soft_int,

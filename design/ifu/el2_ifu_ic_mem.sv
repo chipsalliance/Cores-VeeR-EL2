@@ -51,8 +51,6 @@ import el2_pkg::*;
       input logic [pt.ICACHE_NUM_WAYS-1:0]          ic_tag_valid,       // Valid from the I$ tag valid outside (in flops).
 
       el2_mem_if.veer_icache_src icache_export,
-      input el2_ic_data_ext_in_pkt_t [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] ic_data_ext_in_pkt,   // this is being driven by the top level for soc testing/etc
-      input el2_ic_tag_ext_in_pkt_t  [pt.ICACHE_NUM_WAYS-1:0]                          ic_tag_ext_in_pkt,    // this is being driven by the top level for soc testing/etc
 
       output logic [pt.ICACHE_NUM_WAYS-1:0]         ic_rd_hit,          // ic_rd_hit[3:0]
       output logic                                  ic_tag_perr,        // Tag Parity error
@@ -143,7 +141,6 @@ import el2_pkg::*;
 
       input logic [pt.ICACHE_NUM_WAYS-1:0]ic_rd_hit,
       el2_mem_if.veer_icache_data         icache_export,
-      input el2_ic_data_ext_in_pkt_t  [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] ic_data_ext_in_pkt,   // this is being driven by the top level for soc testing/etc
       // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
       /*verilator coverage_off*/
       input  logic                         scan_mode
@@ -746,7 +743,6 @@ import el2_pkg::*;
       input logic [pt.ICACHE_NUM_WAYS-1:0]                         ic_debug_way,         // Debug way. Rd or Wr.
 
       el2_mem_if.veer_icache_tag                                  icache_export,
-      input el2_ic_tag_ext_in_pkt_t   [pt.ICACHE_NUM_WAYS-1:0]    ic_tag_ext_in_pkt,
 
       output logic [25:0]                                          ictag_debug_rd_data,
       input  logic [70:0]                                          ic_debug_wr_data,     // Debug wr cache.

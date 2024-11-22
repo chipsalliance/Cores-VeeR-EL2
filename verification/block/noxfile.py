@@ -23,6 +23,13 @@ coverageTypes = [
     "toggle",
 ]
 
+busTypes = [
+    "default",
+    "default_ahb",
+    "typical_pd",
+    "high_perf",
+]
+
 # Used lint tools
 lintTools = [
     "isort",  # config in pyproject.toml
@@ -94,7 +101,7 @@ def isSimFailure(
     return rc
 
 
-def verify_block(session, blockName, testName, coverage=""):
+def verify_block(session, blockName, testName, coverage="", bus="axi4"):
     session.install("-r", pipRequirementsPath)
     testPath = os.path.join(blockPath, blockName)
     testNameXML = os.path.join(testName + ".xml")
@@ -110,6 +117,7 @@ def verify_block(session, blockName, testName, coverage=""):
             "COVERAGE_TYPE=" + coverage,
             "MODULE=" + testName,
             "COCOTB_RESULTS_FILE=" + testNameXML,
+            "BUS=" + bus,
             external=True,
             stdout=testLog,
             stderr=testLog,
@@ -119,10 +127,10 @@ def verify_block(session, blockName, testName, coverage=""):
         coveragePath = testPath
         coverageName = "coverage.dat"
         coverageNamePath = os.path.join(coveragePath, coverageName)
-        newCoverageName = "coverage_" + testName + "_" + coverage + ".dat"
+        newCoverageName = "coverage_" + testName + "_" + bus + "_" + coverage + ".dat"
         newCoverageNamePath = os.path.join(coveragePath, newCoverageName)
         os.rename(coverageNamePath, newCoverageNamePath)
-        newTestNameLog = testName + "_" + coverage + ".log"
+        newTestNameLog = testName + "_" + bus + "_" + coverage + ".log"
         newTestNameLogPath = os.path.join(testPath, newTestNameLog)
         os.rename(testNameLogPath, newTestNameLogPath)
     # Add check from results.xml to notify nox that test failed
@@ -143,33 +151,37 @@ def verify_block(session, blockName, testName, coverage=""):
         "test_servicing",
     ],
 )
+@nox.parametrize("bus", busTypes)
 @nox.parametrize("coverage", coverageTypes)
-def pic_verify(session, blockName, testName, coverage):
-    verify_block(session, blockName, testName, coverage)
+def pic_verify(session, blockName, testName, coverage, bus):
+    verify_block(session, blockName, testName, coverage, bus)
 
 
 @nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["pic_gw"])
 @nox.parametrize("testName", ["test_gateway"])
 @nox.parametrize("coverage", coverageTypes)
-def pic_gw_verify(session, blockName, testName, coverage):
-    verify_block(session, blockName, testName, coverage)
+@nox.parametrize("bus", busTypes)
+def pic_gw_verify(session, blockName, testName, coverage, bus):
+    verify_block(session, blockName, testName, coverage, bus)
 
 
 @nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["dec_tl"])
 @nox.parametrize("testName", ["test_dec_tl"])
 @nox.parametrize("coverage", "toggle")
-def dec_tl_verify(session, blockName, testName, coverage):
-    verify_block(session, blockName, testName, coverage)
+@nox.parametrize("bus", busTypes)
+def dec_tl_verify(session, blockName, testName, coverage, bus):
+    verify_block(session, blockName, testName, coverage, bus)
 
 
 @nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["dec_ib"])
 @nox.parametrize("testName", ["test_dec_ib"])
 @nox.parametrize("coverage", "toggle")
-def dec_ib_verify(session, blockName, testName, coverage):
-    verify_block(session, blockName, testName, coverage)
+@nox.parametrize("bus", busTypes)
+def dec_ib_verify(session, blockName, testName, coverage, bus):
+    verify_block(session, blockName, testName, coverage, bus)
 
 
 @nox.session(tags=["tests"])
@@ -187,17 +199,19 @@ def dec_ib_verify(session, blockName, testName, coverage):
         "test_debug_address",
     ],
 )
+@nox.parametrize("bus", busTypes)
 @nox.parametrize("coverage", coverageTypes)
-def dma_verify(session, blockName, testName, coverage):
-    verify_block(session, blockName, testName, coverage)
+def dma_verify(session, blockName, testName, coverage, bus):
+    verify_block(session, blockName, testName, coverage, bus)
 
 
 @nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["ifu_compress"])
 @nox.parametrize("testName", ["test_compress"])
 @nox.parametrize("coverage", "toggle")  # No branches in the decompressor
-def ifu_compress_verify(session, blockName, testName, coverage):
-    verify_block(session, blockName, testName, coverage)
+@nox.parametrize("bus", busTypes)
+def ifu_compress_verify(session, blockName, testName, coverage, bus):
+    verify_block(session, blockName, testName, coverage, bus)
 
 
 @nox.session(tags=["tests"])
@@ -214,8 +228,9 @@ def ifu_compress_verify(session, blockName, testName, coverage):
     ],
 )
 @nox.parametrize("coverage", coverageTypes)
-def exu_alu_verify(session, blockName, testName, coverage):
-    verify_block(session, blockName, testName, coverage)
+@nox.parametrize("bus", busTypes)
+def exu_alu_verify(session, blockName, testName, coverage, bus):
+    verify_block(session, blockName, testName, coverage, bus)
 
 
 @nox.session(tags=["tests"])
@@ -227,8 +242,9 @@ def exu_alu_verify(session, blockName, testName, coverage):
     ],
 )
 @nox.parametrize("coverage", coverageTypes)
-def exu_mul_verify(session, blockName, testName, coverage):
-    verify_block(session, blockName, testName, coverage)
+@nox.parametrize("bus", busTypes)
+def exu_mul_verify(session, blockName, testName, coverage, bus):
+    verify_block(session, blockName, testName, coverage, bus)
 
 
 @nox.session(tags=["tests"])
@@ -240,8 +256,9 @@ def exu_mul_verify(session, blockName, testName, coverage):
     ],
 )
 @nox.parametrize("coverage", coverageTypes)
-def exu_div_verify(session, blockName, testName, coverage):
-    verify_block(session, blockName, testName, coverage)
+@nox.parametrize("bus", busTypes)
+def exu_div_verify(session, blockName, testName, coverage, bus):
+    verify_block(session, blockName, testName, coverage, bus)
 
 
 @nox.session(tags=["tests"])
@@ -253,8 +270,9 @@ def exu_div_verify(session, blockName, testName, coverage):
     ],
 )
 @nox.parametrize("coverage", coverageTypes)
-def iccm_verify(session, blockName, testName, coverage):
-    verify_block(session, blockName, testName, coverage)
+@nox.parametrize("bus", busTypes)
+def iccm_verify(session, blockName, testName, coverage, bus):
+    verify_block(session, blockName, testName, coverage, bus)
 
 
 @nox.session(tags=["tests"])
@@ -266,8 +284,9 @@ def iccm_verify(session, blockName, testName, coverage):
     ],
 )
 @nox.parametrize("coverage", coverageTypes)
-def dccm_verify(session, blockName, testName, coverage):
-    verify_block(session, blockName, testName, coverage)
+@nox.parametrize("bus", busTypes)
+def dccm_verify(session, blockName, testName, coverage, bus):
+    verify_block(session, blockName, testName, coverage, bus)
 
 
 @nox.session(tags=["tests"])
@@ -281,8 +300,9 @@ def dccm_verify(session, blockName, testName, coverage):
     ],
 )
 @nox.parametrize("coverage", coverageTypes)
-def lib_axi4_to_ahb_verify(session, blockName, testName, coverage):
-    verify_block(session, blockName, testName, coverage)
+@nox.parametrize("bus", busTypes)
+def lib_axi4_to_ahb_verify(session, blockName, testName, coverage, bus):
+    verify_block(session, blockName, testName, coverage, bus)
 
 
 @nox.session(tags=["tests"])
@@ -295,8 +315,9 @@ def lib_axi4_to_ahb_verify(session, blockName, testName, coverage):
     ],
 )
 @nox.parametrize("coverage", coverageTypes)
-def lib_ahb_to_axi4_verify(session, blockName, testName, coverage):
-    verify_block(session, blockName, testName, coverage)
+@nox.parametrize("bus", busTypes)
+def lib_ahb_to_axi4_verify(session, blockName, testName, coverage, bus):
+    verify_block(session, blockName, testName, coverage, bus)
 
 
 @nox.session(tags=["tests"])
@@ -310,8 +331,9 @@ def lib_ahb_to_axi4_verify(session, blockName, testName, coverage):
     ],
 )
 @nox.parametrize("coverage", coverageTypes)
-def pmp_verify(session, blockName, testName, coverage):
-    verify_block(session, blockName, testName, coverage)
+@nox.parametrize("bus", busTypes)
+def pmp_verify(session, blockName, testName, coverage, bus):
+    verify_block(session, blockName, testName, coverage, bus)
 
 
 @nox.session(tags=["tests"])
@@ -324,16 +346,18 @@ def pmp_verify(session, blockName, testName, coverage):
     ],
 )
 @nox.parametrize("coverage", coverageTypes)
-def dmi_verify(session, blockName, testName, coverage):
-    verify_block(session, blockName, testName, coverage)
+@nox.parametrize("bus", busTypes)
+def dmi_verify(session, blockName, testName, coverage, bus):
+    verify_block(session, blockName, testName, coverage, bus)
 
 
 @nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["lsu_tl"])
 @nox.parametrize("testName", ["test_lsu_tl"])
 @nox.parametrize("coverage", "toggle")
-def lsu_tl_verify(session, blockName, testName, coverage):
-    verify_block(session, blockName, testName, coverage)
+@nox.parametrize("bus", busTypes)
+def lsu_tl_verify(session, blockName, testName, coverage, bus):
+    verify_block(session, blockName, testName, coverage, bus)
 
 
 @nox.session(reuse_venv=True)

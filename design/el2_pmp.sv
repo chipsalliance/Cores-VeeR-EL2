@@ -169,12 +169,14 @@ module el2_pmp
 
     // PMP entries are statically prioritized, from 0 to N-1
     // The lowest-numbered PMP entry which matches an address determines accessibility
+    /* verilator lint_off UNSIGNED */
     for (int r = 0; r < pt.PMP_ENTRIES; r++) begin
       if (!matched && match_all[r]) begin
         access_fail = ~final_perm_check[r];
         matched = 1'b1;
       end
     end
+    /* verilator lint_on UNSIGNED */
     return access_fail;
   endfunction
 

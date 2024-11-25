@@ -1,3 +1,5 @@
+CONF_PARAMS+="-set=pmp_entries=0"
+
 CONF_PARAMS+="-set=data_access_enable0=1"
 CONF_PARAMS+="-set=data_access_mask0=0x7fffffff"
 CONF_PARAMS+="-set=data_access_addr0=0x00000000"

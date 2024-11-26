@@ -44,14 +44,16 @@ _start:
     // and write to stdout address
 
     li x3, 0x00000001
-    la x4, 32
+    li x4, 32
 
 loop:
-   lb x5, 0(x3)
-   slli x3, x3, 1
-   addi x4, x4, -1
-   bnez x4, loop
-   li a0, 0xff # success
+    li x5, STDOUT
+    or x5, x5, x3
+    lb x5, 0(x5)
+    slli x3, x3, 1
+    addi x4, x4, -1
+    bnez x4, loop
+    li a0, 0x01 # failure
 
 // Write return value (a0) from printf to STDOUT for TB to termiate test.
 _finish:
@@ -64,7 +66,7 @@ _finish:
 
 .align 4
 _trap:
-    li a0, 1 # failure
+    li a0, 0xff # success
     j _finish
 
 .data

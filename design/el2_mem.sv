@@ -62,8 +62,6 @@ import el2_pkg::*;
    input  logic         ic_rd_en,
    input  logic [63:0] ic_premux_data,      // Premux data to be muxed with each way of the Icache.
    input  logic         ic_sel_premux_data, // Premux data sel
-   input el2_ic_data_ext_in_pkt_t   [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0]         ic_data_ext_in_pkt,
-   input el2_ic_tag_ext_in_pkt_t    [pt.ICACHE_NUM_WAYS-1:0]           ic_tag_ext_in_pkt,
 
    input  logic [pt.ICACHE_BANKS_WAY-1:0][70:0]               ic_wr_data,         // Data to fill to the Icache. With ECC
    input  logic [70:0]               ic_debug_wr_data,   // Debug wr cache.
@@ -83,7 +81,8 @@ import el2_pkg::*;
    output logic [pt.ICACHE_NUM_WAYS-1:0]   ic_rd_hit,
    output logic         ic_tag_perr,        // Icache Tag parity error
 
-   el2_mem_if.veer_sram_src mem_export,
+   el2_mem_if.veer_sram_src   mem_export,
+   el2_mem_if.veer_icache_src icache_export,
 
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
    /*verilator coverage_off*/
@@ -98,6 +97,7 @@ import el2_pkg::*;
    el2_mem_if mem_export_local ();
 
    assign mem_export      .clk = clk;
+   assign icache_export   .clk = clk;
    assign mem_export_local.clk = clk;
 
    assign mem_export      .iccm_clken         = mem_export_local.iccm_clken;
@@ -116,6 +116,25 @@ import el2_pkg::*;
    assign mem_export_local.dccm_bank_dout     = mem_export      .dccm_bank_dout;
    assign mem_export_local.dccm_bank_ecc      = mem_export      .dccm_bank_ecc;
 
+   // icache data
+   assign icache_export   .ic_b_sb_wren               = mem_export_local.ic_b_sb_wren;
+   assign icache_export   .ic_b_sb_bit_en_vec         = mem_export_local.ic_b_sb_bit_en_vec;
+   assign icache_export   .ic_sb_wr_data              = mem_export_local.ic_sb_wr_data;
+   assign icache_export   .ic_rw_addr_bank_q          = mem_export_local.ic_rw_addr_bank_q;
+   assign icache_export   .ic_bank_way_clken_final    = mem_export_local.ic_bank_way_clken_final;
+   assign icache_export   .ic_bank_way_clken_final_up = mem_export_local.ic_bank_way_clken_final_up;
+   assign mem_export_local.wb_packeddout_pre          = icache_export   .wb_packeddout_pre;
+   assign mem_export_local.wb_dout_pre_up             = icache_export   .wb_dout_pre_up;
+
+   // icache tag
+   assign icache_export   .ic_tag_clken_final         = mem_export_local.ic_tag_clken_final;
+   assign icache_export   .ic_tag_wren_q              = mem_export_local.ic_tag_wren_q;
+   assign icache_export   .ic_tag_wren_biten_vec      = mem_export_local.ic_tag_wren_biten_vec;
+   assign icache_export   .ic_tag_wr_data             = mem_export_local.ic_tag_wr_data;
+   assign icache_export   .ic_rw_addr_q               = mem_export_local.ic_rw_addr_q;
+   assign mem_export_local.ic_tag_data_raw_packed_pre = icache_export   .ic_tag_data_raw_packed_pre;
+   assign mem_export_local.ic_tag_data_raw_pre        = icache_export   .ic_tag_data_raw_pre;
+
    // DCCM Instantiation
    if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable
       el2_lsu_dccm_mem #(.pt(pt)) dccm (
@@ -131,6 +150,7 @@ import el2_pkg::*;
 if ( pt.ICACHE_ENABLE ) begin: icache
    el2_ifu_ic_mem #(.pt(pt)) icm  (
       .clk_override(icm_clk_override),
+      .icache_export(mem_export_local.veer_icache_src),
       .*
    );
 end

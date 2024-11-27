@@ -2,7 +2,8 @@
 
 **Revision:** 1.4 December 22, 2022
 
-![Logo](img/logo.png)
+![CHIPS Alliance logo](img/logo.png)
+![VeeR project logo](img/VeeR-logo-white-rgb.png)
 
 ```
 SPDX-License-Identifier: Apache-2.0 Copyright © 2022 CHIPS Alliance.

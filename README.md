@@ -1,3 +1,14 @@
+<picture>
+  <!-- User prefers light mode: -->
+  <source srcset="docs/source/img/VeeR-logo-black-rgb.png" media="(prefers-color-scheme: light)"/>
+
+  <!-- User prefers dark mode: -->
+  <source srcset="/docs/source/img/VeeR-logo-white-rgb.png"  media="(prefers-color-scheme: dark)"/>
+
+  <!-- User has no color preference: -->
+  <img src="/docs/source/img/VeeR-logo-black-rgb.png"/>
+</picture>
+
 # VeeR EL2 RISC-V Core
 
 This repository contains the VeeR EL2 RISC-V Core design RTL.

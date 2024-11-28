@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         test: ["test_pyuvm"]
-        coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
+        coverage: ["branch", "toggle"] #TODO: add functional coverage
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/regression/.cache/"

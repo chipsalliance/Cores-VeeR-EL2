@@ -107,7 +107,7 @@ jobs:
         iss:
           - spike
           - renode
-        coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
+        coverage: ["branch", "toggle"] #TODO: add functional coverage
         version: [ uvm ]
         # TODO use separate privilege modes configurations for generating the VeeR model
         priv: ["", "u"]
@@ -233,7 +233,7 @@ jobs:
       fail-fast: false
       matrix:
         test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
-        coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
+        coverage: ["branch", "toggle"] #TODO: add functional coverage
         version: [ uvm ]
     env:
       DEBIAN_FRONTEND: "noninteractive"

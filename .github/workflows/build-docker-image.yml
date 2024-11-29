@@ -12,7 +12,7 @@ jobs:
     env:
       VERILATOR_VERSION: v5.024
       VERILATOR_UVM_VERSION: 7ca2d6470a
-      OPENOCD_VERSION: riscv-nohalt-change-module
+      OPENOCD_VERSION: riscv-nohalt-rebase
       RENODE_VERSION: 1.15.3+20240924gitc7bc336bb
       SPIKE_VERSION: d70ea67d
       DEBIAN_FRONTEND: "noninteractive"

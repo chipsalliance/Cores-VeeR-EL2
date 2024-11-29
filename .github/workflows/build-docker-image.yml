@@ -35,12 +35,16 @@ jobs:
         # Work in an empty directory to avoid unnecessary copying.
         mkdir context
 
+    - name: Get current date
+      id: date
+      run: echo "timestamp=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+
     - name: Build and push to registry
       uses: docker/build-push-action@v6
       with:
         context: context
         push: true
-        tags: ghcr.io/antmicro/cores-veer-el2:latest
+        tags: ghcr.io/antmicro/cores-veer-el2:${{ steps.date.outputs.timestamp }}
         file: .github/Dockerfile
         build-args: |
           VERILATOR_VERSION=${{ env.VERILATOR_VERSION }}

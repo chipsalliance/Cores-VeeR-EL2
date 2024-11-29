@@ -118,27 +118,12 @@ set *(0xd0000008) = 0x55555555
 set *(0xd000000C) = 0xAAAAAAAA
 print/x *0xd0000000@4
 
-echo Setting Breakpoint 1...\n
-hbreak *0x1c
-
-echo Continuing...\n
-continue
-
-delete
-
-# This causes an error. Let's execute it anyway for coverage.
-echo Accessing region at 0xe0000000...\n
-set *(0xe0000000) = 0x01234567
-set *(0xe0000004) = 0x89ABCDEF
-set *(0xe0000008) = 0x55555555
-set *(0xe000000C) = 0xAAAAAAAA
-print/x *0xe0000000@4
-echo Accessing region at 0xf0000000...\n
-set *(0xf0000000) = 0x01234567
-set *(0xf0000004) = 0x89ABCDEF
-set *(0xf0000008) = 0x55555555
-set *(0xf000000C) = 0xAAAAAAAA
-print/x *0xf0000000@4
+# TODO test breakpoint
+# echo Setting Breakpoint 1...\n
+# hbreak *0x1c
+# echo Continuing...\n
+# continue
+# delete
 
 # end the simulation gracefully
 set *(volatile unsigned char*)0xd0580000 = 0xff

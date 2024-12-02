@@ -75,8 +75,11 @@ echo -e "Simulation running and ready (pid=${SIM_PID})"
 
 # Launch OpenOCD
 echo -e "Launching OpenOCD..."
-cd ${RV_ROOT}/.github/scripts/openocd && openocd -d2 --file board/caliptra-verilator.cfg >"${OPENOCD_LOG}" 2>&1 &
+WORKDIR=$PWD
+cd ${RV_ROOT}/.github/scripts/openocd
+openocd -d2 --file board/caliptra-verilator.cfg > ${OPENOCD_LOG} 2>&1 &
 OPENOCD_PID=$!
+cd $WORKDIR
 
 # Wait
 wait_for_phrase "${OPENOCD_LOG}" "Listening on port 3333 for gdb connections"
@@ -93,23 +96,16 @@ sleep 1s
 # Run the test
 echo -e "${COLOR_WHITE}======== Running test '$@' ========${COLOR_OFF}"
 
-bash -c "$(printf ' %q' "$@")"
-EXITCODE=$?
+bash -c "$(printf ' %q' "$@")" > test.log 2>&1 &
+TEST_PID=$!
 
-if [ ${EXITCODE} -eq 0 ]; then
-    echo -e "${COLOR_GREEN}[PASSED]${COLOR_OFF}"
-else
-    echo -e "${COLOR_RED}[FAILED]${COLOR_OFF}"
-fi
+# The simulation must end naturally in order to produce coverage data.
+wait ${SIM_PID}
 
-sleep 1s
-
-# Terminate
-echo -e "${COLOR_WHITE}Terminating...${COLOR_OFF}"
-terminate_all
+# OpenOCD waits endlessly for the target (Vtb_top) to reconnect.
+# Kill OpenoCD and GDB in case they're stuck
+kill -s SIGKILL ${OPENOCD_PID} || true
+kill -s SIGKILL ${TEST_PID} || true
 
 # Display logs
 print_logs
-
-# Honor the exitcode
-exit ${EXITCODE}

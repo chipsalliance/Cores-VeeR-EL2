@@ -120,10 +120,10 @@ print/x *0xd0000000@4
 
 # TODO test breakpoint
 # echo Setting Breakpoint 1...\n
-# hbreak *0x1c
+hbreak *0x1c
 # echo Continuing...\n
 # continue
-# delete
+delete
 
 # end the simulation gracefully
 set *(volatile unsigned char*)0xd0580000 = 0xff

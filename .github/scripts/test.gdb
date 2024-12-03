@@ -17,9 +17,6 @@ set architecture riscv:rv32
 set remotetimeout 360
 target extended-remote :3333
 
-echo Connected, waiting...\n
-shell sleep 30s
-
 echo Dumping registers...\n
 info registers
 echo Accessing DCCM...\n

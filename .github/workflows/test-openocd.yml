@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
+        coverage: ["branch", "toggle"] #TODO: add functional coverage
         bus: ["axi4", "ahb_lite"]
     env:
       DEBIAN_FRONTEND: "noninteractive"

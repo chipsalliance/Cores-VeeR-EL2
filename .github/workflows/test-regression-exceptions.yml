@@ -17,7 +17,7 @@ jobs:
                "dside_access_across_region_boundary", "nmi_pin_assertion", "dside_size_misaligned_access_to_non_idempotent_address",
                "dside_core_local_access_unmapped_address_error", "dbus_nonblocking_load_error", "internal_timer_ints", "ebreak_ecall", "illegal_instruction",
                "clk_override", "core_pause"]
-        coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
+        coverage: ["branch", "toggle"] #TODO: add functional coverage
         priv: ["0"]
     env:
       DEBIAN_FRONTEND: "noninteractive"

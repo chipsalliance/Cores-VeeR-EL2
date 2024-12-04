@@ -95,13 +95,6 @@ jobs:
         run: |
           cp .github/scripts/indexgen/index_redirect/index.html ./public.new/
 
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.ref == 'refs/heads/main' }}
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public.new
-
       - name: Save PR number
         if: github.event_name == 'pull_request'
         run: |
@@ -116,7 +109,6 @@ jobs:
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
-        if: success()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public.new

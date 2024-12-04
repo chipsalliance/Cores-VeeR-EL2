@@ -30,21 +30,27 @@ output              wr_en,
 output              rd_en,
 
 input   [31:0]      rd_data,
+/*verilator coverage_off*/
 input   [1:0]       rd_status,
+/*verilator coverage_on*/
 
 output  reg         dmi_reset,
 output  reg         dmi_hard_reset,
 
+/*verilator coverage_off*/
 input   [2:0]       idle,
 input   [1:0]       dmi_stat,
+/*verilator coverage_on*/
 /*
 --  revisionCode        : 4'h0;
 --  manufacturersIdCode : 11'h45;
 --  deviceIdCode        : 16'h0001;
 --  order MSB .. LSB -> [4 bit version or revision] [16 bit part number] [11 bit manufacturer id] [value of 1'b1 in LSB]
 */
+/*verilator coverage_off*/
 input   [31:1]      jtag_id,
 input   [3:0]       version
+/*verilator coverage_on*/
 );
 
 localparam USER_DR_LENGTH = AWIDTH + 34;

@@ -22,8 +22,6 @@ import el2_pkg::*;
 interface el2_mem_if #(
     `include "el2_param.vh"
 ) ();
-  localparam DCCM_ECC_WIDTH = pt.DCCM_FDATA_WIDTH - pt.DCCM_DATA_WIDTH;
-
   //////////////////////////////////////////
   // Clock
   logic                                                               clk;
@@ -47,9 +45,9 @@ interface el2_mem_if #(
   logic [pt.DCCM_NUM_BANKS-1:0]                                       dccm_wren_bank;
   logic [pt.DCCM_NUM_BANKS-1:0][pt.DCCM_BITS-1:(pt.DCCM_BANK_BITS+2)] dccm_addr_bank;
   logic [pt.DCCM_NUM_BANKS-1:0][              pt.DCCM_DATA_WIDTH-1:0] dccm_wr_data_bank;
-  logic [pt.DCCM_NUM_BANKS-1:0][                  DCCM_ECC_WIDTH-1:0] dccm_wr_ecc_bank;
+  logic [pt.DCCM_NUM_BANKS-1:0][               pt.DCCM_ECC_WIDTH-1:0] dccm_wr_ecc_bank;
   logic [pt.DCCM_NUM_BANKS-1:0][              pt.DCCM_DATA_WIDTH-1:0] dccm_bank_dout;
-  logic [pt.DCCM_NUM_BANKS-1:0][                  DCCM_ECC_WIDTH-1:0] dccm_bank_ecc;
+  logic [pt.DCCM_NUM_BANKS-1:0][               pt.DCCM_ECC_WIDTH-1:0] dccm_bank_ecc;
 
   //////////////////////////////////////////
   // ICACHE DATA

@@ -2337,8 +2337,7 @@ end : Gen_iccm_enable
               `EL2_PACKED_IC_DATA_SRAM(512,284,71,k)
            end // block: WAYS
            else   begin : WAYS
-              // TODO bring back
-              // `EL2_PACKED_IC_DATA_SRAM(512,142,71,k)
+              `EL2_PACKED_IC_DATA_SRAM(512,142,71,k)
            end // block: WAYS
         end // block: size_512
 

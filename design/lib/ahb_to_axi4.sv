@@ -24,9 +24,9 @@ module ahb_to_axi4
 import el2_pkg::*;
 #(
    TAG = 1,
+   CHECK_RANGES = 1,
    `include "el2_param.vh"
 )
-//   ,TAG  = 1)
 (
    input                   clk,
    input                   rst_l,
@@ -145,9 +145,6 @@ import el2_pkg::*;
    logic [31:0]             ahb_haddr_q;
    logic                    ahb_hresp_q;
 
-    //Miscellaneous signals
-   logic                    ahb_addr_in_dccm, ahb_addr_in_iccm, ahb_addr_in_pic;
-   logic                    ahb_addr_in_dccm_region_nc, ahb_addr_in_iccm_region_nc, ahb_addr_in_pic_region_nc;
    // signals needed for the read data coming back from the core and to block any further commands as AHB is a blocking bus
    logic                    buf_rdata_en;
 
@@ -207,8 +204,13 @@ import el2_pkg::*;
    assign ahb_hready          = ahb_hreadyout & ahb_hreadyin;
    assign ahb_htrans_in[1:0]  = {2{ahb_hsel}} & ahb_htrans[1:0];
    assign ahb_hrdata[63:0]    = buf_rdata[63:0];
-   assign ahb_hresp        = ((ahb_htrans_q[1:0] != 2'b0) & (buf_state != IDLE)  &
 
+   if (CHECK_RANGES) begin
+       // Miscellaneous signals
+       logic                    ahb_addr_in_dccm, ahb_addr_in_iccm, ahb_addr_in_pic;
+       logic                    ahb_addr_in_dccm_region_nc, ahb_addr_in_iccm_region_nc, ahb_addr_in_pic_region_nc;
+
+       assign ahb_hresp    = ((ahb_htrans_q[1:0] != 2'b0) & (buf_state != IDLE)  &
                              ((~(ahb_addr_in_dccm | ahb_addr_in_iccm)) |                                                                                   // request not for ICCM or DCCM
                              ((ahb_addr_in_iccm | (ahb_addr_in_dccm &  ahb_hwrite_q)) & ~((ahb_hsize_q[1:0] == 2'b10) | (ahb_hsize_q[1:0] == 2'b11))) |    // ICCM Rd/Wr OR DCCM Wr not the right size
                              ((ahb_hsize_q[2:0] == 3'h1) & ahb_haddr_q[0])   |                                                                             // HW size but unaligned
@@ -216,6 +218,43 @@ import el2_pkg::*;
                              ((ahb_hsize_q[2:0] == 3'h3) & (|ahb_haddr_q[2:0])))) |                                                                        // DW size but unaligned
                              buf_read_error |                                                                                                              // Read ECC error
                              (ahb_hresp_q & ~ahb_hready_q);
+
+       // Address check  dccm
+       rvrangecheck #(.CCM_SADR(pt.DCCM_SADR),
+                      .CCM_SIZE(pt.DCCM_SIZE)) addr_dccm_rangecheck (
+          .addr(ahb_haddr_q[31:0]),
+          .in_range(ahb_addr_in_dccm),
+          .in_region(ahb_addr_in_dccm_region_nc)
+       );
+
+      // Address check  iccm
+      if (pt.ICCM_ENABLE == 1) begin: GenICCM
+         rvrangecheck #(.CCM_SADR(pt.ICCM_SADR),
+                        .CCM_SIZE(pt.ICCM_SIZE)) addr_iccm_rangecheck (
+            .addr(ahb_haddr_q[31:0]),
+            .in_range(ahb_addr_in_iccm),
+            .in_region(ahb_addr_in_iccm_region_nc)
+         );
+      end else begin: GenNoICCM
+         assign ahb_addr_in_iccm = '0;
+         assign ahb_addr_in_iccm_region_nc = '0;
+      end
+
+      // PIC memory address check
+      rvrangecheck #(.CCM_SADR(pt.PIC_BASE_ADDR),
+                     .CCM_SIZE(pt.PIC_SIZE)) addr_pic_rangecheck (
+         .addr(ahb_haddr_q[31:0]),
+         .in_range(ahb_addr_in_pic),
+         .in_region(ahb_addr_in_pic_region_nc)
+      );
+   end else begin // !CHECK_RANGES
+       assign ahb_hresp    = ((ahb_htrans_q[1:0] != 2'b0) & (buf_state != IDLE)  &
+                             (((ahb_hsize_q[2:0] == 3'h1) & ahb_haddr_q[0]) |       // HW size but unaligned
+                             ((ahb_hsize_q[2:0] == 3'h2) & (|ahb_haddr_q[1:0])) |   // W size but unaligned
+                             ((ahb_hsize_q[2:0] == 3'h3) & (|ahb_haddr_q[2:0])))) | // DW size but unaligned
+                             buf_read_error |                                       // Read ECC error
+                             (ahb_hresp_q & ~ahb_hready_q);
+   end // CHECK_RANGES
 
    // Buffer signals - needed for the read data and ECC error response
    rvdff_fpga  #(.WIDTH(64)) buf_rdata_ff     (.din(axi_rdata[63:0]),   .dout(buf_rdata[63:0]), .clk(buf_rdata_clk), .clken(buf_rdata_clk_en), .rawclk(clk), .*);
@@ -228,35 +267,6 @@ import el2_pkg::*;
    rvdff_fpga #(.WIDTH(3))  hsize_ff  (.din(ahb_hsize[2:0]),     .dout(ahb_hsize_q[2:0]),  .clk(ahb_addr_clk), .clken(ahb_addr_clk_en), .rawclk(clk), .*);
    rvdff_fpga #(.WIDTH(1))  hwrite_ff (.din(ahb_hwrite),         .dout(ahb_hwrite_q),      .clk(ahb_addr_clk), .clken(ahb_addr_clk_en), .rawclk(clk), .*);
    rvdff_fpga #(.WIDTH(32)) haddr_ff  (.din(ahb_haddr[31:0]),    .dout(ahb_haddr_q[31:0]), .clk(ahb_addr_clk), .clken(ahb_addr_clk_en), .rawclk(clk), .*);
-
-   // Address check  dccm
-   rvrangecheck #(.CCM_SADR(pt.DCCM_SADR),
-                  .CCM_SIZE(pt.DCCM_SIZE)) addr_dccm_rangecheck (
-      .addr(ahb_haddr_q[31:0]),
-      .in_range(ahb_addr_in_dccm),
-      .in_region(ahb_addr_in_dccm_region_nc)
-   );
-
-   // Address check  iccm
-   if (pt.ICCM_ENABLE == 1) begin: GenICCM
-      rvrangecheck #(.CCM_SADR(pt.ICCM_SADR),
-                     .CCM_SIZE(pt.ICCM_SIZE)) addr_iccm_rangecheck (
-         .addr(ahb_haddr_q[31:0]),
-         .in_range(ahb_addr_in_iccm),
-         .in_region(ahb_addr_in_iccm_region_nc)
-      );
-   end else begin: GenNoICCM
-      assign ahb_addr_in_iccm = '0;
-      assign ahb_addr_in_iccm_region_nc = '0;
-   end
-
-   // PIC memory address check
-   rvrangecheck #(.CCM_SADR(pt.PIC_BASE_ADDR),
-                  .CCM_SIZE(pt.PIC_SIZE)) addr_pic_rangecheck (
-      .addr(ahb_haddr_q[31:0]),
-      .in_range(ahb_addr_in_pic),
-      .in_region(ahb_addr_in_pic_region_nc)
-   );
 
    // Command Buffer - Holding for the commands to be sent for the AXI. It will be converted to the AXI signals.
    assign cmdbuf_rst         = (((axi_awvalid & axi_awready) | (axi_arvalid & axi_arready)) & ~cmdbuf_wr_en) | (ahb_hresp & ~cmdbuf_write);

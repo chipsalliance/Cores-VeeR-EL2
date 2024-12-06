@@ -44,6 +44,55 @@ module tb_top
 );
 `endif
 
+`ifdef RV_BUILD_AHB_LITE
+    // Use AXI memory (lmem) even if VeeR is configured for AHB because it goes to axi bridge anyway.
+    logic                       lmem_axi_awvalid;
+    logic                       lmem_axi_awready;
+    logic [pt.LSU_BUS_TAG-1:0]  lmem_axi_awid;
+    logic [31:0]                lmem_axi_awaddr;
+    logic [2:0]                 lmem_axi_awsize;
+    logic [2:0]                 lmem_axi_awprot;
+    logic [7:0]                 lmem_axi_awlen;
+    logic [1:0]                 lmem_axi_awburst;
+
+    logic                       lmem_axi_wvalid;
+    logic                       lmem_axi_wready;
+    logic [63:0]                lmem_axi_wdata;
+    logic [7:0]                 lmem_axi_wstrb;
+    logic                       lmem_axi_wlast;
+
+    logic                       lmem_axi_bvalid;
+    logic                       lmem_axi_bready;
+    logic [1:0]                 lmem_axi_bresp;
+    logic [pt.LSU_BUS_TAG-1:0]  lmem_axi_bid;
+
+    logic                       lmem_axi_arvalid;
+    logic                       lmem_axi_arready;
+    logic [pt.LSU_BUS_TAG-1:0]  lmem_axi_arid;
+    logic [31:0]                lmem_axi_araddr;
+    logic [2:0]                 lmem_axi_arsize;
+    logic [2:0]                 lmem_axi_arprot;
+    logic [7:0]                 lmem_axi_arlen;
+    logic [1:0]                 lmem_axi_arburst;
+
+    logic                       lmem_axi_rvalid;
+    logic                       lmem_axi_rready;
+    logic [pt.LSU_BUS_TAG-1:0]  lmem_axi_rid;
+    logic [63:0]                lmem_axi_rdata;
+    logic [1:0]                 lmem_axi_rresp;
+    logic                       lmem_axi_rlast;
+
+    logic        [31:0]         dma_haddr;
+    logic        [2:0]          dma_hburst;
+    logic                       dma_hmastlock;
+    logic        [3:0]          dma_hprot;
+    logic        [2:0]          dma_hsize;
+    logic        [1:0]          dma_htrans;
+    logic                       dma_hwrite;
+    logic                       dma_hreadyout;
+    logic                       dma_hreadyin;
+`endif // RV_BUILD_AHB_LITE
+
 `ifndef VERILATOR
     bit                         core_clk;
     bit          [31:0]         mem_signature_begin = 32'd0; // TODO:
@@ -215,7 +264,6 @@ module tb_top
    assign mux_hwrite = lsu_hwrite;
    assign mux_htrans = lsu_htrans;
    assign mux_hsize = lsu_hsize;
-   assign mux_hready = lsu_hready;
 
    assign lsu_hresp = mux_hresp;
    assign lsu_hrdata = mux_hrdata;
@@ -702,14 +750,9 @@ module tb_top
 
 `define DEC rvtop_wrapper.rvtop.veer.dec
 
-`ifdef RV_BUILD_AXI4
+    // `lmem` is an instance of AXI memory even if VeeR uses AHB.
     assign mailbox_write = lmem.awvalid && lmem.awaddr == mem_mailbox && rst_l;
     assign mailbox_data  = lmem.wdata;
-`endif
-`ifdef RV_BUILD_AHB_LITE
-    assign mailbox_write = lmem.write   && lmem.laddr  == mem_mailbox && rst_l;
-    assign mailbox_data  = lmem.HWDATA;
-`endif
 
     assign mailbox_data_val = mailbox_data[7:0] > 8'h5 && mailbox_data[7:0] < 8'h7f;
 
@@ -1030,21 +1073,21 @@ veer_wrapper rvtop_wrapper (
     //---------------------------------------------------------------
     // DMA Slave
     //---------------------------------------------------------------
-    .dma_haddr              ( '0 ),
-    .dma_hburst             ( '0 ),
-    .dma_hmastlock          ( '0 ),
-    .dma_hprot              ( '0 ),
-    .dma_hsize              ( '0 ),
-    .dma_htrans             ( '0 ),
-    .dma_hwrite             ( '0 ),
-    .dma_hwdata             ( '0 ),
+    .dma_haddr              (dma_haddr),
+    .dma_hburst             (dma_hburst),
+    .dma_hmastlock          (dma_hmastlock),
+    .dma_hprot              (dma_hprot),
+    .dma_hsize              (dma_hsize),
+    .dma_htrans             (dma_htrans),
+    .dma_hwrite             (dma_hwrite),
+    .dma_hwdata             (dma_hwdata),
 
     .dma_hrdata             ( dma_hrdata    ),
     .dma_hresp              ( dma_hresp     ),
     .dma_hsel               ( 1'b1            ),
     .dma_hreadyin           ( dma_hready_out  ),
     .dma_hreadyout          ( dma_hready_out  ),
-`endif
+`endif // RV_BUILD_AHB_LITE
 `ifdef RV_BUILD_AXI4
     //-------------------------- LSU AXI signals--------------------------
     // AXI Write Channels
@@ -1349,28 +1392,107 @@ ahb_sif imem (
      .HRDATA(ic_hrdata[63:0])
 );
 
+// Use AXI memory even if VeeR is configured for AHB because it goes to axi bridge anyway.
+defparam lmem.TAGW = 4;
+axi_slv lmem(
+    .aclk(core_clk),
+    .rst_l(rst_l),
 
-ahb_sif lmem (
-     // Inputs
-     .HWDATA(mux_hwdata),
-     .HCLK(core_clk),
-     .HSEL(mux_hsel),
-     .HPROT(mux_hprot),
-     .HWRITE(mux_hwrite),
-     .HTRANS(mux_htrans),
-     .HSIZE(mux_hsize),
-     .HREADY(mux_hready),
-     .HRESETn(rst_l),
-     .HADDR(mux_haddr),
-     .HBURST(mux_hburst),
+    .arvalid(lmem_axi_arvalid),
+    .arready(lmem_axi_arready),
+    .araddr(lmem_axi_araddr),
+    .arid(lmem_axi_arid),
+    .arlen(lmem_axi_arlen),
+    .arburst(lmem_axi_arburst),
+    .arsize(lmem_axi_arsize),
 
-     // Outputs
-     .HREADYOUT(mux_hreadyout),
-     .HRESP(mux_hresp),
-     .HRDATA(mux_hrdata[63:0])
+    .rvalid(lmem_axi_rvalid),
+    .rready(lmem_axi_rready),
+    .rdata(lmem_axi_rdata),
+    .rresp(lmem_axi_rresp),
+    .rid(lmem_axi_rid),
+    .rlast(lmem_axi_rlast),
+
+    .awvalid(lmem_axi_awvalid),
+    .awready(lmem_axi_awready),
+    .awaddr(lmem_axi_awaddr),
+    .awid(lmem_axi_awid),
+    .awlen(lmem_axi_awlen),
+    .awburst(lmem_axi_awburst),
+    .awsize(lmem_axi_awsize),
+
+    .wdata(lmem_axi_wdata),
+    .wstrb(lmem_axi_wstrb),
+    .wvalid(lmem_axi_wvalid),
+    .wready(lmem_axi_wready),
+
+    .bvalid(lmem_axi_bvalid),
+    .bready(lmem_axi_bready),
+    .bresp(lmem_axi_bresp),
+    .bid(lmem_axi_bid)
 );
 
-`endif
+ahb_lsu_dma_bridge #(.pt(pt)) bridge (
+    .clk(core_clk),
+    .reset_l(rst_l),
+
+    .m_ahb_haddr(mux_haddr[31:0]),
+    .m_ahb_hburst(mux_hburst),
+    .m_ahb_hmastlock(mux_hmastlock),
+    .m_ahb_hprot(mux_hprot[3:0]),
+    .m_ahb_hsize(mux_hsize[2:0]),
+    .m_ahb_htrans(mux_htrans[1:0]),
+    .m_ahb_hwrite(mux_hwrite),
+    .m_ahb_hwdata(mux_hwdata[63:0]),
+    .m_ahb_hsel(mux_hsel),
+    .m_ahb_hreadyin(mux_hready),
+    .m_ahb_hrdata(mux_hrdata[63:0]),
+    .m_ahb_hreadyout(mux_hreadyout),
+    .m_ahb_hresp(mux_hresp),
+    
+    .s0_axi_awvalid(lmem_axi_awvalid),
+    .s0_axi_awready(lmem_axi_awready),
+    .s0_axi_awid(lmem_axi_awid),
+    .s0_axi_awaddr(lmem_axi_awaddr),
+    .s0_axi_awsize(lmem_axi_awsize),
+
+    .s0_axi_wvalid(lmem_axi_wvalid),
+    .s0_axi_wready(lmem_axi_wready),
+    .s0_axi_wdata(lmem_axi_wdata),
+    .s0_axi_wstrb(lmem_axi_wstrb),
+
+    .s0_axi_bvalid(lmem_axi_bvalid),
+    .s0_axi_bready(lmem_axi_bready),
+    .s0_axi_bresp(lmem_axi_bresp),
+    .s0_axi_bid(lmem_axi_bid),
+
+    .s0_axi_arvalid(lmem_axi_arvalid),
+    .s0_axi_arready(lmem_axi_arready),
+    .s0_axi_arid(lmem_axi_arid),
+    .s0_axi_araddr(lmem_axi_araddr),
+    .s0_axi_arsize(lmem_axi_arsize),
+
+    .s0_axi_rvalid(lmem_axi_rvalid),
+    .s0_axi_rready(lmem_axi_rready),
+    .s0_axi_rid(lmem_axi_rid),
+    .s0_axi_rdata(lmem_axi_rdata),
+    .s0_axi_rresp(lmem_axi_rresp),
+    .s0_axi_rlast(lmem_axi_rlast),
+
+    .s1_ahb_haddr(dma_haddr),
+    .s1_ahb_hburst(dma_hburst),
+    .s1_ahb_hmastlock(dma_hmastlock),
+    .s1_ahb_hprot(dma_hprot),
+    .s1_ahb_hsize(dma_hsize),
+    .s1_ahb_htrans(dma_htrans),
+    .s1_ahb_hwrite(dma_hwrite),
+    .s1_ahb_hwdata(dma_hwdata),
+    .s1_ahb_hrdata(dma_hrdata),
+    .s1_ahb_hready(dma_hready_out),
+    .s1_ahb_hresp(dma_hresp)
+);
+`endif // RV_BUILD_AHB_LITE
+
 `ifdef RV_BUILD_AXI4
 axi_slv #(.TAGW(`RV_IFU_BUS_TAG)) imem(
     .aclk(core_clk),

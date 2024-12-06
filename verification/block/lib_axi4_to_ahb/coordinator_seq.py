@@ -6,7 +6,11 @@ import random
 import cocotb
 from ahb_lite_pkg import AHB_LITE_NOTIFICATION
 from ahb_lite_seq import AHBLiteAcceptReadSeq, AHBLiteAcceptWriteSeq
-from axi_r_seq import AXIReadTransactionRequestSeq, AXIReadTransactionResponseSeq
+from axi_r_seq import (
+    AXIReadTransactionRequestMultipleSeq,
+    AXIReadTransactionRequestSeq,
+    AXIReadTransactionResponseSeq,
+)
 from axi_w_seq import (
     AXIWriteDataSeq,
     AXIWriteResponseSeq,
@@ -37,6 +41,21 @@ class CoordinatorSeq(uvm_sequence):
 
     async def axi_read(self, axi_seqr, ahb_seqr):
         axi_trq_seq = AXIReadTransactionRequestSeq()
+        axi_rresp_seq = AXIReadTransactionResponseSeq()
+
+        # Read Request
+        await axi_trq_seq.start(axi_seqr)
+        await self.delay(5)
+
+        # Handle AHB Response
+        await self.ahb_response_handler(ahb_seqr=ahb_seqr, is_read=True)
+        await self.delay(5)
+
+        # Read Response
+        await axi_rresp_seq.start(axi_seqr)
+
+    async def axi_read_multiple(self, axi_seqr, ahb_seqr):
+        axi_trq_seq = AXIReadTransactionRequestMultipleSeq()
         axi_rresp_seq = AXIReadTransactionResponseSeq()
 
         # Read Request
@@ -93,6 +112,17 @@ class TestReadChannelSeq(CoordinatorSeq):
         NUM_TRANSACTIONS_PER_TEST = ConfigDB().get(None, "", "NUM_TRANSACTIONS_PER_TEST")
         for _ in range(NUM_TRANSACTIONS_PER_TEST):
             await self.axi_read(axi_seqr=axi_seqr, ahb_seqr=ahb_seqr)
+            await self.delay(10)
+
+
+class TestReadChannelMultipleSeq(CoordinatorSeq):
+    async def body(self):
+        ahb_seqr = ConfigDB().get(None, "", "ahb_seqr")
+        axi_seqr = ConfigDB().get(None, "", "axi_r_seqr")
+
+        NUM_TRANSACTIONS_PER_TEST = ConfigDB().get(None, "", "NUM_TRANSACTIONS_PER_TEST")
+        for _ in range(NUM_TRANSACTIONS_PER_TEST):
+            await self.axi_read_multiple(axi_seqr=axi_seqr, ahb_seqr=ahb_seqr)
             await self.delay(10)
 
 

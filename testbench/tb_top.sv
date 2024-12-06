@@ -2290,7 +2290,7 @@ end : Gen_iccm_enable
  end // block: PACKED_0
 
  // WAY PACKED
- else begin : PACKED_1
+ else begin : PACKED_10
 
  // generate IC DATA PACKED SRAMS for 2/4 ways
   for (genvar k=0; k<pt.ICACHE_BANKS_WAY; k++) begin: BANKS_WAY   // 16B subbank
@@ -2337,8 +2337,7 @@ end : Gen_iccm_enable
               `EL2_PACKED_IC_DATA_SRAM(512,284,71,k)
            end // block: WAYS
            else   begin : WAYS
-              // TODO bring back
-              // `EL2_PACKED_IC_DATA_SRAM(512,142,71,k)
+              `EL2_PACKED_IC_DATA_SRAM(512,142,71,k)
            end // block: WAYS
         end // block: size_512
 
@@ -2445,7 +2444,7 @@ end : Gen_iccm_enable
         end // block: size_64
      end // block: ECC0
      end // block: BANKS_WAY
- end // block: PACKED_1
+ end // block: PACKED_10
 
 
 // ICACHE TAG

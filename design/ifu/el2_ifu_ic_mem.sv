@@ -297,7 +297,7 @@ import el2_pkg::*;
 
         // Use exported ICache interface.
         always_comb begin
-          wb_dout_pre_up = icache_export.wb_dout_pre_up;
+          wb_dout_pre_up[i][k] = icache_export.wb_dout_pre_up[i][k];
         end
         if (pt.ICACHE_BYPASS_ENABLE == 1) begin
           assign wrptr_in_up[i][k] = (wrptr_up[i][k] == (pt.ICACHE_NUM_BYPASS-1)) ? '0 : (wrptr_up[i][k] + 1'd1);
@@ -358,7 +358,7 @@ import el2_pkg::*;
 
         // Use exported ICache interface.
         always_comb begin
-           wb_dout_pre_up = icache_export.wb_dout_pre_up;
+           wb_dout_pre_up[i][k][68-1:0] = icache_export.wb_dout_pre_up[i][k][68-1:0];
         end
         if (pt.ICACHE_BYPASS_ENABLE == 1) begin
           assign wrptr_in_up[i][k] = (wrptr_up[i][k] == (pt.ICACHE_NUM_BYPASS-1)) ? '0 : (wrptr_up[i][k] + 1'd1);
@@ -439,8 +439,8 @@ import el2_pkg::*;
 
         // Use exported ICache interface.
         always_comb begin
-          icache_export.ic_b_sb_bit_en_vec = ic_b_sb_bit_en_vec;
-          wb_packeddout_pre = icache_export.wb_packeddout_pre;
+          icache_export.ic_b_sb_bit_en_vec[k] = ic_b_sb_bit_en_vec[k];
+          wb_packeddout_pre[k] = icache_export.wb_packeddout_pre[k];
         end
 
         for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: BITEN
@@ -519,8 +519,8 @@ import el2_pkg::*;
 
         // Use exported ICache interface.
         always_comb begin
-           icache_export.ic_b_sb_bit_en_vec = ic_b_sb_bit_en_vec;
-           wb_packeddout_pre = icache_export.wb_packeddout_pre;
+           icache_export.ic_b_sb_bit_en_vec[k] = ic_b_sb_bit_en_vec[k];
+           wb_packeddout_pre[k] = icache_export.wb_packeddout_pre[k];
         end
 
         for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: BITEN

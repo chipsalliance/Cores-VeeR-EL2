@@ -2,8 +2,8 @@ null  :=
 space := $(null) #
 comma := ,
 
-CURDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-SRCDIR := $(abspath $(CURDIR)../../../../design)
+TEST_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+SRCDIR := $(abspath $(TEST_DIR)../../../../design)
 
 TEST_FILES   = $(sort $(wildcard test_*.py))
 
@@ -13,4 +13,4 @@ TOPLEVEL     = el2_ifu_compress_ctl
 VERILOG_SOURCES  = \
     $(SRCDIR)/ifu/el2_ifu_compress_ctl.sv
 
-include $(CURDIR)/../common.mk
+include $(TEST_DIR)/../common.mk

@@ -3,7 +3,7 @@
 	url = https://github.com/picolibc/picolibc
 [submodule "third_party/riscv-dv"]
 	path = third_party/riscv-dv
-	url = https://github.com/chipsalliance/riscv-dv
+	url = https://github.com/antmicro/riscv-dv
 [submodule "third_party/cocotb"]
 	path = third_party/cocotb
 	url = https://github.com/cocotb/cocotb

@@ -19,6 +19,7 @@ $RV_ROOT/design/include/el2_def.sv
         /wdc/apps/mentor/questa/formal/2019.2/share/MODIFIED/dw/dw.remodel.v
 
 $RV_ROOT/design/el2_veer_wrapper.sv
+$RV_ROOT/design/el2_veer_lockstep.sv
 $RV_ROOT/design/el2_mem.sv
 $RV_ROOT/design/el2_pic_ctrl.sv
 $RV_ROOT/design/el2_veer.sv

@@ -3,8 +3,8 @@ null  :=
 space := $(null) #
 comma := ,
 
-CURDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-SRCDIR := $(abspath $(CURDIR)../../../../design)
+TEST_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+SRCDIR := $(abspath $(TEST_DIR)../../../../design)
 
 TEST_FILES   = $(sort $(wildcard test_*.py))
 
@@ -13,7 +13,7 @@ TOPLEVEL     = el2_lsu_dccm_mem_wrapper
 
 VERILOG_SOURCES  = \
     $(SRCDIR)/lib/el2_mem_if.sv \
-    $(CURDIR)/dccm/el2_lsu_dccm_mem_wrapper.sv \
+    $(TEST_DIR)/el2_lsu_dccm_mem_wrapper.sv \
     $(SRCDIR)/lsu/el2_lsu_dccm_mem.sv \
     $(SRCDIR)/lib/mem_lib.sv
 
@@ -21,4 +21,4 @@ VERILOG_SOURCES  = \
 # of simulation models
 EXTRA_ARGS += -UVERILATOR
 
-include $(CURDIR)/../common.mk
+include $(TEST_DIR)/../common.mk

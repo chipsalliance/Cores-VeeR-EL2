@@ -24,7 +24,7 @@ run_regression_test(){
     echo -e "${COLOR_WHITE} COVERAGE    = ${COVERAGE}${COLOR_CLEAR}"
     echo -e "${COLOR_WHITE} USER_MODE   = ${USER_MODE}${COLOR_CLEAR}"
 
-    COMMON_PARAMS=""
+    COMMON_PARAMS="-set bitmanip_zba -set bitmanip_zbb -set bitmanip_zbc -set bitmanip_zbe -set bitmanip_zbf -set bitmanip_zbp -set bitmanip_zbr -set bitmanip_zbs"
 
     if [[ "${USER_MODE}" == "1" ]]; then
         COMMON_PARAMS="-set=user_mode=1 -set=smepmp=1 ${COMMON_PARAMS}"

@@ -32,7 +32,7 @@ _start:
 
     // Enable Caches in MRAC
     li x1, 0x5f555555
-    csrw 0x7c0, x1
+    // csrw 0x7c0, x1
     li  x3, 4
     csrw    mfdc, x3        // disable store merging
 

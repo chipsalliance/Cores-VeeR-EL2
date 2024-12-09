@@ -16,7 +16,7 @@
 set -ex
 
 # Invoke GDB and dump core registers
-${GCC_PREFIX}-gdb -n --batch -x test.gdb >gdb.log
+${GCC_PREFIX}-gdb -n --batch -x $RV_ROOT/.github/scripts/test.gdb >gdb.log
 # Parse the log, extract register values. Skip those which change as the
 # program executes since we don't know at which point we tap in.
 cat gdb.log | grep -E '^ra |^sp |^gp |^tp |^t[01256] |^s[0-9]+ |^a[0-9]+ |^\$[0-9]+' >gdb_test_dump.txt
@@ -24,5 +24,5 @@ cat gdb.log | grep -E '^ra |^sp |^gp |^tp |^t[01256] |^s[0-9]+ |^a[0-9]+ |^\$[0-
 # Compare the dumps
 # TODO this temporarily exits with success just to allow collecting coverage data
 # without considering the truthness of register values.
-diff -E -y gdb_test_golden.txt gdb_test_dump.txt || true
+diff -E -y $RV_ROOT/.github/scripts/gdb_test_golden.txt gdb_test_dump.txt || true
 

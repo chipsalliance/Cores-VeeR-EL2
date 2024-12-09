@@ -95,13 +95,6 @@ jobs:
         run: |
           cp .github/scripts/indexgen/index_redirect/index.html ./public.new/
 
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.ref == 'refs/heads/main' }}
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public.new
-
       - name: Save PR number
         if: github.event_name == 'pull_request'
         run: |
@@ -114,9 +107,8 @@ jobs:
           name: pr_number
           path: ./pr_number.txt
 
-      - name: Pack webpage as an artifact
-        if: always()
-        uses: actions/upload-artifact@v3
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          name: webpage
-          path: ./public.new
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public.new

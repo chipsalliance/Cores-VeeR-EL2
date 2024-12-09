@@ -21,6 +21,7 @@
 volatile char* stdout = (char *)STDOUT;
 
 #define MFDC_DISABLE_ECC_MASK 0x100
+#define MFDC_DISABLE_SIDE_EFFECT_PIPELINING_MASK 0x40
 #define INJECT_ICCM_SINGLE_BIT 0xe0
 #define INJECT_ICCM_DOUBLE_BIT 0xe1
 #define INJECT_DCCM_SINGLE_BIT 0xe2
@@ -131,6 +132,16 @@ void enable_ecc_check(void) {
                     : "i" (0x7F9), "r" (mfdc_disable_ecc_mask) /* input : immediate */
                     : /* clobbers: none */);
 }
+
+void disable_side_effect_pipelining(void) {
+    uint32_t mfdc_disable_ecc_mask = MFDC_DISABLE_SIDE_EFFECT_PIPELINING_MASK;
+
+    __asm__ volatile ("csrs %0, %1"
+                    : /* output: none */
+                    : "i" (0x7F9), "r" (mfdc_disable_ecc_mask) /* input : immediate */
+                    : /* clobbers: none */);
+}
+
 
 void trap_handler(void) {
     uint32_t mcause, mscause, mfdc;
@@ -245,6 +256,8 @@ void execute_from_iccm (void) {
 void main(void)
 {
     boot_count++;
+
+    disable_side_effect_pipelining();
 
     printf("------------------------\n");
     printf("Test ECC error injection\n");

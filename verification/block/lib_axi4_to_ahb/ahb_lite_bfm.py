@@ -44,7 +44,8 @@ class AHBLiteBFM(metaclass=utility_classes.Singleton):
         while True:
             if self.rst_n.value == 0:
                 self.dut.ahb_hrdata.value = 0
-                self.dut.ahb_hready.value = 0
+                # self.dut.ahb_hready.value = 0
+                self.dut.ahb_hready.value = 1
                 self.dut.ahb_hresp.value = 0
                 await RisingEdge(self.rst_n)
             await RisingEdge(self.clk)
@@ -53,7 +54,8 @@ class AHBLiteBFM(metaclass=utility_classes.Singleton):
             if get_int(self.dut.ahb_htrans) == AHB_LITE_TRANSFER_TYPE_ENCODING.IDLE:
                 htrans = AHB_LITE_TRANSFER_TYPE_ENCODING.IDLE
                 self.dut.ahb_hrdata.value = 0
-                self.dut.ahb_hready.value = 0
+                # self.dut.ahb_hready.value = 0
+                self.dut.ahb_hready.value = 1
                 self.dut.ahb_hresp.value = AHB_LITE_RESPONSE_CODES.OKAY
             elif get_int(self.dut.ahb_htrans) == AHB_LITE_TRANSFER_TYPE_ENCODING.NONSEQ:
                 htrans = AHB_LITE_TRANSFER_TYPE_ENCODING.NONSEQ
@@ -71,7 +73,8 @@ class AHBLiteBFM(metaclass=utility_classes.Singleton):
                 self.dut.ahb_hresp.value = ahb_hresp
             except QueueEmpty:
                 self.dut.ahb_hrdata.value = 0
-                self.dut.ahb_hready.value = 0
+                # self.dut.ahb_hready.value = 0
+                self.dut.ahb_hready.value = 1
                 self.dut.ahb_hresp.value = 0
 
     async def req_monitor_q_bfm(self):

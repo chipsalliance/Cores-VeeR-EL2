@@ -3,8 +3,8 @@ null  :=
 space := $(null) #
 comma := ,
 
-CURDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-SRCDIR := $(abspath $(CURDIR)../../../../design)
+TEST_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+SRCDIR := $(abspath $(TEST_DIR)../../../../design)
 
 TEST_FILES   = $(sort $(wildcard test_*.py))
 
@@ -14,4 +14,4 @@ TOPLEVEL     = ahb_to_axi4
 VERILOG_SOURCES  = \
     $(SRCDIR)/lib/ahb_to_axi4.sv
 
-include $(CURDIR)/../common.mk
+include $(TEST_DIR)/../common.mk

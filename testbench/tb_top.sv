@@ -195,6 +195,8 @@ module tb_top
     wire                        dma_hready_out;
     int                         commit_count;
 
+    logic [3:0]                 nmi_assert_int;
+
     logic                       wb_valid;
     logic [4:0]                 wb_dest;
     logic [31:0]                wb_data;

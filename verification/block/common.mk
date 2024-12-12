@@ -40,10 +40,16 @@ endif
 # Enable processing of #delay statements
 ifeq ($(SIM), verilator)
     COMPILE_ARGS += --timing
-    COMPILE_ARGS += -Wall -Wno-fatal
+    COMPILE_ARGS += -Wall
+    COMPILE_ARGS += $(CURDIR)/config.vlt
 
     EXTRA_ARGS   += --trace --trace-structs
     EXTRA_ARGS   += $(VERILATOR_COVERAGE)
+endif
+
+# Include test specific Verilator config if it exists
+ifneq ("$(wildcard $(TEST_DIR)/config.vlt)","")
+    COMPILE_ARGS += $(TEST_DIR)/config.vlt
 endif
 
 COCOTB_HDL_TIMEUNIT         = 1ns
@@ -60,5 +66,5 @@ include $(shell cocotb-config --makefiles)/Makefile.sim
 
 # Rules for generating VeeR config
 $(CFGDIR)/common_defines.vh:
-	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0
+	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0 $(EXTRA_VEER_CONFIG)
 

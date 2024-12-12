@@ -70,26 +70,30 @@ jobs:
       - name: Update webpage
         if: github.event_name != 'pull_request'
         run: |
-          mkdir -p public.new/html/main/docs_rendered
-          cp -arf ./docs_rendered/* public.new/html/main/docs_rendered
           sis -d webpage \
             --include-documentation \
             --doc-project-name "Cores VeeR EL2" \
             --loc-github-ref-name ${{ github.ref_name }} \
             --loc-github-event-name ${{ github.event_name }} \
             --pr-number 0
+          # use docs from the artifact
+          rm -rf public.new/html/main/docs_rendered
+          mkdir -p public.new/html/main/docs_rendered
+          cp -arf ./docs_rendered/* public.new/html/main/docs_rendered
 
       - name: Update webpage PR
         if: github.event_name == 'pull_request'
         run: |
-          mkdir -p public.new/html/dev/${{ github.event.number }}/docs_rendered
-          cp -arf ./docs_rendered/* public.new/html/dev/${{ github.event.number }}/docs_rendered
           sis -d webpage \
             --include-documentation \
             --doc-project-name "Cores VeeR EL2" \
             --loc-github-ref-name ${{ github.ref_name }} \
             --loc-github-event-name ${{ github.event_name }} \
             --pr-number ${{ github.event.number }}
+          # use docs from the artifact
+          rm -rf public.new/html/dev/${{ github.event.number }}/docs_rendered
+          mkdir -p public.new/html/dev/${{ github.event.number }}/docs_rendered
+          cp -arf ./docs_rendered/* public.new/html/dev/${{ github.event.number }}/docs_rendered
 
       - name: Add redirect index page
         run: |

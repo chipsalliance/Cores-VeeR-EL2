@@ -147,6 +147,7 @@ int main(int argc, char** argv) {
   tb->trace (tfp, 24);
   tfp->open ("sim.vcd");
 #endif
+  tb->lsu_bus_clk_en = 1;
   // Simulate
   if(test_halt) {
     // Test halt/start first (if requested)

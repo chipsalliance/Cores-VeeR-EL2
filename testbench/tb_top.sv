@@ -40,7 +40,8 @@ module tb_top
     output bit                  mpc_debug_halt_ack,
     input bit                   mpc_debug_run_req,
     output bit                  mpc_debug_run_ack,
-    output bit                  o_debug_mode_status
+    output bit                  o_debug_mode_status,
+    input bit                   lsu_bus_clk_en
 );
 `endif
 
@@ -1272,7 +1273,7 @@ veer_wrapper rvtop_wrapper (
     .timer_int              ( timer_int ),
     .extintsrc_req          ( ext_int ),
 
-    .lsu_bus_clk_en         ( 1'b1  ),// Clock ratio b/w cpu core clk & AHB master interface
+    .lsu_bus_clk_en         (lsu_bus_clk_en),// Clock ratio b/w cpu core clk & AHB master interface
     .ifu_bus_clk_en         ( 1'b1  ),// Clock ratio b/w cpu core clk & AHB master interface
     .dbg_bus_clk_en         ( 1'b1  ),// Clock ratio b/w cpu core clk & AHB Debug master interface
     .dma_bus_clk_en         ( 1'b1  ),// Clock ratio b/w cpu core clk & AHB slave interface

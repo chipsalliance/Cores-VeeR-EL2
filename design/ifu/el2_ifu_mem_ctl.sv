@@ -978,12 +978,15 @@ assign ic_miss_buff_half[63:0]    = {ic_miss_buff_data[{other_tag,1'b1}],ic_miss
         perr_nxtstate = ERR_IDLE;
         perr_state_en = 1'b1;
       end
+      /* perr_state is an enum and the existing members are handled above */
+      /*verilator coverage_off*/
       default: begin : def_case
         perr_nxtstate        = ERR_IDLE;
         perr_state_en        = 1'b0;
         perr_sel_invalidate  = 1'b0;
         perr_sb_write_status = 1'b0;
       end
+      /*verilator coverage_on*/
     endcase
    end
 

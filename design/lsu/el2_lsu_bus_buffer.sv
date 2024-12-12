@@ -747,6 +747,8 @@ import el2_pkg::*;
                      buf_ldfwd_en[i]           = buf_state_en[i];
                      buf_cmd_state_bus_en[i]  = '0;
             end
+            /* buf_state is an enum and the existing members are handled above */
+            /*verilator coverage_off*/
             default : begin
                      buf_nxtstate[i]          = IDLE;
                      buf_state_en[i]          = '0;
@@ -759,6 +761,7 @@ import el2_pkg::*;
                      buf_rst[i]               = '0;
                      buf_cmd_state_bus_en[i]  = '0;
             end
+            /*verilator coverage_on*/
          endcase
       end
 

@@ -28,6 +28,7 @@ module tb_top
     `include "el2_param.vh"
 ) (
     input bit                   core_clk,
+    input bit                   rst_l,
     input bit [31:0]            mem_signature_begin,
     input bit [31:0]            mem_signature_end,
     input bit [31:0]            mem_mailbox,
@@ -100,7 +101,6 @@ module tb_top
     bit          [31:0]         mem_signature_end   = 32'd0;
     bit          [31:0]         mem_mailbox         = 32'hD0580000;
 `endif
-    logic                       rst_l;
     logic                       porst_l;
     logic [pt.PIC_TOTAL_INT:1]  ext_int;
     logic                       nmi_int;
@@ -1011,7 +1011,6 @@ module tb_top
     end
 
 
-    assign rst_l = cycleCnt > 5;
     assign porst_l = cycleCnt > 2;
 
    //=========================================================================-

@@ -148,6 +148,14 @@ int main(int argc, char** argv) {
   tfp->open ("sim.vcd");
 #endif
   tb->lsu_bus_clk_en = 1;
+  // reset
+  tb->rst_l = 0;
+  for (int i=0;i<6;i++) {
+    main_time += 5;
+    tb->core_clk = !tb->core_clk;
+    tb->eval();
+  }
+  tb->rst_l = 1;
   // Simulate
   if(test_halt) {
     // Test halt/start first (if requested)

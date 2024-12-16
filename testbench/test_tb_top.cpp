@@ -68,6 +68,7 @@ int main(int argc, char** argv) {
 
   Vtb_top* tb = new Vtb_top;
   bool test_halt = false;
+  bool test_lsu_clk_ratio = false;
 
   tb->mem_signature_begin = 0x00000000;
   tb->mem_signature_end   = 0x00000000;
@@ -124,6 +125,9 @@ int main(int argc, char** argv) {
   for (int i=1; i<argc; ++i) {
     if (!strcmp(argv[i], "--test-halt")) {
       test_halt = true;
+    }
+    if (!strcmp(argv[i], "--test-lsu-clk-ratio")) {
+      test_lsu_clk_ratio = true;
     }
   }
 
@@ -228,6 +232,31 @@ int main(int argc, char** argv) {
     tb->mpc_debug_halt_req = 0;
     tb->mpc_debug_run_req = 0;
   }
+
+  if (test_lsu_clk_ratio) {
+    std::cout<<"Test lower clock ratio between bus master interface and core" << std::endl;
+    tb->lsu_bus_clk_en = 0;
+    for(int i=0;i<30;i++) {
+      for(int j=0;j<10;j++) {
+        main_time += 5;
+        tb->core_clk = !tb->core_clk;
+        tb->eval();
+      }
+      tb->lsu_bus_clk_en = !tb->lsu_bus_clk_en;
+    }
+    tb->lsu_bus_clk_en = 1;
+
+    std::cout<<"Pre-start checks complete. Restarting again for normal operation." << std::endl;
+    // reset
+    tb->rst_l = 0;
+    for (int i=0;i<30;i++) {
+      main_time += 5;
+      tb->core_clk = !tb->core_clk;
+      tb->eval();
+    }
+    tb->rst_l = 1;
+  }
+
   while(!Verilated::gotFinish()){
 #if VM_TRACE
       tfp->dump (main_time);

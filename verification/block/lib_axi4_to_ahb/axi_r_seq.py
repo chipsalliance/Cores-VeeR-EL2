@@ -65,6 +65,19 @@ class AXIReadTransactionRequestSeq(BaseSeq):
         await self.run_items(items)
 
 
+class AXIReadTransactionRequestMultipleSeq(BaseSeq):
+    async def body(self):
+        items = [
+            AXIReadTransactionRequestSeqItem("AXIReadTransactionRequestSeqItem"),
+            AXIReadTransactionRequestSeqItem("AXIReadTransactionRequestSeqItem"),
+            AXIReadTransactionRequestSeqItem("AXIReadTransactionRequestSeqItem"),
+            AXIReadTransactionRequestSeqItem("AXIReadTransactionRequestSeqItem"),
+            AXIReadTransactionRequestSeqItem("AXIReadTransactionRequestSeqItem"),
+            AXIReadInactiveSeqItem("AXIReadInactiveSeqItem"),
+        ]
+        await self.run_items(items)
+
+
 class AXIReadTransactionResponseSeq(BaseSeq):
     async def body(self):
         items = [

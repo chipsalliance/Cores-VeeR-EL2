@@ -27,6 +27,8 @@ TEST_CFLAGS = -g -gdwarf -O3 -funroll-all-loops
 ABI = -mabi=ilp32
 LD_ABI = $(ABI) -march=rv32imac
 
+TB_EXTRA_ARGS ?= --test-halt
+
 # Check for RV_ROOT
 ifeq (,$(wildcard ${RV_ROOT}/configs/veer.config))
 $(error env var RV_ROOT does not point to a valid dir! Exiting!)
@@ -218,9 +220,9 @@ verilator: program.hex verilator-build
 	if [ $$? -eq 0 ]; then \
 		BEG=`grep "begin_signature" $(TEST).sym | cut -d\  -f 1`;\
 		END=`grep "end_signature"   $(TEST).sym | cut -d\  -f 1`;\
-		./obj_dir/Vtb_top --test-halt --mem-signature $${BEG} $${END}; \
+		./obj_dir/Vtb_top ${TB_EXTRA_ARGS} --mem-signature $${BEG} $${END}; \
 	else \
-		./obj_dir/Vtb_top --test-halt; \
+		./obj_dir/Vtb_top ${TB_EXTRA_ARGS}; \
 	fi
 
 irun: program.hex irun-build

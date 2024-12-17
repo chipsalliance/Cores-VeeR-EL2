@@ -28,6 +28,7 @@ module tb_top
     `include "el2_param.vh"
 ) (
     input bit                   core_clk,
+    input bit                   rst_l,
     input bit [31:0]            mem_signature_begin,
     input bit [31:0]            mem_signature_end,
     input bit [31:0]            mem_mailbox,
@@ -40,7 +41,8 @@ module tb_top
     output bit                  mpc_debug_halt_ack,
     input bit                   mpc_debug_run_req,
     output bit                  mpc_debug_run_ack,
-    output bit                  o_debug_mode_status
+    output bit                  o_debug_mode_status,
+    input bit                   lsu_bus_clk_en
 );
 `endif
 
@@ -99,7 +101,6 @@ module tb_top
     bit          [31:0]         mem_signature_end   = 32'd0;
     bit          [31:0]         mem_mailbox         = 32'hD0580000;
 `endif
-    logic                       rst_l;
     logic                       porst_l;
     logic [pt.PIC_TOTAL_INT:1]  ext_int;
     logic                       nmi_int;
@@ -1010,7 +1011,6 @@ module tb_top
     end
 
 
-    assign rst_l = cycleCnt > 5;
     assign porst_l = cycleCnt > 2;
 
    //=========================================================================-
@@ -1272,7 +1272,7 @@ veer_wrapper rvtop_wrapper (
     .timer_int              ( timer_int ),
     .extintsrc_req          ( ext_int ),
 
-    .lsu_bus_clk_en         ( 1'b1  ),// Clock ratio b/w cpu core clk & AHB master interface
+    .lsu_bus_clk_en         (lsu_bus_clk_en),// Clock ratio b/w cpu core clk & AHB master interface
     .ifu_bus_clk_en         ( 1'b1  ),// Clock ratio b/w cpu core clk & AHB master interface
     .dbg_bus_clk_en         ( 1'b1  ),// Clock ratio b/w cpu core clk & AHB Debug master interface
     .dma_bus_clk_en         ( 1'b1  ),// Clock ratio b/w cpu core clk & AHB slave interface

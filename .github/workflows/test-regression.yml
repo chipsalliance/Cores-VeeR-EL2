@@ -12,11 +12,12 @@ jobs:
     strategy:
       matrix:
         bus: ["axi", "ahb"]
-        test: ["hello_world", "hello_world_dccm", "hello_world_iccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
+        test: ["hello_world", "hello_world_dccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
                "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters", "pmp", "write_unaligned",
                "icache", "bitmanip"]
         coverage: ["branch", "toggle"] #TODO: add functional coverage
         priv: ["0", "1"]
+        tb_extra_args: ["--test-halt"]
         exclude:
           # These tests require user mode
           - priv: "0"
@@ -32,6 +33,18 @@ jobs:
           - priv: "0"
             test: "perf_counters"
           # end tests which require user mode
+        include:
+          # Use hello_world_iccm for testing '--test-lsu-clk-ratio'
+          - test: "hello_world_iccm"
+            bus: "axi"
+            coverage: "branch"
+            priv: "0"
+            tb_extra_args: "--test-halt --test-lsu-clk-ratio"
+          - test: "hello_world_iccm"
+            bus: "axi"
+            coverage: "toggle"
+            priv: "0"
+            tb_extra_args: "--test-halt --test-lsu-clk-ratio"
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/regression/.cache/"
@@ -74,6 +87,7 @@ jobs:
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
+          export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }}
 
       - name: Prepare coverage data

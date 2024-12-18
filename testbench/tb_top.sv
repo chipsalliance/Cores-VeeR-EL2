@@ -869,7 +869,6 @@ module tb_top
         // 8'h81 - set NMI handler address (mailbox_data[31:8] is the address of a handler,
         //         i.e. it must be 256 byte-aligned)
         // 8'h82 - trigger data bus error on the next load/store
-        nmi_assert_int <= nmi_assert_int >> 1;
         soft_int <= 0;
         timer_int <= 0;
         extintsrc_req[1] <= 0;
@@ -881,7 +880,7 @@ module tb_top
         if (mailbox_write && mailbox_data[7:0] == 8'h82)
             // wait for current transaction that to complete to not trigger error on it
             @(negedge lsu_axi_bvalid) next_dbus_error <= 1;
-        if (mailbox_write && mailbox_data[7:0] == 8'h83)
+        if (mailbox_write && mailbox_data[7:0] == 8'h87)
             @(negedge ifu_axi_rvalid or ifu_axi_rid) next_ibus_error <= 1;
         // turn off forcing dbus error after a transaction
         if (next_dbus_error)
@@ -916,6 +915,7 @@ module tb_top
 
     // trace monitor
     always @(posedge core_clk) begin
+        nmi_assert_int <= nmi_assert_int >> 1;
         wb_valid      <= `DEC.dec_i0_wen_r;
         wb_dest       <= `DEC.dec_i0_waddr_r;
         wb_data       <= `DEC.dec_i0_wdata_r;

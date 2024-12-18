@@ -773,12 +773,6 @@ module tb_top
     logic [1:0] ifu_axi_rresp_override;
 
     always @(negedge core_clk) begin
-        // Custom test commands
-        // Available commands (that can be written into address mem_mailbox_testcmd) are:
-        // 8'h80 - trigger NMI
-        // 8'h81 - set NMI handler address (mailbox_data[31:8] is the address of a handler,
-        //         i.e. it must be 256 byte-aligned)
-        // 8'h82 - trigger data bus error on the next load/store
         nmi_assert_int <= nmi_assert_int >> 1;
         soft_int <= 0;
         timer_int <= 0;
@@ -799,6 +793,9 @@ module tb_top
         // data[7:0] == 0x81 - set ext irq line index given by data[15:8]
         // data[7:0] == 0x82 - clean NMI, timer and soft irq lines to bits data[8:10]
         // data[7:0] == 0x83 - set NMI, timer and soft irq lines to bits data[8:10]
+        // data[7:0] == 0x86 - Trigger external interrupt
+        // data[7:0] == 0x87 - (AXI4) Trigger data bus error on the next load/store
+        // data[7:0] == 0x88 - (AXI4) Trigger instruction bus error on the next load/store
         // data[7:0] == 0x90 - clear all interrupt request signals
         if(mailbox_write && (mailbox_data[7:0] >= 8'h80 && mailbox_data[7:0] < 8'h87)) begin
             if (mailbox_data[7:0] == 8'h80) begin
@@ -837,6 +834,7 @@ module tb_top
             timer_int      <= 1'b0;
             soft_int       <= 1'b0;
         end
+        // end
         // ECC error injection
         if(mailbox_write && (mailbox_data[7:0] == 8'he0)) begin
             $display("Injecting single bit ICCM error");
@@ -887,10 +885,10 @@ module tb_top
     `ifdef RV_BUILD_AXI4
     // this needs to be a separate block due to sensitivity to other signals
     always @(negedge core_clk or lsu_axi_bvalid or lsu_axi_rvalid or ifu_axi_rvalid or ifu_axi_rid) begin
-        if (mailbox_write && mailbox_data[7:0] == 8'h82)
+        if (mailbox_write && mailbox_data[7:0] == 8'h87)
             // wait for current transaction that to complete to not trigger error on it
             @(negedge lsu_axi_bvalid) next_dbus_error <= 1;
-        if (mailbox_write && mailbox_data[7:0] == 8'h83)
+        if (mailbox_write && mailbox_data[7:0] == 8'h88)
             @(negedge ifu_axi_rvalid or ifu_axi_rid) next_ibus_error <= 1;
         // turn off forcing dbus error after a transaction
         if (next_dbus_error)

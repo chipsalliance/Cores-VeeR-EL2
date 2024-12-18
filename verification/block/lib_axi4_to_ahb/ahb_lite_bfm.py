@@ -76,12 +76,14 @@ class AHBLiteBFM(metaclass=utility_classes.Singleton):
                 self.dut.ahb_hresp.value = ahb_hresp
             except QueueEmpty:
                 self.dut.ahb_hrdata.value = 0
-                self.dut.ahb_hresp.value = 0
 
+                # enforce error on sequential transfers to cover the `STREAM_RD_ERR` state
                 if get_int(self.dut.ahb_htrans) == AHB_LITE_TRANSFER_TYPE_ENCODING.SEQ:
                     self.dut.ahb_hready.value = 1
+                    self.dut.ahb_hresp.value = 1
                 else:
                     self.dut.ahb_hready.value = 0
+                    self.dut.ahb_hresp.value = 0
 
     async def req_monitor_q_bfm(self):
         while True:

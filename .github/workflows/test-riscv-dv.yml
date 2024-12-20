@@ -232,6 +232,12 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Download Code Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: riscv-dv_generated_code_${{ matrix.version }}
+          path: tools/riscv-dv/work/
+
       - name: Prepare Environment
         run: _secret_prepare_env
 

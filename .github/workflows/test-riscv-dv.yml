@@ -67,7 +67,6 @@ jobs:
         run: _secret_generate_code
         env:
           RISCV_DV_TEST: ${{ matrix.test }}
-        continue-on-error: true
 
       - name: Generate code (pyflow)
         if: steps.cache-code.outputs.cache-hit != 'true' && matrix.version == 'pyflow'
@@ -256,4 +255,3 @@ jobs:
         run: _secret_custom_run
         env:
           RISCV_DV_TEST: ${{ matrix.test }}
-        continue-on-error: true

@@ -100,6 +100,7 @@ module tb_top
     bit          [31:0]         mem_signature_begin = 32'd0; // TODO:
     bit          [31:0]         mem_signature_end   = 32'd0;
     bit          [31:0]         mem_mailbox         = 32'hD0580000;
+    logic                       rst_l;
 `endif
     logic                       porst_l;
     logic [pt.PIC_TOTAL_INT:1]  ext_int;
@@ -1010,7 +1011,9 @@ module tb_top
 `endif
     end
 
-
+`ifndef VERILATOR
+    assign rst_l = cycleCnt > 5;
+`endif
     assign porst_l = cycleCnt > 2;
 
    //=========================================================================-
@@ -2570,7 +2573,7 @@ end : Gen_iccm_enable
 
 
 // ICACHE TAG
-if (pt.ICACHE_WAYPACK == 0 ) begin : PACKED_0
+if (pt.ICACHE_WAYPACK == 0 ) begin : PACKED_11
     for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: WAYS
         if (pt.ICACHE_TAG_DEPTH == 32)   begin : size_32
                  `EL2_IC_TAG_SRAM(32,26,i)
@@ -2597,7 +2600,7 @@ if (pt.ICACHE_WAYPACK == 0 ) begin : PACKED_0
                  `EL2_IC_TAG_SRAM(4096,26,i)
         end // if (pt.ICACHE_TAG_DEPTH == 4096)
    end // block: WAYS
- end // block: PACKED_0
+ end // block: PACKED_11
 
  else begin : PACKED_1
     if (pt.ICACHE_ECC) begin  : ECC1

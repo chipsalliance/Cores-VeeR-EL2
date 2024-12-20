@@ -96,8 +96,6 @@ import el2_pkg::*;
 
    el2_mem_if mem_export_local ();
 
-   assign mem_export      .clk = clk;
-   assign icache_export   .clk = clk;
    assign mem_export_local.clk = clk;
 
    assign mem_export      .iccm_clken         = mem_export_local.iccm_clken;

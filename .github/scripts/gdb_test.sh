@@ -16,8 +16,9 @@
 # This script runs Verilator RTL simulation and OpenOCD in background, invokes
 # the supplied test command and shuts everything down.
 
-SIM_LOG=`realpath sim.log`
-OPENOCD_LOG=`realpath openocd.log`
+SIM_LOG=$(realpath sim.log)
+OPENOCD_LOG=$(realpath openocd.log)
+GDB_LOG=$(realpath gdb.log)
 GCC_PREFIX=riscv64-unknown-elf
 
 # Ensure that RISC-V toolchain is installed
@@ -32,11 +33,6 @@ export GCC_PREFIX
 
 set +e
 
-if [ "$#" -lt 1 ]; then
-    echo "Usage: gdb_test.sh <command> [args ...]"
-    exit 1
-fi
-
 # Utils
 source `dirname ${BASH_SOURCE[0]}`/utils.sh
 
@@ -48,10 +44,12 @@ terminate_all () {
 }
 
 print_logs () {
-    echo -e "${COLOR_WHITE}======== Simulation log ========${COLOR_OFF}"
-    cat ${SIM_LOG} || true
     echo -e "${COLOR_WHITE}======== OpenOCD log ========${COLOR_OFF}"
     cat ${OPENOCD_LOG} || true
+    echo -e "${COLOR_WHITE}======== GDB log ========${COLOR_OFF}"
+    cat ${GDB_LOG} || true
+    echo -e "${COLOR_WHITE}======== Simulation log ========${COLOR_OFF}"
+    cat ${SIM_LOG} || true
 }
 
 echo -e "${COLOR_WHITE}======== Launching interactive simulation ========${COLOR_OFF}"
@@ -63,9 +61,8 @@ SIM_PID=$!
 
 # Wait
 wait_for_phrase "${SIM_LOG}" "Start of sim"
-# TODO handle proper string in the output instead of waiting
-sleep 10s
 retcode=$?
+sleep 10s
 if [ $retcode -ne 0 ]; then
     echo -e "${COLOR_RED}Failed to start the simulation: $retcode ${COLOR_OFF}"
     print_logs
@@ -94,9 +91,9 @@ echo -e "OpenOCD running and ready (pid=${OPENOCD_PID})"
 sleep 1s
 
 # Run the test
-echo -e "${COLOR_WHITE}======== Running test '$@' ========${COLOR_OFF}"
+echo -e "${COLOR_WHITE}======== Running test dump_and_compare.sh ========${COLOR_OFF}"
 
-bash -c "$(printf ' %q' "$@")" > test.log 2>&1 &
+${RV_ROOT}/.github/scripts/dump_and_compare.sh > test.log 2>&1 &
 TEST_PID=$!
 
 # The simulation must end naturally in order to produce coverage data.

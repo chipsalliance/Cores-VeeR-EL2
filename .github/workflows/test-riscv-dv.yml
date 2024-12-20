@@ -226,7 +226,6 @@ jobs:
     name: Run custom RISC-V DV tests
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: centos:8
-    if: github.ref == 'refs/heads/main'
     needs: [ generate-config, generate-code ]
     strategy:
       fail-fast: false

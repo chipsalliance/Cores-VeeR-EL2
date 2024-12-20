@@ -49,27 +49,16 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Cache Code
-        uses: actions/cache@v3
-        id: cache-code
-        timeout-minutes: 60
-        with:
-          path: tools/riscv-dv/work/test_${{ matrix.test }}/asm_test
-          key: cache_${{ matrix.test }}_${{ matrix.version }}_${{ env.CACHE_HASH }}
-
       - name: Prepare Environment
-        if: steps.cache-code.outputs.cache-hit != 'true'
         run: _secret_prepare_env
 
       - name: Generate code
         id: riscv_dv_test
-        if: steps.cache-code.outputs.cache-hit != 'true' && matrix.version == 'uvm'
         run: _secret_generate_code
         env:
           RISCV_DV_TEST: ${{ matrix.test }}
 
       - name: Generate code (pyflow)
-        if: steps.cache-code.outputs.cache-hit != 'true' && matrix.version == 'pyflow'
         shell: bash
         run: |
           export RV_ROOT=`realpath .`
@@ -82,7 +71,6 @@ jobs:
           popd
 
       - name: Use fallback code
-        if: steps.cache-code.outputs.cache-hit != 'true' && steps.riscv_dv_test.outcome != 'success'
         run: |
           mkdir -p tools/riscv-dv/work/
           cp -r .github/assets/riscv_dv/${{ matrix.version  }}/* tools/riscv-dv/work/

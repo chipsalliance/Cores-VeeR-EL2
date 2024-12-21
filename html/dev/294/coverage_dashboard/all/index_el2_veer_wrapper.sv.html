@@ -131,19 +131,19 @@
 <span id="L27"><span class="lineNum">      27</span>              : `include "el2_param.vh"</span>
 <span id="L28"><span class="lineNum">      28</span>              : )</span>
 <span id="L29"><span class="lineNum">      29</span>              : (</span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC tlaBgGNC">   110777153 :    input logic                             clk,</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC tlaBgGNC">   110777235 :    input logic                             clk,</span></span>
 <span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">         299 :    input logic                             rst_l,</span></span>
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">         297 :    input logic                             dbg_rst_l,</span></span>
 <span id="L33"><span class="lineNum">      33</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [31:1]                      rst_vec,</span></span>
-<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">           6 :    input logic                             nmi_int,</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">           7 :    input logic                             nmi_int,</span></span>
 <span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">          16 :    input logic [31:1]                      nmi_vec,</span></span>
 <span id="L36"><span class="lineNum">      36</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [31:1]                      jtag_id,</span></span>
 <span id="L37"><span class="lineNum">      37</span>              : </span>
 <span id="L38"><span class="lineNum">      38</span>              : </span>
 <span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC tlaBgGNC">      282911 :    output logic [31:0]                     trace_rv_i_insn_ip,</span></span>
 <span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">        1121 :    output logic [31:0]                     trace_rv_i_address_ip,</span></span>
-<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">    13224121 :    output logic                            trace_rv_i_valid_ip,</span></span>
-<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">     5588909 :    output logic                            trace_rv_i_exception_ip,</span></span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">    13224137 :    output logic                            trace_rv_i_valid_ip,</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">     5588925 :    output logic                            trace_rv_i_exception_ip,</span></span>
 <span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">           4 :    output logic [4:0]                      trace_rv_i_ecause_ip,</span></span>
 <span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">          18 :    output logic                            trace_rv_i_interrupt_ip,</span></span>
 <span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">          61 :    output logic [31:0]                     trace_rv_i_tval_ip,</span></span>
@@ -494,7 +494,7 @@
 <span id="L390"><span class="lineNum">     390</span>              :    // ICache export interface</span>
 <span id="L391"><span class="lineNum">     391</span>              :    el2_mem_if.veer_icache_src              el2_icache_export,</span>
 <span id="L392"><span class="lineNum">     392</span>              : </span>
-<span id="L393"><span class="lineNum">     393</span> <span class="tlaGNC tlaBgGNC">          16 :    input logic                             timer_int,</span></span>
+<span id="L393"><span class="lineNum">     393</span> <span class="tlaGNC tlaBgGNC">          17 :    input logic                             timer_int,</span></span>
 <span id="L394"><span class="lineNum">     394</span> <span class="tlaGNC">          14 :    input logic                             soft_int,</span></span>
 <span id="L395"><span class="lineNum">     395</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [pt.PIC_TOTAL_INT:1]        extintsrc_req,</span></span>
 <span id="L396"><span class="lineNum">     396</span>              : </span>
@@ -504,11 +504,11 @@
 <span id="L400"><span class="lineNum">     400</span> <span class="tlaGNC">       24234 :    output logic                            dec_tlu_perfcnt3,</span></span>
 <span id="L401"><span class="lineNum">     401</span>              : </span>
 <span id="L402"><span class="lineNum">     402</span>              :    // ports added by the soc team</span>
-<span id="L403"><span class="lineNum">     403</span> <span class="tlaGNC">     2785736 :    input logic                             jtag_tck,    // JTAG clk</span></span>
+<span id="L403"><span class="lineNum">     403</span> <span class="tlaGNC">     2785766 :    input logic                             jtag_tck,    // JTAG clk</span></span>
 <span id="L404"><span class="lineNum">     404</span> <span class="tlaGNC">      163172 :    input logic                             jtag_tms,    // JTAG TMS</span></span>
-<span id="L405"><span class="lineNum">     405</span> <span class="tlaGNC">      197278 :    input logic                             jtag_tdi,    // JTAG tdi</span></span>
+<span id="L405"><span class="lineNum">     405</span> <span class="tlaGNC">      197280 :    input logic                             jtag_tdi,    // JTAG tdi</span></span>
 <span id="L406"><span class="lineNum">     406</span> <span class="tlaGNC">           4 :    input logic                             jtag_trst_n, // JTAG Reset</span></span>
-<span id="L407"><span class="lineNum">     407</span> <span class="tlaGNC">      279659 :    output logic                            jtag_tdo,    // JTAG TDO</span></span>
+<span id="L407"><span class="lineNum">     407</span> <span class="tlaGNC">      279660 :    output logic                            jtag_tdo,    // JTAG TDO</span></span>
 <span id="L408"><span class="lineNum">     408</span> <span class="tlaGNC">       81578 :    output logic                            jtag_tdoEn,  // JTAG Test Data Output enable</span></span>
 <span id="L409"><span class="lineNum">     409</span>              : </span>
 <span id="L410"><span class="lineNum">     410</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [31:4] core_id,</span></span>
@@ -548,8 +548,8 @@
 <span id="L444"><span class="lineNum">     444</span>              :    /* verilator coverage_on */</span>
 <span id="L445"><span class="lineNum">     445</span>              : );</span>
 <span id="L446"><span class="lineNum">     446</span>              : </span>
-<span id="L447"><span class="lineNum">     447</span> <span class="tlaGNC">   110777153 :    logic                             active_l2clk;</span></span>
-<span id="L448"><span class="lineNum">     448</span> <span class="tlaGNC">   110777153 :    logic                             free_l2clk;</span></span>
+<span id="L447"><span class="lineNum">     447</span> <span class="tlaGNC">   110777235 :    logic                             active_l2clk;</span></span>
+<span id="L448"><span class="lineNum">     448</span> <span class="tlaGNC">   110777235 :    logic                             free_l2clk;</span></span>
 <span id="L449"><span class="lineNum">     449</span>              : </span>
 <span id="L450"><span class="lineNum">     450</span>              :    // DCCM ports</span>
 <span id="L451"><span class="lineNum">     451</span> <span class="tlaGNC">         198 :    logic         dccm_wren;</span></span>
@@ -569,12 +569,12 @@
 <span id="L465"><span class="lineNum">     465</span>              :    // Icache &amp; Itag ports</span>
 <span id="L466"><span class="lineNum">     466</span> <span class="tlaGNC tlaBgGNC">        1306 :    logic [31:1]  ic_rw_addr;</span></span>
 <span id="L467"><span class="lineNum">     467</span> <span class="tlaGNC">      273978 :    logic [pt.ICACHE_NUM_WAYS-1:0]   ic_wr_en  ;     // Which way to write</span></span>
-<span id="L468"><span class="lineNum">     468</span> <span class="tlaGNC">     4766097 :    logic         ic_rd_en ;</span></span>
+<span id="L468"><span class="lineNum">     468</span> <span class="tlaGNC">     4766118 :    logic         ic_rd_en ;</span></span>
 <span id="L469"><span class="lineNum">     469</span>              : </span>
 <span id="L470"><span class="lineNum">     470</span>              : </span>
-<span id="L471"><span class="lineNum">     471</span> <span class="tlaGNC">     2028865 :    logic [pt.ICACHE_NUM_WAYS-1:0]   ic_tag_valid;   // Valid from the I$ tag valid outside (in flops).</span></span>
+<span id="L471"><span class="lineNum">     471</span> <span class="tlaGNC">     2028887 :    logic [pt.ICACHE_NUM_WAYS-1:0]   ic_tag_valid;   // Valid from the I$ tag valid outside (in flops).</span></span>
 <span id="L472"><span class="lineNum">     472</span>              : </span>
-<span id="L473"><span class="lineNum">     473</span> <span class="tlaGNC">     1571068 :    logic [pt.ICACHE_NUM_WAYS-1:0]   ic_rd_hit;      // ic_rd_hit[3:0]</span></span>
+<span id="L473"><span class="lineNum">     473</span> <span class="tlaGNC">     1571090 :    logic [pt.ICACHE_NUM_WAYS-1:0]   ic_rd_hit;      // ic_rd_hit[3:0]</span></span>
 <span id="L474"><span class="lineNum">     474</span> <span class="tlaUNC tlaBgUNC">           0 :    logic         ic_tag_perr;                       // Ic tag parity error</span></span>
 <span id="L475"><span class="lineNum">     475</span>              : </span>
 <span id="L476"><span class="lineNum">     476</span> <span class="tlaUNC">           0 :    logic [pt.ICACHE_INDEX_HI:3]  ic_debug_addr;     // Read/Write addresss to the Icache.</span></span>

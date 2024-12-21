@@ -135,13 +135,13 @@
 <span id="L31"><span class="lineNum">      31</span>              :  )</span>
 <span id="L32"><span class="lineNum">      32</span>              :   (</span>
 <span id="L33"><span class="lineNum">      33</span>              : </span>
-<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">   110777153 :    input logic clk,</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">   110777235 :    input logic clk,</span></span>
 <span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">         299 :    input logic rst_l,</span></span>
 <span id="L36"><span class="lineNum">      36</span>              : </span>
-<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">    13432237 :    input logic ic_hit_f,      // Icache hit, enables F address capture</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">    13432257 :    input logic ic_hit_f,      // Icache hit, enables F address capture</span></span>
 <span id="L38"><span class="lineNum">      38</span>              : </span>
 <span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">        1192 :    input logic [31:1] ifc_fetch_addr_f, // look up btb address</span></span>
-<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">    10313825 :    input logic ifc_fetch_req_f,  // F1 valid</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">    10313843 :    input logic ifc_fetch_req_f,  // F1 valid</span></span>
 <span id="L41"><span class="lineNum">      41</span>              : </span>
 <span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">      608213 :    input el2_br_tlu_pkt_t dec_tlu_br0_r_pkt, // BP commit update packet, includes errors</span></span>
 <span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">      213604 :    input logic [pt.BHT_GHR_SIZE-1:0] exu_i0_br_fghr_r, // fghr to bp</span></span>
@@ -149,7 +149,7 @@
 <span id="L45"><span class="lineNum">      45</span>              : </span>
 <span id="L46"><span class="lineNum">      46</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [$clog2(pt.BTB_SIZE)-1:0] dec_fa_error_index, // Fully associative btb error index</span></span>
 <span id="L47"><span class="lineNum">      47</span>              : </span>
-<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC tlaBgGNC">     5634810 :    input logic dec_tlu_flush_lower_wb, // used to move EX4 RS to EX1 and F</span></span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC tlaBgGNC">     5634830 :    input logic dec_tlu_flush_lower_wb, // used to move EX4 RS to EX1 and F</span></span>
 <span id="L49"><span class="lineNum">      49</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic dec_tlu_flush_leak_one_wb, // don't hit for leak one fetches</span></span>
 <span id="L50"><span class="lineNum">      50</span>              : </span>
 <span id="L51"><span class="lineNum">      51</span> <span class="tlaUNC">           0 :    input logic dec_tlu_bpred_disable, // disable all branch prediction</span></span>
@@ -161,7 +161,7 @@
 <span id="L57"><span class="lineNum">      57</span> <span class="tlaGNC">      110144 :    input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO]  exu_mp_index,         // Mispredict index</span></span>
 <span id="L58"><span class="lineNum">      58</span> <span class="tlaGNC">       68110 :    input logic [pt.BTB_BTAG_SIZE-1:0]  exu_mp_btag,                   // Mispredict btag</span></span>
 <span id="L59"><span class="lineNum">      59</span>              : </span>
-<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">     7257298 :    input logic exu_flush_final, // all flushes</span></span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">     7257318 :    input logic exu_flush_final, // all flushes</span></span>
 <span id="L61"><span class="lineNum">      61</span>              : </span>
 <span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">     2468869 :    output logic ifu_bp_hit_taken_f, // btb hit, select target</span></span>
 <span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">      277624 :    output logic [31:1] ifu_bp_btb_target_f, //  predicted target PC</span></span>
@@ -351,7 +351,7 @@
 <span id="L247"><span class="lineNum">     247</span>              :    // set on leak one, hold until next flush without leak one</span>
 <span id="L248"><span class="lineNum">     248</span>              :    assign leak_one_f = (dec_tlu_flush_leak_one_wb &amp; dec_tlu_flush_lower_wb) | (leak_one_f_d1 &amp; ~dec_tlu_flush_lower_wb);</span>
 <span id="L249"><span class="lineNum">     249</span>              : </span>
-<span id="L250"><span class="lineNum">     250</span> <span class="tlaGNC">     7257294 : logic exu_flush_final_d1;</span></span>
+<span id="L250"><span class="lineNum">     250</span> <span class="tlaGNC">     7257312 : logic exu_flush_final_d1;</span></span>
 <span id="L251"><span class="lineNum">     251</span>              : </span>
 <span id="L252"><span class="lineNum">     252</span>              :  if(!pt.BTB_FULLYA) begin : genblock1</span>
 <span id="L253"><span class="lineNum">     253</span>              :    assign fetch_mp_collision_f = ( (exu_mp_btag[pt.BTB_BTAG_SIZE-1:0] == fetch_rd_tag_f[pt.BTB_BTAG_SIZE-1:0]) &amp;</span>
@@ -780,18 +780,18 @@
 <span id="L676"><span class="lineNum">     676</span> <span class="tlaGNC">         298 :         btb_bank0_rd_data_way1_p1_f[BTB_DWIDTH-1:0] = '0 ;</span></span>
 <span id="L677"><span class="lineNum">     677</span>              : </span>
 <span id="L678"><span class="lineNum">     678</span> <span class="tlaGNC">         298 :         for (int j=0; j&lt; LRU_SIZE; j++) begin</span></span>
-<span id="L679"><span class="lineNum">     679</span> <span class="tlaGNC">    42254009 :           if (btb_rd_addr_f[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] == (pt.BTB_ADDR_HI-pt.BTB_ADDR_LO+1)'(j)) begin</span></span>
+<span id="L679"><span class="lineNum">     679</span> <span class="tlaGNC">    42267250 :           if (btb_rd_addr_f[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] == (pt.BTB_ADDR_HI-pt.BTB_ADDR_LO+1)'(j)) begin</span></span>
 <span id="L680"><span class="lineNum">     680</span>              : </span>
-<span id="L681"><span class="lineNum">     681</span> <span class="tlaGNC">    42254009 :            btb_bank0_rd_data_way0_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way0_out[j];</span></span>
-<span id="L682"><span class="lineNum">     682</span> <span class="tlaGNC">    42254009 :            btb_bank0_rd_data_way1_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way1_out[j];</span></span>
+<span id="L681"><span class="lineNum">     681</span> <span class="tlaGNC">    42267250 :            btb_bank0_rd_data_way0_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way0_out[j];</span></span>
+<span id="L682"><span class="lineNum">     682</span> <span class="tlaGNC">    42267250 :            btb_bank0_rd_data_way1_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way1_out[j];</span></span>
 <span id="L683"><span class="lineNum">     683</span>              : </span>
 <span id="L684"><span class="lineNum">     684</span>              :           end</span>
 <span id="L685"><span class="lineNum">     685</span>              :         end</span>
 <span id="L686"><span class="lineNum">     686</span> <span class="tlaGNC">         298 :         for (int j=0; j&lt; LRU_SIZE; j++) begin</span></span>
-<span id="L687"><span class="lineNum">     687</span> <span class="tlaGNC">    42254009 :           if (btb_rd_addr_p1_f[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] == (pt.BTB_ADDR_HI-pt.BTB_ADDR_LO+1)'(j)) begin</span></span>
+<span id="L687"><span class="lineNum">     687</span> <span class="tlaGNC">    42267250 :           if (btb_rd_addr_p1_f[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] == (pt.BTB_ADDR_HI-pt.BTB_ADDR_LO+1)'(j)) begin</span></span>
 <span id="L688"><span class="lineNum">     688</span>              : </span>
-<span id="L689"><span class="lineNum">     689</span> <span class="tlaGNC">    42254009 :            btb_bank0_rd_data_way0_p1_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way0_out[j];</span></span>
-<span id="L690"><span class="lineNum">     690</span> <span class="tlaGNC">    42254009 :            btb_bank0_rd_data_way1_p1_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way1_out[j];</span></span>
+<span id="L689"><span class="lineNum">     689</span> <span class="tlaGNC">    42267250 :            btb_bank0_rd_data_way0_p1_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way0_out[j];</span></span>
+<span id="L690"><span class="lineNum">     690</span> <span class="tlaGNC">    42267250 :            btb_bank0_rd_data_way1_p1_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way1_out[j];</span></span>
 <span id="L691"><span class="lineNum">     691</span>              : </span>
 <span id="L692"><span class="lineNum">     692</span>              :           end</span>
 <span id="L693"><span class="lineNum">     693</span>              :         end</span>
@@ -981,12 +981,12 @@
 <span id="L877"><span class="lineNum">     877</span> <span class="tlaGNC">         298 :      bht_bank1_rd_data_f[1:0] = '0 ;</span></span>
 <span id="L878"><span class="lineNum">     878</span> <span class="tlaGNC">         298 :      bht_bank0_rd_data_p1_f[1:0] = '0 ;</span></span>
 <span id="L879"><span class="lineNum">     879</span> <span class="tlaGNC">         298 :      for (int j=0; j&lt; pt.BHT_ARRAY_DEPTH; j++) begin</span></span>
-<span id="L880"><span class="lineNum">     880</span> <span class="tlaGNC">    42254009 :        if (bht_rd_addr_f[pt.BHT_ADDR_HI:pt.BHT_ADDR_LO] == (pt.BHT_ADDR_HI-pt.BHT_ADDR_LO+1)'(j)) begin</span></span>
-<span id="L881"><span class="lineNum">     881</span> <span class="tlaGNC">    42254009 :          bht_bank0_rd_data_f[1:0] = bht_bank_rd_data_out[0][j];</span></span>
-<span id="L882"><span class="lineNum">     882</span> <span class="tlaGNC">    42254009 :          bht_bank1_rd_data_f[1:0] = bht_bank_rd_data_out[1][j];</span></span>
+<span id="L880"><span class="lineNum">     880</span> <span class="tlaGNC">    42267250 :        if (bht_rd_addr_f[pt.BHT_ADDR_HI:pt.BHT_ADDR_LO] == (pt.BHT_ADDR_HI-pt.BHT_ADDR_LO+1)'(j)) begin</span></span>
+<span id="L881"><span class="lineNum">     881</span> <span class="tlaGNC">    42267250 :          bht_bank0_rd_data_f[1:0] = bht_bank_rd_data_out[0][j];</span></span>
+<span id="L882"><span class="lineNum">     882</span> <span class="tlaGNC">    42267250 :          bht_bank1_rd_data_f[1:0] = bht_bank_rd_data_out[1][j];</span></span>
 <span id="L883"><span class="lineNum">     883</span>              :        end</span>
-<span id="L884"><span class="lineNum">     884</span> <span class="tlaGNC">    42254009 :        if (bht_rd_addr_p1_f[pt.BHT_ADDR_HI:pt.BHT_ADDR_LO] == (pt.BHT_ADDR_HI-pt.BHT_ADDR_LO+1)'(j)) begin</span></span>
-<span id="L885"><span class="lineNum">     885</span> <span class="tlaGNC">    42254009 :          bht_bank0_rd_data_p1_f[1:0] = bht_bank_rd_data_out[0][j];</span></span>
+<span id="L884"><span class="lineNum">     884</span> <span class="tlaGNC">    42267250 :        if (bht_rd_addr_p1_f[pt.BHT_ADDR_HI:pt.BHT_ADDR_LO] == (pt.BHT_ADDR_HI-pt.BHT_ADDR_LO+1)'(j)) begin</span></span>
+<span id="L885"><span class="lineNum">     885</span> <span class="tlaGNC">    42267250 :          bht_bank0_rd_data_p1_f[1:0] = bht_bank_rd_data_out[0][j];</span></span>
 <span id="L886"><span class="lineNum">     886</span>              :        end</span>
 <span id="L887"><span class="lineNum">     887</span>              :       end</span>
 <span id="L888"><span class="lineNum">     888</span>              :     end // block: BHT_rd_mux</span>

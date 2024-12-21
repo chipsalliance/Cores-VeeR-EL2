@@ -313,7 +313,7 @@
 <span id="L209"><span class="lineNum">     209</span> <span class="tlaGNC">           1 :        for (bcompress_i=0; bcompress_i&lt;32; bcompress_i++)</span></span>
 <span id="L210"><span class="lineNum">     210</span> <span class="tlaGNC">          32 :          begin</span></span>
 <span id="L211"><span class="lineNum">     211</span> <span class="tlaGNC">          32 :              bcompress_test_bit_d              =  rs2_in[bcompress_i];</span></span>
-<span id="L212"><span class="lineNum">     212</span> <span class="tlaGNC">      672992 :              if (bcompress_test_bit_d)</span></span>
+<span id="L212"><span class="lineNum">     212</span> <span class="tlaGNC">      451648 :              if (bcompress_test_bit_d)</span></span>
 <span id="L213"><span class="lineNum">     213</span> <span class="tlaUNC tlaBgUNC">           0 :                begin</span></span>
 <span id="L214"><span class="lineNum">     214</span> <span class="tlaUNC">           0 :                   bcompress_d[bcompress_j]     =  rs1_in[bcompress_i];</span></span>
 <span id="L215"><span class="lineNum">     215</span> <span class="tlaUNC">           0 :                   bcompress_j                  =  bcompress_j + 1;</span></span>
@@ -340,7 +340,7 @@
 <span id="L236"><span class="lineNum">     236</span> <span class="tlaGNC">           1 :        for (bdecompress_i=0; bdecompress_i&lt;32; bdecompress_i++)</span></span>
 <span id="L237"><span class="lineNum">     237</span> <span class="tlaGNC">          32 :          begin</span></span>
 <span id="L238"><span class="lineNum">     238</span> <span class="tlaGNC">          32 :              bdecompress_test_bit_d            =  rs2_in[bdecompress_i];</span></span>
-<span id="L239"><span class="lineNum">     239</span> <span class="tlaGNC">      672992 :              if (bdecompress_test_bit_d)</span></span>
+<span id="L239"><span class="lineNum">     239</span> <span class="tlaGNC">      451648 :              if (bdecompress_test_bit_d)</span></span>
 <span id="L240"><span class="lineNum">     240</span> <span class="tlaUNC tlaBgUNC">           0 :                begin</span></span>
 <span id="L241"><span class="lineNum">     241</span> <span class="tlaUNC">           0 :                   bdecompress_d[bdecompress_i] =  rs1_in[bdecompress_j];</span></span>
 <span id="L242"><span class="lineNum">     242</span> <span class="tlaUNC">           0 :                   bdecompress_j                =  bdecompress_j + 1;</span></span>

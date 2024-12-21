@@ -58,14 +58,14 @@
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff8600;">
-        26.3%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ffc400;">
+        38.5%
     </td>
     <td class="headerCovSummaryEntry">
         5
     </td>
     <td class="headerCovSummaryEntry">
-        19
+        13
     </td>
 
             </tr>
@@ -134,15 +134,15 @@
 <span id="L30"><span class="lineNum">      30</span>              :     /* verilator coverage_on */</span>
 <span id="L31"><span class="lineNum">      31</span>              : </span>
 <span id="L32"><span class="lineNum">      32</span>              : `ifdef RV_SMEPMP</span>
-<span id="L33"><span class="lineNum">      33</span> <span class="tlaUNC tlaBgUNC">           0 :     input el2_mseccfg_pkt_t mseccfg, // mseccfg CSR content, RLB, MMWP and MML bits</span></span>
+<span id="L33"><span class="lineNum">      33</span>              :     input el2_mseccfg_pkt_t mseccfg, // mseccfg CSR content, RLB, MMWP and MML bits</span>
 <span id="L34"><span class="lineNum">      34</span>              : `endif</span>
 <span id="L35"><span class="lineNum">      35</span>              : </span>
 <span id="L36"><span class="lineNum">      36</span>              : `ifdef RV_USER_MODE</span>
-<span id="L37"><span class="lineNum">      37</span> <span class="tlaUNC">           0 :     input logic priv_mode_ns,   // operating privilege mode (next clock cycle)</span></span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaUNC">           0 :     input logic priv_mode_eff,  // operating effective privilege mode</span></span>
+<span id="L37"><span class="lineNum">      37</span>              :     input logic priv_mode_ns,   // operating privilege mode (next clock cycle)</span>
+<span id="L38"><span class="lineNum">      38</span>              :     input logic priv_mode_eff,  // operating effective privilege mode</span>
 <span id="L39"><span class="lineNum">      39</span>              : `endif</span>
 <span id="L40"><span class="lineNum">      40</span>              : </span>
-<span id="L41"><span class="lineNum">      41</span> <span class="tlaUNC">           0 :     input el2_pmp_cfg_pkt_t        pmp_pmpcfg [pt.PMP_ENTRIES],</span></span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaUNC tlaBgUNC">           0 :     input el2_pmp_cfg_pkt_t        pmp_pmpcfg [pt.PMP_ENTRIES],</span></span>
 <span id="L42"><span class="lineNum">      42</span>              :     input logic             [31:0] pmp_pmpaddr[pt.PMP_ENTRIES],</span>
 <span id="L43"><span class="lineNum">      43</span>              : </span>
 <span id="L44"><span class="lineNum">      44</span> <span class="tlaUNC">           0 :     input  logic              [31:0] pmp_chan_addr[PMP_CHANNELS],</span></span>
@@ -163,7 +163,7 @@
 <span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC tlaBgGNC">           1 :   logic [    PMP_CHANNELS-1:0][pt.PMP_ENTRIES-1:0] region_perm_check;</span></span>
 <span id="L60"><span class="lineNum">      60</span>              : </span>
 <span id="L61"><span class="lineNum">      61</span>              : `ifdef RV_USER_MODE</span>
-<span id="L62"><span class="lineNum">      62</span> <span class="tlaUNC tlaBgUNC">           0 :   logic any_region_enabled;</span></span>
+<span id="L62"><span class="lineNum">      62</span>              :   logic any_region_enabled;</span>
 <span id="L63"><span class="lineNum">      63</span>              : `endif</span>
 <span id="L64"><span class="lineNum">      64</span>              : </span>
 <span id="L65"><span class="lineNum">      65</span>              :   ///////////////////////</span>
@@ -179,7 +179,7 @@
 <span id="L75"><span class="lineNum">      75</span>              :   //                                             \--&gt; pmp_chan_err</span>
 <span id="L76"><span class="lineNum">      76</span>              : </span>
 <span id="L77"><span class="lineNum">      77</span>              :   // A wrapper function in which it is decided which form of permission check function gets called</span>
-<span id="L78"><span class="lineNum">      78</span> <span class="tlaGNC tlaBgGNC">          48 :   function automatic logic perm_check_wrapper(el2_mseccfg_pkt_t csr_pmp_mseccfg,</span></span>
+<span id="L78"><span class="lineNum">      78</span> <span class="tlaGNC">          48 :   function automatic logic perm_check_wrapper(el2_mseccfg_pkt_t csr_pmp_mseccfg,</span></span>
 <span id="L79"><span class="lineNum">      79</span>              :                                               el2_pmp_cfg_pkt_t csr_pmp_cfg,</span>
 <span id="L80"><span class="lineNum">      80</span>              :                                               el2_pmp_type_pkt_t req_type,</span>
 <span id="L81"><span class="lineNum">      81</span>              :                                               logic priv_mode,</span>
@@ -287,7 +287,7 @@
 <span id="L183"><span class="lineNum">     183</span>              :   // ---------------</span>
 <span id="L184"><span class="lineNum">     184</span>              : </span>
 <span id="L185"><span class="lineNum">     185</span>              : `ifdef RV_USER_MODE</span>
-<span id="L186"><span class="lineNum">     186</span> <span class="tlaUNC tlaBgUNC">           0 :   logic [pt.PMP_ENTRIES-1:0] region_enabled;</span></span>
+<span id="L186"><span class="lineNum">     186</span>              :   logic [pt.PMP_ENTRIES-1:0] region_enabled;</span>
 <span id="L187"><span class="lineNum">     187</span>              :   for (genvar r = 0; r &lt; pt.PMP_ENTRIES; r++) begin : g_reg_ena</span>
 <span id="L188"><span class="lineNum">     188</span>              :     assign region_enabled[r] = pmp_pmpcfg[r].mode != OFF;</span>
 <span id="L189"><span class="lineNum">     189</span>              :   end</span>
@@ -328,7 +328,7 @@
 <span id="L224"><span class="lineNum">     224</span>              :   end</span>
 <span id="L225"><span class="lineNum">     225</span>              : </span>
 <span id="L226"><span class="lineNum">     226</span>              : `ifdef RV_USER_MODE</span>
-<span id="L227"><span class="lineNum">     227</span> <span class="tlaUNC">           0 :   logic [PMP_CHANNELS-1:0] pmp_priv_mode_eff;</span></span>
+<span id="L227"><span class="lineNum">     227</span>              :   logic [PMP_CHANNELS-1:0] pmp_priv_mode_eff;</span>
 <span id="L228"><span class="lineNum">     228</span>              :   for (genvar c = 0; c &lt; PMP_CHANNELS; c++) begin : g_priv_mode_eff</span>
 <span id="L229"><span class="lineNum">     229</span>              :     assign pmp_priv_mode_eff[c] = (</span>
 <span id="L230"><span class="lineNum">     230</span>              :       ((pmp_chan_type[c] == EXEC) &amp; priv_mode_ns) |</span>
@@ -336,7 +336,7 @@
 <span id="L232"><span class="lineNum">     232</span>              :   end</span>
 <span id="L233"><span class="lineNum">     233</span>              : `endif</span>
 <span id="L234"><span class="lineNum">     234</span>              : </span>
-<span id="L235"><span class="lineNum">     235</span> <span class="tlaUNC">           0 :   for (genvar c = 0; c &lt; PMP_CHANNELS; c++) begin : g_access_check</span></span>
+<span id="L235"><span class="lineNum">     235</span> <span class="tlaUNC tlaBgUNC">           0 :   for (genvar c = 0; c &lt; PMP_CHANNELS; c++) begin : g_access_check</span></span>
 <span id="L236"><span class="lineNum">     236</span>              :     assign pmp_req_addr_i[c] = {2'b00, pmp_chan_addr[c]};  // addr. widening: 32-bit -&gt; 34-bit</span>
 <span id="L237"><span class="lineNum">     237</span> <span class="tlaUNC">           0 :     for (genvar r = 0; r &lt; pt.PMP_ENTRIES; r++) begin : g_regions</span></span>
 <span id="L238"><span class="lineNum">     238</span>              :       // Comparators are sized according to granularity</span>

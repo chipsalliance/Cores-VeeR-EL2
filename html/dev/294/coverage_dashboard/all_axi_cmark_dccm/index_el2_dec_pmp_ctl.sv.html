@@ -58,14 +58,14 @@
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff8f00;">
-        28.1%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff9400;">
+        29.0%
     </td>
     <td class="headerCovSummaryEntry">
         9
     </td>
     <td class="headerCovSummaryEntry">
-        32
+        31
     </td>
 
             </tr>
@@ -153,10 +153,10 @@
 <span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC">           2 :    input logic internal_dbg_halt_timers, // debug halted</span></span>
 <span id="L50"><span class="lineNum">      50</span>              : </span>
 <span id="L51"><span class="lineNum">      51</span>              : `ifdef RV_SMEPMP</span>
-<span id="L52"><span class="lineNum">      52</span> <span class="tlaUNC tlaBgUNC">           0 :    input el2_mseccfg_pkt_t mseccfg,</span></span>
+<span id="L52"><span class="lineNum">      52</span>              :    input el2_mseccfg_pkt_t mseccfg,</span>
 <span id="L53"><span class="lineNum">      53</span>              : `endif</span>
 <span id="L54"><span class="lineNum">      54</span>              : </span>
-<span id="L55"><span class="lineNum">      55</span> <span class="tlaUNC">           0 :    output logic [31:0] dec_pmp_rddata_d,  // pmp CSR read data</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [31:0] dec_pmp_rddata_d,  // pmp CSR read data</span></span>
 <span id="L56"><span class="lineNum">      56</span> <span class="tlaUNC">           0 :    output logic        dec_pmp_read_d,    // pmp CSR address match</span></span>
 <span id="L57"><span class="lineNum">      57</span>              : </span>
 <span id="L58"><span class="lineNum">      58</span> <span class="tlaUNC">           0 :    output el2_pmp_cfg_pkt_t pmp_pmpcfg  [pt.PMP_ENTRIES],</span></span>

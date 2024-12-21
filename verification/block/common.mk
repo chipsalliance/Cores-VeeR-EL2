@@ -46,6 +46,10 @@ ifeq ($(SIM), verilator)
     EXTRA_ARGS   += $(VERILATOR_COVERAGE)
 endif
 
+ifeq ($(SIM), vcs)
+    EXTRA_ARGS   += +incdir+$(CFGDIR) -assert svaext -cm line+cond+fsm+tgl+branch
+endif
+
 COCOTB_HDL_TIMEUNIT         = 1ns
 COCOTB_HDL_TIMEPRECISION    = 10ps
 

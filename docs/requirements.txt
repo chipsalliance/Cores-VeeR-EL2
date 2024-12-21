@@ -1,2 +1,2 @@
-Sphinx==8.0.2
+Sphinx>=8.0.2,<9
 https://github.com/antmicro/antmicro-sphinx-utils/archive/main.zip

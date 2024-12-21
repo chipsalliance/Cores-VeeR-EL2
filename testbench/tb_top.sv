@@ -21,6 +21,18 @@ module tb_top
 #(
     `include "el2_param.vh"
 );
+
+  logic i_cpu_halt_req;
+  logic i_cpu_run_req;
+  logic mpc_debug_halt_req;
+  logic mpc_debug_run_req;
+  logic lsu_bus_clk_en;
+
+  assign i_cpu_halt_req = 1'b0;
+  assign i_cpu_run_req = 1'b0;
+  assign mpc_debug_halt_req = 1'b0;
+  assign mpc_debug_run_req = 1'b1;
+  assign lsu_bus_clk_en = 1'b1;
 `else
 module tb_top
     import tb_top_pkg::*;
@@ -1006,7 +1018,9 @@ module tb_top
         preload_iccm();
 
 `ifndef VERILATOR
-        if($test$plusargs("dumpon")) $dumpvars;
+        $dumpfile("dump.vcd");
+	$dumpvars(0, tb_top);
+        //if($test$plusargs("dumpon")) $dumpvars;
         forever  core_clk = #5 ~core_clk;
 `endif
     end
@@ -2770,6 +2784,11 @@ jtagdpi #(
     .jtag_trst_n    (jtag_trst_n),
     .jtag_srst_n    ()
 );
+`else
+  assign jtag_tck = 1'b0;
+  assign jtag_tms = 1'b0;
+  assign jtag_tdi = 1'b0;
+  assign jtag_trst_n = 1'b0;
 `endif
 
 /* verilator lint_off CASEINCOMPLETE */

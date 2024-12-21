@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    20-12-2024
+                    21-12-2024
                 </td>
                 <td></td>
                 
@@ -131,8 +131,8 @@
 <span id="L27"><span class="lineNum">      27</span>              :  )</span>
 <span id="L28"><span class="lineNum">      28</span>              :                   (</span>
 <span id="L29"><span class="lineNum">      29</span>              : </span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC tlaBgGNC">     3041714 :                      input  logic                   clk,                  // Core clock</span></span>
-<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">     3041714 :                      input  logic                   free_clk,             // free clock</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC tlaBgGNC">     3041628 :                      input  logic                   clk,                  // Core clock</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">     3041628 :                      input  logic                   free_clk,             // free clock</span></span>
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">           1 :                      input  logic                   rst_l,                // Reset for all flops</span></span>
 <span id="L33"><span class="lineNum">      33</span> <span class="tlaUNC tlaBgUNC">           0 :                      input  logic                   clk_override,         // Clock over-ride for gating</span></span>
 <span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">           1 :                      input  logic                   io_clk_override,      // PIC IO  Clock over-ride for gating</span></span>
@@ -259,11 +259,11 @@
 <span id="L155"><span class="lineNum">     155</span> <span class="tlaUNC">           0 :    logic                                     gw_config_c1_clken;</span></span>
 <span id="L156"><span class="lineNum">     156</span>              : </span>
 <span id="L157"><span class="lineNum">     157</span>              : // clocks</span>
-<span id="L158"><span class="lineNum">     158</span> <span class="tlaGNC tlaBgGNC">     3041714 :    logic                                     pic_raddr_c1_clk;</span></span>
-<span id="L159"><span class="lineNum">     159</span> <span class="tlaGNC">     3041714 :    logic                                     pic_data_c1_clk;</span></span>
-<span id="L160"><span class="lineNum">     160</span> <span class="tlaGNC">     3041714 :    logic                                     pic_pri_c1_clk;</span></span>
-<span id="L161"><span class="lineNum">     161</span> <span class="tlaGNC">     3041714 :    logic                                     pic_int_c1_clk;</span></span>
-<span id="L162"><span class="lineNum">     162</span> <span class="tlaGNC">     3041714 :    logic                                     gw_config_c1_clk;</span></span>
+<span id="L158"><span class="lineNum">     158</span> <span class="tlaGNC tlaBgGNC">     3041628 :    logic                                     pic_raddr_c1_clk;</span></span>
+<span id="L159"><span class="lineNum">     159</span> <span class="tlaGNC">     3041628 :    logic                                     pic_data_c1_clk;</span></span>
+<span id="L160"><span class="lineNum">     160</span> <span class="tlaGNC">     3041628 :    logic                                     pic_pri_c1_clk;</span></span>
+<span id="L161"><span class="lineNum">     161</span> <span class="tlaGNC">     3041628 :    logic                                     pic_int_c1_clk;</span></span>
+<span id="L162"><span class="lineNum">     162</span> <span class="tlaGNC">     3041628 :    logic                                     gw_config_c1_clk;</span></span>
 <span id="L163"><span class="lineNum">     163</span>              : </span>
 <span id="L164"><span class="lineNum">     164</span>              : // ---- Clock gating section ------</span>
 <span id="L165"><span class="lineNum">     165</span>              : // c1 clock enables</span>
@@ -604,13 +604,13 @@
 <span id="L500"><span class="lineNum">     500</span> <span class="tlaGNC">           1 :          intpriority_rd_out =  '0 ;</span></span>
 <span id="L501"><span class="lineNum">     501</span> <span class="tlaGNC">           1 :          gw_config_rd_out =  '0 ;</span></span>
 <span id="L502"><span class="lineNum">     502</span> <span class="tlaGNC">           1 :          for (int i=0; i&lt;pt.PIC_TOTAL_INT_PLUS1; i++) begin</span></span>
-<span id="L503"><span class="lineNum">     503</span> <span class="tlaGNC">    50988032 :               if (intenable_reg_re[i]) begin</span></span>
+<span id="L503"><span class="lineNum">     503</span> <span class="tlaGNC">    51210176 :               if (intenable_reg_re[i]) begin</span></span>
 <span id="L504"><span class="lineNum">     504</span> <span class="tlaUNC tlaBgUNC">           0 :                intenable_rd_out    =  intenable_reg[i]  ;</span></span>
 <span id="L505"><span class="lineNum">     505</span>              :               end</span>
-<span id="L506"><span class="lineNum">     506</span> <span class="tlaGNC tlaBgGNC">    50988032 :               if (intpriority_reg_re[i]) begin</span></span>
+<span id="L506"><span class="lineNum">     506</span> <span class="tlaGNC tlaBgGNC">    51210176 :               if (intpriority_reg_re[i]) begin</span></span>
 <span id="L507"><span class="lineNum">     507</span> <span class="tlaUNC tlaBgUNC">           0 :                intpriority_rd_out  =  intpriority_reg[i] ;</span></span>
 <span id="L508"><span class="lineNum">     508</span>              :               end</span>
-<span id="L509"><span class="lineNum">     509</span> <span class="tlaGNC tlaBgGNC">    50988032 :               if (gw_config_reg_re[i]) begin</span></span>
+<span id="L509"><span class="lineNum">     509</span> <span class="tlaGNC tlaBgGNC">    51210176 :               if (gw_config_reg_re[i]) begin</span></span>
 <span id="L510"><span class="lineNum">     510</span> <span class="tlaUNC tlaBgUNC">           0 :                gw_config_rd_out  =  gw_config_reg[i] ;</span></span>
 <span id="L511"><span class="lineNum">     511</span>              :               end</span>
 <span id="L512"><span class="lineNum">     512</span>              :          end</span>
@@ -666,7 +666,7 @@
 <span id="L562"><span class="lineNum">     562</span>              : </span>
 <span id="L563"><span class="lineNum">     563</span>              : module el2_configurable_gw (</span>
 <span id="L564"><span class="lineNum">     564</span> <span class="tlaUNC">           0 :                              input logic gw_clk,</span></span>
-<span id="L565"><span class="lineNum">     565</span> <span class="tlaGNC tlaBgGNC">    94293134 :                              input logic rawclk,</span></span>
+<span id="L565"><span class="lineNum">     565</span> <span class="tlaGNC tlaBgGNC">    94290468 :                              input logic rawclk,</span></span>
 <span id="L566"><span class="lineNum">     566</span> <span class="tlaGNC">          31 :                              input logic clken,</span></span>
 <span id="L567"><span class="lineNum">     567</span> <span class="tlaGNC">          31 :                              input logic rst_l,</span></span>
 <span id="L568"><span class="lineNum">     568</span> <span class="tlaUNC tlaBgUNC">           0 :                              input logic extintsrc_req ,</span></span>

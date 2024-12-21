@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    20-12-2024
+                    21-12-2024
                 </td>
                 <td></td>
                 
@@ -131,8 +131,8 @@
 <span id="L27"><span class="lineNum">      27</span>              : `include "el2_param.vh"</span>
 <span id="L28"><span class="lineNum">      28</span>              : ,parameter TAG  = 1) (</span>
 <span id="L29"><span class="lineNum">      29</span>              : </span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC tlaBgGNC">    68909264 :    input                   clk,</span></span>
-<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">    68909264 :    input                   free_clk,</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC tlaBgGNC">    68909224 :    input                   clk,</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">    68909224 :    input                   free_clk,</span></span>
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">          25 :    input                   rst_l,</span></span>
 <span id="L33"><span class="lineNum">      33</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
 <span id="L34"><span class="lineNum">      34</span>              :    /*verilator coverage_off*/</span>
@@ -395,18 +395,18 @@
 <span id="L291"><span class="lineNum">     291</span> <span class="tlaGNC">          25 :       rd_bypass_idle   = 1'b0;</span></span>
 <span id="L292"><span class="lineNum">     292</span>              : </span>
 <span id="L293"><span class="lineNum">     293</span> <span class="tlaGNC">          25 :       case (buf_state)</span></span>
-<span id="L294"><span class="lineNum">     294</span> <span class="tlaGNC">    22169732 :          IDLE: begin</span></span>
-<span id="L295"><span class="lineNum">     295</span> <span class="tlaGNC">    22169732 :                   master_ready   = 1'b1;</span></span>
-<span id="L296"><span class="lineNum">     296</span> <span class="tlaGNC">    22169732 :                   buf_write_in = (master_opc[2:1] == 2'b01);</span></span>
-<span id="L297"><span class="lineNum">     297</span> <span class="tlaGNC">    22169732 :                   buf_nxtstate = buf_write_in ? CMD_WR : CMD_RD;</span></span>
-<span id="L298"><span class="lineNum">     298</span> <span class="tlaGNC">    22169732 :                   buf_state_en = master_valid &amp; master_ready;</span></span>
-<span id="L299"><span class="lineNum">     299</span> <span class="tlaGNC">    22169732 :                   buf_wr_en    = buf_state_en;</span></span>
-<span id="L300"><span class="lineNum">     300</span> <span class="tlaGNC">    22169732 :                   buf_data_wr_en = buf_state_en &amp; (buf_nxtstate == CMD_WR);</span></span>
-<span id="L301"><span class="lineNum">     301</span> <span class="tlaGNC">    22169732 :                   buf_cmd_byte_ptr_en   = buf_state_en;</span></span>
-<span id="L302"><span class="lineNum">     302</span> <span class="tlaGNC">    22169732 :                   buf_cmd_byte_ptr[2:0] = buf_write_in ? get_nxtbyte_ptr(3'b0,buf_byteen_in[7:0],1'b0) : master_addr[2:0];</span></span>
-<span id="L303"><span class="lineNum">     303</span> <span class="tlaGNC">    22169732 :                   bypass_en       = buf_state_en;</span></span>
-<span id="L304"><span class="lineNum">     304</span> <span class="tlaGNC">    22169732 :                   rd_bypass_idle  = bypass_en &amp; (buf_nxtstate == CMD_RD);</span></span>
-<span id="L305"><span class="lineNum">     305</span> <span class="tlaGNC">    22169732 :                   ahb_htrans[1:0] = {2{bypass_en}} &amp; 2'b10;</span></span>
+<span id="L294"><span class="lineNum">     294</span> <span class="tlaGNC">    22163431 :          IDLE: begin</span></span>
+<span id="L295"><span class="lineNum">     295</span> <span class="tlaGNC">    22163431 :                   master_ready   = 1'b1;</span></span>
+<span id="L296"><span class="lineNum">     296</span> <span class="tlaGNC">    22163431 :                   buf_write_in = (master_opc[2:1] == 2'b01);</span></span>
+<span id="L297"><span class="lineNum">     297</span> <span class="tlaGNC">    22163431 :                   buf_nxtstate = buf_write_in ? CMD_WR : CMD_RD;</span></span>
+<span id="L298"><span class="lineNum">     298</span> <span class="tlaGNC">    22163431 :                   buf_state_en = master_valid &amp; master_ready;</span></span>
+<span id="L299"><span class="lineNum">     299</span> <span class="tlaGNC">    22163431 :                   buf_wr_en    = buf_state_en;</span></span>
+<span id="L300"><span class="lineNum">     300</span> <span class="tlaGNC">    22163431 :                   buf_data_wr_en = buf_state_en &amp; (buf_nxtstate == CMD_WR);</span></span>
+<span id="L301"><span class="lineNum">     301</span> <span class="tlaGNC">    22163431 :                   buf_cmd_byte_ptr_en   = buf_state_en;</span></span>
+<span id="L302"><span class="lineNum">     302</span> <span class="tlaGNC">    22163431 :                   buf_cmd_byte_ptr[2:0] = buf_write_in ? get_nxtbyte_ptr(3'b0,buf_byteen_in[7:0],1'b0) : master_addr[2:0];</span></span>
+<span id="L303"><span class="lineNum">     303</span> <span class="tlaGNC">    22163431 :                   bypass_en       = buf_state_en;</span></span>
+<span id="L304"><span class="lineNum">     304</span> <span class="tlaGNC">    22163431 :                   rd_bypass_idle  = bypass_en &amp; (buf_nxtstate == CMD_RD);</span></span>
+<span id="L305"><span class="lineNum">     305</span> <span class="tlaGNC">    22163431 :                   ahb_htrans[1:0] = {2{bypass_en}} &amp; 2'b10;</span></span>
 <span id="L306"><span class="lineNum">     306</span>              :           end</span>
 <span id="L307"><span class="lineNum">     307</span> <span class="tlaGNC">        1606 :          CMD_RD: begin</span></span>
 <span id="L308"><span class="lineNum">     308</span> <span class="tlaGNC">        1606 :                   buf_nxtstate    = (master_valid &amp; (master_opc[2:0] == 3'b000))? STREAM_RD : DATA_RD;</span></span>

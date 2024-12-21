@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    20-12-2024
+                    21-12-2024
                 </td>
                 <td></td>
                 
@@ -138,10 +138,10 @@
 <span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">     4000060 :    input logic clk,</span></span>
 <span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">           1 :    input logic rst_l,</span></span>
 <span id="L36"><span class="lineNum">      36</span>              : </span>
-<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">      793437 :    input logic ic_hit_f,      // Icache hit, enables F address capture</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">      793439 :    input logic ic_hit_f,      // Icache hit, enables F address capture</span></span>
 <span id="L38"><span class="lineNum">      38</span>              : </span>
 <span id="L39"><span class="lineNum">      39</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [31:1] ifc_fetch_addr_f, // look up btb address</span></span>
-<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC tlaBgGNC">      793435 :    input logic ifc_fetch_req_f,  // F1 valid</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC tlaBgGNC">      793437 :    input logic ifc_fetch_req_f,  // F1 valid</span></span>
 <span id="L41"><span class="lineNum">      41</span>              : </span>
 <span id="L42"><span class="lineNum">      42</span> <span class="tlaUNC tlaBgUNC">           0 :    input el2_br_tlu_pkt_t dec_tlu_br0_r_pkt, // BP commit update packet, includes errors</span></span>
 <span id="L43"><span class="lineNum">      43</span> <span class="tlaUNC">           0 :    input logic [pt.BHT_GHR_SIZE-1:0] exu_i0_br_fghr_r, // fghr to bp</span></span>
@@ -149,7 +149,7 @@
 <span id="L45"><span class="lineNum">      45</span>              : </span>
 <span id="L46"><span class="lineNum">      46</span> <span class="tlaUNC">           0 :    input logic [$clog2(pt.BTB_SIZE)-1:0] dec_fa_error_index, // Fully associative btb error index</span></span>
 <span id="L47"><span class="lineNum">      47</span>              : </span>
-<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC tlaBgGNC">      793428 :    input logic dec_tlu_flush_lower_wb, // used to move EX4 RS to EX1 and F</span></span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC tlaBgGNC">      793430 :    input logic dec_tlu_flush_lower_wb, // used to move EX4 RS to EX1 and F</span></span>
 <span id="L49"><span class="lineNum">      49</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic dec_tlu_flush_leak_one_wb, // don't hit for leak one fetches</span></span>
 <span id="L50"><span class="lineNum">      50</span>              : </span>
 <span id="L51"><span class="lineNum">      51</span> <span class="tlaUNC">           0 :    input logic dec_tlu_bpred_disable, // disable all branch prediction</span></span>
@@ -161,7 +161,7 @@
 <span id="L57"><span class="lineNum">      57</span> <span class="tlaUNC">           0 :    input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO]  exu_mp_index,         // Mispredict index</span></span>
 <span id="L58"><span class="lineNum">      58</span> <span class="tlaUNC">           0 :    input logic [pt.BTB_BTAG_SIZE-1:0]  exu_mp_btag,                   // Mispredict btag</span></span>
 <span id="L59"><span class="lineNum">      59</span>              : </span>
-<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC tlaBgGNC">      793430 :    input logic exu_flush_final, // all flushes</span></span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC tlaBgGNC">      793432 :    input logic exu_flush_final, // all flushes</span></span>
 <span id="L61"><span class="lineNum">      61</span>              : </span>
 <span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">           2 :    output logic ifu_bp_hit_taken_f, // btb hit, select target</span></span>
 <span id="L63"><span class="lineNum">      63</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [31:1] ifu_bp_btb_target_f, //  predicted target PC</span></span>
@@ -351,7 +351,7 @@
 <span id="L247"><span class="lineNum">     247</span>              :    // set on leak one, hold until next flush without leak one</span>
 <span id="L248"><span class="lineNum">     248</span>              :    assign leak_one_f = (dec_tlu_flush_leak_one_wb &amp; dec_tlu_flush_lower_wb) | (leak_one_f_d1 &amp; ~dec_tlu_flush_lower_wb);</span>
 <span id="L249"><span class="lineNum">     249</span>              : </span>
-<span id="L250"><span class="lineNum">     250</span> <span class="tlaGNC tlaBgGNC">      793430 : logic exu_flush_final_d1;</span></span>
+<span id="L250"><span class="lineNum">     250</span> <span class="tlaGNC tlaBgGNC">      793432 : logic exu_flush_final_d1;</span></span>
 <span id="L251"><span class="lineNum">     251</span>              : </span>
 <span id="L252"><span class="lineNum">     252</span>              :  if(!pt.BTB_FULLYA) begin : genblock1</span>
 <span id="L253"><span class="lineNum">     253</span>              :    assign fetch_mp_collision_f = ( (exu_mp_btag[pt.BTB_BTAG_SIZE-1:0] == fetch_rd_tag_f[pt.BTB_BTAG_SIZE-1:0]) &amp;</span>

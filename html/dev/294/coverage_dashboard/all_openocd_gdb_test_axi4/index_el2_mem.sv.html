@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    20-12-2024
+                    21-12-2024
                 </td>
                 <td></td>
                 
@@ -161,9 +161,9 @@
 <span id="L57"><span class="lineNum">      57</span>              :    // Icache and Itag Ports</span>
 <span id="L58"><span class="lineNum">      58</span>              : </span>
 <span id="L59"><span class="lineNum">      59</span> <span class="tlaUNC">           0 :    input  logic [31:1]  ic_rw_addr,</span></span>
-<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC tlaBgGNC">      785491 :    input  logic [pt.ICACHE_NUM_WAYS-1:0]   ic_tag_valid,</span></span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC tlaBgGNC">      785641 :    input  logic [pt.ICACHE_NUM_WAYS-1:0]   ic_tag_valid,</span></span>
 <span id="L61"><span class="lineNum">      61</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic [pt.ICACHE_NUM_WAYS-1:0]   ic_wr_en,</span></span>
-<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC tlaBgGNC">      793727 :    input  logic         ic_rd_en,</span></span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC tlaBgGNC">      793879 :    input  logic         ic_rd_en,</span></span>
 <span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">           2 :    input  logic [63:0] ic_premux_data,      // Premux data to be muxed with each way of the Icache.</span></span>
 <span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">          12 :    input  logic         ic_sel_premux_data, // Premux data sel</span></span>
 <span id="L65"><span class="lineNum">      65</span>              : </span>
@@ -182,7 +182,7 @@
 <span id="L78"><span class="lineNum">      78</span>              : </span>
 <span id="L79"><span class="lineNum">      79</span> <span class="tlaUNC">           0 :    output logic [pt.ICACHE_BANKS_WAY-1:0] ic_eccerr,    // ecc error per bank</span></span>
 <span id="L80"><span class="lineNum">      80</span> <span class="tlaUNC">           0 :    output logic [pt.ICACHE_BANKS_WAY-1:0] ic_parerr,          // parity error per bank</span></span>
-<span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC tlaBgGNC">      785491 :    output logic [pt.ICACHE_NUM_WAYS-1:0]   ic_rd_hit,</span></span>
+<span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC tlaBgGNC">      785641 :    output logic [pt.ICACHE_NUM_WAYS-1:0]   ic_rd_hit,</span></span>
 <span id="L82"><span class="lineNum">      82</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic         ic_tag_perr,        // Icache Tag parity error</span></span>
 <span id="L83"><span class="lineNum">      83</span>              : </span>
 <span id="L84"><span class="lineNum">      84</span>              :    el2_mem_if.veer_sram_src   mem_export,</span>

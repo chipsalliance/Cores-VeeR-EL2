@@ -188,6 +188,7 @@ module axi_slv #(
     arready = 1'b1;
     rlast   = 1'b0;
     rvalid  = 0;
+    bvalid  = 0;
   end
 
   always @(posedge aclk) begin

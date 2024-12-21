@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    18-12-2024
+                    21-12-2024
                 </td>
                 <td></td>
                 
@@ -161,28 +161,28 @@
 <span id="L57"><span class="lineNum">      57</span>              :    // Icache and Itag Ports</span>
 <span id="L58"><span class="lineNum">      58</span>              : </span>
 <span id="L59"><span class="lineNum">      59</span> <span class="tlaUNC">           0 :    input  logic [31:1]  ic_rw_addr,</span></span>
-<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC tlaBgGNC">           2 :    input  logic [pt.ICACHE_NUM_WAYS-1:0]   ic_tag_valid,</span></span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC tlaBgGNC">           4 :    input  logic [pt.ICACHE_NUM_WAYS-1:0]   ic_tag_valid,</span></span>
 <span id="L61"><span class="lineNum">      61</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic [pt.ICACHE_NUM_WAYS-1:0]   ic_wr_en,</span></span>
-<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC tlaBgGNC">         148 :    input  logic         ic_rd_en,</span></span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC tlaBgGNC">         144 :    input  logic         ic_rd_en,</span></span>
 <span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">           4 :    input  logic [63:0] ic_premux_data,      // Premux data to be muxed with each way of the Icache.</span></span>
 <span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">          14 :    input  logic         ic_sel_premux_data, // Premux data sel</span></span>
 <span id="L65"><span class="lineNum">      65</span>              : </span>
 <span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">           5 :    input  logic [pt.ICACHE_BANKS_WAY-1:0][70:0]               ic_wr_data,         // Data to fill to the Icache. With ECC</span></span>
 <span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC">           1 :    input  logic [70:0]               ic_debug_wr_data,   // Debug wr cache.</span></span>
-<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">         134 :    output logic [70:0]               ic_debug_rd_data ,  // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC</span></span>
+<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">         128 :    output logic [70:0]               ic_debug_rd_data ,  // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC</span></span>
 <span id="L69"><span class="lineNum">      69</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic [pt.ICACHE_INDEX_HI:3]               ic_debug_addr,      // Read/Write addresss to the Icache.</span></span>
-<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC tlaBgGNC">           8 :    input  logic                      ic_debug_rd_en,     // Icache debug rd</span></span>
-<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">          40 :    input  logic                      ic_debug_wr_en,     // Icache debug wr</span></span>
-<span id="L72"><span class="lineNum">      72</span> <span class="tlaGNC">           3 :    input  logic                      ic_debug_tag_array, // Debug tag array</span></span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC tlaBgGNC">          12 :    input  logic                      ic_debug_rd_en,     // Icache debug rd</span></span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">          60 :    input  logic                      ic_debug_wr_en,     // Icache debug wr</span></span>
+<span id="L72"><span class="lineNum">      72</span> <span class="tlaGNC">           5 :    input  logic                      ic_debug_tag_array, // Debug tag array</span></span>
 <span id="L73"><span class="lineNum">      73</span> <span class="tlaGNC">           1 :    input  logic [pt.ICACHE_NUM_WAYS-1:0]                ic_debug_way,       // Debug way. Rd or Wr.</span></span>
 <span id="L74"><span class="lineNum">      74</span>              : </span>
-<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">         138 :    output logic [63:0]              ic_rd_data ,        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC</span></span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">         132 :    output logic [63:0]              ic_rd_data ,        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC</span></span>
 <span id="L76"><span class="lineNum">      76</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [25:0]               ictag_debug_rd_data,// Debug icache tag.</span></span>
 <span id="L77"><span class="lineNum">      77</span>              : </span>
 <span id="L78"><span class="lineNum">      78</span>              : </span>
-<span id="L79"><span class="lineNum">      79</span> <span class="tlaGNC tlaBgGNC">           2 :    output logic [pt.ICACHE_BANKS_WAY-1:0] ic_eccerr,    // ecc error per bank</span></span>
+<span id="L79"><span class="lineNum">      79</span> <span class="tlaGNC tlaBgGNC">           4 :    output logic [pt.ICACHE_BANKS_WAY-1:0] ic_eccerr,    // ecc error per bank</span></span>
 <span id="L80"><span class="lineNum">      80</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [pt.ICACHE_BANKS_WAY-1:0] ic_parerr,          // parity error per bank</span></span>
-<span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC tlaBgGNC">           2 :    output logic [pt.ICACHE_NUM_WAYS-1:0]   ic_rd_hit,</span></span>
+<span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC tlaBgGNC">           4 :    output logic [pt.ICACHE_NUM_WAYS-1:0]   ic_rd_hit,</span></span>
 <span id="L82"><span class="lineNum">      82</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic         ic_tag_perr,        // Icache Tag parity error</span></span>
 <span id="L83"><span class="lineNum">      83</span>              : </span>
 <span id="L84"><span class="lineNum">      84</span>              :    el2_mem_if.veer_sram_src   mem_export,</span>

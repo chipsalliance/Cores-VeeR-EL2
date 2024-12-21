@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    18-12-2024
+                    21-12-2024
                 </td>
                 <td></td>
                 
@@ -167,8 +167,8 @@
 <span id="L63"><span class="lineNum">      63</span> <span class="tlaUNC">           0 :    input logic       dma_dccm_stall_any,     // DMA stall of lsu</span></span>
 <span id="L64"><span class="lineNum">      64</span> <span class="tlaUNC">           0 :    input logic       dma_iccm_stall_any,     // DMA stall of ifu</span></span>
 <span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC tlaBgGNC">         156 :    input logic       exu_pmu_i0_br_misp,     // pipe 0 branch misp</span></span>
-<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">       15326 :    input logic       exu_pmu_i0_br_ataken,   // pipe 0 branch actual taken</span></span>
-<span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC">       15456 :    input logic       exu_pmu_i0_pc4,         // pipe 0 4 byte branch</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">       15340 :    input logic       exu_pmu_i0_br_ataken,   // pipe 0 branch actual taken</span></span>
+<span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC">       15470 :    input logic       exu_pmu_i0_pc4,         // pipe 0 4 byte branch</span></span>
 <span id="L68"><span class="lineNum">      68</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic       lsu_pmu_bus_trxn,       // D side bus transaction</span></span>
 <span id="L69"><span class="lineNum">      69</span> <span class="tlaUNC">           0 :    input logic       lsu_pmu_bus_misaligned, // D side bus misaligned</span></span>
 <span id="L70"><span class="lineNum">      70</span> <span class="tlaUNC">           0 :    input logic       lsu_pmu_bus_error,      // D side bus error</span></span>
@@ -216,12 +216,12 @@
 <span id="L112"><span class="lineNum">     112</span> <span class="tlaGNC tlaBgGNC">        1430 :    input logic        dec_i0_decode_d,  // decode valid, used for clean icache diagnostics</span></span>
 <span id="L113"><span class="lineNum">     113</span>              : </span>
 <span id="L114"><span class="lineNum">     114</span>              :    // branch info from pipe0 for errors or counter updates</span>
-<span id="L115"><span class="lineNum">     115</span> <span class="tlaGNC">       15292 :    input logic [1:0]  exu_i0_br_hist_r, // history</span></span>
+<span id="L115"><span class="lineNum">     115</span> <span class="tlaGNC">       15306 :    input logic [1:0]  exu_i0_br_hist_r, // history</span></span>
 <span id="L116"><span class="lineNum">     116</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic        exu_i0_br_error_r, // error</span></span>
 <span id="L117"><span class="lineNum">     117</span> <span class="tlaUNC">           0 :    input logic        exu_i0_br_start_error_r, // start error</span></span>
-<span id="L118"><span class="lineNum">     118</span> <span class="tlaGNC tlaBgGNC">       15324 :    input logic        exu_i0_br_valid_r, // valid</span></span>
+<span id="L118"><span class="lineNum">     118</span> <span class="tlaGNC tlaBgGNC">       15338 :    input logic        exu_i0_br_valid_r, // valid</span></span>
 <span id="L119"><span class="lineNum">     119</span> <span class="tlaGNC">         156 :    input logic        exu_i0_br_mp_r, // mispredict</span></span>
-<span id="L120"><span class="lineNum">     120</span> <span class="tlaGNC">         134 :    input logic        exu_i0_br_middle_r, // middle of bank</span></span>
+<span id="L120"><span class="lineNum">     120</span> <span class="tlaGNC">         132 :    input logic        exu_i0_br_middle_r, // middle of bank</span></span>
 <span id="L121"><span class="lineNum">     121</span>              : </span>
 <span id="L122"><span class="lineNum">     122</span>              :    // branch info from pipe1 for errors or counter updates</span>
 <span id="L123"><span class="lineNum">     123</span>              : </span>
@@ -459,7 +459,7 @@
 <span id="L355"><span class="lineNum">     355</span> <span class="tlaGNC tlaBgGNC">        1132 :    logic valid_csr;</span></span>
 <span id="L356"><span class="lineNum">     356</span> <span class="tlaGNC">           2 :    logic rfpc_i0_r;</span></span>
 <span id="L357"><span class="lineNum">     357</span> <span class="tlaUNC tlaBgUNC">           0 :    logic lsu_i0_rfnpc_r;</span></span>
-<span id="L358"><span class="lineNum">     358</span> <span class="tlaGNC tlaBgGNC">       15414 :    logic dec_tlu_br0_error_r, dec_tlu_br0_start_error_r, dec_tlu_br0_v_r;</span></span>
+<span id="L358"><span class="lineNum">     358</span> <span class="tlaGNC tlaBgGNC">       15428 :    logic dec_tlu_br0_error_r, dec_tlu_br0_start_error_r, dec_tlu_br0_v_r;</span></span>
 <span id="L359"><span class="lineNum">     359</span> <span class="tlaUNC tlaBgUNC">           0 :    logic lsu_i0_exc_r, lsu_i0_exc_r_raw, lsu_exc_ma_r, lsu_exc_acc_r, lsu_exc_st_r,</span></span>
 <span id="L360"><span class="lineNum">     360</span> <span class="tlaGNC tlaBgGNC">           9 :          lsu_exc_valid_r, lsu_exc_valid_r_raw, lsu_exc_valid_r_d1, lsu_i0_exc_r_d1, block_interrupts;</span></span>
 <span id="L361"><span class="lineNum">     361</span> <span class="tlaGNC">        1428 :    logic i0_trigger_eval_r;</span></span>

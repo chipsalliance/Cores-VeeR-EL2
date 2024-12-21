@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    18-12-2024
+                    21-12-2024
                 </td>
                 <td></td>
                 
@@ -150,9 +150,9 @@
 <span id="L46"><span class="lineNum">      46</span> <span class="tlaUNC">           0 :    input logic                       ifc_region_acc_fault_bf,       // Access fault. in ICCM region but offset is outside defined ICCM.</span></span>
 <span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC tlaBgGNC">         175 :    input logic                       ifc_dma_access_ok,             // It is OK to give dma access to the ICCM. (ICCM is not busy this cycle).</span></span>
 <span id="L48"><span class="lineNum">      48</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                       dec_tlu_fence_i_wb,            // Fence.i instruction is committing. Clear all Icache valids.</span></span>
-<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC tlaBgGNC">       15436 :    input logic                       ifu_bp_hit_taken_f,            // Branch is predicted taken. Kill the fetch next cycle.</span></span>
+<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC tlaBgGNC">       15450 :    input logic                       ifu_bp_hit_taken_f,            // Branch is predicted taken. Kill the fetch next cycle.</span></span>
 <span id="L50"><span class="lineNum">      50</span>              : </span>
-<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">       15189 :    input logic                       ifu_bp_inst_mask_f,            // tell ic which valids to kill because of a taken branch, right justified</span></span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">       15203 :    input logic                       ifu_bp_inst_mask_f,            // tell ic which valids to kill because of a taken branch, right justified</span></span>
 <span id="L52"><span class="lineNum">      52</span>              : </span>
 <span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC">          15 :    output logic                      ifu_miss_state_idle,           // No icache misses are outstanding.</span></span>
 <span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">          21 :    output logic                      ifu_ic_mb_empty,               // Continue with normal fetching. This does not mean that miss is finished.</span></span>
@@ -547,7 +547,7 @@
 <span id="L443"><span class="lineNum">     443</span>              : </span>
 <span id="L444"><span class="lineNum">     444</span> <span class="tlaGNC tlaBgGNC">          14 :    logic   ic_crit_wd_rdy;         // Critical fetch is ready to be bypassed.</span></span>
 <span id="L445"><span class="lineNum">     445</span>              : </span>
-<span id="L446"><span class="lineNum">     446</span> <span class="tlaGNC">       15422 :    logic   ifu_bp_hit_taken_q_f;</span></span>
+<span id="L446"><span class="lineNum">     446</span> <span class="tlaGNC">       15436 :    logic   ifu_bp_hit_taken_q_f;</span></span>
 <span id="L447"><span class="lineNum">     447</span> <span class="tlaGNC">          28 :    logic   ifu_bus_rvalid_unq;</span></span>
 <span id="L448"><span class="lineNum">     448</span> <span class="tlaGNC">          14 :    logic   bus_cmd_beat_en;</span></span>
 <span id="L449"><span class="lineNum">     449</span>              : </span>

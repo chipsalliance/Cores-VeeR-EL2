@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    18-12-2024
+                    21-12-2024
                 </td>
                 <td></td>
                 
@@ -163,15 +163,15 @@
 <span id="L59"><span class="lineNum">      59</span> <span class="tlaUNC">           0 :    output logic                                   ifu_i0_dbecc,             // Instruction 0 has double bit ecc error</span></span>
 <span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC tlaBgGNC">         124 :    output logic [31:0]                            ifu_i0_instr,             // Instruction 0</span></span>
 <span id="L61"><span class="lineNum">      61</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [31:1]                            ifu_i0_pc,                // Instruction 0 PC</span></span>
-<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC tlaBgGNC">       15588 :    output logic                                   ifu_i0_pc4,</span></span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC tlaBgGNC">       15602 :    output logic                                   ifu_i0_pc4,</span></span>
 <span id="L63"><span class="lineNum">      63</span>              : </span>
 <span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">         260 :    output logic                                   ifu_fb_consume1,          // Consumed one buffer. To fetch control fetch for buffer mass balance</span></span>
-<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">       15046 :    output logic                                   ifu_fb_consume2,          // Consumed two buffers.To fetch control fetch for buffer mass balance</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">       15060 :    output logic                                   ifu_fb_consume2,          // Consumed two buffers.To fetch control fetch for buffer mass balance</span></span>
 <span id="L66"><span class="lineNum">      66</span>              : </span>
 <span id="L67"><span class="lineNum">      67</span>              : </span>
 <span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">         125 :    input logic [pt.BHT_GHR_SIZE-1:0]              ifu_bp_fghr_f,            // fetch GHR</span></span>
 <span id="L69"><span class="lineNum">      69</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [31:1]                             ifu_bp_btb_target_f,      // predicted RET target</span></span>
-<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC tlaBgGNC">       15302 :    input logic [11:0]                             ifu_bp_poffset_f,         // predicted target offset</span></span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC tlaBgGNC">       15316 :    input logic [11:0]                             ifu_bp_poffset_f,         // predicted target offset</span></span>
 <span id="L71"><span class="lineNum">      71</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [1:0] [$clog2(pt.BTB_SIZE)-1:0]    ifu_bp_fa_index_f,        // predicted branch index (fully associative option)</span></span>
 <span id="L72"><span class="lineNum">      72</span>              : </span>
 <span id="L73"><span class="lineNum">      73</span> <span class="tlaGNC tlaBgGNC">         242 :    input logic [1:0]                              ifu_bp_hist0_f,           // history counters for all 4 potential branches, bit 1, right justified</span></span>
@@ -206,20 +206,20 @@
 <span id="L102"><span class="lineNum">     102</span> <span class="tlaGNC">           2 :    logic [1:0]                                    sf1val, sf0val;</span></span>
 <span id="L103"><span class="lineNum">     103</span>              : </span>
 <span id="L104"><span class="lineNum">     104</span> <span class="tlaGNC">         124 :    logic [31:0]                                   aligndata;</span></span>
-<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC">       15588 :    logic                                          first4B, first2B;</span></span>
+<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC">       15602 :    logic                                          first4B, first2B;</span></span>
 <span id="L106"><span class="lineNum">     106</span>              : </span>
 <span id="L107"><span class="lineNum">     107</span> <span class="tlaGNC">           2 :    logic [31:0]                                   uncompress0;</span></span>
 <span id="L108"><span class="lineNum">     108</span> <span class="tlaGNC">        1430 :    logic                                          i0_shift;</span></span>
-<span id="L109"><span class="lineNum">     109</span> <span class="tlaGNC">       15584 :    logic                                          shift_2B, shift_4B;</span></span>
-<span id="L110"><span class="lineNum">     110</span> <span class="tlaGNC">       15326 :    logic                                          f1_shift_2B;</span></span>
+<span id="L109"><span class="lineNum">     109</span> <span class="tlaGNC">       15598 :    logic                                          shift_2B, shift_4B;</span></span>
+<span id="L110"><span class="lineNum">     110</span> <span class="tlaGNC">       15340 :    logic                                          f1_shift_2B;</span></span>
 <span id="L111"><span class="lineNum">     111</span> <span class="tlaGNC">         126 :    logic                                          f2_valid, sf1_valid, sf0_valid;</span></span>
 <span id="L112"><span class="lineNum">     112</span>              : </span>
 <span id="L113"><span class="lineNum">     113</span> <span class="tlaGNC">         124 :    logic [31:0]                                   ifirst;</span></span>
 <span id="L114"><span class="lineNum">     114</span> <span class="tlaGNC">         174 :    logic [1:0]                                    alignval;</span></span>
 <span id="L115"><span class="lineNum">     115</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [31:1]                                   firstpc, secondpc;</span></span>
 <span id="L116"><span class="lineNum">     116</span>              : </span>
-<span id="L117"><span class="lineNum">     117</span> <span class="tlaGNC tlaBgGNC">       15299 :    logic [11:0]                                   f1poffset;</span></span>
-<span id="L118"><span class="lineNum">     118</span> <span class="tlaGNC">         134 :    logic [11:0]                                   f0poffset;</span></span>
+<span id="L117"><span class="lineNum">     117</span> <span class="tlaGNC tlaBgGNC">       15311 :    logic [11:0]                                   f1poffset;</span></span>
+<span id="L118"><span class="lineNum">     118</span> <span class="tlaGNC">         132 :    logic [11:0]                                   f0poffset;</span></span>
 <span id="L119"><span class="lineNum">     119</span> <span class="tlaGNC">         125 :    logic [pt.BHT_GHR_SIZE-1:0]                    f1fghr;</span></span>
 <span id="L120"><span class="lineNum">     120</span> <span class="tlaGNC">         125 :    logic [pt.BHT_GHR_SIZE-1:0]                    f0fghr;</span></span>
 <span id="L121"><span class="lineNum">     121</span> <span class="tlaGNC">         126 :    logic [1:0]                                    f1hist1;</span></span>
@@ -233,25 +233,25 @@
 <span id="L129"><span class="lineNum">     129</span> <span class="tlaUNC">           0 :    logic [1:0]                                    f0ictype;</span></span>
 <span id="L130"><span class="lineNum">     130</span>              : </span>
 <span id="L131"><span class="lineNum">     131</span> <span class="tlaGNC tlaBgGNC">         124 :    logic [1:0]                                    f1pc4;</span></span>
-<span id="L132"><span class="lineNum">     132</span> <span class="tlaGNC">         248 :    logic [1:0]                                    f0pc4;</span></span>
+<span id="L132"><span class="lineNum">     132</span> <span class="tlaGNC">           2 :    logic [1:0]                                    f0pc4;</span></span>
 <span id="L133"><span class="lineNum">     133</span>              : </span>
 <span id="L134"><span class="lineNum">     134</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [1:0]                                    f1ret;</span></span>
 <span id="L135"><span class="lineNum">     135</span> <span class="tlaUNC">           0 :    logic [1:0]                                    f0ret;</span></span>
-<span id="L136"><span class="lineNum">     136</span> <span class="tlaGNC tlaBgGNC">       14954 :    logic [1:0]                                    f1way;</span></span>
-<span id="L137"><span class="lineNum">     137</span> <span class="tlaGNC">       15174 :    logic [1:0]                                    f0way;</span></span>
+<span id="L136"><span class="lineNum">     136</span> <span class="tlaGNC tlaBgGNC">       14972 :    logic [1:0]                                    f1way;</span></span>
+<span id="L137"><span class="lineNum">     137</span> <span class="tlaGNC">       15188 :    logic [1:0]                                    f0way;</span></span>
 <span id="L138"><span class="lineNum">     138</span>              : </span>
 <span id="L139"><span class="lineNum">     139</span> <span class="tlaGNC">         124 :    logic [1:0]                                    f1brend;</span></span>
-<span id="L140"><span class="lineNum">     140</span> <span class="tlaGNC">         248 :    logic [1:0]                                    f0brend;</span></span>
+<span id="L140"><span class="lineNum">     140</span> <span class="tlaGNC">           2 :    logic [1:0]                                    f0brend;</span></span>
 <span id="L141"><span class="lineNum">     141</span>              : </span>
-<span id="L142"><span class="lineNum">     142</span> <span class="tlaGNC">       15450 :    logic [1:0]                                    alignbrend;</span></span>
-<span id="L143"><span class="lineNum">     143</span> <span class="tlaGNC">       15450 :    logic [1:0]                                    alignpc4;</span></span>
+<span id="L142"><span class="lineNum">     142</span> <span class="tlaGNC">       15464 :    logic [1:0]                                    alignbrend;</span></span>
+<span id="L143"><span class="lineNum">     143</span> <span class="tlaGNC">       15464 :    logic [1:0]                                    alignpc4;</span></span>
 <span id="L144"><span class="lineNum">     144</span>              : </span>
 <span id="L145"><span class="lineNum">     145</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [1:0]                                    alignret;</span></span>
-<span id="L146"><span class="lineNum">     146</span> <span class="tlaGNC tlaBgGNC">       15298 :    logic [1:0]                                    alignway;</span></span>
-<span id="L147"><span class="lineNum">     147</span> <span class="tlaGNC">       14220 :    logic [1:0]                                    alignhist1;</span></span>
-<span id="L148"><span class="lineNum">     148</span> <span class="tlaGNC">       13862 :    logic [1:0]                                    alignhist0;</span></span>
-<span id="L149"><span class="lineNum">     149</span> <span class="tlaGNC">       15332 :    logic [1:1]                                    alignfromf1;</span></span>
-<span id="L150"><span class="lineNum">     150</span> <span class="tlaGNC">       15330 :    logic                                          i0_ends_f1;</span></span>
+<span id="L146"><span class="lineNum">     146</span> <span class="tlaGNC tlaBgGNC">       15312 :    logic [1:0]                                    alignway;</span></span>
+<span id="L147"><span class="lineNum">     147</span> <span class="tlaGNC">       14234 :    logic [1:0]                                    alignhist1;</span></span>
+<span id="L148"><span class="lineNum">     148</span> <span class="tlaGNC">       13876 :    logic [1:0]                                    alignhist0;</span></span>
+<span id="L149"><span class="lineNum">     149</span> <span class="tlaGNC">       15346 :    logic [1:1]                                    alignfromf1;</span></span>
+<span id="L150"><span class="lineNum">     150</span> <span class="tlaGNC">       15344 :    logic                                          i0_ends_f1;</span></span>
 <span id="L151"><span class="lineNum">     151</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                                          i0_br_start_error;</span></span>
 <span id="L152"><span class="lineNum">     152</span>              : </span>
 <span id="L153"><span class="lineNum">     153</span> <span class="tlaUNC">           0 :    logic [31:1]                                   f1prett;</span></span>
@@ -263,34 +263,34 @@
 <span id="L159"><span class="lineNum">     159</span>              : </span>
 <span id="L160"><span class="lineNum">     160</span> <span class="tlaUNC">           0 :    logic [1:0]                                    aligndbecc;</span></span>
 <span id="L161"><span class="lineNum">     161</span> <span class="tlaUNC">           0 :    logic [1:0]                                    alignicaf;</span></span>
-<span id="L162"><span class="lineNum">     162</span> <span class="tlaGNC tlaBgGNC">       15450 :    logic                                          i0_brp_pc4;</span></span>
+<span id="L162"><span class="lineNum">     162</span> <span class="tlaGNC tlaBgGNC">       15464 :    logic                                          i0_brp_pc4;</span></span>
 <span id="L163"><span class="lineNum">     163</span>              : </span>
 <span id="L164"><span class="lineNum">     164</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO]          firstpc_hash, secondpc_hash;</span></span>
 <span id="L165"><span class="lineNum">     165</span>              : </span>
 <span id="L166"><span class="lineNum">     166</span> <span class="tlaUNC">           0 :    logic                                          first_legal;</span></span>
 <span id="L167"><span class="lineNum">     167</span>              : </span>
-<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC tlaBgGNC">       10354 :    logic [1:0]                                    wrptr, wrptr_in;</span></span>
-<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC">        5110 :    logic [1:0]                                    rdptr, rdptr_in;</span></span>
-<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">       10204 :    logic [2:0]                                    qwen;</span></span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC tlaBgGNC">       10364 :    logic [1:0]                                    wrptr, wrptr_in;</span></span>
+<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC">        5114 :    logic [1:0]                                    rdptr, rdptr_in;</span></span>
+<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">       10212 :    logic [2:0]                                    qwen;</span></span>
 <span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">           1 :    logic [31:0]                                   q2,q1,q0;</span></span>
-<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC">       10195 :    logic                                          q2off_in, q2off;</span></span>
-<span id="L173"><span class="lineNum">     173</span> <span class="tlaGNC">       10345 :    logic                                          q1off_in, q1off;</span></span>
-<span id="L174"><span class="lineNum">     174</span> <span class="tlaGNC">       10115 :    logic                                          q0off_in, q0off;</span></span>
+<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC">       10205 :    logic                                          q2off_in, q2off;</span></span>
+<span id="L173"><span class="lineNum">     173</span> <span class="tlaGNC">       10355 :    logic                                          q1off_in, q1off;</span></span>
+<span id="L174"><span class="lineNum">     174</span> <span class="tlaGNC">       10123 :    logic                                          q0off_in, q0off;</span></span>
 <span id="L175"><span class="lineNum">     175</span> <span class="tlaGNC">         292 :    logic                                          f0_shift_2B;</span></span>
 <span id="L176"><span class="lineNum">     176</span>              : </span>
 <span id="L177"><span class="lineNum">     177</span> <span class="tlaGNC">          15 :    logic [31:0]                                   q0eff;</span></span>
-<span id="L178"><span class="lineNum">     178</span> <span class="tlaGNC">           5 :    logic [31:0]                                   q0final;</span></span>
-<span id="L179"><span class="lineNum">     179</span> <span class="tlaGNC">       15335 :    logic                                          q0ptr;</span></span>
-<span id="L180"><span class="lineNum">     180</span> <span class="tlaGNC">       15335 :    logic [1:0]                                    q0sel;</span></span>
+<span id="L178"><span class="lineNum">     178</span> <span class="tlaGNC">           7 :    logic [31:0]                                   q0final;</span></span>
+<span id="L179"><span class="lineNum">     179</span> <span class="tlaGNC">       15349 :    logic                                          q0ptr;</span></span>
+<span id="L180"><span class="lineNum">     180</span> <span class="tlaGNC">       15349 :    logic [1:0]                                    q0sel;</span></span>
 <span id="L181"><span class="lineNum">     181</span>              : </span>
 <span id="L182"><span class="lineNum">     182</span> <span class="tlaGNC">           3 :    logic [31:0]                                   q1eff;</span></span>
 <span id="L183"><span class="lineNum">     183</span> <span class="tlaGNC">         129 :    logic [15:0]                                   q1final;</span></span>
-<span id="L184"><span class="lineNum">     184</span> <span class="tlaGNC">       15199 :    logic                                          q1ptr;</span></span>
-<span id="L185"><span class="lineNum">     185</span> <span class="tlaGNC">       15199 :    logic [1:0]                                    q1sel;</span></span>
+<span id="L184"><span class="lineNum">     184</span> <span class="tlaGNC">       15217 :    logic                                          q1ptr;</span></span>
+<span id="L185"><span class="lineNum">     185</span> <span class="tlaGNC">       15217 :    logic [1:0]                                    q1sel;</span></span>
 <span id="L186"><span class="lineNum">     186</span>              : </span>
-<span id="L187"><span class="lineNum">     187</span> <span class="tlaGNC">        5110 :    logic [2:0]                                    qren;</span></span>
+<span id="L187"><span class="lineNum">     187</span> <span class="tlaGNC">        5114 :    logic [2:0]                                    qren;</span></span>
 <span id="L188"><span class="lineNum">     188</span>              : </span>
-<span id="L189"><span class="lineNum">     189</span> <span class="tlaGNC">       15170 :    logic                                          consume_fb1, consume_fb0;</span></span>
+<span id="L189"><span class="lineNum">     189</span> <span class="tlaGNC">       15184 :    logic                                          consume_fb1, consume_fb0;</span></span>
 <span id="L190"><span class="lineNum">     190</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [1:0]                                    icaf_eff;</span></span>
 <span id="L191"><span class="lineNum">     191</span>              : </span>
 <span id="L192"><span class="lineNum">     192</span>              :    localparam                                     BRDATA_SIZE  = pt.BTB_ENABLE ? 16+($clog2(pt.BTB_SIZE)*2*pt.BTB_FULLYA) : 4;</span>

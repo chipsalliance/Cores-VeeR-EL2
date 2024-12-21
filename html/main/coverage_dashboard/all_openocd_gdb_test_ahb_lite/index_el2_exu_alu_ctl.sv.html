@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    18-12-2024
+                    21-12-2024
                 </td>
                 <td></td>
                 
@@ -139,7 +139,7 @@
 <span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">         912 :    input  logic                  csr_ren_in,         // CSR select</span></span>
 <span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">          16 :    input  logic        [31:0]    csr_rddata_in,      // CSR data</span></span>
 <span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">          28 :    input  logic signed [31:0]    a_in,               // A operand</span></span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">       15330 :    input  logic        [31:0]    b_in,               // B operand</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">       15344 :    input  logic        [31:0]    b_in,               // B operand</span></span>
 <span id="L39"><span class="lineNum">      39</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic        [31:1]    pc_in,              // for pc=pc+2,4 calculations</span></span>
 <span id="L40"><span class="lineNum">      40</span> <span class="tlaUNC">           0 :    input  el2_predict_pkt_t     pp_in,              // Predicted branch structure</span></span>
 <span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC tlaBgGNC">          32 :    input  logic        [12:1]    brimm_in,           // Branch offset</span></span>
@@ -150,7 +150,7 @@
 <span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">         174 :    output logic                  flush_final_out,    // Branch flush or flush entire pipeline</span></span>
 <span id="L47"><span class="lineNum">      47</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic        [31:1]    flush_path_out,     // Branch flush PC</span></span>
 <span id="L48"><span class="lineNum">      48</span> <span class="tlaUNC">           0 :    output logic        [31:1]    pc_ff,              // flopped PC</span></span>
-<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC tlaBgGNC">       15170 :    output logic                  pred_correct_out,   // NPC control</span></span>
+<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC tlaBgGNC">       15184 :    output logic                  pred_correct_out,   // NPC control</span></span>
 <span id="L50"><span class="lineNum">      50</span> <span class="tlaUNC tlaBgUNC">           0 :    output el2_predict_pkt_t     predict_p_out       // Predicted branch structure</span></span>
 <span id="L51"><span class="lineNum">      51</span>              :   );</span>
 <span id="L52"><span class="lineNum">      52</span>              : </span>
@@ -163,7 +163,7 @@
 <span id="L59"><span class="lineNum">      59</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                         sel_shift;</span></span>
 <span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC tlaBgGNC">         168 :    logic                         sel_adder;</span></span>
 <span id="L61"><span class="lineNum">      61</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                         slt_one;</span></span>
-<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC tlaBgGNC">       15330 :    logic                         actual_taken;</span></span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC tlaBgGNC">       15344 :    logic                         actual_taken;</span></span>
 <span id="L63"><span class="lineNum">      63</span> <span class="tlaUNC tlaBgUNC">           0 :    logic               [31:1]    pcout;</span></span>
 <span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC tlaBgGNC">         158 :    logic                         cond_mispredict;</span></span>
 <span id="L65"><span class="lineNum">      65</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                         target_mispredict;</span></span>

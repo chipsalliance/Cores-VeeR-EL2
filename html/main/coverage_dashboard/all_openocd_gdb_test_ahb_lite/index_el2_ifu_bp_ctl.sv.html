@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    18-12-2024
+                    21-12-2024
                 </td>
                 <td></td>
                 
@@ -163,9 +163,9 @@
 <span id="L59"><span class="lineNum">      59</span>              : </span>
 <span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC tlaBgGNC">         174 :    input logic exu_flush_final, // all flushes</span></span>
 <span id="L61"><span class="lineNum">      61</span>              : </span>
-<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">       15436 :    output logic ifu_bp_hit_taken_f, // btb hit, select target</span></span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">       15450 :    output logic ifu_bp_hit_taken_f, // btb hit, select target</span></span>
 <span id="L63"><span class="lineNum">      63</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [31:1] ifu_bp_btb_target_f, //  predicted target PC</span></span>
-<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC tlaBgGNC">       15189 :    output logic ifu_bp_inst_mask_f, // tell ic which valids to kill because of a taken branch, right justified</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC tlaBgGNC">       15203 :    output logic ifu_bp_inst_mask_f, // tell ic which valids to kill because of a taken branch, right justified</span></span>
 <span id="L65"><span class="lineNum">      65</span>              : </span>
 <span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">         125 :    output logic [pt.BHT_GHR_SIZE-1:0] ifu_bp_fghr_f, // fetch ghr</span></span>
 <span id="L67"><span class="lineNum">      67</span>              : </span>
@@ -175,7 +175,7 @@
 <span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">         242 :    output logic [1:0] ifu_bp_hist0_f, // history counters for all 4 potential branches, bit 0, right justified</span></span>
 <span id="L72"><span class="lineNum">      72</span> <span class="tlaGNC">         248 :    output logic [1:0] ifu_bp_pc4_f, // pc4 indication, right justified</span></span>
 <span id="L73"><span class="lineNum">      73</span> <span class="tlaGNC">         248 :    output logic [1:0] ifu_bp_valid_f, // branch valid, right justified</span></span>
-<span id="L74"><span class="lineNum">      74</span> <span class="tlaGNC">       15302 :    output logic [11:0] ifu_bp_poffset_f, // predicted target</span></span>
+<span id="L74"><span class="lineNum">      74</span> <span class="tlaGNC">       15316 :    output logic [11:0] ifu_bp_poffset_f, // predicted target</span></span>
 <span id="L75"><span class="lineNum">      75</span>              : </span>
 <span id="L76"><span class="lineNum">      76</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [1:0] [$clog2(pt.BTB_SIZE)-1:0]    ifu_bp_fa_index_f, // predicted branch index (fully associative option)</span></span>
 <span id="L77"><span class="lineNum">      77</span>              : </span>
@@ -219,8 +219,8 @@
 <span id="L115"><span class="lineNum">     115</span> <span class="tlaGNC">         158 :    logic [1:0] exu_mp_hist; // new history</span></span>
 <span id="L116"><span class="lineNum">     116</span> <span class="tlaGNC">         156 :    logic [11:0] exu_mp_tgt; // target offset</span></span>
 <span id="L117"><span class="lineNum">     117</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] exu_mp_addr; // BTB/BHT address</span></span>
-<span id="L118"><span class="lineNum">     118</span> <span class="tlaGNC tlaBgGNC">       15414 :    logic                                   dec_tlu_br0_v_wb; // WB stage history update</span></span>
-<span id="L119"><span class="lineNum">     119</span> <span class="tlaGNC">       15292 :    logic [1:0]                             dec_tlu_br0_hist_wb; // new history</span></span>
+<span id="L118"><span class="lineNum">     118</span> <span class="tlaGNC tlaBgGNC">       15428 :    logic                                   dec_tlu_br0_v_wb; // WB stage history update</span></span>
+<span id="L119"><span class="lineNum">     119</span> <span class="tlaGNC">       15306 :    logic [1:0]                             dec_tlu_br0_hist_wb; // new history</span></span>
 <span id="L120"><span class="lineNum">     120</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] dec_tlu_br0_addr_wb; // addr</span></span>
 <span id="L121"><span class="lineNum">     121</span> <span class="tlaUNC">           0 :    logic                                   dec_tlu_br0_error_wb; // error; invalidate bank</span></span>
 <span id="L122"><span class="lineNum">     122</span> <span class="tlaUNC">           0 :    logic                                   dec_tlu_br0_start_error_wb; // error; invalidate all 4 banks in fg</span></span>
@@ -231,7 +231,7 @@
 <span id="L127"><span class="lineNum">     127</span> <span class="tlaUNC">           0 :    logic [pt.RET_STACK_SIZE-1:0]        rsenable;</span></span>
 <span id="L128"><span class="lineNum">     128</span>              : </span>
 <span id="L129"><span class="lineNum">     129</span>              : </span>
-<span id="L130"><span class="lineNum">     130</span> <span class="tlaGNC tlaBgGNC">       15302 :    logic [11:0]       btb_rd_tgt_f;</span></span>
+<span id="L130"><span class="lineNum">     130</span> <span class="tlaGNC tlaBgGNC">       15316 :    logic [11:0]       btb_rd_tgt_f;</span></span>
 <span id="L131"><span class="lineNum">     131</span> <span class="tlaGNC">         136 :    logic              btb_rd_pc4_f, btb_rd_call_f, btb_rd_ret_f;</span></span>
 <span id="L132"><span class="lineNum">     132</span> <span class="tlaGNC">         133 :    logic [1:1]        bp_total_branch_offset_f;</span></span>
 <span id="L133"><span class="lineNum">     133</span>              : </span>
@@ -244,7 +244,7 @@
 <span id="L140"><span class="lineNum">     140</span> <span class="tlaUNC tlaBgUNC">           0 :    logic               btb_wr_en_way0, btb_wr_en_way1;</span></span>
 <span id="L141"><span class="lineNum">     141</span>              : </span>
 <span id="L142"><span class="lineNum">     142</span>              : </span>
-<span id="L143"><span class="lineNum">     143</span> <span class="tlaGNC tlaBgGNC">         134 :    logic               dec_tlu_error_wb, btb_valid, dec_tlu_br0_middle_wb;</span></span>
+<span id="L143"><span class="lineNum">     143</span> <span class="tlaGNC tlaBgGNC">         132 :    logic               dec_tlu_error_wb, btb_valid, dec_tlu_br0_middle_wb;</span></span>
 <span id="L144"><span class="lineNum">     144</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO]        btb_error_addr_wb;</span></span>
 <span id="L145"><span class="lineNum">     145</span> <span class="tlaGNC tlaBgGNC">          30 :    logic branch_error_collision_f, fetch_mp_collision_f, branch_error_collision_p1_f, fetch_mp_collision_p1_f;</span></span>
 <span id="L146"><span class="lineNum">     146</span>              : </span>
@@ -265,7 +265,7 @@
 <span id="L161"><span class="lineNum">     161</span>              : </span>
 <span id="L162"><span class="lineNum">     162</span>              :    logic [LRU_SIZE-1:0][BTB_DWIDTH-1:0]  btb_bank0_rd_data_way1_out ;</span>
 <span id="L163"><span class="lineNum">     163</span>              : </span>
-<span id="L164"><span class="lineNum">     164</span> <span class="tlaGNC tlaBgGNC">       15330 :    logic                [BTB_DWIDTH-1:0] btb_bank0_rd_data_way0_f ;</span></span>
+<span id="L164"><span class="lineNum">     164</span> <span class="tlaGNC tlaBgGNC">       15344 :    logic                [BTB_DWIDTH-1:0] btb_bank0_rd_data_way0_f ;</span></span>
 <span id="L165"><span class="lineNum">     165</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                [BTB_DWIDTH-1:0] btb_bank0_rd_data_way1_f ;</span></span>
 <span id="L166"><span class="lineNum">     166</span>              : </span>
 <span id="L167"><span class="lineNum">     167</span> <span class="tlaGNC tlaBgGNC">         388 :    logic                [BTB_DWIDTH-1:0] btb_bank0_rd_data_way0_p1_f ;</span></span>
@@ -273,7 +273,7 @@
 <span id="L169"><span class="lineNum">     169</span>              : </span>
 <span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC tlaBgGNC">         126 :    logic                [BTB_DWIDTH-1:0] btb_vbank0_rd_data_f, btb_vbank1_rd_data_f;</span></span>
 <span id="L171"><span class="lineNum">     171</span>              : </span>
-<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC">       15436 :    logic                                         final_h;</span></span>
+<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC">       15450 :    logic                                         final_h;</span></span>
 <span id="L173"><span class="lineNum">     173</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                                         btb_fg_crossing_f;</span></span>
 <span id="L174"><span class="lineNum">     174</span> <span class="tlaGNC tlaBgGNC">         158 :    logic                                         middle_of_bank;</span></span>
 <span id="L175"><span class="lineNum">     175</span>              : </span>
@@ -289,7 +289,7 @@
 <span id="L185"><span class="lineNum">     185</span> <span class="tlaUNC">           0 :    logic exu_mp_way, exu_mp_way_f, dec_tlu_br0_way_wb, dec_tlu_way_wb;</span></span>
 <span id="L186"><span class="lineNum">     186</span> <span class="tlaUNC">           0 :    logic                [BTB_DWIDTH-1:0] btb_bank0e_rd_data_f, btb_bank0e_rd_data_p1_f;</span></span>
 <span id="L187"><span class="lineNum">     187</span>              : </span>
-<span id="L188"><span class="lineNum">     188</span> <span class="tlaGNC tlaBgGNC">       15330 :    logic                [BTB_DWIDTH-1:0] btb_bank0o_rd_data_f;</span></span>
+<span id="L188"><span class="lineNum">     188</span> <span class="tlaGNC tlaBgGNC">       15344 :    logic                [BTB_DWIDTH-1:0] btb_bank0o_rd_data_f;</span></span>
 <span id="L189"><span class="lineNum">     189</span>              : </span>
 <span id="L190"><span class="lineNum">     190</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [1:0] tag_match_way0_expanded_f, tag_match_way1_expanded_f;</span></span>
 <span id="L191"><span class="lineNum">     191</span>              : </span>
@@ -476,7 +476,7 @@
 <span id="L372"><span class="lineNum">     372</span>              : </span>
 <span id="L373"><span class="lineNum">     373</span>              :    // mux out critical hit bank for pc computation</span>
 <span id="L374"><span class="lineNum">     374</span>              :    // This is only useful for the first taken branch in the fetch group</span>
-<span id="L375"><span class="lineNum">     375</span> <span class="tlaGNC">       15302 :    logic [16:1] btb_sel_data_f;</span></span>
+<span id="L375"><span class="lineNum">     375</span> <span class="tlaGNC">       15316 :    logic [16:1] btb_sel_data_f;</span></span>
 <span id="L376"><span class="lineNum">     376</span>              : </span>
 <span id="L377"><span class="lineNum">     377</span>              :    assign btb_rd_tgt_f[11:0] = btb_sel_data_f[16:5];</span>
 <span id="L378"><span class="lineNum">     378</span>              :    assign btb_rd_pc4_f       = btb_sel_data_f[4];</span>
@@ -604,8 +604,8 @@
 <span id="L500"><span class="lineNum">     500</span>              : //    -1            10 -  10  0</span>
 <span id="L501"><span class="lineNum">     501</span>              : //    10            10 0  01  1</span>
 <span id="L502"><span class="lineNum">     502</span>              : //    10            10 1  01  0</span>
-<span id="L503"><span class="lineNum">     503</span> <span class="tlaGNC">       15316 : logic [1:0] bloc_f;</span></span>
-<span id="L504"><span class="lineNum">     504</span> <span class="tlaGNC">       15316 : logic use_fa_plus;</span></span>
+<span id="L503"><span class="lineNum">     503</span> <span class="tlaGNC">       15330 : logic [1:0] bloc_f;</span></span>
+<span id="L504"><span class="lineNum">     504</span> <span class="tlaGNC">       15330 : logic use_fa_plus;</span></span>
 <span id="L505"><span class="lineNum">     505</span>              : assign bloc_f[1] = (bht_dir_f[0] &amp; ~fetch_start_f[0]) | (~bht_dir_f[0]</span>
 <span id="L506"><span class="lineNum">     506</span>              :      &amp; fetch_start_f[0]);</span>
 <span id="L507"><span class="lineNum">     507</span>              : assign bloc_f[0] = (bht_dir_f[0] &amp; fetch_start_f[0]) | (~bht_dir_f[0]</span>
@@ -723,7 +723,7 @@
 <span id="L619"><span class="lineNum">     619</span>              : </span>
 <span id="L620"><span class="lineNum">     620</span>              :    assign exu_mp_valid_write = exu_mp_valid &amp; exu_mp_ataken &amp; ~exu_mp_pkt.valid;</span>
 <span id="L621"><span class="lineNum">     621</span> <span class="tlaGNC tlaBgGNC">         158 :    logic [1:0] bht_wr_data0, bht_wr_data2;</span></span>
-<span id="L622"><span class="lineNum">     622</span> <span class="tlaGNC">       15414 :    logic [1:0] bht_wr_en0, bht_wr_en2;</span></span>
+<span id="L622"><span class="lineNum">     622</span> <span class="tlaGNC">       15428 :    logic [1:0] bht_wr_en0, bht_wr_en2;</span></span>
 <span id="L623"><span class="lineNum">     623</span>              : </span>
 <span id="L624"><span class="lineNum">     624</span>              :    assign middle_of_bank = exu_mp_pc4 ^ exu_mp_boffset;</span>
 <span id="L625"><span class="lineNum">     625</span>              :    assign bht_wr_en0[1:0] = {2{exu_mp_valid &amp; ~exu_mp_call &amp; ~exu_mp_ret &amp; ~exu_mp_ja}} &amp; {middle_of_bank, ~middle_of_bank};</span>

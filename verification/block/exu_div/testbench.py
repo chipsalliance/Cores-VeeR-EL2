@@ -313,6 +313,15 @@ class BaseTest(uvm_test):
         cocotb.start_soon(clock.start(start_high=False))
 
     async def do_reset(self):
+
+        cocotb.top.scan_mode.value = 0
+        cocotb.top.dp_valid.value = 0
+        cocotb.top.dp_unsign.value = 0
+        cocotb.top.dp_rem.value = 0
+        cocotb.top.dividend.value = 0
+        cocotb.top.divisor.value = 0
+        cocotb.top.cancel.value = 0
+
         cocotb.top.rst_l.value = 0
         await ClockCycles(cocotb.top.clk, 2)
         await FallingEdge(cocotb.top.clk)

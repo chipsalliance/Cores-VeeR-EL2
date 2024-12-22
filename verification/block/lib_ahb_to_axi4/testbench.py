@@ -247,6 +247,7 @@ class AHBLiteMonitor(uvm_component):
         htrans = None
         hwrite = None
 
+        await RisingEdge(self.bfm.ahb_hreset)
         while True:
             # Wait for reset deassertion if necessary
             if self.bfm.ahb_hreset.value == 0:
@@ -620,6 +621,29 @@ class BaseTest(uvm_test):
         cocotb.start_soon(clock.start(start_high=False))
 
     async def do_reset(self):
+
+        cocotb.top.scan_mode.value = 0
+        cocotb.top.clk_override.value = 0
+        cocotb.top.axi_awready.value = 0
+        cocotb.top.axi_wready.value = 0
+        cocotb.top.axi_bvalid.value = 0
+        cocotb.top.axi_bresp.value = 0
+        cocotb.top.axi_bid.value = 0
+        cocotb.top.axi_arready.value = 0
+        cocotb.top.axi_rvalid.value = 0
+        cocotb.top.axi_rid.value = 0
+        cocotb.top.axi_rdata.value = 0
+        cocotb.top.axi_rresp.value = 0
+        cocotb.top.ahb_haddr.value = 0
+        cocotb.top.ahb_hburst.value = 0
+        cocotb.top.ahb_hmastlock.value = 0
+        cocotb.top.ahb_hprot.value = 0
+        cocotb.top.ahb_hsize.value = 0
+        cocotb.top.ahb_htrans.value = 0
+        cocotb.top.ahb_hwrite.value = 0
+        cocotb.top.ahb_hwdata.value = 0
+        cocotb.top.ahb_hsel.value = 0
+
         cocotb.top.rst_l.value = 0
         await ClockCycles(cocotb.top.clk, 2)
         await FallingEdge(cocotb.top.clk)

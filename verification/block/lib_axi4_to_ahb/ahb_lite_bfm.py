@@ -41,6 +41,7 @@ class AHBLiteBFM(metaclass=utility_classes.Singleton):
         prev_htrans = AHB_LITE_TRANSFER_TYPE_ENCODING.IDLE
         htrans = AHB_LITE_TRANSFER_TYPE_ENCODING.IDLE
 
+        await RisingEdge(self.rst_n)
         while True:
             if self.rst_n.value == 0:
                 self.dut.ahb_hrdata.value = 0

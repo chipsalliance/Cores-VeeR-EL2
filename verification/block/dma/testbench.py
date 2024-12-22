@@ -899,7 +899,7 @@ class BaseTest(uvm_test):
     async def do_reset(self):
 
         cocotb.top.free_clk.value = 0
-        cocotb.top.dma_bus_clk_en.value = 0
+        cocotb.top.dma_bus_clk_en.value = 1
         cocotb.top.clk_override.value = 0
         cocotb.top.scan_mode.value = 0
         cocotb.top.dbg_cmd_addr.value = 0

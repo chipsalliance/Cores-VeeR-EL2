@@ -906,7 +906,6 @@ class BaseTest(uvm_test):
         cocotb.top.dbg_cmd_wrdata.value = 0
         cocotb.top.dbg_cmd_valid.value = 0
         cocotb.top.dbg_cmd_write.value = 0
-        cocotb.top.dbg_cmd_type.value = 0
         cocotb.top.dbg_cmd_size.value = 0
         cocotb.top.dbg_dma_bubble.value = 0
         cocotb.top.dccm_dma_rvalid.value = 0

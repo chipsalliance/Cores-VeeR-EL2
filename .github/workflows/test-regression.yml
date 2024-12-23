@@ -111,15 +111,11 @@ jobs:
     container: centos:8
     env:
       GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: Prepare Environment
-        run: _secret_prepare_env
-        continue-on-error: true
-
       - name: Run tests
-        run: _secret_custom_test
-        continue-on-error: true
+        run: _secret_custom_regression_tests

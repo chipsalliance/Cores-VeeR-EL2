@@ -152,3 +152,17 @@ jobs:
           path: |
             verification/${{ matrix.test }}/*.log
             verification/${{ matrix.test }}/*.vcd
+
+  custom_tests:
+    name: Run custom Microarchitectural tests
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Perform custom tests
+        run: _secret_custom_uarch

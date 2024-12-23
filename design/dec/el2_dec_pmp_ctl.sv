@@ -59,9 +59,9 @@ module el2_dec_pmp_ctl
    output logic [31:0]      pmp_pmpaddr [pt.PMP_ENTRIES],
 
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic        scan_mode
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    );
 
    logic wr_pmpcfg_r;

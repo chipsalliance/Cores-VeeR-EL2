@@ -31,9 +31,9 @@ import el2_pkg::*;
    input logic                          clk_override,                       // Override non-functional clock gating
    input logic                          rst_l,                              // reset, active low
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input logic                          scan_mode,                          // scan mode
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input logic                          dec_tlu_external_ldfwd_disable,     // disable load to load forwarding for externals
    input logic                          dec_tlu_wb_coalescing_disable,      // disable write buffer coalescing
    input logic                          dec_tlu_sideeffect_posted_disable,  // disable the posted sideeffect load store to the bus
@@ -106,21 +106,21 @@ import el2_pkg::*;
    output logic [31:0]                 lsu_axi_awaddr,
    output logic [3:0]                  lsu_axi_awregion,
    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [7:0]                  lsu_axi_awlen,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [2:0]                  lsu_axi_awsize,
    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [1:0]                  lsu_axi_awburst,
    output logic                        lsu_axi_awlock,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [3:0]                  lsu_axi_awcache,
    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [2:0]                  lsu_axi_awprot,
    output logic [3:0]                  lsu_axi_awqos,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    output logic                        lsu_axi_wvalid,
    input  logic                        lsu_axi_wready,
@@ -130,9 +130,9 @@ import el2_pkg::*;
 
    input  logic                        lsu_axi_bvalid,
    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic                        lsu_axi_bready,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input  logic [1:0]                  lsu_axi_bresp,
    input  logic [pt.LSU_BUS_TAG-1:0]   lsu_axi_bid,
 
@@ -143,27 +143,27 @@ import el2_pkg::*;
    output logic [31:0]                 lsu_axi_araddr,
    output logic [3:0]                  lsu_axi_arregion,
    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [7:0]                  lsu_axi_arlen,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [2:0]                  lsu_axi_arsize,
    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [1:0]                  lsu_axi_arburst,
    output logic                        lsu_axi_arlock,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [3:0]                  lsu_axi_arcache,
    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [2:0]                  lsu_axi_arprot,
    output logic [3:0]                  lsu_axi_arqos,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    input  logic                        lsu_axi_rvalid,
    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic                        lsu_axi_rready,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input  logic [pt.LSU_BUS_TAG-1:0]   lsu_axi_rid,
    input  logic [63:0]                 lsu_axi_rdata,
    input  logic [1:0]                  lsu_axi_rresp,

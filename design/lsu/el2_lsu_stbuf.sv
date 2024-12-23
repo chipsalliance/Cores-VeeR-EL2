@@ -82,9 +82,9 @@ import el2_pkg::*;
    output logic [pt.DCCM_BYTE_WIDTH-1:0] stbuf_fwdbyteen_lo_m,        // stbuf data
 
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic       scan_mode                                       // Scan mode
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
 );
 

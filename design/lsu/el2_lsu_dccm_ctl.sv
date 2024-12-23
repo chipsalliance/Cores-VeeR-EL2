@@ -154,9 +154,9 @@ import el2_pkg::*;
    input logic [31:0]                      picm_rd_data,            // read data
 
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input logic                             scan_mode                // scan mode
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 );
 
 

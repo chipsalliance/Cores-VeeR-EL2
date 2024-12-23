@@ -43,9 +43,9 @@ import el2_pkg::*;
    output logic [63:0]                                iccm_rd_data,                        // ICCM read data
    output logic [77:0]                                iccm_rd_data_ecc,                    // ICCM read ecc
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic                                       scan_mode                            // Scan mode control
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
 );
 

@@ -197,9 +197,9 @@ import el2_pkg::*;
    output logic       dec_div_active,                 // non-block divide is active
 
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic       scan_mode
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    );
 
 

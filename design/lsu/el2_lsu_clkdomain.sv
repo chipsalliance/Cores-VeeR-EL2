@@ -74,9 +74,9 @@ import el2_pkg::*;
    output logic     lsu_free_c2_clk,                   // free double pulse clock
 
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic     scan_mode                          // Scan mode
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 );
 
    logic lsu_c1_m_clken, lsu_c1_r_clken;

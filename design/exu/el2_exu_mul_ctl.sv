@@ -23,9 +23,9 @@ import el2_pkg::*;
    input logic          clk,              // Top level clock
    input logic          rst_l,            // Reset
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input logic          scan_mode,        // Scan mode
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    input el2_mul_pkt_t mul_p,            // {Valid, RS1 signed operand, RS2 signed operand, Select low 32-bits of result}
 

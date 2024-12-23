@@ -170,9 +170,9 @@ module rvdffe #( parameter WIDTH=1, SHORT=0, OVERRIDE=0 )
      input  logic           clk,
      input  logic           rst_l,
      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-     /*verilator coverage_off*/
+     /*pragma coverage off*/
      input  logic             scan_mode,
-     /*verilator coverage_on*/
+     /*pragma coverage on*/
      output logic [WIDTH-1:0] dout
      );
 
@@ -213,9 +213,9 @@ module rvdffpcie #( parameter WIDTH=31 )
      input  logic             rst_l,
      input  logic             en,
      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-     /*verilator coverage_off*/
+     /*pragma coverage off*/
      input  logic             scan_mode,
-     /*verilator coverage_on*/
+     /*pragma coverage on*/
      output logic [WIDTH-1:0] dout
      );
 
@@ -249,9 +249,9 @@ module rvdfflie #( parameter WIDTH=16, LEFT=8 )
      input  logic             rst_l,
      input  logic             en,
      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-     /*verilator coverage_off*/
+     /*pragma coverage off*/
      input  logic             scan_mode,
-     /*verilator coverage_on*/
+     /*pragma coverage on*/
      output logic [WIDTH-1:0] dout
      );
 
@@ -307,9 +307,9 @@ module rvdffppe #( parameter integer WIDTH = 39 )
      input  logic             rst_l,
      input  logic             en,
      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-     /*verilator coverage_off*/
+     /*pragma coverage off*/
      input  logic             scan_mode,
-     /*verilator coverage_on*/
+     /*pragma coverage on*/
      output logic [WIDTH-1:0] dout
      );
 
@@ -353,9 +353,9 @@ module rvdffie #( parameter WIDTH=1, OVERRIDE=0 )
      input  logic           clk,
      input  logic           rst_l,
      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-     /*verilator coverage_off*/
+     /*pragma coverage off*/
      input  logic             scan_mode,
-     /*verilator coverage_on*/
+     /*pragma coverage on*/
      output logic [WIDTH-1:0] dout
      );
 
@@ -399,9 +399,9 @@ module rvdffiee #( parameter WIDTH=1, OVERRIDE=0 )
      input  logic           clk,
      input  logic           rst_l,
      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-     /*verilator coverage_off*/
+     /*pragma coverage off*/
      input  logic           scan_mode,
-     /*verilator coverage_on*/
+     /*pragma coverage on*/
      input  logic           en,
      output logic [WIDTH-1:0] dout
      );
@@ -793,9 +793,9 @@ module rvclkhdr
    input  logic en,
    input  logic clk,
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic scan_mode,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic l1clk
    );
 
@@ -816,9 +816,9 @@ module rvoclkhdr
    input  logic en,
    input  logic clk,
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic scan_mode,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic l1clk
    );
 

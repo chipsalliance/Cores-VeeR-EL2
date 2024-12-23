@@ -157,6 +157,8 @@ jobs:
     name: Run custom Microarchitectural tests
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: centos:8
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
     steps:
       - uses: actions/checkout@v3
         with:

@@ -112,6 +112,7 @@ jobs:
     container: centos:8
     env:
       GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
     steps:
       - uses: actions/checkout@v3
         with:
@@ -119,4 +120,3 @@ jobs:
 
       - name: Run tests
         run: _secret_custom_regression_tests
-        continue-on-error: true

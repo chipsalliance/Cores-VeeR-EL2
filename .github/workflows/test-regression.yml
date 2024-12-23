@@ -117,10 +117,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Prepare Environment
-        run: _secret_prepare_env
-        continue-on-error: true
-
       - name: Run tests
-        run: _secret_custom_test
+        run: _secret_custom_regression_tests
         continue-on-error: true

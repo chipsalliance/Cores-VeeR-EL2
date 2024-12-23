@@ -62,7 +62,7 @@ RUN cpanm --notest Module::Pluggable
 RUN cpanm Bit::Vector Capture::Tiny DateTime DateTime::Format::W3CDTF Devel::Cover Digest::MD5 File::Spec JSON::XS Memory::Process Time::HiRes
 
 # Clone and build Verilator
-RUN git clone https://github.com/verilator/verilator verilator && \
+RUN git clone https://github.com/antmicro/verilator verilator && \
     cd verilator && \
     git checkout ${VERILATOR_VERSION} && \
     autoconf && \

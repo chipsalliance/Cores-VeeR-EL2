@@ -7,7 +7,7 @@ jobs:
   tests:
     name: Verification tests
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:latest
+    container: ghcr.io/antmicro/cores-veer-el2:20241223
     strategy:
       matrix:
         test: ["test_pyuvm"]

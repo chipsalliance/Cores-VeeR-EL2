@@ -246,9 +246,9 @@ class AluScoreboard(uvm_component):
     def connect_phase(self):
         self.port_inp.connect(self.fifo_inp.get_export)
         self.port_out.connect(self.fifo_out.get_export)
-        
+
     def bit_count(self, val):
-            return bin(val).count("1")
+        return bin(val).count("1")
 
     def check_phase(self):
         # Get item pairs
@@ -495,7 +495,6 @@ class BaseTest(uvm_test):
         cocotb.top.b_in.value = 0
         cocotb.top.pc_in.value = 0
         cocotb.top.brimm_in.value = 0
-
 
         # perform reset
         cocotb.top.rst_l.value = 0

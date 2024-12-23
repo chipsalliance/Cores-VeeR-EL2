@@ -79,3 +79,11 @@
    
    * [Documentation](external:dev/240/docs_rendered/html/index.html)
    
+ * 296
+   * [Coverage](296_coverage_dashboard)
+
+   * [Verification tests](external:dev/296/verification_dashboard.html)
+
+   
+   * [Documentation](external:dev/296/docs_rendered/html/index.html)
+   

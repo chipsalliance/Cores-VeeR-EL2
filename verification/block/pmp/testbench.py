@@ -6,7 +6,7 @@ import os
 
 from cocotb.binary import BinaryValue
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, RisingEdge, FallingEdge
+from cocotb.triggers import ClockCycles, FallingEdge, RisingEdge
 from pyuvm import *
 
 # ==============================================================================
@@ -45,7 +45,7 @@ def getDecodedEntryCfg(regs, index, range_only=False):
     else:
         start_address = 0
 
-    if address_matching == 0: #Entry diabled
+    if address_matching == 0:  # Entry diabled
         if range_only:
             end_address = pmpaddr.integer << 2
             return start_address, end_address
@@ -348,8 +348,6 @@ class BaseTest(uvm_test):
         self.raise_objection()
 
         cocotb.top.scan_mode.value = 0
-        #cocotb.top.pmp_pmpcfg.value = 0
-        #cocotb.top.pmp_pmpaddr.value = 0
         cocotb.top.pmp_chan_addr.value = [0, 0, 0]
         cocotb.top.pmp_chan_type.value = [0, 0, 0]
 

@@ -157,7 +157,7 @@
 <span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC">           8 :    input  logic                        dec_tlu_resume_ack,        // core sends back an ack for the resume (pulse)</span></span>
 <span id="L54"><span class="lineNum">      54</span>              : </span>
 <span id="L55"><span class="lineNum">      55</span>              :    // inputs from the JTAG</span>
-<span id="L56"><span class="lineNum">      56</span> <span class="tlaGNC">       27750 :    input logic                         dmi_reg_en,                // read or write</span></span>
+<span id="L56"><span class="lineNum">      56</span> <span class="tlaGNC">       27748 :    input logic                         dmi_reg_en,                // read or write</span></span>
 <span id="L57"><span class="lineNum">      57</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [6:0]                   dmi_reg_addr,              // address of DM register</span></span>
 <span id="L58"><span class="lineNum">      58</span> <span class="tlaGNC tlaBgGNC">        2624 :    input logic                         dmi_reg_wr_en,             // write instruction</span></span>
 <span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC">         124 :    input logic [31:0]                  dmi_reg_wdata,             // write data</span></span>
@@ -232,8 +232,8 @@
 <span id="L128"><span class="lineNum">     128</span> <span class="tlaGNC tlaBgGNC">         297 :    input logic                         dbg_bus_clk_en,</span></span>
 <span id="L129"><span class="lineNum">     129</span>              : </span>
 <span id="L130"><span class="lineNum">     130</span>              :    // general inputs</span>
-<span id="L131"><span class="lineNum">     131</span> <span class="tlaGNC">   110777147 :    input logic                         clk,</span></span>
-<span id="L132"><span class="lineNum">     132</span> <span class="tlaGNC">   110777147 :    input logic                         free_clk,</span></span>
+<span id="L131"><span class="lineNum">     131</span> <span class="tlaGNC">   110777257 :    input logic                         clk,</span></span>
+<span id="L132"><span class="lineNum">     132</span> <span class="tlaGNC">   110777257 :    input logic                         free_clk,</span></span>
 <span id="L133"><span class="lineNum">     133</span> <span class="tlaGNC">         299 :    input logic                         rst_l,        // This includes both top rst and debug rst</span></span>
 <span id="L134"><span class="lineNum">     134</span> <span class="tlaGNC">         297 :    input logic                         dbg_rst_l,</span></span>
 <span id="L135"><span class="lineNum">     135</span> <span class="tlaGNC">           2 :    input logic                         clk_override,</span></span>
@@ -379,11 +379,11 @@
 <span id="L275"><span class="lineNum">     275</span> <span class="tlaGNC">         299 :    logic              rst_l_sync;</span></span>
 <span id="L276"><span class="lineNum">     276</span>              : </span>
 <span id="L277"><span class="lineNum">     277</span>              :    //clken</span>
-<span id="L278"><span class="lineNum">     278</span> <span class="tlaGNC">       21542 :    logic              dbg_free_clken;</span></span>
-<span id="L279"><span class="lineNum">     279</span> <span class="tlaGNC">   110777147 :    logic              dbg_free_clk;</span></span>
+<span id="L278"><span class="lineNum">     278</span> <span class="tlaGNC">       21534 :    logic              dbg_free_clken;</span></span>
+<span id="L279"><span class="lineNum">     279</span> <span class="tlaGNC">   110777257 :    logic              dbg_free_clk;</span></span>
 <span id="L280"><span class="lineNum">     280</span>              : </span>
-<span id="L281"><span class="lineNum">     281</span> <span class="tlaGNC">       27752 :    logic              sb_free_clken;</span></span>
-<span id="L282"><span class="lineNum">     282</span> <span class="tlaGNC">   110777147 :    logic              sb_free_clk;</span></span>
+<span id="L281"><span class="lineNum">     281</span> <span class="tlaGNC">       27750 :    logic              sb_free_clken;</span></span>
+<span id="L282"><span class="lineNum">     282</span> <span class="tlaGNC">   110777257 :    logic              sb_free_clk;</span></span>
 <span id="L283"><span class="lineNum">     283</span>              : </span>
 <span id="L284"><span class="lineNum">     284</span>              :    // clocking</span>
 <span id="L285"><span class="lineNum">     285</span>              :    // used for the abstract commands.</span>
@@ -599,23 +599,23 @@
 <span id="L495"><span class="lineNum">     495</span> <span class="tlaGNC">         298 :       sb_abmem_data_done_en   = 1'b0;</span></span>
 <span id="L496"><span class="lineNum">     496</span>              : </span>
 <span id="L497"><span class="lineNum">     497</span> <span class="tlaGNC">         298 :        case (dbg_state)</span></span>
-<span id="L498"><span class="lineNum">     498</span> <span class="tlaGNC">    41406474 :             IDLE: begin</span></span>
-<span id="L499"><span class="lineNum">     499</span> <span class="tlaGNC">    41406474 :                      dbg_nxtstate         = (dmstatus_reg[9] | dec_tlu_mpc_halted_only) ? HALTED : HALTING;         // initiate the halt command to the core</span></span>
-<span id="L500"><span class="lineNum">     500</span> <span class="tlaGNC">    41406474 :                      dbg_state_en         = dmcontrol_reg[31] | dmstatus_reg[9] | dec_tlu_mpc_halted_only;      // when the jtag writes the halt bit in the DM register, OR when the status indicates H</span></span>
-<span id="L501"><span class="lineNum">     501</span> <span class="tlaGNC">    41406474 :                      dbg_halt_req         = dmcontrol_reg[31];               // only when jtag has written the halt_req bit in the control. Removed debug mode qualification during MPC changes</span></span>
+<span id="L498"><span class="lineNum">     498</span> <span class="tlaGNC">    41483357 :             IDLE: begin</span></span>
+<span id="L499"><span class="lineNum">     499</span> <span class="tlaGNC">    41483357 :                      dbg_nxtstate         = (dmstatus_reg[9] | dec_tlu_mpc_halted_only) ? HALTED : HALTING;         // initiate the halt command to the core</span></span>
+<span id="L500"><span class="lineNum">     500</span> <span class="tlaGNC">    41483357 :                      dbg_state_en         = dmcontrol_reg[31] | dmstatus_reg[9] | dec_tlu_mpc_halted_only;      // when the jtag writes the halt bit in the DM register, OR when the status indicates H</span></span>
+<span id="L501"><span class="lineNum">     501</span> <span class="tlaGNC">    41483357 :                      dbg_halt_req         = dmcontrol_reg[31];               // only when jtag has written the halt_req bit in the control. Removed debug mode qualification during MPC changes</span></span>
 <span id="L502"><span class="lineNum">     502</span>              :             end</span>
-<span id="L503"><span class="lineNum">     503</span> <span class="tlaGNC">          17 :             HALTING : begin</span></span>
-<span id="L504"><span class="lineNum">     504</span> <span class="tlaGNC">          17 :                      dbg_nxtstate         = HALTED;                                 // Goto HALTED once the core sends an ACK</span></span>
-<span id="L505"><span class="lineNum">     505</span> <span class="tlaGNC">          17 :                      dbg_state_en         = dmstatus_reg[9] | dec_tlu_mpc_halted_only;     // core indicates halted</span></span>
+<span id="L503"><span class="lineNum">     503</span> <span class="tlaGNC">          16 :             HALTING : begin</span></span>
+<span id="L504"><span class="lineNum">     504</span> <span class="tlaGNC">          16 :                      dbg_nxtstate         = HALTED;                                 // Goto HALTED once the core sends an ACK</span></span>
+<span id="L505"><span class="lineNum">     505</span> <span class="tlaGNC">          16 :                      dbg_state_en         = dmstatus_reg[9] | dec_tlu_mpc_halted_only;     // core indicates halted</span></span>
 <span id="L506"><span class="lineNum">     506</span>              :             end</span>
-<span id="L507"><span class="lineNum">     507</span> <span class="tlaGNC">      753168 :             HALTED: begin</span></span>
+<span id="L507"><span class="lineNum">     507</span> <span class="tlaGNC">      753610 :             HALTED: begin</span></span>
 <span id="L508"><span class="lineNum">     508</span>              :                      // wait for halted to go away before send to resume. Else start of new command</span>
-<span id="L509"><span class="lineNum">     509</span> <span class="tlaGNC">      753168 :                      dbg_nxtstate         = dmstatus_reg[9] ? (resumereq ? RESUMING : (((command_reg[31:24] == 8'h2) &amp; abmem_addr_external) ? SB_CMD_START : CORE_CMD_START)) :</span></span>
-<span id="L510"><span class="lineNum">     510</span> <span class="tlaGNC">      753168 :                                                                                     (dmcontrol_reg[31] ? HALTING : IDLE);       // This is MPC halted case</span></span>
-<span id="L511"><span class="lineNum">     511</span> <span class="tlaGNC">      753168 :                      dbg_state_en         = (dmstatus_reg[9] &amp; resumereq) | execute_command | ~(dmstatus_reg[9] | dec_tlu_mpc_halted_only);</span></span>
-<span id="L512"><span class="lineNum">     512</span> <span class="tlaGNC">      753168 :                      abstractcs_busy_wren = dbg_state_en &amp; ((dbg_nxtstate == CORE_CMD_START) | (dbg_nxtstate == SB_CMD_START));                 // write busy when a new command was written by jtag</span></span>
-<span id="L513"><span class="lineNum">     513</span> <span class="tlaGNC">      753168 :                      abstractcs_busy_din  = 1'b1;</span></span>
-<span id="L514"><span class="lineNum">     514</span> <span class="tlaGNC">      753168 :                      dbg_resume_req       = dbg_state_en &amp; (dbg_nxtstate == RESUMING);                       // single cycle pulse to core if resuming</span></span>
+<span id="L509"><span class="lineNum">     509</span> <span class="tlaGNC">      753610 :                      dbg_nxtstate         = dmstatus_reg[9] ? (resumereq ? RESUMING : (((command_reg[31:24] == 8'h2) &amp; abmem_addr_external) ? SB_CMD_START : CORE_CMD_START)) :</span></span>
+<span id="L510"><span class="lineNum">     510</span> <span class="tlaGNC">      753610 :                                                                                     (dmcontrol_reg[31] ? HALTING : IDLE);       // This is MPC halted case</span></span>
+<span id="L511"><span class="lineNum">     511</span> <span class="tlaGNC">      753610 :                      dbg_state_en         = (dmstatus_reg[9] &amp; resumereq) | execute_command | ~(dmstatus_reg[9] | dec_tlu_mpc_halted_only);</span></span>
+<span id="L512"><span class="lineNum">     512</span> <span class="tlaGNC">      753610 :                      abstractcs_busy_wren = dbg_state_en &amp; ((dbg_nxtstate == CORE_CMD_START) | (dbg_nxtstate == SB_CMD_START));                 // write busy when a new command was written by jtag</span></span>
+<span id="L513"><span class="lineNum">     513</span> <span class="tlaGNC">      753610 :                      abstractcs_busy_din  = 1'b1;</span></span>
+<span id="L514"><span class="lineNum">     514</span> <span class="tlaGNC">      753610 :                      dbg_resume_req       = dbg_state_en &amp; (dbg_nxtstate == RESUMING);                       // single cycle pulse to core if resuming</span></span>
 <span id="L515"><span class="lineNum">     515</span>              :             end</span>
 <span id="L516"><span class="lineNum">     516</span> <span class="tlaGNC">         598 :             CORE_CMD_START: begin</span></span>
 <span id="L517"><span class="lineNum">     517</span>              :                      // Don't execute the command if cmderror or transfer=0 for abstract register access</span>
@@ -732,13 +732,13 @@
 <span id="L628"><span class="lineNum">     628</span> <span class="tlaGNC">         298 :       sbcs_sberror_din[2:0]  = 3'b0;</span></span>
 <span id="L629"><span class="lineNum">     629</span> <span class="tlaGNC">         298 :       sbaddress0_reg_wren1   = 1'b0;</span></span>
 <span id="L630"><span class="lineNum">     630</span> <span class="tlaGNC">         298 :       case (sb_state)</span></span>
-<span id="L631"><span class="lineNum">     631</span> <span class="tlaGNC">    42164117 :             SBIDLE: begin</span></span>
-<span id="L632"><span class="lineNum">     632</span> <span class="tlaGNC">    42164117 :                      sb_nxtstate            = sbdata0wr_access ? WAIT_WR : WAIT_RD;</span></span>
-<span id="L633"><span class="lineNum">     633</span> <span class="tlaGNC">    42164117 :                      sb_state_en            = (sbdata0wr_access | sbreadondata_access | sbreadonaddr_access) &amp; ~(|sbcs_reg[14:12]) &amp; ~sbcs_reg[22];</span></span>
-<span id="L634"><span class="lineNum">     634</span> <span class="tlaGNC">    42164117 :                      sbcs_sbbusy_wren       = sb_state_en;                                                 // set the single read bit if it is a singlread command</span></span>
-<span id="L635"><span class="lineNum">     635</span> <span class="tlaGNC">    42164117 :                      sbcs_sbbusy_din        = 1'b1;</span></span>
-<span id="L636"><span class="lineNum">     636</span> <span class="tlaGNC">    42164117 :                      sbcs_sberror_wren      = sbcs_wren &amp; (|dmi_reg_wdata[14:12]);                                            // write to clear the error bits</span></span>
-<span id="L637"><span class="lineNum">     637</span> <span class="tlaGNC">    42164117 :                      sbcs_sberror_din[2:0]  = ~dmi_reg_wdata[14:12] &amp; sbcs_reg[14:12];</span></span>
+<span id="L631"><span class="lineNum">     631</span> <span class="tlaGNC">    42241441 :             SBIDLE: begin</span></span>
+<span id="L632"><span class="lineNum">     632</span> <span class="tlaGNC">    42241441 :                      sb_nxtstate            = sbdata0wr_access ? WAIT_WR : WAIT_RD;</span></span>
+<span id="L633"><span class="lineNum">     633</span> <span class="tlaGNC">    42241441 :                      sb_state_en            = (sbdata0wr_access | sbreadondata_access | sbreadonaddr_access) &amp; ~(|sbcs_reg[14:12]) &amp; ~sbcs_reg[22];</span></span>
+<span id="L634"><span class="lineNum">     634</span> <span class="tlaGNC">    42241441 :                      sbcs_sbbusy_wren       = sb_state_en;                                                 // set the single read bit if it is a singlread command</span></span>
+<span id="L635"><span class="lineNum">     635</span> <span class="tlaGNC">    42241441 :                      sbcs_sbbusy_din        = 1'b1;</span></span>
+<span id="L636"><span class="lineNum">     636</span> <span class="tlaGNC">    42241441 :                      sbcs_sberror_wren      = sbcs_wren &amp; (|dmi_reg_wdata[14:12]);                                            // write to clear the error bits</span></span>
+<span id="L637"><span class="lineNum">     637</span> <span class="tlaGNC">    42241441 :                      sbcs_sberror_din[2:0]  = ~dmi_reg_wdata[14:12] &amp; sbcs_reg[14:12];</span></span>
 <span id="L638"><span class="lineNum">     638</span>              :             end</span>
 <span id="L639"><span class="lineNum">     639</span> <span class="tlaGNC">           8 :             WAIT_RD: begin</span></span>
 <span id="L640"><span class="lineNum">     640</span> <span class="tlaGNC">           8 :                      sb_nxtstate           = (sbcs_unaligned | sbcs_illegal_size) ? DONE : CMD_RD;</span></span>

@@ -136,19 +136,19 @@
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">     4000060 :    input logic free_l2clk,                                          // Clock always.                  Through one clock header.  For flops with    second header built in.</span></span>
 <span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">           1 :    input logic rst_l,                                               // reset, active low</span></span>
 <span id="L34"><span class="lineNum">      34</span>              : </span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">      793730 :    input logic                       exu_flush_final,               // Flush from the pipeline., includes flush lower</span></span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">      793728 :    input logic                       dec_tlu_flush_lower_wb,        // Flush lower from the pipeline.</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">      793579 :    input logic                       exu_flush_final,               // Flush from the pipeline., includes flush lower</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">      793577 :    input logic                       dec_tlu_flush_lower_wb,        // Flush lower from the pipeline.</span></span>
 <span id="L37"><span class="lineNum">      37</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                       dec_tlu_flush_err_wb,          // Flush from the pipeline due to perr.</span></span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC tlaBgGNC">      793730 :    input logic                       dec_tlu_i0_commit_cmt,         // committed i0 instruction</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC tlaBgGNC">      793583 :    input logic                       dec_tlu_i0_commit_cmt,         // committed i0 instruction</span></span>
 <span id="L39"><span class="lineNum">      39</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                       dec_tlu_force_halt,            // force halt.</span></span>
 <span id="L40"><span class="lineNum">      40</span>              : </span>
 <span id="L41"><span class="lineNum">      41</span> <span class="tlaUNC">           0 :    input logic [31:1]                ifc_fetch_addr_bf,             // Fetch Address byte aligned always.      F1 stage.</span></span>
 <span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC tlaBgGNC">           2 :    input logic                       ifc_fetch_uncacheable_bf,      // The fetch request is uncacheable space. F1 stage</span></span>
-<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">      793734 :    input logic                       ifc_fetch_req_bf,              // Fetch request. Comes with the address.  F1 stage</span></span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">      793587 :    input logic                       ifc_fetch_req_bf,              // Fetch request. Comes with the address.  F1 stage</span></span>
 <span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">           5 :    input logic                       ifc_fetch_req_bf_raw,          // Fetch request without some qualifications. Used for clock-gating. F1 stage</span></span>
 <span id="L45"><span class="lineNum">      45</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                       ifc_iccm_access_bf,            // This request is to the ICCM. Do not generate misses to the bus.</span></span>
 <span id="L46"><span class="lineNum">      46</span> <span class="tlaUNC">           0 :    input logic                       ifc_region_acc_fault_bf,       // Access fault. in ICCM region but offset is outside defined ICCM.</span></span>
-<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC tlaBgGNC">      793731 :    input logic                       ifc_dma_access_ok,             // It is OK to give dma access to the ICCM. (ICCM is not busy this cycle).</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC tlaBgGNC">      793580 :    input logic                       ifc_dma_access_ok,             // It is OK to give dma access to the ICCM. (ICCM is not busy this cycle).</span></span>
 <span id="L48"><span class="lineNum">      48</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                       dec_tlu_fence_i_wb,            // Fence.i instruction is committing. Clear all Icache valids.</span></span>
 <span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC tlaBgGNC">           2 :    input logic                       ifu_bp_hit_taken_f,            // Branch is predicted taken. Kill the fetch next cycle.</span></span>
 <span id="L50"><span class="lineNum">      50</span>              : </span>
@@ -161,7 +161,7 @@
 <span id="L57"><span class="lineNum">      57</span>              : </span>
 <span id="L58"><span class="lineNum">      58</span>              : /// PMU signals</span>
 <span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC">          12 :    output logic                      ifu_pmu_ic_miss,               // IC miss event</span></span>
-<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">      793721 :    output logic                      ifu_pmu_ic_hit,                // IC hit event</span></span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">      793569 :    output logic                      ifu_pmu_ic_hit,                // IC hit event</span></span>
 <span id="L61"><span class="lineNum">      61</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic                      ifu_pmu_bus_error,             // Bus error event</span></span>
 <span id="L62"><span class="lineNum">      62</span> <span class="tlaUNC">           0 :    output logic                      ifu_pmu_bus_busy,              // Bus busy event</span></span>
 <span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC tlaBgGNC">          12 :    output logic                      ifu_pmu_bus_trxn,              // Bus transaction</span></span>
@@ -230,13 +230,13 @@
 <span id="L126"><span class="lineNum">     126</span> <span class="tlaUNC">           0 :    output logic                      iccm_dma_rvalid,   //   Data read from iccm is valid</span></span>
 <span id="L127"><span class="lineNum">     127</span> <span class="tlaUNC">           0 :    output logic [63:0]               iccm_dma_rdata,    //   dma data read from iccm</span></span>
 <span id="L128"><span class="lineNum">     128</span> <span class="tlaUNC">           0 :    output logic [2:0]                iccm_dma_rtag,     //   Tag of the DMA req</span></span>
-<span id="L129"><span class="lineNum">     129</span> <span class="tlaGNC tlaBgGNC">      793727 :    output logic                      iccm_ready,        //   iccm ready to accept new command.</span></span>
+<span id="L129"><span class="lineNum">     129</span> <span class="tlaGNC tlaBgGNC">      793578 :    output logic                      iccm_ready,        //   iccm ready to accept new command.</span></span>
 <span id="L130"><span class="lineNum">     130</span>              : </span>
 <span id="L131"><span class="lineNum">     131</span>              : </span>
 <span id="L132"><span class="lineNum">     132</span>              : //   I$ &amp; ITAG Ports</span>
 <span id="L133"><span class="lineNum">     133</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [31:1]               ic_rw_addr,         // Read/Write addresss to the Icache.</span></span>
 <span id="L134"><span class="lineNum">     134</span> <span class="tlaUNC">           0 :    output logic [pt.ICACHE_NUM_WAYS-1:0]                ic_wr_en,           // Icache write enable, when filling the Icache.</span></span>
-<span id="L135"><span class="lineNum">     135</span> <span class="tlaGNC tlaBgGNC">      793726 :    output logic                      ic_rd_en,           // Icache read  enable.</span></span>
+<span id="L135"><span class="lineNum">     135</span> <span class="tlaGNC tlaBgGNC">      793579 :    output logic                      ic_rd_en,           // Icache read  enable.</span></span>
 <span id="L136"><span class="lineNum">     136</span>              : </span>
 <span id="L137"><span class="lineNum">     137</span> <span class="tlaGNC">           2 :    output logic [pt.ICACHE_BANKS_WAY-1:0] [70:0]               ic_wr_data,           // Data to fill to the Icache. With ECC</span></span>
 <span id="L138"><span class="lineNum">     138</span> <span class="tlaGNC">           2 :    input  logic [63:0]               ic_rd_data ,          // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC</span></span>
@@ -256,9 +256,9 @@
 <span id="L152"><span class="lineNum">     152</span> <span class="tlaGNC">           1 :    output logic [pt.ICACHE_NUM_WAYS-1:0]                ic_debug_way,       // Debug way. Rd or Wr.</span></span>
 <span id="L153"><span class="lineNum">     153</span>              : </span>
 <span id="L154"><span class="lineNum">     154</span>              : </span>
-<span id="L155"><span class="lineNum">     155</span> <span class="tlaGNC">      785697 :    output logic [pt.ICACHE_NUM_WAYS-1:0]                ic_tag_valid,       // Valid bits when accessing the Icache. One valid bit per way. F2 stage</span></span>
+<span id="L155"><span class="lineNum">     155</span> <span class="tlaGNC">      785560 :    output logic [pt.ICACHE_NUM_WAYS-1:0]                ic_tag_valid,       // Valid bits when accessing the Icache. One valid bit per way. F2 stage</span></span>
 <span id="L156"><span class="lineNum">     156</span>              : </span>
-<span id="L157"><span class="lineNum">     157</span> <span class="tlaGNC">      785697 :    input  logic [pt.ICACHE_NUM_WAYS-1:0]                ic_rd_hit,          // Compare hits from Icache tags. Per way.  F2 stage</span></span>
+<span id="L157"><span class="lineNum">     157</span> <span class="tlaGNC">      785560 :    input  logic [pt.ICACHE_NUM_WAYS-1:0]                ic_rd_hit,          // Compare hits from Icache tags. Per way.  F2 stage</span></span>
 <span id="L158"><span class="lineNum">     158</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic                      ic_tag_perr,        // Icache Tag parity error</span></span>
 <span id="L159"><span class="lineNum">     159</span>              : </span>
 <span id="L160"><span class="lineNum">     160</span>              :    // ICCM ports</span>
@@ -270,9 +270,9 @@
 <span id="L166"><span class="lineNum">     166</span>              : </span>
 <span id="L167"><span class="lineNum">     167</span> <span class="tlaUNC">           0 :    input  logic [63:0]               iccm_rd_data,       // Data read from ICCM.</span></span>
 <span id="L168"><span class="lineNum">     168</span> <span class="tlaUNC">           0 :    input  logic [77:0]               iccm_rd_data_ecc,   // Data + ECC read from ICCM.</span></span>
-<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC tlaBgGNC">      793737 :    input  logic [1:0]                ifu_fetch_val,</span></span>
+<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC tlaBgGNC">      793586 :    input  logic [1:0]                ifu_fetch_val,</span></span>
 <span id="L170"><span class="lineNum">     170</span>              :    // IFU control signals</span>
-<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">      793737 :    output logic                      ic_hit_f,               // Hit in Icache(if Icache access) or ICCM access( ICCM always has ic_hit_f)</span></span>
+<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">      793586 :    output logic                      ic_hit_f,               // Hit in Icache(if Icache access) or ICCM access( ICCM always has ic_hit_f)</span></span>
 <span id="L172"><span class="lineNum">     172</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [1:0]                ic_access_fault_f,      // Access fault (bus error or ICCM access in region but out of offset range).</span></span>
 <span id="L173"><span class="lineNum">     173</span> <span class="tlaUNC">           0 :    output logic [1:0]                ic_access_fault_type_f, // Access fault types</span></span>
 <span id="L174"><span class="lineNum">     174</span> <span class="tlaUNC">           0 :    output logic                      iccm_rd_ecc_single_err, // This fetch has a single ICCM ECC error.</span></span>
@@ -283,7 +283,7 @@
 <span id="L179"><span class="lineNum">     179</span>              : </span>
 <span id="L180"><span class="lineNum">     180</span> <span class="tlaUNC">           0 :    output logic                      ifu_async_error_start,  // Or of the sb iccm, and all the icache errors sent to aligner to stop</span></span>
 <span id="L181"><span class="lineNum">     181</span> <span class="tlaUNC">           0 :    output logic                      iccm_dma_sb_error,      // Single Bit ECC error from a DMA access</span></span>
-<span id="L182"><span class="lineNum">     182</span> <span class="tlaGNC tlaBgGNC">      793737 :    output logic [1:0]                ic_fetch_val_f,         // valid bytes for fetch. To the Aligner.</span></span>
+<span id="L182"><span class="lineNum">     182</span> <span class="tlaGNC tlaBgGNC">      793586 :    output logic [1:0]                ic_fetch_val_f,         // valid bytes for fetch. To the Aligner.</span></span>
 <span id="L183"><span class="lineNum">     183</span> <span class="tlaGNC">           2 :    output logic [31:0]               ic_data_f,              // Data read from Icache or ICCM. To the Aligner.</span></span>
 <span id="L184"><span class="lineNum">     184</span> <span class="tlaGNC">           2 :    output logic [63:0]               ic_premux_data,         // Premuxed data to be muxed with Icache data</span></span>
 <span id="L185"><span class="lineNum">     185</span> <span class="tlaGNC">          12 :    output logic                      ic_sel_premux_data,     // Select premux data.</span></span>
@@ -327,13 +327,13 @@
 <span id="L223"><span class="lineNum">     223</span>              : </span>
 <span id="L224"><span class="lineNum">     224</span> <span class="tlaGNC">           3 :    logic [pt.ICACHE_STATUS_BITS-1:0]     way_status;</span></span>
 <span id="L225"><span class="lineNum">     225</span> <span class="tlaGNC">           3 :    logic [pt.ICACHE_STATUS_BITS-1:0]     way_status_mb_in;</span></span>
-<span id="L226"><span class="lineNum">     226</span> <span class="tlaGNC">      793722 :    logic [pt.ICACHE_STATUS_BITS-1:0]     way_status_rep_new;</span></span>
+<span id="L226"><span class="lineNum">     226</span> <span class="tlaGNC">      793570 :    logic [pt.ICACHE_STATUS_BITS-1:0]     way_status_rep_new;</span></span>
 <span id="L227"><span class="lineNum">     227</span> <span class="tlaGNC">           3 :    logic [pt.ICACHE_STATUS_BITS-1:0]     way_status_mb_ff;</span></span>
-<span id="L228"><span class="lineNum">     228</span> <span class="tlaGNC">      793723 :    logic [pt.ICACHE_STATUS_BITS-1:0]     way_status_new;</span></span>
-<span id="L229"><span class="lineNum">     229</span> <span class="tlaGNC">      793721 :    logic [pt.ICACHE_STATUS_BITS-1:0]     way_status_hit_new;</span></span>
-<span id="L230"><span class="lineNum">     230</span> <span class="tlaGNC">      793723 :    logic [pt.ICACHE_STATUS_BITS-1:0]     way_status_new_w_debug;</span></span>
-<span id="L231"><span class="lineNum">     231</span> <span class="tlaGNC">      785697 :    logic [pt.ICACHE_NUM_WAYS-1:0]     tagv_mb_in;</span></span>
-<span id="L232"><span class="lineNum">     232</span> <span class="tlaGNC">      785697 :    logic [pt.ICACHE_NUM_WAYS-1:0]     tagv_mb_ff;</span></span>
+<span id="L228"><span class="lineNum">     228</span> <span class="tlaGNC">      793576 :    logic [pt.ICACHE_STATUS_BITS-1:0]     way_status_new;</span></span>
+<span id="L229"><span class="lineNum">     229</span> <span class="tlaGNC">      793574 :    logic [pt.ICACHE_STATUS_BITS-1:0]     way_status_hit_new;</span></span>
+<span id="L230"><span class="lineNum">     230</span> <span class="tlaGNC">      793576 :    logic [pt.ICACHE_STATUS_BITS-1:0]     way_status_new_w_debug;</span></span>
+<span id="L231"><span class="lineNum">     231</span> <span class="tlaGNC">      785560 :    logic [pt.ICACHE_NUM_WAYS-1:0]     tagv_mb_in;</span></span>
+<span id="L232"><span class="lineNum">     232</span> <span class="tlaGNC">      785559 :    logic [pt.ICACHE_NUM_WAYS-1:0]     tagv_mb_ff;</span></span>
 <span id="L233"><span class="lineNum">     233</span>              : </span>
 <span id="L234"><span class="lineNum">     234</span>              : </span>
 <span id="L235"><span class="lineNum">     235</span> <span class="tlaUNC tlaBgUNC">           0 :    logic           ifu_wr_data_comb_err ;</span></span>
@@ -345,7 +345,7 @@
 <span id="L241"><span class="lineNum">     241</span> <span class="tlaUNC">           0 :    logic           scnd_miss_index_match ;</span></span>
 <span id="L242"><span class="lineNum">     242</span>              : </span>
 <span id="L243"><span class="lineNum">     243</span>              : </span>
-<span id="L244"><span class="lineNum">     244</span> <span class="tlaGNC tlaBgGNC">      793727 :    logic           ifc_dma_access_q_ok;</span></span>
+<span id="L244"><span class="lineNum">     244</span> <span class="tlaGNC tlaBgGNC">      793578 :    logic           ifc_dma_access_q_ok;</span></span>
 <span id="L245"><span class="lineNum">     245</span> <span class="tlaUNC tlaBgUNC">           0 :    logic           ifc_iccm_access_f ;</span></span>
 <span id="L246"><span class="lineNum">     246</span> <span class="tlaUNC">           0 :    logic           ifc_region_acc_fault_f;</span></span>
 <span id="L247"><span class="lineNum">     247</span> <span class="tlaUNC">           0 :    logic           ifc_region_acc_fault_final_f;</span></span>
@@ -353,17 +353,17 @@
 <span id="L249"><span class="lineNum">     249</span> <span class="tlaGNC tlaBgGNC">          12 :    logic           ic_act_miss_f;</span></span>
 <span id="L250"><span class="lineNum">     250</span> <span class="tlaUNC tlaBgUNC">           0 :    logic           ic_miss_under_miss_f;</span></span>
 <span id="L251"><span class="lineNum">     251</span> <span class="tlaUNC">           0 :    logic           ic_ignore_2nd_miss_f;</span></span>
-<span id="L252"><span class="lineNum">     252</span> <span class="tlaGNC tlaBgGNC">      793721 :    logic           ic_act_hit_f;</span></span>
+<span id="L252"><span class="lineNum">     252</span> <span class="tlaGNC tlaBgGNC">      793570 :    logic           ic_act_hit_f;</span></span>
 <span id="L253"><span class="lineNum">     253</span> <span class="tlaGNC">          12 :    logic           miss_pending;</span></span>
 <span id="L254"><span class="lineNum">     254</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [31:1]    imb_in , imb_ff  ;</span></span>
 <span id="L255"><span class="lineNum">     255</span> <span class="tlaUNC">           0 :    logic [31:pt.ICACHE_BEAT_ADDR_HI+1]    miss_addr_in , miss_addr  ;</span></span>
 <span id="L256"><span class="lineNum">     256</span> <span class="tlaUNC">           0 :    logic           miss_wrap_f ;</span></span>
-<span id="L257"><span class="lineNum">     257</span> <span class="tlaGNC tlaBgGNC">      793730 :    logic           flush_final_f;</span></span>
-<span id="L258"><span class="lineNum">     258</span> <span class="tlaGNC">      793733 :    logic           ifc_fetch_req_f;</span></span>
-<span id="L259"><span class="lineNum">     259</span> <span class="tlaGNC">      793733 :    logic           ifc_fetch_req_f_raw;</span></span>
-<span id="L260"><span class="lineNum">     260</span> <span class="tlaGNC">      793737 :    logic           fetch_req_f_qual   ;</span></span>
-<span id="L261"><span class="lineNum">     261</span> <span class="tlaGNC">      793734 :    logic           ifc_fetch_req_qual_bf ;</span></span>
-<span id="L262"><span class="lineNum">     262</span> <span class="tlaGNC">      793721 :    logic [pt.ICACHE_NUM_WAYS-1:0]     replace_way_mb_any;</span></span>
+<span id="L257"><span class="lineNum">     257</span> <span class="tlaGNC tlaBgGNC">      793578 :    logic           flush_final_f;</span></span>
+<span id="L258"><span class="lineNum">     258</span> <span class="tlaGNC">      793582 :    logic           ifc_fetch_req_f;</span></span>
+<span id="L259"><span class="lineNum">     259</span> <span class="tlaGNC">      793586 :    logic           ifc_fetch_req_f_raw;</span></span>
+<span id="L260"><span class="lineNum">     260</span> <span class="tlaGNC">      793586 :    logic           fetch_req_f_qual   ;</span></span>
+<span id="L261"><span class="lineNum">     261</span> <span class="tlaGNC">      793587 :    logic           ifc_fetch_req_qual_bf ;</span></span>
+<span id="L262"><span class="lineNum">     262</span> <span class="tlaGNC">      793569 :    logic [pt.ICACHE_NUM_WAYS-1:0]     replace_way_mb_any;</span></span>
 <span id="L263"><span class="lineNum">     263</span> <span class="tlaGNC">          12 :    logic           last_beat;</span></span>
 <span id="L264"><span class="lineNum">     264</span> <span class="tlaGNC">          20 :    logic           reset_beat_cnt  ;</span></span>
 <span id="L265"><span class="lineNum">     265</span> <span class="tlaGNC">           2 :    logic [pt.ICACHE_BEAT_ADDR_HI:3]     ic_req_addr_bits_hi_3 ;</span></span>
@@ -399,18 +399,18 @@
 <span id="L295"><span class="lineNum">     295</span> <span class="tlaGNC">           4 :    logic           sel_mb_status_addr ;</span></span>
 <span id="L296"><span class="lineNum">     296</span> <span class="tlaGNC">           2 :    logic [63:0]    ic_final_data;</span></span>
 <span id="L297"><span class="lineNum">     297</span>              : </span>
-<span id="L298"><span class="lineNum">     298</span> <span class="tlaGNC">      793723 :    logic [pt.ICACHE_STATUS_BITS-1:0]                              way_status_new_ff ;</span></span>
-<span id="L299"><span class="lineNum">     299</span> <span class="tlaGNC">      793733 :    logic                                    way_status_wr_en_ff ;</span></span>
+<span id="L298"><span class="lineNum">     298</span> <span class="tlaGNC">      793575 :    logic [pt.ICACHE_STATUS_BITS-1:0]                              way_status_new_ff ;</span></span>
+<span id="L299"><span class="lineNum">     299</span> <span class="tlaGNC">      793581 :    logic                                    way_status_wr_en_ff ;</span></span>
 <span id="L300"><span class="lineNum">     300</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [pt.ICACHE_TAG_DEPTH-1:0][pt.ICACHE_STATUS_BITS-1:0]        way_status_out ;</span></span>
 <span id="L301"><span class="lineNum">     301</span> <span class="tlaUNC">           0 :    logic [1:0]                              ic_debug_way_enc;</span></span>
 <span id="L302"><span class="lineNum">     302</span>              : </span>
 <span id="L303"><span class="lineNum">     303</span> <span class="tlaGNC tlaBgGNC">           2 :    logic [pt.IFU_BUS_TAG-1:0]             ifu_bus_rid_ff;</span></span>
 <span id="L304"><span class="lineNum">     304</span>              : </span>
-<span id="L305"><span class="lineNum">     305</span> <span class="tlaGNC">      793733 :    logic         fetch_req_icache_f;</span></span>
+<span id="L305"><span class="lineNum">     305</span> <span class="tlaGNC">      793582 :    logic         fetch_req_icache_f;</span></span>
 <span id="L306"><span class="lineNum">     306</span> <span class="tlaUNC tlaBgUNC">           0 :    logic         fetch_req_iccm_f;</span></span>
 <span id="L307"><span class="lineNum">     307</span> <span class="tlaUNC">           0 :    logic         ic_iccm_hit_f;</span></span>
 <span id="L308"><span class="lineNum">     308</span> <span class="tlaGNC tlaBgGNC">           2 :    logic         fetch_uncacheable_ff;</span></span>
-<span id="L309"><span class="lineNum">     309</span> <span class="tlaGNC">      793723 :    logic         way_status_wr_en;</span></span>
+<span id="L309"><span class="lineNum">     309</span> <span class="tlaGNC">      793572 :    logic         way_status_wr_en;</span></span>
 <span id="L310"><span class="lineNum">     310</span> <span class="tlaGNC">          12 :    logic         sel_byp_data;</span></span>
 <span id="L311"><span class="lineNum">     311</span> <span class="tlaGNC">          13 :    logic         sel_ic_data;</span></span>
 <span id="L312"><span class="lineNum">     312</span> <span class="tlaUNC tlaBgUNC">           0 :    logic         sel_iccm_data;</span></span>
@@ -418,10 +418,10 @@
 <span id="L314"><span class="lineNum">     314</span> <span class="tlaGNC tlaBgGNC">          12 :    logic         ic_act_miss_f_delayed;</span></span>
 <span id="L315"><span class="lineNum">     315</span> <span class="tlaUNC tlaBgUNC">           0 :    logic         bus_ifu_wr_data_error;</span></span>
 <span id="L316"><span class="lineNum">     316</span> <span class="tlaUNC">           0 :    logic         bus_ifu_wr_data_error_ff;</span></span>
-<span id="L317"><span class="lineNum">     317</span> <span class="tlaGNC tlaBgGNC">      793733 :    logic         way_status_wr_en_w_debug;</span></span>
+<span id="L317"><span class="lineNum">     317</span> <span class="tlaGNC tlaBgGNC">      793582 :    logic         way_status_wr_en_w_debug;</span></span>
 <span id="L318"><span class="lineNum">     318</span> <span class="tlaUNC tlaBgUNC">           0 :    logic         ic_debug_tag_val_rd_out;</span></span>
 <span id="L319"><span class="lineNum">     319</span> <span class="tlaGNC tlaBgGNC">          12 :    logic         ifu_pmu_ic_miss_in;</span></span>
-<span id="L320"><span class="lineNum">     320</span> <span class="tlaGNC">      793721 :    logic         ifu_pmu_ic_hit_in;</span></span>
+<span id="L320"><span class="lineNum">     320</span> <span class="tlaGNC">      793570 :    logic         ifu_pmu_ic_hit_in;</span></span>
 <span id="L321"><span class="lineNum">     321</span> <span class="tlaUNC tlaBgUNC">           0 :    logic         ifu_pmu_bus_error_in;</span></span>
 <span id="L322"><span class="lineNum">     322</span> <span class="tlaGNC tlaBgGNC">          12 :    logic         ifu_pmu_bus_trxn_in;</span></span>
 <span id="L323"><span class="lineNum">     323</span> <span class="tlaUNC tlaBgUNC">           0 :    logic         ifu_pmu_bus_busy_in;</span></span>
@@ -519,8 +519,8 @@
 <span id="L415"><span class="lineNum">     415</span>              : </span>
 <span id="L416"><span class="lineNum">     416</span> <span class="tlaUNC">           0 :    logic [pt.ICACHE_NUM_WAYS-1:0]       bus_wren_last       ;</span></span>
 <span id="L417"><span class="lineNum">     417</span> <span class="tlaUNC">           0 :    logic [pt.ICACHE_NUM_WAYS-1:0]       wren_reset_miss      ;</span></span>
-<span id="L418"><span class="lineNum">     418</span> <span class="tlaGNC tlaBgGNC">      793731 :    logic        ifc_dma_access_ok_d;</span></span>
-<span id="L419"><span class="lineNum">     419</span> <span class="tlaGNC">      793731 :    logic        ifc_dma_access_ok_prev;</span></span>
+<span id="L418"><span class="lineNum">     418</span> <span class="tlaGNC tlaBgGNC">      793580 :    logic        ifc_dma_access_ok_d;</span></span>
+<span id="L419"><span class="lineNum">     419</span> <span class="tlaGNC">      793579 :    logic        ifc_dma_access_ok_prev;</span></span>
 <span id="L420"><span class="lineNum">     420</span>              : </span>
 <span id="L421"><span class="lineNum">     421</span> <span class="tlaGNC">          12 :    logic   bus_cmd_req_in ;</span></span>
 <span id="L422"><span class="lineNum">     422</span> <span class="tlaGNC">          12 :    logic   bus_cmd_req_hold ;</span></span>
@@ -667,8 +667,8 @@
 <span id="L563"><span class="lineNum">     563</span> <span class="tlaGNC tlaBgGNC">           2 :    logic         uncacheable_miss_scnd_in ;</span></span>
 <span id="L564"><span class="lineNum">     564</span> <span class="tlaGNC">           2 :    logic         uncacheable_miss_scnd_ff ;</span></span>
 <span id="L565"><span class="lineNum">     565</span>              : </span>
-<span id="L566"><span class="lineNum">     566</span> <span class="tlaGNC">      785697 :    logic  [pt.ICACHE_NUM_WAYS-1:0] tagv_mb_scnd_in;</span></span>
-<span id="L567"><span class="lineNum">     567</span> <span class="tlaGNC">      785697 :    logic  [pt.ICACHE_NUM_WAYS-1:0] tagv_mb_scnd_ff;</span></span>
+<span id="L566"><span class="lineNum">     566</span> <span class="tlaGNC">      785560 :    logic  [pt.ICACHE_NUM_WAYS-1:0] tagv_mb_scnd_in;</span></span>
+<span id="L567"><span class="lineNum">     567</span> <span class="tlaGNC">      785559 :    logic  [pt.ICACHE_NUM_WAYS-1:0] tagv_mb_scnd_ff;</span></span>
 <span id="L568"><span class="lineNum">     568</span>              : </span>
 <span id="L569"><span class="lineNum">     569</span> <span class="tlaGNC">           3 :    logic  [pt.ICACHE_STATUS_BITS-1:0] way_status_mb_scnd_in;</span></span>
 <span id="L570"><span class="lineNum">     570</span> <span class="tlaGNC">           3 :    logic  [pt.ICACHE_STATUS_BITS-1:0] way_status_mb_scnd_ff;</span></span>
@@ -1488,7 +1488,7 @@
 <span id="L1384"><span class="lineNum">    1384</span>              :                               ((miss_state == CRIT_BYP_OK) &amp;  miss_state_en &amp;  (miss_nxtstate == MISS_WAIT))  ))  |</span>
 <span id="L1385"><span class="lineNum">    1385</span>              :                              ( ifc_fetch_req_bf &amp; exu_flush_final  &amp; ~ifc_fetch_uncacheable_bf &amp; ~ifc_iccm_access_bf )     ;</span>
 <span id="L1386"><span class="lineNum">    1386</span>              : </span>
-<span id="L1387"><span class="lineNum">    1387</span> <span class="tlaGNC tlaBgGNC">      793734 : logic   ic_real_rd_wp_unused;</span></span>
+<span id="L1387"><span class="lineNum">    1387</span> <span class="tlaGNC tlaBgGNC">      793587 : logic   ic_real_rd_wp_unused;</span></span>
 <span id="L1388"><span class="lineNum">    1388</span>              : assign  ic_real_rd_wp_unused  =  (ifc_fetch_req_bf &amp;  ~ifc_iccm_access_bf  &amp;  ~ifc_region_acc_fault_final_bf &amp; ~dec_tlu_fence_i_wb &amp; ~stream_miss_f &amp; ~ic_act_miss_f &amp;</span>
 <span id="L1389"><span class="lineNum">    1389</span>              :                             ~(((miss_state == STREAM) &amp; ~miss_state_en) |</span>
 <span id="L1390"><span class="lineNum">    1390</span>              :                               ((miss_state == CRIT_BYP_OK) &amp; ~miss_state_en &amp; ~(miss_nxtstate == MISS_WAIT)) |</span>

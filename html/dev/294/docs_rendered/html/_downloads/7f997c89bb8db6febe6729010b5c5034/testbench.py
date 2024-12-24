@@ -6,7 +6,7 @@ import os
 
 from cocotb.binary import BinaryValue
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, RisingEdge
+from cocotb.triggers import ClockCycles, FallingEdge, RisingEdge
 from pyuvm import *
 
 # ==============================================================================
@@ -45,34 +45,33 @@ def getDecodedEntryCfg(regs, index, range_only=False):
     else:
         start_address = 0
 
-    match address_matching:
-        case 0:  # Entry disabled
+    if address_matching == 0:  # Entry diabled
+        if range_only:
+            end_address = pmpaddr.integer << 2
+            return start_address, end_address
+        else:
+            return None
+    elif address_matching == 1:  # Top of range
+        end_address = pmpaddr.integer << 2
+        if start_address > end_address:
             if range_only:
-                end_address = pmpaddr.integer << 2
                 return start_address, end_address
             else:
                 return None
-        case 1:  # Top of range
-            end_address = pmpaddr.integer << 2
-            if start_address > end_address:
-                if range_only:
-                    return start_address, end_address
-                else:
-                    return None
-        case 2:  # Naturally aligned four-byte region
-            end_address = (pmpaddr.integer << 2) + 4
-        case 3:  # Naturally aligned power-of-two region, >=8 bytes
-            napot = 3
-            start_address = pmpaddr
-            for i in range(len(pmpaddr)):
-                if pmpaddr[i].integer == 1:
-                    start_address[i].value = 0
-                    napot += 1
-                else:
-                    continue
+    elif address_matching == 2:  # Naturally aligned four-byte region
+        end_address = (pmpaddr.integer << 2) + 4
+    elif address_matching == 3:  # Naturally aligned power-of-two region, >=8 bytes
+        napot = 3
+        start_address = pmpaddr
+        for i in range(len(pmpaddr)):
+            if pmpaddr[i].integer == 1:
+                start_address[i].value = 0
+                napot += 1
+            else:
+                continue
 
-            start_address = start_address.integer << 2
-            end_address = start_address + 2**napot
+        start_address = start_address.integer << 2
+        end_address = start_address + 2**napot
 
     # PMP upper address bundary is non-inclusive
     end_address -= 1
@@ -347,8 +346,16 @@ class BaseTest(uvm_test):
 
     async def run_phase(self):
         self.raise_objection()
+
+        cocotb.top.scan_mode.value = 0
+        cocotb.top.pmp_chan_addr.value = [0, 0, 0]
+        cocotb.top.pmp_chan_type.value = [0, 0, 0]
+
         self.start_clock("clk")
+        cocotb.top.rst_l.value = 0
         await ClockCycles(cocotb.top.clk, 2)
+        await FallingEdge(cocotb.top.clk)
+        cocotb.top.rst_l.value = 1
         await self.run()
         await ClockCycles(cocotb.top.clk, 2)
         self.drop_objection()

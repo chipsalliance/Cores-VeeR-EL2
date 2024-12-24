@@ -472,15 +472,15 @@
 <span id="L368"><span class="lineNum">     368</span>              :    //------------------------------------------------------------------------------</span>
 <span id="L369"><span class="lineNum">     369</span>              : </span>
 <span id="L370"><span class="lineNum">     370</span>              :    // Function to do 8 to 3 bit encoding</span>
-<span id="L371"><span class="lineNum">     371</span> <span class="tlaGNC tlaBgGNC">       46241 :    function automatic logic [2:0] f_Enc8to3;</span></span>
+<span id="L371"><span class="lineNum">     371</span> <span class="tlaGNC tlaBgGNC">       30908 :    function automatic logic [2:0] f_Enc8to3;</span></span>
 <span id="L372"><span class="lineNum">     372</span>              :       input logic [7:0] Dec_value;</span>
 <span id="L373"><span class="lineNum">     373</span>              : </span>
 <span id="L374"><span class="lineNum">     374</span>              :       logic [2:0]       Enc_value;</span>
-<span id="L375"><span class="lineNum">     375</span> <span class="tlaGNC">       46241 :       Enc_value[0] = Dec_value[1] | Dec_value[3] | Dec_value[5] | Dec_value[7];</span></span>
-<span id="L376"><span class="lineNum">     376</span> <span class="tlaGNC">       46241 :       Enc_value[1] = Dec_value[2] | Dec_value[3] | Dec_value[6] | Dec_value[7];</span></span>
-<span id="L377"><span class="lineNum">     377</span> <span class="tlaGNC">       46241 :       Enc_value[2] = Dec_value[4] | Dec_value[5] | Dec_value[6] | Dec_value[7];</span></span>
+<span id="L375"><span class="lineNum">     375</span> <span class="tlaGNC">       30908 :       Enc_value[0] = Dec_value[1] | Dec_value[3] | Dec_value[5] | Dec_value[7];</span></span>
+<span id="L376"><span class="lineNum">     376</span> <span class="tlaGNC">       30908 :       Enc_value[1] = Dec_value[2] | Dec_value[3] | Dec_value[6] | Dec_value[7];</span></span>
+<span id="L377"><span class="lineNum">     377</span> <span class="tlaGNC">       30908 :       Enc_value[2] = Dec_value[4] | Dec_value[5] | Dec_value[6] | Dec_value[7];</span></span>
 <span id="L378"><span class="lineNum">     378</span>              : </span>
-<span id="L379"><span class="lineNum">     379</span> <span class="tlaGNC">       46241 :       return Enc_value[2:0];</span></span>
+<span id="L379"><span class="lineNum">     379</span> <span class="tlaGNC">       30908 :       return Enc_value[2:0];</span></span>
 <span id="L380"><span class="lineNum">     380</span>              :    endfunction // f_Enc8to3</span>
 <span id="L381"><span class="lineNum">     381</span>              : </span>
 <span id="L382"><span class="lineNum">     382</span>              :    // Buffer hit logic for bus load forwarding</span>
@@ -785,51 +785,51 @@
 <span id="L681"><span class="lineNum">     681</span> <span class="tlaGNC">           4 :          buf_ldfwdtag_in[i]       = '0;</span></span>
 <span id="L682"><span class="lineNum">     682</span>              : </span>
 <span id="L683"><span class="lineNum">     683</span> <span class="tlaGNC">           4 :          case (buf_state[i])</span></span>
-<span id="L684"><span class="lineNum">     684</span> <span class="tlaGNC">       16725 :             IDLE: begin</span></span>
-<span id="L685"><span class="lineNum">     685</span> <span class="tlaGNC">       16725 :                      buf_nxtstate[i] = lsu_bus_clk_en ? CMD : START_WAIT;</span></span>
-<span id="L686"><span class="lineNum">     686</span> <span class="tlaGNC">       16725 :                      buf_state_en[i] = (lsu_busreq_r &amp; lsu_commit_r &amp; (((ibuf_byp | ldst_dual_r) &amp; ~ibuf_merge_en &amp; (i == WrPtr0_r)) | (ibuf_byp &amp; ldst_dual_r &amp; (i == WrPtr1_r)))) |</span></span>
-<span id="L687"><span class="lineNum">     687</span> <span class="tlaGNC">       16725 :                                        (ibuf_drain_vld &amp; (i == ibuf_tag));</span></span>
-<span id="L688"><span class="lineNum">     688</span> <span class="tlaGNC">       16725 :                      buf_wr_en[i]    = buf_state_en[i];</span></span>
-<span id="L689"><span class="lineNum">     689</span> <span class="tlaGNC">       16725 :                      buf_data_en[i]  = buf_state_en[i];</span></span>
-<span id="L690"><span class="lineNum">     690</span> <span class="tlaGNC">       16725 :                      buf_data_in[i]   = (ibuf_drain_vld &amp; (i == ibuf_tag)) ? ibuf_data_out[31:0] : store_data_lo_r[31:0];</span></span>
-<span id="L691"><span class="lineNum">     691</span> <span class="tlaGNC">       16725 :                      buf_cmd_state_bus_en[i]  = '0;</span></span>
+<span id="L684"><span class="lineNum">     684</span> <span class="tlaGNC">       11301 :             IDLE: begin</span></span>
+<span id="L685"><span class="lineNum">     685</span> <span class="tlaGNC">       11301 :                      buf_nxtstate[i] = lsu_bus_clk_en ? CMD : START_WAIT;</span></span>
+<span id="L686"><span class="lineNum">     686</span> <span class="tlaGNC">       11301 :                      buf_state_en[i] = (lsu_busreq_r &amp; lsu_commit_r &amp; (((ibuf_byp | ldst_dual_r) &amp; ~ibuf_merge_en &amp; (i == WrPtr0_r)) | (ibuf_byp &amp; ldst_dual_r &amp; (i == WrPtr1_r)))) |</span></span>
+<span id="L687"><span class="lineNum">     687</span> <span class="tlaGNC">       11301 :                                        (ibuf_drain_vld &amp; (i == ibuf_tag));</span></span>
+<span id="L688"><span class="lineNum">     688</span> <span class="tlaGNC">       11301 :                      buf_wr_en[i]    = buf_state_en[i];</span></span>
+<span id="L689"><span class="lineNum">     689</span> <span class="tlaGNC">       11301 :                      buf_data_en[i]  = buf_state_en[i];</span></span>
+<span id="L690"><span class="lineNum">     690</span> <span class="tlaGNC">       11301 :                      buf_data_in[i]   = (ibuf_drain_vld &amp; (i == ibuf_tag)) ? ibuf_data_out[31:0] : store_data_lo_r[31:0];</span></span>
+<span id="L691"><span class="lineNum">     691</span> <span class="tlaGNC">       11301 :                      buf_cmd_state_bus_en[i]  = '0;</span></span>
 <span id="L692"><span class="lineNum">     692</span>              :             end</span>
 <span id="L693"><span class="lineNum">     693</span> <span class="tlaUNC tlaBgUNC">           0 :             START_WAIT: begin</span></span>
 <span id="L694"><span class="lineNum">     694</span> <span class="tlaUNC">           0 :                      buf_nxtstate[i] = dec_tlu_force_halt ? IDLE : CMD;</span></span>
 <span id="L695"><span class="lineNum">     695</span> <span class="tlaUNC">           0 :                      buf_state_en[i] = lsu_bus_clk_en | dec_tlu_force_halt;</span></span>
 <span id="L696"><span class="lineNum">     696</span> <span class="tlaUNC">           0 :                      buf_cmd_state_bus_en[i]  = '0;</span></span>
 <span id="L697"><span class="lineNum">     697</span>              :             end</span>
-<span id="L698"><span class="lineNum">     698</span> <span class="tlaGNC tlaBgGNC">        1031 :             CMD: begin</span></span>
-<span id="L699"><span class="lineNum">     699</span> <span class="tlaGNC">        1031 :                      buf_nxtstate[i]          = dec_tlu_force_halt ? IDLE : (obuf_nosend &amp; bus_rsp_read &amp; (bus_rsp_read_tag == obuf_rdrsp_tag)) ? DONE_WAIT : RESP;</span></span>
-<span id="L700"><span class="lineNum">     700</span> <span class="tlaGNC">        1031 :                      buf_cmd_state_bus_en[i]  = ((obuf_tag0 == i) | (obuf_merge &amp; (obuf_tag1 == i))) &amp; obuf_valid &amp; obuf_wr_enQ;  // Just use the recently written obuf_valid</span></span>
-<span id="L701"><span class="lineNum">     701</span> <span class="tlaGNC">        1031 :                      buf_state_bus_en[i]      = buf_cmd_state_bus_en[i];</span></span>
-<span id="L702"><span class="lineNum">     702</span> <span class="tlaGNC">        1031 :                      buf_state_en[i]          = (buf_state_bus_en[i] &amp; lsu_bus_clk_en) | dec_tlu_force_halt;</span></span>
-<span id="L703"><span class="lineNum">     703</span> <span class="tlaGNC">        1031 :                      buf_ldfwd_in[i]          = 1'b1;</span></span>
-<span id="L704"><span class="lineNum">     704</span> <span class="tlaGNC">        1031 :                      buf_ldfwd_en[i]          = buf_state_en[i] &amp; ~buf_write[i] &amp; obuf_nosend &amp; ~dec_tlu_force_halt;</span></span>
-<span id="L705"><span class="lineNum">     705</span> <span class="tlaGNC">        1031 :                      buf_ldfwdtag_in[i]       = DEPTH_LOG2'(obuf_rdrsp_tag[pt.LSU_BUS_TAG-2:0]);</span></span>
-<span id="L706"><span class="lineNum">     706</span> <span class="tlaGNC">        1031 :                      buf_data_en[i]           = buf_state_bus_en[i] &amp; lsu_bus_clk_en &amp; obuf_nosend &amp; bus_rsp_read;</span></span>
-<span id="L707"><span class="lineNum">     707</span> <span class="tlaGNC">        1031 :                      buf_error_en[i]          = buf_state_bus_en[i] &amp; lsu_bus_clk_en &amp; obuf_nosend &amp; bus_rsp_read_error;</span></span>
-<span id="L708"><span class="lineNum">     708</span> <span class="tlaGNC">        1031 :                      buf_data_in[i]           = buf_error_en[i] ? bus_rsp_rdata[31:0] : (buf_addr[i][2] ? bus_rsp_rdata[63:32] : bus_rsp_rdata[31:0]);</span></span>
+<span id="L698"><span class="lineNum">     698</span> <span class="tlaGNC tlaBgGNC">         517 :             CMD: begin</span></span>
+<span id="L699"><span class="lineNum">     699</span> <span class="tlaGNC">         517 :                      buf_nxtstate[i]          = dec_tlu_force_halt ? IDLE : (obuf_nosend &amp; bus_rsp_read &amp; (bus_rsp_read_tag == obuf_rdrsp_tag)) ? DONE_WAIT : RESP;</span></span>
+<span id="L700"><span class="lineNum">     700</span> <span class="tlaGNC">         517 :                      buf_cmd_state_bus_en[i]  = ((obuf_tag0 == i) | (obuf_merge &amp; (obuf_tag1 == i))) &amp; obuf_valid &amp; obuf_wr_enQ;  // Just use the recently written obuf_valid</span></span>
+<span id="L701"><span class="lineNum">     701</span> <span class="tlaGNC">         517 :                      buf_state_bus_en[i]      = buf_cmd_state_bus_en[i];</span></span>
+<span id="L702"><span class="lineNum">     702</span> <span class="tlaGNC">         517 :                      buf_state_en[i]          = (buf_state_bus_en[i] &amp; lsu_bus_clk_en) | dec_tlu_force_halt;</span></span>
+<span id="L703"><span class="lineNum">     703</span> <span class="tlaGNC">         517 :                      buf_ldfwd_in[i]          = 1'b1;</span></span>
+<span id="L704"><span class="lineNum">     704</span> <span class="tlaGNC">         517 :                      buf_ldfwd_en[i]          = buf_state_en[i] &amp; ~buf_write[i] &amp; obuf_nosend &amp; ~dec_tlu_force_halt;</span></span>
+<span id="L705"><span class="lineNum">     705</span> <span class="tlaGNC">         517 :                      buf_ldfwdtag_in[i]       = DEPTH_LOG2'(obuf_rdrsp_tag[pt.LSU_BUS_TAG-2:0]);</span></span>
+<span id="L706"><span class="lineNum">     706</span> <span class="tlaGNC">         517 :                      buf_data_en[i]           = buf_state_bus_en[i] &amp; lsu_bus_clk_en &amp; obuf_nosend &amp; bus_rsp_read;</span></span>
+<span id="L707"><span class="lineNum">     707</span> <span class="tlaGNC">         517 :                      buf_error_en[i]          = buf_state_bus_en[i] &amp; lsu_bus_clk_en &amp; obuf_nosend &amp; bus_rsp_read_error;</span></span>
+<span id="L708"><span class="lineNum">     708</span> <span class="tlaGNC">         517 :                      buf_data_in[i]           = buf_error_en[i] ? bus_rsp_rdata[31:0] : (buf_addr[i][2] ? bus_rsp_rdata[63:32] : bus_rsp_rdata[31:0]);</span></span>
 <span id="L709"><span class="lineNum">     709</span>              :             end</span>
-<span id="L710"><span class="lineNum">     710</span> <span class="tlaGNC">         191 :             RESP: begin</span></span>
-<span id="L711"><span class="lineNum">     711</span> <span class="tlaGNC">         191 :                      buf_nxtstate[i]           = (dec_tlu_force_halt | (buf_write[i] &amp; ~bus_rsp_write_error)) ? IDLE :    // Side-effect writes will be non-posted</span></span>
-<span id="L712"><span class="lineNum">     712</span> <span class="tlaGNC">         191 :                                                       (buf_dual[i] &amp; ~buf_samedw[i] &amp; ~buf_write[i] &amp; (buf_state[buf_dualtag[i]] != DONE_PARTIAL)) ? DONE_PARTIAL : // Goto DONE_PARTIAL if this is the first return of dual</span></span>
-<span id="L713"><span class="lineNum">     713</span> <span class="tlaGNC">         191 :                                                            (buf_ldfwd[i] | any_done_wait_state |</span></span>
-<span id="L714"><span class="lineNum">     714</span> <span class="tlaGNC">         191 :                                                             (buf_dual[i] &amp; ~buf_samedw[i] &amp; ~buf_write[i] &amp; buf_ldfwd[buf_dualtag[i]] &amp;</span></span>
-<span id="L715"><span class="lineNum">     715</span> <span class="tlaGNC">         191 :                                                              (buf_state[buf_dualtag[i]] == DONE_PARTIAL) &amp; any_done_wait_state)) ? DONE_WAIT : DONE;</span></span>
-<span id="L716"><span class="lineNum">     716</span> <span class="tlaGNC">         191 :                      buf_resp_state_bus_en[i]  = (bus_rsp_write &amp; (bus_rsp_write_tag == (pt.LSU_BUS_TAG)'(i))) |</span></span>
-<span id="L717"><span class="lineNum">     717</span> <span class="tlaGNC">         191 :                                                  (bus_rsp_read  &amp; ((bus_rsp_read_tag == (pt.LSU_BUS_TAG)'(i)) |</span></span>
-<span id="L718"><span class="lineNum">     718</span> <span class="tlaGNC">         191 :                                                                    (buf_ldfwd[i] &amp; (bus_rsp_read_tag == (pt.LSU_BUS_TAG)'(buf_ldfwdtag[i]))) |</span></span>
-<span id="L719"><span class="lineNum">     719</span> <span class="tlaGNC">         191 :                                                                    (buf_dual[i] &amp; buf_dualhi[i] &amp; ~buf_write[i] &amp; buf_samedw[i] &amp; (bus_rsp_read_tag == (pt.LSU_BUS_TAG)'(buf_dualtag[i])))));</span></span>
-<span id="L720"><span class="lineNum">     720</span> <span class="tlaGNC">         191 :                      buf_state_bus_en[i]       = buf_resp_state_bus_en[i];</span></span>
-<span id="L721"><span class="lineNum">     721</span> <span class="tlaGNC">         191 :                      buf_state_en[i]           = (buf_state_bus_en[i] &amp; lsu_bus_clk_en) | dec_tlu_force_halt;</span></span>
-<span id="L722"><span class="lineNum">     722</span> <span class="tlaGNC">         191 :                      buf_data_en[i]            = buf_state_bus_en[i] &amp; bus_rsp_read &amp; lsu_bus_clk_en;</span></span>
+<span id="L710"><span class="lineNum">     710</span> <span class="tlaGNC">         133 :             RESP: begin</span></span>
+<span id="L711"><span class="lineNum">     711</span> <span class="tlaGNC">         133 :                      buf_nxtstate[i]           = (dec_tlu_force_halt | (buf_write[i] &amp; ~bus_rsp_write_error)) ? IDLE :    // Side-effect writes will be non-posted</span></span>
+<span id="L712"><span class="lineNum">     712</span> <span class="tlaGNC">         133 :                                                       (buf_dual[i] &amp; ~buf_samedw[i] &amp; ~buf_write[i] &amp; (buf_state[buf_dualtag[i]] != DONE_PARTIAL)) ? DONE_PARTIAL : // Goto DONE_PARTIAL if this is the first return of dual</span></span>
+<span id="L713"><span class="lineNum">     713</span> <span class="tlaGNC">         133 :                                                            (buf_ldfwd[i] | any_done_wait_state |</span></span>
+<span id="L714"><span class="lineNum">     714</span> <span class="tlaGNC">         133 :                                                             (buf_dual[i] &amp; ~buf_samedw[i] &amp; ~buf_write[i] &amp; buf_ldfwd[buf_dualtag[i]] &amp;</span></span>
+<span id="L715"><span class="lineNum">     715</span> <span class="tlaGNC">         133 :                                                              (buf_state[buf_dualtag[i]] == DONE_PARTIAL) &amp; any_done_wait_state)) ? DONE_WAIT : DONE;</span></span>
+<span id="L716"><span class="lineNum">     716</span> <span class="tlaGNC">         133 :                      buf_resp_state_bus_en[i]  = (bus_rsp_write &amp; (bus_rsp_write_tag == (pt.LSU_BUS_TAG)'(i))) |</span></span>
+<span id="L717"><span class="lineNum">     717</span> <span class="tlaGNC">         133 :                                                  (bus_rsp_read  &amp; ((bus_rsp_read_tag == (pt.LSU_BUS_TAG)'(i)) |</span></span>
+<span id="L718"><span class="lineNum">     718</span> <span class="tlaGNC">         133 :                                                                    (buf_ldfwd[i] &amp; (bus_rsp_read_tag == (pt.LSU_BUS_TAG)'(buf_ldfwdtag[i]))) |</span></span>
+<span id="L719"><span class="lineNum">     719</span> <span class="tlaGNC">         133 :                                                                    (buf_dual[i] &amp; buf_dualhi[i] &amp; ~buf_write[i] &amp; buf_samedw[i] &amp; (bus_rsp_read_tag == (pt.LSU_BUS_TAG)'(buf_dualtag[i])))));</span></span>
+<span id="L720"><span class="lineNum">     720</span> <span class="tlaGNC">         133 :                      buf_state_bus_en[i]       = buf_resp_state_bus_en[i];</span></span>
+<span id="L721"><span class="lineNum">     721</span> <span class="tlaGNC">         133 :                      buf_state_en[i]           = (buf_state_bus_en[i] &amp; lsu_bus_clk_en) | dec_tlu_force_halt;</span></span>
+<span id="L722"><span class="lineNum">     722</span> <span class="tlaGNC">         133 :                      buf_data_en[i]            = buf_state_bus_en[i] &amp; bus_rsp_read &amp; lsu_bus_clk_en;</span></span>
 <span id="L723"><span class="lineNum">     723</span>              :                       // Need to capture the error for stores as well for AXI</span>
-<span id="L724"><span class="lineNum">     724</span> <span class="tlaGNC">         191 :                      buf_error_en[i]           = buf_state_bus_en[i] &amp; lsu_bus_clk_en &amp; ((bus_rsp_read_error  &amp; (bus_rsp_read_tag  == (pt.LSU_BUS_TAG)'(i))) |</span></span>
-<span id="L725"><span class="lineNum">     725</span> <span class="tlaGNC">         191 :                                                                                          (bus_rsp_read_error  &amp; buf_ldfwd[i] &amp; (bus_rsp_read_tag == (pt.LSU_BUS_TAG)'(buf_ldfwdtag[i]))) |</span></span>
-<span id="L726"><span class="lineNum">     726</span> <span class="tlaGNC">         191 :                                                                                          (bus_rsp_write_error &amp; (bus_rsp_write_tag == (pt.LSU_BUS_TAG)'(i))));</span></span>
-<span id="L727"><span class="lineNum">     727</span> <span class="tlaGNC">         191 :                      buf_data_in[i][31:0]      = (buf_state_en[i] &amp; ~buf_error_en[i]) ? (buf_addr[i][2] ? bus_rsp_rdata[63:32] : bus_rsp_rdata[31:0]) : bus_rsp_rdata[31:0];</span></span>
-<span id="L728"><span class="lineNum">     728</span> <span class="tlaGNC">         191 :                      buf_cmd_state_bus_en[i]  = '0;</span></span>
+<span id="L724"><span class="lineNum">     724</span> <span class="tlaGNC">         133 :                      buf_error_en[i]           = buf_state_bus_en[i] &amp; lsu_bus_clk_en &amp; ((bus_rsp_read_error  &amp; (bus_rsp_read_tag  == (pt.LSU_BUS_TAG)'(i))) |</span></span>
+<span id="L725"><span class="lineNum">     725</span> <span class="tlaGNC">         133 :                                                                                          (bus_rsp_read_error  &amp; buf_ldfwd[i] &amp; (bus_rsp_read_tag == (pt.LSU_BUS_TAG)'(buf_ldfwdtag[i]))) |</span></span>
+<span id="L726"><span class="lineNum">     726</span> <span class="tlaGNC">         133 :                                                                                          (bus_rsp_write_error &amp; (bus_rsp_write_tag == (pt.LSU_BUS_TAG)'(i))));</span></span>
+<span id="L727"><span class="lineNum">     727</span> <span class="tlaGNC">         133 :                      buf_data_in[i][31:0]      = (buf_state_en[i] &amp; ~buf_error_en[i]) ? (buf_addr[i][2] ? bus_rsp_rdata[63:32] : bus_rsp_rdata[31:0]) : bus_rsp_rdata[31:0];</span></span>
+<span id="L728"><span class="lineNum">     728</span> <span class="tlaGNC">         133 :                      buf_cmd_state_bus_en[i]  = '0;</span></span>
 <span id="L729"><span class="lineNum">     729</span>              :             end</span>
 <span id="L730"><span class="lineNum">     730</span> <span class="tlaUNC tlaBgUNC">           0 :             DONE_PARTIAL: begin   // Other part of dual load hasn't returned</span></span>
 <span id="L731"><span class="lineNum">     731</span> <span class="tlaUNC">           0 :                      buf_nxtstate[i]           = dec_tlu_force_halt ? IDLE : (buf_ldfwd[i] | buf_ldfwd[buf_dualtag[i]] | any_done_wait_state) ? DONE_WAIT : DONE;</span></span>

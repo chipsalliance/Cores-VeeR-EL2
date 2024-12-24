@@ -137,7 +137,7 @@
 <span id="L33"><span class="lineNum">      33</span>              : (</span>
 <span id="L34"><span class="lineNum">      34</span>              : </span>
 <span id="L35"><span class="lineNum">      35</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                             clk_override,             // Override non-functional clock gating</span></span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC tlaBgGNC">      793728 :    input logic                             dec_tlu_flush_lower_r,    // I0/I1 writeback flush. This is used to flush the old packets only</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC tlaBgGNC">      793429 :    input logic                             dec_tlu_flush_lower_r,    // I0/I1 writeback flush. This is used to flush the old packets only</span></span>
 <span id="L37"><span class="lineNum">      37</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                             dec_tlu_i0_kill_writeb_r, // I0 is flushed, don't writeback any results to arch state</span></span>
 <span id="L38"><span class="lineNum">      38</span> <span class="tlaUNC">           0 :    input logic                             dec_tlu_force_halt,       // This will be high till TLU goes to debug halt</span></span>
 <span id="L39"><span class="lineNum">      39</span>              : </span>
@@ -152,7 +152,7 @@
 <span id="L48"><span class="lineNum">      48</span> <span class="tlaUNC">           0 :    input logic [11:0]                      dec_lsu_offset_d,     // address offset operand</span></span>
 <span id="L49"><span class="lineNum">      49</span>              : </span>
 <span id="L50"><span class="lineNum">      50</span> <span class="tlaUNC">           0 :    input                                   el2_lsu_pkt_t lsu_p,  // lsu control packet</span></span>
-<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC tlaBgGNC">      793721 :    input logic                             dec_lsu_valid_raw_d,   // Raw valid for address computation</span></span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC tlaBgGNC">      793424 :    input logic                             dec_lsu_valid_raw_d,   // Raw valid for address computation</span></span>
 <span id="L52"><span class="lineNum">      52</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [31:0]                      dec_tlu_mrac_ff,       // CSR for memory region control</span></span>
 <span id="L53"><span class="lineNum">      53</span>              : </span>
 <span id="L54"><span class="lineNum">      54</span> <span class="tlaUNC">           0 :    output logic [31:0]                     lsu_result_m,          // lsu load data</span></span>
@@ -300,7 +300,7 @@
 <span id="L196"><span class="lineNum">     196</span> <span class="tlaUNC">           0 :    output logic                            dccm_dma_ecc_error,  // DMA load had ecc error</span></span>
 <span id="L197"><span class="lineNum">     197</span> <span class="tlaUNC">           0 :    output logic [2:0]                      dccm_dma_rtag,       // DMA request tag</span></span>
 <span id="L198"><span class="lineNum">     198</span> <span class="tlaUNC">           0 :    output logic [63:0]                     dccm_dma_rdata,      // lsu data for DMA dccm read</span></span>
-<span id="L199"><span class="lineNum">     199</span> <span class="tlaGNC tlaBgGNC">      793722 :    output logic                            dccm_ready,          // lsu ready for DMA access</span></span>
+<span id="L199"><span class="lineNum">     199</span> <span class="tlaGNC tlaBgGNC">      793425 :    output logic                            dccm_ready,          // lsu ready for DMA access</span></span>
 <span id="L200"><span class="lineNum">     200</span>              : </span>
 <span id="L201"><span class="lineNum">     201</span>              :    // DCCM ECC status</span>
 <span id="L202"><span class="lineNum">     202</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic                            lsu_dccm_rd_ecc_single_err,</span></span>

@@ -130,8 +130,8 @@
 <span id="L26"><span class="lineNum">      26</span>              : `include "el2_param.vh"</span>
 <span id="L27"><span class="lineNum">      27</span>              :  )</span>
 <span id="L28"><span class="lineNum">      28</span>              :   (</span>
-<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC tlaBgGNC">       44458 :    input logic clk,                         // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">       44458 :    input logic free_l2clk,                  // Clock always.                  Through one clock header.  For flops with    second header built in.</span></span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC tlaBgGNC">       44488 :    input logic clk,                         // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">       44488 :    input logic free_l2clk,                  // Clock always.                  Through one clock header.  For flops with    second header built in.</span></span>
 <span id="L31"><span class="lineNum">      31</span>              : </span>
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">           1 :    input logic rst_l, // reset enable, from core pin</span></span>
 <span id="L33"><span class="lineNum">      33</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
@@ -139,14 +139,14 @@
 <span id="L35"><span class="lineNum">      35</span>              :    input logic scan_mode, // scan</span>
 <span id="L36"><span class="lineNum">      36</span>              :    /*verilator coverage_on*/</span>
 <span id="L37"><span class="lineNum">      37</span>              : </span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">       11087 :    input logic ic_hit_f,      // Icache hit</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">       11095 :    input logic ic_hit_f,      // Icache hit</span></span>
 <span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">          15 :    input logic ifu_ic_mb_empty, // Miss buffer empty</span></span>
 <span id="L40"><span class="lineNum">      40</span>              : </span>
 <span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">          12 :    input logic ifu_fb_consume1,  // Aligner consumed 1 fetch buffer</span></span>
 <span id="L42"><span class="lineNum">      42</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic ifu_fb_consume2,  // Aligner consumed 2 fetch buffers</span></span>
 <span id="L43"><span class="lineNum">      43</span>              : </span>
 <span id="L44"><span class="lineNum">      44</span> <span class="tlaUNC">           0 :    input logic dec_tlu_flush_noredir_wb, // Don't fetch on flush</span></span>
-<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC tlaBgGNC">       11076 :    input logic exu_flush_final, // FLush</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC tlaBgGNC">       11084 :    input logic exu_flush_final, // FLush</span></span>
 <span id="L46"><span class="lineNum">      46</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [31:1] exu_flush_path_final, // Flush path</span></span>
 <span id="L47"><span class="lineNum">      47</span>              : </span>
 <span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC tlaBgGNC">           2 :    input logic ifu_bp_hit_taken_f, // btb hit, select the target path</span></span>
@@ -161,26 +161,26 @@
 <span id="L57"><span class="lineNum">      57</span> <span class="tlaUNC">           0 :    output logic [31:1] ifc_fetch_addr_f, // fetch addr F</span></span>
 <span id="L58"><span class="lineNum">      58</span> <span class="tlaUNC">           0 :    output logic [31:1] ifc_fetch_addr_bf, // fetch addr BF</span></span>
 <span id="L59"><span class="lineNum">      59</span>              : </span>
-<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC tlaBgGNC">       11083 :    output logic  ifc_fetch_req_f,  // fetch request valid F</span></span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC tlaBgGNC">       11091 :    output logic  ifc_fetch_req_f,  // fetch request valid F</span></span>
 <span id="L61"><span class="lineNum">      61</span>              : </span>
 <span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">           4 :    output logic  ifu_pmu_fetch_stall, // pmu event measuring fetch stall</span></span>
 <span id="L63"><span class="lineNum">      63</span>              : </span>
 <span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">           2 :    output logic                       ifc_fetch_uncacheable_bf,      // The fetch request is uncacheable space. BF stage</span></span>
-<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">       11084 :    output logic                      ifc_fetch_req_bf,              // Fetch request. Comes with the address.  BF stage</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">       11091 :    output logic                      ifc_fetch_req_bf,              // Fetch request. Comes with the address.  BF stage</span></span>
 <span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">           1 :    output logic                       ifc_fetch_req_bf_raw,          // Fetch request without some qualifications. Used for clock-gating. BF stage</span></span>
 <span id="L67"><span class="lineNum">      67</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic                       ifc_iccm_access_bf,            // This request is to the ICCM. Do not generate misses to the bus.</span></span>
 <span id="L68"><span class="lineNum">      68</span> <span class="tlaUNC">           0 :    output logic                       ifc_region_acc_fault_bf,       // Access fault. in ICCM region but offset is outside defined ICCM.</span></span>
 <span id="L69"><span class="lineNum">      69</span>              : </span>
-<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC tlaBgGNC">       11077 :    output logic  ifc_dma_access_ok // fetch is not accessing the ICCM, DMA can proceed</span></span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC tlaBgGNC">       11085 :    output logic  ifc_dma_access_ok // fetch is not accessing the ICCM, DMA can proceed</span></span>
 <span id="L71"><span class="lineNum">      71</span>              : </span>
 <span id="L72"><span class="lineNum">      72</span>              : </span>
 <span id="L73"><span class="lineNum">      73</span>              :    );</span>
 <span id="L74"><span class="lineNum">      74</span>              : </span>
 <span id="L75"><span class="lineNum">      75</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [31:1]  fetch_addr_bf;</span></span>
 <span id="L76"><span class="lineNum">      76</span> <span class="tlaUNC">           0 :    logic [31:1]  fetch_addr_next;</span></span>
-<span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC tlaBgGNC">       11074 :    logic [3:0]   fb_write_f, fb_write_ns;</span></span>
+<span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC tlaBgGNC">       11082 :    logic [3:0]   fb_write_f, fb_write_ns;</span></span>
 <span id="L78"><span class="lineNum">      78</span>              : </span>
-<span id="L79"><span class="lineNum">      79</span> <span class="tlaGNC">       11074 :    logic     fb_full_f_ns, fb_full_f;</span></span>
+<span id="L79"><span class="lineNum">      79</span> <span class="tlaGNC">       11082 :    logic     fb_full_f_ns, fb_full_f;</span></span>
 <span id="L80"><span class="lineNum">      80</span> <span class="tlaGNC">           2 :    logic     fb_right, fb_right2, fb_left, wfm, idle;</span></span>
 <span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC">          22 :    logic     sel_last_addr_bf, sel_next_addr_bf;</span></span>
 <span id="L82"><span class="lineNum">      82</span> <span class="tlaGNC">          18 :    logic     miss_f, miss_a;</span></span>

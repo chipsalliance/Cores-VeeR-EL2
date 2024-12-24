@@ -79,14 +79,14 @@
     <td class="headerCovSummary rowLeft">
         Branch
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ffff00;">
-        50.0%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #faff00;">
+        51.0%
     </td>
     <td class="headerCovSummaryEntry">
-        25
+        26
     </td>
     <td class="headerCovSummaryEntry">
-        50
+        51
     </td>
 
             </tr>
@@ -259,14 +259,14 @@
 <span id="L155"><span class="lineNum">     155</span>              :   `ifdef RV_SMEPMP</span>
 <span id="L156"><span class="lineNum">     156</span>              :     // When MSECCFG.MMWP is set default deny always, otherwise allow for M-mode, deny for other</span>
 <span id="L157"><span class="lineNum">     157</span>              :     // modes. Also deny unmatched for M-mode when MSECCFG.MML is set and request type is EXEC.</span>
-<span id="L158"><span class="lineNum">     158</span>              :     logic access_fail = csr_pmp_mseccfg.MMWP | priv_mode |</span>
-<span id="L159"><span class="lineNum">     159</span>              :                        (csr_pmp_mseccfg.MML &amp;&amp; (req_type == EXEC));</span>
+<span id="L158"><span class="lineNum">     158</span> <span class="tlaGNC">           3 :     logic access_fail = csr_pmp_mseccfg.MMWP | priv_mode |</span></span>
+<span id="L159"><span class="lineNum">     159</span> <span class="tlaGNC">           3 :                        (csr_pmp_mseccfg.MML &amp;&amp; (req_type == EXEC));</span></span>
 <span id="L160"><span class="lineNum">     160</span>              :   `else</span>
 <span id="L161"><span class="lineNum">     161</span>              :     // When in user mode and at least one PMP region is enabled deny access by default.</span>
 <span id="L162"><span class="lineNum">     162</span>              :     logic access_fail = any_region_enabled &amp; priv_mode;</span>
 <span id="L163"><span class="lineNum">     163</span>              :   `endif</span>
 <span id="L164"><span class="lineNum">     164</span>              : `else</span>
-<span id="L165"><span class="lineNum">     165</span> <span class="tlaGNC">           3 :     logic access_fail = 1'b0;</span></span>
+<span id="L165"><span class="lineNum">     165</span>              :     logic access_fail = 1'b0;</span>
 <span id="L166"><span class="lineNum">     166</span>              : `endif</span>
 <span id="L167"><span class="lineNum">     167</span>              : </span>
 <span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC">           3 :     logic matched = 1'b0;</span></span>

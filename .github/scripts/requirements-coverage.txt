@@ -1,0 +1,1 @@
+git+https://github.com/antmicro/sitespawner@abff708256a15a5db7c498ff7f484c78cf18d4e3

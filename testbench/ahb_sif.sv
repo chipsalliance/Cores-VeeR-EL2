@@ -181,6 +181,7 @@ module axi_slv #(
 
   bit [7:0] mem[bit [31:0]];
   bit [31:0] write_address;
+  bit [31:0] read_address;
 
   initial begin
     wready  = 1;
@@ -188,19 +189,21 @@ module axi_slv #(
     arready = 1'b1;
     rlast   = 1'b0;
     rvalid  = 0;
+    bvalid  = 0;
   end
 
   always @(posedge aclk) begin
     if (arvalid && arready) begin
+      read_address = araddr;
        rdata <= {
-        mem[araddr+7],
-        mem[araddr+6],
-        mem[araddr+5],
-        mem[araddr+4],
-        mem[araddr+3],
-        mem[araddr+2],
-        mem[araddr+1],
-        mem[araddr]
+        mem[read_address+7],
+        mem[read_address+6],
+        mem[read_address+5],
+        mem[read_address+4],
+        mem[read_address+3],
+        mem[read_address+2],
+        mem[read_address+1],
+        mem[read_address]
       };
        arready <= 0;
        rvalid <= 1;

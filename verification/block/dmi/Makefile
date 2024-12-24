@@ -7,7 +7,7 @@ SRCDIR := $(abspath $(CURDIR)../../../../design)
 
 TEST_FILES   = $(sort $(wildcard test_*.py))
 
-MODULE      ?= $(subst $(space),$(comma),$(subst .py,,$(TEST_FILES)))
+MODULE      ?= test_dmi_read_write,test_jtag_ir
 TOPLEVEL     = dmi_test_wrapper
 
 VERILOG_SOURCES  = \

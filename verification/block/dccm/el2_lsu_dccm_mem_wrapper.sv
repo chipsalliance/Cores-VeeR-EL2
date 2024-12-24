@@ -56,8 +56,6 @@ module el2_lsu_dccm_mem_wrapper
   assign dccm_addr_bank            = mem_export.dccm_addr_bank;
   assign dccm_wr_data_bank         = mem_export.dccm_wr_data_bank;
   assign dccm_wr_ecc_bank          = mem_export.dccm_wr_ecc_bank;
-  assign mem_export.dccm_bank_dout = dccm_bank_dout;
-  assign mem_export.dccm_bank_ecc  = dccm_bank_ecc;
 
   // Pack dccm_ext_in_pkt
   el2_dccm_ext_in_pkt_t [pt.DCCM_NUM_BANKS-1:0] dccm_ext_in_pkt;

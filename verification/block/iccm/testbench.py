@@ -257,6 +257,27 @@ class BaseTest(uvm_test):
         cocotb.start_soon(clock.start(start_high=False))
 
     async def do_reset(self):
+
+        cocotb.top.active_clk.value = 0
+        cocotb.top.clk_override.value = 0
+        cocotb.top.iccm_wren.value = 0
+        cocotb.top.iccm_rden.value = 0
+        cocotb.top.iccm_rw_addr.value = 0
+        cocotb.top.iccm_buf_correct_ecc.value = 0
+        cocotb.top.iccm_correction_state.value = 0
+        cocotb.top.iccm_wr_size.value = 0
+        cocotb.top.iccm_wr_data.value = 0
+        cocotb.top.iccm_ext_in_pkt_TEST1.value = 0
+        cocotb.top.iccm_ext_in_pkt_RME.value = 0
+        cocotb.top.iccm_ext_in_pkt_RM.value = 0
+        cocotb.top.iccm_ext_in_pkt_LS.value = 0
+        cocotb.top.iccm_ext_in_pkt_DS.value = 0
+        cocotb.top.iccm_ext_in_pkt_SD.value = 0
+        cocotb.top.iccm_ext_in_pkt_TEST_RNM.value = 0
+        cocotb.top.iccm_ext_in_pkt_BC1.value = 0
+        cocotb.top.iccm_ext_in_pkt_BC2.value = 0
+        cocotb.top.scan_mode.value = 0
+
         cocotb.top.rst_l.value = 0
         await ClockCycles(cocotb.top.clk, 2)
         await FallingEdge(cocotb.top.clk)

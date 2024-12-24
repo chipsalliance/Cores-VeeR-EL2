@@ -77,3 +77,18 @@ jobs:
         with:
           name: regression_tests_coverage_data
           path: results/*.info
+
+  custom-regression-exceptions-tests:
+    name: Custom regression exceptions tests
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Run tests
+        run: _secret_custom_regression_exceptions_tests

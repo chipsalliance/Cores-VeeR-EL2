@@ -302,6 +302,7 @@ class BaseTest(uvm_test):
 
     def build_phase(self):
         self.env = BaseEnvironment("env", self)
+        cocotb.top.rst_l = 0
 
     def start_clock(self, name):
         period = ConfigDB().get(None, "", "TEST_CLK_PERIOD")
@@ -310,6 +311,32 @@ class BaseTest(uvm_test):
         cocotb.start_soon(clock.start(start_high=False))
 
     async def do_reset(self, signalName, timeLength="100e-9", isActiveHigh=True):
+
+        cocotb.top.rst_l = 0
+        cocotb.top.free_clk = 0
+        cocotb.top.bus_clk_en = 1
+        cocotb.top.clk_override = 0
+        cocotb.top.dec_tlu_force_halt = 0
+        cocotb.top.axi_awvalid = 0
+        cocotb.top.axi_awid = 0
+        cocotb.top.axi_awaddr = 0
+        cocotb.top.axi_awsize = 0
+        cocotb.top.axi_awprot = 0
+        cocotb.top.axi_wvalid = 0
+        cocotb.top.axi_wdata = 0
+        cocotb.top.axi_wstrb = 0
+        cocotb.top.axi_wlast = 0
+        cocotb.top.axi_bready = 0
+        cocotb.top.axi_arvalid = 0
+        cocotb.top.axi_arid = 0
+        cocotb.top.axi_araddr = 0
+        cocotb.top.axi_arsize = 0
+        cocotb.top.axi_arprot = 0
+        cocotb.top.axi_rready = 0
+        cocotb.top.ahb_hrdata = 0
+        cocotb.top.ahb_hready = 0
+        cocotb.top.ahb_hresp = 0
+
         signal = getattr(cocotb.top, signalName)
         signal.value = int(isActiveHigh)
         self.config()

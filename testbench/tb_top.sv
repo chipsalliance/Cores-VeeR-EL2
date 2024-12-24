@@ -21,6 +21,18 @@ module tb_top
 #(
     `include "el2_param.vh"
 );
+
+  logic i_cpu_halt_req;
+  logic i_cpu_run_req;
+  logic mpc_debug_halt_req;
+  logic mpc_debug_run_req;
+  logic lsu_bus_clk_en;
+
+  assign i_cpu_halt_req = 1'b0;
+  assign i_cpu_run_req = 1'b0;
+  assign mpc_debug_halt_req = 1'b0;
+  assign mpc_debug_run_req = 1'b1;
+  assign lsu_bus_clk_en = 1'b1;
 `else
 module tb_top
     import tb_top_pkg::*;
@@ -100,6 +112,7 @@ module tb_top
     bit          [31:0]         mem_signature_begin = 32'd0; // TODO:
     bit          [31:0]         mem_signature_end   = 32'd0;
     bit          [31:0]         mem_mailbox         = 32'hD0580000;
+    logic                       rst_l;
 `endif
     logic                       porst_l;
     logic [pt.PIC_TOTAL_INT:1]  ext_int;
@@ -1005,12 +1018,16 @@ module tb_top
         preload_iccm();
 
 `ifndef VERILATOR
-        if($test$plusargs("dumpon")) $dumpvars;
+        $dumpfile("dump.vcd");
+	$dumpvars(0, tb_top);
+        //if($test$plusargs("dumpon")) $dumpvars;
         forever  core_clk = #5 ~core_clk;
 `endif
     end
 
-
+`ifndef VERILATOR
+    assign rst_l = cycleCnt > 5;
+`endif
     assign porst_l = cycleCnt > 2;
 
    //=========================================================================-
@@ -2570,7 +2587,7 @@ end : Gen_iccm_enable
 
 
 // ICACHE TAG
-if (pt.ICACHE_WAYPACK == 0 ) begin : PACKED_0
+if (pt.ICACHE_WAYPACK == 0 ) begin : PACKED_11
     for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: WAYS
         if (pt.ICACHE_TAG_DEPTH == 32)   begin : size_32
                  `EL2_IC_TAG_SRAM(32,26,i)
@@ -2597,7 +2614,7 @@ if (pt.ICACHE_WAYPACK == 0 ) begin : PACKED_0
                  `EL2_IC_TAG_SRAM(4096,26,i)
         end // if (pt.ICACHE_TAG_DEPTH == 4096)
    end // block: WAYS
- end // block: PACKED_0
+ end // block: PACKED_11
 
  else begin : PACKED_1
     if (pt.ICACHE_ECC) begin  : ECC1
@@ -2767,6 +2784,11 @@ jtagdpi #(
     .jtag_trst_n    (jtag_trst_n),
     .jtag_srst_n    ()
 );
+`else
+  assign jtag_tck = 1'b0;
+  assign jtag_tms = 1'b0;
+  assign jtag_tdi = 1'b0;
+  assign jtag_trst_n = 1'b0;
 `endif
 
 /* verilator lint_off CASEINCOMPLETE */

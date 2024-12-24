@@ -897,6 +897,42 @@ class BaseTest(uvm_test):
         cocotb.start_soon(clock.start(start_high=False))
 
     async def do_reset(self):
+
+        cocotb.top.free_clk.value = 0
+        cocotb.top.dma_bus_clk_en.value = 1
+        cocotb.top.clk_override.value = 0
+        cocotb.top.scan_mode.value = 0
+        cocotb.top.dbg_cmd_addr.value = 0
+        cocotb.top.dbg_cmd_wrdata.value = 0
+        cocotb.top.dbg_cmd_valid.value = 0
+        cocotb.top.dbg_cmd_write.value = 0
+        cocotb.top.dbg_cmd_size.value = 0
+        cocotb.top.dbg_dma_bubble.value = 0
+        cocotb.top.dccm_dma_rvalid.value = 0
+        cocotb.top.dccm_dma_ecc_error.value = 0
+        cocotb.top.dccm_dma_rtag.value = 0
+        cocotb.top.dccm_dma_rdata.value = 0
+        cocotb.top.iccm_dma_rvalid.value = 0
+        cocotb.top.iccm_dma_ecc_error.value = 0
+        cocotb.top.iccm_dma_rtag.value = 0
+        cocotb.top.iccm_dma_rdata.value = 0
+        cocotb.top.dccm_ready.value = 0
+        cocotb.top.iccm_ready.value = 0
+        cocotb.top.dec_tlu_dma_qos_prty.value = 0
+        cocotb.top.dma_axi_awvalid.value = 0
+        cocotb.top.dma_axi_awid.value = 0
+        cocotb.top.dma_axi_awaddr.value = 0
+        cocotb.top.dma_axi_awsize.value = 0
+        cocotb.top.dma_axi_wvalid.value = 0
+        cocotb.top.dma_axi_wdata.value = 0
+        cocotb.top.dma_axi_wstrb.value = 0
+        cocotb.top.dma_axi_bready.value = 0
+        cocotb.top.dma_axi_arvalid.value = 0
+        cocotb.top.dma_axi_arid.value = 0
+        cocotb.top.dma_axi_araddr.value = 0
+        cocotb.top.dma_axi_arsize.value = 0
+        cocotb.top.dma_axi_rready.value = 0
+
         cocotb.top.rst_l.value = 0
         await ClockCycles(cocotb.top.clk, 2)
         await FallingEdge(cocotb.top.clk)

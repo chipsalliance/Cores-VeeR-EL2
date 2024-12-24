@@ -25,9 +25,9 @@ module el2_pmp
 ) (
     input logic clk,       // Top level clock
     input logic rst_l,     // Reset
-    /* verilator coverage_off */
+    /* pragma coverage off */
     input logic scan_mode, // Scan mode
-    /* verilator coverage_on */
+    /* pragma coverage on */
 
 `ifdef RV_SMEPMP
     input el2_mseccfg_pkt_t mseccfg, // mseccfg CSR content, RLB, MMWP and MML bits
@@ -115,9 +115,9 @@ module el2_pmp
         2'b11: result =
              (pmp_req_type == EXEC) |
             ((pmp_req_type == READ) & ~priv_mode);
-        /* verilator coverage_off */
+        /* pragma coverage off */
         default: ;
-        /* verilator coverage_on */
+        /* pragma coverage on */
       endcase
     end else begin
       if (csr_pmp_cfg.read & csr_pmp_cfg.write & csr_pmp_cfg.execute & csr_pmp_cfg.lock) begin

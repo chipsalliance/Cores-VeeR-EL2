@@ -51,18 +51,18 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff4a00;">
-        14.6%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff6f00;">
+        22.0%
     </td>
     <td class="headerCovSummaryEntry">
-        6
+        9
     </td>
     <td class="headerCovSummaryEntry">
         41
@@ -135,9 +135,9 @@
 <span id="L31"><span class="lineNum">      31</span>              : </span>
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic rst_l, // reset enable, from core pin</span></span>
 <span id="L33"><span class="lineNum">      33</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L34"><span class="lineNum">      34</span>              :    /*verilator coverage_off*/</span>
+<span id="L34"><span class="lineNum">      34</span>              :    /*pragma coverage off*/</span>
 <span id="L35"><span class="lineNum">      35</span>              :    input logic scan_mode, // scan</span>
-<span id="L36"><span class="lineNum">      36</span>              :    /*verilator coverage_on*/</span>
+<span id="L36"><span class="lineNum">      36</span>              :    /*pragma coverage on*/</span>
 <span id="L37"><span class="lineNum">      37</span>              : </span>
 <span id="L38"><span class="lineNum">      38</span> <span class="tlaUNC">           0 :    input logic ic_hit_f,      // Icache hit</span></span>
 <span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC tlaBgGNC">           1 :    input logic ifu_ic_mb_empty, // Miss buffer empty</span></span>
@@ -177,16 +177,16 @@
 <span id="L73"><span class="lineNum">      73</span>              :    );</span>
 <span id="L74"><span class="lineNum">      74</span>              : </span>
 <span id="L75"><span class="lineNum">      75</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [31:1]  fetch_addr_bf;</span></span>
-<span id="L76"><span class="lineNum">      76</span> <span class="tlaUNC">           0 :    logic [31:1]  fetch_addr_next;</span></span>
-<span id="L77"><span class="lineNum">      77</span> <span class="tlaUNC">           0 :    logic [3:0]   fb_write_f, fb_write_ns;</span></span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC tlaBgGNC">           1 :    logic [31:1]  fetch_addr_next;</span></span>
+<span id="L77"><span class="lineNum">      77</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [3:0]   fb_write_f, fb_write_ns;</span></span>
 <span id="L78"><span class="lineNum">      78</span>              : </span>
 <span id="L79"><span class="lineNum">      79</span> <span class="tlaUNC">           0 :    logic     fb_full_f_ns, fb_full_f;</span></span>
 <span id="L80"><span class="lineNum">      80</span> <span class="tlaGNC tlaBgGNC">           1 :    logic     fb_right, fb_right2, fb_left, wfm, idle;</span></span>
-<span id="L81"><span class="lineNum">      81</span> <span class="tlaUNC tlaBgUNC">           0 :    logic     sel_last_addr_bf, sel_next_addr_bf;</span></span>
-<span id="L82"><span class="lineNum">      82</span> <span class="tlaUNC">           0 :    logic     miss_f, miss_a;</span></span>
+<span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC">           1 :    logic     sel_last_addr_bf, sel_next_addr_bf;</span></span>
+<span id="L82"><span class="lineNum">      82</span> <span class="tlaUNC tlaBgUNC">           0 :    logic     miss_f, miss_a;</span></span>
 <span id="L83"><span class="lineNum">      83</span> <span class="tlaUNC">           0 :    logic     flush_fb, dma_iccm_stall_any_f;</span></span>
-<span id="L84"><span class="lineNum">      84</span> <span class="tlaUNC">           0 :    logic     mb_empty_mod, goto_idle, leave_idle;</span></span>
-<span id="L85"><span class="lineNum">      85</span> <span class="tlaUNC">           0 :    logic     fetch_bf_en;</span></span>
+<span id="L84"><span class="lineNum">      84</span> <span class="tlaGNC tlaBgGNC">           1 :    logic     mb_empty_mod, goto_idle, leave_idle;</span></span>
+<span id="L85"><span class="lineNum">      85</span> <span class="tlaUNC tlaBgUNC">           0 :    logic     fetch_bf_en;</span></span>
 <span id="L86"><span class="lineNum">      86</span> <span class="tlaUNC">           0 :    logic         line_wrap;</span></span>
 <span id="L87"><span class="lineNum">      87</span> <span class="tlaUNC">           0 :    logic         fetch_addr_next_1;</span></span>
 <span id="L88"><span class="lineNum">      88</span>              : </span>

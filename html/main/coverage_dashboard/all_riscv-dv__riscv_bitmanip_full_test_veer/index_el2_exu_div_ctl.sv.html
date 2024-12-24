@@ -51,18 +51,18 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #13ff00;">
-        96.2%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #00ff00;">
+        100.0%
     </td>
     <td class="headerCovSummaryEntry">
-        76
+        79
     </td>
     <td class="headerCovSummaryEntry">
         79
@@ -127,23 +127,23 @@
 <span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC tlaBgGNC">      668396 :    input logic           clk,                       // Top level clock</span></span>
 <span id="L24"><span class="lineNum">      24</span> <span class="tlaGNC">           3 :    input logic           rst_l,                     // Reset</span></span>
 <span id="L25"><span class="lineNum">      25</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L26"><span class="lineNum">      26</span>              :    /*verilator coverage_off*/</span>
+<span id="L26"><span class="lineNum">      26</span>              :    /*pragma coverage off*/</span>
 <span id="L27"><span class="lineNum">      27</span>              :    input logic           scan_mode,                 // Scan mode</span>
-<span id="L28"><span class="lineNum">      28</span>              :    /*verilator coverage_on*/</span>
+<span id="L28"><span class="lineNum">      28</span>              :    /*pragma coverage on*/</span>
 <span id="L29"><span class="lineNum">      29</span>              : </span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">        1508 :    input el2_div_pkt_t  dp,                        // valid, sign, rem</span></span>
-<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">       11846 :    input logic  [31:0]   dividend,                  // Numerator</span></span>
-<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">       16982 :    input logic  [31:0]   divisor,                   // Denominator</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">       12590 :    input el2_div_pkt_t  dp,                        // valid, sign, rem</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">       44044 :    input logic  [31:0]   dividend,                  // Numerator</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">       28532 :    input logic  [31:0]   divisor,                   // Denominator</span></span>
 <span id="L33"><span class="lineNum">      33</span>              : </span>
 <span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">          74 :    input logic           cancel,                    // Cancel divide</span></span>
 <span id="L35"><span class="lineNum">      35</span>              : </span>
 <span id="L36"><span class="lineNum">      36</span>              : </span>
 <span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">        3024 :    output logic          finish_dly,                // Finish to match data</span></span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">         750 :    output logic [31:0]   out                        // Result</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">        1062 :    output logic [31:0]   out                        // Result</span></span>
 <span id="L39"><span class="lineNum">      39</span>              :   );</span>
 <span id="L40"><span class="lineNum">      40</span>              : </span>
 <span id="L41"><span class="lineNum">      41</span>              : </span>
-<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">         996 :    logic [31:0]          out_raw;</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">        1912 :    logic [31:0]          out_raw;</span></span>
 <span id="L43"><span class="lineNum">      43</span>              : </span>
 <span id="L44"><span class="lineNum">      44</span>              :    assign out[31:0] = {32{finish_dly}} &amp; out_raw[31:0];     // Qualification added to quiet result bus while divide is iterating</span>
 <span id="L45"><span class="lineNum">      45</span>              : </span>
@@ -248,9 +248,9 @@
 <span id="L144"><span class="lineNum">     144</span>              :    input  logic            clk,                       // Top level clock</span>
 <span id="L145"><span class="lineNum">     145</span>              :    input  logic            rst_l,                     // Reset</span>
 <span id="L146"><span class="lineNum">     146</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L147"><span class="lineNum">     147</span>              :    /*verilator coverage_off*/</span>
+<span id="L147"><span class="lineNum">     147</span>              :    /*pragma coverage off*/</span>
 <span id="L148"><span class="lineNum">     148</span>              :    input  logic            scan_mode,                 // Scan mode</span>
-<span id="L149"><span class="lineNum">     149</span>              :    /*verilator coverage_on*/</span>
+<span id="L149"><span class="lineNum">     149</span>              :    /*pragma coverage on*/</span>
 <span id="L150"><span class="lineNum">     150</span>              : </span>
 <span id="L151"><span class="lineNum">     151</span>              :    input  logic            cancel,                    // Flush pipeline</span>
 <span id="L152"><span class="lineNum">     152</span>              :    input  logic            valid_in,</span>
@@ -559,9 +559,9 @@
 <span id="L455"><span class="lineNum">     455</span>              :    input  logic            clk,                       // Top level clock</span>
 <span id="L456"><span class="lineNum">     456</span>              :    input  logic            rst_l,                     // Reset</span>
 <span id="L457"><span class="lineNum">     457</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L458"><span class="lineNum">     458</span>              :    /*verilator coverage_off*/</span>
+<span id="L458"><span class="lineNum">     458</span>              :    /*pragma coverage off*/</span>
 <span id="L459"><span class="lineNum">     459</span>              :    input  logic            scan_mode,                 // Scan mode</span>
-<span id="L460"><span class="lineNum">     460</span>              :    /*verilator coverage_on*/</span>
+<span id="L460"><span class="lineNum">     460</span>              :    /*pragma coverage on*/</span>
 <span id="L461"><span class="lineNum">     461</span>              : </span>
 <span id="L462"><span class="lineNum">     462</span>              :    input  logic            cancel,                    // Flush pipeline</span>
 <span id="L463"><span class="lineNum">     463</span>              :    input  logic            valid_in,</span>
@@ -820,9 +820,9 @@
 <span id="L716"><span class="lineNum">     716</span>              :    input  logic            clk,                       // Top level clock</span>
 <span id="L717"><span class="lineNum">     717</span>              :    input  logic            rst_l,                     // Reset</span>
 <span id="L718"><span class="lineNum">     718</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L719"><span class="lineNum">     719</span>              :    /*verilator coverage_off*/</span>
+<span id="L719"><span class="lineNum">     719</span>              :    /*pragma coverage off*/</span>
 <span id="L720"><span class="lineNum">     720</span>              :    input  logic            scan_mode,                 // Scan mode</span>
-<span id="L721"><span class="lineNum">     721</span>              :    /*verilator coverage_on*/</span>
+<span id="L721"><span class="lineNum">     721</span>              :    /*pragma coverage on*/</span>
 <span id="L722"><span class="lineNum">     722</span>              : </span>
 <span id="L723"><span class="lineNum">     723</span>              :    input  logic            cancel,                    // Flush pipeline</span>
 <span id="L724"><span class="lineNum">     724</span>              :    input  logic            valid_in,</span>
@@ -1097,9 +1097,9 @@
 <span id="L993"><span class="lineNum">     993</span>              :    input  logic            clk,                       // Top level clock</span>
 <span id="L994"><span class="lineNum">     994</span>              :    input  logic            rst_l,                     // Reset</span>
 <span id="L995"><span class="lineNum">     995</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L996"><span class="lineNum">     996</span>              :    /*verilator coverage_off*/</span>
+<span id="L996"><span class="lineNum">     996</span>              :    /*pragma coverage off*/</span>
 <span id="L997"><span class="lineNum">     997</span>              :    input  logic            scan_mode,                 // Scan mode</span>
-<span id="L998"><span class="lineNum">     998</span>              :    /*verilator coverage_on*/</span>
+<span id="L998"><span class="lineNum">     998</span>              :    /*pragma coverage on*/</span>
 <span id="L999"><span class="lineNum">     999</span>              : </span>
 <span id="L1000"><span class="lineNum">    1000</span>              :    input  logic            cancel,                    // Flush pipeline</span>
 <span id="L1001"><span class="lineNum">    1001</span>              :    input  logic            valid_in,</span>
@@ -1432,81 +1432,81 @@
 <span id="L1328"><span class="lineNum">    1328</span> <span class="tlaGNC">      668396 :    input  logic            clk,                       // Top level clock</span></span>
 <span id="L1329"><span class="lineNum">    1329</span> <span class="tlaGNC">           3 :    input  logic            rst_l,                     // Reset</span></span>
 <span id="L1330"><span class="lineNum">    1330</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L1331"><span class="lineNum">    1331</span>              :    /*verilator coverage_off*/</span>
+<span id="L1331"><span class="lineNum">    1331</span>              :    /*pragma coverage off*/</span>
 <span id="L1332"><span class="lineNum">    1332</span>              :    input  logic            scan_mode,                 // Scan mode</span>
-<span id="L1333"><span class="lineNum">    1333</span>              :    /*verilator coverage_on*/</span>
+<span id="L1333"><span class="lineNum">    1333</span>              :    /*pragma coverage on*/</span>
 <span id="L1334"><span class="lineNum">    1334</span>              : </span>
 <span id="L1335"><span class="lineNum">    1335</span> <span class="tlaGNC">          74 :    input  logic            cancel,                    // Flush pipeline</span></span>
 <span id="L1336"><span class="lineNum">    1336</span> <span class="tlaGNC">        3098 :    input  logic            valid_in,</span></span>
 <span id="L1337"><span class="lineNum">    1337</span> <span class="tlaGNC">       12593 :    input  logic            signed_in,</span></span>
 <span id="L1338"><span class="lineNum">    1338</span> <span class="tlaGNC">        1508 :    input  logic            rem_in,</span></span>
-<span id="L1339"><span class="lineNum">    1339</span> <span class="tlaGNC">       11846 :    input  logic [31:0]     dividend_in,</span></span>
-<span id="L1340"><span class="lineNum">    1340</span> <span class="tlaGNC">       16982 :    input  logic [31:0]     divisor_in,</span></span>
+<span id="L1339"><span class="lineNum">    1339</span> <span class="tlaGNC">       44044 :    input  logic [31:0]     dividend_in,</span></span>
+<span id="L1340"><span class="lineNum">    1340</span> <span class="tlaGNC">       28532 :    input  logic [31:0]     divisor_in,</span></span>
 <span id="L1341"><span class="lineNum">    1341</span>              : </span>
 <span id="L1342"><span class="lineNum">    1342</span> <span class="tlaGNC">        3024 :    output logic            valid_out,</span></span>
-<span id="L1343"><span class="lineNum">    1343</span> <span class="tlaGNC">         996 :    output logic [31:0]     data_out</span></span>
+<span id="L1343"><span class="lineNum">    1343</span> <span class="tlaGNC">        1912 :    output logic [31:0]     data_out</span></span>
 <span id="L1344"><span class="lineNum">    1344</span>              :   );</span>
 <span id="L1345"><span class="lineNum">    1345</span>              : </span>
 <span id="L1346"><span class="lineNum">    1346</span>              : </span>
 <span id="L1347"><span class="lineNum">    1347</span> <span class="tlaGNC">        3098 :    logic                   valid_ff_in, valid_ff;</span></span>
-<span id="L1348"><span class="lineNum">    1348</span> <span class="tlaGNC">        3024 :    logic                   finish_raw, finish, finish_ff;</span></span>
+<span id="L1348"><span class="lineNum">    1348</span> <span class="tlaGNC">        3040 :    logic                   finish_raw, finish, finish_ff;</span></span>
 <span id="L1349"><span class="lineNum">    1349</span> <span class="tlaGNC">        2966 :    logic                   running_state;</span></span>
 <span id="L1350"><span class="lineNum">    1350</span> <span class="tlaGNC">        3052 :    logic                   misc_enable;</span></span>
-<span id="L1351"><span class="lineNum">    1351</span> <span class="tlaGNC">         420 :    logic         [2:0]     control_in, control_ff;</span></span>
-<span id="L1352"><span class="lineNum">    1352</span> <span class="tlaGNC">         420 :    logic                   dividend_sign_ff, divisor_sign_ff, rem_ff;</span></span>
+<span id="L1351"><span class="lineNum">    1351</span> <span class="tlaGNC">         735 :    logic         [2:0]     control_in, control_ff;</span></span>
+<span id="L1352"><span class="lineNum">    1352</span> <span class="tlaGNC">         735 :    logic                   dividend_sign_ff, divisor_sign_ff, rem_ff;</span></span>
 <span id="L1353"><span class="lineNum">    1353</span> <span class="tlaGNC">        1878 :    logic                   count_enable;</span></span>
-<span id="L1354"><span class="lineNum">    1354</span> <span class="tlaUNC tlaBgUNC">           0 :    logic         [6:0]     count_in, count_ff;</span></span>
+<span id="L1354"><span class="lineNum">    1354</span> <span class="tlaGNC">        1878 :    logic         [6:0]     count_in, count_ff;</span></span>
 <span id="L1355"><span class="lineNum">    1355</span>              : </span>
-<span id="L1356"><span class="lineNum">    1356</span> <span class="tlaGNC tlaBgGNC">         306 :    logic                   smallnum_case;</span></span>
-<span id="L1357"><span class="lineNum">    1357</span> <span class="tlaGNC">         392 :    logic         [3:0]     smallnum;</span></span>
+<span id="L1356"><span class="lineNum">    1356</span> <span class="tlaGNC">         306 :    logic                   smallnum_case;</span></span>
+<span id="L1357"><span class="lineNum">    1357</span> <span class="tlaGNC">        1198 :    logic         [3:0]     smallnum;</span></span>
 <span id="L1358"><span class="lineNum">    1358</span>              : </span>
-<span id="L1359"><span class="lineNum">    1359</span> <span class="tlaGNC">        1878 :    logic                   a_enable, a_shift;</span></span>
-<span id="L1360"><span class="lineNum">    1360</span> <span class="tlaGNC">         747 :    logic        [31:0]     a_in, a_ff;</span></span>
+<span id="L1359"><span class="lineNum">    1359</span> <span class="tlaGNC">        6064 :    logic                   a_enable, a_shift;</span></span>
+<span id="L1360"><span class="lineNum">    1360</span> <span class="tlaGNC">       45054 :    logic        [31:0]     a_in, a_ff;</span></span>
 <span id="L1361"><span class="lineNum">    1361</span>              : </span>
-<span id="L1362"><span class="lineNum">    1362</span> <span class="tlaGNC">        2384 :    logic                   b_enable, b_twos_comp;</span></span>
-<span id="L1363"><span class="lineNum">    1363</span> <span class="tlaGNC">       18102 :    logic        [32:0]     b_in;</span></span>
-<span id="L1364"><span class="lineNum">    1364</span> <span class="tlaGNC">         569 :    logic        [37:0]     b_ff;</span></span>
+<span id="L1362"><span class="lineNum">    1362</span> <span class="tlaGNC">        3098 :    logic                   b_enable, b_twos_comp;</span></span>
+<span id="L1363"><span class="lineNum">    1363</span> <span class="tlaGNC">       28996 :    logic        [32:0]     b_in;</span></span>
+<span id="L1364"><span class="lineNum">    1364</span> <span class="tlaGNC">        2302 :    logic        [37:0]     b_ff;</span></span>
 <span id="L1365"><span class="lineNum">    1365</span>              : </span>
-<span id="L1366"><span class="lineNum">    1366</span> <span class="tlaGNC">         623 :    logic        [31:0]     q_in, q_ff;</span></span>
+<span id="L1366"><span class="lineNum">    1366</span> <span class="tlaGNC">        3707 :    logic        [31:0]     q_in, q_ff;</span></span>
 <span id="L1367"><span class="lineNum">    1367</span>              : </span>
 <span id="L1368"><span class="lineNum">    1368</span> <span class="tlaGNC">        3098 :    logic                   rq_enable;</span></span>
 <span id="L1369"><span class="lineNum">    1369</span> <span class="tlaGNC">         402 :    logic                   r_sign_sel;</span></span>
 <span id="L1370"><span class="lineNum">    1370</span> <span class="tlaGNC">        1444 :    logic                   r_restore_sel;</span></span>
-<span id="L1371"><span class="lineNum">    1371</span> <span class="tlaGNC">         164 :    logic                   r_adder01_sel, r_adder02_sel, r_adder03_sel;</span></span>
-<span id="L1372"><span class="lineNum">    1372</span> <span class="tlaGNC">         100 :    logic                   r_adder04_sel, r_adder05_sel, r_adder06_sel, r_adder07_sel;</span></span>
-<span id="L1373"><span class="lineNum">    1373</span> <span class="tlaGNC">          82 :    logic                   r_adder08_sel, r_adder09_sel, r_adder10_sel, r_adder11_sel;</span></span>
-<span id="L1374"><span class="lineNum">    1374</span> <span class="tlaGNC">          68 :    logic                   r_adder12_sel, r_adder13_sel, r_adder14_sel, r_adder15_sel;</span></span>
-<span id="L1375"><span class="lineNum">    1375</span> <span class="tlaGNC">         546 :    logic        [32:0]     r_in, r_ff;</span></span>
+<span id="L1371"><span class="lineNum">    1371</span> <span class="tlaGNC">         488 :    logic                   r_adder01_sel, r_adder02_sel, r_adder03_sel;</span></span>
+<span id="L1372"><span class="lineNum">    1372</span> <span class="tlaGNC">         124 :    logic                   r_adder04_sel, r_adder05_sel, r_adder06_sel, r_adder07_sel;</span></span>
+<span id="L1373"><span class="lineNum">    1373</span> <span class="tlaGNC">         186 :    logic                   r_adder08_sel, r_adder09_sel, r_adder10_sel, r_adder11_sel;</span></span>
+<span id="L1374"><span class="lineNum">    1374</span> <span class="tlaGNC">         204 :    logic                   r_adder12_sel, r_adder13_sel, r_adder14_sel, r_adder15_sel;</span></span>
+<span id="L1375"><span class="lineNum">    1375</span> <span class="tlaGNC">        1846 :    logic        [32:0]     r_in, r_ff;</span></span>
 <span id="L1376"><span class="lineNum">    1376</span>              : </span>
-<span id="L1377"><span class="lineNum">    1377</span> <span class="tlaGNC">         337 :    logic                   twos_comp_q_sel, twos_comp_b_sel;</span></span>
-<span id="L1378"><span class="lineNum">    1378</span> <span class="tlaGNC">         531 :    logic        [31:0]     twos_comp_in, twos_comp_out;</span></span>
+<span id="L1377"><span class="lineNum">    1377</span> <span class="tlaGNC">        2384 :    logic                   twos_comp_q_sel, twos_comp_b_sel;</span></span>
+<span id="L1378"><span class="lineNum">    1378</span> <span class="tlaGNC">        1234 :    logic        [31:0]     twos_comp_in, twos_comp_out;</span></span>
 <span id="L1379"><span class="lineNum">    1379</span>              : </span>
-<span id="L1380"><span class="lineNum">    1380</span> <span class="tlaGNC">        2948 :    logic        [15:1]     quotient_raw;</span></span>
-<span id="L1381"><span class="lineNum">    1381</span> <span class="tlaGNC">        3460 :    logic         [3:0]     quotient_new;</span></span>
-<span id="L1382"><span class="lineNum">    1382</span> <span class="tlaGNC">        1759 :    logic        [34:0]     adder01_out;</span></span>
-<span id="L1383"><span class="lineNum">    1383</span> <span class="tlaGNC">        1494 :    logic        [35:0]     adder02_out;</span></span>
-<span id="L1384"><span class="lineNum">    1384</span> <span class="tlaGNC">        1759 :    logic        [36:0]     adder03_out;</span></span>
-<span id="L1385"><span class="lineNum">    1385</span> <span class="tlaGNC">        1340 :    logic        [37:0]     adder04_out;</span></span>
-<span id="L1386"><span class="lineNum">    1386</span> <span class="tlaGNC">        1759 :    logic        [37:0]     adder05_out;</span></span>
-<span id="L1387"><span class="lineNum">    1387</span> <span class="tlaGNC">        1494 :    logic        [37:0]     adder06_out;</span></span>
-<span id="L1388"><span class="lineNum">    1388</span> <span class="tlaGNC">        1759 :    logic        [37:0]     adder07_out;</span></span>
-<span id="L1389"><span class="lineNum">    1389</span> <span class="tlaGNC">        1340 :    logic        [37:0]     adder08_out;</span></span>
-<span id="L1390"><span class="lineNum">    1390</span> <span class="tlaGNC">        1759 :    logic        [37:0]     adder09_out;</span></span>
-<span id="L1391"><span class="lineNum">    1391</span> <span class="tlaGNC">        1494 :    logic        [37:0]     adder10_out;</span></span>
-<span id="L1392"><span class="lineNum">    1392</span> <span class="tlaGNC">        1759 :    logic        [37:0]     adder11_out;</span></span>
-<span id="L1393"><span class="lineNum">    1393</span> <span class="tlaGNC">        1340 :    logic        [37:0]     adder12_out;</span></span>
-<span id="L1394"><span class="lineNum">    1394</span> <span class="tlaGNC">        1759 :    logic        [37:0]     adder13_out;</span></span>
-<span id="L1395"><span class="lineNum">    1395</span> <span class="tlaGNC">        1494 :    logic        [37:0]     adder14_out;</span></span>
-<span id="L1396"><span class="lineNum">    1396</span> <span class="tlaGNC">        1759 :    logic        [37:0]     adder15_out;</span></span>
+<span id="L1380"><span class="lineNum">    1380</span> <span class="tlaGNC">        3636 :    logic        [15:1]     quotient_raw;</span></span>
+<span id="L1381"><span class="lineNum">    1381</span> <span class="tlaGNC">        3781 :    logic         [3:0]     quotient_new;</span></span>
+<span id="L1382"><span class="lineNum">    1382</span> <span class="tlaGNC">        3559 :    logic        [34:0]     adder01_out;</span></span>
+<span id="L1383"><span class="lineNum">    1383</span> <span class="tlaGNC">        3552 :    logic        [35:0]     adder02_out;</span></span>
+<span id="L1384"><span class="lineNum">    1384</span> <span class="tlaGNC">        4204 :    logic        [36:0]     adder03_out;</span></span>
+<span id="L1385"><span class="lineNum">    1385</span> <span class="tlaGNC">        3652 :    logic        [37:0]     adder04_out;</span></span>
+<span id="L1386"><span class="lineNum">    1386</span> <span class="tlaGNC">        4074 :    logic        [37:0]     adder05_out;</span></span>
+<span id="L1387"><span class="lineNum">    1387</span> <span class="tlaGNC">        4216 :    logic        [37:0]     adder06_out;</span></span>
+<span id="L1388"><span class="lineNum">    1388</span> <span class="tlaGNC">        4319 :    logic        [37:0]     adder07_out;</span></span>
+<span id="L1389"><span class="lineNum">    1389</span> <span class="tlaGNC">        3658 :    logic        [37:0]     adder08_out;</span></span>
+<span id="L1390"><span class="lineNum">    1390</span> <span class="tlaGNC">        3984 :    logic        [37:0]     adder09_out;</span></span>
+<span id="L1391"><span class="lineNum">    1391</span> <span class="tlaGNC">        3830 :    logic        [37:0]     adder10_out;</span></span>
+<span id="L1392"><span class="lineNum">    1392</span> <span class="tlaGNC">        3960 :    logic        [37:0]     adder11_out;</span></span>
+<span id="L1393"><span class="lineNum">    1393</span> <span class="tlaGNC">        3828 :    logic        [37:0]     adder12_out;</span></span>
+<span id="L1394"><span class="lineNum">    1394</span> <span class="tlaGNC">        3717 :    logic        [37:0]     adder13_out;</span></span>
+<span id="L1395"><span class="lineNum">    1395</span> <span class="tlaGNC">        3733 :    logic        [37:0]     adder14_out;</span></span>
+<span id="L1396"><span class="lineNum">    1396</span> <span class="tlaGNC">        3719 :    logic        [37:0]     adder15_out;</span></span>
 <span id="L1397"><span class="lineNum">    1397</span>              : </span>
-<span id="L1398"><span class="lineNum">    1398</span> <span class="tlaGNC">         439 :    logic        [64:0]     ar_shifted;</span></span>
-<span id="L1399"><span class="lineNum">    1399</span> <span class="tlaGNC">         227 :    logic         [5:0]     shortq;</span></span>
-<span id="L1400"><span class="lineNum">    1400</span> <span class="tlaGNC">        2486 :    logic         [4:0]     shortq_shift;</span></span>
-<span id="L1401"><span class="lineNum">    1401</span> <span class="tlaGNC">         792 :    logic         [4:0]     shortq_decode;</span></span>
-<span id="L1402"><span class="lineNum">    1402</span> <span class="tlaGNC">        2486 :    logic         [4:0]     shortq_shift_ff;</span></span>
+<span id="L1398"><span class="lineNum">    1398</span> <span class="tlaGNC">        1668 :    logic        [64:0]     ar_shifted;</span></span>
+<span id="L1399"><span class="lineNum">    1399</span> <span class="tlaGNC">        1925 :    logic         [5:0]     shortq;</span></span>
+<span id="L1400"><span class="lineNum">    1400</span> <span class="tlaGNC">        2546 :    logic         [4:0]     shortq_shift;</span></span>
+<span id="L1401"><span class="lineNum">    1401</span> <span class="tlaGNC">         965 :    logic         [4:0]     shortq_decode;</span></span>
+<span id="L1402"><span class="lineNum">    1402</span> <span class="tlaGNC">        2546 :    logic         [4:0]     shortq_shift_ff;</span></span>
 <span id="L1403"><span class="lineNum">    1403</span> <span class="tlaGNC">        2832 :    logic                   shortq_enable;</span></span>
 <span id="L1404"><span class="lineNum">    1404</span> <span class="tlaGNC">        2832 :    logic                   shortq_enable_ff;</span></span>
-<span id="L1405"><span class="lineNum">    1405</span> <span class="tlaGNC">         439 :    logic        [32:0]     shortq_dividend;</span></span>
+<span id="L1405"><span class="lineNum">    1405</span> <span class="tlaGNC">        1668 :    logic        [32:0]     shortq_dividend;</span></span>
 <span id="L1406"><span class="lineNum">    1406</span>              : </span>
 <span id="L1407"><span class="lineNum">    1407</span> <span class="tlaGNC">         856 :    logic                   by_zero_case;</span></span>
 <span id="L1408"><span class="lineNum">    1408</span> <span class="tlaGNC">         856 :    logic                   by_zero_case_ff;</span></span>
@@ -1762,9 +1762,9 @@
 <span id="L1658"><span class="lineNum">    1658</span>              :    assign shortq_dividend[32:0]   = {dividend_sign_ff,a_ff[31:0]};</span>
 <span id="L1659"><span class="lineNum">    1659</span>              : </span>
 <span id="L1660"><span class="lineNum">    1660</span>              : </span>
-<span id="L1661"><span class="lineNum">    1661</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [5:0]  dw_a_enc;</span></span>
-<span id="L1662"><span class="lineNum">    1662</span> <span class="tlaUNC">           0 :    logic [5:0]  dw_b_enc;</span></span>
-<span id="L1663"><span class="lineNum">    1663</span> <span class="tlaGNC tlaBgGNC">         883 :    logic [6:0]  dw_shortq_raw;</span></span>
+<span id="L1661"><span class="lineNum">    1661</span> <span class="tlaGNC">        1252 :    logic [5:0]  dw_a_enc;</span></span>
+<span id="L1662"><span class="lineNum">    1662</span> <span class="tlaGNC">        1069 :    logic [5:0]  dw_b_enc;</span></span>
+<span id="L1663"><span class="lineNum">    1663</span> <span class="tlaGNC">        1904 :    logic [6:0]  dw_shortq_raw;</span></span>
 <span id="L1664"><span class="lineNum">    1664</span>              : </span>
 <span id="L1665"><span class="lineNum">    1665</span>              : </span>
 <span id="L1666"><span class="lineNum">    1666</span>              : </span>
@@ -1839,14 +1839,14 @@
 <span id="L1735"><span class="lineNum">    1735</span>              : </span>
 <span id="L1736"><span class="lineNum">    1736</span>              : module el2_exu_div_cls</span>
 <span id="L1737"><span class="lineNum">    1737</span>              :   (</span>
-<span id="L1738"><span class="lineNum">    1738</span> <span class="tlaGNC">        1458 :    input  logic [32:0] operand,</span></span>
+<span id="L1738"><span class="lineNum">    1738</span> <span class="tlaGNC">        3279 :    input  logic [32:0] operand,</span></span>
 <span id="L1739"><span class="lineNum">    1739</span>              : </span>
-<span id="L1740"><span class="lineNum">    1740</span> <span class="tlaGNC">        1300 :    output logic [4:0]  cls                  // Count leading sign bits - "n" format ignoring [32]</span></span>
+<span id="L1740"><span class="lineNum">    1740</span> <span class="tlaGNC">        2321 :    output logic [4:0]  cls                  // Count leading sign bits - "n" format ignoring [32]</span></span>
 <span id="L1741"><span class="lineNum">    1741</span>              :    );</span>
 <span id="L1742"><span class="lineNum">    1742</span>              : </span>
 <span id="L1743"><span class="lineNum">    1743</span>              : </span>
-<span id="L1744"><span class="lineNum">    1744</span> <span class="tlaGNC">        1298 :    logic [4:0]   cls_zeros;</span></span>
-<span id="L1745"><span class="lineNum">    1745</span> <span class="tlaGNC">        1132 :    logic [4:0]   cls_ones;</span></span>
+<span id="L1744"><span class="lineNum">    1744</span> <span class="tlaGNC">        2422 :    logic [4:0]   cls_zeros;</span></span>
+<span id="L1745"><span class="lineNum">    1745</span> <span class="tlaGNC">        1572 :    logic [4:0]   cls_ones;</span></span>
 <span id="L1746"><span class="lineNum">    1746</span>              : </span>
 <span id="L1747"><span class="lineNum">    1747</span>              : </span>
 <span id="L1748"><span class="lineNum">    1748</span>              : assign cls_zeros[4:0]             = ({5{operand[31]    ==  {           1'b1} }} &amp; 5'd00) |</span>

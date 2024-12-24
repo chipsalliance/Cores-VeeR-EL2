@@ -51,18 +51,18 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff7c00;">
-        24.3%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff8500;">
+        26.1%
     </td>
     <td class="headerCovSummaryEntry">
-        27
+        29
     </td>
     <td class="headerCovSummaryEntry">
         111
@@ -146,9 +146,9 @@
 <span id="L42"><span class="lineNum">      42</span>              : </span>
 <span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">           1 :    input logic                             rst_l,                   // reset, active low</span></span>
 <span id="L44"><span class="lineNum">      44</span>              : </span>
-<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">        1306 :    input                                   el2_lsu_pkt_t lsu_pkt_r,// lsu packets</span></span>
-<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">        1306 :    input                                   el2_lsu_pkt_t lsu_pkt_m,// lsu packets</span></span>
-<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">        1306 :    input                                   el2_lsu_pkt_t lsu_pkt_d,// lsu packets</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">        5951 :    input                                   el2_lsu_pkt_t lsu_pkt_r,// lsu packets</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">        5951 :    input                                   el2_lsu_pkt_t lsu_pkt_m,// lsu packets</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">        5951 :    input                                   el2_lsu_pkt_t lsu_pkt_d,// lsu packets</span></span>
 <span id="L48"><span class="lineNum">      48</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                             addr_in_dccm_d,          // address maps to dccm</span></span>
 <span id="L49"><span class="lineNum">      49</span> <span class="tlaUNC">           0 :    input logic                             addr_in_pic_d,           // address maps to pic</span></span>
 <span id="L50"><span class="lineNum">      50</span> <span class="tlaUNC">           0 :    input logic                             addr_in_pic_m,           // address maps to pic</span></span>
@@ -159,14 +159,14 @@
 <span id="L55"><span class="lineNum">      55</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                             ldst_dual_m, ldst_dual_r,// load/store is unaligned at 32 bit boundary per pipe stage</span></span>
 <span id="L56"><span class="lineNum">      56</span>              : </span>
 <span id="L57"><span class="lineNum">      57</span>              :    // lsu address down the pipe</span>
-<span id="L58"><span class="lineNum">      58</span> <span class="tlaGNC tlaBgGNC">        1248 :    input logic [31:0]                      lsu_addr_d,</span></span>
-<span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC">        1168 :    input logic [pt.DCCM_BITS-1:0]          lsu_addr_m,</span></span>
-<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">        1248 :    input logic [31:0]                      lsu_addr_r,</span></span>
+<span id="L58"><span class="lineNum">      58</span> <span class="tlaGNC tlaBgGNC">        5950 :    input logic [31:0]                      lsu_addr_d,</span></span>
+<span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC">        3872 :    input logic [pt.DCCM_BITS-1:0]          lsu_addr_m,</span></span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">        5950 :    input logic [31:0]                      lsu_addr_r,</span></span>
 <span id="L61"><span class="lineNum">      61</span>              : </span>
 <span id="L62"><span class="lineNum">      62</span>              :    // lsu address down the pipe - needed to check unaligned</span>
-<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">        1248 :    input logic [pt.DCCM_BITS-1:0]          end_addr_d,</span></span>
-<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">        1248 :    input logic [pt.DCCM_BITS-1:0]          end_addr_m,</span></span>
-<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">        1248 :    input logic [pt.DCCM_BITS-1:0]          end_addr_r,</span></span>
+<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">        3872 :    input logic [pt.DCCM_BITS-1:0]          end_addr_d,</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">        3872 :    input logic [pt.DCCM_BITS-1:0]          end_addr_m,</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">        3872 :    input logic [pt.DCCM_BITS-1:0]          end_addr_r,</span></span>
 <span id="L66"><span class="lineNum">      66</span>              : </span>
 <span id="L67"><span class="lineNum">      67</span>              : </span>
 <span id="L68"><span class="lineNum">      68</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                             stbuf_reqvld_any,        // write enable</span></span>
@@ -206,7 +206,7 @@
 <span id="L102"><span class="lineNum">     102</span> <span class="tlaUNC">           0 :    input logic [pt.DCCM_DATA_WIDTH-1:0]    sec_data_hi_m,           // corrected dccm data</span></span>
 <span id="L103"><span class="lineNum">     103</span> <span class="tlaUNC">           0 :    input logic [pt.DCCM_DATA_WIDTH-1:0]    sec_data_lo_m,           // corrected dccm data</span></span>
 <span id="L104"><span class="lineNum">     104</span>              : </span>
-<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC tlaBgGNC">          36 :    input logic [31:0]                      store_data_m,            // Store data M-stage</span></span>
+<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC tlaBgGNC">        2008 :    input logic [31:0]                      store_data_m,            // Store data M-stage</span></span>
 <span id="L106"><span class="lineNum">     106</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                             dma_dccm_wen,            // Perform DMA writes only for word/dword</span></span>
 <span id="L107"><span class="lineNum">     107</span> <span class="tlaUNC">           0 :    input logic                             dma_pic_wen,             // Perform PIC writes</span></span>
 <span id="L108"><span class="lineNum">     108</span> <span class="tlaUNC">           0 :    input logic [2:0]                       dma_mem_tag_m,           // DMA Buffer entry number M-stage</span></span>
@@ -218,10 +218,10 @@
 <span id="L114"><span class="lineNum">     114</span> <span class="tlaUNC">           0 :    input logic [pt.DCCM_ECC_WIDTH-1:0]     dma_dccm_wdata_ecc_lo,   // ECC bits for the DMA wdata</span></span>
 <span id="L115"><span class="lineNum">     115</span>              : </span>
 <span id="L116"><span class="lineNum">     116</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_DATA_WIDTH-1:0]   store_data_hi_r,</span></span>
-<span id="L117"><span class="lineNum">     117</span> <span class="tlaGNC tlaBgGNC">          12 :    output logic [pt.DCCM_DATA_WIDTH-1:0]   store_data_lo_r,</span></span>
+<span id="L117"><span class="lineNum">     117</span> <span class="tlaGNC tlaBgGNC">        1896 :    output logic [pt.DCCM_DATA_WIDTH-1:0]   store_data_lo_r,</span></span>
 <span id="L118"><span class="lineNum">     118</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [pt.DCCM_DATA_WIDTH-1:0]   store_datafn_hi_r,       // data from the dccm</span></span>
-<span id="L119"><span class="lineNum">     119</span> <span class="tlaGNC tlaBgGNC">          12 :    output logic [pt.DCCM_DATA_WIDTH-1:0]   store_datafn_lo_r,       // data from the dccm</span></span>
-<span id="L120"><span class="lineNum">     120</span> <span class="tlaGNC">          36 :    output logic [31:0]                     store_data_r,            // raw store data to be sent to bus</span></span>
+<span id="L119"><span class="lineNum">     119</span> <span class="tlaGNC tlaBgGNC">        1896 :    output logic [pt.DCCM_DATA_WIDTH-1:0]   store_datafn_lo_r,       // data from the dccm</span></span>
+<span id="L120"><span class="lineNum">     120</span> <span class="tlaGNC">        2008 :    output logic [31:0]                     store_data_r,            // raw store data to be sent to bus</span></span>
 <span id="L121"><span class="lineNum">     121</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic                            ld_single_ecc_error_r,</span></span>
 <span id="L122"><span class="lineNum">     122</span> <span class="tlaUNC">           0 :    output logic                            ld_single_ecc_error_r_ff,</span></span>
 <span id="L123"><span class="lineNum">     123</span>              : </span>
@@ -240,8 +240,8 @@
 <span id="L136"><span class="lineNum">     136</span> <span class="tlaUNC">           0 :    output logic                            dccm_rden,               // dccm interface -- write</span></span>
 <span id="L137"><span class="lineNum">     137</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_BITS-1:0]         dccm_wr_addr_lo,         // dccm interface -- wr addr for lo bank</span></span>
 <span id="L138"><span class="lineNum">     138</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_BITS-1:0]         dccm_wr_addr_hi,         // dccm interface -- wr addr for hi bank</span></span>
-<span id="L139"><span class="lineNum">     139</span> <span class="tlaGNC tlaBgGNC">        1168 :    output logic [pt.DCCM_BITS-1:0]         dccm_rd_addr_lo,         // dccm interface -- read address for lo bank</span></span>
-<span id="L140"><span class="lineNum">     140</span> <span class="tlaGNC">        1248 :    output logic [pt.DCCM_BITS-1:0]         dccm_rd_addr_hi,         // dccm interface -- read address for hi bank</span></span>
+<span id="L139"><span class="lineNum">     139</span> <span class="tlaGNC tlaBgGNC">        3872 :    output logic [pt.DCCM_BITS-1:0]         dccm_rd_addr_lo,         // dccm interface -- read address for lo bank</span></span>
+<span id="L140"><span class="lineNum">     140</span> <span class="tlaGNC">        3872 :    output logic [pt.DCCM_BITS-1:0]         dccm_rd_addr_hi,         // dccm interface -- read address for hi bank</span></span>
 <span id="L141"><span class="lineNum">     141</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [pt.DCCM_FDATA_WIDTH-1:0]  dccm_wr_data_lo,         // dccm write data for lo bank</span></span>
 <span id="L142"><span class="lineNum">     142</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_FDATA_WIDTH-1:0]  dccm_wr_data_hi,         // dccm write data for hi bank</span></span>
 <span id="L143"><span class="lineNum">     143</span>              : </span>
@@ -252,15 +252,15 @@
 <span id="L148"><span class="lineNum">     148</span> <span class="tlaUNC">           0 :    output logic                            picm_wren,               // write to pic</span></span>
 <span id="L149"><span class="lineNum">     149</span> <span class="tlaUNC">           0 :    output logic                            picm_rden,               // read to pick</span></span>
 <span id="L150"><span class="lineNum">     150</span> <span class="tlaUNC">           0 :    output logic                            picm_mken,               // write to pic need a mask</span></span>
-<span id="L151"><span class="lineNum">     151</span> <span class="tlaGNC tlaBgGNC">           1 :    output logic [31:0]                     picm_rdaddr,             // address for pic read access</span></span>
-<span id="L152"><span class="lineNum">     152</span> <span class="tlaGNC">           1 :    output logic [31:0]                     picm_wraddr,             // address for pic write access</span></span>
-<span id="L153"><span class="lineNum">     153</span> <span class="tlaGNC">          12 :    output logic [31:0]                     picm_wr_data,            // write data</span></span>
+<span id="L151"><span class="lineNum">     151</span> <span class="tlaGNC tlaBgGNC">        3872 :    output logic [31:0]                     picm_rdaddr,             // address for pic read access</span></span>
+<span id="L152"><span class="lineNum">     152</span> <span class="tlaGNC">        3872 :    output logic [31:0]                     picm_wraddr,             // address for pic write access</span></span>
+<span id="L153"><span class="lineNum">     153</span> <span class="tlaGNC">        1896 :    output logic [31:0]                     picm_wr_data,            // write data</span></span>
 <span id="L154"><span class="lineNum">     154</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [31:0]                      picm_rd_data,            // read data</span></span>
 <span id="L155"><span class="lineNum">     155</span>              : </span>
 <span id="L156"><span class="lineNum">     156</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L157"><span class="lineNum">     157</span>              :    /*verilator coverage_off*/</span>
+<span id="L157"><span class="lineNum">     157</span>              :    /*pragma coverage off*/</span>
 <span id="L158"><span class="lineNum">     158</span>              :    input logic                             scan_mode                // scan mode</span>
-<span id="L159"><span class="lineNum">     159</span>              :    /*verilator coverage_on*/</span>
+<span id="L159"><span class="lineNum">     159</span>              :    /*pragma coverage on*/</span>
 <span id="L160"><span class="lineNum">     160</span>              : );</span>
 <span id="L161"><span class="lineNum">     161</span>              : </span>
 <span id="L162"><span class="lineNum">     162</span>              : </span>
@@ -272,16 +272,16 @@
 <span id="L168"><span class="lineNum">     168</span> <span class="tlaUNC">           0 :    logic                           ld_single_ecc_error_lo_r_ff, ld_single_ecc_error_hi_r_ff;</span></span>
 <span id="L169"><span class="lineNum">     169</span> <span class="tlaUNC">           0 :    logic                           lsu_double_ecc_error_r_ff;</span></span>
 <span id="L170"><span class="lineNum">     170</span> <span class="tlaUNC">           0 :    logic [pt.DCCM_BITS-1:0]        ld_sec_addr_lo_r_ff, ld_sec_addr_hi_r_ff;</span></span>
-<span id="L171"><span class="lineNum">     171</span> <span class="tlaUNC">           0 :    logic [pt.DCCM_DATA_WIDTH-1:0]  store_data_lo_r_in, store_data_hi_r_in ;</span></span>
-<span id="L172"><span class="lineNum">     172</span> <span class="tlaUNC">           0 :    logic [63:0]                    picm_rd_data_m;</span></span>
+<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC tlaBgGNC">        1896 :    logic [pt.DCCM_DATA_WIDTH-1:0]  store_data_lo_r_in, store_data_hi_r_in ;</span></span>
+<span id="L172"><span class="lineNum">     172</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [63:0]                    picm_rd_data_m;</span></span>
 <span id="L173"><span class="lineNum">     173</span>              : </span>
 <span id="L174"><span class="lineNum">     174</span> <span class="tlaUNC">           0 :    logic                           dccm_wr_bypass_d_m_hi, dccm_wr_bypass_d_r_hi;</span></span>
 <span id="L175"><span class="lineNum">     175</span> <span class="tlaUNC">           0 :    logic                           dccm_wr_bypass_d_m_lo, dccm_wr_bypass_d_r_lo;</span></span>
 <span id="L176"><span class="lineNum">     176</span> <span class="tlaUNC">           0 :    logic                           kill_ecc_corr_lo_r, kill_ecc_corr_hi_r;</span></span>
 <span id="L177"><span class="lineNum">     177</span>              : </span>
 <span id="L178"><span class="lineNum">     178</span>              :     // byte_en flowing down</span>
-<span id="L179"><span class="lineNum">     179</span> <span class="tlaGNC tlaBgGNC">         660 :    logic [3:0]                     store_byteen_m ,store_byteen_r;</span></span>
-<span id="L180"><span class="lineNum">     180</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [7:0]                     store_byteen_ext_m, store_byteen_ext_r;</span></span>
+<span id="L179"><span class="lineNum">     179</span> <span class="tlaGNC tlaBgGNC">        2938 :    logic [3:0]                     store_byteen_m ,store_byteen_r;</span></span>
+<span id="L180"><span class="lineNum">     180</span> <span class="tlaGNC">        2826 :    logic [7:0]                     store_byteen_ext_m, store_byteen_ext_r;</span></span>
 <span id="L181"><span class="lineNum">     181</span>              : </span>
 <span id="L182"><span class="lineNum">     182</span>              :    if (pt.LOAD_TO_USE_PLUS1 == 1) begin: L2U_Plus1_1</span>
 <span id="L183"><span class="lineNum">     183</span>              :       logic [63:0]  lsu_rdata_r, lsu_rdata_corr_r;</span>

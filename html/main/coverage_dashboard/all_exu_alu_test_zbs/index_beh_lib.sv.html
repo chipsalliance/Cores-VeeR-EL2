@@ -51,18 +51,18 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #e6ff00;">
-        54.8%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #aaff00;">
+        66.7%
     </td>
     <td class="headerCovSummaryEntry">
-        23
+        28
     </td>
     <td class="headerCovSummaryEntry">
         42
@@ -122,11 +122,11 @@
 <span id="L18"><span class="lineNum">      18</span>              : </span>
 <span id="L19"><span class="lineNum">      19</span>              : module rvdff #( parameter WIDTH=1, SHORT=0 )</span>
 <span id="L20"><span class="lineNum">      20</span>              :    (</span>
-<span id="L21"><span class="lineNum">      21</span> <span class="tlaUNC tlaBgUNC">           0 :      input logic [WIDTH-1:0] din,</span></span>
-<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC tlaBgGNC">        1000 :      input logic           clk,</span></span>
+<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC tlaBgGNC">         248 :      input logic [WIDTH-1:0] din,</span></span>
+<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">        2270 :      input logic           clk,</span></span>
 <span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">          18 :      input logic                   rst_l,</span></span>
 <span id="L24"><span class="lineNum">      24</span>              : </span>
-<span id="L25"><span class="lineNum">      25</span> <span class="tlaUNC tlaBgUNC">           0 :      output logic [WIDTH-1:0] dout</span></span>
+<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">         252 :      output logic [WIDTH-1:0] dout</span></span>
 <span id="L26"><span class="lineNum">      26</span>              :      );</span>
 <span id="L27"><span class="lineNum">      27</span>              : </span>
 <span id="L28"><span class="lineNum">      28</span>              : if (SHORT == 1) begin</span>
@@ -139,11 +139,11 @@
 <span id="L35"><span class="lineNum">      35</span>              :    end</span>
 <span id="L36"><span class="lineNum">      36</span>              : `endif</span>
 <span id="L37"><span class="lineNum">      37</span>              : </span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC tlaBgGNC">           8 :    always_ff @(posedge clk or negedge rst_l) begin</span></span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">         500 :       if (rst_l == 0)</span></span>
-<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">           8 :         dout[WIDTH-1:0] &lt;= 0;</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">        1144 :    always_ff @(posedge clk or negedge rst_l) begin</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">        1120 :       if (rst_l == 0)</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">          24 :         dout[WIDTH-1:0] &lt;= 0;</span></span>
 <span id="L41"><span class="lineNum">      41</span>              :       else</span>
-<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">         500 :         dout[WIDTH-1:0] &lt;= din[WIDTH-1:0];</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">        1120 :         dout[WIDTH-1:0] &lt;= din[WIDTH-1:0];</span></span>
 <span id="L43"><span class="lineNum">      43</span>              :    end</span>
 <span id="L44"><span class="lineNum">      44</span>              : </span>
 <span id="L45"><span class="lineNum">      45</span>              : end</span>
@@ -269,18 +269,18 @@
 <span id="L165"><span class="lineNum">     165</span>              : </span>
 <span id="L166"><span class="lineNum">     166</span>              : module rvdffe #( parameter WIDTH=1, SHORT=0, OVERRIDE=0 )</span>
 <span id="L167"><span class="lineNum">     167</span>              :    (</span>
-<span id="L168"><span class="lineNum">     168</span> <span class="tlaUNC tlaBgUNC">           0 :      input  logic [WIDTH-1:0] din,</span></span>
-<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC tlaBgGNC">           2 :      input  logic           en,</span></span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC">         248 :      input  logic [WIDTH-1:0] din,</span></span>
+<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC">        1000 :      input  logic           en,</span></span>
 <span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">        2278 :      input  logic           clk,</span></span>
 <span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">          18 :      input  logic           rst_l,</span></span>
 <span id="L172"><span class="lineNum">     172</span>              :      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L173"><span class="lineNum">     173</span>              :      /*verilator coverage_off*/</span>
+<span id="L173"><span class="lineNum">     173</span>              :      /*pragma coverage off*/</span>
 <span id="L174"><span class="lineNum">     174</span>              :      input  logic             scan_mode,</span>
-<span id="L175"><span class="lineNum">     175</span>              :      /*verilator coverage_on*/</span>
-<span id="L176"><span class="lineNum">     176</span> <span class="tlaUNC tlaBgUNC">           0 :      output logic [WIDTH-1:0] dout</span></span>
+<span id="L175"><span class="lineNum">     175</span>              :      /*pragma coverage on*/</span>
+<span id="L176"><span class="lineNum">     176</span> <span class="tlaGNC">         252 :      output logic [WIDTH-1:0] dout</span></span>
 <span id="L177"><span class="lineNum">     177</span>              :      );</span>
 <span id="L178"><span class="lineNum">     178</span>              : </span>
-<span id="L179"><span class="lineNum">     179</span> <span class="tlaGNC tlaBgGNC">        1000 :    logic                      l1clk;</span></span>
+<span id="L179"><span class="lineNum">     179</span> <span class="tlaGNC">        2270 :    logic                      l1clk;</span></span>
 <span id="L180"><span class="lineNum">     180</span>              : </span>
 <span id="L181"><span class="lineNum">     181</span>              : if (SHORT == 1) begin : genblock</span>
 <span id="L182"><span class="lineNum">     182</span>              :    if (1) begin : genblock</span>
@@ -317,9 +317,9 @@
 <span id="L213"><span class="lineNum">     213</span> <span class="tlaGNC">          18 :      input  logic             rst_l,</span></span>
 <span id="L214"><span class="lineNum">     214</span> <span class="tlaGNC">           2 :      input  logic             en,</span></span>
 <span id="L215"><span class="lineNum">     215</span>              :      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L216"><span class="lineNum">     216</span>              :      /*verilator coverage_off*/</span>
+<span id="L216"><span class="lineNum">     216</span>              :      /*pragma coverage off*/</span>
 <span id="L217"><span class="lineNum">     217</span>              :      input  logic             scan_mode,</span>
-<span id="L218"><span class="lineNum">     218</span>              :      /*verilator coverage_on*/</span>
+<span id="L218"><span class="lineNum">     218</span>              :      /*pragma coverage on*/</span>
 <span id="L219"><span class="lineNum">     219</span> <span class="tlaUNC tlaBgUNC">           0 :      output logic [WIDTH-1:0] dout</span></span>
 <span id="L220"><span class="lineNum">     220</span>              :      );</span>
 <span id="L221"><span class="lineNum">     221</span>              : </span>
@@ -353,9 +353,9 @@
 <span id="L249"><span class="lineNum">     249</span> <span class="tlaGNC">          18 :      input  logic             rst_l,</span></span>
 <span id="L250"><span class="lineNum">     250</span> <span class="tlaGNC">           2 :      input  logic             en,</span></span>
 <span id="L251"><span class="lineNum">     251</span>              :      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L252"><span class="lineNum">     252</span>              :      /*verilator coverage_off*/</span>
+<span id="L252"><span class="lineNum">     252</span>              :      /*pragma coverage off*/</span>
 <span id="L253"><span class="lineNum">     253</span>              :      input  logic             scan_mode,</span>
-<span id="L254"><span class="lineNum">     254</span>              :      /*verilator coverage_on*/</span>
+<span id="L254"><span class="lineNum">     254</span>              :      /*pragma coverage on*/</span>
 <span id="L255"><span class="lineNum">     255</span> <span class="tlaUNC tlaBgUNC">           0 :      output logic [WIDTH-1:0] dout</span></span>
 <span id="L256"><span class="lineNum">     256</span>              :      );</span>
 <span id="L257"><span class="lineNum">     257</span>              : </span>
@@ -411,9 +411,9 @@
 <span id="L307"><span class="lineNum">     307</span>              :      input  logic             rst_l,</span>
 <span id="L308"><span class="lineNum">     308</span>              :      input  logic             en,</span>
 <span id="L309"><span class="lineNum">     309</span>              :      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L310"><span class="lineNum">     310</span>              :      /*verilator coverage_off*/</span>
+<span id="L310"><span class="lineNum">     310</span>              :      /*pragma coverage off*/</span>
 <span id="L311"><span class="lineNum">     311</span>              :      input  logic             scan_mode,</span>
-<span id="L312"><span class="lineNum">     312</span>              :      /*verilator coverage_on*/</span>
+<span id="L312"><span class="lineNum">     312</span>              :      /*pragma coverage on*/</span>
 <span id="L313"><span class="lineNum">     313</span>              :      output logic [WIDTH-1:0] dout</span>
 <span id="L314"><span class="lineNum">     314</span>              :      );</span>
 <span id="L315"><span class="lineNum">     315</span>              : </span>
@@ -457,9 +457,9 @@
 <span id="L353"><span class="lineNum">     353</span>              :      input  logic           clk,</span>
 <span id="L354"><span class="lineNum">     354</span>              :      input  logic           rst_l,</span>
 <span id="L355"><span class="lineNum">     355</span>              :      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L356"><span class="lineNum">     356</span>              :      /*verilator coverage_off*/</span>
+<span id="L356"><span class="lineNum">     356</span>              :      /*pragma coverage off*/</span>
 <span id="L357"><span class="lineNum">     357</span>              :      input  logic             scan_mode,</span>
-<span id="L358"><span class="lineNum">     358</span>              :      /*verilator coverage_on*/</span>
+<span id="L358"><span class="lineNum">     358</span>              :      /*pragma coverage on*/</span>
 <span id="L359"><span class="lineNum">     359</span>              :      output logic [WIDTH-1:0] dout</span>
 <span id="L360"><span class="lineNum">     360</span>              :      );</span>
 <span id="L361"><span class="lineNum">     361</span>              : </span>
@@ -503,9 +503,9 @@
 <span id="L399"><span class="lineNum">     399</span> <span class="tlaGNC tlaBgGNC">        2278 :      input  logic           clk,</span></span>
 <span id="L400"><span class="lineNum">     400</span> <span class="tlaGNC">          18 :      input  logic           rst_l,</span></span>
 <span id="L401"><span class="lineNum">     401</span>              :      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L402"><span class="lineNum">     402</span>              :      /*verilator coverage_off*/</span>
+<span id="L402"><span class="lineNum">     402</span>              :      /*pragma coverage off*/</span>
 <span id="L403"><span class="lineNum">     403</span>              :      input  logic           scan_mode,</span>
-<span id="L404"><span class="lineNum">     404</span>              :      /*verilator coverage_on*/</span>
+<span id="L404"><span class="lineNum">     404</span>              :      /*pragma coverage on*/</span>
 <span id="L405"><span class="lineNum">     405</span> <span class="tlaGNC">           2 :      input  logic           en,</span></span>
 <span id="L406"><span class="lineNum">     406</span> <span class="tlaUNC tlaBgUNC">           0 :      output logic [WIDTH-1:0] dout</span></span>
 <span id="L407"><span class="lineNum">     407</span>              :      );</span>
@@ -608,8 +608,8 @@
 <span id="L504"><span class="lineNum">     504</span> <span class="tlaUNC">           0 :    logic          cout;</span></span>
 <span id="L505"><span class="lineNum">     505</span> <span class="tlaUNC">           0 :    logic          sign;</span></span>
 <span id="L506"><span class="lineNum">     506</span>              : </span>
-<span id="L507"><span class="lineNum">     507</span> <span class="tlaUNC">           0 :    logic [31:13]  pc_inc;</span></span>
-<span id="L508"><span class="lineNum">     508</span> <span class="tlaGNC tlaBgGNC">           2 :    logic [31:13]  pc_dec;</span></span>
+<span id="L507"><span class="lineNum">     507</span> <span class="tlaGNC tlaBgGNC">           2 :    logic [31:13]  pc_inc;</span></span>
+<span id="L508"><span class="lineNum">     508</span> <span class="tlaGNC">           2 :    logic [31:13]  pc_dec;</span></span>
 <span id="L509"><span class="lineNum">     509</span>              : </span>
 <span id="L510"><span class="lineNum">     510</span>              :    assign {cout,dout[12:1]} = {1'b0,pc[12:1]} + {1'b0,offset[12:1]};</span>
 <span id="L511"><span class="lineNum">     511</span>              : </span>
@@ -873,7 +873,7 @@
 <span id="L769"><span class="lineNum">     769</span>              : `ifndef TECH_SPECIFIC_EC_RV_ICG</span>
 <span id="L770"><span class="lineNum">     770</span>              : module `TEC_RV_ICG</span>
 <span id="L771"><span class="lineNum">     771</span>              :   (</span>
-<span id="L772"><span class="lineNum">     772</span> <span class="tlaGNC">        1002 :    input logic SE, EN, CK,</span></span>
+<span id="L772"><span class="lineNum">     772</span> <span class="tlaGNC">        6834 :    input logic SE, EN, CK,</span></span>
 <span id="L773"><span class="lineNum">     773</span> <span class="tlaGNC">        3270 :    output Q</span></span>
 <span id="L774"><span class="lineNum">     774</span>              :    );</span>
 <span id="L775"><span class="lineNum">     775</span>              : </span>
@@ -882,9 +882,9 @@
 <span id="L778"><span class="lineNum">     778</span>              : </span>
 <span id="L779"><span class="lineNum">     779</span>              :    assign      enable = EN | SE;</span>
 <span id="L780"><span class="lineNum">     780</span>              : </span>
-<span id="L781"><span class="lineNum">     781</span> <span class="tlaGNC">           6 :    always @(CK, enable) begin</span></span>
-<span id="L782"><span class="lineNum">     782</span> <span class="tlaGNC">        6906 :       if(!CK)</span></span>
-<span id="L783"><span class="lineNum">     783</span> <span class="tlaGNC">        6906 :         en_ff = enable;</span></span>
+<span id="L781"><span class="lineNum">     781</span> <span class="tlaGNC">        7842 :    always @(CK, enable) begin</span></span>
+<span id="L782"><span class="lineNum">     782</span> <span class="tlaGNC">        4420 :       if(!CK)</span></span>
+<span id="L783"><span class="lineNum">     783</span> <span class="tlaGNC">        3422 :         en_ff = enable;</span></span>
 <span id="L784"><span class="lineNum">     784</span>              :    end</span>
 <span id="L785"><span class="lineNum">     785</span>              :    assign Q = CK &amp; en_ff;</span>
 <span id="L786"><span class="lineNum">     786</span>              : </span>
@@ -897,9 +897,9 @@
 <span id="L793"><span class="lineNum">     793</span> <span class="tlaGNC">        1002 :    input  logic en,</span></span>
 <span id="L794"><span class="lineNum">     794</span> <span class="tlaGNC">        6834 :    input  logic clk,</span></span>
 <span id="L795"><span class="lineNum">     795</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L796"><span class="lineNum">     796</span>              :    /*verilator coverage_off*/</span>
+<span id="L796"><span class="lineNum">     796</span>              :    /*pragma coverage off*/</span>
 <span id="L797"><span class="lineNum">     797</span>              :    input  logic scan_mode,</span>
-<span id="L798"><span class="lineNum">     798</span>              :    /*verilator coverage_on*/</span>
+<span id="L798"><span class="lineNum">     798</span>              :    /*pragma coverage on*/</span>
 <span id="L799"><span class="lineNum">     799</span> <span class="tlaGNC">        3270 :    output logic l1clk</span></span>
 <span id="L800"><span class="lineNum">     800</span>              :    );</span>
 <span id="L801"><span class="lineNum">     801</span>              : </span>
@@ -920,9 +920,9 @@
 <span id="L816"><span class="lineNum">     816</span>              :    input  logic en,</span>
 <span id="L817"><span class="lineNum">     817</span>              :    input  logic clk,</span>
 <span id="L818"><span class="lineNum">     818</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L819"><span class="lineNum">     819</span>              :    /*verilator coverage_off*/</span>
+<span id="L819"><span class="lineNum">     819</span>              :    /*pragma coverage off*/</span>
 <span id="L820"><span class="lineNum">     820</span>              :    input  logic scan_mode,</span>
-<span id="L821"><span class="lineNum">     821</span>              :    /*verilator coverage_on*/</span>
+<span id="L821"><span class="lineNum">     821</span>              :    /*pragma coverage on*/</span>
 <span id="L822"><span class="lineNum">     822</span>              :    output logic l1clk</span>
 <span id="L823"><span class="lineNum">     823</span>              :    );</span>
 <span id="L824"><span class="lineNum">     824</span>              : </span>

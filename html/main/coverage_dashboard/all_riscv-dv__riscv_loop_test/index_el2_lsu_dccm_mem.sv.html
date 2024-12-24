@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -136,17 +136,17 @@
 <span id="L32"><span class="lineNum">      32</span>              : #(</span>
 <span id="L33"><span class="lineNum">      33</span>              : `include "el2_param.vh"</span>
 <span id="L34"><span class="lineNum">      34</span>              :  )(</span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">      197198 :    input logic         clk,                                             // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">      197198 :    input logic         active_clk,                                      // Clock only while core active.  Through two clock headers. For flops without second clock header built in.</span></span>
-<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">           3 :    input logic         rst_l,                                           // reset, active low</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">      267134 :    input logic         clk,                                             // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">      267134 :    input logic         active_clk,                                      // Clock only while core active.  Through two clock headers. For flops without second clock header built in.</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">           1 :    input logic         rst_l,                                           // reset, active low</span></span>
 <span id="L38"><span class="lineNum">      38</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic         clk_override,                                    // Override non-functional clock gating</span></span>
 <span id="L39"><span class="lineNum">      39</span>              : </span>
 <span id="L40"><span class="lineNum">      40</span> <span class="tlaUNC">           0 :    input logic         dccm_wren,                                       // write enable</span></span>
 <span id="L41"><span class="lineNum">      41</span> <span class="tlaUNC">           0 :    input logic         dccm_rden,                                       // read enable</span></span>
 <span id="L42"><span class="lineNum">      42</span> <span class="tlaUNC">           0 :    input logic [pt.DCCM_BITS-1:0]  dccm_wr_addr_lo,                     // write address</span></span>
 <span id="L43"><span class="lineNum">      43</span> <span class="tlaUNC">           0 :    input logic [pt.DCCM_BITS-1:0]  dccm_wr_addr_hi,                     // write address</span></span>
-<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC tlaBgGNC">          12 :    input logic [pt.DCCM_BITS-1:0]  dccm_rd_addr_lo,                     // read address</span></span>
-<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">          12 :    input logic [pt.DCCM_BITS-1:0]  dccm_rd_addr_hi,                     // read address for the upper bank in case of a misaligned access</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC tlaBgGNC">          84 :    input logic [pt.DCCM_BITS-1:0]  dccm_rd_addr_lo,                     // read address</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">         143 :    input logic [pt.DCCM_BITS-1:0]  dccm_rd_addr_hi,                     // read address for the upper bank in case of a misaligned access</span></span>
 <span id="L46"><span class="lineNum">      46</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [pt.DCCM_FDATA_WIDTH-1:0]  dccm_wr_data_lo,              // write data</span></span>
 <span id="L47"><span class="lineNum">      47</span> <span class="tlaUNC">           0 :    input logic [pt.DCCM_FDATA_WIDTH-1:0]  dccm_wr_data_hi,              // write data</span></span>
 <span id="L48"><span class="lineNum">      48</span>              :    el2_mem_if.veer_dccm                   dccm_mem_export,              // RAM repositioned in testbench and connected by this interface</span>
@@ -155,9 +155,9 @@
 <span id="L51"><span class="lineNum">      51</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_rd_data_hi,              // read data from the hi bank</span></span>
 <span id="L52"><span class="lineNum">      52</span>              : </span>
 <span id="L53"><span class="lineNum">      53</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L54"><span class="lineNum">      54</span>              :    /*verilator coverage_off*/</span>
+<span id="L54"><span class="lineNum">      54</span>              :    /*pragma coverage off*/</span>
 <span id="L55"><span class="lineNum">      55</span>              :    input  logic         scan_mode</span>
-<span id="L56"><span class="lineNum">      56</span>              :    /*verilator coverage_on*/</span>
+<span id="L56"><span class="lineNum">      56</span>              :    /*pragma coverage on*/</span>
 <span id="L57"><span class="lineNum">      57</span>              : );</span>
 <span id="L58"><span class="lineNum">      58</span>              : </span>
 <span id="L59"><span class="lineNum">      59</span>              : </span>
@@ -167,7 +167,7 @@
 <span id="L63"><span class="lineNum">      63</span>              : </span>
 <span id="L64"><span class="lineNum">      64</span> <span class="tlaUNC">           0 :    logic [pt.DCCM_NUM_BANKS-1:0]                                        wren_bank;</span></span>
 <span id="L65"><span class="lineNum">      65</span> <span class="tlaUNC">           0 :    logic [pt.DCCM_NUM_BANKS-1:0]                                        rden_bank;</span></span>
-<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC tlaBgGNC">          12 :    logic [pt.DCCM_NUM_BANKS-1:0] [pt.DCCM_BITS-1:(pt.DCCM_BANK_BITS+2)] addr_bank;</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC tlaBgGNC">          84 :    logic [pt.DCCM_NUM_BANKS-1:0] [pt.DCCM_BITS-1:(pt.DCCM_BANK_BITS+2)] addr_bank;</span></span>
 <span id="L67"><span class="lineNum">      67</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [pt.DCCM_BITS-1:(pt.DCCM_BANK_BITS+DCCM_WIDTH_BITS)]           rd_addr_even, rd_addr_odd;</span></span>
 <span id="L68"><span class="lineNum">      68</span> <span class="tlaUNC">           0 :    logic                                                                rd_unaligned, wr_unaligned;</span></span>
 <span id="L69"><span class="lineNum">      69</span> <span class="tlaUNC">           0 :    logic [pt.DCCM_NUM_BANKS-1:0] [pt.DCCM_FDATA_WIDTH-1:0]              dccm_bank_dout;</span></span>
@@ -175,8 +175,8 @@
 <span id="L71"><span class="lineNum">      71</span>              : </span>
 <span id="L72"><span class="lineNum">      72</span> <span class="tlaUNC">           0 :    logic [pt.DCCM_NUM_BANKS-1:0][pt.DCCM_FDATA_WIDTH-1:0]               wr_data_bank;</span></span>
 <span id="L73"><span class="lineNum">      73</span>              : </span>
-<span id="L74"><span class="lineNum">      74</span> <span class="tlaGNC tlaBgGNC">         196 :    logic [(DCCM_WIDTH_BITS+pt.DCCM_BANK_BITS-1):DCCM_WIDTH_BITS]        dccm_rd_addr_lo_q;</span></span>
-<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">         196 :    logic [(DCCM_WIDTH_BITS+pt.DCCM_BANK_BITS-1):DCCM_WIDTH_BITS]        dccm_rd_addr_hi_q;</span></span>
+<span id="L74"><span class="lineNum">      74</span> <span class="tlaGNC tlaBgGNC">          80 :    logic [(DCCM_WIDTH_BITS+pt.DCCM_BANK_BITS-1):DCCM_WIDTH_BITS]        dccm_rd_addr_lo_q;</span></span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">          80 :    logic [(DCCM_WIDTH_BITS+pt.DCCM_BANK_BITS-1):DCCM_WIDTH_BITS]        dccm_rd_addr_hi_q;</span></span>
 <span id="L76"><span class="lineNum">      76</span>              : </span>
 <span id="L77"><span class="lineNum">      77</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [pt.DCCM_NUM_BANKS-1:0]            dccm_clken;</span></span>
 <span id="L78"><span class="lineNum">      78</span>              : </span>
@@ -189,7 +189,7 @@
 <span id="L85"><span class="lineNum">      85</span>              : </span>
 <span id="L86"><span class="lineNum">      86</span>              : </span>
 <span id="L87"><span class="lineNum">      87</span>              :    // 8 Banks, 16KB each (2048 x 72)</span>
-<span id="L88"><span class="lineNum">      88</span> <span class="tlaGNC tlaBgGNC">          12 :    for (genvar i=0; i&lt;pt.DCCM_NUM_BANKS; i++) begin: mem_bank</span></span>
+<span id="L88"><span class="lineNum">      88</span> <span class="tlaGNC tlaBgGNC">           4 :    for (genvar i=0; i&lt;pt.DCCM_NUM_BANKS; i++) begin: mem_bank</span></span>
 <span id="L89"><span class="lineNum">      89</span>              :       assign  wren_bank[i]        = dccm_wren &amp; ((dccm_wr_addr_hi[2+:pt.DCCM_BANK_BITS] == i) | (dccm_wr_addr_lo[2+:pt.DCCM_BANK_BITS] == i));</span>
 <span id="L90"><span class="lineNum">      90</span>              :       assign  rden_bank[i]        = dccm_rden &amp; ((dccm_rd_addr_hi[2+:pt.DCCM_BANK_BITS] == i) | (dccm_rd_addr_lo[2+:pt.DCCM_BANK_BITS] == i));</span>
 <span id="L91"><span class="lineNum">      91</span>              :       assign  addr_bank[i][(pt.DCCM_BANK_BITS+DCCM_WIDTH_BITS)+:DCCM_INDEX_BITS] = wren_bank[i] ? (((dccm_wr_addr_hi[2+:pt.DCCM_BANK_BITS] == i) &amp; wr_unaligned) ?</span>
@@ -206,14 +206,14 @@
 <span id="L102"><span class="lineNum">     102</span>              :       // end clock gating section</span>
 <span id="L103"><span class="lineNum">     103</span>              : </span>
 <span id="L104"><span class="lineNum">     104</span>              :       // Connect to exported RAM Banks</span>
-<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC">          12 :       always_comb begin</span></span>
-<span id="L106"><span class="lineNum">     106</span> <span class="tlaGNC">          12 :          dccm_mem_export.dccm_clken[i]                               = dccm_clken[i];</span></span>
-<span id="L107"><span class="lineNum">     107</span> <span class="tlaGNC">          12 :          dccm_mem_export.dccm_wren_bank[i]                           = wren_bank[i];</span></span>
-<span id="L108"><span class="lineNum">     108</span> <span class="tlaGNC">          12 :          dccm_mem_export.dccm_addr_bank[i]                           = addr_bank[i];</span></span>
-<span id="L109"><span class="lineNum">     109</span> <span class="tlaGNC">          12 :          dccm_mem_export.dccm_wr_data_bank[i]                        = wr_data_bank[i][pt.DCCM_DATA_WIDTH-1:0];</span></span>
-<span id="L110"><span class="lineNum">     110</span> <span class="tlaGNC">          12 :          dccm_mem_export.dccm_wr_ecc_bank[i]                         = wr_data_bank[i][pt.DCCM_FDATA_WIDTH-1:pt.DCCM_DATA_WIDTH];</span></span>
-<span id="L111"><span class="lineNum">     111</span> <span class="tlaGNC">          12 :          dccm_bank_dout[i][pt.DCCM_DATA_WIDTH-1:0]                   = dccm_mem_export.dccm_bank_dout[i];</span></span>
-<span id="L112"><span class="lineNum">     112</span> <span class="tlaGNC">          12 :          dccm_bank_dout[i][pt.DCCM_FDATA_WIDTH-1:pt.DCCM_DATA_WIDTH] = dccm_mem_export.dccm_bank_ecc[i];</span></span>
+<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC">           4 :       always_comb begin</span></span>
+<span id="L106"><span class="lineNum">     106</span> <span class="tlaGNC">           4 :          dccm_mem_export.dccm_clken[i]                               = dccm_clken[i];</span></span>
+<span id="L107"><span class="lineNum">     107</span> <span class="tlaGNC">           4 :          dccm_mem_export.dccm_wren_bank[i]                           = wren_bank[i];</span></span>
+<span id="L108"><span class="lineNum">     108</span> <span class="tlaGNC">           4 :          dccm_mem_export.dccm_addr_bank[i]                           = addr_bank[i];</span></span>
+<span id="L109"><span class="lineNum">     109</span> <span class="tlaGNC">           4 :          dccm_mem_export.dccm_wr_data_bank[i]                        = wr_data_bank[i][pt.DCCM_DATA_WIDTH-1:0];</span></span>
+<span id="L110"><span class="lineNum">     110</span> <span class="tlaGNC">           4 :          dccm_mem_export.dccm_wr_ecc_bank[i]                         = wr_data_bank[i][pt.DCCM_FDATA_WIDTH-1:pt.DCCM_DATA_WIDTH];</span></span>
+<span id="L111"><span class="lineNum">     111</span> <span class="tlaGNC">           4 :          dccm_bank_dout[i][pt.DCCM_DATA_WIDTH-1:0]                   = dccm_mem_export.dccm_bank_dout[i];</span></span>
+<span id="L112"><span class="lineNum">     112</span> <span class="tlaGNC">           4 :          dccm_bank_dout[i][pt.DCCM_FDATA_WIDTH-1:pt.DCCM_DATA_WIDTH] = dccm_mem_export.dccm_bank_ecc[i];</span></span>
 <span id="L113"><span class="lineNum">     113</span>              :       end</span>
 <span id="L114"><span class="lineNum">     114</span>              : </span>
 <span id="L115"><span class="lineNum">     115</span>              :    end : mem_bank</span>

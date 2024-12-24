@@ -51,18 +51,18 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff2500;">
-        7.4%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff8400;">
+        25.9%
     </td>
     <td class="headerCovSummaryEntry">
-        2
+        7
     </td>
     <td class="headerCovSummaryEntry">
         27
@@ -133,19 +133,19 @@
 <span id="L29"><span class="lineNum">      29</span>              : </span>
 <span id="L30"><span class="lineNum">      30</span>              :   //////////////////////////////////////////</span>
 <span id="L31"><span class="lineNum">      31</span>              :   // ICCM</span>
-<span id="L32"><span class="lineNum">      32</span> <span class="tlaUNC">           0 :   logic [pt.ICCM_NUM_BANKS-1:0]                                       iccm_clken;</span></span>
-<span id="L33"><span class="lineNum">      33</span> <span class="tlaUNC">           0 :   logic [pt.ICCM_NUM_BANKS-1:0]                                       iccm_wren_bank;</span></span>
-<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">         700 :   logic [pt.ICCM_NUM_BANKS-1:0][pt.ICCM_BITS-1:pt.ICCM_BANK_INDEX_LO] iccm_addr_bank;</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC tlaBgGNC">        4000 :   logic [pt.ICCM_NUM_BANKS-1:0]                                       iccm_clken;</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">        2000 :   logic [pt.ICCM_NUM_BANKS-1:0]                                       iccm_wren_bank;</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">        1064 :   logic [pt.ICCM_NUM_BANKS-1:0][pt.ICCM_BITS-1:pt.ICCM_BANK_INDEX_LO] iccm_addr_bank;</span></span>
 <span id="L35"><span class="lineNum">      35</span>              : </span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">         484 :   logic [pt.ICCM_NUM_BANKS-1:0][                                31:0] iccm_bank_wr_data;</span></span>
-<span id="L37"><span class="lineNum">      37</span> <span class="tlaUNC tlaBgUNC">           0 :   logic [pt.ICCM_NUM_BANKS-1:0][               pt.ICCM_ECC_WIDTH-1:0] iccm_bank_wr_ecc;</span></span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaUNC">           0 :   logic [pt.ICCM_NUM_BANKS-1:0][                                31:0] iccm_bank_dout;</span></span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaUNC">           0 :   logic [pt.ICCM_NUM_BANKS-1:0][               pt.ICCM_ECC_WIDTH-1:0] iccm_bank_ecc;</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">         550 :   logic [pt.ICCM_NUM_BANKS-1:0][                                31:0] iccm_bank_wr_data;</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">         500 :   logic [pt.ICCM_NUM_BANKS-1:0][               pt.ICCM_ECC_WIDTH-1:0] iccm_bank_wr_ecc;</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">         602 :   logic [pt.ICCM_NUM_BANKS-1:0][                                31:0] iccm_bank_dout;</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">         578 :   logic [pt.ICCM_NUM_BANKS-1:0][               pt.ICCM_ECC_WIDTH-1:0] iccm_bank_ecc;</span></span>
 <span id="L40"><span class="lineNum">      40</span>              : </span>
 <span id="L41"><span class="lineNum">      41</span>              : </span>
 <span id="L42"><span class="lineNum">      42</span>              :   //////////////////////////////////////////</span>
 <span id="L43"><span class="lineNum">      43</span>              :   // DCCM</span>
-<span id="L44"><span class="lineNum">      44</span> <span class="tlaUNC">           0 :   logic [pt.DCCM_NUM_BANKS-1:0]                                       dccm_clken;</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaUNC tlaBgUNC">           0 :   logic [pt.DCCM_NUM_BANKS-1:0]                                       dccm_clken;</span></span>
 <span id="L45"><span class="lineNum">      45</span> <span class="tlaUNC">           0 :   logic [pt.DCCM_NUM_BANKS-1:0]                                       dccm_wren_bank;</span></span>
 <span id="L46"><span class="lineNum">      46</span> <span class="tlaUNC">           0 :   logic [pt.DCCM_NUM_BANKS-1:0][pt.DCCM_BITS-1:(pt.DCCM_BANK_BITS+2)] dccm_addr_bank;</span></span>
 <span id="L47"><span class="lineNum">      47</span> <span class="tlaUNC">           0 :   logic [pt.DCCM_NUM_BANKS-1:0][              pt.DCCM_DATA_WIDTH-1:0] dccm_wr_data_bank;</span></span>

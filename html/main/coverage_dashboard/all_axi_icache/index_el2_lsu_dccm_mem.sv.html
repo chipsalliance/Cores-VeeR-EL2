@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -136,8 +136,8 @@
 <span id="L32"><span class="lineNum">      32</span>              : #(</span>
 <span id="L33"><span class="lineNum">      33</span>              : `include "el2_param.vh"</span>
 <span id="L34"><span class="lineNum">      34</span>              :  )(</span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">       53400 :    input logic         clk,                                             // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">       53400 :    input logic         active_clk,                                      // Clock only while core active.  Through two clock headers. For flops without second clock header built in.</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">     4000002 :    input logic         clk,                                             // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">     4000002 :    input logic         active_clk,                                      // Clock only while core active.  Through two clock headers. For flops without second clock header built in.</span></span>
 <span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">           1 :    input logic         rst_l,                                           // reset, active low</span></span>
 <span id="L38"><span class="lineNum">      38</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic         clk_override,                                    // Override non-functional clock gating</span></span>
 <span id="L39"><span class="lineNum">      39</span>              : </span>
@@ -155,9 +155,9 @@
 <span id="L51"><span class="lineNum">      51</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_rd_data_hi,              // read data from the hi bank</span></span>
 <span id="L52"><span class="lineNum">      52</span>              : </span>
 <span id="L53"><span class="lineNum">      53</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L54"><span class="lineNum">      54</span>              :    /*verilator coverage_off*/</span>
+<span id="L54"><span class="lineNum">      54</span>              :    /*pragma coverage off*/</span>
 <span id="L55"><span class="lineNum">      55</span>              :    input  logic         scan_mode</span>
-<span id="L56"><span class="lineNum">      56</span>              :    /*verilator coverage_on*/</span>
+<span id="L56"><span class="lineNum">      56</span>              :    /*pragma coverage on*/</span>
 <span id="L57"><span class="lineNum">      57</span>              : );</span>
 <span id="L58"><span class="lineNum">      58</span>              : </span>
 <span id="L59"><span class="lineNum">      59</span>              : </span>

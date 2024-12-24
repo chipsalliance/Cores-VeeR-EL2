@@ -51,18 +51,18 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #dbff00;">
-        57.0%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #abff00;">
+        66.4%
     </td>
     <td class="headerCovSummaryEntry">
-        61
+        71
     </td>
     <td class="headerCovSummaryEntry">
         107
@@ -136,25 +136,25 @@
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">           2 :                      input  logic                   rst_l,                // Reset for all flops</span></span>
 <span id="L33"><span class="lineNum">      33</span> <span class="tlaUNC tlaBgUNC">           0 :                      input  logic                   clk_override,         // Clock over-ride for gating</span></span>
 <span id="L34"><span class="lineNum">      34</span> <span class="tlaUNC">           0 :                      input  logic                   io_clk_override,      // PIC IO  Clock over-ride for gating</span></span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">           4 :                      input  logic [pt.PIC_TOTAL_INT_PLUS1-1:0]   extintsrc_req,  // Interrupt requests</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">          36 :                      input  logic [pt.PIC_TOTAL_INT_PLUS1-1:0]   extintsrc_req,  // Interrupt requests</span></span>
 <span id="L36"><span class="lineNum">      36</span> <span class="tlaUNC tlaBgUNC">           0 :                      input  logic [31:0]            picm_rdaddr,          // Address of the register</span></span>
-<span id="L37"><span class="lineNum">      37</span> <span class="tlaUNC">           0 :                      input  logic [31:0]            picm_wraddr,          // Address of the register</span></span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaUNC">           0 :                      input  logic [31:0]            picm_wr_data,         // Data to be written to the register</span></span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC tlaBgGNC">       19236 :                      input  logic                   picm_wren,            // Write enable to the register</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC tlaBgGNC">        9250 :                      input  logic [31:0]            picm_wraddr,          // Address of the register</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">        2800 :                      input  logic [31:0]            picm_wr_data,         // Data to be written to the register</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">       19236 :                      input  logic                   picm_wren,            // Write enable to the register</span></span>
 <span id="L40"><span class="lineNum">      40</span> <span class="tlaUNC tlaBgUNC">           0 :                      input  logic                   picm_rden,            // Read enable for the register</span></span>
 <span id="L41"><span class="lineNum">      41</span> <span class="tlaUNC">           0 :                      input  logic                   picm_mken,            // Read the Mask for the register</span></span>
-<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC tlaBgGNC">          48 :                      input  logic [3:0]             meicurpl,             // Current Priority Level</span></span>
-<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">          38 :                      input  logic [3:0]             meipt,                // Current Priority Threshold</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC tlaBgGNC">          60 :                      input  logic [3:0]             meicurpl,             // Current Priority Level</span></span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">          60 :                      input  logic [3:0]             meipt,                // Current Priority Threshold</span></span>
 <span id="L44"><span class="lineNum">      44</span>              : </span>
 <span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">         124 :                      output logic                   mexintpend,           // External Inerrupt request to the core</span></span>
-<span id="L46"><span class="lineNum">      46</span> <span class="tlaUNC tlaBgUNC">           0 :                      output logic [7:0]             claimid,              // Claim Id of the requested interrupt</span></span>
-<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC tlaBgGNC">         138 :                      output logic [3:0]             pl,                   // Priority level of the requested interrupt</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">         140 :                      output logic [7:0]             claimid,              // Claim Id of the requested interrupt</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">         166 :                      output logic [3:0]             pl,                   // Priority level of the requested interrupt</span></span>
 <span id="L48"><span class="lineNum">      48</span> <span class="tlaUNC tlaBgUNC">           0 :                      output logic [31:0]            picm_rd_data,         // Read data of the register</span></span>
 <span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC tlaBgGNC">          28 :                      output logic                   mhwakeup,             // Wake-up interrupt request</span></span>
 <span id="L50"><span class="lineNum">      50</span>              :                      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L51"><span class="lineNum">      51</span>              :                      /*verilator coverage_off*/</span>
+<span id="L51"><span class="lineNum">      51</span>              :                      /*pragma coverage off*/</span>
 <span id="L52"><span class="lineNum">      52</span>              :                      input  logic                   scan_mode             // scan mode</span>
-<span id="L53"><span class="lineNum">      53</span>              :                      /*verilator coverage_on*/</span>
+<span id="L53"><span class="lineNum">      53</span>              :                      /*pragma coverage on*/</span>
 <span id="L54"><span class="lineNum">      54</span>              : </span>
 <span id="L55"><span class="lineNum">      55</span>              : );</span>
 <span id="L56"><span class="lineNum">      56</span>              : </span>
@@ -180,7 +180,7 @@
 <span id="L76"><span class="lineNum">      76</span>              : </span>
 <span id="L77"><span class="lineNum">      77</span>              : localparam INT_ENABLE_GRPS       =   (pt.PIC_TOTAL_INT_PLUS1 - 1)  / 4 ;</span>
 <span id="L78"><span class="lineNum">      78</span>              : </span>
-<span id="L79"><span class="lineNum">      79</span> <span class="tlaGNC">           2 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]           intenable_clk_enable ;</span></span>
+<span id="L79"><span class="lineNum">      79</span> <span class="tlaGNC">           6 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]           intenable_clk_enable ;</span></span>
 <span id="L80"><span class="lineNum">      80</span> <span class="tlaUNC tlaBgUNC">           0 : logic [INT_ENABLE_GRPS:0]                    intenable_clk_enable_grp ;</span></span>
 <span id="L81"><span class="lineNum">      81</span> <span class="tlaUNC">           0 : logic [INT_ENABLE_GRPS:0]                    gw_clk ;</span></span>
 <span id="L82"><span class="lineNum">      82</span>              : </span>
@@ -206,25 +206,25 @@
 <span id="L102"><span class="lineNum">     102</span> <span class="tlaUNC">           0 : logic [INTPRIORITY_BITS-1:0]                 intpriority_rd_out;</span></span>
 <span id="L103"><span class="lineNum">     103</span> <span class="tlaUNC">           0 : logic [1:0]                                  gw_config_rd_out;</span></span>
 <span id="L104"><span class="lineNum">     104</span>              : </span>
-<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC tlaBgGNC">          32 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0] [INTPRIORITY_BITS-1:0] intpriority_reg;</span></span>
-<span id="L106"><span class="lineNum">     106</span> <span class="tlaGNC">           2 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0] [INTPRIORITY_BITS-1:0] intpriority_reg_inv;</span></span>
+<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC tlaBgGNC">          70 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0] [INTPRIORITY_BITS-1:0] intpriority_reg;</span></span>
+<span id="L106"><span class="lineNum">     106</span> <span class="tlaGNC">          72 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0] [INTPRIORITY_BITS-1:0] intpriority_reg_inv;</span></span>
 <span id="L107"><span class="lineNum">     107</span> <span class="tlaGNC">         200 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        intpriority_reg_we;</span></span>
 <span id="L108"><span class="lineNum">     108</span> <span class="tlaUNC tlaBgUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        intpriority_reg_re;</span></span>
 <span id="L109"><span class="lineNum">     109</span> <span class="tlaGNC tlaBgGNC">           2 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0] [1:0]                  gw_config_reg;</span></span>
 <span id="L110"><span class="lineNum">     110</span>              : </span>
-<span id="L111"><span class="lineNum">     111</span> <span class="tlaGNC">          22 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        intenable_reg;</span></span>
+<span id="L111"><span class="lineNum">     111</span> <span class="tlaGNC">          50 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        intenable_reg;</span></span>
 <span id="L112"><span class="lineNum">     112</span> <span class="tlaGNC">         200 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        intenable_reg_we;</span></span>
 <span id="L113"><span class="lineNum">     113</span> <span class="tlaUNC tlaBgUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        intenable_reg_re;</span></span>
 <span id="L114"><span class="lineNum">     114</span> <span class="tlaGNC tlaBgGNC">         200 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        gw_config_reg_we;</span></span>
 <span id="L115"><span class="lineNum">     115</span> <span class="tlaUNC tlaBgUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        gw_config_reg_re;</span></span>
-<span id="L116"><span class="lineNum">     116</span> <span class="tlaGNC tlaBgGNC">           4 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        gw_clear_reg_we;</span></span>
+<span id="L116"><span class="lineNum">     116</span> <span class="tlaGNC tlaBgGNC">          36 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        gw_clear_reg_we;</span></span>
 <span id="L117"><span class="lineNum">     117</span>              : </span>
-<span id="L118"><span class="lineNum">     118</span> <span class="tlaGNC">          20 : logic [INTPEND_SIZE-1:0]                     intpend_reg_extended;</span></span>
+<span id="L118"><span class="lineNum">     118</span> <span class="tlaGNC">          36 : logic [INTPEND_SIZE-1:0]                     intpend_reg_extended;</span></span>
 <span id="L119"><span class="lineNum">     119</span>              : </span>
-<span id="L120"><span class="lineNum">     120</span> <span class="tlaUNC tlaBgUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0] [INTPRIORITY_BITS-1:0] intpend_w_prior_en;</span></span>
-<span id="L121"><span class="lineNum">     121</span> <span class="tlaUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0] [ID_BITS-1:0]          intpend_id;</span></span>
-<span id="L122"><span class="lineNum">     122</span> <span class="tlaGNC tlaBgGNC">           4 : logic [INTPRIORITY_BITS-1:0]                 maxint;</span></span>
-<span id="L123"><span class="lineNum">     123</span> <span class="tlaGNC">         136 : logic [INTPRIORITY_BITS-1:0]                 selected_int_priority;</span></span>
+<span id="L120"><span class="lineNum">     120</span> <span class="tlaGNC">          28 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0] [INTPRIORITY_BITS-1:0] intpend_w_prior_en;</span></span>
+<span id="L121"><span class="lineNum">     121</span> <span class="tlaGNC">           2 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0] [ID_BITS-1:0]          intpend_id;</span></span>
+<span id="L122"><span class="lineNum">     122</span> <span class="tlaGNC">           4 : logic [INTPRIORITY_BITS-1:0]                 maxint;</span></span>
+<span id="L123"><span class="lineNum">     123</span> <span class="tlaGNC">         164 : logic [INTPRIORITY_BITS-1:0]                 selected_int_priority;</span></span>
 <span id="L124"><span class="lineNum">     124</span> <span class="tlaUNC tlaBgUNC">           0 : logic [INT_GRPS-1:0] [31:0]                  intpend_rd_part_out ;</span></span>
 <span id="L125"><span class="lineNum">     125</span>              : </span>
 <span id="L126"><span class="lineNum">     126</span> <span class="tlaGNC tlaBgGNC">           2 : logic                                        config_reg;</span></span>
@@ -236,18 +236,18 @@
 <span id="L132"><span class="lineNum">     132</span> <span class="tlaUNC">           0 : logic                                        intpriority_reg_read ;</span></span>
 <span id="L133"><span class="lineNum">     133</span> <span class="tlaUNC">           0 : logic                                        intenable_reg_read   ;</span></span>
 <span id="L134"><span class="lineNum">     134</span> <span class="tlaUNC">           0 : logic                                        gw_config_reg_read   ;</span></span>
-<span id="L135"><span class="lineNum">     135</span> <span class="tlaUNC">           0 : logic                                        picm_wren_ff , picm_rden_ff ;</span></span>
-<span id="L136"><span class="lineNum">     136</span> <span class="tlaUNC">           0 : logic [31:0]                                 picm_raddr_ff;</span></span>
-<span id="L137"><span class="lineNum">     137</span> <span class="tlaUNC">           0 : logic [31:0]                                 picm_waddr_ff;</span></span>
-<span id="L138"><span class="lineNum">     138</span> <span class="tlaUNC">           0 : logic [31:0]                                 picm_wr_data_ff;</span></span>
-<span id="L139"><span class="lineNum">     139</span> <span class="tlaUNC">           0 : logic [3:0]                                  mask;</span></span>
-<span id="L140"><span class="lineNum">     140</span> <span class="tlaUNC">           0 : logic                                        picm_mken_ff;</span></span>
-<span id="L141"><span class="lineNum">     141</span> <span class="tlaUNC">           0 : logic [ID_BITS-1:0]                          claimid_in ;</span></span>
-<span id="L142"><span class="lineNum">     142</span> <span class="tlaGNC tlaBgGNC">         136 : logic [INTPRIORITY_BITS-1:0]                 pl_in ;</span></span>
-<span id="L143"><span class="lineNum">     143</span> <span class="tlaGNC">         138 : logic [INTPRIORITY_BITS-1:0]                 pl_in_q ;</span></span>
+<span id="L135"><span class="lineNum">     135</span> <span class="tlaGNC tlaBgGNC">       19236 : logic                                        picm_wren_ff , picm_rden_ff ;</span></span>
+<span id="L136"><span class="lineNum">     136</span> <span class="tlaUNC tlaBgUNC">           0 : logic [31:0]                                 picm_raddr_ff;</span></span>
+<span id="L137"><span class="lineNum">     137</span> <span class="tlaGNC tlaBgGNC">        9250 : logic [31:0]                                 picm_waddr_ff;</span></span>
+<span id="L138"><span class="lineNum">     138</span> <span class="tlaGNC">        2800 : logic [31:0]                                 picm_wr_data_ff;</span></span>
+<span id="L139"><span class="lineNum">     139</span> <span class="tlaGNC">           2 : logic [3:0]                                  mask;</span></span>
+<span id="L140"><span class="lineNum">     140</span> <span class="tlaUNC tlaBgUNC">           0 : logic                                        picm_mken_ff;</span></span>
+<span id="L141"><span class="lineNum">     141</span> <span class="tlaGNC tlaBgGNC">         140 : logic [ID_BITS-1:0]                          claimid_in ;</span></span>
+<span id="L142"><span class="lineNum">     142</span> <span class="tlaGNC">         164 : logic [INTPRIORITY_BITS-1:0]                 pl_in ;</span></span>
+<span id="L143"><span class="lineNum">     143</span> <span class="tlaGNC">         166 : logic [INTPRIORITY_BITS-1:0]                 pl_in_q ;</span></span>
 <span id="L144"><span class="lineNum">     144</span>              : </span>
 <span id="L145"><span class="lineNum">     145</span> <span class="tlaUNC tlaBgUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        extintsrc_req_sync;</span></span>
-<span id="L146"><span class="lineNum">     146</span> <span class="tlaGNC tlaBgGNC">           4 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        extintsrc_req_gw;</span></span>
+<span id="L146"><span class="lineNum">     146</span> <span class="tlaGNC tlaBgGNC">          36 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        extintsrc_req_gw;</span></span>
 <span id="L147"><span class="lineNum">     147</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                                                  picm_bypass_ff;</span></span>
 <span id="L148"><span class="lineNum">     148</span>              : </span>
 <span id="L149"><span class="lineNum">     149</span>              : // clkens</span>
@@ -561,7 +561,7 @@
 <span id="L457"><span class="lineNum">     457</span>              : rvdff #(ID_BITS)          claimid_ff  (.*,  .din (claimid_in[ID_BITS-1:00]),     .dout(claimid[ID_BITS-1:00]),    .clk(free_clk));</span>
 <span id="L458"><span class="lineNum">     458</span>              : rvdff  #(INTPRIORITY_BITS) pl_ff      (.*, .din (pl_in_q[INTPRIORITY_BITS-1:0]), .dout(pl[INTPRIORITY_BITS-1:0]), .clk(free_clk));</span>
 <span id="L459"><span class="lineNum">     459</span>              : </span>
-<span id="L460"><span class="lineNum">     460</span> <span class="tlaGNC">          40 : logic [INTPRIORITY_BITS-1:0] meipt_inv , meicurpl_inv ;</span></span>
+<span id="L460"><span class="lineNum">     460</span> <span class="tlaGNC">          62 : logic [INTPRIORITY_BITS-1:0] meipt_inv , meicurpl_inv ;</span></span>
 <span id="L461"><span class="lineNum">     461</span>              : assign meipt_inv[INTPRIORITY_BITS-1:0]    = intpriord ? ~meipt[INTPRIORITY_BITS-1:0]    : meipt[INTPRIORITY_BITS-1:0] ;</span>
 <span id="L462"><span class="lineNum">     462</span>              : assign meicurpl_inv[INTPRIORITY_BITS-1:0] = intpriord ? ~meicurpl[INTPRIORITY_BITS-1:0] : meicurpl[INTPRIORITY_BITS-1:0] ;</span>
 <span id="L463"><span class="lineNum">     463</span>              : assign mexintpend_in = (( selected_int_priority[INTPRIORITY_BITS-1:0] &gt; meipt_inv[INTPRIORITY_BITS-1:0]) &amp;</span>
@@ -594,16 +594,16 @@
 <span id="L490"><span class="lineNum">     490</span>              : </span>
 <span id="L491"><span class="lineNum">     491</span> <span class="tlaGNC">           2 :    always_comb begin : INTPEND_RD</span></span>
 <span id="L492"><span class="lineNum">     492</span> <span class="tlaGNC">           2 :          intpend_rd_out =  '0 ;</span></span>
-<span id="L493"><span class="lineNum">     493</span> <span class="tlaGNC">           2 :          for (int i=0; i&lt;INT_GRPS; i++) begin</span></span>
+<span id="L493"><span class="lineNum">     493</span> <span class="tlaGNC">           4 :          for (int i=0; i&lt;INT_GRPS; i++) begin</span></span>
 <span id="L494"><span class="lineNum">     494</span> <span class="tlaGNC">           4 :                intpend_rd_out |=  intpend_rd_part_out[i] ;</span></span>
 <span id="L495"><span class="lineNum">     495</span>              :          end</span>
 <span id="L496"><span class="lineNum">     496</span>              :    end</span>
 <span id="L497"><span class="lineNum">     497</span>              : </span>
-<span id="L498"><span class="lineNum">     498</span> <span class="tlaGNC">           2 :    always_comb begin : INTEN_RD</span></span>
-<span id="L499"><span class="lineNum">     499</span> <span class="tlaGNC">           2 :          intenable_rd_out =  '0 ;</span></span>
-<span id="L500"><span class="lineNum">     500</span> <span class="tlaGNC">           2 :          intpriority_rd_out =  '0 ;</span></span>
-<span id="L501"><span class="lineNum">     501</span> <span class="tlaGNC">           2 :          gw_config_rd_out =  '0 ;</span></span>
-<span id="L502"><span class="lineNum">     502</span> <span class="tlaGNC">           2 :          for (int i=0; i&lt;pt.PIC_TOTAL_INT_PLUS1; i++) begin</span></span>
+<span id="L498"><span class="lineNum">     498</span> <span class="tlaGNC">      123262 :    always_comb begin : INTEN_RD</span></span>
+<span id="L499"><span class="lineNum">     499</span> <span class="tlaGNC">      123262 :          intenable_rd_out =  '0 ;</span></span>
+<span id="L500"><span class="lineNum">     500</span> <span class="tlaGNC">      123262 :          intpriority_rd_out =  '0 ;</span></span>
+<span id="L501"><span class="lineNum">     501</span> <span class="tlaGNC">      123262 :          gw_config_rd_out =  '0 ;</span></span>
+<span id="L502"><span class="lineNum">     502</span> <span class="tlaGNC">     3944384 :          for (int i=0; i&lt;pt.PIC_TOTAL_INT_PLUS1; i++) begin</span></span>
 <span id="L503"><span class="lineNum">     503</span> <span class="tlaGNC">     3944384 :               if (intenable_reg_re[i]) begin</span></span>
 <span id="L504"><span class="lineNum">     504</span> <span class="tlaUNC tlaBgUNC">           0 :                intenable_rd_out    =  intenable_reg[i]  ;</span></span>
 <span id="L505"><span class="lineNum">     505</span>              :               end</span>
@@ -642,14 +642,14 @@
 <span id="L538"><span class="lineNum">     538</span>              : module el2_cmp_and_mux #(parameter ID_BITS=8,</span>
 <span id="L539"><span class="lineNum">     539</span>              :                                INTPRIORITY_BITS = 4)</span>
 <span id="L540"><span class="lineNum">     540</span>              :                     (</span>
-<span id="L541"><span class="lineNum">     541</span> <span class="tlaGNC tlaBgGNC">          10 :                         input  logic [ID_BITS-1:0]       a_id,</span></span>
-<span id="L542"><span class="lineNum">     542</span> <span class="tlaGNC">         556 :                         input  logic [INTPRIORITY_BITS-1:0] a_priority,</span></span>
+<span id="L541"><span class="lineNum">     541</span> <span class="tlaGNC tlaBgGNC">         382 :                         input  logic [ID_BITS-1:0]       a_id,</span></span>
+<span id="L542"><span class="lineNum">     542</span> <span class="tlaGNC">         688 :                         input  logic [INTPRIORITY_BITS-1:0] a_priority,</span></span>
 <span id="L543"><span class="lineNum">     543</span>              : </span>
-<span id="L544"><span class="lineNum">     544</span> <span class="tlaGNC">           2 :                         input  logic [ID_BITS-1:0]       b_id,</span></span>
-<span id="L545"><span class="lineNum">     545</span> <span class="tlaGNC">         536 :                         input  logic [INTPRIORITY_BITS-1:0] b_priority,</span></span>
+<span id="L544"><span class="lineNum">     544</span> <span class="tlaGNC">         426 :                         input  logic [ID_BITS-1:0]       b_id,</span></span>
+<span id="L545"><span class="lineNum">     545</span> <span class="tlaGNC">         636 :                         input  logic [INTPRIORITY_BITS-1:0] b_priority,</span></span>
 <span id="L546"><span class="lineNum">     546</span>              : </span>
-<span id="L547"><span class="lineNum">     547</span> <span class="tlaGNC">          10 :                         output logic [ID_BITS-1:0]       out_id,</span></span>
-<span id="L548"><span class="lineNum">     548</span> <span class="tlaGNC">        1000 :                         output logic [INTPRIORITY_BITS-1:0] out_priority</span></span>
+<span id="L547"><span class="lineNum">     547</span> <span class="tlaGNC">         906 :                         output logic [ID_BITS-1:0]       out_id,</span></span>
+<span id="L548"><span class="lineNum">     548</span> <span class="tlaGNC">        1184 :                         output logic [INTPRIORITY_BITS-1:0] out_priority</span></span>
 <span id="L549"><span class="lineNum">     549</span>              : </span>
 <span id="L550"><span class="lineNum">     550</span>              :                     );</span>
 <span id="L551"><span class="lineNum">     551</span>              : </span>

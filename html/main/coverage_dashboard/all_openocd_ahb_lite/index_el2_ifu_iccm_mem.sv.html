@@ -51,18 +51,18 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff4800;">
-        14.3%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff8300;">
+        25.7%
     </td>
     <td class="headerCovSummaryEntry">
-        5
+        9
     </td>
     <td class="headerCovSummaryEntry">
         35
@@ -129,15 +129,15 @@
 <span id="L25"><span class="lineNum">      25</span>              : #(</span>
 <span id="L26"><span class="lineNum">      26</span>              : `include "el2_param.vh"</span>
 <span id="L27"><span class="lineNum">      27</span>              :  )(</span>
-<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC tlaBgGNC">       44576 :    input logic                                        clk,                                 // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
-<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">       44576 :    input logic                                        active_clk,                          // Clock only while core active.  Through two clock headers. For flops without second clock header built in.</span></span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC tlaBgGNC">       44490 :    input logic                                        clk,                                 // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">       44490 :    input logic                                        active_clk,                          // Clock only while core active.  Through two clock headers. For flops without second clock header built in.</span></span>
 <span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">           1 :    input logic                                        rst_l,                               // reset, active low</span></span>
 <span id="L31"><span class="lineNum">      31</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                                        clk_override,                        // Override non-functional clock gating</span></span>
 <span id="L32"><span class="lineNum">      32</span>              : </span>
 <span id="L33"><span class="lineNum">      33</span> <span class="tlaUNC">           0 :    input logic                                        iccm_wren,                           // ICCM write enable</span></span>
 <span id="L34"><span class="lineNum">      34</span> <span class="tlaUNC">           0 :    input logic                                        iccm_rden,                           // ICCM read enable</span></span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaUNC">           0 :    input logic [pt.ICCM_BITS-1:1]                     iccm_rw_addr,                        // ICCM read/write address</span></span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaUNC">           0 :    input logic                                        iccm_buf_correct_ecc,                // ICCM is doing a single bit error correct cycle</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">       22171 :    input logic [pt.ICCM_BITS-1:1]                     iccm_rw_addr,                        // ICCM read/write address</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                                        iccm_buf_correct_ecc,                // ICCM is doing a single bit error correct cycle</span></span>
 <span id="L37"><span class="lineNum">      37</span> <span class="tlaUNC">           0 :    input logic                                        iccm_correction_state,               // ICCM under a correction - This is needed to guard replacements when hit</span></span>
 <span id="L38"><span class="lineNum">      38</span> <span class="tlaUNC">           0 :    input logic [2:0]                                  iccm_wr_size,                        // ICCM write size</span></span>
 <span id="L39"><span class="lineNum">      39</span> <span class="tlaUNC">           0 :    input logic [77:0]                                 iccm_wr_data,                        // ICCM write data</span></span>
@@ -147,9 +147,9 @@
 <span id="L43"><span class="lineNum">      43</span> <span class="tlaUNC">           0 :    output logic [63:0]                                iccm_rd_data,                        // ICCM read data</span></span>
 <span id="L44"><span class="lineNum">      44</span> <span class="tlaUNC">           0 :    output logic [77:0]                                iccm_rd_data_ecc,                    // ICCM read ecc</span></span>
 <span id="L45"><span class="lineNum">      45</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L46"><span class="lineNum">      46</span>              :    /*verilator coverage_off*/</span>
+<span id="L46"><span class="lineNum">      46</span>              :    /*pragma coverage off*/</span>
 <span id="L47"><span class="lineNum">      47</span>              :    input  logic                                       scan_mode                            // Scan mode control</span>
-<span id="L48"><span class="lineNum">      48</span>              :    /*verilator coverage_on*/</span>
+<span id="L48"><span class="lineNum">      48</span>              :    /*pragma coverage on*/</span>
 <span id="L49"><span class="lineNum">      49</span>              : </span>
 <span id="L50"><span class="lineNum">      50</span>              : );</span>
 <span id="L51"><span class="lineNum">      51</span>              : </span>
@@ -157,17 +157,17 @@
 <span id="L53"><span class="lineNum">      53</span> <span class="tlaUNC">           0 :    logic [pt.ICCM_NUM_BANKS-1:0]                                                wren_bank;</span></span>
 <span id="L54"><span class="lineNum">      54</span> <span class="tlaUNC">           0 :    logic [pt.ICCM_NUM_BANKS-1:0]                                                rden_bank;</span></span>
 <span id="L55"><span class="lineNum">      55</span> <span class="tlaUNC">           0 :    logic [pt.ICCM_NUM_BANKS-1:0]                                                iccm_clken;</span></span>
-<span id="L56"><span class="lineNum">      56</span> <span class="tlaUNC">           0 :    logic [pt.ICCM_NUM_BANKS-1:0] [pt.ICCM_BITS-1:pt.ICCM_BANK_INDEX_LO] addr_bank;</span></span>
+<span id="L56"><span class="lineNum">      56</span> <span class="tlaGNC tlaBgGNC">           6 :    logic [pt.ICCM_NUM_BANKS-1:0] [pt.ICCM_BITS-1:pt.ICCM_BANK_INDEX_LO] addr_bank;</span></span>
 <span id="L57"><span class="lineNum">      57</span>              : </span>
-<span id="L58"><span class="lineNum">      58</span> <span class="tlaUNC">           0 :    logic [pt.ICCM_NUM_BANKS-1:0] [38:0]  iccm_bank_dout, iccm_bank_dout_fn;</span></span>
+<span id="L58"><span class="lineNum">      58</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [pt.ICCM_NUM_BANKS-1:0] [38:0]  iccm_bank_dout, iccm_bank_dout_fn;</span></span>
 <span id="L59"><span class="lineNum">      59</span> <span class="tlaUNC">           0 :    logic [pt.ICCM_NUM_BANKS-1:0] [38:0]  iccm_bank_wr_data;</span></span>
-<span id="L60"><span class="lineNum">      60</span> <span class="tlaUNC">           0 :    logic [pt.ICCM_BITS-1:1]              addr_bank_inc;</span></span>
-<span id="L61"><span class="lineNum">      61</span> <span class="tlaGNC tlaBgGNC">       21840 :    logic [pt.ICCM_BANK_HI : 2]           iccm_rd_addr_hi_q;</span></span>
-<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">         177 :    logic [pt.ICCM_BANK_HI : 1]           iccm_rd_addr_lo_q;</span></span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC tlaBgGNC">       22169 :    logic [pt.ICCM_BITS-1:1]              addr_bank_inc;</span></span>
+<span id="L61"><span class="lineNum">      61</span> <span class="tlaGNC">       22168 :    logic [pt.ICCM_BANK_HI : 2]           iccm_rd_addr_hi_q;</span></span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">       22170 :    logic [pt.ICCM_BANK_HI : 1]           iccm_rd_addr_lo_q;</span></span>
 <span id="L63"><span class="lineNum">      63</span> <span class="tlaUNC tlaBgUNC">           0 :    logic             [63:0]              iccm_rd_data_pre;</span></span>
 <span id="L64"><span class="lineNum">      64</span> <span class="tlaUNC">           0 :    logic             [63:0]              iccm_data;</span></span>
-<span id="L65"><span class="lineNum">      65</span> <span class="tlaUNC">           0 :    logic [1:0]                           addr_incr;</span></span>
-<span id="L66"><span class="lineNum">      66</span> <span class="tlaUNC">           0 :    logic [pt.ICCM_NUM_BANKS-1:0] [38:0]  iccm_bank_wr_data_vec;</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC tlaBgGNC">           1 :    logic [1:0]                           addr_incr;</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [pt.ICCM_NUM_BANKS-1:0] [38:0]  iccm_bank_wr_data_vec;</span></span>
 <span id="L67"><span class="lineNum">      67</span>              : </span>
 <span id="L68"><span class="lineNum">      68</span>              :    // logic to handle hard persisten faults</span>
 <span id="L69"><span class="lineNum">      69</span> <span class="tlaUNC">           0 :    logic [1:0] [pt.ICCM_BITS-1:2]        redundant_address;</span></span>

@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -122,37 +122,37 @@
 <span id="L18"><span class="lineNum">      18</span>              : #(</span>
 <span id="L19"><span class="lineNum">      19</span>              :    `include "el2_param.vh"</span>
 <span id="L20"><span class="lineNum">      20</span>              :  )  (</span>
-<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC tlaBgGNC">        1463 :     input logic [4:0]  raddr0,       // logical read addresses</span></span>
-<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">        1844 :     input logic [4:0]  raddr1,</span></span>
+<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC tlaBgGNC">       13740 :     input logic [4:0]  raddr0,       // logical read addresses</span></span>
+<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">       12460 :     input logic [4:0]  raddr1,</span></span>
 <span id="L23"><span class="lineNum">      23</span>              : </span>
-<span id="L24"><span class="lineNum">      24</span> <span class="tlaGNC">        2676 :     input logic        wen0,         // write enable</span></span>
-<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">        1740 :     input logic [4:0]  waddr0,       // write address</span></span>
-<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC">         268 :     input logic [31:0] wd0,          // write data</span></span>
+<span id="L24"><span class="lineNum">      24</span> <span class="tlaGNC">       16892 :     input logic        wen0,         // write enable</span></span>
+<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">       14096 :     input logic [4:0]  waddr0,       // write address</span></span>
+<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC">        4083 :     input logic [31:0] wd0,          // write data</span></span>
 <span id="L27"><span class="lineNum">      27</span>              : </span>
-<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">         228 :     input logic        wen1,         // write enable</span></span>
-<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">          88 :     input logic [4:0]  waddr1,       // write address</span></span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">           2 :     input logic [31:0] wd1,          // write data</span></span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">        2832 :     input logic        wen1,         // write enable</span></span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">        1440 :     input logic [4:0]  waddr1,       // write address</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">          70 :     input logic [31:0] wd1,          // write data</span></span>
 <span id="L31"><span class="lineNum">      31</span>              : </span>
-<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">         230 :     input logic        wen2,         // write enable</span></span>
-<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">          52 :     input logic [4:0]  waddr2,       // write address</span></span>
-<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">          42 :     input logic [31:0] wd2,          // write data</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">        1544 :     input logic        wen2,         // write enable</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">         401 :     input logic [4:0]  waddr2,       // write address</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">         608 :     input logic [31:0] wd2,          // write data</span></span>
 <span id="L35"><span class="lineNum">      35</span>              : </span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">       29570 :     input logic        clk,</span></span>
-<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">           3 :     input logic        rst_l,</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">      183466 :     input logic        clk,</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">           1 :     input logic        rst_l,</span></span>
 <span id="L38"><span class="lineNum">      38</span>              : </span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">         364 :     output logic [31:0] rd0,         // read data</span></span>
-<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">         430 :     output logic [31:0] rd1,</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">       10614 :     output logic [31:0] rd0,         // read data</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">        6680 :     output logic [31:0] rd1,</span></span>
 <span id="L41"><span class="lineNum">      41</span>              : </span>
 <span id="L42"><span class="lineNum">      42</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L43"><span class="lineNum">      43</span>              :    /*verilator coverage_off*/</span>
+<span id="L43"><span class="lineNum">      43</span>              :    /*pragma coverage off*/</span>
 <span id="L44"><span class="lineNum">      44</span>              :     input  logic        scan_mode</span>
-<span id="L45"><span class="lineNum">      45</span>              :    /*verilator coverage_on*/</span>
+<span id="L45"><span class="lineNum">      45</span>              :    /*pragma coverage on*/</span>
 <span id="L46"><span class="lineNum">      46</span>              : );</span>
 <span id="L47"><span class="lineNum">      47</span>              : </span>
 <span id="L48"><span class="lineNum">      48</span>              :    logic [31:1] [31:0] gpr_out;      // 31 x 32 bit GPRs</span>
 <span id="L49"><span class="lineNum">      49</span>              :    logic [31:1] [31:0] gpr_in;</span>
-<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">           4 :    logic [31:1] w0v,w1v,w2v;</span></span>
-<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">          12 :    logic [31:1] gpr_wr_en;</span></span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">        1130 :    logic [31:1] w0v,w1v,w2v;</span></span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">        1310 :    logic [31:1] gpr_wr_en;</span></span>
 <span id="L52"><span class="lineNum">      52</span>              : </span>
 <span id="L53"><span class="lineNum">      53</span>              :    // GPR Write Enables</span>
 <span id="L54"><span class="lineNum">      54</span>              :    assign gpr_wr_en[31:1] = (w0v[31:1] | w1v[31:1] | w2v[31:1]);</span>
@@ -161,28 +161,28 @@
 <span id="L57"><span class="lineNum">      57</span>              :    end : gpr</span>
 <span id="L58"><span class="lineNum">      58</span>              : </span>
 <span id="L59"><span class="lineNum">      59</span>              :    // the read out</span>
-<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">           3 :    always_comb begin</span></span>
-<span id="L61"><span class="lineNum">      61</span> <span class="tlaGNC">           3 :       rd0[31:0] = 32'b0;</span></span>
-<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">           3 :       rd1[31:0] = 32'b0;</span></span>
-<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">           3 :       w0v[31:1] = 31'b0;</span></span>
-<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">           3 :       w1v[31:1] = 31'b0;</span></span>
-<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">           3 :       w2v[31:1] = 31'b0;</span></span>
-<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">           3 :       gpr_in[31:1] = '0;</span></span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">           1 :    always_comb begin</span></span>
+<span id="L61"><span class="lineNum">      61</span> <span class="tlaGNC">           1 :       rd0[31:0] = 32'b0;</span></span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">           1 :       rd1[31:0] = 32'b0;</span></span>
+<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">           1 :       w0v[31:1] = 31'b0;</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">           1 :       w1v[31:1] = 31'b0;</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">           1 :       w2v[31:1] = 31'b0;</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">           1 :       gpr_in[31:1] = '0;</span></span>
 <span id="L67"><span class="lineNum">      67</span>              : </span>
 <span id="L68"><span class="lineNum">      68</span>              :       // GPR Read logic</span>
-<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC">           3 :       for (int j=1; j&lt;32; j++ )  begin</span></span>
-<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC">          93 :          rd0[31:0] |= ({32{(raddr0[4:0]== 5'(j))}} &amp; gpr_out[j][31:0]);</span></span>
-<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">          93 :          rd1[31:0] |= ({32{(raddr1[4:0]== 5'(j))}} &amp; gpr_out[j][31:0]);</span></span>
+<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC">          31 :       for (int j=1; j&lt;32; j++ )  begin</span></span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC">          31 :          rd0[31:0] |= ({32{(raddr0[4:0]== 5'(j))}} &amp; gpr_out[j][31:0]);</span></span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">          31 :          rd1[31:0] |= ({32{(raddr1[4:0]== 5'(j))}} &amp; gpr_out[j][31:0]);</span></span>
 <span id="L72"><span class="lineNum">      72</span>              :       end</span>
 <span id="L73"><span class="lineNum">      73</span>              : </span>
 <span id="L74"><span class="lineNum">      74</span>              :      // GPR Write logic</span>
-<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">           3 :      for (int j=1; j&lt;32; j++ )  begin</span></span>
-<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">          93 :          w0v[j]     = wen0  &amp; (waddr0[4:0]== 5'(j) );</span></span>
-<span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC">          93 :          w1v[j]     = wen1  &amp; (waddr1[4:0]== 5'(j) );</span></span>
-<span id="L78"><span class="lineNum">      78</span> <span class="tlaGNC">          93 :          w2v[j]     = wen2  &amp; (waddr2[4:0]== 5'(j) );</span></span>
-<span id="L79"><span class="lineNum">      79</span> <span class="tlaGNC">          93 :          gpr_in[j]  =    ({32{w0v[j]}} &amp; wd0[31:0]) |</span></span>
-<span id="L80"><span class="lineNum">      80</span> <span class="tlaGNC">          93 :                          ({32{w1v[j]}} &amp; wd1[31:0]) |</span></span>
-<span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC">          93 :                          ({32{w2v[j]}} &amp; wd2[31:0]);</span></span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">          31 :      for (int j=1; j&lt;32; j++ )  begin</span></span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">          31 :          w0v[j]     = wen0  &amp; (waddr0[4:0]== 5'(j) );</span></span>
+<span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC">          31 :          w1v[j]     = wen1  &amp; (waddr1[4:0]== 5'(j) );</span></span>
+<span id="L78"><span class="lineNum">      78</span> <span class="tlaGNC">          31 :          w2v[j]     = wen2  &amp; (waddr2[4:0]== 5'(j) );</span></span>
+<span id="L79"><span class="lineNum">      79</span> <span class="tlaGNC">          31 :          gpr_in[j]  =    ({32{w0v[j]}} &amp; wd0[31:0]) |</span></span>
+<span id="L80"><span class="lineNum">      80</span> <span class="tlaGNC">          31 :                          ({32{w1v[j]}} &amp; wd1[31:0]) |</span></span>
+<span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC">          31 :                          ({32{w2v[j]}} &amp; wd2[31:0]);</span></span>
 <span id="L82"><span class="lineNum">      82</span>              :      end</span>
 <span id="L83"><span class="lineNum">      83</span>              :    end // always_comb begin</span>
 <span id="L84"><span class="lineNum">      84</span>              : </span>

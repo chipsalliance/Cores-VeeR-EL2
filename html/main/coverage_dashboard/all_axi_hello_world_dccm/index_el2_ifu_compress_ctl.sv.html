@@ -51,18 +51,18 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff9300;">
-        28.9%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #e4ff00;">
+        55.3%
     </td>
     <td class="headerCovSummaryEntry">
-        11
+        21
     </td>
     <td class="headerCovSummaryEntry">
         38
@@ -127,39 +127,39 @@
 <span id="L23"><span class="lineNum">      23</span>              : `include "el2_param.vh"</span>
 <span id="L24"><span class="lineNum">      24</span>              :  )</span>
 <span id="L25"><span class="lineNum">      25</span>              :   (</span>
-<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC tlaBgGNC">         158 :    input  logic [15:0] din,        // 16-bit   compressed instruction</span></span>
-<span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC">         158 :    output logic [31:0] dout        // 32-bit uncompressed instruction</span></span>
+<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC tlaBgGNC">           2 :    input  logic [15:0] din,        // 16-bit   compressed instruction</span></span>
+<span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC">           2 :    output logic [31:0] dout        // 32-bit uncompressed instruction</span></span>
 <span id="L28"><span class="lineNum">      28</span>              :    );</span>
 <span id="L29"><span class="lineNum">      29</span>              : </span>
 <span id="L30"><span class="lineNum">      30</span>              : </span>
-<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">         158 :    logic               legal;</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">           2 :    logic               legal;</span></span>
 <span id="L32"><span class="lineNum">      32</span>              : </span>
-<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">         158 :    logic [15:0]  i;</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">           2 :    logic [15:0]  i;</span></span>
 <span id="L34"><span class="lineNum">      34</span>              : </span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">         158 :    logic [31:0]  o,l1,l2,l3;</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">           3 :    logic [31:0]  o,l1,l2,l3;</span></span>
 <span id="L36"><span class="lineNum">      36</span>              : </span>
 <span id="L37"><span class="lineNum">      37</span>              : </span>
 <span id="L38"><span class="lineNum">      38</span>              :    assign i[15:0] = din[15:0];</span>
 <span id="L39"><span class="lineNum">      39</span>              : </span>
 <span id="L40"><span class="lineNum">      40</span>              : </span>
-<span id="L41"><span class="lineNum">      41</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [4:0]   rs2d,rdd,rdpd,rs2pd;</span></span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">           2 :    logic [4:0]   rs2d,rdd,rdpd,rs2pd;</span></span>
 <span id="L42"><span class="lineNum">      42</span>              : </span>
-<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC tlaBgGNC">         158 :    logic rdrd;</span></span>
-<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">         158 :    logic rdrs1;</span></span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">           2 :    logic rdrd;</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">           2 :    logic rdrs1;</span></span>
 <span id="L45"><span class="lineNum">      45</span> <span class="tlaUNC tlaBgUNC">           0 :    logic rs2rs2;</span></span>
 <span id="L46"><span class="lineNum">      46</span> <span class="tlaUNC">           0 :    logic rdprd;</span></span>
 <span id="L47"><span class="lineNum">      47</span> <span class="tlaUNC">           0 :    logic rdprs1;</span></span>
 <span id="L48"><span class="lineNum">      48</span> <span class="tlaUNC">           0 :    logic rs2prs2;</span></span>
-<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC tlaBgGNC">         159 :    logic rs2prd;</span></span>
-<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">         159 :    logic uimm9_2;</span></span>
+<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC tlaBgGNC">           3 :    logic rs2prd;</span></span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">           3 :    logic uimm9_2;</span></span>
 <span id="L51"><span class="lineNum">      51</span> <span class="tlaUNC tlaBgUNC">           0 :    logic ulwimm6_2;</span></span>
 <span id="L52"><span class="lineNum">      52</span> <span class="tlaUNC">           0 :    logic ulwspimm7_2;</span></span>
 <span id="L53"><span class="lineNum">      53</span> <span class="tlaUNC">           0 :    logic rdeq2;</span></span>
 <span id="L54"><span class="lineNum">      54</span> <span class="tlaUNC">           0 :    logic rdeq1;</span></span>
-<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC tlaBgGNC">         159 :    logic rs1eq2;</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC tlaBgGNC">           3 :    logic rs1eq2;</span></span>
 <span id="L56"><span class="lineNum">      56</span> <span class="tlaUNC tlaBgUNC">           0 :    logic sbroffset8_1;</span></span>
 <span id="L57"><span class="lineNum">      57</span> <span class="tlaUNC">           0 :    logic simm9_4;</span></span>
-<span id="L58"><span class="lineNum">      58</span> <span class="tlaGNC tlaBgGNC">         158 :    logic simm5_0;</span></span>
+<span id="L58"><span class="lineNum">      58</span> <span class="tlaGNC tlaBgGNC">           2 :    logic simm5_0;</span></span>
 <span id="L59"><span class="lineNum">      59</span> <span class="tlaUNC tlaBgUNC">           0 :    logic sjaloffset11_1;</span></span>
 <span id="L60"><span class="lineNum">      60</span> <span class="tlaUNC">           0 :    logic sluimm17_12;</span></span>
 <span id="L61"><span class="lineNum">      61</span> <span class="tlaUNC">           0 :    logic uimm5_0;</span></span>
@@ -216,16 +216,16 @@
 <span id="L112"><span class="lineNum">     112</span>              : </span>
 <span id="L113"><span class="lineNum">     113</span>              :    assign l1[31:25] = o[31:25];</span>
 <span id="L114"><span class="lineNum">     114</span>              : </span>
-<span id="L115"><span class="lineNum">     115</span> <span class="tlaUNC">           0 :    logic [5:0] simm5d;</span></span>
-<span id="L116"><span class="lineNum">     116</span> <span class="tlaUNC">           0 :    logic [9:2] uimm9d;</span></span>
+<span id="L115"><span class="lineNum">     115</span> <span class="tlaGNC tlaBgGNC">           2 :    logic [5:0] simm5d;</span></span>
+<span id="L116"><span class="lineNum">     116</span> <span class="tlaGNC">           2 :    logic [9:2] uimm9d;</span></span>
 <span id="L117"><span class="lineNum">     117</span>              : </span>
-<span id="L118"><span class="lineNum">     118</span> <span class="tlaUNC">           0 :    logic [9:4] simm9d;</span></span>
-<span id="L119"><span class="lineNum">     119</span> <span class="tlaUNC">           0 :    logic [6:2] ulwimm6d;</span></span>
-<span id="L120"><span class="lineNum">     120</span> <span class="tlaUNC">           0 :    logic [7:2] ulwspimm7d;</span></span>
-<span id="L121"><span class="lineNum">     121</span> <span class="tlaUNC">           0 :    logic [5:0] uimm5d;</span></span>
-<span id="L122"><span class="lineNum">     122</span> <span class="tlaUNC">           0 :    logic [20:1] sjald;</span></span>
+<span id="L118"><span class="lineNum">     118</span> <span class="tlaGNC">           2 :    logic [9:4] simm9d;</span></span>
+<span id="L119"><span class="lineNum">     119</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [6:2] ulwimm6d;</span></span>
+<span id="L120"><span class="lineNum">     120</span> <span class="tlaGNC tlaBgGNC">           2 :    logic [7:2] ulwspimm7d;</span></span>
+<span id="L121"><span class="lineNum">     121</span> <span class="tlaGNC">           2 :    logic [5:0] uimm5d;</span></span>
+<span id="L122"><span class="lineNum">     122</span> <span class="tlaGNC">           2 :    logic [20:1] sjald;</span></span>
 <span id="L123"><span class="lineNum">     123</span>              : </span>
-<span id="L124"><span class="lineNum">     124</span> <span class="tlaUNC">           0 :    logic [31:12] sluimmd;</span></span>
+<span id="L124"><span class="lineNum">     124</span> <span class="tlaGNC">           2 :    logic [31:12] sluimmd;</span></span>
 <span id="L125"><span class="lineNum">     125</span>              : </span>
 <span id="L126"><span class="lineNum">     126</span>              :    // merge in immediates + jal offset</span>
 <span id="L127"><span class="lineNum">     127</span>              : </span>
@@ -272,9 +272,9 @@
 <span id="L168"><span class="lineNum">     168</span>              : </span>
 <span id="L169"><span class="lineNum">     169</span>              :    // merge in branch offset and store immediates</span>
 <span id="L170"><span class="lineNum">     170</span>              : </span>
-<span id="L171"><span class="lineNum">     171</span> <span class="tlaUNC">           0 :    logic [8:1]   sbr8d;</span></span>
-<span id="L172"><span class="lineNum">     172</span> <span class="tlaUNC">           0 :    logic [6:2]   uswimm6d;</span></span>
-<span id="L173"><span class="lineNum">     173</span> <span class="tlaUNC">           0 :    logic [7:2]   uswspimm7d;</span></span>
+<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">           2 :    logic [8:1]   sbr8d;</span></span>
+<span id="L172"><span class="lineNum">     172</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [6:2]   uswimm6d;</span></span>
+<span id="L173"><span class="lineNum">     173</span> <span class="tlaGNC tlaBgGNC">           2 :    logic [7:2]   uswspimm7d;</span></span>
 <span id="L174"><span class="lineNum">     174</span>              : </span>
 <span id="L175"><span class="lineNum">     175</span>              : </span>
 <span id="L176"><span class="lineNum">     176</span>              :    assign sbr8d[8:1] =   { i[12], i[6], i[5], i[2], i[11], i[10], i[4], i[3] };</span>

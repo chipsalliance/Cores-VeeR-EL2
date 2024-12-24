@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -151,10 +151,10 @@
 <span id="L47"><span class="lineNum">      47</span>              : </span>
 <span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">           3 :    input logic      lsu_bus_clk_en,                    // bus clock enable</span></span>
 <span id="L49"><span class="lineNum">      49</span>              : </span>
-<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">        1493 :    input el2_lsu_pkt_t  lsu_p,                        // lsu packet in decode</span></span>
-<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">        1485 :    input el2_lsu_pkt_t  lsu_pkt_d,                    // lsu packet in d</span></span>
-<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">        1484 :    input el2_lsu_pkt_t  lsu_pkt_m,                    // lsu packet in m</span></span>
-<span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC">        1484 :    input el2_lsu_pkt_t  lsu_pkt_r,                    // lsu packet in r</span></span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">       72648 :    input el2_lsu_pkt_t  lsu_p,                        // lsu packet in decode</span></span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">       18612 :    input el2_lsu_pkt_t  lsu_pkt_d,                    // lsu packet in d</span></span>
+<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">       18611 :    input el2_lsu_pkt_t  lsu_pkt_m,                    // lsu packet in m</span></span>
+<span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC">       18611 :    input el2_lsu_pkt_t  lsu_pkt_r,                    // lsu packet in r</span></span>
 <span id="L54"><span class="lineNum">      54</span>              : </span>
 <span id="L55"><span class="lineNum">      55</span>              :    // Outputs</span>
 <span id="L56"><span class="lineNum">      56</span> <span class="tlaGNC">       19610 :    output logic     lsu_bus_obuf_c1_clken,             // obuf clock enable</span></span>
@@ -178,21 +178,21 @@
 <span id="L74"><span class="lineNum">      74</span> <span class="tlaGNC tlaBgGNC">      550588 :    output logic     lsu_free_c2_clk,                   // free double pulse clock</span></span>
 <span id="L75"><span class="lineNum">      75</span>              : </span>
 <span id="L76"><span class="lineNum">      76</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L77"><span class="lineNum">      77</span>              :    /*verilator coverage_off*/</span>
+<span id="L77"><span class="lineNum">      77</span>              :    /*pragma coverage off*/</span>
 <span id="L78"><span class="lineNum">      78</span>              :    input  logic     scan_mode                          // Scan mode</span>
-<span id="L79"><span class="lineNum">      79</span>              :    /*verilator coverage_on*/</span>
+<span id="L79"><span class="lineNum">      79</span>              :    /*pragma coverage on*/</span>
 <span id="L80"><span class="lineNum">      80</span>              : );</span>
 <span id="L81"><span class="lineNum">      81</span>              : </span>
-<span id="L82"><span class="lineNum">      82</span> <span class="tlaGNC">       18396 :    logic lsu_c1_m_clken, lsu_c1_r_clken;</span></span>
-<span id="L83"><span class="lineNum">      83</span> <span class="tlaGNC">       18396 :    logic lsu_c2_m_clken, lsu_c2_r_clken;</span></span>
+<span id="L82"><span class="lineNum">      82</span> <span class="tlaGNC">       18397 :    logic lsu_c1_m_clken, lsu_c1_r_clken;</span></span>
+<span id="L83"><span class="lineNum">      83</span> <span class="tlaGNC">       18397 :    logic lsu_c2_m_clken, lsu_c2_r_clken;</span></span>
 <span id="L84"><span class="lineNum">      84</span> <span class="tlaGNC">       18396 :    logic lsu_c1_m_clken_q, lsu_c1_r_clken_q;</span></span>
-<span id="L85"><span class="lineNum">      85</span> <span class="tlaGNC">        6458 :    logic lsu_store_c1_m_clken, lsu_store_c1_r_clken;</span></span>
+<span id="L85"><span class="lineNum">      85</span> <span class="tlaGNC">        6459 :    logic lsu_store_c1_m_clken, lsu_store_c1_r_clken;</span></span>
 <span id="L86"><span class="lineNum">      86</span>              : </span>
 <span id="L87"><span class="lineNum">      87</span>              : </span>
 <span id="L88"><span class="lineNum">      88</span> <span class="tlaUNC tlaBgUNC">           0 :    logic lsu_stbuf_c1_clken;</span></span>
-<span id="L89"><span class="lineNum">      89</span> <span class="tlaGNC tlaBgGNC">       12825 :    logic lsu_bus_ibuf_c1_clken, lsu_bus_buf_c1_clken;</span></span>
+<span id="L89"><span class="lineNum">      89</span> <span class="tlaGNC tlaBgGNC">       18106 :    logic lsu_bus_ibuf_c1_clken, lsu_bus_buf_c1_clken;</span></span>
 <span id="L90"><span class="lineNum">      90</span>              : </span>
-<span id="L91"><span class="lineNum">      91</span> <span class="tlaGNC">        5191 :    logic lsu_free_c1_clken, lsu_free_c1_clken_q, lsu_free_c2_clken;</span></span>
+<span id="L91"><span class="lineNum">      91</span> <span class="tlaGNC">        8093 :    logic lsu_free_c1_clken, lsu_free_c1_clken_q, lsu_free_c2_clken;</span></span>
 <span id="L92"><span class="lineNum">      92</span>              : </span>
 <span id="L93"><span class="lineNum">      93</span>              :    //-------------------------------------------------------------------------------------------</span>
 <span id="L94"><span class="lineNum">      94</span>              :    // Clock Enable logic</span>

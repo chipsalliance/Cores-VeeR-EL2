@@ -51,18 +51,18 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff1200;">
-        3.6%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff3600;">
+        10.7%
     </td>
     <td class="headerCovSummaryEntry">
-        1
+        3
     </td>
     <td class="headerCovSummaryEntry">
         28
@@ -134,27 +134,27 @@
 <span id="L30"><span class="lineNum">      30</span> <span class="tlaUNC">           0 : output              rd_en,</span></span>
 <span id="L31"><span class="lineNum">      31</span>              : </span>
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaUNC">           0 : input   [31:0]      rd_data,</span></span>
-<span id="L33"><span class="lineNum">      33</span>              : /*verilator coverage_off*/</span>
+<span id="L33"><span class="lineNum">      33</span>              : /*pragma coverage off*/</span>
 <span id="L34"><span class="lineNum">      34</span>              : input   [1:0]       rd_status,</span>
-<span id="L35"><span class="lineNum">      35</span>              : /*verilator coverage_on*/</span>
+<span id="L35"><span class="lineNum">      35</span>              : /*pragma coverage on*/</span>
 <span id="L36"><span class="lineNum">      36</span>              : </span>
 <span id="L37"><span class="lineNum">      37</span> <span class="tlaUNC">           0 : output  reg         dmi_reset,</span></span>
 <span id="L38"><span class="lineNum">      38</span> <span class="tlaUNC">           0 : output  reg         dmi_hard_reset,</span></span>
 <span id="L39"><span class="lineNum">      39</span>              : </span>
-<span id="L40"><span class="lineNum">      40</span>              : /*verilator coverage_off*/</span>
+<span id="L40"><span class="lineNum">      40</span>              : /*pragma coverage off*/</span>
 <span id="L41"><span class="lineNum">      41</span>              : input   [2:0]       idle,</span>
 <span id="L42"><span class="lineNum">      42</span>              : input   [1:0]       dmi_stat,</span>
-<span id="L43"><span class="lineNum">      43</span>              : /*verilator coverage_on*/</span>
+<span id="L43"><span class="lineNum">      43</span>              : /*pragma coverage on*/</span>
 <span id="L44"><span class="lineNum">      44</span>              : /*</span>
 <span id="L45"><span class="lineNum">      45</span>              : --  revisionCode        : 4'h0;</span>
 <span id="L46"><span class="lineNum">      46</span>              : --  manufacturersIdCode : 11'h45;</span>
 <span id="L47"><span class="lineNum">      47</span>              : --  deviceIdCode        : 16'h0001;</span>
 <span id="L48"><span class="lineNum">      48</span>              : --  order MSB .. LSB -&gt; [4 bit version or revision] [16 bit part number] [11 bit manufacturer id] [value of 1'b1 in LSB]</span>
 <span id="L49"><span class="lineNum">      49</span>              : */</span>
-<span id="L50"><span class="lineNum">      50</span>              : /*verilator coverage_off*/</span>
+<span id="L50"><span class="lineNum">      50</span>              : /*pragma coverage off*/</span>
 <span id="L51"><span class="lineNum">      51</span>              : input   [31:1]      jtag_id,</span>
 <span id="L52"><span class="lineNum">      52</span>              : input   [3:0]       version</span>
-<span id="L53"><span class="lineNum">      53</span>              : /*verilator coverage_on*/</span>
+<span id="L53"><span class="lineNum">      53</span>              : /*pragma coverage on*/</span>
 <span id="L54"><span class="lineNum">      54</span>              : );</span>
 <span id="L55"><span class="lineNum">      55</span>              : </span>
 <span id="L56"><span class="lineNum">      56</span>              : localparam USER_DR_LENGTH = AWIDTH + 34;</span>
@@ -165,9 +165,9 @@
 <span id="L61"><span class="lineNum">      61</span>              : ///////////////////////////////////////////////////////</span>
 <span id="L62"><span class="lineNum">      62</span>              : //                      Tap controller</span>
 <span id="L63"><span class="lineNum">      63</span>              : ///////////////////////////////////////////////////////</span>
-<span id="L64"><span class="lineNum">      64</span> <span class="tlaUNC">           0 : logic[3:0] state, nstate;</span></span>
-<span id="L65"><span class="lineNum">      65</span> <span class="tlaUNC">           0 : logic [4:0] ir;</span></span>
-<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC tlaBgGNC">           3 : wire jtag_reset;</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC tlaBgGNC">           2 : logic[3:0] state, nstate;</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaUNC tlaBgUNC">           0 : logic [4:0] ir;</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC tlaBgGNC">           2 : wire jtag_reset;</span></span>
 <span id="L67"><span class="lineNum">      67</span> <span class="tlaUNC tlaBgUNC">           0 : wire shift_dr;</span></span>
 <span id="L68"><span class="lineNum">      68</span> <span class="tlaUNC">           0 : wire pause_dr;</span></span>
 <span id="L69"><span class="lineNum">      69</span> <span class="tlaUNC">           0 : wire update_dr;</span></span>
@@ -178,7 +178,7 @@
 <span id="L74"><span class="lineNum">      74</span> <span class="tlaUNC">           0 : wire capture_ir;</span></span>
 <span id="L75"><span class="lineNum">      75</span> <span class="tlaUNC">           0 : wire[1:0] dr_en;</span></span>
 <span id="L76"><span class="lineNum">      76</span> <span class="tlaUNC">           0 : wire devid_sel;</span></span>
-<span id="L77"><span class="lineNum">      77</span> <span class="tlaUNC">           0 : wire [5:0] abits;</span></span>
+<span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC tlaBgGNC">           2 : wire [5:0] abits;</span></span>
 <span id="L78"><span class="lineNum">      78</span>              : </span>
 <span id="L79"><span class="lineNum">      79</span>              : assign abits = AWIDTH[5:0];</span>
 <span id="L80"><span class="lineNum">      80</span>              : </span>
@@ -200,10 +200,10 @@
 <span id="L96"><span class="lineNum">      96</span>              : localparam EXIT2_IR_STATE         = 14;</span>
 <span id="L97"><span class="lineNum">      97</span>              : localparam UPDATE_IR_STATE        = 15;</span>
 <span id="L98"><span class="lineNum">      98</span>              : </span>
-<span id="L99"><span class="lineNum">      99</span> <span class="tlaGNC tlaBgGNC">           3 : always_comb  begin</span></span>
-<span id="L100"><span class="lineNum">     100</span> <span class="tlaGNC">           3 :     nstate = state;</span></span>
-<span id="L101"><span class="lineNum">     101</span> <span class="tlaGNC">           3 :     case(state)</span></span>
-<span id="L102"><span class="lineNum">     102</span> <span class="tlaGNC">           3 :     TEST_LOGIC_RESET_STATE: nstate = tms ? TEST_LOGIC_RESET_STATE : RUN_TEST_IDLE_STATE;</span></span>
+<span id="L99"><span class="lineNum">      99</span> <span class="tlaGNC">           2 : always_comb  begin</span></span>
+<span id="L100"><span class="lineNum">     100</span> <span class="tlaGNC">           2 :     nstate = state;</span></span>
+<span id="L101"><span class="lineNum">     101</span> <span class="tlaGNC">           2 :     case(state)</span></span>
+<span id="L102"><span class="lineNum">     102</span> <span class="tlaGNC">           2 :     TEST_LOGIC_RESET_STATE: nstate = tms ? TEST_LOGIC_RESET_STATE : RUN_TEST_IDLE_STATE;</span></span>
 <span id="L103"><span class="lineNum">     103</span> <span class="tlaUNC tlaBgUNC">           0 :     RUN_TEST_IDLE_STATE:    nstate = tms ? SELECT_DR_SCAN_STATE   : RUN_TEST_IDLE_STATE;</span></span>
 <span id="L104"><span class="lineNum">     104</span> <span class="tlaUNC">           0 :     SELECT_DR_SCAN_STATE:   nstate = tms ? SELECT_IR_SCAN_STATE   : CAPTURE_DR_STATE;</span></span>
 <span id="L105"><span class="lineNum">     105</span> <span class="tlaUNC">           0 :     CAPTURE_DR_STATE:       nstate = tms ? EXIT1_DR_STATE         : SHIFT_DR_STATE;</span></span>
@@ -270,9 +270,9 @@
 <span id="L166"><span class="lineNum">     166</span>              : end</span>
 <span id="L167"><span class="lineNum">     167</span>              : </span>
 <span id="L168"><span class="lineNum">     168</span>              : // SR next value</span>
-<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC tlaBgGNC">           3 : always_comb begin</span></span>
-<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">           3 :     nsr = sr;</span></span>
-<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">           3 :     case(1)</span></span>
+<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC tlaBgGNC">      280025 : always_comb begin</span></span>
+<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">      280025 :     nsr = sr;</span></span>
+<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">      280025 :     case(1)</span></span>
 <span id="L172"><span class="lineNum">     172</span> <span class="tlaUNC tlaBgUNC">           0 :     shift_dr:   begin</span></span>
 <span id="L173"><span class="lineNum">     173</span> <span class="tlaUNC">           0 :                     case(1)</span></span>
 <span id="L174"><span class="lineNum">     174</span> <span class="tlaUNC">           0 :                     dr_en[1]:   nsr = {tdi, sr[USER_DR_LENGTH-1:1]};</span></span>

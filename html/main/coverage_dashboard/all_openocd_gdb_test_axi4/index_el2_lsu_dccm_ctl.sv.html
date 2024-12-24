@@ -51,18 +51,18 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff3200;">
-        9.9%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff3700;">
+        10.8%
     </td>
     <td class="headerCovSummaryEntry">
-        11
+        12
     </td>
     <td class="headerCovSummaryEntry">
         111
@@ -146,9 +146,9 @@
 <span id="L42"><span class="lineNum">      42</span>              : </span>
 <span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">           1 :    input logic                             rst_l,                   // reset, active low</span></span>
 <span id="L44"><span class="lineNum">      44</span>              : </span>
-<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">           2 :    input                                   el2_lsu_pkt_t lsu_pkt_r,// lsu packets</span></span>
-<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">           2 :    input                                   el2_lsu_pkt_t lsu_pkt_m,// lsu packets</span></span>
-<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">           2 :    input                                   el2_lsu_pkt_t lsu_pkt_d,// lsu packets</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">      793871 :    input                                   el2_lsu_pkt_t lsu_pkt_r,// lsu packets</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">      793871 :    input                                   el2_lsu_pkt_t lsu_pkt_m,// lsu packets</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">      793872 :    input                                   el2_lsu_pkt_t lsu_pkt_d,// lsu packets</span></span>
 <span id="L48"><span class="lineNum">      48</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                             addr_in_dccm_d,          // address maps to dccm</span></span>
 <span id="L49"><span class="lineNum">      49</span> <span class="tlaUNC">           0 :    input logic                             addr_in_pic_d,           // address maps to pic</span></span>
 <span id="L50"><span class="lineNum">      50</span> <span class="tlaUNC">           0 :    input logic                             addr_in_pic_m,           // address maps to pic</span></span>
@@ -252,15 +252,15 @@
 <span id="L148"><span class="lineNum">     148</span> <span class="tlaUNC">           0 :    output logic                            picm_wren,               // write to pic</span></span>
 <span id="L149"><span class="lineNum">     149</span> <span class="tlaUNC">           0 :    output logic                            picm_rden,               // read to pick</span></span>
 <span id="L150"><span class="lineNum">     150</span> <span class="tlaUNC">           0 :    output logic                            picm_mken,               // write to pic need a mask</span></span>
-<span id="L151"><span class="lineNum">     151</span> <span class="tlaUNC">           0 :    output logic [31:0]                     picm_rdaddr,             // address for pic read access</span></span>
-<span id="L152"><span class="lineNum">     152</span> <span class="tlaUNC">           0 :    output logic [31:0]                     picm_wraddr,             // address for pic write access</span></span>
-<span id="L153"><span class="lineNum">     153</span> <span class="tlaUNC">           0 :    output logic [31:0]                     picm_wr_data,            // write data</span></span>
+<span id="L151"><span class="lineNum">     151</span> <span class="tlaGNC tlaBgGNC">           1 :    output logic [31:0]                     picm_rdaddr,             // address for pic read access</span></span>
+<span id="L152"><span class="lineNum">     152</span> <span class="tlaGNC">           1 :    output logic [31:0]                     picm_wraddr,             // address for pic write access</span></span>
+<span id="L153"><span class="lineNum">     153</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [31:0]                     picm_wr_data,            // write data</span></span>
 <span id="L154"><span class="lineNum">     154</span> <span class="tlaUNC">           0 :    input logic [31:0]                      picm_rd_data,            // read data</span></span>
 <span id="L155"><span class="lineNum">     155</span>              : </span>
 <span id="L156"><span class="lineNum">     156</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L157"><span class="lineNum">     157</span>              :    /*verilator coverage_off*/</span>
+<span id="L157"><span class="lineNum">     157</span>              :    /*pragma coverage off*/</span>
 <span id="L158"><span class="lineNum">     158</span>              :    input logic                             scan_mode                // scan mode</span>
-<span id="L159"><span class="lineNum">     159</span>              :    /*verilator coverage_on*/</span>
+<span id="L159"><span class="lineNum">     159</span>              :    /*pragma coverage on*/</span>
 <span id="L160"><span class="lineNum">     160</span>              : );</span>
 <span id="L161"><span class="lineNum">     161</span>              : </span>
 <span id="L162"><span class="lineNum">     162</span>              : </span>
@@ -280,8 +280,8 @@
 <span id="L176"><span class="lineNum">     176</span> <span class="tlaUNC">           0 :    logic                           kill_ecc_corr_lo_r, kill_ecc_corr_hi_r;</span></span>
 <span id="L177"><span class="lineNum">     177</span>              : </span>
 <span id="L178"><span class="lineNum">     178</span>              :     // byte_en flowing down</span>
-<span id="L179"><span class="lineNum">     179</span> <span class="tlaGNC tlaBgGNC">           2 :    logic [3:0]                     store_byteen_m ,store_byteen_r;</span></span>
-<span id="L180"><span class="lineNum">     180</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [7:0]                     store_byteen_ext_m, store_byteen_ext_r;</span></span>
+<span id="L179"><span class="lineNum">     179</span> <span class="tlaUNC">           0 :    logic [3:0]                     store_byteen_m ,store_byteen_r;</span></span>
+<span id="L180"><span class="lineNum">     180</span> <span class="tlaUNC">           0 :    logic [7:0]                     store_byteen_ext_m, store_byteen_ext_r;</span></span>
 <span id="L181"><span class="lineNum">     181</span>              : </span>
 <span id="L182"><span class="lineNum">     182</span>              :    if (pt.LOAD_TO_USE_PLUS1 == 1) begin: L2U_Plus1_1</span>
 <span id="L183"><span class="lineNum">     183</span>              :       logic [63:0]  lsu_rdata_r, lsu_rdata_corr_r;</span>

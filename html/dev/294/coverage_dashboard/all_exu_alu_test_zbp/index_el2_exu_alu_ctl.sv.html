@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -133,7 +133,7 @@
 <span id="L29"><span class="lineNum">      29</span>              : </span>
 <span id="L30"><span class="lineNum">      30</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic                  flush_upper_x,      // Branch flush from previous cycle</span></span>
 <span id="L31"><span class="lineNum">      31</span> <span class="tlaUNC">           0 :    input  logic                  flush_lower_r,      // Master flush of entire pipeline</span></span>
-<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC tlaBgGNC">           2 :    input  logic                  enable,             // Clock enable</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC tlaBgGNC">          10 :    input  logic                  enable,             // Clock enable</span></span>
 <span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">         600 :    input  logic                  valid_in,           // Valid</span></span>
 <span id="L34"><span class="lineNum">      34</span> <span class="tlaUNC tlaBgUNC">           0 :    input  el2_alu_pkt_t         ap,                 // predecodes</span></span>
 <span id="L35"><span class="lineNum">      35</span> <span class="tlaUNC">           0 :    input  logic                  csr_ren_in,         // CSR select</span></span>
@@ -156,8 +156,8 @@
 <span id="L52"><span class="lineNum">      52</span>              : </span>
 <span id="L53"><span class="lineNum">      53</span>              : </span>
 <span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC tlaBgGNC">         132 :    logic               [31:0]    zba_a_in;</span></span>
-<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">         108 :    logic               [31:0]    aout;</span></span>
-<span id="L56"><span class="lineNum">      56</span> <span class="tlaGNC">         112 :    logic                         cout,ov,neg;</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">         116 :    logic               [31:0]    aout;</span></span>
+<span id="L56"><span class="lineNum">      56</span> <span class="tlaGNC">         116 :    logic                         cout,ov,neg;</span></span>
 <span id="L57"><span class="lineNum">      57</span> <span class="tlaUNC tlaBgUNC">           0 :    logic               [31:0]    lout;</span></span>
 <span id="L58"><span class="lineNum">      58</span> <span class="tlaGNC tlaBgGNC">         132 :    logic               [31:0]    sout;</span></span>
 <span id="L59"><span class="lineNum">      59</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                         sel_shift;</span></span>
@@ -167,7 +167,7 @@
 <span id="L63"><span class="lineNum">      63</span> <span class="tlaUNC">           0 :    logic               [31:1]    pcout;</span></span>
 <span id="L64"><span class="lineNum">      64</span> <span class="tlaUNC">           0 :    logic                         cond_mispredict;</span></span>
 <span id="L65"><span class="lineNum">      65</span> <span class="tlaUNC">           0 :    logic                         target_mispredict;</span></span>
-<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC tlaBgGNC">           2 :    logic                         eq, ne, lt, ge;</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC tlaBgGNC">          10 :    logic                         eq, ne, lt, ge;</span></span>
 <span id="L67"><span class="lineNum">      67</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                         any_jal;</span></span>
 <span id="L68"><span class="lineNum">      68</span> <span class="tlaUNC">           0 :    logic               [1:0]     newhist;</span></span>
 <span id="L69"><span class="lineNum">      69</span> <span class="tlaUNC">           0 :    logic                         sel_pc;</span></span>
@@ -202,7 +202,7 @@
 <span id="L98"><span class="lineNum">      98</span>              :    // Zbp</span>
 <span id="L99"><span class="lineNum">      99</span> <span class="tlaGNC tlaBgGNC">          52 :    logic                  ap_pack;</span></span>
 <span id="L100"><span class="lineNum">     100</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                  ap_packu;</span></span>
-<span id="L101"><span class="lineNum">     101</span> <span class="tlaGNC tlaBgGNC">          50 :    logic                  ap_packh;</span></span>
+<span id="L101"><span class="lineNum">     101</span> <span class="tlaGNC tlaBgGNC">          54 :    logic                  ap_packh;</span></span>
 <span id="L102"><span class="lineNum">     102</span>              : </span>
 <span id="L103"><span class="lineNum">     103</span>              :    // Zba</span>
 <span id="L104"><span class="lineNum">     104</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                  ap_sh1add;</span></span>
@@ -502,7 +502,7 @@
 <span id="L398"><span class="lineNum">     398</span>              : </span>
 <span id="L399"><span class="lineNum">     399</span>              :    assign bitmanip_minmax_sel          =  ap_min | ap_max;</span>
 <span id="L400"><span class="lineNum">     400</span>              : </span>
-<span id="L401"><span class="lineNum">     401</span> <span class="tlaGNC tlaBgGNC">         142 :    logic                  bitmanip_minmax_sel_a;</span></span>
+<span id="L401"><span class="lineNum">     401</span> <span class="tlaGNC tlaBgGNC">         146 :    logic                  bitmanip_minmax_sel_a;</span></span>
 <span id="L402"><span class="lineNum">     402</span>              : </span>
 <span id="L403"><span class="lineNum">     403</span>              :    assign bitmanip_minmax_sel_a        =  ge  ^ ap_min;</span>
 <span id="L404"><span class="lineNum">     404</span>              : </span>

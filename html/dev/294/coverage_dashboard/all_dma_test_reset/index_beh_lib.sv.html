@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -192,13 +192,13 @@
 <span id="L88"><span class="lineNum">      88</span>              : // _fpga versions</span>
 <span id="L89"><span class="lineNum">      89</span>              : module rvdff_fpga #( parameter WIDTH=1, SHORT=0 )</span>
 <span id="L90"><span class="lineNum">      90</span>              :    (</span>
-<span id="L91"><span class="lineNum">      91</span> <span class="tlaGNC tlaBgGNC">           8 :      input logic [WIDTH-1:0] din,</span></span>
+<span id="L91"><span class="lineNum">      91</span> <span class="tlaGNC tlaBgGNC">           4 :      input logic [WIDTH-1:0] din,</span></span>
 <span id="L92"><span class="lineNum">      92</span> <span class="tlaGNC">         428 :      input logic           clk,</span></span>
 <span id="L93"><span class="lineNum">      93</span> <span class="tlaGNC">           4 :      input logic           clken,</span></span>
 <span id="L94"><span class="lineNum">      94</span> <span class="tlaGNC">         428 :      input logic           rawclk,</span></span>
 <span id="L95"><span class="lineNum">      95</span> <span class="tlaGNC">           4 :      input logic           rst_l,</span></span>
 <span id="L96"><span class="lineNum">      96</span>              : </span>
-<span id="L97"><span class="lineNum">      97</span> <span class="tlaGNC">           8 :      output logic [WIDTH-1:0] dout</span></span>
+<span id="L97"><span class="lineNum">      97</span> <span class="tlaGNC">           4 :      output logic [WIDTH-1:0] dout</span></span>
 <span id="L98"><span class="lineNum">      98</span>              :      );</span>
 <span id="L99"><span class="lineNum">      99</span>              : </span>
 <span id="L100"><span class="lineNum">     100</span>              : if (SHORT == 1) begin : genblock</span>

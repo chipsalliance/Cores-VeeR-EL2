@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -133,13 +133,13 @@
 <span id="L29"><span class="lineNum">      29</span>              : </span>
 <span id="L30"><span class="lineNum">      30</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic                  flush_upper_x,      // Branch flush from previous cycle</span></span>
 <span id="L31"><span class="lineNum">      31</span> <span class="tlaUNC">           0 :    input  logic                  flush_lower_r,      // Master flush of entire pipeline</span></span>
-<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC tlaBgGNC">           2 :    input  logic                  enable,             // Clock enable</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC tlaBgGNC">          18 :    input  logic                  enable,             // Clock enable</span></span>
 <span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">        1000 :    input  logic                  valid_in,           // Valid</span></span>
 <span id="L34"><span class="lineNum">      34</span> <span class="tlaUNC tlaBgUNC">           0 :    input  el2_alu_pkt_t         ap,                 // predecodes</span></span>
 <span id="L35"><span class="lineNum">      35</span> <span class="tlaUNC">           0 :    input  logic                  csr_ren_in,         // CSR select</span></span>
 <span id="L36"><span class="lineNum">      36</span> <span class="tlaUNC">           0 :    input  logic        [31:0]    csr_rddata_in,      // CSR data</span></span>
-<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC tlaBgGNC">         210 :    input  logic signed [31:0]    a_in,               // A operand</span></span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">         218 :    input  logic        [31:0]    b_in,               // B operand</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC tlaBgGNC">         218 :    input  logic signed [31:0]    a_in,               // A operand</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">         224 :    input  logic        [31:0]    b_in,               // B operand</span></span>
 <span id="L39"><span class="lineNum">      39</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic        [31:1]    pc_in,              // for pc=pc+2,4 calculations</span></span>
 <span id="L40"><span class="lineNum">      40</span> <span class="tlaUNC">           0 :    input  el2_predict_pkt_t     pp_in,              // Predicted branch structure</span></span>
 <span id="L41"><span class="lineNum">      41</span> <span class="tlaUNC">           0 :    input  logic        [12:1]    brimm_in,           // Branch offset</span></span>
@@ -155,8 +155,8 @@
 <span id="L51"><span class="lineNum">      51</span>              :   );</span>
 <span id="L52"><span class="lineNum">      52</span>              : </span>
 <span id="L53"><span class="lineNum">      53</span>              : </span>
-<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC tlaBgGNC">         210 :    logic               [31:0]    zba_a_in;</span></span>
-<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">         218 :    logic               [31:0]    aout;</span></span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC tlaBgGNC">         218 :    logic               [31:0]    zba_a_in;</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">         222 :    logic               [31:0]    aout;</span></span>
 <span id="L56"><span class="lineNum">      56</span> <span class="tlaGNC">         176 :    logic                         cout,ov,neg;</span></span>
 <span id="L57"><span class="lineNum">      57</span> <span class="tlaUNC tlaBgUNC">           0 :    logic               [31:0]    lout;</span></span>
 <span id="L58"><span class="lineNum">      58</span> <span class="tlaGNC tlaBgGNC">         198 :    logic               [31:0]    sout;</span></span>
@@ -167,12 +167,12 @@
 <span id="L63"><span class="lineNum">      63</span> <span class="tlaUNC">           0 :    logic               [31:1]    pcout;</span></span>
 <span id="L64"><span class="lineNum">      64</span> <span class="tlaUNC">           0 :    logic                         cond_mispredict;</span></span>
 <span id="L65"><span class="lineNum">      65</span> <span class="tlaUNC">           0 :    logic                         target_mispredict;</span></span>
-<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC tlaBgGNC">           2 :    logic                         eq, ne, lt, ge;</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC tlaBgGNC">          18 :    logic                         eq, ne, lt, ge;</span></span>
 <span id="L67"><span class="lineNum">      67</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                         any_jal;</span></span>
 <span id="L68"><span class="lineNum">      68</span> <span class="tlaUNC">           0 :    logic               [1:0]     newhist;</span></span>
 <span id="L69"><span class="lineNum">      69</span> <span class="tlaUNC">           0 :    logic                         sel_pc;</span></span>
-<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC tlaBgGNC">         210 :    logic               [31:0]    csr_write_data;</span></span>
-<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">         170 :    logic               [31:0]    result;</span></span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC tlaBgGNC">         218 :    logic               [31:0]    csr_write_data;</span></span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">         174 :    logic               [31:0]    result;</span></span>
 <span id="L72"><span class="lineNum">      72</span>              : </span>
 <span id="L73"><span class="lineNum">      73</span>              : </span>
 <span id="L74"><span class="lineNum">      74</span>              : </span>
@@ -351,7 +351,7 @@
 <span id="L247"><span class="lineNum">     247</span>              :                                 ( {32{ ap_sh3add}} &amp; {a_in[28:0],3'b0} ) |</span>
 <span id="L248"><span class="lineNum">     248</span>              :                                 ( {32{~ap_zba   }} &amp;  a_in[31:0]       );</span>
 <span id="L249"><span class="lineNum">     249</span>              : </span>
-<span id="L250"><span class="lineNum">     250</span> <span class="tlaGNC tlaBgGNC">         218 :    logic        [31:0]    bm;</span></span>
+<span id="L250"><span class="lineNum">     250</span> <span class="tlaGNC tlaBgGNC">         224 :    logic        [31:0]    bm;</span></span>
 <span id="L251"><span class="lineNum">     251</span>              : </span>
 <span id="L252"><span class="lineNum">     252</span>              :    assign bm[31:0]            = ( ap.sub )  ?  ~b_in[31:0]  :  b_in[31:0];</span>
 <span id="L253"><span class="lineNum">     253</span>              : </span>
@@ -386,8 +386,8 @@
 <span id="L282"><span class="lineNum">     282</span>              : </span>
 <span id="L283"><span class="lineNum">     283</span> <span class="tlaUNC tlaBgUNC">           0 :    logic        [5:0]     shift_amount;</span></span>
 <span id="L284"><span class="lineNum">     284</span> <span class="tlaGNC tlaBgGNC">           2 :    logic        [31:0]    shift_mask;</span></span>
-<span id="L285"><span class="lineNum">     285</span> <span class="tlaGNC">         232 :    logic        [62:0]    shift_extend;</span></span>
-<span id="L286"><span class="lineNum">     286</span> <span class="tlaGNC">         232 :    logic        [62:0]    shift_long;</span></span>
+<span id="L285"><span class="lineNum">     285</span> <span class="tlaGNC">         236 :    logic        [62:0]    shift_extend;</span></span>
+<span id="L286"><span class="lineNum">     286</span> <span class="tlaGNC">         236 :    logic        [62:0]    shift_long;</span></span>
 <span id="L287"><span class="lineNum">     287</span>              : </span>
 <span id="L288"><span class="lineNum">     288</span>              : </span>
 <span id="L289"><span class="lineNum">     289</span>              :    assign shift_amount[5:0]            = ( { 6{ap.sll}}   &amp; (6'd32 - {1'b0,b_in[4:0]}) ) |   // [5] unused</span>
@@ -419,7 +419,7 @@
 <span id="L315"><span class="lineNum">     315</span>              :    // * * * * * * * * * * * * * * * * * *  BitManip  :  CLZ,CTZ      * * * * * * * * * * * * * * * * * *</span>
 <span id="L316"><span class="lineNum">     316</span>              : </span>
 <span id="L317"><span class="lineNum">     317</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                  bitmanip_clz_ctz_sel;</span></span>
-<span id="L318"><span class="lineNum">     318</span> <span class="tlaGNC tlaBgGNC">         210 :    logic        [31:0]    bitmanip_a_reverse_ff;</span></span>
+<span id="L318"><span class="lineNum">     318</span> <span class="tlaGNC tlaBgGNC">         218 :    logic        [31:0]    bitmanip_a_reverse_ff;</span></span>
 <span id="L319"><span class="lineNum">     319</span> <span class="tlaUNC tlaBgUNC">           0 :    logic        [31:0]    bitmanip_lzd_in;</span></span>
 <span id="L320"><span class="lineNum">     320</span> <span class="tlaGNC tlaBgGNC">           2 :    logic        [5:0]     bitmanip_dw_lzd_enc;</span></span>
 <span id="L321"><span class="lineNum">     321</span> <span class="tlaUNC tlaBgUNC">           0 :    logic        [5:0]     bitmanip_clz_ctz_result;</span></span>
@@ -561,7 +561,7 @@
 <span id="L457"><span class="lineNum">     457</span>              :    // * * * * * * * * * * * * * * * * * *  BitManip  :  ZBSET, ZBCLR, ZBINV  * * * * * * * * * * * * * *</span>
 <span id="L458"><span class="lineNum">     458</span>              : </span>
 <span id="L459"><span class="lineNum">     459</span> <span class="tlaGNC tlaBgGNC">          16 :    logic        [31:0]    bitmanip_sb_1hot;</span></span>
-<span id="L460"><span class="lineNum">     460</span> <span class="tlaGNC">         170 :    logic        [31:0]    bitmanip_sb_data;</span></span>
+<span id="L460"><span class="lineNum">     460</span> <span class="tlaGNC">         174 :    logic        [31:0]    bitmanip_sb_data;</span></span>
 <span id="L461"><span class="lineNum">     461</span>              : </span>
 <span id="L462"><span class="lineNum">     462</span>              :    assign bitmanip_sb_1hot[31:0]       = ( 32'h00000001 &lt;&lt; b_in[4:0] );</span>
 <span id="L463"><span class="lineNum">     463</span>              : </span>

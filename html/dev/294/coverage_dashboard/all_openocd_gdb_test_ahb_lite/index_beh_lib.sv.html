@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -315,7 +315,7 @@
 <span id="L211"><span class="lineNum">     211</span> <span class="tlaGNC tlaBgGNC">           6 :      input  logic [WIDTH-1:0] din,</span></span>
 <span id="L212"><span class="lineNum">     212</span> <span class="tlaGNC">    48000024 :      input  logic             clk,</span></span>
 <span id="L213"><span class="lineNum">     213</span> <span class="tlaGNC">          12 :      input  logic             rst_l,</span></span>
-<span id="L214"><span class="lineNum">     214</span> <span class="tlaGNC">     6352881 :      input  logic             en,</span></span>
+<span id="L214"><span class="lineNum">     214</span> <span class="tlaGNC">     6352877 :      input  logic             en,</span></span>
 <span id="L215"><span class="lineNum">     215</span>              :      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
 <span id="L216"><span class="lineNum">     216</span>              :      /*verilator coverage_off*/</span>
 <span id="L217"><span class="lineNum">     217</span>              :      input  logic             scan_mode,</span>
@@ -778,7 +778,7 @@
 <span id="L674"><span class="lineNum">     674</span>              : endmodule // rvecc_encode</span>
 <span id="L675"><span class="lineNum">     675</span>              : </span>
 <span id="L676"><span class="lineNum">     676</span>              : module rvecc_decode  (</span>
-<span id="L677"><span class="lineNum">     677</span> <span class="tlaGNC tlaBgGNC">     1587452 :                       input         en,</span></span>
+<span id="L677"><span class="lineNum">     677</span> <span class="tlaGNC tlaBgGNC">     1587450 :                       input         en,</span></span>
 <span id="L678"><span class="lineNum">     678</span> <span class="tlaUNC tlaBgUNC">           0 :                       input [31:0]  din,</span></span>
 <span id="L679"><span class="lineNum">     679</span> <span class="tlaUNC">           0 :                       input [6:0]   ecc_in,</span></span>
 <span id="L680"><span class="lineNum">     680</span> <span class="tlaGNC tlaBgGNC">           2 :                       input         sed_ded,    // only do detection and no correction. Used for the I$</span></span>
@@ -843,7 +843,7 @@
 <span id="L739"><span class="lineNum">     739</span>              : </span>
 <span id="L740"><span class="lineNum">     740</span>              : </span>
 <span id="L741"><span class="lineNum">     741</span>              : module rvecc_decode_64  (</span>
-<span id="L742"><span class="lineNum">     742</span> <span class="tlaGNC">      793724 :                       input         en,</span></span>
+<span id="L742"><span class="lineNum">     742</span> <span class="tlaGNC">      793723 :                       input         en,</span></span>
 <span id="L743"><span class="lineNum">     743</span> <span class="tlaUNC tlaBgUNC">           0 :                       input [63:0]  din,</span></span>
 <span id="L744"><span class="lineNum">     744</span> <span class="tlaUNC">           0 :                       input [6:0]   ecc_in,</span></span>
 <span id="L745"><span class="lineNum">     745</span> <span class="tlaUNC">           0 :                       output        ecc_error</span></span>
@@ -917,7 +917,7 @@
 <span id="L813"><span class="lineNum">     813</span>              : </span>
 <span id="L814"><span class="lineNum">     814</span>              : module rvoclkhdr</span>
 <span id="L815"><span class="lineNum">     815</span>              :   (</span>
-<span id="L816"><span class="lineNum">     816</span> <span class="tlaGNC tlaBgGNC">     1613729 :    input  logic en,</span></span>
+<span id="L816"><span class="lineNum">     816</span> <span class="tlaGNC tlaBgGNC">     1613727 :    input  logic en,</span></span>
 <span id="L817"><span class="lineNum">     817</span> <span class="tlaGNC">   108001620 :    input  logic clk,</span></span>
 <span id="L818"><span class="lineNum">     818</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
 <span id="L819"><span class="lineNum">     819</span>              :    /*verilator coverage_off*/</span>

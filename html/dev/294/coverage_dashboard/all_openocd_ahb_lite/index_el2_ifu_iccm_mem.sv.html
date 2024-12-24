@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    21-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -129,8 +129,8 @@
 <span id="L25"><span class="lineNum">      25</span>              : #(</span>
 <span id="L26"><span class="lineNum">      26</span>              : `include "el2_param.vh"</span>
 <span id="L27"><span class="lineNum">      27</span>              :  )(</span>
-<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC tlaBgGNC">       44574 :    input logic                                        clk,                                 // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
-<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">       44574 :    input logic                                        active_clk,                          // Clock only while core active.  Through two clock headers. For flops without second clock header built in.</span></span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC tlaBgGNC">       44458 :    input logic                                        clk,                                 // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">       44458 :    input logic                                        active_clk,                          // Clock only while core active.  Through two clock headers. For flops without second clock header built in.</span></span>
 <span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">           1 :    input logic                                        rst_l,                               // reset, active low</span></span>
 <span id="L31"><span class="lineNum">      31</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                                        clk_override,                        // Override non-functional clock gating</span></span>
 <span id="L32"><span class="lineNum">      32</span>              : </span>
@@ -162,7 +162,7 @@
 <span id="L58"><span class="lineNum">      58</span> <span class="tlaUNC">           0 :    logic [pt.ICCM_NUM_BANKS-1:0] [38:0]  iccm_bank_dout, iccm_bank_dout_fn;</span></span>
 <span id="L59"><span class="lineNum">      59</span> <span class="tlaUNC">           0 :    logic [pt.ICCM_NUM_BANKS-1:0] [38:0]  iccm_bank_wr_data;</span></span>
 <span id="L60"><span class="lineNum">      60</span> <span class="tlaUNC">           0 :    logic [pt.ICCM_BITS-1:1]              addr_bank_inc;</span></span>
-<span id="L61"><span class="lineNum">      61</span> <span class="tlaGNC tlaBgGNC">       11106 :    logic [pt.ICCM_BANK_HI : 2]           iccm_rd_addr_hi_q;</span></span>
+<span id="L61"><span class="lineNum">      61</span> <span class="tlaGNC tlaBgGNC">       11077 :    logic [pt.ICCM_BANK_HI : 2]           iccm_rd_addr_hi_q;</span></span>
 <span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">           2 :    logic [pt.ICCM_BANK_HI : 1]           iccm_rd_addr_lo_q;</span></span>
 <span id="L63"><span class="lineNum">      63</span> <span class="tlaUNC tlaBgUNC">           0 :    logic             [63:0]              iccm_rd_data_pre;</span></span>
 <span id="L64"><span class="lineNum">      64</span> <span class="tlaUNC">           0 :    logic             [63:0]              iccm_data;</span></span>

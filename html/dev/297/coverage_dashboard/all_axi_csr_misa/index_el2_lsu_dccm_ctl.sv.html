@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -136,13 +136,13 @@
 <span id="L32"><span class="lineNum">      32</span>              : `include "el2_param.vh"</span>
 <span id="L33"><span class="lineNum">      33</span>              :  )</span>
 <span id="L34"><span class="lineNum">      34</span>              :   (</span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">        6004 :    input logic                             lsu_c2_m_clk,            // clocks</span></span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">        6004 :    input logic                             lsu_c2_r_clk,            // clocks</span></span>
-<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">        6004 :    input logic                             lsu_c1_r_clk,            // clocks</span></span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">        6004 :    input logic                             lsu_store_c1_r_clk,      // clocks</span></span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">        6004 :    input logic                             lsu_free_c2_clk,         // clocks</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">        9002 :    input logic                             lsu_c2_m_clk,            // clocks</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">        9002 :    input logic                             lsu_c2_r_clk,            // clocks</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">        9002 :    input logic                             lsu_c1_r_clk,            // clocks</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">        9002 :    input logic                             lsu_store_c1_r_clk,      // clocks</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">        9002 :    input logic                             lsu_free_c2_clk,         // clocks</span></span>
 <span id="L40"><span class="lineNum">      40</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                             clk_override,            // Override non-functional clock gating</span></span>
-<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC tlaBgGNC">        6004 :    input logic                             clk,                     // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC tlaBgGNC">        9002 :    input logic                             clk,                     // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
 <span id="L42"><span class="lineNum">      42</span>              : </span>
 <span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">           1 :    input logic                             rst_l,                   // reset, active low</span></span>
 <span id="L44"><span class="lineNum">      44</span>              : </span>
@@ -155,7 +155,7 @@
 <span id="L51"><span class="lineNum">      51</span> <span class="tlaUNC">           0 :    input logic                             addr_in_dccm_m, addr_in_dccm_r,   // address in dccm per pipe stage</span></span>
 <span id="L52"><span class="lineNum">      52</span> <span class="tlaUNC">           0 :    input logic                             addr_in_pic_r,                    // address in pic  per pipe stage</span></span>
 <span id="L53"><span class="lineNum">      53</span> <span class="tlaUNC">           0 :    input logic                             lsu_raw_fwd_lo_r, lsu_raw_fwd_hi_r,</span></span>
-<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC tlaBgGNC">         238 :    input logic                             lsu_commit_r,            // lsu instruction in r commits</span></span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC tlaBgGNC">         354 :    input logic                             lsu_commit_r,            // lsu instruction in r commits</span></span>
 <span id="L55"><span class="lineNum">      55</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                             ldst_dual_m, ldst_dual_r,// load/store is unaligned at 32 bit boundary per pipe stage</span></span>
 <span id="L56"><span class="lineNum">      56</span>              : </span>
 <span id="L57"><span class="lineNum">      57</span>              :    // lsu address down the pipe</span>

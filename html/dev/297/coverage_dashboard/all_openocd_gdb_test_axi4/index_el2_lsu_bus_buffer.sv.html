@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -170,7 +170,7 @@
 <span id="L66"><span class="lineNum">      66</span> <span class="tlaUNC">           0 :    input logic                          lsu_busreq_m,                   // bus request is in m</span></span>
 <span id="L67"><span class="lineNum">      67</span> <span class="tlaUNC">           0 :    output logic                         lsu_busreq_r,                   // bus request is in r</span></span>
 <span id="L68"><span class="lineNum">      68</span> <span class="tlaUNC">           0 :    input logic                          ld_full_hit_m,                  // load can get all its byte from a write buffer entry</span></span>
-<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC tlaBgGNC">          20 :    input logic                          flush_m_up,                     // flush</span></span>
+<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC tlaBgGNC">          16 :    input logic                          flush_m_up,                     // flush</span></span>
 <span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC">           4 :    input logic                          flush_r,                        // flush</span></span>
 <span id="L71"><span class="lineNum">      71</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                          lsu_commit_r,                   // lsu instruction in r commits</span></span>
 <span id="L72"><span class="lineNum">      72</span> <span class="tlaUNC">           0 :    input logic                          is_sideeffects_r,               // lsu attribute is side_effects</span></span>
@@ -273,7 +273,7 @@
 <span id="L169"><span class="lineNum">     169</span>              :    output logic                            lsu_axi_rready,</span>
 <span id="L170"><span class="lineNum">     170</span>              :    /*verilator coverage_on*/</span>
 <span id="L171"><span class="lineNum">     171</span> <span class="tlaUNC">           0 :    input  logic [pt.LSU_BUS_TAG-1:0]       lsu_axi_rid,</span></span>
-<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC tlaBgGNC">           4 :    input  logic [63:0]                     lsu_axi_rdata,</span></span>
+<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC tlaBgGNC">           2 :    input  logic [63:0]                     lsu_axi_rdata,</span></span>
 <span id="L173"><span class="lineNum">     173</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic [1:0]                      lsu_axi_rresp,</span></span>
 <span id="L174"><span class="lineNum">     174</span>              : </span>
 <span id="L175"><span class="lineNum">     175</span> <span class="tlaGNC tlaBgGNC">           1 :    input logic                             lsu_bus_clk_en,</span></span>
@@ -330,7 +330,7 @@
 <span id="L226"><span class="lineNum">     226</span> <span class="tlaUNC">           0 :    logic                                bus_rsp_read, bus_rsp_write;</span></span>
 <span id="L227"><span class="lineNum">     227</span> <span class="tlaUNC">           0 :    logic [pt.LSU_BUS_TAG-1:0]           bus_rsp_read_tag, bus_rsp_write_tag;</span></span>
 <span id="L228"><span class="lineNum">     228</span> <span class="tlaUNC">           0 :    logic                                bus_rsp_read_error, bus_rsp_write_error;</span></span>
-<span id="L229"><span class="lineNum">     229</span> <span class="tlaGNC tlaBgGNC">           4 :    logic [63:0]                         bus_rsp_rdata;</span></span>
+<span id="L229"><span class="lineNum">     229</span> <span class="tlaGNC tlaBgGNC">           2 :    logic [63:0]                         bus_rsp_rdata;</span></span>
 <span id="L230"><span class="lineNum">     230</span>              : </span>
 <span id="L231"><span class="lineNum">     231</span>              :    // Bus buffer signals</span>
 <span id="L232"><span class="lineNum">     232</span> <span class="tlaUNC tlaBgUNC">           0 :    state_t [DEPTH-1:0]                  buf_state;</span></span>

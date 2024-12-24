@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -135,7 +135,7 @@
 <span id="L31"><span class="lineNum">      31</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [pt.BTB_BTAG_SIZE-1:0] ifu_i0_bp_btag,              // BP tag</span></span>
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaUNC">           0 :    input logic [$clog2(pt.BTB_SIZE)-1:0] ifu_i0_fa_index,          // Fully associt btb index</span></span>
 <span id="L33"><span class="lineNum">      33</span>              : </span>
-<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">       22134 :    input logic       ifu_i0_pc4,                                   // i0 is 4B inst else 2B</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">       22160 :    input logic       ifu_i0_pc4,                                   // i0 is 4B inst else 2B</span></span>
 <span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">         221 :    input logic       ifu_i0_valid,                                 // i0 valid from ifu</span></span>
 <span id="L36"><span class="lineNum">      36</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic       ifu_i0_icaf,                                  // i0 instruction access fault</span></span>
 <span id="L37"><span class="lineNum">      37</span> <span class="tlaUNC">           0 :    input logic [1:0] ifu_i0_icaf_type,                             // i0 instruction access fault type</span></span>
@@ -154,7 +154,7 @@
 <span id="L50"><span class="lineNum">      50</span>              : </span>
 <span id="L51"><span class="lineNum">      51</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [31:1] dec_i0_pc_d,                                // i0 pc at decode</span></span>
 <span id="L52"><span class="lineNum">      52</span>              : </span>
-<span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC tlaBgGNC">       22134 :    output logic dec_i0_pc4_d,                                      // i0 is 4B inst else 2B</span></span>
+<span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC tlaBgGNC">       22160 :    output logic dec_i0_pc4_d,                                      // i0 is 4B inst else 2B</span></span>
 <span id="L54"><span class="lineNum">      54</span>              : </span>
 <span id="L55"><span class="lineNum">      55</span> <span class="tlaUNC tlaBgUNC">           0 :    output el2_br_pkt_t dec_i0_brp,                                // i0 branch packet at decode</span></span>
 <span id="L56"><span class="lineNum">      56</span> <span class="tlaUNC">           0 :    output logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] dec_i0_bp_index,   // i0 branch index</span></span>

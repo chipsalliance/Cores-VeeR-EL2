@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -137,10 +137,10 @@
 <span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">     4000092 :    input logic free_l2clk,</span></span>
 <span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">     4000092 :    input logic csr_wr_clk,</span></span>
 <span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">           1 :    input logic rst_l,</span></span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">         316 :    input logic        dec_csr_wen_r_mod,  // csr write enable at wb</span></span>
-<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">           6 :    input logic [11:0] dec_csr_wraddr_r,   // write address for csr</span></span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">          32 :    input logic [31:0] dec_csr_wrdata_r,   // csr write data at wb</span></span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">          36 :    input logic [11:0] dec_csr_rdaddr_d,   // read address for csr</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">         220 :    input logic        dec_csr_wen_r_mod,  // csr write enable at wb</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">           4 :    input logic [11:0] dec_csr_wraddr_r,   // write address for csr</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">          22 :    input logic [31:0] dec_csr_wrdata_r,   // csr write data at wb</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">          24 :    input logic [11:0] dec_csr_rdaddr_d,   // read address for csr</span></span>
 <span id="L40"><span class="lineNum">      40</span>              : </span>
 <span id="L41"><span class="lineNum">      41</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic csr_pmpcfg,</span></span>
 <span id="L42"><span class="lineNum">      42</span> <span class="tlaUNC">           0 :    input logic csr_pmpaddr0,</span></span>
@@ -150,7 +150,7 @@
 <span id="L46"><span class="lineNum">      46</span>              : </span>
 <span id="L47"><span class="lineNum">      47</span> <span class="tlaUNC">           0 :    input logic dec_pause_state, // Paused</span></span>
 <span id="L48"><span class="lineNum">      48</span> <span class="tlaUNC">           0 :    input logic dec_tlu_pmu_fw_halted, // pmu/fw halted</span></span>
-<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC tlaBgGNC">           7 :    input logic internal_dbg_halt_timers, // debug halted</span></span>
+<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC tlaBgGNC">           5 :    input logic internal_dbg_halt_timers, // debug halted</span></span>
 <span id="L50"><span class="lineNum">      50</span>              : </span>
 <span id="L51"><span class="lineNum">      51</span>              : `ifdef RV_SMEPMP</span>
 <span id="L52"><span class="lineNum">      52</span>              :    input el2_mseccfg_pkt_t mseccfg,</span>
@@ -169,7 +169,7 @@
 <span id="L65"><span class="lineNum">      65</span>              :    );</span>
 <span id="L66"><span class="lineNum">      66</span>              : </span>
 <span id="L67"><span class="lineNum">      67</span> <span class="tlaUNC">           0 :    logic wr_pmpcfg_r;</span></span>
-<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC tlaBgGNC">          30 :    logic [3:0] wr_pmpcfg_group;</span></span>
+<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC tlaBgGNC">          20 :    logic [3:0] wr_pmpcfg_group;</span></span>
 <span id="L69"><span class="lineNum">      69</span>              : </span>
 <span id="L70"><span class="lineNum">      70</span> <span class="tlaUNC tlaBgUNC">           0 :    logic wr_pmpaddr0_sel;</span></span>
 <span id="L71"><span class="lineNum">      71</span> <span class="tlaUNC">           0 :    logic wr_pmpaddr16_sel;</span></span>
@@ -179,7 +179,7 @@
 <span id="L75"><span class="lineNum">      75</span> <span class="tlaUNC">           0 :    logic [1:0] wr_pmpaddr_quarter;</span></span>
 <span id="L76"><span class="lineNum">      76</span> <span class="tlaUNC">           0 :    logic [5:0] wr_pmpaddr_address;</span></span>
 <span id="L77"><span class="lineNum">      77</span>              : </span>
-<span id="L78"><span class="lineNum">      78</span> <span class="tlaGNC tlaBgGNC">          36 :    logic [3:0] pmp_quarter_rdaddr;</span></span>
+<span id="L78"><span class="lineNum">      78</span> <span class="tlaGNC tlaBgGNC">          24 :    logic [3:0] pmp_quarter_rdaddr;</span></span>
 <span id="L79"><span class="lineNum">      79</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [31:0] pmp_pmpcfg_rddata;</span></span>
 <span id="L80"><span class="lineNum">      80</span>              : </span>
 <span id="L81"><span class="lineNum">      81</span>              :    // ----------------------------------------------------------------------</span>

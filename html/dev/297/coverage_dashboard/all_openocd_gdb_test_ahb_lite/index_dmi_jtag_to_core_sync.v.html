@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -128,20 +128,20 @@
 <span id="L24"><span class="lineNum">      24</span>              : </span>
 <span id="L25"><span class="lineNum">      25</span>              : module dmi_jtag_to_core_sync (</span>
 <span id="L26"><span class="lineNum">      26</span>              : // JTAG signals</span>
-<span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC tlaBgGNC">        5048 : input       rd_en,      // 1 bit  Read Enable from JTAG</span></span>
-<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">        3268 : input       wr_en,      // 1 bit  Write enable from JTAG</span></span>
+<span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC tlaBgGNC">        4584 : input       rd_en,      // 1 bit  Read Enable from JTAG</span></span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">        2952 : input       wr_en,      // 1 bit  Write enable from JTAG</span></span>
 <span id="L29"><span class="lineNum">      29</span>              : </span>
 <span id="L30"><span class="lineNum">      30</span>              : // Processor Signals</span>
 <span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">           1 : input       rst_n,      // Core reset</span></span>
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">     4000092 : input       clk,        // Core clock</span></span>
 <span id="L33"><span class="lineNum">      33</span>              : </span>
-<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">        8316 : output      reg_en,     // 1 bit  Write interface bit to Processor</span></span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">        3268 : output      reg_wr_en   // 1 bit  Write enable to Processor</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">        7536 : output      reg_en,     // 1 bit  Write interface bit to Processor</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">        2952 : output      reg_wr_en   // 1 bit  Write enable to Processor</span></span>
 <span id="L36"><span class="lineNum">      36</span>              : );</span>
 <span id="L37"><span class="lineNum">      37</span>              :   </span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">        5048 : wire        c_rd_en;</span></span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">        3268 : wire        c_wr_en;</span></span>
-<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">        3268 : reg [2:0]   rden, wren;</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">        4584 : wire        c_rd_en;</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">        2952 : wire        c_wr_en;</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">        2952 : reg [2:0]   rden, wren;</span></span>
 <span id="L41"><span class="lineNum">      41</span>              :  </span>
 <span id="L42"><span class="lineNum">      42</span>              : </span>
 <span id="L43"><span class="lineNum">      43</span>              : // Outputs</span>

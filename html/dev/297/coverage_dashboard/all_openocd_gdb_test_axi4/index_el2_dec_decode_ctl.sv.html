@@ -51,18 +51,18 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #f0ff00;">
-        52.9%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #fbff00;">
+        50.7%
     </td>
     <td class="headerCovSummaryEntry">
-        145
+        139
     </td>
     <td class="headerCovSummaryEntry">
         274
@@ -125,7 +125,7 @@
 <span id="L21"><span class="lineNum">      21</span>              :  )</span>
 <span id="L22"><span class="lineNum">      22</span>              :   (</span>
 <span id="L23"><span class="lineNum">      23</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic dec_tlu_trace_disable,</span></span>
-<span id="L24"><span class="lineNum">      24</span> <span class="tlaGNC tlaBgGNC">        1434 :    input logic dec_debug_valid_d,</span></span>
+<span id="L24"><span class="lineNum">      24</span> <span class="tlaGNC tlaBgGNC">        1252 :    input logic dec_debug_valid_d,</span></span>
 <span id="L25"><span class="lineNum">      25</span>              : </span>
 <span id="L26"><span class="lineNum">      26</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic dec_tlu_flush_extint,         // Flush external interrupt</span></span>
 <span id="L27"><span class="lineNum">      27</span>              : </span>
@@ -133,8 +133,8 @@
 <span id="L29"><span class="lineNum">      29</span>              : </span>
 <span id="L30"><span class="lineNum">      30</span> <span class="tlaUNC">           0 :    output logic dec_extint_stall,            // Stall from external interrupt</span></span>
 <span id="L31"><span class="lineNum">      31</span>              : </span>
-<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC tlaBgGNC">         132 :    input  logic [15:0] ifu_i0_cinst,         // 16b compressed instruction</span></span>
-<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">           8 :    output logic [31:0] dec_i0_inst_wb,       // 32b instruction at wb+1 for trace encoder</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC tlaBgGNC">         130 :    input  logic [15:0] ifu_i0_cinst,         // 16b compressed instruction</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">           6 :    output logic [31:0] dec_i0_inst_wb,       // 32b instruction at wb+1 for trace encoder</span></span>
 <span id="L34"><span class="lineNum">      34</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [31:1] dec_i0_pc_wb,         // 31b pc at wb+1 for trace encoder</span></span>
 <span id="L35"><span class="lineNum">      35</span>              : </span>
 <span id="L36"><span class="lineNum">      36</span>              : </span>
@@ -155,12 +155,12 @@
 <span id="L51"><span class="lineNum">      51</span> <span class="tlaUNC">           0 :    input logic [3:0]  lsu_trigger_match_m,            // lsu trigger matches</span></span>
 <span id="L52"><span class="lineNum">      52</span>              : </span>
 <span id="L53"><span class="lineNum">      53</span> <span class="tlaUNC">           0 :    input logic lsu_pmu_misaligned_m,                  // perf mon: load/store misalign</span></span>
-<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC tlaBgGNC">           8 :    input logic dec_tlu_debug_stall,                   // debug stall decode</span></span>
-<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">           2 :    input logic dec_tlu_flush_leak_one_r,              // leak1 instruction</span></span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC tlaBgGNC">           6 :    input logic dec_tlu_debug_stall,                   // debug stall decode</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic dec_tlu_flush_leak_one_r,              // leak1 instruction</span></span>
 <span id="L56"><span class="lineNum">      56</span>              : </span>
-<span id="L57"><span class="lineNum">      57</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic dec_debug_fence_d,                     // debug fence instruction</span></span>
+<span id="L57"><span class="lineNum">      57</span> <span class="tlaUNC">           0 :    input logic dec_debug_fence_d,                     // debug fence instruction</span></span>
 <span id="L58"><span class="lineNum">      58</span>              : </span>
-<span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC tlaBgGNC">         233 :    input logic [1:0] dbg_cmd_wrdata,                  // disambiguate fence, fence_i</span></span>
+<span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC tlaBgGNC">         201 :    input logic [1:0] dbg_cmd_wrdata,                  // disambiguate fence, fence_i</span></span>
 <span id="L60"><span class="lineNum">      60</span>              : </span>
 <span id="L61"><span class="lineNum">      61</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic dec_i0_icaf_d,                         // icache access fault</span></span>
 <span id="L62"><span class="lineNum">      62</span> <span class="tlaUNC">           0 :    input logic dec_i0_icaf_second_d,                  // i0 instruction access fault on second 2B of 4B inst</span></span>
@@ -168,9 +168,9 @@
 <span id="L64"><span class="lineNum">      64</span>              : </span>
 <span id="L65"><span class="lineNum">      65</span> <span class="tlaUNC">           0 :    input logic dec_i0_dbecc_d,                        // icache/iccm double-bit error</span></span>
 <span id="L66"><span class="lineNum">      66</span>              : </span>
-<span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC tlaBgGNC">           2 :    input el2_br_pkt_t dec_i0_brp,                    // branch packet</span></span>
-<span id="L68"><span class="lineNum">      68</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] dec_i0_bp_index,   // i0 branch index</span></span>
-<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC tlaBgGNC">         133 :    input logic [pt.BHT_GHR_SIZE-1:0] dec_i0_bp_fghr,  // BP FGHR</span></span>
+<span id="L67"><span class="lineNum">      67</span> <span class="tlaUNC">           0 :    input el2_br_pkt_t dec_i0_brp,                    // branch packet</span></span>
+<span id="L68"><span class="lineNum">      68</span> <span class="tlaUNC">           0 :    input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] dec_i0_bp_index,   // i0 branch index</span></span>
+<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC tlaBgGNC">         131 :    input logic [pt.BHT_GHR_SIZE-1:0] dec_i0_bp_fghr,  // BP FGHR</span></span>
 <span id="L70"><span class="lineNum">      70</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [pt.BTB_BTAG_SIZE-1:0] dec_i0_bp_btag, // BP tag</span></span>
 <span id="L71"><span class="lineNum">      71</span> <span class="tlaUNC">           0 :    input logic [$clog2(pt.BTB_SIZE)-1:0] dec_i0_bp_fa_index,          // Fully associt btb index</span></span>
 <span id="L72"><span class="lineNum">      72</span>              : </span>
@@ -183,32 +183,32 @@
 <span id="L79"><span class="lineNum">      79</span> <span class="tlaUNC">           0 :    input logic exu_div_wren,                          // nonblocking divide write enable to GPR.</span></span>
 <span id="L80"><span class="lineNum">      80</span>              : </span>
 <span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC tlaBgGNC">           4 :    input logic dec_tlu_i0_kill_writeb_wb,             // I0 is flushed, don't writeback any results to arch state</span></span>
-<span id="L82"><span class="lineNum">      82</span> <span class="tlaGNC">          20 :    input logic dec_tlu_flush_lower_wb,                // trap lower flush</span></span>
+<span id="L82"><span class="lineNum">      82</span> <span class="tlaGNC">          16 :    input logic dec_tlu_flush_lower_wb,                // trap lower flush</span></span>
 <span id="L83"><span class="lineNum">      83</span> <span class="tlaGNC">           4 :    input logic dec_tlu_i0_kill_writeb_r,              // I0 is flushed, don't writeback any results to arch state</span></span>
-<span id="L84"><span class="lineNum">      84</span> <span class="tlaGNC">          20 :    input logic dec_tlu_flush_lower_r,                 // trap lower flush</span></span>
+<span id="L84"><span class="lineNum">      84</span> <span class="tlaGNC">          16 :    input logic dec_tlu_flush_lower_r,                 // trap lower flush</span></span>
 <span id="L85"><span class="lineNum">      85</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic dec_tlu_flush_pause_r,                 // don't clear pause state on initial lower flush</span></span>
 <span id="L86"><span class="lineNum">      86</span> <span class="tlaGNC tlaBgGNC">          12 :    input logic dec_tlu_presync_d,                     // CSR read needs to be presync'd</span></span>
-<span id="L87"><span class="lineNum">      87</span> <span class="tlaGNC">          28 :    input logic dec_tlu_postsync_d,                    // CSR ops that need to be postsync'd</span></span>
+<span id="L87"><span class="lineNum">      87</span> <span class="tlaGNC">          26 :    input logic dec_tlu_postsync_d,                    // CSR ops that need to be postsync'd</span></span>
 <span id="L88"><span class="lineNum">      88</span>              : </span>
-<span id="L89"><span class="lineNum">      89</span> <span class="tlaGNC">       16574 :    input logic dec_i0_pc4_d,                          // inst is 4B inst else 2B</span></span>
+<span id="L89"><span class="lineNum">      89</span> <span class="tlaGNC">       16404 :    input logic dec_i0_pc4_d,                          // inst is 4B inst else 2B</span></span>
 <span id="L90"><span class="lineNum">      90</span>              : </span>
-<span id="L91"><span class="lineNum">      91</span> <span class="tlaGNC">          24 :    input logic [31:0] dec_csr_rddata_d,               // csr read data at wb</span></span>
-<span id="L92"><span class="lineNum">      92</span> <span class="tlaGNC">        1252 :    input logic dec_csr_legal_d,                       // csr indicates legal operation</span></span>
+<span id="L91"><span class="lineNum">      91</span> <span class="tlaGNC">          16 :    input logic [31:0] dec_csr_rddata_d,               // csr read data at wb</span></span>
+<span id="L92"><span class="lineNum">      92</span> <span class="tlaGNC">        1132 :    input logic dec_csr_legal_d,                       // csr indicates legal operation</span></span>
 <span id="L93"><span class="lineNum">      93</span>              : </span>
 <span id="L94"><span class="lineNum">      94</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [31:0] exu_csr_rs1_x,                  // rs1 for csr instr</span></span>
 <span id="L95"><span class="lineNum">      95</span>              : </span>
 <span id="L96"><span class="lineNum">      96</span> <span class="tlaUNC">           0 :    input logic [31:0] lsu_result_m,                   // load result</span></span>
 <span id="L97"><span class="lineNum">      97</span> <span class="tlaUNC">           0 :    input logic [31:0] lsu_result_corr_r,              // load result - corrected data for writing gpr's, not for bypassing</span></span>
 <span id="L98"><span class="lineNum">      98</span>              : </span>
-<span id="L99"><span class="lineNum">      99</span> <span class="tlaGNC tlaBgGNC">         188 :    input logic exu_flush_final,                       // lower flush or i0 flush at X or D</span></span>
+<span id="L99"><span class="lineNum">      99</span> <span class="tlaGNC tlaBgGNC">         180 :    input logic exu_flush_final,                       // lower flush or i0 flush at X or D</span></span>
 <span id="L100"><span class="lineNum">     100</span>              : </span>
 <span id="L101"><span class="lineNum">     101</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [31:1] exu_i0_pc_x,                    // pcs at e1</span></span>
 <span id="L102"><span class="lineNum">     102</span>              : </span>
-<span id="L103"><span class="lineNum">     103</span> <span class="tlaGNC tlaBgGNC">         132 :    input logic [31:0] dec_i0_instr_d,                 // inst at decode</span></span>
+<span id="L103"><span class="lineNum">     103</span> <span class="tlaGNC tlaBgGNC">         130 :    input logic [31:0] dec_i0_instr_d,                 // inst at decode</span></span>
 <span id="L104"><span class="lineNum">     104</span>              : </span>
-<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC">        1624 :    input logic  dec_ib0_valid_d,                      // inst valid at decode</span></span>
+<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC">        1436 :    input logic  dec_ib0_valid_d,                      // inst valid at decode</span></span>
 <span id="L106"><span class="lineNum">     106</span>              : </span>
-<span id="L107"><span class="lineNum">     107</span> <span class="tlaGNC">          38 :    input logic [31:0] exu_i0_result_x,                // from primary alu's</span></span>
+<span id="L107"><span class="lineNum">     107</span> <span class="tlaGNC">          26 :    input logic [31:0] exu_i0_result_x,                // from primary alu's</span></span>
 <span id="L108"><span class="lineNum">     108</span>              : </span>
 <span id="L109"><span class="lineNum">     109</span> <span class="tlaGNC">     4000002 :    input logic  clk,                                  // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
 <span id="L110"><span class="lineNum">     110</span> <span class="tlaGNC">     4000002 :    input logic  active_clk,                           // Clock only while core active.  Through two clock headers. For flops without second clock header built in.</span></span>
@@ -219,36 +219,36 @@
 <span id="L115"><span class="lineNum">     115</span>              : </span>
 <span id="L116"><span class="lineNum">     116</span>              : </span>
 <span id="L117"><span class="lineNum">     117</span>              : </span>
-<span id="L118"><span class="lineNum">     118</span> <span class="tlaGNC">         504 :    output logic        dec_i0_rs1_en_d,               // rs1 enable at decode</span></span>
+<span id="L118"><span class="lineNum">     118</span> <span class="tlaGNC">         434 :    output logic        dec_i0_rs1_en_d,               // rs1 enable at decode</span></span>
 <span id="L119"><span class="lineNum">     119</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic        dec_i0_rs2_en_d,               // rs2 enable at decode</span></span>
 <span id="L120"><span class="lineNum">     120</span>              : </span>
-<span id="L121"><span class="lineNum">     121</span> <span class="tlaGNC tlaBgGNC">         232 :    output logic [4:0]  dec_i0_rs1_d,                  // rs1 logical source</span></span>
-<span id="L122"><span class="lineNum">     122</span> <span class="tlaGNC">       16448 :    output logic [4:0]  dec_i0_rs2_d,                  // rs2 logical source</span></span>
+<span id="L121"><span class="lineNum">     121</span> <span class="tlaGNC tlaBgGNC">         198 :    output logic [4:0]  dec_i0_rs1_d,                  // rs1 logical source</span></span>
+<span id="L122"><span class="lineNum">     122</span> <span class="tlaGNC">       16232 :    output logic [4:0]  dec_i0_rs2_d,                  // rs2 logical source</span></span>
 <span id="L123"><span class="lineNum">     123</span>              : </span>
-<span id="L124"><span class="lineNum">     124</span> <span class="tlaGNC">       16302 :    output logic [31:0] dec_i0_immed_d,                // 32b immediate data decode</span></span>
+<span id="L124"><span class="lineNum">     124</span> <span class="tlaGNC">       16134 :    output logic [31:0] dec_i0_immed_d,                // 32b immediate data decode</span></span>
 <span id="L125"><span class="lineNum">     125</span>              : </span>
 <span id="L126"><span class="lineNum">     126</span>              : </span>
-<span id="L127"><span class="lineNum">     127</span> <span class="tlaGNC">          34 :    output logic [12:1] dec_i0_br_immed_d,             // 12b branch immediate</span></span>
+<span id="L127"><span class="lineNum">     127</span> <span class="tlaGNC">          32 :    output logic [12:1] dec_i0_br_immed_d,             // 12b branch immediate</span></span>
 <span id="L128"><span class="lineNum">     128</span>              : </span>
 <span id="L129"><span class="lineNum">     129</span> <span class="tlaUNC tlaBgUNC">           0 :    output el2_alu_pkt_t i0_ap,                       // alu packets</span></span>
 <span id="L130"><span class="lineNum">     130</span>              : </span>
-<span id="L131"><span class="lineNum">     131</span> <span class="tlaGNC tlaBgGNC">        1624 :    output logic        dec_i0_decode_d,               // i0 decode</span></span>
+<span id="L131"><span class="lineNum">     131</span> <span class="tlaGNC tlaBgGNC">        1438 :    output logic        dec_i0_decode_d,               // i0 decode</span></span>
 <span id="L132"><span class="lineNum">     132</span>              : </span>
-<span id="L133"><span class="lineNum">     133</span> <span class="tlaGNC">        1622 :    output logic        dec_i0_alu_decode_d,           // decode to D-stage alu</span></span>
-<span id="L134"><span class="lineNum">     134</span> <span class="tlaGNC">       16432 :    output logic        dec_i0_branch_d,               // Branch in D-stage</span></span>
+<span id="L133"><span class="lineNum">     133</span> <span class="tlaGNC">        1436 :    output logic        dec_i0_alu_decode_d,           // decode to D-stage alu</span></span>
+<span id="L134"><span class="lineNum">     134</span> <span class="tlaGNC">       16264 :    output logic        dec_i0_branch_d,               // Branch in D-stage</span></span>
 <span id="L135"><span class="lineNum">     135</span>              : </span>
-<span id="L136"><span class="lineNum">     136</span> <span class="tlaGNC">         174 :    output logic [4:0]  dec_i0_waddr_r,                // i0 logical source to write to gpr's</span></span>
-<span id="L137"><span class="lineNum">     137</span> <span class="tlaGNC">       16300 :    output logic        dec_i0_wen_r,                  // i0 write enable</span></span>
-<span id="L138"><span class="lineNum">     138</span> <span class="tlaGNC">          38 :    output logic [31:0] dec_i0_wdata_r,                // i0 write data</span></span>
+<span id="L136"><span class="lineNum">     136</span> <span class="tlaGNC">         170 :    output logic [4:0]  dec_i0_waddr_r,                // i0 logical source to write to gpr's</span></span>
+<span id="L137"><span class="lineNum">     137</span> <span class="tlaGNC">       16134 :    output logic        dec_i0_wen_r,                  // i0 write enable</span></span>
+<span id="L138"><span class="lineNum">     138</span> <span class="tlaGNC">          26 :    output logic [31:0] dec_i0_wdata_r,                // i0 write data</span></span>
 <span id="L139"><span class="lineNum">     139</span>              : </span>
-<span id="L140"><span class="lineNum">     140</span> <span class="tlaGNC">         132 :    output logic        dec_i0_select_pc_d,            // i0 select pc for rs1 - branches</span></span>
+<span id="L140"><span class="lineNum">     140</span> <span class="tlaGNC">         130 :    output logic        dec_i0_select_pc_d,            // i0 select pc for rs1 - branches</span></span>
 <span id="L141"><span class="lineNum">     141</span>              : </span>
 <span id="L142"><span class="lineNum">     142</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [3:0]    dec_i0_rs1_bypass_en_d,      // i0 rs1 bypass enable</span></span>
 <span id="L143"><span class="lineNum">     143</span> <span class="tlaUNC">           0 :    output logic [3:0]    dec_i0_rs2_bypass_en_d,      // i0 rs2 bypass enable</span></span>
-<span id="L144"><span class="lineNum">     144</span> <span class="tlaGNC tlaBgGNC">          38 :    output logic [31:0]   dec_i0_result_r,             // Result R-stage</span></span>
+<span id="L144"><span class="lineNum">     144</span> <span class="tlaGNC tlaBgGNC">          26 :    output logic [31:0]   dec_i0_result_r,             // Result R-stage</span></span>
 <span id="L145"><span class="lineNum">     145</span>              : </span>
 <span id="L146"><span class="lineNum">     146</span> <span class="tlaUNC tlaBgUNC">           0 :    output el2_lsu_pkt_t    lsu_p,                    // load/store packet</span></span>
-<span id="L147"><span class="lineNum">     147</span> <span class="tlaGNC tlaBgGNC">        1621 :    output logic             dec_qual_lsu_d,           // LSU instruction at D.  Use to quiet LSU operands</span></span>
+<span id="L147"><span class="lineNum">     147</span> <span class="tlaGNC tlaBgGNC">        1433 :    output logic             dec_qual_lsu_d,           // LSU instruction at D.  Use to quiet LSU operands</span></span>
 <span id="L148"><span class="lineNum">     148</span>              : </span>
 <span id="L149"><span class="lineNum">     149</span> <span class="tlaUNC tlaBgUNC">           0 :    output el2_mul_pkt_t    mul_p,                    // multiply packet</span></span>
 <span id="L150"><span class="lineNum">     150</span>              : </span>
@@ -259,17 +259,17 @@
 <span id="L155"><span class="lineNum">     155</span> <span class="tlaGNC tlaBgGNC">           2 :    output logic        dec_lsu_valid_raw_d,</span></span>
 <span id="L156"><span class="lineNum">     156</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [11:0] dec_lsu_offset_d,</span></span>
 <span id="L157"><span class="lineNum">     157</span>              : </span>
-<span id="L158"><span class="lineNum">     158</span> <span class="tlaGNC tlaBgGNC">         936 :    output logic        dec_csr_ren_d,                 // valid csr decode</span></span>
-<span id="L159"><span class="lineNum">     159</span> <span class="tlaGNC">         316 :    output logic        dec_csr_wen_unq_d,             // valid csr with write - for csr legal</span></span>
-<span id="L160"><span class="lineNum">     160</span> <span class="tlaGNC">        1252 :    output logic        dec_csr_any_unq_d,             // valid csr - for csr legal</span></span>
-<span id="L161"><span class="lineNum">     161</span> <span class="tlaGNC">          36 :    output logic [11:0] dec_csr_rdaddr_d,              // read address for csr</span></span>
-<span id="L162"><span class="lineNum">     162</span> <span class="tlaGNC">         316 :    output logic        dec_csr_wen_r,                 // csr write enable at r</span></span>
-<span id="L163"><span class="lineNum">     163</span> <span class="tlaGNC">         306 :    output logic [11:0] dec_csr_rdaddr_r,              // read address for csr</span></span>
-<span id="L164"><span class="lineNum">     164</span> <span class="tlaGNC">           6 :    output logic [11:0] dec_csr_wraddr_r,              // write address for csr</span></span>
-<span id="L165"><span class="lineNum">     165</span> <span class="tlaGNC">          32 :    output logic [31:0] dec_csr_wrdata_r,              // csr write data at r</span></span>
+<span id="L158"><span class="lineNum">     158</span> <span class="tlaGNC tlaBgGNC">         912 :    output logic        dec_csr_ren_d,                 // valid csr decode</span></span>
+<span id="L159"><span class="lineNum">     159</span> <span class="tlaGNC">         220 :    output logic        dec_csr_wen_unq_d,             // valid csr with write - for csr legal</span></span>
+<span id="L160"><span class="lineNum">     160</span> <span class="tlaGNC">        1132 :    output logic        dec_csr_any_unq_d,             // valid csr - for csr legal</span></span>
+<span id="L161"><span class="lineNum">     161</span> <span class="tlaGNC">          24 :    output logic [11:0] dec_csr_rdaddr_d,              // read address for csr</span></span>
+<span id="L162"><span class="lineNum">     162</span> <span class="tlaGNC">         220 :    output logic        dec_csr_wen_r,                 // csr write enable at r</span></span>
+<span id="L163"><span class="lineNum">     163</span> <span class="tlaGNC">         300 :    output logic [11:0] dec_csr_rdaddr_r,              // read address for csr</span></span>
+<span id="L164"><span class="lineNum">     164</span> <span class="tlaGNC">           4 :    output logic [11:0] dec_csr_wraddr_r,              // write address for csr</span></span>
+<span id="L165"><span class="lineNum">     165</span> <span class="tlaGNC">          22 :    output logic [31:0] dec_csr_wrdata_r,              // csr write data at r</span></span>
 <span id="L166"><span class="lineNum">     166</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic        dec_csr_stall_int_ff,          // csr is mie/mstatus</span></span>
 <span id="L167"><span class="lineNum">     167</span>              : </span>
-<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC tlaBgGNC">        1622 :    output              dec_tlu_i0_valid_r,            // i0 valid inst at c</span></span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC tlaBgGNC">        1436 :    output              dec_tlu_i0_valid_r,            // i0 valid inst at c</span></span>
 <span id="L169"><span class="lineNum">     169</span>              : </span>
 <span id="L170"><span class="lineNum">     170</span> <span class="tlaUNC tlaBgUNC">           0 :    output el2_trap_pkt_t   dec_tlu_packet_r,              // trap packet</span></span>
 <span id="L171"><span class="lineNum">     171</span>              : </span>
@@ -278,18 +278,18 @@
 <span id="L174"><span class="lineNum">     174</span> <span class="tlaUNC">           0 :    output logic [31:0] dec_illegal_inst,              // illegal inst</span></span>
 <span id="L175"><span class="lineNum">     175</span> <span class="tlaGNC tlaBgGNC">           2 :    output logic [31:1] pred_correct_npc_x,            // npc e2 if the prediction is correct</span></span>
 <span id="L176"><span class="lineNum">     176</span>              : </span>
-<span id="L177"><span class="lineNum">     177</span> <span class="tlaGNC">           2 :    output el2_predict_pkt_t dec_i0_predict_p_d,      // i0 predict packet decode</span></span>
-<span id="L178"><span class="lineNum">     178</span> <span class="tlaGNC">         133 :    output logic [pt.BHT_GHR_SIZE-1:0] i0_predict_fghr_d, // i0 predict fghr</span></span>
+<span id="L177"><span class="lineNum">     177</span> <span class="tlaUNC tlaBgUNC">           0 :    output el2_predict_pkt_t dec_i0_predict_p_d,      // i0 predict packet decode</span></span>
+<span id="L178"><span class="lineNum">     178</span> <span class="tlaGNC tlaBgGNC">         131 :    output logic [pt.BHT_GHR_SIZE-1:0] i0_predict_fghr_d, // i0 predict fghr</span></span>
 <span id="L179"><span class="lineNum">     179</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] i0_predict_index_d, // i0 predict index</span></span>
 <span id="L180"><span class="lineNum">     180</span> <span class="tlaUNC">           0 :    output logic [pt.BTB_BTAG_SIZE-1:0] i0_predict_btag_d, // i0_predict branch tag</span></span>
 <span id="L181"><span class="lineNum">     181</span>              : </span>
 <span id="L182"><span class="lineNum">     182</span> <span class="tlaUNC">           0 :    output logic [$clog2(pt.BTB_SIZE)-1:0] dec_fa_error_index, // Fully associt btb error index</span></span>
 <span id="L183"><span class="lineNum">     183</span>              : </span>
-<span id="L184"><span class="lineNum">     184</span> <span class="tlaGNC tlaBgGNC">        1624 :    output logic [1:0] dec_data_en,                    // clock-gating logic</span></span>
-<span id="L185"><span class="lineNum">     185</span> <span class="tlaGNC">        1460 :    output logic [1:0] dec_ctl_en,</span></span>
+<span id="L184"><span class="lineNum">     184</span> <span class="tlaGNC tlaBgGNC">        1438 :    output logic [1:0] dec_data_en,                    // clock-gating logic</span></span>
+<span id="L185"><span class="lineNum">     185</span> <span class="tlaGNC">        1276 :    output logic [1:0] dec_ctl_en,</span></span>
 <span id="L186"><span class="lineNum">     186</span>              : </span>
-<span id="L187"><span class="lineNum">     187</span> <span class="tlaGNC">        1624 :    output logic       dec_pmu_instr_decoded,          // number of instructions decode this cycle encoded</span></span>
-<span id="L188"><span class="lineNum">     188</span> <span class="tlaGNC">          12 :    output logic       dec_pmu_decode_stall,           // decode is stalled</span></span>
+<span id="L187"><span class="lineNum">     187</span> <span class="tlaGNC">        1438 :    output logic       dec_pmu_instr_decoded,          // number of instructions decode this cycle encoded</span></span>
+<span id="L188"><span class="lineNum">     188</span> <span class="tlaGNC">          10 :    output logic       dec_pmu_decode_stall,           // decode is stalled</span></span>
 <span id="L189"><span class="lineNum">     189</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic       dec_pmu_presync_stall,          // decode has presync stall</span></span>
 <span id="L190"><span class="lineNum">     190</span> <span class="tlaGNC tlaBgGNC">           4 :    output logic       dec_pmu_postsync_stall,         // decode has postsync stall</span></span>
 <span id="L191"><span class="lineNum">     191</span>              : </span>
@@ -311,27 +311,27 @@
 <span id="L207"><span class="lineNum">     207</span>              : </span>
 <span id="L208"><span class="lineNum">     208</span> <span class="tlaUNC">           0 :    el2_dec_pkt_t           i0_dp_raw, i0_dp;</span></span>
 <span id="L209"><span class="lineNum">     209</span>              : </span>
-<span id="L210"><span class="lineNum">     210</span> <span class="tlaGNC tlaBgGNC">         132 :    logic [31:0]        i0;</span></span>
-<span id="L211"><span class="lineNum">     211</span> <span class="tlaGNC">        1624 :    logic               i0_valid_d;</span></span>
+<span id="L210"><span class="lineNum">     210</span> <span class="tlaGNC tlaBgGNC">         130 :    logic [31:0]        i0;</span></span>
+<span id="L211"><span class="lineNum">     211</span> <span class="tlaGNC">        1436 :    logic               i0_valid_d;</span></span>
 <span id="L212"><span class="lineNum">     212</span>              : </span>
-<span id="L213"><span class="lineNum">     213</span> <span class="tlaGNC">          38 :    logic [31:0]        i0_result_r;</span></span>
+<span id="L213"><span class="lineNum">     213</span> <span class="tlaGNC">          26 :    logic [31:0]        i0_result_r;</span></span>
 <span id="L214"><span class="lineNum">     214</span>              : </span>
 <span id="L215"><span class="lineNum">     215</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [2:0]         i0_rs1bypass, i0_rs2bypass;</span></span>
 <span id="L216"><span class="lineNum">     216</span>              : </span>
-<span id="L217"><span class="lineNum">     217</span> <span class="tlaGNC tlaBgGNC">         132 :    logic               i0_jalimm20;</span></span>
+<span id="L217"><span class="lineNum">     217</span> <span class="tlaGNC tlaBgGNC">         130 :    logic               i0_jalimm20;</span></span>
 <span id="L218"><span class="lineNum">     218</span> <span class="tlaGNC">           2 :    logic               i0_uiimm20;</span></span>
 <span id="L219"><span class="lineNum">     219</span>              : </span>
 <span id="L220"><span class="lineNum">     220</span> <span class="tlaUNC tlaBgUNC">           0 :    logic               lsu_decode_d;</span></span>
-<span id="L221"><span class="lineNum">     221</span> <span class="tlaGNC tlaBgGNC">       16302 :    logic [31:0]        i0_immed_d;</span></span>
+<span id="L221"><span class="lineNum">     221</span> <span class="tlaGNC tlaBgGNC">       16134 :    logic [31:0]        i0_immed_d;</span></span>
 <span id="L222"><span class="lineNum">     222</span> <span class="tlaGNC">          12 :    logic               i0_presync;</span></span>
-<span id="L223"><span class="lineNum">     223</span> <span class="tlaGNC">          30 :    logic               i0_postsync;</span></span>
+<span id="L223"><span class="lineNum">     223</span> <span class="tlaGNC">          28 :    logic               i0_postsync;</span></span>
 <span id="L224"><span class="lineNum">     224</span>              : </span>
-<span id="L225"><span class="lineNum">     225</span> <span class="tlaGNC">          30 :    logic               postsync_stall;</span></span>
-<span id="L226"><span class="lineNum">     226</span> <span class="tlaGNC">          30 :    logic               ps_stall;</span></span>
+<span id="L225"><span class="lineNum">     225</span> <span class="tlaGNC">          28 :    logic               postsync_stall;</span></span>
+<span id="L226"><span class="lineNum">     226</span> <span class="tlaGNC">          28 :    logic               ps_stall;</span></span>
 <span id="L227"><span class="lineNum">     227</span>              : </span>
-<span id="L228"><span class="lineNum">     228</span> <span class="tlaGNC">        1460 :    logic               prior_inflight, prior_inflight_wb;</span></span>
+<span id="L228"><span class="lineNum">     228</span> <span class="tlaGNC">        1276 :    logic               prior_inflight, prior_inflight_wb;</span></span>
 <span id="L229"><span class="lineNum">     229</span>              : </span>
-<span id="L230"><span class="lineNum">     230</span> <span class="tlaGNC">         316 :    logic               csr_clr_d, csr_set_d, csr_write_d;</span></span>
+<span id="L230"><span class="lineNum">     230</span> <span class="tlaGNC">         220 :    logic               csr_clr_d, csr_set_d, csr_write_d;</span></span>
 <span id="L231"><span class="lineNum">     231</span>              : </span>
 <span id="L232"><span class="lineNum">     232</span> <span class="tlaUNC tlaBgUNC">           0 :    logic               csr_clr_x,csr_set_x,csr_write_x,csr_imm_x;</span></span>
 <span id="L233"><span class="lineNum">     233</span> <span class="tlaUNC">           0 :    logic [31:0]        csr_mask_x;</span></span>
@@ -342,7 +342,7 @@
 <span id="L238"><span class="lineNum">     238</span>              : </span>
 <span id="L239"><span class="lineNum">     239</span> <span class="tlaUNC">           0 :    logic [4:0]         csrimm_x;</span></span>
 <span id="L240"><span class="lineNum">     240</span>              : </span>
-<span id="L241"><span class="lineNum">     241</span> <span class="tlaGNC tlaBgGNC">          24 :    logic [31:0]        csr_rddata_x;</span></span>
+<span id="L241"><span class="lineNum">     241</span> <span class="tlaGNC tlaBgGNC">          16 :    logic [31:0]        csr_rddata_x;</span></span>
 <span id="L242"><span class="lineNum">     242</span>              : </span>
 <span id="L243"><span class="lineNum">     243</span> <span class="tlaUNC tlaBgUNC">           0 :    logic               mul_decode_d;</span></span>
 <span id="L244"><span class="lineNum">     244</span> <span class="tlaUNC">           0 :    logic               div_decode_d;</span></span>
@@ -354,15 +354,15 @@
 <span id="L250"><span class="lineNum">     250</span> <span class="tlaUNC">           0 :    logic               i0_div_prior_div_stall;</span></span>
 <span id="L251"><span class="lineNum">     251</span> <span class="tlaUNC">           0 :    logic               nonblock_div_cancel;</span></span>
 <span id="L252"><span class="lineNum">     252</span>              : </span>
-<span id="L253"><span class="lineNum">     253</span> <span class="tlaGNC tlaBgGNC">        1620 :    logic               i0_legal;</span></span>
+<span id="L253"><span class="lineNum">     253</span> <span class="tlaGNC tlaBgGNC">        1432 :    logic               i0_legal;</span></span>
 <span id="L254"><span class="lineNum">     254</span> <span class="tlaGNC">           2 :    logic               shift_illegal;</span></span>
 <span id="L255"><span class="lineNum">     255</span> <span class="tlaGNC">           2 :    logic               illegal_inst_en;</span></span>
 <span id="L256"><span class="lineNum">     256</span> <span class="tlaGNC">           2 :    logic               illegal_lockout_in, illegal_lockout;</span></span>
-<span id="L257"><span class="lineNum">     257</span> <span class="tlaGNC">        1622 :    logic               i0_legal_decode_d;</span></span>
-<span id="L258"><span class="lineNum">     258</span> <span class="tlaGNC">          38 :    logic               i0_exulegal_decode_d, i0_exudecode_d, i0_exublock_d;</span></span>
+<span id="L257"><span class="lineNum">     257</span> <span class="tlaGNC">        1436 :    logic               i0_legal_decode_d;</span></span>
+<span id="L258"><span class="lineNum">     258</span> <span class="tlaGNC">          34 :    logic               i0_exulegal_decode_d, i0_exudecode_d, i0_exublock_d;</span></span>
 <span id="L259"><span class="lineNum">     259</span>              : </span>
-<span id="L260"><span class="lineNum">     260</span> <span class="tlaGNC">         176 :    logic [12:1]        last_br_immed_d;</span></span>
-<span id="L261"><span class="lineNum">     261</span> <span class="tlaGNC">       16132 :    logic               i0_rs1_depend_i0_x, i0_rs1_depend_i0_r;</span></span>
+<span id="L260"><span class="lineNum">     260</span> <span class="tlaGNC">         172 :    logic [12:1]        last_br_immed_d;</span></span>
+<span id="L261"><span class="lineNum">     261</span> <span class="tlaGNC">       15968 :    logic               i0_rs1_depend_i0_x, i0_rs1_depend_i0_r;</span></span>
 <span id="L262"><span class="lineNum">     262</span> <span class="tlaUNC tlaBgUNC">           0 :    logic               i0_rs2_depend_i0_x, i0_rs2_depend_i0_r;</span></span>
 <span id="L263"><span class="lineNum">     263</span>              : </span>
 <span id="L264"><span class="lineNum">     264</span> <span class="tlaUNC">           0 :    logic               i0_div_decode_d;</span></span>
@@ -372,23 +372,23 @@
 <span id="L268"><span class="lineNum">     268</span> <span class="tlaUNC">           0 :    logic               i0_load_stall_d;</span></span>
 <span id="L269"><span class="lineNum">     269</span> <span class="tlaUNC">           0 :    logic               i0_store_stall_d;</span></span>
 <span id="L270"><span class="lineNum">     270</span>              : </span>
-<span id="L271"><span class="lineNum">     271</span> <span class="tlaGNC tlaBgGNC">          36 :    logic               i0_predict_nt, i0_predict_t;</span></span>
+<span id="L271"><span class="lineNum">     271</span> <span class="tlaGNC tlaBgGNC">          34 :    logic               i0_predict_nt, i0_predict_t;</span></span>
 <span id="L272"><span class="lineNum">     272</span>              : </span>
 <span id="L273"><span class="lineNum">     273</span> <span class="tlaGNC">           2 :    logic               i0_notbr_error, i0_br_toffset_error;</span></span>
 <span id="L274"><span class="lineNum">     274</span> <span class="tlaUNC tlaBgUNC">           0 :    logic               i0_ret_error;</span></span>
 <span id="L275"><span class="lineNum">     275</span> <span class="tlaGNC tlaBgGNC">           2 :    logic               i0_br_error;</span></span>
 <span id="L276"><span class="lineNum">     276</span> <span class="tlaGNC">           2 :    logic               i0_br_error_all;</span></span>
-<span id="L277"><span class="lineNum">     277</span> <span class="tlaGNC">         178 :    logic [11:0]        i0_br_offset;</span></span>
+<span id="L277"><span class="lineNum">     277</span> <span class="tlaGNC">         172 :    logic [11:0]        i0_br_offset;</span></span>
 <span id="L278"><span class="lineNum">     278</span>              : </span>
-<span id="L279"><span class="lineNum">     279</span> <span class="tlaGNC">         232 :    logic [20:1]        i0_pcall_imm;                          // predicted jal's</span></span>
-<span id="L280"><span class="lineNum">     280</span> <span class="tlaGNC">        1755 :    logic               i0_pcall_12b_offset;</span></span>
+<span id="L279"><span class="lineNum">     279</span> <span class="tlaGNC">         198 :    logic [20:1]        i0_pcall_imm;                          // predicted jal's</span></span>
+<span id="L280"><span class="lineNum">     280</span> <span class="tlaGNC">        1565 :    logic               i0_pcall_12b_offset;</span></span>
 <span id="L281"><span class="lineNum">     281</span> <span class="tlaUNC tlaBgUNC">           0 :    logic               i0_pcall_raw;</span></span>
 <span id="L282"><span class="lineNum">     282</span> <span class="tlaUNC">           0 :    logic               i0_pcall_case;</span></span>
 <span id="L283"><span class="lineNum">     283</span> <span class="tlaUNC">           0 :    logic               i0_pcall;</span></span>
 <span id="L284"><span class="lineNum">     284</span>              : </span>
-<span id="L285"><span class="lineNum">     285</span> <span class="tlaGNC tlaBgGNC">         132 :    logic               i0_pja_raw;</span></span>
-<span id="L286"><span class="lineNum">     286</span> <span class="tlaGNC">         132 :    logic               i0_pja_case;</span></span>
-<span id="L287"><span class="lineNum">     287</span> <span class="tlaGNC">         132 :    logic               i0_pja;</span></span>
+<span id="L285"><span class="lineNum">     285</span> <span class="tlaGNC tlaBgGNC">         130 :    logic               i0_pja_raw;</span></span>
+<span id="L286"><span class="lineNum">     286</span> <span class="tlaGNC">         130 :    logic               i0_pja_case;</span></span>
+<span id="L287"><span class="lineNum">     287</span> <span class="tlaGNC">         130 :    logic               i0_pja;</span></span>
 <span id="L288"><span class="lineNum">     288</span>              : </span>
 <span id="L289"><span class="lineNum">     289</span> <span class="tlaUNC tlaBgUNC">           0 :    logic               i0_pret_case;</span></span>
 <span id="L290"><span class="lineNum">     290</span> <span class="tlaUNC">           0 :    logic               i0_pret_raw, i0_pret;</span></span>
@@ -396,7 +396,7 @@
 <span id="L292"><span class="lineNum">     292</span> <span class="tlaUNC">           0 :    logic               i0_jal;                                // jal's that are not predicted</span></span>
 <span id="L293"><span class="lineNum">     293</span>              : </span>
 <span id="L294"><span class="lineNum">     294</span>              : </span>
-<span id="L295"><span class="lineNum">     295</span> <span class="tlaGNC tlaBgGNC">       16432 :    logic               i0_predict_br;</span></span>
+<span id="L295"><span class="lineNum">     295</span> <span class="tlaGNC tlaBgGNC">       16264 :    logic               i0_predict_br;</span></span>
 <span id="L296"><span class="lineNum">     296</span>              : </span>
 <span id="L297"><span class="lineNum">     297</span> <span class="tlaUNC tlaBgUNC">           0 :    logic               store_data_bypass_d, store_data_bypass_m;</span></span>
 <span id="L298"><span class="lineNum">     298</span>              : </span>
@@ -405,53 +405,53 @@
 <span id="L301"><span class="lineNum">     301</span> <span class="tlaUNC">           0 :    el2_class_pkt_t         i0_d_c, i0_x_c, i0_r_c;</span></span>
 <span id="L302"><span class="lineNum">     302</span>              : </span>
 <span id="L303"><span class="lineNum">     303</span>              : </span>
-<span id="L304"><span class="lineNum">     304</span> <span class="tlaGNC tlaBgGNC">       16574 :    logic               i0_ap_pc2, i0_ap_pc4;</span></span>
+<span id="L304"><span class="lineNum">     304</span> <span class="tlaGNC tlaBgGNC">       16404 :    logic               i0_ap_pc2, i0_ap_pc4;</span></span>
 <span id="L305"><span class="lineNum">     305</span>              : </span>
-<span id="L306"><span class="lineNum">     306</span> <span class="tlaGNC">       16308 :    logic               i0_rd_en_d;</span></span>
+<span id="L306"><span class="lineNum">     306</span> <span class="tlaGNC">       16140 :    logic               i0_rd_en_d;</span></span>
 <span id="L307"><span class="lineNum">     307</span>              : </span>
 <span id="L308"><span class="lineNum">     308</span> <span class="tlaUNC tlaBgUNC">           0 :    logic               load_ldst_bypass_d;</span></span>
 <span id="L309"><span class="lineNum">     309</span>              : </span>
-<span id="L310"><span class="lineNum">     310</span> <span class="tlaGNC tlaBgGNC">           2 :    logic               leak1_i0_stall_in, leak1_i0_stall;</span></span>
-<span id="L311"><span class="lineNum">     311</span> <span class="tlaGNC">           2 :    logic               leak1_i1_stall_in, leak1_i1_stall;</span></span>
-<span id="L312"><span class="lineNum">     312</span> <span class="tlaGNC">           2 :    logic               leak1_mode;</span></span>
+<span id="L310"><span class="lineNum">     310</span> <span class="tlaUNC">           0 :    logic               leak1_i0_stall_in, leak1_i0_stall;</span></span>
+<span id="L311"><span class="lineNum">     311</span> <span class="tlaUNC">           0 :    logic               leak1_i1_stall_in, leak1_i1_stall;</span></span>
+<span id="L312"><span class="lineNum">     312</span> <span class="tlaUNC">           0 :    logic               leak1_mode;</span></span>
 <span id="L313"><span class="lineNum">     313</span>              : </span>
-<span id="L314"><span class="lineNum">     314</span> <span class="tlaGNC">         316 :    logic               i0_csr_write_only_d;</span></span>
+<span id="L314"><span class="lineNum">     314</span> <span class="tlaGNC tlaBgGNC">         220 :    logic               i0_csr_write_only_d;</span></span>
 <span id="L315"><span class="lineNum">     315</span>              : </span>
-<span id="L316"><span class="lineNum">     316</span> <span class="tlaGNC">        1460 :    logic               prior_inflight_x, prior_inflight_eff;</span></span>
-<span id="L317"><span class="lineNum">     317</span> <span class="tlaGNC">        1252 :    logic               any_csr_d;</span></span>
+<span id="L316"><span class="lineNum">     316</span> <span class="tlaGNC">        1276 :    logic               prior_inflight_x, prior_inflight_eff;</span></span>
+<span id="L317"><span class="lineNum">     317</span> <span class="tlaGNC">        1132 :    logic               any_csr_d;</span></span>
 <span id="L318"><span class="lineNum">     318</span>              : </span>
-<span id="L319"><span class="lineNum">     319</span> <span class="tlaGNC">         316 :    logic               prior_csr_write;</span></span>
+<span id="L319"><span class="lineNum">     319</span> <span class="tlaGNC">         220 :    logic               prior_csr_write;</span></span>
 <span id="L320"><span class="lineNum">     320</span>              : </span>
-<span id="L321"><span class="lineNum">     321</span> <span class="tlaGNC">        1624 :    logic [3:0]        i0_pipe_en;</span></span>
-<span id="L322"><span class="lineNum">     322</span> <span class="tlaGNC">        1460 :    logic              i0_r_ctl_en,  i0_x_ctl_en,  i0_wb_ctl_en;</span></span>
-<span id="L323"><span class="lineNum">     323</span> <span class="tlaGNC">        1624 :    logic              i0_x_data_en, i0_r_data_en, i0_wb_data_en;</span></span>
+<span id="L321"><span class="lineNum">     321</span> <span class="tlaGNC">        1438 :    logic [3:0]        i0_pipe_en;</span></span>
+<span id="L322"><span class="lineNum">     322</span> <span class="tlaGNC">        1276 :    logic              i0_r_ctl_en,  i0_x_ctl_en,  i0_wb_ctl_en;</span></span>
+<span id="L323"><span class="lineNum">     323</span> <span class="tlaGNC">        1438 :    logic              i0_x_data_en, i0_r_data_en, i0_wb_data_en;</span></span>
 <span id="L324"><span class="lineNum">     324</span>              : </span>
 <span id="L325"><span class="lineNum">     325</span> <span class="tlaUNC tlaBgUNC">           0 :    logic              debug_fence_i;</span></span>
 <span id="L326"><span class="lineNum">     326</span> <span class="tlaUNC">           0 :    logic              debug_fence;</span></span>
 <span id="L327"><span class="lineNum">     327</span>              : </span>
-<span id="L328"><span class="lineNum">     328</span> <span class="tlaGNC tlaBgGNC">         316 :    logic              i0_csr_write;</span></span>
+<span id="L328"><span class="lineNum">     328</span> <span class="tlaGNC tlaBgGNC">         220 :    logic              i0_csr_write;</span></span>
 <span id="L329"><span class="lineNum">     329</span> <span class="tlaUNC tlaBgUNC">           0 :    logic              presync_stall;</span></span>
 <span id="L330"><span class="lineNum">     330</span>              : </span>
 <span id="L331"><span class="lineNum">     331</span> <span class="tlaUNC">           0 :    logic              i0_instr_error;</span></span>
 <span id="L332"><span class="lineNum">     332</span> <span class="tlaUNC">           0 :    logic              i0_icaf_d;</span></span>
 <span id="L333"><span class="lineNum">     333</span>              : </span>
-<span id="L334"><span class="lineNum">     334</span> <span class="tlaGNC tlaBgGNC">          20 :    logic              clear_pause;</span></span>
+<span id="L334"><span class="lineNum">     334</span> <span class="tlaGNC tlaBgGNC">          16 :    logic              clear_pause;</span></span>
 <span id="L335"><span class="lineNum">     335</span> <span class="tlaUNC tlaBgUNC">           0 :    logic              pause_state_in, pause_state;</span></span>
 <span id="L336"><span class="lineNum">     336</span> <span class="tlaUNC">           0 :    logic              pause_stall;</span></span>
 <span id="L337"><span class="lineNum">     337</span>              : </span>
-<span id="L338"><span class="lineNum">     338</span> <span class="tlaGNC tlaBgGNC">       16426 :    logic              i0_brp_valid;</span></span>
+<span id="L338"><span class="lineNum">     338</span> <span class="tlaGNC tlaBgGNC">       16260 :    logic              i0_brp_valid;</span></span>
 <span id="L339"><span class="lineNum">     339</span> <span class="tlaUNC tlaBgUNC">           0 :    logic              nonblock_load_cancel;</span></span>
 <span id="L340"><span class="lineNum">     340</span> <span class="tlaGNC tlaBgGNC">           1 :    logic              lsu_idle;</span></span>
 <span id="L341"><span class="lineNum">     341</span> <span class="tlaUNC tlaBgUNC">           0 :    logic              lsu_pmu_misaligned_r;</span></span>
-<span id="L342"><span class="lineNum">     342</span> <span class="tlaGNC tlaBgGNC">         936 :    logic              csr_ren_qual_d;</span></span>
-<span id="L343"><span class="lineNum">     343</span> <span class="tlaGNC">         936 :    logic              csr_read_x;</span></span>
-<span id="L344"><span class="lineNum">     344</span> <span class="tlaGNC">          38 :    logic              i0_block_d;</span></span>
-<span id="L345"><span class="lineNum">     345</span> <span class="tlaGNC">          38 :    logic              i0_block_raw_d;  // This is use to create the raw valid</span></span>
-<span id="L346"><span class="lineNum">     346</span> <span class="tlaGNC">          30 :    logic              ps_stall_in;</span></span>
-<span id="L347"><span class="lineNum">     347</span> <span class="tlaGNC">          38 :    logic [31:0]       i0_result_x;</span></span>
+<span id="L342"><span class="lineNum">     342</span> <span class="tlaGNC tlaBgGNC">         912 :    logic              csr_ren_qual_d;</span></span>
+<span id="L343"><span class="lineNum">     343</span> <span class="tlaGNC">         912 :    logic              csr_read_x;</span></span>
+<span id="L344"><span class="lineNum">     344</span> <span class="tlaGNC">          34 :    logic              i0_block_d;</span></span>
+<span id="L345"><span class="lineNum">     345</span> <span class="tlaGNC">          34 :    logic              i0_block_raw_d;  // This is use to create the raw valid</span></span>
+<span id="L346"><span class="lineNum">     346</span> <span class="tlaGNC">          28 :    logic              ps_stall_in;</span></span>
+<span id="L347"><span class="lineNum">     347</span> <span class="tlaGNC">          26 :    logic [31:0]       i0_result_x;</span></span>
 <span id="L348"><span class="lineNum">     348</span>              : </span>
-<span id="L349"><span class="lineNum">     349</span> <span class="tlaGNC">        1622 :    el2_dest_pkt_t         d_d, x_d, r_d, wbd;</span></span>
-<span id="L350"><span class="lineNum">     350</span> <span class="tlaGNC">        1622 :    el2_dest_pkt_t         x_d_in, r_d_in;</span></span>
+<span id="L349"><span class="lineNum">     349</span> <span class="tlaGNC">        1436 :    el2_dest_pkt_t         d_d, x_d, r_d, wbd;</span></span>
+<span id="L350"><span class="lineNum">     350</span> <span class="tlaGNC">        1436 :    el2_dest_pkt_t         x_d_in, r_d_in;</span></span>
 <span id="L351"><span class="lineNum">     351</span>              : </span>
 <span id="L352"><span class="lineNum">     352</span> <span class="tlaUNC tlaBgUNC">           0 :    el2_trap_pkt_t         d_t, x_t, x_t_in, r_t_in, r_t;</span></span>
 <span id="L353"><span class="lineNum">     353</span>              : </span>
@@ -459,16 +459,16 @@
 <span id="L355"><span class="lineNum">     355</span>              : </span>
 <span id="L356"><span class="lineNum">     356</span> <span class="tlaUNC">           0 :    logic [31:1]       dec_i0_pc_r;</span></span>
 <span id="L357"><span class="lineNum">     357</span>              : </span>
-<span id="L358"><span class="lineNum">     358</span> <span class="tlaGNC tlaBgGNC">         316 :    logic csr_read, csr_write;</span></span>
+<span id="L358"><span class="lineNum">     358</span> <span class="tlaGNC tlaBgGNC">         220 :    logic csr_read, csr_write;</span></span>
 <span id="L359"><span class="lineNum">     359</span> <span class="tlaUNC tlaBgUNC">           0 :    logic i0_br_unpred;</span></span>
 <span id="L360"><span class="lineNum">     360</span>              : </span>
 <span id="L361"><span class="lineNum">     361</span> <span class="tlaUNC">           0 :    logic nonblock_load_valid_m_delay;</span></span>
-<span id="L362"><span class="lineNum">     362</span> <span class="tlaGNC tlaBgGNC">       16300 :    logic i0_wen_r;</span></span>
+<span id="L362"><span class="lineNum">     362</span> <span class="tlaGNC tlaBgGNC">       16134 :    logic i0_wen_r;</span></span>
 <span id="L363"><span class="lineNum">     363</span>              : </span>
 <span id="L364"><span class="lineNum">     364</span> <span class="tlaUNC tlaBgUNC">           0 :    logic tlu_wr_pause_r1;</span></span>
 <span id="L365"><span class="lineNum">     365</span> <span class="tlaUNC">           0 :    logic tlu_wr_pause_r2;</span></span>
 <span id="L366"><span class="lineNum">     366</span>              : </span>
-<span id="L367"><span class="lineNum">     367</span> <span class="tlaGNC tlaBgGNC">         188 :    logic flush_final_r;</span></span>
+<span id="L367"><span class="lineNum">     367</span> <span class="tlaGNC tlaBgGNC">         180 :    logic flush_final_r;</span></span>
 <span id="L368"><span class="lineNum">     368</span>              : </span>
 <span id="L369"><span class="lineNum">     369</span> <span class="tlaGNC">           1 :    logic bitmanip_zbb_legal;</span></span>
 <span id="L370"><span class="lineNum">     370</span> <span class="tlaGNC">           1 :    logic bitmanip_zbs_legal;</span></span>
@@ -517,27 +517,27 @@
 <span id="L413"><span class="lineNum">     413</span>              : </span>
 <span id="L414"><span class="lineNum">     414</span> <span class="tlaUNC">           0 :    logic debug_fence_raw;</span></span>
 <span id="L415"><span class="lineNum">     415</span>              : </span>
-<span id="L416"><span class="lineNum">     416</span> <span class="tlaGNC tlaBgGNC">          38 :    logic [31:0] i0_result_r_raw;</span></span>
-<span id="L417"><span class="lineNum">     417</span> <span class="tlaGNC">          38 :    logic [31:0] i0_result_corr_r;</span></span>
+<span id="L416"><span class="lineNum">     416</span> <span class="tlaGNC tlaBgGNC">          26 :    logic [31:0] i0_result_r_raw;</span></span>
+<span id="L417"><span class="lineNum">     417</span> <span class="tlaGNC">          26 :    logic [31:0] i0_result_corr_r;</span></span>
 <span id="L418"><span class="lineNum">     418</span>              : </span>
-<span id="L419"><span class="lineNum">     419</span> <span class="tlaGNC">           8 :    logic [12:1] last_br_immed_x;</span></span>
+<span id="L419"><span class="lineNum">     419</span> <span class="tlaGNC">           6 :    logic [12:1] last_br_immed_x;</span></span>
 <span id="L420"><span class="lineNum">     420</span>              : </span>
-<span id="L421"><span class="lineNum">     421</span> <span class="tlaGNC">         132 :    logic [31:0]        i0_inst_d;</span></span>
-<span id="L422"><span class="lineNum">     422</span> <span class="tlaGNC">           8 :    logic [31:0]        i0_inst_x;</span></span>
-<span id="L423"><span class="lineNum">     423</span> <span class="tlaGNC">           8 :    logic [31:0]        i0_inst_r;</span></span>
-<span id="L424"><span class="lineNum">     424</span> <span class="tlaGNC">           8 :    logic [31:0]        i0_inst_wb_in;</span></span>
-<span id="L425"><span class="lineNum">     425</span> <span class="tlaGNC">           8 :    logic [31:0]        i0_inst_wb;</span></span>
+<span id="L421"><span class="lineNum">     421</span> <span class="tlaGNC">         130 :    logic [31:0]        i0_inst_d;</span></span>
+<span id="L422"><span class="lineNum">     422</span> <span class="tlaGNC">           6 :    logic [31:0]        i0_inst_x;</span></span>
+<span id="L423"><span class="lineNum">     423</span> <span class="tlaGNC">           6 :    logic [31:0]        i0_inst_r;</span></span>
+<span id="L424"><span class="lineNum">     424</span> <span class="tlaGNC">           6 :    logic [31:0]        i0_inst_wb_in;</span></span>
+<span id="L425"><span class="lineNum">     425</span> <span class="tlaGNC">           6 :    logic [31:0]        i0_inst_wb;</span></span>
 <span id="L426"><span class="lineNum">     426</span>              : </span>
 <span id="L427"><span class="lineNum">     427</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [31:1]        i0_pc_wb;</span></span>
 <span id="L428"><span class="lineNum">     428</span>              : </span>
-<span id="L429"><span class="lineNum">     429</span> <span class="tlaGNC tlaBgGNC">        1624 :    logic               i0_wb_en;</span></span>
+<span id="L429"><span class="lineNum">     429</span> <span class="tlaGNC tlaBgGNC">        1438 :    logic               i0_wb_en;</span></span>
 <span id="L430"><span class="lineNum">     430</span>              : </span>
 <span id="L431"><span class="lineNum">     431</span> <span class="tlaGNC">           1 :    logic               trace_enable;</span></span>
 <span id="L432"><span class="lineNum">     432</span>              : </span>
-<span id="L433"><span class="lineNum">     433</span> <span class="tlaGNC">        1434 :    logic               debug_valid_x;</span></span>
+<span id="L433"><span class="lineNum">     433</span> <span class="tlaGNC">        1252 :    logic               debug_valid_x;</span></span>
 <span id="L434"><span class="lineNum">     434</span>              : </span>
-<span id="L435"><span class="lineNum">     435</span> <span class="tlaGNC">         448 :    el2_inst_pkt_t i0_itype;</span></span>
-<span id="L436"><span class="lineNum">     436</span> <span class="tlaGNC">         178 :    el2_reg_pkt_t i0r;</span></span>
+<span id="L435"><span class="lineNum">     435</span> <span class="tlaGNC">         350 :    el2_inst_pkt_t i0_itype;</span></span>
+<span id="L436"><span class="lineNum">     436</span> <span class="tlaGNC">         172 :    el2_reg_pkt_t i0r;</span></span>
 <span id="L437"><span class="lineNum">     437</span>              : </span>
 <span id="L438"><span class="lineNum">     438</span>              : </span>
 <span id="L439"><span class="lineNum">     439</span>              :    rvdffie  #(8) misc1ff (.*,</span>
@@ -850,26 +850,26 @@
 <span id="L746"><span class="lineNum">     746</span> <span class="tlaGNC">           1 :    always_comb begin</span></span>
 <span id="L747"><span class="lineNum">     747</span> <span class="tlaGNC">           1 :       i0_itype = NULL_OP;</span></span>
 <span id="L748"><span class="lineNum">     748</span>              : </span>
-<span id="L749"><span class="lineNum">     749</span> <span class="tlaGNC">     1013068 :       if (i0_legal_decode_d) begin</span></span>
-<span id="L750"><span class="lineNum">     750</span> <span class="tlaGNC">     1013068 :          if (i0_dp.mul)                  i0_itype = MUL;</span></span>
-<span id="L751"><span class="lineNum">     751</span> <span class="tlaGNC">     1013068 :          if (i0_dp.load)                 i0_itype = LOAD;</span></span>
-<span id="L752"><span class="lineNum">     752</span> <span class="tlaGNC">     1013068 :          if (i0_dp.store)                i0_itype = STORE;</span></span>
-<span id="L753"><span class="lineNum">     753</span> <span class="tlaGNC">      505528 :          if (i0_dp.pm_alu)               i0_itype = ALU;</span></span>
-<span id="L754"><span class="lineNum">     754</span> <span class="tlaGNC">     1013068 :          if (i0_dp.zbb | i0_dp.zbs |</span></span>
+<span id="L749"><span class="lineNum">     749</span> <span class="tlaGNC">     1011236 :       if (i0_legal_decode_d) begin</span></span>
+<span id="L750"><span class="lineNum">     750</span> <span class="tlaGNC">     1011236 :          if (i0_dp.mul)                  i0_itype = MUL;</span></span>
+<span id="L751"><span class="lineNum">     751</span> <span class="tlaGNC">     1011236 :          if (i0_dp.load)                 i0_itype = LOAD;</span></span>
+<span id="L752"><span class="lineNum">     752</span> <span class="tlaGNC">     1011236 :          if (i0_dp.store)                i0_itype = STORE;</span></span>
+<span id="L753"><span class="lineNum">     753</span> <span class="tlaGNC">      504680 :          if (i0_dp.pm_alu)               i0_itype = ALU;</span></span>
+<span id="L754"><span class="lineNum">     754</span> <span class="tlaGNC">     1011236 :          if (i0_dp.zbb | i0_dp.zbs |</span></span>
 <span id="L755"><span class="lineNum">     755</span>              :              i0_dp.zbe | i0_dp.zbc |</span>
 <span id="L756"><span class="lineNum">     756</span>              :              i0_dp.zbp | i0_dp.zbr |</span>
 <span id="L757"><span class="lineNum">     757</span>              :              i0_dp.zbf | i0_dp.zba)</span>
 <span id="L758"><span class="lineNum">     758</span> <span class="tlaUNC tlaBgUNC">           0 :                                          i0_itype = BITMANIPU;</span></span>
-<span id="L759"><span class="lineNum">     759</span> <span class="tlaGNC tlaBgGNC">        1844 :          if ( csr_read &amp; ~csr_write)     i0_itype = CSRREAD;</span></span>
-<span id="L760"><span class="lineNum">     760</span> <span class="tlaGNC">         478 :          if (~csr_read &amp;  csr_write)     i0_itype = CSRWRITE;</span></span>
-<span id="L761"><span class="lineNum">     761</span> <span class="tlaGNC">     1013068 :          if ( csr_read &amp;  csr_write)     i0_itype = CSRRW;</span></span>
-<span id="L762"><span class="lineNum">     762</span> <span class="tlaGNC">     1013068 :          if (i0_dp.ebreak)               i0_itype = EBREAK;</span></span>
-<span id="L763"><span class="lineNum">     763</span> <span class="tlaGNC">     1013068 :          if (i0_dp.ecall)                i0_itype = ECALL;</span></span>
-<span id="L764"><span class="lineNum">     764</span> <span class="tlaGNC">     1013068 :          if (i0_dp.fence)                i0_itype = FENCE;</span></span>
-<span id="L765"><span class="lineNum">     765</span> <span class="tlaGNC">     1013068 :          if (i0_dp.fence_i)              i0_itype = FENCEI;  // fencei will set this even with fence attribute</span></span>
-<span id="L766"><span class="lineNum">     766</span> <span class="tlaGNC">     1013068 :          if (i0_dp.mret)                 i0_itype = MRET;</span></span>
-<span id="L767"><span class="lineNum">     767</span> <span class="tlaGNC">      499150 :          if (i0_dp.condbr)               i0_itype = CONDBR;</span></span>
-<span id="L768"><span class="lineNum">     768</span> <span class="tlaGNC">        4056 :          if (i0_dp.jal)                  i0_itype = JAL;</span></span>
+<span id="L759"><span class="lineNum">     759</span> <span class="tlaGNC tlaBgGNC">        1892 :          if ( csr_read &amp; ~csr_write)     i0_itype = CSRREAD;</span></span>
+<span id="L760"><span class="lineNum">     760</span> <span class="tlaGNC">         674 :          if (~csr_read &amp;  csr_write)     i0_itype = CSRWRITE;</span></span>
+<span id="L761"><span class="lineNum">     761</span> <span class="tlaGNC">     1011236 :          if ( csr_read &amp;  csr_write)     i0_itype = CSRRW;</span></span>
+<span id="L762"><span class="lineNum">     762</span> <span class="tlaGNC">     1011236 :          if (i0_dp.ebreak)               i0_itype = EBREAK;</span></span>
+<span id="L763"><span class="lineNum">     763</span> <span class="tlaGNC">     1011236 :          if (i0_dp.ecall)                i0_itype = ECALL;</span></span>
+<span id="L764"><span class="lineNum">     764</span> <span class="tlaGNC">     1011236 :          if (i0_dp.fence)                i0_itype = FENCE;</span></span>
+<span id="L765"><span class="lineNum">     765</span> <span class="tlaGNC">     1011236 :          if (i0_dp.fence_i)              i0_itype = FENCEI;  // fencei will set this even with fence attribute</span></span>
+<span id="L766"><span class="lineNum">     766</span> <span class="tlaGNC">     1011236 :          if (i0_dp.mret)                 i0_itype = MRET;</span></span>
+<span id="L767"><span class="lineNum">     767</span> <span class="tlaGNC">      498066 :          if (i0_dp.condbr)               i0_itype = CONDBR;</span></span>
+<span id="L768"><span class="lineNum">     768</span> <span class="tlaGNC">        4048 :          if (i0_dp.jal)                  i0_itype = JAL;</span></span>
 <span id="L769"><span class="lineNum">     769</span>              :       end</span>
 <span id="L770"><span class="lineNum">     770</span>              :    end</span>
 <span id="L771"><span class="lineNum">     771</span>              : </span>
@@ -1383,7 +1383,7 @@
 <span id="L1279"><span class="lineNum">    1279</span> <span class="tlaGNC">           1 :       r_t_in.i0trigger[3:0]              = ({4{(r_d.i0load | r_d.i0store)}} &amp; lsu_trigger_match_r[3:0]) | r_t.i0trigger[3:0];</span></span>
 <span id="L1280"><span class="lineNum">    1280</span> <span class="tlaGNC">           1 :       r_t_in.pmu_lsu_misaligned          = lsu_pmu_misaligned_r;   // only valid if a load/store is valid in DC3 stage</span></span>
 <span id="L1281"><span class="lineNum">    1281</span>              : </span>
-<span id="L1282"><span class="lineNum">    1282</span> <span class="tlaGNC">          10 :       if (dec_tlu_flush_lower_wb) r_t_in = '0 ;</span></span>
+<span id="L1282"><span class="lineNum">    1282</span> <span class="tlaGNC">          12 :       if (dec_tlu_flush_lower_wb) r_t_in = '0 ;</span></span>
 <span id="L1283"><span class="lineNum">    1283</span>              : </span>
 <span id="L1284"><span class="lineNum">    1284</span>              :    end</span>
 <span id="L1285"><span class="lineNum">    1285</span>              : </span>
@@ -1617,11 +1617,11 @@
 <span id="L1513"><span class="lineNum">    1513</span>              : module el2_dec_dec_ctl</span>
 <span id="L1514"><span class="lineNum">    1514</span>              :   import el2_pkg::*;</span>
 <span id="L1515"><span class="lineNum">    1515</span>              : (</span>
-<span id="L1516"><span class="lineNum">    1516</span> <span class="tlaGNC">         132 :     input logic [31:0] inst,</span></span>
+<span id="L1516"><span class="lineNum">    1516</span> <span class="tlaGNC">         130 :     input logic [31:0] inst,</span></span>
 <span id="L1517"><span class="lineNum">    1517</span> <span class="tlaUNC tlaBgUNC">           0 :     output el2_dec_pkt_t out</span></span>
 <span id="L1518"><span class="lineNum">    1518</span>              : );</span>
 <span id="L1519"><span class="lineNum">    1519</span>              : </span>
-<span id="L1520"><span class="lineNum">    1520</span> <span class="tlaGNC tlaBgGNC">         132 :   logic [31:0] i;</span></span>
+<span id="L1520"><span class="lineNum">    1520</span> <span class="tlaGNC tlaBgGNC">         130 :   logic [31:0] i;</span></span>
 <span id="L1521"><span class="lineNum">    1521</span>              : </span>
 <span id="L1522"><span class="lineNum">    1522</span>              :   assign i[31:0] = inst[31:0];</span>
 <span id="L1523"><span class="lineNum">    1523</span>              : </span>

@@ -6,7 +6,7 @@ import os
 
 from cocotb.binary import BinaryValue
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, RisingEdge
+from cocotb.triggers import ClockCycles, RisingEdge, FallingEdge
 from pyuvm import *
 
 # ==============================================================================
@@ -347,8 +347,18 @@ class BaseTest(uvm_test):
 
     async def run_phase(self):
         self.raise_objection()
+
+        cocotb.top.scan_mode.value = 0
+        #cocotb.top.pmp_pmpcfg.value = 0
+        #cocotb.top.pmp_pmpaddr.value = 0
+        cocotb.top.pmp_chan_addr.value = [0, 0, 0]
+        cocotb.top.pmp_chan_type.value = [0, 0, 0]
+
         self.start_clock("clk")
+        cocotb.top.rst_l.value = 0
         await ClockCycles(cocotb.top.clk, 2)
+        await FallingEdge(cocotb.top.clk)
+        cocotb.top.rst_l.value = 1
         await self.run()
         await ClockCycles(cocotb.top.clk, 2)
         self.drop_objection()

@@ -83,18 +83,12 @@
         100.0%
     </td>
     <td class="headerCovSummaryEntry">
-        4
+        17
     </td>
     <td class="headerCovSummaryEntry">
-        4
+        17
     </td>
 
-            </tr>
-            <tr>
-              <td></td>
-              <td></td>
-              <td></td>
-              
             </tr>
             
         </table>
@@ -106,165 +100,106 @@
 </tr>
 <tr>
 <td>
-<pre class="sourceHeading">             Branch data     Line data    Source code</pre>
+<pre class="sourceHeading">            Line data    Source code</pre>
 <pre class="source">
-<span id="L1"><span class="lineNum">       1</span>                 :             : // SPDX-License-Identifier: Apache-2.0</span>
-<span id="L2"><span class="lineNum">       2</span>                 :             : // Copyright 2020 Western Digital Corporation or its affiliates.</span>
-<span id="L3"><span class="lineNum">       3</span>                 :             : //</span>
-<span id="L4"><span class="lineNum">       4</span>                 :             : // Licensed under the Apache License, Version 2.0 (the "License");</span>
-<span id="L5"><span class="lineNum">       5</span>                 :             : // you may not use this file except in compliance with the License.</span>
-<span id="L6"><span class="lineNum">       6</span>                 :             : // You may obtain a copy of the License at</span>
-<span id="L7"><span class="lineNum">       7</span>                 :             : //</span>
-<span id="L8"><span class="lineNum">       8</span>                 :             : // http://www.apache.org/licenses/LICENSE-2.0</span>
-<span id="L9"><span class="lineNum">       9</span>                 :             : //</span>
-<span id="L10"><span class="lineNum">      10</span>                 :             : // Unless required by applicable law or agreed to in writing, software</span>
-<span id="L11"><span class="lineNum">      11</span>                 :             : // distributed under the License is distributed on an "AS IS" BASIS,</span>
-<span id="L12"><span class="lineNum">      12</span>                 :             : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
-<span id="L13"><span class="lineNum">      13</span>                 :             : // See the License for the specific language governing permissions and</span>
-<span id="L14"><span class="lineNum">      14</span>                 :             : // limitations under the License.</span>
-<span id="L15"><span class="lineNum">      15</span>                 :             : </span>
-<span id="L16"><span class="lineNum">      16</span>                 :             : module el2_dec_gpr_ctl</span>
-<span id="L17"><span class="lineNum">      17</span>                 :             : import el2_pkg::*;</span>
-<span id="L18"><span class="lineNum">      18</span>                 :             : #(</span>
-<span id="L19"><span class="lineNum">      19</span>                 :             :    `include "el2_param.vh"</span>
-<span id="L20"><span class="lineNum">      20</span>                 :             :  )  (</span>
-<span id="L21"><span class="lineNum">      21</span>   [<span class="tlaGBC" title="Branch 0 was taken 376 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 284 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 390 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 394 times"> + </span> :<span class="tlaGNC tlaBgGNC">         394 :     input logic [4:0]  raddr0,       // logical read addresses</span></span>
-<span class="lineNum">        </span>             <span class="tlaGBC" title="Branch 4 was taken 234 times"> + </span>]
-<span id="L22"><span class="lineNum">      22</span>   [<span class="tlaGBC" title="Branch 0 was taken 356 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 252 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 384 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 336 times"> + </span> :<span class="tlaGNC">         384 :     input logic [4:0]  raddr1,</span></span>
-<span class="lineNum">        </span>             <span class="tlaGBC" title="Branch 4 was taken 240 times"> + </span>]
-<span id="L23"><span class="lineNum">      23</span>                 :             : </span>
-<span id="L24"><span class="lineNum">      24</span>                 :<span class="tlaGNC">         394 :     input logic        wen0,         // write enable</span></span>
-<span id="L25"><span class="lineNum">      25</span>   [<span class="tlaGBC" title="Branch 0 was taken 334 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 358 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 488 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 494 times"> + </span> :<span class="tlaGNC">         494 :     input logic [4:0]  waddr0,       // write address</span></span>
-<span class="lineNum">        </span>             <span class="tlaGBC" title="Branch 4 was taken 258 times"> + </span>]
-<span id="L26"><span class="lineNum">      26</span>   [<span class="tlaGBC" title="Branch 0 was taken 116 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 123 times"> + </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaGBC" title="Branch 3 was taken 59 times"> + </span> :<span class="tlaGNC">         169 :     input logic [31:0] wd0,          // write data</span></span>
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaGBC" title="Branch 5 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaGBC" title="Branch 7 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 96 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 6 times"> + </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 4 times"> + </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaUNC" title="Branch 16 was not taken"> - </span><span class="tlaUNC" title="Branch 17 was not taken"> - </span><span class="tlaGBC" title="Branch 18 was taken 2 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaGBC" title="Branch 20 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaGBC" title="Branch 22 was taken 124 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 6 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 153 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 122 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 125 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 167 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 169 times"> + </span> 
-<span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 48 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 50 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 46 times"> + </span>]
-<span id="L27"><span class="lineNum">      27</span>                 :             : </span>
-<span id="L28"><span class="lineNum">      28</span>                 :<span class="tlaGNC">          92 :     input logic        wen1,         // write enable</span></span>
-<span id="L29"><span class="lineNum">      29</span>   [<span class="tlaGBC" title="Branch 0 was taken 14 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 34 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 74 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 70 times"> + </span> :<span class="tlaGNC">          74 :     input logic [4:0]  waddr1,       // write address</span></span>
-<span class="lineNum">        </span>             <span class="tlaGBC" title="Branch 4 was taken 18 times"> + </span>]
-<span id="L30"><span class="lineNum">      30</span>   [<span class="tlaGBC" title="Branch 0 was taken 18 times"> + </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaGBC" title="Branch 3 was taken 2 times"> + </span> :<span class="tlaGNC">          52 :     input logic [31:0] wd1,          // write data</span></span>
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaGBC" title="Branch 11 was taken 10 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 14 was not taken"> - </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaUNC" title="Branch 16 was not taken"> - </span><span class="tlaUNC" title="Branch 17 was not taken"> - </span><span class="tlaUNC" title="Branch 18 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaUNC" title="Branch 20 was not taken"> - </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaGBC" title="Branch 22 was taken 14 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 2 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 26 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 36 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 52 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 24 times"> + </span> 
-<span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 6 times"> + </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span>]
-<span id="L31"><span class="lineNum">      31</span>                 :             : </span>
-<span id="L32"><span class="lineNum">      32</span>                 :<span class="tlaUNC tlaBgUNC">           0 :     input logic        wen2,         // write enable</span></span>
-<span id="L33"><span class="lineNum">      33</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaUNC">           0 :     input logic [4:0]  waddr2,       // write address</span></span>
-<span class="lineNum">        </span>             <span class="tlaUNC" title="Branch 4 was not taken"> - </span>]
-<span id="L34"><span class="lineNum">      34</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaUNC">           0 :     input logic [31:0] wd2,          // write data</span></span>
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaUNC" title="Branch 11 was not taken"> - </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 14 was not taken"> - </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaUNC" title="Branch 16 was not taken"> - </span><span class="tlaUNC" title="Branch 17 was not taken"> - </span><span class="tlaUNC" title="Branch 18 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaUNC" title="Branch 20 was not taken"> - </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaUNC" title="Branch 22 was not taken"> - </span><span class="tlaUNC" title="Branch 23 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 24 was not taken"> - </span><span class="tlaUNC" title="Branch 25 was not taken"> - </span><span class="tlaUNC" title="Branch 26 was not taken"> - </span><span class="tlaUNC" title="Branch 27 was not taken"> - </span><span class="tlaUNC" title="Branch 28 was not taken"> - </span> 
-<span class="lineNum">        </span>       <span class="tlaUNC" title="Branch 29 was not taken"> - </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span>]
-<span id="L35"><span class="lineNum">      35</span>                 :             : </span>
-<span id="L36"><span class="lineNum">      36</span>                 :<span class="tlaGNC tlaBgGNC">     5004186 :     input logic        clk,</span></span>
-<span id="L37"><span class="lineNum">      37</span>                 :<span class="tlaGNC">           1 :     input logic        rst_l,</span></span>
-<span id="L38"><span class="lineNum">      38</span>                 :             : </span>
-<span id="L39"><span class="lineNum">      39</span>   [<span class="tlaGBC" title="Branch 0 was taken 216 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 178 times"> + </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaGBC" title="Branch 3 was taken 156 times"> + </span> :<span class="tlaGNC">         336 :     output logic [31:0] rd0,         // read data</span></span>
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaGBC" title="Branch 5 was taken 4 times"> + </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaGBC" title="Branch 7 was taken 4 times"> + </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 52 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 146 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 58 times"> + </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 56 times"> + </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaUNC" title="Branch 16 was not taken"> - </span><span class="tlaUNC" title="Branch 17 was not taken"> - </span><span class="tlaGBC" title="Branch 18 was taken 4 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaGBC" title="Branch 20 was taken 52 times"> + </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaGBC" title="Branch 22 was taken 172 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 58 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 326 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 224 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 258 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 336 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 266 times"> + </span> 
-<span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 96 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 106 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 94 times"> + </span>]
-<span id="L40"><span class="lineNum">      40</span>   [<span class="tlaGBC" title="Branch 0 was taken 178 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 60 times"> + </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaGBC" title="Branch 3 was taken 52 times"> + </span> :<span class="tlaGNC">         386 :     output logic [31:0] rd1,</span></span>
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaGBC" title="Branch 10 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 102 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 6 times"> + </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 4 times"> + </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaUNC" title="Branch 16 was not taken"> - </span><span class="tlaUNC" title="Branch 17 was not taken"> - </span><span class="tlaUNC" title="Branch 18 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaGBC" title="Branch 20 was taken 4 times"> + </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaGBC" title="Branch 22 was taken 316 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 12 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 218 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 246 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 134 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 386 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 128 times"> + </span> 
-<span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 188 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 196 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 188 times"> + </span>]
-<span id="L41"><span class="lineNum">      41</span>                 :             : </span>
-<span id="L42"><span class="lineNum">      42</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L43"><span class="lineNum">      43</span>                 :             :    /*pragma coverage off*/</span>
-<span id="L44"><span class="lineNum">      44</span>                 :             :     input  logic        scan_mode</span>
-<span id="L45"><span class="lineNum">      45</span>                 :             :    /*pragma coverage on*/</span>
-<span id="L46"><span class="lineNum">      46</span>                 :             : );</span>
-<span id="L47"><span class="lineNum">      47</span>                 :             : </span>
-<span id="L48"><span class="lineNum">      48</span>                 :             :    logic [31:1] [31:0] gpr_out;      // 31 x 32 bit GPRs</span>
-<span id="L49"><span class="lineNum">      49</span>                 :             :    logic [31:1] [31:0] gpr_in;</span>
-<span id="L50"><span class="lineNum">      50</span>   [<span class="tlaGBC" title="Branch 0 was taken 44 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 8 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 22 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 56 times"> + </span> :<span class="tlaGNC">          86 :    logic [31:1] w0v,w1v,w2v;</span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 38 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 86 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 34 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 2 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 6 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 4 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 14 was not taken"> - </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaUNC" title="Branch 16 was not taken"> - </span><span class="tlaUNC" title="Branch 17 was not taken"> - </span><span class="tlaUNC" title="Branch 18 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 56 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 44 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 14 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 2 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 24 was not taken"> - </span><span class="tlaUNC" title="Branch 25 was not taken"> - </span><span class="tlaGBC" title="Branch 26 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 2 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 29 was taken 6 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span><span class="tlaUNC" title="Branch 32 was not taken"> - </span><span class="tlaGBC" title="Branch 33 was taken 38 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 34 was not taken"> - </span><span class="tlaGBC" title="Branch 35 was taken 26 times"> + </span><span class="tlaGBC" title="Branch 36 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 37 was taken 14 times"> + </span><span class="tlaUNC" title="Branch 38 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 39 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 40 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 41 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 42 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 43 was taken 2 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 44 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 45 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 46 was not taken"> - </span><span class="tlaUNC" title="Branch 47 was not taken"> - </span><span class="tlaUNC" title="Branch 48 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 49 was not taken"> - </span><span class="tlaUNC" title="Branch 50 was not taken"> - </span><span class="tlaUNC" title="Branch 51 was not taken"> - </span><span class="tlaUNC" title="Branch 52 was not taken"> - </span><span class="tlaUNC" title="Branch 53 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 54 was not taken"> - </span><span class="tlaUNC" title="Branch 55 was not taken"> - </span><span class="tlaUNC" title="Branch 56 was not taken"> - </span><span class="tlaUNC" title="Branch 57 was not taken"> - </span><span class="tlaUNC" title="Branch 58 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 59 was not taken"> - </span><span class="tlaGBC" title="Branch 60 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 61 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 62 was not taken"> - </span><span class="tlaUNC" title="Branch 63 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 64 was not taken"> - </span><span class="tlaUNC" title="Branch 65 was not taken"> - </span><span class="tlaUNC" title="Branch 66 was not taken"> - </span><span class="tlaUNC" title="Branch 67 was not taken"> - </span><span class="tlaUNC" title="Branch 68 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 69 was not taken"> - </span><span class="tlaUNC" title="Branch 70 was not taken"> - </span><span class="tlaUNC" title="Branch 71 was not taken"> - </span><span class="tlaUNC" title="Branch 72 was not taken"> - </span><span class="tlaUNC" title="Branch 73 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 74 was not taken"> - </span><span class="tlaUNC" title="Branch 75 was not taken"> - </span><span class="tlaUNC" title="Branch 76 was not taken"> - </span><span class="tlaUNC" title="Branch 77 was not taken"> - </span><span class="tlaUNC" title="Branch 78 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 79 was not taken"> - </span><span class="tlaUNC" title="Branch 80 was not taken"> - </span><span class="tlaUNC" title="Branch 81 was not taken"> - </span><span class="tlaUNC" title="Branch 82 was not taken"> - </span><span class="tlaUNC" title="Branch 83 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 84 was not taken"> - </span><span class="tlaUNC" title="Branch 85 was not taken"> - </span><span class="tlaUNC" title="Branch 86 was not taken"> - </span><span class="tlaUNC" title="Branch 87 was not taken"> - </span><span class="tlaUNC" title="Branch 88 was not taken"> - </span> 
-<span class="lineNum">        </span>    <span class="tlaUNC" title="Branch 89 was not taken"> - </span><span class="tlaUNC" title="Branch 90 was not taken"> - </span><span class="tlaUNC" title="Branch 91 was not taken"> - </span><span class="tlaUNC" title="Branch 92 was not taken"> - </span>]
-<span id="L51"><span class="lineNum">      51</span>   [<span class="tlaGBC" title="Branch 0 was taken 44 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 8 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 60 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 56 times"> + </span> :<span class="tlaGNC">          90 :    logic [31:1] gpr_wr_en;</span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 64 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 90 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 48 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 4 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 8 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 6 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 6 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaUNC" title="Branch 16 was not taken"> - </span><span class="tlaUNC" title="Branch 17 was not taken"> - </span><span class="tlaUNC" title="Branch 18 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 56 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 44 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 14 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 2 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 24 was not taken"> - </span><span class="tlaUNC" title="Branch 25 was not taken"> - </span><span class="tlaGBC" title="Branch 26 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 2 times"> + </span> 
-<span class="lineNum">        </span>          <span class="tlaGBC" title="Branch 29 was taken 8 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 4 times"> + </span>]
-<span id="L52"><span class="lineNum">      52</span>                 :             : </span>
-<span id="L53"><span class="lineNum">      53</span>                 :             :    // GPR Write Enables</span>
-<span id="L54"><span class="lineNum">      54</span>                 :             :    assign gpr_wr_en[31:1] = (w0v[31:1] | w1v[31:1] | w2v[31:1]);</span>
-<span id="L55"><span class="lineNum">      55</span>                 :             :    for ( genvar j=1; j&lt;32; j++ )  begin : gpr</span>
-<span id="L56"><span class="lineNum">      56</span>                 :             :       rvdffe #(32) gprff (.*, .en(gpr_wr_en[j]), .din(gpr_in[j][31:0]), .dout(gpr_out[j][31:0]));</span>
-<span id="L57"><span class="lineNum">      57</span>                 :             :    end : gpr</span>
-<span id="L58"><span class="lineNum">      58</span>                 :             : </span>
-<span id="L59"><span class="lineNum">      59</span>                 :             :    // the read out</span>
-<span id="L60"><span class="lineNum">      60</span>                 :<span class="tlaGNC">           1 :    always_comb begin</span></span>
-<span id="L61"><span class="lineNum">      61</span>                 :<span class="tlaGNC">           1 :       rd0[31:0] = 32'b0;</span></span>
-<span id="L62"><span class="lineNum">      62</span>                 :<span class="tlaGNC">           1 :       rd1[31:0] = 32'b0;</span></span>
-<span id="L63"><span class="lineNum">      63</span>                 :<span class="tlaGNC">           1 :       w0v[31:1] = 31'b0;</span></span>
-<span id="L64"><span class="lineNum">      64</span>                 :<span class="tlaGNC">           1 :       w1v[31:1] = 31'b0;</span></span>
-<span id="L65"><span class="lineNum">      65</span>                 :<span class="tlaGNC">           1 :       w2v[31:1] = 31'b0;</span></span>
-<span id="L66"><span class="lineNum">      66</span>                 :<span class="tlaGNC">           1 :       gpr_in[31:1] = '0;</span></span>
-<span id="L67"><span class="lineNum">      67</span>                 :             : </span>
-<span id="L68"><span class="lineNum">      68</span>                 :             :       // GPR Read logic</span>
-<span id="L69"><span class="lineNum">      69</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 31 times"> + </span>]:<span class="tlaGNC">          31 :       for (int j=1; j&lt;32; j++ )  begin</span></span>
-<span id="L70"><span class="lineNum">      70</span>                 :<span class="tlaGNC">          31 :          rd0[31:0] |= ({32{(raddr0[4:0]== 5'(j))}} &amp; gpr_out[j][31:0]);</span></span>
-<span id="L71"><span class="lineNum">      71</span>                 :<span class="tlaGNC">          31 :          rd1[31:0] |= ({32{(raddr1[4:0]== 5'(j))}} &amp; gpr_out[j][31:0]);</span></span>
-<span id="L72"><span class="lineNum">      72</span>                 :             :       end</span>
-<span id="L73"><span class="lineNum">      73</span>                 :             : </span>
-<span id="L74"><span class="lineNum">      74</span>                 :             :      // GPR Write logic</span>
-<span id="L75"><span class="lineNum">      75</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 31 times"> + </span>]:<span class="tlaGNC">          31 :      for (int j=1; j&lt;32; j++ )  begin</span></span>
-<span id="L76"><span class="lineNum">      76</span>                 :<span class="tlaGNC">          31 :          w0v[j]     = wen0  &amp; (waddr0[4:0]== 5'(j) );</span></span>
-<span id="L77"><span class="lineNum">      77</span>                 :<span class="tlaGNC">          31 :          w1v[j]     = wen1  &amp; (waddr1[4:0]== 5'(j) );</span></span>
-<span id="L78"><span class="lineNum">      78</span>                 :<span class="tlaGNC">          31 :          w2v[j]     = wen2  &amp; (waddr2[4:0]== 5'(j) );</span></span>
-<span id="L79"><span class="lineNum">      79</span>                 :<span class="tlaGNC">          31 :          gpr_in[j]  =    ({32{w0v[j]}} &amp; wd0[31:0]) |</span></span>
-<span id="L80"><span class="lineNum">      80</span>                 :<span class="tlaGNC">          31 :                          ({32{w1v[j]}} &amp; wd1[31:0]) |</span></span>
-<span id="L81"><span class="lineNum">      81</span>                 :<span class="tlaGNC">          31 :                          ({32{w2v[j]}} &amp; wd2[31:0]);</span></span>
-<span id="L82"><span class="lineNum">      82</span>                 :             :      end</span>
-<span id="L83"><span class="lineNum">      83</span>                 :             :    end // always_comb begin</span>
-<span id="L84"><span class="lineNum">      84</span>                 :             : </span>
-<span id="L85"><span class="lineNum">      85</span>                 :             : `ifdef RV_ASSERT_ON</span>
-<span id="L86"><span class="lineNum">      86</span>                 :             : </span>
-<span id="L87"><span class="lineNum">      87</span>                 :             :    logic  write_collision_unused;</span>
-<span id="L88"><span class="lineNum">      88</span>                 :             :    assign write_collision_unused = ( (w0v[31:1] == w1v[31:1]) &amp; wen0 &amp; wen1 ) |</span>
-<span id="L89"><span class="lineNum">      89</span>                 :             :                                    ( (w0v[31:1] == w2v[31:1]) &amp; wen0 &amp; wen2 ) |</span>
-<span id="L90"><span class="lineNum">      90</span>                 :             :                                    ( (w1v[31:1] == w2v[31:1]) &amp; wen1 &amp; wen2 );</span>
-<span id="L91"><span class="lineNum">      91</span>                 :             : </span>
-<span id="L92"><span class="lineNum">      92</span>                 :             : </span>
-<span id="L93"><span class="lineNum">      93</span>                 :             :    // asserting that no 2 ports will write to the same gpr simultaneously</span>
-<span id="L94"><span class="lineNum">      94</span>                 :             :    assert_multiple_wen_to_same_gpr: assert #0 (~( write_collision_unused ) );</span>
-<span id="L95"><span class="lineNum">      95</span>                 :             : </span>
-<span id="L96"><span class="lineNum">      96</span>                 :             : `endif</span>
-<span id="L97"><span class="lineNum">      97</span>                 :             : </span>
-<span id="L98"><span class="lineNum">      98</span>                 :             : endmodule</span>
+<span id="L1"><span class="lineNum">       1</span>              : // SPDX-License-Identifier: Apache-2.0</span>
+<span id="L2"><span class="lineNum">       2</span>              : // Copyright 2020 Western Digital Corporation or its affiliates.</span>
+<span id="L3"><span class="lineNum">       3</span>              : //</span>
+<span id="L4"><span class="lineNum">       4</span>              : // Licensed under the Apache License, Version 2.0 (the "License");</span>
+<span id="L5"><span class="lineNum">       5</span>              : // you may not use this file except in compliance with the License.</span>
+<span id="L6"><span class="lineNum">       6</span>              : // You may obtain a copy of the License at</span>
+<span id="L7"><span class="lineNum">       7</span>              : //</span>
+<span id="L8"><span class="lineNum">       8</span>              : // http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L9"><span class="lineNum">       9</span>              : //</span>
+<span id="L10"><span class="lineNum">      10</span>              : // Unless required by applicable law or agreed to in writing, software</span>
+<span id="L11"><span class="lineNum">      11</span>              : // distributed under the License is distributed on an "AS IS" BASIS,</span>
+<span id="L12"><span class="lineNum">      12</span>              : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L13"><span class="lineNum">      13</span>              : // See the License for the specific language governing permissions and</span>
+<span id="L14"><span class="lineNum">      14</span>              : // limitations under the License.</span>
+<span id="L15"><span class="lineNum">      15</span>              : </span>
+<span id="L16"><span class="lineNum">      16</span>              : module el2_dec_gpr_ctl</span>
+<span id="L17"><span class="lineNum">      17</span>              : import el2_pkg::*;</span>
+<span id="L18"><span class="lineNum">      18</span>              : #(</span>
+<span id="L19"><span class="lineNum">      19</span>              :    `include "el2_param.vh"</span>
+<span id="L20"><span class="lineNum">      20</span>              :  )  (</span>
+<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC tlaBgGNC">         394 :     input logic [4:0]  raddr0,       // logical read addresses</span></span>
+<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">         384 :     input logic [4:0]  raddr1,</span></span>
+<span id="L23"><span class="lineNum">      23</span>              : </span>
+<span id="L24"><span class="lineNum">      24</span> <span class="tlaGNC">         394 :     input logic        wen0,         // write enable</span></span>
+<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">         494 :     input logic [4:0]  waddr0,       // write address</span></span>
+<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC">         169 :     input logic [31:0] wd0,          // write data</span></span>
+<span id="L27"><span class="lineNum">      27</span>              : </span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">          92 :     input logic        wen1,         // write enable</span></span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">          74 :     input logic [4:0]  waddr1,       // write address</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">          52 :     input logic [31:0] wd1,          // write data</span></span>
+<span id="L31"><span class="lineNum">      31</span>              : </span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaUNC tlaBgUNC">           0 :     input logic        wen2,         // write enable</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaUNC">           0 :     input logic [4:0]  waddr2,       // write address</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaUNC">           0 :     input logic [31:0] wd2,          // write data</span></span>
+<span id="L35"><span class="lineNum">      35</span>              : </span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC tlaBgGNC">     5004186 :     input logic        clk,</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">           1 :     input logic        rst_l,</span></span>
+<span id="L38"><span class="lineNum">      38</span>              : </span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">         336 :     output logic [31:0] rd0,         // read data</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">         386 :     output logic [31:0] rd1,</span></span>
+<span id="L41"><span class="lineNum">      41</span>              : </span>
+<span id="L42"><span class="lineNum">      42</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
+<span id="L43"><span class="lineNum">      43</span>              :    /*pragma coverage off*/</span>
+<span id="L44"><span class="lineNum">      44</span>              :     input  logic        scan_mode</span>
+<span id="L45"><span class="lineNum">      45</span>              :    /*pragma coverage on*/</span>
+<span id="L46"><span class="lineNum">      46</span>              : );</span>
+<span id="L47"><span class="lineNum">      47</span>              : </span>
+<span id="L48"><span class="lineNum">      48</span>              :    logic [31:1] [31:0] gpr_out;      // 31 x 32 bit GPRs</span>
+<span id="L49"><span class="lineNum">      49</span>              :    logic [31:1] [31:0] gpr_in;</span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">          86 :    logic [31:1] w0v,w1v,w2v;</span></span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">          90 :    logic [31:1] gpr_wr_en;</span></span>
+<span id="L52"><span class="lineNum">      52</span>              : </span>
+<span id="L53"><span class="lineNum">      53</span>              :    // GPR Write Enables</span>
+<span id="L54"><span class="lineNum">      54</span>              :    assign gpr_wr_en[31:1] = (w0v[31:1] | w1v[31:1] | w2v[31:1]);</span>
+<span id="L55"><span class="lineNum">      55</span>              :    for ( genvar j=1; j&lt;32; j++ )  begin : gpr</span>
+<span id="L56"><span class="lineNum">      56</span>              :       rvdffe #(32) gprff (.*, .en(gpr_wr_en[j]), .din(gpr_in[j][31:0]), .dout(gpr_out[j][31:0]));</span>
+<span id="L57"><span class="lineNum">      57</span>              :    end : gpr</span>
+<span id="L58"><span class="lineNum">      58</span>              : </span>
+<span id="L59"><span class="lineNum">      59</span>              :    // the read out</span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">           1 :    always_comb begin</span></span>
+<span id="L61"><span class="lineNum">      61</span> <span class="tlaGNC">           1 :       rd0[31:0] = 32'b0;</span></span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">           1 :       rd1[31:0] = 32'b0;</span></span>
+<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">           1 :       w0v[31:1] = 31'b0;</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">           1 :       w1v[31:1] = 31'b0;</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">           1 :       w2v[31:1] = 31'b0;</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">           1 :       gpr_in[31:1] = '0;</span></span>
+<span id="L67"><span class="lineNum">      67</span>              : </span>
+<span id="L68"><span class="lineNum">      68</span>              :       // GPR Read logic</span>
+<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC">          31 :       for (int j=1; j&lt;32; j++ )  begin</span></span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC">          31 :          rd0[31:0] |= ({32{(raddr0[4:0]== 5'(j))}} &amp; gpr_out[j][31:0]);</span></span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">          31 :          rd1[31:0] |= ({32{(raddr1[4:0]== 5'(j))}} &amp; gpr_out[j][31:0]);</span></span>
+<span id="L72"><span class="lineNum">      72</span>              :       end</span>
+<span id="L73"><span class="lineNum">      73</span>              : </span>
+<span id="L74"><span class="lineNum">      74</span>              :      // GPR Write logic</span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">          31 :      for (int j=1; j&lt;32; j++ )  begin</span></span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">          31 :          w0v[j]     = wen0  &amp; (waddr0[4:0]== 5'(j) );</span></span>
+<span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC">          31 :          w1v[j]     = wen1  &amp; (waddr1[4:0]== 5'(j) );</span></span>
+<span id="L78"><span class="lineNum">      78</span> <span class="tlaGNC">          31 :          w2v[j]     = wen2  &amp; (waddr2[4:0]== 5'(j) );</span></span>
+<span id="L79"><span class="lineNum">      79</span> <span class="tlaGNC">          31 :          gpr_in[j]  =    ({32{w0v[j]}} &amp; wd0[31:0]) |</span></span>
+<span id="L80"><span class="lineNum">      80</span> <span class="tlaGNC">          31 :                          ({32{w1v[j]}} &amp; wd1[31:0]) |</span></span>
+<span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC">          31 :                          ({32{w2v[j]}} &amp; wd2[31:0]);</span></span>
+<span id="L82"><span class="lineNum">      82</span>              :      end</span>
+<span id="L83"><span class="lineNum">      83</span>              :    end // always_comb begin</span>
+<span id="L84"><span class="lineNum">      84</span>              : </span>
+<span id="L85"><span class="lineNum">      85</span>              : `ifdef RV_ASSERT_ON</span>
+<span id="L86"><span class="lineNum">      86</span>              : </span>
+<span id="L87"><span class="lineNum">      87</span>              :    logic  write_collision_unused;</span>
+<span id="L88"><span class="lineNum">      88</span>              :    assign write_collision_unused = ( (w0v[31:1] == w1v[31:1]) &amp; wen0 &amp; wen1 ) |</span>
+<span id="L89"><span class="lineNum">      89</span>              :                                    ( (w0v[31:1] == w2v[31:1]) &amp; wen0 &amp; wen2 ) |</span>
+<span id="L90"><span class="lineNum">      90</span>              :                                    ( (w1v[31:1] == w2v[31:1]) &amp; wen1 &amp; wen2 );</span>
+<span id="L91"><span class="lineNum">      91</span>              : </span>
+<span id="L92"><span class="lineNum">      92</span>              : </span>
+<span id="L93"><span class="lineNum">      93</span>              :    // asserting that no 2 ports will write to the same gpr simultaneously</span>
+<span id="L94"><span class="lineNum">      94</span>              :    assert_multiple_wen_to_same_gpr: assert #0 (~( write_collision_unused ) );</span>
+<span id="L95"><span class="lineNum">      95</span>              : </span>
+<span id="L96"><span class="lineNum">      96</span>              : `endif</span>
+<span id="L97"><span class="lineNum">      97</span>              : </span>
+<span id="L98"><span class="lineNum">      98</span>              : endmodule</span>
         </pre>
 </td>
 </tr>

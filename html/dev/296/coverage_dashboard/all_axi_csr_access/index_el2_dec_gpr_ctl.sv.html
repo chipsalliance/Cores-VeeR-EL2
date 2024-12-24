@@ -83,18 +83,12 @@
         100.0%
     </td>
     <td class="headerCovSummaryEntry">
-        4
+        17
     </td>
     <td class="headerCovSummaryEntry">
-        4
+        17
     </td>
 
-            </tr>
-            <tr>
-              <td></td>
-              <td></td>
-              <td></td>
-              
             </tr>
             
         </table>
@@ -106,165 +100,106 @@
 </tr>
 <tr>
 <td>
-<pre class="sourceHeading">             Branch data     Line data    Source code</pre>
+<pre class="sourceHeading">            Line data    Source code</pre>
 <pre class="source">
-<span id="L1"><span class="lineNum">       1</span>                 :             : // SPDX-License-Identifier: Apache-2.0</span>
-<span id="L2"><span class="lineNum">       2</span>                 :             : // Copyright 2020 Western Digital Corporation or its affiliates.</span>
-<span id="L3"><span class="lineNum">       3</span>                 :             : //</span>
-<span id="L4"><span class="lineNum">       4</span>                 :             : // Licensed under the Apache License, Version 2.0 (the "License");</span>
-<span id="L5"><span class="lineNum">       5</span>                 :             : // you may not use this file except in compliance with the License.</span>
-<span id="L6"><span class="lineNum">       6</span>                 :             : // You may obtain a copy of the License at</span>
-<span id="L7"><span class="lineNum">       7</span>                 :             : //</span>
-<span id="L8"><span class="lineNum">       8</span>                 :             : // http://www.apache.org/licenses/LICENSE-2.0</span>
-<span id="L9"><span class="lineNum">       9</span>                 :             : //</span>
-<span id="L10"><span class="lineNum">      10</span>                 :             : // Unless required by applicable law or agreed to in writing, software</span>
-<span id="L11"><span class="lineNum">      11</span>                 :             : // distributed under the License is distributed on an "AS IS" BASIS,</span>
-<span id="L12"><span class="lineNum">      12</span>                 :             : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
-<span id="L13"><span class="lineNum">      13</span>                 :             : // See the License for the specific language governing permissions and</span>
-<span id="L14"><span class="lineNum">      14</span>                 :             : // limitations under the License.</span>
-<span id="L15"><span class="lineNum">      15</span>                 :             : </span>
-<span id="L16"><span class="lineNum">      16</span>                 :             : module el2_dec_gpr_ctl</span>
-<span id="L17"><span class="lineNum">      17</span>                 :             : import el2_pkg::*;</span>
-<span id="L18"><span class="lineNum">      18</span>                 :             : #(</span>
-<span id="L19"><span class="lineNum">      19</span>                 :             :    `include "el2_param.vh"</span>
-<span id="L20"><span class="lineNum">      20</span>                 :             :  )  (</span>
-<span id="L21"><span class="lineNum">      21</span>   [<span class="tlaGBC" title="Branch 0 was taken 185844 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 284330 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 179686 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 307214 times"> + </span> :<span class="tlaGNC tlaBgGNC">      307214 :     input logic [4:0]  raddr0,       // logical read addresses</span></span>
-<span class="lineNum">        </span>             <span class="tlaGBC" title="Branch 4 was taken 163026 times"> + </span>]
-<span id="L22"><span class="lineNum">      22</span>   [<span class="tlaGBC" title="Branch 0 was taken 213874 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 199920 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 196196 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 241072 times"> + </span> :<span class="tlaGNC">      241072 :     input logic [4:0]  raddr1,</span></span>
-<span class="lineNum">        </span>             <span class="tlaGBC" title="Branch 4 was taken 150788 times"> + </span>]
-<span id="L23"><span class="lineNum">      23</span>                 :             : </span>
-<span id="L24"><span class="lineNum">      24</span>                 :<span class="tlaGNC">      293076 :     input logic        wen0,         // write enable</span></span>
-<span id="L25"><span class="lineNum">      25</span>   [<span class="tlaGBC" title="Branch 0 was taken 210570 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 296136 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 261298 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 355444 times"> + </span> :<span class="tlaGNC">      355444 :     input logic [4:0]  waddr0,       // write address</span></span>
-<span class="lineNum">        </span>             <span class="tlaGBC" title="Branch 4 was taken 142556 times"> + </span>]
-<span id="L26"><span class="lineNum">      26</span>   [<span class="tlaGBC" title="Branch 0 was taken 62756 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 35464 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 29154 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 25232 times"> + </span> :<span class="tlaGNC">       83711 :     input logic [31:0] wd0,          // write data</span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 73438 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 5024 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 7916 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 7694 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 3638 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 4072 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 19949 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 65718 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 19627 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 4198 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 19057 times"> + </span><span class="tlaGBC" title="Branch 15 was taken 3150 times"> + </span><span class="tlaGBC" title="Branch 16 was taken 2822 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 3150 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 3146 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 5766 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 22515 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 4742 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 73316 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 20845 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 83711 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 64910 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 78452 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 76396 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 67170 times"> + </span> 
-<span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 61472 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 27136 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 52122 times"> + </span>]
-<span id="L27"><span class="lineNum">      27</span>                 :             : </span>
-<span id="L28"><span class="lineNum">      28</span>                 :<span class="tlaGNC">       46880 :     input logic        wen1,         // write enable</span></span>
-<span id="L29"><span class="lineNum">      29</span>   [<span class="tlaGBC" title="Branch 0 was taken 17154 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 34018 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 16426 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 39400 times"> + </span> :<span class="tlaGNC">       39400 :     input logic [4:0]  waddr1,       // write address</span></span>
-<span class="lineNum">        </span>             <span class="tlaGBC" title="Branch 4 was taken 21470 times"> + </span>]
-<span id="L30"><span class="lineNum">      30</span>   [<span class="tlaGBC" title="Branch 0 was taken 17860 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 5254 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 5646 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 3156 times"> + </span> :<span class="tlaGNC">       26542 :     input logic [31:0] wd1,          // write data</span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 9448 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 678 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 1298 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 1298 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 678 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 1298 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 1300 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 13400 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 684 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 1298 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 684 times"> + </span><span class="tlaGBC" title="Branch 15 was taken 1298 times"> + </span><span class="tlaGBC" title="Branch 16 was taken 678 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 1298 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 1298 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 1298 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 1300 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 678 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 18096 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 1300 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 13858 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 15378 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 18306 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 26542 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 22304 times"> + </span> 
-<span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 7890 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 6406 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 5604 times"> + </span>]
-<span id="L31"><span class="lineNum">      31</span>                 :             : </span>
-<span id="L32"><span class="lineNum">      32</span>                 :<span class="tlaGNC">       10688 :     input logic        wen2,         // write enable</span></span>
-<span id="L33"><span class="lineNum">      33</span>   [<span class="tlaGBC" title="Branch 0 was taken 2673 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 1337 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 3 was taken 1 time"> + </span> :<span class="tlaGNC">        2673 :     input logic [4:0]  waddr2,       // write address</span></span>
-<span class="lineNum">        </span>             <span class="tlaUNC" title="Branch 4 was not taken"> - </span>]
-<span id="L34"><span class="lineNum">      34</span>   [<span class="tlaGBC" title="Branch 0 was taken 1632 times"> + </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaGBC" title="Branch 2 was taken 1048 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 1412 times"> + </span> :<span class="tlaGNC">        1632 :     input logic [31:0] wd2,          // write data</span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 768 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 748 times"> + </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaGBC" title="Branch 11 was taken 1336 times"> + </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 14 was not taken"> - </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaUNC" title="Branch 16 was not taken"> - </span><span class="tlaUNC" title="Branch 17 was not taken"> - </span><span class="tlaUNC" title="Branch 18 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaUNC" title="Branch 20 was not taken"> - </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaGBC" title="Branch 22 was taken 1144 times"> + </span><span class="tlaUNC" title="Branch 23 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 24 was not taken"> - </span><span class="tlaGBC" title="Branch 25 was taken 1248 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 1280 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 896 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 520 times"> + </span> 
-<span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 264 times"> + </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span>]
-<span id="L35"><span class="lineNum">      35</span>                 :             : </span>
-<span id="L36"><span class="lineNum">      36</span>                 :<span class="tlaGNC">     3357856 :     input logic        clk,</span></span>
-<span id="L37"><span class="lineNum">      37</span>                 :<span class="tlaGNC">           1 :     input logic        rst_l,</span></span>
-<span id="L38"><span class="lineNum">      38</span>                 :             : </span>
-<span id="L39"><span class="lineNum">      39</span>   [<span class="tlaGBC" title="Branch 0 was taken 95572 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 69664 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 48582 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 57042 times"> + </span> :<span class="tlaGNC">      179450 :     output logic [31:0] rd0,         // read data</span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 114050 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 5868 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 6442 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 5646 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 3944 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 4714 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 20916 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 115174 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 20438 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 3470 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 18932 times"> + </span><span class="tlaGBC" title="Branch 15 was taken 2282 times"> + </span><span class="tlaGBC" title="Branch 16 was taken 1802 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 2282 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 2282 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 6998 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 24710 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 5258 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 94154 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 21724 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 179450 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 148280 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 151536 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 174038 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 163046 times"> + </span> 
-<span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 71080 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 64314 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 66888 times"> + </span>]
-<span id="L40"><span class="lineNum">      40</span>   [<span class="tlaGBC" title="Branch 0 was taken 108932 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 44930 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 64420 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 22722 times"> + </span> :<span class="tlaGNC">      166986 :     output logic [31:0] rd1,</span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 70342 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 3750 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 15474 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 7850 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 4018 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 5086 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 5250 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 138836 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 4218 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 4904 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 4028 times"> + </span><span class="tlaGBC" title="Branch 15 was taken 4776 times"> + </span><span class="tlaGBC" title="Branch 16 was taken 3742 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 4776 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 4774 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 5938 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 6598 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 4382 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 140408 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 5564 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 134718 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 133380 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 123736 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 166986 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 124246 times"> + </span> 
-<span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 79630 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 44278 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 62226 times"> + </span>]
-<span id="L41"><span class="lineNum">      41</span>                 :             : </span>
-<span id="L42"><span class="lineNum">      42</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L43"><span class="lineNum">      43</span>                 :             :    /*pragma coverage off*/</span>
-<span id="L44"><span class="lineNum">      44</span>                 :             :     input  logic        scan_mode</span>
-<span id="L45"><span class="lineNum">      45</span>                 :             :    /*pragma coverage on*/</span>
-<span id="L46"><span class="lineNum">      46</span>                 :             : );</span>
-<span id="L47"><span class="lineNum">      47</span>                 :             : </span>
-<span id="L48"><span class="lineNum">      48</span>                 :             :    logic [31:1] [31:0] gpr_out;      // 31 x 32 bit GPRs</span>
-<span id="L49"><span class="lineNum">      49</span>                 :             :    logic [31:1] [31:0] gpr_in;</span>
-<span id="L50"><span class="lineNum">      50</span>   [<span class="tlaGBC" title="Branch 0 was taken 32652 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 43564 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 21648 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 30240 times"> + </span> :<span class="tlaGNC">       55304 :    logic [31:1] w0v,w1v,w2v;</span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 55304 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 26794 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 6680 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 9352 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 7344 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 2516 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 21362 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 2008 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 1174 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 4012 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 12290 times"> + </span><span class="tlaGBC" title="Branch 15 was taken 2508 times"> + </span><span class="tlaGBC" title="Branch 16 was taken 3498 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 1174 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 12416 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 1336 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 1336 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 9086 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 1336 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 1336 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 24 was not taken"> - </span><span class="tlaUNC" title="Branch 25 was not taken"> - </span><span class="tlaGBC" title="Branch 26 was taken 3422 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 10680 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 1336 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 29 was taken 15388 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 7682 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 7924 times"> + </span><span class="tlaGBC" title="Branch 32 was taken 578 times"> + </span><span class="tlaGBC" title="Branch 33 was taken 180 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 34 was taken 4020 times"> + </span><span class="tlaGBC" title="Branch 35 was taken 5862 times"> + </span><span class="tlaGBC" title="Branch 36 was taken 2500 times"> + </span><span class="tlaGBC" title="Branch 37 was taken 164 times"> + </span><span class="tlaGBC" title="Branch 38 was taken 164 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 39 was taken 1194 times"> + </span><span class="tlaGBC" title="Branch 40 was taken 1172 times"> + </span><span class="tlaGBC" title="Branch 41 was taken 2022 times"> + </span><span class="tlaGBC" title="Branch 42 was taken 1672 times"> + </span><span class="tlaGBC" title="Branch 43 was taken 1172 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 44 was taken 1172 times"> + </span><span class="tlaGBC" title="Branch 45 was taken 1172 times"> + </span><span class="tlaGBC" title="Branch 46 was taken 2004 times"> + </span><span class="tlaGBC" title="Branch 47 was taken 1172 times"> + </span><span class="tlaGBC" title="Branch 48 was taken 12776 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 49 was taken 504 times"> + </span><span class="tlaGBC" title="Branch 50 was taken 164 times"> + </span><span class="tlaGBC" title="Branch 51 was taken 164 times"> + </span><span class="tlaUNC" title="Branch 52 was not taken"> - </span><span class="tlaGBC" title="Branch 53 was taken 164 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 54 was taken 164 times"> + </span><span class="tlaUNC" title="Branch 55 was not taken"> - </span><span class="tlaUNC" title="Branch 56 was not taken"> - </span><span class="tlaGBC" title="Branch 57 was taken 164 times"> + </span><span class="tlaGBC" title="Branch 58 was taken 164 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 59 was taken 164 times"> + </span><span class="tlaGBC" title="Branch 60 was taken 1358 times"> + </span><span class="tlaGBC" title="Branch 61 was taken 1358 times"> + </span><span class="tlaUNC" title="Branch 62 was not taken"> - </span><span class="tlaUNC" title="Branch 63 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 64 was not taken"> - </span><span class="tlaGBC" title="Branch 65 was taken 2672 times"> + </span><span class="tlaGBC" title="Branch 66 was taken 4008 times"> + </span><span class="tlaGBC" title="Branch 67 was taken 4008 times"> + </span><span class="tlaUNC" title="Branch 68 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 69 was not taken"> - </span><span class="tlaUNC" title="Branch 70 was not taken"> - </span><span class="tlaUNC" title="Branch 71 was not taken"> - </span><span class="tlaUNC" title="Branch 72 was not taken"> - </span><span class="tlaUNC" title="Branch 73 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 74 was not taken"> - </span><span class="tlaUNC" title="Branch 75 was not taken"> - </span><span class="tlaUNC" title="Branch 76 was not taken"> - </span><span class="tlaUNC" title="Branch 77 was not taken"> - </span><span class="tlaUNC" title="Branch 78 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 79 was not taken"> - </span><span class="tlaUNC" title="Branch 80 was not taken"> - </span><span class="tlaUNC" title="Branch 81 was not taken"> - </span><span class="tlaUNC" title="Branch 82 was not taken"> - </span><span class="tlaUNC" title="Branch 83 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 84 was not taken"> - </span><span class="tlaUNC" title="Branch 85 was not taken"> - </span><span class="tlaUNC" title="Branch 86 was not taken"> - </span><span class="tlaUNC" title="Branch 87 was not taken"> - </span><span class="tlaUNC" title="Branch 88 was not taken"> - </span> 
-<span class="lineNum">        </span>    <span class="tlaUNC" title="Branch 89 was not taken"> - </span><span class="tlaUNC" title="Branch 90 was not taken"> - </span><span class="tlaUNC" title="Branch 91 was not taken"> - </span><span class="tlaUNC" title="Branch 92 was not taken"> - </span>]
-<span id="L51"><span class="lineNum">      51</span>   [<span class="tlaGBC" title="Branch 0 was taken 40576 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 44142 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 21828 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 36932 times"> + </span> :<span class="tlaGNC">       65174 :    logic [31:1] gpr_wr_en;</span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 65174 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 33302 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 6844 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 9516 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 8538 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 3688 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 23384 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 3680 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 2346 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 5184 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 13462 times"> + </span><span class="tlaGBC" title="Branch 15 was taken 4512 times"> + </span><span class="tlaGBC" title="Branch 16 was taken 4670 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 13950 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 12920 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 1500 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 1500 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 9086 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 1500 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 1500 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 24 was not taken"> - </span><span class="tlaUNC" title="Branch 25 was not taken"> - </span><span class="tlaGBC" title="Branch 26 was taken 3586 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 10844 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 1500 times"> + </span> 
-<span class="lineNum">        </span>          <span class="tlaGBC" title="Branch 29 was taken 16746 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 9040 times"> + </span>]
-<span id="L52"><span class="lineNum">      52</span>                 :             : </span>
-<span id="L53"><span class="lineNum">      53</span>                 :             :    // GPR Write Enables</span>
-<span id="L54"><span class="lineNum">      54</span>                 :             :    assign gpr_wr_en[31:1] = (w0v[31:1] | w1v[31:1] | w2v[31:1]);</span>
-<span id="L55"><span class="lineNum">      55</span>                 :             :    for ( genvar j=1; j&lt;32; j++ )  begin : gpr</span>
-<span id="L56"><span class="lineNum">      56</span>                 :             :       rvdffe #(32) gprff (.*, .en(gpr_wr_en[j]), .din(gpr_in[j][31:0]), .dout(gpr_out[j][31:0]));</span>
-<span id="L57"><span class="lineNum">      57</span>                 :             :    end : gpr</span>
-<span id="L58"><span class="lineNum">      58</span>                 :             : </span>
-<span id="L59"><span class="lineNum">      59</span>                 :             :    // the read out</span>
-<span id="L60"><span class="lineNum">      60</span>                 :<span class="tlaGNC">           1 :    always_comb begin</span></span>
-<span id="L61"><span class="lineNum">      61</span>                 :<span class="tlaGNC">           1 :       rd0[31:0] = 32'b0;</span></span>
-<span id="L62"><span class="lineNum">      62</span>                 :<span class="tlaGNC">           1 :       rd1[31:0] = 32'b0;</span></span>
-<span id="L63"><span class="lineNum">      63</span>                 :<span class="tlaGNC">           1 :       w0v[31:1] = 31'b0;</span></span>
-<span id="L64"><span class="lineNum">      64</span>                 :<span class="tlaGNC">           1 :       w1v[31:1] = 31'b0;</span></span>
-<span id="L65"><span class="lineNum">      65</span>                 :<span class="tlaGNC">           1 :       w2v[31:1] = 31'b0;</span></span>
-<span id="L66"><span class="lineNum">      66</span>                 :<span class="tlaGNC">           1 :       gpr_in[31:1] = '0;</span></span>
-<span id="L67"><span class="lineNum">      67</span>                 :             : </span>
-<span id="L68"><span class="lineNum">      68</span>                 :             :       // GPR Read logic</span>
-<span id="L69"><span class="lineNum">      69</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 31 times"> + </span>]:<span class="tlaGNC">          31 :       for (int j=1; j&lt;32; j++ )  begin</span></span>
-<span id="L70"><span class="lineNum">      70</span>                 :<span class="tlaGNC">          31 :          rd0[31:0] |= ({32{(raddr0[4:0]== 5'(j))}} &amp; gpr_out[j][31:0]);</span></span>
-<span id="L71"><span class="lineNum">      71</span>                 :<span class="tlaGNC">          31 :          rd1[31:0] |= ({32{(raddr1[4:0]== 5'(j))}} &amp; gpr_out[j][31:0]);</span></span>
-<span id="L72"><span class="lineNum">      72</span>                 :             :       end</span>
-<span id="L73"><span class="lineNum">      73</span>                 :             : </span>
-<span id="L74"><span class="lineNum">      74</span>                 :             :      // GPR Write logic</span>
-<span id="L75"><span class="lineNum">      75</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 31 times"> + </span>]:<span class="tlaGNC">          31 :      for (int j=1; j&lt;32; j++ )  begin</span></span>
-<span id="L76"><span class="lineNum">      76</span>                 :<span class="tlaGNC">          31 :          w0v[j]     = wen0  &amp; (waddr0[4:0]== 5'(j) );</span></span>
-<span id="L77"><span class="lineNum">      77</span>                 :<span class="tlaGNC">          31 :          w1v[j]     = wen1  &amp; (waddr1[4:0]== 5'(j) );</span></span>
-<span id="L78"><span class="lineNum">      78</span>                 :<span class="tlaGNC">          31 :          w2v[j]     = wen2  &amp; (waddr2[4:0]== 5'(j) );</span></span>
-<span id="L79"><span class="lineNum">      79</span>                 :<span class="tlaGNC">          31 :          gpr_in[j]  =    ({32{w0v[j]}} &amp; wd0[31:0]) |</span></span>
-<span id="L80"><span class="lineNum">      80</span>                 :<span class="tlaGNC">          31 :                          ({32{w1v[j]}} &amp; wd1[31:0]) |</span></span>
-<span id="L81"><span class="lineNum">      81</span>                 :<span class="tlaGNC">          31 :                          ({32{w2v[j]}} &amp; wd2[31:0]);</span></span>
-<span id="L82"><span class="lineNum">      82</span>                 :             :      end</span>
-<span id="L83"><span class="lineNum">      83</span>                 :             :    end // always_comb begin</span>
-<span id="L84"><span class="lineNum">      84</span>                 :             : </span>
-<span id="L85"><span class="lineNum">      85</span>                 :             : `ifdef RV_ASSERT_ON</span>
-<span id="L86"><span class="lineNum">      86</span>                 :             : </span>
-<span id="L87"><span class="lineNum">      87</span>                 :             :    logic  write_collision_unused;</span>
-<span id="L88"><span class="lineNum">      88</span>                 :             :    assign write_collision_unused = ( (w0v[31:1] == w1v[31:1]) &amp; wen0 &amp; wen1 ) |</span>
-<span id="L89"><span class="lineNum">      89</span>                 :             :                                    ( (w0v[31:1] == w2v[31:1]) &amp; wen0 &amp; wen2 ) |</span>
-<span id="L90"><span class="lineNum">      90</span>                 :             :                                    ( (w1v[31:1] == w2v[31:1]) &amp; wen1 &amp; wen2 );</span>
-<span id="L91"><span class="lineNum">      91</span>                 :             : </span>
-<span id="L92"><span class="lineNum">      92</span>                 :             : </span>
-<span id="L93"><span class="lineNum">      93</span>                 :             :    // asserting that no 2 ports will write to the same gpr simultaneously</span>
-<span id="L94"><span class="lineNum">      94</span>                 :             :    assert_multiple_wen_to_same_gpr: assert #0 (~( write_collision_unused ) );</span>
-<span id="L95"><span class="lineNum">      95</span>                 :             : </span>
-<span id="L96"><span class="lineNum">      96</span>                 :             : `endif</span>
-<span id="L97"><span class="lineNum">      97</span>                 :             : </span>
-<span id="L98"><span class="lineNum">      98</span>                 :             : endmodule</span>
+<span id="L1"><span class="lineNum">       1</span>              : // SPDX-License-Identifier: Apache-2.0</span>
+<span id="L2"><span class="lineNum">       2</span>              : // Copyright 2020 Western Digital Corporation or its affiliates.</span>
+<span id="L3"><span class="lineNum">       3</span>              : //</span>
+<span id="L4"><span class="lineNum">       4</span>              : // Licensed under the Apache License, Version 2.0 (the "License");</span>
+<span id="L5"><span class="lineNum">       5</span>              : // you may not use this file except in compliance with the License.</span>
+<span id="L6"><span class="lineNum">       6</span>              : // You may obtain a copy of the License at</span>
+<span id="L7"><span class="lineNum">       7</span>              : //</span>
+<span id="L8"><span class="lineNum">       8</span>              : // http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L9"><span class="lineNum">       9</span>              : //</span>
+<span id="L10"><span class="lineNum">      10</span>              : // Unless required by applicable law or agreed to in writing, software</span>
+<span id="L11"><span class="lineNum">      11</span>              : // distributed under the License is distributed on an "AS IS" BASIS,</span>
+<span id="L12"><span class="lineNum">      12</span>              : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L13"><span class="lineNum">      13</span>              : // See the License for the specific language governing permissions and</span>
+<span id="L14"><span class="lineNum">      14</span>              : // limitations under the License.</span>
+<span id="L15"><span class="lineNum">      15</span>              : </span>
+<span id="L16"><span class="lineNum">      16</span>              : module el2_dec_gpr_ctl</span>
+<span id="L17"><span class="lineNum">      17</span>              : import el2_pkg::*;</span>
+<span id="L18"><span class="lineNum">      18</span>              : #(</span>
+<span id="L19"><span class="lineNum">      19</span>              :    `include "el2_param.vh"</span>
+<span id="L20"><span class="lineNum">      20</span>              :  )  (</span>
+<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC tlaBgGNC">      307214 :     input logic [4:0]  raddr0,       // logical read addresses</span></span>
+<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">      241072 :     input logic [4:0]  raddr1,</span></span>
+<span id="L23"><span class="lineNum">      23</span>              : </span>
+<span id="L24"><span class="lineNum">      24</span> <span class="tlaGNC">      293076 :     input logic        wen0,         // write enable</span></span>
+<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">      355444 :     input logic [4:0]  waddr0,       // write address</span></span>
+<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC">       83711 :     input logic [31:0] wd0,          // write data</span></span>
+<span id="L27"><span class="lineNum">      27</span>              : </span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">       46880 :     input logic        wen1,         // write enable</span></span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">       39400 :     input logic [4:0]  waddr1,       // write address</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">       26542 :     input logic [31:0] wd1,          // write data</span></span>
+<span id="L31"><span class="lineNum">      31</span>              : </span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">       10688 :     input logic        wen2,         // write enable</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">        2673 :     input logic [4:0]  waddr2,       // write address</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">        1632 :     input logic [31:0] wd2,          // write data</span></span>
+<span id="L35"><span class="lineNum">      35</span>              : </span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">     3357856 :     input logic        clk,</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">           1 :     input logic        rst_l,</span></span>
+<span id="L38"><span class="lineNum">      38</span>              : </span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">      179450 :     output logic [31:0] rd0,         // read data</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">      166986 :     output logic [31:0] rd1,</span></span>
+<span id="L41"><span class="lineNum">      41</span>              : </span>
+<span id="L42"><span class="lineNum">      42</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
+<span id="L43"><span class="lineNum">      43</span>              :    /*pragma coverage off*/</span>
+<span id="L44"><span class="lineNum">      44</span>              :     input  logic        scan_mode</span>
+<span id="L45"><span class="lineNum">      45</span>              :    /*pragma coverage on*/</span>
+<span id="L46"><span class="lineNum">      46</span>              : );</span>
+<span id="L47"><span class="lineNum">      47</span>              : </span>
+<span id="L48"><span class="lineNum">      48</span>              :    logic [31:1] [31:0] gpr_out;      // 31 x 32 bit GPRs</span>
+<span id="L49"><span class="lineNum">      49</span>              :    logic [31:1] [31:0] gpr_in;</span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">       55304 :    logic [31:1] w0v,w1v,w2v;</span></span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">       65174 :    logic [31:1] gpr_wr_en;</span></span>
+<span id="L52"><span class="lineNum">      52</span>              : </span>
+<span id="L53"><span class="lineNum">      53</span>              :    // GPR Write Enables</span>
+<span id="L54"><span class="lineNum">      54</span>              :    assign gpr_wr_en[31:1] = (w0v[31:1] | w1v[31:1] | w2v[31:1]);</span>
+<span id="L55"><span class="lineNum">      55</span>              :    for ( genvar j=1; j&lt;32; j++ )  begin : gpr</span>
+<span id="L56"><span class="lineNum">      56</span>              :       rvdffe #(32) gprff (.*, .en(gpr_wr_en[j]), .din(gpr_in[j][31:0]), .dout(gpr_out[j][31:0]));</span>
+<span id="L57"><span class="lineNum">      57</span>              :    end : gpr</span>
+<span id="L58"><span class="lineNum">      58</span>              : </span>
+<span id="L59"><span class="lineNum">      59</span>              :    // the read out</span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">           1 :    always_comb begin</span></span>
+<span id="L61"><span class="lineNum">      61</span> <span class="tlaGNC">           1 :       rd0[31:0] = 32'b0;</span></span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">           1 :       rd1[31:0] = 32'b0;</span></span>
+<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">           1 :       w0v[31:1] = 31'b0;</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">           1 :       w1v[31:1] = 31'b0;</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">           1 :       w2v[31:1] = 31'b0;</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">           1 :       gpr_in[31:1] = '0;</span></span>
+<span id="L67"><span class="lineNum">      67</span>              : </span>
+<span id="L68"><span class="lineNum">      68</span>              :       // GPR Read logic</span>
+<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC">          31 :       for (int j=1; j&lt;32; j++ )  begin</span></span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC">          31 :          rd0[31:0] |= ({32{(raddr0[4:0]== 5'(j))}} &amp; gpr_out[j][31:0]);</span></span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">          31 :          rd1[31:0] |= ({32{(raddr1[4:0]== 5'(j))}} &amp; gpr_out[j][31:0]);</span></span>
+<span id="L72"><span class="lineNum">      72</span>              :       end</span>
+<span id="L73"><span class="lineNum">      73</span>              : </span>
+<span id="L74"><span class="lineNum">      74</span>              :      // GPR Write logic</span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">          31 :      for (int j=1; j&lt;32; j++ )  begin</span></span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">          31 :          w0v[j]     = wen0  &amp; (waddr0[4:0]== 5'(j) );</span></span>
+<span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC">          31 :          w1v[j]     = wen1  &amp; (waddr1[4:0]== 5'(j) );</span></span>
+<span id="L78"><span class="lineNum">      78</span> <span class="tlaGNC">          31 :          w2v[j]     = wen2  &amp; (waddr2[4:0]== 5'(j) );</span></span>
+<span id="L79"><span class="lineNum">      79</span> <span class="tlaGNC">          31 :          gpr_in[j]  =    ({32{w0v[j]}} &amp; wd0[31:0]) |</span></span>
+<span id="L80"><span class="lineNum">      80</span> <span class="tlaGNC">          31 :                          ({32{w1v[j]}} &amp; wd1[31:0]) |</span></span>
+<span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC">          31 :                          ({32{w2v[j]}} &amp; wd2[31:0]);</span></span>
+<span id="L82"><span class="lineNum">      82</span>              :      end</span>
+<span id="L83"><span class="lineNum">      83</span>              :    end // always_comb begin</span>
+<span id="L84"><span class="lineNum">      84</span>              : </span>
+<span id="L85"><span class="lineNum">      85</span>              : `ifdef RV_ASSERT_ON</span>
+<span id="L86"><span class="lineNum">      86</span>              : </span>
+<span id="L87"><span class="lineNum">      87</span>              :    logic  write_collision_unused;</span>
+<span id="L88"><span class="lineNum">      88</span>              :    assign write_collision_unused = ( (w0v[31:1] == w1v[31:1]) &amp; wen0 &amp; wen1 ) |</span>
+<span id="L89"><span class="lineNum">      89</span>              :                                    ( (w0v[31:1] == w2v[31:1]) &amp; wen0 &amp; wen2 ) |</span>
+<span id="L90"><span class="lineNum">      90</span>              :                                    ( (w1v[31:1] == w2v[31:1]) &amp; wen1 &amp; wen2 );</span>
+<span id="L91"><span class="lineNum">      91</span>              : </span>
+<span id="L92"><span class="lineNum">      92</span>              : </span>
+<span id="L93"><span class="lineNum">      93</span>              :    // asserting that no 2 ports will write to the same gpr simultaneously</span>
+<span id="L94"><span class="lineNum">      94</span>              :    assert_multiple_wen_to_same_gpr: assert #0 (~( write_collision_unused ) );</span>
+<span id="L95"><span class="lineNum">      95</span>              : </span>
+<span id="L96"><span class="lineNum">      96</span>              : `endif</span>
+<span id="L97"><span class="lineNum">      97</span>              : </span>
+<span id="L98"><span class="lineNum">      98</span>              : endmodule</span>
         </pre>
 </td>
 </tr>

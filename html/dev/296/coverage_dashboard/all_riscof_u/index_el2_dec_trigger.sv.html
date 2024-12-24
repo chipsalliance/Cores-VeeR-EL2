@@ -90,12 +90,6 @@
     </td>
 
             </tr>
-            <tr>
-              <td></td>
-              <td></td>
-              <td></td>
-              
-            </tr>
             
         </table>
     </center>
@@ -106,118 +100,57 @@
 </tr>
 <tr>
 <td>
-<pre class="sourceHeading">             Branch data     Line data    Source code</pre>
+<pre class="sourceHeading">            Line data    Source code</pre>
 <pre class="source">
-<span id="L1"><span class="lineNum">       1</span>                 :             : // SPDX-License-Identifier: Apache-2.0</span>
-<span id="L2"><span class="lineNum">       2</span>                 :             : // Copyright 2020 Western Digital Corporation or its affiliates.</span>
-<span id="L3"><span class="lineNum">       3</span>                 :             : //</span>
-<span id="L4"><span class="lineNum">       4</span>                 :             : // Licensed under the Apache License, Version 2.0 (the "License");</span>
-<span id="L5"><span class="lineNum">       5</span>                 :             : // you may not use this file except in compliance with the License.</span>
-<span id="L6"><span class="lineNum">       6</span>                 :             : // You may obtain a copy of the License at</span>
-<span id="L7"><span class="lineNum">       7</span>                 :             : //</span>
-<span id="L8"><span class="lineNum">       8</span>                 :             : // http://www.apache.org/licenses/LICENSE-2.0</span>
-<span id="L9"><span class="lineNum">       9</span>                 :             : //</span>
-<span id="L10"><span class="lineNum">      10</span>                 :             : // Unless required by applicable law or agreed to in writing, software</span>
-<span id="L11"><span class="lineNum">      11</span>                 :             : // distributed under the License is distributed on an "AS IS" BASIS,</span>
-<span id="L12"><span class="lineNum">      12</span>                 :             : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
-<span id="L13"><span class="lineNum">      13</span>                 :             : // See the License for the specific language governing permissions and</span>
-<span id="L14"><span class="lineNum">      14</span>                 :             : // limitations under the License.</span>
-<span id="L15"><span class="lineNum">      15</span>                 :             : </span>
-<span id="L16"><span class="lineNum">      16</span>                 :             : //********************************************************************************</span>
-<span id="L17"><span class="lineNum">      17</span>                 :             : // $Id$</span>
-<span id="L18"><span class="lineNum">      18</span>                 :             : //</span>
-<span id="L19"><span class="lineNum">      19</span>                 :             : //</span>
-<span id="L20"><span class="lineNum">      20</span>                 :             : // Owner:</span>
-<span id="L21"><span class="lineNum">      21</span>                 :             : // Function: DEC Trigger Logic</span>
-<span id="L22"><span class="lineNum">      22</span>                 :             : // Comments:</span>
-<span id="L23"><span class="lineNum">      23</span>                 :             : //</span>
-<span id="L24"><span class="lineNum">      24</span>                 :             : //********************************************************************************</span>
-<span id="L25"><span class="lineNum">      25</span>                 :             : module el2_dec_trigger</span>
-<span id="L26"><span class="lineNum">      26</span>                 :             : import el2_pkg::*;</span>
-<span id="L27"><span class="lineNum">      27</span>                 :             : #(</span>
-<span id="L28"><span class="lineNum">      28</span>                 :             : `include "el2_param.vh"</span>
-<span id="L29"><span class="lineNum">      29</span>                 :             :  )(</span>
-<span id="L30"><span class="lineNum">      30</span>                 :             : </span>
-<span id="L31"><span class="lineNum">      31</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaUNC tlaBgUNC">           0 :    input el2_trigger_pkt_t [3:0] trigger_pkt_any,           // Packet from tlu. 'select':0-pc,1-Opcode  'Execute' needs to be set for dec triggers to fire. 'match'-1 do mask, 0: full match</span></span>
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaUNC" title="Branch 11 was not taken"> - </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 14 was not taken"> - </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaUNC" title="Branch 16 was not taken"> - </span><span class="tlaUNC" title="Branch 17 was not taken"> - </span><span class="tlaUNC" title="Branch 18 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaUNC" title="Branch 20 was not taken"> - </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaUNC" title="Branch 22 was not taken"> - </span><span class="tlaUNC" title="Branch 23 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 24 was not taken"> - </span><span class="tlaUNC" title="Branch 25 was not taken"> - </span><span class="tlaUNC" title="Branch 26 was not taken"> - </span><span class="tlaUNC" title="Branch 27 was not taken"> - </span><span class="tlaUNC" title="Branch 28 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 29 was not taken"> - </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span><span class="tlaUNC" title="Branch 32 was not taken"> - </span><span class="tlaUNC" title="Branch 33 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 34 was not taken"> - </span><span class="tlaUNC" title="Branch 35 was not taken"> - </span><span class="tlaUNC" title="Branch 36 was not taken"> - </span><span class="tlaUNC" title="Branch 37 was not taken"> - </span><span class="tlaUNC" title="Branch 38 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 39 was not taken"> - </span><span class="tlaUNC" title="Branch 40 was not taken"> - </span><span class="tlaUNC" title="Branch 41 was not taken"> - </span><span class="tlaUNC" title="Branch 42 was not taken"> - </span><span class="tlaUNC" title="Branch 43 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 44 was not taken"> - </span><span class="tlaUNC" title="Branch 45 was not taken"> - </span><span class="tlaUNC" title="Branch 46 was not taken"> - </span><span class="tlaUNC" title="Branch 47 was not taken"> - </span><span class="tlaUNC" title="Branch 48 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 49 was not taken"> - </span><span class="tlaUNC" title="Branch 50 was not taken"> - </span><span class="tlaUNC" title="Branch 51 was not taken"> - </span><span class="tlaUNC" title="Branch 52 was not taken"> - </span><span class="tlaUNC" title="Branch 53 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 54 was not taken"> - </span><span class="tlaUNC" title="Branch 55 was not taken"> - </span><span class="tlaUNC" title="Branch 56 was not taken"> - </span><span class="tlaUNC" title="Branch 57 was not taken"> - </span><span class="tlaUNC" title="Branch 58 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 59 was not taken"> - </span><span class="tlaUNC" title="Branch 60 was not taken"> - </span><span class="tlaUNC" title="Branch 61 was not taken"> - </span><span class="tlaUNC" title="Branch 62 was not taken"> - </span><span class="tlaUNC" title="Branch 63 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 64 was not taken"> - </span><span class="tlaUNC" title="Branch 65 was not taken"> - </span><span class="tlaUNC" title="Branch 66 was not taken"> - </span><span class="tlaUNC" title="Branch 67 was not taken"> - </span><span class="tlaUNC" title="Branch 68 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 69 was not taken"> - </span><span class="tlaUNC" title="Branch 70 was not taken"> - </span><span class="tlaUNC" title="Branch 71 was not taken"> - </span><span class="tlaUNC" title="Branch 72 was not taken"> - </span><span class="tlaUNC" title="Branch 73 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 74 was not taken"> - </span><span class="tlaUNC" title="Branch 75 was not taken"> - </span><span class="tlaUNC" title="Branch 76 was not taken"> - </span><span class="tlaUNC" title="Branch 77 was not taken"> - </span><span class="tlaUNC" title="Branch 78 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 79 was not taken"> - </span><span class="tlaUNC" title="Branch 80 was not taken"> - </span><span class="tlaUNC" title="Branch 81 was not taken"> - </span><span class="tlaUNC" title="Branch 82 was not taken"> - </span><span class="tlaUNC" title="Branch 83 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 84 was not taken"> - </span><span class="tlaUNC" title="Branch 85 was not taken"> - </span><span class="tlaUNC" title="Branch 86 was not taken"> - </span><span class="tlaUNC" title="Branch 87 was not taken"> - </span><span class="tlaUNC" title="Branch 88 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 89 was not taken"> - </span><span class="tlaUNC" title="Branch 90 was not taken"> - </span><span class="tlaUNC" title="Branch 91 was not taken"> - </span><span class="tlaUNC" title="Branch 92 was not taken"> - </span><span class="tlaUNC" title="Branch 93 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 94 was not taken"> - </span><span class="tlaUNC" title="Branch 95 was not taken"> - </span><span class="tlaUNC" title="Branch 96 was not taken"> - </span><span class="tlaUNC" title="Branch 97 was not taken"> - </span><span class="tlaUNC" title="Branch 98 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 99 was not taken"> - </span><span class="tlaUNC" title="Branch 100 was not taken"> - </span><span class="tlaUNC" title="Branch 101 was not taken"> - </span><span class="tlaUNC" title="Branch 102 was not taken"> - </span><span class="tlaUNC" title="Branch 103 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 104 was not taken"> - </span><span class="tlaUNC" title="Branch 105 was not taken"> - </span><span class="tlaUNC" title="Branch 106 was not taken"> - </span><span class="tlaUNC" title="Branch 107 was not taken"> - </span><span class="tlaUNC" title="Branch 108 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 109 was not taken"> - </span><span class="tlaUNC" title="Branch 110 was not taken"> - </span><span class="tlaUNC" title="Branch 111 was not taken"> - </span><span class="tlaUNC" title="Branch 112 was not taken"> - </span><span class="tlaUNC" title="Branch 113 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 114 was not taken"> - </span><span class="tlaUNC" title="Branch 115 was not taken"> - </span><span class="tlaUNC" title="Branch 116 was not taken"> - </span><span class="tlaUNC" title="Branch 117 was not taken"> - </span><span class="tlaUNC" title="Branch 118 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 119 was not taken"> - </span><span class="tlaUNC" title="Branch 120 was not taken"> - </span><span class="tlaUNC" title="Branch 121 was not taken"> - </span><span class="tlaUNC" title="Branch 122 was not taken"> - </span><span class="tlaUNC" title="Branch 123 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 124 was not taken"> - </span><span class="tlaUNC" title="Branch 125 was not taken"> - </span><span class="tlaUNC" title="Branch 126 was not taken"> - </span><span class="tlaUNC" title="Branch 127 was not taken"> - </span><span class="tlaUNC" title="Branch 128 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 129 was not taken"> - </span><span class="tlaUNC" title="Branch 130 was not taken"> - </span><span class="tlaUNC" title="Branch 131 was not taken"> - </span><span class="tlaUNC" title="Branch 132 was not taken"> - </span><span class="tlaUNC" title="Branch 133 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 134 was not taken"> - </span><span class="tlaUNC" title="Branch 135 was not taken"> - </span><span class="tlaUNC" title="Branch 136 was not taken"> - </span><span class="tlaUNC" title="Branch 137 was not taken"> - </span><span class="tlaUNC" title="Branch 138 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 139 was not taken"> - </span><span class="tlaUNC" title="Branch 140 was not taken"> - </span><span class="tlaUNC" title="Branch 141 was not taken"> - </span><span class="tlaUNC" title="Branch 142 was not taken"> - </span><span class="tlaUNC" title="Branch 143 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 144 was not taken"> - </span><span class="tlaUNC" title="Branch 145 was not taken"> - </span><span class="tlaUNC" title="Branch 146 was not taken"> - </span><span class="tlaUNC" title="Branch 147 was not taken"> - </span><span class="tlaUNC" title="Branch 148 was not taken"> - </span> 
-<span class="lineNum">        </span>       <span class="tlaUNC" title="Branch 149 was not taken"> - </span><span class="tlaUNC" title="Branch 150 was not taken"> - </span><span class="tlaUNC" title="Branch 151 was not taken"> - </span>]
-<span id="L32"><span class="lineNum">      32</span>   [<span class="tlaGBC" title="Branch 0 was taken 5642 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 4204 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 2512 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 1186 times"> + </span> :<span class="tlaGNC tlaBgGNC">      202544 :    input logic [31:1]  dec_i0_pc_d,                          // i0 pc</span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 508 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 252 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 116 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 49 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 10 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 19 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 22866 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 7 times"> + </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 14 was not taken"> - </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaUNC" title="Branch 16 was not taken"> - </span><span class="tlaUNC" title="Branch 17 was not taken"> - </span><span class="tlaUNC" title="Branch 18 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaUNC" title="Branch 20 was not taken"> - </span><span class="tlaGBC" title="Branch 21 was taken 148876 times"> + </span><span class="tlaUNC" title="Branch 22 was not taken"> - </span><span class="tlaGBC" title="Branch 23 was taken 375 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 202544 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 167286 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 92516 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 49459 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 25625 times"> + </span> 
-<span class="lineNum">        </span>          <span class="tlaGBC" title="Branch 29 was taken 14190 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 8352 times"> + </span>]
-<span id="L33"><span class="lineNum">      33</span>                 :             : </span>
-<span id="L34"><span class="lineNum">      34</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span>]:<span class="tlaUNC tlaBgUNC">           0 :    output logic [3:0] dec_i0_trigger_match_d                 // Trigger match</span></span>
-<span id="L35"><span class="lineNum">      35</span>                 :             : );</span>
-<span id="L36"><span class="lineNum">      36</span>                 :             : </span>
-<span id="L37"><span class="lineNum">      37</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaUNC">           0 :    logic [3:0][31:0]  dec_i0_match_data;</span></span>
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaUNC" title="Branch 11 was not taken"> - </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 14 was not taken"> - </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaUNC" title="Branch 16 was not taken"> - </span><span class="tlaUNC" title="Branch 17 was not taken"> - </span><span class="tlaUNC" title="Branch 18 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaUNC" title="Branch 20 was not taken"> - </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaUNC" title="Branch 22 was not taken"> - </span><span class="tlaUNC" title="Branch 23 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 24 was not taken"> - </span><span class="tlaUNC" title="Branch 25 was not taken"> - </span><span class="tlaUNC" title="Branch 26 was not taken"> - </span><span class="tlaUNC" title="Branch 27 was not taken"> - </span><span class="tlaUNC" title="Branch 28 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 29 was not taken"> - </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span><span class="tlaUNC" title="Branch 32 was not taken"> - </span><span class="tlaUNC" title="Branch 33 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 34 was not taken"> - </span><span class="tlaUNC" title="Branch 35 was not taken"> - </span><span class="tlaUNC" title="Branch 36 was not taken"> - </span><span class="tlaUNC" title="Branch 37 was not taken"> - </span><span class="tlaUNC" title="Branch 38 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 39 was not taken"> - </span><span class="tlaUNC" title="Branch 40 was not taken"> - </span><span class="tlaUNC" title="Branch 41 was not taken"> - </span><span class="tlaUNC" title="Branch 42 was not taken"> - </span><span class="tlaUNC" title="Branch 43 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 44 was not taken"> - </span><span class="tlaUNC" title="Branch 45 was not taken"> - </span><span class="tlaUNC" title="Branch 46 was not taken"> - </span><span class="tlaUNC" title="Branch 47 was not taken"> - </span><span class="tlaUNC" title="Branch 48 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 49 was not taken"> - </span><span class="tlaUNC" title="Branch 50 was not taken"> - </span><span class="tlaUNC" title="Branch 51 was not taken"> - </span><span class="tlaUNC" title="Branch 52 was not taken"> - </span><span class="tlaUNC" title="Branch 53 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 54 was not taken"> - </span><span class="tlaUNC" title="Branch 55 was not taken"> - </span><span class="tlaUNC" title="Branch 56 was not taken"> - </span><span class="tlaUNC" title="Branch 57 was not taken"> - </span><span class="tlaUNC" title="Branch 58 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 59 was not taken"> - </span><span class="tlaUNC" title="Branch 60 was not taken"> - </span><span class="tlaUNC" title="Branch 61 was not taken"> - </span><span class="tlaUNC" title="Branch 62 was not taken"> - </span><span class="tlaUNC" title="Branch 63 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 64 was not taken"> - </span><span class="tlaUNC" title="Branch 65 was not taken"> - </span><span class="tlaUNC" title="Branch 66 was not taken"> - </span><span class="tlaUNC" title="Branch 67 was not taken"> - </span><span class="tlaUNC" title="Branch 68 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 69 was not taken"> - </span><span class="tlaUNC" title="Branch 70 was not taken"> - </span><span class="tlaUNC" title="Branch 71 was not taken"> - </span><span class="tlaUNC" title="Branch 72 was not taken"> - </span><span class="tlaUNC" title="Branch 73 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 74 was not taken"> - </span><span class="tlaUNC" title="Branch 75 was not taken"> - </span><span class="tlaUNC" title="Branch 76 was not taken"> - </span><span class="tlaUNC" title="Branch 77 was not taken"> - </span><span class="tlaUNC" title="Branch 78 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 79 was not taken"> - </span><span class="tlaUNC" title="Branch 80 was not taken"> - </span><span class="tlaUNC" title="Branch 81 was not taken"> - </span><span class="tlaUNC" title="Branch 82 was not taken"> - </span><span class="tlaUNC" title="Branch 83 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 84 was not taken"> - </span><span class="tlaUNC" title="Branch 85 was not taken"> - </span><span class="tlaUNC" title="Branch 86 was not taken"> - </span><span class="tlaUNC" title="Branch 87 was not taken"> - </span><span class="tlaUNC" title="Branch 88 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 89 was not taken"> - </span><span class="tlaUNC" title="Branch 90 was not taken"> - </span><span class="tlaUNC" title="Branch 91 was not taken"> - </span><span class="tlaUNC" title="Branch 92 was not taken"> - </span><span class="tlaUNC" title="Branch 93 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 94 was not taken"> - </span><span class="tlaUNC" title="Branch 95 was not taken"> - </span><span class="tlaUNC" title="Branch 96 was not taken"> - </span><span class="tlaUNC" title="Branch 97 was not taken"> - </span><span class="tlaUNC" title="Branch 98 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 99 was not taken"> - </span><span class="tlaUNC" title="Branch 100 was not taken"> - </span><span class="tlaUNC" title="Branch 101 was not taken"> - </span><span class="tlaUNC" title="Branch 102 was not taken"> - </span><span class="tlaUNC" title="Branch 103 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 104 was not taken"> - </span><span class="tlaUNC" title="Branch 105 was not taken"> - </span><span class="tlaUNC" title="Branch 106 was not taken"> - </span><span class="tlaUNC" title="Branch 107 was not taken"> - </span><span class="tlaUNC" title="Branch 108 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 109 was not taken"> - </span><span class="tlaUNC" title="Branch 110 was not taken"> - </span><span class="tlaUNC" title="Branch 111 was not taken"> - </span><span class="tlaUNC" title="Branch 112 was not taken"> - </span><span class="tlaUNC" title="Branch 113 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 114 was not taken"> - </span><span class="tlaUNC" title="Branch 115 was not taken"> - </span><span class="tlaUNC" title="Branch 116 was not taken"> - </span><span class="tlaUNC" title="Branch 117 was not taken"> - </span><span class="tlaUNC" title="Branch 118 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 119 was not taken"> - </span><span class="tlaUNC" title="Branch 120 was not taken"> - </span><span class="tlaUNC" title="Branch 121 was not taken"> - </span><span class="tlaUNC" title="Branch 122 was not taken"> - </span><span class="tlaUNC" title="Branch 123 was not taken"> - </span> 
-<span class="lineNum">        </span>    <span class="tlaUNC" title="Branch 124 was not taken"> - </span><span class="tlaUNC" title="Branch 125 was not taken"> - </span><span class="tlaUNC" title="Branch 126 was not taken"> - </span><span class="tlaUNC" title="Branch 127 was not taken"> - </span>]
-<span id="L38"><span class="lineNum">      38</span>   [<span class="tlaGBC" title="Branch 0 was taken 75 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 75 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 75 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 75 times"> + </span>]:<span class="tlaGNC tlaBgGNC">          75 :    logic [3:0]        dec_i0_trigger_data_match;</span></span>
-<span id="L39"><span class="lineNum">      39</span>                 :             : </span>
-<span id="L40"><span class="lineNum">      40</span>                 :             :    for (genvar i=0; i&lt;4; i++) begin : genblock</span>
-<span id="L41"><span class="lineNum">      41</span>                 :             :       assign dec_i0_match_data[i][31:0] = ({32{~trigger_pkt_any[i].select &amp; trigger_pkt_any[i].execute}} &amp; {dec_i0_pc_d[31:1], trigger_pkt_any[i].tdata2[0]});      // select=0; do a PC match</span>
-<span id="L42"><span class="lineNum">      42</span>                 :             : </span>
-<span id="L43"><span class="lineNum">      43</span>                 :             :       rvmaskandmatch trigger_i0_match (.mask(trigger_pkt_any[i].tdata2[31:0]), .data(dec_i0_match_data[i][31:0]), .masken(trigger_pkt_any[i].match), .match(dec_i0_trigger_data_match[i]));</span>
-<span id="L44"><span class="lineNum">      44</span>                 :             : </span>
-<span id="L45"><span class="lineNum">      45</span>                 :             :       assign dec_i0_trigger_match_d[i] = trigger_pkt_any[i].execute &amp; trigger_pkt_any[i].m &amp; dec_i0_trigger_data_match[i];</span>
-<span id="L46"><span class="lineNum">      46</span>                 :             :    end</span>
-<span id="L47"><span class="lineNum">      47</span>                 :             : </span>
-<span id="L48"><span class="lineNum">      48</span>                 :             : endmodule // el2_dec_trigger</span>
-<span id="L49"><span class="lineNum">      49</span>                 :             : </span>
+<span id="L1"><span class="lineNum">       1</span>              : // SPDX-License-Identifier: Apache-2.0</span>
+<span id="L2"><span class="lineNum">       2</span>              : // Copyright 2020 Western Digital Corporation or its affiliates.</span>
+<span id="L3"><span class="lineNum">       3</span>              : //</span>
+<span id="L4"><span class="lineNum">       4</span>              : // Licensed under the Apache License, Version 2.0 (the "License");</span>
+<span id="L5"><span class="lineNum">       5</span>              : // you may not use this file except in compliance with the License.</span>
+<span id="L6"><span class="lineNum">       6</span>              : // You may obtain a copy of the License at</span>
+<span id="L7"><span class="lineNum">       7</span>              : //</span>
+<span id="L8"><span class="lineNum">       8</span>              : // http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L9"><span class="lineNum">       9</span>              : //</span>
+<span id="L10"><span class="lineNum">      10</span>              : // Unless required by applicable law or agreed to in writing, software</span>
+<span id="L11"><span class="lineNum">      11</span>              : // distributed under the License is distributed on an "AS IS" BASIS,</span>
+<span id="L12"><span class="lineNum">      12</span>              : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L13"><span class="lineNum">      13</span>              : // See the License for the specific language governing permissions and</span>
+<span id="L14"><span class="lineNum">      14</span>              : // limitations under the License.</span>
+<span id="L15"><span class="lineNum">      15</span>              : </span>
+<span id="L16"><span class="lineNum">      16</span>              : //********************************************************************************</span>
+<span id="L17"><span class="lineNum">      17</span>              : // $Id$</span>
+<span id="L18"><span class="lineNum">      18</span>              : //</span>
+<span id="L19"><span class="lineNum">      19</span>              : //</span>
+<span id="L20"><span class="lineNum">      20</span>              : // Owner:</span>
+<span id="L21"><span class="lineNum">      21</span>              : // Function: DEC Trigger Logic</span>
+<span id="L22"><span class="lineNum">      22</span>              : // Comments:</span>
+<span id="L23"><span class="lineNum">      23</span>              : //</span>
+<span id="L24"><span class="lineNum">      24</span>              : //********************************************************************************</span>
+<span id="L25"><span class="lineNum">      25</span>              : module el2_dec_trigger</span>
+<span id="L26"><span class="lineNum">      26</span>              : import el2_pkg::*;</span>
+<span id="L27"><span class="lineNum">      27</span>              : #(</span>
+<span id="L28"><span class="lineNum">      28</span>              : `include "el2_param.vh"</span>
+<span id="L29"><span class="lineNum">      29</span>              :  )(</span>
+<span id="L30"><span class="lineNum">      30</span>              : </span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaUNC tlaBgUNC">           0 :    input el2_trigger_pkt_t [3:0] trigger_pkt_any,           // Packet from tlu. 'select':0-pc,1-Opcode  'Execute' needs to be set for dec triggers to fire. 'match'-1 do mask, 0: full match</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC tlaBgGNC">      202544 :    input logic [31:1]  dec_i0_pc_d,                          // i0 pc</span></span>
+<span id="L33"><span class="lineNum">      33</span>              : </span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [3:0] dec_i0_trigger_match_d                 // Trigger match</span></span>
+<span id="L35"><span class="lineNum">      35</span>              : );</span>
+<span id="L36"><span class="lineNum">      36</span>              : </span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaUNC">           0 :    logic [3:0][31:0]  dec_i0_match_data;</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC tlaBgGNC">          75 :    logic [3:0]        dec_i0_trigger_data_match;</span></span>
+<span id="L39"><span class="lineNum">      39</span>              : </span>
+<span id="L40"><span class="lineNum">      40</span>              :    for (genvar i=0; i&lt;4; i++) begin : genblock</span>
+<span id="L41"><span class="lineNum">      41</span>              :       assign dec_i0_match_data[i][31:0] = ({32{~trigger_pkt_any[i].select &amp; trigger_pkt_any[i].execute}} &amp; {dec_i0_pc_d[31:1], trigger_pkt_any[i].tdata2[0]});      // select=0; do a PC match</span>
+<span id="L42"><span class="lineNum">      42</span>              : </span>
+<span id="L43"><span class="lineNum">      43</span>              :       rvmaskandmatch trigger_i0_match (.mask(trigger_pkt_any[i].tdata2[31:0]), .data(dec_i0_match_data[i][31:0]), .masken(trigger_pkt_any[i].match), .match(dec_i0_trigger_data_match[i]));</span>
+<span id="L44"><span class="lineNum">      44</span>              : </span>
+<span id="L45"><span class="lineNum">      45</span>              :       assign dec_i0_trigger_match_d[i] = trigger_pkt_any[i].execute &amp; trigger_pkt_any[i].m &amp; dec_i0_trigger_data_match[i];</span>
+<span id="L46"><span class="lineNum">      46</span>              :    end</span>
+<span id="L47"><span class="lineNum">      47</span>              : </span>
+<span id="L48"><span class="lineNum">      48</span>              : endmodule // el2_dec_trigger</span>
+<span id="L49"><span class="lineNum">      49</span>              : </span>
         </pre>
 </td>
 </tr>

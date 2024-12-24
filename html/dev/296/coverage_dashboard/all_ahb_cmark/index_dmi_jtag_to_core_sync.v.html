@@ -83,18 +83,12 @@
         100.0%
     </td>
     <td class="headerCovSummaryEntry">
-        2
+        7
     </td>
     <td class="headerCovSummaryEntry">
-        2
+        7
     </td>
 
-            </tr>
-            <tr>
-              <td></td>
-              <td></td>
-              <td></td>
-              
             </tr>
             
         </table>
@@ -106,73 +100,72 @@
 </tr>
 <tr>
 <td>
-<pre class="sourceHeading">             Branch data     Line data    Source code</pre>
+<pre class="sourceHeading">            Line data    Source code</pre>
 <pre class="source">
-<span id="L1"><span class="lineNum">       1</span>                 :             : // SPDX-License-Identifier: Apache-2.0</span>
-<span id="L2"><span class="lineNum">       2</span>                 :             : // Copyright 2018 Western Digital Corporation or it's affiliates.</span>
-<span id="L3"><span class="lineNum">       3</span>                 :             : // </span>
-<span id="L4"><span class="lineNum">       4</span>                 :             : // Licensed under the Apache License, Version 2.0 (the "License");</span>
-<span id="L5"><span class="lineNum">       5</span>                 :             : // you may not use this file except in compliance with the License.</span>
-<span id="L6"><span class="lineNum">       6</span>                 :             : // You may obtain a copy of the License at</span>
-<span id="L7"><span class="lineNum">       7</span>                 :             : // </span>
-<span id="L8"><span class="lineNum">       8</span>                 :             : // http://www.apache.org/licenses/LICENSE-2.0</span>
-<span id="L9"><span class="lineNum">       9</span>                 :             : // </span>
-<span id="L10"><span class="lineNum">      10</span>                 :             : // Unless required by applicable law or agreed to in writing, software</span>
-<span id="L11"><span class="lineNum">      11</span>                 :             : // distributed under the License is distributed on an "AS IS" BASIS,</span>
-<span id="L12"><span class="lineNum">      12</span>                 :             : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
-<span id="L13"><span class="lineNum">      13</span>                 :             : // See the License for the specific language governing permissions and</span>
-<span id="L14"><span class="lineNum">      14</span>                 :             : // limitations under the License.</span>
-<span id="L15"><span class="lineNum">      15</span>                 :             : //------------------------------------------------------------------------------------</span>
-<span id="L16"><span class="lineNum">      16</span>                 :             : //</span>
-<span id="L17"><span class="lineNum">      17</span>                 :             : //  Copyright Western Digital, 2019</span>
-<span id="L18"><span class="lineNum">      18</span>                 :             : //  Owner : Alex Grobman</span>
-<span id="L19"><span class="lineNum">      19</span>                 :             : //  Description:  </span>
-<span id="L20"><span class="lineNum">      20</span>                 :             : //                This module Synchronizes the signals between JTAG (TCK) and</span>
-<span id="L21"><span class="lineNum">      21</span>                 :             : //                processor (Core_clk)</span>
-<span id="L22"><span class="lineNum">      22</span>                 :             : //</span>
-<span id="L23"><span class="lineNum">      23</span>                 :             : //-------------------------------------------------------------------------------------</span>
-<span id="L24"><span class="lineNum">      24</span>                 :             : </span>
-<span id="L25"><span class="lineNum">      25</span>                 :             : module dmi_jtag_to_core_sync (</span>
-<span id="L26"><span class="lineNum">      26</span>                 :             : // JTAG signals</span>
-<span id="L27"><span class="lineNum">      27</span>                 :<span class="tlaUNC tlaBgUNC">           0 : input       rd_en,      // 1 bit  Read Enable from JTAG</span></span>
-<span id="L28"><span class="lineNum">      28</span>                 :<span class="tlaUNC">           0 : input       wr_en,      // 1 bit  Write enable from JTAG</span></span>
-<span id="L29"><span class="lineNum">      29</span>                 :             : </span>
-<span id="L30"><span class="lineNum">      30</span>                 :             : // Processor Signals</span>
-<span id="L31"><span class="lineNum">      31</span>                 :<span class="tlaGNC tlaBgGNC">           3 : input       rst_n,      // Core reset</span></span>
-<span id="L32"><span class="lineNum">      32</span>                 :<span class="tlaGNC">     4822300 : input       clk,        // Core clock</span></span>
-<span id="L33"><span class="lineNum">      33</span>                 :             : </span>
-<span id="L34"><span class="lineNum">      34</span>                 :<span class="tlaUNC tlaBgUNC">           0 : output      reg_en,     // 1 bit  Write interface bit to Processor</span></span>
-<span id="L35"><span class="lineNum">      35</span>                 :<span class="tlaUNC">           0 : output      reg_wr_en   // 1 bit  Write enable to Processor</span></span>
-<span id="L36"><span class="lineNum">      36</span>                 :             : );</span>
-<span id="L37"><span class="lineNum">      37</span>                 :             :   </span>
-<span id="L38"><span class="lineNum">      38</span>                 :<span class="tlaUNC">           0 : wire        c_rd_en;</span></span>
-<span id="L39"><span class="lineNum">      39</span>                 :<span class="tlaUNC">           0 : wire        c_wr_en;</span></span>
-<span id="L40"><span class="lineNum">      40</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaUNC">           0 : reg [2:0]   rden, wren;</span></span>
-<span class="lineNum">        </span>          <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span>]
-<span id="L41"><span class="lineNum">      41</span>                 :             :  </span>
-<span id="L42"><span class="lineNum">      42</span>                 :             : </span>
-<span id="L43"><span class="lineNum">      43</span>                 :             : // Outputs</span>
-<span id="L44"><span class="lineNum">      44</span>                 :             : assign reg_en    = c_wr_en | c_rd_en;</span>
-<span id="L45"><span class="lineNum">      45</span>                 :             : assign reg_wr_en = c_wr_en;</span>
-<span id="L46"><span class="lineNum">      46</span>                 :             : </span>
-<span id="L47"><span class="lineNum">      47</span>                 :             : </span>
-<span id="L48"><span class="lineNum">      48</span>                 :             : // synchronizers  </span>
-<span id="L49"><span class="lineNum">      49</span>                 :<span class="tlaGNC tlaBgGNC">     1129270 : always @ ( posedge clk or negedge rst_n) begin</span></span>
-<span id="L50"><span class="lineNum">      50</span>         [<span class="tlaGBC" title="Branch 0 was taken 6 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 1129264 times"> + </span>]:<span class="tlaGNC">     1129264 :     if(!rst_n) begin</span></span>
-<span id="L51"><span class="lineNum">      51</span>                 :<span class="tlaGNC">           6 :         rden &lt;= '0;</span></span>
-<span id="L52"><span class="lineNum">      52</span>                 :<span class="tlaGNC">           6 :         wren &lt;= '0;</span></span>
-<span id="L53"><span class="lineNum">      53</span>                 :             :     end</span>
-<span id="L54"><span class="lineNum">      54</span>                 :<span class="tlaGNC">     1129264 :     else begin</span></span>
-<span id="L55"><span class="lineNum">      55</span>                 :<span class="tlaGNC">     1129264 :         rden &lt;= {rden[1:0], rd_en};</span></span>
-<span id="L56"><span class="lineNum">      56</span>                 :<span class="tlaGNC">     1129264 :         wren &lt;= {wren[1:0], wr_en};</span></span>
-<span id="L57"><span class="lineNum">      57</span>                 :             :     end</span>
-<span id="L58"><span class="lineNum">      58</span>                 :             : end</span>
-<span id="L59"><span class="lineNum">      59</span>                 :             : </span>
-<span id="L60"><span class="lineNum">      60</span>                 :             : assign c_rd_en = rden[1] &amp; ~rden[2];</span>
-<span id="L61"><span class="lineNum">      61</span>                 :             : assign c_wr_en = wren[1] &amp; ~wren[2];</span>
-<span id="L62"><span class="lineNum">      62</span>                 :             :  </span>
-<span id="L63"><span class="lineNum">      63</span>                 :             : </span>
-<span id="L64"><span class="lineNum">      64</span>                 :             : endmodule</span>
+<span id="L1"><span class="lineNum">       1</span>              : // SPDX-License-Identifier: Apache-2.0</span>
+<span id="L2"><span class="lineNum">       2</span>              : // Copyright 2018 Western Digital Corporation or it's affiliates.</span>
+<span id="L3"><span class="lineNum">       3</span>              : // </span>
+<span id="L4"><span class="lineNum">       4</span>              : // Licensed under the Apache License, Version 2.0 (the "License");</span>
+<span id="L5"><span class="lineNum">       5</span>              : // you may not use this file except in compliance with the License.</span>
+<span id="L6"><span class="lineNum">       6</span>              : // You may obtain a copy of the License at</span>
+<span id="L7"><span class="lineNum">       7</span>              : // </span>
+<span id="L8"><span class="lineNum">       8</span>              : // http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L9"><span class="lineNum">       9</span>              : // </span>
+<span id="L10"><span class="lineNum">      10</span>              : // Unless required by applicable law or agreed to in writing, software</span>
+<span id="L11"><span class="lineNum">      11</span>              : // distributed under the License is distributed on an "AS IS" BASIS,</span>
+<span id="L12"><span class="lineNum">      12</span>              : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L13"><span class="lineNum">      13</span>              : // See the License for the specific language governing permissions and</span>
+<span id="L14"><span class="lineNum">      14</span>              : // limitations under the License.</span>
+<span id="L15"><span class="lineNum">      15</span>              : //------------------------------------------------------------------------------------</span>
+<span id="L16"><span class="lineNum">      16</span>              : //</span>
+<span id="L17"><span class="lineNum">      17</span>              : //  Copyright Western Digital, 2019</span>
+<span id="L18"><span class="lineNum">      18</span>              : //  Owner : Alex Grobman</span>
+<span id="L19"><span class="lineNum">      19</span>              : //  Description:  </span>
+<span id="L20"><span class="lineNum">      20</span>              : //                This module Synchronizes the signals between JTAG (TCK) and</span>
+<span id="L21"><span class="lineNum">      21</span>              : //                processor (Core_clk)</span>
+<span id="L22"><span class="lineNum">      22</span>              : //</span>
+<span id="L23"><span class="lineNum">      23</span>              : //-------------------------------------------------------------------------------------</span>
+<span id="L24"><span class="lineNum">      24</span>              : </span>
+<span id="L25"><span class="lineNum">      25</span>              : module dmi_jtag_to_core_sync (</span>
+<span id="L26"><span class="lineNum">      26</span>              : // JTAG signals</span>
+<span id="L27"><span class="lineNum">      27</span> <span class="tlaUNC tlaBgUNC">           0 : input       rd_en,      // 1 bit  Read Enable from JTAG</span></span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaUNC">           0 : input       wr_en,      // 1 bit  Write enable from JTAG</span></span>
+<span id="L29"><span class="lineNum">      29</span>              : </span>
+<span id="L30"><span class="lineNum">      30</span>              : // Processor Signals</span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC tlaBgGNC">           3 : input       rst_n,      // Core reset</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">     4822300 : input       clk,        // Core clock</span></span>
+<span id="L33"><span class="lineNum">      33</span>              : </span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaUNC tlaBgUNC">           0 : output      reg_en,     // 1 bit  Write interface bit to Processor</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaUNC">           0 : output      reg_wr_en   // 1 bit  Write enable to Processor</span></span>
+<span id="L36"><span class="lineNum">      36</span>              : );</span>
+<span id="L37"><span class="lineNum">      37</span>              :   </span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaUNC">           0 : wire        c_rd_en;</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaUNC">           0 : wire        c_wr_en;</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaUNC">           0 : reg [2:0]   rden, wren;</span></span>
+<span id="L41"><span class="lineNum">      41</span>              :  </span>
+<span id="L42"><span class="lineNum">      42</span>              : </span>
+<span id="L43"><span class="lineNum">      43</span>              : // Outputs</span>
+<span id="L44"><span class="lineNum">      44</span>              : assign reg_en    = c_wr_en | c_rd_en;</span>
+<span id="L45"><span class="lineNum">      45</span>              : assign reg_wr_en = c_wr_en;</span>
+<span id="L46"><span class="lineNum">      46</span>              : </span>
+<span id="L47"><span class="lineNum">      47</span>              : </span>
+<span id="L48"><span class="lineNum">      48</span>              : // synchronizers  </span>
+<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC tlaBgGNC">     1129270 : always @ ( posedge clk or negedge rst_n) begin</span></span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">     1129264 :     if(!rst_n) begin</span></span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">           6 :         rden &lt;= '0;</span></span>
+<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">           6 :         wren &lt;= '0;</span></span>
+<span id="L53"><span class="lineNum">      53</span>              :     end</span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">     1129264 :     else begin</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">     1129264 :         rden &lt;= {rden[1:0], rd_en};</span></span>
+<span id="L56"><span class="lineNum">      56</span> <span class="tlaGNC">     1129264 :         wren &lt;= {wren[1:0], wr_en};</span></span>
+<span id="L57"><span class="lineNum">      57</span>              :     end</span>
+<span id="L58"><span class="lineNum">      58</span>              : end</span>
+<span id="L59"><span class="lineNum">      59</span>              : </span>
+<span id="L60"><span class="lineNum">      60</span>              : assign c_rd_en = rden[1] &amp; ~rden[2];</span>
+<span id="L61"><span class="lineNum">      61</span>              : assign c_wr_en = wren[1] &amp; ~wren[2];</span>
+<span id="L62"><span class="lineNum">      62</span>              :  </span>
+<span id="L63"><span class="lineNum">      63</span>              : </span>
+<span id="L64"><span class="lineNum">      64</span>              : endmodule</span>
         </pre>
 </td>
 </tr>

@@ -158,7 +158,7 @@ jobs:
         run: |
           python3 -m venv .venv
           source .venv/bin/activate
-          pip install git+https://github.com/antmicro/sitespawner@5e842effbb1408dcefcf42d166973f180b9c3f03
+          pip install git+https://github.com/antmicro/sitespawner@abff708256a15a5db7c498ff7f484c78cf18d4e3
           echo "PATH=$PATH" >> $GITHUB_ENV
 
       - name: Install Python deps

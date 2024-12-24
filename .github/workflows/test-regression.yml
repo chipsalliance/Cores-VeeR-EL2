@@ -66,10 +66,9 @@ jobs:
         shell: bash
         run: |
           python3 -m venv .venv
-          .venv/bin/python3 -m pip install tools/SiteSpawner
           source .venv/bin/activate
+          pip install git+https://github.com/antmicro/sitespawner@abff708256a15a5db7c498ff7f484c78cf18d4e3
           echo "PATH=$PATH" >> $GITHUB_ENV
-          python3 -m pip install tools/SiteSpawner
 
       - name: Setup environment
         shell: bash

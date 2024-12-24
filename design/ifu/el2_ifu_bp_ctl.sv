@@ -76,9 +76,9 @@ import el2_pkg::*;
    output logic [1:0] [$clog2(pt.BTB_SIZE)-1:0]    ifu_bp_fa_index_f, // predicted branch index (fully associative option)
 
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic       scan_mode
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    );
 
 

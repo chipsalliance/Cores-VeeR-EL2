@@ -31,9 +31,9 @@ import el2_pkg::*;
    input                   free_clk,
    input                   rst_l,
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input                   scan_mode,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input                   bus_clk_en,
    input                   clk_override,
    input                   dec_tlu_force_halt,
@@ -76,10 +76,10 @@ import el2_pkg::*;
    // AHB-Lite signals
    output logic [31:0]     ahb_haddr,       // ahb bus address
    /* exclude signals that are tied to constant value in this file */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [2:0]      ahb_hburst,      // tied to 0
    output logic            ahb_hmastlock,   // tied to 0
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [3:0]      ahb_hprot,       // [3:1] are tied to 3'b001
    output logic [2:0]      ahb_hsize,       // size of bus transaction (possible values 0,1,2,3)
    output logic [1:0]      ahb_htrans,      // Transaction type (possible values 0,2 only right now)

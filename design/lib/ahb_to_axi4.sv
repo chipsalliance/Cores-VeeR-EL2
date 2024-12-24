@@ -30,9 +30,9 @@ import el2_pkg::*;
 (
    input                   clk,
    input                   rst_l,
-   /* verilator coverage_off */
+   /* pragma coverage off */
    input                   scan_mode,
-   /* verilator coverage_on */
+   /* pragma coverage on */
    input                   bus_clk_en,
    input                   clk_override,
 
@@ -41,63 +41,63 @@ import el2_pkg::*;
    output logic            axi_awvalid,
    input  logic            axi_awready,
    /* exclude signals that are tied to constant value in this file */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [TAG-1:0]  axi_awid,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [31:0]     axi_awaddr,
    output logic [2:0]      axi_awsize,
    /* exclude signals that are tied to constant value in this file */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [2:0]      axi_awprot,
    output logic [7:0]      axi_awlen,
    output logic [1:0]      axi_awburst,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    output logic            axi_wvalid,
    input  logic            axi_wready,
    output logic [63:0]     axi_wdata,
    output logic [7:0]      axi_wstrb,
    /* exclude signals that are tied to constant value in this file */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic            axi_wlast,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    input  logic            axi_bvalid,
    /* exclude signals that are tied to constant value in this file */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic            axi_bready,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input  logic [1:0]      axi_bresp,
    /* Exclude unused AXI rid since it has no equivalent in AHB */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic [TAG-1:0]  axi_bid,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    // AXI Read Channels
    output logic            axi_arvalid,
    input  logic            axi_arready,
    /* exclude signals that are tied to constant value in this file */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [TAG-1:0]  axi_arid,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [31:0]     axi_araddr,
    output logic [2:0]      axi_arsize,
    /* exclude signals that are tied to constant value in this file */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [2:0]      axi_arprot,
    output logic [7:0]      axi_arlen,
    output logic [1:0]      axi_arburst,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    input  logic            axi_rvalid,
    /* exclude signals that are tied to constant value in this file */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic            axi_rready,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    /* Exclude unused AXI rid since it has no equivalent in AHB */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic [TAG-1:0]  axi_rid,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input  logic [63:0]     axi_rdata,
    input  logic [1:0]      axi_rresp,
 
@@ -105,11 +105,11 @@ import el2_pkg::*;
    input logic [31:0]      ahb_haddr,     // ahb bus address
    // Exclude input signals that are unused in this file (their AXI equivalents
    // are tied to constants)
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input logic [2:0]       ahb_hburst,    // tied to 0
    input logic             ahb_hmastlock, // tied to 0
    input logic [3:0]       ahb_hprot,     // tied to 4'b0011
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input logic [2:0]       ahb_hsize,     // size of bus transaction (possible values 0,1,2,3)
    input logic [1:0]       ahb_htrans,    // Transaction type (possible values 0,2 only right now)
    input logic             ahb_hwrite,    // ahb bus write

@@ -23,9 +23,9 @@ import el2_pkg::*;
    input logic           clk,                       // Top level clock
    input logic           rst_l,                     // Reset
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input logic           scan_mode,                 // Scan mode
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    input el2_div_pkt_t  dp,                        // valid, sign, rem
    input logic  [31:0]   dividend,                  // Numerator
@@ -144,9 +144,9 @@ module el2_exu_div_existing_1bit_cheapshortq
    input  logic            clk,                       // Top level clock
    input  logic            rst_l,                     // Reset
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic            scan_mode,                 // Scan mode
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    input  logic            cancel,                    // Flush pipeline
    input  logic            valid_in,
@@ -455,9 +455,9 @@ module el2_exu_div_new_1bit_fullshortq
    input  logic            clk,                       // Top level clock
    input  logic            rst_l,                     // Reset
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic            scan_mode,                 // Scan mode
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    input  logic            cancel,                    // Flush pipeline
    input  logic            valid_in,
@@ -716,9 +716,9 @@ module el2_exu_div_new_2bit_fullshortq
    input  logic            clk,                       // Top level clock
    input  logic            rst_l,                     // Reset
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic            scan_mode,                 // Scan mode
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    input  logic            cancel,                    // Flush pipeline
    input  logic            valid_in,
@@ -993,9 +993,9 @@ module el2_exu_div_new_3bit_fullshortq
    input  logic            clk,                       // Top level clock
    input  logic            rst_l,                     // Reset
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic            scan_mode,                 // Scan mode
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    input  logic            cancel,                    // Flush pipeline
    input  logic            valid_in,
@@ -1328,9 +1328,9 @@ module el2_exu_div_new_4bit_fullshortq
    input  logic            clk,                       // Top level clock
    input  logic            rst_l,                     // Reset
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic            scan_mode,                 // Scan mode
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    input  logic            cancel,                    // Flush pipeline
    input  logic            valid_in,

@@ -321,9 +321,9 @@ module el2_dec
 
     output logic dec_tlu_i0_commit_cmt,  // committed i0 instruction
     // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-    /*verilator coverage_off*/
+    /*pragma coverage off*/
     input  logic scan_mode               // Flop scan mode control
-    /*verilator coverage_on*/
+    /*pragma coverage on*/
 
 );
 

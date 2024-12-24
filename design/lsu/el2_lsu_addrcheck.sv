@@ -54,9 +54,9 @@ import el2_pkg::*;
     input logic lsu_pmp_error_end,
 
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic         scan_mode                  // Scan mode
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 );
 
 

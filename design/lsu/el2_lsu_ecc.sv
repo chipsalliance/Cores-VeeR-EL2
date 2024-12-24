@@ -36,9 +36,9 @@ import el2_pkg::*;
    input logic                           clk_override,       // Override non-functional clock gating
    input logic                           rst_l,              // reset, active low
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input logic                           scan_mode,          // scan mode
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    input el2_lsu_pkt_t                  lsu_pkt_m,          // packet in m
    input el2_lsu_pkt_t                  lsu_pkt_r,          // packet in r

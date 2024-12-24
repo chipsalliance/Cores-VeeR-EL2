@@ -54,21 +54,21 @@ import el2_pkg::*;
    output logic [31:0]                     lsu_axi_awaddr,
    output logic [3:0]                      lsu_axi_awregion,
    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [7:0]                      lsu_axi_awlen,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [2:0]                      lsu_axi_awsize,
    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [1:0]                      lsu_axi_awburst,
    output logic                            lsu_axi_awlock,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [3:0]                      lsu_axi_awcache,
    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [2:0]                      lsu_axi_awprot,
    output logic [3:0]                      lsu_axi_awqos,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    output logic                            lsu_axi_wvalid,
    input  logic                            lsu_axi_wready,
@@ -78,9 +78,9 @@ import el2_pkg::*;
 
    input  logic                            lsu_axi_bvalid,
    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic                            lsu_axi_bready,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input  logic [1:0]                      lsu_axi_bresp,
    input  logic [pt.LSU_BUS_TAG-1:0]       lsu_axi_bid,
 
@@ -91,27 +91,27 @@ import el2_pkg::*;
    output logic [31:0]                     lsu_axi_araddr,
    output logic [3:0]                      lsu_axi_arregion,
    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [7:0]                      lsu_axi_arlen,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [2:0]                      lsu_axi_arsize,
    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [1:0]                      lsu_axi_arburst,
    output logic                            lsu_axi_arlock,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [3:0]                      lsu_axi_arcache,
    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [2:0]                      lsu_axi_arprot,
    output logic [3:0]                      lsu_axi_arqos,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    input  logic                            lsu_axi_rvalid,
    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic                            lsu_axi_rready,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input  logic [pt.LSU_BUS_TAG-1:0]       lsu_axi_rid,
    input  logic [63:0]                     lsu_axi_rdata,
    input  logic [1:0]                      lsu_axi_rresp,
@@ -120,12 +120,12 @@ import el2_pkg::*;
    //-------------------------- IFU AXI signals--------------------------
    // AXI Write Channels
    /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic                            ifu_axi_awvalid,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input  logic                            ifu_axi_awready,
    /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_awid,
    output logic [31:0]                     ifu_axi_awaddr,
    output logic [3:0]                      ifu_axi_awregion,
@@ -138,20 +138,20 @@ import el2_pkg::*;
    output logic [3:0]                      ifu_axi_awqos,
 
    output logic                            ifu_axi_wvalid,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input  logic                            ifu_axi_wready,
    /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [63:0]                     ifu_axi_wdata,
    output logic [7:0]                      ifu_axi_wstrb,
    output logic                            ifu_axi_wlast,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    input  logic                            ifu_axi_bvalid,
    /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic                            ifu_axi_bready,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input  logic [1:0]                      ifu_axi_bresp,
    input  logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_bid,
 
@@ -162,7 +162,7 @@ import el2_pkg::*;
    output logic [31:0]                     ifu_axi_araddr,
    output logic [3:0]                      ifu_axi_arregion,
    /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [7:0]                      ifu_axi_arlen,
    output logic [2:0]                      ifu_axi_arsize,
    output logic [1:0]                      ifu_axi_arburst,
@@ -170,13 +170,13 @@ import el2_pkg::*;
    output logic [3:0]                      ifu_axi_arcache,
    output logic [2:0]                      ifu_axi_arprot,
    output logic [3:0]                      ifu_axi_arqos,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    input  logic                            ifu_axi_rvalid,
    /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic                            ifu_axi_rready,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input  logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_rid,
    input  logic [63:0]                     ifu_axi_rdata,
    input  logic [1:0]                      ifu_axi_rresp,
@@ -187,24 +187,24 @@ import el2_pkg::*;
    output logic                            sb_axi_awvalid,
    input  logic                            sb_axi_awready,
    /* exclude signals that are tied to constant value in dbg/el2_dbg.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [pt.SB_BUS_TAG-1:0]        sb_axi_awid,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [31:0]                     sb_axi_awaddr,
    output logic [3:0]                      sb_axi_awregion,
    /* exclude signals that are tied to constant value in dbg/el2_dbg.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [7:0]                      sb_axi_awlen,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [2:0]                      sb_axi_awsize,
    /* exclude signals that are tied to constant value in dbg/el2_dbg.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [1:0]                      sb_axi_awburst,
    output logic                            sb_axi_awlock,
    output logic [3:0]                      sb_axi_awcache,
    output logic [2:0]                      sb_axi_awprot,
    output logic [3:0]                      sb_axi_awqos,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    output logic                            sb_axi_wvalid,
    input  logic                            sb_axi_wready,
@@ -221,30 +221,30 @@ import el2_pkg::*;
    output logic                            sb_axi_arvalid,
    input  logic                            sb_axi_arready,
    /* exclude signals that are tied to constant value in dbg/el2_dbg.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [pt.SB_BUS_TAG-1:0]        sb_axi_arid,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [31:0]                     sb_axi_araddr,
    output logic [3:0]                      sb_axi_arregion,
    /* exclude signals that are tied to constant value in dbg/el2_dbg.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [7:0]                      sb_axi_arlen,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [2:0]                      sb_axi_arsize,
    /* exclude signals that are tied to constant value in dbg/el2_dbg.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [1:0]                      sb_axi_arburst,
    output logic                            sb_axi_arlock,
    output logic [3:0]                      sb_axi_arcache,
    output logic [2:0]                      sb_axi_arprot,
    output logic [3:0]                      sb_axi_arqos,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    input  logic                            sb_axi_rvalid,
    /* exclude signals that are tied to constant value in dbg/el2_dbg.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic                            sb_axi_rready,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input  logic [pt.SB_BUS_TAG-1:0]        sb_axi_rid,
    input  logic [63:0]                     sb_axi_rdata,
    input  logic [1:0]                      sb_axi_rresp,
@@ -255,9 +255,9 @@ import el2_pkg::*;
    input  logic                            dma_axi_awvalid,
    output logic                            dma_axi_awready,
    /* exclude signals that are tied to constant value in tb_top.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic [pt.DMA_BUS_TAG-1:0]       dma_axi_awid,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input  logic [31:0]                     dma_axi_awaddr,
    input  logic [2:0]                      dma_axi_awsize,
    input  logic [2:0]                      dma_axi_awprot,
@@ -280,9 +280,9 @@ import el2_pkg::*;
    input  logic                            dma_axi_arvalid,
    output logic                            dma_axi_arready,
    /* exclude signals that are tied to constant value in tb_top.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic [pt.DMA_BUS_TAG-1:0]       dma_axi_arid,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input  logic [31:0]                     dma_axi_araddr,
    input  logic [2:0]                      dma_axi_arsize,
    input  logic [2:0]                      dma_axi_arprot,
@@ -301,29 +301,29 @@ import el2_pkg::*;
  //// AHB LITE BUS
    output logic [31:0]                     haddr,
    /* exclude signals that are tied to constant value in axi4_to_ahb.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [2:0]                      hburst,
    output logic                            hmastlock,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [3:0]                      hprot,
    output logic [2:0]                      hsize,
    output logic [1:0]                      htrans,
    output logic                            hwrite,
 
    /* exclude signals that are tied to constant value in this file */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input logic [63:0]                      hrdata,
    input logic                             hready,
    input logic                             hresp,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    // LSU AHB Master
    output logic [31:0]                     lsu_haddr,
    /* exclude signals that are tied to constant value in axi4_to_ahb.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [2:0]                      lsu_hburst,
    output logic                            lsu_hmastlock,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [3:0]                      lsu_hprot,
    output logic [2:0]                      lsu_hsize,
    output logic [1:0]                      lsu_htrans,
@@ -331,18 +331,18 @@ import el2_pkg::*;
    output logic [63:0]                     lsu_hwdata,
 
    /* exclude signals that are tied to constant value in this file */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input logic [63:0]                      lsu_hrdata,
    input logic                             lsu_hready,
    input logic                             lsu_hresp,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    // Debug Syster Bus AHB
    output logic [31:0]                     sb_haddr,
    /* exclude signals that are tied to constant value in axi4_to_ahb.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    output logic [2:0]                      sb_hburst,
    output logic                            sb_hmastlock,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    output logic [3:0]                      sb_hprot,
    output logic [2:0]                      sb_hsize,
    output logic [1:0]                      sb_htrans,
@@ -350,15 +350,15 @@ import el2_pkg::*;
    output logic [63:0]                     sb_hwdata,
 
    /* exclude signals that are tied to constant value in this file */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input  logic [63:0]                     sb_hrdata,
    input  logic                            sb_hready,
    input  logic                            sb_hresp,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
    // DMA Slave
    /* exclude signals that are tied to constant value in tb_top.sv */
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input logic                             dma_hsel,
    input logic [31:0]                      dma_haddr,
    input logic [2:0]                       dma_hburst,
@@ -368,7 +368,7 @@ import el2_pkg::*;
    input logic [1:0]                       dma_htrans,
    input logic                             dma_hwrite,
    input logic [63:0]                      dma_hwdata,
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input logic                             dma_hreadyin,
 
    output logic [63:0]                     dma_hrdata,
@@ -428,7 +428,7 @@ import el2_pkg::*;
    output logic                            o_cpu_run_ack, // Core response to run req
 
    // Excluding scan_mode and mbist_mode from coverage as their usage is determined by the integrator of the VeeR core.
-   /* verilator coverage_off */
+   /* pragma coverage off */
    input logic                             scan_mode,     // To enable scan mode
    input logic                             mbist_mode,    // to enable mbist
 
@@ -441,7 +441,7 @@ import el2_pkg::*;
    output logic                     [31:0] dmi_uncore_wdata,
    input logic                      [31:0] dmi_uncore_rdata,
    output logic                            dmi_active
-   /* verilator coverage_on */
+   /* pragma coverage on */
 );
 
    logic                             active_l2clk;
@@ -513,7 +513,7 @@ import el2_pkg::*;
    // zero out the signals not presented at the wrapper instantiation level
 `ifdef RV_BUILD_AXI4
    // Since all the signals in this block are tied to constant, we exclude this from coverage analysis
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
 
  //// AHB LITE BUS
    logic [31:0]              haddr;
@@ -598,14 +598,14 @@ import el2_pkg::*;
    assign  dma_hwdata[63:0]                       = '0;
    assign  dma_hreadyin                           = '0;
 
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
 `endif //  `ifdef RV_BUILD_AXI4
 
 
 `ifdef RV_BUILD_AHB_LITE
    // Since all the signals in this block are tied to constant, we exclude this from coverage analysis
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    wire                            lsu_axi_awvalid;
    wire                            lsu_axi_awready;
    wire [pt.LSU_BUS_TAG-1:0]       lsu_axi_awid;
@@ -851,7 +851,7 @@ import el2_pkg::*;
    assign ifu_axi_bresp[1:0] = '0;
    assign ifu_axi_bid[pt.IFU_BUS_TAG-1:0] = '0;
  
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
 
 `endif //  `ifdef RV_BUILD_AHB_LITE
 

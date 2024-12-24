@@ -26,9 +26,9 @@ import el2_pkg::*;
   (
 
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
-   /*verilator coverage_off*/
+   /*pragma coverage off*/
    input logic                                    scan_mode,                // Flop scan mode control
-   /*verilator coverage_on*/
+   /*pragma coverage on*/
    input logic                                    rst_l,                    // reset, active low
    input logic                                    clk,                      // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.
    input logic                                    active_clk,               // Clock only while core active.  Through two clock headers. For flops without second clock header built in.

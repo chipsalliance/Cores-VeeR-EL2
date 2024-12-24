@@ -49,28 +49,16 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Cache Code
-        uses: actions/cache@v3
-        id: cache-code
-        timeout-minutes: 60
-        with:
-          path: tools/riscv-dv/work/test_${{ matrix.test }}/asm_test
-          key: cache_${{ matrix.test }}_${{ matrix.version }}_${{ env.CACHE_HASH }}
-
       - name: Prepare Environment
-        if: steps.cache-code.outputs.cache-hit != 'true'
         run: _secret_prepare_env
 
       - name: Generate code
         id: riscv_dv_test
-        if: steps.cache-code.outputs.cache-hit != 'true' && matrix.version == 'uvm'
         run: _secret_generate_code
         env:
           RISCV_DV_TEST: ${{ matrix.test }}
-        continue-on-error: true
 
       - name: Generate code (pyflow)
-        if: steps.cache-code.outputs.cache-hit != 'true' && matrix.version == 'pyflow'
         shell: bash
         run: |
           export RV_ROOT=`realpath .`
@@ -83,7 +71,6 @@ jobs:
           popd
 
       - name: Use fallback code
-        if: steps.cache-code.outputs.cache-hit != 'true' && steps.riscv_dv_test.outcome != 'success'
         run: |
           mkdir -p tools/riscv-dv/work/
           cp -r .github/assets/riscv_dv/${{ matrix.version  }}/* tools/riscv-dv/work/
@@ -98,7 +85,7 @@ jobs:
   run-tests:
     name: Run RISC-V DV tests
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:latest
+    container: ghcr.io/antmicro/cores-veer-el2:20241223
     needs: [ generate-config, generate-code ]
     strategy:
       fail-fast: false
@@ -226,7 +213,6 @@ jobs:
     name: Run custom RISC-V DV tests
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: centos:8
-    if: github.ref == 'refs/heads/main'
     needs: [ generate-config, generate-code ]
     strategy:
       fail-fast: false
@@ -246,6 +232,12 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Download Code Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: riscv-dv_generated_code_${{ matrix.version }}
+          path: tools/riscv-dv/work/
+
       - name: Prepare Environment
         run: _secret_prepare_env
 
@@ -257,4 +249,3 @@ jobs:
         run: _secret_custom_run
         env:
           RISCV_DV_TEST: ${{ matrix.test }}
-        continue-on-error: true

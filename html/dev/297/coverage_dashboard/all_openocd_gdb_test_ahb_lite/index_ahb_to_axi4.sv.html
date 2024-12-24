@@ -271,9 +271,9 @@
 <span id="L167"><span class="lineNum">     167</span> <span class="tlaGNC">           1 :       buf_read_error_in = 1'b0;              // signal indicating that an error came back with the read from the core</span></span>
 <span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC">           1 :       cmdbuf_wr_en      = 1'b0;              // all clear from the gasket to load the buffer with the command for reads, command/dat for writes</span></span>
 <span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC">           1 :       case (buf_state)</span></span>
-<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">     1999027 :          IDLE: begin  // No commands recieved</span></span>
-<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">     1999027 :                   buf_nxtstate      = ahb_hwrite ? WR : RD;</span></span>
-<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC">     1999027 :                   buf_state_en      = ahb_hready &amp; ahb_htrans[1] &amp; ahb_hsel;                 // only transition on a valid hrtans</span></span>
+<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">     1998979 :          IDLE: begin  // No commands recieved</span></span>
+<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">     1998979 :                   buf_nxtstate      = ahb_hwrite ? WR : RD;</span></span>
+<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC">     1998979 :                   buf_state_en      = ahb_hready &amp; ahb_htrans[1] &amp; ahb_hsel;                 // only transition on a valid hrtans</span></span>
 <span id="L173"><span class="lineNum">     173</span>              :           end</span>
 <span id="L174"><span class="lineNum">     174</span> <span class="tlaUNC tlaBgUNC">           0 :          WR: begin // Write command recieved last cycle</span></span>
 <span id="L175"><span class="lineNum">     175</span> <span class="tlaUNC">           0 :                   buf_nxtstate      = (ahb_hresp | (ahb_htrans[1:0] == 2'b0) | ~ahb_hsel) ? IDLE : ahb_hwrite  ? WR : RD;</span></span>

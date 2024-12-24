@@ -58,14 +58,14 @@
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ffb400;">
-        35.3%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ffb300;">
+        35.2%
     </td>
     <td class="headerCovSummaryEntry">
-        89
+        90
     </td>
     <td class="headerCovSummaryEntry">
-        252
+        256
     </td>
 
             </tr>
@@ -354,9 +354,9 @@
 <span id="L250"><span class="lineNum">     250</span> <span class="tlaUNC">           0 :     output logic [11:0] dec_lsu_offset_d,  // 12b offset for load/store addresses</span></span>
 <span id="L251"><span class="lineNum">     251</span>              : </span>
 <span id="L252"><span class="lineNum">     252</span> <span class="tlaUNC">           0 :     output logic        dec_csr_ren_d,    // CSR read enable</span></span>
-<span id="L253"><span class="lineNum">     253</span> <span class="tlaUNC">           0 :     output logic [31:0] dec_csr_rddata_d, // CSR read data</span></span>
+<span id="L253"><span class="lineNum">     253</span> <span class="tlaGNC tlaBgGNC">           6 :     output logic [31:0] dec_csr_rddata_d, // CSR read data</span></span>
 <span id="L254"><span class="lineNum">     254</span>              : </span>
-<span id="L255"><span class="lineNum">     255</span> <span class="tlaGNC tlaBgGNC">          10 :     output logic dec_tlu_flush_lower_r,  // tlu flush due to late mp, exception, rfpc, or int</span></span>
+<span id="L255"><span class="lineNum">     255</span> <span class="tlaGNC">          10 :     output logic dec_tlu_flush_lower_r,  // tlu flush due to late mp, exception, rfpc, or int</span></span>
 <span id="L256"><span class="lineNum">     256</span> <span class="tlaGNC">          10 :     output logic dec_tlu_flush_lower_wb,</span></span>
 <span id="L257"><span class="lineNum">     257</span> <span class="tlaUNC tlaBgUNC">           0 :     output logic [31:1] dec_tlu_flush_path_r,  // tlu flush target</span></span>
 <span id="L258"><span class="lineNum">     258</span> <span class="tlaUNC">           0 :     output logic        dec_tlu_i0_kill_writeb_r,    // I0 is flushed, don't writeback any results to arch state</span></span>
@@ -396,12 +396,12 @@
 <span id="L292"><span class="lineNum">     292</span>              : `ifdef RV_USER_MODE</span>
 <span id="L293"><span class="lineNum">     293</span>              : </span>
 <span id="L294"><span class="lineNum">     294</span>              :     // Privilege mode</span>
-<span id="L295"><span class="lineNum">     295</span>              :     output logic priv_mode,</span>
-<span id="L296"><span class="lineNum">     296</span>              :     output logic priv_mode_eff,</span>
-<span id="L297"><span class="lineNum">     297</span>              :     output logic priv_mode_ns,</span>
+<span id="L295"><span class="lineNum">     295</span> <span class="tlaUNC">           0 :     output logic priv_mode,</span></span>
+<span id="L296"><span class="lineNum">     296</span> <span class="tlaUNC">           0 :     output logic priv_mode_eff,</span></span>
+<span id="L297"><span class="lineNum">     297</span> <span class="tlaUNC">           0 :     output logic priv_mode_ns,</span></span>
 <span id="L298"><span class="lineNum">     298</span>              : </span>
 <span id="L299"><span class="lineNum">     299</span>              :     // mseccfg CSR content for PMP</span>
-<span id="L300"><span class="lineNum">     300</span>              :     output el2_mseccfg_pkt_t mseccfg,</span>
+<span id="L300"><span class="lineNum">     300</span> <span class="tlaUNC">           0 :     output el2_mseccfg_pkt_t mseccfg,</span></span>
 <span id="L301"><span class="lineNum">     301</span>              : </span>
 <span id="L302"><span class="lineNum">     302</span>              : `endif</span>
 <span id="L303"><span class="lineNum">     303</span>              : </span>

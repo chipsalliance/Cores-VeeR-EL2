@@ -153,7 +153,7 @@
 <span id="L49"><span class="lineNum">      49</span> <span class="tlaUNC">           0 :     input logic        rst_l,   // reset, active low</span></span>
 <span id="L50"><span class="lineNum">      50</span> <span class="tlaUNC">           0 :     input logic [31:1] rst_vec, // reset vector, from core pins</span></span>
 <span id="L51"><span class="lineNum">      51</span>              : </span>
-<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC tlaBgGNC">           4 :     input logic        nmi_int,  // NMI pin</span></span>
+<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC tlaBgGNC">           7 :     input logic        nmi_int,  // NMI pin</span></span>
 <span id="L53"><span class="lineNum">      53</span> <span class="tlaUNC tlaBgUNC">           0 :     input logic [31:1] nmi_vec,  // NMI vector, from pins</span></span>
 <span id="L54"><span class="lineNum">      54</span>              : </span>
 <span id="L55"><span class="lineNum">      55</span> <span class="tlaUNC">           0 :     input logic i_cpu_halt_req,  // Asynchronous Halt request to CPU</span></span>
@@ -272,8 +272,8 @@
 <span id="L168"><span class="lineNum">     168</span> <span class="tlaUNC">           0 :     input logic [31:1] exu_i0_pc_x,   // pc's for e1 from the alu's</span></span>
 <span id="L169"><span class="lineNum">     169</span>              : </span>
 <span id="L170"><span class="lineNum">     170</span> <span class="tlaUNC">           0 :     input logic mexintpend,  // External interrupt pending</span></span>
-<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC tlaBgGNC">           5 :     input logic timer_int,   // Timer interrupt pending (from pin)</span></span>
-<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC">           4 :     input logic soft_int,    // Software interrupt pending (from pin)</span></span>
+<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC tlaBgGNC">           4 :     input logic timer_int,   // Timer interrupt pending (from pin)</span></span>
+<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC">           3 :     input logic soft_int,    // Software interrupt pending (from pin)</span></span>
 <span id="L173"><span class="lineNum">     173</span>              : </span>
 <span id="L174"><span class="lineNum">     174</span> <span class="tlaUNC tlaBgUNC">           0 :     input logic [7:0] pic_claimid,  // PIC claimid</span></span>
 <span id="L175"><span class="lineNum">     175</span> <span class="tlaUNC">           0 :     input logic [3:0] pic_pl,       // PIC priv level</span></span>

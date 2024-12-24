@@ -58,14 +58,14 @@
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ffcd00;">
-        40.2%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ffca00;">
+        39.7%
     </td>
     <td class="headerCovSummaryEntry">
-        144
+        148
     </td>
     <td class="headerCovSummaryEntry">
-        358
+        373
     </td>
 
             </tr>
@@ -287,8 +287,8 @@
 <span id="L183"><span class="lineNum">     183</span> <span class="tlaUNC">           0 :    output logic [3:0] dec_tlu_meipt, // to PIC</span></span>
 <span id="L184"><span class="lineNum">     184</span>              : </span>
 <span id="L185"><span class="lineNum">     185</span>              : </span>
-<span id="L186"><span class="lineNum">     186</span> <span class="tlaUNC">           0 :    output logic [31:0] dec_csr_rddata_d,      // csr read data at wb</span></span>
-<span id="L187"><span class="lineNum">     187</span> <span class="tlaGNC tlaBgGNC">          40 :    output logic dec_csr_legal_d,              // csr indicates legal operation</span></span>
+<span id="L186"><span class="lineNum">     186</span> <span class="tlaGNC tlaBgGNC">           4 :    output logic [31:0] dec_csr_rddata_d,      // csr read data at wb</span></span>
+<span id="L187"><span class="lineNum">     187</span> <span class="tlaGNC">          40 :    output logic dec_csr_legal_d,              // csr indicates legal operation</span></span>
 <span id="L188"><span class="lineNum">     188</span>              : </span>
 <span id="L189"><span class="lineNum">     189</span> <span class="tlaGNC">        2496 :    output el2_br_tlu_pkt_t dec_tlu_br0_r_pkt, // branch pkt to bp</span></span>
 <span id="L190"><span class="lineNum">     190</span>              : </span>
@@ -347,12 +347,12 @@
 <span id="L243"><span class="lineNum">     243</span>              : </span>
 <span id="L244"><span class="lineNum">     244</span>              :    // Privilege mode</span>
 <span id="L245"><span class="lineNum">     245</span>              :    // 0 - machine, 1 - user</span>
-<span id="L246"><span class="lineNum">     246</span>              :    output logic  priv_mode,</span>
-<span id="L247"><span class="lineNum">     247</span>              :    output logic  priv_mode_eff,</span>
-<span id="L248"><span class="lineNum">     248</span>              :    output logic  priv_mode_ns,</span>
+<span id="L246"><span class="lineNum">     246</span> <span class="tlaUNC">           0 :    output logic  priv_mode,</span></span>
+<span id="L247"><span class="lineNum">     247</span> <span class="tlaUNC">           0 :    output logic  priv_mode_eff,</span></span>
+<span id="L248"><span class="lineNum">     248</span> <span class="tlaUNC">           0 :    output logic  priv_mode_ns,</span></span>
 <span id="L249"><span class="lineNum">     249</span>              : </span>
 <span id="L250"><span class="lineNum">     250</span>              :    // mseccfg CSR content for PMP</span>
-<span id="L251"><span class="lineNum">     251</span>              :    output logic [2:0] mseccfg,</span>
+<span id="L251"><span class="lineNum">     251</span> <span class="tlaUNC">           0 :    output logic [2:0] mseccfg,</span></span>
 <span id="L252"><span class="lineNum">     252</span>              : </span>
 <span id="L253"><span class="lineNum">     253</span>              : `endif</span>
 <span id="L254"><span class="lineNum">     254</span>              : </span>
@@ -379,12 +379,12 @@
 <span id="L275"><span class="lineNum">     275</span> <span class="tlaUNC">           0 :    logic set_mie_pmu_fw_halt, fw_halted_ns, fw_halted;</span></span>
 <span id="L276"><span class="lineNum">     276</span> <span class="tlaUNC">           0 :    logic wr_mcountinhibit_r;</span></span>
 <span id="L277"><span class="lineNum">     277</span>              : `ifdef RV_USER_MODE</span>
-<span id="L278"><span class="lineNum">     278</span>              :    logic wr_mcounteren_r;</span>
-<span id="L279"><span class="lineNum">     279</span>              :    logic [5:0] mcounteren; // HPM6, HPM5, HPM4, HPM3, IR, CY</span>
-<span id="L280"><span class="lineNum">     280</span>              :    logic wr_mseccfg_r;</span>
-<span id="L281"><span class="lineNum">     281</span>              :    logic [2:0] mseccfg_ns;</span>
+<span id="L278"><span class="lineNum">     278</span> <span class="tlaUNC">           0 :    logic wr_mcounteren_r;</span></span>
+<span id="L279"><span class="lineNum">     279</span> <span class="tlaUNC">           0 :    logic [5:0] mcounteren; // HPM6, HPM5, HPM4, HPM3, IR, CY</span></span>
+<span id="L280"><span class="lineNum">     280</span> <span class="tlaUNC">           0 :    logic wr_mseccfg_r;</span></span>
+<span id="L281"><span class="lineNum">     281</span> <span class="tlaGNC tlaBgGNC">           6 :    logic [2:0] mseccfg_ns;</span></span>
 <span id="L282"><span class="lineNum">     282</span>              : `endif</span>
-<span id="L283"><span class="lineNum">     283</span> <span class="tlaUNC">           0 :    logic [6:0] mcountinhibit;</span></span>
+<span id="L283"><span class="lineNum">     283</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [6:0] mcountinhibit;</span></span>
 <span id="L284"><span class="lineNum">     284</span> <span class="tlaUNC">           0 :    logic wr_mtsel_r, wr_mtdata1_t0_r, wr_mtdata1_t1_r, wr_mtdata1_t2_r, wr_mtdata1_t3_r, wr_mtdata2_t0_r, wr_mtdata2_t1_r, wr_mtdata2_t2_r, wr_mtdata2_t3_r;</span></span>
 <span id="L285"><span class="lineNum">     285</span> <span class="tlaUNC">           0 :    logic [31:0] mtdata2_t0, mtdata2_t1, mtdata2_t2, mtdata2_t3, mtdata2_tsel_out, mtdata1_tsel_out;</span></span>
 <span id="L286"><span class="lineNum">     286</span> <span class="tlaUNC">           0 :    logic [9:0]  mtdata1_t0_ns, mtdata1_t0, mtdata1_t1_ns, mtdata1_t1, mtdata1_t2_ns, mtdata1_t2, mtdata1_t3_ns, mtdata1_t3;</span></span>
@@ -392,9 +392,9 @@
 <span id="L288"><span class="lineNum">     288</span> <span class="tlaUNC">           0 :    logic [1:0] mtsel_ns, mtsel;</span></span>
 <span id="L289"><span class="lineNum">     289</span> <span class="tlaGNC tlaBgGNC">          16 :    logic tlu_i0_kill_writeb_r;</span></span>
 <span id="L290"><span class="lineNum">     290</span>              : `ifdef RV_USER_MODE</span>
-<span id="L291"><span class="lineNum">     291</span>              :    logic [3:0]  mstatus_ns, mstatus; // MPRV, MPP (inverted! 0-M, 1-U), MPIE, MIE</span>
+<span id="L291"><span class="lineNum">     291</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [3:0]  mstatus_ns, mstatus; // MPRV, MPP (inverted! 0-M, 1-U), MPIE, MIE</span></span>
 <span id="L292"><span class="lineNum">     292</span>              : `else</span>
-<span id="L293"><span class="lineNum">     293</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [1:0]  mstatus_ns, mstatus;</span></span>
+<span id="L293"><span class="lineNum">     293</span>              :    logic [1:0]  mstatus_ns, mstatus;</span>
 <span id="L294"><span class="lineNum">     294</span>              : `endif</span>
 <span id="L295"><span class="lineNum">     295</span> <span class="tlaUNC">           0 :    logic [1:0] mfdhs_ns, mfdhs;</span></span>
 <span id="L296"><span class="lineNum">     296</span> <span class="tlaUNC">           0 :    logic [31:0] force_halt_ctr, force_halt_ctr_f;</span></span>
@@ -587,9 +587,9 @@
 <span id="L483"><span class="lineNum">     483</span>              : </span>
 <span id="L484"><span class="lineNum">     484</span>              :    `include "el2_dec_csr_equ_mu.svh"</span>
 <span id="L485"><span class="lineNum">     485</span>              : </span>
-<span id="L486"><span class="lineNum">     486</span>              :    logic  csr_acc_r;    // CSR access error</span>
-<span id="L487"><span class="lineNum">     487</span>              :    logic  csr_wr_usr_r; // Write to an unprivileged/user-level CSR</span>
-<span id="L488"><span class="lineNum">     488</span>              :    logic  csr_rd_usr_r; // REad from an unprivileged/user-level CSR</span>
+<span id="L486"><span class="lineNum">     486</span> <span class="tlaUNC tlaBgUNC">           0 :    logic  csr_acc_r;    // CSR access error</span></span>
+<span id="L487"><span class="lineNum">     487</span> <span class="tlaGNC tlaBgGNC">          25 :    logic  csr_wr_usr_r; // Write to an unprivileged/user-level CSR</span></span>
+<span id="L488"><span class="lineNum">     488</span> <span class="tlaGNC">        6515 :    logic  csr_rd_usr_r; // REad from an unprivileged/user-level CSR</span></span>
 <span id="L489"><span class="lineNum">     489</span>              : </span>
 <span id="L490"><span class="lineNum">     490</span>              : `else</span>
 <span id="L491"><span class="lineNum">     491</span>              : </span>
@@ -1478,8 +1478,8 @@
 <span id="L1374"><span class="lineNum">    1374</span>              : </span>
 <span id="L1375"><span class="lineNum">    1375</span>              :    // CSR access error</span>
 <span id="L1376"><span class="lineNum">    1376</span>              :    // cycle and instret CSR unprivileged access is controller by bits in mcounteren CSR</span>
-<span id="L1377"><span class="lineNum">    1377</span>              :    logic csr_wr_acc_r;</span>
-<span id="L1378"><span class="lineNum">    1378</span>              :    logic csr_rd_acc_r;</span>
+<span id="L1377"><span class="lineNum">    1377</span> <span class="tlaUNC tlaBgUNC">           0 :    logic csr_wr_acc_r;</span></span>
+<span id="L1378"><span class="lineNum">    1378</span> <span class="tlaUNC">           0 :    logic csr_rd_acc_r;</span></span>
 <span id="L1379"><span class="lineNum">    1379</span>              : </span>
 <span id="L1380"><span class="lineNum">    1380</span>              :    assign csr_wr_acc_r = csr_wr_usr_r &amp; (</span>
 <span id="L1381"><span class="lineNum">    1381</span>              :                              ((dec_csr_wraddr_r[11:0] == CYCLEL)   &amp; mcounteren[MCOUNTEREN_CY]) |</span>
@@ -2008,12 +2008,12 @@
 <span id="L1904"><span class="lineNum">    1904</span>              : </span>
 <span id="L1905"><span class="lineNum">    1905</span>              :    // Detect if any PMP region is locked regardless of being enabled. This is</span>
 <span id="L1906"><span class="lineNum">    1906</span>              :    // necessary for mseccfg.RLB bit write behavior</span>
-<span id="L1907"><span class="lineNum">    1907</span>              :    logic [pt.PMP_ENTRIES-1:0] pmp_region_locked;</span>
+<span id="L1907"><span class="lineNum">    1907</span> <span class="tlaUNC">           0 :    logic [pt.PMP_ENTRIES-1:0] pmp_region_locked;</span></span>
 <span id="L1908"><span class="lineNum">    1908</span>              :    for (genvar r = 0; r &lt; pt.PMP_ENTRIES; r++) begin : g_regions</span>
 <span id="L1909"><span class="lineNum">    1909</span>              :      assign pmp_region_locked[r] = pmp_pmpcfg[r].lock;</span>
 <span id="L1910"><span class="lineNum">    1910</span>              :    end</span>
 <span id="L1911"><span class="lineNum">    1911</span>              : </span>
-<span id="L1912"><span class="lineNum">    1912</span>              :    logic  pmp_any_region_locked;</span>
+<span id="L1912"><span class="lineNum">    1912</span> <span class="tlaUNC">           0 :    logic  pmp_any_region_locked;</span></span>
 <span id="L1913"><span class="lineNum">    1913</span>              :    assign pmp_any_region_locked = |pmp_region_locked;</span>
 <span id="L1914"><span class="lineNum">    1914</span>              : </span>
 <span id="L1915"><span class="lineNum">    1915</span>              :    // mseccfg</span>
@@ -2968,7 +2968,7 @@
 <span id="L2864"><span class="lineNum">    2864</span>              :    //--------------------------------------------------------------------------------</span>
 <span id="L2865"><span class="lineNum">    2865</span>              :    // trace</span>
 <span id="L2866"><span class="lineNum">    2866</span>              :    //--------------------------------------------------------------------------------</span>
-<span id="L2867"><span class="lineNum">    2867</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [4:0] dec_tlu_exc_cause_wb1_raw, dec_tlu_exc_cause_wb2;</span></span>
+<span id="L2867"><span class="lineNum">    2867</span> <span class="tlaUNC">           0 :    logic [4:0] dec_tlu_exc_cause_wb1_raw, dec_tlu_exc_cause_wb2;</span></span>
 <span id="L2868"><span class="lineNum">    2868</span> <span class="tlaUNC">           0 :    logic       dec_tlu_int_valid_wb1_raw, dec_tlu_int_valid_wb2;</span></span>
 <span id="L2869"><span class="lineNum">    2869</span>              : </span>
 <span id="L2870"><span class="lineNum">    2870</span>              :    assign {dec_tlu_i0_valid_wb1,</span>

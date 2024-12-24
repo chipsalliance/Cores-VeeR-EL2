@@ -141,15 +141,15 @@
 <span id="L37"><span class="lineNum">      37</span>              :    /*verilator coverage_on*/</span>
 <span id="L38"><span class="lineNum">      38</span>              : </span>
 <span id="L39"><span class="lineNum">      39</span>              :    // Debug signals</span>
-<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC tlaBgGNC">           6 :    input logic [31:0]  dbg_cmd_addr,</span></span>
-<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">          96 :    input logic [31:0]  dbg_cmd_wrdata,</span></span>
-<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">        1254 :    input logic         dbg_cmd_valid,</span></span>
-<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">         147 :    input logic         dbg_cmd_write, // 1: write command, 0: read_command</span></span>
-<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">         611 :    input logic [1:0]   dbg_cmd_type, // 0:gpr 1:csr 2: memory</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC tlaBgGNC">           8 :    input logic [31:0]  dbg_cmd_addr,</span></span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">         118 :    input logic [31:0]  dbg_cmd_wrdata,</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">        1436 :    input logic         dbg_cmd_valid,</span></span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">         153 :    input logic         dbg_cmd_write, // 1: write command, 0: read_command</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">         613 :    input logic [1:0]   dbg_cmd_type, // 0:gpr 1:csr 2: memory</span></span>
 <span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">         465 :    input logic [1:0]   dbg_cmd_size, // size of the abstract mem access debug command</span></span>
 <span id="L46"><span class="lineNum">      46</span>              : </span>
-<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">        1254 :    input  logic        dbg_dma_bubble,   // Debug needs a bubble to send a valid</span></span>
-<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">        1254 :    output logic        dma_dbg_ready,    // DMA is ready to accept debug request</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">        1436 :    input  logic        dbg_dma_bubble,   // Debug needs a bubble to send a valid</span></span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">        1436 :    output logic        dma_dbg_ready,    // DMA is ready to accept debug request</span></span>
 <span id="L49"><span class="lineNum">      49</span>              : </span>
 <span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">           2 :    output logic        dma_dbg_cmd_done,</span></span>
 <span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">           2 :    output logic        dma_dbg_cmd_fail,</span></span>
@@ -177,7 +177,7 @@
 <span id="L73"><span class="lineNum">      73</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic        dma_dccm_stall_any, // stall dccm pipe (bubble) so that DMA can proceed</span></span>
 <span id="L74"><span class="lineNum">      74</span> <span class="tlaUNC">           0 :    output logic        dma_iccm_stall_any, // stall iccm pipe (bubble) so that DMA can proceed</span></span>
 <span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC tlaBgGNC">           3 :    input logic         dccm_ready, // dccm ready to accept DMA request</span></span>
-<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">         171 :    input logic         iccm_ready, // iccm ready to accept DMA request</span></span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">         185 :    input logic         iccm_ready, // iccm ready to accept DMA request</span></span>
 <span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC">           2 :    input logic [2:0]   dec_tlu_dma_qos_prty,    // DMA QoS priority coming from MFDC [18:15]</span></span>
 <span id="L78"><span class="lineNum">      78</span>              : </span>
 <span id="L79"><span class="lineNum">      79</span>              :    // PMU signals</span>
@@ -252,9 +252,9 @@
 <span id="L148"><span class="lineNum">     148</span> <span class="tlaGNC tlaBgGNC">           2 :    logic [DEPTH-1:0][1:0]   fifo_error_in;</span></span>
 <span id="L149"><span class="lineNum">     149</span>              :    logic [DEPTH-1:0][63:0]  fifo_data_in;</span>
 <span id="L150"><span class="lineNum">     150</span>              : </span>
-<span id="L151"><span class="lineNum">     151</span> <span class="tlaGNC">         218 :    logic                    fifo_write_in;</span></span>
+<span id="L151"><span class="lineNum">     151</span> <span class="tlaGNC">         314 :    logic                    fifo_write_in;</span></span>
 <span id="L152"><span class="lineNum">     152</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                    fifo_posted_write_in;</span></span>
-<span id="L153"><span class="lineNum">     153</span> <span class="tlaGNC tlaBgGNC">        1254 :    logic                    fifo_dbg_in;</span></span>
+<span id="L153"><span class="lineNum">     153</span> <span class="tlaGNC tlaBgGNC">        1436 :    logic                    fifo_dbg_in;</span></span>
 <span id="L154"><span class="lineNum">     154</span> <span class="tlaGNC">           2 :    logic [31:0]             fifo_addr_in;</span></span>
 <span id="L155"><span class="lineNum">     155</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [2:0]              fifo_sz_in;</span></span>
 <span id="L156"><span class="lineNum">     156</span> <span class="tlaUNC">           0 :    logic [7:0]              fifo_byteen_in;</span></span>
@@ -267,7 +267,7 @@
 <span id="L163"><span class="lineNum">     163</span> <span class="tlaGNC">           2 :    logic [1:0]              dma_dbg_sz;</span></span>
 <span id="L164"><span class="lineNum">     164</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [1:0]              dma_dbg_addr;</span></span>
 <span id="L165"><span class="lineNum">     165</span> <span class="tlaUNC">           0 :    logic [31:0]             dma_dbg_mem_rddata;</span></span>
-<span id="L166"><span class="lineNum">     166</span> <span class="tlaGNC tlaBgGNC">          96 :    logic [31:0]             dma_dbg_mem_wrdata;</span></span>
+<span id="L166"><span class="lineNum">     166</span> <span class="tlaGNC tlaBgGNC">         118 :    logic [31:0]             dma_dbg_mem_wrdata;</span></span>
 <span id="L167"><span class="lineNum">     167</span> <span class="tlaGNC">           2 :    logic                    dma_dbg_cmd_error;</span></span>
 <span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC">           2 :    logic                    dma_dbg_cmd_done_q;</span></span>
 <span id="L169"><span class="lineNum">     169</span>              : </span>
@@ -287,8 +287,8 @@
 <span id="L183"><span class="lineNum">     183</span>              : </span>
 <span id="L184"><span class="lineNum">     184</span> <span class="tlaGNC">           2 :    logic [2:0]              dma_nack_count, dma_nack_count_d, dma_nack_count_csr;</span></span>
 <span id="L185"><span class="lineNum">     185</span>              : </span>
-<span id="L186"><span class="lineNum">     186</span> <span class="tlaGNC">        1254 :    logic                    dma_buffer_c1_clken;</span></span>
-<span id="L187"><span class="lineNum">     187</span> <span class="tlaGNC">        1254 :    logic                    dma_free_clken;</span></span>
+<span id="L186"><span class="lineNum">     186</span> <span class="tlaGNC">        1436 :    logic                    dma_buffer_c1_clken;</span></span>
+<span id="L187"><span class="lineNum">     187</span> <span class="tlaGNC">        1436 :    logic                    dma_free_clken;</span></span>
 <span id="L188"><span class="lineNum">     188</span> <span class="tlaGNC">     4000002 :    logic                    dma_buffer_c1_clk;</span></span>
 <span id="L189"><span class="lineNum">     189</span> <span class="tlaGNC">     4000002 :    logic                    dma_free_clk;</span></span>
 <span id="L190"><span class="lineNum">     190</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                    dma_bus_clk;</span></span>
@@ -306,9 +306,9 @@
 <span id="L202"><span class="lineNum">     202</span> <span class="tlaUNC">           0 :    logic                    bus_posted_write_done;</span></span>
 <span id="L203"><span class="lineNum">     203</span>              : </span>
 <span id="L204"><span class="lineNum">     204</span> <span class="tlaUNC">           0 :    logic                    fifo_full_spec_bus;</span></span>
-<span id="L205"><span class="lineNum">     205</span> <span class="tlaGNC tlaBgGNC">        1254 :    logic                    dbg_dma_bubble_bus;</span></span>
+<span id="L205"><span class="lineNum">     205</span> <span class="tlaGNC tlaBgGNC">        1436 :    logic                    dbg_dma_bubble_bus;</span></span>
 <span id="L206"><span class="lineNum">     206</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                    stall_dma_in;</span></span>
-<span id="L207"><span class="lineNum">     207</span> <span class="tlaGNC tlaBgGNC">        1255 :    logic                    dma_fifo_ready;</span></span>
+<span id="L207"><span class="lineNum">     207</span> <span class="tlaGNC tlaBgGNC">        1437 :    logic                    dma_fifo_ready;</span></span>
 <span id="L208"><span class="lineNum">     208</span>              : </span>
 <span id="L209"><span class="lineNum">     209</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       wrbuf_en, wrbuf_data_en;</span></span>
 <span id="L210"><span class="lineNum">     210</span> <span class="tlaUNC">           0 :    logic                       wrbuf_cmd_sent, wrbuf_rst, wrbuf_data_rst;</span></span>

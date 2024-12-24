@@ -58,11 +58,11 @@
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #85ff00;">
-        73.7%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #80ff00;">
+        74.7%
     </td>
     <td class="headerCovSummaryEntry">
-        73
+        74
     </td>
     <td class="headerCovSummaryEntry">
         99
@@ -159,9 +159,9 @@
 <span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">           8 :    input logic  [3:0]   dec_i0_rs1_bypass_en_d,                        // DEC bypass select  1 - X-stage, 0 - dec bypass data</span></span>
 <span id="L56"><span class="lineNum">      56</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic  [3:0]   dec_i0_rs2_bypass_en_d,                        // DEC bypass select  1 - X-stage, 0 - dec bypass data</span></span>
 <span id="L57"><span class="lineNum">      57</span> <span class="tlaGNC tlaBgGNC">           2 :    input logic          dec_csr_ren_d,                                 // CSR read select</span></span>
-<span id="L58"><span class="lineNum">      58</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic  [31:0]  dec_csr_rddata_d,                              // CSR read data</span></span>
+<span id="L58"><span class="lineNum">      58</span> <span class="tlaGNC">        3906 :    input logic  [31:0]  dec_csr_rddata_d,                              // CSR read data</span></span>
 <span id="L59"><span class="lineNum">      59</span>              : </span>
-<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC tlaBgGNC">         535 :    input logic          dec_qual_lsu_d,                                // LSU instruction at D.  Use to quiet LSU operands</span></span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">         535 :    input logic          dec_qual_lsu_d,                                // LSU instruction at D.  Use to quiet LSU operands</span></span>
 <span id="L61"><span class="lineNum">      61</span> <span class="tlaUNC tlaBgUNC">           0 :    input el2_mul_pkt_t mul_p,                                         // DEC {valid, operand signs, low, operand bypass}</span></span>
 <span id="L62"><span class="lineNum">      62</span> <span class="tlaUNC">           0 :    input el2_div_pkt_t div_p,                                         // DEC {valid, unsigned, rem}</span></span>
 <span id="L63"><span class="lineNum">      63</span> <span class="tlaUNC">           0 :    input logic          dec_div_cancel,                                // Cancel the divide operation</span></span>

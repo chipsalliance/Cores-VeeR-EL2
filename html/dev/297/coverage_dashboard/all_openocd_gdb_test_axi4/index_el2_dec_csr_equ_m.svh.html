@@ -107,7 +107,7 @@
 <span id="L3"><span class="lineNum">       3</span> <span class="tlaUNC">           0 : logic csr_marchid;</span></span>
 <span id="L4"><span class="lineNum">       4</span> <span class="tlaUNC">           0 : logic csr_mimpid;</span></span>
 <span id="L5"><span class="lineNum">       5</span> <span class="tlaUNC">           0 : logic csr_mhartid;</span></span>
-<span id="L6"><span class="lineNum">       6</span> <span class="tlaGNC tlaBgGNC">        1129 : logic csr_mstatus;</span></span>
+<span id="L6"><span class="lineNum">       6</span> <span class="tlaGNC tlaBgGNC">        1247 : logic csr_mstatus;</span></span>
 <span id="L7"><span class="lineNum">       7</span> <span class="tlaUNC tlaBgUNC">           0 : logic csr_mtvec;</span></span>
 <span id="L8"><span class="lineNum">       8</span> <span class="tlaUNC">           0 : logic csr_mip;</span></span>
 <span id="L9"><span class="lineNum">       9</span> <span class="tlaUNC">           0 : logic csr_mie;</span></span>
@@ -128,10 +128,10 @@
 <span id="L24"><span class="lineNum">      24</span> <span class="tlaUNC">           0 : logic csr_meipt;</span></span>
 <span id="L25"><span class="lineNum">      25</span> <span class="tlaUNC">           0 : logic csr_meicurpl;</span></span>
 <span id="L26"><span class="lineNum">      26</span> <span class="tlaUNC">           0 : logic csr_meicidpl;</span></span>
-<span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC tlaBgGNC">         618 : logic csr_dcsr;</span></span>
+<span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC tlaBgGNC">         624 : logic csr_dcsr;</span></span>
 <span id="L28"><span class="lineNum">      28</span> <span class="tlaUNC tlaBgUNC">           0 : logic csr_mcgc;</span></span>
 <span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC tlaBgGNC">           2 : logic csr_mfdc;</span></span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">         234 : logic csr_dpc;</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">         238 : logic csr_dpc;</span></span>
 <span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">          36 : logic csr_mtsel;</span></span>
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">          16 : logic csr_mtdata1;</span></span>
 <span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">           2 : logic csr_mtdata2;</span></span>
@@ -175,11 +175,11 @@
 <span id="L71"><span class="lineNum">      71</span> <span class="tlaUNC">           0 : logic csr_mdccmect;</span></span>
 <span id="L72"><span class="lineNum">      72</span> <span class="tlaUNC">           0 : logic csr_mfdht;</span></span>
 <span id="L73"><span class="lineNum">      73</span> <span class="tlaUNC">           0 : logic csr_mfdhs;</span></span>
-<span id="L74"><span class="lineNum">      74</span> <span class="tlaGNC tlaBgGNC">          48 : logic csr_dicawics;</span></span>
-<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">          24 : logic csr_dicad0h;</span></span>
-<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">          48 : logic csr_dicad0;</span></span>
-<span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC">          48 : logic csr_dicad1;</span></span>
-<span id="L78"><span class="lineNum">      78</span> <span class="tlaGNC">          48 : logic csr_dicago;</span></span>
+<span id="L74"><span class="lineNum">      74</span> <span class="tlaGNC tlaBgGNC">          72 : logic csr_dicawics;</span></span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">          36 : logic csr_dicad0h;</span></span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">          72 : logic csr_dicad0;</span></span>
+<span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC">          72 : logic csr_dicad1;</span></span>
+<span id="L78"><span class="lineNum">      78</span> <span class="tlaGNC">          72 : logic csr_dicago;</span></span>
 <span id="L79"><span class="lineNum">      79</span> <span class="tlaUNC tlaBgUNC">           0 : logic csr_pmpcfg;</span></span>
 <span id="L80"><span class="lineNum">      80</span> <span class="tlaUNC">           0 : logic csr_pmpaddr0;</span></span>
 <span id="L81"><span class="lineNum">      81</span> <span class="tlaUNC">           0 : logic csr_pmpaddr16;</span></span>
@@ -187,7 +187,7 @@
 <span id="L83"><span class="lineNum">      83</span> <span class="tlaUNC">           0 : logic csr_pmpaddr48;</span></span>
 <span id="L84"><span class="lineNum">      84</span> <span class="tlaUNC">           0 : logic valid_only;</span></span>
 <span id="L85"><span class="lineNum">      85</span> <span class="tlaGNC tlaBgGNC">          18 : logic presync;</span></span>
-<span id="L86"><span class="lineNum">      86</span> <span class="tlaGNC">        1107 : logic postsync;</span></span>
+<span id="L86"><span class="lineNum">      86</span> <span class="tlaGNC">        1225 : logic postsync;</span></span>
 <span id="L87"><span class="lineNum">      87</span>              : assign csr_misa = (!dec_csr_rdaddr_d[11]&amp;!dec_csr_rdaddr_d[6]</span>
 <span id="L88"><span class="lineNum">      88</span>              :     &amp;!dec_csr_rdaddr_d[5]&amp;!dec_csr_rdaddr_d[2]&amp;dec_csr_rdaddr_d[0]);</span>
 <span id="L89"><span class="lineNum">      89</span>              : </span>
@@ -474,7 +474,7 @@
 <span id="L370"><span class="lineNum">     370</span>              :     &amp;!dec_csr_rdaddr_d[2]&amp;dec_csr_rdaddr_d[1]) | (!dec_csr_rdaddr_d[7]</span>
 <span id="L371"><span class="lineNum">     371</span>              :     &amp;dec_csr_rdaddr_d[6]&amp;!dec_csr_rdaddr_d[1]&amp;dec_csr_rdaddr_d[0]);</span>
 <span id="L372"><span class="lineNum">     372</span>              : </span>
-<span id="L373"><span class="lineNum">     373</span> <span class="tlaGNC">        1132 : logic legal;</span></span>
+<span id="L373"><span class="lineNum">     373</span> <span class="tlaGNC">        1252 : logic legal;</span></span>
 <span id="L374"><span class="lineNum">     374</span>              : assign legal = (!dec_csr_rdaddr_d[11]&amp;dec_csr_rdaddr_d[10]&amp;dec_csr_rdaddr_d[9]</span>
 <span id="L375"><span class="lineNum">     375</span>              :     &amp;dec_csr_rdaddr_d[8]&amp;dec_csr_rdaddr_d[7]&amp;dec_csr_rdaddr_d[6]</span>
 <span id="L376"><span class="lineNum">     376</span>              :     &amp;dec_csr_rdaddr_d[4]&amp;!dec_csr_rdaddr_d[3]&amp;!dec_csr_rdaddr_d[2]</span>

@@ -157,7 +157,7 @@
 <span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC tlaBgGNC">           6 :    input  logic                        dec_tlu_resume_ack,        // core sends back an ack for the resume (pulse)</span></span>
 <span id="L54"><span class="lineNum">      54</span>              : </span>
 <span id="L55"><span class="lineNum">      55</span>              :    // inputs from the JTAG</span>
-<span id="L56"><span class="lineNum">      56</span> <span class="tlaGNC">        8314 :    input logic                         dmi_reg_en,                // read or write</span></span>
+<span id="L56"><span class="lineNum">      56</span> <span class="tlaGNC">        8316 :    input logic                         dmi_reg_en,                // read or write</span></span>
 <span id="L57"><span class="lineNum">      57</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [6:0]                   dmi_reg_addr,              // address of DM register</span></span>
 <span id="L58"><span class="lineNum">      58</span> <span class="tlaGNC tlaBgGNC">        3268 :    input logic                         dmi_reg_wr_en,             // write instruction</span></span>
 <span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC">          94 :    input logic [31:0]                  dmi_reg_wdata,             // write data</span></span>
@@ -379,10 +379,10 @@
 <span id="L275"><span class="lineNum">     275</span> <span class="tlaGNC">           1 :    logic              rst_l_sync;</span></span>
 <span id="L276"><span class="lineNum">     276</span>              : </span>
 <span id="L277"><span class="lineNum">     277</span>              :    //clken</span>
-<span id="L278"><span class="lineNum">     278</span> <span class="tlaGNC">          49 :    logic              dbg_free_clken;</span></span>
+<span id="L278"><span class="lineNum">     278</span> <span class="tlaGNC">          47 :    logic              dbg_free_clken;</span></span>
 <span id="L279"><span class="lineNum">     279</span> <span class="tlaGNC">     4000092 :    logic              dbg_free_clk;</span></span>
 <span id="L280"><span class="lineNum">     280</span>              : </span>
-<span id="L281"><span class="lineNum">     281</span> <span class="tlaGNC">        8314 :    logic              sb_free_clken;</span></span>
+<span id="L281"><span class="lineNum">     281</span> <span class="tlaGNC">        8316 :    logic              sb_free_clken;</span></span>
 <span id="L282"><span class="lineNum">     282</span> <span class="tlaGNC">     4000092 :    logic              sb_free_clk;</span></span>
 <span id="L283"><span class="lineNum">     283</span>              : </span>
 <span id="L284"><span class="lineNum">     284</span>              :    // clocking</span>
@@ -599,64 +599,64 @@
 <span id="L495"><span class="lineNum">     495</span> <span class="tlaGNC">           1 :       sb_abmem_data_done_en   = 1'b0;</span></span>
 <span id="L496"><span class="lineNum">     496</span>              : </span>
 <span id="L497"><span class="lineNum">     497</span> <span class="tlaGNC">           1 :        case (dbg_state)</span></span>
-<span id="L498"><span class="lineNum">     498</span> <span class="tlaGNC">      254998 :             IDLE: begin</span></span>
-<span id="L499"><span class="lineNum">     499</span> <span class="tlaGNC">      254998 :                      dbg_nxtstate         = (dmstatus_reg[9] | dec_tlu_mpc_halted_only) ? HALTED : HALTING;         // initiate the halt command to the core</span></span>
-<span id="L500"><span class="lineNum">     500</span> <span class="tlaGNC">      254998 :                      dbg_state_en         = dmcontrol_reg[31] | dmstatus_reg[9] | dec_tlu_mpc_halted_only;      // when the jtag writes the halt bit in the DM register, OR when the status indicates H</span></span>
-<span id="L501"><span class="lineNum">     501</span> <span class="tlaGNC">      254998 :                      dbg_halt_req         = dmcontrol_reg[31];               // only when jtag has written the halt_req bit in the control. Removed debug mode qualification during MPC changes</span></span>
+<span id="L498"><span class="lineNum">     498</span> <span class="tlaGNC">      263631 :             IDLE: begin</span></span>
+<span id="L499"><span class="lineNum">     499</span> <span class="tlaGNC">      263631 :                      dbg_nxtstate         = (dmstatus_reg[9] | dec_tlu_mpc_halted_only) ? HALTED : HALTING;         // initiate the halt command to the core</span></span>
+<span id="L500"><span class="lineNum">     500</span> <span class="tlaGNC">      263631 :                      dbg_state_en         = dmcontrol_reg[31] | dmstatus_reg[9] | dec_tlu_mpc_halted_only;      // when the jtag writes the halt bit in the DM register, OR when the status indicates H</span></span>
+<span id="L501"><span class="lineNum">     501</span> <span class="tlaGNC">      263631 :                      dbg_halt_req         = dmcontrol_reg[31];               // only when jtag has written the halt_req bit in the control. Removed debug mode qualification during MPC changes</span></span>
 <span id="L502"><span class="lineNum">     502</span>              :             end</span>
 <span id="L503"><span class="lineNum">     503</span> <span class="tlaGNC">           8 :             HALTING : begin</span></span>
 <span id="L504"><span class="lineNum">     504</span> <span class="tlaGNC">           8 :                      dbg_nxtstate         = HALTED;                                 // Goto HALTED once the core sends an ACK</span></span>
 <span id="L505"><span class="lineNum">     505</span> <span class="tlaGNC">           8 :                      dbg_state_en         = dmstatus_reg[9] | dec_tlu_mpc_halted_only;     // core indicates halted</span></span>
 <span id="L506"><span class="lineNum">     506</span>              :             end</span>
-<span id="L507"><span class="lineNum">     507</span> <span class="tlaGNC">     1739326 :             HALTED: begin</span></span>
+<span id="L507"><span class="lineNum">     507</span> <span class="tlaGNC">     1730178 :             HALTED: begin</span></span>
 <span id="L508"><span class="lineNum">     508</span>              :                      // wait for halted to go away before send to resume. Else start of new command</span>
-<span id="L509"><span class="lineNum">     509</span> <span class="tlaGNC">     1739326 :                      dbg_nxtstate         = dmstatus_reg[9] ? (resumereq ? RESUMING : (((command_reg[31:24] == 8'h2) &amp; abmem_addr_external) ? SB_CMD_START : CORE_CMD_START)) :</span></span>
-<span id="L510"><span class="lineNum">     510</span> <span class="tlaGNC">     1739326 :                                                                                     (dmcontrol_reg[31] ? HALTING : IDLE);       // This is MPC halted case</span></span>
-<span id="L511"><span class="lineNum">     511</span> <span class="tlaGNC">     1739326 :                      dbg_state_en         = (dmstatus_reg[9] &amp; resumereq) | execute_command | ~(dmstatus_reg[9] | dec_tlu_mpc_halted_only);</span></span>
-<span id="L512"><span class="lineNum">     512</span> <span class="tlaGNC">     1739326 :                      abstractcs_busy_wren = dbg_state_en &amp; ((dbg_nxtstate == CORE_CMD_START) | (dbg_nxtstate == SB_CMD_START));                 // write busy when a new command was written by jtag</span></span>
-<span id="L513"><span class="lineNum">     513</span> <span class="tlaGNC">     1739326 :                      abstractcs_busy_din  = 1'b1;</span></span>
-<span id="L514"><span class="lineNum">     514</span> <span class="tlaGNC">     1739326 :                      dbg_resume_req       = dbg_state_en &amp; (dbg_nxtstate == RESUMING);                       // single cycle pulse to core if resuming</span></span>
+<span id="L509"><span class="lineNum">     509</span> <span class="tlaGNC">     1730178 :                      dbg_nxtstate         = dmstatus_reg[9] ? (resumereq ? RESUMING : (((command_reg[31:24] == 8'h2) &amp; abmem_addr_external) ? SB_CMD_START : CORE_CMD_START)) :</span></span>
+<span id="L510"><span class="lineNum">     510</span> <span class="tlaGNC">     1730178 :                                                                                     (dmcontrol_reg[31] ? HALTING : IDLE);       // This is MPC halted case</span></span>
+<span id="L511"><span class="lineNum">     511</span> <span class="tlaGNC">     1730178 :                      dbg_state_en         = (dmstatus_reg[9] &amp; resumereq) | execute_command | ~(dmstatus_reg[9] | dec_tlu_mpc_halted_only);</span></span>
+<span id="L512"><span class="lineNum">     512</span> <span class="tlaGNC">     1730178 :                      abstractcs_busy_wren = dbg_state_en &amp; ((dbg_nxtstate == CORE_CMD_START) | (dbg_nxtstate == SB_CMD_START));                 // write busy when a new command was written by jtag</span></span>
+<span id="L513"><span class="lineNum">     513</span> <span class="tlaGNC">     1730178 :                      abstractcs_busy_din  = 1'b1;</span></span>
+<span id="L514"><span class="lineNum">     514</span> <span class="tlaGNC">     1730178 :                      dbg_resume_req       = dbg_state_en &amp; (dbg_nxtstate == RESUMING);                       // single cycle pulse to core if resuming</span></span>
 <span id="L515"><span class="lineNum">     515</span>              :             end</span>
-<span id="L516"><span class="lineNum">     516</span> <span class="tlaGNC">         643 :             CORE_CMD_START: begin</span></span>
+<span id="L516"><span class="lineNum">     516</span> <span class="tlaGNC">         735 :             CORE_CMD_START: begin</span></span>
 <span id="L517"><span class="lineNum">     517</span>              :                      // Don't execute the command if cmderror or transfer=0 for abstract register access</span>
-<span id="L518"><span class="lineNum">     518</span> <span class="tlaGNC">         643 :                      dbg_nxtstate         = ((|abstractcs_reg[10:8]) | ((command_reg[31:24] == 8'h0) &amp; ~command_reg[17])) ? CMD_DONE : CORE_CMD_WAIT;     // new command sent to the core</span></span>
-<span id="L519"><span class="lineNum">     519</span> <span class="tlaGNC">         643 :                      dbg_state_en         = dbg_cmd_valid | (|abstractcs_reg[10:8]) | ((command_reg[31:24] == 8'h0) &amp; ~command_reg[17]);</span></span>
+<span id="L518"><span class="lineNum">     518</span> <span class="tlaGNC">         735 :                      dbg_nxtstate         = ((|abstractcs_reg[10:8]) | ((command_reg[31:24] == 8'h0) &amp; ~command_reg[17])) ? CMD_DONE : CORE_CMD_WAIT;     // new command sent to the core</span></span>
+<span id="L519"><span class="lineNum">     519</span> <span class="tlaGNC">         735 :                      dbg_state_en         = dbg_cmd_valid | (|abstractcs_reg[10:8]) | ((command_reg[31:24] == 8'h0) &amp; ~command_reg[17]);</span></span>
 <span id="L520"><span class="lineNum">     520</span>              :             end</span>
-<span id="L521"><span class="lineNum">     521</span> <span class="tlaGNC">        1284 :             CORE_CMD_WAIT: begin</span></span>
-<span id="L522"><span class="lineNum">     522</span> <span class="tlaGNC">        1284 :                      dbg_nxtstate         = CMD_DONE;</span></span>
-<span id="L523"><span class="lineNum">     523</span> <span class="tlaGNC">        1284 :                      dbg_state_en         = core_dbg_cmd_done;                   // go to done state for one cycle after completing current command</span></span>
+<span id="L521"><span class="lineNum">     521</span> <span class="tlaGNC">        1468 :             CORE_CMD_WAIT: begin</span></span>
+<span id="L522"><span class="lineNum">     522</span> <span class="tlaGNC">        1468 :                      dbg_nxtstate         = CMD_DONE;</span></span>
+<span id="L523"><span class="lineNum">     523</span> <span class="tlaGNC">        1468 :                      dbg_state_en         = core_dbg_cmd_done;                   // go to done state for one cycle after completing current command</span></span>
 <span id="L524"><span class="lineNum">     524</span>              :             end</span>
-<span id="L525"><span class="lineNum">     525</span> <span class="tlaGNC">         362 :             SB_CMD_START: begin</span></span>
-<span id="L526"><span class="lineNum">     526</span> <span class="tlaGNC">         362 :                      dbg_nxtstate         = (|abstractcs_reg[10:8]) ? CMD_DONE : SB_CMD_SEND;</span></span>
-<span id="L527"><span class="lineNum">     527</span> <span class="tlaGNC">         362 :                      dbg_state_en         = (dbg_bus_clk_en &amp; ~sb_cmd_pending) | (|abstractcs_reg[10:8]);</span></span>
+<span id="L525"><span class="lineNum">     525</span> <span class="tlaGNC">         378 :             SB_CMD_START: begin</span></span>
+<span id="L526"><span class="lineNum">     526</span> <span class="tlaGNC">         378 :                      dbg_nxtstate         = (|abstractcs_reg[10:8]) ? CMD_DONE : SB_CMD_SEND;</span></span>
+<span id="L527"><span class="lineNum">     527</span> <span class="tlaGNC">         378 :                      dbg_state_en         = (dbg_bus_clk_en &amp; ~sb_cmd_pending) | (|abstractcs_reg[10:8]);</span></span>
 <span id="L528"><span class="lineNum">     528</span>              :             end</span>
-<span id="L529"><span class="lineNum">     529</span> <span class="tlaGNC">         362 :             SB_CMD_SEND: begin</span></span>
-<span id="L530"><span class="lineNum">     530</span> <span class="tlaGNC">         362 :                      sb_abmem_cmd_done_in = 1'b1;</span></span>
-<span id="L531"><span class="lineNum">     531</span> <span class="tlaGNC">         362 :                      sb_abmem_data_done_in= 1'b1;</span></span>
-<span id="L532"><span class="lineNum">     532</span> <span class="tlaGNC">         362 :                      sb_abmem_cmd_done_en = (sb_bus_cmd_read | sb_bus_cmd_write_addr) &amp; dbg_bus_clk_en;</span></span>
-<span id="L533"><span class="lineNum">     533</span> <span class="tlaGNC">         362 :                      sb_abmem_data_done_en= (sb_bus_cmd_read | sb_bus_cmd_write_data) &amp; dbg_bus_clk_en;</span></span>
-<span id="L534"><span class="lineNum">     534</span> <span class="tlaGNC">         362 :                      dbg_nxtstate         = SB_CMD_RESP;</span></span>
-<span id="L535"><span class="lineNum">     535</span> <span class="tlaGNC">         362 :                      dbg_state_en         = (sb_abmem_cmd_done | sb_abmem_cmd_done_en) &amp; (sb_abmem_data_done | sb_abmem_data_done_en) &amp; dbg_bus_clk_en;</span></span>
+<span id="L529"><span class="lineNum">     529</span> <span class="tlaGNC">         378 :             SB_CMD_SEND: begin</span></span>
+<span id="L530"><span class="lineNum">     530</span> <span class="tlaGNC">         378 :                      sb_abmem_cmd_done_in = 1'b1;</span></span>
+<span id="L531"><span class="lineNum">     531</span> <span class="tlaGNC">         378 :                      sb_abmem_data_done_in= 1'b1;</span></span>
+<span id="L532"><span class="lineNum">     532</span> <span class="tlaGNC">         378 :                      sb_abmem_cmd_done_en = (sb_bus_cmd_read | sb_bus_cmd_write_addr) &amp; dbg_bus_clk_en;</span></span>
+<span id="L533"><span class="lineNum">     533</span> <span class="tlaGNC">         378 :                      sb_abmem_data_done_en= (sb_bus_cmd_read | sb_bus_cmd_write_data) &amp; dbg_bus_clk_en;</span></span>
+<span id="L534"><span class="lineNum">     534</span> <span class="tlaGNC">         378 :                      dbg_nxtstate         = SB_CMD_RESP;</span></span>
+<span id="L535"><span class="lineNum">     535</span> <span class="tlaGNC">         378 :                      dbg_state_en         = (sb_abmem_cmd_done | sb_abmem_cmd_done_en) &amp; (sb_abmem_data_done | sb_abmem_data_done_en) &amp; dbg_bus_clk_en;</span></span>
 <span id="L536"><span class="lineNum">     536</span>              :             end</span>
-<span id="L537"><span class="lineNum">     537</span> <span class="tlaGNC">        2004 :             SB_CMD_RESP: begin</span></span>
-<span id="L538"><span class="lineNum">     538</span> <span class="tlaGNC">        2004 :                      dbg_nxtstate         = CMD_DONE;</span></span>
-<span id="L539"><span class="lineNum">     539</span> <span class="tlaGNC">        2004 :                      dbg_state_en         = (sb_bus_rsp_read | sb_bus_rsp_write) &amp; dbg_bus_clk_en;</span></span>
-<span id="L540"><span class="lineNum">     540</span> <span class="tlaGNC">        2004 :                      dbg_sb_bus_error     = (sb_bus_rsp_read | sb_bus_rsp_write) &amp; sb_bus_rsp_error &amp; dbg_bus_clk_en;</span></span>
-<span id="L541"><span class="lineNum">     541</span> <span class="tlaGNC">        2004 :                      data0_reg_wren2      = dbg_state_en &amp; ~sb_abmem_cmd_write &amp; ~dbg_sb_bus_error;</span></span>
+<span id="L537"><span class="lineNum">     537</span> <span class="tlaGNC">        2100 :             SB_CMD_RESP: begin</span></span>
+<span id="L538"><span class="lineNum">     538</span> <span class="tlaGNC">        2100 :                      dbg_nxtstate         = CMD_DONE;</span></span>
+<span id="L539"><span class="lineNum">     539</span> <span class="tlaGNC">        2100 :                      dbg_state_en         = (sb_bus_rsp_read | sb_bus_rsp_write) &amp; dbg_bus_clk_en;</span></span>
+<span id="L540"><span class="lineNum">     540</span> <span class="tlaGNC">        2100 :                      dbg_sb_bus_error     = (sb_bus_rsp_read | sb_bus_rsp_write) &amp; sb_bus_rsp_error &amp; dbg_bus_clk_en;</span></span>
+<span id="L541"><span class="lineNum">     541</span> <span class="tlaGNC">        2100 :                      data0_reg_wren2      = dbg_state_en &amp; ~sb_abmem_cmd_write &amp; ~dbg_sb_bus_error;</span></span>
 <span id="L542"><span class="lineNum">     542</span>              :             end</span>
-<span id="L543"><span class="lineNum">     543</span> <span class="tlaGNC">        1005 :             CMD_DONE: begin</span></span>
-<span id="L544"><span class="lineNum">     544</span> <span class="tlaGNC">        1005 :                      dbg_nxtstate         = HALTED;</span></span>
-<span id="L545"><span class="lineNum">     545</span> <span class="tlaGNC">        1005 :                      dbg_state_en         = 1'b1;</span></span>
-<span id="L546"><span class="lineNum">     546</span> <span class="tlaGNC">        1005 :                      abstractcs_busy_wren = dbg_state_en;                    // remove the busy bit from the abstracts ( bit 12 )</span></span>
-<span id="L547"><span class="lineNum">     547</span> <span class="tlaGNC">        1005 :                      abstractcs_busy_din  = 1'b0;</span></span>
-<span id="L548"><span class="lineNum">     548</span> <span class="tlaGNC">        1005 :                      sb_abmem_cmd_done_in = 1'b0;</span></span>
-<span id="L549"><span class="lineNum">     549</span> <span class="tlaGNC">        1005 :                      sb_abmem_data_done_in= 1'b0;</span></span>
-<span id="L550"><span class="lineNum">     550</span> <span class="tlaGNC">        1005 :                      sb_abmem_cmd_done_en = 1'b1;</span></span>
-<span id="L551"><span class="lineNum">     551</span> <span class="tlaGNC">        1005 :                      sb_abmem_data_done_en= 1'b1;</span></span>
+<span id="L543"><span class="lineNum">     543</span> <span class="tlaGNC">        1113 :             CMD_DONE: begin</span></span>
+<span id="L544"><span class="lineNum">     544</span> <span class="tlaGNC">        1113 :                      dbg_nxtstate         = HALTED;</span></span>
+<span id="L545"><span class="lineNum">     545</span> <span class="tlaGNC">        1113 :                      dbg_state_en         = 1'b1;</span></span>
+<span id="L546"><span class="lineNum">     546</span> <span class="tlaGNC">        1113 :                      abstractcs_busy_wren = dbg_state_en;                    // remove the busy bit from the abstracts ( bit 12 )</span></span>
+<span id="L547"><span class="lineNum">     547</span> <span class="tlaGNC">        1113 :                      abstractcs_busy_din  = 1'b0;</span></span>
+<span id="L548"><span class="lineNum">     548</span> <span class="tlaGNC">        1113 :                      sb_abmem_cmd_done_in = 1'b0;</span></span>
+<span id="L549"><span class="lineNum">     549</span> <span class="tlaGNC">        1113 :                      sb_abmem_data_done_in= 1'b0;</span></span>
+<span id="L550"><span class="lineNum">     550</span> <span class="tlaGNC">        1113 :                      sb_abmem_cmd_done_en = 1'b1;</span></span>
+<span id="L551"><span class="lineNum">     551</span> <span class="tlaGNC">        1113 :                      sb_abmem_data_done_en= 1'b1;</span></span>
 <span id="L552"><span class="lineNum">     552</span>              :             end</span>
-<span id="L553"><span class="lineNum">     553</span> <span class="tlaGNC">           9 :             RESUMING : begin</span></span>
-<span id="L554"><span class="lineNum">     554</span> <span class="tlaGNC">           9 :                      dbg_nxtstate            = IDLE;</span></span>
-<span id="L555"><span class="lineNum">     555</span> <span class="tlaGNC">           9 :                      dbg_state_en            = dmstatus_reg[17];             // resume ack has been updated in the dmstatus register</span></span>
+<span id="L553"><span class="lineNum">     553</span> <span class="tlaGNC">          12 :             RESUMING : begin</span></span>
+<span id="L554"><span class="lineNum">     554</span> <span class="tlaGNC">          12 :                      dbg_nxtstate            = IDLE;</span></span>
+<span id="L555"><span class="lineNum">     555</span> <span class="tlaGNC">          12 :                      dbg_state_en            = dmstatus_reg[17];             // resume ack has been updated in the dmstatus register</span></span>
 <span id="L556"><span class="lineNum">     556</span>              :            end</span>
 <span id="L557"><span class="lineNum">     557</span>              :            /* All legal values are handled above. Exclude the default part from coverage. */</span>
 <span id="L558"><span class="lineNum">     558</span>              :            /*verilator coverage_off*/</span>

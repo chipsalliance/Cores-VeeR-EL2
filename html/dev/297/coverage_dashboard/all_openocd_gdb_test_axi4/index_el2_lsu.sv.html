@@ -137,7 +137,7 @@
 <span id="L33"><span class="lineNum">      33</span>              : (</span>
 <span id="L34"><span class="lineNum">      34</span>              : </span>
 <span id="L35"><span class="lineNum">      35</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                             clk_override,             // Override non-functional clock gating</span></span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC tlaBgGNC">          16 :    input logic                             dec_tlu_flush_lower_r,    // I0/I1 writeback flush. This is used to flush the old packets only</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC tlaBgGNC">          20 :    input logic                             dec_tlu_flush_lower_r,    // I0/I1 writeback flush. This is used to flush the old packets only</span></span>
 <span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">           4 :    input logic                             dec_tlu_i0_kill_writeb_r, // I0 is flushed, don't writeback any results to arch state</span></span>
 <span id="L38"><span class="lineNum">      38</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                             dec_tlu_force_halt,       // This will be high till TLU goes to debug halt</span></span>
 <span id="L39"><span class="lineNum">      39</span>              : </span>
@@ -282,9 +282,9 @@
 <span id="L178"><span class="lineNum">     178</span>              :    output logic                            lsu_axi_rready,</span>
 <span id="L179"><span class="lineNum">     179</span>              :    /*verilator coverage_on*/</span>
 <span id="L180"><span class="lineNum">     180</span> <span class="tlaUNC">           0 :    input  logic [pt.LSU_BUS_TAG-1:0]       lsu_axi_rid,</span></span>
-<span id="L181"><span class="lineNum">     181</span> <span class="tlaGNC tlaBgGNC">           2 :    input  logic [63:0]                     lsu_axi_rdata,</span></span>
+<span id="L181"><span class="lineNum">     181</span> <span class="tlaGNC tlaBgGNC">           4 :    input  logic [63:0]                     lsu_axi_rdata,</span></span>
 <span id="L182"><span class="lineNum">     182</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic [1:0]                      lsu_axi_rresp,</span></span>
-<span id="L183"><span class="lineNum">     183</span> <span class="tlaGNC tlaBgGNC">         612 :    input  logic                            lsu_axi_rlast,</span></span>
+<span id="L183"><span class="lineNum">     183</span> <span class="tlaGNC tlaBgGNC">         644 :    input  logic                            lsu_axi_rlast,</span></span>
 <span id="L184"><span class="lineNum">     184</span>              : </span>
 <span id="L185"><span class="lineNum">     185</span> <span class="tlaGNC">           1 :    input logic                             lsu_bus_clk_en,    // external drives a clock_en to control bus ratio</span></span>
 <span id="L186"><span class="lineNum">     186</span>              : </span>

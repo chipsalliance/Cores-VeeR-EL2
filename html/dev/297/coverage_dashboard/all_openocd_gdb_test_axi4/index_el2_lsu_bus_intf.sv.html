@@ -172,7 +172,7 @@
 <span id="L68"><span class="lineNum">      68</span>              : </span>
 <span id="L69"><span class="lineNum">      69</span> <span class="tlaUNC">           0 :    input logic                          lsu_commit_r,                      // lsu instruction in r commits</span></span>
 <span id="L70"><span class="lineNum">      70</span> <span class="tlaUNC">           0 :    input logic                          is_sideeffects_m,                  // lsu attribute is side_effects</span></span>
-<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC tlaBgGNC">          16 :    input logic                          flush_m_up,                        // flush</span></span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC tlaBgGNC">          20 :    input logic                          flush_m_up,                        // flush</span></span>
 <span id="L72"><span class="lineNum">      72</span> <span class="tlaGNC">           4 :    input logic                          flush_r,                           // flush</span></span>
 <span id="L73"><span class="lineNum">      73</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                          ldst_dual_d, ldst_dual_m, ldst_dual_r,</span></span>
 <span id="L74"><span class="lineNum">      74</span>              : </span>
@@ -269,7 +269,7 @@
 <span id="L165"><span class="lineNum">     165</span>              :    output logic                        lsu_axi_rready,</span>
 <span id="L166"><span class="lineNum">     166</span>              :    /*verilator coverage_on*/</span>
 <span id="L167"><span class="lineNum">     167</span> <span class="tlaUNC">           0 :    input  logic [pt.LSU_BUS_TAG-1:0]   lsu_axi_rid,</span></span>
-<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC tlaBgGNC">           2 :    input  logic [63:0]                 lsu_axi_rdata,</span></span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC tlaBgGNC">           4 :    input  logic [63:0]                 lsu_axi_rdata,</span></span>
 <span id="L169"><span class="lineNum">     169</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic [1:0]                  lsu_axi_rresp,</span></span>
 <span id="L170"><span class="lineNum">     170</span>              : </span>
 <span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC tlaBgGNC">           1 :    input logic                         lsu_bus_clk_en</span></span>

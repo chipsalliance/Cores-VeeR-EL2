@@ -62,10 +62,10 @@
         24.6%
     </td>
     <td class="headerCovSummaryEntry">
-        137
+        138
     </td>
     <td class="headerCovSummaryEntry">
-        558
+        562
     </td>
 
             </tr>
@@ -802,9 +802,9 @@
 <span id="L698"><span class="lineNum">     698</span> <span class="tlaUNC">           0 :    logic [31:0]                          lsu_nonblock_load_data;</span></span>
 <span id="L699"><span class="lineNum">     699</span>              : </span>
 <span id="L700"><span class="lineNum">     700</span> <span class="tlaUNC">           0 :    logic        dec_csr_ren_d;</span></span>
-<span id="L701"><span class="lineNum">     701</span> <span class="tlaUNC">           0 :    logic [31:0] dec_csr_rddata_d;</span></span>
+<span id="L701"><span class="lineNum">     701</span> <span class="tlaGNC tlaBgGNC">           6 :    logic [31:0] dec_csr_rddata_d;</span></span>
 <span id="L702"><span class="lineNum">     702</span>              : </span>
-<span id="L703"><span class="lineNum">     703</span> <span class="tlaUNC">           0 :    logic [31:0] exu_csr_rs1_x;</span></span>
+<span id="L703"><span class="lineNum">     703</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [31:0] exu_csr_rs1_x;</span></span>
 <span id="L704"><span class="lineNum">     704</span>              : </span>
 <span id="L705"><span class="lineNum">     705</span> <span class="tlaGNC tlaBgGNC">         420 :    logic        dec_tlu_i0_commit_cmt;</span></span>
 <span id="L706"><span class="lineNum">     706</span> <span class="tlaGNC">          10 :    logic        dec_tlu_flush_lower_r;</span></span>
@@ -1081,13 +1081,13 @@
 <span id="L977"><span class="lineNum">     977</span>              : `ifdef RV_USER_MODE</span>
 <span id="L978"><span class="lineNum">     978</span>              : </span>
 <span id="L979"><span class="lineNum">     979</span>              :    // Operating privilege mode, 0 - machine, 1 - user</span>
-<span id="L980"><span class="lineNum">     980</span>              :    logic priv_mode;</span>
+<span id="L980"><span class="lineNum">     980</span> <span class="tlaUNC tlaBgUNC">           0 :    logic priv_mode;</span></span>
 <span id="L981"><span class="lineNum">     981</span>              :    // Effective privilege mode, 0 - machine, 1 - user (driven in el2_dec_tlu_ctl.sv)</span>
-<span id="L982"><span class="lineNum">     982</span>              :    logic priv_mode_eff;</span>
+<span id="L982"><span class="lineNum">     982</span> <span class="tlaUNC">           0 :    logic priv_mode_eff;</span></span>
 <span id="L983"><span class="lineNum">     983</span>              :    // Next privilege mode</span>
-<span id="L984"><span class="lineNum">     984</span>              :    logic priv_mode_ns;</span>
+<span id="L984"><span class="lineNum">     984</span> <span class="tlaUNC">           0 :    logic priv_mode_ns;</span></span>
 <span id="L985"><span class="lineNum">     985</span>              : </span>
-<span id="L986"><span class="lineNum">     986</span>              :    el2_mseccfg_pkt_t mseccfg; // mseccfg CSR for PMP</span>
+<span id="L986"><span class="lineNum">     986</span> <span class="tlaUNC">           0 :    el2_mseccfg_pkt_t mseccfg; // mseccfg CSR for PMP</span></span>
 <span id="L987"><span class="lineNum">     987</span>              : </span>
 <span id="L988"><span class="lineNum">     988</span>              : `endif</span>
 <span id="L989"><span class="lineNum">     989</span>              : </span>

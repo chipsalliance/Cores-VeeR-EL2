@@ -131,12 +131,12 @@
 <span id="L27"><span class="lineNum">      27</span>              : </span>
 <span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC tlaBgGNC">          72 :    input el2_br_pkt_t i0_brp,                                     // i0 branch packet from aligner</span></span>
 <span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">          16 :    input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] ifu_i0_bp_index,    // BP index</span></span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">         109 :    input logic [pt.BHT_GHR_SIZE-1:0] ifu_i0_bp_fghr,               // BP FGHR</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">          93 :    input logic [pt.BHT_GHR_SIZE-1:0] ifu_i0_bp_fghr,               // BP FGHR</span></span>
 <span id="L31"><span class="lineNum">      31</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [pt.BTB_BTAG_SIZE-1:0] ifu_i0_bp_btag,              // BP tag</span></span>
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaUNC">           0 :    input logic [$clog2(pt.BTB_SIZE)-1:0] ifu_i0_fa_index,          // Fully associt btb index</span></span>
 <span id="L33"><span class="lineNum">      33</span>              : </span>
-<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">         894 :    input logic       ifu_i0_pc4,                                   // i0 is 4B inst else 2B</span></span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">        1382 :    input logic       ifu_i0_valid,                                 // i0 valid from ifu</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">         428 :    input logic       ifu_i0_pc4,                                   // i0 is 4B inst else 2B</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">         924 :    input logic       ifu_i0_valid,                                 // i0 valid from ifu</span></span>
 <span id="L36"><span class="lineNum">      36</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic       ifu_i0_icaf,                                  // i0 instruction access fault</span></span>
 <span id="L37"><span class="lineNum">      37</span> <span class="tlaUNC">           0 :    input logic [1:0] ifu_i0_icaf_type,                             // i0 instruction access fault type</span></span>
 <span id="L38"><span class="lineNum">      38</span>              : </span>
@@ -146,7 +146,7 @@
 <span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">           5 :    input logic [31:1]  ifu_i0_pc,                                  // i0 pc from the aligner</span></span>
 <span id="L43"><span class="lineNum">      43</span>              : </span>
 <span id="L44"><span class="lineNum">      44</span>              : </span>
-<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">        1382 :    output logic dec_ib0_valid_d,                                   // ib0 valid</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">         924 :    output logic dec_ib0_valid_d,                                   // ib0 valid</span></span>
 <span id="L46"><span class="lineNum">      46</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic dec_debug_valid_d,                                 // Debug read or write at D-stage</span></span>
 <span id="L47"><span class="lineNum">      47</span>              : </span>
 <span id="L48"><span class="lineNum">      48</span>              : </span>
@@ -154,11 +154,11 @@
 <span id="L50"><span class="lineNum">      50</span>              : </span>
 <span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">           5 :    output logic [31:1] dec_i0_pc_d,                                // i0 pc at decode</span></span>
 <span id="L52"><span class="lineNum">      52</span>              : </span>
-<span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC">         894 :    output logic dec_i0_pc4_d,                                      // i0 is 4B inst else 2B</span></span>
+<span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC">         428 :    output logic dec_i0_pc4_d,                                      // i0 is 4B inst else 2B</span></span>
 <span id="L54"><span class="lineNum">      54</span>              : </span>
 <span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">          72 :    output el2_br_pkt_t dec_i0_brp,                                // i0 branch packet at decode</span></span>
 <span id="L56"><span class="lineNum">      56</span> <span class="tlaGNC">          16 :    output logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] dec_i0_bp_index,   // i0 branch index</span></span>
-<span id="L57"><span class="lineNum">      57</span> <span class="tlaGNC">         109 :    output logic [pt.BHT_GHR_SIZE-1:0] dec_i0_bp_fghr,              // BP FGHR</span></span>
+<span id="L57"><span class="lineNum">      57</span> <span class="tlaGNC">          93 :    output logic [pt.BHT_GHR_SIZE-1:0] dec_i0_bp_fghr,              // BP FGHR</span></span>
 <span id="L58"><span class="lineNum">      58</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [pt.BTB_BTAG_SIZE-1:0] dec_i0_bp_btag,             // BP tag</span></span>
 <span id="L59"><span class="lineNum">      59</span> <span class="tlaUNC">           0 :    output logic [$clog2(pt.BTB_SIZE)-1:0] dec_i0_bp_fa_index,          // Fully associt btb index</span></span>
 <span id="L60"><span class="lineNum">      60</span>              : </span>

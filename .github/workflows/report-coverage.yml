@@ -81,6 +81,8 @@ jobs:
         run: |
           export PATH=${{ env.LCOV_PATH }}:${PATH}
           sis -d reports . --report-dir report --src-pattern \*design\*
+          cat *_toggle.info > coverage.toggle.info
+          cat *_branch.info > coverage.branch.info
 
       - name: Pack artifacts
         if: always()
@@ -88,6 +90,15 @@ jobs:
         with:
           name: coverage_report
           path: ./report
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: combined_coverage_data
+          path: |
+            coverage.toggle.info
+            coverage.branch.info
 
   custom-coverage-report:
     name: Custom coverage report

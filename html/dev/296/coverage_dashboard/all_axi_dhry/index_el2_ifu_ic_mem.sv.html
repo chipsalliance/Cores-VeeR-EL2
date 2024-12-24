@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -83,12 +83,18 @@
         100.0%
     </td>
     <td class="headerCovSummaryEntry">
-        90
+        25
     </td>
     <td class="headerCovSummaryEntry">
-        90
+        25
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -254,9 +260,9 @@
 <span id="L55"><span class="lineNum">      55</span>         [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span>]:<span class="tlaUNC tlaBgUNC">           0 :       output logic [pt.ICACHE_NUM_WAYS-1:0]         ic_rd_hit,          // ic_rd_hit[3:0]</span></span>
 <span id="L56"><span class="lineNum">      56</span>                 :<span class="tlaUNC">           0 :       output logic                                  ic_tag_perr,        // Tag Parity error</span></span>
 <span id="L57"><span class="lineNum">      57</span>                 :             :       // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L58"><span class="lineNum">      58</span>                 :             :       /*verilator coverage_off*/</span>
+<span id="L58"><span class="lineNum">      58</span>                 :             :       /*pragma coverage off*/</span>
 <span id="L59"><span class="lineNum">      59</span>                 :             :       input  logic                                  scan_mode           // Flop scan mode control</span>
-<span id="L60"><span class="lineNum">      60</span>                 :             :       /*verilator coverage_on*/</span>
+<span id="L60"><span class="lineNum">      60</span>                 :             :       /*pragma coverage on*/</span>
 <span id="L61"><span class="lineNum">      61</span>                 :             :       ) ;</span>
 <span id="L62"><span class="lineNum">      62</span>                 :             : </span>
 <span id="L63"><span class="lineNum">      63</span>                 :             :    // split the veer_icache_src interface into veer_icache_data and veer_icache_tag</span>
@@ -431,9 +437,9 @@
 <span id="L142"><span class="lineNum">     142</span>         [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span>]:<span class="tlaUNC tlaBgUNC">           0 :       input logic [pt.ICACHE_NUM_WAYS-1:0]ic_rd_hit,</span></span>
 <span id="L143"><span class="lineNum">     143</span>                 :             :       el2_mem_if.veer_icache_data         icache_export,</span>
 <span id="L144"><span class="lineNum">     144</span>                 :             :       // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L145"><span class="lineNum">     145</span>                 :             :       /*verilator coverage_off*/</span>
+<span id="L145"><span class="lineNum">     145</span>                 :             :       /*pragma coverage off*/</span>
 <span id="L146"><span class="lineNum">     146</span>                 :             :       input  logic                         scan_mode</span>
-<span id="L147"><span class="lineNum">     147</span>                 :             :       /*verilator coverage_on*/</span>
+<span id="L147"><span class="lineNum">     147</span>                 :             :       /*pragma coverage on*/</span>
 <span id="L148"><span class="lineNum">     148</span>                 :             : </span>
 <span id="L149"><span class="lineNum">     149</span>                 :             :       ) ;</span>
 <span id="L150"><span class="lineNum">     150</span>                 :             : </span>
@@ -1378,9 +1384,9 @@
 <span id="L750"><span class="lineNum">     750</span>         [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span>]:<span class="tlaUNC">           0 :       output logic [pt.ICACHE_NUM_WAYS-1:0]                        ic_rd_hit,</span></span>
 <span id="L751"><span class="lineNum">     751</span>                 :<span class="tlaUNC">           0 :       output logic                                                 ic_tag_perr,</span></span>
 <span id="L752"><span class="lineNum">     752</span>                 :             :       // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L753"><span class="lineNum">     753</span>                 :             :       /*verilator coverage_off*/</span>
+<span id="L753"><span class="lineNum">     753</span>                 :             :       /*pragma coverage off*/</span>
 <span id="L754"><span class="lineNum">     754</span>                 :             :       input  logic                                                 scan_mode</span>
-<span id="L755"><span class="lineNum">     755</span>                 :             :       /*verilator coverage_on*/</span>
+<span id="L755"><span class="lineNum">     755</span>                 :             :       /*pragma coverage on*/</span>
 <span id="L756"><span class="lineNum">     756</span>                 :             :    ) ;</span>
 <span id="L757"><span class="lineNum">     757</span>                 :             : </span>
 <span id="L758"><span class="lineNum">     758</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaUNC">           0 :    logic [pt.ICACHE_NUM_WAYS-1:0] [25:0]                           ic_tag_data_raw;</span></span>

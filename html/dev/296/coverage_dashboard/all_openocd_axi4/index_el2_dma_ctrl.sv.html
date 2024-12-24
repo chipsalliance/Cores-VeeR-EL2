@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -83,12 +83,18 @@
         100.0%
     </td>
     <td class="headerCovSummaryEntry">
-        4
+        2
     </td>
     <td class="headerCovSummaryEntry">
-        4
+        2
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -130,15 +136,15 @@
 <span id="L26"><span class="lineNum">      26</span>                 :             : #(</span>
 <span id="L27"><span class="lineNum">      27</span>                 :             : `include "el2_param.vh"</span>
 <span id="L28"><span class="lineNum">      28</span>                 :             :  )(</span>
-<span id="L29"><span class="lineNum">      29</span>                 :<span class="tlaGNC tlaBgGNC">     3041638 :    input logic         clk,</span></span>
-<span id="L30"><span class="lineNum">      30</span>                 :<span class="tlaGNC">     3041638 :    input logic         free_clk,</span></span>
+<span id="L29"><span class="lineNum">      29</span>                 :<span class="tlaGNC tlaBgGNC">     3041620 :    input logic         clk,</span></span>
+<span id="L30"><span class="lineNum">      30</span>                 :<span class="tlaGNC">     3041620 :    input logic         free_clk,</span></span>
 <span id="L31"><span class="lineNum">      31</span>                 :<span class="tlaGNC">           1 :    input logic         rst_l,</span></span>
 <span id="L32"><span class="lineNum">      32</span>                 :<span class="tlaGNC">           1 :    input logic         dma_bus_clk_en, // slave bus clock enable</span></span>
 <span id="L33"><span class="lineNum">      33</span>                 :<span class="tlaUNC tlaBgUNC">           0 :    input logic         clk_override,</span></span>
 <span id="L34"><span class="lineNum">      34</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L35"><span class="lineNum">      35</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L35"><span class="lineNum">      35</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L36"><span class="lineNum">      36</span>                 :             :    input logic         scan_mode,</span>
-<span id="L37"><span class="lineNum">      37</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L37"><span class="lineNum">      37</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L38"><span class="lineNum">      38</span>                 :             : </span>
 <span id="L39"><span class="lineNum">      39</span>                 :             :    // Debug signals</span>
 <span id="L40"><span class="lineNum">      40</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaUNC">           0 :    input logic [31:0]  dbg_cmd_addr,</span></span>
@@ -240,7 +246,7 @@
 <span id="L73"><span class="lineNum">      73</span>                 :<span class="tlaUNC">           0 :    output logic        dma_dccm_stall_any, // stall dccm pipe (bubble) so that DMA can proceed</span></span>
 <span id="L74"><span class="lineNum">      74</span>                 :<span class="tlaUNC">           0 :    output logic        dma_iccm_stall_any, // stall iccm pipe (bubble) so that DMA can proceed</span></span>
 <span id="L75"><span class="lineNum">      75</span>                 :<span class="tlaGNC tlaBgGNC">           3 :    input logic         dccm_ready, // dccm ready to accept DMA request</span></span>
-<span id="L76"><span class="lineNum">      76</span>                 :<span class="tlaGNC">       12200 :    input logic         iccm_ready, // iccm ready to accept DMA request</span></span>
+<span id="L76"><span class="lineNum">      76</span>                 :<span class="tlaGNC">       12199 :    input logic         iccm_ready, // iccm ready to accept DMA request</span></span>
 <span id="L77"><span class="lineNum">      77</span>      [<span class="tlaGBC" title="Branch 0 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 2 times"> + </span>]:<span class="tlaGNC">           2 :    input logic [2:0]   dec_tlu_dma_qos_prty,    // DMA QoS priority coming from MFDC [18:15]</span></span>
 <span id="L78"><span class="lineNum">      78</span>                 :             : </span>
 <span id="L79"><span class="lineNum">      79</span>                 :             :    // PMU signals</span>
@@ -489,8 +495,8 @@
 <span id="L185"><span class="lineNum">     185</span>                 :             : </span>
 <span id="L186"><span class="lineNum">     186</span>                 :<span class="tlaUNC tlaBgUNC">           0 :    logic                    dma_buffer_c1_clken;</span></span>
 <span id="L187"><span class="lineNum">     187</span>                 :<span class="tlaUNC">           0 :    logic                    dma_free_clken;</span></span>
-<span id="L188"><span class="lineNum">     188</span>                 :<span class="tlaGNC tlaBgGNC">     3041638 :    logic                    dma_buffer_c1_clk;</span></span>
-<span id="L189"><span class="lineNum">     189</span>                 :<span class="tlaGNC">     3041638 :    logic                    dma_free_clk;</span></span>
+<span id="L188"><span class="lineNum">     188</span>                 :<span class="tlaGNC tlaBgGNC">     3041620 :    logic                    dma_buffer_c1_clk;</span></span>
+<span id="L189"><span class="lineNum">     189</span>                 :<span class="tlaGNC">     3041620 :    logic                    dma_free_clk;</span></span>
 <span id="L190"><span class="lineNum">     190</span>                 :<span class="tlaUNC tlaBgUNC">           0 :    logic                    dma_bus_clk;</span></span>
 <span id="L191"><span class="lineNum">     191</span>                 :             : </span>
 <span id="L192"><span class="lineNum">     192</span>         [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span>]:<span class="tlaUNC">           0 :    logic                    bus_rsp_valid, bus_rsp_sent;</span></span>

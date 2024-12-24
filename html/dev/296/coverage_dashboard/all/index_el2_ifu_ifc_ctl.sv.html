@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -78,6 +78,25 @@
                 
     <td class="headerCovSummary rowLeft">
         Branch
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #a9a9a9;">
+        0.0%
+    </td>
+    <td class="headerCovSummaryEntry">
+        0
+    </td>
+    <td class="headerCovSummaryEntry">
+        0
+    </td>
+
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
+    <td class="headerCovSummary rowLeft">
+        Line
     </td>
     <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #a9a9a9;">
         0.0%
@@ -130,117 +149,73 @@
 <span id="L26"><span class="lineNum">      26</span>                 :             : `include "el2_param.vh"</span>
 <span id="L27"><span class="lineNum">      27</span>                 :             :  )</span>
 <span id="L28"><span class="lineNum">      28</span>                 :             :   (</span>
-<span id="L29"><span class="lineNum">      29</span>                 :<span class="tlaGNC tlaBgGNC">   117932382 :    input logic clk,                         // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
-<span id="L30"><span class="lineNum">      30</span>                 :<span class="tlaGNC">   117932382 :    input logic free_l2clk,                  // Clock always.                  Through one clock header.  For flops with    second header built in.</span></span>
+<span id="L29"><span class="lineNum">      29</span>                 :<span class="tlaGNC tlaBgGNC">   117932386 :    input logic clk,                         // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
+<span id="L30"><span class="lineNum">      30</span>                 :<span class="tlaGNC">   117932386 :    input logic free_l2clk,                  // Clock always.                  Through one clock header.  For flops with    second header built in.</span></span>
 <span id="L31"><span class="lineNum">      31</span>                 :             : </span>
 <span id="L32"><span class="lineNum">      32</span>                 :<span class="tlaGNC">         343 :    input logic rst_l, // reset enable, from core pin</span></span>
 <span id="L33"><span class="lineNum">      33</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L34"><span class="lineNum">      34</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L34"><span class="lineNum">      34</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L35"><span class="lineNum">      35</span>                 :             :    input logic scan_mode, // scan</span>
-<span id="L36"><span class="lineNum">      36</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L36"><span class="lineNum">      36</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L37"><span class="lineNum">      37</span>                 :             : </span>
-<span id="L38"><span class="lineNum">      38</span>                 :<span class="tlaGNC">    10410918 :    input logic ic_hit_f,      // Icache hit</span></span>
+<span id="L38"><span class="lineNum">      38</span>                 :<span class="tlaGNC">    10410908 :    input logic ic_hit_f,      // Icache hit</span></span>
 <span id="L39"><span class="lineNum">      39</span>                 :<span class="tlaGNC">    10102846 :    input logic ifu_ic_mb_empty, // Miss buffer empty</span></span>
 <span id="L40"><span class="lineNum">      40</span>                 :             : </span>
-<span id="L41"><span class="lineNum">      41</span>                 :<span class="tlaGNC">     7155716 :    input logic ifu_fb_consume1,  // Aligner consumed 1 fetch buffer</span></span>
-<span id="L42"><span class="lineNum">      42</span>                 :<span class="tlaGNC">     1902558 :    input logic ifu_fb_consume2,  // Aligner consumed 2 fetch buffers</span></span>
+<span id="L41"><span class="lineNum">      41</span>                 :<span class="tlaGNC">     7155706 :    input logic ifu_fb_consume1,  // Aligner consumed 1 fetch buffer</span></span>
+<span id="L42"><span class="lineNum">      42</span>                 :<span class="tlaGNC">     1901900 :    input logic ifu_fb_consume2,  // Aligner consumed 2 fetch buffers</span></span>
 <span id="L43"><span class="lineNum">      43</span>                 :             : </span>
 <span id="L44"><span class="lineNum">      44</span>                 :<span class="tlaGNC">         244 :    input logic dec_tlu_flush_noredir_wb, // Don't fetch on flush</span></span>
-<span id="L45"><span class="lineNum">      45</span>                 :<span class="tlaGNC">     3070226 :    input logic exu_flush_final, // FLush</span></span>
-<span id="L46"><span class="lineNum">      46</span>   [<span class="tlaGBC" title="Branch 0 was taken 367198 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 254520 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 250130 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 157416 times"> + </span> :<span class="tlaGNC">     1570316 :    input logic [31:1] exu_flush_path_final, // Flush path</span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 137716 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 102500 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 44012 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 18778 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 2002 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 408 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 915948 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 386 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 36 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 34 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 8 times"> + </span><span class="tlaGBC" title="Branch 15 was taken 26 times"> + </span><span class="tlaGBC" title="Branch 16 was taken 34010 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 34008 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 34014 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 22 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 34016 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 422388 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 34012 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 1557262 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 940708 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 427540 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 466650 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 501060 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 810234 times"> + </span> 
-<span class="lineNum">        </span>          <span class="tlaGBC" title="Branch 29 was taken 1043478 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 531066 times"> + </span>]
+<span id="L45"><span class="lineNum">      45</span>                 :<span class="tlaGNC">     3070220 :    input logic exu_flush_final, // FLush</span></span>
+<span id="L46"><span class="lineNum">      46</span>                 :<span class="tlaGNC">     1570310 :    input logic [31:1] exu_flush_path_final, // Flush path</span></span>
 <span id="L47"><span class="lineNum">      47</span>                 :             : </span>
-<span id="L48"><span class="lineNum">      48</span>                 :<span class="tlaGNC">     4557792 :    input logic ifu_bp_hit_taken_f, // btb hit, select the target path</span></span>
-<span id="L49"><span class="lineNum">      49</span>   [<span class="tlaGBC" title="Branch 0 was taken 1171520 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 1194465 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 892223 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 252806 times"> + </span> :<span class="tlaGNC">     4557312 :    input logic [31:1] ifu_bp_btb_target_f, //  predicted target PC</span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 164592 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 68526 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 39340 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 7368 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 1104 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 604 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 3249260 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 604 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 4 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 15 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 16 was taken 117450 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 117450 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 117450 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 117450 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 1471647 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 117454 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 2443511 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 2946946 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 2462063 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 979809 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 732140 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 1637372 times"> + </span> 
-<span class="lineNum">        </span>          <span class="tlaGBC" title="Branch 29 was taken 1771249 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 1292050 times"> + </span>]
+<span id="L48"><span class="lineNum">      48</span>                 :<span class="tlaGNC">     4557118 :    input logic ifu_bp_hit_taken_f, // btb hit, select the target path</span></span>
+<span id="L49"><span class="lineNum">      49</span>                 :<span class="tlaGNC">     4556638 :    input logic [31:1] ifu_bp_btb_target_f, //  predicted target PC</span></span>
 <span id="L50"><span class="lineNum">      50</span>                 :             : </span>
 <span id="L51"><span class="lineNum">      51</span>                 :<span class="tlaGNC">          36 :    input logic ic_dma_active, // IC DMA active, stop fetching</span></span>
 <span id="L52"><span class="lineNum">      52</span>                 :<span class="tlaGNC">     6613184 :    input logic ic_write_stall, // IC is writing, stop fetching</span></span>
 <span id="L53"><span class="lineNum">      53</span>                 :<span class="tlaGNC">          28 :    input logic dma_iccm_stall_any, // force a stall in the fetch pipe for DMA ICCM access</span></span>
 <span id="L54"><span class="lineNum">      54</span>                 :             : </span>
-<span id="L55"><span class="lineNum">      55</span>   [<span class="tlaGBC" title="Branch 0 was taken 39 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 39 times"> + </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaGBC" title="Branch 3 was taken 39 times"> + </span> :<span class="tlaGNC">          39 :    input logic [31:0]  dec_tlu_mrac_ff ,   // side_effect and cacheable for each region</span></span>
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaGBC" title="Branch 5 was taken 39 times"> + </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaGBC" title="Branch 7 was taken 39 times"> + </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 39 times"> + </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaUNC" title="Branch 11 was not taken"> - </span><span class="tlaGBC" title="Branch 12 was taken 39 times"> + </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 39 times"> + </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaGBC" title="Branch 16 was taken 10 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 29 times"> + </span><span class="tlaUNC" title="Branch 18 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 39 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 39 times"> + </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaGBC" title="Branch 22 was taken 39 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 39 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 24 was not taken"> - </span><span class="tlaUNC" title="Branch 25 was not taken"> - </span><span class="tlaGBC" title="Branch 26 was taken 39 times"> + </span><span class="tlaUNC" title="Branch 27 was not taken"> - </span><span class="tlaGBC" title="Branch 28 was taken 39 times"> + </span> 
-<span class="lineNum">        </span>       <span class="tlaUNC" title="Branch 29 was not taken"> - </span><span class="tlaGBC" title="Branch 30 was taken 39 times"> + </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span>]
+<span id="L55"><span class="lineNum">      55</span>                 :<span class="tlaGNC">          39 :    input logic [31:0]  dec_tlu_mrac_ff ,   // side_effect and cacheable for each region</span></span>
 <span id="L56"><span class="lineNum">      56</span>                 :             : </span>
-<span id="L57"><span class="lineNum">      57</span>   [<span class="tlaGBC" title="Branch 0 was taken 519664 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 765399 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 202030 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 18206 times"> + </span> :<span class="tlaGNC">     9001017 :    output logic [31:1] ifc_fetch_addr_f, // fetch addr F</span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 10056 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 3740 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 4988 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 48 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 38 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 46 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 1645110 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 32 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 40 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 38 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 12 times"> + </span><span class="tlaGBC" title="Branch 15 was taken 30 times"> + </span><span class="tlaGBC" title="Branch 16 was taken 112 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 108 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 114 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 26 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 116 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 8502145 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 116 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 1882 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 3058813 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 1762846 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 1220372 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 831071 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 653322 times"> + </span> 
-<span class="lineNum">        </span>          <span class="tlaGBC" title="Branch 29 was taken 617584 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 282390 times"> + </span>]
-<span id="L58"><span class="lineNum">      58</span>   [<span class="tlaGBC" title="Branch 0 was taken 519664 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 765399 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 202030 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 18206 times"> + </span> :<span class="tlaGNC">     9001214 :    output logic [31:1] ifc_fetch_addr_bf, // fetch addr BF</span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 10056 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 3740 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 4988 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 48 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 38 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 46 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 1645975 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 32 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 40 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 38 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 12 times"> + </span><span class="tlaGBC" title="Branch 15 was taken 30 times"> + </span><span class="tlaGBC" title="Branch 16 was taken 112 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 108 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 114 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 26 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 116 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 8502342 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 116 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 1882 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 3058917 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 1762885 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 1220396 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 831090 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 653326 times"> + </span> 
-<span class="lineNum">        </span>          <span class="tlaGBC" title="Branch 29 was taken 617586 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 282392 times"> + </span>]
+<span id="L57"><span class="lineNum">      57</span>                 :<span class="tlaGNC">     9000344 :    output logic [31:1] ifc_fetch_addr_f, // fetch addr F</span></span>
+<span id="L58"><span class="lineNum">      58</span>                 :<span class="tlaGNC">     9000541 :    output logic [31:1] ifc_fetch_addr_bf, // fetch addr BF</span></span>
 <span id="L59"><span class="lineNum">      59</span>                 :             : </span>
-<span id="L60"><span class="lineNum">      60</span>                 :<span class="tlaGNC">     7658991 :    output logic  ifc_fetch_req_f,  // fetch request valid F</span></span>
+<span id="L60"><span class="lineNum">      60</span>                 :<span class="tlaGNC">     7658987 :    output logic  ifc_fetch_req_f,  // fetch request valid F</span></span>
 <span id="L61"><span class="lineNum">      61</span>                 :             : </span>
 <span id="L62"><span class="lineNum">      62</span>                 :<span class="tlaGNC">     2196593 :    output logic  ifu_pmu_fetch_stall, // pmu event measuring fetch stall</span></span>
 <span id="L63"><span class="lineNum">      63</span>                 :             : </span>
 <span id="L64"><span class="lineNum">      64</span>                 :<span class="tlaGNC">         381 :    output logic                       ifc_fetch_uncacheable_bf,      // The fetch request is uncacheable space. BF stage</span></span>
-<span id="L65"><span class="lineNum">      65</span>                 :<span class="tlaGNC">     7659054 :    output logic                      ifc_fetch_req_bf,              // Fetch request. Comes with the address.  BF stage</span></span>
+<span id="L65"><span class="lineNum">      65</span>                 :<span class="tlaGNC">     7659050 :    output logic                      ifc_fetch_req_bf,              // Fetch request. Comes with the address.  BF stage</span></span>
 <span id="L66"><span class="lineNum">      66</span>                 :<span class="tlaGNC">         585 :    output logic                       ifc_fetch_req_bf_raw,          // Fetch request without some qualifications. Used for clock-gating. BF stage</span></span>
 <span id="L67"><span class="lineNum">      67</span>                 :<span class="tlaGNC">          80 :    output logic                       ifc_iccm_access_bf,            // This request is to the ICCM. Do not generate misses to the bus.</span></span>
 <span id="L68"><span class="lineNum">      68</span>                 :<span class="tlaGNC">           2 :    output logic                       ifc_region_acc_fault_bf,       // Access fault. in ICCM region but offset is outside defined ICCM.</span></span>
 <span id="L69"><span class="lineNum">      69</span>                 :             : </span>
-<span id="L70"><span class="lineNum">      70</span>                 :<span class="tlaGNC">     3036788 :    output logic  ifc_dma_access_ok // fetch is not accessing the ICCM, DMA can proceed</span></span>
+<span id="L70"><span class="lineNum">      70</span>                 :<span class="tlaGNC">     3036782 :    output logic  ifc_dma_access_ok // fetch is not accessing the ICCM, DMA can proceed</span></span>
 <span id="L71"><span class="lineNum">      71</span>                 :             : </span>
 <span id="L72"><span class="lineNum">      72</span>                 :             : </span>
 <span id="L73"><span class="lineNum">      73</span>                 :             :    );</span>
 <span id="L74"><span class="lineNum">      74</span>                 :             : </span>
-<span id="L75"><span class="lineNum">      75</span>   [<span class="tlaGBC" title="Branch 0 was taken 519664 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 765399 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 202030 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 18206 times"> + </span> :<span class="tlaGNC">     9001214 :    logic [31:1]  fetch_addr_bf;</span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 10056 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 3740 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 4988 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 48 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 38 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 46 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 1645975 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 32 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 40 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 38 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 12 times"> + </span><span class="tlaGBC" title="Branch 15 was taken 30 times"> + </span><span class="tlaGBC" title="Branch 16 was taken 112 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 108 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 114 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 26 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 116 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 8502342 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 116 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 1882 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 3058917 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 1762885 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 1220396 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 831090 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 653326 times"> + </span> 
-<span class="lineNum">        </span>          <span class="tlaGBC" title="Branch 29 was taken 617586 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 282392 times"> + </span>]
-<span id="L76"><span class="lineNum">      76</span>   [<span class="tlaGBC" title="Branch 0 was taken 519794 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 765285 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 202554 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 18730 times"> + </span> :<span class="tlaGNC">     9001358 :    logic [31:1]  fetch_addr_next;</span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 10562 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 3730 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 4978 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 40 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 30 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 38 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 1652468 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 24 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 32 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 30 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 15 was taken 22 times"> + </span><span class="tlaGBC" title="Branch 16 was taken 106 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 102 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 108 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 20 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 110 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 8502487 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 114 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 1882 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 6201122 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 3688940 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 2531867 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 595022 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 492112 times"> + </span> 
-<span class="lineNum">        </span>          <span class="tlaGBC" title="Branch 29 was taken 634304 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 281800 times"> + </span>]
-<span id="L77"><span class="lineNum">      77</span>   [<span class="tlaGBC" title="Branch 0 was taken 7908345 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 10574238 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 4823491 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 1144076 times"> + </span> :<span class="tlaGNC">    10875181 :    logic [3:0]   fb_write_f, fb_write_ns;</span></span>
-<span class="lineNum">        </span>    <span class="tlaGBC" title="Branch 4 was taken 7908896 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 10574972 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 4823707 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 1144115 times"> + </span>]
+<span id="L75"><span class="lineNum">      75</span>                 :<span class="tlaGNC">     9000541 :    logic [31:1]  fetch_addr_bf;</span></span>
+<span id="L76"><span class="lineNum">      76</span>                 :<span class="tlaGNC">     9000685 :    logic [31:1]  fetch_addr_next;</span></span>
+<span id="L77"><span class="lineNum">      77</span>                 :<span class="tlaGNC">    10874518 :    logic [3:0]   fb_write_f, fb_write_ns;</span></span>
 <span id="L78"><span class="lineNum">      78</span>                 :             : </span>
-<span id="L79"><span class="lineNum">      79</span>         [<span class="tlaGBC" title="Branch 0 was taken 1144115 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 1144076 times"> + </span>]:<span class="tlaGNC">     1144115 :    logic     fb_full_f_ns, fb_full_f;</span></span>
-<span id="L80"><span class="lineNum">      80</span>   [<span class="tlaGBC" title="Branch 0 was taken 8470164 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 316693 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 13007056 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 2172809 times"> + </span> :<span class="tlaGNC">    13007057 :    logic     fb_right, fb_right2, fb_left, wfm, idle;</span></span>
-<span class="lineNum">        </span>             <span class="tlaGBC" title="Branch 4 was taken 927 times"> + </span>]
-<span id="L81"><span class="lineNum">      81</span>         [<span class="tlaGBC" title="Branch 0 was taken 12487456 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 9939567 times"> + </span>]:<span class="tlaGNC">    14162224 :    logic     sel_last_addr_bf, sel_next_addr_bf;</span></span>
-<span id="L82"><span class="lineNum">      82</span>         [<span class="tlaGBC" title="Branch 0 was taken 16250319 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 16250042 times"> + </span>]:<span class="tlaGNC">    16250319 :    logic     miss_f, miss_a;</span></span>
-<span id="L83"><span class="lineNum">      83</span>         [<span class="tlaGBC" title="Branch 0 was taken 3070226 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 28 times"> + </span>]:<span class="tlaGNC">     3070226 :    logic     flush_fb, dma_iccm_stall_any_f;</span></span>
-<span id="L84"><span class="lineNum">      84</span>      [<span class="tlaGBC" title="Branch 0 was taken 2262419 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 244 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 924 times"> + </span>]:<span class="tlaGNC">     2262419 :    logic     mb_empty_mod, goto_idle, leave_idle;</span></span>
-<span id="L85"><span class="lineNum">      85</span>                 :<span class="tlaGNC">     6377087 :    logic     fetch_bf_en;</span></span>
+<span id="L79"><span class="lineNum">      79</span>                 :<span class="tlaGNC">     1144111 :    logic     fb_full_f_ns, fb_full_f;</span></span>
+<span id="L80"><span class="lineNum">      80</span>                 :<span class="tlaGNC">    13006389 :    logic     fb_right, fb_right2, fb_left, wfm, idle;</span></span>
+<span id="L81"><span class="lineNum">      81</span>                 :<span class="tlaGNC">    14161558 :    logic     sel_last_addr_bf, sel_next_addr_bf;</span></span>
+<span id="L82"><span class="lineNum">      82</span>                 :<span class="tlaGNC">    16250319 :    logic     miss_f, miss_a;</span></span>
+<span id="L83"><span class="lineNum">      83</span>                 :<span class="tlaGNC">     3070220 :    logic     flush_fb, dma_iccm_stall_any_f;</span></span>
+<span id="L84"><span class="lineNum">      84</span>                 :<span class="tlaGNC">     2262419 :    logic     mb_empty_mod, goto_idle, leave_idle;</span></span>
+<span id="L85"><span class="lineNum">      85</span>                 :<span class="tlaGNC">     6377083 :    logic     fetch_bf_en;</span></span>
 <span id="L86"><span class="lineNum">      86</span>                 :<span class="tlaGNC">      901543 :    logic         line_wrap;</span></span>
-<span id="L87"><span class="lineNum">      87</span>                 :<span class="tlaGNC">     1652468 :    logic         fetch_addr_next_1;</span></span>
+<span id="L87"><span class="lineNum">      87</span>                 :<span class="tlaGNC">     1652463 :    logic         fetch_addr_next_1;</span></span>
 <span id="L88"><span class="lineNum">      88</span>                 :             : </span>
 <span id="L89"><span class="lineNum">      89</span>                 :             :    // FSM assignment</span>
 <span id="L90"><span class="lineNum">      90</span>                 :             :     typedef enum logic [1:0] { IDLE  = 2'b00 ,</span>
 <span id="L91"><span class="lineNum">      91</span>                 :             :                                FETCH = 2'b01 ,</span>
 <span id="L92"><span class="lineNum">      92</span>                 :             :                                STALL = 2'b10 ,</span>
 <span id="L93"><span class="lineNum">      93</span>                 :             :                                WFM   = 2'b11   } state_t ;</span>
-<span id="L94"><span class="lineNum">      94</span>         [<span class="tlaGBC" title="Branch 0 was taken 585 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 2172809 times"> + </span>]:<span class="tlaGNC">     2172812 :    state_t state      ;</span></span>
-<span id="L95"><span class="lineNum">      95</span>         [<span class="tlaGBC" title="Branch 0 was taken 585 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 2172809 times"> + </span>]:<span class="tlaGNC">     2172812 :    state_t next_state ;</span></span>
+<span id="L94"><span class="lineNum">      94</span>                 :<span class="tlaGNC">     2172812 :    state_t state      ;</span></span>
+<span id="L95"><span class="lineNum">      95</span>                 :<span class="tlaGNC">     2172812 :    state_t next_state ;</span></span>
 <span id="L96"><span class="lineNum">      96</span>                 :             : </span>
 <span id="L97"><span class="lineNum">      97</span>                 :<span class="tlaGNC">          64 :    logic     dma_stall;</span></span>
 <span id="L98"><span class="lineNum">      98</span>                 :             :    assign dma_stall = ic_dma_active | dma_iccm_stall_any_f;</span>

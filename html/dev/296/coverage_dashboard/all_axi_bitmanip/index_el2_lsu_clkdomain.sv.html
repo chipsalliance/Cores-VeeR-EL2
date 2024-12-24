@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -89,6 +89,12 @@
         0
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -190,9 +196,9 @@
 <span id="L74"><span class="lineNum">      74</span>                 :<span class="tlaGNC tlaBgGNC">        3922 :    output logic     lsu_free_c2_clk,                   // free double pulse clock</span></span>
 <span id="L75"><span class="lineNum">      75</span>                 :             : </span>
 <span id="L76"><span class="lineNum">      76</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L77"><span class="lineNum">      77</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L77"><span class="lineNum">      77</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L78"><span class="lineNum">      78</span>                 :             :    input  logic     scan_mode                          // Scan mode</span>
-<span id="L79"><span class="lineNum">      79</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L79"><span class="lineNum">      79</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L80"><span class="lineNum">      80</span>                 :             : );</span>
 <span id="L81"><span class="lineNum">      81</span>                 :             : </span>
 <span id="L82"><span class="lineNum">      82</span>         [<span class="tlaGBC" title="Branch 0 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 2 times"> + </span>]:<span class="tlaGNC">           2 :    logic lsu_c1_m_clken, lsu_c1_r_clken;</span></span>

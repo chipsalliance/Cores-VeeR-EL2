@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -79,16 +79,22 @@
     <td class="headerCovSummary rowLeft">
         Branch
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ffe000;">
-        44.0%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ffb200;">
+        35.0%
     </td>
     <td class="headerCovSummaryEntry">
-        22
+        7
     </td>
     <td class="headerCovSummaryEntry">
-        50
+        20
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -129,9 +135,9 @@
 <span id="L25"><span class="lineNum">      25</span>                 :             : ) (</span>
 <span id="L26"><span class="lineNum">      26</span>                 :<span class="tlaGNC tlaBgGNC">     4000002 :     input logic clk,       // Top level clock</span></span>
 <span id="L27"><span class="lineNum">      27</span>                 :<span class="tlaGNC">           1 :     input logic rst_l,     // Reset</span></span>
-<span id="L28"><span class="lineNum">      28</span>                 :             :     /* verilator coverage_off */</span>
+<span id="L28"><span class="lineNum">      28</span>                 :             :     /* pragma coverage off */</span>
 <span id="L29"><span class="lineNum">      29</span>                 :             :     input logic scan_mode, // Scan mode</span>
-<span id="L30"><span class="lineNum">      30</span>                 :             :     /* verilator coverage_on */</span>
+<span id="L30"><span class="lineNum">      30</span>                 :             :     /* pragma coverage on */</span>
 <span id="L31"><span class="lineNum">      31</span>                 :             : </span>
 <span id="L32"><span class="lineNum">      32</span>                 :             : `ifdef RV_SMEPMP</span>
 <span id="L33"><span class="lineNum">      33</span>                 :             :     input el2_mseccfg_pkt_t mseccfg, // mseccfg CSR content, RLB, MMWP and MML bits</span>
@@ -170,12 +176,12 @@
 <span class="lineNum">        </span>    <span class="tlaUNC" title="Branch 124 was not taken"> - </span><span class="tlaUNC" title="Branch 125 was not taken"> - </span><span class="tlaUNC" title="Branch 126 was not taken"> - </span><span class="tlaUNC" title="Branch 127 was not taken"> - </span>]
 <span id="L42"><span class="lineNum">      42</span>                 :             :     input logic             [31:0] pmp_pmpaddr[pt.PMP_ENTRIES],</span>
 <span id="L43"><span class="lineNum">      43</span>                 :             : </span>
-<span id="L44"><span class="lineNum">      44</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaGNC tlaBgGNC">       16210 :     input  logic              [31:0] pmp_chan_addr[PMP_CHANNELS],</span></span>
+<span id="L44"><span class="lineNum">      44</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaGNC tlaBgGNC">       15930 :     input  logic              [31:0] pmp_chan_addr[PMP_CHANNELS],</span></span>
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaGBC" title="Branch 11 was taken 138 times"> + </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
+<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaGBC" title="Branch 11 was taken 136 times"> + </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 14 was not taken"> - </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaUNC" title="Branch 16 was not taken"> - </span><span class="tlaUNC" title="Branch 17 was not taken"> - </span><span class="tlaUNC" title="Branch 18 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaUNC" title="Branch 20 was not taken"> - </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaGBC" title="Branch 22 was taken 16210 times"> + </span><span class="tlaUNC" title="Branch 23 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 174 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 172 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 166 times"> + </span><span class="tlaUNC" title="Branch 28 was not taken"> - </span> 
+<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaUNC" title="Branch 20 was not taken"> - </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaGBC" title="Branch 22 was taken 15930 times"> + </span><span class="tlaUNC" title="Branch 23 was not taken"> - </span> 
+<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 172 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 170 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 164 times"> + </span><span class="tlaUNC" title="Branch 28 was not taken"> - </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 29 was not taken"> - </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span><span class="tlaUNC" title="Branch 32 was not taken"> - </span><span class="tlaUNC" title="Branch 33 was not taken"> - </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 34 was not taken"> - </span><span class="tlaUNC" title="Branch 35 was not taken"> - </span><span class="tlaUNC" title="Branch 36 was not taken"> - </span><span class="tlaUNC" title="Branch 37 was not taken"> - </span><span class="tlaUNC" title="Branch 38 was not taken"> - </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 39 was not taken"> - </span><span class="tlaUNC" title="Branch 40 was not taken"> - </span><span class="tlaUNC" title="Branch 41 was not taken"> - </span><span class="tlaUNC" title="Branch 42 was not taken"> - </span><span class="tlaUNC" title="Branch 43 was not taken"> - </span> 
@@ -197,13 +203,13 @@
 <span id="L47"><span class="lineNum">      47</span>                 :             : );</span>
 <span id="L48"><span class="lineNum">      48</span>                 :             : </span>
 <span id="L49"><span class="lineNum">      49</span>                 :             :   logic [                33:0]                     csr_pmp_addr_i          [pt.PMP_ENTRIES];</span>
-<span id="L50"><span class="lineNum">      50</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaGNC tlaBgGNC">       16210 :   logic [                33:0]                     pmp_req_addr_i          [  PMP_CHANNELS];</span></span>
+<span id="L50"><span class="lineNum">      50</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaGNC tlaBgGNC">       15930 :   logic [                33:0]                     pmp_req_addr_i          [  PMP_CHANNELS];</span></span>
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaGBC" title="Branch 11 was taken 138 times"> + </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
+<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaGBC" title="Branch 11 was taken 136 times"> + </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 14 was not taken"> - </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaUNC" title="Branch 16 was not taken"> - </span><span class="tlaUNC" title="Branch 17 was not taken"> - </span><span class="tlaUNC" title="Branch 18 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaUNC" title="Branch 20 was not taken"> - </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaGBC" title="Branch 22 was taken 16210 times"> + </span><span class="tlaUNC" title="Branch 23 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 25 was not taken"> - </span><span class="tlaUNC" title="Branch 26 was not taken"> - </span><span class="tlaGBC" title="Branch 27 was taken 174 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 172 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 29 was taken 166 times"> + </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span><span class="tlaUNC" title="Branch 32 was not taken"> - </span><span class="tlaUNC" title="Branch 33 was not taken"> - </span> 
+<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaUNC" title="Branch 20 was not taken"> - </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaGBC" title="Branch 22 was taken 15930 times"> + </span><span class="tlaUNC" title="Branch 23 was not taken"> - </span> 
+<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 25 was not taken"> - </span><span class="tlaUNC" title="Branch 26 was not taken"> - </span><span class="tlaGBC" title="Branch 27 was taken 172 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 170 times"> + </span> 
+<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 29 was taken 164 times"> + </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span><span class="tlaUNC" title="Branch 32 was not taken"> - </span><span class="tlaUNC" title="Branch 33 was not taken"> - </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 34 was not taken"> - </span><span class="tlaUNC" title="Branch 35 was not taken"> - </span><span class="tlaUNC" title="Branch 36 was not taken"> - </span><span class="tlaUNC" title="Branch 37 was not taken"> - </span><span class="tlaUNC" title="Branch 38 was not taken"> - </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 39 was not taken"> - </span><span class="tlaUNC" title="Branch 40 was not taken"> - </span><span class="tlaUNC" title="Branch 41 was not taken"> - </span><span class="tlaUNC" title="Branch 42 was not taken"> - </span><span class="tlaUNC" title="Branch 43 was not taken"> - </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 44 was not taken"> - </span><span class="tlaUNC" title="Branch 45 was not taken"> - </span><span class="tlaUNC" title="Branch 46 was not taken"> - </span><span class="tlaUNC" title="Branch 47 was not taken"> - </span><span class="tlaUNC" title="Branch 48 was not taken"> - </span> 
@@ -339,9 +345,9 @@
 <span id="L115"><span class="lineNum">     115</span>                 :<span class="tlaUNC">           0 :         2'b11: result =</span></span>
 <span id="L116"><span class="lineNum">     116</span>                 :<span class="tlaUNC">           0 :              (pmp_req_type == EXEC) |</span></span>
 <span id="L117"><span class="lineNum">     117</span>                 :<span class="tlaUNC">           0 :             ((pmp_req_type == READ) &amp; ~priv_mode);</span></span>
-<span id="L118"><span class="lineNum">     118</span>                 :             :         /* verilator coverage_off */</span>
+<span id="L118"><span class="lineNum">     118</span>                 :             :         /* pragma coverage off */</span>
 <span id="L119"><span class="lineNum">     119</span>                 :             :         default: ;</span>
-<span id="L120"><span class="lineNum">     120</span>                 :             :         /* verilator coverage_on */</span>
+<span id="L120"><span class="lineNum">     120</span>                 :             :         /* pragma coverage on */</span>
 <span id="L121"><span class="lineNum">     121</span>                 :             :       endcase</span>
 <span id="L122"><span class="lineNum">     122</span>                 :<span class="tlaUNC">           0 :     end else begin</span></span>
 <span id="L123"><span class="lineNum">     123</span>         [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span>]:<span class="tlaUNC">           0 :       if (csr_pmp_cfg.read &amp; csr_pmp_cfg.write &amp; csr_pmp_cfg.execute &amp; csr_pmp_cfg.lock) begin</span></span>

@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -79,16 +79,22 @@
     <td class="headerCovSummary rowLeft">
         Branch
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #14ff00;">
-        96.0%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ffff00;">
+        50.0%
     </td>
     <td class="headerCovSummaryEntry">
-        24
+        1
     </td>
     <td class="headerCovSummaryEntry">
-        25
+        2
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -130,9 +136,9 @@
 <span id="L26"><span class="lineNum">      26</span>                 :             :   (</span>
 <span id="L27"><span class="lineNum">      27</span>                 :             : </span>
 <span id="L28"><span class="lineNum">      28</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L29"><span class="lineNum">      29</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L29"><span class="lineNum">      29</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L30"><span class="lineNum">      30</span>                 :             :    input logic                                    scan_mode,                // Flop scan mode control</span>
-<span id="L31"><span class="lineNum">      31</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L31"><span class="lineNum">      31</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L32"><span class="lineNum">      32</span>                 :<span class="tlaGNC tlaBgGNC">           1 :    input logic                                    rst_l,                    // reset, active low</span></span>
 <span id="L33"><span class="lineNum">      33</span>                 :<span class="tlaGNC">     3949938 :    input logic                                    clk,                      // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
 <span id="L34"><span class="lineNum">      34</span>                 :<span class="tlaGNC">     3949938 :    input logic                                    active_clk,               // Clock only while core active.  Through two clock headers. For flops without second clock header built in.</span></span>

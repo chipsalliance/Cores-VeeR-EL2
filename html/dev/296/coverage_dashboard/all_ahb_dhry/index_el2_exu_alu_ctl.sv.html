@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -79,16 +79,22 @@
     <td class="headerCovSummary rowLeft">
         Branch
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #17ff00;">
-        95.5%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #54ff00;">
+        83.3%
     </td>
     <td class="headerCovSummaryEntry">
-        21
+        5
     </td>
     <td class="headerCovSummaryEntry">
-        22
+        6
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -127,9 +133,9 @@
 <span id="L23"><span class="lineNum">      23</span>                 :<span class="tlaGNC tlaBgGNC">     3949938 :    input  logic                  clk,                // Top level clock</span></span>
 <span id="L24"><span class="lineNum">      24</span>                 :<span class="tlaGNC">           1 :    input  logic                  rst_l,              // Reset</span></span>
 <span id="L25"><span class="lineNum">      25</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L26"><span class="lineNum">      26</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L26"><span class="lineNum">      26</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L27"><span class="lineNum">      27</span>                 :             :    input  logic                  scan_mode,          // Scan control</span>
-<span id="L28"><span class="lineNum">      28</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L28"><span class="lineNum">      28</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L29"><span class="lineNum">      29</span>                 :             : </span>
 <span id="L30"><span class="lineNum">      30</span>                 :<span class="tlaGNC">       18856 :    input  logic                  flush_upper_x,      // Branch flush from previous cycle</span></span>
 <span id="L31"><span class="lineNum">      31</span>                 :<span class="tlaGNC">          10 :    input  logic                  flush_lower_r,      // Master flush of entire pipeline</span></span>
@@ -145,13 +151,13 @@
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 34 was taken 4092 times"> + </span><span class="tlaGBC" title="Branch 35 was taken 2002 times"> + </span><span class="tlaUNC" title="Branch 36 was not taken"> - </span><span class="tlaGBC" title="Branch 37 was taken 32 times"> + </span><span class="tlaGBC" title="Branch 38 was taken 78300 times"> + </span> 
 <span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 39 was taken 65738 times"> + </span><span class="tlaUNC" title="Branch 40 was not taken"> - </span><span class="tlaUNC" title="Branch 41 was not taken"> - </span>]
 <span id="L35"><span class="lineNum">      35</span>                 :<span class="tlaGNC">           4 :    input  logic                  csr_ren_in,         // CSR select</span></span>
-<span id="L36"><span class="lineNum">      36</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaGBC" title="Branch 1 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 11 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 9 times"> + </span> :<span class="tlaGNC">          11 :    input  logic        [31:0]    csr_rddata_in,      // CSR data</span></span>
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaGBC" title="Branch 5 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 4 times"> + </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
+<span id="L36"><span class="lineNum">      36</span>   [<span class="tlaGBC" title="Branch 0 was taken 836718 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 821 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 11 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 9 times"> + </span> :<span class="tlaGNC">      836718 :    input  logic        [31:0]    csr_rddata_in,      // CSR data</span></span>
+<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 102 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 55 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 25 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 12 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 6 times"> + </span> 
+<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 7 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 5 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 418365 times"> + </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 14 was not taken"> - </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaUNC" title="Branch 16 was not taken"> - </span><span class="tlaUNC" title="Branch 17 was not taken"> - </span><span class="tlaUNC" title="Branch 18 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaUNC" title="Branch 20 was not taken"> - </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaUNC" title="Branch 22 was not taken"> - </span><span class="tlaUNC" title="Branch 23 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 24 was not taken"> - </span><span class="tlaGBC" title="Branch 25 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 2 times"> + </span> 
-<span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 2 times"> + </span>]
+<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaUNC" title="Branch 20 was not taken"> - </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaGBC" title="Branch 22 was taken 209182 times"> + </span><span class="tlaUNC" title="Branch 23 was not taken"> - </span> 
+<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 24 was not taken"> - </span><span class="tlaGBC" title="Branch 25 was taken 104597 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 52299 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 26153 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 13077 times"> + </span> 
+<span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 6540 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 3276 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 1638 times"> + </span>]
 <span id="L37"><span class="lineNum">      37</span>   [<span class="tlaGBC" title="Branch 0 was taken 60154 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 133140 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 116214 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 126142 times"> + </span> :<span class="tlaGNC">      154420 :    input  logic signed [31:0]    a_in,               // A operand</span></span>
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 124134 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 48 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 20 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 32 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 20 times"> + </span> 
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 140610 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 3564 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 69174 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 3554 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 16 times"> + </span> 

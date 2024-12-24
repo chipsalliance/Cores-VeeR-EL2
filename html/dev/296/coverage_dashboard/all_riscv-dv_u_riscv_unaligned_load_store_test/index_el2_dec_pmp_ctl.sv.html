@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -89,6 +89,12 @@
         0
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -204,9 +210,9 @@
 <span id="L59"><span class="lineNum">      59</span>                 :             :    output logic [31:0]      pmp_pmpaddr [pt.PMP_ENTRIES],</span>
 <span id="L60"><span class="lineNum">      60</span>                 :             : </span>
 <span id="L61"><span class="lineNum">      61</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L62"><span class="lineNum">      62</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L62"><span class="lineNum">      62</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L63"><span class="lineNum">      63</span>                 :             :    input  logic        scan_mode</span>
-<span id="L64"><span class="lineNum">      64</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L64"><span class="lineNum">      64</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L65"><span class="lineNum">      65</span>                 :             :    );</span>
 <span id="L66"><span class="lineNum">      66</span>                 :             : </span>
 <span id="L67"><span class="lineNum">      67</span>                 :<span class="tlaGNC">           6 :    logic wr_pmpcfg_r;</span></span>

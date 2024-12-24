@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -78,6 +78,25 @@
                 
     <td class="headerCovSummary rowLeft">
         Branch
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #a9a9a9;">
+        0.0%
+    </td>
+    <td class="headerCovSummaryEntry">
+        0
+    </td>
+    <td class="headerCovSummaryEntry">
+        0
+    </td>
+
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
+    <td class="headerCovSummary rowLeft">
+        Line
     </td>
     <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #a9a9a9;">
         0.0%
@@ -129,39 +148,20 @@
 <span id="L25"><span class="lineNum">      25</span>                 :             : </span>
 <span id="L26"><span class="lineNum">      26</span>                 :             :   // JTAG signals</span>
 <span id="L27"><span class="lineNum">      27</span>                 :<span class="tlaGNC tlaBgGNC">          16 :   input              trst_n,              // JTAG reset</span></span>
-<span id="L28"><span class="lineNum">      28</span>                 :<span class="tlaGNC">     1474070 :   input              tck,                 // JTAG clock</span></span>
-<span id="L29"><span class="lineNum">      29</span>                 :<span class="tlaGNC">       88410 :   input              tms,                 // Test mode select   </span></span>
-<span id="L30"><span class="lineNum">      30</span>                 :<span class="tlaGNC">      115388 :   input              tdi,                 // Test Data Input</span></span>
-<span id="L31"><span class="lineNum">      31</span>                 :<span class="tlaGNC">      111397 :   output             tdo,                 // Test Data Output           </span></span>
-<span id="L32"><span class="lineNum">      32</span>                 :<span class="tlaGNC">       44190 :   output             tdoEnable,           // Test Data Output enable             </span></span>
+<span id="L28"><span class="lineNum">      28</span>                 :<span class="tlaGNC">     1473864 :   input              tck,                 // JTAG clock</span></span>
+<span id="L29"><span class="lineNum">      29</span>                 :<span class="tlaGNC">       88398 :   input              tms,                 // Test mode select   </span></span>
+<span id="L30"><span class="lineNum">      30</span>                 :<span class="tlaGNC">      115374 :   input              tdi,                 // Test Data Input</span></span>
+<span id="L31"><span class="lineNum">      31</span>                 :<span class="tlaGNC">      111387 :   output             tdo,                 // Test Data Output           </span></span>
+<span id="L32"><span class="lineNum">      32</span>                 :<span class="tlaGNC">       44184 :   output             tdoEnable,           // Test Data Output enable             </span></span>
 <span id="L33"><span class="lineNum">      33</span>                 :             : </span>
 <span id="L34"><span class="lineNum">      34</span>                 :             :   // Processor Signals</span>
 <span id="L35"><span class="lineNum">      35</span>                 :<span class="tlaGNC">         353 :   input              core_rst_n,          // Core reset                  </span></span>
-<span id="L36"><span class="lineNum">      36</span>                 :<span class="tlaGNC">   117939594 :   input              core_clk,            // Core clock                  </span></span>
-<span id="L37"><span class="lineNum">      37</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaGNC">         341 :   input [31:1]       jtag_id,             // JTAG ID</span></span>
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaGBC" title="Branch 10 was taken 341 times"> + </span><span class="tlaUNC" title="Branch 11 was not taken"> - </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 14 was not taken"> - </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaUNC" title="Branch 16 was not taken"> - </span><span class="tlaUNC" title="Branch 17 was not taken"> - </span><span class="tlaUNC" title="Branch 18 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 341 times"> + </span><span class="tlaUNC" title="Branch 20 was not taken"> - </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaUNC" title="Branch 22 was not taken"> - </span><span class="tlaUNC" title="Branch 23 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 341 times"> + </span><span class="tlaUNC" title="Branch 25 was not taken"> - </span><span class="tlaUNC" title="Branch 26 was not taken"> - </span><span class="tlaUNC" title="Branch 27 was not taken"> - </span><span class="tlaGBC" title="Branch 28 was taken 341 times"> + </span> 
-<span class="lineNum">        </span>          <span class="tlaUNC" title="Branch 29 was not taken"> - </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span>]
-<span id="L38"><span class="lineNum">      38</span>   [<span class="tlaGBC" title="Branch 0 was taken 3515 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 2634 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 385 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 1036 times"> + </span> :<span class="tlaGNC">        5117 :   input [31:0]       rd_data,             // 32 bit Read data from  Processor                       </span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 215 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 742 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 711 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 2517 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 4210 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 395 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 1753 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 4534 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 1320 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 3319 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 303 times"> + </span><span class="tlaGBC" title="Branch 15 was taken 217 times"> + </span><span class="tlaGBC" title="Branch 16 was taken 392 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 1713 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 327 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 269 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 411 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 403 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 1619 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 1535 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 317 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 1693 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 3272 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 2649 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 2231 times"> + </span> 
-<span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 5099 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 4035 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 3863 times"> + </span>]
-<span id="L39"><span class="lineNum">      39</span>   [<span class="tlaGBC" title="Branch 0 was taken 1394 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 2732 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 348 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 466 times"> + </span> :<span class="tlaGNC">        3602 :   output [31:0]      reg_wr_data,         // 32 bit Write data to Processor                      </span></span>
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 198 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 256 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 254 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 1154 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 3046 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 270 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 1806 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 1230 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 1258 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 3562 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 200 times"> + </span><span class="tlaGBC" title="Branch 15 was taken 256 times"> + </span><span class="tlaGBC" title="Branch 16 was taken 362 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 1696 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 212 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 260 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 316 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 308 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 1068 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 328 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 376 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 1118 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 2018 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 2180 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 950 times"> + </span> 
-<span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 2752 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 2696 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 2626 times"> + </span>]
-<span id="L40"><span class="lineNum">      40</span>   [<span class="tlaGBC" title="Branch 0 was taken 4600 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 4148 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 1844 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 70 times"> + </span> :<span class="tlaGNC">        4600 :   output [6:0]       reg_wr_addr,         // 7 bit reg address to Processor                   </span></span>
-<span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 4 was taken 3919 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 68 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 3 times"> + </span>]
-<span id="L41"><span class="lineNum">      41</span>                 :<span class="tlaGNC">       16120 :   output             reg_en,              // 1 bit  Read enable to Processor                                    </span></span>
+<span id="L36"><span class="lineNum">      36</span>                 :<span class="tlaGNC">   117939598 :   input              core_clk,            // Core clock                  </span></span>
+<span id="L37"><span class="lineNum">      37</span>                 :<span class="tlaGNC">         341 :   input [31:1]       jtag_id,             // JTAG ID</span></span>
+<span id="L38"><span class="lineNum">      38</span>                 :<span class="tlaGNC">        5121 :   input [31:0]       rd_data,             // 32 bit Read data from  Processor                       </span></span>
+<span id="L39"><span class="lineNum">      39</span>                 :<span class="tlaGNC">        3602 :   output [31:0]      reg_wr_data,         // 32 bit Write data to Processor                      </span></span>
+<span id="L40"><span class="lineNum">      40</span>                 :<span class="tlaGNC">        4600 :   output [6:0]       reg_wr_addr,         // 7 bit reg address to Processor                   </span></span>
+<span id="L41"><span class="lineNum">      41</span>                 :<span class="tlaGNC">       16118 :   output             reg_en,              // 1 bit  Read enable to Processor                                    </span></span>
 <span id="L42"><span class="lineNum">      42</span>                 :<span class="tlaGNC">        6348 :   output             reg_wr_en,           // 1 bit  Write enable to Processor </span></span>
 <span id="L43"><span class="lineNum">      43</span>                 :<span class="tlaUNC tlaBgUNC">           0 :   output             dmi_hard_reset  </span></span>
 <span id="L44"><span class="lineNum">      44</span>                 :             : );</span>
@@ -171,7 +171,7 @@
 <span id="L48"><span class="lineNum">      48</span>                 :             : </span>
 <span id="L49"><span class="lineNum">      49</span>                 :             : </span>
 <span id="L50"><span class="lineNum">      50</span>                 :             :   //Wire Declaration</span>
-<span id="L51"><span class="lineNum">      51</span>                 :<span class="tlaGNC tlaBgGNC">        9788 :   wire                     rd_en;</span></span>
+<span id="L51"><span class="lineNum">      51</span>                 :<span class="tlaGNC tlaBgGNC">        9786 :   wire                     rd_en;</span></span>
 <span id="L52"><span class="lineNum">      52</span>                 :<span class="tlaGNC">        6348 :   wire                     wr_en;</span></span>
 <span id="L53"><span class="lineNum">      53</span>                 :<span class="tlaUNC tlaBgUNC">           0 :   wire                     dmireset;</span></span>
 <span id="L54"><span class="lineNum">      54</span>                 :             : </span>

@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -83,12 +83,18 @@
         100.0%
     </td>
     <td class="headerCovSummaryEntry">
-        4
+        2
     </td>
     <td class="headerCovSummaryEntry">
-        4
+        2
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -136,9 +142,9 @@
 <span id="L32"><span class="lineNum">      32</span>                 :<span class="tlaGNC">           1 :    input logic         dma_bus_clk_en, // slave bus clock enable</span></span>
 <span id="L33"><span class="lineNum">      33</span>                 :<span class="tlaUNC tlaBgUNC">           0 :    input logic         clk_override,</span></span>
 <span id="L34"><span class="lineNum">      34</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L35"><span class="lineNum">      35</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L35"><span class="lineNum">      35</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L36"><span class="lineNum">      36</span>                 :             :    input logic         scan_mode,</span>
-<span id="L37"><span class="lineNum">      37</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L37"><span class="lineNum">      37</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L38"><span class="lineNum">      38</span>                 :             : </span>
 <span id="L39"><span class="lineNum">      39</span>                 :             :    // Debug signals</span>
 <span id="L40"><span class="lineNum">      40</span>   [<span class="tlaGBC" title="Branch 0 was taken 350 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 620 times"> + </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaGNC tlaBgGNC">         628 :    input logic [31:0]  dbg_cmd_addr,</span></span>
@@ -148,12 +154,12 @@
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 8 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 60 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 61 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 612 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 61 times"> + </span> 
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 61 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 268 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 628 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 622 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 10 times"> + </span> 
 <span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 620 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 620 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 620 times"> + </span>]
-<span id="L41"><span class="lineNum">      41</span>   [<span class="tlaGBC" title="Branch 0 was taken 229 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 191 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 192 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 342 times"> + </span> :<span class="tlaGNC">         720 :    input logic [31:0]  dbg_cmd_wrdata,</span></span>
+<span id="L41"><span class="lineNum">      41</span>   [<span class="tlaGBC" title="Branch 0 was taken 233 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 191 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 192 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 342 times"> + </span> :<span class="tlaGNC">         720 :    input logic [31:0]  dbg_cmd_wrdata,</span></span>
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 130 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 395 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 396 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 229 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 245 times"> + </span> 
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 136 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 154 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 363 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 202 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 211 times"> + </span> 
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 142 times"> + </span><span class="tlaGBC" title="Branch 15 was taken 156 times"> + </span><span class="tlaGBC" title="Branch 16 was taken 229 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 142 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 128 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 158 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 132 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 136 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 331 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 720 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 150 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 232 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 658 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 479 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 591 times"> + </span> 
+<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 158 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 132 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 136 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 327 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 720 times"> + </span> 
+<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 150 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 232 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 652 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 485 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 591 times"> + </span> 
 <span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 352 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 273 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 118 times"> + </span>]
 <span id="L42"><span class="lineNum">      42</span>                 :<span class="tlaGNC">        1436 :    input logic         dbg_cmd_valid,</span></span>
 <span id="L43"><span class="lineNum">      43</span>                 :<span class="tlaGNC">         153 :    input logic         dbg_cmd_write, // 1: write command, 0: read_command</span></span>
@@ -240,7 +246,7 @@
 <span id="L73"><span class="lineNum">      73</span>                 :<span class="tlaUNC tlaBgUNC">           0 :    output logic        dma_dccm_stall_any, // stall dccm pipe (bubble) so that DMA can proceed</span></span>
 <span id="L74"><span class="lineNum">      74</span>                 :<span class="tlaUNC">           0 :    output logic        dma_iccm_stall_any, // stall iccm pipe (bubble) so that DMA can proceed</span></span>
 <span id="L75"><span class="lineNum">      75</span>                 :<span class="tlaGNC tlaBgGNC">           3 :    input logic         dccm_ready, // dccm ready to accept DMA request</span></span>
-<span id="L76"><span class="lineNum">      76</span>                 :<span class="tlaGNC">         183 :    input logic         iccm_ready, // iccm ready to accept DMA request</span></span>
+<span id="L76"><span class="lineNum">      76</span>                 :<span class="tlaGNC">         181 :    input logic         iccm_ready, // iccm ready to accept DMA request</span></span>
 <span id="L77"><span class="lineNum">      77</span>      [<span class="tlaGBC" title="Branch 0 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 2 times"> + </span>]:<span class="tlaGNC">           2 :    input logic [2:0]   dec_tlu_dma_qos_prty,    // DMA QoS priority coming from MFDC [18:15]</span></span>
 <span id="L78"><span class="lineNum">      78</span>                 :             : </span>
 <span id="L79"><span class="lineNum">      79</span>                 :             :    // PMU signals</span>
@@ -452,12 +458,12 @@
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaUNC" title="Branch 20 was not taken"> - </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaGBC" title="Branch 22 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 23 was not taken"> - </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 24 was not taken"> - </span><span class="tlaUNC" title="Branch 25 was not taken"> - </span><span class="tlaUNC" title="Branch 26 was not taken"> - </span><span class="tlaGBC" title="Branch 27 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 2 times"> + </span> 
 <span class="lineNum">        </span>       <span class="tlaUNC" title="Branch 29 was not taken"> - </span><span class="tlaGBC" title="Branch 30 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span>]
-<span id="L166"><span class="lineNum">     166</span>   [<span class="tlaGBC" title="Branch 0 was taken 229 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 191 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 192 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 342 times"> + </span> :<span class="tlaGNC">         952 :    logic [31:0]             dma_dbg_mem_wrdata;</span></span>
+<span id="L166"><span class="lineNum">     166</span>   [<span class="tlaGBC" title="Branch 0 was taken 233 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 191 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 192 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 342 times"> + </span> :<span class="tlaGNC">         952 :    logic [31:0]             dma_dbg_mem_wrdata;</span></span>
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 130 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 395 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 396 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 693 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 709 times"> + </span> 
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 9 was taken 252 times"> + </span><span class="tlaGBC" title="Branch 10 was taken 154 times"> + </span><span class="tlaGBC" title="Branch 11 was taken 363 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 666 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 443 times"> + </span> 
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 14 was taken 598 times"> + </span><span class="tlaGBC" title="Branch 15 was taken 620 times"> + </span><span class="tlaGBC" title="Branch 16 was taken 345 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 142 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 128 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 160 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 364 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 136 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 331 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 952 times"> + </span> 
-<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 386 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 232 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 658 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 479 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 591 times"> + </span> 
+<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 19 was taken 160 times"> + </span><span class="tlaGBC" title="Branch 20 was taken 364 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 136 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 327 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 952 times"> + </span> 
+<span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 386 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 232 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 652 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 485 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 591 times"> + </span> 
 <span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 352 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 273 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 118 times"> + </span>]
 <span id="L167"><span class="lineNum">     167</span>                 :<span class="tlaGNC">           2 :    logic                    dma_dbg_cmd_error;</span></span>
 <span id="L168"><span class="lineNum">     168</span>                 :<span class="tlaGNC">           2 :    logic                    dma_dbg_cmd_done_q;</span></span>

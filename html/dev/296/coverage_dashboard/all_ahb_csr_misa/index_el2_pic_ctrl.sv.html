@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -79,16 +79,22 @@
     <td class="headerCovSummary rowLeft">
         Branch
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #66ff00;">
-        80.0%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #99ff00;">
+        70.0%
     </td>
     <td class="headerCovSummaryEntry">
-        12
+        7
     </td>
     <td class="headerCovSummaryEntry">
-        15
+        10
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -159,7 +165,7 @@
 <span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 24 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 24 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 24 times"> + </span>]
 <span id="L38"><span class="lineNum">      38</span>   [<span class="tlaGBC" title="Branch 0 was taken 14 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaGBC" title="Branch 3 was taken 12 times"> + </span> :<span class="tlaGNC">          42 :                      input  logic [31:0]            picm_wr_data,         // Data to be written to the register</span></span>
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 4 times"> + </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaGBC" title="Branch 7 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaGBC" title="Branch 11 was taken 14 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 10 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 4 times"> + </span> 
+<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaGBC" title="Branch 11 was taken 14 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 6 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 4 times"> + </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 14 was not taken"> - </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaGBC" title="Branch 16 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 17 was not taken"> - </span><span class="tlaGBC" title="Branch 18 was taken 2 times"> + </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaGBC" title="Branch 20 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 20 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 6 times"> + </span> 
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 6 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 18 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 30 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 42 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 20 times"> + </span> 
@@ -183,9 +189,9 @@
 <span class="lineNum">        </span>       <span class="tlaUNC" title="Branch 29 was not taken"> - </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span>]
 <span id="L49"><span class="lineNum">      49</span>                 :<span class="tlaUNC">           0 :                      output logic                   mhwakeup,             // Wake-up interrupt request</span></span>
 <span id="L50"><span class="lineNum">      50</span>                 :             :                      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L51"><span class="lineNum">      51</span>                 :             :                      /*verilator coverage_off*/</span>
+<span id="L51"><span class="lineNum">      51</span>                 :             :                      /*pragma coverage off*/</span>
 <span id="L52"><span class="lineNum">      52</span>                 :             :                      input  logic                   scan_mode             // scan mode</span>
-<span id="L53"><span class="lineNum">      53</span>                 :             :                      /*verilator coverage_on*/</span>
+<span id="L53"><span class="lineNum">      53</span>                 :             :                      /*pragma coverage on*/</span>
 <span id="L54"><span class="lineNum">      54</span>                 :             : </span>
 <span id="L55"><span class="lineNum">      55</span>                 :             : );</span>
 <span id="L56"><span class="lineNum">      56</span>                 :             : </span>
@@ -518,7 +524,7 @@
 <span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 24 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 24 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 24 times"> + </span>]
 <span id="L138"><span class="lineNum">     138</span>   [<span class="tlaGBC" title="Branch 0 was taken 14 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaGBC" title="Branch 3 was taken 12 times"> + </span> :<span class="tlaGNC">          42 : logic [31:0]                                 picm_wr_data_ff;</span></span>
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 4 times"> + </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaGBC" title="Branch 7 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaGBC" title="Branch 11 was taken 14 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 10 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 4 times"> + </span> 
+<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaGBC" title="Branch 11 was taken 14 times"> + </span><span class="tlaGBC" title="Branch 12 was taken 6 times"> + </span><span class="tlaGBC" title="Branch 13 was taken 4 times"> + </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 14 was not taken"> - </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaGBC" title="Branch 16 was taken 2 times"> + </span><span class="tlaUNC" title="Branch 17 was not taken"> - </span><span class="tlaGBC" title="Branch 18 was taken 2 times"> + </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 19 was not taken"> - </span><span class="tlaGBC" title="Branch 20 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 21 was taken 4 times"> + </span><span class="tlaGBC" title="Branch 22 was taken 20 times"> + </span><span class="tlaGBC" title="Branch 23 was taken 6 times"> + </span> 
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 24 was taken 6 times"> + </span><span class="tlaGBC" title="Branch 25 was taken 18 times"> + </span><span class="tlaGBC" title="Branch 26 was taken 30 times"> + </span><span class="tlaGBC" title="Branch 27 was taken 42 times"> + </span><span class="tlaGBC" title="Branch 28 was taken 20 times"> + </span> 

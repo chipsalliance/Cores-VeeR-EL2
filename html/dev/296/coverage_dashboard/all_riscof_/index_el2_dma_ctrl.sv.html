@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -83,12 +83,18 @@
         100.0%
     </td>
     <td class="headerCovSummaryEntry">
-        4
+        2
     </td>
     <td class="headerCovSummaryEntry">
-        4
+        2
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -136,9 +142,9 @@
 <span id="L32"><span class="lineNum">      32</span>                 :<span class="tlaGNC">         150 :    input logic         dma_bus_clk_en, // slave bus clock enable</span></span>
 <span id="L33"><span class="lineNum">      33</span>                 :<span class="tlaUNC tlaBgUNC">           0 :    input logic         clk_override,</span></span>
 <span id="L34"><span class="lineNum">      34</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L35"><span class="lineNum">      35</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L35"><span class="lineNum">      35</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L36"><span class="lineNum">      36</span>                 :             :    input logic         scan_mode,</span>
-<span id="L37"><span class="lineNum">      37</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L37"><span class="lineNum">      37</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L38"><span class="lineNum">      38</span>                 :             : </span>
 <span id="L39"><span class="lineNum">      39</span>                 :             :    // Debug signals</span>
 <span id="L40"><span class="lineNum">      40</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaUNC">           0 :    input logic [31:0]  dbg_cmd_addr,</span></span>

@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -89,6 +89,12 @@
         0
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -135,9 +141,9 @@
 <span id="L31"><span class="lineNum">      31</span>                 :             : </span>
 <span id="L32"><span class="lineNum">      32</span>                 :<span class="tlaGNC">           3 :    input logic rst_l, // reset enable, from core pin</span></span>
 <span id="L33"><span class="lineNum">      33</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L34"><span class="lineNum">      34</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L34"><span class="lineNum">      34</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L35"><span class="lineNum">      35</span>                 :             :    input logic scan_mode, // scan</span>
-<span id="L36"><span class="lineNum">      36</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L36"><span class="lineNum">      36</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L37"><span class="lineNum">      37</span>                 :             : </span>
 <span id="L38"><span class="lineNum">      38</span>                 :<span class="tlaGNC">       26153 :    input logic ic_hit_f,      // Icache hit</span></span>
 <span id="L39"><span class="lineNum">      39</span>                 :<span class="tlaGNC">       26363 :    input logic ifu_ic_mb_empty, // Miss buffer empty</span></span>

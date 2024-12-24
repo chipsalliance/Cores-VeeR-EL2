@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -89,6 +89,12 @@
         0
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -159,7 +165,7 @@
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 24 was not taken"> - </span><span class="tlaUNC" title="Branch 25 was not taken"> - </span><span class="tlaUNC" title="Branch 26 was not taken"> - </span><span class="tlaUNC" title="Branch 27 was not taken"> - </span><span class="tlaUNC" title="Branch 28 was not taken"> - </span> 
 <span class="lineNum">        </span>          <span class="tlaUNC" title="Branch 29 was not taken"> - </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span>]
 <span id="L51"><span class="lineNum">      51</span>                 :             : </span>
-<span id="L52"><span class="lineNum">      52</span>                 :<span class="tlaGNC tlaBgGNC">           6 :     input logic        nmi_int,  // NMI pin</span></span>
+<span id="L52"><span class="lineNum">      52</span>                 :<span class="tlaGNC tlaBgGNC">           4 :     input logic        nmi_int,  // NMI pin</span></span>
 <span id="L53"><span class="lineNum">      53</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaUNC tlaBgUNC">           0 :     input logic [31:1] nmi_vec,  // NMI vector, from pins</span></span>
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaUNC" title="Branch 11 was not taken"> - </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
@@ -390,8 +396,8 @@
 <span class="lineNum">        </span>          <span class="tlaUNC" title="Branch 29 was not taken"> - </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span>]
 <span id="L169"><span class="lineNum">     169</span>                 :             : </span>
 <span id="L170"><span class="lineNum">     170</span>                 :<span class="tlaUNC">           0 :     input logic mexintpend,  // External interrupt pending</span></span>
-<span id="L171"><span class="lineNum">     171</span>                 :<span class="tlaGNC tlaBgGNC">           3 :     input logic timer_int,   // Timer interrupt pending (from pin)</span></span>
-<span id="L172"><span class="lineNum">     172</span>                 :<span class="tlaGNC">           8 :     input logic soft_int,    // Software interrupt pending (from pin)</span></span>
+<span id="L171"><span class="lineNum">     171</span>                 :<span class="tlaGNC tlaBgGNC">           7 :     input logic timer_int,   // Timer interrupt pending (from pin)</span></span>
+<span id="L172"><span class="lineNum">     172</span>                 :<span class="tlaGNC">           5 :     input logic soft_int,    // Software interrupt pending (from pin)</span></span>
 <span id="L173"><span class="lineNum">     173</span>                 :             : </span>
 <span id="L174"><span class="lineNum">     174</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaUNC tlaBgUNC">           0 :     input logic [7:0] pic_claimid,  // PIC claimid</span></span>
 <span class="lineNum">        </span>    <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span>]
@@ -757,9 +763,9 @@
 <span id="L321"><span class="lineNum">     321</span>                 :             : </span>
 <span id="L322"><span class="lineNum">     322</span>                 :<span class="tlaUNC">           0 :     output logic dec_tlu_i0_commit_cmt,  // committed i0 instruction</span></span>
 <span id="L323"><span class="lineNum">     323</span>                 :             :     // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L324"><span class="lineNum">     324</span>                 :             :     /*verilator coverage_off*/</span>
+<span id="L324"><span class="lineNum">     324</span>                 :             :     /*pragma coverage off*/</span>
 <span id="L325"><span class="lineNum">     325</span>                 :             :     input  logic scan_mode               // Flop scan mode control</span>
-<span id="L326"><span class="lineNum">     326</span>                 :             :     /*verilator coverage_on*/</span>
+<span id="L326"><span class="lineNum">     326</span>                 :             :     /*pragma coverage on*/</span>
 <span id="L327"><span class="lineNum">     327</span>                 :             : </span>
 <span id="L328"><span class="lineNum">     328</span>                 :             : );</span>
 <span id="L329"><span class="lineNum">     329</span>                 :             : </span>

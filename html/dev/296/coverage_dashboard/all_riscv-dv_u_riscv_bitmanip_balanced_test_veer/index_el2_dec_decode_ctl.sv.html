@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -79,16 +79,22 @@
     <td class="headerCovSummary rowLeft">
         Branch
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #18ff00;">
-        95.2%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #21ff00;">
+        93.4%
     </td>
     <td class="headerCovSummaryEntry">
-        100
+        57
     </td>
     <td class="headerCovSummaryEntry">
-        105
+        61
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -464,9 +470,9 @@
 <span id="L197"><span class="lineNum">     197</span>                 :<span class="tlaGNC tlaBgGNC">         778 :    output logic       dec_div_active,                 // non-block divide is active</span></span>
 <span id="L198"><span class="lineNum">     198</span>                 :             : </span>
 <span id="L199"><span class="lineNum">     199</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L200"><span class="lineNum">     200</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L200"><span class="lineNum">     200</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L201"><span class="lineNum">     201</span>                 :             :    input  logic       scan_mode</span>
-<span id="L202"><span class="lineNum">     202</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L202"><span class="lineNum">     202</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L203"><span class="lineNum">     203</span>                 :             :    );</span>
 <span id="L204"><span class="lineNum">     204</span>                 :             : </span>
 <span id="L205"><span class="lineNum">     205</span>                 :             : </span>

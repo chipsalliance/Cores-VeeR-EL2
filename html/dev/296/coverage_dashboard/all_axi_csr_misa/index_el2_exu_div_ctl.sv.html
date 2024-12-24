@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -90,6 +90,12 @@
     </td>
 
             </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
+            </tr>
             
         </table>
     </center>
@@ -127,9 +133,9 @@
 <span id="L23"><span class="lineNum">      23</span>                 :<span class="tlaGNC tlaBgGNC">        9002 :    input logic           clk,                       // Top level clock</span></span>
 <span id="L24"><span class="lineNum">      24</span>                 :<span class="tlaGNC">           1 :    input logic           rst_l,                     // Reset</span></span>
 <span id="L25"><span class="lineNum">      25</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L26"><span class="lineNum">      26</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L26"><span class="lineNum">      26</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L27"><span class="lineNum">      27</span>                 :             :    input logic           scan_mode,                 // Scan mode</span>
-<span id="L28"><span class="lineNum">      28</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L28"><span class="lineNum">      28</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L29"><span class="lineNum">      29</span>                 :             : </span>
 <span id="L30"><span class="lineNum">      30</span>      [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaGBC" title="Branch 1 was taken 102 times"> + </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span>]:<span class="tlaGNC">         102 :    input el2_div_pkt_t  dp,                        // valid, sign, rem</span></span>
 <span id="L31"><span class="lineNum">      31</span>   [<span class="tlaGBC" title="Branch 0 was taken 298 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 214 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 246 times"> + </span> :<span class="tlaGNC">         658 :    input logic  [31:0]   dividend,                  // Numerator</span></span>
@@ -272,9 +278,9 @@
 <span id="L144"><span class="lineNum">     144</span>                 :             :    input  logic            clk,                       // Top level clock</span>
 <span id="L145"><span class="lineNum">     145</span>                 :             :    input  logic            rst_l,                     // Reset</span>
 <span id="L146"><span class="lineNum">     146</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L147"><span class="lineNum">     147</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L147"><span class="lineNum">     147</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L148"><span class="lineNum">     148</span>                 :             :    input  logic            scan_mode,                 // Scan mode</span>
-<span id="L149"><span class="lineNum">     149</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L149"><span class="lineNum">     149</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L150"><span class="lineNum">     150</span>                 :             : </span>
 <span id="L151"><span class="lineNum">     151</span>                 :             :    input  logic            cancel,                    // Flush pipeline</span>
 <span id="L152"><span class="lineNum">     152</span>                 :             :    input  logic            valid_in,</span>
@@ -583,9 +589,9 @@
 <span id="L455"><span class="lineNum">     455</span>                 :             :    input  logic            clk,                       // Top level clock</span>
 <span id="L456"><span class="lineNum">     456</span>                 :             :    input  logic            rst_l,                     // Reset</span>
 <span id="L457"><span class="lineNum">     457</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L458"><span class="lineNum">     458</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L458"><span class="lineNum">     458</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L459"><span class="lineNum">     459</span>                 :             :    input  logic            scan_mode,                 // Scan mode</span>
-<span id="L460"><span class="lineNum">     460</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L460"><span class="lineNum">     460</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L461"><span class="lineNum">     461</span>                 :             : </span>
 <span id="L462"><span class="lineNum">     462</span>                 :             :    input  logic            cancel,                    // Flush pipeline</span>
 <span id="L463"><span class="lineNum">     463</span>                 :             :    input  logic            valid_in,</span>
@@ -844,9 +850,9 @@
 <span id="L716"><span class="lineNum">     716</span>                 :             :    input  logic            clk,                       // Top level clock</span>
 <span id="L717"><span class="lineNum">     717</span>                 :             :    input  logic            rst_l,                     // Reset</span>
 <span id="L718"><span class="lineNum">     718</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L719"><span class="lineNum">     719</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L719"><span class="lineNum">     719</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L720"><span class="lineNum">     720</span>                 :             :    input  logic            scan_mode,                 // Scan mode</span>
-<span id="L721"><span class="lineNum">     721</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L721"><span class="lineNum">     721</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L722"><span class="lineNum">     722</span>                 :             : </span>
 <span id="L723"><span class="lineNum">     723</span>                 :             :    input  logic            cancel,                    // Flush pipeline</span>
 <span id="L724"><span class="lineNum">     724</span>                 :             :    input  logic            valid_in,</span>
@@ -1121,9 +1127,9 @@
 <span id="L993"><span class="lineNum">     993</span>                 :             :    input  logic            clk,                       // Top level clock</span>
 <span id="L994"><span class="lineNum">     994</span>                 :             :    input  logic            rst_l,                     // Reset</span>
 <span id="L995"><span class="lineNum">     995</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L996"><span class="lineNum">     996</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L996"><span class="lineNum">     996</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L997"><span class="lineNum">     997</span>                 :             :    input  logic            scan_mode,                 // Scan mode</span>
-<span id="L998"><span class="lineNum">     998</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L998"><span class="lineNum">     998</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L999"><span class="lineNum">     999</span>                 :             : </span>
 <span id="L1000"><span class="lineNum">    1000</span>                 :             :    input  logic            cancel,                    // Flush pipeline</span>
 <span id="L1001"><span class="lineNum">    1001</span>                 :             :    input  logic            valid_in,</span>
@@ -1456,9 +1462,9 @@
 <span id="L1328"><span class="lineNum">    1328</span>                 :<span class="tlaGNC tlaBgGNC">        9002 :    input  logic            clk,                       // Top level clock</span></span>
 <span id="L1329"><span class="lineNum">    1329</span>                 :<span class="tlaGNC">           1 :    input  logic            rst_l,                     // Reset</span></span>
 <span id="L1330"><span class="lineNum">    1330</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L1331"><span class="lineNum">    1331</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L1331"><span class="lineNum">    1331</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L1332"><span class="lineNum">    1332</span>                 :             :    input  logic            scan_mode,                 // Scan mode</span>
-<span id="L1333"><span class="lineNum">    1333</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L1333"><span class="lineNum">    1333</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L1334"><span class="lineNum">    1334</span>                 :             : </span>
 <span id="L1335"><span class="lineNum">    1335</span>                 :<span class="tlaUNC tlaBgUNC">           0 :    input  logic            cancel,                    // Flush pipeline</span></span>
 <span id="L1336"><span class="lineNum">    1336</span>                 :<span class="tlaUNC">           0 :    input  logic            valid_in,</span></span>

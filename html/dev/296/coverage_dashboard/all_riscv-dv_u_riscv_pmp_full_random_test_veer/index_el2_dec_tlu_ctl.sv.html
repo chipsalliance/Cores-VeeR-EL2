@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -89,6 +89,12 @@
         0
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -138,9 +144,9 @@
 <span id="L34"><span class="lineNum">      34</span>                 :<span class="tlaGNC">       13778 :    input logic free_l2clk,</span></span>
 <span id="L35"><span class="lineNum">      35</span>                 :<span class="tlaGNC">           3 :    input logic rst_l,</span></span>
 <span id="L36"><span class="lineNum">      36</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L37"><span class="lineNum">      37</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L37"><span class="lineNum">      37</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L38"><span class="lineNum">      38</span>                 :             :    input logic scan_mode,</span>
-<span id="L39"><span class="lineNum">      39</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L39"><span class="lineNum">      39</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L40"><span class="lineNum">      40</span>                 :             : </span>
 <span id="L41"><span class="lineNum">      41</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaGNC">           3 :    input logic [31:1] rst_vec, // reset vector, from core pins</span></span>
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
@@ -4008,9 +4014,9 @@
 <span id="L3034"><span class="lineNum">    3034</span>                 :<span class="tlaUNC">           0 :    output logic        dec_timer_t1_pulse, // timer1 int</span></span>
 <span id="L3035"><span class="lineNum">    3035</span>                 :             : </span>
 <span id="L3036"><span class="lineNum">    3036</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L3037"><span class="lineNum">    3037</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L3037"><span class="lineNum">    3037</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L3038"><span class="lineNum">    3038</span>                 :             :    input  logic        scan_mode</span>
-<span id="L3039"><span class="lineNum">    3039</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L3039"><span class="lineNum">    3039</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L3040"><span class="lineNum">    3040</span>                 :             :    );</span>
 <span id="L3041"><span class="lineNum">    3041</span>                 :             :    localparam MITCTL_ENABLE             = 0;</span>
 <span id="L3042"><span class="lineNum">    3042</span>                 :             :    localparam MITCTL_ENABLE_HALTED      = 1;</span>

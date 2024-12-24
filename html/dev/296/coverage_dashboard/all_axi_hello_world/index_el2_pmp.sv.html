@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -79,16 +79,22 @@
     <td class="headerCovSummary rowLeft">
         Branch
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ffe600;">
-        45.1%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ffb200;">
+        35.0%
     </td>
     <td class="headerCovSummaryEntry">
-        23
+        7
     </td>
     <td class="headerCovSummaryEntry">
-        51
+        20
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -129,9 +135,9 @@
 <span id="L25"><span class="lineNum">      25</span>                 :             : ) (</span>
 <span id="L26"><span class="lineNum">      26</span>                 :<span class="tlaGNC tlaBgGNC">       18448 :     input logic clk,       // Top level clock</span></span>
 <span id="L27"><span class="lineNum">      27</span>                 :<span class="tlaGNC">           5 :     input logic rst_l,     // Reset</span></span>
-<span id="L28"><span class="lineNum">      28</span>                 :             :     /* verilator coverage_off */</span>
+<span id="L28"><span class="lineNum">      28</span>                 :             :     /* pragma coverage off */</span>
 <span id="L29"><span class="lineNum">      29</span>                 :             :     input logic scan_mode, // Scan mode</span>
-<span id="L30"><span class="lineNum">      30</span>                 :             :     /* verilator coverage_on */</span>
+<span id="L30"><span class="lineNum">      30</span>                 :             :     /* pragma coverage on */</span>
 <span id="L31"><span class="lineNum">      31</span>                 :             : </span>
 <span id="L32"><span class="lineNum">      32</span>                 :             : `ifdef RV_SMEPMP</span>
 <span id="L33"><span class="lineNum">      33</span>      [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span>]:<span class="tlaUNC tlaBgUNC">           0 :     input el2_mseccfg_pkt_t mseccfg, // mseccfg CSR content, RLB, MMWP and MML bits</span></span>
@@ -339,9 +345,9 @@
 <span id="L115"><span class="lineNum">     115</span>                 :<span class="tlaUNC">           0 :         2'b11: result =</span></span>
 <span id="L116"><span class="lineNum">     116</span>                 :<span class="tlaUNC">           0 :              (pmp_req_type == EXEC) |</span></span>
 <span id="L117"><span class="lineNum">     117</span>                 :<span class="tlaUNC">           0 :             ((pmp_req_type == READ) &amp; ~priv_mode);</span></span>
-<span id="L118"><span class="lineNum">     118</span>                 :             :         /* verilator coverage_off */</span>
+<span id="L118"><span class="lineNum">     118</span>                 :             :         /* pragma coverage off */</span>
 <span id="L119"><span class="lineNum">     119</span>                 :             :         default: ;</span>
-<span id="L120"><span class="lineNum">     120</span>                 :             :         /* verilator coverage_on */</span>
+<span id="L120"><span class="lineNum">     120</span>                 :             :         /* pragma coverage on */</span>
 <span id="L121"><span class="lineNum">     121</span>                 :             :       endcase</span>
 <span id="L122"><span class="lineNum">     122</span>                 :<span class="tlaUNC">           0 :     end else begin</span></span>
 <span id="L123"><span class="lineNum">     123</span>         [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span>]:<span class="tlaUNC">           0 :       if (csr_pmp_cfg.read &amp; csr_pmp_cfg.write &amp; csr_pmp_cfg.execute &amp; csr_pmp_cfg.lock) begin</span></span>
@@ -379,14 +385,14 @@
 <span id="L155"><span class="lineNum">     155</span>                 :             :   `ifdef RV_SMEPMP</span>
 <span id="L156"><span class="lineNum">     156</span>                 :             :     // When MSECCFG.MMWP is set default deny always, otherwise allow for M-mode, deny for other</span>
 <span id="L157"><span class="lineNum">     157</span>                 :             :     // modes. Also deny unmatched for M-mode when MSECCFG.MML is set and request type is EXEC.</span>
-<span id="L158"><span class="lineNum">     158</span>                 :<span class="tlaGNC">       46158 :     logic access_fail = csr_pmp_mseccfg.MMWP | priv_mode |</span></span>
-<span id="L159"><span class="lineNum">     159</span>                 :<span class="tlaGNC">       46158 :                        (csr_pmp_mseccfg.MML &amp;&amp; (req_type == EXEC));</span></span>
+<span id="L158"><span class="lineNum">     158</span>                 :<span class="tlaGNC">       91836 :     logic access_fail = csr_pmp_mseccfg.MMWP | priv_mode |</span></span>
+<span id="L159"><span class="lineNum">     159</span>                 :<span class="tlaGNC">       91836 :                        (csr_pmp_mseccfg.MML &amp;&amp; (req_type == EXEC));</span></span>
 <span id="L160"><span class="lineNum">     160</span>                 :             :   `else</span>
 <span id="L161"><span class="lineNum">     161</span>                 :             :     // When in user mode and at least one PMP region is enabled deny access by default.</span>
 <span id="L162"><span class="lineNum">     162</span>                 :             :     logic access_fail = any_region_enabled &amp; priv_mode;</span>
 <span id="L163"><span class="lineNum">     163</span>                 :             :   `endif</span>
 <span id="L164"><span class="lineNum">     164</span>                 :             : `else</span>
-<span id="L165"><span class="lineNum">     165</span>                 :<span class="tlaGNC">       89421 :     logic access_fail = 1'b0;</span></span>
+<span id="L165"><span class="lineNum">     165</span>                 :<span class="tlaGNC">       43743 :     logic access_fail = 1'b0;</span></span>
 <span id="L166"><span class="lineNum">     166</span>                 :             : `endif</span>
 <span id="L167"><span class="lineNum">     167</span>                 :             : </span>
 <span id="L168"><span class="lineNum">     168</span>                 :<span class="tlaGNC">      135579 :     logic matched = 1'b0;</span></span>

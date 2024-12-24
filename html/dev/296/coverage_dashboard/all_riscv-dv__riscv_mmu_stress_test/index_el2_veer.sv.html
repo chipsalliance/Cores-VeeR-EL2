@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -89,6 +89,12 @@
         0
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -466,21 +472,21 @@
 <span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 3906 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 3312 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 2792 times"> + </span>]
 <span id="L136"><span class="lineNum">     136</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaGBC" title="Branch 3 was taken 3 times"> + </span>]:<span class="tlaGNC">           3 :    output logic [3:0]                      lsu_axi_awregion,</span></span>
 <span id="L137"><span class="lineNum">     137</span>                 :             :    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */</span>
-<span id="L138"><span class="lineNum">     138</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L138"><span class="lineNum">     138</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L139"><span class="lineNum">     139</span>                 :             :    output logic [7:0]                      lsu_axi_awlen,</span>
-<span id="L140"><span class="lineNum">     140</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L140"><span class="lineNum">     140</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L141"><span class="lineNum">     141</span>      [<span class="tlaGBC" title="Branch 0 was taken 3 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 3 times"> + </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span>]:<span class="tlaGNC">           3 :    output logic [2:0]                      lsu_axi_awsize,</span></span>
 <span id="L142"><span class="lineNum">     142</span>                 :             :    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */</span>
-<span id="L143"><span class="lineNum">     143</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L143"><span class="lineNum">     143</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L144"><span class="lineNum">     144</span>                 :             :    output logic [1:0]                      lsu_axi_awburst,</span>
 <span id="L145"><span class="lineNum">     145</span>                 :             :    output logic                            lsu_axi_awlock,</span>
-<span id="L146"><span class="lineNum">     146</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L146"><span class="lineNum">     146</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L147"><span class="lineNum">     147</span>   [<span class="tlaGBC" title="Branch 0 was taken 3 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 3 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 3 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 3 times"> + </span>]:<span class="tlaGNC">           3 :    output logic [3:0]                      lsu_axi_awcache,</span></span>
 <span id="L148"><span class="lineNum">     148</span>                 :             :    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */</span>
-<span id="L149"><span class="lineNum">     149</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L149"><span class="lineNum">     149</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L150"><span class="lineNum">     150</span>                 :             :    output logic [2:0]                      lsu_axi_awprot,</span>
 <span id="L151"><span class="lineNum">     151</span>                 :             :    output logic [3:0]                      lsu_axi_awqos,</span>
-<span id="L152"><span class="lineNum">     152</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L152"><span class="lineNum">     152</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L153"><span class="lineNum">     153</span>                 :             : </span>
 <span id="L154"><span class="lineNum">     154</span>                 :<span class="tlaGNC">        8493 :    output logic                            lsu_axi_wvalid,</span></span>
 <span id="L155"><span class="lineNum">     155</span>                 :<span class="tlaGNC">        8493 :    input  logic                            lsu_axi_wready,</span></span>
@@ -504,9 +510,9 @@
 <span id="L159"><span class="lineNum">     159</span>                 :             : </span>
 <span id="L160"><span class="lineNum">     160</span>                 :<span class="tlaGNC">        8490 :    input  logic                            lsu_axi_bvalid,</span></span>
 <span id="L161"><span class="lineNum">     161</span>                 :             :    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */</span>
-<span id="L162"><span class="lineNum">     162</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L162"><span class="lineNum">     162</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L163"><span class="lineNum">     163</span>                 :             :    output logic                            lsu_axi_bready,</span>
-<span id="L164"><span class="lineNum">     164</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L164"><span class="lineNum">     164</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L165"><span class="lineNum">     165</span>         [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span>]:<span class="tlaUNC tlaBgUNC">           0 :    input  logic [1:0]                      lsu_axi_bresp,</span></span>
 <span id="L166"><span class="lineNum">     166</span>      [<span class="tlaGBC" title="Branch 0 was taken 1893 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 24 times"> + </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span>]:<span class="tlaGNC tlaBgGNC">        1893 :    input  logic [pt.LSU_BUS_TAG-1:0]       lsu_axi_bid,</span></span>
 <span id="L167"><span class="lineNum">     167</span>                 :             : </span>
@@ -523,27 +529,27 @@
 <span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 3906 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 3312 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 2792 times"> + </span>]
 <span id="L173"><span class="lineNum">     173</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaGBC" title="Branch 3 was taken 3 times"> + </span>]:<span class="tlaGNC">           3 :    output logic [3:0]                      lsu_axi_arregion,</span></span>
 <span id="L174"><span class="lineNum">     174</span>                 :             :    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */</span>
-<span id="L175"><span class="lineNum">     175</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L175"><span class="lineNum">     175</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L176"><span class="lineNum">     176</span>                 :             :    output logic [7:0]                      lsu_axi_arlen,</span>
-<span id="L177"><span class="lineNum">     177</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L177"><span class="lineNum">     177</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L178"><span class="lineNum">     178</span>      [<span class="tlaGBC" title="Branch 0 was taken 3 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 3 times"> + </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span>]:<span class="tlaGNC">           3 :    output logic [2:0]                      lsu_axi_arsize,</span></span>
 <span id="L179"><span class="lineNum">     179</span>                 :             :    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */</span>
-<span id="L180"><span class="lineNum">     180</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L180"><span class="lineNum">     180</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L181"><span class="lineNum">     181</span>                 :             :    output logic [1:0]                      lsu_axi_arburst,</span>
 <span id="L182"><span class="lineNum">     182</span>                 :             :    output logic                            lsu_axi_arlock,</span>
-<span id="L183"><span class="lineNum">     183</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L183"><span class="lineNum">     183</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L184"><span class="lineNum">     184</span>   [<span class="tlaGBC" title="Branch 0 was taken 3 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 3 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 3 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 3 times"> + </span>]:<span class="tlaGNC">           3 :    output logic [3:0]                      lsu_axi_arcache,</span></span>
 <span id="L185"><span class="lineNum">     185</span>                 :             :    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */</span>
-<span id="L186"><span class="lineNum">     186</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L186"><span class="lineNum">     186</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L187"><span class="lineNum">     187</span>                 :             :    output logic [2:0]                      lsu_axi_arprot,</span>
 <span id="L188"><span class="lineNum">     188</span>                 :             :    output logic [3:0]                      lsu_axi_arqos,</span>
-<span id="L189"><span class="lineNum">     189</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L189"><span class="lineNum">     189</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L190"><span class="lineNum">     190</span>                 :             : </span>
 <span id="L191"><span class="lineNum">     191</span>                 :<span class="tlaGNC">       15068 :    input  logic                            lsu_axi_rvalid,</span></span>
 <span id="L192"><span class="lineNum">     192</span>                 :             :    /* exclude signals that are tied to constant value in el2_lsu_bus_buffer.sv */</span>
-<span id="L193"><span class="lineNum">     193</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L193"><span class="lineNum">     193</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L194"><span class="lineNum">     194</span>                 :             :    output logic                            lsu_axi_rready,</span>
-<span id="L195"><span class="lineNum">     195</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L195"><span class="lineNum">     195</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L196"><span class="lineNum">     196</span>      [<span class="tlaGBC" title="Branch 0 was taken 2547 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 10 times"> + </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span>]:<span class="tlaGNC">        2547 :    input  logic [pt.LSU_BUS_TAG-1:0]       lsu_axi_rid,</span></span>
 <span id="L197"><span class="lineNum">     197</span>   [<span class="tlaGBC" title="Branch 0 was taken 609 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 651 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 2213 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 2302 times"> + </span> :<span class="tlaGNC">        2381 :    input  logic [63:0]                     lsu_axi_rdata,</span></span>
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 2231 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 2274 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 2026 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 769 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 579 times"> + </span> 
@@ -565,12 +571,12 @@
 <span id="L201"><span class="lineNum">     201</span>                 :             :    //-------------------------- IFU AXI signals--------------------------</span>
 <span id="L202"><span class="lineNum">     202</span>                 :             :    // AXI Write Channels</span>
 <span id="L203"><span class="lineNum">     203</span>                 :             :    /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */</span>
-<span id="L204"><span class="lineNum">     204</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L204"><span class="lineNum">     204</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L205"><span class="lineNum">     205</span>                 :             :    output logic                            ifu_axi_awvalid,</span>
-<span id="L206"><span class="lineNum">     206</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L206"><span class="lineNum">     206</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L207"><span class="lineNum">     207</span>                 :<span class="tlaUNC tlaBgUNC">           0 :    input  logic                            ifu_axi_awready,</span></span>
 <span id="L208"><span class="lineNum">     208</span>                 :             :    /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */</span>
-<span id="L209"><span class="lineNum">     209</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L209"><span class="lineNum">     209</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L210"><span class="lineNum">     210</span>                 :             :    output logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_awid,</span>
 <span id="L211"><span class="lineNum">     211</span>                 :             :    output logic [31:0]                     ifu_axi_awaddr,</span>
 <span id="L212"><span class="lineNum">     212</span>                 :             :    output logic [3:0]                      ifu_axi_awregion,</span>
@@ -583,20 +589,20 @@
 <span id="L219"><span class="lineNum">     219</span>                 :             :    output logic [3:0]                      ifu_axi_awqos,</span>
 <span id="L220"><span class="lineNum">     220</span>                 :             : </span>
 <span id="L221"><span class="lineNum">     221</span>                 :             :    output logic                            ifu_axi_wvalid,</span>
-<span id="L222"><span class="lineNum">     222</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L222"><span class="lineNum">     222</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L223"><span class="lineNum">     223</span>                 :<span class="tlaUNC">           0 :    input  logic                            ifu_axi_wready,</span></span>
 <span id="L224"><span class="lineNum">     224</span>                 :             :    /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */</span>
-<span id="L225"><span class="lineNum">     225</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L225"><span class="lineNum">     225</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L226"><span class="lineNum">     226</span>                 :             :    output logic [63:0]                     ifu_axi_wdata,</span>
 <span id="L227"><span class="lineNum">     227</span>                 :             :    output logic [7:0]                      ifu_axi_wstrb,</span>
 <span id="L228"><span class="lineNum">     228</span>                 :             :    output logic                            ifu_axi_wlast,</span>
-<span id="L229"><span class="lineNum">     229</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L229"><span class="lineNum">     229</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L230"><span class="lineNum">     230</span>                 :             : </span>
 <span id="L231"><span class="lineNum">     231</span>                 :<span class="tlaUNC">           0 :    input  logic                            ifu_axi_bvalid,</span></span>
 <span id="L232"><span class="lineNum">     232</span>                 :             :    /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */</span>
-<span id="L233"><span class="lineNum">     233</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L233"><span class="lineNum">     233</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L234"><span class="lineNum">     234</span>                 :             :    output logic                            ifu_axi_bready,</span>
-<span id="L235"><span class="lineNum">     235</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L235"><span class="lineNum">     235</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L236"><span class="lineNum">     236</span>         [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span>]:<span class="tlaUNC">           0 :    input  logic [1:0]                      ifu_axi_bresp,</span></span>
 <span id="L237"><span class="lineNum">     237</span>      [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span>]:<span class="tlaUNC">           0 :    input  logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_bid,</span></span>
 <span id="L238"><span class="lineNum">     238</span>                 :             : </span>
@@ -613,7 +619,7 @@
 <span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 29 was taken 27086 times"> + </span><span class="tlaGBC" title="Branch 30 was taken 27033 times"> + </span><span class="tlaGBC" title="Branch 31 was taken 26895 times"> + </span>]
 <span id="L244"><span class="lineNum">     244</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaGBC" title="Branch 3 was taken 3 times"> + </span>]:<span class="tlaGNC">           3 :    output logic [3:0]                      ifu_axi_arregion,</span></span>
 <span id="L245"><span class="lineNum">     245</span>                 :             :    /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */</span>
-<span id="L246"><span class="lineNum">     246</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L246"><span class="lineNum">     246</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L247"><span class="lineNum">     247</span>                 :             :    output logic [7:0]                      ifu_axi_arlen,</span>
 <span id="L248"><span class="lineNum">     248</span>                 :             :    output logic [2:0]                      ifu_axi_arsize,</span>
 <span id="L249"><span class="lineNum">     249</span>                 :             :    output logic [1:0]                      ifu_axi_arburst,</span>
@@ -621,13 +627,13 @@
 <span id="L251"><span class="lineNum">     251</span>                 :             :    output logic [3:0]                      ifu_axi_arcache,</span>
 <span id="L252"><span class="lineNum">     252</span>                 :             :    output logic [2:0]                      ifu_axi_arprot,</span>
 <span id="L253"><span class="lineNum">     253</span>                 :             :    output logic [3:0]                      ifu_axi_arqos,</span>
-<span id="L254"><span class="lineNum">     254</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L254"><span class="lineNum">     254</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L255"><span class="lineNum">     255</span>                 :             : </span>
 <span id="L256"><span class="lineNum">     256</span>                 :<span class="tlaGNC">      108709 :    input  logic                            ifu_axi_rvalid,</span></span>
 <span id="L257"><span class="lineNum">     257</span>                 :             :    /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */</span>
-<span id="L258"><span class="lineNum">     258</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L258"><span class="lineNum">     258</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L259"><span class="lineNum">     259</span>                 :             :    output logic                            ifu_axi_rready,</span>
-<span id="L260"><span class="lineNum">     260</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L260"><span class="lineNum">     260</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L261"><span class="lineNum">     261</span>      [<span class="tlaGBC" title="Branch 0 was taken 40802 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 20508 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 10337 times"> + </span>]:<span class="tlaGNC">       40802 :    input  logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_rid,</span></span>
 <span id="L262"><span class="lineNum">     262</span>   [<span class="tlaGBC" title="Branch 0 was taken 10040 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 19139 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 18692 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 16232 times"> + </span> :<span class="tlaGNC">       20121 :    input  logic [63:0]                     ifu_axi_rdata,</span></span>
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 13709 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 17128 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 16499 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 9705 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 13827 times"> + </span> 
@@ -651,9 +657,9 @@
 <span id="L268"><span class="lineNum">     268</span>                 :<span class="tlaUNC tlaBgUNC">           0 :    output logic                            sb_axi_awvalid,</span></span>
 <span id="L269"><span class="lineNum">     269</span>                 :<span class="tlaUNC">           0 :    input  logic                            sb_axi_awready,</span></span>
 <span id="L270"><span class="lineNum">     270</span>                 :             :    /* exclude signals that are tied to constant value in dbg/el2_dbg.sv */</span>
-<span id="L271"><span class="lineNum">     271</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L271"><span class="lineNum">     271</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L272"><span class="lineNum">     272</span>                 :             :    output logic [pt.SB_BUS_TAG-1:0]        sb_axi_awid,</span>
-<span id="L273"><span class="lineNum">     273</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L273"><span class="lineNum">     273</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L274"><span class="lineNum">     274</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaUNC">           0 :    output logic [31:0]                     sb_axi_awaddr,</span></span>
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaUNC" title="Branch 11 was not taken"> - </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
@@ -663,18 +669,18 @@
 <span class="lineNum">        </span>       <span class="tlaUNC" title="Branch 29 was not taken"> - </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span>]
 <span id="L275"><span class="lineNum">     275</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span>]:<span class="tlaUNC">           0 :    output logic [3:0]                      sb_axi_awregion,</span></span>
 <span id="L276"><span class="lineNum">     276</span>                 :             :    /* exclude signals that are tied to constant value in dbg/el2_dbg.sv */</span>
-<span id="L277"><span class="lineNum">     277</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L277"><span class="lineNum">     277</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L278"><span class="lineNum">     278</span>                 :             :    output logic [7:0]                      sb_axi_awlen,</span>
-<span id="L279"><span class="lineNum">     279</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L279"><span class="lineNum">     279</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L280"><span class="lineNum">     280</span>      [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaGBC" title="Branch 1 was taken 3 times"> + </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span>]:<span class="tlaGNC tlaBgGNC">           3 :    output logic [2:0]                      sb_axi_awsize,</span></span>
 <span id="L281"><span class="lineNum">     281</span>                 :             :    /* exclude signals that are tied to constant value in dbg/el2_dbg.sv */</span>
-<span id="L282"><span class="lineNum">     282</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L282"><span class="lineNum">     282</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L283"><span class="lineNum">     283</span>                 :             :    output logic [1:0]                      sb_axi_awburst,</span>
 <span id="L284"><span class="lineNum">     284</span>                 :             :    output logic                            sb_axi_awlock,</span>
 <span id="L285"><span class="lineNum">     285</span>                 :             :    output logic [3:0]                      sb_axi_awcache,</span>
 <span id="L286"><span class="lineNum">     286</span>                 :             :    output logic [2:0]                      sb_axi_awprot,</span>
 <span id="L287"><span class="lineNum">     287</span>                 :             :    output logic [3:0]                      sb_axi_awqos,</span>
-<span id="L288"><span class="lineNum">     288</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L288"><span class="lineNum">     288</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L289"><span class="lineNum">     289</span>                 :             : </span>
 <span id="L290"><span class="lineNum">     290</span>                 :<span class="tlaUNC tlaBgUNC">           0 :    output logic                            sb_axi_wvalid,</span></span>
 <span id="L291"><span class="lineNum">     291</span>                 :<span class="tlaUNC">           0 :    input  logic                            sb_axi_wready,</span></span>
@@ -705,9 +711,9 @@
 <span id="L302"><span class="lineNum">     302</span>                 :<span class="tlaUNC">           0 :    output logic                            sb_axi_arvalid,</span></span>
 <span id="L303"><span class="lineNum">     303</span>                 :<span class="tlaUNC">           0 :    input  logic                            sb_axi_arready,</span></span>
 <span id="L304"><span class="lineNum">     304</span>                 :             :    /* exclude signals that are tied to constant value in dbg/el2_dbg.sv */</span>
-<span id="L305"><span class="lineNum">     305</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L305"><span class="lineNum">     305</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L306"><span class="lineNum">     306</span>                 :             :    output logic [pt.SB_BUS_TAG-1:0]        sb_axi_arid,</span>
-<span id="L307"><span class="lineNum">     307</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L307"><span class="lineNum">     307</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L308"><span class="lineNum">     308</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaUNC">           0 :    output logic [31:0]                     sb_axi_araddr,</span></span>
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaUNC" title="Branch 11 was not taken"> - </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
@@ -717,24 +723,24 @@
 <span class="lineNum">        </span>       <span class="tlaUNC" title="Branch 29 was not taken"> - </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span>]
 <span id="L309"><span class="lineNum">     309</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span>]:<span class="tlaUNC">           0 :    output logic [3:0]                      sb_axi_arregion,</span></span>
 <span id="L310"><span class="lineNum">     310</span>                 :             :    /* exclude signals that are tied to constant value in dbg/el2_dbg.sv */</span>
-<span id="L311"><span class="lineNum">     311</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L311"><span class="lineNum">     311</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L312"><span class="lineNum">     312</span>                 :             :    output logic [7:0]                      sb_axi_arlen,</span>
-<span id="L313"><span class="lineNum">     313</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L313"><span class="lineNum">     313</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L314"><span class="lineNum">     314</span>      [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaGBC" title="Branch 1 was taken 3 times"> + </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span>]:<span class="tlaGNC tlaBgGNC">           3 :    output logic [2:0]                      sb_axi_arsize,</span></span>
 <span id="L315"><span class="lineNum">     315</span>                 :             :    /* exclude signals that are tied to constant value in dbg/el2_dbg.sv */</span>
-<span id="L316"><span class="lineNum">     316</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L316"><span class="lineNum">     316</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L317"><span class="lineNum">     317</span>                 :             :    output logic [1:0]                      sb_axi_arburst,</span>
 <span id="L318"><span class="lineNum">     318</span>                 :             :    output logic                            sb_axi_arlock,</span>
 <span id="L319"><span class="lineNum">     319</span>                 :             :    output logic [3:0]                      sb_axi_arcache,</span>
 <span id="L320"><span class="lineNum">     320</span>                 :             :    output logic [2:0]                      sb_axi_arprot,</span>
 <span id="L321"><span class="lineNum">     321</span>                 :             :    output logic [3:0]                      sb_axi_arqos,</span>
-<span id="L322"><span class="lineNum">     322</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L322"><span class="lineNum">     322</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L323"><span class="lineNum">     323</span>                 :             : </span>
 <span id="L324"><span class="lineNum">     324</span>                 :<span class="tlaUNC tlaBgUNC">           0 :    input  logic                            sb_axi_rvalid,</span></span>
 <span id="L325"><span class="lineNum">     325</span>                 :             :    /* exclude signals that are tied to constant value in dbg/el2_dbg.sv */</span>
-<span id="L326"><span class="lineNum">     326</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L326"><span class="lineNum">     326</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L327"><span class="lineNum">     327</span>                 :             :    output logic                            sb_axi_rready,</span>
-<span id="L328"><span class="lineNum">     328</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L328"><span class="lineNum">     328</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L329"><span class="lineNum">     329</span>                 :<span class="tlaUNC">           0 :    input  logic [pt.SB_BUS_TAG-1:0]        sb_axi_rid,</span></span>
 <span id="L330"><span class="lineNum">     330</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaUNC">           0 :    input  logic [63:0]                     sb_axi_rdata,</span></span>
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
@@ -844,10 +850,10 @@
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 24 was not taken"> - </span><span class="tlaUNC" title="Branch 25 was not taken"> - </span><span class="tlaUNC" title="Branch 26 was not taken"> - </span><span class="tlaUNC" title="Branch 27 was not taken"> - </span><span class="tlaUNC" title="Branch 28 was not taken"> - </span> 
 <span class="lineNum">        </span>       <span class="tlaUNC" title="Branch 29 was not taken"> - </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span>]
 <span id="L377"><span class="lineNum">     377</span>                 :             :    /* exclude signals that are tied to constant value in axi4_to_ahb.sv */</span>
-<span id="L378"><span class="lineNum">     378</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L378"><span class="lineNum">     378</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L379"><span class="lineNum">     379</span>                 :             :    output logic [2:0]            hburst,</span>
 <span id="L380"><span class="lineNum">     380</span>                 :             :    output logic                  hmastlock,</span>
-<span id="L381"><span class="lineNum">     381</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L381"><span class="lineNum">     381</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L382"><span class="lineNum">     382</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span>]:<span class="tlaUNC">           0 :    output logic [3:0]            hprot,</span></span>
 <span id="L383"><span class="lineNum">     383</span>      [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span>]:<span class="tlaUNC">           0 :    output logic [2:0]            hsize,</span></span>
 <span id="L384"><span class="lineNum">     384</span>         [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span>]:<span class="tlaUNC">           0 :    output logic [1:0]            htrans,</span></span>
@@ -879,10 +885,10 @@
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 24 was not taken"> - </span><span class="tlaUNC" title="Branch 25 was not taken"> - </span><span class="tlaUNC" title="Branch 26 was not taken"> - </span><span class="tlaUNC" title="Branch 27 was not taken"> - </span><span class="tlaUNC" title="Branch 28 was not taken"> - </span> 
 <span class="lineNum">        </span>       <span class="tlaUNC" title="Branch 29 was not taken"> - </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span>]
 <span id="L393"><span class="lineNum">     393</span>                 :             :    /* exclude signals that are tied to constant value in axi4_to_ahb.sv */</span>
-<span id="L394"><span class="lineNum">     394</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L394"><span class="lineNum">     394</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L395"><span class="lineNum">     395</span>                 :             :    output logic [2:0]           lsu_hburst,</span>
 <span id="L396"><span class="lineNum">     396</span>                 :             :    output logic                 lsu_hmastlock,</span>
-<span id="L397"><span class="lineNum">     397</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L397"><span class="lineNum">     397</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L398"><span class="lineNum">     398</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span>]:<span class="tlaUNC">           0 :    output logic [3:0]           lsu_hprot,</span></span>
 <span id="L399"><span class="lineNum">     399</span>      [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span>]:<span class="tlaUNC">           0 :    output logic [2:0]           lsu_hsize,</span></span>
 <span id="L400"><span class="lineNum">     400</span>         [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span>]:<span class="tlaUNC">           0 :    output logic [1:0]           lsu_htrans,</span></span>
@@ -928,10 +934,10 @@
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 24 was not taken"> - </span><span class="tlaUNC" title="Branch 25 was not taken"> - </span><span class="tlaUNC" title="Branch 26 was not taken"> - </span><span class="tlaUNC" title="Branch 27 was not taken"> - </span><span class="tlaUNC" title="Branch 28 was not taken"> - </span> 
 <span class="lineNum">        </span>       <span class="tlaUNC" title="Branch 29 was not taken"> - </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span>]
 <span id="L410"><span class="lineNum">     410</span>                 :             :    /* exclude signals that are tied to constant value in axi4_to_ahb.sv */</span>
-<span id="L411"><span class="lineNum">     411</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L411"><span class="lineNum">     411</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L412"><span class="lineNum">     412</span>                 :             :    output logic [2:0]           sb_hburst,</span>
 <span id="L413"><span class="lineNum">     413</span>                 :             :    output logic                 sb_hmastlock,</span>
-<span id="L414"><span class="lineNum">     414</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L414"><span class="lineNum">     414</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L415"><span class="lineNum">     415</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span>]:<span class="tlaUNC">           0 :    output logic [3:0]           sb_hprot,</span></span>
 <span id="L416"><span class="lineNum">     416</span>      [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span>]:<span class="tlaUNC">           0 :    output logic [2:0]           sb_hsize,</span></span>
 <span id="L417"><span class="lineNum">     417</span>         [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span>]:<span class="tlaUNC">           0 :    output logic [1:0]           sb_htrans,</span></span>
@@ -1056,9 +1062,9 @@
 <span id="L459"><span class="lineNum">     459</span>                 :<span class="tlaUNC">           0 :    input logic                   timer_int,</span></span>
 <span id="L460"><span class="lineNum">     460</span>                 :<span class="tlaUNC">           0 :    input logic                   soft_int,</span></span>
 <span id="L461"><span class="lineNum">     461</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L462"><span class="lineNum">     462</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L462"><span class="lineNum">     462</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L463"><span class="lineNum">     463</span>                 :             :    input logic                   scan_mode</span>
-<span id="L464"><span class="lineNum">     464</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L464"><span class="lineNum">     464</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L465"><span class="lineNum">     465</span>                 :             : );</span>
 <span id="L466"><span class="lineNum">     466</span>                 :             : </span>
 <span id="L467"><span class="lineNum">     467</span>                 :             : </span>
@@ -1248,9 +1254,9 @@
 <span id="L560"><span class="lineNum">     560</span>                 :             : </span>
 <span id="L561"><span class="lineNum">     561</span>                 :<span class="tlaUNC">           0 :    logic                         dma_axi_awvalid_ahb;</span></span>
 <span id="L562"><span class="lineNum">     562</span>                 :             :    /* exclude signals that are tied to constant value in ahb_to_axi4.sv */</span>
-<span id="L563"><span class="lineNum">     563</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L563"><span class="lineNum">     563</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L564"><span class="lineNum">     564</span>                 :             :    logic [pt.DMA_BUS_TAG-1:0]    dma_axi_awid_ahb;</span>
-<span id="L565"><span class="lineNum">     565</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L565"><span class="lineNum">     565</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L566"><span class="lineNum">     566</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaUNC">           0 :    logic [31:0]                  dma_axi_awaddr_ahb;</span></span>
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaUNC" title="Branch 11 was not taken"> - </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
@@ -1260,11 +1266,11 @@
 <span class="lineNum">        </span>       <span class="tlaUNC" title="Branch 29 was not taken"> - </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span>]
 <span id="L567"><span class="lineNum">     567</span>      [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span>]:<span class="tlaUNC">           0 :    logic [2:0]                   dma_axi_awsize_ahb;</span></span>
 <span id="L568"><span class="lineNum">     568</span>                 :             :    /* exclude signals that are tied to constant value in ahb_to_axi4.sv */</span>
-<span id="L569"><span class="lineNum">     569</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L569"><span class="lineNum">     569</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L570"><span class="lineNum">     570</span>                 :             :    logic [2:0]                   dma_axi_awprot_ahb;</span>
 <span id="L571"><span class="lineNum">     571</span>                 :             :    logic [7:0]                   dma_axi_awlen_ahb;</span>
 <span id="L572"><span class="lineNum">     572</span>                 :             :    logic [1:0]                   dma_axi_awburst_ahb;</span>
-<span id="L573"><span class="lineNum">     573</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L573"><span class="lineNum">     573</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L574"><span class="lineNum">     574</span>                 :<span class="tlaUNC">           0 :    logic                         dma_axi_wvalid_ahb;</span></span>
 <span id="L575"><span class="lineNum">     575</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaUNC">           0 :    logic [63:0]                  dma_axi_wdata_ahb;</span></span>
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
@@ -1283,15 +1289,15 @@
 <span id="L576"><span class="lineNum">     576</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaUNC">           0 :    logic [7:0]                   dma_axi_wstrb_ahb;</span></span>
 <span class="lineNum">        </span>    <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span>]
 <span id="L577"><span class="lineNum">     577</span>                 :             :    /* exclude signals that are tied to constant value in ahb_to_axi4.sv */</span>
-<span id="L578"><span class="lineNum">     578</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L578"><span class="lineNum">     578</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L579"><span class="lineNum">     579</span>                 :             :    logic                         dma_axi_wlast_ahb;</span>
 <span id="L580"><span class="lineNum">     580</span>                 :             :    logic                         dma_axi_bready_ahb;</span>
-<span id="L581"><span class="lineNum">     581</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L581"><span class="lineNum">     581</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L582"><span class="lineNum">     582</span>                 :<span class="tlaUNC">           0 :    logic                         dma_axi_arvalid_ahb;</span></span>
 <span id="L583"><span class="lineNum">     583</span>                 :             :    /* exclude signals that are tied to constant value in ahb_to_axi4.sv */</span>
-<span id="L584"><span class="lineNum">     584</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L584"><span class="lineNum">     584</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L585"><span class="lineNum">     585</span>                 :             :    logic [pt.DMA_BUS_TAG-1:0]    dma_axi_arid_ahb;</span>
-<span id="L586"><span class="lineNum">     586</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L586"><span class="lineNum">     586</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L587"><span class="lineNum">     587</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaUNC">           0 :    logic [31:0]                  dma_axi_araddr_ahb;</span></span>
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaUNC" title="Branch 11 was not taken"> - </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
@@ -1301,12 +1307,12 @@
 <span class="lineNum">        </span>       <span class="tlaUNC" title="Branch 29 was not taken"> - </span><span class="tlaUNC" title="Branch 30 was not taken"> - </span><span class="tlaUNC" title="Branch 31 was not taken"> - </span>]
 <span id="L588"><span class="lineNum">     588</span>      [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span>]:<span class="tlaUNC">           0 :    logic [2:0]                   dma_axi_arsize_ahb;</span></span>
 <span id="L589"><span class="lineNum">     589</span>                 :             :    /* exclude signals that are tied to constant value in ahb_to_axi4.sv */</span>
-<span id="L590"><span class="lineNum">     590</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L590"><span class="lineNum">     590</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L591"><span class="lineNum">     591</span>                 :             :    logic [2:0]                   dma_axi_arprot_ahb;</span>
 <span id="L592"><span class="lineNum">     592</span>                 :             :    logic [7:0]                   dma_axi_arlen_ahb;</span>
 <span id="L593"><span class="lineNum">     593</span>                 :             :    logic [1:0]                   dma_axi_arburst_ahb;</span>
 <span id="L594"><span class="lineNum">     594</span>                 :             :    logic                         dma_axi_rready_ahb;</span>
-<span id="L595"><span class="lineNum">     595</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L595"><span class="lineNum">     595</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L596"><span class="lineNum">     596</span>                 :             : </span>
 <span id="L597"><span class="lineNum">     597</span>                 :<span class="tlaUNC">           0 :    logic                         dma_axi_awvalid_int;</span></span>
 <span id="L598"><span class="lineNum">     598</span>                 :<span class="tlaUNC">           0 :    logic [pt.DMA_BUS_TAG-1:0]    dma_axi_awid_int;</span></span>

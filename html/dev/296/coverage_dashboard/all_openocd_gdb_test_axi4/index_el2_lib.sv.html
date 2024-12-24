@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -89,6 +89,12 @@
         0
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -140,13 +146,13 @@
 <span id="L32"><span class="lineNum">      32</span>                 :             : #(</span>
 <span id="L33"><span class="lineNum">      33</span>                 :             : `include "el2_param.vh"</span>
 <span id="L34"><span class="lineNum">      34</span>                 :             :  )(</span>
-<span id="L35"><span class="lineNum">      35</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaGNC tlaBgGNC">       48928 :                         input logic [pt.BTB_INDEX3_HI:pt.BTB_INDEX1_LO] pc,</span></span>
+<span id="L35"><span class="lineNum">      35</span>   [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaGNC tlaBgGNC">       48086 :                         input logic [pt.BTB_INDEX3_HI:pt.BTB_INDEX1_LO] pc,</span></span>
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span><span class="tlaUNC" title="Branch 8 was not taken"> - </span> 
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 9 was not taken"> - </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaUNC" title="Branch 11 was not taken"> - </span><span class="tlaUNC" title="Branch 12 was not taken"> - </span><span class="tlaUNC" title="Branch 13 was not taken"> - </span> 
-<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 14 was not taken"> - </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaGBC" title="Branch 16 was taken 48928 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 16695 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 16679 times"> + </span> 
-<span class="lineNum">        </span>    <span class="tlaGBC" title="Branch 19 was taken 16630 times"> + </span><span class="tlaUNC" title="Branch 20 was not taken"> - </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaUNC" title="Branch 22 was not taken"> - </span> 
+<span class="lineNum">        </span> <span class="tlaUNC" title="Branch 14 was not taken"> - </span><span class="tlaUNC" title="Branch 15 was not taken"> - </span><span class="tlaGBC" title="Branch 16 was taken 48086 times"> + </span><span class="tlaGBC" title="Branch 17 was taken 16413 times"> + </span><span class="tlaGBC" title="Branch 18 was taken 16397 times"> + </span> 
+<span class="lineNum">        </span>    <span class="tlaGBC" title="Branch 19 was taken 16344 times"> + </span><span class="tlaUNC" title="Branch 20 was not taken"> - </span><span class="tlaUNC" title="Branch 21 was not taken"> - </span><span class="tlaUNC" title="Branch 22 was not taken"> - </span> 
 <span class="lineNum">        </span>             <span class="tlaUNC" title="Branch 23 was not taken"> - </span>]
-<span id="L36"><span class="lineNum">      36</span>   [<span class="tlaGBC" title="Branch 0 was taken 48928 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 16695 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 16679 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 16630 times"> + </span> :<span class="tlaGNC">       48928 :                         output logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] hash</span></span>
+<span id="L36"><span class="lineNum">      36</span>   [<span class="tlaGBC" title="Branch 0 was taken 48086 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 16413 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 16397 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 16344 times"> + </span> :<span class="tlaGNC">       48086 :                         output logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] hash</span></span>
 <span class="lineNum">        </span>    <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span>]
 <span id="L37"><span class="lineNum">      37</span>                 :             :                         );</span>
 <span id="L38"><span class="lineNum">      38</span>                 :             : </span>
@@ -168,12 +174,12 @@
 <span id="L54"><span class="lineNum">      54</span>                 :             : #(</span>
 <span id="L55"><span class="lineNum">      55</span>                 :             : `include "el2_param.vh"</span>
 <span id="L56"><span class="lineNum">      56</span>                 :             :  )(</span>
-<span id="L57"><span class="lineNum">      57</span>   [<span class="tlaGBC" title="Branch 0 was taken 32716 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 16669 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 16661 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 16494 times"> + </span> :<span class="tlaGNC">       32716 :                        input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] hashin,</span></span>
+<span id="L57"><span class="lineNum">      57</span>   [<span class="tlaGBC" title="Branch 0 was taken 32152 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 16387 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 16379 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 16210 times"> + </span> :<span class="tlaGNC">       32152 :                        input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] hashin,</span></span>
 <span class="lineNum">        </span>    <span class="tlaUNC" title="Branch 4 was not taken"> - </span><span class="tlaUNC" title="Branch 5 was not taken"> - </span><span class="tlaUNC" title="Branch 6 was not taken"> - </span><span class="tlaUNC" title="Branch 7 was not taken"> - </span>]
-<span id="L58"><span class="lineNum">      58</span>   [<span class="tlaGBC" title="Branch 0 was taken 611 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 553 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 555 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 549 times"> + </span> :<span class="tlaGNC">         611 :                        input logic [pt.BHT_GHR_SIZE-1:0] ghr,</span></span>
-<span class="lineNum">        </span>    <span class="tlaGBC" title="Branch 4 was taken 547 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 545 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 543 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 543 times"> + </span>]
-<span id="L59"><span class="lineNum">      59</span>   [<span class="tlaGBC" title="Branch 0 was taken 32241 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 16644 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 16636 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 16777 times"> + </span> :<span class="tlaGNC">       32241 :                        output logic [pt.BHT_ADDR_HI:pt.BHT_ADDR_LO] hash</span></span>
-<span class="lineNum">        </span>    <span class="tlaGBC" title="Branch 4 was taken 547 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 545 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 543 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 543 times"> + </span>]
+<span id="L58"><span class="lineNum">      58</span>   [<span class="tlaGBC" title="Branch 0 was taken 603 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 545 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 547 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 541 times"> + </span> :<span class="tlaGNC">         603 :                        input logic [pt.BHT_GHR_SIZE-1:0] ghr,</span></span>
+<span class="lineNum">        </span>    <span class="tlaGBC" title="Branch 4 was taken 539 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 537 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 535 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 535 times"> + </span>]
+<span id="L59"><span class="lineNum">      59</span>   [<span class="tlaGBC" title="Branch 0 was taken 31683 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 16362 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 16354 times"> + </span><span class="tlaGBC" title="Branch 3 was taken 16489 times"> + </span> :<span class="tlaGNC">       31683 :                        output logic [pt.BHT_ADDR_HI:pt.BHT_ADDR_LO] hash</span></span>
+<span class="lineNum">        </span>    <span class="tlaGBC" title="Branch 4 was taken 539 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 537 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 535 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 535 times"> + </span>]
 <span id="L60"><span class="lineNum">      60</span>                 :             :                        );</span>
 <span id="L61"><span class="lineNum">      61</span>                 :             : </span>
 <span id="L62"><span class="lineNum">      62</span>                 :             :    // The hash function is too complex to write in verilog for all cases.</span>

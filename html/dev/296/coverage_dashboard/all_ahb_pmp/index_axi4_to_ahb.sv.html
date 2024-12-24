@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -79,16 +79,22 @@
     <td class="headerCovSummary rowLeft">
         Branch
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #3aff00;">
-        88.5%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ffe600;">
+        45.2%
     </td>
     <td class="headerCovSummaryEntry">
-        115
+        179
     </td>
     <td class="headerCovSummaryEntry">
-        130
+        396
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -135,9 +141,9 @@
 <span id="L31"><span class="lineNum">      31</span>      [<span class="tlaGBC" title="Branch 0 was taken 6269786 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 8000004 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 6269786 times"> + </span>]:<span class="tlaGNC">     8000004 :    input                   free_clk,</span></span>
 <span id="L32"><span class="lineNum">      32</span>      [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 1 time"> + </span>]:<span class="tlaGNC">           2 :    input                   rst_l,</span></span>
 <span id="L33"><span class="lineNum">      33</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L34"><span class="lineNum">      34</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L34"><span class="lineNum">      34</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L35"><span class="lineNum">      35</span>                 :             :    input                   scan_mode,</span>
-<span id="L36"><span class="lineNum">      36</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L36"><span class="lineNum">      36</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L37"><span class="lineNum">      37</span>      [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 2 was taken 1 time"> + </span>]:<span class="tlaGNC">           2 :    input                   bus_clk_en,</span></span>
 <span id="L38"><span class="lineNum">      38</span>      [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span>]:<span class="tlaUNC tlaBgUNC">           0 :    input                   clk_override,</span></span>
 <span id="L39"><span class="lineNum">      39</span>      [<span class="tlaUNC" title="Branch 0 was not taken"> - </span><span class="tlaUNC" title="Branch 1 was not taken"> - </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span>]:<span class="tlaUNC">           0 :    input                   dec_tlu_force_halt,</span></span>
@@ -332,10 +338,10 @@
 <span class="lineNum">        </span> <span class="tlaUNC" title="Branch 89 was not taken"> - </span><span class="tlaUNC" title="Branch 90 was not taken"> - </span><span class="tlaUNC" title="Branch 91 was not taken"> - </span><span class="tlaUNC" title="Branch 92 was not taken"> - </span><span class="tlaUNC" title="Branch 93 was not taken"> - </span> 
 <span class="lineNum">        </span>          <span class="tlaUNC" title="Branch 94 was not taken"> - </span><span class="tlaUNC" title="Branch 95 was not taken"> - </span>]
 <span id="L78"><span class="lineNum">      78</span>                 :             :    /* exclude signals that are tied to constant value in this file */</span>
-<span id="L79"><span class="lineNum">      79</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L79"><span class="lineNum">      79</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L80"><span class="lineNum">      80</span>                 :             :    output logic [2:0]      ahb_hburst,      // tied to 0</span>
 <span id="L81"><span class="lineNum">      81</span>                 :             :    output logic            ahb_hmastlock,   // tied to 0</span>
-<span id="L82"><span class="lineNum">      82</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L82"><span class="lineNum">      82</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L83"><span class="lineNum">      83</span>   [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 1 time"> + </span><span class="tlaUNC" title="Branch 2 was not taken"> - </span><span class="tlaUNC" title="Branch 3 was not taken"> - </span> :<span class="tlaGNC">      151270 :    output logic [3:0]      ahb_hprot,       // [3:1] are tied to 3'b001</span></span>
 <span class="lineNum">        </span> <span class="tlaGBC" title="Branch 4 was taken 151270 times"> + </span><span class="tlaGBC" title="Branch 5 was taken 2 times"> + </span><span class="tlaGBC" title="Branch 6 was taken 151270 times"> + </span><span class="tlaGBC" title="Branch 7 was taken 151270 times"> + </span><span class="tlaGBC" title="Branch 8 was taken 1 time"> + </span> 
 <span class="lineNum">        </span>       <span class="tlaGBC" title="Branch 9 was taken 1 time"> + </span><span class="tlaUNC" title="Branch 10 was not taken"> - </span><span class="tlaUNC" title="Branch 11 was not taken"> - </span>]

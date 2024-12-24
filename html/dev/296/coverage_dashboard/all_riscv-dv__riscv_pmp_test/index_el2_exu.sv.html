@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    23-12-2024
+                    24-12-2024
                 </td>
                 <td></td>
                 
@@ -79,16 +79,22 @@
     <td class="headerCovSummary rowLeft">
         Branch
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #00ff00;">
-        100.0%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #a9a9a9;">
+        0.0%
     </td>
     <td class="headerCovSummaryEntry">
-        3
+        0
     </td>
     <td class="headerCovSummaryEntry">
-        3
+        0
     </td>
 
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              
             </tr>
             
         </table>
@@ -127,9 +133,9 @@
 <span id="L23"><span class="lineNum">      23</span>                 :<span class="tlaGNC tlaBgGNC">      453802 :    input logic          clk,                                           // Top level clock</span></span>
 <span id="L24"><span class="lineNum">      24</span>                 :<span class="tlaGNC">           3 :    input logic          rst_l,                                         // Reset</span></span>
 <span id="L25"><span class="lineNum">      25</span>                 :             :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
-<span id="L26"><span class="lineNum">      26</span>                 :             :    /*verilator coverage_off*/</span>
+<span id="L26"><span class="lineNum">      26</span>                 :             :    /*pragma coverage off*/</span>
 <span id="L27"><span class="lineNum">      27</span>                 :             :    input logic          scan_mode,                                     // Scan control</span>
-<span id="L28"><span class="lineNum">      28</span>                 :             :    /*verilator coverage_on*/</span>
+<span id="L28"><span class="lineNum">      28</span>                 :             :    /*pragma coverage on*/</span>
 <span id="L29"><span class="lineNum">      29</span>                 :             : </span>
 <span id="L30"><span class="lineNum">      30</span>         [<span class="tlaGBC" title="Branch 0 was taken 68852 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 68854 times"> + </span>]:<span class="tlaGNC">       68854 :    input logic  [1:0]   dec_data_en,                                   // Clock enable {x,r}, one cycle pulse</span></span>
 <span id="L31"><span class="lineNum">      31</span>         [<span class="tlaGBC" title="Branch 0 was taken 68812 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 68814 times"> + </span>]:<span class="tlaGNC">       68814 :    input logic  [1:0]   dec_ctl_en,                                    // Clock enable {x,r}, two cycle pulse</span></span>

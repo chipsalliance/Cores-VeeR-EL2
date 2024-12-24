@@ -45,34 +45,33 @@ def getDecodedEntryCfg(regs, index, range_only=False):
     else:
         start_address = 0
 
-    match address_matching:
-        case 0:  # Entry disabled
+    if address_matching == 0: #Entry diabled
+        if range_only:
+            end_address = pmpaddr.integer << 2
+            return start_address, end_address
+        else:
+            return None
+    elif address_matching == 1:  # Top of range
+        end_address = pmpaddr.integer << 2
+        if start_address > end_address:
             if range_only:
-                end_address = pmpaddr.integer << 2
                 return start_address, end_address
             else:
                 return None
-        case 1:  # Top of range
-            end_address = pmpaddr.integer << 2
-            if start_address > end_address:
-                if range_only:
-                    return start_address, end_address
-                else:
-                    return None
-        case 2:  # Naturally aligned four-byte region
-            end_address = (pmpaddr.integer << 2) + 4
-        case 3:  # Naturally aligned power-of-two region, >=8 bytes
-            napot = 3
-            start_address = pmpaddr
-            for i in range(len(pmpaddr)):
-                if pmpaddr[i].integer == 1:
-                    start_address[i].value = 0
-                    napot += 1
-                else:
-                    continue
+    elif address_matching == 2:  # Naturally aligned four-byte region
+        end_address = (pmpaddr.integer << 2) + 4
+    elif address_matching == 3:  # Naturally aligned power-of-two region, >=8 bytes
+        napot = 3
+        start_address = pmpaddr
+        for i in range(len(pmpaddr)):
+            if pmpaddr[i].integer == 1:
+                start_address[i].value = 0
+                napot += 1
+            else:
+                continue
 
-            start_address = start_address.integer << 2
-            end_address = start_address + 2**napot
+        start_address = start_address.integer << 2
+        end_address = start_address + 2**napot
 
     # PMP upper address bundary is non-inclusive
     end_address -= 1

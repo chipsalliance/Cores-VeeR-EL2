@@ -493,7 +493,6 @@ class BaseTest(uvm_test):
         cocotb.top.pc_in.value = 0
         cocotb.top.brimm_in.value = 0
 
-
         # perform reset
         cocotb.top.rst_l.value = 0
         await ClockCycles(cocotb.top.clk, 2)

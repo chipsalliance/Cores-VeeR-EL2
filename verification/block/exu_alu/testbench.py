@@ -288,7 +288,7 @@ class AluScoreboard(uvm_component):
             elif item_inp.op == "ctz":
                 result = next((i for i in range(32) if (item_inp.a >> i) & 1), 32)
             elif item_inp.op == "cpop":
-                result = item_inp.a.bit_count()
+                result = bin(item_inp.a).count("1")
             elif item_inp.op == "sext_b":
                 last_byte = item_inp.a & 0xFF
                 sign = (item_inp.a & 0x00000080) >> 7

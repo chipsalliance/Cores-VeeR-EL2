@@ -15,6 +15,14 @@
    
    * [Documentation](external:dev/254/docs_rendered/html/index.html)
    
+ * 298
+   * [Coverage](298_coverage_dashboard)
+
+   * [Verification tests](external:dev/298/verification_dashboard.html)
+
+   
+   * [Documentation](external:dev/298/docs_rendered/html/index.html)
+   
  * 293
    * [Coverage](293_coverage_dashboard)
 

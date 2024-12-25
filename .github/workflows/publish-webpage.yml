@@ -79,6 +79,7 @@ jobs:
           rm -rf public.new/html/main/docs_rendered
           mkdir -p public.new/html/main/docs_rendered
           mv ./docs_rendered/* public.new/html/main/docs_rendered
+          tar -acf webpage.tar.gz public.new
 
       - name: Update webpage PR
         if: github.event_name == 'pull_request'
@@ -92,7 +93,8 @@ jobs:
           # use docs from the artifact
           rm -rf public.new/html/dev/${{ github.event.number }}/docs_rendered
           mkdir -p public.new/html/dev/${{ github.event.number }}/docs_rendered
-          mv -arf ./docs_rendered/* public.new/html/dev/${{ github.event.number }}/docs_rendered
+          mv ./docs_rendered/* public.new/html/dev/${{ github.event.number }}/docs_rendered
+          tar -acf webpage.tar.gz public.new
 
       - name: Add redirect index page
         run: |
@@ -122,4 +124,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: webpage
-          path: ./public.new
+          path: ./webpage.tar.gz

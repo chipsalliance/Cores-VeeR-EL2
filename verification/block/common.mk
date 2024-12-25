@@ -37,19 +37,19 @@ else
     VERILATOR_COVERAGE = ""
 endif
 
-# Enable processing of #delay statements
 ifeq ($(SIM), verilator)
     COMPILE_ARGS += --timing
     COMPILE_ARGS += -Wall -Wno-fatal
 
     EXTRA_ARGS   += --trace --trace-structs
     EXTRA_ARGS   += $(VERILATOR_COVERAGE)
+    EXTRA_ARGS   += -I$(CFGDIR) -Wno-DECLFILENAME
+else ifeq ($(SIM), vcs)
+    EXTRA_ARGS   += +incdir+$(CFGDIR) -assert svaext -cm line+cond+fsm+tgl+branch
 endif
 
 COCOTB_HDL_TIMEUNIT         = 1ns
 COCOTB_HDL_TIMEPRECISION    = 10ps
-
-EXTRA_ARGS += -I$(CFGDIR) -Wno-DECLFILENAME
 
 # Build directory
 ifneq ($(COVERAGE_TYPE),)

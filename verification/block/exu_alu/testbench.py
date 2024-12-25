@@ -438,6 +438,63 @@ class BaseTest(uvm_test):
         cocotb.start_soon(clock.start(start_high=False))
 
     async def do_reset(self):
+        # zero input signals
+        cocotb.top.scan_mode.value = 0
+        cocotb.top.flush_upper_x.value = 0
+        cocotb.top.flush_lower_r.value = 0
+        cocotb.top.enable.value = 0
+        cocotb.top.valid_in.value = 0
+        cocotb.top.ap_clz.value = 0
+        cocotb.top.ap_ctz.value = 0
+        cocotb.top.ap_cpop.value = 0
+        cocotb.top.ap_sext_b.value = 0
+        cocotb.top.ap_sext_h.value = 0
+        cocotb.top.ap_min.value = 0
+        cocotb.top.ap_max.value = 0
+        cocotb.top.ap_pack.value = 0
+        cocotb.top.ap_packu.value = 0
+        cocotb.top.ap_packh.value = 0
+        cocotb.top.ap_rol.value = 0
+        cocotb.top.ap_ror.value = 0
+        cocotb.top.ap_grev.value = 0
+        cocotb.top.ap_gorc.value = 0
+        cocotb.top.ap_zbb.value = 0
+        cocotb.top.ap_bset.value = 0
+        cocotb.top.ap_bclr.value = 0
+        cocotb.top.ap_binv.value = 0
+        cocotb.top.ap_bext.value = 0
+        cocotb.top.ap_sh1add.value = 0
+        cocotb.top.ap_sh2add.value = 0
+        cocotb.top.ap_sh3add.value = 0
+        cocotb.top.ap_zba.value = 0
+        cocotb.top.ap_land.value = 0
+        cocotb.top.ap_lor.value = 0
+        cocotb.top.ap_lxor.value = 0
+        cocotb.top.ap_sll.value = 0
+        cocotb.top.ap_srl.value = 0
+        cocotb.top.ap_sra.value = 0
+        cocotb.top.ap_beq.value = 0
+        cocotb.top.ap_bne.value = 0
+        cocotb.top.ap_blt.value = 0
+        cocotb.top.ap_bge.value = 0
+        cocotb.top.ap_add.value = 0
+        cocotb.top.ap_sub.value = 0
+        cocotb.top.ap_slt.value = 0
+        cocotb.top.ap_unsignl.value = 0
+        cocotb.top.ap_jall.value = 0
+        cocotb.top.ap_predict_tl.value = 0
+        cocotb.top.ap_predict_nt.value = 0
+        cocotb.top.ap_csr_write.value = 0
+        cocotb.top.ap_csr_imm.value = 0
+        cocotb.top.csr_ren_in.value = 0
+        cocotb.top.csr_rddata_in.value = 0
+        cocotb.top.a_in.value = 0
+        cocotb.top.b_in.value = 0
+        cocotb.top.pc_in.value = 0
+        cocotb.top.brimm_in.value = 0
+
+
+        # perform reset
         cocotb.top.rst_l.value = 0
         await ClockCycles(cocotb.top.clk, 2)
         await FallingEdge(cocotb.top.clk)

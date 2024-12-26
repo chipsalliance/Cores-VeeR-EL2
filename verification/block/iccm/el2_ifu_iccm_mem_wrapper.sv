@@ -52,8 +52,6 @@ module el2_ifu_iccm_mem_wrapper
   assign iccm_addr_bank            = mem_export.iccm_addr_bank;
   assign iccm_bank_wr_data         = mem_export.iccm_bank_wr_data;
   assign iccm_bank_wr_ecc          = mem_export.iccm_bank_wr_ecc;
-  assign mem_export.iccm_bank_dout = iccm_bank_dout;
-  assign mem_export.iccm_bank_ecc  = iccm_bank_ecc;
 
   // Pack el2_ccm_ext_in_pkt_t
   el2_ccm_ext_in_pkt_t [pt.ICCM_NUM_BANKS-1:0] iccm_ext_in_pkt;

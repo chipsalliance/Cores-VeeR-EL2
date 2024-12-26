@@ -35,6 +35,7 @@ class AXIReadChannelDriver(uvm_driver):
 
     async def run_phase(self):
         self.bfm.start_bfm()
+        await RisingEdge(self.rst_n)
         while True:
             if self.rst_n.value == 0:
                 await RisingEdge(self.rst_n)

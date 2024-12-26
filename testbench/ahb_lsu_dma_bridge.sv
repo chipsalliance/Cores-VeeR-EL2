@@ -265,7 +265,7 @@ module ahb_lsu_dma_bridge
     );
 
     // This is the actual bridge, implemented for AXI only.
-    axi_lsu_dma_bridge # (4,4) bridge(
+    axi_lsu_dma_bridge # (TAG, TAG) bridge(
         .clk(clk),
         .reset_l(reset_l),
 

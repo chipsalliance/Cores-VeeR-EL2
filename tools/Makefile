@@ -142,7 +142,8 @@ TBFILES = $(TBDIR)/tb_top_pkg.sv \
           $(TBDIR)/tb_top.sv \
           $(TBDIR)/ahb_sif.sv \
           $(TBDIR)/jtagdpi/jtagdpi.sv \
-          $(TBDIR)/ahb_lite_2to1_mux.sv
+          $(TBDIR)/ahb_lite_2to1_mux.sv \
+          $(TBDIR)/ahb_lsu_dma_bridge.sv
 
 defines  = $(BUILD_DIR)/common_defines.vh
 defines += ${RV_ROOT}/design/include/el2_def.sv

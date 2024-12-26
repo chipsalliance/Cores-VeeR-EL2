@@ -1,5 +1,5 @@
 null  :=
-space := $(null)
+space := $(null) #
 comma := ,
 
 CURDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))

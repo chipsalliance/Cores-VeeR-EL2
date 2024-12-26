@@ -101,6 +101,7 @@ class DMITestBfm(metaclass=utility_classes.Singleton):
     async def rsp_monitor_q_bfm(self):
         DMI_CORE_BOUNDARY = 0x4F
 
+        await RisingEdge(self.rst_n)
         while True:
             if self.rst_n.value == 0:
                 await RisingEdge(self.rst_n)

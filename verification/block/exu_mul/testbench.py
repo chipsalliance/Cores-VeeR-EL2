@@ -321,7 +321,35 @@ class BaseTest(uvm_test):
         cocotb.start_soon(clock.start(start_high=False))
 
     async def do_reset(self):
-        cocotb.top.rst_l.value = 0
+
+        # zero input signals
+        cocotb.top.scan_mode.value = 0
+        cocotb.top.mul_p_valid.value = 0
+        cocotb.top.mul_p_rs1_sign.value = 0
+        cocotb.top.mul_p_rs2_sign.value = 0
+        cocotb.top.mul_p_low.value = 0
+        cocotb.top.mul_p_bcompress.value = 0
+        cocotb.top.mul_p_bdecompress.value = 0
+        cocotb.top.mul_p_clmul.value = 0
+        cocotb.top.mul_p_clmulh.value = 0
+        cocotb.top.mul_p_clmulr.value = 0
+        cocotb.top.mul_p_grev.value = 0
+        cocotb.top.mul_p_gorc.value = 0
+        cocotb.top.mul_p_shfl.value = 0
+        cocotb.top.mul_p_unshfl.value = 0
+        cocotb.top.mul_p_crc32_b.value = 0
+        cocotb.top.mul_p_crc32_h.value = 0
+        cocotb.top.mul_p_crc32_w.value = 0
+        cocotb.top.mul_p_crc32c_b.value = 0
+        cocotb.top.mul_p_crc32c_h.value = 0
+        cocotb.top.mul_p_crc32c_w.value = 0
+        cocotb.top.mul_p_bfp.value = 0
+        cocotb.top.mul_p_xperm_n.value = 0
+        cocotb.top.mul_p_xperm_b.value = 0
+        cocotb.top.mul_p_xperm_h.value = 0
+        cocotb.top.rs1_in.value = 0
+        cocotb.top.rs2_in.value = 0
+
         await ClockCycles(cocotb.top.clk, 2)
         await FallingEdge(cocotb.top.clk)
         cocotb.top.rst_l.value = 1

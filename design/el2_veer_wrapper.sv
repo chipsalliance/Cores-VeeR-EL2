@@ -119,13 +119,11 @@ import el2_pkg::*;
 
    //-------------------------- IFU AXI signals--------------------------
    // AXI Write Channels
-   /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */
+   /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv
+      IFU does not use AXI write channel */
    /*pragma coverage off*/
    output logic                            ifu_axi_awvalid,
-   /*pragma coverage on*/
    input  logic                            ifu_axi_awready,
-   /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */
-   /*pragma coverage off*/
    output logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_awid,
    output logic [31:0]                     ifu_axi_awaddr,
    output logic [3:0]                      ifu_axi_awregion,
@@ -138,22 +136,16 @@ import el2_pkg::*;
    output logic [3:0]                      ifu_axi_awqos,
 
    output logic                            ifu_axi_wvalid,
-   /*pragma coverage on*/
    input  logic                            ifu_axi_wready,
-   /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */
-   /*pragma coverage off*/
    output logic [63:0]                     ifu_axi_wdata,
    output logic [7:0]                      ifu_axi_wstrb,
    output logic                            ifu_axi_wlast,
-   /*pragma coverage on*/
 
    input  logic                            ifu_axi_bvalid,
-   /* exclude signals that are tied to constant value in el2_ifu_mem_ctl.sv */
-   /*pragma coverage off*/
    output logic                            ifu_axi_bready,
-   /*pragma coverage on*/
    input  logic [1:0]                      ifu_axi_bresp,
    input  logic [pt.IFU_BUS_TAG-1:0]       ifu_axi_bid,
+   /*pragma coverage on*/
 
    // AXI Read Channels
    output logic                            ifu_axi_arvalid,

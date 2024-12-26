@@ -140,12 +140,12 @@ jobs:
         with:
           submodules: recursive
 
-      - name: install SiteSpawner package
+      - name: Install coverage dependencies
         shell: bash
         run: |
           python3 -m venv .venv
           source .venv/bin/activate
-          pip install git+https://github.com/antmicro/sitespawner@abff708256a15a5db7c498ff7f484c78cf18d4e3
+          pip install -r .github/scripts/requirements-coverage.txt
           echo "PATH=$PATH" >> $GITHUB_ENV
 
       - name: Install Python deps

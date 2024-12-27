@@ -1019,15 +1019,14 @@ module tb_top
 
 `ifndef VERILATOR
         $dumpfile("dump.vcd");
-	$dumpvars(0, tb_top);
-        //if($test$plusargs("dumpon")) $dumpvars;
+        $dumpvars(0, tb_top);
+        rst_l = 1'b1;
+        rst_l = #5 1'b0;
+        rst_l = #5 1'b1;
         forever  core_clk = #5 ~core_clk;
 `endif
     end
 
-`ifndef VERILATOR
-    assign rst_l = cycleCnt > 5;
-`endif
     assign porst_l = cycleCnt > 2;
 
    //=========================================================================-

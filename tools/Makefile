@@ -150,6 +150,8 @@ defines += ${RV_ROOT}/design/include/el2_def.sv
 defines += $(BUILD_DIR)/el2_pdef.vh
 includes = -I${BUILD_DIR} -I$(TBDIR)/axi4_mux
 
+CM_HIER_FILE = $(RV_ROOT)/cm.cfg
+
 # Verilator supports only C++14 and newer
 CFLAGS += -std=c++14
 
@@ -188,6 +190,7 @@ vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	  +error+500 +incdir+${RV_ROOT}/design/lib \
 	  +incdir+${RV_ROOT}/design/include ${BUILD_DIR}/common_defines.vh \
 	  +incdir+$(BUILD_DIR)  +libext+.v $(defines) -CFLAGS "${CFLAGS}" \
+	  -cm_hier $(CM_HIER_FILE) \
 	  -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -l vcs.log
 	touch vcs-build
 

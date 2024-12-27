@@ -118,4 +118,3 @@ jobs:
 
       - name: Generate custom report
         run: _secret_custom_report
-        continue-on-error: true

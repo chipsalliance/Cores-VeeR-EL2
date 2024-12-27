@@ -34,7 +34,10 @@ module dmi_wrapper(
   // Processor Signals
   input              core_rst_n,          // Core reset                  
   input              core_clk,            // Core clock                  
+  //jtag_id is supposed to be connected to a constant in the top level
+  /* pragma coverage off*/
   input [31:1]       jtag_id,             // JTAG ID
+  /* pragma coverage on*/
   input [31:0]       rd_data,             // 32 bit Read data from  Processor                       
   output [31:0]      reg_wr_data,         // 32 bit Write data to Processor                      
   output [6:0]       reg_wr_addr,         // 7 bit reg address to Processor                   

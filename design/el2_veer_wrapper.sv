@@ -30,10 +30,16 @@ import el2_pkg::*;
    input logic                             clk,
    input logic                             rst_l,
    input logic                             dbg_rst_l,
+   // rst_vec is supposed to be tied to constant in the top level
+   /*pragma coverage off*/
    input logic [31:1]                      rst_vec,
+   /*pragma coverage on*/
    input logic                             nmi_int,
+   // jtag_id and nmi_vec are supposed to be tied to constants in the top level
+   /*pragma coverage off*/
    input logic [31:1]                      nmi_vec,
    input logic [31:1]                      jtag_id,
+   /*pragma coverage on*/
 
 
    output logic [31:0]                     trace_rv_i_insn_ip,

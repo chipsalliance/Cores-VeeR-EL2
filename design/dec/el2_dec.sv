@@ -47,10 +47,16 @@ module el2_dec
     output logic dec_tlu_core_empty,
 
     input logic        rst_l,   // reset, active low
+    // rst_vec is supposed to be connected to a constant in the top level
+    /*pragma coverage off*/
     input logic [31:1] rst_vec, // reset vector, from core pins
+    /*pragma coverage on*/
 
     input logic        nmi_int,  // NMI pin
+    // nmi_vec is supposed to be connected to a constant in the top level
+    /*pragma coverage off*/
     input logic [31:1] nmi_vec,  // NMI vector, from pins
+    /*pragma coverage on*/
 
     input logic i_cpu_halt_req,  // Asynchronous Halt request to CPU
     input logic i_cpu_run_req,   // Asynchronous Restart request to CPU

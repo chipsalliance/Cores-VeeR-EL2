@@ -38,9 +38,15 @@ import el2_pkg::*;
    input logic scan_mode,
    /*pragma coverage on*/
 
+   //rst_vec is supposed to be connected to constant in the top level
+   /*pragma coverage off*/
    input logic [31:1] rst_vec, // reset vector, from core pins
+   /*pragma coverage on*/
    input logic        nmi_int, // nmi pin
+   //nmi_vec is supposed to be connected to constant in the top level
+   /*pragma coverage off*/
    input logic [31:1] nmi_vec, // nmi vector
+   /*pragma coverage on*/
    input logic  i_cpu_halt_req,    // Asynchronous Halt request to CPU
    input logic  i_cpu_run_req,     // Asynchronous Restart request to CPU
 

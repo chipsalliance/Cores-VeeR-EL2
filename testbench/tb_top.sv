@@ -22,16 +22,13 @@ module tb_top
     `include "el2_param.vh"
 );
 
-  logic i_cpu_halt_req;
-  logic i_cpu_run_req;
-  logic mpc_debug_halt_req;
-  logic mpc_debug_run_req;
+  logic i_cpu_halt_req, o_cpu_halt_ack, o_cpu_halt_status;
+  logic i_cpu_run_req, o_cpu_run_ack;
+  logic mpc_debug_halt_req, mpc_debug_halt_ack;
+  logic mpc_debug_run_req, mpc_debug_run_ack;
+  logic o_debug_mode_status;
   logic lsu_bus_clk_en;
 
-  assign i_cpu_halt_req = 1'b0;
-  assign i_cpu_run_req = 1'b0;
-  assign mpc_debug_halt_req = 1'b0;
-  assign mpc_debug_run_req = 1'b1;
   assign lsu_bus_clk_en = 1'b1;
 `else
 module tb_top
@@ -1022,13 +1019,54 @@ module tb_top
         $dumpvars(0, tb_top);
         rst_l = 1'b1;
         rst_l = #5 1'b0;
-        rst_l = #5 1'b1;
-        forever  core_clk = #5 ~core_clk;
+        rst_l = #25 1'b1;
+        // halt and start the core
+        i_cpu_halt_req = 1'b0;
+        i_cpu_run_req = 1'b0;
+        mpc_debug_halt_req = 1'b0;
+        mpc_debug_run_req = 1'b0;
+
+        $display("halting CPU and waiting for ack");
+        i_cpu_halt_req = #5 1'b1;
+        wait(o_cpu_halt_ack == 1);
+        $display("waiting for halt");
+        i_cpu_halt_req = 1'b0;
+        wait(o_cpu_halt_status == 1'b1);
+        $display("requesting start and waiting for ack");
+        i_cpu_run_req = 1'b1;
+        wait(o_cpu_run_ack == 1'b1);
+        $display("waiting for run");
+        i_cpu_run_req = 1'b0;
+        wait(o_cpu_halt_status == 1'b0);
+        $display("done");
+
+        $display("requesting mpc halt and wating for ack");
+        mpc_debug_halt_req = 1'b1;
+        wait(mpc_debug_halt_ack == 1'b1);
+        $display("waiting for debug halt");
+        mpc_debug_halt_req = 1'b0;
+        wait(o_debug_mode_status == 1'b1);
+        $display("requesting start and waiting for ack");
+        mpc_debug_run_req = 1'b1;
+        wait(mpc_debug_run_ack == 1'b1);
+        $display("waiting for cpu to start");
+        mpc_debug_run_req = 1'b0;
+        wait(o_debug_mode_status == 1'b0);
+        $display("done");
 `endif
     end
-
-    assign porst_l = cycleCnt > 2;
-
+`ifndef VERILATOR
+    initial begin
+        forever  core_clk = #5 ~core_clk;
+    end
+    initial begin
+        porst_l = 1'b1;
+        porst_l = #1 1'b0;
+        porst_l = #10 1'b1;
+    end
+`else
+        assign porst_l = cycleCnt > 2;
+`endif
    //=========================================================================-
    // RTL instance
    //=========================================================================-

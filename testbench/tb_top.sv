@@ -2640,8 +2640,7 @@ if (pt.ICACHE_WAYPACK == 0 ) begin : PACKED_11
                  `EL2_IC_TAG_PACKED_SRAM(128,104)
       end // block: WAYS
       else begin : WAYS
-                 // TODO bring back
-                 // `EL2_IC_TAG_PACKED_SRAM(128,52)
+                 `EL2_IC_TAG_PACKED_SRAM(128,52)
       end // block: WAYS
 
       end // block: size_128

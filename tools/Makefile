@@ -143,7 +143,16 @@ TBFILES = $(TBDIR)/tb_top_pkg.sv \
           $(TBDIR)/ahb_sif.sv \
           $(TBDIR)/jtagdpi/jtagdpi.sv \
           $(TBDIR)/ahb_lite_2to1_mux.sv \
-          $(TBDIR)/ahb_lsu_dma_bridge.sv
+          $(TBDIR)/ahb_lsu_dma_bridge.sv \
+          $(TBDIR)/axi4_mux/axi_crossbar_wrap_2x1.v \
+          $(TBDIR)/axi4_mux/arbiter.v \
+          $(TBDIR)/axi4_mux/axi_crossbar_addr.v \
+          $(TBDIR)/axi4_mux/axi_crossbar_rd.v \
+          $(TBDIR)/axi4_mux/axi_crossbar.v \
+          $(TBDIR)/axi4_mux/axi_crossbar_wr.v \
+          $(TBDIR)/axi4_mux/axi_register_rd.v \
+          $(TBDIR)/axi4_mux/axi_register_wr.v \
+          $(TBDIR)/axi4_mux/priority_encoder.v
 
 defines  = $(BUILD_DIR)/common_defines.vh
 defines += ${RV_ROOT}/design/include/el2_def.sv

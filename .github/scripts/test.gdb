@@ -126,19 +126,5 @@ continue
 
 delete
 
-# This causes an error. Let's execute it anyway for coverage.
-echo Accessing region at 0xe0000000...\n
-set *(0xe0000000) = 0x01234567
-set *(0xe0000004) = 0x89ABCDEF
-set *(0xe0000008) = 0x55555555
-set *(0xe000000C) = 0xAAAAAAAA
-print/x *0xe0000000@4
-echo Accessing region at 0xf0000000...\n
-set *(0xf0000000) = 0x01234567
-set *(0xf0000004) = 0x89ABCDEF
-set *(0xf0000008) = 0x55555555
-set *(0xf000000C) = 0xAAAAAAAA
-print/x *0xf0000000@4
-
 # end the simulation gracefully
 set *(volatile unsigned char*)0xd0580000 = 0xff

@@ -43,8 +43,10 @@ echo -e "${COLOR_WHITE}======== Launching interactive simulation ========${COLOR
 # Start the simulation
 echo -e "Starting simulation..."
 if [ -f obj_dir/Vtb_top ]; then
+    SIM_START_STRING="VerilatorTB: Start of sim"
     obj_dir/Vtb_top >"${SIM_LOG}" 2>&1 &
 elif [ -f ./simv ]; then
+    SIM_START_STRING="  remote_bitbang_port 5000"
     ./simv >"${SIM_LOG}" 2>&1 &
 else
     echo "No simulation binary found, exiting"
@@ -53,7 +55,7 @@ fi
 SIM_PID=$!
 
 # Wait
-wait_for_phrase "${SIM_LOG}" "  remote_bitbang_port 5000"
+wait_for_phrase "${SIM_LOG}" "${SIM_START_STRING}"
 if [ $? -ne 0 ]; then
     echo -e "${COLOR_RED}Failed to start the simulation!${COLOR_OFF}"
     print_logs

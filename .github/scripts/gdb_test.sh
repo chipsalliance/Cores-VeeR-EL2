@@ -75,7 +75,7 @@ SIM_PID=$!
 # Wait
 wait_for_phrase "${SIM_LOG}" "${SIM_START_STRING}"
 # TODO handle proper string in the output instead of waiting
-sleep 10s
+sleep 1s
 retcode=$?
 if [ $retcode -ne 0 ]; then
     echo -e "${COLOR_RED}Failed to start the simulation: $retcode ${COLOR_OFF}"

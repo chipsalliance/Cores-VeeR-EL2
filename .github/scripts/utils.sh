@@ -33,8 +33,8 @@ wait_for_phrase () {
     fi
 
     # Wait for the phrase
-    DEADLINE=$((${EPOCHSECONDS} + 30))
-    while [ ${EPOCHSECONDS} -lt ${DEADLINE} ]
+    DEADLINE=$(($(date +%s) + 30))
+    while [ $(date +%s) -lt ${DEADLINE} ]
     do
         # Check for the phrase
         grep "$2" "$1" >/dev/null

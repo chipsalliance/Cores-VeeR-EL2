@@ -60,11 +60,20 @@ echo -e "${COLOR_WHITE}======== Launching interactive simulation ========${COLOR
 
 # Start the simulation
 echo -e "Starting simulation..."
-./obj_dir/Vtb_top >"${SIM_LOG}" 2>&1 &
+if [ -f obj_dir/Vtb_top ]; then
+    SIM_START_STRING="VerilatorTB: Start of sim"
+    obj_dir/Vtb_top >"${SIM_LOG}" 2>&1 &
+elif [ -f ./simv ]; then
+    SIM_START_STRING="  remote_bitbang_port 5000"
+    ./simv >"${SIM_LOG}" 2>&1 &
+else
+    echo "No simulation binary found, exiting"
+    exit 1
+fi
 SIM_PID=$!
 
 # Wait
-wait_for_phrase "${SIM_LOG}" "Start of sim"
+wait_for_phrase "${SIM_LOG}" "${SIM_START_STRING}"
 # TODO handle proper string in the output instead of waiting
 sleep 10s
 retcode=$?

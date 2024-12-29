@@ -218,9 +218,7 @@ module tb_top
 
     logic dmi_core_enable;
 
-    `ifdef VERILATOR
     always_comb dmi_core_enable = ~(o_cpu_halt_status);
-    `endif
 
    `ifdef RV_OPENOCD_TEST
     // SB and LSU AHB master mux

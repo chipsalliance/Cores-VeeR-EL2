@@ -18,7 +18,9 @@
 
 SIM_LOG=`realpath sim.log`
 OPENOCD_LOG=`realpath openocd.log`
-GCC_PREFIX=riscv64-unknown-elf
+if [ -z $GCC_PREFIX ]; then
+    GCC_PREFIX=riscv64-unknown-elf
+fi
 
 # Ensure that RISC-V toolchain is installed
 if ! which ${GCC_PREFIX}-gcc >/dev/null; then

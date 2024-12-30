@@ -19,20 +19,6 @@ target extended-remote :3333
 
 echo Dumping registers...\n
 info registers
-echo Accessing DCCM...\n
-set *(0x00080000) = 0x01234567
-set *(0x00080004) = 0x89ABCDEF
-set *(0x00080008) = 0x55555555
-set *(0x0008000C) = 0xAAAAAAAA
-print/x *0x00080000@4
-
-# TODO why does the default configuration for iccm (0xe000000) differ from the documentation (0x40000)?
-echo Accessing ICCM...\n
-set *(0x0e000000) = 0x01234567
-set *(0x0e000004) = 0x89ABCDEF
-set *(0x0e000008) = 0x55555555
-set *(0x0e00000C) = 0xAAAAAAAA
-print/x *0x00e00000@4
 
 echo Accessing region at 0x20000000...\n
 set *(0x20000000) = 0x01234567

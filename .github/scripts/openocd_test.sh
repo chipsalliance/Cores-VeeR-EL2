@@ -47,7 +47,7 @@ if [ -f obj_dir/Vtb_top ]; then
     obj_dir/Vtb_top >"${SIM_LOG}" 2>&1 &
 elif [ -f ./simv ]; then
     SIM_START_STRING="  remote_bitbang_port 5000"
-    ./simv +vcs+lic+wait -cm line+cond+fsm >"${SIM_LOG}" 2>&1 &
+    ./simv +vcs+lic+wait -cm line+cond+fsm+tgl+branch >"${SIM_LOG}" 2>&1 &
 else
     echo "No simulation binary found, exiting"
     exit 1

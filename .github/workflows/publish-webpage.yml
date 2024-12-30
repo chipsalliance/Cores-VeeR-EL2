@@ -69,6 +69,7 @@ jobs:
       - name: Update webpage
         if: github.event_name != 'pull_request'
         run: |
+          mv coverage_dashboard/*.zip .
           sis -d webpage \
             --include-documentation \
             --doc-project-name "Cores VeeR EL2" \
@@ -79,11 +80,15 @@ jobs:
           rm -rf public.new/html/main/docs_rendered
           mkdir -p public.new/html/main/docs_rendered
           mv ./docs_rendered/* public.new/html/main/docs_rendered
+          mv data.zip public.new/html/main/
+          mv data_v.zip public.new/html/main/
+          echo ${GITHUB_RUN_ID} > public.new/html/main/run_id
           tar -acf webpage.tar.gz public.new
 
       - name: Update webpage PR
         if: github.event_name == 'pull_request'
         run: |
+          mv coverage_dashboard/*.zip .
           sis -d webpage \
             --include-documentation \
             --doc-project-name "Cores VeeR EL2" \
@@ -94,6 +99,9 @@ jobs:
           rm -rf public.new/html/dev/${{ github.event.number }}/docs_rendered
           mkdir -p public.new/html/dev/${{ github.event.number }}/docs_rendered
           mv ./docs_rendered/* public.new/html/dev/${{ github.event.number }}/docs_rendered
+          mv data.zip public.new/html/dev/${{ github.event.number }}/
+          mv data_v.zip public.new/html/dev/${{ github.event.number }}/
+          echo ${GITHUB_RUN_ID} > public.new/html/dev/${{ github.event.number }}/run_id
           tar -acf webpage.tar.gz public.new
 
       - name: Add redirect index page

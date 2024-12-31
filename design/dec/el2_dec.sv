@@ -66,7 +66,9 @@ module el2_dec
     output logic o_cpu_run_ack,  // Run request ack
     output logic o_debug_mode_status,         // Core to the PMU that core is in debug mode. When core is in debug mode, the PMU should refrain from sendng a halt or run request
 
+    /*pragma coverage off*/
     input logic [31:4] core_id,  // CORE ID
+    /*pragma coverage on*/
 
     // external MPC halt/run interface
     input  logic mpc_debug_halt_req,  // Async halt request

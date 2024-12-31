@@ -405,7 +405,9 @@ import el2_pkg::*;
    output logic                            jtag_tdo,    // JTAG TDO
    output logic                            jtag_tdoEn,  // JTAG Test Data Output enable
 
+   /*pragma coverage off*/
    input logic [31:4] core_id,
+   /*pragma coverage on*/
 
    // Memory Export Interface
    el2_mem_if.veer_sram_src                el2_mem_export,

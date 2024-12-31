@@ -194,7 +194,7 @@ module axi_slv #(
 
   always @(posedge aclk) begin
     if (arvalid && arready) begin
-      read_address = araddr;
+      read_address = {araddr[31:3], 3'b000};
        rdata <= {
         mem[read_address+7],
         mem[read_address+6],
@@ -217,7 +217,7 @@ module axi_slv #(
     end
 
     if (awvalid) begin
-       write_address = awaddr;
+       write_address = {awaddr[31:3], 3'b000};
        awready <= 0;
     end
      if (wvalid) begin

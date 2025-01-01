@@ -5,10 +5,83 @@ on:
 
 jobs:
 
+  merge-verilator-reports:
+    name: Merge Verilator info data
+    runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:20241230
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: regression_tests_coverage_data
+          path: ./
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: verification_tests_coverage_data
+          path: ./
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: uarch_tests_coverage_data
+          path: ./
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: riscv-dv_coverage_data
+          path: ./
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: riscof_coverage_data
+          path: ./
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: openocd_coverage_data
+          path: ./
+
+      - name: Merge data
+        shell: bash
+        run: |
+          sudo apt update
+          sudo apt install -y zip unzip
+          .github/scripts/prepare_coverage_data.sh
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: verilator_coverage_data
+          path: |
+            coverage_toggle_verilator.info
+            coverage_line_verilator.info
+            coverage_branch_verilator.info
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverview_data
+          path: |
+            data.zip
+
   coverage-report:
     name: Coverage report
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20241223
+    container: ghcr.io/antmicro/cores-veer-el2:20241230
+    needs: [merge-verilator-reports, custom-coverage-report]
     env:
       DEBIAN_FRONTEND: "noninteractive"
 
@@ -76,11 +149,28 @@ jobs:
           name: openocd_coverage_data
           path: ./
 
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: coverview_data
+          path: ./
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: data_v
+          path: ./
+
       - name: Generate reports
         shell: bash
         run: |
+          sudo apt update
+          sudo apt install -y zip unzip
           export PATH=${{ env.LCOV_PATH }}:${PATH}
           sis -d reports . --report-dir report --src-pattern \*design\*
+          cp data.zip report
+          cp data_v.zip report
+
           cat *_toggle.info > coverage.toggle.info
           cat *_branch.info > coverage.branch.info
 
@@ -100,10 +190,12 @@ jobs:
             coverage.toggle.info
             coverage.branch.info
 
+
   custom-coverage-report:
     name: Custom coverage report
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: centos:8
+    needs: [merge-verilator-reports]
     env:
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader
@@ -113,8 +205,20 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: verilator_coverage_data
+          path: ./
+
       - name: Prepare Environment
         run: _secret_prepare_env
 
       - name: Generate custom report
         run: _secret_custom_report
+
+      - name: Pack artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: data_v
+          path: ./data_v.zip

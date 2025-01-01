@@ -8,7 +8,7 @@ jobs:
   tests:
     name: Run OpenOCD tests
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20241223
+    container: ghcr.io/antmicro/cores-veer-el2:20241230
     strategy:
       fail-fast: false
       matrix:
@@ -99,3 +99,24 @@ jobs:
         with:
           name: openocd_coverage_data
           path: results/*.info
+
+  custom-openocd-tests:
+    name: Run Custom OpenOCD tests
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    strategy:
+      fail-fast: false
+      matrix:
+        bus: ["axi4"]
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Run tests
+        run: _secret_custom_openocd_tests
+        env:
+          BUS: ${{ matrix.bus }}

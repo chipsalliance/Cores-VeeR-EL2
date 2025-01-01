@@ -29,9 +29,15 @@ import el2_pkg::*;
    input logic                  clk,
    input logic                  rst_l,
    input logic                  dbg_rst_l,
+   // rst_vec is supposed to be connected to a constant in the top level
+   /*pragma coverage off*/
    input logic [31:1]           rst_vec,
+   /*pragma coverage on*/
    input logic                  nmi_int,
+   // nmi_vec is supposed to be connected to a constant in the top level
+   /*pragma coverage off*/
    input logic [31:1]           nmi_vec,
+   /*pragma coverage on*/
    output logic                 core_rst_l,   // This is "rst_l | dbg_rst_l"
 
    output logic                 active_l2clk,
@@ -58,7 +64,9 @@ import el2_pkg::*;
    output logic o_cpu_run_ack,     // Core Acknowledge to run request
    output logic o_debug_mode_status, // Core to the PMU that core is in debug mode. When core is in debug mode, the PMU should refrain from sendng a halt or run request
 
+   /*pragma coverage off*/
    input logic [31:4] core_id, // CORE ID
+   /*pragma coverage on*/
 
    // external MPC halt/run interface
    input logic mpc_debug_halt_req, // Async halt request

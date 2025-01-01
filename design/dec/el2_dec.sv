@@ -47,10 +47,16 @@ module el2_dec
     output logic dec_tlu_core_empty,
 
     input logic        rst_l,   // reset, active low
+    // rst_vec is supposed to be connected to a constant in the top level
+    /*pragma coverage off*/
     input logic [31:1] rst_vec, // reset vector, from core pins
+    /*pragma coverage on*/
 
     input logic        nmi_int,  // NMI pin
+    // nmi_vec is supposed to be connected to a constant in the top level
+    /*pragma coverage off*/
     input logic [31:1] nmi_vec,  // NMI vector, from pins
+    /*pragma coverage on*/
 
     input logic i_cpu_halt_req,  // Asynchronous Halt request to CPU
     input logic i_cpu_run_req,   // Asynchronous Restart request to CPU
@@ -60,7 +66,9 @@ module el2_dec
     output logic o_cpu_run_ack,  // Run request ack
     output logic o_debug_mode_status,         // Core to the PMU that core is in debug mode. When core is in debug mode, the PMU should refrain from sendng a halt or run request
 
+    /*pragma coverage off*/
     input logic [31:4] core_id,  // CORE ID
+    /*pragma coverage on*/
 
     // external MPC halt/run interface
     input  logic mpc_debug_halt_req,  // Async halt request

@@ -3,7 +3,7 @@
 `define EL2_IC_TAG_PACKED_SRAM(depth,width)                                                       \
    ram_be_``depth``x``width  ic_way_tag (                                                         \
       .CLK (el2_mem_export.clk),                                                                  \
-      .ME  (el2_mem_export.ic_tag_clken_final),                                                   \
+      .ME  (|el2_mem_export.ic_tag_clken_final),                                                   \
       .WE  (|el2_mem_export.ic_tag_wren_q[pt.ICACHE_NUM_WAYS-1:0]),                               \
       .WEM (el2_mem_export.ic_tag_wren_biten_vec[``width-1:0]),                                   \
                                                                                                   \

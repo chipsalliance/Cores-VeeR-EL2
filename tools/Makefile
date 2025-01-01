@@ -143,12 +143,23 @@ TBFILES = $(TBDIR)/tb_top_pkg.sv \
           $(TBDIR)/ahb_sif.sv \
           $(TBDIR)/jtagdpi/jtagdpi.sv \
           $(TBDIR)/ahb_lite_2to1_mux.sv \
-          $(TBDIR)/ahb_lsu_dma_bridge.sv
+          $(TBDIR)/ahb_lsu_dma_bridge.sv \
+          $(TBDIR)/axi4_mux/axi_crossbar_wrap_2x1.v \
+          $(TBDIR)/axi4_mux/arbiter.v \
+          $(TBDIR)/axi4_mux/axi_crossbar_addr.v \
+          $(TBDIR)/axi4_mux/axi_crossbar_rd.v \
+          $(TBDIR)/axi4_mux/axi_crossbar.v \
+          $(TBDIR)/axi4_mux/axi_crossbar_wr.v \
+          $(TBDIR)/axi4_mux/axi_register_rd.v \
+          $(TBDIR)/axi4_mux/axi_register_wr.v \
+          $(TBDIR)/axi4_mux/priority_encoder.v
 
 defines  = $(BUILD_DIR)/common_defines.vh
 defines += ${RV_ROOT}/design/include/el2_def.sv
 defines += $(BUILD_DIR)/el2_pdef.vh
 includes = -I${BUILD_DIR} -I$(TBDIR)/axi4_mux
+
+CM_HIER_FILE = $(RV_ROOT)/cm.cfg
 
 # Verilator supports only C++14 and newer
 CFLAGS += -std=c++14
@@ -188,6 +199,7 @@ vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	  +error+500 +incdir+${RV_ROOT}/design/lib \
 	  +incdir+${RV_ROOT}/design/include ${BUILD_DIR}/common_defines.vh \
 	  +incdir+$(BUILD_DIR)  +libext+.v $(defines) -CFLAGS "${CFLAGS}" \
+	  -cm_hier $(CM_HIER_FILE) \
 	  -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -l vcs.log
 	touch vcs-build
 

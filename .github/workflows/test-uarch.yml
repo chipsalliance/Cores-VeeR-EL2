@@ -58,6 +58,7 @@ jobs:
           - "block/pmp"
           - "block/dmi"
           - "block/lsu_tl"
+          - "block/dec_tlu_ctl"
     env:
       CCACHE_DIR: "/opt/verification/.cache/"
       DEBIAN_FRONTEND: "noninteractive"

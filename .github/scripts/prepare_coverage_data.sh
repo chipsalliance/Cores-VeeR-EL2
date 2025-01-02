@@ -154,8 +154,8 @@ with open('coverage_toggle_verilator.info') as f:
                             if not k in new_hits or new_hits[k] != 1:
                                 new_hits[k] = v
 
-            for k, v in new_hits.items():
-                out.write(f"{lineno},0,toggle_{k},{v}\n")
+            for k in sorted(new_hits.keys()):
+                out.write(f"{lineno},0,toggle_{k},{new_hits[k]}\n")
         else:
             out.write(lines[n])
 

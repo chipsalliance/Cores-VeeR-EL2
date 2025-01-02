@@ -379,9 +379,6 @@ import el2_pkg::*;
    logic bitmanip_zbb_zbp_zbe_zbf_legal;
    logic bitmanip_legal;
 
-   logic              data_gate_en;
-   logic              data_gate_clk;
-
 
    localparam NBLOAD_SIZE     = pt.LSU_NUM_NBLOAD;
    localparam NBLOAD_SIZE_MSB = int'(pt.LSU_NUM_NBLOAD)-1;

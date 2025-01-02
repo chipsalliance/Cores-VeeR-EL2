@@ -316,6 +316,19 @@ def pmp_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["dec_tlu_ctl"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_dec_tl",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def dec_tlu_ctl_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["dmi"])
 @nox.parametrize(
     "testName",

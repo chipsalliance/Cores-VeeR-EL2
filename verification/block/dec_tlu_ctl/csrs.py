@@ -1,0 +1,23 @@
+MEICPCT = 0xBCA
+MEIVT = 0xBC8
+# MTSEL (R/W)
+# [1:0] : Trigger select : 00, 01, 10 are data/address triggers. 11 is inst count
+MTSEL = 0x7A0
+
+# MTDATA1 (R/W)
+# [31:0] : Trigger Data 1
+MTDATA1 = 0x7A1
+
+# MTDATA2 (R/W)
+# [31:0] : Trigger Data 2
+MTDATA2 = 0x7A2
+
+# performance counters
+MHPMC3 = 0xB03
+MHPMC3H = 0xB83
+MHPMC4 = 0xB04
+MHPMC4H = 0xB84
+MHPMC5 = 0xB05
+MHPMC5H = 0xB85
+MHPMC6 = 0xB06
+MHPMC6H = 0xB86

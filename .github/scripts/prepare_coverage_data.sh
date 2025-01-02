@@ -192,7 +192,7 @@ cp _coverage_branch.info coverage_branch_verilator.info
 cp _coverage_toggle.info coverage_toggle_verilator.info
 
 python3 toggle_filter.py
-mv coverage_toggle_verilator.info coverage_toggle_verilator_orig.info
+mv coverage_toggle_verilator.info coverage_toggle_verilator_orig.info_
 mv coverage_toggle_verilator_filtered.info coverage_toggle_verilator.info
 
 grep 'SF:' coverage_*.info | cut -d ":" -f 3 | sort | uniq > files.txt

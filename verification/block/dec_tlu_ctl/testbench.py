@@ -30,25 +30,48 @@ class TlInputItem(uvm_sequence_item):
     Trigger Logic output data
     """
 
-    def __init__(self, pic_claimid=0, dec_csr_wrdata_r=0):
+    def __init__(self, pic_claimid=0, dec_csr_wrdata_r=0, mtdata1=0, mtdata2=0, mtsel=0):
         super().__init__("TlOutputItem")
 
         self.pic_claimid = pic_claimid
         self.dec_csr_wrdata_r = dec_csr_wrdata_r
+        self.mtdata1 = mtdata1
+        self.mtdata2 = mtdata2
+        self.mtsel = mtsel
 
-    def randomize(self):
+    def randomize(self, test):
 
-        pic_claimid = ""
-        # CSR
-        dec_csr_wrdata_r = ""
-        for _ in range(8):
-            pic_claimid += random.choice(["0", "1"])
+        if test == "meihap":
+            pic_claimid = ""
+            # CSR
+            dec_csr_wrdata_r = ""
+            for _ in range(8):
+                pic_claimid += random.choice(["0", "1"])
 
-        for _ in range(22):
-            dec_csr_wrdata_r += random.choice(["0", "1"])
+            for _ in range(22):
+                dec_csr_wrdata_r += random.choice(["0", "1"])
 
-        self.pic_claimid = int(pic_claimid, 2)
-        self.dec_csr_wrdata_r = int(dec_csr_wrdata_r, 2) << 10
+            self.pic_claimid = int(pic_claimid, 2)
+            self.dec_csr_wrdata_r = int(dec_csr_wrdata_r, 2) << 10
+        elif test == "mtdata":
+            # bits 31:28 are hardcoded to 0x2
+            mtdata1 = "0010"
+            mtdata2 = ""
+            mtsel = ""
+            for _ in range(28):
+                mtdata1 += random.choice(["0", "1"])
+            # set DMODE (bit 27) to 0 so that the settigs are actually taken into account
+            # in the list, bits are nubered from 0
+            tmp = list(mtdata1)
+            tmp[31 - 27] = "0"
+            mtdata1 = "".join(tmp)
+            self.mtdata1 = int(mtdata1, 2)
+            for _ in range(32):
+                mtdata2 += random.choice(["0", "1"])
+            self.mtdata2 = int(mtdata2, 2)
+            for _ in range(2):
+                mtsel += random.choice(["0", "1"])
+            self.mtsel = int(mtsel, 2)
 
 
 class TlOutputItem(uvm_sequence_item):
@@ -56,14 +79,29 @@ class TlOutputItem(uvm_sequence_item):
     Trigger Logic output data
     """
 
-    def __init__(self, dec_tlu_meihap):
+    def __init__(self, dec_tlu_meihap=0, mtdata1=0, mtdata2=0, mtsel=0, trigger_pkt_any=0):
         super().__init__("TlOutputItem")
         self.dec_tlu_meihap = dec_tlu_meihap
+        self.mtdata1 = mtdata1
+        self.mtdata2 = mtdata2
+        self.mtsel = mtsel
+        self.trigger_pkt_any = trigger_pkt_any
 
 
 # ==============================================================================
 MEICPCT = 0xBCA
 MEIVT = 0xBC8
+# MTSEL (R/W)
+# [1:0] : Trigger select : 00, 01, 10 are data/address triggers. 11 is inst count
+MTSEL = 0x7A0
+
+# MTDATA1 (R/W)
+# [31:0] : Trigger Data 1
+MTDATA1 = 0x7A1
+
+# MTDATA2 (R/W)
+# [31:0] : Trigger Data 2
+MTDATA2 = 0x7A2
 
 
 class TlDriver(uvm_driver):
@@ -76,30 +114,40 @@ class TlDriver(uvm_driver):
         del kwargs["dut"]
         super().__init__(*args, **kwargs)
 
+    async def write_csr(self, address, value):
+        self.dut.dec_csr_wen_r.value = 0
+        await RisingEdge(self.dut.clk)
+        self.dut.dec_csr_wen_r.value = 1
+        self.dut.dec_csr_wraddr_r.value = address
+        self.dut.dec_csr_wrdata_r.value = value
+        await RisingEdge(self.dut.clk)
+        self.dut.dec_csr_wen_r.value = 0
+
     async def run_phase(self):
 
         while True:
             it = await self.seq_item_port.get_next_item()
 
             if isinstance(it, TlInputItem):
-                # write MEIVT
-                self.dut.dec_csr_wen_r.value = 0
-                await RisingEdge(self.dut.clk)
-                self.dut.dec_csr_wen_r.value = 1
-                self.dut.dec_csr_wraddr_r.value = MEIVT
-                self.dut.dec_csr_wrdata_r.value = it.dec_csr_wrdata_r
-                await RisingEdge(self.dut.clk)
-                self.dut.dec_csr_wen_r.value = 0
-                # write pic_claimid
-                await RisingEdge(self.dut.clk)
-                self.dut.pic_claimid.value = it.pic_claimid
-                self.dut.dec_csr_wen_r.value = 1
-                self.dut.dec_csr_wraddr_r.value = MEICPCT
-                await RisingEdge(self.dut.clk)
-                self.dut.dec_csr_wen_r.value = 0
-                # give two more cycles so that output monitor can catch the data on the outputs
-                await RisingEdge(self.dut.clk)
-                await RisingEdge(self.dut.clk)
+                test = ConfigDB().get(self, "", "TEST")
+                if test == "meihap":
+                    # write MEIVT
+                    await self.write_csr(MEIVT, it.dec_csr_wrdata_r)
+                    # write pic_claimid
+                    await RisingEdge(self.dut.clk)
+                    self.dut.pic_claimid.value = it.pic_claimid
+                    self.dut.dec_csr_wen_r.value = 1
+                    self.dut.dec_csr_wraddr_r.value = MEICPCT
+                    await RisingEdge(self.dut.clk)
+                    self.dut.dec_csr_wen_r.value = 0
+                    # give two more cycles so that output monitor can catch the data on the outputs
+                    await RisingEdge(self.dut.clk)
+                    await RisingEdge(self.dut.clk)
+                elif test == "mtdata":
+                    # test triggers
+                    await self.write_csr(MTSEL, it.mtsel)
+                    await self.write_csr(MTDATA1, it.mtdata1)
+                    await self.write_csr(MTDATA2, it.mtdata2)
             else:
                 raise RuntimeError("Unknown item '{}'".format(type(it)))
 
@@ -122,16 +170,27 @@ class TlInputMonitor(uvm_component):
     async def run_phase(self):
 
         while True:
-            # Wait for the driver to set the input signals
-            await RisingEdge(self.dut.dec_csr_wen_r)
-            await RisingEdge(self.dut.dec_csr_wen_r)
-            # for _ in range(4):
-            #    await RisingEdge(self.dut.clk)
+            test = ConfigDB().get(self, "", "TEST")
 
-            pic_claimid = int(self.dut.pic_claimid.value)
-            meivt = int(self.dut.dec_csr_wrdata_r.value)
+            if test == "meihap":
+                # Wait for the driver to set the input signals
+                await RisingEdge(self.dut.dec_csr_wen_r)
+                await RisingEdge(self.dut.dec_csr_wen_r)
+                # for _ in range(4):
+                #    await RisingEdge(self.dut.clk)
 
-            self.ap.write(TlInputItem(pic_claimid, meivt))
+                pic_claimid = int(self.dut.pic_claimid.value)
+                meivt = int(self.dut.dec_csr_wrdata_r.value)
+
+                self.ap.write(TlInputItem(pic_claimid=pic_claimid, dec_csr_wrdata_r=meivt))
+            elif test == "mtdata":
+                await RisingEdge(self.dut.dec_csr_wen_r)
+                mtsel = int(self.dut.dec_csr_wrdata_r.value)
+                await RisingEdge(self.dut.dec_csr_wen_r)
+                mtdata1 = int(self.dut.dec_csr_wrdata_r.value)
+                await RisingEdge(self.dut.dec_csr_wen_r)
+                mtdata2 = int(self.dut.dec_csr_wrdata_r.value)
+                self.ap.write(TlInputItem(mtdata1=mtdata1, mtdata2=mtdata2, mtsel=mtsel))
 
 
 class TlOutputMonitor(uvm_component):
@@ -150,14 +209,26 @@ class TlOutputMonitor(uvm_component):
     async def run_phase(self):
 
         while True:
-            # Wait for the driver to set the input signals and the data goes through
-            await RisingEdge(self.dut.dec_csr_wen_r)
-            await RisingEdge(self.dut.dec_csr_wen_r)
-            for _ in range(2):
-                await RisingEdge(self.dut.clk)
+            test = ConfigDB().get(self, "", "TEST")
 
-            dec_tlu_meihap = int(self.dut.dec_tlu_meihap.value) << 2
-            self.ap.write(TlOutputItem(dec_tlu_meihap))
+            if test == "meihap":
+                # Wait for the driver to set the input signals and the data goes through
+                await RisingEdge(self.dut.dec_csr_wen_r)
+                await RisingEdge(self.dut.dec_csr_wen_r)
+                for _ in range(2):
+                    await RisingEdge(self.dut.clk)
+
+                dec_tlu_meihap = int(self.dut.dec_tlu_meihap.value) << 2
+                self.ap.write(TlOutputItem(dec_tlu_meihap))
+            elif test == "mtdata":
+                # wait for reg writes
+                for _ in range(3):
+                    await RisingEdge(self.dut.dec_csr_wen_r)
+                # wait for the outputs
+                for _ in range(2):
+                    await RisingEdge(self.dut.clk)
+                trigger_pkt_any = int(self.dut.trigger_pkt_any.value)
+                self.ap.write(TlOutputItem(trigger_pkt_any=trigger_pkt_any))
 
 
 # ==============================================================================
@@ -205,24 +276,96 @@ class TlScoreboard(uvm_component):
             if self.passed is None:
                 self.passed = True
 
-            sent_pic_claimid = item_inp.pic_claimid
-            sent_meivt = item_inp.dec_csr_wrdata_r >> 12
-            recv_pic_claimid = (item_out.dec_tlu_meihap >> 2) & 0xFF
-            recv_meivt = item_out.dec_tlu_meihap >> 12
+            test = ConfigDB().get(self, "", "TEST")
 
-            if sent_pic_claimid != recv_pic_claimid:
-                self.logger.error(
-                    "pic_claimid {} != {} (should be {})".format(
-                        sent_pic_claimid, recv_pic_claimid, sent_pic_claimid
+            if test == "meihap":
+                sent_pic_claimid = item_inp.pic_claimid
+                sent_meivt = item_inp.dec_csr_wrdata_r >> 12
+                recv_pic_claimid = (item_out.dec_tlu_meihap >> 2) & 0xFF
+                recv_meivt = item_out.dec_tlu_meihap >> 12
+
+                if sent_pic_claimid != recv_pic_claimid:
+                    self.logger.error(
+                        "pic_claimid {} != {} (should be {})".format(
+                            sent_pic_claimid, recv_pic_claimid, sent_pic_claimid
+                        )
                     )
-                )
-                self.passed = False
+                    self.passed = False
 
-            if sent_meivt != recv_meivt:
-                self.logger.error(
-                    "meivt {} != {} (should be {})".format(sent_meivt, recv_meivt, sent_meivt)
-                )
-                self.passed = False
+                if sent_meivt != recv_meivt:
+                    self.logger.error(
+                        "meivt {} != {} (should be {})".format(sent_meivt, recv_meivt, sent_meivt)
+                    )
+                    self.passed = False
+            elif test == "mtdata":
+
+                pkt_any_mask = 0x3FFFFFFFFF
+                tdata2_mask = 0xFFFFFFFF
+                flags_mask = 0x3F
+                flags_shift = 32
+
+                mtsel = item_inp.mtsel
+                pkt_any_shift = mtsel * 38
+
+                mtdata1_i = item_inp.mtdata1
+                mtdata2_i = item_inp.mtdata2
+                trigger_pkt_any = ((item_out.trigger_pkt_any) >> pkt_any_shift) & pkt_any_mask
+
+                select_i = (mtdata1_i >> 19) & 1
+                match_i = (mtdata1_i >> 7) & 1
+                store_i = (mtdata1_i >> 1) & 1
+                load_i = ((mtdata1_i >> 0) & 1) & ~((mtdata1_i >> 19) & 1)
+                execute_i = ((mtdata1_i >> 2) & 1) & ~((mtdata1_i >> 19) & 1)
+                m_i = (mtdata1_i >> 6) & 1
+
+                flags_o = (trigger_pkt_any >> flags_shift) & flags_mask
+
+                select_o = (flags_o >> 5) & 1
+                match_o = (flags_o >> 4) & 1
+                store_o = (flags_o >> 3) & 1
+                load_o = (flags_o >> 2) & 1
+                execute_o = (flags_o >> 1) & 1
+                m_o = (flags_o) & 1
+
+                mtdata2_o = trigger_pkt_any & tdata2_mask
+
+                if mtdata2_i != mtdata2_o:
+                    self.logger.error(
+                        "mtdata2 {} != {} (should be {})".format(mtdata2_i, mtdata2_o, mtdata2_i)
+                    )
+                    self.passed = False
+
+                if select_i != select_o:
+                    self.logger.error(
+                        "select {} != {} (should be {})".format(select_i, select_o, select_i)
+                    )
+                    self.passed = False
+
+                if match_i != match_o:
+                    self.logger.error(
+                        "match {} != {} (should be {})".format(match_i, match_o, match_i)
+                    )
+                    self.passed = False
+
+                if store_i != store_o:
+                    self.logger.error(
+                        "store {} != {} (should be {})".format(store_i, store_o, store_i)
+                    )
+                    self.passed = False
+
+                if load_i != load_o:
+                    self.logger.error("load {} != {} (should be {})".format(load_i, load_o, load_i))
+                    self.passed = False
+
+                if execute_i != execute_o:
+                    self.logger.error(
+                        "execute {} != {} (should be {})".format(execute_i, execute_o, execute_i)
+                    )
+                    self.passed = False
+
+                if m_i != m_o:
+                    self.logger.error("m {} != {} (should be {})".format(m_i, m_o, m_i))
+                    self.passed = False
 
     def final_phase(self):
         if not self.passed:
@@ -240,10 +383,11 @@ class TlSequence(uvm_sequence):
 
     async def body(self):
         count = ConfigDB().get(None, "", "TEST_ITERATIONS")
+        test = ConfigDB().get(None, "", "TEST")
 
         for i in range(count):
             item = TlInputItem()
-            item.randomize()
+            item.randomize(test)
 
             await self.start_item(item)
             await self.finish_item(item)

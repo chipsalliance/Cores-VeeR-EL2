@@ -393,10 +393,13 @@ import el2_pkg::*;
                   slvbuf_error_en = 1'b1;
                   slave_valid_pre = 1'b1;
          end
+         // `buf_state` is an enum and all the members are handled above, so the default case is excluded from coverge.
+         /*pragma coverage off*/
          default: begin
                   buf_nxtstate = IDLE;
                   buf_state_en = 1'b1;
          end
+         /*pragma coverage on*/
       endcase
    end
 

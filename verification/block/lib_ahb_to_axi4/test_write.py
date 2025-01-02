@@ -25,8 +25,7 @@ class AHBWriteSequence(uvm_sequence):
         dwidth = 64
         align = 8
 
-        addr = 0xF0040000 + random.randrange(0, 0x1000)
-        addr = (addr // align) * align
+        addr = align * random.randint(0, 0x1FFFFFFF)
         data = [random.randrange(0, (1 << dwidth) - 1)]
 
         item = BusWriteItem(addr, data)

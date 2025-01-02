@@ -23,9 +23,7 @@ class AHBReadSequence(uvm_sequence):
 
     async def body(self):
         align = 8
-
-        addr = 0xF0040000 + random.randrange(0, 0x1000)
-        addr = (addr // align) * align
+        addr = align * random.randint(0, 0x1FFFFFFF)
 
         item = BusReadItem(addr)
         await self.start_item(item)

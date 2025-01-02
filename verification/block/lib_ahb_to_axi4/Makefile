@@ -9,9 +9,10 @@ SRCDIR := $(abspath $(CURDIR)../../../../design)
 TEST_FILES   = $(sort $(wildcard test_*.py))
 
 MODULE      ?= $(subst $(space),$(comma),$(subst .py,,$(TEST_FILES)))
-TOPLEVEL     = ahb_to_axi4
+TOPLEVEL     = ahb_to_axi4_wrapper
 
 VERILOG_SOURCES  = \
-    $(SRCDIR)/lib/ahb_to_axi4.sv
+    $(SRCDIR)/lib/ahb_to_axi4.sv \
+    $(CURDIR)/lib_ahb_to_axi4/ahb_to_axi4_wrapper.sv
 
 include $(CURDIR)/../common.mk

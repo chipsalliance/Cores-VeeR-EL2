@@ -151,7 +151,8 @@ with open('coverage_toggle_verilator.info') as f:
                 for l in hits[h]:
                     for v in [0, 1]:
                         for k in hits[h][l][v]:
-                            new_hits[k] = v
+                            if not k in new_hits or new_hits[k] != 1:
+                                new_hits[k] = v
 
             for k, v in new_hits.items():
                 out.write(f"{lineno},0,toggle_{k},{v}\n")

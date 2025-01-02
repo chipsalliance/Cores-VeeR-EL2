@@ -7,6 +7,7 @@ import os
 import random
 import struct
 
+import csrs
 import pyuvm
 from cocotb.binary import BinaryValue
 from cocotb.clock import Clock
@@ -30,7 +31,16 @@ class TlInputItem(uvm_sequence_item):
     Trigger Logic output data
     """
 
-    def __init__(self, pic_claimid=0, dec_csr_wrdata_r=0, mtdata1=0, mtdata2=0, mtsel=0):
+    def __init__(
+        self,
+        pic_claimid=0,
+        dec_csr_wrdata_r=0,
+        mtdata1=0,
+        mtdata2=0,
+        mtsel=0,
+        perf_counter_addr=0,
+        dec_csr_rddata_d=0,
+    ):
         super().__init__("TlOutputItem")
 
         self.pic_claimid = pic_claimid
@@ -38,6 +48,8 @@ class TlInputItem(uvm_sequence_item):
         self.mtdata1 = mtdata1
         self.mtdata2 = mtdata2
         self.mtsel = mtsel
+        self.perf_counter_addr = perf_counter_addr
+        self.dec_csr_rddata_d = dec_csr_rddata_d
 
     def randomize(self, test):
 
@@ -72,6 +84,23 @@ class TlInputItem(uvm_sequence_item):
             for _ in range(2):
                 mtsel += random.choice(["0", "1"])
             self.mtsel = int(mtsel, 2)
+        elif test == "perf_counters":
+            value = ""
+            for _ in range(32):
+                value += random.choice(["0", "1"])
+            self.dec_csr_wrdata_r = int(value, 2)
+            self.perf_counter_addr = random.choice(
+                [
+                    csrs.MHPMC3,
+                    csrs.MHPMC3H,
+                    csrs.MHPMC4,
+                    csrs.MHPMC4H,
+                    csrs.MHPMC5,
+                    csrs.MHPMC5H,
+                    csrs.MHPMC6,
+                    csrs.MHPMC6H,
+                ]
+            )
 
 
 class TlOutputItem(uvm_sequence_item):
@@ -79,29 +108,19 @@ class TlOutputItem(uvm_sequence_item):
     Trigger Logic output data
     """
 
-    def __init__(self, dec_tlu_meihap=0, mtdata1=0, mtdata2=0, mtsel=0, trigger_pkt_any=0):
+    def __init__(
+        self, dec_tlu_meihap=0, mtdata1=0, mtdata2=0, mtsel=0, trigger_pkt_any=0, dec_csr_rddata_d=0
+    ):
         super().__init__("TlOutputItem")
         self.dec_tlu_meihap = dec_tlu_meihap
         self.mtdata1 = mtdata1
         self.mtdata2 = mtdata2
         self.mtsel = mtsel
         self.trigger_pkt_any = trigger_pkt_any
+        self.dec_csr_rddata_d = dec_csr_rddata_d
 
 
 # ==============================================================================
-MEICPCT = 0xBCA
-MEIVT = 0xBC8
-# MTSEL (R/W)
-# [1:0] : Trigger select : 00, 01, 10 are data/address triggers. 11 is inst count
-MTSEL = 0x7A0
-
-# MTDATA1 (R/W)
-# [31:0] : Trigger Data 1
-MTDATA1 = 0x7A1
-
-# MTDATA2 (R/W)
-# [31:0] : Trigger Data 2
-MTDATA2 = 0x7A2
 
 
 class TlDriver(uvm_driver):
@@ -113,6 +132,10 @@ class TlDriver(uvm_driver):
         self.dut = kwargs["dut"]
         del kwargs["dut"]
         super().__init__(*args, **kwargs)
+
+    async def read_csr(self, address):
+        self.dut.dec_csr_rdaddr_d.value = address
+        await RisingEdge(self.dut.clk)
 
     async def write_csr(self, address, value):
         self.dut.dec_csr_wen_r.value = 0
@@ -132,12 +155,12 @@ class TlDriver(uvm_driver):
                 test = ConfigDB().get(self, "", "TEST")
                 if test == "meihap":
                     # write MEIVT
-                    await self.write_csr(MEIVT, it.dec_csr_wrdata_r)
+                    await self.write_csr(csrs.MEIVT, it.dec_csr_wrdata_r)
                     # write pic_claimid
                     await RisingEdge(self.dut.clk)
                     self.dut.pic_claimid.value = it.pic_claimid
                     self.dut.dec_csr_wen_r.value = 1
-                    self.dut.dec_csr_wraddr_r.value = MEICPCT
+                    self.dut.dec_csr_wraddr_r.value = csrs.MEICPCT
                     await RisingEdge(self.dut.clk)
                     self.dut.dec_csr_wen_r.value = 0
                     # give two more cycles so that output monitor can catch the data on the outputs
@@ -145,9 +168,14 @@ class TlDriver(uvm_driver):
                     await RisingEdge(self.dut.clk)
                 elif test == "mtdata":
                     # test triggers
-                    await self.write_csr(MTSEL, it.mtsel)
-                    await self.write_csr(MTDATA1, it.mtdata1)
-                    await self.write_csr(MTDATA2, it.mtdata2)
+                    await self.write_csr(csrs.MTSEL, it.mtsel)
+                    await self.write_csr(csrs.MTDATA1, it.mtdata1)
+                    await self.write_csr(csrs.MTDATA2, it.mtdata2)
+                elif test == "perf_counters":
+                    # write a perf counter
+                    await self.write_csr(it.perf_counter_addr, it.dec_csr_wrdata_r)
+                    # read it back
+                    await self.read_csr(it.perf_counter_addr)
             else:
                 raise RuntimeError("Unknown item '{}'".format(type(it)))
 
@@ -191,6 +219,17 @@ class TlInputMonitor(uvm_component):
                 await RisingEdge(self.dut.dec_csr_wen_r)
                 mtdata2 = int(self.dut.dec_csr_wrdata_r.value)
                 self.ap.write(TlInputItem(mtdata1=mtdata1, mtdata2=mtdata2, mtsel=mtsel))
+            elif test == "perf_counters":
+                # wait for reg write
+                await RisingEdge(self.dut.dec_csr_wen_r)
+                await RisingEdge(self.dut.clk)
+                perf_counter_addr = int(self.dut.dec_csr_wraddr_r.value)
+                perf_counter_value = int(self.dut.dec_csr_wrdata_r.value)
+                self.ap.write(
+                    TlInputItem(
+                        perf_counter_addr=perf_counter_addr, dec_csr_wrdata_r=perf_counter_value
+                    )
+                )
 
 
 class TlOutputMonitor(uvm_component):
@@ -229,6 +268,14 @@ class TlOutputMonitor(uvm_component):
                     await RisingEdge(self.dut.clk)
                 trigger_pkt_any = int(self.dut.trigger_pkt_any.value)
                 self.ap.write(TlOutputItem(trigger_pkt_any=trigger_pkt_any))
+            elif test == "perf_counters":
+                # wait for reg write
+                await RisingEdge(self.dut.dec_csr_wen_r)
+                # wait for read
+                for _ in range(2):
+                    await RisingEdge(self.dut.clk)
+                dec_csr_rddata_d = int(self.dut.dec_csr_rddata_d.value)
+                self.ap.write(TlOutputItem(dec_csr_rddata_d=dec_csr_rddata_d))
 
 
 # ==============================================================================
@@ -367,6 +414,17 @@ class TlScoreboard(uvm_component):
                     self.logger.error("m {} != {} (should be {})".format(m_i, m_o, m_i))
                     self.passed = False
 
+            elif test == "perf_counters":
+                perf_reg_val_i = item_inp.dec_csr_wrdata_r
+                perf_reg_val_o = item_out.dec_csr_rddata_d
+                if perf_reg_val_i != perf_reg_val_o:
+                    self.logger.error(
+                        "perf_reg_val {} != {} (should be {})".format(
+                            perf_reg_val_i, perf_reg_val_o, perf_reg_val_i
+                        )
+                    )
+                    self.passed = False
+
     def final_phase(self):
         if not self.passed:
             self.logger.critical("{} reports a failure".format(type(self)))
@@ -462,6 +520,7 @@ class BaseTest(uvm_test):
         self.raise_objection()
 
         # Start clocks
+        self.start_clock("free_l2clk")
         self.start_clock("clk")
 
         # Issue reset

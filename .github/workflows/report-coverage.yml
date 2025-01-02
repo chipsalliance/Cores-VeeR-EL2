@@ -8,7 +8,7 @@ jobs:
   merge-verilator-reports:
     name: Merge Verilator info data
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20241230
+    container: ghcr.io/antmicro/cores-veer-el2:20250102
     env:
       DEBIAN_FRONTEND: "noninteractive"
     steps:
@@ -80,7 +80,7 @@ jobs:
   coverage-report:
     name: Coverage report
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20241230
+    container: ghcr.io/antmicro/cores-veer-el2:20250102
     needs: [merge-verilator-reports, custom-coverage-report]
     env:
       DEBIAN_FRONTEND: "noninteractive"

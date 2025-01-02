@@ -337,6 +337,30 @@ def lsu_tl_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
 
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["ifu_ic_mem"])
+@nox.parametrize("testName", ["test_ic_mem"])
+@nox.parametrize("coverage", coverageTypes)
+def ifu_ic_mem_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["ifu_ic_tag"])
+@nox.parametrize("testName", ["test_ic_tag"])
+@nox.parametrize("coverage", coverageTypes)
+def ifu_ic_tag_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["ifu_ic_data"])
+@nox.parametrize("testName", ["test_ic_data"])
+@nox.parametrize("coverage", coverageTypes)
+def ifu_ic_data_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
 @nox.session(reuse_venv=True)
 def lint(session: nox.Session) -> None:
     """Options are defined in pyproject.toml and .flake8 files"""

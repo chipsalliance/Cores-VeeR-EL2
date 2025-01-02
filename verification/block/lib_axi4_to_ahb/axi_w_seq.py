@@ -44,7 +44,7 @@ class AXIWriteTransactionRequestSeqItem(AXIWriteBaseSeqItem):
 
     def randomize(self):
         self.axi_awid = random.randint(0, 1)
-        self.axi_awaddr = 8 * random.randint(8, 32)
+        self.axi_awaddr = 8 * random.randint(0, 0x1FFFFFFF)
 
 
 class AXIWriteDataSeqItem(AXIWriteBaseSeqItem):
@@ -54,7 +54,7 @@ class AXIWriteDataSeqItem(AXIWriteBaseSeqItem):
         self.axi_wstrb = LogicArray("1" * self.AXI_NUM_STRB_BITS)
 
     def randomize(self):
-        self.axi_wdata = random.randint(0, 255)
+        self.axi_wdata = random.randint(0, 0xFFFFFFFFFFFFFFFF)
 
 
 class AXIWriteLastDataSeqItem(AXIWriteDataSeqItem):

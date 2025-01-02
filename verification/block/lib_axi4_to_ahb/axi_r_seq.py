@@ -38,7 +38,7 @@ class AXIReadTransactionRequestSeqItem(AXIReadBaseSeqItem):
         self.axi_arvalid = 1
 
     def randomize(self):
-        self.axi_araddr = 8 * random.randint(8, 32)
+        self.axi_araddr = 8 * random.randint(0, 0x1FFFFFFF)
 
 
 class AXIReadResponseReadSeqItem(AXIReadBaseSeqItem):

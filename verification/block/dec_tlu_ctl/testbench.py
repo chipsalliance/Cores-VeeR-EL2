@@ -99,6 +99,10 @@ class TlInputItem(uvm_sequence_item):
                     csrs.MHPMC5H,
                     csrs.MHPMC6,
                     csrs.MHPMC6H,
+                    csrs.MCYCLEL,
+                    csrs.MCYCLEH,
+                    csrs.MINSTRETL,
+                    csrs.MINSTRETH,
                 ]
             )
 

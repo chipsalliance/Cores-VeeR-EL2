@@ -137,7 +137,7 @@
 <span id="L33"><span class="lineNum">      33</span>              :    /*pragma coverage off*/</span>
 <span id="L34"><span class="lineNum">      34</span>              :    input logic [31:1]           rst_vec,</span>
 <span id="L35"><span class="lineNum">      35</span>              :    /*pragma coverage on*/</span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC tlaBgGNC">           4 :    input logic                  nmi_int,</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC tlaBgGNC">           3 :    input logic                  nmi_int,</span></span>
 <span id="L37"><span class="lineNum">      37</span>              :    // nmi_vec is supposed to be connected to a constant in the top level</span>
 <span id="L38"><span class="lineNum">      38</span>              :    /*pragma coverage off*/</span>
 <span id="L39"><span class="lineNum">      39</span>              :    input logic [31:1]           nmi_vec,</span>
@@ -559,9 +559,9 @@
 <span id="L455"><span class="lineNum">     455</span> <span class="tlaUNC">           0 :    output logic                 dccm_ecc_single_error,</span></span>
 <span id="L456"><span class="lineNum">     456</span> <span class="tlaUNC">           0 :    output logic                 dccm_ecc_double_error,</span></span>
 <span id="L457"><span class="lineNum">     457</span>              : </span>
-<span id="L458"><span class="lineNum">     458</span> <span class="tlaGNC tlaBgGNC">           3 :    input logic [pt.PIC_TOTAL_INT:1]           extintsrc_req,</span></span>
-<span id="L459"><span class="lineNum">     459</span> <span class="tlaGNC">           3 :    input logic                   timer_int,</span></span>
-<span id="L460"><span class="lineNum">     460</span> <span class="tlaGNC">           4 :    input logic                   soft_int,</span></span>
+<span id="L458"><span class="lineNum">     458</span> <span class="tlaGNC tlaBgGNC">           7 :    input logic [pt.PIC_TOTAL_INT:1]           extintsrc_req,</span></span>
+<span id="L459"><span class="lineNum">     459</span> <span class="tlaGNC">           2 :    input logic                   timer_int,</span></span>
+<span id="L460"><span class="lineNum">     460</span> <span class="tlaGNC">           7 :    input logic                   soft_int,</span></span>
 <span id="L461"><span class="lineNum">     461</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
 <span id="L462"><span class="lineNum">     462</span>              :    /*pragma coverage off*/</span>
 <span id="L463"><span class="lineNum">     463</span>              :    input logic                   scan_mode</span>

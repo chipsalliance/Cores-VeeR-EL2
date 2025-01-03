@@ -251,7 +251,7 @@
 <span id="L147"><span class="lineNum">     147</span>              : </span>
 <span id="L148"><span class="lineNum">     148</span>              :    assign dec_debug_fence_d = debug_write_csr &amp; (dcsr[11:0] == 12'h7c4);</span>
 <span id="L149"><span class="lineNum">     149</span>              : </span>
-<span id="L150"><span class="lineNum">     150</span> <span class="tlaGNC">       86486 :    assign ib0[31:0] = (debug_valid) ? ib0_debug_in[31:0] : ifu_i0_instr[31:0];</span></span>
+<span id="L150"><span class="lineNum">     150</span> <span class="tlaGNC">      196329 :    assign ib0[31:0] = (debug_valid) ? ib0_debug_in[31:0] : ifu_i0_instr[31:0];</span></span>
 <span id="L151"><span class="lineNum">     151</span>              : </span>
 <span id="L152"><span class="lineNum">     152</span>              :    assign dec_ib0_valid_d = ifu_i0_valid | debug_valid;</span>
 <span id="L153"><span class="lineNum">     153</span>              : </span>

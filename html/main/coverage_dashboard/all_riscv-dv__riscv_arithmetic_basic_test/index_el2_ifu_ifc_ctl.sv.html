@@ -236,7 +236,7 @@
 <span id="L132"><span class="lineNum">     132</span>              :    assign fetch_addr_next[31:1] = {({ifc_fetch_addr_f[31:2]} + 30'b1), fetch_addr_next_1 };</span>
 <span id="L133"><span class="lineNum">     133</span>              :    assign line_wrap = (fetch_addr_next[pt.ICACHE_TAG_INDEX_LO] ^ ifc_fetch_addr_f[pt.ICACHE_TAG_INDEX_LO]);</span>
 <span id="L134"><span class="lineNum">     134</span>              : </span>
-<span id="L135"><span class="lineNum">     135</span> <span class="tlaGNC tlaBgGNC">       81546 :    assign fetch_addr_next_1 = line_wrap ? 1'b0 : ifc_fetch_addr_f[1];</span></span>
+<span id="L135"><span class="lineNum">     135</span> <span class="tlaGNC tlaBgGNC">      185050 :    assign fetch_addr_next_1 = line_wrap ? 1'b0 : ifc_fetch_addr_f[1];</span></span>
 <span id="L136"><span class="lineNum">     136</span>              : </span>
 <span id="L137"><span class="lineNum">     137</span>              :    assign ifc_fetch_req_bf_raw = ~idle;</span>
 <span id="L138"><span class="lineNum">     138</span>              :    assign ifc_fetch_req_bf =  ifc_fetch_req_bf_raw &amp;</span>

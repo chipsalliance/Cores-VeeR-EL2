@@ -663,7 +663,7 @@
 <span id="L559"><span class="lineNum">     559</span>              :    assign ifu_i0_icaf        = (first4B &amp; (|alignicaf[1:0])) |</span>
 <span id="L560"><span class="lineNum">     560</span>              :                                (first2B &amp;   alignicaf[0]   );</span>
 <span id="L561"><span class="lineNum">     561</span>              : </span>
-<span id="L562"><span class="lineNum">     562</span> <span class="tlaGNC">       55670 :    assign ifu_i0_icaf_type[1:0] = (first4B &amp; ~f0val[1] &amp; f0val[0] &amp; ~alignicaf[0] &amp; ~aligndbecc[0]) ? f1ictype[1:0] : f0ictype[1:0];</span></span>
+<span id="L562"><span class="lineNum">     562</span> <span class="tlaGNC">      121929 :    assign ifu_i0_icaf_type[1:0] = (first4B &amp; ~f0val[1] &amp; f0val[0] &amp; ~alignicaf[0] &amp; ~aligndbecc[0]) ? f1ictype[1:0] : f0ictype[1:0];</span></span>
 <span id="L563"><span class="lineNum">     563</span>              : </span>
 <span id="L564"><span class="lineNum">     564</span>              : </span>
 <span id="L565"><span class="lineNum">     565</span>              :    assign icaf_eff[1:0] = alignicaf[1:0] | aligndbecc[1:0];</span>
@@ -728,7 +728,7 @@
 <span id="L624"><span class="lineNum">     624</span> <span class="tlaGNC">           3 :       i0_brp.ret             = (first2B &amp; alignret[0]) |</span></span>
 <span id="L625"><span class="lineNum">     625</span> <span class="tlaGNC">           3 :                                (first4B &amp; alignret[1]);</span></span>
 <span id="L626"><span class="lineNum">     626</span>              : </span>
-<span id="L627"><span class="lineNum">     627</span> <span class="tlaGNC">       50543 :       i0_brp.way             = (first2B | alignbrend[0])  ?  alignway[0]  :  alignway[1];</span></span>
+<span id="L627"><span class="lineNum">     627</span> <span class="tlaGNC">      110393 :       i0_brp.way             = (first2B | alignbrend[0])  ?  alignway[0]  :  alignway[1];</span></span>
 <span id="L628"><span class="lineNum">     628</span>              : </span>
 <span id="L629"><span class="lineNum">     629</span> <span class="tlaGNC">           3 :       i0_brp.hist[1]         = (first2B &amp; alignhist1[0]) |</span></span>
 <span id="L630"><span class="lineNum">     630</span> <span class="tlaGNC">           3 :                                (first4B &amp; alignhist1[1]);</span></span>
@@ -738,32 +738,32 @@
 <span id="L634"><span class="lineNum">     634</span>              : </span>
 <span id="L635"><span class="lineNum">     635</span> <span class="tlaGNC">           3 :       i0_ends_f1             =  first4B &amp; alignfromf1[1];</span></span>
 <span id="L636"><span class="lineNum">     636</span>              : </span>
-<span id="L637"><span class="lineNum">     637</span> <span class="tlaGNC">       55670 :       i0_brp.toffset[11:0]   = (i0_ends_f1)  ?  f1poffset[11:0]  :  f0poffset[11:0];</span></span>
+<span id="L637"><span class="lineNum">     637</span> <span class="tlaGNC">      121929 :       i0_brp.toffset[11:0]   = (i0_ends_f1)  ?  f1poffset[11:0]  :  f0poffset[11:0];</span></span>
 <span id="L638"><span class="lineNum">     638</span>              : </span>
-<span id="L639"><span class="lineNum">     639</span> <span class="tlaGNC">       55670 :       i0_brp.prett[31:1]     = (i0_ends_f1)  ?  f1prett[31:1]    :  f0prett[31:1];</span></span>
+<span id="L639"><span class="lineNum">     639</span> <span class="tlaGNC">      121929 :       i0_brp.prett[31:1]     = (i0_ends_f1)  ?  f1prett[31:1]    :  f0prett[31:1];</span></span>
 <span id="L640"><span class="lineNum">     640</span>              : </span>
 <span id="L641"><span class="lineNum">     641</span> <span class="tlaGNC">           3 :       i0_brp.br_start_error  = i0_br_start_error;</span></span>
 <span id="L642"><span class="lineNum">     642</span>              : </span>
-<span id="L643"><span class="lineNum">     643</span> <span class="tlaGNC">       50543 :       i0_brp.bank            = (first2B | alignbrend[0])  ?  firstpc[1]  :  secondpc[1];</span></span>
+<span id="L643"><span class="lineNum">     643</span> <span class="tlaGNC">      110393 :       i0_brp.bank            = (first2B | alignbrend[0])  ?  firstpc[1]  :  secondpc[1];</span></span>
 <span id="L644"><span class="lineNum">     644</span>              : </span>
 <span id="L645"><span class="lineNum">     645</span> <span class="tlaGNC">           3 :       i0_brp.br_error        = (i0_brp.valid &amp;  i0_brp_pc4 &amp;  first2B) |</span></span>
 <span id="L646"><span class="lineNum">     646</span> <span class="tlaGNC">           3 :                                (i0_brp.valid &amp; ~i0_brp_pc4 &amp;  first4B);</span></span>
 <span id="L647"><span class="lineNum">     647</span>              : </span>
 <span id="L648"><span class="lineNum">     648</span> <span class="tlaGNC">           3 :       if(pt.BTB_FULLYA)</span></span>
-<span id="L649"><span class="lineNum">     649</span> <span class="tlaGNC">       50543 :         ifu_i0_fa_index = (first2B | alignbrend[0])  ?  alignindex[0]  :  alignindex[1];</span></span>
+<span id="L649"><span class="lineNum">     649</span> <span class="tlaGNC">      110393 :         ifu_i0_fa_index = (first2B | alignbrend[0])  ?  alignindex[0]  :  alignindex[1];</span></span>
 <span id="L650"><span class="lineNum">     650</span>              :       else</span>
 <span id="L651"><span class="lineNum">     651</span> <span class="tlaGNC">           3 :         ifu_i0_fa_index = '0;</span></span>
 <span id="L652"><span class="lineNum">     652</span>              : </span>
 <span id="L653"><span class="lineNum">     653</span>              :  end</span>
 <span id="L654"><span class="lineNum">     654</span>              : </span>
 <span id="L655"><span class="lineNum">     655</span>              : </span>
-<span id="L656"><span class="lineNum">     656</span> <span class="tlaGNC">       50543 :    assign ifu_i0_bp_index[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] = (first2B | alignbrend[0])  ?  firstpc_hash[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO]  :</span></span>
+<span id="L656"><span class="lineNum">     656</span> <span class="tlaGNC">      110393 :    assign ifu_i0_bp_index[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] = (first2B | alignbrend[0])  ?  firstpc_hash[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO]  :</span></span>
 <span id="L657"><span class="lineNum">     657</span>              :                                                                                          secondpc_hash[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO];</span>
 <span id="L658"><span class="lineNum">     658</span>              : </span>
-<span id="L659"><span class="lineNum">     659</span> <span class="tlaGNC">       55670 :    assign ifu_i0_bp_fghr[pt.BHT_GHR_SIZE-1:0]            = (i0_ends_f1)               ?  f1fghr[pt.BHT_GHR_SIZE-1:0]  :</span></span>
+<span id="L659"><span class="lineNum">     659</span> <span class="tlaGNC">      121929 :    assign ifu_i0_bp_fghr[pt.BHT_GHR_SIZE-1:0]            = (i0_ends_f1)               ?  f1fghr[pt.BHT_GHR_SIZE-1:0]  :</span></span>
 <span id="L660"><span class="lineNum">     660</span>              :                                                                                          f0fghr[pt.BHT_GHR_SIZE-1:0];</span>
 <span id="L661"><span class="lineNum">     661</span>              : </span>
-<span id="L662"><span class="lineNum">     662</span> <span class="tlaGNC">       50543 :    assign ifu_i0_bp_btag[pt.BTB_BTAG_SIZE-1:0]           = (first2B | alignbrend[0])  ?  firstbrtag_hash[pt.BTB_BTAG_SIZE-1:0]  :</span></span>
+<span id="L662"><span class="lineNum">     662</span> <span class="tlaGNC">      110393 :    assign ifu_i0_bp_btag[pt.BTB_BTAG_SIZE-1:0]           = (first2B | alignbrend[0])  ?  firstbrtag_hash[pt.BTB_BTAG_SIZE-1:0]  :</span></span>
 <span id="L663"><span class="lineNum">     663</span>              :                                                                                          secondbrtag_hash[pt.BTB_BTAG_SIZE-1:0];</span>
 <span id="L664"><span class="lineNum">     664</span>              : end</span>
 <span id="L665"><span class="lineNum">     665</span>              : else begin</span>
@@ -776,7 +776,7 @@
 <span id="L672"><span class="lineNum">     672</span>              :    // decompress</span>
 <span id="L673"><span class="lineNum">     673</span>              : </span>
 <span id="L674"><span class="lineNum">     674</span>              :    // quiet inputs for 4B inst</span>
-<span id="L675"><span class="lineNum">     675</span> <span class="tlaGNC">       50543 :    el2_ifu_compress_ctl compress0 (.din((first2B) ? aligndata[15:0] : '0), .dout(uncompress0[31:0]));</span></span>
+<span id="L675"><span class="lineNum">     675</span> <span class="tlaGNC">      110366 :    el2_ifu_compress_ctl compress0 (.din((first2B) ? aligndata[15:0] : '0), .dout(uncompress0[31:0]));</span></span>
 <span id="L676"><span class="lineNum">     676</span>              : </span>
 <span id="L677"><span class="lineNum">     677</span>              : </span>
 <span id="L678"><span class="lineNum">     678</span>              : </span>

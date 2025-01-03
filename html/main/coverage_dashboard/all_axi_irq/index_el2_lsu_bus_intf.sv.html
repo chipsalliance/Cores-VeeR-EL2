@@ -369,9 +369,9 @@
 <span id="L265"><span class="lineNum">     265</span>              :                                                     ({8{ld_byte_rhit_hi_hi[i]}} &amp; store_data_hi_r[(8*i)+7:(8*i)]);</span>
 <span id="L266"><span class="lineNum">     266</span>              : </span>
 <span id="L267"><span class="lineNum">     267</span>              :       // Final muxing between m/r</span>
-<span id="L268"><span class="lineNum">     268</span> <span class="tlaGNC">      234200 :       assign ld_fwddata_lo[(8*i)+7:(8*i)] = ld_byte_rhit_lo[i]    ? ld_fwddata_rpipe_lo[(8*i)+7:(8*i)] : ld_fwddata_buf_lo[(8*i)+7:(8*i)];</span></span>
+<span id="L268"><span class="lineNum">     268</span> <span class="tlaGNC">      156648 :       assign ld_fwddata_lo[(8*i)+7:(8*i)] = ld_byte_rhit_lo[i]    ? ld_fwddata_rpipe_lo[(8*i)+7:(8*i)] : ld_fwddata_buf_lo[(8*i)+7:(8*i)];</span></span>
 <span id="L269"><span class="lineNum">     269</span>              : </span>
-<span id="L270"><span class="lineNum">     270</span> <span class="tlaGNC">      234200 :       assign ld_fwddata_hi[(8*i)+7:(8*i)] = ld_byte_rhit_hi[i]    ? ld_fwddata_rpipe_hi[(8*i)+7:(8*i)] : ld_fwddata_buf_hi[(8*i)+7:(8*i)];</span></span>
+<span id="L270"><span class="lineNum">     270</span> <span class="tlaGNC">      156648 :       assign ld_fwddata_hi[(8*i)+7:(8*i)] = ld_byte_rhit_hi[i]    ? ld_fwddata_rpipe_hi[(8*i)+7:(8*i)] : ld_fwddata_buf_hi[(8*i)+7:(8*i)];</span></span>
 <span id="L271"><span class="lineNum">     271</span>              : </span>
 <span id="L272"><span class="lineNum">     272</span>              :    end</span>
 <span id="L273"><span class="lineNum">     273</span>              : </span>

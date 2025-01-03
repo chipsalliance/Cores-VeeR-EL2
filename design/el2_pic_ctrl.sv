@@ -63,13 +63,13 @@ localparam EXT_INTR_GW_CONFIG    = pt.PIC_BASE_ADDR + 32'h00004000 ;
 localparam EXT_INTR_GW_CLEAR     = pt.PIC_BASE_ADDR + 32'h00005000 ;
 
 
-localparam INTPEND_SIZE          = (pt.PIC_TOTAL_INT_PLUS1 < 32)  ? 32  :
-                                   (pt.PIC_TOTAL_INT_PLUS1 < 64)  ? 64  :
-                                   (pt.PIC_TOTAL_INT_PLUS1 < 128) ? 128 :
-                                   (pt.PIC_TOTAL_INT_PLUS1 < 256) ? 256 :
-                                   (pt.PIC_TOTAL_INT_PLUS1 < 512) ? 512 :  1024 ;
+localparam INTPEND_SIZE          = (pt.PIC_TOTAL_INT_PLUS1 <= 32)  ? 32  :
+                                   (pt.PIC_TOTAL_INT_PLUS1 <= 64)  ? 64  :
+                                   (pt.PIC_TOTAL_INT_PLUS1 <= 128) ? 128 :
+                                   (pt.PIC_TOTAL_INT_PLUS1 <= 256) ? 256 :
+                                   (pt.PIC_TOTAL_INT_PLUS1 <= 512) ? 512 :  1024 ;
 
-localparam INT_GRPS              =   INTPEND_SIZE / 32 ;
+localparam INT_GRPS              =  INTPEND_SIZE / 32 ;
 localparam INTPRIORITY_BITS      =  4 ;
 localparam ID_BITS               =  8 ;
 localparam int GW_CONFIG[pt.PIC_TOTAL_INT_PLUS1-1:0] = '{default:0} ;
@@ -77,7 +77,7 @@ localparam int GW_CONFIG[pt.PIC_TOTAL_INT_PLUS1-1:0] = '{default:0} ;
 localparam INT_ENABLE_GRPS       =   (pt.PIC_TOTAL_INT_PLUS1 - 1)  / 4 ;
 
 logic [pt.PIC_TOTAL_INT_PLUS1-1:0]           intenable_clk_enable ;
-logic [INT_ENABLE_GRPS:0]                    intenable_clk_enable_grp ;
+//logic [INT_ENABLE_GRPS:0]                    intenable_clk_enable_grp ;
 logic [INT_ENABLE_GRPS:0]                    gw_clk ;
 
 logic  addr_intpend_base_match;
@@ -128,7 +128,6 @@ logic                                        intpriord;
 logic                                        config_reg_we ;
 logic                                        config_reg_re ;
 logic                                        config_reg_in ;
-logic                                        prithresh_reg_write , prithresh_reg_read;
 logic                                        intpriority_reg_read ;
 logic                                        intenable_reg_read   ;
 logic                                        gw_config_reg_read   ;
@@ -142,7 +141,7 @@ logic [ID_BITS-1:0]                          claimid_in ;
 logic [INTPRIORITY_BITS-1:0]                 pl_in ;
 logic [INTPRIORITY_BITS-1:0]                 pl_in_q ;
 
-logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        extintsrc_req_sync;
+//logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        extintsrc_req_sync;
 logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        extintsrc_req_gw;
    logic                                                  picm_bypass_ff;
 
@@ -234,7 +233,9 @@ wire grp_clk, grp_clken;
   `ifndef RV_FPGA_OPTIMIZE
     rvclkhdr intenable_c1_cgc( .en(grp_clken),  .l1clk(grp_clk), .* );
   `else
+/*pragma coverage off*/
     assign gw_clk[p] = 1'b0 ;
+/*pragma coverage on*/
   `endif
 
     for(genvar i= (p==0 ? 1: 0); i< (p==INT_ENABLE_GRPS ? pt.PIC_TOTAL_INT_PLUS1-p*4 :4); i++) begin : GW
@@ -320,7 +321,7 @@ for (i=0; i<pt.PIC_TOTAL_INT_PLUS1 ; i++) begin  : SETREG
      assign intpriority_reg[i] = {INTPRIORITY_BITS{1'b0}} ;
      assign intenable_reg[i]   = 1'b0 ;
      assign extintsrc_req_gw[i] = 1'b0 ;
-     assign extintsrc_req_sync[i]    = 1'b0 ;
+//     assign extintsrc_req_sync[i]    = 1'b0 ;
      assign intenable_clk_enable[i] = 1'b0;
  end
 

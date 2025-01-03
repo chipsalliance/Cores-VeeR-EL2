@@ -139,6 +139,7 @@ def verify_block(session, blockName, testName, coverage=""):
         "test_reset",
         "test_clken",
         "test_config",
+        "test_pending",
         "test_prioritization",
         "test_servicing",
     ],

@@ -128,6 +128,7 @@ jobs:
           sis -d convert --dat-dir ${TEST_PATH}/${TEST_NAME}/
           mkdir -p results
           mv ${TEST_PATH}/${TEST_NAME}/*.info results/
+          mv ${TEST_PATH}/${TEST_NAME}/dump.vcd ${TEST_PATH}/${TEST_NAME}/${TEST_NAME}.vcd
 
           # Prefix coverage results
           pushd results

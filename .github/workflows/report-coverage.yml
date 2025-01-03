@@ -171,6 +171,7 @@ jobs:
           sis -d reports . --report-dir report --src-pattern \*design\*
           cp data.zip report
           cp data_v.zip report
+          cp data_both.zip report
 
           cat *_toggle.info > coverage.toggle.info
           cat *_branch.info > coverage.branch.info
@@ -222,4 +223,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: data_v
-          path: ./data_v.zip
+          path: |
+            data_v.zip
+            data_both.zip

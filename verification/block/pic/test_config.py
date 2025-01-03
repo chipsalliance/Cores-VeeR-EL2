@@ -34,7 +34,9 @@ class TestSequence(uvm_sequence):
                 reg = self.reg_map.reg[name]
                 val = None
 
-                if name.startswith("meipl"):
+                if name == "mpiccfg":
+                    val = random.randint(0, 1)
+                elif name.startswith("meipl"):
                     val = random.randint(0, max_pri)
                 elif name.startswith("meigwctrl"):
                     val = random.randint(0, 3)  # 2-bit combinations

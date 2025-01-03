@@ -136,14 +136,14 @@
 <span id="L32"><span class="lineNum">      32</span>              :  )(</span>
 <span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC tlaBgGNC">           1 :    input logic                rst_l,                     // reset, active low</span></span>
 <span id="L34"><span class="lineNum">      34</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                clk_override,              // Override non-functional clock gating</span></span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">     2505530 :    input logic                clk,                       // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">     2505506 :    input logic                clk,                       // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
 <span id="L36"><span class="lineNum">      36</span>              : </span>
 <span id="L37"><span class="lineNum">      37</span>              :    // clocks per pipe</span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">     2505530 :    input logic                lsu_c1_m_clk,</span></span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">     2505530 :    input logic                lsu_c1_r_clk,</span></span>
-<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">     2505530 :    input logic                lsu_c2_m_clk,</span></span>
-<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">     2505530 :    input logic                lsu_c2_r_clk,</span></span>
-<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">     2505530 :    input logic                lsu_store_c1_m_clk,</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">     2505506 :    input logic                lsu_c1_m_clk,</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">     2505506 :    input logic                lsu_c1_r_clk,</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">     2505506 :    input logic                lsu_c2_m_clk,</span></span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">     2505506 :    input logic                lsu_c2_r_clk,</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">     2505506 :    input logic                lsu_store_c1_m_clk,</span></span>
 <span id="L43"><span class="lineNum">      43</span>              : </span>
 <span id="L44"><span class="lineNum">      44</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [31:0]         lsu_ld_data_r,             // Load data R-stage</span></span>
 <span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC tlaBgGNC">          31 :    input logic [31:0]         lsu_ld_data_corr_r,        // ECC corrected data R-stage</span></span>
@@ -255,12 +255,12 @@
 <span id="L151"><span class="lineNum">     151</span>              : </span>
 <span id="L152"><span class="lineNum">     152</span>              : </span>
 <span id="L153"><span class="lineNum">     153</span>              :    // Premux the rs1/offset for dma</span>
-<span id="L154"><span class="lineNum">     154</span> <span class="tlaGNC">     4916917 :    assign lsu_rs1_d[31:0]    = dec_lsu_valid_raw_d ? exu_lsu_rs1_d[31:0] : dma_mem_addr[31:0];</span></span>
+<span id="L154"><span class="lineNum">     154</span> <span class="tlaGNC">     4916821 :    assign lsu_rs1_d[31:0]    = dec_lsu_valid_raw_d ? exu_lsu_rs1_d[31:0] : dma_mem_addr[31:0];</span></span>
 <span id="L155"><span class="lineNum">     155</span>              :    assign lsu_offset_d[11:0] = dec_lsu_offset_d[11:0] &amp; {12{dec_lsu_valid_raw_d}};</span>
 <span id="L156"><span class="lineNum">     156</span>              :    assign rs1_d_raw[31:0]    = lsu_rs1_d[31:0];</span>
 <span id="L157"><span class="lineNum">     157</span>              :    assign offset_d[11:0]     = lsu_offset_d[11:0];</span>
 <span id="L158"><span class="lineNum">     158</span>              : </span>
-<span id="L159"><span class="lineNum">     159</span> <span class="tlaGNC">     4916942 :    assign rs1_d[31:0] = (lsu_pkt_d.load_ldst_bypass_d) ? lsu_result_m[31:0] : rs1_d_raw[31:0];</span></span>
+<span id="L159"><span class="lineNum">     159</span> <span class="tlaGNC">     4916846 :    assign rs1_d[31:0] = (lsu_pkt_d.load_ldst_bypass_d) ? lsu_result_m[31:0] : rs1_d_raw[31:0];</span></span>
 <span id="L160"><span class="lineNum">     160</span>              : </span>
 <span id="L161"><span class="lineNum">     161</span>              :    // generate the ls address</span>
 <span id="L162"><span class="lineNum">     162</span>              :    rvlsadder   lsadder  (.rs1(rs1_d[31:0]),</span>
@@ -315,10 +315,10 @@
 <span id="L211"><span class="lineNum">     211</span>              :       assign lsu_error_pkt_m.single_ecc_error = lsu_single_ecc_error_m &amp; ~lsu_error_pkt_m.exc_valid &amp; ~lsu_pkt_m.dma;</span>
 <span id="L212"><span class="lineNum">     212</span>              :       assign lsu_error_pkt_m.inst_type = lsu_pkt_m.store;</span>
 <span id="L213"><span class="lineNum">     213</span>              :       assign lsu_error_pkt_m.exc_type  = ~misaligned_fault_m;</span>
-<span id="L214"><span class="lineNum">     214</span> <span class="tlaGNC">     1229245 :       assign lsu_error_pkt_m.mscause[3:0] = (lsu_double_ecc_error_m &amp; ~misaligned_fault_m &amp; ~access_fault_m) ? 4'h1 : exc_mscause_m[3:0];</span></span>
+<span id="L214"><span class="lineNum">     214</span> <span class="tlaGNC">     1229221 :       assign lsu_error_pkt_m.mscause[3:0] = (lsu_double_ecc_error_m &amp; ~misaligned_fault_m &amp; ~access_fault_m) ? 4'h1 : exc_mscause_m[3:0];</span></span>
 <span id="L215"><span class="lineNum">     215</span>              :       assign lsu_error_pkt_m.addr[31:0] = lsu_addr_m[31:0];</span>
 <span id="L216"><span class="lineNum">     216</span>              : </span>
-<span id="L217"><span class="lineNum">     217</span> <span class="tlaGNC">     1229245 :       assign lsu_fir_error_m[1:0] = fir_nondccm_access_error_m ? 2'b11 : (fir_dccm_access_error_m ? 2'b10 : ((lsu_pkt_m.fast_int &amp; lsu_double_ecc_error_m) ? 2'b01 : 2'b00));</span></span>
+<span id="L217"><span class="lineNum">     217</span> <span class="tlaGNC">     1229221 :       assign lsu_fir_error_m[1:0] = fir_nondccm_access_error_m ? 2'b11 : (fir_dccm_access_error_m ? 2'b10 : ((lsu_pkt_m.fast_int &amp; lsu_double_ecc_error_m) ? 2'b01 : 2'b00));</span></span>
 <span id="L218"><span class="lineNum">     218</span>              : </span>
 <span id="L219"><span class="lineNum">     219</span>              :       rvdff  #(1)                             lsu_exc_valid_rff       (.*, .din(lsu_error_pkt_m.exc_valid),                        .dout(lsu_error_pkt_r.exc_valid),                        .clk(lsu_c2_r_clk));</span>
 <span id="L220"><span class="lineNum">     220</span>              :       rvdff  #(1)                             lsu_single_ecc_error_rff(.*, .din(lsu_error_pkt_m.single_ecc_error),                 .dout(lsu_error_pkt_r.single_ecc_error),                 .clk(lsu_c2_r_clk));</span>
@@ -340,7 +340,7 @@
 <span id="L236"><span class="lineNum">     236</span>              :    end</span>
 <span id="L237"><span class="lineNum">     237</span>              : </span>
 <span id="L238"><span class="lineNum">     238</span> <span class="tlaGNC">           1 :    always_comb begin</span></span>
-<span id="L239"><span class="lineNum">     239</span> <span class="tlaGNC">     4916917 :       lsu_pkt_d = dec_lsu_valid_raw_d ? lsu_p : dma_pkt_d;</span></span>
+<span id="L239"><span class="lineNum">     239</span> <span class="tlaGNC">     4916821 :       lsu_pkt_d = dec_lsu_valid_raw_d ? lsu_p : dma_pkt_d;</span></span>
 <span id="L240"><span class="lineNum">     240</span> <span class="tlaGNC">           1 :       lsu_pkt_m_in = lsu_pkt_d;</span></span>
 <span id="L241"><span class="lineNum">     241</span> <span class="tlaGNC">           1 :       lsu_pkt_r_in = lsu_pkt_m;</span></span>
 <span id="L242"><span class="lineNum">     242</span>              : </span>
@@ -381,8 +381,8 @@
 <span id="L277"><span class="lineNum">     277</span>              :    end else begin: L2U1_Plus1_0 // block: L2U1_Plus1_1</span>
 <span id="L278"><span class="lineNum">     278</span>              :       logic [31:0] lsu_ld_datafn_m, lsu_ld_datafn_corr_r;</span>
 <span id="L279"><span class="lineNum">     279</span>              : </span>
-<span id="L280"><span class="lineNum">     280</span> <span class="tlaGNC">      821101 :       assign lsu_ld_datafn_m[31:0] = addr_external_m ? bus_read_data_m[31:0] : lsu_ld_data_m[31:0];</span></span>
-<span id="L281"><span class="lineNum">     281</span> <span class="tlaGNC">      821101 :       assign lsu_ld_datafn_corr_r[31:0] = addr_external_r ? bus_read_data_r[31:0] : lsu_ld_data_corr_r[31:0];</span></span>
+<span id="L280"><span class="lineNum">     280</span> <span class="tlaGNC">      821098 :       assign lsu_ld_datafn_m[31:0] = addr_external_m ? bus_read_data_m[31:0] : lsu_ld_data_m[31:0];</span></span>
+<span id="L281"><span class="lineNum">     281</span> <span class="tlaGNC">      821098 :       assign lsu_ld_datafn_corr_r[31:0] = addr_external_r ? bus_read_data_r[31:0] : lsu_ld_data_corr_r[31:0];</span></span>
 <span id="L282"><span class="lineNum">     282</span>              : </span>
 <span id="L283"><span class="lineNum">     283</span>              :       // this result must look at prior stores and merge them in</span>
 <span id="L284"><span class="lineNum">     284</span>              :       assign lsu_result_m[31:0] = ({32{ lsu_pkt_m.unsign &amp; lsu_pkt_m.by  }} &amp; {24'b0,lsu_ld_datafn_m[7:0]}) |</span>
@@ -409,11 +409,11 @@
 <span id="L305"><span class="lineNum">     305</span>              :    assign lsu_commit_r = lsu_pkt_r.valid &amp; (lsu_pkt_r.store | lsu_pkt_r.load) &amp; ~flush_r &amp; ~lsu_pkt_r.dma;</span>
 <span id="L306"><span class="lineNum">     306</span>              : </span>
 <span id="L307"><span class="lineNum">     307</span>              :    assign dma_mem_wdata_shifted[63:0] = 64'(dma_mem_wdata[63:0] &gt;&gt; {dma_mem_addr[2:0], 3'b000});   // Shift the dma data to lower bits to make it consistent to lsu stores</span>
-<span id="L308"><span class="lineNum">     308</span> <span class="tlaGNC">     4916502 :    assign store_data_d[31:0] = dma_dccm_req ? dma_mem_wdata_shifted[31:0] : exu_lsu_rs2_d[31:0];  // Write to PIC still happens in r stage</span></span>
+<span id="L308"><span class="lineNum">     308</span> <span class="tlaGNC">     4916406 :    assign store_data_d[31:0] = dma_dccm_req ? dma_mem_wdata_shifted[31:0] : exu_lsu_rs2_d[31:0];  // Write to PIC still happens in r stage</span></span>
 <span id="L309"><span class="lineNum">     309</span>              : </span>
-<span id="L310"><span class="lineNum">     310</span> <span class="tlaGNC">     4916942 :    assign store_data_m_in[31:0] = (lsu_pkt_d.store_data_bypass_d) ? lsu_result_m[31:0] : store_data_d[31:0];</span></span>
+<span id="L310"><span class="lineNum">     310</span> <span class="tlaGNC">     4916846 :    assign store_data_m_in[31:0] = (lsu_pkt_d.store_data_bypass_d) ? lsu_result_m[31:0] : store_data_d[31:0];</span></span>
 <span id="L311"><span class="lineNum">     311</span>              : </span>
-<span id="L312"><span class="lineNum">     312</span> <span class="tlaGNC">     1229207 :    assign store_data_m[31:0] = (picm_mask_data_m[31:0] | {32{~addr_in_pic_m}}) &amp; ((lsu_pkt_m.store_data_bypass_m) ? lsu_result_m[31:0] : store_data_pre_m[31:0]);</span></span>
+<span id="L312"><span class="lineNum">     312</span> <span class="tlaGNC">     1229183 :    assign store_data_m[31:0] = (picm_mask_data_m[31:0] | {32{~addr_in_pic_m}}) &amp; ((lsu_pkt_m.store_data_bypass_m) ? lsu_result_m[31:0] : store_data_pre_m[31:0]);</span></span>
 <span id="L313"><span class="lineNum">     313</span>              : </span>
 <span id="L314"><span class="lineNum">     314</span>              : </span>
 <span id="L315"><span class="lineNum">     315</span>              :    rvdff #(32)  sdmff (.*, .din(store_data_m_in[31:0]), .dout(store_data_pre_m[31:0]),                       .clk(lsu_store_c1_m_clk));</span>
@@ -421,8 +421,8 @@
 <span id="L317"><span class="lineNum">     317</span>              :    rvdff #(32) samff (.*, .din(lsu_addr_d[31:0]), .dout(lsu_addr_m[31:0]), .clk(lsu_c1_m_clk));</span>
 <span id="L318"><span class="lineNum">     318</span>              :    rvdff #(32) sarff (.*, .din(lsu_addr_m[31:0]), .dout(lsu_addr_r[31:0]), .clk(lsu_c1_r_clk));</span>
 <span id="L319"><span class="lineNum">     319</span>              : </span>
-<span id="L320"><span class="lineNum">     320</span> <span class="tlaGNC">     1123424 :    assign end_addr_m[31:3] = ldst_dual_m ? end_addr_pre_m[31:3] : lsu_addr_m[31:3];       // This is for power saving</span></span>
-<span id="L321"><span class="lineNum">     321</span> <span class="tlaGNC">     1123424 :    assign end_addr_r[31:3] = ldst_dual_r ? end_addr_pre_r[31:3] : lsu_addr_r[31:3];       // This is for power saving</span></span>
+<span id="L320"><span class="lineNum">     320</span> <span class="tlaGNC">     1123400 :    assign end_addr_m[31:3] = ldst_dual_m ? end_addr_pre_m[31:3] : lsu_addr_m[31:3];       // This is for power saving</span></span>
+<span id="L321"><span class="lineNum">     321</span> <span class="tlaGNC">     1123400 :    assign end_addr_r[31:3] = ldst_dual_r ? end_addr_pre_r[31:3] : lsu_addr_r[31:3];       // This is for power saving</span></span>
 <span id="L322"><span class="lineNum">     322</span>              : </span>
 <span id="L323"><span class="lineNum">     323</span>              :    rvdffe #(29) end_addr_hi_mff (.*, .din(end_addr_d[31:3]), .dout(end_addr_pre_m[31:3]), .en((lsu_pkt_d.valid &amp; ldst_dual_d) | clk_override));</span>
 <span id="L324"><span class="lineNum">     324</span>              :    rvdffe #(29) end_addr_hi_rff (.*, .din(end_addr_m[31:3]), .dout(end_addr_pre_r[31:3]), .en((lsu_pkt_m.valid &amp; ldst_dual_m) | clk_override));</span>

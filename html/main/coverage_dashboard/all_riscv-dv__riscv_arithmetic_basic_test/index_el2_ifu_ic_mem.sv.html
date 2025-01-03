@@ -345,7 +345,7 @@
 <span id="L241"><span class="lineNum">     241</span> <span class="tlaGNC">           6 :        ic_b_sb_wren[i]        =  ic_wr_en[pt.ICACHE_NUM_WAYS-1:0]  |</span></span>
 <span id="L242"><span class="lineNum">     242</span> <span class="tlaGNC">           6 :                                        (ic_debug_wr_way_en[pt.ICACHE_NUM_WAYS-1:0] &amp; {pt.ICACHE_NUM_WAYS{ic_debug_addr[pt.ICACHE_BANK_HI : pt.ICACHE_BANK_LO] == i}}) ;</span></span>
 <span id="L243"><span class="lineNum">     243</span> <span class="tlaGNC">           6 :        ic_debug_sel_sb[i]     = (ic_debug_addr[pt.ICACHE_BANK_HI : pt.ICACHE_BANK_LO] == i );</span></span>
-<span id="L244"><span class="lineNum">     244</span> <span class="tlaGNC">      196329 :        ic_sb_wr_data[i]       = (ic_debug_sel_sb[i] &amp; ic_debug_wr_en) ? ic_debug_wr_data : ic_bank_wr_data[i] ;</span></span>
+<span id="L244"><span class="lineNum">     244</span> <span class="tlaGNC">       86486 :        ic_sb_wr_data[i]       = (ic_debug_sel_sb[i] &amp; ic_debug_wr_en) ? ic_debug_wr_data : ic_bank_wr_data[i] ;</span></span>
 <span id="L245"><span class="lineNum">     245</span> <span class="tlaGNC">           6 :        ic_b_rden[i]           =  ic_rd_en_with_debug &amp; ( ( ~ic_rw_addr_q[pt.ICACHE_BANK_HI] &amp; (i==0)) |</span></span>
 <span id="L246"><span class="lineNum">     246</span> <span class="tlaGNC">           6 :                                                         (( ic_rw_addr_q[pt.ICACHE_BANK_HI] &amp; ic_rw_addr_q[2:1] == 2'b11) &amp; (i==0) &amp; ~end_of_cache_line) |</span></span>
 <span id="L247"><span class="lineNum">     247</span> <span class="tlaGNC">           6 :                                                          (  ic_rw_addr_q[pt.ICACHE_BANK_HI] &amp; (i==1)) |</span></span>
@@ -363,7 +363,7 @@
 <span id="L259"><span class="lineNum">     259</span>              : </span>
 <span id="L260"><span class="lineNum">     260</span>              : // bank read enables</span>
 <span id="L261"><span class="lineNum">     261</span>              :   assign ic_rd_en_with_debug                          = (ic_rd_en   | ic_debug_rd_en ) &amp; ~(|ic_wr_en);</span>
-<span id="L262"><span class="lineNum">     262</span> <span class="tlaGNC">      196329 :   assign ic_rw_addr_q[pt.ICACHE_INDEX_HI:1] = (ic_debug_rd_en | ic_debug_wr_en) ?</span></span>
+<span id="L262"><span class="lineNum">     262</span> <span class="tlaGNC">       86486 :   assign ic_rw_addr_q[pt.ICACHE_INDEX_HI:1] = (ic_debug_rd_en | ic_debug_wr_en) ?</span></span>
 <span id="L263"><span class="lineNum">     263</span>              :                                               {ic_debug_addr[pt.ICACHE_INDEX_HI:3],2'b0} :</span>
 <span id="L264"><span class="lineNum">     264</span>              :                                               ic_rw_addr[pt.ICACHE_INDEX_HI:1] ;</span>
 <span id="L265"><span class="lineNum">     265</span>              : </span>
@@ -372,7 +372,7 @@
 <span id="L268"><span class="lineNum">     268</span>              :    assign ic_cacheline_wrap_ff                                   = ic_rw_addr_ff[pt.ICACHE_TAG_INDEX_LO-1:pt.ICACHE_BANK_LO] == {(pt.ICACHE_TAG_INDEX_LO - pt.ICACHE_BANK_LO){1'b1}};</span>
 <span id="L269"><span class="lineNum">     269</span>              : </span>
 <span id="L270"><span class="lineNum">     270</span>              : </span>
-<span id="L271"><span class="lineNum">     271</span> <span class="tlaGNC">      906243 :    assign ic_rw_addr_bank_q[0] = ~ic_rw_addr_wrap ? ic_rw_addr_q[pt.ICACHE_INDEX_HI:pt.ICACHE_DATA_INDEX_LO] : {ic_rw_addr_q[pt.ICACHE_INDEX_HI: pt.ICACHE_TAG_INDEX_LO] , ic_rw_addr_q_inc[pt.ICACHE_TAG_INDEX_LO-1: pt.ICACHE_DATA_INDEX_LO] } ;</span></span>
+<span id="L271"><span class="lineNum">     271</span> <span class="tlaGNC">      399276 :    assign ic_rw_addr_bank_q[0] = ~ic_rw_addr_wrap ? ic_rw_addr_q[pt.ICACHE_INDEX_HI:pt.ICACHE_DATA_INDEX_LO] : {ic_rw_addr_q[pt.ICACHE_INDEX_HI: pt.ICACHE_TAG_INDEX_LO] , ic_rw_addr_q_inc[pt.ICACHE_TAG_INDEX_LO-1: pt.ICACHE_DATA_INDEX_LO] } ;</span></span>
 <span id="L272"><span class="lineNum">     272</span>              :    assign ic_rw_addr_bank_q[1] = ic_rw_addr_q[pt.ICACHE_INDEX_HI:pt.ICACHE_DATA_INDEX_LO];</span>
 <span id="L273"><span class="lineNum">     273</span>              : </span>
 <span id="L274"><span class="lineNum">     274</span>              : </span>
@@ -553,7 +553,7 @@
 <span id="L449"><span class="lineNum">     449</span>              : </span>
 <span id="L450"><span class="lineNum">     450</span>              :         // SRAMS with ECC (single/double detect; no correct)</span>
 <span id="L451"><span class="lineNum">     451</span>              :         if (pt.ICACHE_BYPASS_ENABLE == 1) begin</span>
-<span id="L452"><span class="lineNum">     452</span> <span class="tlaGNC">      392658 :           assign wrptr_in[k] = (wrptr[k] == (pt.ICACHE_NUM_BYPASS-1)) ? '0 : (wrptr[k] + 1'd1);</span></span>
+<span id="L452"><span class="lineNum">     452</span> <span class="tlaGNC">      172972 :           assign wrptr_in[k] = (wrptr[k] == (pt.ICACHE_NUM_BYPASS-1)) ? '0 : (wrptr[k] + 1'd1);</span></span>
 <span id="L453"><span class="lineNum">     453</span>              : </span>
 <span id="L454"><span class="lineNum">     454</span>              :           rvdffs  #(pt.ICACHE_NUM_BYPASS_WIDTH)  wrptr_ff(</span>
 <span id="L455"><span class="lineNum">     455</span>              :               .*, .clk(active_clk), .en(|write_bypass_en[k]), .din (wrptr_in[k]), .dout(wrptr[k])</span>
@@ -599,9 +599,9 @@
 <span id="L495"><span class="lineNum">     495</span>              : </span>
 <span id="L496"><span class="lineNum">     496</span> <span class="tlaGNC">          12 :             for (int l=0; l&lt;pt.ICACHE_NUM_BYPASS; l++) begin</span></span>
 <span id="L497"><span class="lineNum">     497</span> <span class="tlaGNC">          12 :               any_bypass[k]      |=  sel_bypass_ff[k][l];</span></span>
-<span id="L498"><span class="lineNum">     498</span> <span class="tlaGNC">      392658 :               sel_bypass_data[k] |= (sel_bypass_ff[k][l]) ? wb_packeddout_hold[k][l] : '0;</span></span>
+<span id="L498"><span class="lineNum">     498</span> <span class="tlaGNC">      172972 :               sel_bypass_data[k] |= (sel_bypass_ff[k][l]) ? wb_packeddout_hold[k][l] : '0;</span></span>
 <span id="L499"><span class="lineNum">     499</span>              :             end</span>
-<span id="L500"><span class="lineNum">     500</span> <span class="tlaGNC">      392658 :               wb_packeddout[k]   =   any_bypass[k] ?  sel_bypass_data[k] :  wb_packeddout_pre[k];</span></span>
+<span id="L500"><span class="lineNum">     500</span> <span class="tlaGNC">      172972 :               wb_packeddout[k]   =   any_bypass[k] ?  sel_bypass_data[k] :  wb_packeddout_pre[k];</span></span>
 <span id="L501"><span class="lineNum">     501</span>              :           end // always_comb begin</span>
 <span id="L502"><span class="lineNum">     502</span>              :         end // if (pt.ICACHE_BYPASS_ENABLE == 1)</span>
 <span id="L503"><span class="lineNum">     503</span>              :         else begin</span>
@@ -697,7 +697,7 @@
 <span id="L593"><span class="lineNum">     593</span>              :  end // block: PACKED_1</span>
 <span id="L594"><span class="lineNum">     594</span>              : </span>
 <span id="L595"><span class="lineNum">     595</span>              : </span>
-<span id="L596"><span class="lineNum">     596</span> <span class="tlaGNC">      196329 :    assign ic_rd_hit_q[pt.ICACHE_NUM_WAYS-1:0] = ic_debug_rd_en_ff ? ic_debug_rd_way_en_ff[pt.ICACHE_NUM_WAYS-1:0] : ic_rd_hit[pt.ICACHE_NUM_WAYS-1:0] ;</span></span>
+<span id="L596"><span class="lineNum">     596</span> <span class="tlaGNC">       86486 :    assign ic_rd_hit_q[pt.ICACHE_NUM_WAYS-1:0] = ic_debug_rd_en_ff ? ic_debug_rd_way_en_ff[pt.ICACHE_NUM_WAYS-1:0] : ic_rd_hit[pt.ICACHE_NUM_WAYS-1:0] ;</span></span>
 <span id="L597"><span class="lineNum">     597</span>              : </span>
 <span id="L598"><span class="lineNum">     598</span>              : </span>
 <span id="L599"><span class="lineNum">     599</span>              :  if ( pt.ICACHE_ECC ) begin : ECC1_MUX</span>
@@ -717,12 +717,12 @@
 <span id="L613"><span class="lineNum">     613</span>              :     end</span>
 <span id="L614"><span class="lineNum">     614</span>              : </span>
 <span id="L615"><span class="lineNum">     615</span>              :     for ( genvar i=0; i&lt;pt.ICACHE_NUM_WAYS; i++) begin : num_ways_mux1</span>
-<span id="L616"><span class="lineNum">     616</span> <span class="tlaGNC">      196690 :       assign wb_dout_way[i][63:0] = (ic_rw_addr_ff[2:1] == 2'b00) ? wb_dout_way_pre[i][63:0]   :</span></span>
-<span id="L617"><span class="lineNum">     617</span> <span class="tlaGNC">      392410 :                                     (ic_rw_addr_ff[2:1] == 2'b01) ?{wb_dout_way_pre[i][86:71], wb_dout_way_pre[i][63:16]} :</span></span>
-<span id="L618"><span class="lineNum">     618</span> <span class="tlaGNC">      196708 :                                     (ic_rw_addr_ff[2:1] == 2'b10) ?{wb_dout_way_pre[i][102:71],wb_dout_way_pre[i][63:32]} :</span></span>
+<span id="L616"><span class="lineNum">     616</span> <span class="tlaGNC">       86952 :       assign wb_dout_way[i][63:0] = (ic_rw_addr_ff[2:1] == 2'b00) ? wb_dout_way_pre[i][63:0]   :</span></span>
+<span id="L617"><span class="lineNum">     617</span> <span class="tlaGNC">      172620 :                                     (ic_rw_addr_ff[2:1] == 2'b01) ?{wb_dout_way_pre[i][86:71], wb_dout_way_pre[i][63:16]} :</span></span>
+<span id="L618"><span class="lineNum">     618</span> <span class="tlaGNC">       87028 :                                     (ic_rw_addr_ff[2:1] == 2'b10) ?{wb_dout_way_pre[i][102:71],wb_dout_way_pre[i][63:32]} :</span></span>
 <span id="L619"><span class="lineNum">     619</span>              :                                                                    {wb_dout_way_pre[i][119:71],wb_dout_way_pre[i][63:48]};</span>
 <span id="L620"><span class="lineNum">     620</span>              : </span>
-<span id="L621"><span class="lineNum">     621</span> <span class="tlaGNC">     1148312 :       assign wb_dout_way_with_premux[i][63:0]  =  ic_sel_premux_data ? ic_premux_data[63:0] : wb_dout_way[i][63:0] ;</span></span>
+<span id="L621"><span class="lineNum">     621</span> <span class="tlaGNC">      506306 :       assign wb_dout_way_with_premux[i][63:0]  =  ic_sel_premux_data ? ic_premux_data[63:0] : wb_dout_way[i][63:0] ;</span></span>
 <span id="L622"><span class="lineNum">     622</span>              :    end</span>
 <span id="L623"><span class="lineNum">     623</span>              : </span>
 <span id="L624"><span class="lineNum">     624</span> <span class="tlaGNC">           3 :    always_comb begin : rd_out</span></span>
@@ -944,7 +944,7 @@
 <span id="L840"><span class="lineNum">     840</span>              :                                   .din    ({{pt.ICACHE_TAG_LO{1'b0}}, ic_rw_addr[31:pt.ICACHE_TAG_LO]}),</span>
 <span id="L841"><span class="lineNum">     841</span>              :                                   .ecc_out({ ic_tag_ecc[6:0]}));</span>
 <span id="L842"><span class="lineNum">     842</span>              : </span>
-<span id="L843"><span class="lineNum">     843</span> <span class="tlaGNC">      196329 :    assign  ic_tag_wr_data[25:0] = (ic_debug_wr_en &amp; ic_debug_tag_array) ?</span></span>
+<span id="L843"><span class="lineNum">     843</span> <span class="tlaGNC">       86486 :    assign  ic_tag_wr_data[25:0] = (ic_debug_wr_en &amp; ic_debug_tag_array) ?</span></span>
 <span id="L844"><span class="lineNum">     844</span>              :                                   {ic_debug_wr_data[68:64],ic_debug_wr_data[31:11]} :</span>
 <span id="L845"><span class="lineNum">     845</span>              :                                   {ic_tag_ecc[4:0], {PAD_BITS{1'b0}},ic_rw_addr[31:pt.ICACHE_TAG_LO]} ;</span>
 <span id="L846"><span class="lineNum">     846</span>              : </span>
@@ -961,7 +961,7 @@
 <span id="L857"><span class="lineNum">     857</span>              : end // block: OTHERS</span>
 <span id="L858"><span class="lineNum">     858</span>              : </span>
 <span id="L859"><span class="lineNum">     859</span>              : </span>
-<span id="L860"><span class="lineNum">     860</span> <span class="tlaGNC">      196329 :     assign ic_rw_addr_q[pt.ICACHE_INDEX_HI: pt.ICACHE_TAG_INDEX_LO] = (ic_debug_rd_en | ic_debug_wr_en) ?</span></span>
+<span id="L860"><span class="lineNum">     860</span> <span class="tlaGNC">       86486 :     assign ic_rw_addr_q[pt.ICACHE_INDEX_HI: pt.ICACHE_TAG_INDEX_LO] = (ic_debug_rd_en | ic_debug_wr_en) ?</span></span>
 <span id="L861"><span class="lineNum">     861</span>              :                                                 ic_debug_addr[pt.ICACHE_INDEX_HI: pt.ICACHE_TAG_INDEX_LO] :</span>
 <span id="L862"><span class="lineNum">     862</span>              :                                                 ic_rw_addr[pt.ICACHE_INDEX_HI: pt.ICACHE_TAG_INDEX_LO] ;</span>
 <span id="L863"><span class="lineNum">     863</span>              : </span>
@@ -1261,7 +1261,7 @@
 <span id="L1157"><span class="lineNum">    1157</span>              :     end // block: WAYS</span>
 <span id="L1158"><span class="lineNum">    1158</span>              :     else begin : WAYS</span>
 <span id="L1159"><span class="lineNum">    1159</span>              :       if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin</span>
-<span id="L1160"><span class="lineNum">    1160</span> <span class="tlaGNC">      196329 :         assign wrptr_in = (wrptr == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr + 1'd1);</span></span>
+<span id="L1160"><span class="lineNum">    1160</span> <span class="tlaGNC">       86486 :         assign wrptr_in = (wrptr == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr + 1'd1);</span></span>
 <span id="L1161"><span class="lineNum">    1161</span>              :         rvdffs  #(pt.ICACHE_TAG_NUM_BYPASS_WIDTH)  wrptr_ff(</span>
 <span id="L1162"><span class="lineNum">    1162</span>              :              .*, .clk(active_clk), .en(|write_bypass_en), .din (wrptr_in), .dout(wrptr)</span>
 <span id="L1163"><span class="lineNum">    1163</span>              :         );</span>
@@ -1307,9 +1307,9 @@
 <span id="L1203"><span class="lineNum">    1203</span>              : </span>
 <span id="L1204"><span class="lineNum">    1204</span> <span class="tlaGNC">           6 :           for (int l=0; l&lt;pt.ICACHE_TAG_NUM_BYPASS; l++) begin</span></span>
 <span id="L1205"><span class="lineNum">    1205</span> <span class="tlaGNC">           6 :             any_bypass      |=  sel_bypass_ff[l];</span></span>
-<span id="L1206"><span class="lineNum">    1206</span> <span class="tlaGNC">      196329 :             sel_bypass_data |= (sel_bypass_ff[l]) ? wb_packeddout_hold[l] : '0;</span></span>
+<span id="L1206"><span class="lineNum">    1206</span> <span class="tlaGNC">       86486 :             sel_bypass_data |= (sel_bypass_ff[l]) ? wb_packeddout_hold[l] : '0;</span></span>
 <span id="L1207"><span class="lineNum">    1207</span>              :           end</span>
-<span id="L1208"><span class="lineNum">    1208</span> <span class="tlaGNC">      196329 :           ic_tag_data_raw_packed   =   any_bypass ?  sel_bypass_data :  ic_tag_data_raw_packed_pre;</span></span>
+<span id="L1208"><span class="lineNum">    1208</span> <span class="tlaGNC">       86486 :           ic_tag_data_raw_packed   =   any_bypass ?  sel_bypass_data :  ic_tag_data_raw_packed_pre;</span></span>
 <span id="L1209"><span class="lineNum">    1209</span>              :         end // always_comb</span>
 <span id="L1210"><span class="lineNum">    1210</span>              :       end // if (pt.ICACHE_BYPASS_ENABLE == 1)</span>
 <span id="L1211"><span class="lineNum">    1211</span>              :       else begin</span>

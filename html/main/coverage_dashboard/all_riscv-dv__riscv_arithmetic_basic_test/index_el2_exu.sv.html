@@ -378,7 +378,7 @@
 <span id="L274"><span class="lineNum">     274</span>              : </span>
 <span id="L275"><span class="lineNum">     275</span>              : </span>
 <span id="L276"><span class="lineNum">     276</span>              : </span>
-<span id="L277"><span class="lineNum">     277</span> <span class="tlaGNC">      192971 :    assign exu_i0_result_x[31:0]    =  (mul_valid_x)  ?  mul_result_x[31:0]  :  alu_result_x[31:0];</span></span>
+<span id="L277"><span class="lineNum">     277</span> <span class="tlaGNC">       85031 :    assign exu_i0_result_x[31:0]    =  (mul_valid_x)  ?  mul_result_x[31:0]  :  alu_result_x[31:0];</span></span>
 <span id="L278"><span class="lineNum">     278</span>              : </span>
 <span id="L279"><span class="lineNum">     279</span>              : </span>
 <span id="L280"><span class="lineNum">     280</span>              : </span>
@@ -422,11 +422,11 @@
 <span id="L318"><span class="lineNum">     318</span>              :            exu_i0_br_index_r[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO]}=  predpipe_r[PREDPIPESIZE-1:pt.BTB_BTAG_SIZE];</span>
 <span id="L319"><span class="lineNum">     319</span>              : </span>
 <span id="L320"><span class="lineNum">     320</span>              : </span>
-<span id="L321"><span class="lineNum">     321</span> <span class="tlaGNC">      196310 :    assign final_predict_mp                                  = (i0_flush_upper_x)  ?  i0_predict_p_x  :  '0;</span></span>
+<span id="L321"><span class="lineNum">     321</span> <span class="tlaGNC">       86465 :    assign final_predict_mp                                  = (i0_flush_upper_x)  ?  i0_predict_p_x  :  '0;</span></span>
 <span id="L322"><span class="lineNum">     322</span>              : </span>
-<span id="L323"><span class="lineNum">     323</span> <span class="tlaGNC">      196310 :    assign final_predpipe_mp[PREDPIPESIZE-1:0]               = (i0_flush_upper_x)  ?  predpipe_x      :  '0;</span></span>
+<span id="L323"><span class="lineNum">     323</span> <span class="tlaGNC">       86465 :    assign final_predpipe_mp[PREDPIPESIZE-1:0]               = (i0_flush_upper_x)  ?  predpipe_x      :  '0;</span></span>
 <span id="L324"><span class="lineNum">     324</span>              : </span>
-<span id="L325"><span class="lineNum">     325</span> <span class="tlaGNC">      196310 :    assign after_flush_eghr[pt.BHT_GHR_SIZE-1:0]             = (i0_flush_upper_x &amp; ~dec_tlu_flush_lower_r)  ?  ghr_d[pt.BHT_GHR_SIZE-1:0]  :  ghr_x[pt.BHT_GHR_SIZE-1:0];</span></span>
+<span id="L325"><span class="lineNum">     325</span> <span class="tlaGNC">       86465 :    assign after_flush_eghr[pt.BHT_GHR_SIZE-1:0]             = (i0_flush_upper_x &amp; ~dec_tlu_flush_lower_r)  ?  ghr_d[pt.BHT_GHR_SIZE-1:0]  :  ghr_x[pt.BHT_GHR_SIZE-1:0];</span></span>
 <span id="L326"><span class="lineNum">     326</span>              : </span>
 <span id="L327"><span class="lineNum">     327</span>              : </span>
 <span id="L328"><span class="lineNum">     328</span>              :    assign exu_mp_pkt.valid                                  =  final_predict_mp.valid;</span>
@@ -470,7 +470,7 @@
 <span id="L366"><span class="lineNum">     366</span>              :    assign exu_flush_path_final[31:1] = ( {31{ dec_tlu_flush_lower_r                   }} &amp; dec_tlu_flush_path_r[31:1] ) |</span>
 <span id="L367"><span class="lineNum">     367</span>              :                                        ( {31{~dec_tlu_flush_lower_r &amp; i0_flush_upper_d}} &amp; i0_flush_path_d[31:1]      );</span>
 <span id="L368"><span class="lineNum">     368</span>              : </span>
-<span id="L369"><span class="lineNum">     369</span> <span class="tlaGNC">      196318 :    assign exu_npc_r[31:1]            = (i0_pred_correct_upper_r)  ?  pred_correct_npc_r[31:1]    :  i0_flush_path_upper_r[31:1];</span></span>
+<span id="L369"><span class="lineNum">     369</span> <span class="tlaGNC">       86486 :    assign exu_npc_r[31:1]            = (i0_pred_correct_upper_r)  ?  pred_correct_npc_r[31:1]    :  i0_flush_path_upper_r[31:1];</span></span>
 <span id="L370"><span class="lineNum">     370</span>              : </span>
 <span id="L371"><span class="lineNum">     371</span>              : </span>
 <span id="L372"><span class="lineNum">     372</span>              : endmodule // el2_exu</span>

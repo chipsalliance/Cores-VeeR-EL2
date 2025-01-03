@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    01-01-2025
+                    03-01-2025
                 </td>
                 <td></td>
                 
@@ -131,31 +131,31 @@
 <span id="L27"><span class="lineNum">      27</span>              : #(</span>
 <span id="L28"><span class="lineNum">      28</span>              : `include "el2_param.vh"</span>
 <span id="L29"><span class="lineNum">      29</span>              :  )(</span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC tlaBgGNC">    62481903 :    input logic          lsu_c2_m_clk,              // clock</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC tlaBgGNC">    67228309 :    input logic          lsu_c2_m_clk,              // clock</span></span>
 <span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">         299 :    input logic          rst_l,                     // reset</span></span>
 <span id="L32"><span class="lineNum">      32</span>              : </span>
-<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">     2127949 :    input logic [31:0]   start_addr_d,              // start address for lsu</span></span>
-<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">     2127949 :    input logic [31:0]   end_addr_d,                // end address for lsu</span></span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">     2148071 :    input el2_lsu_pkt_t lsu_pkt_d,                 // packet in d</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">     2128389 :    input logic [31:0]   start_addr_d,              // start address for lsu</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">     2128353 :    input logic [31:0]   end_addr_d,                // end address for lsu</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">     2148631 :    input el2_lsu_pkt_t lsu_pkt_d,                 // packet in d</span></span>
 <span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">          39 :    input logic [31:0]   dec_tlu_mrac_ff,           // CSR read</span></span>
-<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">     2127929 :    input logic [3:0]    rs1_region_d,              // address rs operand [31:28]</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">     2128201 :    input logic [3:0]    rs1_region_d,              // address rs operand [31:28]</span></span>
 <span id="L38"><span class="lineNum">      38</span>              : </span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">     2127929 :    input logic [31:0]   rs1_d,                     // address rs operand</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">     2128369 :    input logic [31:0]   rs1_d,                     // address rs operand</span></span>
 <span id="L40"><span class="lineNum">      40</span>              : </span>
 <span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">       37759 :    output logic         is_sideeffects_m,          // is sideffects space</span></span>
-<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">      615426 :    output logic         addr_in_dccm_d,            // address in dccm</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">      615552 :    output logic         addr_in_dccm_d,            // address in dccm</span></span>
 <span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">          12 :    output logic         addr_in_pic_d,             // address in pic</span></span>
-<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">      615770 :    output logic         addr_external_d,           // address in external</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">      615896 :    output logic         addr_external_d,           // address in external</span></span>
 <span id="L45"><span class="lineNum">      45</span>              : </span>
 <span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">          70 :    output logic         access_fault_d,            // access fault</span></span>
 <span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">          10 :    output logic         misaligned_fault_d,        // misaligned</span></span>
-<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">      156521 :    output logic [3:0]   exc_mscause_d,             // mscause for access/misaligned faults</span></span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">      156930 :    output logic [3:0]   exc_mscause_d,             // mscause for access/misaligned faults</span></span>
 <span id="L49"><span class="lineNum">      49</span>              : </span>
 <span id="L50"><span class="lineNum">      50</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic         fir_dccm_access_error_d,   // Fast interrupt dccm access error</span></span>
 <span id="L51"><span class="lineNum">      51</span> <span class="tlaUNC">           0 :    output logic         fir_nondccm_access_error_d,// Fast interrupt dccm access error</span></span>
 <span id="L52"><span class="lineNum">      52</span>              : </span>
-<span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC tlaBgGNC">      156473 :     input logic lsu_pmp_error_start,</span></span>
-<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">      156473 :     input logic lsu_pmp_error_end,</span></span>
+<span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC tlaBgGNC">      156882 :     input logic lsu_pmp_error_start,</span></span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">      156882 :     input logic lsu_pmp_error_end,</span></span>
 <span id="L55"><span class="lineNum">      55</span>              : </span>
 <span id="L56"><span class="lineNum">      56</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
 <span id="L57"><span class="lineNum">      57</span>              :    /*pragma coverage off*/</span>
@@ -165,18 +165,18 @@
 <span id="L61"><span class="lineNum">      61</span>              : </span>
 <span id="L62"><span class="lineNum">      62</span>              : </span>
 <span id="L63"><span class="lineNum">      63</span> <span class="tlaUNC tlaBgUNC">           0 :    logic        non_dccm_access_ok;</span></span>
-<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC tlaBgGNC">       78428 :    logic        is_sideeffects_d, is_aligned_d;</span></span>
-<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">      615430 :    logic        start_addr_in_dccm_d, end_addr_in_dccm_d;</span></span>
-<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">      615472 :    logic        start_addr_in_dccm_region_d, end_addr_in_dccm_region_d;</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC tlaBgGNC">       78446 :    logic        is_sideeffects_d, is_aligned_d;</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">      615556 :    logic        start_addr_in_dccm_d, end_addr_in_dccm_d;</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">      615598 :    logic        start_addr_in_dccm_region_d, end_addr_in_dccm_region_d;</span></span>
 <span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC">          12 :    logic        start_addr_in_pic_d, end_addr_in_pic_d;</span></span>
-<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">      615472 :    logic        start_addr_in_pic_region_d, end_addr_in_pic_region_d;</span></span>
-<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC">     2127954 :    logic [4:0]  csr_idx;</span></span>
-<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC">       10096 :    logic        addr_in_iccm;</span></span>
-<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">      615472 :    logic        start_addr_dccm_or_pic;</span></span>
-<span id="L72"><span class="lineNum">      72</span> <span class="tlaGNC">      615452 :    logic        base_reg_dccm_or_pic;</span></span>
-<span id="L73"><span class="lineNum">      73</span> <span class="tlaGNC">      156511 :    logic        unmapped_access_fault_d, mpu_access_fault_d, picm_access_fault_d, regpred_access_fault_d;</span></span>
+<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">      615598 :    logic        start_addr_in_pic_region_d, end_addr_in_pic_region_d;</span></span>
+<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC">     2128224 :    logic [4:0]  csr_idx;</span></span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC">       10222 :    logic        addr_in_iccm;</span></span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">      615598 :    logic        start_addr_dccm_or_pic;</span></span>
+<span id="L72"><span class="lineNum">      72</span> <span class="tlaGNC">      615578 :    logic        base_reg_dccm_or_pic;</span></span>
+<span id="L73"><span class="lineNum">      73</span> <span class="tlaGNC">      156920 :    logic        unmapped_access_fault_d, mpu_access_fault_d, picm_access_fault_d, regpred_access_fault_d;</span></span>
 <span id="L74"><span class="lineNum">      74</span> <span class="tlaGNC">          10 :    logic        regcross_misaligned_fault_d, sideeffect_misaligned_fault_d;</span></span>
-<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">      156511 :    logic [3:0]  access_fault_mscause_d;</span></span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">      156920 :    logic [3:0]  access_fault_mscause_d;</span></span>
 <span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">          10 :    logic [3:0]  misaligned_fault_mscause_d;</span></span>
 <span id="L77"><span class="lineNum">      77</span>              : </span>
 <span id="L78"><span class="lineNum">      78</span>              :    if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable</span>
@@ -323,7 +323,7 @@
 <span id="L219"><span class="lineNum">     219</span>              :    end</span>
 <span id="L220"><span class="lineNum">     220</span>              : </span>
 <span id="L221"><span class="lineNum">     221</span>              :    assign access_fault_d = (unmapped_access_fault_d | mpu_access_fault_d | picm_access_fault_d | regpred_access_fault_d) &amp; lsu_pkt_d.valid &amp; ~lsu_pkt_d.dma;</span>
-<span id="L222"><span class="lineNum">     222</span> <span class="tlaGNC tlaBgGNC">   104786509 :    assign access_fault_mscause_d[3:0] = unmapped_access_fault_d ? 4'h2 : mpu_access_fault_d ? 4'h3 : regpred_access_fault_d ? 4'h5 : picm_access_fault_d ? 4'h6 : 4'h0;</span></span>
+<span id="L222"><span class="lineNum">     222</span> <span class="tlaGNC tlaBgGNC">   113972499 :    assign access_fault_mscause_d[3:0] = unmapped_access_fault_d ? 4'h2 : mpu_access_fault_d ? 4'h3 : regpred_access_fault_d ? 4'h5 : picm_access_fault_d ? 4'h6 : 4'h0;</span></span>
 <span id="L223"><span class="lineNum">     223</span>              : </span>
 <span id="L224"><span class="lineNum">     224</span>              :    // Misaligned happens due to 2 reasons</span>
 <span id="L225"><span class="lineNum">     225</span>              :    // 0. Region cross</span>
@@ -331,9 +331,9 @@
 <span id="L227"><span class="lineNum">     227</span>              :    assign regcross_misaligned_fault_d = (start_addr_d[31:28] != end_addr_d[31:28]);</span>
 <span id="L228"><span class="lineNum">     228</span>              :    assign sideeffect_misaligned_fault_d = (is_sideeffects_d &amp; ~is_aligned_d);</span>
 <span id="L229"><span class="lineNum">     229</span>              :    assign misaligned_fault_d = (regcross_misaligned_fault_d | (sideeffect_misaligned_fault_d &amp; addr_external_d)) &amp; lsu_pkt_d.valid &amp; ~lsu_pkt_d.dma;</span>
-<span id="L230"><span class="lineNum">     230</span> <span class="tlaGNC">   100102259 :    assign misaligned_fault_mscause_d[3:0] = regcross_misaligned_fault_d ? 4'h2 : sideeffect_misaligned_fault_d ? 4'h1 : 4'h0;</span></span>
+<span id="L230"><span class="lineNum">     230</span> <span class="tlaGNC">   108159835 :    assign misaligned_fault_mscause_d[3:0] = regcross_misaligned_fault_d ? 4'h2 : sideeffect_misaligned_fault_d ? 4'h1 : 4'h0;</span></span>
 <span id="L231"><span class="lineNum">     231</span>              : </span>
-<span id="L232"><span class="lineNum">     232</span> <span class="tlaGNC">   100102241 :    assign exc_mscause_d[3:0] = misaligned_fault_d ? misaligned_fault_mscause_d[3:0] : access_fault_mscause_d[3:0];</span></span>
+<span id="L232"><span class="lineNum">     232</span> <span class="tlaGNC">   108159817 :    assign exc_mscause_d[3:0] = misaligned_fault_d ? misaligned_fault_mscause_d[3:0] : access_fault_mscause_d[3:0];</span></span>
 <span id="L233"><span class="lineNum">     233</span>              : </span>
 <span id="L234"><span class="lineNum">     234</span>              :    // Fast interrupt error logic</span>
 <span id="L235"><span class="lineNum">     235</span>              :    assign fir_dccm_access_error_d    = ((start_addr_in_dccm_region_d &amp; ~start_addr_in_dccm_d) |</span>

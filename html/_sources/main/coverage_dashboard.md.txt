@@ -65,6 +65,7 @@
  * [dccm_test_readwrite](external:coverage_dashboard/all_dccm_test_readwrite/index.html)
  * [dec_ib_test_dec_ib](external:coverage_dashboard/all_dec_ib_test_dec_ib/index.html)
  * [dec_tl_test_dec_tl](external:coverage_dashboard/all_dec_tl_test_dec_tl/index.html)
+ * [dec_tlu_ctl_test_dec_tl](external:coverage_dashboard/all_dec_tlu_ctl_test_dec_tl/index.html)
  * [dma_test_address](external:coverage_dashboard/all_dma_test_address/index.html)
  * [dma_test_debug_address](external:coverage_dashboard/all_dma_test_debug_address/index.html)
  * [dma_test_debug_read](external:coverage_dashboard/all_dma_test_debug_read/index.html)

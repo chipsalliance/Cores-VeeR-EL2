@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    01-01-2025
+                    03-01-2025
                 </td>
                 <td></td>
                 
@@ -122,12 +122,12 @@
 <span id="L18"><span class="lineNum">      18</span>              : #(</span>
 <span id="L19"><span class="lineNum">      19</span>              :    `include "el2_param.vh"</span>
 <span id="L20"><span class="lineNum">      20</span>              :  )  (</span>
-<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC tlaBgGNC">         391 :     input logic [4:0]  raddr0,       // logical read addresses</span></span>
-<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">       21959 :     input logic [4:0]  raddr1,</span></span>
+<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC tlaBgGNC">       12246 :     input logic [4:0]  raddr0,       // logical read addresses</span></span>
+<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">      754938 :     input logic [4:0]  raddr1,</span></span>
 <span id="L23"><span class="lineNum">      23</span>              : </span>
-<span id="L24"><span class="lineNum">      24</span> <span class="tlaGNC">       21781 :     input logic        wen0,         // write enable</span></span>
-<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">       21776 :     input logic [4:0]  waddr0,       // write address</span></span>
-<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC">       10979 :     input logic [31:0] wd0,          // write data</span></span>
+<span id="L24"><span class="lineNum">      24</span> <span class="tlaGNC">      748848 :     input logic        wen0,         // write enable</span></span>
+<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">      748844 :     input logic [4:0]  waddr0,       // write address</span></span>
+<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC">      377468 :     input logic [31:0] wd0,          // write data</span></span>
 <span id="L27"><span class="lineNum">      27</span>              : </span>
 <span id="L28"><span class="lineNum">      28</span> <span class="tlaUNC tlaBgUNC">           0 :     input logic        wen1,         // write enable</span></span>
 <span id="L29"><span class="lineNum">      29</span> <span class="tlaUNC">           0 :     input logic [4:0]  waddr1,       // write address</span></span>
@@ -137,11 +137,11 @@
 <span id="L33"><span class="lineNum">      33</span> <span class="tlaUNC">           0 :     input logic [4:0]  waddr2,       // write address</span></span>
 <span id="L34"><span class="lineNum">      34</span> <span class="tlaUNC">           0 :     input logic [31:0] wd2,          // write data</span></span>
 <span id="L35"><span class="lineNum">      35</span>              : </span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC tlaBgGNC">       44460 :     input logic        clk,</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC tlaBgGNC">     2528944 :     input logic        clk,</span></span>
 <span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">           1 :     input logic        rst_l,</span></span>
 <span id="L38"><span class="lineNum">      38</span>              : </span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">       11062 :     output logic [31:0] rd0,         // read data</span></span>
-<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">         178 :     output logic [31:0] rd1,</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">      380508 :     output logic [31:0] rd0,         // read data</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">        6090 :     output logic [31:0] rd1,</span></span>
 <span id="L41"><span class="lineNum">      41</span>              : </span>
 <span id="L42"><span class="lineNum">      42</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
 <span id="L43"><span class="lineNum">      43</span>              :    /*pragma coverage off*/</span>
@@ -151,8 +151,8 @@
 <span id="L47"><span class="lineNum">      47</span>              : </span>
 <span id="L48"><span class="lineNum">      48</span>              :    logic [31:1] [31:0] gpr_out;      // 31 x 32 bit GPRs</span>
 <span id="L49"><span class="lineNum">      49</span>              :    logic [31:1] [31:0] gpr_in;</span>
-<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">       21775 :    logic [31:1] w0v,w1v,w2v;</span></span>
-<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">       21775 :    logic [31:1] gpr_wr_en;</span></span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">      748842 :    logic [31:1] w0v,w1v,w2v;</span></span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">      748842 :    logic [31:1] gpr_wr_en;</span></span>
 <span id="L52"><span class="lineNum">      52</span>              : </span>
 <span id="L53"><span class="lineNum">      53</span>              :    // GPR Write Enables</span>
 <span id="L54"><span class="lineNum">      54</span>              :    assign gpr_wr_en[31:1] = (w0v[31:1] | w1v[31:1] | w2v[31:1]);</span>

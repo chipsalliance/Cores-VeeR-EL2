@@ -131,19 +131,19 @@
 <span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC tlaBgGNC">           1 :   input              trst_n,              // JTAG reset</span></span>
 <span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">      864028 :   input              tck,                 // JTAG clock</span></span>
 <span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">       49820 :   input              tms,                 // Test mode select   </span></span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">       62250 :   input              tdi,                 // Test Data Input</span></span>
-<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">       79318 :   output             tdo,                 // Test Data Output           </span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">       62188 :   input              tdi,                 // Test Data Input</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">       79130 :   output             tdo,                 // Test Data Output           </span></span>
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">       24908 :   output             tdoEnable,           // Test Data Output enable             </span></span>
 <span id="L33"><span class="lineNum">      33</span>              : </span>
 <span id="L34"><span class="lineNum">      34</span>              :   // Processor Signals</span>
 <span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">           1 :   input              core_rst_n,          // Core reset                  </span></span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">     2505582 :   input              core_clk,            // Core clock                  </span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">     2505530 :   input              core_clk,            // Core clock                  </span></span>
 <span id="L37"><span class="lineNum">      37</span>              :   //jtag_id is supposed to be connected to a constant in the top level</span>
 <span id="L38"><span class="lineNum">      38</span>              :   /* pragma coverage off*/</span>
 <span id="L39"><span class="lineNum">      39</span>              :   input [31:1]       jtag_id,             // JTAG ID</span>
 <span id="L40"><span class="lineNum">      40</span>              :   /* pragma coverage on*/</span>
-<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">        2480 :   input [31:0]       rd_data,             // 32 bit Read data from  Processor                       </span></span>
-<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">        1574 :   output [31:0]      reg_wr_data,         // 32 bit Write data to Processor                      </span></span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">        2482 :   input [31:0]       rd_data,             // 32 bit Read data from  Processor                       </span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">        1564 :   output [31:0]      reg_wr_data,         // 32 bit Write data to Processor                      </span></span>
 <span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">        3195 :   output [6:0]       reg_wr_addr,         // 7 bit reg address to Processor                   </span></span>
 <span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">        8708 :   output             reg_en,              // 1 bit  Read enable to Processor                                    </span></span>
 <span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">        4540 :   output             reg_wr_en,           // 1 bit  Write enable to Processor </span></span>

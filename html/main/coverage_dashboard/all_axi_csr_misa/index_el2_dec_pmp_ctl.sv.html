@@ -58,14 +58,14 @@
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff7f00;">
-        25.0%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff8300;">
+        25.8%
     </td>
     <td class="headerCovSummaryEntry">
         8
     </td>
     <td class="headerCovSummaryEntry">
-        32
+        31
     </td>
 
             </tr>
@@ -79,14 +79,14 @@
     <td class="headerCovSummary rowLeft">
         Branch
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #a9a9a9;">
-        0.0%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #00ff00;">
+        100.0%
     </td>
     <td class="headerCovSummaryEntry">
-        0
+        1
     </td>
     <td class="headerCovSummaryEntry">
-        0
+        1
     </td>
 
             </tr>
@@ -133,9 +133,9 @@
 <span id="L29"><span class="lineNum">      29</span>              : `include "el2_param.vh"</span>
 <span id="L30"><span class="lineNum">      30</span>              :  )</span>
 <span id="L31"><span class="lineNum">      31</span>              :   (</span>
-<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC tlaBgGNC">        9002 :    input logic clk,</span></span>
-<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">        9002 :    input logic free_l2clk,</span></span>
-<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">        9002 :    input logic csr_wr_clk,</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC tlaBgGNC">        6004 :    input logic clk,</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">        6004 :    input logic free_l2clk,</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">        6004 :    input logic csr_wr_clk,</span></span>
 <span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">           1 :    input logic rst_l,</span></span>
 <span id="L36"><span class="lineNum">      36</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic        dec_csr_wen_r_mod,  // csr write enable at wb</span></span>
 <span id="L37"><span class="lineNum">      37</span> <span class="tlaUNC">           0 :    input logic [11:0] dec_csr_wraddr_r,   // write address for csr</span></span>
@@ -153,10 +153,10 @@
 <span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC">           2 :    input logic internal_dbg_halt_timers, // debug halted</span></span>
 <span id="L50"><span class="lineNum">      50</span>              : </span>
 <span id="L51"><span class="lineNum">      51</span>              : `ifdef RV_SMEPMP</span>
-<span id="L52"><span class="lineNum">      52</span> <span class="tlaUNC tlaBgUNC">           0 :    input el2_mseccfg_pkt_t mseccfg,</span></span>
+<span id="L52"><span class="lineNum">      52</span>              :    input el2_mseccfg_pkt_t mseccfg,</span>
 <span id="L53"><span class="lineNum">      53</span>              : `endif</span>
 <span id="L54"><span class="lineNum">      54</span>              : </span>
-<span id="L55"><span class="lineNum">      55</span> <span class="tlaUNC">           0 :    output logic [31:0] dec_pmp_rddata_d,  // pmp CSR read data</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [31:0] dec_pmp_rddata_d,  // pmp CSR read data</span></span>
 <span id="L56"><span class="lineNum">      56</span> <span class="tlaUNC">           0 :    output logic        dec_pmp_read_d,    // pmp CSR address match</span></span>
 <span id="L57"><span class="lineNum">      57</span>              : </span>
 <span id="L58"><span class="lineNum">      58</span> <span class="tlaUNC">           0 :    output el2_pmp_cfg_pkt_t pmp_pmpcfg  [pt.PMP_ENTRIES],</span></span>
@@ -217,7 +217,7 @@
 <span id="L113"><span class="lineNum">     113</span>              : `ifdef RV_SMEPMP</span>
 <span id="L114"><span class="lineNum">     114</span>              :       assign csr_wdata = raw_wdata &amp; 8'b10011111;</span>
 <span id="L115"><span class="lineNum">     115</span>              : `else</span>
-<span id="L116"><span class="lineNum">     116</span>              :       assign csr_wdata = raw_wdata[0] ? (raw_wdata &amp; 8'b10011111) : (raw_wdata &amp; 8'b10011101);</span>
+<span id="L116"><span class="lineNum">     116</span> <span class="tlaGNC tlaBgGNC">       48032 :       assign csr_wdata = raw_wdata[0] ? (raw_wdata &amp; 8'b10011111) : (raw_wdata &amp; 8'b10011101);</span></span>
 <span id="L117"><span class="lineNum">     117</span>              : `endif</span>
 <span id="L118"><span class="lineNum">     118</span>              : </span>
 <span id="L119"><span class="lineNum">     119</span>              :       rvdffe #(8) pmpcfg_ff (.*, .clk(free_l2clk),</span>

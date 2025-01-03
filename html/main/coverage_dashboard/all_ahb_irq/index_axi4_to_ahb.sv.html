@@ -131,8 +131,8 @@
 <span id="L27"><span class="lineNum">      27</span>              : `include "el2_param.vh"</span>
 <span id="L28"><span class="lineNum">      28</span>              : ,parameter TAG  = 1) (</span>
 <span id="L29"><span class="lineNum">      29</span>              : </span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC tlaBgGNC">       30390 :    input                   clk,</span></span>
-<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">       30390 :    input                   free_clk,</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC tlaBgGNC">       35654 :    input                   clk,</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">       35654 :    input                   free_clk,</span></span>
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">           2 :    input                   rst_l,</span></span>
 <span id="L33"><span class="lineNum">      33</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
 <span id="L34"><span class="lineNum">      34</span>              :    /*pragma coverage off*/</span>
@@ -144,55 +144,55 @@
 <span id="L40"><span class="lineNum">      40</span>              : </span>
 <span id="L41"><span class="lineNum">      41</span>              :    // AXI signals</span>
 <span id="L42"><span class="lineNum">      42</span>              :    // AXI Write Channels</span>
-<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC tlaBgGNC">        9265 :    input  logic            axi_awvalid,</span></span>
-<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">        2819 :    output logic            axi_awready,</span></span>
-<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">        9265 :    input  logic [TAG-1:0]  axi_awid,</span></span>
-<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">        9265 :    input  logic [31:0]     axi_awaddr,</span></span>
-<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">        9265 :    input  logic [2:0]      axi_awsize,</span></span>
-<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">        9265 :    input  logic [2:0]      axi_awprot,</span></span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC tlaBgGNC">       11925 :    input  logic            axi_awvalid,</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">        3387 :    output logic            axi_awready,</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">       11925 :    input  logic [TAG-1:0]  axi_awid,</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">       11925 :    input  logic [31:0]     axi_awaddr,</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">       11925 :    input  logic [2:0]      axi_awsize,</span></span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">       11925 :    input  logic [2:0]      axi_awprot,</span></span>
 <span id="L49"><span class="lineNum">      49</span>              : </span>
-<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">        9265 :    input  logic            axi_wvalid,</span></span>
-<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">        2819 :    output logic            axi_wready,</span></span>
-<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">        9265 :    input  logic [63:0]     axi_wdata,</span></span>
-<span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC">        9265 :    input  logic [7:0]      axi_wstrb,</span></span>
-<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">        9265 :    input  logic            axi_wlast,</span></span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">       11925 :    input  logic            axi_wvalid,</span></span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">        3387 :    output logic            axi_wready,</span></span>
+<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">       11925 :    input  logic [63:0]     axi_wdata,</span></span>
+<span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC">       11925 :    input  logic [7:0]      axi_wstrb,</span></span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">       11925 :    input  logic            axi_wlast,</span></span>
 <span id="L55"><span class="lineNum">      55</span>              : </span>
-<span id="L56"><span class="lineNum">      56</span> <span class="tlaGNC">         493 :    output logic            axi_bvalid,</span></span>
+<span id="L56"><span class="lineNum">      56</span> <span class="tlaGNC">         633 :    output logic            axi_bvalid,</span></span>
 <span id="L57"><span class="lineNum">      57</span> <span class="tlaGNC">           2 :    input  logic            axi_bready,</span></span>
 <span id="L58"><span class="lineNum">      58</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [1:0]      axi_bresp,</span></span>
-<span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC tlaBgGNC">        1713 :    output logic [TAG-1:0]  axi_bid,</span></span>
+<span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC tlaBgGNC">        2081 :    output logic [TAG-1:0]  axi_bid,</span></span>
 <span id="L60"><span class="lineNum">      60</span>              : </span>
 <span id="L61"><span class="lineNum">      61</span>              :    // AXI Read Channels</span>
-<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">        2324 :    input  logic            axi_arvalid,</span></span>
-<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">        2819 :    output logic            axi_arready,</span></span>
-<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">       30390 :    input  logic [TAG-1:0]  axi_arid,</span></span>
-<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">       30390 :    input  logic [31:0]     axi_araddr,</span></span>
-<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">        9265 :    input  logic [2:0]      axi_arsize,</span></span>
-<span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC">        9265 :    input  logic [2:0]      axi_arprot,</span></span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">        2750 :    input  logic            axi_arvalid,</span></span>
+<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">        3383 :    output logic            axi_arready,</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">       35654 :    input  logic [TAG-1:0]  axi_arid,</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">       35654 :    input  logic [31:0]     axi_araddr,</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">       11925 :    input  logic [2:0]      axi_arsize,</span></span>
+<span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC">       11925 :    input  logic [2:0]      axi_arprot,</span></span>
 <span id="L68"><span class="lineNum">      68</span>              : </span>
-<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC">        4189 :    output logic            axi_rvalid,</span></span>
+<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC">        4921 :    output logic            axi_rvalid,</span></span>
 <span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC">           2 :    input  logic            axi_rready,</span></span>
-<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">        1713 :    output logic [TAG-1:0]  axi_rid,</span></span>
-<span id="L72"><span class="lineNum">      72</span> <span class="tlaGNC">        1184 :    output logic [63:0]     axi_rdata,</span></span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">        2081 :    output logic [TAG-1:0]  axi_rid,</span></span>
+<span id="L72"><span class="lineNum">      72</span> <span class="tlaGNC">        1426 :    output logic [63:0]     axi_rdata,</span></span>
 <span id="L73"><span class="lineNum">      73</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [1:0]      axi_rresp,</span></span>
 <span id="L74"><span class="lineNum">      74</span> <span class="tlaGNC tlaBgGNC">           2 :    output logic            axi_rlast,</span></span>
 <span id="L75"><span class="lineNum">      75</span>              : </span>
 <span id="L76"><span class="lineNum">      76</span>              :    // AHB-Lite signals</span>
-<span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC">        1569 :    output logic [31:0]     ahb_haddr,       // ahb bus address</span></span>
+<span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC">        1831 :    output logic [31:0]     ahb_haddr,       // ahb bus address</span></span>
 <span id="L78"><span class="lineNum">      78</span>              :    /* exclude signals that are tied to constant value in this file */</span>
 <span id="L79"><span class="lineNum">      79</span>              :    /*pragma coverage off*/</span>
 <span id="L80"><span class="lineNum">      80</span>              :    output logic [2:0]      ahb_hburst,      // tied to 0</span>
 <span id="L81"><span class="lineNum">      81</span>              :    output logic            ahb_hmastlock,   // tied to 0</span>
 <span id="L82"><span class="lineNum">      82</span>              :    /*pragma coverage on*/</span>
-<span id="L83"><span class="lineNum">      83</span> <span class="tlaGNC">        9265 :    output logic [3:0]      ahb_hprot,       // [3:1] are tied to 3'b001</span></span>
-<span id="L84"><span class="lineNum">      84</span> <span class="tlaGNC">         431 :    output logic [2:0]      ahb_hsize,       // size of bus transaction (possible values 0,1,2,3)</span></span>
-<span id="L85"><span class="lineNum">      85</span> <span class="tlaGNC">        2818 :    output logic [1:0]      ahb_htrans,      // Transaction type (possible values 0,2 only right now)</span></span>
-<span id="L86"><span class="lineNum">      86</span> <span class="tlaGNC">         431 :    output logic            ahb_hwrite,      // ahb bus write</span></span>
-<span id="L87"><span class="lineNum">      87</span> <span class="tlaGNC">        1919 :    output logic [63:0]     ahb_hwdata,      // ahb bus write data</span></span>
+<span id="L83"><span class="lineNum">      83</span> <span class="tlaGNC">       11925 :    output logic [3:0]      ahb_hprot,       // [3:1] are tied to 3'b001</span></span>
+<span id="L84"><span class="lineNum">      84</span> <span class="tlaGNC">         569 :    output logic [2:0]      ahb_hsize,       // size of bus transaction (possible values 0,1,2,3)</span></span>
+<span id="L85"><span class="lineNum">      85</span> <span class="tlaGNC">        3382 :    output logic [1:0]      ahb_htrans,      // Transaction type (possible values 0,2 only right now)</span></span>
+<span id="L86"><span class="lineNum">      86</span> <span class="tlaGNC">         569 :    output logic            ahb_hwrite,      // ahb bus write</span></span>
+<span id="L87"><span class="lineNum">      87</span> <span class="tlaGNC">        2406 :    output logic [63:0]     ahb_hwdata,      // ahb bus write data</span></span>
 <span id="L88"><span class="lineNum">      88</span>              : </span>
-<span id="L89"><span class="lineNum">      89</span> <span class="tlaGNC">        1184 :    input logic [63:0]      ahb_hrdata,      // ahb bus read data</span></span>
-<span id="L90"><span class="lineNum">      90</span> <span class="tlaGNC">         460 :    input logic             ahb_hready,      // slave ready to accept transaction</span></span>
-<span id="L91"><span class="lineNum">      91</span> <span class="tlaGNC">        9265 :    input logic             ahb_hresp        // slave response (high indicates erro)</span></span>
+<span id="L89"><span class="lineNum">      89</span> <span class="tlaGNC">        1426 :    input logic [63:0]      ahb_hrdata,      // ahb bus read data</span></span>
+<span id="L90"><span class="lineNum">      90</span> <span class="tlaGNC">         584 :    input logic             ahb_hready,      // slave ready to accept transaction</span></span>
+<span id="L91"><span class="lineNum">      91</span> <span class="tlaGNC">       11925 :    input logic             ahb_hresp        // slave response (high indicates erro)</span></span>
 <span id="L92"><span class="lineNum">      92</span>              : </span>
 <span id="L93"><span class="lineNum">      93</span>              : );</span>
 <span id="L94"><span class="lineNum">      94</span>              : </span>
@@ -210,92 +210,92 @@
 <span id="L106"><span class="lineNum">     106</span>              :         STREAM_ERR_RD   = 4'b0110</span>
 <span id="L107"><span class="lineNum">     107</span>              :     } state_t;</span>
 <span id="L108"><span class="lineNum">     108</span>              : </span>
-<span id="L109"><span class="lineNum">     109</span> <span class="tlaGNC">        5142 :    state_t buf_state, buf_nxtstate;</span></span>
+<span id="L109"><span class="lineNum">     109</span> <span class="tlaGNC">        6132 :    state_t buf_state, buf_nxtstate;</span></span>
 <span id="L110"><span class="lineNum">     110</span>              : </span>
-<span id="L111"><span class="lineNum">     111</span> <span class="tlaGNC">        4682 :    logic             slave_valid;</span></span>
-<span id="L112"><span class="lineNum">     112</span> <span class="tlaGNC">        1713 :    logic [TAG-1:0]   slave_tag;</span></span>
-<span id="L113"><span class="lineNum">     113</span> <span class="tlaGNC">        1184 :    logic [63:0]      slave_rdata;</span></span>
-<span id="L114"><span class="lineNum">     114</span> <span class="tlaGNC">         431 :    logic [3:0]       slave_opc;</span></span>
+<span id="L111"><span class="lineNum">     111</span> <span class="tlaGNC">        5554 :    logic             slave_valid;</span></span>
+<span id="L112"><span class="lineNum">     112</span> <span class="tlaGNC">        2081 :    logic [TAG-1:0]   slave_tag;</span></span>
+<span id="L113"><span class="lineNum">     113</span> <span class="tlaGNC">        1426 :    logic [63:0]      slave_rdata;</span></span>
+<span id="L114"><span class="lineNum">     114</span> <span class="tlaGNC">         569 :    logic [3:0]       slave_opc;</span></span>
 <span id="L115"><span class="lineNum">     115</span>              : </span>
-<span id="L116"><span class="lineNum">     116</span> <span class="tlaGNC">        9265 :    logic             wrbuf_en, wrbuf_data_en;</span></span>
-<span id="L117"><span class="lineNum">     117</span> <span class="tlaGNC">         494 :    logic             wrbuf_cmd_sent, wrbuf_rst;</span></span>
-<span id="L118"><span class="lineNum">     118</span> <span class="tlaGNC">         494 :    logic             wrbuf_vld;</span></span>
-<span id="L119"><span class="lineNum">     119</span> <span class="tlaGNC">         494 :    logic             wrbuf_data_vld;</span></span>
-<span id="L120"><span class="lineNum">     120</span> <span class="tlaGNC">          36 :    logic [TAG-1:0]   wrbuf_tag;</span></span>
+<span id="L116"><span class="lineNum">     116</span> <span class="tlaGNC">       11925 :    logic             wrbuf_en, wrbuf_data_en;</span></span>
+<span id="L117"><span class="lineNum">     117</span> <span class="tlaGNC">         634 :    logic             wrbuf_cmd_sent, wrbuf_rst;</span></span>
+<span id="L118"><span class="lineNum">     118</span> <span class="tlaGNC">         630 :    logic             wrbuf_vld;</span></span>
+<span id="L119"><span class="lineNum">     119</span> <span class="tlaGNC">         630 :    logic             wrbuf_data_vld;</span></span>
+<span id="L120"><span class="lineNum">     120</span> <span class="tlaGNC">          40 :    logic [TAG-1:0]   wrbuf_tag;</span></span>
 <span id="L121"><span class="lineNum">     121</span> <span class="tlaGNC">           1 :    logic [2:0]       wrbuf_size;</span></span>
 <span id="L122"><span class="lineNum">     122</span> <span class="tlaGNC">          14 :    logic [31:0]      wrbuf_addr;</span></span>
-<span id="L123"><span class="lineNum">     123</span> <span class="tlaGNC">         121 :    logic [63:0]      wrbuf_data;</span></span>
-<span id="L124"><span class="lineNum">     124</span> <span class="tlaGNC">          38 :    logic [7:0]       wrbuf_byteen;</span></span>
+<span id="L123"><span class="lineNum">     123</span> <span class="tlaGNC">         169 :    logic [63:0]      wrbuf_data;</span></span>
+<span id="L124"><span class="lineNum">     124</span> <span class="tlaGNC">          42 :    logic [7:0]       wrbuf_byteen;</span></span>
 <span id="L125"><span class="lineNum">     125</span>              : </span>
-<span id="L126"><span class="lineNum">     126</span> <span class="tlaGNC">        2818 :    logic             master_valid;</span></span>
-<span id="L127"><span class="lineNum">     127</span> <span class="tlaGNC">        2819 :    logic             master_ready;</span></span>
-<span id="L128"><span class="lineNum">     128</span> <span class="tlaGNC">        2274 :    logic [TAG-1:0]   master_tag;</span></span>
-<span id="L129"><span class="lineNum">     129</span> <span class="tlaGNC">        2114 :    logic [31:0]      master_addr;</span></span>
-<span id="L130"><span class="lineNum">     130</span> <span class="tlaGNC">         121 :    logic [63:0]      master_wdata;</span></span>
-<span id="L131"><span class="lineNum">     131</span> <span class="tlaGNC">         430 :    logic [2:0]       master_size;</span></span>
-<span id="L132"><span class="lineNum">     132</span> <span class="tlaGNC">         494 :    logic [2:0]       master_opc;</span></span>
-<span id="L133"><span class="lineNum">     133</span> <span class="tlaGNC">          38 :    logic [7:0]       master_byteen;</span></span>
+<span id="L126"><span class="lineNum">     126</span> <span class="tlaGNC">        3380 :    logic             master_valid;</span></span>
+<span id="L127"><span class="lineNum">     127</span> <span class="tlaGNC">        3387 :    logic             master_ready;</span></span>
+<span id="L128"><span class="lineNum">     128</span> <span class="tlaGNC">        2730 :    logic [TAG-1:0]   master_tag;</span></span>
+<span id="L129"><span class="lineNum">     129</span> <span class="tlaGNC">        2480 :    logic [31:0]      master_addr;</span></span>
+<span id="L130"><span class="lineNum">     130</span> <span class="tlaGNC">         169 :    logic [63:0]      master_wdata;</span></span>
+<span id="L131"><span class="lineNum">     131</span> <span class="tlaGNC">         568 :    logic [2:0]       master_size;</span></span>
+<span id="L132"><span class="lineNum">     132</span> <span class="tlaGNC">         630 :    logic [2:0]       master_opc;</span></span>
+<span id="L133"><span class="lineNum">     133</span> <span class="tlaGNC">          42 :    logic [7:0]       master_byteen;</span></span>
 <span id="L134"><span class="lineNum">     134</span>              : </span>
 <span id="L135"><span class="lineNum">     135</span>              :    // Buffer signals (one entry buffer)</span>
-<span id="L136"><span class="lineNum">     136</span> <span class="tlaGNC">        1569 :    logic [31:0]                buf_addr;</span></span>
-<span id="L137"><span class="lineNum">     137</span> <span class="tlaGNC">          22 :    logic [1:0]                 buf_size;</span></span>
-<span id="L138"><span class="lineNum">     138</span> <span class="tlaGNC">         431 :    logic                       buf_write;</span></span>
-<span id="L139"><span class="lineNum">     139</span> <span class="tlaGNC">          38 :    logic [7:0]                 buf_byteen;</span></span>
-<span id="L140"><span class="lineNum">     140</span> <span class="tlaGNC">         427 :    logic                       buf_aligned;</span></span>
-<span id="L141"><span class="lineNum">     141</span> <span class="tlaGNC">        1919 :    logic [63:0]                buf_data;</span></span>
-<span id="L142"><span class="lineNum">     142</span> <span class="tlaGNC">        1713 :    logic [TAG-1:0]             buf_tag;</span></span>
+<span id="L136"><span class="lineNum">     136</span> <span class="tlaGNC">        1831 :    logic [31:0]                buf_addr;</span></span>
+<span id="L137"><span class="lineNum">     137</span> <span class="tlaGNC">          30 :    logic [1:0]                 buf_size;</span></span>
+<span id="L138"><span class="lineNum">     138</span> <span class="tlaGNC">         569 :    logic                       buf_write;</span></span>
+<span id="L139"><span class="lineNum">     139</span> <span class="tlaGNC">          42 :    logic [7:0]                 buf_byteen;</span></span>
+<span id="L140"><span class="lineNum">     140</span> <span class="tlaGNC">         569 :    logic                       buf_aligned;</span></span>
+<span id="L141"><span class="lineNum">     141</span> <span class="tlaGNC">        2406 :    logic [63:0]                buf_data;</span></span>
+<span id="L142"><span class="lineNum">     142</span> <span class="tlaGNC">        2081 :    logic [TAG-1:0]             buf_tag;</span></span>
 <span id="L143"><span class="lineNum">     143</span>              : </span>
 <span id="L144"><span class="lineNum">     144</span>              :    //Miscellaneous signals</span>
 <span id="L145"><span class="lineNum">     145</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       buf_rst;</span></span>
-<span id="L146"><span class="lineNum">     146</span> <span class="tlaGNC tlaBgGNC">        2274 :    logic [TAG-1:0]             buf_tag_in;</span></span>
-<span id="L147"><span class="lineNum">     147</span> <span class="tlaGNC">        2114 :    logic [31:0]                buf_addr_in;</span></span>
-<span id="L148"><span class="lineNum">     148</span> <span class="tlaGNC">          38 :    logic [7:0]                 buf_byteen_in;</span></span>
-<span id="L149"><span class="lineNum">     149</span> <span class="tlaGNC">        1932 :    logic [63:0]                buf_data_in;</span></span>
-<span id="L150"><span class="lineNum">     150</span> <span class="tlaGNC">         494 :    logic                       buf_write_in;</span></span>
-<span id="L151"><span class="lineNum">     151</span> <span class="tlaGNC">         428 :    logic                       buf_aligned_in;</span></span>
-<span id="L152"><span class="lineNum">     152</span> <span class="tlaGNC">         430 :    logic [2:0]                 buf_size_in;</span></span>
+<span id="L146"><span class="lineNum">     146</span> <span class="tlaGNC tlaBgGNC">        2730 :    logic [TAG-1:0]             buf_tag_in;</span></span>
+<span id="L147"><span class="lineNum">     147</span> <span class="tlaGNC">        2480 :    logic [31:0]                buf_addr_in;</span></span>
+<span id="L148"><span class="lineNum">     148</span> <span class="tlaGNC">          42 :    logic [7:0]                 buf_byteen_in;</span></span>
+<span id="L149"><span class="lineNum">     149</span> <span class="tlaGNC">        2547 :    logic [63:0]                buf_data_in;</span></span>
+<span id="L150"><span class="lineNum">     150</span> <span class="tlaGNC">         634 :    logic                       buf_write_in;</span></span>
+<span id="L151"><span class="lineNum">     151</span> <span class="tlaGNC">         570 :    logic                       buf_aligned_in;</span></span>
+<span id="L152"><span class="lineNum">     152</span> <span class="tlaGNC">         568 :    logic [2:0]                 buf_size_in;</span></span>
 <span id="L153"><span class="lineNum">     153</span>              : </span>
-<span id="L154"><span class="lineNum">     154</span> <span class="tlaGNC">        5576 :    logic                       buf_state_en;</span></span>
-<span id="L155"><span class="lineNum">     155</span> <span class="tlaGNC">        2818 :    logic                       buf_wr_en;</span></span>
-<span id="L156"><span class="lineNum">     156</span> <span class="tlaGNC">        3170 :    logic                       buf_data_wr_en;</span></span>
-<span id="L157"><span class="lineNum">     157</span> <span class="tlaGNC">        2816 :    logic                       slvbuf_error_en;</span></span>
-<span id="L158"><span class="lineNum">     158</span> <span class="tlaGNC">         494 :    logic                       wr_cmd_vld;</span></span>
+<span id="L154"><span class="lineNum">     154</span> <span class="tlaGNC">        6688 :    logic                       buf_state_en;</span></span>
+<span id="L155"><span class="lineNum">     155</span> <span class="tlaGNC">        3384 :    logic                       buf_wr_en;</span></span>
+<span id="L156"><span class="lineNum">     156</span> <span class="tlaGNC">        3892 :    logic                       buf_data_wr_en;</span></span>
+<span id="L157"><span class="lineNum">     157</span> <span class="tlaGNC">        3384 :    logic                       slvbuf_error_en;</span></span>
+<span id="L158"><span class="lineNum">     158</span> <span class="tlaGNC">         630 :    logic                       wr_cmd_vld;</span></span>
 <span id="L159"><span class="lineNum">     159</span>              : </span>
-<span id="L160"><span class="lineNum">     160</span> <span class="tlaGNC">        4682 :    logic                       cmd_done_rst, cmd_done, cmd_doneQ;</span></span>
-<span id="L161"><span class="lineNum">     161</span> <span class="tlaGNC">         494 :    logic                       trxn_done;</span></span>
-<span id="L162"><span class="lineNum">     162</span> <span class="tlaGNC">         493 :    logic [2:0]                 buf_cmd_byte_ptr, buf_cmd_byte_ptrQ, buf_cmd_nxtbyte_ptr;</span></span>
-<span id="L163"><span class="lineNum">     163</span> <span class="tlaGNC">        2466 :    logic                       buf_cmd_byte_ptr_en;</span></span>
+<span id="L160"><span class="lineNum">     160</span> <span class="tlaGNC">        5554 :    logic                       cmd_done_rst, cmd_done, cmd_doneQ;</span></span>
+<span id="L161"><span class="lineNum">     161</span> <span class="tlaGNC">         634 :    logic                       trxn_done;</span></span>
+<span id="L162"><span class="lineNum">     162</span> <span class="tlaGNC">         633 :    logic [2:0]                 buf_cmd_byte_ptr, buf_cmd_byte_ptrQ, buf_cmd_nxtbyte_ptr;</span></span>
+<span id="L163"><span class="lineNum">     163</span> <span class="tlaGNC">        2872 :    logic                       buf_cmd_byte_ptr_en;</span></span>
 <span id="L164"><span class="lineNum">     164</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       found;</span></span>
 <span id="L165"><span class="lineNum">     165</span>              : </span>
-<span id="L166"><span class="lineNum">     166</span> <span class="tlaGNC tlaBgGNC">        4682 :    logic                       slave_valid_pre;</span></span>
-<span id="L167"><span class="lineNum">     167</span> <span class="tlaGNC">         460 :    logic                       ahb_hready_q;</span></span>
+<span id="L166"><span class="lineNum">     166</span> <span class="tlaGNC tlaBgGNC">        5554 :    logic                       slave_valid_pre;</span></span>
+<span id="L167"><span class="lineNum">     167</span> <span class="tlaGNC">         584 :    logic                       ahb_hready_q;</span></span>
 <span id="L168"><span class="lineNum">     168</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       ahb_hresp_q;</span></span>
-<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC tlaBgGNC">        2818 :    logic [1:0]                 ahb_htrans_q;</span></span>
-<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">         431 :    logic                       ahb_hwrite_q;</span></span>
-<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">        1184 :    logic [63:0]                ahb_hrdata_q;</span></span>
+<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC tlaBgGNC">        3382 :    logic [1:0]                 ahb_htrans_q;</span></span>
+<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">         569 :    logic                       ahb_hwrite_q;</span></span>
+<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">        1426 :    logic [63:0]                ahb_hrdata_q;</span></span>
 <span id="L172"><span class="lineNum">     172</span>              : </span>
 <span id="L173"><span class="lineNum">     173</span>              : </span>
-<span id="L174"><span class="lineNum">     174</span> <span class="tlaGNC">         431 :    logic                       slvbuf_write;</span></span>
+<span id="L174"><span class="lineNum">     174</span> <span class="tlaGNC">         569 :    logic                       slvbuf_write;</span></span>
 <span id="L175"><span class="lineNum">     175</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       slvbuf_error;</span></span>
-<span id="L176"><span class="lineNum">     176</span> <span class="tlaGNC tlaBgGNC">        1713 :    logic [TAG-1:0]             slvbuf_tag;</span></span>
+<span id="L176"><span class="lineNum">     176</span> <span class="tlaGNC tlaBgGNC">        2081 :    logic [TAG-1:0]             slvbuf_tag;</span></span>
 <span id="L177"><span class="lineNum">     177</span>              : </span>
 <span id="L178"><span class="lineNum">     178</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       slvbuf_error_in;</span></span>
-<span id="L179"><span class="lineNum">     179</span> <span class="tlaGNC tlaBgGNC">        5142 :    logic                       slvbuf_wr_en;</span></span>
-<span id="L180"><span class="lineNum">     180</span> <span class="tlaGNC">        2466 :    logic                       bypass_en;</span></span>
-<span id="L181"><span class="lineNum">     181</span> <span class="tlaGNC">        1972 :    logic                       rd_bypass_idle;</span></span>
+<span id="L179"><span class="lineNum">     179</span> <span class="tlaGNC tlaBgGNC">        6132 :    logic                       slvbuf_wr_en;</span></span>
+<span id="L180"><span class="lineNum">     180</span> <span class="tlaGNC">        2878 :    logic                       bypass_en;</span></span>
+<span id="L181"><span class="lineNum">     181</span> <span class="tlaGNC">        2242 :    logic                       rd_bypass_idle;</span></span>
 <span id="L182"><span class="lineNum">     182</span>              : </span>
-<span id="L183"><span class="lineNum">     183</span> <span class="tlaGNC">         494 :    logic                       last_addr_en;</span></span>
-<span id="L184"><span class="lineNum">     184</span> <span class="tlaGNC">          26 :    logic [31:0]                last_bus_addr;</span></span>
+<span id="L183"><span class="lineNum">     183</span> <span class="tlaGNC">         634 :    logic                       last_addr_en;</span></span>
+<span id="L184"><span class="lineNum">     184</span> <span class="tlaGNC">          22 :    logic [31:0]                last_bus_addr;</span></span>
 <span id="L185"><span class="lineNum">     185</span>              : </span>
 <span id="L186"><span class="lineNum">     186</span>              :    // Clocks</span>
-<span id="L187"><span class="lineNum">     187</span> <span class="tlaGNC">        5142 :    logic                       buf_clken;</span></span>
-<span id="L188"><span class="lineNum">     188</span> <span class="tlaGNC">        2464 :    logic                       ahbm_data_clken;</span></span>
+<span id="L187"><span class="lineNum">     187</span> <span class="tlaGNC">        6128 :    logic                       buf_clken;</span></span>
+<span id="L188"><span class="lineNum">     188</span> <span class="tlaGNC">        2870 :    logic                       ahbm_data_clken;</span></span>
 <span id="L189"><span class="lineNum">     189</span>              : </span>
-<span id="L190"><span class="lineNum">     190</span> <span class="tlaGNC">        9265 :    logic                       buf_clk;</span></span>
-<span id="L191"><span class="lineNum">     191</span> <span class="tlaGNC">        9265 :    logic                       bus_clk;</span></span>
-<span id="L192"><span class="lineNum">     192</span> <span class="tlaGNC">        9265 :    logic                       ahbm_data_clk;</span></span>
+<span id="L190"><span class="lineNum">     190</span> <span class="tlaGNC">       11925 :    logic                       buf_clk;</span></span>
+<span id="L191"><span class="lineNum">     191</span> <span class="tlaGNC">       11925 :    logic                       bus_clk;</span></span>
+<span id="L192"><span class="lineNum">     192</span> <span class="tlaGNC">       11925 :    logic                       ahbm_data_clk;</span></span>
 <span id="L193"><span class="lineNum">     193</span>              : </span>
-<span id="L194"><span class="lineNum">     194</span> <span class="tlaGNC">        9265 :    logic                       dec_tlu_force_halt_bus, dec_tlu_force_halt_bus_ns, dec_tlu_force_halt_bus_q;</span></span>
+<span id="L194"><span class="lineNum">     194</span> <span class="tlaGNC">       11925 :    logic                       dec_tlu_force_halt_bus, dec_tlu_force_halt_bus_ns, dec_tlu_force_halt_bus_q;</span></span>
 <span id="L195"><span class="lineNum">     195</span>              : </span>
 <span id="L196"><span class="lineNum">     196</span>              :    // Function to get the length from byte enable</span>
 <span id="L197"><span class="lineNum">     197</span>              :    function automatic logic [1:0] get_write_size;</span>

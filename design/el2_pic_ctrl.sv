@@ -77,7 +77,7 @@ localparam int GW_CONFIG[pt.PIC_TOTAL_INT_PLUS1-1:0] = '{default:0} ;
 localparam INT_ENABLE_GRPS       =   (pt.PIC_TOTAL_INT_PLUS1 - 1)  / 4 ;
 
 logic [pt.PIC_TOTAL_INT_PLUS1-1:0]           intenable_clk_enable ;
-logic [INT_ENABLE_GRPS:0]                    intenable_clk_enable_grp ;
+//logic [INT_ENABLE_GRPS:0]                    intenable_clk_enable_grp ;
 logic [INT_ENABLE_GRPS:0]                    gw_clk ;
 
 logic  addr_intpend_base_match;
@@ -128,7 +128,6 @@ logic                                        intpriord;
 logic                                        config_reg_we ;
 logic                                        config_reg_re ;
 logic                                        config_reg_in ;
-logic                                        prithresh_reg_write , prithresh_reg_read;
 logic                                        intpriority_reg_read ;
 logic                                        intenable_reg_read   ;
 logic                                        gw_config_reg_read   ;
@@ -142,7 +141,7 @@ logic [ID_BITS-1:0]                          claimid_in ;
 logic [INTPRIORITY_BITS-1:0]                 pl_in ;
 logic [INTPRIORITY_BITS-1:0]                 pl_in_q ;
 
-logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        extintsrc_req_sync;
+//logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        extintsrc_req_sync;
 logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        extintsrc_req_gw;
    logic                                                  picm_bypass_ff;
 
@@ -320,7 +319,7 @@ for (i=0; i<pt.PIC_TOTAL_INT_PLUS1 ; i++) begin  : SETREG
      assign intpriority_reg[i] = {INTPRIORITY_BITS{1'b0}} ;
      assign intenable_reg[i]   = 1'b0 ;
      assign extintsrc_req_gw[i] = 1'b0 ;
-     assign extintsrc_req_sync[i]    = 1'b0 ;
+//     assign extintsrc_req_sync[i]    = 1'b0 ;
      assign intenable_clk_enable[i] = 1'b0;
  end
 

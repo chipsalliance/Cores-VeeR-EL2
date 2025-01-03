@@ -24,13 +24,14 @@ from pyuvm import *
 
 # ==============================================================================
 
-PMPCFG    = 0x3A0
-PMPADDR0  = 0x3B0
+PMPCFG = 0x3A0
+PMPADDR0 = 0x3B0
 PMPADDR16 = 0x3C0
 PMPADDR32 = 0x3D0
 PMPADDR48 = 0x3E0
 
 # ==============================================================================
+
 
 class InputItem(uvm_sequence_item):
     """
@@ -50,9 +51,11 @@ class InputItem(uvm_sequence_item):
         Randomize data and address offset
         """
         self.addr += random.randint(0, self.RANGE - 1)
-        self.data  = random.randint(0, 0xFFFFFFFF)
+        self.data = random.randint(0, 0xFFFFFFFF)
+
 
 # ==============================================================================
+
 
 class CsrWriteDriver(uvm_driver):
     """
@@ -108,32 +111,32 @@ class CsrReadDriver(uvm_driver):
 
                 # Emulate address decoder
                 if it.addr >= PMPADDR48:
-                    self.dut.csr_pmpcfg.value    = 0
-                    self.dut.csr_pmpaddr0.value  = 0
+                    self.dut.csr_pmpcfg.value = 0
+                    self.dut.csr_pmpaddr0.value = 0
                     self.dut.csr_pmpaddr16.value = 0
                     self.dut.csr_pmpaddr32.value = 0
                     self.dut.csr_pmpaddr48.value = 1
                 elif it.addr >= PMPADDR32:
-                    self.dut.csr_pmpcfg.value    = 0
-                    self.dut.csr_pmpaddr0.value  = 0
+                    self.dut.csr_pmpcfg.value = 0
+                    self.dut.csr_pmpaddr0.value = 0
                     self.dut.csr_pmpaddr16.value = 0
                     self.dut.csr_pmpaddr32.value = 1
                     self.dut.csr_pmpaddr48.value = 0
                 elif it.addr >= PMPADDR16:
-                    self.dut.csr_pmpcfg.value    = 0
-                    self.dut.csr_pmpaddr0.value  = 0
+                    self.dut.csr_pmpcfg.value = 0
+                    self.dut.csr_pmpaddr0.value = 0
                     self.dut.csr_pmpaddr16.value = 1
                     self.dut.csr_pmpaddr32.value = 0
                     self.dut.csr_pmpaddr48.value = 0
                 elif it.addr >= PMPADDR0:
-                    self.dut.csr_pmpcfg.value    = 0
-                    self.dut.csr_pmpaddr0.value  = 1
+                    self.dut.csr_pmpcfg.value = 0
+                    self.dut.csr_pmpaddr0.value = 1
                     self.dut.csr_pmpaddr16.value = 0
                     self.dut.csr_pmpaddr32.value = 0
                     self.dut.csr_pmpaddr48.value = 0
                 elif it.addr >= PMPCFG:
-                    self.dut.csr_pmpcfg.value    = 1
-                    self.dut.csr_pmpaddr0.value  = 0
+                    self.dut.csr_pmpcfg.value = 1
+                    self.dut.csr_pmpaddr0.value = 0
                     self.dut.csr_pmpaddr16.value = 0
                     self.dut.csr_pmpaddr32.value = 0
                     self.dut.csr_pmpaddr48.value = 0
@@ -141,8 +144,8 @@ class CsrReadDriver(uvm_driver):
                 await RisingEdge(self.dut.clk)
 
                 # Deselect all
-                self.dut.csr_pmpcfg.value    = 0
-                self.dut.csr_pmpaddr0.value  = 0
+                self.dut.csr_pmpcfg.value = 0
+                self.dut.csr_pmpaddr0.value = 0
                 self.dut.csr_pmpaddr16.value = 0
                 self.dut.csr_pmpaddr32.value = 0
                 self.dut.csr_pmpaddr48.value = 0
@@ -152,7 +155,9 @@ class CsrReadDriver(uvm_driver):
 
             self.seq_item_port.item_done()
 
+
 # ==============================================================================
+
 
 class WriteMonitor(uvm_component):
     """
@@ -302,6 +307,7 @@ class BaseEnv(uvm_env):
 
         self.wr_mon.ap.connect(self.scoreboard.fifo_inp.analysis_export)
         self.rd_mon.ap.connect(self.scoreboard.fifo_out.analysis_export)
+
 
 # ==============================================================================
 

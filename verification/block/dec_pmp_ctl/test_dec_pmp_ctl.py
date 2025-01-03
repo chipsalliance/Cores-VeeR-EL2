@@ -5,10 +5,18 @@ import random
 import pyuvm
 from cocotb.triggers import ClockCycles
 from pyuvm import *
-from testbench import BaseTest, InputItem
-from testbench import PMPCFG, PMPADDR0, PMPADDR16, PMPADDR32, PMPADDR48
+from testbench import (
+    PMPADDR0,
+    PMPADDR16,
+    PMPADDR32,
+    PMPADDR48,
+    PMPCFG,
+    BaseTest,
+    InputItem,
+)
 
 # =============================================================================
+
 
 class CsrSequence(uvm_sequence):
     """
@@ -102,7 +110,9 @@ class PmpCfgLockSequence(uvm_sequence):
             await self.start_item(item)
             await self.finish_item(item)
 
+
 # =============================================================================
+
 
 @pyuvm.test()
 class TestCsrAccess(BaseTest):
@@ -115,6 +125,7 @@ class TestCsrAccess(BaseTest):
         for seq in self.seq:
             await seq.start(self.env.pmp_wr_seqr)
             await seq.start(self.env.pmp_rd_seqr)
+
 
 @pyuvm.test()
 class TestPmpCfgLock(BaseTest):

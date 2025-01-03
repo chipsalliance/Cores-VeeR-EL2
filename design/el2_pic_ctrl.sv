@@ -233,7 +233,9 @@ wire grp_clk, grp_clken;
   `ifndef RV_FPGA_OPTIMIZE
     rvclkhdr intenable_c1_cgc( .en(grp_clken),  .l1clk(grp_clk), .* );
   `else
+/*pragma coverage off*/
     assign gw_clk[p] = 1'b0 ;
+/*pragma coverage on*/
   `endif
 
     for(genvar i= (p==0 ? 1: 0); i< (p==INT_ENABLE_GRPS ? pt.PIC_TOTAL_INT_PLUS1-p*4 :4); i++) begin : GW

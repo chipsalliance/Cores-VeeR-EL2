@@ -197,7 +197,13 @@ mv coverage_toggle_verilator_filtered.info coverage_toggle_verilator.info
 
 grep 'SF:' coverage_*.info | cut -d ":" -f 3 | sort | uniq > files.txt
 
-export BRANCH=$GITHUB_HEAD_REF
+if [ -z "${GITHUB_HEAD_REF}" ]; then
+        # We're in merge triggered run
+        export BRANCH=$GITHUB_REF_NAME
+else
+        # We're in PR triggered run
+        export BRANCH=$GITHUB_HEAD_REF
+fi
 export COMMIT=$GITHUB_SHA
 {
         while read file

@@ -136,13 +136,13 @@
 <span id="L32"><span class="lineNum">      32</span>              : `include "el2_param.vh"</span>
 <span id="L33"><span class="lineNum">      33</span>              :  )</span>
 <span id="L34"><span class="lineNum">      34</span>              :   (</span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">     2528924 :    input logic                             lsu_c2_m_clk,            // clocks</span></span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">     2528924 :    input logic                             lsu_c2_r_clk,            // clocks</span></span>
-<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">     2528924 :    input logic                             lsu_c1_r_clk,            // clocks</span></span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">     2528924 :    input logic                             lsu_store_c1_r_clk,      // clocks</span></span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">     2528924 :    input logic                             lsu_free_c2_clk,         // clocks</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">     2528900 :    input logic                             lsu_c2_m_clk,            // clocks</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">     2528900 :    input logic                             lsu_c2_r_clk,            // clocks</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">     2528900 :    input logic                             lsu_c1_r_clk,            // clocks</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">     2528900 :    input logic                             lsu_store_c1_r_clk,      // clocks</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">     2528900 :    input logic                             lsu_free_c2_clk,         // clocks</span></span>
 <span id="L40"><span class="lineNum">      40</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                             clk_override,            // Override non-functional clock gating</span></span>
-<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC tlaBgGNC">     2528924 :    input logic                             clk,                     // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC tlaBgGNC">     2528900 :    input logic                             clk,                     // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
 <span id="L42"><span class="lineNum">      42</span>              : </span>
 <span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">           1 :    input logic                             rst_l,                   // reset, active low</span></span>
 <span id="L44"><span class="lineNum">      44</span>              : </span>
@@ -338,7 +338,7 @@
 <span id="L234"><span class="lineNum">     234</span>              :       assign dccm_dma_rvalid      = lsu_pkt_m.valid &amp; lsu_pkt_m.load &amp; lsu_pkt_m.dma;</span>
 <span id="L235"><span class="lineNum">     235</span>              :       assign dccm_dma_ecc_error   = lsu_double_ecc_error_m;</span>
 <span id="L236"><span class="lineNum">     236</span>              :       assign dccm_dma_rtag[2:0]   = dma_mem_tag_m[2:0];</span>
-<span id="L237"><span class="lineNum">     237</span> <span class="tlaGNC">     1240792 :       assign dccm_dma_rdata[63:0] = ldst_dual_m ? lsu_rdata_corr_m[63:0] : {2{lsu_rdata_corr_m[31:0]}};</span></span>
+<span id="L237"><span class="lineNum">     237</span> <span class="tlaGNC">     1240550 :       assign dccm_dma_rdata[63:0] = ldst_dual_m ? lsu_rdata_corr_m[63:0] : {2{lsu_rdata_corr_m[31:0]}};</span></span>
 <span id="L238"><span class="lineNum">     238</span>              :       assign {lsu_ld_data_m_nc[63:32], lsu_ld_data_m[31:0]} = 64'(lsu_rdata_m[63:0] &gt;&gt; 8*lsu_addr_m[1:0]);</span>
 <span id="L239"><span class="lineNum">     239</span>              :       assign {lsu_ld_data_corr_m_nc[63:32], lsu_ld_data_corr_m[31:0]} = 64'(lsu_rdata_corr_m[63:0] &gt;&gt; 8*lsu_addr_m[1:0]);</span>
 <span id="L240"><span class="lineNum">     240</span>              : </span>
@@ -348,11 +348,11 @@
 <span id="L244"><span class="lineNum">     244</span>              :       assign stbuf_fwdbyteen_m[7:0]  = {stbuf_fwdbyteen_hi_m[3:0], stbuf_fwdbyteen_lo_m[3:0]};</span>
 <span id="L245"><span class="lineNum">     245</span>              : </span>
 <span id="L246"><span class="lineNum">     246</span>              :       for (genvar i=0; i&lt;8; i++) begin: GenLoop</span>
-<span id="L247"><span class="lineNum">     247</span> <span class="tlaGNC">     9941748 :          assign lsu_rdata_corr_m[(8*i)+7:8*i] = stbuf_fwdbyteen_m[i] ? stbuf_fwddata_m[(8*i)+7:8*i] :</span></span>
-<span id="L248"><span class="lineNum">     248</span> <span class="tlaGNC">     9926320 :                                                                        (addr_in_pic_m ? picm_rd_data_m[(8*i)+7:8*i] : ({8{addr_in_dccm_m}} &amp; dccm_rdata_corr_m[(8*i)+7:8*i]));</span></span>
+<span id="L247"><span class="lineNum">     247</span> <span class="tlaGNC">     9939812 :          assign lsu_rdata_corr_m[(8*i)+7:8*i] = stbuf_fwdbyteen_m[i] ? stbuf_fwddata_m[(8*i)+7:8*i] :</span></span>
+<span id="L248"><span class="lineNum">     248</span> <span class="tlaGNC">     9924384 :                                                                        (addr_in_pic_m ? picm_rd_data_m[(8*i)+7:8*i] : ({8{addr_in_dccm_m}} &amp; dccm_rdata_corr_m[(8*i)+7:8*i]));</span></span>
 <span id="L249"><span class="lineNum">     249</span>              : </span>
-<span id="L250"><span class="lineNum">     250</span> <span class="tlaGNC">     9941748 :          assign lsu_rdata_m[(8*i)+7:8*i]      = stbuf_fwdbyteen_m[i] ? stbuf_fwddata_m[(8*i)+7:8*i] :</span></span>
-<span id="L251"><span class="lineNum">     251</span> <span class="tlaGNC">     9926320 :                                                                        (addr_in_pic_m ? picm_rd_data_m[(8*i)+7:8*i] : ({8{addr_in_dccm_m}} &amp; dccm_rdata_m[(8*i)+7:8*i]));</span></span>
+<span id="L250"><span class="lineNum">     250</span> <span class="tlaGNC">     9939812 :          assign lsu_rdata_m[(8*i)+7:8*i]      = stbuf_fwdbyteen_m[i] ? stbuf_fwddata_m[(8*i)+7:8*i] :</span></span>
+<span id="L251"><span class="lineNum">     251</span> <span class="tlaGNC">     9924384 :                                                                        (addr_in_pic_m ? picm_rd_data_m[(8*i)+7:8*i] : ({8{addr_in_dccm_m}} &amp; dccm_rdata_m[(8*i)+7:8*i]));</span></span>
 <span id="L252"><span class="lineNum">     252</span>              :       end</span>
 <span id="L253"><span class="lineNum">     253</span>              : </span>
 <span id="L254"><span class="lineNum">     254</span>              :       rvdffe #(32) lsu_ld_data_corr_rff(.*, .din(lsu_ld_data_corr_m[31:0]), .dout(lsu_ld_data_corr_r[31:0]), .en((lsu_pkt_m.valid &amp; lsu_pkt_m.load &amp; (addr_in_pic_m | addr_in_dccm_m)) | clk_override));</span>
@@ -386,19 +386,19 @@
 <span id="L282"><span class="lineNum">     282</span>              :    // DCCM inputs</span>
 <span id="L283"><span class="lineNum">     283</span>              :    assign dccm_wren                             = lsu_dccm_wren_d | lsu_stbuf_commit_any | ld_single_ecc_error_r_ff;</span>
 <span id="L284"><span class="lineNum">     284</span>              :    assign dccm_rden                             = lsu_dccm_rden_d &amp; addr_in_dccm_d;</span>
-<span id="L285"><span class="lineNum">     285</span> <span class="tlaGNC">     1240790 :    assign dccm_wr_addr_lo[pt.DCCM_BITS-1:0]     = ld_single_ecc_error_r_ff ? (ld_single_ecc_error_lo_r_ff ? ld_sec_addr_lo_r_ff[pt.DCCM_BITS-1:0] : ld_sec_addr_hi_r_ff[pt.DCCM_BITS-1:0]) :</span></span>
-<span id="L286"><span class="lineNum">     286</span> <span class="tlaGNC">     3724286 :                                                                              lsu_dccm_wren_d ? lsu_addr_d[pt.DCCM_BITS-1:0] : stbuf_addr_any[pt.DCCM_BITS-1:0];</span></span>
-<span id="L287"><span class="lineNum">     287</span> <span class="tlaGNC">     1240790 :    assign dccm_wr_addr_hi[pt.DCCM_BITS-1:0]     = ld_single_ecc_error_r_ff ? (ld_single_ecc_error_hi_r_ff ? ld_sec_addr_hi_r_ff[pt.DCCM_BITS-1:0] : ld_sec_addr_lo_r_ff[pt.DCCM_BITS-1:0]) :</span></span>
-<span id="L288"><span class="lineNum">     288</span> <span class="tlaGNC">     3724286 :                                                                              lsu_dccm_wren_d ? end_addr_d[pt.DCCM_BITS-1:0] : stbuf_addr_any[pt.DCCM_BITS-1:0];</span></span>
+<span id="L285"><span class="lineNum">     285</span> <span class="tlaGNC">     1240548 :    assign dccm_wr_addr_lo[pt.DCCM_BITS-1:0]     = ld_single_ecc_error_r_ff ? (ld_single_ecc_error_lo_r_ff ? ld_sec_addr_lo_r_ff[pt.DCCM_BITS-1:0] : ld_sec_addr_hi_r_ff[pt.DCCM_BITS-1:0]) :</span></span>
+<span id="L286"><span class="lineNum">     286</span> <span class="tlaGNC">     3723560 :                                                                              lsu_dccm_wren_d ? lsu_addr_d[pt.DCCM_BITS-1:0] : stbuf_addr_any[pt.DCCM_BITS-1:0];</span></span>
+<span id="L287"><span class="lineNum">     287</span> <span class="tlaGNC">     1240548 :    assign dccm_wr_addr_hi[pt.DCCM_BITS-1:0]     = ld_single_ecc_error_r_ff ? (ld_single_ecc_error_hi_r_ff ? ld_sec_addr_hi_r_ff[pt.DCCM_BITS-1:0] : ld_sec_addr_lo_r_ff[pt.DCCM_BITS-1:0]) :</span></span>
+<span id="L288"><span class="lineNum">     288</span> <span class="tlaGNC">     3723560 :                                                                              lsu_dccm_wren_d ? end_addr_d[pt.DCCM_BITS-1:0] : stbuf_addr_any[pt.DCCM_BITS-1:0];</span></span>
 <span id="L289"><span class="lineNum">     289</span>              :    assign dccm_rd_addr_lo[pt.DCCM_BITS-1:0]     = lsu_addr_d[pt.DCCM_BITS-1:0];</span>
 <span id="L290"><span class="lineNum">     290</span>              :    assign dccm_rd_addr_hi[pt.DCCM_BITS-1:0]     = end_addr_d[pt.DCCM_BITS-1:0];</span>
-<span id="L291"><span class="lineNum">     291</span> <span class="tlaGNC">     1240790 :    assign dccm_wr_data_lo[pt.DCCM_FDATA_WIDTH-1:0] = ld_single_ecc_error_r_ff ? (ld_single_ecc_error_lo_r_ff ? {sec_data_ecc_lo_r_ff[pt.DCCM_ECC_WIDTH-1:0],sec_data_lo_r_ff[pt.DCCM_DATA_WIDTH-1:0]} :</span></span>
+<span id="L291"><span class="lineNum">     291</span> <span class="tlaGNC">     1240548 :    assign dccm_wr_data_lo[pt.DCCM_FDATA_WIDTH-1:0] = ld_single_ecc_error_r_ff ? (ld_single_ecc_error_lo_r_ff ? {sec_data_ecc_lo_r_ff[pt.DCCM_ECC_WIDTH-1:0],sec_data_lo_r_ff[pt.DCCM_DATA_WIDTH-1:0]} :</span></span>
 <span id="L292"><span class="lineNum">     292</span>              :                                                                                                                {sec_data_ecc_hi_r_ff[pt.DCCM_ECC_WIDTH-1:0],sec_data_hi_r_ff[pt.DCCM_DATA_WIDTH-1:0]}) :</span>
-<span id="L293"><span class="lineNum">     293</span> <span class="tlaGNC">     3724286 :                                                                                 (dma_dccm_wen ? {dma_dccm_wdata_ecc_lo[pt.DCCM_ECC_WIDTH-1:0],dma_dccm_wdata_lo[pt.DCCM_DATA_WIDTH-1:0]} :</span></span>
+<span id="L293"><span class="lineNum">     293</span> <span class="tlaGNC">     3723560 :                                                                                 (dma_dccm_wen ? {dma_dccm_wdata_ecc_lo[pt.DCCM_ECC_WIDTH-1:0],dma_dccm_wdata_lo[pt.DCCM_DATA_WIDTH-1:0]} :</span></span>
 <span id="L294"><span class="lineNum">     294</span>              :                                                                                                 {stbuf_ecc_any[pt.DCCM_ECC_WIDTH-1:0],stbuf_data_any[pt.DCCM_DATA_WIDTH-1:0]});</span>
-<span id="L295"><span class="lineNum">     295</span> <span class="tlaGNC">     1240790 :    assign dccm_wr_data_hi[pt.DCCM_FDATA_WIDTH-1:0] = ld_single_ecc_error_r_ff ? (ld_single_ecc_error_hi_r_ff ? {sec_data_ecc_hi_r_ff[pt.DCCM_ECC_WIDTH-1:0],sec_data_hi_r_ff[pt.DCCM_DATA_WIDTH-1:0]} :</span></span>
+<span id="L295"><span class="lineNum">     295</span> <span class="tlaGNC">     1240548 :    assign dccm_wr_data_hi[pt.DCCM_FDATA_WIDTH-1:0] = ld_single_ecc_error_r_ff ? (ld_single_ecc_error_hi_r_ff ? {sec_data_ecc_hi_r_ff[pt.DCCM_ECC_WIDTH-1:0],sec_data_hi_r_ff[pt.DCCM_DATA_WIDTH-1:0]} :</span></span>
 <span id="L296"><span class="lineNum">     296</span>              :                                                                                                                {sec_data_ecc_lo_r_ff[pt.DCCM_ECC_WIDTH-1:0],sec_data_lo_r_ff[pt.DCCM_DATA_WIDTH-1:0]}) :</span>
-<span id="L297"><span class="lineNum">     297</span> <span class="tlaGNC">     3724286 :                                                                                 (dma_dccm_wen ? {dma_dccm_wdata_ecc_hi[pt.DCCM_ECC_WIDTH-1:0],dma_dccm_wdata_hi[pt.DCCM_DATA_WIDTH-1:0]} :</span></span>
+<span id="L297"><span class="lineNum">     297</span> <span class="tlaGNC">     3723560 :                                                                                 (dma_dccm_wen ? {dma_dccm_wdata_ecc_hi[pt.DCCM_ECC_WIDTH-1:0],dma_dccm_wdata_hi[pt.DCCM_DATA_WIDTH-1:0]} :</span></span>
 <span id="L298"><span class="lineNum">     298</span>              :                                                                                                 {stbuf_ecc_any[pt.DCCM_ECC_WIDTH-1:0],stbuf_data_any[pt.DCCM_DATA_WIDTH-1:0]});</span>
 <span id="L299"><span class="lineNum">     299</span>              : </span>
 <span id="L300"><span class="lineNum">     300</span>              :    // DCCM outputs</span>
@@ -455,13 +455,13 @@
 <span id="L351"><span class="lineNum">     351</span>              :       assign {store_data_hi_m[31:0] , store_data_lo_m[31:0]} = {32'b0,store_data_m[31:0]} &lt;&lt; 8*lsu_addr_m[1:0];</span>
 <span id="L352"><span class="lineNum">     352</span>              : </span>
 <span id="L353"><span class="lineNum">     353</span>              :       for (genvar i=0; i&lt;4; i++) begin</span>
-<span id="L354"><span class="lineNum">     354</span> <span class="tlaGNC">     4963160 :          assign store_data_hi_r_in[(8*i)+7:(8*i)]  = store_byteen_ext_m[i+4] ? store_data_hi_m[(8*i)+7:(8*i)] :</span></span>
-<span id="L355"><span class="lineNum">     355</span> <span class="tlaGNC">    14896604 :                                                                                ((lsu_stbuf_commit_any &amp;  dccm_wr_bypass_d_m_hi)   ? stbuf_data_any[(8*i)+7:(8*i)] : sec_data_hi_m[(8*i)+7:(8*i)]);</span></span>
-<span id="L356"><span class="lineNum">     356</span> <span class="tlaGNC">     2523946 :          assign store_data_lo_r_in[(8*i)+7:(8*i)]  = store_byteen_ext_m[i]   ? store_data_lo_m[(8*i)+7:(8*i)] :</span></span>
-<span id="L357"><span class="lineNum">     357</span> <span class="tlaGNC">    14896604 :                                                                                ((lsu_stbuf_commit_any &amp;  dccm_wr_bypass_d_m_lo) ? stbuf_data_any[(8*i)+7:(8*i)] : sec_data_lo_m[(8*i)+7:(8*i)]);</span></span>
+<span id="L354"><span class="lineNum">     354</span> <span class="tlaGNC">     4962192 :          assign store_data_hi_r_in[(8*i)+7:(8*i)]  = store_byteen_ext_m[i+4] ? store_data_hi_m[(8*i)+7:(8*i)] :</span></span>
+<span id="L355"><span class="lineNum">     355</span> <span class="tlaGNC">    14893700 :                                                                                ((lsu_stbuf_commit_any &amp;  dccm_wr_bypass_d_m_hi)   ? stbuf_data_any[(8*i)+7:(8*i)] : sec_data_hi_m[(8*i)+7:(8*i)]);</span></span>
+<span id="L356"><span class="lineNum">     356</span> <span class="tlaGNC">     2523953 :          assign store_data_lo_r_in[(8*i)+7:(8*i)]  = store_byteen_ext_m[i]   ? store_data_lo_m[(8*i)+7:(8*i)] :</span></span>
+<span id="L357"><span class="lineNum">     357</span> <span class="tlaGNC">    14893700 :                                                                                ((lsu_stbuf_commit_any &amp;  dccm_wr_bypass_d_m_lo) ? stbuf_data_any[(8*i)+7:(8*i)] : sec_data_lo_m[(8*i)+7:(8*i)]);</span></span>
 <span id="L358"><span class="lineNum">     358</span>              : </span>
-<span id="L359"><span class="lineNum">     359</span> <span class="tlaGNC">    14896769 :          assign store_datafn_lo_r[(8*i)+7:(8*i)]   = (lsu_stbuf_commit_any &amp; dccm_wr_bypass_d_r_lo &amp; ~store_byteen_ext_r[i])   ? stbuf_data_any[(8*i)+7:(8*i)] : store_data_lo_r[(8*i)+7:(8*i)];</span></span>
-<span id="L360"><span class="lineNum">     360</span> <span class="tlaGNC">    14896604 :          assign store_datafn_hi_r[(8*i)+7:(8*i)]   = (lsu_stbuf_commit_any &amp; dccm_wr_bypass_d_r_hi &amp; ~store_byteen_ext_r[i+4]) ? stbuf_data_any[(8*i)+7:(8*i)] : store_data_hi_r[(8*i)+7:(8*i)];</span></span>
+<span id="L359"><span class="lineNum">     359</span> <span class="tlaGNC">    14893865 :          assign store_datafn_lo_r[(8*i)+7:(8*i)]   = (lsu_stbuf_commit_any &amp; dccm_wr_bypass_d_r_lo &amp; ~store_byteen_ext_r[i])   ? stbuf_data_any[(8*i)+7:(8*i)] : store_data_lo_r[(8*i)+7:(8*i)];</span></span>
+<span id="L360"><span class="lineNum">     360</span> <span class="tlaGNC">    14893700 :          assign store_datafn_hi_r[(8*i)+7:(8*i)]   = (lsu_stbuf_commit_any &amp; dccm_wr_bypass_d_r_hi &amp; ~store_byteen_ext_r[i+4]) ? stbuf_data_any[(8*i)+7:(8*i)] : store_data_hi_r[(8*i)+7:(8*i)];</span></span>
 <span id="L361"><span class="lineNum">     361</span>              :       end // for (genvar i=0; i&lt;BYTE_WIDTH; i++)</span>
 <span id="L362"><span class="lineNum">     362</span>              : </span>
 <span id="L363"><span class="lineNum">     363</span>              :       for (genvar i=0; i&lt;4; i++) begin</span>
@@ -486,9 +486,9 @@
 <span id="L382"><span class="lineNum">     382</span>              :    assign picm_mken          = lsu_pkt_d.valid &amp; lsu_pkt_d.store &amp; addr_in_pic_d;  // Get the mask for stores</span>
 <span id="L383"><span class="lineNum">     383</span>              :    assign picm_rdaddr[31:0]  = pt.PIC_BASE_ADDR | {{32-pt.PIC_BITS{1'b0}},lsu_addr_d[pt.PIC_BITS-1:0]};</span>
 <span id="L384"><span class="lineNum">     384</span>              : </span>
-<span id="L385"><span class="lineNum">     385</span> <span class="tlaGNC">     3724316 :    assign picm_wraddr[31:0]  = pt.PIC_BASE_ADDR | {{32-pt.PIC_BITS{1'b0}},(dma_pic_wen ? dma_mem_addr[pt.PIC_BITS-1:0] : lsu_addr_r[pt.PIC_BITS-1:0])};</span></span>
+<span id="L385"><span class="lineNum">     385</span> <span class="tlaGNC">     3723590 :    assign picm_wraddr[31:0]  = pt.PIC_BASE_ADDR | {{32-pt.PIC_BITS{1'b0}},(dma_pic_wen ? dma_mem_addr[pt.PIC_BITS-1:0] : lsu_addr_r[pt.PIC_BITS-1:0])};</span></span>
 <span id="L386"><span class="lineNum">     386</span>              : </span>
-<span id="L387"><span class="lineNum">     387</span> <span class="tlaGNC">     3724316 :    assign picm_wr_data[31:0] = dma_pic_wen ? dma_mem_wdata[31:0] : store_datafn_lo_r[31:0];</span></span>
+<span id="L387"><span class="lineNum">     387</span> <span class="tlaGNC">     3723590 :    assign picm_wr_data[31:0] = dma_pic_wen ? dma_mem_wdata[31:0] : store_datafn_lo_r[31:0];</span></span>
 <span id="L388"><span class="lineNum">     388</span>              : </span>
 <span id="L389"><span class="lineNum">     389</span>              :    assign picm_mask_data_m[31:0] = picm_rd_data_m[31:0];</span>
 <span id="L390"><span class="lineNum">     390</span>              :    assign picm_rd_data_m[63:0]   = {picm_rd_data[31:0],picm_rd_data[31:0]};</span>

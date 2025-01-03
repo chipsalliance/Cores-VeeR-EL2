@@ -129,24 +129,24 @@
 <span id="L25"><span class="lineNum">      25</span>              : </span>
 <span id="L26"><span class="lineNum">      26</span>              :   // JTAG signals</span>
 <span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC tlaBgGNC">           1 :   input              trst_n,              // JTAG reset</span></span>
-<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">      927532 :   input              tck,                 // JTAG clock</span></span>
-<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">       55779 :   input              tms,                 // Test mode select   </span></span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">       72536 :   input              tdi,                 // Test Data Input</span></span>
-<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">       69308 :   output             tdo,                 // Test Data Output           </span></span>
-<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">       27887 :   output             tdoEnable,           // Test Data Output enable             </span></span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">      856624 :   input              tck,                 // JTAG clock</span></span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">       51503 :   input              tms,                 // Test mode select   </span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">       66860 :   input              tdi,                 // Test Data Input</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">       64572 :   output             tdo,                 // Test Data Output           </span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">       25749 :   output             tdoEnable,           // Test Data Output enable             </span></span>
 <span id="L33"><span class="lineNum">      33</span>              : </span>
 <span id="L34"><span class="lineNum">      34</span>              :   // Processor Signals</span>
 <span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">           1 :   input              core_rst_n,          // Core reset                  </span></span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">     2674676 :   input              core_clk,            // Core clock                  </span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">     2470264 :   input              core_clk,            // Core clock                  </span></span>
 <span id="L37"><span class="lineNum">      37</span>              :   //jtag_id is supposed to be connected to a constant in the top level</span>
 <span id="L38"><span class="lineNum">      38</span>              :   /* pragma coverage off*/</span>
 <span id="L39"><span class="lineNum">      39</span>              :   input [31:1]       jtag_id,             // JTAG ID</span>
 <span id="L40"><span class="lineNum">      40</span>              :   /* pragma coverage on*/</span>
-<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">        3330 :   input [31:0]       rd_data,             // 32 bit Read data from  Processor                       </span></span>
-<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">        2112 :   output [31:0]      reg_wr_data,         // 32 bit Write data to Processor                      </span></span>
-<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">        2874 :   output [6:0]       reg_wr_addr,         // 7 bit reg address to Processor                   </span></span>
-<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">       10176 :   output             reg_en,              // 1 bit  Read enable to Processor                                    </span></span>
-<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">        3964 :   output             reg_wr_en,           // 1 bit  Write enable to Processor </span></span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">        3146 :   input [31:0]       rd_data,             // 32 bit Read data from  Processor                       </span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">        1878 :   output [31:0]      reg_wr_data,         // 32 bit Write data to Processor                      </span></span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">        2562 :   output [6:0]       reg_wr_addr,         // 7 bit reg address to Processor                   </span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">        9392 :   output             reg_en,              // 1 bit  Read enable to Processor                                    </span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">        3648 :   output             reg_wr_en,           // 1 bit  Write enable to Processor </span></span>
 <span id="L46"><span class="lineNum">      46</span> <span class="tlaUNC tlaBgUNC">           0 :   output             dmi_hard_reset  </span></span>
 <span id="L47"><span class="lineNum">      47</span>              : );</span>
 <span id="L48"><span class="lineNum">      48</span>              : </span>
@@ -155,8 +155,8 @@
 <span id="L51"><span class="lineNum">      51</span>              : </span>
 <span id="L52"><span class="lineNum">      52</span>              : </span>
 <span id="L53"><span class="lineNum">      53</span>              :   //Wire Declaration</span>
-<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC tlaBgGNC">        6212 :   wire                     rd_en;</span></span>
-<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">        3964 :   wire                     wr_en;</span></span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC tlaBgGNC">        5744 :   wire                     rd_en;</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">        3648 :   wire                     wr_en;</span></span>
 <span id="L56"><span class="lineNum">      56</span> <span class="tlaUNC tlaBgUNC">           0 :   wire                     dmireset;</span></span>
 <span id="L57"><span class="lineNum">      57</span>              : </span>
 <span id="L58"><span class="lineNum">      58</span>              :  </span>

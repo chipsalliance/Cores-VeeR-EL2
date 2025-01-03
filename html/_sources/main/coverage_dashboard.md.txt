@@ -100,6 +100,7 @@
  * [pic_gw_test_gateway](external:coverage_dashboard/all_pic_gw_test_gateway/index.html)
  * [pic_test_clken](external:coverage_dashboard/all_pic_test_clken/index.html)
  * [pic_test_config](external:coverage_dashboard/all_pic_test_config/index.html)
+ * [pic_test_pending](external:coverage_dashboard/all_pic_test_pending/index.html)
  * [pic_test_prioritization](external:coverage_dashboard/all_pic_test_prioritization/index.html)
  * [pic_test_reset](external:coverage_dashboard/all_pic_test_reset/index.html)
  * [pic_test_servicing](external:coverage_dashboard/all_pic_test_servicing/index.html)

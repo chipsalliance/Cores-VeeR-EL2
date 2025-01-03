@@ -133,9 +133,9 @@
 <span id="L29"><span class="lineNum">      29</span>              : `include "el2_param.vh"</span>
 <span id="L30"><span class="lineNum">      30</span>              :  )</span>
 <span id="L31"><span class="lineNum">      31</span>              :   (</span>
-<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC tlaBgGNC">     2528924 :    input logic clk,</span></span>
-<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">     2528924 :    input logic free_l2clk,</span></span>
-<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">     2528924 :    input logic csr_wr_clk,</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC tlaBgGNC">     2528900 :    input logic clk,</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">     2528900 :    input logic free_l2clk,</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">     2528900 :    input logic csr_wr_clk,</span></span>
 <span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">           1 :    input logic rst_l,</span></span>
 <span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">           4 :    input logic        dec_csr_wen_r_mod,  // csr write enable at wb</span></span>
 <span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">           4 :    input logic [11:0] dec_csr_wraddr_r,   // write address for csr</span></span>
@@ -217,7 +217,7 @@
 <span id="L113"><span class="lineNum">     113</span>              : `ifdef RV_SMEPMP</span>
 <span id="L114"><span class="lineNum">     114</span>              :       assign csr_wdata = raw_wdata &amp; 8'b10011111;</span>
 <span id="L115"><span class="lineNum">     115</span>              : `else</span>
-<span id="L116"><span class="lineNum">     116</span> <span class="tlaGNC tlaBgGNC">    19852624 :       assign csr_wdata = raw_wdata[0] ? (raw_wdata &amp; 8'b10011111) : (raw_wdata &amp; 8'b10011101);</span></span>
+<span id="L116"><span class="lineNum">     116</span> <span class="tlaGNC tlaBgGNC">    19848752 :       assign csr_wdata = raw_wdata[0] ? (raw_wdata &amp; 8'b10011111) : (raw_wdata &amp; 8'b10011101);</span></span>
 <span id="L117"><span class="lineNum">     117</span>              : `endif</span>
 <span id="L118"><span class="lineNum">     118</span>              : </span>
 <span id="L119"><span class="lineNum">     119</span>              :       rvdffe #(8) pmpcfg_ff (.*, .clk(free_l2clk),</span>

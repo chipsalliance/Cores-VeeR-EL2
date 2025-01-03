@@ -83,10 +83,10 @@
         100.0%
     </td>
     <td class="headerCovSummaryEntry">
-        47
+        48
     </td>
     <td class="headerCovSummaryEntry">
-        47
+        48
     </td>
 
             </tr>
@@ -2029,7 +2029,7 @@
 <span id="L1925"><span class="lineNum">    1925</span>              :    rvdffs #(3) mseccfg_ff (.*, .clk(csr_wr_clk), .en(wr_mseccfg_r), .din(mseccfg_ns), .dout(mseccfg));</span>
 <span id="L1926"><span class="lineNum">    1926</span>              : </span>
 <span id="L1927"><span class="lineNum">    1927</span>              :    assign mseccfg_ns = {</span>
-<span id="L1928"><span class="lineNum">    1928</span>              :      pmp_any_region_locked ?</span>
+<span id="L1928"><span class="lineNum">    1928</span> <span class="tlaGNC">       16719 :      pmp_any_region_locked ?</span></span>
 <span id="L1929"><span class="lineNum">    1929</span>              :         (dec_csr_wrdata_r[MSECCFG_RLB] &amp; mseccfg[MSECCFG_RLB]) :  // When any PMP region is locked this bit can only be cleared</span>
 <span id="L1930"><span class="lineNum">    1930</span>              :          dec_csr_wrdata_r[MSECCFG_RLB],                           // Otherwise regularly writeable</span>
 <span id="L1931"><span class="lineNum">    1931</span>              :      dec_csr_wrdata_r[MSECCFG_MMWP] |  mseccfg[MSECCFG_MMWP],     // Sticky bit, can only be set but not cleared</span>

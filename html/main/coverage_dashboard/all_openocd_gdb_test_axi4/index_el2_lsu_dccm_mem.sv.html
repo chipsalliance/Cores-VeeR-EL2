@@ -136,8 +136,8 @@
 <span id="L32"><span class="lineNum">      32</span>              : #(</span>
 <span id="L33"><span class="lineNum">      33</span>              : `include "el2_param.vh"</span>
 <span id="L34"><span class="lineNum">      34</span>              :  )(</span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">     2470412 :    input logic         clk,                                             // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">     2470412 :    input logic         active_clk,                                      // Clock only while core active.  Through two clock headers. For flops without second clock header built in.</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">     2467994 :    input logic         clk,                                             // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">     2467994 :    input logic         active_clk,                                      // Clock only while core active.  Through two clock headers. For flops without second clock header built in.</span></span>
 <span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">           1 :    input logic         rst_l,                                           // reset, active low</span></span>
 <span id="L38"><span class="lineNum">      38</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic         clk_override,                                    // Override non-functional clock gating</span></span>
 <span id="L39"><span class="lineNum">      39</span>              : </span>
@@ -192,14 +192,14 @@
 <span id="L88"><span class="lineNum">      88</span> <span class="tlaGNC tlaBgGNC">           4 :    for (genvar i=0; i&lt;pt.DCCM_NUM_BANKS; i++) begin: mem_bank</span></span>
 <span id="L89"><span class="lineNum">      89</span>              :       assign  wren_bank[i]        = dccm_wren &amp; ((dccm_wr_addr_hi[2+:pt.DCCM_BANK_BITS] == i) | (dccm_wr_addr_lo[2+:pt.DCCM_BANK_BITS] == i));</span>
 <span id="L90"><span class="lineNum">      90</span>              :       assign  rden_bank[i]        = dccm_rden &amp; ((dccm_rd_addr_hi[2+:pt.DCCM_BANK_BITS] == i) | (dccm_rd_addr_lo[2+:pt.DCCM_BANK_BITS] == i));</span>
-<span id="L91"><span class="lineNum">      91</span> <span class="tlaGNC">    20052040 :       assign  addr_bank[i][(pt.DCCM_BANK_BITS+DCCM_WIDTH_BITS)+:DCCM_INDEX_BITS] = wren_bank[i] ? (((dccm_wr_addr_hi[2+:pt.DCCM_BANK_BITS] == i) &amp; wr_unaligned) ?</span></span>
+<span id="L91"><span class="lineNum">      91</span> <span class="tlaGNC">    21604568 :       assign  addr_bank[i][(pt.DCCM_BANK_BITS+DCCM_WIDTH_BITS)+:DCCM_INDEX_BITS] = wren_bank[i] ? (((dccm_wr_addr_hi[2+:pt.DCCM_BANK_BITS] == i) &amp; wr_unaligned) ?</span></span>
 <span id="L92"><span class="lineNum">      92</span>              :                                                                                                         dccm_wr_addr_hi[(pt.DCCM_BANK_BITS+DCCM_WIDTH_BITS)+:DCCM_INDEX_BITS] :</span>
 <span id="L93"><span class="lineNum">      93</span>              :                                                                                                         dccm_wr_addr_lo[(pt.DCCM_BANK_BITS+DCCM_WIDTH_BITS)+:DCCM_INDEX_BITS])  :</span>
-<span id="L94"><span class="lineNum">      94</span> <span class="tlaGNC">    20052040 :                                                                                                   (((dccm_rd_addr_hi[2+:pt.DCCM_BANK_BITS] == i) &amp; rd_unaligned) ?</span></span>
+<span id="L94"><span class="lineNum">      94</span> <span class="tlaGNC">    21604568 :                                                                                                   (((dccm_rd_addr_hi[2+:pt.DCCM_BANK_BITS] == i) &amp; rd_unaligned) ?</span></span>
 <span id="L95"><span class="lineNum">      95</span>              :                                                                                                         dccm_rd_addr_hi[(pt.DCCM_BANK_BITS+DCCM_WIDTH_BITS)+:DCCM_INDEX_BITS] :</span>
 <span id="L96"><span class="lineNum">      96</span>              :                                                                                                         dccm_rd_addr_lo[(pt.DCCM_BANK_BITS+DCCM_WIDTH_BITS)+:DCCM_INDEX_BITS]);</span>
 <span id="L97"><span class="lineNum">      97</span>              : </span>
-<span id="L98"><span class="lineNum">      98</span> <span class="tlaGNC">    20052040 :       assign wr_data_bank[i]     = ((dccm_wr_addr_hi[2+:pt.DCCM_BANK_BITS] == i) &amp; wr_unaligned) ? dccm_wr_data_hi[pt.DCCM_FDATA_WIDTH-1:0] : dccm_wr_data_lo[pt.DCCM_FDATA_WIDTH-1:0];</span></span>
+<span id="L98"><span class="lineNum">      98</span> <span class="tlaGNC">    21604568 :       assign wr_data_bank[i]     = ((dccm_wr_addr_hi[2+:pt.DCCM_BANK_BITS] == i) &amp; wr_unaligned) ? dccm_wr_data_hi[pt.DCCM_FDATA_WIDTH-1:0] : dccm_wr_data_lo[pt.DCCM_FDATA_WIDTH-1:0];</span></span>
 <span id="L99"><span class="lineNum">      99</span>              : </span>
 <span id="L100"><span class="lineNum">     100</span>              :       // clock gating section</span>
 <span id="L101"><span class="lineNum">     101</span>              :       assign  dccm_clken[i] = (wren_bank[i] | rden_bank[i] | clk_override) ;</span>

@@ -124,7 +124,7 @@
 <span id="L20"><span class="lineNum">      20</span>              : `include "el2_param.vh"</span>
 <span id="L21"><span class="lineNum">      21</span>              : )</span>
 <span id="L22"><span class="lineNum">      22</span>              :   (</span>
-<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC tlaBgGNC">    67024628 :    input logic           clk,                       // Top level clock</span></span>
+<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC tlaBgGNC">    67225438 :    input logic           clk,                       // Top level clock</span></span>
 <span id="L24"><span class="lineNum">      24</span> <span class="tlaGNC">         304 :    input logic           rst_l,                     // Reset</span></span>
 <span id="L25"><span class="lineNum">      25</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
 <span id="L26"><span class="lineNum">      26</span>              :    /*pragma coverage off*/</span>
@@ -132,8 +132,8 @@
 <span id="L28"><span class="lineNum">      28</span>              :    /*pragma coverage on*/</span>
 <span id="L29"><span class="lineNum">      29</span>              : </span>
 <span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">      870668 :    input el2_div_pkt_t  dp,                        // valid, sign, rem</span></span>
-<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">     4045460 :    input logic  [31:0]   dividend,                  // Numerator</span></span>
-<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">     4068251 :    input logic  [31:0]   divisor,                   // Denominator</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">     4045280 :    input logic  [31:0]   dividend,                  // Numerator</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">     4068115 :    input logic  [31:0]   divisor,                   // Denominator</span></span>
 <span id="L33"><span class="lineNum">      33</span>              : </span>
 <span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">        2466 :    input logic           cancel,                    // Cancel divide</span></span>
 <span id="L35"><span class="lineNum">      35</span>              : </span>
@@ -1429,7 +1429,7 @@
 <span id="L1325"><span class="lineNum">    1325</span>              : // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *</span>
 <span id="L1326"><span class="lineNum">    1326</span>              : module el2_exu_div_new_4bit_fullshortq</span>
 <span id="L1327"><span class="lineNum">    1327</span>              :   (</span>
-<span id="L1328"><span class="lineNum">    1328</span> <span class="tlaGNC">    67024628 :    input  logic            clk,                       // Top level clock</span></span>
+<span id="L1328"><span class="lineNum">    1328</span> <span class="tlaGNC">    67225438 :    input  logic            clk,                       // Top level clock</span></span>
 <span id="L1329"><span class="lineNum">    1329</span> <span class="tlaGNC">         304 :    input  logic            rst_l,                     // Reset</span></span>
 <span id="L1330"><span class="lineNum">    1330</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
 <span id="L1331"><span class="lineNum">    1331</span>              :    /*pragma coverage off*/</span>
@@ -1440,8 +1440,8 @@
 <span id="L1336"><span class="lineNum">    1336</span> <span class="tlaGNC">      150558 :    input  logic            valid_in,</span></span>
 <span id="L1337"><span class="lineNum">    1337</span> <span class="tlaGNC">      869286 :    input  logic            signed_in,</span></span>
 <span id="L1338"><span class="lineNum">    1338</span> <span class="tlaGNC">       73405 :    input  logic            rem_in,</span></span>
-<span id="L1339"><span class="lineNum">    1339</span> <span class="tlaGNC">     4045460 :    input  logic [31:0]     dividend_in,</span></span>
-<span id="L1340"><span class="lineNum">    1340</span> <span class="tlaGNC">     4068251 :    input  logic [31:0]     divisor_in,</span></span>
+<span id="L1339"><span class="lineNum">    1339</span> <span class="tlaGNC">     4045280 :    input  logic [31:0]     dividend_in,</span></span>
+<span id="L1340"><span class="lineNum">    1340</span> <span class="tlaGNC">     4068115 :    input  logic [31:0]     divisor_in,</span></span>
 <span id="L1341"><span class="lineNum">    1341</span>              : </span>
 <span id="L1342"><span class="lineNum">    1342</span> <span class="tlaGNC">      148092 :    output logic            valid_out,</span></span>
 <span id="L1343"><span class="lineNum">    1343</span> <span class="tlaGNC">       78615 :    output logic [31:0]     data_out</span></span>
@@ -1461,10 +1461,10 @@
 <span id="L1357"><span class="lineNum">    1357</span> <span class="tlaGNC">       50406 :    logic         [3:0]     smallnum;</span></span>
 <span id="L1358"><span class="lineNum">    1358</span>              : </span>
 <span id="L1359"><span class="lineNum">    1359</span> <span class="tlaGNC">      296628 :    logic                   a_enable, a_shift;</span></span>
-<span id="L1360"><span class="lineNum">    1360</span> <span class="tlaGNC">     4071947 :    logic        [31:0]     a_in, a_ff;</span></span>
+<span id="L1360"><span class="lineNum">    1360</span> <span class="tlaGNC">     4071767 :    logic        [31:0]     a_in, a_ff;</span></span>
 <span id="L1361"><span class="lineNum">    1361</span>              : </span>
 <span id="L1362"><span class="lineNum">    1362</span> <span class="tlaGNC">      150558 :    logic                   b_enable, b_twos_comp;</span></span>
-<span id="L1363"><span class="lineNum">    1363</span> <span class="tlaGNC">     4081959 :    logic        [32:0]     b_in;</span></span>
+<span id="L1363"><span class="lineNum">    1363</span> <span class="tlaGNC">     4081823 :    logic        [32:0]     b_in;</span></span>
 <span id="L1364"><span class="lineNum">    1364</span> <span class="tlaGNC">      129962 :    logic        [37:0]     b_ff;</span></span>
 <span id="L1365"><span class="lineNum">    1365</span>              : </span>
 <span id="L1366"><span class="lineNum">    1366</span> <span class="tlaGNC">      192785 :    logic        [31:0]     q_in, q_ff;</span></span>
@@ -1781,7 +1781,7 @@
 <span id="L1677"><span class="lineNum">    1677</span>              : </span>
 <span id="L1678"><span class="lineNum">    1678</span>              : </span>
 <span id="L1679"><span class="lineNum">    1679</span>              :    assign dw_shortq_raw[6:0]      =  {1'b0,dw_b_enc[5:0]} - {1'b0,dw_a_enc[5:0]} + 7'd1;</span>
-<span id="L1680"><span class="lineNum">    1680</span> <span class="tlaGNC">    26748112 :    assign shortq[5:0]             =  dw_shortq_raw[6]  ?  6'd0  :  dw_shortq_raw[5:0];</span></span>
+<span id="L1680"><span class="lineNum">    1680</span> <span class="tlaGNC">    26838683 :    assign shortq[5:0]             =  dw_shortq_raw[6]  ?  6'd0  :  dw_shortq_raw[5:0];</span></span>
 <span id="L1681"><span class="lineNum">    1681</span>              : </span>
 <span id="L1682"><span class="lineNum">    1682</span>              :    assign shortq_enable           =  valid_ff &amp; ~shortq[5] &amp; ~(shortq[4:2] ==  3'b111) &amp; ~cancel;</span>
 <span id="L1683"><span class="lineNum">    1683</span>              : </span>
@@ -1819,7 +1819,7 @@
 <span id="L1715"><span class="lineNum">    1715</span>              :                                     ( {5{shortq[4:0] == 5'd00}} &amp; 5'd28);</span>
 <span id="L1716"><span class="lineNum">    1716</span>              : </span>
 <span id="L1717"><span class="lineNum">    1717</span>              : </span>
-<span id="L1718"><span class="lineNum">    1718</span> <span class="tlaGNC">    26926610 :    assign shortq_shift[4:0]       = ~shortq_enable     ?  5'd0  :  shortq_decode[4:0];</span></span>
+<span id="L1718"><span class="lineNum">    1718</span> <span class="tlaGNC">    27017245 :    assign shortq_shift[4:0]       = ~shortq_enable     ?  5'd0  :  shortq_decode[4:0];</span></span>
 <span id="L1719"><span class="lineNum">    1719</span>              : </span>
 <span id="L1720"><span class="lineNum">    1720</span>              : </span>
 <span id="L1721"><span class="lineNum">    1721</span>              :    // *** *** *** End   : Short Q }}</span>
@@ -1918,7 +1918,7 @@
 <span id="L1814"><span class="lineNum">    1814</span>              :                                     ({5{operand[31:00] ==  {{32{1'b1}}     } }} &amp; 5'd31);</span>
 <span id="L1815"><span class="lineNum">    1815</span>              : </span>
 <span id="L1816"><span class="lineNum">    1816</span>              : </span>
-<span id="L1817"><span class="lineNum">    1817</span> <span class="tlaGNC">    34427854 : assign cls[4:0]                   =  operand[32]  ?  cls_ones[4:0]  :  cls_zeros[4:0];</span></span>
+<span id="L1817"><span class="lineNum">    1817</span> <span class="tlaGNC">    34608996 : assign cls[4:0]                   =  operand[32]  ?  cls_ones[4:0]  :  cls_zeros[4:0];</span></span>
 <span id="L1818"><span class="lineNum">    1818</span>              : </span>
 <span id="L1819"><span class="lineNum">    1819</span>              : endmodule // el2_exu_div_cls</span>
         </pre>

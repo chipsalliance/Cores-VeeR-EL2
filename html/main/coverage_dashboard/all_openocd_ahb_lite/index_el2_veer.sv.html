@@ -393,7 +393,7 @@
 <span id="L289"><span class="lineNum">     289</span>              : </span>
 <span id="L290"><span class="lineNum">     290</span> <span class="tlaGNC">         582 :    output logic                            sb_axi_wvalid,</span></span>
 <span id="L291"><span class="lineNum">     291</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic                            sb_axi_wready,</span></span>
-<span id="L292"><span class="lineNum">     292</span> <span class="tlaGNC tlaBgGNC">         455 :    output logic [63:0]                     sb_axi_wdata,</span></span>
+<span id="L292"><span class="lineNum">     292</span> <span class="tlaGNC tlaBgGNC">         457 :    output logic [63:0]                     sb_axi_wdata,</span></span>
 <span id="L293"><span class="lineNum">     293</span> <span class="tlaGNC">         720 :    output logic [7:0]                      sb_axi_wstrb,</span></span>
 <span id="L294"><span class="lineNum">     294</span> <span class="tlaGNC">           1 :    output logic                            sb_axi_wlast,</span></span>
 <span id="L295"><span class="lineNum">     295</span>              : </span>
@@ -550,8 +550,8 @@
 <span id="L446"><span class="lineNum">     446</span> <span class="tlaGNC">        8788 :    input logic                  dmi_reg_en,                // read or write</span></span>
 <span id="L447"><span class="lineNum">     447</span> <span class="tlaGNC">        3225 :    input logic [6:0]            dmi_reg_addr,              // address of DM register</span></span>
 <span id="L448"><span class="lineNum">     448</span> <span class="tlaGNC">        4580 :    input logic                  dmi_reg_wr_en,             // write instruction</span></span>
-<span id="L449"><span class="lineNum">     449</span> <span class="tlaGNC">        1568 :    input logic [31:0]           dmi_reg_wdata,             // write data</span></span>
-<span id="L450"><span class="lineNum">     450</span> <span class="tlaGNC">        2510 :    output logic [31:0]          dmi_reg_rdata,</span></span>
+<span id="L449"><span class="lineNum">     449</span> <span class="tlaGNC">        1572 :    input logic [31:0]           dmi_reg_wdata,             // write data</span></span>
+<span id="L450"><span class="lineNum">     450</span> <span class="tlaGNC">        2520 :    output logic [31:0]          dmi_reg_rdata,</span></span>
 <span id="L451"><span class="lineNum">     451</span>              : </span>
 <span id="L452"><span class="lineNum">     452</span>              :    // ICCM/DCCM ECC status</span>
 <span id="L453"><span class="lineNum">     453</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic                 iccm_ecc_single_error,</span></span>
@@ -1050,7 +1050,7 @@
 <span id="L946"><span class="lineNum">     946</span>              : </span>
 <span id="L947"><span class="lineNum">     947</span>              :    assign core_dbg_cmd_done = dma_dbg_cmd_done | dec_dbg_cmd_done;</span>
 <span id="L948"><span class="lineNum">     948</span>              :    assign core_dbg_cmd_fail = dma_dbg_cmd_fail | dec_dbg_cmd_fail;</span>
-<span id="L949"><span class="lineNum">     949</span> <span class="tlaGNC">     1240215 :    assign core_dbg_rddata[31:0] = dma_dbg_cmd_done ? dma_dbg_rddata[31:0] : dec_dbg_rddata[31:0];</span></span>
+<span id="L949"><span class="lineNum">     949</span> <span class="tlaGNC">     1240670 :    assign core_dbg_rddata[31:0] = dma_dbg_cmd_done ? dma_dbg_rddata[31:0] : dec_dbg_rddata[31:0];</span></span>
 <span id="L950"><span class="lineNum">     950</span>              : </span>
 <span id="L951"><span class="lineNum">     951</span>              :    el2_dbg #(.pt(pt)) dbg (</span>
 <span id="L952"><span class="lineNum">     952</span>              :       .rst_l(core_rst_l),</span>
@@ -1196,10 +1196,10 @@
 <span id="L1092"><span class="lineNum">    1092</span>              :   assign pmp_chan_type[0] = EXEC;</span>
 <span id="L1093"><span class="lineNum">    1093</span>              :   assign ifu_pmp_error    = pmp_chan_err[0];</span>
 <span id="L1094"><span class="lineNum">    1094</span>              :   assign pmp_chan_addr[1] = lsu_pmp_addr_start;</span>
-<span id="L1095"><span class="lineNum">    1095</span> <span class="tlaGNC">     3722846 :   assign pmp_chan_type[1] = lsu_pmp_we ? WRITE : (lsu_pmp_re ? READ : NONE);</span></span>
+<span id="L1095"><span class="lineNum">    1095</span> <span class="tlaGNC">     3724211 :   assign pmp_chan_type[1] = lsu_pmp_we ? WRITE : (lsu_pmp_re ? READ : NONE);</span></span>
 <span id="L1096"><span class="lineNum">    1096</span>              :   assign lsu_pmp_error_start = pmp_chan_err[1];</span>
 <span id="L1097"><span class="lineNum">    1097</span>              :   assign pmp_chan_addr[2] = lsu_pmp_addr_end;</span>
-<span id="L1098"><span class="lineNum">    1098</span> <span class="tlaGNC">     3722846 :   assign pmp_chan_type[2] = lsu_pmp_we ? WRITE : (lsu_pmp_re ? READ : NONE);</span></span>
+<span id="L1098"><span class="lineNum">    1098</span> <span class="tlaGNC">     3724211 :   assign pmp_chan_type[2] = lsu_pmp_we ? WRITE : (lsu_pmp_re ? READ : NONE);</span></span>
 <span id="L1099"><span class="lineNum">    1099</span>              :   assign lsu_pmp_error_end = pmp_chan_err[2];</span>
 <span id="L1100"><span class="lineNum">    1100</span>              : </span>
 <span id="L1101"><span class="lineNum">    1101</span>              :   el2_pmp #(</span>

@@ -504,9 +504,9 @@
 <span id="L400"><span class="lineNum">     400</span>              :    // ports added by the soc team</span>
 <span id="L401"><span class="lineNum">     401</span> <span class="tlaGNC tlaBgGNC">      872158 :    input logic                             jtag_tck,    // JTAG clk</span></span>
 <span id="L402"><span class="lineNum">     402</span> <span class="tlaGNC">       50280 :    input logic                             jtag_tms,    // JTAG TMS</span></span>
-<span id="L403"><span class="lineNum">     403</span> <span class="tlaGNC">       62784 :    input logic                             jtag_tdi,    // JTAG tdi</span></span>
+<span id="L403"><span class="lineNum">     403</span> <span class="tlaGNC">       62740 :    input logic                             jtag_tdi,    // JTAG tdi</span></span>
 <span id="L404"><span class="lineNum">     404</span> <span class="tlaGNC">           1 :    input logic                             jtag_trst_n, // JTAG Reset</span></span>
-<span id="L405"><span class="lineNum">     405</span> <span class="tlaGNC">       80330 :    output logic                            jtag_tdo,    // JTAG TDO</span></span>
+<span id="L405"><span class="lineNum">     405</span> <span class="tlaGNC">       80250 :    output logic                            jtag_tdo,    // JTAG TDO</span></span>
 <span id="L406"><span class="lineNum">     406</span> <span class="tlaGNC">       25138 :    output logic                            jtag_tdoEn,  // JTAG Test Data Output enable</span></span>
 <span id="L407"><span class="lineNum">     407</span>              : </span>
 <span id="L408"><span class="lineNum">     408</span>              :    /*pragma coverage off*/</span>
@@ -963,15 +963,15 @@
 <span id="L859"><span class="lineNum">     859</span> <span class="tlaGNC tlaBgGNC">        8788 :    logic                   dmi_en;</span></span>
 <span id="L860"><span class="lineNum">     860</span> <span class="tlaGNC">        3225 :    logic [6:0]             dmi_addr;</span></span>
 <span id="L861"><span class="lineNum">     861</span> <span class="tlaGNC">        4580 :    logic                   dmi_wr_en;</span></span>
-<span id="L862"><span class="lineNum">     862</span> <span class="tlaGNC">        1568 :    logic [31:0]            dmi_wdata;</span></span>
-<span id="L863"><span class="lineNum">     863</span> <span class="tlaGNC">        2510 :    logic [31:0]            dmi_rdata;</span></span>
+<span id="L862"><span class="lineNum">     862</span> <span class="tlaGNC">        1572 :    logic [31:0]            dmi_wdata;</span></span>
+<span id="L863"><span class="lineNum">     863</span> <span class="tlaGNC">        2520 :    logic [31:0]            dmi_rdata;</span></span>
 <span id="L864"><span class="lineNum">     864</span>              : </span>
 <span id="L865"><span class="lineNum">     865</span>              :    // DMI (core)</span>
 <span id="L866"><span class="lineNum">     866</span> <span class="tlaGNC">        8788 :    logic                   dmi_reg_en;</span></span>
 <span id="L867"><span class="lineNum">     867</span> <span class="tlaGNC">        3225 :    logic [6:0]             dmi_reg_addr;</span></span>
 <span id="L868"><span class="lineNum">     868</span> <span class="tlaGNC">        4580 :    logic                   dmi_reg_wr_en;</span></span>
-<span id="L869"><span class="lineNum">     869</span> <span class="tlaGNC">        1568 :    logic [31:0]            dmi_reg_wdata;</span></span>
-<span id="L870"><span class="lineNum">     870</span> <span class="tlaGNC">        2510 :    logic [31:0]            dmi_reg_rdata;</span></span>
+<span id="L869"><span class="lineNum">     869</span> <span class="tlaGNC">        1572 :    logic [31:0]            dmi_reg_wdata;</span></span>
+<span id="L870"><span class="lineNum">     870</span> <span class="tlaGNC">        2520 :    logic [31:0]            dmi_reg_rdata;</span></span>
 <span id="L871"><span class="lineNum">     871</span>              : </span>
 <span id="L872"><span class="lineNum">     872</span>              :    // Instantiate the el2_veer core</span>
 <span id="L873"><span class="lineNum">     873</span>              :    el2_veer #(.pt(pt)) veer (</span>

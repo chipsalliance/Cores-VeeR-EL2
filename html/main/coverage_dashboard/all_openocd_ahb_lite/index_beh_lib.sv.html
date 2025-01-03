@@ -139,11 +139,11 @@
 <span id="L35"><span class="lineNum">      35</span>              :    end</span>
 <span id="L36"><span class="lineNum">      36</span>              : `endif</span>
 <span id="L37"><span class="lineNum">      37</span>              : </span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">   826062444 :    always_ff @(posedge clk or negedge rst_l) begin</span></span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">   825737212 :       if (rst_l == 0)</span></span>
-<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">      325232 :         dout[WIDTH-1:0] &lt;= 0;</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">   826365474 :    always_ff @(posedge clk or negedge rst_l) begin</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">   826035462 :       if (rst_l == 0)</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">      330012 :         dout[WIDTH-1:0] &lt;= 0;</span></span>
 <span id="L41"><span class="lineNum">      41</span>              :       else</span>
-<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">   825737212 :         dout[WIDTH-1:0] &lt;= din[WIDTH-1:0];</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">   826035462 :         dout[WIDTH-1:0] &lt;= din[WIDTH-1:0];</span></span>
 <span id="L43"><span class="lineNum">      43</span>              :    end</span>
 <span id="L44"><span class="lineNum">      44</span>              : </span>
 <span id="L45"><span class="lineNum">      45</span>              : end</span>
@@ -152,8 +152,8 @@
 <span id="L48"><span class="lineNum">      48</span>              : // rvdff with 2:1 input mux to flop din iff sel==1</span>
 <span id="L49"><span class="lineNum">      49</span>              : module rvdffs #( parameter WIDTH=1, SHORT=0 )</span>
 <span id="L50"><span class="lineNum">      50</span>              :    (</span>
-<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">    98573297 :      input logic [WIDTH-1:0] din,</span></span>
-<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">    98573297 :      input logic             en,</span></span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">    98573475 :      input logic [WIDTH-1:0] din,</span></span>
+<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">    98573475 :      input logic             en,</span></span>
 <span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC">  1443982486 :      input logic           clk,</span></span>
 <span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">         571 :      input logic                   rst_l,</span></span>
 <span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">     9807974 :      output logic [WIDTH-1:0] dout</span></span>
@@ -163,7 +163,7 @@
 <span id="L59"><span class="lineNum">      59</span>              :    assign dout = din;</span>
 <span id="L60"><span class="lineNum">      60</span>              : end</span>
 <span id="L61"><span class="lineNum">      61</span>              : else begin : genblock</span>
-<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">  1325542303 :    rvdff #(WIDTH) dffs (.din((en) ? din[WIDTH-1:0] : dout[WIDTH-1:0]), .*);</span></span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">  1326025107 :    rvdff #(WIDTH) dffs (.din((en) ? din[WIDTH-1:0] : dout[WIDTH-1:0]), .*);</span></span>
 <span id="L63"><span class="lineNum">      63</span>              : end</span>
 <span id="L64"><span class="lineNum">      64</span>              : </span>
 <span id="L65"><span class="lineNum">      65</span>              : endmodule</span>
@@ -184,7 +184,7 @@
 <span id="L80"><span class="lineNum">      80</span>              :    assign dout = din;</span>
 <span id="L81"><span class="lineNum">      81</span>              : end</span>
 <span id="L82"><span class="lineNum">      82</span>              : else begin : genblock</span>
-<span id="L83"><span class="lineNum">      83</span> <span class="tlaGNC">   126744953 :    assign din_new = {WIDTH{~clear}} &amp; (en ? din[WIDTH-1:0] : dout[WIDTH-1:0]);</span></span>
+<span id="L83"><span class="lineNum">      83</span> <span class="tlaGNC">   126791453 :    assign din_new = {WIDTH{~clear}} &amp; (en ? din[WIDTH-1:0] : dout[WIDTH-1:0]);</span></span>
 <span id="L84"><span class="lineNum">      84</span>              :    rvdff #(WIDTH) dffsc (.din(din_new[WIDTH-1:0]), .*);</span>
 <span id="L85"><span class="lineNum">      85</span>              : end</span>
 <span id="L86"><span class="lineNum">      86</span>              : endmodule</span>
@@ -269,15 +269,15 @@
 <span id="L165"><span class="lineNum">     165</span>              : </span>
 <span id="L166"><span class="lineNum">     166</span>              : module rvdffe #( parameter WIDTH=1, SHORT=0, OVERRIDE=0 )</span>
 <span id="L167"><span class="lineNum">     167</span>              :    (</span>
-<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC tlaBgGNC">    98567668 :      input  logic [WIDTH-1:0] din,</span></span>
-<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC">    98567668 :      input  logic           en,</span></span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC tlaBgGNC">    98567846 :      input  logic [WIDTH-1:0] din,</span></span>
+<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC">    98567846 :      input  logic           en,</span></span>
 <span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">  1297308258 :      input  logic           clk,</span></span>
 <span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">         513 :      input  logic           rst_l,</span></span>
 <span id="L172"><span class="lineNum">     172</span>              :      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
 <span id="L173"><span class="lineNum">     173</span>              :      /*pragma coverage off*/</span>
 <span id="L174"><span class="lineNum">     174</span>              :      input  logic             scan_mode,</span>
 <span id="L175"><span class="lineNum">     175</span>              :      /*pragma coverage on*/</span>
-<span id="L176"><span class="lineNum">     176</span> <span class="tlaGNC">     3584121 :      output logic [WIDTH-1:0] dout</span></span>
+<span id="L176"><span class="lineNum">     176</span> <span class="tlaGNC">     3584119 :      output logic [WIDTH-1:0] dout</span></span>
 <span id="L177"><span class="lineNum">     177</span>              :      );</span>
 <span id="L178"><span class="lineNum">     178</span>              : </span>
 <span id="L179"><span class="lineNum">     179</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                      l1clk;</span></span>
@@ -641,7 +641,7 @@
 <span id="L537"><span class="lineNum">     537</span>              :    genvar                     i;</span>
 <span id="L538"><span class="lineNum">     538</span>              : </span>
 <span id="L539"><span class="lineNum">     539</span>              :    for ( i = 1; i &lt; WIDTH; i++ )  begin : flip_after_first_one</span>
-<span id="L540"><span class="lineNum">     540</span> <span class="tlaGNC tlaBgGNC">    38450447 :       assign dout_temp[i] = (|din[i-1:0]) ? ~din[i] : din[i];</span></span>
+<span id="L540"><span class="lineNum">     540</span> <span class="tlaGNC tlaBgGNC">    38464552 :       assign dout_temp[i] = (|din[i-1:0]) ? ~din[i] : din[i];</span></span>
 <span id="L541"><span class="lineNum">     541</span>              :    end : flip_after_first_one</span>
 <span id="L542"><span class="lineNum">     542</span>              : </span>
 <span id="L543"><span class="lineNum">     543</span>              :    assign dout[WIDTH-1:0]  = { dout_temp[WIDTH-1:1], din[0] };</span>
@@ -705,7 +705,7 @@
 <span id="L601"><span class="lineNum">     601</span>              :    genvar                     i;</span>
 <span id="L602"><span class="lineNum">     602</span>              : </span>
 <span id="L603"><span class="lineNum">     603</span>              :    for ( i = 1; i &lt; WIDTH; i++ )  begin : match_after_first_zero</span>
-<span id="L604"><span class="lineNum">     604</span> <span class="tlaGNC tlaBgGNC">   307603080 :       assign matchvec[i] = (&amp;mask[i-1:0] &amp; masken_or_fullmask) ? 1'b1 : (mask[i] == data[i]);</span></span>
+<span id="L604"><span class="lineNum">     604</span> <span class="tlaGNC tlaBgGNC">   307715920 :       assign matchvec[i] = (&amp;mask[i-1:0] &amp; masken_or_fullmask) ? 1'b1 : (mask[i] == data[i]);</span></span>
 <span id="L605"><span class="lineNum">     605</span>              :    end : match_after_first_zero</span>
 <span id="L606"><span class="lineNum">     606</span>              : </span>
 <span id="L607"><span class="lineNum">     607</span>              :    assign match  = &amp;matchvec[WIDTH-1:0];    // all bits either matched or were masked off</span>
@@ -815,7 +815,7 @@
 <span id="L711"><span class="lineNum">     711</span>              :    // Generate the corrected data</span>
 <span id="L712"><span class="lineNum">     712</span>              :    assign din_plus_parity[38:0] = {ecc_in[6], din[31:26], ecc_in[5], din[25:11], ecc_in[4], din[10:4], ecc_in[3], din[3:1], ecc_in[2], din[0], ecc_in[1:0]};</span>
 <span id="L713"><span class="lineNum">     713</span>              : </span>
-<span id="L714"><span class="lineNum">     714</span> <span class="tlaGNC">     9926576 :    assign dout_plus_parity[38:0] = single_ecc_error ? (error_mask[38:0] ^ din_plus_parity[38:0]) : din_plus_parity[38:0];</span></span>
+<span id="L714"><span class="lineNum">     714</span> <span class="tlaGNC">     9930216 :    assign dout_plus_parity[38:0] = single_ecc_error ? (error_mask[38:0] ^ din_plus_parity[38:0]) : din_plus_parity[38:0];</span></span>
 <span id="L715"><span class="lineNum">     715</span>              :    assign dout[31:0]             = {dout_plus_parity[37:32], dout_plus_parity[30:16], dout_plus_parity[14:8], dout_plus_parity[6:4], dout_plus_parity[2]};</span>
 <span id="L716"><span class="lineNum">     716</span>              :    assign ecc_out[6:0]           = {(dout_plus_parity[38] ^ (ecc_check[6:0] == 7'b1000000)), dout_plus_parity[31], dout_plus_parity[15], dout_plus_parity[7], dout_plus_parity[3], dout_plus_parity[1:0]};</span>
 <span id="L717"><span class="lineNum">     717</span>              : </span>

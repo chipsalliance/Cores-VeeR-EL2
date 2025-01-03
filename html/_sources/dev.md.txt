@@ -31,14 +31,6 @@
    
    * [Documentation](external:dev/246/docs_rendered/html/index.html)
    
- * 316
-   * [Coverage](316_coverage_dashboard)
-
-   * [Verification tests](external:dev/316/verification_dashboard.html)
-
-   
-   * [Documentation](external:dev/316/docs_rendered/html/index.html)
-   
  * 311
    * [Coverage](311_coverage_dashboard)
 

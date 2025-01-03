@@ -60,5 +60,5 @@ include $(shell cocotb-config --makefiles)/Makefile.sim
 
 # Rules for generating VeeR config
 $(CFGDIR)/common_defines.vh:
-	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0
+	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0 -set=pmp_entries=64
 

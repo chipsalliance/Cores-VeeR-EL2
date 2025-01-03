@@ -51,6 +51,8 @@ logic csr_mitb0;
 logic csr_mitb1;
 logic csr_mitcnt0;
 logic csr_mitcnt1;
+/* exclude signals that are tied to constant value in this file */
+/*pragma coverage off*/
 logic csr_perfva;
 logic csr_perfvb;
 logic csr_perfvc;
@@ -60,6 +62,7 @@ logic csr_perfvf;
 logic csr_perfvg;
 logic csr_perfvh;
 logic csr_perfvi;
+/*pragma coverage on*/
 logic csr_mpmc;
 logic csr_mcpc;
 logic csr_meicpct;

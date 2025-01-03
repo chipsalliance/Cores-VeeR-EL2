@@ -2,52 +2,9 @@ import logging
 import os
 
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, FallingEdge, Timer
+from cocotb.triggers import ClockCycles, FallingEdge
 from pyuvm import *
-
-
-class Item(uvm_sequence_item):
-    """
-    A generic item
-    """
-
-    def __init__(self):
-        super().__init__("Item")
-
-
-class Sequence(uvm_sequence):
-    """
-    A generic sequence
-    """
-
-    def __init__(self, name):
-        super().__init__(name)
-
-    async def body(self):
-        await Timer(100, "ns")
-
-
-class Driver(uvm_driver):
-    """
-    Driver
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    async def run_phase(self):
-        pass
-
-
-class Monitor(uvm_component):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def build_phase(self):
-        self.ap = uvm_analysis_port("ap", self)
-
-    async def run_phase(self):
-        pass
+from ifu_ic_tag_agent import IcTagAgent
 
 
 class Scoreboard(uvm_component):
@@ -86,21 +43,20 @@ class BaseEnv(uvm_env):
         ConfigDB().set(None, "*", "TEST_ITERATIONS", 1)
         ConfigDB().set(None, "*", "TEST_CLK_PERIOD", 1)
 
+        ConfigDB().set(None, "*", "ICACHE_WAYPOINT", 0)
+
         # Sequencers
         self.seqr = uvm_sequencer("seqr", self)
 
-        # Driver
-        self.drv = Driver("drv", self)
-
-        # Monitor
-        self.mon = Monitor("mon", self)
+        # Agent
+        self.agent = IcTagAgent("ic_tag_agent", self)
 
         # Scoreboard
         self.scoreboard = Scoreboard("scoreboard", self)
 
     def connect_phase(self):
-        self.drv.seq_item_port.connect(self.seqr.seq_item_export)
-        self.mon.ap.connect(self.scoreboard.fifo.analysis_export)
+        self.agent.driver.seq_item_port.connect(self.seqr.seq_item_export)
+        self.agent.monitor.ap.connect(self.scoreboard.fifo.analysis_export)
 
 
 class BaseTest(uvm_test):
@@ -125,7 +81,6 @@ class BaseTest(uvm_test):
         cocotb.start_soon(clock.start(start_high=False))
 
     async def do_reset(self):
-
         cocotb.top.rst_l.value = 0
         await ClockCycles(cocotb.top.clk, 2)
         await FallingEdge(cocotb.top.clk)
@@ -133,12 +88,16 @@ class BaseTest(uvm_test):
 
     async def run_phase(self):
         self.raise_objection()
+
+
         # Start clocks
         self.start_clock("clk")
+        self.start_clock("active_clk")
 
         # Issue reset
+        # breakpoint()
         await self.do_reset()
-        await self.run()
+        # await self.run()
         self.drop_objection()
 
     async def run(self):

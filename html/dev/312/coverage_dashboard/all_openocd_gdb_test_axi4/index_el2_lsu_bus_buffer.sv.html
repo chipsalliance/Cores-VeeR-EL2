@@ -132,7 +132,7 @@
 <span id="L28"><span class="lineNum">      28</span>              : #(</span>
 <span id="L29"><span class="lineNum">      29</span>              : `include "el2_param.vh"</span>
 <span id="L30"><span class="lineNum">      30</span>              :  )(</span>
-<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC tlaBgGNC">     2470378 :    input logic                          clk,                                // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC tlaBgGNC">     2672926 :    input logic                          clk,                                // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                          clk_override,                       // Override non-functional clock gating</span></span>
 <span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC tlaBgGNC">           1 :    input logic                          rst_l,                              // reset, active low</span></span>
 <span id="L34"><span class="lineNum">      34</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
@@ -147,11 +147,11 @@
 <span id="L43"><span class="lineNum">      43</span>              :    // various clocks needed for the bus reads and writes</span>
 <span id="L44"><span class="lineNum">      44</span> <span class="tlaUNC">           0 :    input logic                          lsu_bus_obuf_c1_clken,</span></span>
 <span id="L45"><span class="lineNum">      45</span> <span class="tlaUNC">           0 :    input logic                          lsu_busm_clken,</span></span>
-<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC tlaBgGNC">     2470378 :    input logic                          lsu_c2_r_clk,</span></span>
-<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">     2470378 :    input logic                          lsu_bus_ibuf_c1_clk,</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC tlaBgGNC">     2672926 :    input logic                          lsu_c2_r_clk,</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">     2672926 :    input logic                          lsu_bus_ibuf_c1_clk,</span></span>
 <span id="L48"><span class="lineNum">      48</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                          lsu_bus_obuf_c1_clk,</span></span>
-<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC tlaBgGNC">     2470378 :    input logic                          lsu_bus_buf_c1_clk,</span></span>
-<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">     2470378 :    input logic                          lsu_free_c2_clk,</span></span>
+<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC tlaBgGNC">     2672926 :    input logic                          lsu_bus_buf_c1_clk,</span></span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">     2672926 :    input logic                          lsu_free_c2_clk,</span></span>
 <span id="L51"><span class="lineNum">      51</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                          lsu_busm_clk,</span></span>
 <span id="L52"><span class="lineNum">      52</span>              : </span>
 <span id="L53"><span class="lineNum">      53</span>              : </span>
@@ -170,8 +170,8 @@
 <span id="L66"><span class="lineNum">      66</span> <span class="tlaUNC">           0 :    input logic                          lsu_busreq_m,                   // bus request is in m</span></span>
 <span id="L67"><span class="lineNum">      67</span> <span class="tlaUNC">           0 :    output logic                         lsu_busreq_r,                   // bus request is in r</span></span>
 <span id="L68"><span class="lineNum">      68</span> <span class="tlaUNC">           0 :    input logic                          ld_full_hit_m,                  // load can get all its byte from a write buffer entry</span></span>
-<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC tlaBgGNC">          16 :    input logic                          flush_m_up,                     // flush</span></span>
-<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC">           4 :    input logic                          flush_r,                        // flush</span></span>
+<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC tlaBgGNC">          22 :    input logic                          flush_m_up,                     // flush</span></span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC">           6 :    input logic                          flush_r,                        // flush</span></span>
 <span id="L71"><span class="lineNum">      71</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                          lsu_commit_r,                   // lsu instruction in r commits</span></span>
 <span id="L72"><span class="lineNum">      72</span> <span class="tlaUNC">           0 :    input logic                          is_sideeffects_r,               // lsu attribute is side_effects</span></span>
 <span id="L73"><span class="lineNum">      73</span> <span class="tlaUNC">           0 :    input logic                          ldst_dual_d,                    // load/store is unaligned at 32 bit boundary</span></span>
@@ -273,7 +273,7 @@
 <span id="L169"><span class="lineNum">     169</span>              :    output logic                            lsu_axi_rready,</span>
 <span id="L170"><span class="lineNum">     170</span>              :    /*pragma coverage on*/</span>
 <span id="L171"><span class="lineNum">     171</span> <span class="tlaUNC">           0 :    input  logic [pt.LSU_BUS_TAG-1:0]       lsu_axi_rid,</span></span>
-<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC tlaBgGNC">         144 :    input  logic [63:0]                     lsu_axi_rdata,</span></span>
+<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC tlaBgGNC">         146 :    input  logic [63:0]                     lsu_axi_rdata,</span></span>
 <span id="L173"><span class="lineNum">     173</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic [1:0]                      lsu_axi_rresp,</span></span>
 <span id="L174"><span class="lineNum">     174</span>              : </span>
 <span id="L175"><span class="lineNum">     175</span> <span class="tlaGNC tlaBgGNC">           1 :    input logic                             lsu_bus_clk_en,</span></span>
@@ -330,7 +330,7 @@
 <span id="L226"><span class="lineNum">     226</span> <span class="tlaUNC">           0 :    logic                                bus_rsp_read, bus_rsp_write;</span></span>
 <span id="L227"><span class="lineNum">     227</span> <span class="tlaUNC">           0 :    logic [pt.LSU_BUS_TAG-1:0]           bus_rsp_read_tag, bus_rsp_write_tag;</span></span>
 <span id="L228"><span class="lineNum">     228</span> <span class="tlaUNC">           0 :    logic                                bus_rsp_read_error, bus_rsp_write_error;</span></span>
-<span id="L229"><span class="lineNum">     229</span> <span class="tlaGNC tlaBgGNC">         144 :    logic [63:0]                         bus_rsp_rdata;</span></span>
+<span id="L229"><span class="lineNum">     229</span> <span class="tlaGNC tlaBgGNC">         146 :    logic [63:0]                         bus_rsp_rdata;</span></span>
 <span id="L230"><span class="lineNum">     230</span>              : </span>
 <span id="L231"><span class="lineNum">     231</span>              :    // Bus buffer signals</span>
 <span id="L232"><span class="lineNum">     232</span> <span class="tlaUNC tlaBgUNC">           0 :    state_t [DEPTH-1:0]                  buf_state;</span></span>
@@ -555,16 +555,16 @@
 <span id="L451"><span class="lineNum">     451</span>              :    assign ibuf_rst   = (ibuf_drain_vld &amp; ~ibuf_wr_en) | dec_tlu_force_halt;</span>
 <span id="L452"><span class="lineNum">     452</span>              :    assign ibuf_force_drain = lsu_busreq_m &amp; ~lsu_busreq_r &amp; ibuf_valid &amp; (lsu_pkt_m.load | (ibuf_addr[31:2] != lsu_addr_m[31:2]));  // Move the ibuf to buf if there is a non-colaescable ld/st in m but nothing in r</span>
 <span id="L453"><span class="lineNum">     453</span>              :    assign ibuf_drain_vld = ibuf_valid &amp; (((ibuf_wr_en | (ibuf_timer == TIMER_MAX)) &amp; ~(ibuf_merge_en &amp; ibuf_merge_in)) | ibuf_byp | ibuf_force_drain | ibuf_sideeffect | ~ibuf_write | bus_coalescing_disable);</span>
-<span id="L454"><span class="lineNum">     454</span> <span class="tlaGNC">     1350560 :    assign ibuf_tag_in[DEPTH_LOG2-1:0] = (ibuf_merge_en &amp; ibuf_merge_in) ? ibuf_tag[DEPTH_LOG2-1:0] : (ldst_dual_r ? WrPtr1_r : WrPtr0_r);</span></span>
+<span id="L454"><span class="lineNum">     454</span> <span class="tlaGNC">     1348272 :    assign ibuf_tag_in[DEPTH_LOG2-1:0] = (ibuf_merge_en &amp; ibuf_merge_in) ? ibuf_tag[DEPTH_LOG2-1:0] : (ldst_dual_r ? WrPtr1_r : WrPtr0_r);</span></span>
 <span id="L455"><span class="lineNum">     455</span>              :    assign ibuf_dualtag_in[DEPTH_LOG2-1:0] = WrPtr0_r;</span>
 <span id="L456"><span class="lineNum">     456</span>              :    assign ibuf_sz_in[1:0]   = {lsu_pkt_r.word, lsu_pkt_r.half};</span>
-<span id="L457"><span class="lineNum">     457</span> <span class="tlaGNC">     1350560 :    assign ibuf_addr_in[31:0] = ldst_dual_r ? end_addr_r[31:0] : lsu_addr_r[31:0];</span></span>
-<span id="L458"><span class="lineNum">     458</span> <span class="tlaGNC">     1350560 :    assign ibuf_byteen_in[3:0] = (ibuf_merge_en &amp; ibuf_merge_in) ? (ibuf_byteen[3:0] | ldst_byteen_lo_r[3:0]) : (ldst_dual_r ? ldst_byteen_hi_r[3:0] : ldst_byteen_lo_r[3:0]);</span></span>
+<span id="L457"><span class="lineNum">     457</span> <span class="tlaGNC">     1348272 :    assign ibuf_addr_in[31:0] = ldst_dual_r ? end_addr_r[31:0] : lsu_addr_r[31:0];</span></span>
+<span id="L458"><span class="lineNum">     458</span> <span class="tlaGNC">     1348272 :    assign ibuf_byteen_in[3:0] = (ibuf_merge_en &amp; ibuf_merge_in) ? (ibuf_byteen[3:0] | ldst_byteen_lo_r[3:0]) : (ldst_dual_r ? ldst_byteen_hi_r[3:0] : ldst_byteen_lo_r[3:0]);</span></span>
 <span id="L459"><span class="lineNum">     459</span>              :    for (genvar i=0; i&lt;4; i++) begin</span>
-<span id="L460"><span class="lineNum">     460</span> <span class="tlaGNC">     5402240 :       assign ibuf_data_in[(8*i)+7:(8*i)] = (ibuf_merge_en &amp; ibuf_merge_in) ? (ldst_byteen_lo_r[i] ? store_data_lo_r[(8*i)+7:(8*i)] : ibuf_data[(8*i)+7:(8*i)]) :</span></span>
-<span id="L461"><span class="lineNum">     461</span> <span class="tlaGNC">     5402240 :                                                                              (ldst_dual_r ? store_data_hi_r[(8*i)+7:(8*i)] : store_data_lo_r[(8*i)+7:(8*i)]);</span></span>
+<span id="L460"><span class="lineNum">     460</span> <span class="tlaGNC">     5393088 :       assign ibuf_data_in[(8*i)+7:(8*i)] = (ibuf_merge_en &amp; ibuf_merge_in) ? (ldst_byteen_lo_r[i] ? store_data_lo_r[(8*i)+7:(8*i)] : ibuf_data[(8*i)+7:(8*i)]) :</span></span>
+<span id="L461"><span class="lineNum">     461</span> <span class="tlaGNC">     5393088 :                                                                              (ldst_dual_r ? store_data_hi_r[(8*i)+7:(8*i)] : store_data_lo_r[(8*i)+7:(8*i)]);</span></span>
 <span id="L462"><span class="lineNum">     462</span>              :    end</span>
-<span id="L463"><span class="lineNum">     463</span> <span class="tlaGNC">     1350560 :    assign ibuf_timer_in = ibuf_wr_en ? '0 : (ibuf_timer &lt; TIMER_MAX) ? (ibuf_timer + 1'b1) : ibuf_timer;</span></span>
+<span id="L463"><span class="lineNum">     463</span> <span class="tlaGNC">     1348272 :    assign ibuf_timer_in = ibuf_wr_en ? '0 : (ibuf_timer &lt; TIMER_MAX) ? (ibuf_timer + 1'b1) : ibuf_timer;</span></span>
 <span id="L464"><span class="lineNum">     464</span>              : </span>
 <span id="L465"><span class="lineNum">     465</span>              : </span>
 <span id="L466"><span class="lineNum">     466</span>              :    assign ibuf_merge_en = lsu_busreq_r &amp; lsu_commit_r &amp; lsu_pkt_r.store &amp; ibuf_valid &amp; ibuf_write &amp; (lsu_addr_r[31:2] == ibuf_addr[31:2]) &amp; ~is_sideeffects_r &amp; ~bus_coalescing_disable;</span>
@@ -572,8 +572,8 @@
 <span id="L468"><span class="lineNum">     468</span>              : </span>
 <span id="L469"><span class="lineNum">     469</span>              :    // ibuf signals going to bus buffer after merging</span>
 <span id="L470"><span class="lineNum">     470</span>              :    for (genvar i=0; i&lt;4; i++) begin</span>
-<span id="L471"><span class="lineNum">     471</span> <span class="tlaGNC">     5402240 :       assign ibuf_byteen_out[i] = (ibuf_merge_en &amp; ~ibuf_merge_in) ? (ibuf_byteen[i] | ldst_byteen_lo_r[i]) : ibuf_byteen[i];</span></span>
-<span id="L472"><span class="lineNum">     472</span> <span class="tlaGNC">     5402240 :       assign ibuf_data_out[(8*i)+7:(8*i)] = (ibuf_merge_en &amp; ~ibuf_merge_in) ? (ldst_byteen_lo_r[i] ? store_data_lo_r[(8*i)+7:(8*i)] : ibuf_data[(8*i)+7:(8*i)]) :</span></span>
+<span id="L471"><span class="lineNum">     471</span> <span class="tlaGNC">     5393088 :       assign ibuf_byteen_out[i] = (ibuf_merge_en &amp; ~ibuf_merge_in) ? (ibuf_byteen[i] | ldst_byteen_lo_r[i]) : ibuf_byteen[i];</span></span>
+<span id="L472"><span class="lineNum">     472</span> <span class="tlaGNC">     5393088 :       assign ibuf_data_out[(8*i)+7:(8*i)] = (ibuf_merge_en &amp; ~ibuf_merge_in) ? (ldst_byteen_lo_r[i] ? store_data_lo_r[(8*i)+7:(8*i)] : ibuf_data[(8*i)+7:(8*i)]) :</span></span>
 <span id="L473"><span class="lineNum">     473</span>              :                                                                                                         ibuf_data[(8*i)+7:(8*i)];</span>
 <span id="L474"><span class="lineNum">     474</span>              :    end</span>
 <span id="L475"><span class="lineNum">     475</span>              : </span>
@@ -604,7 +604,7 @@
 <span id="L500"><span class="lineNum">     500</span>              : </span>
 <span id="L501"><span class="lineNum">     501</span>              :    assign obuf_wr_wait = (buf_numvld_wrcmd_any[3:0] == 4'b1) &amp; (buf_numvld_cmd_any[3:0] == 4'b1) &amp; (obuf_wr_timer != TIMER_MAX) &amp;</span>
 <span id="L502"><span class="lineNum">     502</span>              :                          ~bus_coalescing_disable &amp; ~buf_nomerge[CmdPtr0] &amp; ~buf_sideeffect[CmdPtr0] &amp; ~obuf_force_wr_en;</span>
-<span id="L503"><span class="lineNum">     503</span> <span class="tlaGNC">     5402302 :    assign obuf_wr_timer_in = obuf_wr_en ? 3'b0: (((buf_numvld_cmd_any &gt; 4'b0) &amp; (obuf_wr_timer &lt; TIMER_MAX)) ? (obuf_wr_timer + 1'b1) : obuf_wr_timer);</span></span>
+<span id="L503"><span class="lineNum">     503</span> <span class="tlaGNC">     5393150 :    assign obuf_wr_timer_in = obuf_wr_en ? 3'b0: (((buf_numvld_cmd_any &gt; 4'b0) &amp; (obuf_wr_timer &lt; TIMER_MAX)) ? (obuf_wr_timer + 1'b1) : obuf_wr_timer);</span></span>
 <span id="L504"><span class="lineNum">     504</span>              :    assign obuf_force_wr_en = lsu_busreq_m &amp; ~lsu_busreq_r &amp; ~ibuf_valid &amp; (buf_numvld_cmd_any[3:0] == 4'b1) &amp; (lsu_addr_m[31:2] != buf_addr[CmdPtr0][31:2]);   // Entry in m can't merge with entry going to obuf and there is no entry in between</span>
 <span id="L505"><span class="lineNum">     505</span>              :    assign ibuf_buf_byp = ibuf_byp &amp; (buf_numvld_pend_any[3:0] == 4'b0) &amp; (~lsu_pkt_r.store | no_dword_merge_r);</span>
 <span id="L506"><span class="lineNum">     506</span>              : </span>
@@ -615,40 +615,40 @@
 <span id="L511"><span class="lineNum">     511</span>              : </span>
 <span id="L512"><span class="lineNum">     512</span>              :    assign obuf_rst   = ((bus_cmd_sent | (obuf_valid &amp; obuf_nosend)) &amp; ~obuf_wr_en &amp; lsu_bus_clk_en) | dec_tlu_force_halt;</span>
 <span id="L513"><span class="lineNum">     513</span>              : </span>
-<span id="L514"><span class="lineNum">     514</span> <span class="tlaGNC">     5402302 :    assign obuf_write_in      = ibuf_buf_byp ? lsu_pkt_r.store : buf_write[CmdPtr0];</span></span>
-<span id="L515"><span class="lineNum">     515</span> <span class="tlaGNC">     5402302 :    assign obuf_sideeffect_in = ibuf_buf_byp ? is_sideeffects_r : buf_sideeffect[CmdPtr0];</span></span>
-<span id="L516"><span class="lineNum">     516</span> <span class="tlaGNC">     5402302 :    assign obuf_addr_in[31:0] = ibuf_buf_byp ? lsu_addr_r[31:0] : buf_addr[CmdPtr0];</span></span>
-<span id="L517"><span class="lineNum">     517</span> <span class="tlaGNC">     5402302 :    assign obuf_sz_in[1:0]    = ibuf_buf_byp ? {lsu_pkt_r.word, lsu_pkt_r.half} : buf_sz[CmdPtr0];</span></span>
+<span id="L514"><span class="lineNum">     514</span> <span class="tlaGNC">     5393150 :    assign obuf_write_in      = ibuf_buf_byp ? lsu_pkt_r.store : buf_write[CmdPtr0];</span></span>
+<span id="L515"><span class="lineNum">     515</span> <span class="tlaGNC">     5393150 :    assign obuf_sideeffect_in = ibuf_buf_byp ? is_sideeffects_r : buf_sideeffect[CmdPtr0];</span></span>
+<span id="L516"><span class="lineNum">     516</span> <span class="tlaGNC">     5393150 :    assign obuf_addr_in[31:0] = ibuf_buf_byp ? lsu_addr_r[31:0] : buf_addr[CmdPtr0];</span></span>
+<span id="L517"><span class="lineNum">     517</span> <span class="tlaGNC">     5393150 :    assign obuf_sz_in[1:0]    = ibuf_buf_byp ? {lsu_pkt_r.word, lsu_pkt_r.half} : buf_sz[CmdPtr0];</span></span>
 <span id="L518"><span class="lineNum">     518</span>              :    assign obuf_merge_in      = obuf_merge_en;</span>
-<span id="L519"><span class="lineNum">     519</span> <span class="tlaGNC">     5402302 :    assign obuf_tag0_in[pt.LSU_BUS_TAG-1:0] = ibuf_buf_byp ? (pt.LSU_BUS_TAG)'(WrPtr0_r) : (pt.LSU_BUS_TAG)'(CmdPtr0);</span></span>
-<span id="L520"><span class="lineNum">     520</span> <span class="tlaGNC">     5402302 :    assign obuf_tag1_in[pt.LSU_BUS_TAG-1:0] = ibuf_buf_byp ? (pt.LSU_BUS_TAG)'(WrPtr1_r) : (pt.LSU_BUS_TAG)'(CmdPtr1);</span></span>
+<span id="L519"><span class="lineNum">     519</span> <span class="tlaGNC">     5393150 :    assign obuf_tag0_in[pt.LSU_BUS_TAG-1:0] = ibuf_buf_byp ? (pt.LSU_BUS_TAG)'(WrPtr0_r) : (pt.LSU_BUS_TAG)'(CmdPtr0);</span></span>
+<span id="L520"><span class="lineNum">     520</span> <span class="tlaGNC">     5393150 :    assign obuf_tag1_in[pt.LSU_BUS_TAG-1:0] = ibuf_buf_byp ? (pt.LSU_BUS_TAG)'(WrPtr1_r) : (pt.LSU_BUS_TAG)'(CmdPtr1);</span></span>
 <span id="L521"><span class="lineNum">     521</span>              : </span>
 <span id="L522"><span class="lineNum">     522</span>              :    assign obuf_cmd_done_in    = ~(obuf_wr_en | obuf_rst) &amp; (obuf_cmd_done | bus_wcmd_sent);</span>
 <span id="L523"><span class="lineNum">     523</span>              :    assign obuf_data_done_in   = ~(obuf_wr_en | obuf_rst) &amp; (obuf_data_done | bus_wdata_sent);</span>
 <span id="L524"><span class="lineNum">     524</span>              : </span>
-<span id="L525"><span class="lineNum">     525</span> <span class="tlaGNC">     5402302 :    assign obuf_aligned_in    = ibuf_buf_byp ? is_aligned_r : ((obuf_sz_in[1:0] == 2'b0) |</span></span>
+<span id="L525"><span class="lineNum">     525</span> <span class="tlaGNC">     5393150 :    assign obuf_aligned_in    = ibuf_buf_byp ? is_aligned_r : ((obuf_sz_in[1:0] == 2'b0) |</span></span>
 <span id="L526"><span class="lineNum">     526</span>              :                                                               (obuf_sz_in[0] &amp; ~obuf_addr_in[0]) |</span>
 <span id="L527"><span class="lineNum">     527</span>              :                                                               (obuf_sz_in[1] &amp; ~(|obuf_addr_in[1:0])));</span>
 <span id="L528"><span class="lineNum">     528</span>              : </span>
 <span id="L529"><span class="lineNum">     529</span>              :    assign obuf_rdrsp_pend_in  = ((~(obuf_wr_en &amp; ~obuf_nosend_in) &amp; obuf_rdrsp_pend &amp; ~(bus_rsp_read &amp; (bus_rsp_read_tag == obuf_rdrsp_tag))) | (bus_cmd_sent &amp; ~obuf_write)) &amp; ~dec_tlu_force_halt;</span>
 <span id="L530"><span class="lineNum">     530</span>              :    assign obuf_rdrsp_pend_en  = lsu_bus_clk_en | dec_tlu_force_halt;</span>
-<span id="L531"><span class="lineNum">     531</span> <span class="tlaGNC">     1350558 :    assign obuf_rdrsp_tag_in[pt.LSU_BUS_TAG-1:0] = (bus_cmd_sent &amp; ~obuf_write) ? obuf_tag0[pt.LSU_BUS_TAG-1:0] : obuf_rdrsp_tag[pt.LSU_BUS_TAG-1:0];</span></span>
+<span id="L531"><span class="lineNum">     531</span> <span class="tlaGNC">     1348270 :    assign obuf_rdrsp_tag_in[pt.LSU_BUS_TAG-1:0] = (bus_cmd_sent &amp; ~obuf_write) ? obuf_tag0[pt.LSU_BUS_TAG-1:0] : obuf_rdrsp_tag[pt.LSU_BUS_TAG-1:0];</span></span>
 <span id="L532"><span class="lineNum">     532</span>              :    // No ld to ld fwd for aligned</span>
 <span id="L533"><span class="lineNum">     533</span>              :    assign obuf_nosend_in      = (obuf_addr_in[31:3] == obuf_addr[31:3]) &amp; obuf_aligned_in &amp; ~obuf_sideeffect &amp; ~obuf_write &amp; ~obuf_write_in &amp; ~dec_tlu_external_ldfwd_disable &amp;</span>
 <span id="L534"><span class="lineNum">     534</span>              :                                 ((obuf_valid &amp; ~obuf_nosend) | (obuf_rdrsp_pend &amp; ~(bus_rsp_read &amp; (bus_rsp_read_tag == obuf_rdrsp_tag))));</span>
 <span id="L535"><span class="lineNum">     535</span>              : </span>
-<span id="L536"><span class="lineNum">     536</span> <span class="tlaGNC">     5402302 :    assign obuf_byteen0_in[7:0] = ibuf_buf_byp ? (lsu_addr_r[2] ? {ldst_byteen_lo_r[3:0],4'b0} : {4'b0,ldst_byteen_lo_r[3:0]}) :</span></span>
-<span id="L537"><span class="lineNum">     537</span> <span class="tlaGNC">     5402302 :                                                 (buf_addr[CmdPtr0][2] ? {buf_byteen[CmdPtr0],4'b0} : {4'b0,buf_byteen[CmdPtr0]});</span></span>
-<span id="L538"><span class="lineNum">     538</span> <span class="tlaGNC">     5402302 :    assign obuf_byteen1_in[7:0] = ibuf_buf_byp ? (end_addr_r[2] ? {ldst_byteen_hi_r[3:0],4'b0} : {4'b0,ldst_byteen_hi_r[3:0]}) :</span></span>
-<span id="L539"><span class="lineNum">     539</span> <span class="tlaGNC">     5402302 :                                                 (buf_addr[CmdPtr1][2] ? {buf_byteen[CmdPtr1],4'b0} : {4'b0,buf_byteen[CmdPtr1]});</span></span>
-<span id="L540"><span class="lineNum">     540</span> <span class="tlaGNC">     5402302 :    assign obuf_data0_in[63:0]  = ibuf_buf_byp ? (lsu_addr_r[2] ? {store_data_lo_r[31:0],32'b0} : {32'b0,store_data_lo_r[31:0]}) :</span></span>
-<span id="L541"><span class="lineNum">     541</span> <span class="tlaGNC">     5402302 :                                                 (buf_addr[CmdPtr0][2] ? {buf_data[CmdPtr0],32'b0} : {32'b0,buf_data[CmdPtr0]});</span></span>
-<span id="L542"><span class="lineNum">     542</span> <span class="tlaGNC">     5402302 :    assign obuf_data1_in[63:0]  = ibuf_buf_byp ? (end_addr_r[2] ? {store_data_hi_r[31:0],32'b0} :{32'b0,store_data_hi_r[31:0]}) :</span></span>
-<span id="L543"><span class="lineNum">     543</span> <span class="tlaGNC">     5402302 :                                                 (buf_addr[CmdPtr1][2] ? {buf_data[CmdPtr1],32'b0} : {32'b0,buf_data[CmdPtr1]});</span></span>
+<span id="L536"><span class="lineNum">     536</span> <span class="tlaGNC">     5393150 :    assign obuf_byteen0_in[7:0] = ibuf_buf_byp ? (lsu_addr_r[2] ? {ldst_byteen_lo_r[3:0],4'b0} : {4'b0,ldst_byteen_lo_r[3:0]}) :</span></span>
+<span id="L537"><span class="lineNum">     537</span> <span class="tlaGNC">     5393150 :                                                 (buf_addr[CmdPtr0][2] ? {buf_byteen[CmdPtr0],4'b0} : {4'b0,buf_byteen[CmdPtr0]});</span></span>
+<span id="L538"><span class="lineNum">     538</span> <span class="tlaGNC">     5393150 :    assign obuf_byteen1_in[7:0] = ibuf_buf_byp ? (end_addr_r[2] ? {ldst_byteen_hi_r[3:0],4'b0} : {4'b0,ldst_byteen_hi_r[3:0]}) :</span></span>
+<span id="L539"><span class="lineNum">     539</span> <span class="tlaGNC">     5393150 :                                                 (buf_addr[CmdPtr1][2] ? {buf_byteen[CmdPtr1],4'b0} : {4'b0,buf_byteen[CmdPtr1]});</span></span>
+<span id="L540"><span class="lineNum">     540</span> <span class="tlaGNC">     5393150 :    assign obuf_data0_in[63:0]  = ibuf_buf_byp ? (lsu_addr_r[2] ? {store_data_lo_r[31:0],32'b0} : {32'b0,store_data_lo_r[31:0]}) :</span></span>
+<span id="L541"><span class="lineNum">     541</span> <span class="tlaGNC">     5393150 :                                                 (buf_addr[CmdPtr0][2] ? {buf_data[CmdPtr0],32'b0} : {32'b0,buf_data[CmdPtr0]});</span></span>
+<span id="L542"><span class="lineNum">     542</span> <span class="tlaGNC">     5393150 :    assign obuf_data1_in[63:0]  = ibuf_buf_byp ? (end_addr_r[2] ? {store_data_hi_r[31:0],32'b0} :{32'b0,store_data_hi_r[31:0]}) :</span></span>
+<span id="L543"><span class="lineNum">     543</span> <span class="tlaGNC">     5393150 :                                                 (buf_addr[CmdPtr1][2] ? {buf_data[CmdPtr1],32'b0} : {32'b0,buf_data[CmdPtr1]});</span></span>
 <span id="L544"><span class="lineNum">     544</span>              : </span>
 <span id="L545"><span class="lineNum">     545</span>              :    for (genvar i=0 ;i&lt;8; i++) begin</span>
 <span id="L546"><span class="lineNum">     546</span>              :       assign obuf_byteen_in[i] = obuf_byteen0_in[i] | (obuf_merge_en &amp; obuf_byteen1_in[i]);</span>
-<span id="L547"><span class="lineNum">     547</span> <span class="tlaGNC">    43218416 :       assign obuf_data_in[(8*i)+7:(8*i)] = (obuf_merge_en &amp; obuf_byteen1_in[i]) ? obuf_data1_in[(8*i)+7:(8*i)] : obuf_data0_in[(8*i)+7:(8*i)];</span></span>
+<span id="L547"><span class="lineNum">     547</span> <span class="tlaGNC">    43145200 :       assign obuf_data_in[(8*i)+7:(8*i)] = (obuf_merge_en &amp; obuf_byteen1_in[i]) ? obuf_data1_in[(8*i)+7:(8*i)] : obuf_data0_in[(8*i)+7:(8*i)];</span></span>
 <span id="L548"><span class="lineNum">     548</span>              :    end</span>
 <span id="L549"><span class="lineNum">     549</span>              : </span>
 <span id="L550"><span class="lineNum">     550</span>              :    // No store obuf merging for AXI since all stores are sent non-posted. Can't track the second id right now</span>
@@ -682,28 +682,28 @@
 <span id="L578"><span class="lineNum">     578</span>              :    //------------------------------------------------------------------------------</span>
 <span id="L579"><span class="lineNum">     579</span>              : </span>
 <span id="L580"><span class="lineNum">     580</span>              :    // Find the entry to allocate and entry to send</span>
-<span id="L581"><span class="lineNum">     581</span> <span class="tlaGNC">     1350560 :    always_comb begin</span></span>
-<span id="L582"><span class="lineNum">     582</span> <span class="tlaGNC">     1350560 :       WrPtr0_m[DEPTH_LOG2-1:0] = '0;</span></span>
-<span id="L583"><span class="lineNum">     583</span> <span class="tlaGNC">     1350560 :       WrPtr1_m[DEPTH_LOG2-1:0] = '0;</span></span>
-<span id="L584"><span class="lineNum">     584</span> <span class="tlaGNC">     1350560 :       found_wrptr0  = '0;</span></span>
-<span id="L585"><span class="lineNum">     585</span> <span class="tlaGNC">     1350560 :       found_wrptr1  = '0;</span></span>
+<span id="L581"><span class="lineNum">     581</span> <span class="tlaGNC">     1348272 :    always_comb begin</span></span>
+<span id="L582"><span class="lineNum">     582</span> <span class="tlaGNC">     1348272 :       WrPtr0_m[DEPTH_LOG2-1:0] = '0;</span></span>
+<span id="L583"><span class="lineNum">     583</span> <span class="tlaGNC">     1348272 :       WrPtr1_m[DEPTH_LOG2-1:0] = '0;</span></span>
+<span id="L584"><span class="lineNum">     584</span> <span class="tlaGNC">     1348272 :       found_wrptr0  = '0;</span></span>
+<span id="L585"><span class="lineNum">     585</span> <span class="tlaGNC">     1348272 :       found_wrptr1  = '0;</span></span>
 <span id="L586"><span class="lineNum">     586</span>              : </span>
 <span id="L587"><span class="lineNum">     587</span>              :       // Find first write pointer</span>
-<span id="L588"><span class="lineNum">     588</span> <span class="tlaGNC">     5402240 :       for (int i=0; i&lt;DEPTH; i++) begin</span></span>
-<span id="L589"><span class="lineNum">     589</span> <span class="tlaGNC">     4051680 :          if (~found_wrptr0) begin</span></span>
-<span id="L590"><span class="lineNum">     590</span> <span class="tlaGNC">     1350560 :             WrPtr0_m[DEPTH_LOG2-1:0] = DEPTH_LOG2'(i);</span></span>
-<span id="L591"><span class="lineNum">     591</span> <span class="tlaGNC">     1350560 :             found_wrptr0 = (buf_state[i] == IDLE) &amp; ~((ibuf_valid &amp; (ibuf_tag == i))                                               |</span></span>
-<span id="L592"><span class="lineNum">     592</span> <span class="tlaGNC">     1350560 :                                                       (lsu_busreq_r &amp; ((WrPtr0_r == i) | (ldst_dual_r &amp; (WrPtr1_r == i)))));</span></span>
+<span id="L588"><span class="lineNum">     588</span> <span class="tlaGNC">     5393088 :       for (int i=0; i&lt;DEPTH; i++) begin</span></span>
+<span id="L589"><span class="lineNum">     589</span> <span class="tlaGNC">     4044816 :          if (~found_wrptr0) begin</span></span>
+<span id="L590"><span class="lineNum">     590</span> <span class="tlaGNC">     1348272 :             WrPtr0_m[DEPTH_LOG2-1:0] = DEPTH_LOG2'(i);</span></span>
+<span id="L591"><span class="lineNum">     591</span> <span class="tlaGNC">     1348272 :             found_wrptr0 = (buf_state[i] == IDLE) &amp; ~((ibuf_valid &amp; (ibuf_tag == i))                                               |</span></span>
+<span id="L592"><span class="lineNum">     592</span> <span class="tlaGNC">     1348272 :                                                       (lsu_busreq_r &amp; ((WrPtr0_r == i) | (ldst_dual_r &amp; (WrPtr1_r == i)))));</span></span>
 <span id="L593"><span class="lineNum">     593</span>              :          end</span>
 <span id="L594"><span class="lineNum">     594</span>              :       end</span>
 <span id="L595"><span class="lineNum">     595</span>              : </span>
 <span id="L596"><span class="lineNum">     596</span>              :       // Find second write pointer</span>
-<span id="L597"><span class="lineNum">     597</span> <span class="tlaGNC">     5402240 :       for (int i=0; i&lt;DEPTH; i++) begin</span></span>
-<span id="L598"><span class="lineNum">     598</span> <span class="tlaGNC">     4051680 :          if (~found_wrptr1) begin</span></span>
-<span id="L599"><span class="lineNum">     599</span> <span class="tlaGNC">     1350560 :             WrPtr1_m[DEPTH_LOG2-1:0] = DEPTH_LOG2'(i);</span></span>
-<span id="L600"><span class="lineNum">     600</span> <span class="tlaGNC">     1350560 :             found_wrptr1 = (buf_state[i] == IDLE) &amp; ~((ibuf_valid &amp; (ibuf_tag == i))                                               |</span></span>
-<span id="L601"><span class="lineNum">     601</span> <span class="tlaGNC">     1350560 :                                                       (lsu_busreq_m &amp; (WrPtr0_m == i))                                         |</span></span>
-<span id="L602"><span class="lineNum">     602</span> <span class="tlaGNC">     1350560 :                                                       (lsu_busreq_r &amp; ((WrPtr0_r == i) | (ldst_dual_r &amp; (WrPtr1_r == i)))));</span></span>
+<span id="L597"><span class="lineNum">     597</span> <span class="tlaGNC">     5393088 :       for (int i=0; i&lt;DEPTH; i++) begin</span></span>
+<span id="L598"><span class="lineNum">     598</span> <span class="tlaGNC">     4044816 :          if (~found_wrptr1) begin</span></span>
+<span id="L599"><span class="lineNum">     599</span> <span class="tlaGNC">     1348272 :             WrPtr1_m[DEPTH_LOG2-1:0] = DEPTH_LOG2'(i);</span></span>
+<span id="L600"><span class="lineNum">     600</span> <span class="tlaGNC">     1348272 :             found_wrptr1 = (buf_state[i] == IDLE) &amp; ~((ibuf_valid &amp; (ibuf_tag == i))                                               |</span></span>
+<span id="L601"><span class="lineNum">     601</span> <span class="tlaGNC">     1348272 :                                                       (lsu_busreq_m &amp; (WrPtr0_m == i))                                         |</span></span>
+<span id="L602"><span class="lineNum">     602</span> <span class="tlaGNC">     1348272 :                                                       (lsu_busreq_r &amp; ((WrPtr0_r == i) | (ldst_dual_r &amp; (WrPtr1_r == i)))));</span></span>
 <span id="L603"><span class="lineNum">     603</span>              :          end</span>
 <span id="L604"><span class="lineNum">     604</span>              :       end</span>
 <span id="L605"><span class="lineNum">     605</span>              :    end</span>
@@ -754,53 +754,53 @@
 <span id="L650"><span class="lineNum">     650</span>              :    //------------------------------------------------------------------------------</span>
 <span id="L651"><span class="lineNum">     651</span>              :    // Buffer logic</span>
 <span id="L652"><span class="lineNum">     652</span>              :    //------------------------------------------------------------------------------</span>
-<span id="L653"><span class="lineNum">     653</span> <span class="tlaGNC">    21609208 :    for (genvar i=0; i&lt;DEPTH; i++) begin : genblock</span></span>
+<span id="L653"><span class="lineNum">     653</span> <span class="tlaGNC">    21572600 :    for (genvar i=0; i&lt;DEPTH; i++) begin : genblock</span></span>
 <span id="L654"><span class="lineNum">     654</span>              : </span>
 <span id="L655"><span class="lineNum">     655</span>              :       assign ibuf_drainvec_vld[i] = (ibuf_drain_vld &amp; (i == ibuf_tag));</span>
-<span id="L656"><span class="lineNum">     656</span> <span class="tlaGNC">     5402240 :       assign buf_byteen_in[i]     = ibuf_drainvec_vld[i] ? ibuf_byteen_out[3:0] : ((ibuf_byp &amp; ldst_dual_r &amp; (i == WrPtr1_r)) ? ldst_byteen_hi_r[3:0] : ldst_byteen_lo_r[3:0]);</span></span>
-<span id="L657"><span class="lineNum">     657</span> <span class="tlaGNC">     5402240 :       assign buf_addr_in[i]       = ibuf_drainvec_vld[i] ? ibuf_addr[31:0] : ((ibuf_byp &amp; ldst_dual_r &amp; (i == WrPtr1_r)) ? end_addr_r[31:0] : lsu_addr_r[31:0]);</span></span>
-<span id="L658"><span class="lineNum">     658</span> <span class="tlaGNC">     5402240 :       assign buf_dual_in[i]       = ibuf_drainvec_vld[i] ? ibuf_dual : ldst_dual_r;</span></span>
-<span id="L659"><span class="lineNum">     659</span> <span class="tlaGNC">     5402240 :       assign buf_samedw_in[i]     = ibuf_drainvec_vld[i] ? ibuf_samedw : ldst_samedw_r;</span></span>
-<span id="L660"><span class="lineNum">     660</span> <span class="tlaGNC">     5402240 :       assign buf_nomerge_in[i]    = ibuf_drainvec_vld[i] ? (ibuf_nomerge | ibuf_force_drain) : no_dword_merge_r;</span></span>
-<span id="L661"><span class="lineNum">     661</span> <span class="tlaGNC">     5402240 :       assign buf_dualhi_in[i]     = ibuf_drainvec_vld[i] ? ibuf_dual : (ibuf_byp &amp; ldst_dual_r &amp; (i == WrPtr1_r));   // If it's dual, ibuf will always have the high</span></span>
-<span id="L662"><span class="lineNum">     662</span> <span class="tlaGNC">     5402240 :       assign buf_dualtag_in[i]    = ibuf_drainvec_vld[i] ? ibuf_dualtag : ((ibuf_byp &amp; ldst_dual_r &amp; (i == WrPtr1_r)) ? WrPtr0_r : WrPtr1_r);</span></span>
-<span id="L663"><span class="lineNum">     663</span> <span class="tlaGNC">     5402240 :       assign buf_sideeffect_in[i] = ibuf_drainvec_vld[i] ? ibuf_sideeffect : is_sideeffects_r;</span></span>
-<span id="L664"><span class="lineNum">     664</span> <span class="tlaGNC">     5402240 :       assign buf_unsign_in[i]     = ibuf_drainvec_vld[i] ? ibuf_unsign : lsu_pkt_r.unsign;</span></span>
-<span id="L665"><span class="lineNum">     665</span> <span class="tlaGNC">     5402240 :       assign buf_sz_in[i]         = ibuf_drainvec_vld[i] ? ibuf_sz : {lsu_pkt_r.word, lsu_pkt_r.half};</span></span>
-<span id="L666"><span class="lineNum">     666</span> <span class="tlaGNC">     5402240 :       assign buf_write_in[i]      = ibuf_drainvec_vld[i] ? ibuf_write : lsu_pkt_r.store;</span></span>
+<span id="L656"><span class="lineNum">     656</span> <span class="tlaGNC">     5393088 :       assign buf_byteen_in[i]     = ibuf_drainvec_vld[i] ? ibuf_byteen_out[3:0] : ((ibuf_byp &amp; ldst_dual_r &amp; (i == WrPtr1_r)) ? ldst_byteen_hi_r[3:0] : ldst_byteen_lo_r[3:0]);</span></span>
+<span id="L657"><span class="lineNum">     657</span> <span class="tlaGNC">     5393088 :       assign buf_addr_in[i]       = ibuf_drainvec_vld[i] ? ibuf_addr[31:0] : ((ibuf_byp &amp; ldst_dual_r &amp; (i == WrPtr1_r)) ? end_addr_r[31:0] : lsu_addr_r[31:0]);</span></span>
+<span id="L658"><span class="lineNum">     658</span> <span class="tlaGNC">     5393088 :       assign buf_dual_in[i]       = ibuf_drainvec_vld[i] ? ibuf_dual : ldst_dual_r;</span></span>
+<span id="L659"><span class="lineNum">     659</span> <span class="tlaGNC">     5393088 :       assign buf_samedw_in[i]     = ibuf_drainvec_vld[i] ? ibuf_samedw : ldst_samedw_r;</span></span>
+<span id="L660"><span class="lineNum">     660</span> <span class="tlaGNC">     5393088 :       assign buf_nomerge_in[i]    = ibuf_drainvec_vld[i] ? (ibuf_nomerge | ibuf_force_drain) : no_dword_merge_r;</span></span>
+<span id="L661"><span class="lineNum">     661</span> <span class="tlaGNC">     5393088 :       assign buf_dualhi_in[i]     = ibuf_drainvec_vld[i] ? ibuf_dual : (ibuf_byp &amp; ldst_dual_r &amp; (i == WrPtr1_r));   // If it's dual, ibuf will always have the high</span></span>
+<span id="L662"><span class="lineNum">     662</span> <span class="tlaGNC">     5393088 :       assign buf_dualtag_in[i]    = ibuf_drainvec_vld[i] ? ibuf_dualtag : ((ibuf_byp &amp; ldst_dual_r &amp; (i == WrPtr1_r)) ? WrPtr0_r : WrPtr1_r);</span></span>
+<span id="L663"><span class="lineNum">     663</span> <span class="tlaGNC">     5393088 :       assign buf_sideeffect_in[i] = ibuf_drainvec_vld[i] ? ibuf_sideeffect : is_sideeffects_r;</span></span>
+<span id="L664"><span class="lineNum">     664</span> <span class="tlaGNC">     5393088 :       assign buf_unsign_in[i]     = ibuf_drainvec_vld[i] ? ibuf_unsign : lsu_pkt_r.unsign;</span></span>
+<span id="L665"><span class="lineNum">     665</span> <span class="tlaGNC">     5393088 :       assign buf_sz_in[i]         = ibuf_drainvec_vld[i] ? ibuf_sz : {lsu_pkt_r.word, lsu_pkt_r.half};</span></span>
+<span id="L666"><span class="lineNum">     666</span> <span class="tlaGNC">     5393088 :       assign buf_write_in[i]      = ibuf_drainvec_vld[i] ? ibuf_write : lsu_pkt_r.store;</span></span>
 <span id="L667"><span class="lineNum">     667</span>              : </span>
 <span id="L668"><span class="lineNum">     668</span>              :       // Buffer entry state machine</span>
-<span id="L669"><span class="lineNum">     669</span> <span class="tlaGNC">    21609208 :       always_comb begin</span></span>
-<span id="L670"><span class="lineNum">     670</span> <span class="tlaGNC">    21609208 :          buf_nxtstate[i]          = IDLE;</span></span>
-<span id="L671"><span class="lineNum">     671</span> <span class="tlaGNC">    21609208 :          buf_state_en[i]          = '0;</span></span>
-<span id="L672"><span class="lineNum">     672</span> <span class="tlaGNC">    21609208 :          buf_resp_state_bus_en[i] = '0;</span></span>
-<span id="L673"><span class="lineNum">     673</span> <span class="tlaGNC">    21609208 :          buf_state_bus_en[i]      = '0;</span></span>
-<span id="L674"><span class="lineNum">     674</span> <span class="tlaGNC">    21609208 :          buf_wr_en[i]             = '0;</span></span>
-<span id="L675"><span class="lineNum">     675</span> <span class="tlaGNC">    21609208 :          buf_data_in[i]           = '0;</span></span>
-<span id="L676"><span class="lineNum">     676</span> <span class="tlaGNC">    21609208 :          buf_data_en[i]           = '0;</span></span>
-<span id="L677"><span class="lineNum">     677</span> <span class="tlaGNC">    21609208 :          buf_error_en[i]          = '0;</span></span>
-<span id="L678"><span class="lineNum">     678</span> <span class="tlaGNC">    21609208 :          buf_rst[i]               = dec_tlu_force_halt;</span></span>
-<span id="L679"><span class="lineNum">     679</span> <span class="tlaGNC">    21609208 :          buf_ldfwd_en[i]          = dec_tlu_force_halt;</span></span>
-<span id="L680"><span class="lineNum">     680</span> <span class="tlaGNC">    21609208 :          buf_ldfwd_in[i]          = '0;</span></span>
-<span id="L681"><span class="lineNum">     681</span> <span class="tlaGNC">    21609208 :          buf_ldfwdtag_in[i]       = '0;</span></span>
+<span id="L669"><span class="lineNum">     669</span> <span class="tlaGNC">    21572600 :       always_comb begin</span></span>
+<span id="L670"><span class="lineNum">     670</span> <span class="tlaGNC">    21572600 :          buf_nxtstate[i]          = IDLE;</span></span>
+<span id="L671"><span class="lineNum">     671</span> <span class="tlaGNC">    21572600 :          buf_state_en[i]          = '0;</span></span>
+<span id="L672"><span class="lineNum">     672</span> <span class="tlaGNC">    21572600 :          buf_resp_state_bus_en[i] = '0;</span></span>
+<span id="L673"><span class="lineNum">     673</span> <span class="tlaGNC">    21572600 :          buf_state_bus_en[i]      = '0;</span></span>
+<span id="L674"><span class="lineNum">     674</span> <span class="tlaGNC">    21572600 :          buf_wr_en[i]             = '0;</span></span>
+<span id="L675"><span class="lineNum">     675</span> <span class="tlaGNC">    21572600 :          buf_data_in[i]           = '0;</span></span>
+<span id="L676"><span class="lineNum">     676</span> <span class="tlaGNC">    21572600 :          buf_data_en[i]           = '0;</span></span>
+<span id="L677"><span class="lineNum">     677</span> <span class="tlaGNC">    21572600 :          buf_error_en[i]          = '0;</span></span>
+<span id="L678"><span class="lineNum">     678</span> <span class="tlaGNC">    21572600 :          buf_rst[i]               = dec_tlu_force_halt;</span></span>
+<span id="L679"><span class="lineNum">     679</span> <span class="tlaGNC">    21572600 :          buf_ldfwd_en[i]          = dec_tlu_force_halt;</span></span>
+<span id="L680"><span class="lineNum">     680</span> <span class="tlaGNC">    21572600 :          buf_ldfwd_in[i]          = '0;</span></span>
+<span id="L681"><span class="lineNum">     681</span> <span class="tlaGNC">    21572600 :          buf_ldfwdtag_in[i]       = '0;</span></span>
 <span id="L682"><span class="lineNum">     682</span>              : </span>
-<span id="L683"><span class="lineNum">     683</span> <span class="tlaGNC">    21609208 :          case (buf_state[i])</span></span>
-<span id="L684"><span class="lineNum">     684</span> <span class="tlaGNC">    21609208 :             IDLE: begin</span></span>
-<span id="L685"><span class="lineNum">     685</span> <span class="tlaGNC">    21609208 :                      buf_nxtstate[i] = lsu_bus_clk_en ? CMD : START_WAIT;</span></span>
-<span id="L686"><span class="lineNum">     686</span> <span class="tlaGNC">    21609208 :                      buf_state_en[i] = (lsu_busreq_r &amp; lsu_commit_r &amp; (((ibuf_byp | ldst_dual_r) &amp; ~ibuf_merge_en &amp; (i == WrPtr0_r)) | (ibuf_byp &amp; ldst_dual_r &amp; (i == WrPtr1_r)))) |</span></span>
-<span id="L687"><span class="lineNum">     687</span> <span class="tlaGNC">    21609208 :                                        (ibuf_drain_vld &amp; (i == ibuf_tag));</span></span>
-<span id="L688"><span class="lineNum">     688</span> <span class="tlaGNC">    21609208 :                      buf_wr_en[i]    = buf_state_en[i];</span></span>
-<span id="L689"><span class="lineNum">     689</span> <span class="tlaGNC">    21609208 :                      buf_data_en[i]  = buf_state_en[i];</span></span>
-<span id="L690"><span class="lineNum">     690</span> <span class="tlaGNC">    21609208 :                      buf_data_in[i]   = (ibuf_drain_vld &amp; (i == ibuf_tag)) ? ibuf_data_out[31:0] : store_data_lo_r[31:0];</span></span>
-<span id="L691"><span class="lineNum">     691</span> <span class="tlaGNC">    21609208 :                      buf_cmd_state_bus_en[i]  = '0;</span></span>
+<span id="L683"><span class="lineNum">     683</span> <span class="tlaGNC">    21572600 :          case (buf_state[i])</span></span>
+<span id="L684"><span class="lineNum">     684</span> <span class="tlaGNC">    21572600 :             IDLE: begin</span></span>
+<span id="L685"><span class="lineNum">     685</span> <span class="tlaGNC">    21572600 :                      buf_nxtstate[i] = lsu_bus_clk_en ? CMD : START_WAIT;</span></span>
+<span id="L686"><span class="lineNum">     686</span> <span class="tlaGNC">    21572600 :                      buf_state_en[i] = (lsu_busreq_r &amp; lsu_commit_r &amp; (((ibuf_byp | ldst_dual_r) &amp; ~ibuf_merge_en &amp; (i == WrPtr0_r)) | (ibuf_byp &amp; ldst_dual_r &amp; (i == WrPtr1_r)))) |</span></span>
+<span id="L687"><span class="lineNum">     687</span> <span class="tlaGNC">    21572600 :                                        (ibuf_drain_vld &amp; (i == ibuf_tag));</span></span>
+<span id="L688"><span class="lineNum">     688</span> <span class="tlaGNC">    21572600 :                      buf_wr_en[i]    = buf_state_en[i];</span></span>
+<span id="L689"><span class="lineNum">     689</span> <span class="tlaGNC">    21572600 :                      buf_data_en[i]  = buf_state_en[i];</span></span>
+<span id="L690"><span class="lineNum">     690</span> <span class="tlaGNC">    21572600 :                      buf_data_in[i]   = (ibuf_drain_vld &amp; (i == ibuf_tag)) ? ibuf_data_out[31:0] : store_data_lo_r[31:0];</span></span>
+<span id="L691"><span class="lineNum">     691</span> <span class="tlaGNC">    21572600 :                      buf_cmd_state_bus_en[i]  = '0;</span></span>
 <span id="L692"><span class="lineNum">     692</span>              :             end</span>
 <span id="L693"><span class="lineNum">     693</span> <span class="tlaUNC tlaBgUNC">           0 :             START_WAIT: begin</span></span>
-<span id="L694"><span class="lineNum">     694</span> <span class="tlaGNC tlaBgGNC">     5402232 :                      buf_nxtstate[i] = dec_tlu_force_halt ? IDLE : CMD;</span></span>
+<span id="L694"><span class="lineNum">     694</span> <span class="tlaGNC tlaBgGNC">     5393080 :                      buf_nxtstate[i] = dec_tlu_force_halt ? IDLE : CMD;</span></span>
 <span id="L695"><span class="lineNum">     695</span> <span class="tlaUNC tlaBgUNC">           0 :                      buf_state_en[i] = lsu_bus_clk_en | dec_tlu_force_halt;</span></span>
 <span id="L696"><span class="lineNum">     696</span> <span class="tlaUNC">           0 :                      buf_cmd_state_bus_en[i]  = '0;</span></span>
 <span id="L697"><span class="lineNum">     697</span>              :             end</span>
 <span id="L698"><span class="lineNum">     698</span> <span class="tlaUNC">           0 :             CMD: begin</span></span>
-<span id="L699"><span class="lineNum">     699</span> <span class="tlaGNC tlaBgGNC">     5402232 :                      buf_nxtstate[i]          = dec_tlu_force_halt ? IDLE : (obuf_nosend &amp; bus_rsp_read &amp; (bus_rsp_read_tag == obuf_rdrsp_tag)) ? DONE_WAIT : RESP;</span></span>
+<span id="L699"><span class="lineNum">     699</span> <span class="tlaGNC tlaBgGNC">     5393080 :                      buf_nxtstate[i]          = dec_tlu_force_halt ? IDLE : (obuf_nosend &amp; bus_rsp_read &amp; (bus_rsp_read_tag == obuf_rdrsp_tag)) ? DONE_WAIT : RESP;</span></span>
 <span id="L700"><span class="lineNum">     700</span> <span class="tlaUNC tlaBgUNC">           0 :                      buf_cmd_state_bus_en[i]  = ((obuf_tag0 == i) | (obuf_merge &amp; (obuf_tag1 == i))) &amp; obuf_valid &amp; obuf_wr_enQ;  // Just use the recently written obuf_valid</span></span>
 <span id="L701"><span class="lineNum">     701</span> <span class="tlaUNC">           0 :                      buf_state_bus_en[i]      = buf_cmd_state_bus_en[i];</span></span>
 <span id="L702"><span class="lineNum">     702</span> <span class="tlaUNC">           0 :                      buf_state_en[i]          = (buf_state_bus_en[i] &amp; lsu_bus_clk_en) | dec_tlu_force_halt;</span></span>
@@ -809,14 +809,14 @@
 <span id="L705"><span class="lineNum">     705</span> <span class="tlaUNC">           0 :                      buf_ldfwdtag_in[i]       = DEPTH_LOG2'(obuf_rdrsp_tag[pt.LSU_BUS_TAG-2:0]);</span></span>
 <span id="L706"><span class="lineNum">     706</span> <span class="tlaUNC">           0 :                      buf_data_en[i]           = buf_state_bus_en[i] &amp; lsu_bus_clk_en &amp; obuf_nosend &amp; bus_rsp_read;</span></span>
 <span id="L707"><span class="lineNum">     707</span> <span class="tlaUNC">           0 :                      buf_error_en[i]          = buf_state_bus_en[i] &amp; lsu_bus_clk_en &amp; obuf_nosend &amp; bus_rsp_read_error;</span></span>
-<span id="L708"><span class="lineNum">     708</span> <span class="tlaGNC tlaBgGNC">    21609208 :                      buf_data_in[i]           = buf_error_en[i] ? bus_rsp_rdata[31:0] : (buf_addr[i][2] ? bus_rsp_rdata[63:32] : bus_rsp_rdata[31:0]);</span></span>
+<span id="L708"><span class="lineNum">     708</span> <span class="tlaGNC tlaBgGNC">    21572600 :                      buf_data_in[i]           = buf_error_en[i] ? bus_rsp_rdata[31:0] : (buf_addr[i][2] ? bus_rsp_rdata[63:32] : bus_rsp_rdata[31:0]);</span></span>
 <span id="L709"><span class="lineNum">     709</span>              :             end</span>
 <span id="L710"><span class="lineNum">     710</span> <span class="tlaUNC tlaBgUNC">           0 :             RESP: begin</span></span>
-<span id="L711"><span class="lineNum">     711</span> <span class="tlaGNC tlaBgGNC">    10804740 :                      buf_nxtstate[i]           = (dec_tlu_force_halt | (buf_write[i] &amp; ~bus_rsp_write_error)) ? IDLE :    // Side-effect writes will be non-posted</span></span>
-<span id="L712"><span class="lineNum">     712</span> <span class="tlaGNC">     5402232 :                                                       (buf_dual[i] &amp; ~buf_samedw[i] &amp; ~buf_write[i] &amp; (buf_state[buf_dualtag[i]] != DONE_PARTIAL)) ? DONE_PARTIAL : // Goto DONE_PARTIAL if this is the first return of dual</span></span>
+<span id="L711"><span class="lineNum">     711</span> <span class="tlaGNC tlaBgGNC">    10786436 :                      buf_nxtstate[i]           = (dec_tlu_force_halt | (buf_write[i] &amp; ~bus_rsp_write_error)) ? IDLE :    // Side-effect writes will be non-posted</span></span>
+<span id="L712"><span class="lineNum">     712</span> <span class="tlaGNC">     5393080 :                                                       (buf_dual[i] &amp; ~buf_samedw[i] &amp; ~buf_write[i] &amp; (buf_state[buf_dualtag[i]] != DONE_PARTIAL)) ? DONE_PARTIAL : // Goto DONE_PARTIAL if this is the first return of dual</span></span>
 <span id="L713"><span class="lineNum">     713</span> <span class="tlaUNC tlaBgUNC">           0 :                                                            (buf_ldfwd[i] | any_done_wait_state |</span></span>
 <span id="L714"><span class="lineNum">     714</span> <span class="tlaUNC">           0 :                                                             (buf_dual[i] &amp; ~buf_samedw[i] &amp; ~buf_write[i] &amp; buf_ldfwd[buf_dualtag[i]] &amp;</span></span>
-<span id="L715"><span class="lineNum">     715</span> <span class="tlaGNC tlaBgGNC">     5402232 :                                                              (buf_state[buf_dualtag[i]] == DONE_PARTIAL) &amp; any_done_wait_state)) ? DONE_WAIT : DONE;</span></span>
+<span id="L715"><span class="lineNum">     715</span> <span class="tlaGNC tlaBgGNC">     5393080 :                                                              (buf_state[buf_dualtag[i]] == DONE_PARTIAL) &amp; any_done_wait_state)) ? DONE_WAIT : DONE;</span></span>
 <span id="L716"><span class="lineNum">     716</span> <span class="tlaUNC tlaBgUNC">           0 :                      buf_resp_state_bus_en[i]  = (bus_rsp_write &amp; (bus_rsp_write_tag == (pt.LSU_BUS_TAG)'(i))) |</span></span>
 <span id="L717"><span class="lineNum">     717</span> <span class="tlaUNC">           0 :                                                  (bus_rsp_read  &amp; ((bus_rsp_read_tag == (pt.LSU_BUS_TAG)'(i)) |</span></span>
 <span id="L718"><span class="lineNum">     718</span> <span class="tlaUNC">           0 :                                                                    (buf_ldfwd[i] &amp; (bus_rsp_read_tag == (pt.LSU_BUS_TAG)'(buf_ldfwdtag[i]))) |</span></span>
@@ -828,18 +828,18 @@
 <span id="L724"><span class="lineNum">     724</span> <span class="tlaUNC">           0 :                      buf_error_en[i]           = buf_state_bus_en[i] &amp; lsu_bus_clk_en &amp; ((bus_rsp_read_error  &amp; (bus_rsp_read_tag  == (pt.LSU_BUS_TAG)'(i))) |</span></span>
 <span id="L725"><span class="lineNum">     725</span> <span class="tlaUNC">           0 :                                                                                          (bus_rsp_read_error  &amp; buf_ldfwd[i] &amp; (bus_rsp_read_tag == (pt.LSU_BUS_TAG)'(buf_ldfwdtag[i]))) |</span></span>
 <span id="L726"><span class="lineNum">     726</span> <span class="tlaUNC">           0 :                                                                                          (bus_rsp_write_error &amp; (bus_rsp_write_tag == (pt.LSU_BUS_TAG)'(i))));</span></span>
-<span id="L727"><span class="lineNum">     727</span> <span class="tlaGNC tlaBgGNC">    21609208 :                      buf_data_in[i][31:0]      = (buf_state_en[i] &amp; ~buf_error_en[i]) ? (buf_addr[i][2] ? bus_rsp_rdata[63:32] : bus_rsp_rdata[31:0]) : bus_rsp_rdata[31:0];</span></span>
+<span id="L727"><span class="lineNum">     727</span> <span class="tlaGNC tlaBgGNC">    21572600 :                      buf_data_in[i][31:0]      = (buf_state_en[i] &amp; ~buf_error_en[i]) ? (buf_addr[i][2] ? bus_rsp_rdata[63:32] : bus_rsp_rdata[31:0]) : bus_rsp_rdata[31:0];</span></span>
 <span id="L728"><span class="lineNum">     728</span> <span class="tlaUNC tlaBgUNC">           0 :                      buf_cmd_state_bus_en[i]  = '0;</span></span>
 <span id="L729"><span class="lineNum">     729</span>              :             end</span>
 <span id="L730"><span class="lineNum">     730</span> <span class="tlaUNC">           0 :             DONE_PARTIAL: begin   // Other part of dual load hasn't returned</span></span>
-<span id="L731"><span class="lineNum">     731</span> <span class="tlaGNC tlaBgGNC">     5402232 :                      buf_nxtstate[i]           = dec_tlu_force_halt ? IDLE : (buf_ldfwd[i] | buf_ldfwd[buf_dualtag[i]] | any_done_wait_state) ? DONE_WAIT : DONE;</span></span>
+<span id="L731"><span class="lineNum">     731</span> <span class="tlaGNC tlaBgGNC">     5393080 :                      buf_nxtstate[i]           = dec_tlu_force_halt ? IDLE : (buf_ldfwd[i] | buf_ldfwd[buf_dualtag[i]] | any_done_wait_state) ? DONE_WAIT : DONE;</span></span>
 <span id="L732"><span class="lineNum">     732</span> <span class="tlaUNC tlaBgUNC">           0 :                      buf_state_bus_en[i]       = bus_rsp_read &amp; ((bus_rsp_read_tag == (pt.LSU_BUS_TAG)'(buf_dualtag[i])) |</span></span>
 <span id="L733"><span class="lineNum">     733</span> <span class="tlaUNC">           0 :                                                                  (buf_ldfwd[buf_dualtag[i]] &amp; (bus_rsp_read_tag == (pt.LSU_BUS_TAG)'(buf_ldfwdtag[buf_dualtag[i]]))));</span></span>
 <span id="L734"><span class="lineNum">     734</span> <span class="tlaUNC">           0 :                      buf_state_en[i]           = (buf_state_bus_en[i] &amp; lsu_bus_clk_en) | dec_tlu_force_halt;</span></span>
 <span id="L735"><span class="lineNum">     735</span> <span class="tlaUNC">           0 :                      buf_cmd_state_bus_en[i]  = '0;</span></span>
 <span id="L736"><span class="lineNum">     736</span>              :             end</span>
 <span id="L737"><span class="lineNum">     737</span> <span class="tlaUNC">           0 :             DONE_WAIT: begin  // START_WAIT state if there are multiple outstanding nb returns</span></span>
-<span id="L738"><span class="lineNum">     738</span> <span class="tlaGNC tlaBgGNC">     5402232 :                       buf_nxtstate[i]           = dec_tlu_force_halt ? IDLE : DONE;</span></span>
+<span id="L738"><span class="lineNum">     738</span> <span class="tlaGNC tlaBgGNC">     5393080 :                       buf_nxtstate[i]           = dec_tlu_force_halt ? IDLE : DONE;</span></span>
 <span id="L739"><span class="lineNum">     739</span> <span class="tlaUNC tlaBgUNC">           0 :                       buf_state_en[i]           = ((RspPtr == DEPTH_LOG2'(i)) | (buf_dual[i] &amp; (buf_dualtag[i] == RspPtr))) | dec_tlu_force_halt;</span></span>
 <span id="L740"><span class="lineNum">     740</span> <span class="tlaUNC">           0 :                       buf_cmd_state_bus_en[i]  = '0;</span></span>
 <span id="L741"><span class="lineNum">     741</span>              :             end</span>
@@ -909,7 +909,7 @@
 <span id="L805"><span class="lineNum">     805</span>              :    end</span>
 <span id="L806"><span class="lineNum">     806</span>              : </span>
 <span id="L807"><span class="lineNum">     807</span>              :    assign lsu_bus_buffer_pend_any = (buf_numvld_pend_any != 0);</span>
-<span id="L808"><span class="lineNum">     808</span> <span class="tlaGNC">     5402302 :    assign lsu_bus_buffer_full_any = (ldst_dual_d &amp; dec_lsu_valid_raw_d) ? (buf_numvld_any[3:0] &gt;= (DEPTH-1)) : (buf_numvld_any[3:0] == DEPTH);</span></span>
+<span id="L808"><span class="lineNum">     808</span> <span class="tlaGNC">     5393150 :    assign lsu_bus_buffer_full_any = (ldst_dual_d &amp; dec_lsu_valid_raw_d) ? (buf_numvld_any[3:0] &gt;= (DEPTH-1)) : (buf_numvld_any[3:0] == DEPTH);</span></span>
 <span id="L809"><span class="lineNum">     809</span>              :    assign lsu_bus_buffer_empty_any = ~(|buf_state[DEPTH-1:0]) &amp; ~ibuf_valid &amp; ~obuf_valid;</span>
 <span id="L810"><span class="lineNum">     810</span>              : </span>
 <span id="L811"><span class="lineNum">     811</span>              : </span>
@@ -964,7 +964,7 @@
 <span id="L860"><span class="lineNum">     860</span>              :    end</span>
 <span id="L861"><span class="lineNum">     861</span>              : </span>
 <span id="L862"><span class="lineNum">     862</span>              :    // Generic bus signals</span>
-<span id="L863"><span class="lineNum">     863</span> <span class="tlaGNC">     1350558 :    assign bus_cmd_ready                      = obuf_write ? ((obuf_cmd_done | obuf_data_done) ? (obuf_cmd_done ? lsu_axi_wready : lsu_axi_awready) : (lsu_axi_awready &amp; lsu_axi_wready)) : lsu_axi_arready;</span></span>
+<span id="L863"><span class="lineNum">     863</span> <span class="tlaGNC">     1348270 :    assign bus_cmd_ready                      = obuf_write ? ((obuf_cmd_done | obuf_data_done) ? (obuf_cmd_done ? lsu_axi_wready : lsu_axi_awready) : (lsu_axi_awready &amp; lsu_axi_wready)) : lsu_axi_arready;</span></span>
 <span id="L864"><span class="lineNum">     864</span>              :    assign bus_wcmd_sent                      = lsu_axi_awvalid &amp; lsu_axi_awready;</span>
 <span id="L865"><span class="lineNum">     865</span>              :    assign bus_wdata_sent                     = lsu_axi_wvalid &amp; lsu_axi_wready;</span>
 <span id="L866"><span class="lineNum">     866</span>              :    assign bus_cmd_sent                       = ((obuf_cmd_done | bus_wcmd_sent) &amp; (obuf_data_done | bus_wdata_sent)) | (lsu_axi_arvalid &amp; lsu_axi_arready);</span>
@@ -980,10 +980,10 @@
 <span id="L876"><span class="lineNum">     876</span>              :    // AXI command signals</span>
 <span id="L877"><span class="lineNum">     877</span>              :    assign lsu_axi_awvalid               = obuf_valid &amp; obuf_write &amp; ~obuf_cmd_done &amp; ~bus_addr_match_pending;</span>
 <span id="L878"><span class="lineNum">     878</span>              :    assign lsu_axi_awid[pt.LSU_BUS_TAG-1:0] = (pt.LSU_BUS_TAG)'(obuf_tag0);</span>
-<span id="L879"><span class="lineNum">     879</span> <span class="tlaGNC">     1350558 :    assign lsu_axi_awaddr[31:0]          = obuf_sideeffect ? obuf_addr[31:0] : {obuf_addr[31:3],3'b0};</span></span>
-<span id="L880"><span class="lineNum">     880</span> <span class="tlaGNC">     1350558 :    assign lsu_axi_awsize[2:0]           = obuf_sideeffect ? {1'b0, obuf_sz[1:0]} : 3'b011;</span></span>
+<span id="L879"><span class="lineNum">     879</span> <span class="tlaGNC">     1348270 :    assign lsu_axi_awaddr[31:0]          = obuf_sideeffect ? obuf_addr[31:0] : {obuf_addr[31:3],3'b0};</span></span>
+<span id="L880"><span class="lineNum">     880</span> <span class="tlaGNC">     1348270 :    assign lsu_axi_awsize[2:0]           = obuf_sideeffect ? {1'b0, obuf_sz[1:0]} : 3'b011;</span></span>
 <span id="L881"><span class="lineNum">     881</span>              :    assign lsu_axi_awprot[2:0]           = 3'b001;</span>
-<span id="L882"><span class="lineNum">     882</span> <span class="tlaGNC">     1350558 :    assign lsu_axi_awcache[3:0]          = obuf_sideeffect ? 4'b0 : 4'b1111;</span></span>
+<span id="L882"><span class="lineNum">     882</span> <span class="tlaGNC">     1348270 :    assign lsu_axi_awcache[3:0]          = obuf_sideeffect ? 4'b0 : 4'b1111;</span></span>
 <span id="L883"><span class="lineNum">     883</span>              :    assign lsu_axi_awregion[3:0]         = obuf_addr[31:28];</span>
 <span id="L884"><span class="lineNum">     884</span>              :    assign lsu_axi_awlen[7:0]            = '0;</span>
 <span id="L885"><span class="lineNum">     885</span>              :    assign lsu_axi_awburst[1:0]          = 2'b01;</span>
@@ -997,10 +997,10 @@
 <span id="L893"><span class="lineNum">     893</span>              : </span>
 <span id="L894"><span class="lineNum">     894</span>              :    assign lsu_axi_arvalid               = obuf_valid &amp; ~obuf_write &amp; ~obuf_nosend &amp; ~bus_addr_match_pending;</span>
 <span id="L895"><span class="lineNum">     895</span>              :    assign lsu_axi_arid[pt.LSU_BUS_TAG-1:0] = (pt.LSU_BUS_TAG)'(obuf_tag0);</span>
-<span id="L896"><span class="lineNum">     896</span> <span class="tlaGNC">     1350558 :    assign lsu_axi_araddr[31:0]          = obuf_sideeffect ? obuf_addr[31:0] : {obuf_addr[31:3],3'b0};</span></span>
-<span id="L897"><span class="lineNum">     897</span> <span class="tlaGNC">     1350558 :    assign lsu_axi_arsize[2:0]           = obuf_sideeffect ? {1'b0, obuf_sz[1:0]} : 3'b011;</span></span>
+<span id="L896"><span class="lineNum">     896</span> <span class="tlaGNC">     1348270 :    assign lsu_axi_araddr[31:0]          = obuf_sideeffect ? obuf_addr[31:0] : {obuf_addr[31:3],3'b0};</span></span>
+<span id="L897"><span class="lineNum">     897</span> <span class="tlaGNC">     1348270 :    assign lsu_axi_arsize[2:0]           = obuf_sideeffect ? {1'b0, obuf_sz[1:0]} : 3'b011;</span></span>
 <span id="L898"><span class="lineNum">     898</span>              :    assign lsu_axi_arprot[2:0]           = 3'b001;</span>
-<span id="L899"><span class="lineNum">     899</span> <span class="tlaGNC">     1350558 :    assign lsu_axi_arcache[3:0]          = obuf_sideeffect ? 4'b0 : 4'b1111;</span></span>
+<span id="L899"><span class="lineNum">     899</span> <span class="tlaGNC">     1348270 :    assign lsu_axi_arcache[3:0]          = obuf_sideeffect ? 4'b0 : 4'b1111;</span></span>
 <span id="L900"><span class="lineNum">     900</span>              :    assign lsu_axi_arregion[3:0]         = obuf_addr[31:28];</span>
 <span id="L901"><span class="lineNum">     901</span>              :    assign lsu_axi_arlen[7:0]            = '0;</span>
 <span id="L902"><span class="lineNum">     902</span>              :    assign lsu_axi_arburst[1:0]          = 2'b01;</span>
@@ -1019,7 +1019,7 @@
 <span id="L915"><span class="lineNum">     915</span>              :       end</span>
 <span id="L916"><span class="lineNum">     916</span>              :    end</span>
 <span id="L917"><span class="lineNum">     917</span>              :    assign lsu_imprecise_error_load_any       = lsu_nonblock_load_data_error &amp; ~lsu_imprecise_error_store_any;   // This is to make sure we send only one imprecise error for load/store</span>
-<span id="L918"><span class="lineNum">     918</span> <span class="tlaGNC">     1350558 :    assign lsu_imprecise_error_addr_any[31:0] = lsu_imprecise_error_store_any ? buf_addr[lsu_imprecise_error_store_tag[DEPTH_LOG2-1:0]] : buf_addr[lsu_nonblock_load_data_tag[DEPTH_LOG2-1:0]];</span></span>
+<span id="L918"><span class="lineNum">     918</span> <span class="tlaGNC">     1348270 :    assign lsu_imprecise_error_addr_any[31:0] = lsu_imprecise_error_store_any ? buf_addr[lsu_imprecise_error_store_tag[DEPTH_LOG2-1:0]] : buf_addr[lsu_nonblock_load_data_tag[DEPTH_LOG2-1:0]];</span></span>
 <span id="L919"><span class="lineNum">     919</span>              : </span>
 <span id="L920"><span class="lineNum">     920</span>              :    // PMU signals</span>
 <span id="L921"><span class="lineNum">     921</span>              :    assign lsu_pmu_bus_trxn  = (lsu_axi_awvalid &amp; lsu_axi_awready) | (lsu_axi_wvalid &amp; lsu_axi_wready) | (lsu_axi_arvalid &amp; lsu_axi_arready);</span>

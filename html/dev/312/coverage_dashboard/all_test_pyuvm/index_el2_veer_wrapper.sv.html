@@ -138,7 +138,7 @@
 <span id="L34"><span class="lineNum">      34</span>              :    /*pragma coverage off*/</span>
 <span id="L35"><span class="lineNum">      35</span>              :    input logic [31:1]                      rst_vec,</span>
 <span id="L36"><span class="lineNum">      36</span>              :    /*pragma coverage on*/</span>
-<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC tlaBgGNC">           7 :    input logic                             nmi_int,</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC tlaBgGNC">           4 :    input logic                             nmi_int,</span></span>
 <span id="L38"><span class="lineNum">      38</span>              :    // jtag_id and nmi_vec are supposed to be tied to constants in the top level</span>
 <span id="L39"><span class="lineNum">      39</span>              :    /*pragma coverage off*/</span>
 <span id="L40"><span class="lineNum">      40</span>              :    input logic [31:1]                      nmi_vec,</span>
@@ -492,8 +492,8 @@
 <span id="L388"><span class="lineNum">     388</span>              :    // ICache export interface</span>
 <span id="L389"><span class="lineNum">     389</span>              :    el2_mem_if.veer_icache_src              el2_icache_export,</span>
 <span id="L390"><span class="lineNum">     390</span>              : </span>
-<span id="L391"><span class="lineNum">     391</span> <span class="tlaGNC tlaBgGNC">           4 :    input logic                             timer_int,</span></span>
-<span id="L392"><span class="lineNum">     392</span> <span class="tlaGNC">           3 :    input logic                             soft_int,</span></span>
+<span id="L391"><span class="lineNum">     391</span> <span class="tlaGNC tlaBgGNC">           2 :    input logic                             timer_int,</span></span>
+<span id="L392"><span class="lineNum">     392</span> <span class="tlaGNC">           5 :    input logic                             soft_int,</span></span>
 <span id="L393"><span class="lineNum">     393</span> <span class="tlaGNC">           4 :    input logic [pt.PIC_TOTAL_INT:1]        extintsrc_req,</span></span>
 <span id="L394"><span class="lineNum">     394</span>              : </span>
 <span id="L395"><span class="lineNum">     395</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic                            dec_tlu_perfcnt0, // toggles when slot0 perf counter 0 has an event inc</span></span>

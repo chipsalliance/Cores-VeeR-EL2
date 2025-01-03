@@ -38,7 +38,7 @@ class TlInputItem(uvm_sequence_item):
         mtdata1=0,
         mtdata2=0,
         mtsel=0,
-        perf_counter_addr=0,
+        csr_addr=0,
         dec_csr_rddata_d=0,
     ):
         super().__init__("TlOutputItem")
@@ -48,7 +48,7 @@ class TlInputItem(uvm_sequence_item):
         self.mtdata1 = mtdata1
         self.mtdata2 = mtdata2
         self.mtsel = mtsel
-        self.perf_counter_addr = perf_counter_addr
+        self.csr_addr = csr_addr
         self.dec_csr_rddata_d = dec_csr_rddata_d
 
     def randomize(self, test):
@@ -84,12 +84,12 @@ class TlInputItem(uvm_sequence_item):
             for _ in range(2):
                 mtsel += random.choice(["0", "1"])
             self.mtsel = int(mtsel, 2)
-        elif test == "perf_counters":
+        elif test == "csrs_access":
             value = ""
             for _ in range(32):
                 value += random.choice(["0", "1"])
             self.dec_csr_wrdata_r = int(value, 2)
-            self.perf_counter_addr = random.choice(
+            self.csr_addr = random.choice(
                 [
                     csrs.MHPMC3,
                     csrs.MHPMC3H,
@@ -103,6 +103,9 @@ class TlInputItem(uvm_sequence_item):
                     csrs.MCYCLEH,
                     csrs.MINSTRETL,
                     csrs.MINSTRETH,
+                    csrs.MICECT,
+                    csrs.MICCMECT,
+                    csrs.MDCCMECT
                 ]
             )
 
@@ -175,11 +178,11 @@ class TlDriver(uvm_driver):
                     await self.write_csr(csrs.MTSEL, it.mtsel)
                     await self.write_csr(csrs.MTDATA1, it.mtdata1)
                     await self.write_csr(csrs.MTDATA2, it.mtdata2)
-                elif test == "perf_counters":
+                elif test == "csrs_access":
                     # write a perf counter
-                    await self.write_csr(it.perf_counter_addr, it.dec_csr_wrdata_r)
+                    await self.write_csr(it.csr_addr, it.dec_csr_wrdata_r)
                     # read it back
-                    await self.read_csr(it.perf_counter_addr)
+                    await self.read_csr(it.csr_addr)
             else:
                 raise RuntimeError("Unknown item '{}'".format(type(it)))
 
@@ -223,15 +226,15 @@ class TlInputMonitor(uvm_component):
                 await RisingEdge(self.dut.dec_csr_wen_r)
                 mtdata2 = int(self.dut.dec_csr_wrdata_r.value)
                 self.ap.write(TlInputItem(mtdata1=mtdata1, mtdata2=mtdata2, mtsel=mtsel))
-            elif test == "perf_counters":
+            elif test == "csrs_access":
                 # wait for reg write
                 await RisingEdge(self.dut.dec_csr_wen_r)
                 await RisingEdge(self.dut.clk)
-                perf_counter_addr = int(self.dut.dec_csr_wraddr_r.value)
-                perf_counter_value = int(self.dut.dec_csr_wrdata_r.value)
+                csr_addr = int(self.dut.dec_csr_wraddr_r.value)
+                csr_value = int(self.dut.dec_csr_wrdata_r.value)
                 self.ap.write(
                     TlInputItem(
-                        perf_counter_addr=perf_counter_addr, dec_csr_wrdata_r=perf_counter_value
+                        csr_addr=csr_addr, dec_csr_wrdata_r=csr_value
                     )
                 )
 
@@ -272,7 +275,7 @@ class TlOutputMonitor(uvm_component):
                     await RisingEdge(self.dut.clk)
                 trigger_pkt_any = int(self.dut.trigger_pkt_any.value)
                 self.ap.write(TlOutputItem(trigger_pkt_any=trigger_pkt_any))
-            elif test == "perf_counters":
+            elif test == "csrs_access":
                 # wait for reg write
                 await RisingEdge(self.dut.dec_csr_wen_r)
                 # wait for read
@@ -418,13 +421,18 @@ class TlScoreboard(uvm_component):
                     self.logger.error("m {} != {} (should be {})".format(m_i, m_o, m_i))
                     self.passed = False
 
-            elif test == "perf_counters":
+            elif test == "csrs_access":
+                csr = item_inp.csr_addr
                 perf_reg_val_i = item_inp.dec_csr_wrdata_r
                 perf_reg_val_o = item_out.dec_csr_rddata_d
+                if csr in [csrs.MICECT, csrs.MICCMECT, csrs.MDCCMECT]:
+                   if ((perf_reg_val_i >> 27) & 0x1f) > 26:
+                     perf_reg_val_i = perf_reg_val_i & 0x07ffffff
+                     perf_reg_val_i = perf_reg_val_i | (26 << 27)
                 if perf_reg_val_i != perf_reg_val_o:
                     self.logger.error(
-                        "perf_reg_val {} != {} (should be {})".format(
-                            perf_reg_val_i, perf_reg_val_o, perf_reg_val_i
+                        "reg_val[{}] {} != {} (should be {})".format(
+                            hex(csr), hex(perf_reg_val_i), hex(perf_reg_val_o), hex(perf_reg_val_i)
                         )
                     )
                     self.passed = False

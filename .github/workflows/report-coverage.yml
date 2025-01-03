@@ -168,10 +168,13 @@ jobs:
           sudo apt update
           sudo apt install -y zip unzip
           export PATH=${{ env.LCOV_PATH }}:${PATH}
+          zip data_verilator_info.zip *.info
           sis -d reports . --report-dir report --src-pattern \*design\*
           cp data.zip report
           cp data_v.zip report
           cp data_both.zip report
+          cp data_verilator_info.zip report
+
 
           cat *_toggle.info > coverage.toggle.info
           cat *_branch.info > coverage.branch.info

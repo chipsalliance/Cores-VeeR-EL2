@@ -1,0 +1,424 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>
+        Full
+        coverage report
+    </title>
+    <link rel="stylesheet" type="text/css" href="cov.css">
+    <style>
+        .container {
+            background-color: rgb(169, 169, 169);
+            width: 100%;
+            min-height: 80%;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <table class="title-header-shadow">
+        <td class="title-container">
+            <table class="title-header">
+                <td class="title-logo">
+                    <a href=index.html>
+                        <img src=_static/white.svg></img>
+                    </a>
+                </td>
+                <td class="title">
+                    Project
+                    Full
+                    coverage report
+                </td>
+            </table>
+        </td>
+    </table>
+    <center>
+        <table class="info-table">
+            <tr class="info-table-view">
+                <td width="10%" class="headerInfo">Current view:</td>
+                <td width="40%" class="headerInfoValue">
+                    <a href=index.html>Cores-VeeR-EL2</a>—Cores-VeeR-EL2—design—el2_pmp.sv
+                </td>
+                <td width=auto></td>
+                <td width="10%"></td>
+                <td width="10%" class="headerCovSummary colTop">Coverage</td>
+                <td width="10%" class="headerCovSummary colTop" title="Covered + Uncovered code">Hit</td>
+                <td width="10%" class="headerCovSummary colTop" title="Exercised code only">Total</td>
+            </tr>
+            <tr>
+                <td class="headerInfo">Test Date:</td>
+                <td class="headerInfoValue">
+                    19-11-2024
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Toggle
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #d6ff00;">
+        57.9%
+    </td>
+    <td class="headerCovSummaryEntry">
+        11
+    </td>
+    <td class="headerCovSummaryEntry">
+        19
+    </td>
+
+            </tr>
+            <tr>
+                <td class="headerInfo">Test:</td>
+                <td class="headerInfoValue">
+                    riscv-dv_u_riscv_pmp_region_exec_test_veer
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Branch
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ffdc00;">
+        43.1%
+    </td>
+    <td class="headerCovSummaryEntry">
+        22
+    </td>
+    <td class="headerCovSummaryEntry">
+        51
+    </td>
+
+            </tr>
+            
+        </table>
+    </center>
+
+    <table border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td><br/></td>
+</tr>
+<tr>
+<td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : // SPDX-License-Identifier: Apache-2.0</span>
+<span id="L2"><span class="lineNum">       2</span>              : // Copyright lowRISC contributors.</span>
+<span id="L3"><span class="lineNum">       3</span>              : // Copyright 2023 Antmicro, Ltd. &lt;www.antmicro.com&gt;</span>
+<span id="L4"><span class="lineNum">       4</span>              : //</span>
+<span id="L5"><span class="lineNum">       5</span>              : // Licensed under the Apache License, Version 2.0 (the "License");</span>
+<span id="L6"><span class="lineNum">       6</span>              : // you may not use this file except in compliance with the License.</span>
+<span id="L7"><span class="lineNum">       7</span>              : // You may obtain a copy of the License at</span>
+<span id="L8"><span class="lineNum">       8</span>              : //</span>
+<span id="L9"><span class="lineNum">       9</span>              : // http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L10"><span class="lineNum">      10</span>              : //</span>
+<span id="L11"><span class="lineNum">      11</span>              : // Unless required by applicable law or agreed to in writing, software</span>
+<span id="L12"><span class="lineNum">      12</span>              : // distributed under the License is distributed on an "AS IS" BASIS,</span>
+<span id="L13"><span class="lineNum">      13</span>              : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L14"><span class="lineNum">      14</span>              : // See the License for the specific language governing permissions and</span>
+<span id="L15"><span class="lineNum">      15</span>              : // limitations under the License.</span>
+<span id="L16"><span class="lineNum">      16</span>              : </span>
+<span id="L17"><span class="lineNum">      17</span>              : module el2_pmp</span>
+<span id="L18"><span class="lineNum">      18</span>              :   import el2_pkg::*;</span>
+<span id="L19"><span class="lineNum">      19</span>              : #(</span>
+<span id="L20"><span class="lineNum">      20</span>              :     parameter PMP_CHANNELS = 3,</span>
+<span id="L21"><span class="lineNum">      21</span>              :     // Granularity of NAPOT access,</span>
+<span id="L22"><span class="lineNum">      22</span>              :     // 0 = No restriction, 1 = 8 byte, 2 = 16 byte, 3 = 32 byte, etc.</span>
+<span id="L23"><span class="lineNum">      23</span>              :     parameter PMP_GRANULARITY = 0,  // TODO: Move to veer.config</span>
+<span id="L24"><span class="lineNum">      24</span>              :     `include "el2_param.vh"</span>
+<span id="L25"><span class="lineNum">      25</span>              : ) (</span>
+<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC tlaBgGNC">       30388 :     input logic clk,       // Top level clock</span></span>
+<span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC">           6 :     input logic rst_l,     // Reset</span></span>
+<span id="L28"><span class="lineNum">      28</span>              :     /* verilator coverage_off */</span>
+<span id="L29"><span class="lineNum">      29</span>              :     input logic scan_mode, // Scan mode</span>
+<span id="L30"><span class="lineNum">      30</span>              :     /* verilator coverage_on */</span>
+<span id="L31"><span class="lineNum">      31</span>              : </span>
+<span id="L32"><span class="lineNum">      32</span>              : `ifdef RV_SMEPMP</span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaUNC tlaBgUNC">           0 :     input el2_mseccfg_pkt_t mseccfg, // mseccfg CSR content, RLB, MMWP and MML bits</span></span>
+<span id="L34"><span class="lineNum">      34</span>              : `endif</span>
+<span id="L35"><span class="lineNum">      35</span>              : </span>
+<span id="L36"><span class="lineNum">      36</span>              : `ifdef RV_USER_MODE</span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaUNC">           0 :     input logic priv_mode_ns,   // operating privilege mode (next clock cycle)</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC tlaBgGNC">          12 :     input logic priv_mode_eff,  // operating effective privilege mode</span></span>
+<span id="L39"><span class="lineNum">      39</span>              : `endif</span>
+<span id="L40"><span class="lineNum">      40</span>              : </span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaUNC tlaBgUNC">           0 :     input el2_pmp_cfg_pkt_t        pmp_pmpcfg [pt.PMP_ENTRIES],</span></span>
+<span id="L42"><span class="lineNum">      42</span>              :     input logic             [31:0] pmp_pmpaddr[pt.PMP_ENTRIES],</span>
+<span id="L43"><span class="lineNum">      43</span>              : </span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC tlaBgGNC">          96 :     input  logic              [31:0] pmp_chan_addr[PMP_CHANNELS],</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaUNC tlaBgUNC">           0 :     input  el2_pmp_type_pkt_t        pmp_chan_type[PMP_CHANNELS],</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC tlaBgGNC">          12 :     output logic                     pmp_chan_err [PMP_CHANNELS]</span></span>
+<span id="L47"><span class="lineNum">      47</span>              : );</span>
+<span id="L48"><span class="lineNum">      48</span>              : </span>
+<span id="L49"><span class="lineNum">      49</span>              :   logic [                33:0]                     csr_pmp_addr_i          [pt.PMP_ENTRIES];</span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">          96 :   logic [                33:0]                     pmp_req_addr_i          [  PMP_CHANNELS];</span></span>
+<span id="L51"><span class="lineNum">      51</span>              : </span>
+<span id="L52"><span class="lineNum">      52</span>              :   logic [                33:0]                     region_start_addr       [pt.PMP_ENTRIES];</span>
+<span id="L53"><span class="lineNum">      53</span>              :   logic [33:PMP_GRANULARITY+2]                     region_addr_mask        [pt.PMP_ENTRIES];</span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">           6 :   logic [    PMP_CHANNELS-1:0][pt.PMP_ENTRIES-1:0] region_match_gt;</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaUNC tlaBgUNC">           0 :   logic [    PMP_CHANNELS-1:0][pt.PMP_ENTRIES-1:0] region_match_lt;</span></span>
+<span id="L56"><span class="lineNum">      56</span> <span class="tlaGNC tlaBgGNC">          12 :   logic [    PMP_CHANNELS-1:0][pt.PMP_ENTRIES-1:0] region_match_eq;</span></span>
+<span id="L57"><span class="lineNum">      57</span> <span class="tlaUNC tlaBgUNC">           0 :   logic [    PMP_CHANNELS-1:0][pt.PMP_ENTRIES-1:0] region_match_all;</span></span>
+<span id="L58"><span class="lineNum">      58</span> <span class="tlaUNC">           0 :   logic [    PMP_CHANNELS-1:0][pt.PMP_ENTRIES-1:0] region_basic_perm_check;</span></span>
+<span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC tlaBgGNC">           6 :   logic [    PMP_CHANNELS-1:0][pt.PMP_ENTRIES-1:0] region_perm_check;</span></span>
+<span id="L60"><span class="lineNum">      60</span>              : </span>
+<span id="L61"><span class="lineNum">      61</span>              : `ifdef RV_USER_MODE</span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">           2 :   logic any_region_enabled;</span></span>
+<span id="L63"><span class="lineNum">      63</span>              : `endif</span>
+<span id="L64"><span class="lineNum">      64</span>              : </span>
+<span id="L65"><span class="lineNum">      65</span>              :   ///////////////////////</span>
+<span id="L66"><span class="lineNum">      66</span>              :   // Functions for PMP //</span>
+<span id="L67"><span class="lineNum">      67</span>              :   ///////////////////////</span>
+<span id="L68"><span class="lineNum">      68</span>              : </span>
+<span id="L69"><span class="lineNum">      69</span>              :   // Flow of the PMP checking operation follows as below</span>
+<span id="L70"><span class="lineNum">      70</span>              :   //</span>
+<span id="L71"><span class="lineNum">      71</span>              :   // basic_perm_check ---&gt; perm_check_wrapper ---&gt; orig_perm_check ---/</span>
+<span id="L72"><span class="lineNum">      72</span>              :   //                                                                  |</span>
+<span id="L73"><span class="lineNum">      73</span>              :   // region_match_all -----------------&gt; access_fault_check &lt;----------</span>
+<span id="L74"><span class="lineNum">      74</span>              :   //                                             |</span>
+<span id="L75"><span class="lineNum">      75</span>              :   //                                             \--&gt; pmp_chan_err</span>
+<span id="L76"><span class="lineNum">      76</span>              : </span>
+<span id="L77"><span class="lineNum">      77</span>              :   // A wrapper function in which it is decided which form of permission check function gets called</span>
+<span id="L78"><span class="lineNum">      78</span> <span class="tlaGNC">         288 :   function automatic logic perm_check_wrapper(el2_mseccfg_pkt_t csr_pmp_mseccfg,</span></span>
+<span id="L79"><span class="lineNum">      79</span>              :                                               el2_pmp_cfg_pkt_t csr_pmp_cfg,</span>
+<span id="L80"><span class="lineNum">      80</span>              :                                               el2_pmp_type_pkt_t req_type,</span>
+<span id="L81"><span class="lineNum">      81</span>              :                                               logic priv_mode,</span>
+<span id="L82"><span class="lineNum">      82</span>              :                                               logic permission_check);</span>
+<span id="L83"><span class="lineNum">      83</span>              : </span>
+<span id="L84"><span class="lineNum">      84</span> <span class="tlaGNC">         288 :     return csr_pmp_mseccfg.MML ? mml_perm_check(csr_pmp_cfg,</span></span>
+<span id="L85"><span class="lineNum">      85</span> <span class="tlaGNC">         288 :                                                 req_type,</span></span>
+<span id="L86"><span class="lineNum">      86</span> <span class="tlaGNC">         288 :                                                 priv_mode,</span></span>
+<span id="L87"><span class="lineNum">      87</span> <span class="tlaGNC">         288 :                                                 permission_check) :</span></span>
+<span id="L88"><span class="lineNum">      88</span> <span class="tlaGNC">         288 :                                  orig_perm_check(csr_pmp_cfg.lock,</span></span>
+<span id="L89"><span class="lineNum">      89</span> <span class="tlaGNC">         288 :                                                  priv_mode,</span></span>
+<span id="L90"><span class="lineNum">      90</span> <span class="tlaGNC">         288 :                                                  permission_check);</span></span>
+<span id="L91"><span class="lineNum">      91</span>              :   endfunction</span>
+<span id="L92"><span class="lineNum">      92</span>              : </span>
+<span id="L93"><span class="lineNum">      93</span>              :   // Compute permissions checks that apply when MSECCFG.MML is set. Added for Smepmp support.</span>
+<span id="L94"><span class="lineNum">      94</span> <span class="tlaUNC tlaBgUNC">           0 :   function automatic logic mml_perm_check(el2_pmp_cfg_pkt_t   csr_pmp_cfg,</span></span>
+<span id="L95"><span class="lineNum">      95</span>              :                                           el2_pmp_type_pkt_t  pmp_req_type,</span>
+<span id="L96"><span class="lineNum">      96</span>              :                                           logic               priv_mode,</span>
+<span id="L97"><span class="lineNum">      97</span>              :                                           logic               permission_check);</span>
+<span id="L98"><span class="lineNum">      98</span>              :     logic result;</span>
+<span id="L99"><span class="lineNum">      99</span> <span class="tlaUNC">           0 :     logic unused_cfg = |csr_pmp_cfg.mode;</span></span>
+<span id="L100"><span class="lineNum">     100</span>              : </span>
+<span id="L101"><span class="lineNum">     101</span> <span class="tlaUNC">           0 :     if (!csr_pmp_cfg.read &amp;&amp; csr_pmp_cfg.write) begin</span></span>
+<span id="L102"><span class="lineNum">     102</span>              :       // Special-case shared regions where R = 0, W = 1</span>
+<span id="L103"><span class="lineNum">     103</span> <span class="tlaUNC">           0 :       unique case ({csr_pmp_cfg.lock, csr_pmp_cfg.execute})</span></span>
+<span id="L104"><span class="lineNum">     104</span>              :         // Read/write in M, read only in U</span>
+<span id="L105"><span class="lineNum">     105</span> <span class="tlaUNC">           0 :         2'b00: result =</span></span>
+<span id="L106"><span class="lineNum">     106</span> <span class="tlaUNC">           0 :              (pmp_req_type == READ) |</span></span>
+<span id="L107"><span class="lineNum">     107</span> <span class="tlaUNC">           0 :             ((pmp_req_type == WRITE) &amp; ~priv_mode);</span></span>
+<span id="L108"><span class="lineNum">     108</span>              :         // Read/write in M/U</span>
+<span id="L109"><span class="lineNum">     109</span> <span class="tlaUNC">           0 :         2'b01: result =</span></span>
+<span id="L110"><span class="lineNum">     110</span> <span class="tlaUNC">           0 :              (pmp_req_type == READ) |</span></span>
+<span id="L111"><span class="lineNum">     111</span> <span class="tlaUNC">           0 :              (pmp_req_type == WRITE);</span></span>
+<span id="L112"><span class="lineNum">     112</span>              :         // Execute only on M/U</span>
+<span id="L113"><span class="lineNum">     113</span> <span class="tlaUNC">           0 :         2'b10: result = (pmp_req_type == EXEC);</span></span>
+<span id="L114"><span class="lineNum">     114</span>              :         // Read/execute in M, execute only on U</span>
+<span id="L115"><span class="lineNum">     115</span> <span class="tlaUNC">           0 :         2'b11: result =</span></span>
+<span id="L116"><span class="lineNum">     116</span> <span class="tlaUNC">           0 :              (pmp_req_type == EXEC) |</span></span>
+<span id="L117"><span class="lineNum">     117</span> <span class="tlaUNC">           0 :             ((pmp_req_type == READ) &amp; ~priv_mode);</span></span>
+<span id="L118"><span class="lineNum">     118</span>              :         /* verilator coverage_off */</span>
+<span id="L119"><span class="lineNum">     119</span>              :         default: ;</span>
+<span id="L120"><span class="lineNum">     120</span>              :         /* verilator coverage_on */</span>
+<span id="L121"><span class="lineNum">     121</span>              :       endcase</span>
+<span id="L122"><span class="lineNum">     122</span> <span class="tlaUNC">           0 :     end else begin</span></span>
+<span id="L123"><span class="lineNum">     123</span> <span class="tlaUNC">           0 :       if (csr_pmp_cfg.read &amp; csr_pmp_cfg.write &amp; csr_pmp_cfg.execute &amp; csr_pmp_cfg.lock) begin</span></span>
+<span id="L124"><span class="lineNum">     124</span>              :         // Special-case shared read only region when R = 1, W = 1, X = 1, L = 1</span>
+<span id="L125"><span class="lineNum">     125</span> <span class="tlaUNC">           0 :         result = (pmp_req_type == READ);</span></span>
+<span id="L126"><span class="lineNum">     126</span> <span class="tlaUNC">           0 :       end else begin</span></span>
+<span id="L127"><span class="lineNum">     127</span>              :         // Otherwise use basic permission check. Permission is always denied if in U mode and</span>
+<span id="L128"><span class="lineNum">     128</span>              :         // L is set or if in M mode and L is unset.</span>
+<span id="L129"><span class="lineNum">     129</span> <span class="tlaUNC">           0 :         result = permission_check &amp; (priv_mode ? ~csr_pmp_cfg.lock : csr_pmp_cfg.lock);</span></span>
+<span id="L130"><span class="lineNum">     130</span>              :       end</span>
+<span id="L131"><span class="lineNum">     131</span>              :     end</span>
+<span id="L132"><span class="lineNum">     132</span> <span class="tlaUNC">           0 :     return result;</span></span>
+<span id="L133"><span class="lineNum">     133</span>              :   endfunction</span>
+<span id="L134"><span class="lineNum">     134</span>              : </span>
+<span id="L135"><span class="lineNum">     135</span>              :   // Compute permissions checks that apply when MSECCFG.MML is unset. This is the original PMP</span>
+<span id="L136"><span class="lineNum">     136</span>              :   // behaviour before Smepmp was added.</span>
+<span id="L137"><span class="lineNum">     137</span> <span class="tlaGNC tlaBgGNC">     1923168 :   function automatic logic orig_perm_check(logic pmp_cfg_lock,</span></span>
+<span id="L138"><span class="lineNum">     138</span>              :                                            logic priv_mode,</span>
+<span id="L139"><span class="lineNum">     139</span>              :                                            logic permission_check);</span>
+<span id="L140"><span class="lineNum">     140</span>              :     // For M-mode, any region which matches with the L-bit clear, or with sufficient</span>
+<span id="L141"><span class="lineNum">     141</span>              :     // access permissions will be allowed.</span>
+<span id="L142"><span class="lineNum">     142</span>              :     // For other modes, the lock bit doesn't matter</span>
+<span id="L143"><span class="lineNum">     143</span> <span class="tlaGNC">     1923168 :     return priv_mode ? (permission_check) : (~pmp_cfg_lock | permission_check);</span></span>
+<span id="L144"><span class="lineNum">     144</span>              :   endfunction</span>
+<span id="L145"><span class="lineNum">     145</span>              : </span>
+<span id="L146"><span class="lineNum">     146</span>              :   // Access fault determination / prioritization</span>
+<span id="L147"><span class="lineNum">     147</span> <span class="tlaGNC">          18 :   function automatic logic access_fault_check(el2_mseccfg_pkt_t          csr_pmp_mseccfg,</span></span>
+<span id="L148"><span class="lineNum">     148</span>              :                                               el2_pmp_type_pkt_t         req_type,</span>
+<span id="L149"><span class="lineNum">     149</span>              :                                               logic [pt.PMP_ENTRIES-1:0] match_all,</span>
+<span id="L150"><span class="lineNum">     150</span>              :                                               logic any_region_enabled,</span>
+<span id="L151"><span class="lineNum">     151</span>              :                                               logic priv_mode,</span>
+<span id="L152"><span class="lineNum">     152</span>              :                                               logic [pt.PMP_ENTRIES-1:0] final_perm_check);</span>
+<span id="L153"><span class="lineNum">     153</span>              : </span>
+<span id="L154"><span class="lineNum">     154</span>              : `ifdef RV_USER_MODE</span>
+<span id="L155"><span class="lineNum">     155</span>              :   `ifdef RV_SMEPMP</span>
+<span id="L156"><span class="lineNum">     156</span>              :     // When MSECCFG.MMWP is set default deny always, otherwise allow for M-mode, deny for other</span>
+<span id="L157"><span class="lineNum">     157</span>              :     // modes. Also deny unmatched for M-mode when MSECCFG.MML is set and request type is EXEC.</span>
+<span id="L158"><span class="lineNum">     158</span> <span class="tlaGNC">          18 :     logic access_fail = csr_pmp_mseccfg.MMWP | priv_mode |</span></span>
+<span id="L159"><span class="lineNum">     159</span> <span class="tlaGNC">          18 :                        (csr_pmp_mseccfg.MML &amp;&amp; (req_type == EXEC));</span></span>
+<span id="L160"><span class="lineNum">     160</span>              :   `else</span>
+<span id="L161"><span class="lineNum">     161</span>              :     // When in user mode and at least one PMP region is enabled deny access by default.</span>
+<span id="L162"><span class="lineNum">     162</span>              :     logic access_fail = any_region_enabled &amp; priv_mode;</span>
+<span id="L163"><span class="lineNum">     163</span>              :   `endif</span>
+<span id="L164"><span class="lineNum">     164</span>              : `else</span>
+<span id="L165"><span class="lineNum">     165</span>              :     logic access_fail = 1'b0;</span>
+<span id="L166"><span class="lineNum">     166</span>              : `endif</span>
+<span id="L167"><span class="lineNum">     167</span>              : </span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC">          18 :     logic matched = 1'b0;</span></span>
+<span id="L169"><span class="lineNum">     169</span>              : </span>
+<span id="L170"><span class="lineNum">     170</span>              :     // PMP entries are statically prioritized, from 0 to N-1</span>
+<span id="L171"><span class="lineNum">     171</span>              :     // The lowest-numbered PMP entry which matches an address determines accessibility</span>
+<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC">          18 :     for (int r = 0; r &lt; pt.PMP_ENTRIES; r++) begin</span></span>
+<span id="L173"><span class="lineNum">     173</span> <span class="tlaGNC">     1939008 :       if (!matched &amp;&amp; match_all[r]) begin</span></span>
+<span id="L174"><span class="lineNum">     174</span> <span class="tlaUNC tlaBgUNC">           0 :         access_fail = ~final_perm_check[r];</span></span>
+<span id="L175"><span class="lineNum">     175</span> <span class="tlaUNC">           0 :         matched = 1'b1;</span></span>
+<span id="L176"><span class="lineNum">     176</span>              :       end</span>
+<span id="L177"><span class="lineNum">     177</span>              :     end</span>
+<span id="L178"><span class="lineNum">     178</span> <span class="tlaGNC tlaBgGNC">          18 :     return access_fail;</span></span>
+<span id="L179"><span class="lineNum">     179</span>              :   endfunction</span>
+<span id="L180"><span class="lineNum">     180</span>              : </span>
+<span id="L181"><span class="lineNum">     181</span>              :   // ---------------</span>
+<span id="L182"><span class="lineNum">     182</span>              :   // Access checking</span>
+<span id="L183"><span class="lineNum">     183</span>              :   // ---------------</span>
+<span id="L184"><span class="lineNum">     184</span>              : </span>
+<span id="L185"><span class="lineNum">     185</span>              : `ifdef RV_USER_MODE</span>
+<span id="L186"><span class="lineNum">     186</span> <span class="tlaUNC tlaBgUNC">           0 :   logic [pt.PMP_ENTRIES-1:0] region_enabled;</span></span>
+<span id="L187"><span class="lineNum">     187</span>              :   for (genvar r = 0; r &lt; pt.PMP_ENTRIES; r++) begin : g_reg_ena</span>
+<span id="L188"><span class="lineNum">     188</span>              :     assign region_enabled[r] = pmp_pmpcfg[r].mode != OFF;</span>
+<span id="L189"><span class="lineNum">     189</span>              :   end</span>
+<span id="L190"><span class="lineNum">     190</span>              :   assign any_region_enabled = |region_enabled;</span>
+<span id="L191"><span class="lineNum">     191</span>              : `endif</span>
+<span id="L192"><span class="lineNum">     192</span>              : </span>
+<span id="L193"><span class="lineNum">     193</span>              :   for (genvar r = 0; r &lt; pt.PMP_ENTRIES; r++) begin : g_addr_exp</span>
+<span id="L194"><span class="lineNum">     194</span>              :     assign csr_pmp_addr_i[r] = {</span>
+<span id="L195"><span class="lineNum">     195</span>              :       pmp_pmpaddr[r], 2'b00</span>
+<span id="L196"><span class="lineNum">     196</span>              :     };  // addr conv.: word @ 32-bit -&gt; byte @ 34-bit</span>
+<span id="L197"><span class="lineNum">     197</span>              :     // Start address for TOR matching</span>
+<span id="L198"><span class="lineNum">     198</span>              :     if (r == 0) begin : g_entry0</span>
+<span id="L199"><span class="lineNum">     199</span>              :       assign region_start_addr[r] = (pmp_pmpcfg[r].mode == TOR) ? 34'h000000000 : csr_pmp_addr_i[r];</span>
+<span id="L200"><span class="lineNum">     200</span>              :     end else begin : g_oth</span>
+<span id="L201"><span class="lineNum">     201</span>              :       assign region_start_addr[r] = (pmp_pmpcfg[r].mode == TOR) ? csr_pmp_addr_i[r-1] :</span>
+<span id="L202"><span class="lineNum">     202</span>              :                                                                   csr_pmp_addr_i[r];</span>
+<span id="L203"><span class="lineNum">     203</span>              :     end</span>
+<span id="L204"><span class="lineNum">     204</span>              :     // Address mask for NA matching</span>
+<span id="L205"><span class="lineNum">     205</span>              :     for (genvar b = PMP_GRANULARITY + 2; b &lt; 34; b++) begin : g_bitmask</span>
+<span id="L206"><span class="lineNum">     206</span>              :       if (b == 2) begin : g_bit0</span>
+<span id="L207"><span class="lineNum">     207</span>              :         // Always mask bit 2 for NAPOT</span>
+<span id="L208"><span class="lineNum">     208</span>              :         assign region_addr_mask[r][b] = (pmp_pmpcfg[r].mode != NAPOT);</span>
+<span id="L209"><span class="lineNum">     209</span>              :       end else begin : g_others</span>
+<span id="L210"><span class="lineNum">     210</span>              :         // We will mask this bit if it is within the programmed granule</span>
+<span id="L211"><span class="lineNum">     211</span>              :         // i.e. addr = yyyy 0111</span>
+<span id="L212"><span class="lineNum">     212</span>              :         //                  ^</span>
+<span id="L213"><span class="lineNum">     213</span>              :         //                  | This bit pos is the top of the mask, all lower bits set</span>
+<span id="L214"><span class="lineNum">     214</span>              :         // thus mask = 1111 0000</span>
+<span id="L215"><span class="lineNum">     215</span>              :         if (PMP_GRANULARITY == 0) begin : g_region_addr_mask_zero_granularity</span>
+<span id="L216"><span class="lineNum">     216</span>              :           assign region_addr_mask[r][b] = (pmp_pmpcfg[r].mode != NAPOT) |</span>
+<span id="L217"><span class="lineNum">     217</span>              :                                           ~&amp;csr_pmp_addr_i[r][b-1:2];</span>
+<span id="L218"><span class="lineNum">     218</span>              :         end else begin : g_region_addr_mask_other_granularity</span>
+<span id="L219"><span class="lineNum">     219</span>              :           assign region_addr_mask[r][b] = (pmp_pmpcfg[r].mode != NAPOT) |</span>
+<span id="L220"><span class="lineNum">     220</span>              :                                           ~&amp;csr_pmp_addr_i[r][b-1:PMP_GRANULARITY+1];</span>
+<span id="L221"><span class="lineNum">     221</span>              :         end</span>
+<span id="L222"><span class="lineNum">     222</span>              :       end</span>
+<span id="L223"><span class="lineNum">     223</span>              :     end</span>
+<span id="L224"><span class="lineNum">     224</span>              :   end</span>
+<span id="L225"><span class="lineNum">     225</span>              : </span>
+<span id="L226"><span class="lineNum">     226</span>              : `ifdef RV_USER_MODE</span>
+<span id="L227"><span class="lineNum">     227</span> <span class="tlaGNC tlaBgGNC">          12 :   logic [PMP_CHANNELS-1:0] pmp_priv_mode_eff;</span></span>
+<span id="L228"><span class="lineNum">     228</span>              :   for (genvar c = 0; c &lt; PMP_CHANNELS; c++) begin : g_priv_mode_eff</span>
+<span id="L229"><span class="lineNum">     229</span>              :     assign pmp_priv_mode_eff[c] = (</span>
+<span id="L230"><span class="lineNum">     230</span>              :       ((pmp_chan_type[c] == EXEC) &amp; priv_mode_ns) |</span>
+<span id="L231"><span class="lineNum">     231</span>              :       ((pmp_chan_type[c] != EXEC) &amp; priv_mode_eff)); // RW affected by mstatus.MPRV</span>
+<span id="L232"><span class="lineNum">     232</span>              :   end</span>
+<span id="L233"><span class="lineNum">     233</span>              : `endif</span>
+<span id="L234"><span class="lineNum">     234</span>              : </span>
+<span id="L235"><span class="lineNum">     235</span> <span class="tlaUNC tlaBgUNC">           0 :   for (genvar c = 0; c &lt; PMP_CHANNELS; c++) begin : g_access_check</span></span>
+<span id="L236"><span class="lineNum">     236</span>              :     assign pmp_req_addr_i[c] = {2'b00, pmp_chan_addr[c]};  // addr. widening: 32-bit -&gt; 34-bit</span>
+<span id="L237"><span class="lineNum">     237</span> <span class="tlaUNC">           0 :     for (genvar r = 0; r &lt; pt.PMP_ENTRIES; r++) begin : g_regions</span></span>
+<span id="L238"><span class="lineNum">     238</span>              :       // Comparators are sized according to granularity</span>
+<span id="L239"><span class="lineNum">     239</span>              :       assign region_match_eq[c][r] = (pmp_req_addr_i[c][33:PMP_GRANULARITY+2] &amp;</span>
+<span id="L240"><span class="lineNum">     240</span>              :                                       region_addr_mask[r]) ==</span>
+<span id="L241"><span class="lineNum">     241</span>              :                                      (region_start_addr[r][33:PMP_GRANULARITY+2] &amp;</span>
+<span id="L242"><span class="lineNum">     242</span>              :                                       region_addr_mask[r]);</span>
+<span id="L243"><span class="lineNum">     243</span>              :       assign region_match_gt[c][r] = pmp_req_addr_i[c][33:PMP_GRANULARITY+2] &gt;</span>
+<span id="L244"><span class="lineNum">     244</span>              :                                      region_start_addr[r][33:PMP_GRANULARITY+2];</span>
+<span id="L245"><span class="lineNum">     245</span>              :       assign region_match_lt[c][r] = pmp_req_addr_i[c][33:PMP_GRANULARITY+2] &lt;</span>
+<span id="L246"><span class="lineNum">     246</span>              :                                      csr_pmp_addr_i[r][33:PMP_GRANULARITY+2];</span>
+<span id="L247"><span class="lineNum">     247</span>              : </span>
+<span id="L248"><span class="lineNum">     248</span> <span class="tlaGNC tlaBgGNC">         288 :       always_comb begin</span></span>
+<span id="L249"><span class="lineNum">     249</span> <span class="tlaGNC">         288 :         region_match_all[c][r] = 1'b0;</span></span>
+<span id="L250"><span class="lineNum">     250</span> <span class="tlaGNC">         288 :         unique case (pmp_pmpcfg[r].mode)</span></span>
+<span id="L251"><span class="lineNum">     251</span> <span class="tlaGNC">      715764 :           OFF:     region_match_all[c][r] = 1'b0;</span></span>
+<span id="L252"><span class="lineNum">     252</span> <span class="tlaUNC tlaBgUNC">           0 :           NA4:     region_match_all[c][r] = region_match_eq[c][r];</span></span>
+<span id="L253"><span class="lineNum">     253</span> <span class="tlaGNC tlaBgGNC">       13548 :           NAPOT:   region_match_all[c][r] = region_match_eq[c][r];</span></span>
+<span id="L254"><span class="lineNum">     254</span> <span class="tlaUNC tlaBgUNC">           0 :           TOR: begin</span></span>
+<span id="L255"><span class="lineNum">     255</span> <span class="tlaUNC">           0 :             region_match_all[c][r] = (region_match_eq[c][r] | region_match_gt[c][r]) &amp;</span></span>
+<span id="L256"><span class="lineNum">     256</span> <span class="tlaUNC">           0 :                                      region_match_lt[c][r];</span></span>
+<span id="L257"><span class="lineNum">     257</span>              :           end</span>
+<span id="L258"><span class="lineNum">     258</span> <span class="tlaUNC">           0 :           default: region_match_all[c][r] = 1'b0;</span></span>
+<span id="L259"><span class="lineNum">     259</span>              :         endcase</span>
+<span id="L260"><span class="lineNum">     260</span>              :       end</span>
+<span id="L261"><span class="lineNum">     261</span>              : </span>
+<span id="L262"><span class="lineNum">     262</span>              :       // Basic permission check compares cfg register only.</span>
+<span id="L263"><span class="lineNum">     263</span>              :       assign region_basic_perm_check[c][r] =</span>
+<span id="L264"><span class="lineNum">     264</span>              :           ((pmp_chan_type[c] == EXEC)  &amp; pmp_pmpcfg[r].execute) |</span>
+<span id="L265"><span class="lineNum">     265</span>              :           ((pmp_chan_type[c] == WRITE) &amp; pmp_pmpcfg[r].write) |</span>
+<span id="L266"><span class="lineNum">     266</span>              :           ((pmp_chan_type[c] == READ)  &amp; pmp_pmpcfg[r].read);</span>
+<span id="L267"><span class="lineNum">     267</span>              : </span>
+<span id="L268"><span class="lineNum">     268</span>              :       // Check specific required permissions since the behaviour is different</span>
+<span id="L269"><span class="lineNum">     269</span>              :       // between Smepmp implementation and original PMP.</span>
+<span id="L270"><span class="lineNum">     270</span>              :       assign region_perm_check[c][r] = perm_check_wrapper(</span>
+<span id="L271"><span class="lineNum">     271</span>              : `ifdef RV_SMEPMP</span>
+<span id="L272"><span class="lineNum">     272</span>              :           mseccfg,</span>
+<span id="L273"><span class="lineNum">     273</span>              : `else</span>
+<span id="L274"><span class="lineNum">     274</span>              :           3'b000,</span>
+<span id="L275"><span class="lineNum">     275</span>              : `endif</span>
+<span id="L276"><span class="lineNum">     276</span>              :           pmp_pmpcfg[r],</span>
+<span id="L277"><span class="lineNum">     277</span>              :           pmp_chan_type[c],</span>
+<span id="L278"><span class="lineNum">     278</span>              : `ifdef RV_USER_MODE</span>
+<span id="L279"><span class="lineNum">     279</span>              :           pmp_priv_mode_eff[c],</span>
+<span id="L280"><span class="lineNum">     280</span>              : `else</span>
+<span id="L281"><span class="lineNum">     281</span>              :           1'b0,</span>
+<span id="L282"><span class="lineNum">     282</span>              : `endif</span>
+<span id="L283"><span class="lineNum">     283</span>              :           region_basic_perm_check[c][r]</span>
+<span id="L284"><span class="lineNum">     284</span>              :       );</span>
+<span id="L285"><span class="lineNum">     285</span>              : </span>
+<span id="L286"><span class="lineNum">     286</span>              :       // Address bits below PMP granularity (which starts at 4 byte) are deliberately unused.</span>
+<span id="L287"><span class="lineNum">     287</span>              :       logic unused_sigs;</span>
+<span id="L288"><span class="lineNum">     288</span>              :       assign unused_sigs = ^{region_start_addr[r][PMP_GRANULARITY+2-1:0],</span>
+<span id="L289"><span class="lineNum">     289</span>              :                              pmp_req_addr_i[c][PMP_GRANULARITY+2-1:0]};</span>
+<span id="L290"><span class="lineNum">     290</span>              :     end</span>
+<span id="L291"><span class="lineNum">     291</span>              : </span>
+<span id="L292"><span class="lineNum">     292</span>              :     // Once the permission checks of the regions are done, decide if the access is</span>
+<span id="L293"><span class="lineNum">     293</span>              :     // denied by figuring out the matching region and its permission check.</span>
+<span id="L294"><span class="lineNum">     294</span>              :     assign pmp_chan_err[c] = access_fault_check(</span>
+<span id="L295"><span class="lineNum">     295</span>              : `ifdef RV_SMEPMP</span>
+<span id="L296"><span class="lineNum">     296</span>              :         mseccfg,</span>
+<span id="L297"><span class="lineNum">     297</span>              : `else</span>
+<span id="L298"><span class="lineNum">     298</span>              :         3'b000,</span>
+<span id="L299"><span class="lineNum">     299</span>              : `endif</span>
+<span id="L300"><span class="lineNum">     300</span>              :         pmp_chan_type[c],</span>
+<span id="L301"><span class="lineNum">     301</span>              :         region_match_all[c],</span>
+<span id="L302"><span class="lineNum">     302</span>              : `ifdef RV_USER_MODE</span>
+<span id="L303"><span class="lineNum">     303</span>              :         any_region_enabled,</span>
+<span id="L304"><span class="lineNum">     304</span>              :         pmp_priv_mode_eff[c],</span>
+<span id="L305"><span class="lineNum">     305</span>              : `else</span>
+<span id="L306"><span class="lineNum">     306</span>              :         1'b0,</span>
+<span id="L307"><span class="lineNum">     307</span>              :         1'b0,</span>
+<span id="L308"><span class="lineNum">     308</span>              : `endif</span>
+<span id="L309"><span class="lineNum">     309</span>              :         region_perm_check[c]);</span>
+<span id="L310"><span class="lineNum">     310</span>              : </span>
+<span id="L311"><span class="lineNum">     311</span>              :   end</span>
+<span id="L312"><span class="lineNum">     312</span>              : </span>
+<span id="L313"><span class="lineNum">     313</span>              : endmodule  // el2_pmp</span>
+        </pre>
+</td>
+</tr>
+</table>
+
+</body>
+</html>

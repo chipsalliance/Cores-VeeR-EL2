@@ -1,0 +1,613 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>
+        Full
+        coverage report
+    </title>
+    <link rel="stylesheet" type="text/css" href="cov.css">
+    <style>
+        .container {
+            background-color: rgb(169, 169, 169);
+            width: 100%;
+            min-height: 80%;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <table class="title-header-shadow">
+        <td class="title-container">
+            <table class="title-header">
+                <td class="title-logo">
+                    <a href=index.html>
+                        <img src=_static/white.svg></img>
+                    </a>
+                </td>
+                <td class="title">
+                    Project
+                    Full
+                    coverage report
+                </td>
+            </table>
+        </td>
+    </table>
+    <center>
+        <table class="info-table">
+            <tr class="info-table-view">
+                <td width="10%" class="headerInfo">Current view:</td>
+                <td width="40%" class="headerInfoValue">
+                    <a href=index.html>Cores-VeeR-EL2</a>—Cores-VeeR-EL2—design—lib—axi4_to_ahb.sv
+                </td>
+                <td width=auto></td>
+                <td width="10%"></td>
+                <td width="10%" class="headerCovSummary colTop">Coverage</td>
+                <td width="10%" class="headerCovSummary colTop" title="Covered + Uncovered code">Hit</td>
+                <td width="10%" class="headerCovSummary colTop" title="Exercised code only">Total</td>
+            </tr>
+            <tr>
+                <td class="headerInfo">Test Date:</td>
+                <td class="headerInfoValue">
+                    11-12-2024
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Toggle
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #d0ff00;">
+        59.1%
+    </td>
+    <td class="headerCovSummaryEntry">
+        65
+    </td>
+    <td class="headerCovSummaryEntry">
+        110
+    </td>
+
+            </tr>
+            <tr>
+                <td class="headerInfo">Test:</td>
+                <td class="headerInfoValue">
+                    lib_axi4_to_ahb_test_axi_write_channel
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Branch
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #c8ff00;">
+        60.8%
+    </td>
+    <td class="headerCovSummaryEntry">
+        79
+    </td>
+    <td class="headerCovSummaryEntry">
+        130
+    </td>
+
+            </tr>
+            
+        </table>
+    </center>
+
+    <table border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td><br/></td>
+</tr>
+<tr>
+<td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : // SPDX-License-Identifier: Apache-2.0</span>
+<span id="L2"><span class="lineNum">       2</span>              : // Copyright 2020 Western Digital Corporation or its affiliates.</span>
+<span id="L3"><span class="lineNum">       3</span>              : //</span>
+<span id="L4"><span class="lineNum">       4</span>              : // Licensed under the Apache License, Version 2.0 (the "License");</span>
+<span id="L5"><span class="lineNum">       5</span>              : // you may not use this file except in compliance with the License.</span>
+<span id="L6"><span class="lineNum">       6</span>              : // You may obtain a copy of the License at</span>
+<span id="L7"><span class="lineNum">       7</span>              : //</span>
+<span id="L8"><span class="lineNum">       8</span>              : // http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L9"><span class="lineNum">       9</span>              : //</span>
+<span id="L10"><span class="lineNum">      10</span>              : // Unless required by applicable law or agreed to in writing, software</span>
+<span id="L11"><span class="lineNum">      11</span>              : // distributed under the License is distributed on an "AS IS" BASIS,</span>
+<span id="L12"><span class="lineNum">      12</span>              : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L13"><span class="lineNum">      13</span>              : // See the License for the specific language governing permissions and</span>
+<span id="L14"><span class="lineNum">      14</span>              : // limitations under the License.</span>
+<span id="L15"><span class="lineNum">      15</span>              : </span>
+<span id="L16"><span class="lineNum">      16</span>              : //********************************************************************************</span>
+<span id="L17"><span class="lineNum">      17</span>              : // $Id$</span>
+<span id="L18"><span class="lineNum">      18</span>              : //</span>
+<span id="L19"><span class="lineNum">      19</span>              : // Owner:</span>
+<span id="L20"><span class="lineNum">      20</span>              : // Function: AXI4 -&gt; AHB Bridge</span>
+<span id="L21"><span class="lineNum">      21</span>              : // Comments:</span>
+<span id="L22"><span class="lineNum">      22</span>              : //</span>
+<span id="L23"><span class="lineNum">      23</span>              : //********************************************************************************</span>
+<span id="L24"><span class="lineNum">      24</span>              : module axi4_to_ahb</span>
+<span id="L25"><span class="lineNum">      25</span>              : import el2_pkg::*;</span>
+<span id="L26"><span class="lineNum">      26</span>              : #(</span>
+<span id="L27"><span class="lineNum">      27</span>              : `include "el2_param.vh"</span>
+<span id="L28"><span class="lineNum">      28</span>              : ,parameter TAG  = 1) (</span>
+<span id="L29"><span class="lineNum">      29</span>              : </span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC tlaBgGNC">        3290 :    input                   clk,</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">        3290 :    input                   free_clk,</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">           2 :    input                   rst_l,</span></span>
+<span id="L33"><span class="lineNum">      33</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
+<span id="L34"><span class="lineNum">      34</span>              :    /*verilator coverage_off*/</span>
+<span id="L35"><span class="lineNum">      35</span>              :    input                   scan_mode,</span>
+<span id="L36"><span class="lineNum">      36</span>              :    /*verilator coverage_on*/</span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">           2 :    input                   bus_clk_en,</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaUNC tlaBgUNC">           0 :    input                   clk_override,</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaUNC">           0 :    input                   dec_tlu_force_halt,</span></span>
+<span id="L40"><span class="lineNum">      40</span>              : </span>
+<span id="L41"><span class="lineNum">      41</span>              :    // AXI signals</span>
+<span id="L42"><span class="lineNum">      42</span>              :    // AXI Write Channels</span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC tlaBgGNC">         128 :    input  logic            axi_awvalid,</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">         258 :    output logic            axi_awready,</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">          68 :    input  logic [TAG-1:0]  axi_awid,</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic [31:0]     axi_awaddr,</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaUNC">           0 :    input  logic [2:0]      axi_awsize,</span></span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaUNC">           0 :    input  logic [2:0]      axi_awprot,</span></span>
+<span id="L49"><span class="lineNum">      49</span>              : </span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC tlaBgGNC">         128 :    input  logic            axi_wvalid,</span></span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">         130 :    output logic            axi_wready,</span></span>
+<span id="L52"><span class="lineNum">      52</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic [63:0]     axi_wdata,</span></span>
+<span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC tlaBgGNC">         384 :    input  logic [7:0]      axi_wstrb,</span></span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">         128 :    input  logic            axi_wlast,</span></span>
+<span id="L55"><span class="lineNum">      55</span>              : </span>
+<span id="L56"><span class="lineNum">      56</span> <span class="tlaGNC">         128 :    output logic            axi_bvalid,</span></span>
+<span id="L57"><span class="lineNum">      57</span> <span class="tlaGNC">         128 :    input  logic            axi_bready,</span></span>
+<span id="L58"><span class="lineNum">      58</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [1:0]      axi_bresp,</span></span>
+<span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC tlaBgGNC">          38 :    output logic [TAG-1:0]  axi_bid,</span></span>
+<span id="L60"><span class="lineNum">      60</span>              : </span>
+<span id="L61"><span class="lineNum">      61</span>              :    // AXI Read Channels</span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic            axi_arvalid,</span></span>
+<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC tlaBgGNC">         130 :    output logic            axi_arready,</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic [TAG-1:0]  axi_arid,</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaUNC">           0 :    input  logic [31:0]     axi_araddr,</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaUNC">           0 :    input  logic [2:0]      axi_arsize,</span></span>
+<span id="L67"><span class="lineNum">      67</span> <span class="tlaUNC">           0 :    input  logic [2:0]      axi_arprot,</span></span>
+<span id="L68"><span class="lineNum">      68</span>              : </span>
+<span id="L69"><span class="lineNum">      69</span> <span class="tlaUNC">           0 :    output logic            axi_rvalid,</span></span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaUNC">           0 :    input  logic            axi_rready,</span></span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC tlaBgGNC">          38 :    output logic [TAG-1:0]  axi_rid,</span></span>
+<span id="L72"><span class="lineNum">      72</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [63:0]     axi_rdata,</span></span>
+<span id="L73"><span class="lineNum">      73</span> <span class="tlaUNC">           0 :    output logic [1:0]      axi_rresp,</span></span>
+<span id="L74"><span class="lineNum">      74</span> <span class="tlaGNC tlaBgGNC">           2 :    output logic            axi_rlast,</span></span>
+<span id="L75"><span class="lineNum">      75</span>              : </span>
+<span id="L76"><span class="lineNum">      76</span>              :    // AHB-Lite signals</span>
+<span id="L77"><span class="lineNum">      77</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [31:0]     ahb_haddr,       // ahb bus address</span></span>
+<span id="L78"><span class="lineNum">      78</span>              :    /* exclude signals that are tied to constant value in this file */</span>
+<span id="L79"><span class="lineNum">      79</span>              :    /*verilator coverage_off*/</span>
+<span id="L80"><span class="lineNum">      80</span>              :    output logic [2:0]      ahb_hburst,      // tied to 0</span>
+<span id="L81"><span class="lineNum">      81</span>              :    output logic            ahb_hmastlock,   // tied to 0</span>
+<span id="L82"><span class="lineNum">      82</span>              :    /*verilator coverage_on*/</span>
+<span id="L83"><span class="lineNum">      83</span> <span class="tlaUNC">           0 :    output logic [3:0]      ahb_hprot,       // [3:1] are tied to 3'b001</span></span>
+<span id="L84"><span class="lineNum">      84</span> <span class="tlaUNC">           0 :    output logic [2:0]      ahb_hsize,       // size of bus transaction (possible values 0,1,2,3)</span></span>
+<span id="L85"><span class="lineNum">      85</span> <span class="tlaGNC tlaBgGNC">         128 :    output logic [1:0]      ahb_htrans,      // Transaction type (possible values 0,2 only right now)</span></span>
+<span id="L86"><span class="lineNum">      86</span> <span class="tlaGNC">           2 :    output logic            ahb_hwrite,      // ahb bus write</span></span>
+<span id="L87"><span class="lineNum">      87</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [63:0]     ahb_hwdata,      // ahb bus write data</span></span>
+<span id="L88"><span class="lineNum">      88</span>              : </span>
+<span id="L89"><span class="lineNum">      89</span> <span class="tlaUNC">           0 :    input logic [63:0]      ahb_hrdata,      // ahb bus read data</span></span>
+<span id="L90"><span class="lineNum">      90</span> <span class="tlaGNC tlaBgGNC">         128 :    input logic             ahb_hready,      // slave ready to accept transaction</span></span>
+<span id="L91"><span class="lineNum">      91</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic             ahb_hresp        // slave response (high indicates erro)</span></span>
+<span id="L92"><span class="lineNum">      92</span>              : </span>
+<span id="L93"><span class="lineNum">      93</span>              : );</span>
+<span id="L94"><span class="lineNum">      94</span>              : </span>
+<span id="L95"><span class="lineNum">      95</span>              :    localparam ID   = 1;</span>
+<span id="L96"><span class="lineNum">      96</span>              :    localparam PRTY = 1;</span>
+<span id="L97"><span class="lineNum">      97</span>              :    typedef enum logic [3:0] {</span>
+<span id="L98"><span class="lineNum">      98</span>              :         IDLE            = 4'b0000,</span>
+<span id="L99"><span class="lineNum">      99</span>              :         CMD_RD          = 4'b0001,</span>
+<span id="L100"><span class="lineNum">     100</span>              :         CMD_WR          = 4'b1001,</span>
+<span id="L101"><span class="lineNum">     101</span>              :         DATA_RD         = 4'b0010,</span>
+<span id="L102"><span class="lineNum">     102</span>              :         DATA_WR         = 4'b1010,</span>
+<span id="L103"><span class="lineNum">     103</span>              :         DONE_RD         = 4'b0011,</span>
+<span id="L104"><span class="lineNum">     104</span>              :         DONE_WR         = 4'b1011,</span>
+<span id="L105"><span class="lineNum">     105</span>              :         STREAM_RD       = 4'b0101,</span>
+<span id="L106"><span class="lineNum">     106</span>              :         STREAM_ERR_RD   = 4'b0110</span>
+<span id="L107"><span class="lineNum">     107</span>              :     } state_t;</span>
+<span id="L108"><span class="lineNum">     108</span>              : </span>
+<span id="L109"><span class="lineNum">     109</span> <span class="tlaGNC tlaBgGNC">         128 :    state_t buf_state, buf_nxtstate;</span></span>
+<span id="L110"><span class="lineNum">     110</span>              : </span>
+<span id="L111"><span class="lineNum">     111</span> <span class="tlaGNC">         128 :    logic             slave_valid;</span></span>
+<span id="L112"><span class="lineNum">     112</span> <span class="tlaGNC">          38 :    logic [TAG-1:0]   slave_tag;</span></span>
+<span id="L113"><span class="lineNum">     113</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [63:0]      slave_rdata;</span></span>
+<span id="L114"><span class="lineNum">     114</span> <span class="tlaGNC tlaBgGNC">           2 :    logic [3:0]       slave_opc;</span></span>
+<span id="L115"><span class="lineNum">     115</span>              : </span>
+<span id="L116"><span class="lineNum">     116</span> <span class="tlaGNC">         128 :    logic             wrbuf_en, wrbuf_data_en;</span></span>
+<span id="L117"><span class="lineNum">     117</span> <span class="tlaGNC">         128 :    logic             wrbuf_cmd_sent, wrbuf_rst;</span></span>
+<span id="L118"><span class="lineNum">     118</span> <span class="tlaGNC">         128 :    logic             wrbuf_vld;</span></span>
+<span id="L119"><span class="lineNum">     119</span> <span class="tlaGNC">         128 :    logic             wrbuf_data_vld;</span></span>
+<span id="L120"><span class="lineNum">     120</span> <span class="tlaGNC">          38 :    logic [TAG-1:0]   wrbuf_tag;</span></span>
+<span id="L121"><span class="lineNum">     121</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [2:0]       wrbuf_size;</span></span>
+<span id="L122"><span class="lineNum">     122</span> <span class="tlaUNC">           0 :    logic [31:0]      wrbuf_addr;</span></span>
+<span id="L123"><span class="lineNum">     123</span> <span class="tlaUNC">           0 :    logic [63:0]      wrbuf_data;</span></span>
+<span id="L124"><span class="lineNum">     124</span> <span class="tlaGNC tlaBgGNC">           2 :    logic [7:0]       wrbuf_byteen;</span></span>
+<span id="L125"><span class="lineNum">     125</span>              : </span>
+<span id="L126"><span class="lineNum">     126</span> <span class="tlaGNC">         128 :    logic             master_valid;</span></span>
+<span id="L127"><span class="lineNum">     127</span> <span class="tlaGNC">         130 :    logic             master_ready;</span></span>
+<span id="L128"><span class="lineNum">     128</span> <span class="tlaGNC">          68 :    logic [TAG-1:0]   master_tag;</span></span>
+<span id="L129"><span class="lineNum">     129</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [31:0]      master_addr;</span></span>
+<span id="L130"><span class="lineNum">     130</span> <span class="tlaUNC">           0 :    logic [63:0]      master_wdata;</span></span>
+<span id="L131"><span class="lineNum">     131</span> <span class="tlaUNC">           0 :    logic [2:0]       master_size;</span></span>
+<span id="L132"><span class="lineNum">     132</span> <span class="tlaUNC">           0 :    logic [2:0]       master_opc;</span></span>
+<span id="L133"><span class="lineNum">     133</span> <span class="tlaGNC tlaBgGNC">           2 :    logic [7:0]       master_byteen;</span></span>
+<span id="L134"><span class="lineNum">     134</span>              : </span>
+<span id="L135"><span class="lineNum">     135</span>              :    // Buffer signals (one entry buffer)</span>
+<span id="L136"><span class="lineNum">     136</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [31:0]                buf_addr;</span></span>
+<span id="L137"><span class="lineNum">     137</span> <span class="tlaGNC tlaBgGNC">           2 :    logic [1:0]                 buf_size;</span></span>
+<span id="L138"><span class="lineNum">     138</span> <span class="tlaGNC">           2 :    logic                       buf_write;</span></span>
+<span id="L139"><span class="lineNum">     139</span> <span class="tlaGNC">           2 :    logic [7:0]                 buf_byteen;</span></span>
+<span id="L140"><span class="lineNum">     140</span> <span class="tlaGNC">           2 :    logic                       buf_aligned;</span></span>
+<span id="L141"><span class="lineNum">     141</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [63:0]                buf_data;</span></span>
+<span id="L142"><span class="lineNum">     142</span> <span class="tlaGNC tlaBgGNC">          38 :    logic [TAG-1:0]             buf_tag;</span></span>
+<span id="L143"><span class="lineNum">     143</span>              : </span>
+<span id="L144"><span class="lineNum">     144</span>              :    //Miscellaneous signals</span>
+<span id="L145"><span class="lineNum">     145</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       buf_rst;</span></span>
+<span id="L146"><span class="lineNum">     146</span> <span class="tlaGNC tlaBgGNC">          68 :    logic [TAG-1:0]             buf_tag_in;</span></span>
+<span id="L147"><span class="lineNum">     147</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [31:0]                buf_addr_in;</span></span>
+<span id="L148"><span class="lineNum">     148</span> <span class="tlaGNC tlaBgGNC">           2 :    logic [7:0]                 buf_byteen_in;</span></span>
+<span id="L149"><span class="lineNum">     149</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [63:0]                buf_data_in;</span></span>
+<span id="L150"><span class="lineNum">     150</span> <span class="tlaGNC tlaBgGNC">         128 :    logic                       buf_write_in;</span></span>
+<span id="L151"><span class="lineNum">     151</span> <span class="tlaGNC">           2 :    logic                       buf_aligned_in;</span></span>
+<span id="L152"><span class="lineNum">     152</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [2:0]                 buf_size_in;</span></span>
+<span id="L153"><span class="lineNum">     153</span>              : </span>
+<span id="L154"><span class="lineNum">     154</span> <span class="tlaGNC tlaBgGNC">         256 :    logic                       buf_state_en;</span></span>
+<span id="L155"><span class="lineNum">     155</span> <span class="tlaGNC">         128 :    logic                       buf_wr_en;</span></span>
+<span id="L156"><span class="lineNum">     156</span> <span class="tlaGNC">         128 :    logic                       buf_data_wr_en;</span></span>
+<span id="L157"><span class="lineNum">     157</span> <span class="tlaGNC">         128 :    logic                       slvbuf_error_en;</span></span>
+<span id="L158"><span class="lineNum">     158</span> <span class="tlaGNC">         128 :    logic                       wr_cmd_vld;</span></span>
+<span id="L159"><span class="lineNum">     159</span>              : </span>
+<span id="L160"><span class="lineNum">     160</span> <span class="tlaGNC">         128 :    logic                       cmd_done_rst, cmd_done, cmd_doneQ;</span></span>
+<span id="L161"><span class="lineNum">     161</span> <span class="tlaGNC">         128 :    logic                       trxn_done;</span></span>
+<span id="L162"><span class="lineNum">     162</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [2:0]                 buf_cmd_byte_ptr, buf_cmd_byte_ptrQ, buf_cmd_nxtbyte_ptr;</span></span>
+<span id="L163"><span class="lineNum">     163</span> <span class="tlaGNC tlaBgGNC">         256 :    logic                       buf_cmd_byte_ptr_en;</span></span>
+<span id="L164"><span class="lineNum">     164</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       found;</span></span>
+<span id="L165"><span class="lineNum">     165</span>              : </span>
+<span id="L166"><span class="lineNum">     166</span> <span class="tlaGNC tlaBgGNC">         128 :    logic                       slave_valid_pre;</span></span>
+<span id="L167"><span class="lineNum">     167</span> <span class="tlaGNC">         128 :    logic                       ahb_hready_q;</span></span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       ahb_hresp_q;</span></span>
+<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC tlaBgGNC">         128 :    logic [1:0]                 ahb_htrans_q;</span></span>
+<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">           2 :    logic                       ahb_hwrite_q;</span></span>
+<span id="L171"><span class="lineNum">     171</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [63:0]                ahb_hrdata_q;</span></span>
+<span id="L172"><span class="lineNum">     172</span>              : </span>
+<span id="L173"><span class="lineNum">     173</span>              : </span>
+<span id="L174"><span class="lineNum">     174</span> <span class="tlaGNC tlaBgGNC">           2 :    logic                       slvbuf_write;</span></span>
+<span id="L175"><span class="lineNum">     175</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       slvbuf_error;</span></span>
+<span id="L176"><span class="lineNum">     176</span> <span class="tlaGNC tlaBgGNC">          38 :    logic [TAG-1:0]             slvbuf_tag;</span></span>
+<span id="L177"><span class="lineNum">     177</span>              : </span>
+<span id="L178"><span class="lineNum">     178</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       slvbuf_error_in;</span></span>
+<span id="L179"><span class="lineNum">     179</span> <span class="tlaGNC tlaBgGNC">         128 :    logic                       slvbuf_wr_en;</span></span>
+<span id="L180"><span class="lineNum">     180</span> <span class="tlaGNC">         128 :    logic                       bypass_en;</span></span>
+<span id="L181"><span class="lineNum">     181</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       rd_bypass_idle;</span></span>
+<span id="L182"><span class="lineNum">     182</span>              : </span>
+<span id="L183"><span class="lineNum">     183</span> <span class="tlaGNC tlaBgGNC">         128 :    logic                       last_addr_en;</span></span>
+<span id="L184"><span class="lineNum">     184</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [31:0]                last_bus_addr;</span></span>
+<span id="L185"><span class="lineNum">     185</span>              : </span>
+<span id="L186"><span class="lineNum">     186</span>              :    // Clocks</span>
+<span id="L187"><span class="lineNum">     187</span> <span class="tlaGNC tlaBgGNC">         256 :    logic                       buf_clken;</span></span>
+<span id="L188"><span class="lineNum">     188</span> <span class="tlaGNC">         128 :    logic                       ahbm_data_clken;</span></span>
+<span id="L189"><span class="lineNum">     189</span>              : </span>
+<span id="L190"><span class="lineNum">     190</span> <span class="tlaGNC">         256 :    logic                       buf_clk;</span></span>
+<span id="L191"><span class="lineNum">     191</span> <span class="tlaGNC">        3290 :    logic                       bus_clk;</span></span>
+<span id="L192"><span class="lineNum">     192</span> <span class="tlaGNC">         516 :    logic                       ahbm_data_clk;</span></span>
+<span id="L193"><span class="lineNum">     193</span>              : </span>
+<span id="L194"><span class="lineNum">     194</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       dec_tlu_force_halt_bus, dec_tlu_force_halt_bus_ns, dec_tlu_force_halt_bus_q;</span></span>
+<span id="L195"><span class="lineNum">     195</span>              : </span>
+<span id="L196"><span class="lineNum">     196</span>              :    // Function to get the length from byte enable</span>
+<span id="L197"><span class="lineNum">     197</span> <span class="tlaGNC tlaBgGNC">         384 :    function automatic logic [1:0] get_write_size;</span></span>
+<span id="L198"><span class="lineNum">     198</span>              :       input logic [7:0] byteen;</span>
+<span id="L199"><span class="lineNum">     199</span>              : </span>
+<span id="L200"><span class="lineNum">     200</span>              :       logic [1:0]       size;</span>
+<span id="L201"><span class="lineNum">     201</span>              : </span>
+<span id="L202"><span class="lineNum">     202</span> <span class="tlaGNC">         384 :       size[1:0] = (2'b11 &amp; {2{(byteen[7:0] == 8'hff)}}) |</span></span>
+<span id="L203"><span class="lineNum">     203</span> <span class="tlaGNC">         384 :                   (2'b10 &amp; {2{((byteen[7:0] == 8'hf0) | (byteen[7:0] == 8'h0f))}}) |</span></span>
+<span id="L204"><span class="lineNum">     204</span> <span class="tlaGNC">         384 :                   (2'b01 &amp; {2{((byteen[7:0] == 8'hc0) | (byteen[7:0] == 8'h30) | (byteen[7:0] == 8'h0c) | (byteen[7:0] == 8'h03))}});</span></span>
+<span id="L205"><span class="lineNum">     205</span>              : </span>
+<span id="L206"><span class="lineNum">     206</span> <span class="tlaGNC">         384 :       return size[1:0];</span></span>
+<span id="L207"><span class="lineNum">     207</span>              :    endfunction // get_write_size</span>
+<span id="L208"><span class="lineNum">     208</span>              : </span>
+<span id="L209"><span class="lineNum">     209</span>              :    // Function to get the length from byte enable</span>
+<span id="L210"><span class="lineNum">     210</span> <span class="tlaGNC">         384 :    function automatic logic [2:0] get_write_addr;</span></span>
+<span id="L211"><span class="lineNum">     211</span>              :       input logic [7:0] byteen;</span>
+<span id="L212"><span class="lineNum">     212</span>              : </span>
+<span id="L213"><span class="lineNum">     213</span>              :       logic [2:0]       addr;</span>
+<span id="L214"><span class="lineNum">     214</span>              : </span>
+<span id="L215"><span class="lineNum">     215</span> <span class="tlaGNC">         384 :       addr[2:0] = (3'h0 &amp; {3{((byteen[7:0] == 8'hff) | (byteen[7:0] == 8'h0f) | (byteen[7:0] == 8'h03))}}) |</span></span>
+<span id="L216"><span class="lineNum">     216</span> <span class="tlaGNC">         384 :                   (3'h2 &amp; {3{(byteen[7:0] == 8'h0c)}})                                                     |</span></span>
+<span id="L217"><span class="lineNum">     217</span> <span class="tlaGNC">         384 :                   (3'h4 &amp; {3{((byteen[7:0] == 8'hf0) | (byteen[7:0] == 8'h03))}})                          |</span></span>
+<span id="L218"><span class="lineNum">     218</span> <span class="tlaGNC">         384 :                   (3'h6 &amp; {3{(byteen[7:0] == 8'hc0)}});</span></span>
+<span id="L219"><span class="lineNum">     219</span>              : </span>
+<span id="L220"><span class="lineNum">     220</span> <span class="tlaGNC">         384 :       return addr[2:0];</span></span>
+<span id="L221"><span class="lineNum">     221</span>              :    endfunction // get_write_addr</span>
+<span id="L222"><span class="lineNum">     222</span>              : </span>
+<span id="L223"><span class="lineNum">     223</span>              :    // Function to get the next byte pointer</span>
+<span id="L224"><span class="lineNum">     224</span> <span class="tlaGNC">        2508 :    function automatic logic [2:0] get_nxtbyte_ptr (logic [2:0] current_byte_ptr, logic [7:0] byteen, logic get_next);</span></span>
+<span id="L225"><span class="lineNum">     225</span>              :       logic [2:0] start_ptr;</span>
+<span id="L226"><span class="lineNum">     226</span>              :       logic       found;</span>
+<span id="L227"><span class="lineNum">     227</span> <span class="tlaGNC">        2508 :       found = '0;</span></span>
+<span id="L228"><span class="lineNum">     228</span> <span class="tlaGNC">        2508 :       get_nxtbyte_ptr[2:0] = 3'd0; </span></span>
+<span id="L229"><span class="lineNum">     229</span> <span class="tlaGNC">        2508 :       start_ptr[2:0] = get_next ? (current_byte_ptr[2:0] + 3'b1) : current_byte_ptr[2:0];</span></span>
+<span id="L230"><span class="lineNum">     230</span> <span class="tlaGNC">        2508 :       for (int j=0; j&lt;8; j++) begin</span></span>
+<span id="L231"><span class="lineNum">     231</span> <span class="tlaGNC">        5208 :          if (~found) begin</span></span>
+<span id="L232"><span class="lineNum">     232</span> <span class="tlaGNC">        5208 :             get_nxtbyte_ptr[2:0] = 3'(j);</span></span>
+<span id="L233"><span class="lineNum">     233</span> <span class="tlaGNC">        5208 :             found |= (byteen[j] &amp; (3'(j) &gt;= start_ptr[2:0])) ;</span></span>
+<span id="L234"><span class="lineNum">     234</span>              :          end</span>
+<span id="L235"><span class="lineNum">     235</span>              :       end</span>
+<span id="L236"><span class="lineNum">     236</span>              :    endfunction // get_nextbyte_ptr</span>
+<span id="L237"><span class="lineNum">     237</span>              : </span>
+<span id="L238"><span class="lineNum">     238</span>              :    // Create bus synchronized version of force halt</span>
+<span id="L239"><span class="lineNum">     239</span>              :    assign dec_tlu_force_halt_bus = dec_tlu_force_halt | dec_tlu_force_halt_bus_q;</span>
+<span id="L240"><span class="lineNum">     240</span>              :    assign dec_tlu_force_halt_bus_ns = ~bus_clk_en &amp; dec_tlu_force_halt_bus;</span>
+<span id="L241"><span class="lineNum">     241</span>              :    rvdff  #(.WIDTH(1))   force_halt_busff(.din(dec_tlu_force_halt_bus_ns), .dout(dec_tlu_force_halt_bus_q), .clk(free_clk), .*);</span>
+<span id="L242"><span class="lineNum">     242</span>              : </span>
+<span id="L243"><span class="lineNum">     243</span>              :    // Write buffer</span>
+<span id="L244"><span class="lineNum">     244</span>              :    assign wrbuf_en       = axi_awvalid &amp; axi_awready &amp; master_ready;</span>
+<span id="L245"><span class="lineNum">     245</span>              :    assign wrbuf_data_en  = axi_wvalid &amp; axi_wready &amp; master_ready;</span>
+<span id="L246"><span class="lineNum">     246</span>              :    assign wrbuf_cmd_sent = master_valid &amp; master_ready &amp; (master_opc[2:1] == 2'b01);</span>
+<span id="L247"><span class="lineNum">     247</span>              :    assign wrbuf_rst      = (wrbuf_cmd_sent &amp; ~wrbuf_en) | dec_tlu_force_halt_bus;</span>
+<span id="L248"><span class="lineNum">     248</span>              : </span>
+<span id="L249"><span class="lineNum">     249</span>              :    assign axi_awready = ~(wrbuf_vld &amp; ~wrbuf_cmd_sent) &amp; master_ready;</span>
+<span id="L250"><span class="lineNum">     250</span>              :    assign axi_wready  = ~(wrbuf_data_vld &amp; ~wrbuf_cmd_sent) &amp; master_ready;</span>
+<span id="L251"><span class="lineNum">     251</span>              :    assign axi_arready = ~(wrbuf_vld &amp; wrbuf_data_vld) &amp; master_ready;</span>
+<span id="L252"><span class="lineNum">     252</span>              :    assign axi_rlast   = 1'b1;</span>
+<span id="L253"><span class="lineNum">     253</span>              : </span>
+<span id="L254"><span class="lineNum">     254</span>              :    assign wr_cmd_vld          = (wrbuf_vld &amp; wrbuf_data_vld);</span>
+<span id="L255"><span class="lineNum">     255</span>              :    assign master_valid        = wr_cmd_vld | axi_arvalid;</span>
+<span id="L256"><span class="lineNum">     256</span>              :    assign master_tag[TAG-1:0] = wr_cmd_vld ? wrbuf_tag[TAG-1:0] : axi_arid[TAG-1:0];</span>
+<span id="L257"><span class="lineNum">     257</span>              :    assign master_opc[2:0]     = wr_cmd_vld ? 3'b011 : 3'b0;</span>
+<span id="L258"><span class="lineNum">     258</span>              :    assign master_addr[31:0]   = wr_cmd_vld ? wrbuf_addr[31:0] : axi_araddr[31:0];</span>
+<span id="L259"><span class="lineNum">     259</span>              :    assign master_size[2:0]    = wr_cmd_vld ? wrbuf_size[2:0] : axi_arsize[2:0];</span>
+<span id="L260"><span class="lineNum">     260</span>              :    assign master_byteen[7:0]  = wrbuf_byteen[7:0];</span>
+<span id="L261"><span class="lineNum">     261</span>              :    assign master_wdata[63:0]  = wrbuf_data[63:0];</span>
+<span id="L262"><span class="lineNum">     262</span>              : </span>
+<span id="L263"><span class="lineNum">     263</span>              :    // AXI response channel signals</span>
+<span id="L264"><span class="lineNum">     264</span>              :    assign axi_bvalid       = slave_valid &amp; slave_opc[3];</span>
+<span id="L265"><span class="lineNum">     265</span>              :    assign axi_bresp[1:0]   = slave_opc[0] ? 2'b10 : (slave_opc[1] ? 2'b11 : 2'b0);</span>
+<span id="L266"><span class="lineNum">     266</span>              :    assign axi_bid[TAG-1:0] = slave_tag[TAG-1:0];</span>
+<span id="L267"><span class="lineNum">     267</span>              : </span>
+<span id="L268"><span class="lineNum">     268</span>              :    assign axi_rvalid       = slave_valid &amp; (slave_opc[3:2] == 2'b0);</span>
+<span id="L269"><span class="lineNum">     269</span>              :    assign axi_rresp[1:0]   = slave_opc[0] ? 2'b10 : (slave_opc[1] ? 2'b11 : 2'b0);</span>
+<span id="L270"><span class="lineNum">     270</span>              :    assign axi_rid[TAG-1:0] = slave_tag[TAG-1:0];</span>
+<span id="L271"><span class="lineNum">     271</span>              :    assign axi_rdata[63:0]  = slave_rdata[63:0];</span>
+<span id="L272"><span class="lineNum">     272</span>              : </span>
+<span id="L273"><span class="lineNum">     273</span>              :  // FIFO state machine</span>
+<span id="L274"><span class="lineNum">     274</span> <span class="tlaGNC">           2 :    always_comb begin</span></span>
+<span id="L275"><span class="lineNum">     275</span> <span class="tlaGNC">           2 :       buf_nxtstate   = IDLE;</span></span>
+<span id="L276"><span class="lineNum">     276</span> <span class="tlaGNC">           2 :       buf_state_en   = 1'b0;</span></span>
+<span id="L277"><span class="lineNum">     277</span> <span class="tlaGNC">           2 :       buf_wr_en      = 1'b0;</span></span>
+<span id="L278"><span class="lineNum">     278</span> <span class="tlaGNC">           2 :       buf_data_wr_en = 1'b0;</span></span>
+<span id="L279"><span class="lineNum">     279</span> <span class="tlaGNC">           2 :       slvbuf_error_in   = 1'b0;</span></span>
+<span id="L280"><span class="lineNum">     280</span> <span class="tlaGNC">           2 :       slvbuf_error_en   = 1'b0;</span></span>
+<span id="L281"><span class="lineNum">     281</span> <span class="tlaGNC">           2 :       buf_write_in   = 1'b0;</span></span>
+<span id="L282"><span class="lineNum">     282</span> <span class="tlaGNC">           2 :       cmd_done       = 1'b0;</span></span>
+<span id="L283"><span class="lineNum">     283</span> <span class="tlaGNC">           2 :       trxn_done      = 1'b0;</span></span>
+<span id="L284"><span class="lineNum">     284</span> <span class="tlaGNC">           2 :       buf_cmd_byte_ptr_en = 1'b0;</span></span>
+<span id="L285"><span class="lineNum">     285</span> <span class="tlaGNC">           2 :       buf_cmd_byte_ptr[2:0] = '0;</span></span>
+<span id="L286"><span class="lineNum">     286</span> <span class="tlaGNC">           2 :       slave_valid_pre   = 1'b0;</span></span>
+<span id="L287"><span class="lineNum">     287</span> <span class="tlaGNC">           2 :       master_ready   = 1'b0;</span></span>
+<span id="L288"><span class="lineNum">     288</span> <span class="tlaGNC">           2 :       ahb_htrans[1:0]  = 2'b0;</span></span>
+<span id="L289"><span class="lineNum">     289</span> <span class="tlaGNC">           2 :       slvbuf_wr_en     = 1'b0;</span></span>
+<span id="L290"><span class="lineNum">     290</span> <span class="tlaGNC">           2 :       bypass_en        = 1'b0;</span></span>
+<span id="L291"><span class="lineNum">     291</span> <span class="tlaGNC">           2 :       rd_bypass_idle   = 1'b0;</span></span>
+<span id="L292"><span class="lineNum">     292</span>              : </span>
+<span id="L293"><span class="lineNum">     293</span> <span class="tlaGNC">           2 :       case (buf_state)</span></span>
+<span id="L294"><span class="lineNum">     294</span> <span class="tlaGNC">        8310 :          IDLE: begin</span></span>
+<span id="L295"><span class="lineNum">     295</span> <span class="tlaGNC">        8310 :                   master_ready   = 1'b1;</span></span>
+<span id="L296"><span class="lineNum">     296</span> <span class="tlaGNC">        8310 :                   buf_write_in = (master_opc[2:1] == 2'b01);</span></span>
+<span id="L297"><span class="lineNum">     297</span> <span class="tlaGNC">        8310 :                   buf_nxtstate = buf_write_in ? CMD_WR : CMD_RD;</span></span>
+<span id="L298"><span class="lineNum">     298</span> <span class="tlaGNC">        8310 :                   buf_state_en = master_valid &amp; master_ready;</span></span>
+<span id="L299"><span class="lineNum">     299</span> <span class="tlaGNC">        8310 :                   buf_wr_en    = buf_state_en;</span></span>
+<span id="L300"><span class="lineNum">     300</span> <span class="tlaGNC">        8310 :                   buf_data_wr_en = buf_state_en &amp; (buf_nxtstate == CMD_WR);</span></span>
+<span id="L301"><span class="lineNum">     301</span> <span class="tlaGNC">        8310 :                   buf_cmd_byte_ptr_en   = buf_state_en;</span></span>
+<span id="L302"><span class="lineNum">     302</span> <span class="tlaGNC">        8310 :                   buf_cmd_byte_ptr[2:0] = buf_write_in ? get_nxtbyte_ptr(3'b0,buf_byteen_in[7:0],1'b0) : master_addr[2:0];</span></span>
+<span id="L303"><span class="lineNum">     303</span> <span class="tlaGNC">        8310 :                   bypass_en       = buf_state_en;</span></span>
+<span id="L304"><span class="lineNum">     304</span> <span class="tlaGNC">        8310 :                   rd_bypass_idle  = bypass_en &amp; (buf_nxtstate == CMD_RD);</span></span>
+<span id="L305"><span class="lineNum">     305</span> <span class="tlaGNC">        8310 :                   ahb_htrans[1:0] = {2{bypass_en}} &amp; 2'b10;</span></span>
+<span id="L306"><span class="lineNum">     306</span>              :           end</span>
+<span id="L307"><span class="lineNum">     307</span> <span class="tlaUNC tlaBgUNC">           0 :          CMD_RD: begin</span></span>
+<span id="L308"><span class="lineNum">     308</span> <span class="tlaUNC">           0 :                   buf_nxtstate    = (master_valid &amp; (master_opc[2:0] == 3'b000))? STREAM_RD : DATA_RD;</span></span>
+<span id="L309"><span class="lineNum">     309</span> <span class="tlaUNC">           0 :                   buf_state_en    = ahb_hready_q &amp; (ahb_htrans_q[1:0] != 2'b0) &amp; ~ahb_hwrite_q;</span></span>
+<span id="L310"><span class="lineNum">     310</span> <span class="tlaUNC">           0 :                   cmd_done        = buf_state_en &amp; ~master_valid;</span></span>
+<span id="L311"><span class="lineNum">     311</span> <span class="tlaUNC">           0 :                   slvbuf_wr_en    = buf_state_en;</span></span>
+<span id="L312"><span class="lineNum">     312</span> <span class="tlaUNC">           0 :                   master_ready  = buf_state_en &amp; (buf_nxtstate == STREAM_RD);</span></span>
+<span id="L313"><span class="lineNum">     313</span> <span class="tlaUNC">           0 :                   buf_wr_en       = master_ready;</span></span>
+<span id="L314"><span class="lineNum">     314</span> <span class="tlaUNC">           0 :                   bypass_en       = master_ready &amp; master_valid;</span></span>
+<span id="L315"><span class="lineNum">     315</span> <span class="tlaUNC">           0 :                   buf_cmd_byte_ptr[2:0] = bypass_en ? master_addr[2:0] : buf_addr[2:0];</span></span>
+<span id="L316"><span class="lineNum">     316</span> <span class="tlaUNC">           0 :                   ahb_htrans[1:0] = 2'b10 &amp; {2{~buf_state_en | bypass_en}};</span></span>
+<span id="L317"><span class="lineNum">     317</span>              :          end</span>
+<span id="L318"><span class="lineNum">     318</span> <span class="tlaUNC">           0 :          STREAM_RD: begin</span></span>
+<span id="L319"><span class="lineNum">     319</span> <span class="tlaUNC">           0 :                   master_ready  =  (ahb_hready_q &amp; ~ahb_hresp_q) &amp; ~(master_valid &amp; master_opc[2:1] == 2'b01);</span></span>
+<span id="L320"><span class="lineNum">     320</span> <span class="tlaUNC">           0 :                   buf_wr_en       = (master_valid &amp; master_ready &amp; (master_opc[2:0] == 3'b000)); // update the fifo if we are streaming the read commands</span></span>
+<span id="L321"><span class="lineNum">     321</span> <span class="tlaUNC">           0 :                   buf_nxtstate    = ahb_hresp_q ? STREAM_ERR_RD : (buf_wr_en ? STREAM_RD : DATA_RD);            // assuming that the master accpets the slave response right away.</span></span>
+<span id="L322"><span class="lineNum">     322</span> <span class="tlaUNC">           0 :                   buf_state_en    = (ahb_hready_q | ahb_hresp_q);</span></span>
+<span id="L323"><span class="lineNum">     323</span> <span class="tlaUNC">           0 :                   buf_data_wr_en  = buf_state_en;</span></span>
+<span id="L324"><span class="lineNum">     324</span> <span class="tlaUNC">           0 :                   slvbuf_error_in = ahb_hresp_q;</span></span>
+<span id="L325"><span class="lineNum">     325</span> <span class="tlaUNC">           0 :                   slvbuf_error_en = buf_state_en;</span></span>
+<span id="L326"><span class="lineNum">     326</span> <span class="tlaUNC">           0 :                   slave_valid_pre  = buf_state_en &amp; ~ahb_hresp_q;             // send a response right away if we are not going through an error response.</span></span>
+<span id="L327"><span class="lineNum">     327</span> <span class="tlaUNC">           0 :                   cmd_done        = buf_state_en &amp; ~master_valid;                     // last one of the stream should not send a htrans</span></span>
+<span id="L328"><span class="lineNum">     328</span> <span class="tlaUNC">           0 :                   bypass_en       = master_ready &amp; master_valid &amp; (buf_nxtstate == STREAM_RD) &amp; buf_state_en;</span></span>
+<span id="L329"><span class="lineNum">     329</span> <span class="tlaUNC">           0 :                   buf_cmd_byte_ptr[2:0] = bypass_en ? master_addr[2:0] : buf_addr[2:0];</span></span>
+<span id="L330"><span class="lineNum">     330</span> <span class="tlaUNC">           0 :                   ahb_htrans[1:0] = 2'b10 &amp; {2{~((buf_nxtstate != STREAM_RD) &amp; buf_state_en)}};</span></span>
+<span id="L331"><span class="lineNum">     331</span> <span class="tlaUNC">           0 :                   slvbuf_wr_en    = buf_wr_en;                                         // shifting the contents from the buf to slv_buf for streaming cases</span></span>
+<span id="L332"><span class="lineNum">     332</span>              :          end // case: STREAM_RD</span>
+<span id="L333"><span class="lineNum">     333</span> <span class="tlaUNC">           0 :          STREAM_ERR_RD: begin</span></span>
+<span id="L334"><span class="lineNum">     334</span> <span class="tlaUNC">           0 :                   buf_nxtstate = DATA_RD;</span></span>
+<span id="L335"><span class="lineNum">     335</span> <span class="tlaUNC">           0 :                   buf_state_en = ahb_hready_q &amp; (ahb_htrans_q[1:0] != 2'b0) &amp; ~ahb_hwrite_q;</span></span>
+<span id="L336"><span class="lineNum">     336</span> <span class="tlaUNC">           0 :                   slave_valid_pre = buf_state_en;</span></span>
+<span id="L337"><span class="lineNum">     337</span> <span class="tlaUNC">           0 :                   slvbuf_wr_en   = buf_state_en;     // Overwrite slvbuf with buffer</span></span>
+<span id="L338"><span class="lineNum">     338</span> <span class="tlaUNC">           0 :                   buf_cmd_byte_ptr[2:0] = buf_addr[2:0];</span></span>
+<span id="L339"><span class="lineNum">     339</span> <span class="tlaUNC">           0 :                   ahb_htrans[1:0] = 2'b10 &amp; {2{~buf_state_en}};</span></span>
+<span id="L340"><span class="lineNum">     340</span>              :          end</span>
+<span id="L341"><span class="lineNum">     341</span> <span class="tlaUNC">           0 :          DATA_RD: begin</span></span>
+<span id="L342"><span class="lineNum">     342</span> <span class="tlaUNC">           0 :                   buf_nxtstate   = DONE_RD;</span></span>
+<span id="L343"><span class="lineNum">     343</span> <span class="tlaUNC">           0 :                   buf_state_en   = (ahb_hready_q | ahb_hresp_q);</span></span>
+<span id="L344"><span class="lineNum">     344</span> <span class="tlaUNC">           0 :                   buf_data_wr_en = buf_state_en;</span></span>
+<span id="L345"><span class="lineNum">     345</span> <span class="tlaUNC">           0 :                   slvbuf_error_in= ahb_hresp_q;</span></span>
+<span id="L346"><span class="lineNum">     346</span> <span class="tlaUNC">           0 :                   slvbuf_error_en= buf_state_en;</span></span>
+<span id="L347"><span class="lineNum">     347</span> <span class="tlaUNC">           0 :                   slvbuf_wr_en   = buf_state_en;</span></span>
+<span id="L348"><span class="lineNum">     348</span>              : </span>
+<span id="L349"><span class="lineNum">     349</span>              :          end</span>
+<span id="L350"><span class="lineNum">     350</span> <span class="tlaGNC tlaBgGNC">        1164 :          CMD_WR: begin</span></span>
+<span id="L351"><span class="lineNum">     351</span> <span class="tlaGNC">        1164 :                   buf_nxtstate = DATA_WR;</span></span>
+<span id="L352"><span class="lineNum">     352</span> <span class="tlaGNC">        1164 :                   trxn_done    = ahb_hready_q &amp; ahb_hwrite_q &amp; (ahb_htrans_q[1:0] != 2'b0);</span></span>
+<span id="L353"><span class="lineNum">     353</span> <span class="tlaGNC">        1164 :                   buf_state_en = trxn_done;</span></span>
+<span id="L354"><span class="lineNum">     354</span> <span class="tlaGNC">        1164 :                   buf_cmd_byte_ptr_en = buf_state_en;</span></span>
+<span id="L355"><span class="lineNum">     355</span> <span class="tlaGNC">        1164 :                   slvbuf_wr_en    = buf_state_en;</span></span>
+<span id="L356"><span class="lineNum">     356</span> <span class="tlaGNC">        1164 :                   buf_cmd_byte_ptr    = trxn_done ? get_nxtbyte_ptr(buf_cmd_byte_ptrQ[2:0],buf_byteen[7:0],1'b1) : buf_cmd_byte_ptrQ;</span></span>
+<span id="L357"><span class="lineNum">     357</span> <span class="tlaGNC">        1164 :                   cmd_done            = trxn_done &amp; (buf_aligned | (buf_cmd_byte_ptrQ == 3'b111) |</span></span>
+<span id="L358"><span class="lineNum">     358</span> <span class="tlaGNC">        1164 :                                                      (buf_byteen[get_nxtbyte_ptr(buf_cmd_byte_ptrQ[2:0],buf_byteen[7:0],1'b1)] == 1'b0));</span></span>
+<span id="L359"><span class="lineNum">     359</span> <span class="tlaGNC">        1164 :                   ahb_htrans[1:0] = {2{~(cmd_done | cmd_doneQ)}} &amp; 2'b10;</span></span>
+<span id="L360"><span class="lineNum">     360</span>              :          end</span>
+<span id="L361"><span class="lineNum">     361</span> <span class="tlaGNC">         384 :          DATA_WR: begin</span></span>
+<span id="L362"><span class="lineNum">     362</span> <span class="tlaGNC">         384 :                   buf_state_en = (cmd_doneQ &amp; ahb_hready_q) | ahb_hresp_q;</span></span>
+<span id="L363"><span class="lineNum">     363</span> <span class="tlaGNC">         384 :                   master_ready = buf_state_en &amp; ~ahb_hresp_q &amp; axi_bready;   // Ready to accept new command if current command done and no error</span></span>
+<span id="L364"><span class="lineNum">     364</span> <span class="tlaGNC">         384 :                   buf_nxtstate = (ahb_hresp_q | ~axi_bready) ? DONE_WR :</span></span>
+<span id="L365"><span class="lineNum">     365</span> <span class="tlaGNC">         384 :                                   ((master_valid &amp; master_ready) ? ((master_opc[2:1] == 2'b01) ? CMD_WR : CMD_RD) : IDLE);</span></span>
+<span id="L366"><span class="lineNum">     366</span> <span class="tlaGNC">         384 :                   slvbuf_error_in = ahb_hresp_q;</span></span>
+<span id="L367"><span class="lineNum">     367</span> <span class="tlaGNC">         384 :                   slvbuf_error_en = buf_state_en;</span></span>
+<span id="L368"><span class="lineNum">     368</span>              : </span>
+<span id="L369"><span class="lineNum">     369</span> <span class="tlaGNC">         384 :                   buf_write_in = (master_opc[2:1] == 2'b01);</span></span>
+<span id="L370"><span class="lineNum">     370</span> <span class="tlaGNC">         384 :                   buf_wr_en = buf_state_en &amp; ((buf_nxtstate == CMD_WR) | (buf_nxtstate == CMD_RD));</span></span>
+<span id="L371"><span class="lineNum">     371</span> <span class="tlaGNC">         384 :                   buf_data_wr_en = buf_wr_en;</span></span>
+<span id="L372"><span class="lineNum">     372</span>              : </span>
+<span id="L373"><span class="lineNum">     373</span> <span class="tlaGNC">         384 :                   cmd_done     = (ahb_hresp_q | (ahb_hready_q &amp; (ahb_htrans_q[1:0] != 2'b0) &amp;</span></span>
+<span id="L374"><span class="lineNum">     374</span> <span class="tlaGNC">         384 :                                  ((buf_cmd_byte_ptrQ == 3'b111) | (buf_byteen[get_nxtbyte_ptr(buf_cmd_byte_ptrQ[2:0],buf_byteen[7:0],1'b1)] == 1'b0))));</span></span>
+<span id="L375"><span class="lineNum">     375</span> <span class="tlaGNC">         384 :                   bypass_en       = buf_state_en &amp; buf_write_in &amp; (buf_nxtstate == CMD_WR);   // Only bypass for writes for the time being</span></span>
+<span id="L376"><span class="lineNum">     376</span> <span class="tlaGNC">         384 :                   ahb_htrans[1:0] = {2{(~(cmd_done | cmd_doneQ) | bypass_en)}} &amp; 2'b10;</span></span>
+<span id="L377"><span class="lineNum">     377</span> <span class="tlaGNC">         384 :                   slave_valid_pre  = buf_state_en &amp; (buf_nxtstate != DONE_WR);</span></span>
+<span id="L378"><span class="lineNum">     378</span>              : </span>
+<span id="L379"><span class="lineNum">     379</span> <span class="tlaGNC">         384 :                   trxn_done = ahb_hready_q &amp; ahb_hwrite_q &amp; (ahb_htrans_q[1:0] != 2'b0);</span></span>
+<span id="L380"><span class="lineNum">     380</span> <span class="tlaGNC">         384 :                   buf_cmd_byte_ptr_en = trxn_done | bypass_en;</span></span>
+<span id="L381"><span class="lineNum">     381</span> <span class="tlaGNC">         384 :                   buf_cmd_byte_ptr = bypass_en ? get_nxtbyte_ptr(3'b0,buf_byteen_in[7:0],1'b0) :</span></span>
+<span id="L382"><span class="lineNum">     382</span> <span class="tlaGNC">         384 :                                                  trxn_done ? get_nxtbyte_ptr(buf_cmd_byte_ptrQ[2:0],buf_byteen[7:0],1'b1) : buf_cmd_byte_ptrQ;</span></span>
+<span id="L383"><span class="lineNum">     383</span>              :          end</span>
+<span id="L384"><span class="lineNum">     384</span> <span class="tlaUNC tlaBgUNC">           0 :          DONE_WR: begin</span></span>
+<span id="L385"><span class="lineNum">     385</span> <span class="tlaUNC">           0 :                   buf_nxtstate = IDLE;</span></span>
+<span id="L386"><span class="lineNum">     386</span> <span class="tlaUNC">           0 :                   buf_state_en = axi_bvalid &amp; axi_bready;</span></span>
+<span id="L387"><span class="lineNum">     387</span> <span class="tlaUNC">           0 :                   slvbuf_error_en = 1'b1;</span></span>
+<span id="L388"><span class="lineNum">     388</span> <span class="tlaUNC">           0 :                   slave_valid_pre = 1'b1;</span></span>
+<span id="L389"><span class="lineNum">     389</span>              :          end</span>
+<span id="L390"><span class="lineNum">     390</span> <span class="tlaUNC">           0 :          DONE_RD: begin</span></span>
+<span id="L391"><span class="lineNum">     391</span> <span class="tlaUNC">           0 :                   buf_nxtstate = IDLE;</span></span>
+<span id="L392"><span class="lineNum">     392</span> <span class="tlaUNC">           0 :                   buf_state_en = axi_rvalid &amp; axi_rready; // axi_rlast == 1</span></span>
+<span id="L393"><span class="lineNum">     393</span> <span class="tlaUNC">           0 :                   slvbuf_error_en = 1'b1;</span></span>
+<span id="L394"><span class="lineNum">     394</span> <span class="tlaUNC">           0 :                   slave_valid_pre = 1'b1;</span></span>
+<span id="L395"><span class="lineNum">     395</span>              :          end</span>
+<span id="L396"><span class="lineNum">     396</span> <span class="tlaUNC">           0 :          default: begin</span></span>
+<span id="L397"><span class="lineNum">     397</span> <span class="tlaUNC">           0 :                   buf_nxtstate = IDLE;</span></span>
+<span id="L398"><span class="lineNum">     398</span> <span class="tlaUNC">           0 :                   buf_state_en = 1'b1;</span></span>
+<span id="L399"><span class="lineNum">     399</span>              :          end</span>
+<span id="L400"><span class="lineNum">     400</span>              :       endcase</span>
+<span id="L401"><span class="lineNum">     401</span>              :    end</span>
+<span id="L402"><span class="lineNum">     402</span>              : </span>
+<span id="L403"><span class="lineNum">     403</span>              :    assign buf_rst              = dec_tlu_force_halt_bus;</span>
+<span id="L404"><span class="lineNum">     404</span>              :    assign cmd_done_rst         = slave_valid_pre;</span>
+<span id="L405"><span class="lineNum">     405</span>              :    assign buf_addr_in[31:3]    = master_addr[31:3];</span>
+<span id="L406"><span class="lineNum">     406</span>              :    assign buf_addr_in[2:0]     = (buf_aligned_in &amp; (master_opc[2:1] == 2'b01)) ? get_write_addr(master_byteen[7:0]) : master_addr[2:0];</span>
+<span id="L407"><span class="lineNum">     407</span>              :    assign buf_tag_in[TAG-1:0]  = master_tag[TAG-1:0];</span>
+<span id="L408"><span class="lineNum">     408</span>              :    assign buf_byteen_in[7:0]   = wrbuf_byteen[7:0];</span>
+<span id="L409"><span class="lineNum">     409</span>              :    assign buf_data_in[63:0]    = (buf_state == DATA_RD) ? ahb_hrdata_q[63:0] : master_wdata[63:0];</span>
+<span id="L410"><span class="lineNum">     410</span>              :    assign buf_size_in[1:0]     = (buf_aligned_in &amp; (master_size[1:0] == 2'b11) &amp; (master_opc[2:1] == 2'b01)) ? get_write_size(master_byteen[7:0]) : master_size[1:0];</span>
+<span id="L411"><span class="lineNum">     411</span>              :    assign buf_aligned_in       = (master_opc[2:0] == 3'b0)    |   // reads are always aligned since they are either DW or sideeffects</span>
+<span id="L412"><span class="lineNum">     412</span>              :                                  (master_size[1:0] == 2'b0) |  (master_size[1:0] == 2'b01) | (master_size[1:0] == 2'b10) | // Always aligned for Byte/HW/Word since they can be only for non-idempotent. IFU/SB are always aligned</span>
+<span id="L413"><span class="lineNum">     413</span>              :                                  ((master_size[1:0] == 2'b11) &amp;</span>
+<span id="L414"><span class="lineNum">     414</span>              :                                   ((master_byteen[7:0] == 8'h3)  | (master_byteen[7:0] == 8'hc)   | (master_byteen[7:0] == 8'h30) | (master_byteen[7:0] == 8'hc0) |</span>
+<span id="L415"><span class="lineNum">     415</span>              :                                    (master_byteen[7:0] == 8'hf)  | (master_byteen[7:0] == 8'hf0)  | (master_byteen[7:0] == 8'hff)));</span>
+<span id="L416"><span class="lineNum">     416</span>              : </span>
+<span id="L417"><span class="lineNum">     417</span>              :    // Generate the ahb signals</span>
+<span id="L418"><span class="lineNum">     418</span>              :    assign ahb_haddr[31:3] = bypass_en ? master_addr[31:3]  : buf_addr[31:3];</span>
+<span id="L419"><span class="lineNum">     419</span>              :    assign ahb_haddr[2:0]  = {3{(ahb_htrans == 2'b10)}} &amp; buf_cmd_byte_ptr[2:0];    // Trxn should be aligned during IDLE</span>
+<span id="L420"><span class="lineNum">     420</span>              :    assign ahb_hsize[2:0]  = bypass_en ? {1'b0, ({2{buf_aligned_in}} &amp; buf_size_in[1:0])} :</span>
+<span id="L421"><span class="lineNum">     421</span>              :                                         {1'b0, ({2{buf_aligned}} &amp; buf_size[1:0])};   // Send the full size for aligned trxn</span>
+<span id="L422"><span class="lineNum">     422</span>              :    assign ahb_hburst[2:0] = 3'b0;</span>
+<span id="L423"><span class="lineNum">     423</span>              :    assign ahb_hmastlock   = 1'b0;</span>
+<span id="L424"><span class="lineNum">     424</span>              :    assign ahb_hprot[3:0]  = {3'b001,~axi_arprot[2]};</span>
+<span id="L425"><span class="lineNum">     425</span>              :    assign ahb_hwrite      = bypass_en ? (master_opc[2:1] == 2'b01) : buf_write;</span>
+<span id="L426"><span class="lineNum">     426</span>              :    assign ahb_hwdata[63:0] = buf_data[63:0];</span>
+<span id="L427"><span class="lineNum">     427</span>              : </span>
+<span id="L428"><span class="lineNum">     428</span>              :    assign slave_valid          = slave_valid_pre;// &amp; (~slvbuf_posted_write | slvbuf_error);</span>
+<span id="L429"><span class="lineNum">     429</span>              :    assign slave_opc[3:2]       = slvbuf_write ? 2'b11 : 2'b00;</span>
+<span id="L430"><span class="lineNum">     430</span>              :    assign slave_opc[1:0]       = {2{slvbuf_error}} &amp; 2'b10;</span>
+<span id="L431"><span class="lineNum">     431</span>              :    assign slave_rdata[63:0]    = slvbuf_error ? {2{last_bus_addr[31:0]}} : ((buf_state == DONE_RD) ? buf_data[63:0] : ahb_hrdata_q[63:0]);</span>
+<span id="L432"><span class="lineNum">     432</span>              :    assign slave_tag[TAG-1:0]   = slvbuf_tag[TAG-1:0];</span>
+<span id="L433"><span class="lineNum">     433</span>              : </span>
+<span id="L434"><span class="lineNum">     434</span>              :    assign last_addr_en = (ahb_htrans[1:0] != 2'b0) &amp; ahb_hready &amp; ahb_hwrite ;</span>
+<span id="L435"><span class="lineNum">     435</span>              : </span>
+<span id="L436"><span class="lineNum">     436</span>              : </span>
+<span id="L437"><span class="lineNum">     437</span>              :    rvdffsc_fpga #(.WIDTH(1))   wrbuf_vldff     (.din(1'b1),              .dout(wrbuf_vld),          .en(wrbuf_en),      .clear(wrbuf_rst), .clk(bus_clk), .clken(bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L438"><span class="lineNum">     438</span>              :    rvdffsc_fpga #(.WIDTH(1))   wrbuf_data_vldff(.din(1'b1),              .dout(wrbuf_data_vld),     .en(wrbuf_data_en), .clear(wrbuf_rst), .clk(bus_clk), .clken(bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L439"><span class="lineNum">     439</span>              :    rvdffs_fpga  #(.WIDTH(TAG)) wrbuf_tagff     (.din(axi_awid[TAG-1:0]), .dout(wrbuf_tag[TAG-1:0]), .en(wrbuf_en),                         .clk(bus_clk), .clken(bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L440"><span class="lineNum">     440</span>              :    rvdffs_fpga  #(.WIDTH(3))   wrbuf_sizeff    (.din(axi_awsize[2:0]),   .dout(wrbuf_size[2:0]),    .en(wrbuf_en),                         .clk(bus_clk), .clken(bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L441"><span class="lineNum">     441</span>              :    rvdffe       #(.WIDTH(32))  wrbuf_addrff    (.din(axi_awaddr[31:0]),  .dout(wrbuf_addr[31:0]),   .en(wrbuf_en &amp; bus_clk_en),            .clk(clk), .*);</span>
+<span id="L442"><span class="lineNum">     442</span>              :    rvdffe       #(.WIDTH(64))  wrbuf_dataff    (.din(axi_wdata[63:0]),   .dout(wrbuf_data[63:0]),   .en(wrbuf_data_en &amp; bus_clk_en),       .clk(clk), .*);</span>
+<span id="L443"><span class="lineNum">     443</span>              :    rvdffs_fpga  #(.WIDTH(8))   wrbuf_byteenff  (.din(axi_wstrb[7:0]),    .dout(wrbuf_byteen[7:0]),  .en(wrbuf_data_en),                    .clk(bus_clk), .clken(bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L444"><span class="lineNum">     444</span>              : </span>
+<span id="L445"><span class="lineNum">     445</span>              :    rvdffs_fpga #(.WIDTH(32))   last_bus_addrff (.din(ahb_haddr[31:0]),   .dout(last_bus_addr[31:0]), .en(last_addr_en), .clk(bus_clk), .clken(bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L446"><span class="lineNum">     446</span>              : </span>
+<span id="L447"><span class="lineNum">     447</span>              :    rvdffsc_fpga #(.WIDTH($bits(state_t))) buf_state_ff  (.din(buf_nxtstate),        .dout({buf_state}),      .en(buf_state_en), .clear(buf_rst), .clk(bus_clk), .clken(bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L448"><span class="lineNum">     448</span>              :    rvdffs_fpga #(.WIDTH(1))               buf_writeff   (.din(buf_write_in),        .dout(buf_write),        .en(buf_wr_en),                     .clk(buf_clk), .clken(buf_clken),  .rawclk(clk), .*);</span>
+<span id="L449"><span class="lineNum">     449</span>              :    rvdffs_fpga #(.WIDTH(TAG))             buf_tagff     (.din(buf_tag_in[TAG-1:0]), .dout(buf_tag[TAG-1:0]), .en(buf_wr_en),                     .clk(buf_clk), .clken(buf_clken),  .rawclk(clk), .*);</span>
+<span id="L450"><span class="lineNum">     450</span>              :    rvdffe      #(.WIDTH(32))              buf_addrff    (.din(buf_addr_in[31:0]),   .dout(buf_addr[31:0]),   .en(buf_wr_en &amp; bus_clk_en),        .clk(clk), .*);</span>
+<span id="L451"><span class="lineNum">     451</span>              :    rvdffs_fpga #(.WIDTH(2))               buf_sizeff    (.din(buf_size_in[1:0]),    .dout(buf_size[1:0]),    .en(buf_wr_en),                     .clk(buf_clk), .clken(buf_clken),  .rawclk(clk), .*);</span>
+<span id="L452"><span class="lineNum">     452</span>              :    rvdffs_fpga #(.WIDTH(1))               buf_alignedff (.din(buf_aligned_in),      .dout(buf_aligned),      .en(buf_wr_en),                     .clk(buf_clk), .clken(buf_clken),  .rawclk(clk), .*);</span>
+<span id="L453"><span class="lineNum">     453</span>              :    rvdffs_fpga #(.WIDTH(8))               buf_byteenff  (.din(buf_byteen_in[7:0]),  .dout(buf_byteen[7:0]),  .en(buf_wr_en),                     .clk(buf_clk), .clken(buf_clken),  .rawclk(clk), .*);</span>
+<span id="L454"><span class="lineNum">     454</span>              :    rvdffe      #(.WIDTH(64))              buf_dataff    (.din(buf_data_in[63:0]),   .dout(buf_data[63:0]),   .en(buf_data_wr_en &amp; bus_clk_en),   .clk(clk), .*);</span>
+<span id="L455"><span class="lineNum">     455</span>              : </span>
+<span id="L456"><span class="lineNum">     456</span>              : </span>
+<span id="L457"><span class="lineNum">     457</span>              :    rvdffs_fpga #(.WIDTH(1))   slvbuf_writeff  (.din(buf_write),        .dout(slvbuf_write),        .en(slvbuf_wr_en),    .clk(buf_clk), .clken(buf_clken), .rawclk(clk), .*);</span>
+<span id="L458"><span class="lineNum">     458</span>              :    rvdffs_fpga #(.WIDTH(TAG)) slvbuf_tagff    (.din(buf_tag[TAG-1:0]), .dout(slvbuf_tag[TAG-1:0]), .en(slvbuf_wr_en),    .clk(buf_clk), .clken(buf_clken), .rawclk(clk), .*);</span>
+<span id="L459"><span class="lineNum">     459</span>              :    rvdffs_fpga #(.WIDTH(1))   slvbuf_errorff  (.din(slvbuf_error_in),  .dout(slvbuf_error),        .en(slvbuf_error_en), .clk(bus_clk), .clken(bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L460"><span class="lineNum">     460</span>              : </span>
+<span id="L461"><span class="lineNum">     461</span>              :    rvdffsc_fpga #(.WIDTH(1)) buf_cmd_doneff     (.din(1'b1),                  .dout(cmd_doneQ),              .en(cmd_done),            .clear(cmd_done_rst), .clk(bus_clk), .clken(bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L462"><span class="lineNum">     462</span>              :    rvdffs_fpga #(.WIDTH(3))  buf_cmd_byte_ptrff (.din(buf_cmd_byte_ptr[2:0]), .dout(buf_cmd_byte_ptrQ[2:0]), .en(buf_cmd_byte_ptr_en),                       .clk(bus_clk), .clken(bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L463"><span class="lineNum">     463</span>              : </span>
+<span id="L464"><span class="lineNum">     464</span>              :    rvdff_fpga #(.WIDTH(1))  hready_ff (.din(ahb_hready),       .dout(ahb_hready_q),       .clk(bus_clk),       .clken(bus_clk_en),      .rawclk(clk), .*);</span>
+<span id="L465"><span class="lineNum">     465</span>              :    rvdff_fpga #(.WIDTH(2))  htrans_ff (.din(ahb_htrans[1:0]),  .dout(ahb_htrans_q[1:0]),  .clk(bus_clk),       .clken(bus_clk_en),      .rawclk(clk), .*);</span>
+<span id="L466"><span class="lineNum">     466</span>              :    rvdff_fpga #(.WIDTH(1))  hwrite_ff (.din(ahb_hwrite),       .dout(ahb_hwrite_q),       .clk(bus_clk),       .clken(bus_clk_en),      .rawclk(clk), .*);</span>
+<span id="L467"><span class="lineNum">     467</span>              :    rvdff_fpga #(.WIDTH(1))  hresp_ff  (.din(ahb_hresp),        .dout(ahb_hresp_q),        .clk(bus_clk),       .clken(bus_clk_en),      .rawclk(clk), .*);</span>
+<span id="L468"><span class="lineNum">     468</span>              :    rvdff_fpga #(.WIDTH(64)) hrdata_ff (.din(ahb_hrdata[63:0]), .dout(ahb_hrdata_q[63:0]), .clk(ahbm_data_clk), .clken(ahbm_data_clken), .rawclk(clk), .*);</span>
+<span id="L469"><span class="lineNum">     469</span>              : </span>
+<span id="L470"><span class="lineNum">     470</span>              :    // Clock headers</span>
+<span id="L471"><span class="lineNum">     471</span>              :    // clock enables for ahbm addr/data</span>
+<span id="L472"><span class="lineNum">     472</span>              :    assign buf_clken       = bus_clk_en &amp; (buf_wr_en | slvbuf_wr_en | clk_override);</span>
+<span id="L473"><span class="lineNum">     473</span>              :    assign ahbm_data_clken = bus_clk_en &amp; ((buf_state != IDLE) | clk_override);</span>
+<span id="L474"><span class="lineNum">     474</span>              : </span>
+<span id="L475"><span class="lineNum">     475</span>              : `ifdef RV_FPGA_OPTIMIZE</span>
+<span id="L476"><span class="lineNum">     476</span>              :    assign bus_clk = 1'b0;</span>
+<span id="L477"><span class="lineNum">     477</span>              :    assign buf_clk = 1'b0;</span>
+<span id="L478"><span class="lineNum">     478</span>              :    assign ahbm_data_clk = 1'b0;</span>
+<span id="L479"><span class="lineNum">     479</span>              : `else</span>
+<span id="L480"><span class="lineNum">     480</span>              :    rvclkhdr bus_cgc       (.en(bus_clk_en),      .l1clk(bus_clk),       .*);</span>
+<span id="L481"><span class="lineNum">     481</span>              :    rvclkhdr buf_cgc       (.en(buf_clken),       .l1clk(buf_clk), .*);</span>
+<span id="L482"><span class="lineNum">     482</span>              :    rvclkhdr ahbm_data_cgc (.en(ahbm_data_clken), .l1clk(ahbm_data_clk), .*);</span>
+<span id="L483"><span class="lineNum">     483</span>              : `endif</span>
+<span id="L484"><span class="lineNum">     484</span>              : </span>
+<span id="L485"><span class="lineNum">     485</span>              : `ifdef RV_ASSERT_ON</span>
+<span id="L486"><span class="lineNum">     486</span>              :    property ahb_trxn_aligned;</span>
+<span id="L487"><span class="lineNum">     487</span>              :      @(posedge bus_clk) ahb_htrans[1]  |-&gt; ((ahb_hsize[2:0] == 3'h0)                              |</span>
+<span id="L488"><span class="lineNum">     488</span>              :                                         ((ahb_hsize[2:0] == 3'h1) &amp; (ahb_haddr[0] == 1'b0))   |</span>
+<span id="L489"><span class="lineNum">     489</span>              :                                         ((ahb_hsize[2:0] == 3'h2) &amp; (ahb_haddr[1:0] == 2'b0)) |</span>
+<span id="L490"><span class="lineNum">     490</span>              :                                         ((ahb_hsize[2:0] == 3'h3) &amp; (ahb_haddr[2:0] == 3'b0)));</span>
+<span id="L491"><span class="lineNum">     491</span>              :    endproperty</span>
+<span id="L492"><span class="lineNum">     492</span>              :    assert_ahb_trxn_aligned: assert property (ahb_trxn_aligned) else</span>
+<span id="L493"><span class="lineNum">     493</span>              :      $display("Assertion ahb_trxn_aligned failed: ahb_htrans=2'h%h, ahb_hsize=3'h%h, ahb_haddr=32'h%h",ahb_htrans[1:0], ahb_hsize[2:0], ahb_haddr[31:0]);</span>
+<span id="L494"><span class="lineNum">     494</span>              : </span>
+<span id="L495"><span class="lineNum">     495</span>              :    property ahb_error_protocol;</span>
+<span id="L496"><span class="lineNum">     496</span>              :       @(posedge bus_clk) (ahb_hready &amp; ahb_hresp) |-&gt; (~$past(ahb_hready) &amp; $past(ahb_hresp));</span>
+<span id="L497"><span class="lineNum">     497</span>              :    endproperty</span>
+<span id="L498"><span class="lineNum">     498</span>              :    assert_ahb_error_protocol: assert property (ahb_error_protocol) else</span>
+<span id="L499"><span class="lineNum">     499</span>              :       $display("Bus Error with hReady isn't preceded with Bus Error without hready");</span>
+<span id="L500"><span class="lineNum">     500</span>              : `endif</span>
+<span id="L501"><span class="lineNum">     501</span>              : </span>
+<span id="L502"><span class="lineNum">     502</span>              : endmodule // axi4_to_ahb</span>
+        </pre>
+</td>
+</tr>
+</table>
+
+</body>
+</html>

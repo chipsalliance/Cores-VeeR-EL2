@@ -1,0 +1,458 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>
+        Full
+        coverage report
+    </title>
+    <link rel="stylesheet" type="text/css" href="cov.css">
+    <style>
+        .container {
+            background-color: rgb(169, 169, 169);
+            width: 100%;
+            min-height: 80%;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <table class="title-header-shadow">
+        <td class="title-container">
+            <table class="title-header">
+                <td class="title-logo">
+                    <a href=index.html>
+                        <img src=_static/white.svg></img>
+                    </a>
+                </td>
+                <td class="title">
+                    Project
+                    Full
+                    coverage report
+                </td>
+            </table>
+        </td>
+    </table>
+    <center>
+        <table class="info-table">
+            <tr class="info-table-view">
+                <td width="10%" class="headerInfo">Current view:</td>
+                <td width="40%" class="headerInfoValue">
+                    <a href=index.html>Cores-VeeR-EL2</a>—Cores-VeeR-EL2—design—lsu—el2_lsu_lsc_ctl.sv
+                </td>
+                <td width=auto></td>
+                <td width="10%"></td>
+                <td width="10%" class="headerCovSummary colTop">Coverage</td>
+                <td width="10%" class="headerCovSummary colTop" title="Covered + Uncovered code">Hit</td>
+                <td width="10%" class="headerCovSummary colTop" title="Exercised code only">Total</td>
+            </tr>
+            <tr>
+                <td class="headerInfo">Test Date:</td>
+                <td class="headerInfoValue">
+                    11-12-2024
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Toggle
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #f8ff00;">
+        51.2%
+    </td>
+    <td class="headerCovSummaryEntry">
+        43
+    </td>
+    <td class="headerCovSummaryEntry">
+        84
+    </td>
+
+            </tr>
+            <tr>
+                <td class="headerInfo">Test:</td>
+                <td class="headerInfoValue">
+                    riscv-dv__riscv_pmp_out_of_bounds_test_veer
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Branch
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #00ff00;">
+        100.0%
+    </td>
+    <td class="headerCovSummaryEntry">
+        17
+    </td>
+    <td class="headerCovSummaryEntry">
+        17
+    </td>
+
+            </tr>
+            
+        </table>
+    </center>
+
+    <table border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td><br/></td>
+</tr>
+<tr>
+<td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : // SPDX-License-Identifier: Apache-2.0</span>
+<span id="L2"><span class="lineNum">       2</span>              : // Copyright 2020 Western Digital Corporation or its affiliates.</span>
+<span id="L3"><span class="lineNum">       3</span>              : //</span>
+<span id="L4"><span class="lineNum">       4</span>              : // Licensed under the Apache License, Version 2.0 (the "License");</span>
+<span id="L5"><span class="lineNum">       5</span>              : // you may not use this file except in compliance with the License.</span>
+<span id="L6"><span class="lineNum">       6</span>              : // You may obtain a copy of the License at</span>
+<span id="L7"><span class="lineNum">       7</span>              : //</span>
+<span id="L8"><span class="lineNum">       8</span>              : // http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L9"><span class="lineNum">       9</span>              : //</span>
+<span id="L10"><span class="lineNum">      10</span>              : // Unless required by applicable law or agreed to in writing, software</span>
+<span id="L11"><span class="lineNum">      11</span>              : // distributed under the License is distributed on an "AS IS" BASIS,</span>
+<span id="L12"><span class="lineNum">      12</span>              : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L13"><span class="lineNum">      13</span>              : // See the License for the specific language governing permissions and</span>
+<span id="L14"><span class="lineNum">      14</span>              : // limitations under the License.</span>
+<span id="L15"><span class="lineNum">      15</span>              : </span>
+<span id="L16"><span class="lineNum">      16</span>              : //********************************************************************************</span>
+<span id="L17"><span class="lineNum">      17</span>              : // $Id$</span>
+<span id="L18"><span class="lineNum">      18</span>              : //</span>
+<span id="L19"><span class="lineNum">      19</span>              : //</span>
+<span id="L20"><span class="lineNum">      20</span>              : // Owner:</span>
+<span id="L21"><span class="lineNum">      21</span>              : // Function: LSU control</span>
+<span id="L22"><span class="lineNum">      22</span>              : // Comments:</span>
+<span id="L23"><span class="lineNum">      23</span>              : //</span>
+<span id="L24"><span class="lineNum">      24</span>              : //</span>
+<span id="L25"><span class="lineNum">      25</span>              : // DC1 -&gt; DC2 -&gt; DC3 -&gt; DC4 (Commit)</span>
+<span id="L26"><span class="lineNum">      26</span>              : //</span>
+<span id="L27"><span class="lineNum">      27</span>              : //********************************************************************************</span>
+<span id="L28"><span class="lineNum">      28</span>              : module el2_lsu_lsc_ctl</span>
+<span id="L29"><span class="lineNum">      29</span>              : import el2_pkg::*;</span>
+<span id="L30"><span class="lineNum">      30</span>              : #(</span>
+<span id="L31"><span class="lineNum">      31</span>              : `include "el2_param.vh"</span>
+<span id="L32"><span class="lineNum">      32</span>              :  )(</span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC tlaBgGNC">           3 :    input logic                rst_l,                     // reset, active low</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                clk_override,              // Override non-functional clock gating</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">      714472 :    input logic                clk,                       // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
+<span id="L36"><span class="lineNum">      36</span>              : </span>
+<span id="L37"><span class="lineNum">      37</span>              :    // clocks per pipe</span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">      714472 :    input logic                lsu_c1_m_clk,</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">      714472 :    input logic                lsu_c1_r_clk,</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">      714472 :    input logic                lsu_c2_m_clk,</span></span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">      714472 :    input logic                lsu_c2_r_clk,</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">      714472 :    input logic                lsu_store_c1_m_clk,</span></span>
+<span id="L43"><span class="lineNum">      43</span>              : </span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [31:0]         lsu_ld_data_r,             // Load data R-stage</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaUNC">           0 :    input logic [31:0]         lsu_ld_data_corr_r,        // ECC corrected data R-stage</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaUNC">           0 :    input logic                lsu_single_ecc_error_r,    // ECC single bit error R-stage</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaUNC">           0 :    input logic                lsu_double_ecc_error_r,    // ECC double bit error R-stage</span></span>
+<span id="L48"><span class="lineNum">      48</span>              : </span>
+<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC tlaBgGNC">           2 :    input logic [31:0]         lsu_ld_data_m,             // Load data M-stage</span></span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                lsu_single_ecc_error_m,    // ECC single bit error M-stage</span></span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaUNC">           0 :    input logic                lsu_double_ecc_error_m,    // ECC double bit error M-stage</span></span>
+<span id="L52"><span class="lineNum">      52</span>              : </span>
+<span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC tlaBgGNC">        2578 :    input logic                flush_m_up,                // Flush M and D stage</span></span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">        1550 :    input logic                flush_r,                   // Flush R-stage</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                ldst_dual_d,               // load/store is unaligned at 32 bit boundary D-stage</span></span>
+<span id="L56"><span class="lineNum">      56</span> <span class="tlaUNC">           0 :    input logic                ldst_dual_m,               // load/store is unaligned at 32 bit boundary M-stage</span></span>
+<span id="L57"><span class="lineNum">      57</span> <span class="tlaUNC">           0 :    input logic                ldst_dual_r,               // load/store is unaligned at 32 bit boundary R-stage</span></span>
+<span id="L58"><span class="lineNum">      58</span>              : </span>
+<span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC tlaBgGNC">        6573 :    input logic [31:0]         exu_lsu_rs1_d,             // address</span></span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">        2824 :    input logic [31:0]         exu_lsu_rs2_d,             // store data</span></span>
+<span id="L61"><span class="lineNum">      61</span>              : </span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">        2739 :    input el2_lsu_pkt_t       lsu_p,                     // lsu control packet</span></span>
+<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">       39507 :    input logic                dec_lsu_valid_raw_d,       // Raw valid for address computation</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">       19106 :    input logic [11:0]         dec_lsu_offset_d,          // 12b offset for load/store addresses</span></span>
+<span id="L65"><span class="lineNum">      65</span>              : </span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic [31:0]        picm_mask_data_m,          // PIC data M-stage</span></span>
+<span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC tlaBgGNC">           2 :    input  logic [31:0]        bus_read_data_m,           // the bus return data</span></span>
+<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">          60 :    output logic [31:0]        lsu_result_m,              // lsu load data</span></span>
+<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC">          60 :    output logic [31:0]        lsu_result_corr_r,         // This is the ECC corrected data going to RF</span></span>
+<span id="L70"><span class="lineNum">      70</span>              :    // lsu address down the pipe</span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">       19050 :    output logic [31:0]        lsu_addr_d,</span></span>
+<span id="L72"><span class="lineNum">      72</span> <span class="tlaGNC">       19050 :    output logic [31:0]        lsu_addr_m,</span></span>
+<span id="L73"><span class="lineNum">      73</span> <span class="tlaGNC">       19050 :    output logic [31:0]        lsu_addr_r,</span></span>
+<span id="L74"><span class="lineNum">      74</span>              :    // lsu address down the pipe - needed to check unaligned</span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">       19050 :    output logic [31:0]        end_addr_d,</span></span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">       19050 :    output logic [31:0]        end_addr_m,</span></span>
+<span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC">       19050 :    output logic [31:0]        end_addr_r,</span></span>
+<span id="L78"><span class="lineNum">      78</span>              :    // store data down the pipe</span>
+<span id="L79"><span class="lineNum">      79</span> <span class="tlaGNC">        2824 :    output logic [31:0]        store_data_m,</span></span>
+<span id="L80"><span class="lineNum">      80</span>              : </span>
+<span id="L81"><span class="lineNum">      81</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic [31:0]         dec_tlu_mrac_ff,          // CSR for memory region control</span></span>
+<span id="L82"><span class="lineNum">      82</span> <span class="tlaUNC">           0 :    output logic                lsu_exc_m,                // Access or misaligned fault</span></span>
+<span id="L83"><span class="lineNum">      83</span> <span class="tlaUNC">           0 :    output logic                is_sideeffects_m,         // is sideffects space</span></span>
+<span id="L84"><span class="lineNum">      84</span> <span class="tlaGNC tlaBgGNC">       38980 :    output logic                lsu_commit_r,             // lsu instruction in r commits</span></span>
+<span id="L85"><span class="lineNum">      85</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic                lsu_single_ecc_error_incr,// LSU inc SB error counter</span></span>
+<span id="L86"><span class="lineNum">      86</span> <span class="tlaUNC">           0 :    output el2_lsu_error_pkt_t lsu_error_pkt_r,          // lsu exception packet</span></span>
+<span id="L87"><span class="lineNum">      87</span>              : </span>
+<span id="L88"><span class="lineNum">      88</span> <span class="tlaUNC">           0 :    output logic [31:1]         lsu_fir_addr,             // fast interrupt address</span></span>
+<span id="L89"><span class="lineNum">      89</span> <span class="tlaUNC">           0 :    output logic [1:0]          lsu_fir_error,            // Error during fast interrupt lookup</span></span>
+<span id="L90"><span class="lineNum">      90</span>              : </span>
+<span id="L91"><span class="lineNum">      91</span>              :    // address in dccm/pic/external per pipe stage</span>
+<span id="L92"><span class="lineNum">      92</span> <span class="tlaUNC">           0 :    output logic               addr_in_dccm_d,</span></span>
+<span id="L93"><span class="lineNum">      93</span> <span class="tlaUNC">           0 :    output logic               addr_in_dccm_m,</span></span>
+<span id="L94"><span class="lineNum">      94</span> <span class="tlaUNC">           0 :    output logic               addr_in_dccm_r,</span></span>
+<span id="L95"><span class="lineNum">      95</span>              : </span>
+<span id="L96"><span class="lineNum">      96</span> <span class="tlaUNC">           0 :    output logic               addr_in_pic_d,</span></span>
+<span id="L97"><span class="lineNum">      97</span> <span class="tlaUNC">           0 :    output logic               addr_in_pic_m,</span></span>
+<span id="L98"><span class="lineNum">      98</span> <span class="tlaUNC">           0 :    output logic               addr_in_pic_r,</span></span>
+<span id="L99"><span class="lineNum">      99</span>              : </span>
+<span id="L100"><span class="lineNum">     100</span> <span class="tlaGNC tlaBgGNC">           3 :    output logic               addr_external_m,</span></span>
+<span id="L101"><span class="lineNum">     101</span>              : </span>
+<span id="L102"><span class="lineNum">     102</span>              :    // DMA slave</span>
+<span id="L103"><span class="lineNum">     103</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                dma_dccm_req,</span></span>
+<span id="L104"><span class="lineNum">     104</span> <span class="tlaUNC">           0 :    input logic [31:0]         dma_mem_addr,</span></span>
+<span id="L105"><span class="lineNum">     105</span> <span class="tlaUNC">           0 :    input logic [2:0]          dma_mem_sz,</span></span>
+<span id="L106"><span class="lineNum">     106</span> <span class="tlaUNC">           0 :    input logic                dma_mem_write,</span></span>
+<span id="L107"><span class="lineNum">     107</span> <span class="tlaUNC">           0 :    input logic [63:0]         dma_mem_wdata,</span></span>
+<span id="L108"><span class="lineNum">     108</span>              : </span>
+<span id="L109"><span class="lineNum">     109</span>              :    // Store buffer related signals</span>
+<span id="L110"><span class="lineNum">     110</span> <span class="tlaGNC tlaBgGNC">        2727 :    output el2_lsu_pkt_t      lsu_pkt_d,</span></span>
+<span id="L111"><span class="lineNum">     111</span> <span class="tlaGNC">        2726 :    output el2_lsu_pkt_t      lsu_pkt_m,</span></span>
+<span id="L112"><span class="lineNum">     112</span> <span class="tlaGNC">        2726 :    output el2_lsu_pkt_t      lsu_pkt_r,</span></span>
+<span id="L113"><span class="lineNum">     113</span>              : </span>
+<span id="L114"><span class="lineNum">     114</span> <span class="tlaUNC tlaBgUNC">           0 :     input logic lsu_pmp_error_start,</span></span>
+<span id="L115"><span class="lineNum">     115</span> <span class="tlaUNC">           0 :     input logic lsu_pmp_error_end,</span></span>
+<span id="L116"><span class="lineNum">     116</span>              : </span>
+<span id="L117"><span class="lineNum">     117</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
+<span id="L118"><span class="lineNum">     118</span>              :    /*verilator coverage_off*/</span>
+<span id="L119"><span class="lineNum">     119</span>              :    input  logic               scan_mode                  // Scan mode</span>
+<span id="L120"><span class="lineNum">     120</span>              :    /*verilator coverage_on*/</span>
+<span id="L121"><span class="lineNum">     121</span>              : </span>
+<span id="L122"><span class="lineNum">     122</span>              :    );</span>
+<span id="L123"><span class="lineNum">     123</span>              : </span>
+<span id="L124"><span class="lineNum">     124</span> <span class="tlaUNC">           0 :    logic [31:3]        end_addr_pre_m, end_addr_pre_r;</span></span>
+<span id="L125"><span class="lineNum">     125</span> <span class="tlaGNC tlaBgGNC">       19050 :    logic [31:0]        full_addr_d;</span></span>
+<span id="L126"><span class="lineNum">     126</span> <span class="tlaGNC">       19050 :    logic [31:0]        full_end_addr_d;</span></span>
+<span id="L127"><span class="lineNum">     127</span> <span class="tlaGNC">        6561 :    logic [31:0]        lsu_rs1_d;</span></span>
+<span id="L128"><span class="lineNum">     128</span> <span class="tlaGNC">       19062 :    logic [11:0]        lsu_offset_d;</span></span>
+<span id="L129"><span class="lineNum">     129</span> <span class="tlaGNC">        6561 :    logic [31:0]        rs1_d;</span></span>
+<span id="L130"><span class="lineNum">     130</span> <span class="tlaGNC">       19062 :    logic [11:0]        offset_d;</span></span>
+<span id="L131"><span class="lineNum">     131</span> <span class="tlaGNC">       18998 :    logic [12:0]        end_addr_offset_d;</span></span>
+<span id="L132"><span class="lineNum">     132</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [2:0]         addr_offset_d;</span></span>
+<span id="L133"><span class="lineNum">     133</span>              : </span>
+<span id="L134"><span class="lineNum">     134</span> <span class="tlaUNC">           0 :    logic [63:0]        dma_mem_wdata_shifted;</span></span>
+<span id="L135"><span class="lineNum">     135</span> <span class="tlaGNC tlaBgGNC">           3 :    logic               addr_external_d;</span></span>
+<span id="L136"><span class="lineNum">     136</span> <span class="tlaGNC">           3 :    logic               addr_external_r;</span></span>
+<span id="L137"><span class="lineNum">     137</span> <span class="tlaUNC tlaBgUNC">           0 :    logic               access_fault_d, misaligned_fault_d;</span></span>
+<span id="L138"><span class="lineNum">     138</span> <span class="tlaUNC">           0 :    logic               access_fault_m, misaligned_fault_m;</span></span>
+<span id="L139"><span class="lineNum">     139</span>              : </span>
+<span id="L140"><span class="lineNum">     140</span> <span class="tlaUNC">           0 :    logic               fir_dccm_access_error_d, fir_nondccm_access_error_d;</span></span>
+<span id="L141"><span class="lineNum">     141</span> <span class="tlaUNC">           0 :    logic               fir_dccm_access_error_m, fir_nondccm_access_error_m;</span></span>
+<span id="L142"><span class="lineNum">     142</span>              : </span>
+<span id="L143"><span class="lineNum">     143</span> <span class="tlaUNC">           0 :    logic [3:0]         exc_mscause_d, exc_mscause_m;</span></span>
+<span id="L144"><span class="lineNum">     144</span> <span class="tlaGNC tlaBgGNC">        6561 :    logic [31:0]        rs1_d_raw;</span></span>
+<span id="L145"><span class="lineNum">     145</span> <span class="tlaGNC">        2824 :    logic [31:0]        store_data_d, store_data_pre_m, store_data_m_in;</span></span>
+<span id="L146"><span class="lineNum">     146</span> <span class="tlaGNC">           2 :    logic [31:0]        bus_read_data_r;</span></span>
+<span id="L147"><span class="lineNum">     147</span>              : </span>
+<span id="L148"><span class="lineNum">     148</span> <span class="tlaUNC tlaBgUNC">           0 :    el2_lsu_pkt_t           dma_pkt_d;</span></span>
+<span id="L149"><span class="lineNum">     149</span> <span class="tlaGNC tlaBgGNC">        2726 :    el2_lsu_pkt_t           lsu_pkt_m_in, lsu_pkt_r_in;</span></span>
+<span id="L150"><span class="lineNum">     150</span> <span class="tlaUNC tlaBgUNC">           0 :    el2_lsu_error_pkt_t     lsu_error_pkt_m;</span></span>
+<span id="L151"><span class="lineNum">     151</span>              : </span>
+<span id="L152"><span class="lineNum">     152</span>              : </span>
+<span id="L153"><span class="lineNum">     153</span>              :    // Premux the rs1/offset for dma</span>
+<span id="L154"><span class="lineNum">     154</span>              :    assign lsu_rs1_d[31:0]    = dec_lsu_valid_raw_d ? exu_lsu_rs1_d[31:0] : dma_mem_addr[31:0];</span>
+<span id="L155"><span class="lineNum">     155</span>              :    assign lsu_offset_d[11:0] = dec_lsu_offset_d[11:0] &amp; {12{dec_lsu_valid_raw_d}};</span>
+<span id="L156"><span class="lineNum">     156</span>              :    assign rs1_d_raw[31:0]    = lsu_rs1_d[31:0];</span>
+<span id="L157"><span class="lineNum">     157</span>              :    assign offset_d[11:0]     = lsu_offset_d[11:0];</span>
+<span id="L158"><span class="lineNum">     158</span>              : </span>
+<span id="L159"><span class="lineNum">     159</span>              :    assign rs1_d[31:0] = (lsu_pkt_d.load_ldst_bypass_d) ? lsu_result_m[31:0] : rs1_d_raw[31:0];</span>
+<span id="L160"><span class="lineNum">     160</span>              : </span>
+<span id="L161"><span class="lineNum">     161</span>              :    // generate the ls address</span>
+<span id="L162"><span class="lineNum">     162</span>              :    rvlsadder   lsadder  (.rs1(rs1_d[31:0]),</span>
+<span id="L163"><span class="lineNum">     163</span>              :                        .offset(offset_d[11:0]),</span>
+<span id="L164"><span class="lineNum">     164</span>              :                        .dout(full_addr_d[31:0])</span>
+<span id="L165"><span class="lineNum">     165</span>              :                        );</span>
+<span id="L166"><span class="lineNum">     166</span>              : </span>
+<span id="L167"><span class="lineNum">     167</span>              :    // Module to generate the memory map of the address</span>
+<span id="L168"><span class="lineNum">     168</span>              :    el2_lsu_addrcheck addrcheck (</span>
+<span id="L169"><span class="lineNum">     169</span>              :               .start_addr_d(full_addr_d[31:0]),</span>
+<span id="L170"><span class="lineNum">     170</span>              :               .end_addr_d(full_end_addr_d[31:0]),</span>
+<span id="L171"><span class="lineNum">     171</span>              :               .rs1_region_d(rs1_d[31:28]),</span>
+<span id="L172"><span class="lineNum">     172</span>              :               .*</span>
+<span id="L173"><span class="lineNum">     173</span>              :   );</span>
+<span id="L174"><span class="lineNum">     174</span>              : </span>
+<span id="L175"><span class="lineNum">     175</span>              :    // Calculate start/end address for load/store</span>
+<span id="L176"><span class="lineNum">     176</span>              :    assign addr_offset_d[2:0]      = ({3{lsu_pkt_d.half}} &amp; 3'b01) | ({3{lsu_pkt_d.word}} &amp; 3'b11) | ({3{lsu_pkt_d.dword}} &amp; 3'b111);</span>
+<span id="L177"><span class="lineNum">     177</span>              :    assign end_addr_offset_d[12:0] = {offset_d[11],offset_d[11:0]} + {9'b0,addr_offset_d[2:0]};</span>
+<span id="L178"><span class="lineNum">     178</span>              :    assign full_end_addr_d[31:0]   = rs1_d[31:0] + {{19{end_addr_offset_d[12]}},end_addr_offset_d[12:0]};</span>
+<span id="L179"><span class="lineNum">     179</span>              :    assign end_addr_d[31:0]        = full_end_addr_d[31:0];</span>
+<span id="L180"><span class="lineNum">     180</span>              :    assign lsu_exc_m               = access_fault_m | misaligned_fault_m;</span>
+<span id="L181"><span class="lineNum">     181</span>              : </span>
+<span id="L182"><span class="lineNum">     182</span>              :    // Goes to TLU to increment the ECC error counter</span>
+<span id="L183"><span class="lineNum">     183</span>              :    assign lsu_single_ecc_error_incr = (lsu_single_ecc_error_r &amp; ~lsu_double_ecc_error_r) &amp; (lsu_commit_r | lsu_pkt_r.dma) &amp; lsu_pkt_r.valid;</span>
+<span id="L184"><span class="lineNum">     184</span>              : </span>
+<span id="L185"><span class="lineNum">     185</span>              :    if (pt.LOAD_TO_USE_PLUS1 == 1) begin: L2U_Plus1_1</span>
+<span id="L186"><span class="lineNum">     186</span>              :       logic               access_fault_r, misaligned_fault_r;</span>
+<span id="L187"><span class="lineNum">     187</span>              :       logic [3:0]         exc_mscause_r;</span>
+<span id="L188"><span class="lineNum">     188</span>              :       logic               fir_dccm_access_error_r, fir_nondccm_access_error_r;</span>
+<span id="L189"><span class="lineNum">     189</span>              : </span>
+<span id="L190"><span class="lineNum">     190</span>              :       // Generate exception packet</span>
+<span id="L191"><span class="lineNum">     191</span>              :       assign lsu_error_pkt_r.exc_valid = (access_fault_r | misaligned_fault_r | lsu_double_ecc_error_r) &amp; lsu_pkt_r.valid &amp; ~lsu_pkt_r.dma &amp; ~lsu_pkt_r.fast_int;</span>
+<span id="L192"><span class="lineNum">     192</span>              :       assign lsu_error_pkt_r.single_ecc_error = lsu_single_ecc_error_r &amp; ~lsu_error_pkt_r.exc_valid &amp; ~lsu_pkt_r.dma;</span>
+<span id="L193"><span class="lineNum">     193</span>              :       assign lsu_error_pkt_r.inst_type = lsu_pkt_r.store;</span>
+<span id="L194"><span class="lineNum">     194</span>              :       assign lsu_error_pkt_r.exc_type  = ~misaligned_fault_r;</span>
+<span id="L195"><span class="lineNum">     195</span>              :       assign lsu_error_pkt_r.mscause[3:0] = (lsu_double_ecc_error_r &amp; ~misaligned_fault_r &amp; ~access_fault_r) ? 4'h1 : exc_mscause_r[3:0];</span>
+<span id="L196"><span class="lineNum">     196</span>              :       assign lsu_error_pkt_r.addr[31:0] = lsu_addr_r[31:0];</span>
+<span id="L197"><span class="lineNum">     197</span>              : </span>
+<span id="L198"><span class="lineNum">     198</span>              :       assign lsu_fir_error[1:0] = fir_nondccm_access_error_r ? 2'b11 : (fir_dccm_access_error_r ? 2'b10 : ((lsu_pkt_r.fast_int &amp; lsu_double_ecc_error_r) ? 2'b01 : 2'b00));</span>
+<span id="L199"><span class="lineNum">     199</span>              : </span>
+<span id="L200"><span class="lineNum">     200</span>              :       rvdff #(1) access_fault_rff             (.din(access_fault_m),             .dout(access_fault_r),             .clk(lsu_c1_r_clk), .*);</span>
+<span id="L201"><span class="lineNum">     201</span>              :       rvdff #(1) misaligned_fault_rff         (.din(misaligned_fault_m),         .dout(misaligned_fault_r),         .clk(lsu_c1_r_clk), .*);</span>
+<span id="L202"><span class="lineNum">     202</span>              :       rvdff #(4) exc_mscause_rff              (.din(exc_mscause_m[3:0]),         .dout(exc_mscause_r[3:0]),         .clk(lsu_c1_r_clk), .*);</span>
+<span id="L203"><span class="lineNum">     203</span>              :       rvdff #(1) fir_dccm_access_error_mff    (.din(fir_dccm_access_error_m),    .dout(fir_dccm_access_error_r),    .clk(lsu_c1_r_clk), .*);</span>
+<span id="L204"><span class="lineNum">     204</span>              :       rvdff #(1) fir_nondccm_access_error_mff (.din(fir_nondccm_access_error_m), .dout(fir_nondccm_access_error_r), .clk(lsu_c1_r_clk), .*);</span>
+<span id="L205"><span class="lineNum">     205</span>              : </span>
+<span id="L206"><span class="lineNum">     206</span>              :    end else begin: L2U_Plus1_0</span>
+<span id="L207"><span class="lineNum">     207</span>              :       logic [1:0] lsu_fir_error_m;</span>
+<span id="L208"><span class="lineNum">     208</span>              : </span>
+<span id="L209"><span class="lineNum">     209</span>              :       // Generate exception packet</span>
+<span id="L210"><span class="lineNum">     210</span>              :       assign lsu_error_pkt_m.exc_valid = (access_fault_m | misaligned_fault_m | lsu_double_ecc_error_m) &amp; lsu_pkt_m.valid &amp; ~lsu_pkt_m.dma &amp; ~lsu_pkt_m.fast_int &amp; ~flush_m_up;</span>
+<span id="L211"><span class="lineNum">     211</span>              :       assign lsu_error_pkt_m.single_ecc_error = lsu_single_ecc_error_m &amp; ~lsu_error_pkt_m.exc_valid &amp; ~lsu_pkt_m.dma;</span>
+<span id="L212"><span class="lineNum">     212</span>              :       assign lsu_error_pkt_m.inst_type = lsu_pkt_m.store;</span>
+<span id="L213"><span class="lineNum">     213</span>              :       assign lsu_error_pkt_m.exc_type  = ~misaligned_fault_m;</span>
+<span id="L214"><span class="lineNum">     214</span>              :       assign lsu_error_pkt_m.mscause[3:0] = (lsu_double_ecc_error_m &amp; ~misaligned_fault_m &amp; ~access_fault_m) ? 4'h1 : exc_mscause_m[3:0];</span>
+<span id="L215"><span class="lineNum">     215</span>              :       assign lsu_error_pkt_m.addr[31:0] = lsu_addr_m[31:0];</span>
+<span id="L216"><span class="lineNum">     216</span>              : </span>
+<span id="L217"><span class="lineNum">     217</span>              :       assign lsu_fir_error_m[1:0] = fir_nondccm_access_error_m ? 2'b11 : (fir_dccm_access_error_m ? 2'b10 : ((lsu_pkt_m.fast_int &amp; lsu_double_ecc_error_m) ? 2'b01 : 2'b00));</span>
+<span id="L218"><span class="lineNum">     218</span>              : </span>
+<span id="L219"><span class="lineNum">     219</span>              :       rvdff  #(1)                             lsu_exc_valid_rff       (.*, .din(lsu_error_pkt_m.exc_valid),                        .dout(lsu_error_pkt_r.exc_valid),                        .clk(lsu_c2_r_clk));</span>
+<span id="L220"><span class="lineNum">     220</span>              :       rvdff  #(1)                             lsu_single_ecc_error_rff(.*, .din(lsu_error_pkt_m.single_ecc_error),                 .dout(lsu_error_pkt_r.single_ecc_error),                 .clk(lsu_c2_r_clk));</span>
+<span id="L221"><span class="lineNum">     221</span>              :       rvdffe #($bits(el2_lsu_error_pkt_t)-2) lsu_error_pkt_rff       (.*, .din(lsu_error_pkt_m[$bits(el2_lsu_error_pkt_t)-1:2]), .dout(lsu_error_pkt_r[$bits(el2_lsu_error_pkt_t)-1:2]), .en(lsu_error_pkt_m.exc_valid | lsu_error_pkt_m.single_ecc_error | clk_override));</span>
+<span id="L222"><span class="lineNum">     222</span>              :       rvdff #(2)                              lsu_fir_error_rff       (.*, .din(lsu_fir_error_m[1:0]),                             .dout(lsu_fir_error[1:0]),                               .clk(lsu_c2_r_clk));</span>
+<span id="L223"><span class="lineNum">     223</span>              :    end</span>
+<span id="L224"><span class="lineNum">     224</span>              : </span>
+<span id="L225"><span class="lineNum">     225</span>              :    //Create DMA packet</span>
+<span id="L226"><span class="lineNum">     226</span> <span class="tlaGNC tlaBgGNC">           3 :    always_comb begin</span></span>
+<span id="L227"><span class="lineNum">     227</span> <span class="tlaGNC">           3 :       dma_pkt_d = '0;</span></span>
+<span id="L228"><span class="lineNum">     228</span> <span class="tlaGNC">           3 :       dma_pkt_d.valid   = dma_dccm_req;</span></span>
+<span id="L229"><span class="lineNum">     229</span> <span class="tlaGNC">           3 :       dma_pkt_d.dma     = 1'b1;</span></span>
+<span id="L230"><span class="lineNum">     230</span> <span class="tlaGNC">           3 :       dma_pkt_d.store   = dma_mem_write;</span></span>
+<span id="L231"><span class="lineNum">     231</span> <span class="tlaGNC">           3 :       dma_pkt_d.load    = ~dma_mem_write;</span></span>
+<span id="L232"><span class="lineNum">     232</span> <span class="tlaGNC">           3 :       dma_pkt_d.by      = (dma_mem_sz[2:0] == 3'b0);</span></span>
+<span id="L233"><span class="lineNum">     233</span> <span class="tlaGNC">           3 :       dma_pkt_d.half    = (dma_mem_sz[2:0] == 3'b1);</span></span>
+<span id="L234"><span class="lineNum">     234</span> <span class="tlaGNC">           3 :       dma_pkt_d.word    = (dma_mem_sz[2:0] == 3'b10);</span></span>
+<span id="L235"><span class="lineNum">     235</span> <span class="tlaGNC">           3 :       dma_pkt_d.dword   = (dma_mem_sz[2:0] == 3'b11);</span></span>
+<span id="L236"><span class="lineNum">     236</span>              :    end</span>
+<span id="L237"><span class="lineNum">     237</span>              : </span>
+<span id="L238"><span class="lineNum">     238</span> <span class="tlaGNC">           3 :    always_comb begin</span></span>
+<span id="L239"><span class="lineNum">     239</span> <span class="tlaGNC">           3 :       lsu_pkt_d = dec_lsu_valid_raw_d ? lsu_p : dma_pkt_d;</span></span>
+<span id="L240"><span class="lineNum">     240</span> <span class="tlaGNC">           3 :       lsu_pkt_m_in = lsu_pkt_d;</span></span>
+<span id="L241"><span class="lineNum">     241</span> <span class="tlaGNC">           3 :       lsu_pkt_r_in = lsu_pkt_m;</span></span>
+<span id="L242"><span class="lineNum">     242</span>              : </span>
+<span id="L243"><span class="lineNum">     243</span> <span class="tlaGNC">           3 :       lsu_pkt_d.valid = (lsu_p.valid &amp; ~(flush_m_up &amp; ~lsu_p.fast_int)) | dma_dccm_req;</span></span>
+<span id="L244"><span class="lineNum">     244</span> <span class="tlaGNC">           3 :       lsu_pkt_m_in.valid = lsu_pkt_d.valid &amp; ~(flush_m_up &amp; ~lsu_pkt_d.dma);</span></span>
+<span id="L245"><span class="lineNum">     245</span> <span class="tlaGNC">           3 :       lsu_pkt_r_in.valid = lsu_pkt_m.valid &amp; ~(flush_m_up &amp; ~lsu_pkt_m.dma) ;</span></span>
+<span id="L246"><span class="lineNum">     246</span>              :    end</span>
+<span id="L247"><span class="lineNum">     247</span>              : </span>
+<span id="L248"><span class="lineNum">     248</span>              :    // C2 clock for valid and C1 for other bits of packet</span>
+<span id="L249"><span class="lineNum">     249</span>              :    rvdff #(1) lsu_pkt_vldmff (.*, .din(lsu_pkt_m_in.valid), .dout(lsu_pkt_m.valid), .clk(lsu_c2_m_clk));</span>
+<span id="L250"><span class="lineNum">     250</span>              :    rvdff #(1) lsu_pkt_vldrff (.*, .din(lsu_pkt_r_in.valid), .dout(lsu_pkt_r.valid), .clk(lsu_c2_r_clk));</span>
+<span id="L251"><span class="lineNum">     251</span>              : </span>
+<span id="L252"><span class="lineNum">     252</span>              :    rvdff #($bits(el2_lsu_pkt_t)-1) lsu_pkt_mff (.*, .din(lsu_pkt_m_in[$bits(el2_lsu_pkt_t)-1:1]), .dout(lsu_pkt_m[$bits(el2_lsu_pkt_t)-1:1]), .clk(lsu_c1_m_clk));</span>
+<span id="L253"><span class="lineNum">     253</span>              :    rvdff #($bits(el2_lsu_pkt_t)-1) lsu_pkt_rff (.*, .din(lsu_pkt_r_in[$bits(el2_lsu_pkt_t)-1:1]), .dout(lsu_pkt_r[$bits(el2_lsu_pkt_t)-1:1]), .clk(lsu_c1_r_clk));</span>
+<span id="L254"><span class="lineNum">     254</span>              : </span>
+<span id="L255"><span class="lineNum">     255</span>              : </span>
+<span id="L256"><span class="lineNum">     256</span>              : </span>
+<span id="L257"><span class="lineNum">     257</span>              :    if (pt.LOAD_TO_USE_PLUS1 == 1) begin: L2U1_Plus1_1</span>
+<span id="L258"><span class="lineNum">     258</span>              :       logic [31:0] lsu_ld_datafn_r, lsu_ld_datafn_corr_r;</span>
+<span id="L259"><span class="lineNum">     259</span>              : </span>
+<span id="L260"><span class="lineNum">     260</span>              :       assign lsu_ld_datafn_r[31:0]  = addr_external_r ? bus_read_data_r[31:0] : lsu_ld_data_r[31:0];</span>
+<span id="L261"><span class="lineNum">     261</span>              :       assign lsu_ld_datafn_corr_r[31:0]  = addr_external_r ? bus_read_data_r[31:0] : lsu_ld_data_corr_r[31:0];</span>
+<span id="L262"><span class="lineNum">     262</span>              : </span>
+<span id="L263"><span class="lineNum">     263</span>              :       // this is really R stage signal</span>
+<span id="L264"><span class="lineNum">     264</span>              :       assign lsu_result_m[31:0] = ({32{ lsu_pkt_r.unsign &amp; lsu_pkt_r.by  }} &amp; {24'b0,lsu_ld_datafn_r[7:0]}) |</span>
+<span id="L265"><span class="lineNum">     265</span>              :                                                                     ({32{ lsu_pkt_r.unsign &amp; lsu_pkt_r.half}} &amp; {16'b0,lsu_ld_datafn_r[15:0]}) |</span>
+<span id="L266"><span class="lineNum">     266</span>              :                                                                     ({32{~lsu_pkt_r.unsign &amp; lsu_pkt_r.by  }} &amp; {{24{  lsu_ld_datafn_r[7]}}, lsu_ld_datafn_r[7:0]}) |</span>
+<span id="L267"><span class="lineNum">     267</span>              :                                                                     ({32{~lsu_pkt_r.unsign &amp; lsu_pkt_r.half}} &amp; {{16{  lsu_ld_datafn_r[15]}},lsu_ld_datafn_r[15:0]}) |</span>
+<span id="L268"><span class="lineNum">     268</span>              :                                                                     ({32{lsu_pkt_r.word}}                     &amp; lsu_ld_datafn_r[31:0]);</span>
+<span id="L269"><span class="lineNum">     269</span>              : </span>
+<span id="L270"><span class="lineNum">     270</span>              :       // this signal is used for gpr update</span>
+<span id="L271"><span class="lineNum">     271</span>              :       assign lsu_result_corr_r[31:0] = ({32{ lsu_pkt_r.unsign &amp; lsu_pkt_r.by  }} &amp; {24'b0,lsu_ld_datafn_corr_r[7:0]}) |</span>
+<span id="L272"><span class="lineNum">     272</span>              :                                                                               ({32{ lsu_pkt_r.unsign &amp; lsu_pkt_r.half}} &amp; {16'b0,lsu_ld_datafn_corr_r[15:0]}) |</span>
+<span id="L273"><span class="lineNum">     273</span>              :                                                                               ({32{~lsu_pkt_r.unsign &amp; lsu_pkt_r.by  }} &amp; {{24{  lsu_ld_datafn_corr_r[7]}}, lsu_ld_datafn_corr_r[7:0]}) |</span>
+<span id="L274"><span class="lineNum">     274</span>              :                                                                               ({32{~lsu_pkt_r.unsign &amp; lsu_pkt_r.half}} &amp; {{16{  lsu_ld_datafn_corr_r[15]}},lsu_ld_datafn_corr_r[15:0]}) |</span>
+<span id="L275"><span class="lineNum">     275</span>              :                                                                               ({32{lsu_pkt_r.word}}                     &amp; lsu_ld_datafn_corr_r[31:0]);</span>
+<span id="L276"><span class="lineNum">     276</span>              : </span>
+<span id="L277"><span class="lineNum">     277</span>              :    end else begin: L2U1_Plus1_0 // block: L2U1_Plus1_1</span>
+<span id="L278"><span class="lineNum">     278</span>              :       logic [31:0] lsu_ld_datafn_m, lsu_ld_datafn_corr_r;</span>
+<span id="L279"><span class="lineNum">     279</span>              : </span>
+<span id="L280"><span class="lineNum">     280</span>              :       assign lsu_ld_datafn_m[31:0] = addr_external_m ? bus_read_data_m[31:0] : lsu_ld_data_m[31:0];</span>
+<span id="L281"><span class="lineNum">     281</span>              :       assign lsu_ld_datafn_corr_r[31:0] = addr_external_r ? bus_read_data_r[31:0] : lsu_ld_data_corr_r[31:0];</span>
+<span id="L282"><span class="lineNum">     282</span>              : </span>
+<span id="L283"><span class="lineNum">     283</span>              :       // this result must look at prior stores and merge them in</span>
+<span id="L284"><span class="lineNum">     284</span>              :       assign lsu_result_m[31:0] = ({32{ lsu_pkt_m.unsign &amp; lsu_pkt_m.by  }} &amp; {24'b0,lsu_ld_datafn_m[7:0]}) |</span>
+<span id="L285"><span class="lineNum">     285</span>              :                                                                     ({32{ lsu_pkt_m.unsign &amp; lsu_pkt_m.half}} &amp; {16'b0,lsu_ld_datafn_m[15:0]}) |</span>
+<span id="L286"><span class="lineNum">     286</span>              :                                                                     ({32{~lsu_pkt_m.unsign &amp; lsu_pkt_m.by  }} &amp; {{24{  lsu_ld_datafn_m[7]}}, lsu_ld_datafn_m[7:0]}) |</span>
+<span id="L287"><span class="lineNum">     287</span>              :                                                                     ({32{~lsu_pkt_m.unsign &amp; lsu_pkt_m.half}} &amp; {{16{  lsu_ld_datafn_m[15]}},lsu_ld_datafn_m[15:0]}) |</span>
+<span id="L288"><span class="lineNum">     288</span>              :                                                                     ({32{lsu_pkt_m.word}}                     &amp; lsu_ld_datafn_m[31:0]);</span>
+<span id="L289"><span class="lineNum">     289</span>              : </span>
+<span id="L290"><span class="lineNum">     290</span>              :       // this signal is used for gpr update</span>
+<span id="L291"><span class="lineNum">     291</span>              :       assign lsu_result_corr_r[31:0] = ({32{ lsu_pkt_r.unsign &amp; lsu_pkt_r.by  }} &amp; {24'b0,lsu_ld_datafn_corr_r[7:0]}) |</span>
+<span id="L292"><span class="lineNum">     292</span>              :                                                                               ({32{ lsu_pkt_r.unsign &amp; lsu_pkt_r.half}} &amp; {16'b0,lsu_ld_datafn_corr_r[15:0]}) |</span>
+<span id="L293"><span class="lineNum">     293</span>              :                                                                               ({32{~lsu_pkt_r.unsign &amp; lsu_pkt_r.by  }} &amp; {{24{  lsu_ld_datafn_corr_r[7]}}, lsu_ld_datafn_corr_r[7:0]}) |</span>
+<span id="L294"><span class="lineNum">     294</span>              :                                                                               ({32{~lsu_pkt_r.unsign &amp; lsu_pkt_r.half}} &amp; {{16{  lsu_ld_datafn_corr_r[15]}},lsu_ld_datafn_corr_r[15:0]}) |</span>
+<span id="L295"><span class="lineNum">     295</span>              :                                                                               ({32{lsu_pkt_r.word}}                     &amp; lsu_ld_datafn_corr_r[31:0]);</span>
+<span id="L296"><span class="lineNum">     296</span>              :    end</span>
+<span id="L297"><span class="lineNum">     297</span>              : </span>
+<span id="L298"><span class="lineNum">     298</span>              :    // Fast interrupt address</span>
+<span id="L299"><span class="lineNum">     299</span>              :    assign lsu_fir_addr[31:1]    = lsu_ld_data_corr_r[31:1];</span>
+<span id="L300"><span class="lineNum">     300</span>              : </span>
+<span id="L301"><span class="lineNum">     301</span>              :    // absence load/store all 0's</span>
+<span id="L302"><span class="lineNum">     302</span>              :    assign lsu_addr_d[31:0] = full_addr_d[31:0];</span>
+<span id="L303"><span class="lineNum">     303</span>              : </span>
+<span id="L304"><span class="lineNum">     304</span>              :    // Interrupt as a flush source allows the WB to occur</span>
+<span id="L305"><span class="lineNum">     305</span>              :    assign lsu_commit_r = lsu_pkt_r.valid &amp; (lsu_pkt_r.store | lsu_pkt_r.load) &amp; ~flush_r &amp; ~lsu_pkt_r.dma;</span>
+<span id="L306"><span class="lineNum">     306</span>              : </span>
+<span id="L307"><span class="lineNum">     307</span>              :    assign dma_mem_wdata_shifted[63:0] = 64'(dma_mem_wdata[63:0] &gt;&gt; {dma_mem_addr[2:0], 3'b000});   // Shift the dma data to lower bits to make it consistent to lsu stores</span>
+<span id="L308"><span class="lineNum">     308</span>              :    assign store_data_d[31:0] = dma_dccm_req ? dma_mem_wdata_shifted[31:0] : exu_lsu_rs2_d[31:0];  // Write to PIC still happens in r stage</span>
+<span id="L309"><span class="lineNum">     309</span>              : </span>
+<span id="L310"><span class="lineNum">     310</span>              :    assign store_data_m_in[31:0] = (lsu_pkt_d.store_data_bypass_d) ? lsu_result_m[31:0] : store_data_d[31:0];</span>
+<span id="L311"><span class="lineNum">     311</span>              : </span>
+<span id="L312"><span class="lineNum">     312</span>              :    assign store_data_m[31:0] = (picm_mask_data_m[31:0] | {32{~addr_in_pic_m}}) &amp; ((lsu_pkt_m.store_data_bypass_m) ? lsu_result_m[31:0] : store_data_pre_m[31:0]);</span>
+<span id="L313"><span class="lineNum">     313</span>              : </span>
+<span id="L314"><span class="lineNum">     314</span>              : </span>
+<span id="L315"><span class="lineNum">     315</span>              :    rvdff #(32)  sdmff (.*, .din(store_data_m_in[31:0]), .dout(store_data_pre_m[31:0]),                       .clk(lsu_store_c1_m_clk));</span>
+<span id="L316"><span class="lineNum">     316</span>              : </span>
+<span id="L317"><span class="lineNum">     317</span>              :    rvdff #(32) samff (.*, .din(lsu_addr_d[31:0]), .dout(lsu_addr_m[31:0]), .clk(lsu_c1_m_clk));</span>
+<span id="L318"><span class="lineNum">     318</span>              :    rvdff #(32) sarff (.*, .din(lsu_addr_m[31:0]), .dout(lsu_addr_r[31:0]), .clk(lsu_c1_r_clk));</span>
+<span id="L319"><span class="lineNum">     319</span>              : </span>
+<span id="L320"><span class="lineNum">     320</span>              :    assign end_addr_m[31:3] = ldst_dual_m ? end_addr_pre_m[31:3] : lsu_addr_m[31:3];       // This is for power saving</span>
+<span id="L321"><span class="lineNum">     321</span>              :    assign end_addr_r[31:3] = ldst_dual_r ? end_addr_pre_r[31:3] : lsu_addr_r[31:3];       // This is for power saving</span>
+<span id="L322"><span class="lineNum">     322</span>              : </span>
+<span id="L323"><span class="lineNum">     323</span>              :    rvdffe #(29) end_addr_hi_mff (.*, .din(end_addr_d[31:3]), .dout(end_addr_pre_m[31:3]), .en((lsu_pkt_d.valid &amp; ldst_dual_d) | clk_override));</span>
+<span id="L324"><span class="lineNum">     324</span>              :    rvdffe #(29) end_addr_hi_rff (.*, .din(end_addr_m[31:3]), .dout(end_addr_pre_r[31:3]), .en((lsu_pkt_m.valid &amp; ldst_dual_m) | clk_override));</span>
+<span id="L325"><span class="lineNum">     325</span>              : </span>
+<span id="L326"><span class="lineNum">     326</span>              :    rvdff #(3)  end_addr_lo_mff (.*, .din(end_addr_d[2:0]), .dout(end_addr_m[2:0]), .clk(lsu_c1_m_clk));</span>
+<span id="L327"><span class="lineNum">     327</span>              :    rvdff #(3)  end_addr_lo_rff (.*, .din(end_addr_m[2:0]), .dout(end_addr_r[2:0]), .clk(lsu_c1_r_clk));</span>
+<span id="L328"><span class="lineNum">     328</span>              : </span>
+<span id="L329"><span class="lineNum">     329</span>              :    rvdff #(1) addr_in_dccm_mff(.din(addr_in_dccm_d), .dout(addr_in_dccm_m), .clk(lsu_c1_m_clk), .*);</span>
+<span id="L330"><span class="lineNum">     330</span>              :    rvdff #(1) addr_in_dccm_rff(.din(addr_in_dccm_m), .dout(addr_in_dccm_r), .clk(lsu_c1_r_clk), .*);</span>
+<span id="L331"><span class="lineNum">     331</span>              : </span>
+<span id="L332"><span class="lineNum">     332</span>              :    rvdff #(1) addr_in_pic_mff(.din(addr_in_pic_d), .dout(addr_in_pic_m), .clk(lsu_c1_m_clk), .*);</span>
+<span id="L333"><span class="lineNum">     333</span>              :    rvdff #(1) addr_in_pic_rff(.din(addr_in_pic_m), .dout(addr_in_pic_r), .clk(lsu_c1_r_clk), .*);</span>
+<span id="L334"><span class="lineNum">     334</span>              : </span>
+<span id="L335"><span class="lineNum">     335</span>              :    rvdff #(1) addr_external_mff(.din(addr_external_d), .dout(addr_external_m), .clk(lsu_c1_m_clk), .*);</span>
+<span id="L336"><span class="lineNum">     336</span>              :    rvdff #(1) addr_external_rff(.din(addr_external_m), .dout(addr_external_r), .clk(lsu_c1_r_clk), .*);</span>
+<span id="L337"><span class="lineNum">     337</span>              : </span>
+<span id="L338"><span class="lineNum">     338</span>              :    rvdff #(1) access_fault_mff     (.din(access_fault_d),     .dout(access_fault_m),     .clk(lsu_c1_m_clk), .*);</span>
+<span id="L339"><span class="lineNum">     339</span>              :    rvdff #(1) misaligned_fault_mff (.din(misaligned_fault_d), .dout(misaligned_fault_m), .clk(lsu_c1_m_clk), .*);</span>
+<span id="L340"><span class="lineNum">     340</span>              :    rvdff #(4) exc_mscause_mff      (.din(exc_mscause_d[3:0]), .dout(exc_mscause_m[3:0]), .clk(lsu_c1_m_clk), .*);</span>
+<span id="L341"><span class="lineNum">     341</span>              : </span>
+<span id="L342"><span class="lineNum">     342</span>              :    rvdff #(1) fir_dccm_access_error_mff    (.din(fir_dccm_access_error_d),    .dout(fir_dccm_access_error_m),    .clk(lsu_c1_m_clk), .*);</span>
+<span id="L343"><span class="lineNum">     343</span>              :    rvdff #(1) fir_nondccm_access_error_mff (.din(fir_nondccm_access_error_d), .dout(fir_nondccm_access_error_m), .clk(lsu_c1_m_clk), .*);</span>
+<span id="L344"><span class="lineNum">     344</span>              : </span>
+<span id="L345"><span class="lineNum">     345</span>              :    rvdffe #(32) bus_read_data_r_ff (.*, .din(bus_read_data_m[31:0]), .dout(bus_read_data_r[31:0]), .en(addr_external_m | clk_override));</span>
+<span id="L346"><span class="lineNum">     346</span>              : </span>
+<span id="L347"><span class="lineNum">     347</span>              : endmodule</span>
+        </pre>
+</td>
+</tr>
+</table>
+
+</body>
+</html>

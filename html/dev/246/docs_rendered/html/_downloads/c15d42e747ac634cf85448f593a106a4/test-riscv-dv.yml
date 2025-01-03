@@ -1,0 +1,261 @@
+name: RISCV-DV tests
+
+on:
+  workflow_call:
+
+jobs:
+
+#--------------#
+#    Tests
+#--------------#
+  generate-config:
+    name: Generate configs
+    runs-on: ubuntu-latest
+    outputs:
+      test-types: ${{ steps.test-types.outputs.tests }}
+      test-include-generate: ${{ steps.test-types.outputs.include-generate }}
+      test-include-run: ${{ steps.test-types.outputs.include-run }}
+      hash: ${{ steps.hash.outputs.files-hash }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - id: test-types
+        run: |
+          python3 -m pip install pyyaml
+          echo "tests=$(python3 .github/scripts/riscv_dv_parse_testlist.py tools/riscv-dv/testlist.yaml)" | tee -a $GITHUB_OUTPUT
+          echo "include-generate=$(python3 .github/scripts/riscv_dv_matrix_include.py generate)" | tee -a $GITHUB_OUTPUT
+          echo "include-run=$(python3 .github/scripts/riscv_dv_matrix_include.py run)" | tee -a $GITHUB_OUTPUT
+      - id: hash
+        run: |
+          echo "files-hash=$(.github/scripts/get_code_hash.sh)" | tee -a $GITHUB_OUTPUT
+
+  generate-code:
+    name: Generate code for tests
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    needs: generate-config
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
+        version: [ uvm ]
+        include: ${{ fromJSON(needs.generate-config.outputs.test-include-generate) }}
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
+      CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Cache Code
+        uses: actions/cache@v3
+        id: cache-code
+        timeout-minutes: 60
+        with:
+          path: tools/riscv-dv/work/test_${{ matrix.test }}/asm_test
+          key: cache_${{ matrix.test }}_${{ matrix.version }}_${{ env.CACHE_HASH }}
+
+      - name: Prepare Environment
+        if: steps.cache-code.outputs.cache-hit != 'true'
+        run: _secret_prepare_env
+
+      - name: Generate code
+        id: riscv_dv_test
+        if: steps.cache-code.outputs.cache-hit != 'true' && matrix.version == 'uvm'
+        run: _secret_generate_code
+        env:
+          RISCV_DV_TEST: ${{ matrix.test }}
+        continue-on-error: true
+
+      - name: Generate code (pyflow)
+        if: steps.cache-code.outputs.cache-hit != 'true' && matrix.version == 'pyflow'
+        shell: bash
+        run: |
+          export RV_ROOT=`realpath .`
+          pushd tools/riscv-dv
+            make -j`nproc` \
+              RISCV_DV_TEST=${{ matrix.test }} \
+              RISCV_DV_ITER=3 \
+              RISCV_DV_SEED=999 \
+              generate
+          popd
+
+      - name: Use fallback code
+        if: steps.cache-code.outputs.cache-hit != 'true' && steps.riscv_dv_test.outcome != 'success'
+        run: |
+          mkdir -p tools/riscv-dv/work/
+          cp -r .github/assets/riscv_dv/${{ matrix.version  }}/* tools/riscv-dv/work/
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: riscv-dv_generated_code_${{ matrix.version }}
+          path: tools/riscv-dv/work/**/asm_test/*.S
+
+  run-tests:
+    name: Run RISC-V DV tests
+    runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:latest
+    needs: [ generate-config, generate-code ]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
+        iss:
+          - spike
+          - renode
+        coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
+        version: [ uvm ]
+        # TODO use separate privilege modes configurations for generating the VeeR model
+        priv: ["", "u"]
+        include: ${{ fromJSON(needs.generate-config.outputs.test-include-run) }}
+        exclude:
+            # Bitmanip tests are temporarily disabled in Renode
+            # until the extension implementation is complete
+            - iss: renode
+              test: riscv_bitmanip_full_test_veer
+            - iss: renode
+              test: riscv_bitmanip_balanced_test_veer
+            # Disable illegal instr test, until illegal instruction handling is improved
+            # since there remain few edge cases to be resolved here
+            - iss: renode
+              test: riscv_illegal_instr_test
+
+            - iss: renode
+              test: riscv_hint_instr_test
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/riscv-dv/.cache/"
+      CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
+
+    steps:
+      - name: Install utils
+        run: |
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+            git ccache device-tree-compiler python3-minimal python3-pip \
+            libboost-all-dev
+
+      # As of July 9th, 2024 `ubuntu:latest` comes with riscv64-unknown-elf-gcc
+      # 10.0.2. We need a newer version for bitmanip extension support.
+      - name: Install cross-compiler
+        shell: bash
+        run: |
+          echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+            gcc-riscv64-unknown-elf
+          riscv64-unknown-elf-gcc --version
+
+      - name: Setup repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: install SiteSpawner package
+        shell: bash
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python3 -m pip install tools/SiteSpawner
+          source .venv/bin/activate
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          python3 -m pip install tools/SiteSpawner
+
+      - name: Install Python deps
+        run: |
+          pip install -r third_party/riscv-dv/requirements.txt
+
+      - name: Download Code Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: riscv-dv_generated_code_${{ matrix.version }}
+          path: tools/riscv-dv/work/
+
+      - name: Run test
+        shell: bash
+        run: |
+          ls tools/riscv-dv/work
+          export PATH=/opt/verilator/bin:$PATH
+          export RV_ROOT=`realpath .`
+          export RISCV_GCC=riscv64-unknown-elf-gcc
+          export RISCV_OBJCOPY=riscv64-unknown-elf-objcopy
+          export RISCV_NM=riscv64-unknown-elf-nm
+          export SPIKE_PATH=/opt/spike/bin
+          export RENODE_PATH=/opt/renode/renode
+
+          echo "RV_ROOT=${RV_ROOT}" >> ${GITHUB_ENV}
+          echo "PATH=${PATH}"       >> ${GITHUB_ENV}
+
+          ${RISCV_GCC} --version
+
+          pushd tools/riscv-dv
+            # TODO use privilege mode from matrix,
+            # find a way to structure the files with `u` and `mu` properly
+            make -j`nproc` \
+              RISCV_DV_TEST=${{ matrix.test }} \
+              RISCV_DV_ISS=${{ matrix.iss }} \
+              RISCV_DV_ITER=3 \
+              RISCV_DV_SEED=999 \
+              COVERAGE=${{ matrix.coverage }} \
+              RISCV_DV_PRIV=${{ matrix.priv }} \
+              run
+          popd
+
+      - name: Prepare coverage data
+        run: |
+          sis -d convert --dat-dir ${RV_ROOT}/tools/riscv-dv/work/
+          mkdir -p results
+          mv ${RV_ROOT}/tools/riscv-dv/work/coverage.info \
+             results/coverage_riscv-dv_${{matrix.priv}}_${{ matrix.test }}_${{ matrix.coverage }}.info
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: riscv-dv_coverage_data
+          path: results/*.info
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts-${{matrix.priv}}_${{ matrix.test }}-${{ matrix.iss }}-${{ matrix.version }}
+          path: tools/riscv-dv/work/test_*
+
+  run-custom-tests:
+    name: Run custom RISC-V DV tests
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    if: github.ref == 'refs/heads/main'
+    needs: [ generate-config, generate-code ]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
+        coverage: ["all", "branch", "toggle"] #TODO: add functional coverage
+        version: [ uvm ]
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/riscv-dv/.cache/"
+      GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
+      CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Prepare Environment
+        run: _secret_prepare_env
+
+      - name: Install Python deps
+        run: |
+          pip3 install -r third_party/riscv-dv/requirements.txt
+
+      - name: Perform custom tests
+        run: _secret_custom_run
+        env:
+          RISCV_DV_TEST: ${{ matrix.test }}
+        continue-on-error: true

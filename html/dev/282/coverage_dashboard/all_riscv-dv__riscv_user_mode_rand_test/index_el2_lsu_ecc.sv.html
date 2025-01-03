@@ -1,0 +1,355 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>
+        Full
+        coverage report
+    </title>
+    <link rel="stylesheet" type="text/css" href="cov.css">
+    <style>
+        .container {
+            background-color: rgb(169, 169, 169);
+            width: 100%;
+            min-height: 80%;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <table class="title-header-shadow">
+        <td class="title-container">
+            <table class="title-header">
+                <td class="title-logo">
+                    <a href=index.html>
+                        <img src=_static/white.svg></img>
+                    </a>
+                </td>
+                <td class="title">
+                    Project
+                    Full
+                    coverage report
+                </td>
+            </table>
+        </td>
+    </table>
+    <center>
+        <table class="info-table">
+            <tr class="info-table-view">
+                <td width="10%" class="headerInfo">Current view:</td>
+                <td width="40%" class="headerInfoValue">
+                    <a href=index.html>Cores-VeeR-EL2</a>—Cores-VeeR-EL2—design—lsu—el2_lsu_ecc.sv
+                </td>
+                <td width=auto></td>
+                <td width="10%"></td>
+                <td width="10%" class="headerCovSummary colTop">Coverage</td>
+                <td width="10%" class="headerCovSummary colTop" title="Covered + Uncovered code">Hit</td>
+                <td width="10%" class="headerCovSummary colTop" title="Exercised code only">Total</td>
+            </tr>
+            <tr>
+                <td class="headerInfo">Test Date:</td>
+                <td class="headerInfoValue">
+                    11-12-2024
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Toggle
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff4f00;">
+        15.5%
+    </td>
+    <td class="headerCovSummaryEntry">
+        9
+    </td>
+    <td class="headerCovSummaryEntry">
+        58
+    </td>
+
+            </tr>
+            <tr>
+                <td class="headerInfo">Test:</td>
+                <td class="headerInfoValue">
+                    riscv-dv__riscv_user_mode_rand_test
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Branch
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #a9a9a9;">
+        0.0%
+    </td>
+    <td class="headerCovSummaryEntry">
+        0
+    </td>
+    <td class="headerCovSummaryEntry">
+        0
+    </td>
+
+            </tr>
+            
+        </table>
+    </center>
+
+    <table border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td><br/></td>
+</tr>
+<tr>
+<td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : // SPDX-License-Identifier: Apache-2.0</span>
+<span id="L2"><span class="lineNum">       2</span>              : // Copyright 2020 Western Digital Corporation or its affiliates.</span>
+<span id="L3"><span class="lineNum">       3</span>              : //</span>
+<span id="L4"><span class="lineNum">       4</span>              : // Licensed under the Apache License, Version 2.0 (the "License");</span>
+<span id="L5"><span class="lineNum">       5</span>              : // you may not use this file except in compliance with the License.</span>
+<span id="L6"><span class="lineNum">       6</span>              : // You may obtain a copy of the License at</span>
+<span id="L7"><span class="lineNum">       7</span>              : //</span>
+<span id="L8"><span class="lineNum">       8</span>              : // http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L9"><span class="lineNum">       9</span>              : //</span>
+<span id="L10"><span class="lineNum">      10</span>              : // Unless required by applicable law or agreed to in writing, software</span>
+<span id="L11"><span class="lineNum">      11</span>              : // distributed under the License is distributed on an "AS IS" BASIS,</span>
+<span id="L12"><span class="lineNum">      12</span>              : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L13"><span class="lineNum">      13</span>              : // See the License for the specific language governing permissions and</span>
+<span id="L14"><span class="lineNum">      14</span>              : // limitations under the License.</span>
+<span id="L15"><span class="lineNum">      15</span>              : </span>
+<span id="L16"><span class="lineNum">      16</span>              : //********************************************************************************</span>
+<span id="L17"><span class="lineNum">      17</span>              : // $Id$</span>
+<span id="L18"><span class="lineNum">      18</span>              : //</span>
+<span id="L19"><span class="lineNum">      19</span>              : //</span>
+<span id="L20"><span class="lineNum">      20</span>              : // Owner:</span>
+<span id="L21"><span class="lineNum">      21</span>              : // Function: Top level file for load store unit</span>
+<span id="L22"><span class="lineNum">      22</span>              : // Comments:</span>
+<span id="L23"><span class="lineNum">      23</span>              : //</span>
+<span id="L24"><span class="lineNum">      24</span>              : //</span>
+<span id="L25"><span class="lineNum">      25</span>              : // DC1 -&gt; DC2 -&gt; DC3 -&gt; DC4 (Commit)</span>
+<span id="L26"><span class="lineNum">      26</span>              : //</span>
+<span id="L27"><span class="lineNum">      27</span>              : //********************************************************************************</span>
+<span id="L28"><span class="lineNum">      28</span>              : module el2_lsu_ecc</span>
+<span id="L29"><span class="lineNum">      29</span>              : import el2_pkg::*;</span>
+<span id="L30"><span class="lineNum">      30</span>              : #(</span>
+<span id="L31"><span class="lineNum">      31</span>              : `include "el2_param.vh"</span>
+<span id="L32"><span class="lineNum">      32</span>              :  )</span>
+<span id="L33"><span class="lineNum">      33</span>              : (</span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">      169548 :    input logic                           clk,                // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">      169548 :    input logic                           lsu_c2_r_clk,       // clock</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                           clk_override,       // Override non-functional clock gating</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC tlaBgGNC">           3 :    input logic                           rst_l,              // reset, active low</span></span>
+<span id="L38"><span class="lineNum">      38</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
+<span id="L39"><span class="lineNum">      39</span>              :    /*verilator coverage_off*/</span>
+<span id="L40"><span class="lineNum">      40</span>              :    input logic                           scan_mode,          // scan mode</span>
+<span id="L41"><span class="lineNum">      41</span>              :    /*verilator coverage_on*/</span>
+<span id="L42"><span class="lineNum">      42</span>              : </span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">         410 :    input el2_lsu_pkt_t                  lsu_pkt_m,          // packet in m</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">         410 :    input el2_lsu_pkt_t                  lsu_pkt_r,          // packet in r</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [pt.DCCM_DATA_WIDTH-1:0]  stbuf_data_any,</span></span>
+<span id="L46"><span class="lineNum">      46</span>              : </span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaUNC">           0 :    input logic                           dec_tlu_core_ecc_disable,  // disables the ecc computation and error flagging</span></span>
+<span id="L48"><span class="lineNum">      48</span>              : </span>
+<span id="L49"><span class="lineNum">      49</span> <span class="tlaUNC">           0 :    input logic                           lsu_dccm_rden_r,          // dccm rden</span></span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaUNC">           0 :    input logic                           addr_in_dccm_r,           // address in dccm</span></span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC tlaBgGNC">          12 :    input logic  [pt.DCCM_BITS-1:0]       lsu_addr_r,               // start address</span></span>
+<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">          12 :    input logic  [pt.DCCM_BITS-1:0]       end_addr_r,               // end address</span></span>
+<span id="L53"><span class="lineNum">      53</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic  [pt.DCCM_DATA_WIDTH-1:0] dccm_rdata_hi_r,          // data from the dccm</span></span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaUNC">           0 :    input logic  [pt.DCCM_DATA_WIDTH-1:0] dccm_rdata_lo_r,          // data from the dccm</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaUNC">           0 :    input logic  [pt.DCCM_ECC_WIDTH-1:0]  dccm_data_ecc_hi_r,       // data from the dccm + ecc</span></span>
+<span id="L56"><span class="lineNum">      56</span> <span class="tlaUNC">           0 :    input logic  [pt.DCCM_ECC_WIDTH-1:0]  dccm_data_ecc_lo_r,       // data from the dccm + ecc</span></span>
+<span id="L57"><span class="lineNum">      57</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_DATA_WIDTH-1:0] sec_data_hi_r,            // corrected dccm data R-stage</span></span>
+<span id="L58"><span class="lineNum">      58</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_DATA_WIDTH-1:0] sec_data_lo_r,            // corrected dccm data R-stage</span></span>
+<span id="L59"><span class="lineNum">      59</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_DATA_WIDTH-1:0] sec_data_hi_r_ff,         // corrected dccm data R+1 stage</span></span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_DATA_WIDTH-1:0] sec_data_lo_r_ff,         // corrected dccm data R+1 stage</span></span>
+<span id="L61"><span class="lineNum">      61</span>              : </span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaUNC">           0 :    input logic                           ld_single_ecc_error_r,     // ld has a single ecc error</span></span>
+<span id="L63"><span class="lineNum">      63</span> <span class="tlaUNC">           0 :    input logic                           ld_single_ecc_error_r_ff,  // ld has a single ecc error</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaUNC">           0 :    input logic                           lsu_dccm_rden_m,           // dccm rden</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaUNC">           0 :    input logic                           addr_in_dccm_m,            // address in dccm</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC tlaBgGNC">          12 :    input logic  [pt.DCCM_BITS-1:0]       lsu_addr_m,                // start address</span></span>
+<span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC">          12 :    input logic  [pt.DCCM_BITS-1:0]       end_addr_m,                // end address</span></span>
+<span id="L68"><span class="lineNum">      68</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic  [pt.DCCM_DATA_WIDTH-1:0] dccm_rdata_hi_m,           // raw data from mem</span></span>
+<span id="L69"><span class="lineNum">      69</span> <span class="tlaUNC">           0 :    input logic  [pt.DCCM_DATA_WIDTH-1:0] dccm_rdata_lo_m,           // raw data from mem</span></span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaUNC">           0 :    input logic  [pt.DCCM_ECC_WIDTH-1:0]  dccm_data_ecc_hi_m,        // ecc read out from mem</span></span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaUNC">           0 :    input logic  [pt.DCCM_ECC_WIDTH-1:0]  dccm_data_ecc_lo_m,        // ecc read out from mem</span></span>
+<span id="L72"><span class="lineNum">      72</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_DATA_WIDTH-1:0] sec_data_hi_m,             // corrected dccm data M-stage</span></span>
+<span id="L73"><span class="lineNum">      73</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_DATA_WIDTH-1:0] sec_data_lo_m,             // corrected dccm data M-stage</span></span>
+<span id="L74"><span class="lineNum">      74</span>              : </span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaUNC">           0 :    input logic                           dma_dccm_wen,              // Perform DMA writes only for word/dword</span></span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaUNC">           0 :    input logic  [31:0]                   dma_dccm_wdata_lo,         // Shifted dma data to lower bits to make it consistent to lsu stores</span></span>
+<span id="L77"><span class="lineNum">      77</span> <span class="tlaUNC">           0 :    input logic  [31:0]                   dma_dccm_wdata_hi,         // Shifted dma data to lower bits to make it consistent to lsu stores</span></span>
+<span id="L78"><span class="lineNum">      78</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_ECC_WIDTH-1:0]  dma_dccm_wdata_ecc_hi,     // ECC bits for the DMA wdata</span></span>
+<span id="L79"><span class="lineNum">      79</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_ECC_WIDTH-1:0]  dma_dccm_wdata_ecc_lo,     // ECC bits for the DMA wdata</span></span>
+<span id="L80"><span class="lineNum">      80</span>              : </span>
+<span id="L81"><span class="lineNum">      81</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_ECC_WIDTH-1:0]  stbuf_ecc_any,             // Encoded data with ECC bits</span></span>
+<span id="L82"><span class="lineNum">      82</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_ECC_WIDTH-1:0]  sec_data_ecc_hi_r_ff,      // Encoded data with ECC bits</span></span>
+<span id="L83"><span class="lineNum">      83</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_ECC_WIDTH-1:0]  sec_data_ecc_lo_r_ff,      // Encoded data with ECC bits</span></span>
+<span id="L84"><span class="lineNum">      84</span>              : </span>
+<span id="L85"><span class="lineNum">      85</span> <span class="tlaUNC">           0 :    output logic                          single_ecc_error_hi_r,                   // sec detected</span></span>
+<span id="L86"><span class="lineNum">      86</span> <span class="tlaUNC">           0 :    output logic                          single_ecc_error_lo_r,                   // sec detected on lower dccm bank</span></span>
+<span id="L87"><span class="lineNum">      87</span> <span class="tlaUNC">           0 :    output logic                          lsu_single_ecc_error_r,                  // or of the 2</span></span>
+<span id="L88"><span class="lineNum">      88</span> <span class="tlaUNC">           0 :    output logic                          lsu_double_ecc_error_r,                   // double error detected</span></span>
+<span id="L89"><span class="lineNum">      89</span>              : </span>
+<span id="L90"><span class="lineNum">      90</span> <span class="tlaUNC">           0 :    output logic                          lsu_single_ecc_error_m,                  // or of the 2</span></span>
+<span id="L91"><span class="lineNum">      91</span> <span class="tlaUNC">           0 :    output logic                          lsu_double_ecc_error_m                   // double error detected</span></span>
+<span id="L92"><span class="lineNum">      92</span>              : </span>
+<span id="L93"><span class="lineNum">      93</span>              :  );</span>
+<span id="L94"><span class="lineNum">      94</span>              : </span>
+<span id="L95"><span class="lineNum">      95</span> <span class="tlaUNC">           0 :    logic                           is_ldst_r;</span></span>
+<span id="L96"><span class="lineNum">      96</span> <span class="tlaUNC">           0 :    logic                           is_ldst_hi_any, is_ldst_lo_any;</span></span>
+<span id="L97"><span class="lineNum">      97</span> <span class="tlaUNC">           0 :    logic [pt.DCCM_DATA_WIDTH-1:0]  dccm_wdata_hi_any, dccm_wdata_lo_any;</span></span>
+<span id="L98"><span class="lineNum">      98</span> <span class="tlaUNC">           0 :    logic [pt.DCCM_ECC_WIDTH-1:0]  dccm_wdata_ecc_hi_any, dccm_wdata_ecc_lo_any;</span></span>
+<span id="L99"><span class="lineNum">      99</span> <span class="tlaUNC">           0 :    logic [pt.DCCM_DATA_WIDTH-1:0]  dccm_rdata_hi_any, dccm_rdata_lo_any;</span></span>
+<span id="L100"><span class="lineNum">     100</span> <span class="tlaUNC">           0 :    logic [pt.DCCM_ECC_WIDTH-1:0]   dccm_data_ecc_hi_any, dccm_data_ecc_lo_any;</span></span>
+<span id="L101"><span class="lineNum">     101</span> <span class="tlaUNC">           0 :    logic [pt.DCCM_DATA_WIDTH-1:0]  sec_data_hi_any, sec_data_lo_any;</span></span>
+<span id="L102"><span class="lineNum">     102</span> <span class="tlaUNC">           0 :    logic                           single_ecc_error_hi_any, single_ecc_error_lo_any;</span></span>
+<span id="L103"><span class="lineNum">     103</span> <span class="tlaUNC">           0 :    logic                           double_ecc_error_hi_any, double_ecc_error_lo_any;</span></span>
+<span id="L104"><span class="lineNum">     104</span>              : </span>
+<span id="L105"><span class="lineNum">     105</span> <span class="tlaUNC">           0 :    logic                           double_ecc_error_hi_m, double_ecc_error_lo_m;</span></span>
+<span id="L106"><span class="lineNum">     106</span> <span class="tlaUNC">           0 :    logic                           double_ecc_error_hi_r, double_ecc_error_lo_r;</span></span>
+<span id="L107"><span class="lineNum">     107</span>              : </span>
+<span id="L108"><span class="lineNum">     108</span> <span class="tlaUNC">           0 :    logic [6:0]                     ecc_out_hi_nc, ecc_out_lo_nc;</span></span>
+<span id="L109"><span class="lineNum">     109</span>              : </span>
+<span id="L110"><span class="lineNum">     110</span>              : </span>
+<span id="L111"><span class="lineNum">     111</span>              :    if (pt.LOAD_TO_USE_PLUS1 == 1) begin: L2U_Plus1_1</span>
+<span id="L112"><span class="lineNum">     112</span>              :       logic        ldst_dual_m, ldst_dual_r;</span>
+<span id="L113"><span class="lineNum">     113</span>              :       logic        is_ldst_m;</span>
+<span id="L114"><span class="lineNum">     114</span>              :       logic        is_ldst_hi_r, is_ldst_lo_r;</span>
+<span id="L115"><span class="lineNum">     115</span>              : </span>
+<span id="L116"><span class="lineNum">     116</span>              :       assign ldst_dual_r                                 = (lsu_addr_r[2] != end_addr_r[2]);</span>
+<span id="L117"><span class="lineNum">     117</span>              :       assign is_ldst_r                                   = lsu_pkt_r.valid &amp; (lsu_pkt_r.load | lsu_pkt_r.store) &amp; addr_in_dccm_r &amp; lsu_dccm_rden_r;</span>
+<span id="L118"><span class="lineNum">     118</span>              :       assign is_ldst_lo_r                                = is_ldst_r &amp; ~dec_tlu_core_ecc_disable;</span>
+<span id="L119"><span class="lineNum">     119</span>              :       assign is_ldst_hi_r                                = is_ldst_r &amp; ldst_dual_r &amp; ~dec_tlu_core_ecc_disable;   // Always check the ECC Hi/Lo for DMA since we don't align for DMA</span>
+<span id="L120"><span class="lineNum">     120</span>              : </span>
+<span id="L121"><span class="lineNum">     121</span>              :       assign is_ldst_hi_any                              = is_ldst_hi_r;</span>
+<span id="L122"><span class="lineNum">     122</span>              :       assign dccm_rdata_hi_any[pt.DCCM_DATA_WIDTH-1:0]   = dccm_rdata_hi_r[pt.DCCM_DATA_WIDTH-1:0];</span>
+<span id="L123"><span class="lineNum">     123</span>              :       assign dccm_data_ecc_hi_any[pt.DCCM_ECC_WIDTH-1:0] = dccm_data_ecc_hi_r[pt.DCCM_ECC_WIDTH-1:0];</span>
+<span id="L124"><span class="lineNum">     124</span>              :       assign is_ldst_lo_any                              = is_ldst_lo_r;</span>
+<span id="L125"><span class="lineNum">     125</span>              :       assign dccm_rdata_lo_any[pt.DCCM_DATA_WIDTH-1:0]   = dccm_rdata_lo_r[pt.DCCM_DATA_WIDTH-1:0];</span>
+<span id="L126"><span class="lineNum">     126</span>              :       assign dccm_data_ecc_lo_any[pt.DCCM_ECC_WIDTH-1:0] = dccm_data_ecc_lo_r[pt.DCCM_ECC_WIDTH-1:0];</span>
+<span id="L127"><span class="lineNum">     127</span>              : </span>
+<span id="L128"><span class="lineNum">     128</span>              :       assign sec_data_hi_r[pt.DCCM_DATA_WIDTH-1:0]       = sec_data_hi_any[pt.DCCM_DATA_WIDTH-1:0];</span>
+<span id="L129"><span class="lineNum">     129</span>              :       assign single_ecc_error_hi_r                       = single_ecc_error_hi_any;</span>
+<span id="L130"><span class="lineNum">     130</span>              :       assign double_ecc_error_hi_r                       = double_ecc_error_hi_any;</span>
+<span id="L131"><span class="lineNum">     131</span>              :       assign sec_data_lo_r[pt.DCCM_DATA_WIDTH-1:0]       = sec_data_lo_any[pt.DCCM_DATA_WIDTH-1:0];</span>
+<span id="L132"><span class="lineNum">     132</span>              :       assign single_ecc_error_lo_r                       = single_ecc_error_lo_any;</span>
+<span id="L133"><span class="lineNum">     133</span>              :       assign double_ecc_error_lo_r                       = double_ecc_error_lo_any;</span>
+<span id="L134"><span class="lineNum">     134</span>              : </span>
+<span id="L135"><span class="lineNum">     135</span>              :       assign lsu_single_ecc_error_r                      = single_ecc_error_hi_r | single_ecc_error_lo_r;</span>
+<span id="L136"><span class="lineNum">     136</span>              :       assign lsu_double_ecc_error_r                      = double_ecc_error_hi_r | double_ecc_error_lo_r;</span>
+<span id="L137"><span class="lineNum">     137</span>              : </span>
+<span id="L138"><span class="lineNum">     138</span>              :    end else begin: L2U_Plus1_0</span>
+<span id="L139"><span class="lineNum">     139</span>              : </span>
+<span id="L140"><span class="lineNum">     140</span>              :       logic        ldst_dual_m;</span>
+<span id="L141"><span class="lineNum">     141</span>              :       logic        is_ldst_m;</span>
+<span id="L142"><span class="lineNum">     142</span>              :       logic        is_ldst_hi_m, is_ldst_lo_m;</span>
+<span id="L143"><span class="lineNum">     143</span>              : </span>
+<span id="L144"><span class="lineNum">     144</span>              :       assign ldst_dual_m                                 = (lsu_addr_m[2] != end_addr_m[2]);</span>
+<span id="L145"><span class="lineNum">     145</span>              :       assign is_ldst_m                                   = lsu_pkt_m.valid &amp; (lsu_pkt_m.load | lsu_pkt_m.store) &amp; addr_in_dccm_m &amp; lsu_dccm_rden_m;</span>
+<span id="L146"><span class="lineNum">     146</span>              :       assign is_ldst_lo_m                                = is_ldst_m &amp; ~dec_tlu_core_ecc_disable;</span>
+<span id="L147"><span class="lineNum">     147</span>              :       assign is_ldst_hi_m                                = is_ldst_m &amp; (ldst_dual_m | lsu_pkt_m.dma) &amp; ~dec_tlu_core_ecc_disable;   // Always check the ECC Hi/Lo for DMA since we don't align for DMA</span>
+<span id="L148"><span class="lineNum">     148</span>              : </span>
+<span id="L149"><span class="lineNum">     149</span>              :       assign is_ldst_hi_any                              = is_ldst_hi_m;</span>
+<span id="L150"><span class="lineNum">     150</span>              :       assign dccm_rdata_hi_any[pt.DCCM_DATA_WIDTH-1:0]   = dccm_rdata_hi_m[pt.DCCM_DATA_WIDTH-1:0];</span>
+<span id="L151"><span class="lineNum">     151</span>              :       assign dccm_data_ecc_hi_any[pt.DCCM_ECC_WIDTH-1:0] = dccm_data_ecc_hi_m[pt.DCCM_ECC_WIDTH-1:0];</span>
+<span id="L152"><span class="lineNum">     152</span>              :       assign is_ldst_lo_any                              = is_ldst_lo_m;</span>
+<span id="L153"><span class="lineNum">     153</span>              :       assign dccm_rdata_lo_any[pt.DCCM_DATA_WIDTH-1:0]   = dccm_rdata_lo_m[pt.DCCM_DATA_WIDTH-1:0];</span>
+<span id="L154"><span class="lineNum">     154</span>              :       assign dccm_data_ecc_lo_any[pt.DCCM_ECC_WIDTH-1:0] = dccm_data_ecc_lo_m[pt.DCCM_ECC_WIDTH-1:0];</span>
+<span id="L155"><span class="lineNum">     155</span>              : </span>
+<span id="L156"><span class="lineNum">     156</span>              :       assign sec_data_hi_m[pt.DCCM_DATA_WIDTH-1:0]       = sec_data_hi_any[pt.DCCM_DATA_WIDTH-1:0];</span>
+<span id="L157"><span class="lineNum">     157</span>              :       assign double_ecc_error_hi_m                       = double_ecc_error_hi_any;</span>
+<span id="L158"><span class="lineNum">     158</span>              :       assign sec_data_lo_m[pt.DCCM_DATA_WIDTH-1:0]       = sec_data_lo_any[pt.DCCM_DATA_WIDTH-1:0];</span>
+<span id="L159"><span class="lineNum">     159</span>              :       assign double_ecc_error_lo_m                       = double_ecc_error_lo_any;</span>
+<span id="L160"><span class="lineNum">     160</span>              : </span>
+<span id="L161"><span class="lineNum">     161</span>              :       assign lsu_single_ecc_error_m                      = single_ecc_error_hi_any | single_ecc_error_lo_any;</span>
+<span id="L162"><span class="lineNum">     162</span>              :       assign lsu_double_ecc_error_m                      = double_ecc_error_hi_m   | double_ecc_error_lo_m;</span>
+<span id="L163"><span class="lineNum">     163</span>              : </span>
+<span id="L164"><span class="lineNum">     164</span>              :       // Flops</span>
+<span id="L165"><span class="lineNum">     165</span>              :       rvdff  #(1) lsu_single_ecc_err_r    (.din(lsu_single_ecc_error_m), .dout(lsu_single_ecc_error_r), .clk(lsu_c2_r_clk), .*);</span>
+<span id="L166"><span class="lineNum">     166</span>              :       rvdff  #(1) lsu_double_ecc_err_r    (.din(lsu_double_ecc_error_m), .dout(lsu_double_ecc_error_r), .clk(lsu_c2_r_clk), .*);</span>
+<span id="L167"><span class="lineNum">     167</span>              :       rvdff  #(.WIDTH(1)) ldst_sec_lo_rff (.din(single_ecc_error_lo_any),  .dout(single_ecc_error_lo_r),  .clk(lsu_c2_r_clk), .*);</span>
+<span id="L168"><span class="lineNum">     168</span>              :       rvdff  #(.WIDTH(1)) ldst_sec_hi_rff (.din(single_ecc_error_hi_any),  .dout(single_ecc_error_hi_r),  .clk(lsu_c2_r_clk), .*);</span>
+<span id="L169"><span class="lineNum">     169</span>              :       rvdffe #(.WIDTH(pt.DCCM_DATA_WIDTH)) sec_data_hi_rff (.din(sec_data_hi_m[pt.DCCM_DATA_WIDTH-1:0]), .dout(sec_data_hi_r[pt.DCCM_DATA_WIDTH-1:0]), .en(lsu_single_ecc_error_m | clk_override), .*);</span>
+<span id="L170"><span class="lineNum">     170</span>              :       rvdffe #(.WIDTH(pt.DCCM_DATA_WIDTH)) sec_data_lo_rff (.din(sec_data_lo_m[pt.DCCM_DATA_WIDTH-1:0]), .dout(sec_data_lo_r[pt.DCCM_DATA_WIDTH-1:0]), .en(lsu_single_ecc_error_m | clk_override), .*);</span>
+<span id="L171"><span class="lineNum">     171</span>              : </span>
+<span id="L172"><span class="lineNum">     172</span>              :    end</span>
+<span id="L173"><span class="lineNum">     173</span>              : </span>
+<span id="L174"><span class="lineNum">     174</span>              :    // Logic for ECC generation during write</span>
+<span id="L175"><span class="lineNum">     175</span>              :    assign dccm_wdata_lo_any[pt.DCCM_DATA_WIDTH-1:0] = ld_single_ecc_error_r_ff ? sec_data_lo_r_ff[pt.DCCM_DATA_WIDTH-1:0] : (dma_dccm_wen ? dma_dccm_wdata_lo[pt.DCCM_DATA_WIDTH-1:0] : stbuf_data_any[pt.DCCM_DATA_WIDTH-1:0]);</span>
+<span id="L176"><span class="lineNum">     176</span>              :    assign dccm_wdata_hi_any[pt.DCCM_DATA_WIDTH-1:0] = ld_single_ecc_error_r_ff ? sec_data_hi_r_ff[pt.DCCM_DATA_WIDTH-1:0] : (dma_dccm_wen ? dma_dccm_wdata_hi[pt.DCCM_DATA_WIDTH-1:0] : 32'h0);</span>
+<span id="L177"><span class="lineNum">     177</span>              : </span>
+<span id="L178"><span class="lineNum">     178</span>              :    assign sec_data_ecc_hi_r_ff[pt.DCCM_ECC_WIDTH-1:0]  = dccm_wdata_ecc_hi_any[pt.DCCM_ECC_WIDTH-1:0];</span>
+<span id="L179"><span class="lineNum">     179</span>              :    assign sec_data_ecc_lo_r_ff[pt.DCCM_ECC_WIDTH-1:0]  = dccm_wdata_ecc_lo_any[pt.DCCM_ECC_WIDTH-1:0];</span>
+<span id="L180"><span class="lineNum">     180</span>              :    assign stbuf_ecc_any[pt.DCCM_ECC_WIDTH-1:0]         = dccm_wdata_ecc_lo_any[pt.DCCM_ECC_WIDTH-1:0];</span>
+<span id="L181"><span class="lineNum">     181</span>              :    assign dma_dccm_wdata_ecc_hi[pt.DCCM_ECC_WIDTH-1:0] = dccm_wdata_ecc_hi_any[pt.DCCM_ECC_WIDTH-1:0];</span>
+<span id="L182"><span class="lineNum">     182</span>              :    assign dma_dccm_wdata_ecc_lo[pt.DCCM_ECC_WIDTH-1:0] = dccm_wdata_ecc_lo_any[pt.DCCM_ECC_WIDTH-1:0];</span>
+<span id="L183"><span class="lineNum">     183</span>              : </span>
+<span id="L184"><span class="lineNum">     184</span>              :    // Instantiate ECC blocks</span>
+<span id="L185"><span class="lineNum">     185</span>              :    if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable</span>
+<span id="L186"><span class="lineNum">     186</span>              : </span>
+<span id="L187"><span class="lineNum">     187</span>              :       //Detect/Repair for Hi</span>
+<span id="L188"><span class="lineNum">     188</span>              :       rvecc_decode lsu_ecc_decode_hi (</span>
+<span id="L189"><span class="lineNum">     189</span>              :          // Inputs</span>
+<span id="L190"><span class="lineNum">     190</span>              :          .en(is_ldst_hi_any),</span>
+<span id="L191"><span class="lineNum">     191</span>              :          .sed_ded (1'b0),    // 1 : means only detection</span>
+<span id="L192"><span class="lineNum">     192</span>              :          .din(dccm_rdata_hi_any[pt.DCCM_DATA_WIDTH-1:0]),</span>
+<span id="L193"><span class="lineNum">     193</span>              :          .ecc_in(dccm_data_ecc_hi_any[pt.DCCM_ECC_WIDTH-1:0]),</span>
+<span id="L194"><span class="lineNum">     194</span>              :          // Outputs</span>
+<span id="L195"><span class="lineNum">     195</span>              :          .dout(sec_data_hi_any[pt.DCCM_DATA_WIDTH-1:0]),</span>
+<span id="L196"><span class="lineNum">     196</span>              :          .ecc_out (ecc_out_hi_nc[6:0]),</span>
+<span id="L197"><span class="lineNum">     197</span>              :          .single_ecc_error(single_ecc_error_hi_any),</span>
+<span id="L198"><span class="lineNum">     198</span>              :          .double_ecc_error(double_ecc_error_hi_any),</span>
+<span id="L199"><span class="lineNum">     199</span>              :          .*</span>
+<span id="L200"><span class="lineNum">     200</span>              :       );</span>
+<span id="L201"><span class="lineNum">     201</span>              : </span>
+<span id="L202"><span class="lineNum">     202</span>              :       //Detect/Repair for Lo</span>
+<span id="L203"><span class="lineNum">     203</span>              :       rvecc_decode lsu_ecc_decode_lo (</span>
+<span id="L204"><span class="lineNum">     204</span>              :          // Inputs</span>
+<span id="L205"><span class="lineNum">     205</span>              :          .en(is_ldst_lo_any),</span>
+<span id="L206"><span class="lineNum">     206</span>              :          .sed_ded (1'b0),    // 1 : means only detection</span>
+<span id="L207"><span class="lineNum">     207</span>              :          .din(dccm_rdata_lo_any[pt.DCCM_DATA_WIDTH-1:0] ),</span>
+<span id="L208"><span class="lineNum">     208</span>              :          .ecc_in(dccm_data_ecc_lo_any[pt.DCCM_ECC_WIDTH-1:0]),</span>
+<span id="L209"><span class="lineNum">     209</span>              :          // Outputs</span>
+<span id="L210"><span class="lineNum">     210</span>              :          .dout(sec_data_lo_any[pt.DCCM_DATA_WIDTH-1:0]),</span>
+<span id="L211"><span class="lineNum">     211</span>              :          .ecc_out (ecc_out_lo_nc[6:0]),</span>
+<span id="L212"><span class="lineNum">     212</span>              :          .single_ecc_error(single_ecc_error_lo_any),</span>
+<span id="L213"><span class="lineNum">     213</span>              :          .double_ecc_error(double_ecc_error_lo_any),</span>
+<span id="L214"><span class="lineNum">     214</span>              :          .*</span>
+<span id="L215"><span class="lineNum">     215</span>              :       );</span>
+<span id="L216"><span class="lineNum">     216</span>              : </span>
+<span id="L217"><span class="lineNum">     217</span>              :       rvecc_encode lsu_ecc_encode_hi (</span>
+<span id="L218"><span class="lineNum">     218</span>              :          //Inputs</span>
+<span id="L219"><span class="lineNum">     219</span>              :          .din(dccm_wdata_hi_any[pt.DCCM_DATA_WIDTH-1:0]),</span>
+<span id="L220"><span class="lineNum">     220</span>              :          //Outputs</span>
+<span id="L221"><span class="lineNum">     221</span>              :          .ecc_out(dccm_wdata_ecc_hi_any[pt.DCCM_ECC_WIDTH-1:0]),</span>
+<span id="L222"><span class="lineNum">     222</span>              :          .*</span>
+<span id="L223"><span class="lineNum">     223</span>              :       );</span>
+<span id="L224"><span class="lineNum">     224</span>              :       rvecc_encode lsu_ecc_encode_lo (</span>
+<span id="L225"><span class="lineNum">     225</span>              :          //Inputs</span>
+<span id="L226"><span class="lineNum">     226</span>              :          .din(dccm_wdata_lo_any[pt.DCCM_DATA_WIDTH-1:0]),</span>
+<span id="L227"><span class="lineNum">     227</span>              :          //Outputs</span>
+<span id="L228"><span class="lineNum">     228</span>              :          .ecc_out(dccm_wdata_ecc_lo_any[pt.DCCM_ECC_WIDTH-1:0]),</span>
+<span id="L229"><span class="lineNum">     229</span>              :          .*</span>
+<span id="L230"><span class="lineNum">     230</span>              :       );</span>
+<span id="L231"><span class="lineNum">     231</span>              :    end else begin: Gen_dccm_disable // block: Gen_dccm_enable</span>
+<span id="L232"><span class="lineNum">     232</span>              :       assign sec_data_hi_any[pt.DCCM_DATA_WIDTH-1:0] = '0;</span>
+<span id="L233"><span class="lineNum">     233</span>              :       assign sec_data_lo_any[pt.DCCM_DATA_WIDTH-1:0] = '0;</span>
+<span id="L234"><span class="lineNum">     234</span>              :       assign single_ecc_error_hi_any = '0;</span>
+<span id="L235"><span class="lineNum">     235</span>              :       assign double_ecc_error_hi_any = '0;</span>
+<span id="L236"><span class="lineNum">     236</span>              :       assign single_ecc_error_lo_any = '0;</span>
+<span id="L237"><span class="lineNum">     237</span>              :       assign double_ecc_error_lo_any = '0;</span>
+<span id="L238"><span class="lineNum">     238</span>              :    end</span>
+<span id="L239"><span class="lineNum">     239</span>              : </span>
+<span id="L240"><span class="lineNum">     240</span>              :    rvdffe #(.WIDTH(pt.DCCM_DATA_WIDTH)) sec_data_hi_rplus1ff (.din(sec_data_hi_r[pt.DCCM_DATA_WIDTH-1:0]), .dout(sec_data_hi_r_ff[pt.DCCM_DATA_WIDTH-1:0]), .en(ld_single_ecc_error_r | clk_override), .clk(clk), .*);</span>
+<span id="L241"><span class="lineNum">     241</span>              :    rvdffe #(.WIDTH(pt.DCCM_DATA_WIDTH)) sec_data_lo_rplus1ff (.din(sec_data_lo_r[pt.DCCM_DATA_WIDTH-1:0]), .dout(sec_data_lo_r_ff[pt.DCCM_DATA_WIDTH-1:0]), .en(ld_single_ecc_error_r | clk_override), .clk(clk), .*);</span>
+<span id="L242"><span class="lineNum">     242</span>              : </span>
+<span id="L243"><span class="lineNum">     243</span>              : </span>
+<span id="L244"><span class="lineNum">     244</span>              : endmodule // el2_lsu_ecc</span>
+        </pre>
+</td>
+</tr>
+</table>
+
+</body>
+</html>

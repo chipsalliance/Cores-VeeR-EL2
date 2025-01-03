@@ -1,0 +1,711 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>
+        Full
+        coverage report
+    </title>
+    <link rel="stylesheet" type="text/css" href="cov.css">
+    <style>
+        .container {
+            background-color: rgb(169, 169, 169);
+            width: 100%;
+            min-height: 80%;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <table class="title-header-shadow">
+        <td class="title-container">
+            <table class="title-header">
+                <td class="title-logo">
+                    <a href=index.html>
+                        <img src=_static/white.svg></img>
+                    </a>
+                </td>
+                <td class="title">
+                    Project
+                    Full
+                    coverage report
+                </td>
+            </table>
+        </td>
+    </table>
+    <center>
+        <table class="info-table">
+            <tr class="info-table-view">
+                <td width="10%" class="headerInfo">Current view:</td>
+                <td width="40%" class="headerInfoValue">
+                    <a href=index.html>Cores-VeeR-EL2</a>—Cores-VeeR-EL2—design—el2_pic_ctrl.sv
+                </td>
+                <td width=auto></td>
+                <td width="10%"></td>
+                <td width="10%" class="headerCovSummary colTop">Coverage</td>
+                <td width="10%" class="headerCovSummary colTop" title="Covered + Uncovered code">Hit</td>
+                <td width="10%" class="headerCovSummary colTop" title="Exercised code only">Total</td>
+            </tr>
+            <tr>
+                <td class="headerInfo">Test Date:</td>
+                <td class="headerInfoValue">
+                    19-11-2024
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Toggle
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff7b00;">
+        24.3%
+    </td>
+    <td class="headerCovSummaryEntry">
+        26
+    </td>
+    <td class="headerCovSummaryEntry">
+        107
+    </td>
+
+            </tr>
+            <tr>
+                <td class="headerInfo">Test:</td>
+                <td class="headerInfoValue">
+                    ahb_modesw
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Branch
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #66ff00;">
+        80.0%
+    </td>
+    <td class="headerCovSummaryEntry">
+        12
+    </td>
+    <td class="headerCovSummaryEntry">
+        15
+    </td>
+
+            </tr>
+            
+        </table>
+    </center>
+
+    <table border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td><br/></td>
+</tr>
+<tr>
+<td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : //********************************************************************************</span>
+<span id="L2"><span class="lineNum">       2</span>              : // SPDX-License-Identifier: Apache-2.0</span>
+<span id="L3"><span class="lineNum">       3</span>              : // Copyright 2020 Western Digital Corporation or its affiliates.</span>
+<span id="L4"><span class="lineNum">       4</span>              : //</span>
+<span id="L5"><span class="lineNum">       5</span>              : // Licensed under the Apache License, Version 2.0 (the "License");</span>
+<span id="L6"><span class="lineNum">       6</span>              : // you may not use this file except in compliance with the License.</span>
+<span id="L7"><span class="lineNum">       7</span>              : // You may obtain a copy of the License at</span>
+<span id="L8"><span class="lineNum">       8</span>              : //</span>
+<span id="L9"><span class="lineNum">       9</span>              : // http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L10"><span class="lineNum">      10</span>              : //</span>
+<span id="L11"><span class="lineNum">      11</span>              : // Unless required by applicable law or agreed to in writing, software</span>
+<span id="L12"><span class="lineNum">      12</span>              : // distributed under the License is distributed on an "AS IS" BASIS,</span>
+<span id="L13"><span class="lineNum">      13</span>              : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L14"><span class="lineNum">      14</span>              : // See the License for the specific language governing permissions and</span>
+<span id="L15"><span class="lineNum">      15</span>              : // limitations under the License.</span>
+<span id="L16"><span class="lineNum">      16</span>              : //********************************************************************************</span>
+<span id="L17"><span class="lineNum">      17</span>              : </span>
+<span id="L18"><span class="lineNum">      18</span>              : //********************************************************************************</span>
+<span id="L19"><span class="lineNum">      19</span>              : // Function: Programmable Interrupt Controller</span>
+<span id="L20"><span class="lineNum">      20</span>              : // Comments:</span>
+<span id="L21"><span class="lineNum">      21</span>              : //********************************************************************************</span>
+<span id="L22"><span class="lineNum">      22</span>              : </span>
+<span id="L23"><span class="lineNum">      23</span>              : module el2_pic_ctrl </span>
+<span id="L24"><span class="lineNum">      24</span>              : import el2_pkg::*;</span>
+<span id="L25"><span class="lineNum">      25</span>              : #(</span>
+<span id="L26"><span class="lineNum">      26</span>              : `include "el2_param.vh"</span>
+<span id="L27"><span class="lineNum">      27</span>              :  )</span>
+<span id="L28"><span class="lineNum">      28</span>              :                   (</span>
+<span id="L29"><span class="lineNum">      29</span>              : </span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC tlaBgGNC">      583534 :                      input  logic                   clk,                  // Core clock</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">      583534 :                      input  logic                   free_clk,             // free clock</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">           2 :                      input  logic                   rst_l,                // Reset for all flops</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaUNC tlaBgUNC">           0 :                      input  logic                   clk_override,         // Clock over-ride for gating</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">           2 :                      input  logic                   io_clk_override,      // PIC IO  Clock over-ride for gating</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaUNC tlaBgUNC">           0 :                      input  logic [pt.PIC_TOTAL_INT_PLUS1-1:0]   extintsrc_req,  // Interrupt requests</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC tlaBgGNC">           2 :                      input  logic [31:0]            picm_rdaddr,          // Address of the register</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">           2 :                      input  logic [31:0]            picm_wraddr,          // Address of the register</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">          24 :                      input  logic [31:0]            picm_wr_data,         // Data to be written to the register</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaUNC tlaBgUNC">           0 :                      input  logic                   picm_wren,            // Write enable to the register</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaUNC">           0 :                      input  logic                   picm_rden,            // Read enable for the register</span></span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaUNC">           0 :                      input  logic                   picm_mken,            // Read the Mask for the register</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaUNC">           0 :                      input  logic [3:0]             meicurpl,             // Current Priority Level</span></span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaUNC">           0 :                      input  logic [3:0]             meipt,                // Current Priority Threshold</span></span>
+<span id="L44"><span class="lineNum">      44</span>              : </span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaUNC">           0 :                      output logic                   mexintpend,           // External Inerrupt request to the core</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaUNC">           0 :                      output logic [7:0]             claimid,              // Claim Id of the requested interrupt</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaUNC">           0 :                      output logic [3:0]             pl,                   // Priority level of the requested interrupt</span></span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaUNC">           0 :                      output logic [31:0]            picm_rd_data,         // Read data of the register</span></span>
+<span id="L49"><span class="lineNum">      49</span> <span class="tlaUNC">           0 :                      output logic                   mhwakeup,             // Wake-up interrupt request</span></span>
+<span id="L50"><span class="lineNum">      50</span>              :                      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
+<span id="L51"><span class="lineNum">      51</span>              :                      /*verilator coverage_off*/</span>
+<span id="L52"><span class="lineNum">      52</span>              :                      input  logic                   scan_mode             // scan mode</span>
+<span id="L53"><span class="lineNum">      53</span>              :                      /*verilator coverage_on*/</span>
+<span id="L54"><span class="lineNum">      54</span>              : </span>
+<span id="L55"><span class="lineNum">      55</span>              : );</span>
+<span id="L56"><span class="lineNum">      56</span>              : </span>
+<span id="L57"><span class="lineNum">      57</span>              : localparam NUM_LEVELS            = $clog2(pt.PIC_TOTAL_INT_PLUS1);</span>
+<span id="L58"><span class="lineNum">      58</span>              : localparam INTPRIORITY_BASE_ADDR = pt.PIC_BASE_ADDR ;</span>
+<span id="L59"><span class="lineNum">      59</span>              : localparam INTPEND_BASE_ADDR     = pt.PIC_BASE_ADDR + 32'h00001000 ;</span>
+<span id="L60"><span class="lineNum">      60</span>              : localparam INTENABLE_BASE_ADDR   = pt.PIC_BASE_ADDR + 32'h00002000 ;</span>
+<span id="L61"><span class="lineNum">      61</span>              : localparam EXT_INTR_PIC_CONFIG   = pt.PIC_BASE_ADDR + 32'h00003000 ;</span>
+<span id="L62"><span class="lineNum">      62</span>              : localparam EXT_INTR_GW_CONFIG    = pt.PIC_BASE_ADDR + 32'h00004000 ;</span>
+<span id="L63"><span class="lineNum">      63</span>              : localparam EXT_INTR_GW_CLEAR     = pt.PIC_BASE_ADDR + 32'h00005000 ;</span>
+<span id="L64"><span class="lineNum">      64</span>              : </span>
+<span id="L65"><span class="lineNum">      65</span>              : </span>
+<span id="L66"><span class="lineNum">      66</span>              : localparam INTPEND_SIZE          = (pt.PIC_TOTAL_INT_PLUS1 &lt; 32)  ? 32  :</span>
+<span id="L67"><span class="lineNum">      67</span>              :                                    (pt.PIC_TOTAL_INT_PLUS1 &lt; 64)  ? 64  :</span>
+<span id="L68"><span class="lineNum">      68</span>              :                                    (pt.PIC_TOTAL_INT_PLUS1 &lt; 128) ? 128 :</span>
+<span id="L69"><span class="lineNum">      69</span>              :                                    (pt.PIC_TOTAL_INT_PLUS1 &lt; 256) ? 256 :</span>
+<span id="L70"><span class="lineNum">      70</span>              :                                    (pt.PIC_TOTAL_INT_PLUS1 &lt; 512) ? 512 :  1024 ;</span>
+<span id="L71"><span class="lineNum">      71</span>              : </span>
+<span id="L72"><span class="lineNum">      72</span>              : localparam INT_GRPS              =   INTPEND_SIZE / 32 ;</span>
+<span id="L73"><span class="lineNum">      73</span>              : localparam INTPRIORITY_BITS      =  4 ;</span>
+<span id="L74"><span class="lineNum">      74</span>              : localparam ID_BITS               =  8 ;</span>
+<span id="L75"><span class="lineNum">      75</span>              : localparam int GW_CONFIG[pt.PIC_TOTAL_INT_PLUS1-1:0] = '{default:0} ;</span>
+<span id="L76"><span class="lineNum">      76</span>              : </span>
+<span id="L77"><span class="lineNum">      77</span>              : localparam INT_ENABLE_GRPS       =   (pt.PIC_TOTAL_INT_PLUS1 - 1)  / 4 ;</span>
+<span id="L78"><span class="lineNum">      78</span>              : </span>
+<span id="L79"><span class="lineNum">      79</span> <span class="tlaUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]           intenable_clk_enable ;</span></span>
+<span id="L80"><span class="lineNum">      80</span> <span class="tlaUNC">           0 : logic [INT_ENABLE_GRPS:0]                    intenable_clk_enable_grp ;</span></span>
+<span id="L81"><span class="lineNum">      81</span> <span class="tlaUNC">           0 : logic [INT_ENABLE_GRPS:0]                    gw_clk ;</span></span>
+<span id="L82"><span class="lineNum">      82</span>              : </span>
+<span id="L83"><span class="lineNum">      83</span> <span class="tlaUNC">           0 : logic  addr_intpend_base_match;</span></span>
+<span id="L84"><span class="lineNum">      84</span>              : </span>
+<span id="L85"><span class="lineNum">      85</span> <span class="tlaUNC">           0 : logic  raddr_config_pic_match ;</span></span>
+<span id="L86"><span class="lineNum">      86</span> <span class="tlaUNC">           0 : logic  raddr_intenable_base_match;</span></span>
+<span id="L87"><span class="lineNum">      87</span> <span class="tlaGNC tlaBgGNC">        7746 : logic  raddr_intpriority_base_match;</span></span>
+<span id="L88"><span class="lineNum">      88</span> <span class="tlaUNC tlaBgUNC">           0 : logic  raddr_config_gw_base_match ;</span></span>
+<span id="L89"><span class="lineNum">      89</span>              : </span>
+<span id="L90"><span class="lineNum">      90</span> <span class="tlaUNC">           0 : logic  waddr_config_pic_match ;</span></span>
+<span id="L91"><span class="lineNum">      91</span> <span class="tlaGNC tlaBgGNC">        7746 : logic  waddr_intpriority_base_match;</span></span>
+<span id="L92"><span class="lineNum">      92</span> <span class="tlaUNC tlaBgUNC">           0 : logic  waddr_intenable_base_match;</span></span>
+<span id="L93"><span class="lineNum">      93</span> <span class="tlaUNC">           0 : logic  waddr_config_gw_base_match ;</span></span>
+<span id="L94"><span class="lineNum">      94</span> <span class="tlaUNC">           0 : logic  addr_clear_gw_base_match ;</span></span>
+<span id="L95"><span class="lineNum">      95</span>              : </span>
+<span id="L96"><span class="lineNum">      96</span> <span class="tlaUNC">           0 : logic  mexintpend_in;</span></span>
+<span id="L97"><span class="lineNum">      97</span> <span class="tlaUNC">           0 : logic  mhwakeup_in ;</span></span>
+<span id="L98"><span class="lineNum">      98</span> <span class="tlaUNC">           0 : logic  intpend_reg_read ;</span></span>
+<span id="L99"><span class="lineNum">      99</span>              : </span>
+<span id="L100"><span class="lineNum">     100</span> <span class="tlaUNC">           0 : logic [31:0]                                 picm_rd_data_in, intpend_rd_out;</span></span>
+<span id="L101"><span class="lineNum">     101</span> <span class="tlaUNC">           0 : logic                                        intenable_rd_out ;</span></span>
+<span id="L102"><span class="lineNum">     102</span> <span class="tlaUNC">           0 : logic [INTPRIORITY_BITS-1:0]                 intpriority_rd_out;</span></span>
+<span id="L103"><span class="lineNum">     103</span> <span class="tlaUNC">           0 : logic [1:0]                                  gw_config_rd_out;</span></span>
+<span id="L104"><span class="lineNum">     104</span>              : </span>
+<span id="L105"><span class="lineNum">     105</span> <span class="tlaUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0] [INTPRIORITY_BITS-1:0] intpriority_reg;</span></span>
+<span id="L106"><span class="lineNum">     106</span> <span class="tlaUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0] [INTPRIORITY_BITS-1:0] intpriority_reg_inv;</span></span>
+<span id="L107"><span class="lineNum">     107</span> <span class="tlaUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        intpriority_reg_we;</span></span>
+<span id="L108"><span class="lineNum">     108</span> <span class="tlaUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        intpriority_reg_re;</span></span>
+<span id="L109"><span class="lineNum">     109</span> <span class="tlaUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0] [1:0]                  gw_config_reg;</span></span>
+<span id="L110"><span class="lineNum">     110</span>              : </span>
+<span id="L111"><span class="lineNum">     111</span> <span class="tlaUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        intenable_reg;</span></span>
+<span id="L112"><span class="lineNum">     112</span> <span class="tlaUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        intenable_reg_we;</span></span>
+<span id="L113"><span class="lineNum">     113</span> <span class="tlaUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        intenable_reg_re;</span></span>
+<span id="L114"><span class="lineNum">     114</span> <span class="tlaUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        gw_config_reg_we;</span></span>
+<span id="L115"><span class="lineNum">     115</span> <span class="tlaUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        gw_config_reg_re;</span></span>
+<span id="L116"><span class="lineNum">     116</span> <span class="tlaUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        gw_clear_reg_we;</span></span>
+<span id="L117"><span class="lineNum">     117</span>              : </span>
+<span id="L118"><span class="lineNum">     118</span> <span class="tlaUNC">           0 : logic [INTPEND_SIZE-1:0]                     intpend_reg_extended;</span></span>
+<span id="L119"><span class="lineNum">     119</span>              : </span>
+<span id="L120"><span class="lineNum">     120</span> <span class="tlaUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0] [INTPRIORITY_BITS-1:0] intpend_w_prior_en;</span></span>
+<span id="L121"><span class="lineNum">     121</span> <span class="tlaUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0] [ID_BITS-1:0]          intpend_id;</span></span>
+<span id="L122"><span class="lineNum">     122</span> <span class="tlaGNC tlaBgGNC">           2 : logic [INTPRIORITY_BITS-1:0]                 maxint;</span></span>
+<span id="L123"><span class="lineNum">     123</span> <span class="tlaUNC tlaBgUNC">           0 : logic [INTPRIORITY_BITS-1:0]                 selected_int_priority;</span></span>
+<span id="L124"><span class="lineNum">     124</span> <span class="tlaUNC">           0 : logic [INT_GRPS-1:0] [31:0]                  intpend_rd_part_out ;</span></span>
+<span id="L125"><span class="lineNum">     125</span>              : </span>
+<span id="L126"><span class="lineNum">     126</span> <span class="tlaUNC">           0 : logic                                        config_reg;</span></span>
+<span id="L127"><span class="lineNum">     127</span> <span class="tlaUNC">           0 : logic                                        intpriord;</span></span>
+<span id="L128"><span class="lineNum">     128</span> <span class="tlaUNC">           0 : logic                                        config_reg_we ;</span></span>
+<span id="L129"><span class="lineNum">     129</span> <span class="tlaUNC">           0 : logic                                        config_reg_re ;</span></span>
+<span id="L130"><span class="lineNum">     130</span> <span class="tlaGNC tlaBgGNC">        2100 : logic                                        config_reg_in ;</span></span>
+<span id="L131"><span class="lineNum">     131</span> <span class="tlaUNC tlaBgUNC">           0 : logic                                        prithresh_reg_write , prithresh_reg_read;</span></span>
+<span id="L132"><span class="lineNum">     132</span> <span class="tlaUNC">           0 : logic                                        intpriority_reg_read ;</span></span>
+<span id="L133"><span class="lineNum">     133</span> <span class="tlaUNC">           0 : logic                                        intenable_reg_read   ;</span></span>
+<span id="L134"><span class="lineNum">     134</span> <span class="tlaUNC">           0 : logic                                        gw_config_reg_read   ;</span></span>
+<span id="L135"><span class="lineNum">     135</span> <span class="tlaUNC">           0 : logic                                        picm_wren_ff , picm_rden_ff ;</span></span>
+<span id="L136"><span class="lineNum">     136</span> <span class="tlaGNC tlaBgGNC">           2 : logic [31:0]                                 picm_raddr_ff;</span></span>
+<span id="L137"><span class="lineNum">     137</span> <span class="tlaGNC">           2 : logic [31:0]                                 picm_waddr_ff;</span></span>
+<span id="L138"><span class="lineNum">     138</span> <span class="tlaGNC">          24 : logic [31:0]                                 picm_wr_data_ff;</span></span>
+<span id="L139"><span class="lineNum">     139</span> <span class="tlaUNC tlaBgUNC">           0 : logic [3:0]                                  mask;</span></span>
+<span id="L140"><span class="lineNum">     140</span> <span class="tlaUNC">           0 : logic                                        picm_mken_ff;</span></span>
+<span id="L141"><span class="lineNum">     141</span> <span class="tlaUNC">           0 : logic [ID_BITS-1:0]                          claimid_in ;</span></span>
+<span id="L142"><span class="lineNum">     142</span> <span class="tlaUNC">           0 : logic [INTPRIORITY_BITS-1:0]                 pl_in ;</span></span>
+<span id="L143"><span class="lineNum">     143</span> <span class="tlaUNC">           0 : logic [INTPRIORITY_BITS-1:0]                 pl_in_q ;</span></span>
+<span id="L144"><span class="lineNum">     144</span>              : </span>
+<span id="L145"><span class="lineNum">     145</span> <span class="tlaUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        extintsrc_req_sync;</span></span>
+<span id="L146"><span class="lineNum">     146</span> <span class="tlaUNC">           0 : logic [pt.PIC_TOTAL_INT_PLUS1-1:0]                        extintsrc_req_gw;</span></span>
+<span id="L147"><span class="lineNum">     147</span> <span class="tlaUNC">           0 :    logic                                                  picm_bypass_ff;</span></span>
+<span id="L148"><span class="lineNum">     148</span>              : </span>
+<span id="L149"><span class="lineNum">     149</span>              : // clkens</span>
+<span id="L150"><span class="lineNum">     150</span> <span class="tlaUNC">           0 :    logic                                     pic_raddr_c1_clken;</span></span>
+<span id="L151"><span class="lineNum">     151</span> <span class="tlaUNC">           0 :    logic                                     pic_waddr_c1_clken;</span></span>
+<span id="L152"><span class="lineNum">     152</span> <span class="tlaUNC">           0 :    logic                                     pic_data_c1_clken;</span></span>
+<span id="L153"><span class="lineNum">     153</span> <span class="tlaUNC">           0 :    logic                                     pic_pri_c1_clken;</span></span>
+<span id="L154"><span class="lineNum">     154</span> <span class="tlaUNC">           0 :    logic                                     pic_int_c1_clken;</span></span>
+<span id="L155"><span class="lineNum">     155</span> <span class="tlaUNC">           0 :    logic                                     gw_config_c1_clken;</span></span>
+<span id="L156"><span class="lineNum">     156</span>              : </span>
+<span id="L157"><span class="lineNum">     157</span>              : // clocks</span>
+<span id="L158"><span class="lineNum">     158</span> <span class="tlaGNC tlaBgGNC">      583534 :    logic                                     pic_raddr_c1_clk;</span></span>
+<span id="L159"><span class="lineNum">     159</span> <span class="tlaGNC">      583534 :    logic                                     pic_data_c1_clk;</span></span>
+<span id="L160"><span class="lineNum">     160</span> <span class="tlaGNC">      583534 :    logic                                     pic_pri_c1_clk;</span></span>
+<span id="L161"><span class="lineNum">     161</span> <span class="tlaGNC">      583534 :    logic                                     pic_int_c1_clk;</span></span>
+<span id="L162"><span class="lineNum">     162</span> <span class="tlaGNC">      583534 :    logic                                     gw_config_c1_clk;</span></span>
+<span id="L163"><span class="lineNum">     163</span>              : </span>
+<span id="L164"><span class="lineNum">     164</span>              : // ---- Clock gating section ------</span>
+<span id="L165"><span class="lineNum">     165</span>              : // c1 clock enables</span>
+<span id="L166"><span class="lineNum">     166</span>              :    assign pic_raddr_c1_clken  = picm_mken | picm_rden | clk_override;</span>
+<span id="L167"><span class="lineNum">     167</span>              :    assign pic_data_c1_clken   = picm_wren | clk_override;</span>
+<span id="L168"><span class="lineNum">     168</span>              :    assign pic_pri_c1_clken    = (waddr_intpriority_base_match &amp; picm_wren_ff)  | (raddr_intpriority_base_match &amp; picm_rden_ff) | clk_override;</span>
+<span id="L169"><span class="lineNum">     169</span>              :    assign pic_int_c1_clken    = (waddr_intenable_base_match   &amp; picm_wren_ff)  | (raddr_intenable_base_match   &amp; picm_rden_ff) | clk_override;</span>
+<span id="L170"><span class="lineNum">     170</span>              :    assign gw_config_c1_clken  = (waddr_config_gw_base_match   &amp; picm_wren_ff)  | (raddr_config_gw_base_match   &amp; picm_rden_ff) | clk_override;</span>
+<span id="L171"><span class="lineNum">     171</span>              : </span>
+<span id="L172"><span class="lineNum">     172</span>              :    // C1 - 1 clock pulse for data</span>
+<span id="L173"><span class="lineNum">     173</span>              :    rvoclkhdr pic_addr_c1_cgc   ( .en(pic_raddr_c1_clken),  .l1clk(pic_raddr_c1_clk), .* );</span>
+<span id="L174"><span class="lineNum">     174</span>              :    rvoclkhdr pic_data_c1_cgc   ( .en(pic_data_c1_clken),   .l1clk(pic_data_c1_clk), .* );</span>
+<span id="L175"><span class="lineNum">     175</span>              :    rvoclkhdr pic_pri_c1_cgc    ( .en(pic_pri_c1_clken),    .l1clk(pic_pri_c1_clk),  .* );</span>
+<span id="L176"><span class="lineNum">     176</span>              :    rvoclkhdr pic_int_c1_cgc    ( .en(pic_int_c1_clken),    .l1clk(pic_int_c1_clk),  .* );</span>
+<span id="L177"><span class="lineNum">     177</span>              :    rvoclkhdr gw_config_c1_cgc  ( .en(gw_config_c1_clken),  .l1clk(gw_config_c1_clk),  .* );</span>
+<span id="L178"><span class="lineNum">     178</span>              : </span>
+<span id="L179"><span class="lineNum">     179</span>              : // ------ end clock gating section ------------------------</span>
+<span id="L180"><span class="lineNum">     180</span>              : </span>
+<span id="L181"><span class="lineNum">     181</span>              : assign raddr_intenable_base_match   = (picm_raddr_ff[31:NUM_LEVELS+2] == INTENABLE_BASE_ADDR[31:NUM_LEVELS+2]) ;</span>
+<span id="L182"><span class="lineNum">     182</span>              : assign raddr_intpriority_base_match = (picm_raddr_ff[31:NUM_LEVELS+2] == INTPRIORITY_BASE_ADDR[31:NUM_LEVELS+2]) ;</span>
+<span id="L183"><span class="lineNum">     183</span>              : assign raddr_config_gw_base_match   = (picm_raddr_ff[31:NUM_LEVELS+2] == EXT_INTR_GW_CONFIG[31:NUM_LEVELS+2]) ;</span>
+<span id="L184"><span class="lineNum">     184</span>              : assign raddr_config_pic_match       = (picm_raddr_ff[31:0]            == EXT_INTR_PIC_CONFIG[31:0]) ;</span>
+<span id="L185"><span class="lineNum">     185</span>              : </span>
+<span id="L186"><span class="lineNum">     186</span>              : assign addr_intpend_base_match      = (picm_raddr_ff[31:6]            == INTPEND_BASE_ADDR[31:6]) ;</span>
+<span id="L187"><span class="lineNum">     187</span>              : </span>
+<span id="L188"><span class="lineNum">     188</span>              : assign waddr_config_pic_match       = (picm_waddr_ff[31:0]            == EXT_INTR_PIC_CONFIG[31:0]) ;</span>
+<span id="L189"><span class="lineNum">     189</span>              : assign addr_clear_gw_base_match     = (picm_waddr_ff[31:NUM_LEVELS+2] == EXT_INTR_GW_CLEAR[31:NUM_LEVELS+2]) ;</span>
+<span id="L190"><span class="lineNum">     190</span>              : assign waddr_intpriority_base_match = (picm_waddr_ff[31:NUM_LEVELS+2] == INTPRIORITY_BASE_ADDR[31:NUM_LEVELS+2]) ;</span>
+<span id="L191"><span class="lineNum">     191</span>              : assign waddr_intenable_base_match   = (picm_waddr_ff[31:NUM_LEVELS+2] == INTENABLE_BASE_ADDR[31:NUM_LEVELS+2]) ;</span>
+<span id="L192"><span class="lineNum">     192</span>              : assign waddr_config_gw_base_match   = (picm_waddr_ff[31:NUM_LEVELS+2] == EXT_INTR_GW_CONFIG[31:NUM_LEVELS+2]) ;</span>
+<span id="L193"><span class="lineNum">     193</span>              : </span>
+<span id="L194"><span class="lineNum">     194</span>              :    assign picm_bypass_ff = picm_rden_ff &amp; picm_wren_ff &amp; ( picm_raddr_ff[31:0] == picm_waddr_ff[31:0] );    // pic writes and reads to same address together</span>
+<span id="L195"><span class="lineNum">     195</span>              : </span>
+<span id="L196"><span class="lineNum">     196</span>              : </span>
+<span id="L197"><span class="lineNum">     197</span>              : rvdff #(32) picm_radd_flop  (.*, .din (picm_rdaddr),        .dout(picm_raddr_ff),         .clk(pic_raddr_c1_clk));</span>
+<span id="L198"><span class="lineNum">     198</span>              : rvdff #(32) picm_wadd_flop  (.*, .din (picm_wraddr),        .dout(picm_waddr_ff),         .clk(pic_data_c1_clk));</span>
+<span id="L199"><span class="lineNum">     199</span>              : rvdff  #(1) picm_wre_flop   (.*, .din (picm_wren),          .dout(picm_wren_ff),          .clk(free_clk));</span>
+<span id="L200"><span class="lineNum">     200</span>              : rvdff  #(1) picm_rde_flop   (.*, .din (picm_rden),          .dout(picm_rden_ff),          .clk(free_clk));</span>
+<span id="L201"><span class="lineNum">     201</span>              : rvdff  #(1) picm_mke_flop   (.*, .din (picm_mken),          .dout(picm_mken_ff),          .clk(free_clk));</span>
+<span id="L202"><span class="lineNum">     202</span>              : rvdff #(32) picm_dat_flop   (.*, .din (picm_wr_data[31:0]), .dout(picm_wr_data_ff[31:0]), .clk(pic_data_c1_clk));</span>
+<span id="L203"><span class="lineNum">     203</span>              : </span>
+<span id="L204"><span class="lineNum">     204</span>              : //rvsyncss  #(pt.PIC_TOTAL_INT_PLUS1-1) sync_inst</span>
+<span id="L205"><span class="lineNum">     205</span>              : //(</span>
+<span id="L206"><span class="lineNum">     206</span>              : // .clk (free_clk),</span>
+<span id="L207"><span class="lineNum">     207</span>              : // .dout(extintsrc_req_sync[pt.PIC_TOTAL_INT_PLUS1-1:1]),</span>
+<span id="L208"><span class="lineNum">     208</span>              : // .din (extintsrc_req[pt.PIC_TOTAL_INT_PLUS1-1:1]),</span>
+<span id="L209"><span class="lineNum">     209</span>              : // .*) ;</span>
+<span id="L210"><span class="lineNum">     210</span>              : //</span>
+<span id="L211"><span class="lineNum">     211</span>              : //assign extintsrc_req_sync[0] = extintsrc_req[0];</span>
+<span id="L212"><span class="lineNum">     212</span>              : /*</span>
+<span id="L213"><span class="lineNum">     213</span>              : genvar p ;</span>
+<span id="L214"><span class="lineNum">     214</span>              : for (p=0; p&lt;=INT_ENABLE_GRPS ; p++) begin  : IO_CLK_GRP</span>
+<span id="L215"><span class="lineNum">     215</span>              :    if (p==INT_ENABLE_GRPS) begin : LAST_GRP</span>
+<span id="L216"><span class="lineNum">     216</span>              :        assign intenable_clk_enable_grp[p] = |intenable_clk_enable[pt.PIC_TOTAL_INT_PLUS1-1 : p*4] | io_clk_override;</span>
+<span id="L217"><span class="lineNum">     217</span>              :        rvoclkhdr intenable_c1_cgc   ( .en(intenable_clk_enable_grp[p]),  .l1clk(gw_clk[p]), .* );</span>
+<span id="L218"><span class="lineNum">     218</span>              :    end else begin :  CLK_GRPS</span>
+<span id="L219"><span class="lineNum">     219</span>              :        assign intenable_clk_enable_grp[p] = |intenable_clk_enable[p*4+3 : p*4] | io_clk_override;</span>
+<span id="L220"><span class="lineNum">     220</span>              :        rvoclkhdr intenable_c1_cgc   ( .en(intenable_clk_enable_grp[p]),  .l1clk(gw_clk[p]), .* );</span>
+<span id="L221"><span class="lineNum">     221</span>              :    end</span>
+<span id="L222"><span class="lineNum">     222</span>              : end</span>
+<span id="L223"><span class="lineNum">     223</span>              : */</span>
+<span id="L224"><span class="lineNum">     224</span>              : </span>
+<span id="L225"><span class="lineNum">     225</span>              : </span>
+<span id="L226"><span class="lineNum">     226</span>              : </span>
+<span id="L227"><span class="lineNum">     227</span>              : genvar i ;</span>
+<span id="L228"><span class="lineNum">     228</span>              : genvar p ;</span>
+<span id="L229"><span class="lineNum">     229</span>              : for (p=0; p&lt;=INT_ENABLE_GRPS ; p++) begin  : IO_CLK_GRP</span>
+<span id="L230"><span class="lineNum">     230</span>              : wire grp_clk, grp_clken;</span>
+<span id="L231"><span class="lineNum">     231</span>              : </span>
+<span id="L232"><span class="lineNum">     232</span>              :     assign grp_clken = |intenable_clk_enable[(p==INT_ENABLE_GRPS?pt.PIC_TOTAL_INT_PLUS1-1:p*4+3) : p*4] | io_clk_override;</span>
+<span id="L233"><span class="lineNum">     233</span>              : </span>
+<span id="L234"><span class="lineNum">     234</span>              :   `ifndef RV_FPGA_OPTIMIZE</span>
+<span id="L235"><span class="lineNum">     235</span>              :     rvclkhdr intenable_c1_cgc( .en(grp_clken),  .l1clk(grp_clk), .* );</span>
+<span id="L236"><span class="lineNum">     236</span>              :   `else</span>
+<span id="L237"><span class="lineNum">     237</span>              :     assign gw_clk[p] = 1'b0 ;</span>
+<span id="L238"><span class="lineNum">     238</span>              :   `endif</span>
+<span id="L239"><span class="lineNum">     239</span>              : </span>
+<span id="L240"><span class="lineNum">     240</span>              :     for(genvar i= (p==0 ? 1: 0); i&lt; (p==INT_ENABLE_GRPS ? pt.PIC_TOTAL_INT_PLUS1-p*4 :4); i++) begin : GW</span>
+<span id="L241"><span class="lineNum">     241</span>              :         el2_configurable_gw gw_inst(</span>
+<span id="L242"><span class="lineNum">     242</span>              :              .*,</span>
+<span id="L243"><span class="lineNum">     243</span>              :             .gw_clk(grp_clk),</span>
+<span id="L244"><span class="lineNum">     244</span>              :             .rawclk(clk),</span>
+<span id="L245"><span class="lineNum">     245</span>              :             .clken (grp_clken),</span>
+<span id="L246"><span class="lineNum">     246</span>              :             .extintsrc_req(extintsrc_req[i+p*4]) ,</span>
+<span id="L247"><span class="lineNum">     247</span>              :             .meigwctrl_polarity(gw_config_reg[i+p*4][0]) ,</span>
+<span id="L248"><span class="lineNum">     248</span>              :             .meigwctrl_type(gw_config_reg[i+p*4][1]) ,</span>
+<span id="L249"><span class="lineNum">     249</span>              :             .meigwclr(gw_clear_reg_we[i+p*4]) ,</span>
+<span id="L250"><span class="lineNum">     250</span>              :             .extintsrc_req_config(extintsrc_req_gw[i+p*4])</span>
+<span id="L251"><span class="lineNum">     251</span>              :         );</span>
+<span id="L252"><span class="lineNum">     252</span>              :     end</span>
+<span id="L253"><span class="lineNum">     253</span>              : end</span>
+<span id="L254"><span class="lineNum">     254</span>              : </span>
+<span id="L255"><span class="lineNum">     255</span>              : </span>
+<span id="L256"><span class="lineNum">     256</span>              : </span>
+<span id="L257"><span class="lineNum">     257</span>              : </span>
+<span id="L258"><span class="lineNum">     258</span>              : </span>
+<span id="L259"><span class="lineNum">     259</span>              : </span>
+<span id="L260"><span class="lineNum">     260</span>              : </span>
+<span id="L261"><span class="lineNum">     261</span>              : </span>
+<span id="L262"><span class="lineNum">     262</span>              : for (i=0; i&lt;pt.PIC_TOTAL_INT_PLUS1 ; i++) begin  : SETREG</span>
+<span id="L263"><span class="lineNum">     263</span>              : </span>
+<span id="L264"><span class="lineNum">     264</span>              :  if (i &gt; 0 ) begin : NON_ZERO_INT</span>
+<span id="L265"><span class="lineNum">     265</span>              :      assign intpriority_reg_we[i] =  waddr_intpriority_base_match &amp; (picm_waddr_ff[NUM_LEVELS+1:2] == i) &amp; picm_wren_ff;</span>
+<span id="L266"><span class="lineNum">     266</span>              :      assign intpriority_reg_re[i] =  raddr_intpriority_base_match &amp; (picm_raddr_ff[NUM_LEVELS+1:2] == i) &amp; picm_rden_ff;</span>
+<span id="L267"><span class="lineNum">     267</span>              : </span>
+<span id="L268"><span class="lineNum">     268</span>              :      assign intenable_reg_we[i]   =  waddr_intenable_base_match   &amp; (picm_waddr_ff[NUM_LEVELS+1:2] == i) &amp; picm_wren_ff;</span>
+<span id="L269"><span class="lineNum">     269</span>              :      assign intenable_reg_re[i]   =  raddr_intenable_base_match   &amp; (picm_raddr_ff[NUM_LEVELS+1:2] == i) &amp; picm_rden_ff;</span>
+<span id="L270"><span class="lineNum">     270</span>              : </span>
+<span id="L271"><span class="lineNum">     271</span>              :      assign gw_config_reg_we[i]   =  waddr_config_gw_base_match   &amp; (picm_waddr_ff[NUM_LEVELS+1:2] == i) &amp; picm_wren_ff;</span>
+<span id="L272"><span class="lineNum">     272</span>              :      assign gw_config_reg_re[i]   =  raddr_config_gw_base_match   &amp; (picm_raddr_ff[NUM_LEVELS+1:2] == i) &amp; picm_rden_ff;</span>
+<span id="L273"><span class="lineNum">     273</span>              : </span>
+<span id="L274"><span class="lineNum">     274</span>              :      assign gw_clear_reg_we[i]    =  addr_clear_gw_base_match     &amp; (picm_waddr_ff[NUM_LEVELS+1:2] == i) &amp; picm_wren_ff ;</span>
+<span id="L275"><span class="lineNum">     275</span>              : </span>
+<span id="L276"><span class="lineNum">     276</span>              :      rvdffs #(INTPRIORITY_BITS) intpriority_ff  (.*, .en( intpriority_reg_we[i]), .din (picm_wr_data_ff[INTPRIORITY_BITS-1:0]), .dout(intpriority_reg[i]), .clk(pic_pri_c1_clk));</span>
+<span id="L277"><span class="lineNum">     277</span>              :      rvdffs #(1)                 intenable_ff   (.*, .en( intenable_reg_we[i]),   .din (picm_wr_data_ff[0]),                    .dout(intenable_reg[i]),   .clk(pic_int_c1_clk));</span>
+<span id="L278"><span class="lineNum">     278</span>              :      rvdffs #(2)                 gw_config_ff   (.*, .en( gw_config_reg_we[i]),   .din (picm_wr_data_ff[1:0]),                  .dout(gw_config_reg[i]),   .clk(gw_config_c1_clk));</span>
+<span id="L279"><span class="lineNum">     279</span>              : </span>
+<span id="L280"><span class="lineNum">     280</span>              :      assign intenable_clk_enable[i]  =  gw_config_reg[i][1] | intenable_reg_we[i] | intenable_reg[i] | gw_clear_reg_we[i] ;</span>
+<span id="L281"><span class="lineNum">     281</span>              : </span>
+<span id="L282"><span class="lineNum">     282</span>              : /*</span>
+<span id="L283"><span class="lineNum">     283</span>              :      rvsyncss_fpga  #(1) sync_inst</span>
+<span id="L284"><span class="lineNum">     284</span>              :      (</span>
+<span id="L285"><span class="lineNum">     285</span>              :       .gw_clk      (gw_clk[i/4]),</span>
+<span id="L286"><span class="lineNum">     286</span>              :       .rawclk      (clk),</span>
+<span id="L287"><span class="lineNum">     287</span>              :       .clken       (intenable_clk_enable_grp[i/4]),</span>
+<span id="L288"><span class="lineNum">     288</span>              :       .dout        (extintsrc_req_sync[i]),</span>
+<span id="L289"><span class="lineNum">     289</span>              :       .din         (extintsrc_req[i]),</span>
+<span id="L290"><span class="lineNum">     290</span>              :       .*) ;</span>
+<span id="L291"><span class="lineNum">     291</span>              : </span>
+<span id="L292"><span class="lineNum">     292</span>              : </span>
+<span id="L293"><span class="lineNum">     293</span>              : </span>
+<span id="L294"><span class="lineNum">     294</span>              : </span>
+<span id="L295"><span class="lineNum">     295</span>              : </span>
+<span id="L296"><span class="lineNum">     296</span>              :         el2_configurable_gw config_gw_inst(.*,</span>
+<span id="L297"><span class="lineNum">     297</span>              :                                             .gw_clk(gw_clk[i/4]),</span>
+<span id="L298"><span class="lineNum">     298</span>              :                                             .rawclk(clk),</span>
+<span id="L299"><span class="lineNum">     299</span>              :                                             .clken (intenable_clk_enable_grp[i/4]),</span>
+<span id="L300"><span class="lineNum">     300</span>              :                                             .extintsrc_req_sync(extintsrc_req_sync[i]) ,</span>
+<span id="L301"><span class="lineNum">     301</span>              :                                             .meigwctrl_polarity(gw_config_reg[i][0]) ,</span>
+<span id="L302"><span class="lineNum">     302</span>              :                                             .meigwctrl_type(gw_config_reg[i][1]) ,</span>
+<span id="L303"><span class="lineNum">     303</span>              :                                             .meigwclr(gw_clear_reg_we[i]) ,</span>
+<span id="L304"><span class="lineNum">     304</span>              :                                             .extintsrc_req_config(extintsrc_req_gw[i])</span>
+<span id="L305"><span class="lineNum">     305</span>              :                                             );</span>
+<span id="L306"><span class="lineNum">     306</span>              :              */</span>
+<span id="L307"><span class="lineNum">     307</span>              : </span>
+<span id="L308"><span class="lineNum">     308</span>              :  end else begin : INT_ZERO</span>
+<span id="L309"><span class="lineNum">     309</span>              :      assign intpriority_reg_we[i] =  1'b0 ;</span>
+<span id="L310"><span class="lineNum">     310</span>              :      assign intpriority_reg_re[i] =  1'b0 ;</span>
+<span id="L311"><span class="lineNum">     311</span>              :      assign intenable_reg_we[i]   =  1'b0 ;</span>
+<span id="L312"><span class="lineNum">     312</span>              :      assign intenable_reg_re[i]   =  1'b0 ;</span>
+<span id="L313"><span class="lineNum">     313</span>              : </span>
+<span id="L314"><span class="lineNum">     314</span>              :      assign gw_config_reg_we[i]   =  1'b0 ;</span>
+<span id="L315"><span class="lineNum">     315</span>              :      assign gw_config_reg_re[i]   =  1'b0 ;</span>
+<span id="L316"><span class="lineNum">     316</span>              :      assign gw_clear_reg_we[i]    =  1'b0 ;</span>
+<span id="L317"><span class="lineNum">     317</span>              : </span>
+<span id="L318"><span class="lineNum">     318</span>              :      assign gw_config_reg[i]    = '0 ;</span>
+<span id="L319"><span class="lineNum">     319</span>              : </span>
+<span id="L320"><span class="lineNum">     320</span>              :      assign intpriority_reg[i] = {INTPRIORITY_BITS{1'b0}} ;</span>
+<span id="L321"><span class="lineNum">     321</span>              :      assign intenable_reg[i]   = 1'b0 ;</span>
+<span id="L322"><span class="lineNum">     322</span>              :      assign extintsrc_req_gw[i] = 1'b0 ;</span>
+<span id="L323"><span class="lineNum">     323</span>              :      assign extintsrc_req_sync[i]    = 1'b0 ;</span>
+<span id="L324"><span class="lineNum">     324</span>              :      assign intenable_clk_enable[i] = 1'b0;</span>
+<span id="L325"><span class="lineNum">     325</span>              :  end</span>
+<span id="L326"><span class="lineNum">     326</span>              : </span>
+<span id="L327"><span class="lineNum">     327</span>              : </span>
+<span id="L328"><span class="lineNum">     328</span>              :     assign intpriority_reg_inv[i] =  intpriord ? ~intpriority_reg[i] : intpriority_reg[i] ;</span>
+<span id="L329"><span class="lineNum">     329</span>              : </span>
+<span id="L330"><span class="lineNum">     330</span>              :     assign intpend_w_prior_en[i]  =  {INTPRIORITY_BITS{(extintsrc_req_gw[i] &amp; intenable_reg[i])}} &amp; intpriority_reg_inv[i] ;</span>
+<span id="L331"><span class="lineNum">     331</span>              :     assign intpend_id[i]          =  i ;</span>
+<span id="L332"><span class="lineNum">     332</span>              : end</span>
+<span id="L333"><span class="lineNum">     333</span>              : </span>
+<span id="L334"><span class="lineNum">     334</span>              : </span>
+<span id="L335"><span class="lineNum">     335</span>              :         assign pl_in[INTPRIORITY_BITS-1:0]                  =      selected_int_priority[INTPRIORITY_BITS-1:0] ;</span>
+<span id="L336"><span class="lineNum">     336</span>              : </span>
+<span id="L337"><span class="lineNum">     337</span>              : //if (pt.PIC_2CYCLE == 1) begin : genblock</span>
+<span id="L338"><span class="lineNum">     338</span>              : //end</span>
+<span id="L339"><span class="lineNum">     339</span>              : //else begin : genblock</span>
+<span id="L340"><span class="lineNum">     340</span>              : //end</span>
+<span id="L341"><span class="lineNum">     341</span>              : </span>
+<span id="L342"><span class="lineNum">     342</span>              :  genvar l, m , j, k;</span>
+<span id="L343"><span class="lineNum">     343</span>              : </span>
+<span id="L344"><span class="lineNum">     344</span>              : if (pt.PIC_2CYCLE == 1) begin : genblock</span>
+<span id="L345"><span class="lineNum">     345</span>              :         logic [NUM_LEVELS/2:0] [pt.PIC_TOTAL_INT_PLUS1+2:0] [INTPRIORITY_BITS-1:0] level_intpend_w_prior_en;</span>
+<span id="L346"><span class="lineNum">     346</span>              :         logic [NUM_LEVELS/2:0] [pt.PIC_TOTAL_INT_PLUS1+2:0] [ID_BITS-1:0]          level_intpend_id;</span>
+<span id="L347"><span class="lineNum">     347</span>              :         logic [NUM_LEVELS:NUM_LEVELS/2] [(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2))+1:0] [INTPRIORITY_BITS-1:0] levelx_intpend_w_prior_en;</span>
+<span id="L348"><span class="lineNum">     348</span>              :         logic [NUM_LEVELS:NUM_LEVELS/2] [(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2))+1:0] [ID_BITS-1:0]          levelx_intpend_id;</span>
+<span id="L349"><span class="lineNum">     349</span>              : </span>
+<span id="L350"><span class="lineNum">     350</span>              :         assign level_intpend_w_prior_en[0][pt.PIC_TOTAL_INT_PLUS1+2:0] = {4'b0,4'b0,4'b0,intpend_w_prior_en[pt.PIC_TOTAL_INT_PLUS1-1:0]} ;</span>
+<span id="L351"><span class="lineNum">     351</span>              :         assign level_intpend_id[0][pt.PIC_TOTAL_INT_PLUS1+2:0]         = {8'b0,8'b0,8'b0,intpend_id[pt.PIC_TOTAL_INT_PLUS1-1:0]} ;</span>
+<span id="L352"><span class="lineNum">     352</span>              : </span>
+<span id="L353"><span class="lineNum">     353</span>              :         logic [(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2)):0] [INTPRIORITY_BITS-1:0] l2_intpend_w_prior_en_ff;</span>
+<span id="L354"><span class="lineNum">     354</span>              :         logic [(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2)):0] [ID_BITS-1:0]          l2_intpend_id_ff;</span>
+<span id="L355"><span class="lineNum">     355</span>              : </span>
+<span id="L356"><span class="lineNum">     356</span>              :         assign levelx_intpend_w_prior_en[NUM_LEVELS/2][(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2))+1:0] = {{1*INTPRIORITY_BITS{1'b0}},l2_intpend_w_prior_en_ff[(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2)):0]} ;</span>
+<span id="L357"><span class="lineNum">     357</span>              :         assign levelx_intpend_id[NUM_LEVELS/2][(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2))+1:0]         = {{1*ID_BITS{1'b1}},l2_intpend_id_ff[(pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2)):0]} ;</span>
+<span id="L358"><span class="lineNum">     358</span>              : ///  Do the prioritization of the interrupts here  ////////////</span>
+<span id="L359"><span class="lineNum">     359</span>              :  for (l=0; l&lt;NUM_LEVELS/2 ; l++) begin : TOP_LEVEL</span>
+<span id="L360"><span class="lineNum">     360</span>              :     for (m=0; m&lt;=(pt.PIC_TOTAL_INT_PLUS1)/(2**(l+1)) ; m++) begin : COMPARE</span>
+<span id="L361"><span class="lineNum">     361</span>              :        if ( m == (pt.PIC_TOTAL_INT_PLUS1)/(2**(l+1))) begin</span>
+<span id="L362"><span class="lineNum">     362</span>              :             assign level_intpend_w_prior_en[l+1][m+1] = '0 ;</span>
+<span id="L363"><span class="lineNum">     363</span>              :             assign level_intpend_id[l+1][m+1]         = '0 ;</span>
+<span id="L364"><span class="lineNum">     364</span>              :        end</span>
+<span id="L365"><span class="lineNum">     365</span>              :        el2_cmp_and_mux  #(.ID_BITS(ID_BITS),</span>
+<span id="L366"><span class="lineNum">     366</span>              :                       .INTPRIORITY_BITS(INTPRIORITY_BITS)) cmp_l1 (</span>
+<span id="L367"><span class="lineNum">     367</span>              :                       .a_id(level_intpend_id[l][2*m]),</span>
+<span id="L368"><span class="lineNum">     368</span>              :                       .a_priority(level_intpend_w_prior_en[l][2*m]),</span>
+<span id="L369"><span class="lineNum">     369</span>              :                       .b_id(level_intpend_id[l][2*m+1]),</span>
+<span id="L370"><span class="lineNum">     370</span>              :                       .b_priority(level_intpend_w_prior_en[l][2*m+1]),</span>
+<span id="L371"><span class="lineNum">     371</span>              :                       .out_id(level_intpend_id[l+1][m]),</span>
+<span id="L372"><span class="lineNum">     372</span>              :                       .out_priority(level_intpend_w_prior_en[l+1][m])) ;</span>
+<span id="L373"><span class="lineNum">     373</span>              : </span>
+<span id="L374"><span class="lineNum">     374</span>              :     end</span>
+<span id="L375"><span class="lineNum">     375</span>              :  end</span>
+<span id="L376"><span class="lineNum">     376</span>              : </span>
+<span id="L377"><span class="lineNum">     377</span>              :         for (i=0; i&lt;=pt.PIC_TOTAL_INT_PLUS1/2**(NUM_LEVELS/2) ; i++) begin : MIDDLE_FLOPS</span>
+<span id="L378"><span class="lineNum">     378</span>              :           rvdff #(INTPRIORITY_BITS) level2_intpend_prior_reg  (.*, .din (level_intpend_w_prior_en[NUM_LEVELS/2][i]), .dout(l2_intpend_w_prior_en_ff[i]),  .clk(free_clk));</span>
+<span id="L379"><span class="lineNum">     379</span>              :           rvdff #(ID_BITS)          level2_intpend_id_reg     (.*, .din (level_intpend_id[NUM_LEVELS/2][i]),         .dout(l2_intpend_id_ff[i]),          .clk(free_clk));</span>
+<span id="L380"><span class="lineNum">     380</span>              :         end</span>
+<span id="L381"><span class="lineNum">     381</span>              : </span>
+<span id="L382"><span class="lineNum">     382</span>              :  for (j=NUM_LEVELS/2; j&lt;NUM_LEVELS ; j++) begin : BOT_LEVELS</span>
+<span id="L383"><span class="lineNum">     383</span>              :     for (k=0; k&lt;=(pt.PIC_TOTAL_INT_PLUS1)/(2**(j+1)) ; k++) begin : COMPARE</span>
+<span id="L384"><span class="lineNum">     384</span>              :        if ( k == (pt.PIC_TOTAL_INT_PLUS1)/(2**(j+1))) begin</span>
+<span id="L385"><span class="lineNum">     385</span>              :             assign levelx_intpend_w_prior_en[j+1][k+1] = '0 ;</span>
+<span id="L386"><span class="lineNum">     386</span>              :             assign levelx_intpend_id[j+1][k+1]         = '0 ;</span>
+<span id="L387"><span class="lineNum">     387</span>              :        end</span>
+<span id="L388"><span class="lineNum">     388</span>              :             el2_cmp_and_mux  #(.ID_BITS(ID_BITS),</span>
+<span id="L389"><span class="lineNum">     389</span>              :                         .INTPRIORITY_BITS(INTPRIORITY_BITS))</span>
+<span id="L390"><span class="lineNum">     390</span>              :                  cmp_l1 (</span>
+<span id="L391"><span class="lineNum">     391</span>              :                         .a_id(levelx_intpend_id[j][2*k]),</span>
+<span id="L392"><span class="lineNum">     392</span>              :                         .a_priority(levelx_intpend_w_prior_en[j][2*k]),</span>
+<span id="L393"><span class="lineNum">     393</span>              :                         .b_id(levelx_intpend_id[j][2*k+1]),</span>
+<span id="L394"><span class="lineNum">     394</span>              :                         .b_priority(levelx_intpend_w_prior_en[j][2*k+1]),</span>
+<span id="L395"><span class="lineNum">     395</span>              :                         .out_id(levelx_intpend_id[j+1][k]),</span>
+<span id="L396"><span class="lineNum">     396</span>              :                         .out_priority(levelx_intpend_w_prior_en[j+1][k])) ;</span>
+<span id="L397"><span class="lineNum">     397</span>              :     end</span>
+<span id="L398"><span class="lineNum">     398</span>              :   end</span>
+<span id="L399"><span class="lineNum">     399</span>              :         assign claimid_in[ID_BITS-1:0]                      =      levelx_intpend_id[NUM_LEVELS][0] ;   // This is the last level output</span>
+<span id="L400"><span class="lineNum">     400</span>              :         assign selected_int_priority[INTPRIORITY_BITS-1:0]  =      levelx_intpend_w_prior_en[NUM_LEVELS][0] ;</span>
+<span id="L401"><span class="lineNum">     401</span>              : end</span>
+<span id="L402"><span class="lineNum">     402</span>              : else begin : genblock</span>
+<span id="L403"><span class="lineNum">     403</span>              : </span>
+<span id="L404"><span class="lineNum">     404</span>              :         logic [NUM_LEVELS:0] [pt.PIC_TOTAL_INT_PLUS1+1:0] [INTPRIORITY_BITS-1:0] level_intpend_w_prior_en;</span>
+<span id="L405"><span class="lineNum">     405</span>              :         logic [NUM_LEVELS:0] [pt.PIC_TOTAL_INT_PLUS1+1:0] [ID_BITS-1:0]          level_intpend_id;</span>
+<span id="L406"><span class="lineNum">     406</span>              : </span>
+<span id="L407"><span class="lineNum">     407</span>              :         assign level_intpend_w_prior_en[0][pt.PIC_TOTAL_INT_PLUS1+1:0] = {{2*INTPRIORITY_BITS{1'b0}},intpend_w_prior_en[pt.PIC_TOTAL_INT_PLUS1-1:0]} ;</span>
+<span id="L408"><span class="lineNum">     408</span>              :         assign level_intpend_id[0][pt.PIC_TOTAL_INT_PLUS1+1:0] = {{2*ID_BITS{1'b1}},intpend_id[pt.PIC_TOTAL_INT_PLUS1-1:0]} ;</span>
+<span id="L409"><span class="lineNum">     409</span>              : </span>
+<span id="L410"><span class="lineNum">     410</span>              : ///  Do the prioritization of the interrupts here  ////////////</span>
+<span id="L411"><span class="lineNum">     411</span>              : // genvar l, m , j, k;  already declared outside ifdef</span>
+<span id="L412"><span class="lineNum">     412</span>              :  for (l=0; l&lt;NUM_LEVELS ; l++) begin : LEVEL</span>
+<span id="L413"><span class="lineNum">     413</span>              :     for (m=0; m&lt;=(pt.PIC_TOTAL_INT_PLUS1)/(2**(l+1)) ; m++) begin : COMPARE</span>
+<span id="L414"><span class="lineNum">     414</span>              :        if ( m == (pt.PIC_TOTAL_INT_PLUS1)/(2**(l+1))) begin</span>
+<span id="L415"><span class="lineNum">     415</span>              :             assign level_intpend_w_prior_en[l+1][m+1] = '0 ;</span>
+<span id="L416"><span class="lineNum">     416</span>              :             assign level_intpend_id[l+1][m+1]         = '0 ;</span>
+<span id="L417"><span class="lineNum">     417</span>              :        end</span>
+<span id="L418"><span class="lineNum">     418</span>              :        el2_cmp_and_mux  #(.ID_BITS(ID_BITS),</span>
+<span id="L419"><span class="lineNum">     419</span>              :                       .INTPRIORITY_BITS(INTPRIORITY_BITS)) cmp_l1 (</span>
+<span id="L420"><span class="lineNum">     420</span>              :                       .a_id(level_intpend_id[l][2*m]),</span>
+<span id="L421"><span class="lineNum">     421</span>              :                       .a_priority(level_intpend_w_prior_en[l][2*m]),</span>
+<span id="L422"><span class="lineNum">     422</span>              :                       .b_id(level_intpend_id[l][2*m+1]),</span>
+<span id="L423"><span class="lineNum">     423</span>              :                       .b_priority(level_intpend_w_prior_en[l][2*m+1]),</span>
+<span id="L424"><span class="lineNum">     424</span>              :                       .out_id(level_intpend_id[l+1][m]),</span>
+<span id="L425"><span class="lineNum">     425</span>              :                       .out_priority(level_intpend_w_prior_en[l+1][m])) ;</span>
+<span id="L426"><span class="lineNum">     426</span>              : </span>
+<span id="L427"><span class="lineNum">     427</span>              :     end</span>
+<span id="L428"><span class="lineNum">     428</span>              :  end</span>
+<span id="L429"><span class="lineNum">     429</span>              :         assign claimid_in[ID_BITS-1:0]                      =      level_intpend_id[NUM_LEVELS][0] ;   // This is the last level output</span>
+<span id="L430"><span class="lineNum">     430</span>              :         assign selected_int_priority[INTPRIORITY_BITS-1:0]  =      level_intpend_w_prior_en[NUM_LEVELS][0] ;</span>
+<span id="L431"><span class="lineNum">     431</span>              : </span>
+<span id="L432"><span class="lineNum">     432</span>              : end</span>
+<span id="L433"><span class="lineNum">     433</span>              : </span>
+<span id="L434"><span class="lineNum">     434</span>              : </span>
+<span id="L435"><span class="lineNum">     435</span>              : </span>
+<span id="L436"><span class="lineNum">     436</span>              : ///////////////////////////////////////////////////////////////////////</span>
+<span id="L437"><span class="lineNum">     437</span>              : // Config Reg`</span>
+<span id="L438"><span class="lineNum">     438</span>              : ///////////////////////////////////////////////////////////////////////</span>
+<span id="L439"><span class="lineNum">     439</span>              : assign config_reg_we               =  waddr_config_pic_match &amp; picm_wren_ff;</span>
+<span id="L440"><span class="lineNum">     440</span>              : assign config_reg_re               =  raddr_config_pic_match &amp; picm_rden_ff;</span>
+<span id="L441"><span class="lineNum">     441</span>              : </span>
+<span id="L442"><span class="lineNum">     442</span>              : assign config_reg_in  =  picm_wr_data_ff[0] ;   //</span>
+<span id="L443"><span class="lineNum">     443</span>              : rvdffs #(1) config_reg_ff  (.*, .clk(free_clk), .en(config_reg_we), .din (config_reg_in), .dout(config_reg));</span>
+<span id="L444"><span class="lineNum">     444</span>              : </span>
+<span id="L445"><span class="lineNum">     445</span>              : assign intpriord  = config_reg ;</span>
+<span id="L446"><span class="lineNum">     446</span>              : </span>
+<span id="L447"><span class="lineNum">     447</span>              : </span>
+<span id="L448"><span class="lineNum">     448</span>              : </span>
+<span id="L449"><span class="lineNum">     449</span>              : //////////////////////////////////////////////////////////////////////////</span>
+<span id="L450"><span class="lineNum">     450</span>              : // Send the interrupt to the core if it is above the thresh-hold</span>
+<span id="L451"><span class="lineNum">     451</span>              : //////////////////////////////////////////////////////////////////////////</span>
+<span id="L452"><span class="lineNum">     452</span>              : ///////////////////////////////////////////////////////////</span>
+<span id="L453"><span class="lineNum">     453</span>              : /// ClaimId  Reg and Corresponding PL</span>
+<span id="L454"><span class="lineNum">     454</span>              : ///////////////////////////////////////////////////////////</span>
+<span id="L455"><span class="lineNum">     455</span>              : //</span>
+<span id="L456"><span class="lineNum">     456</span>              : assign pl_in_q[INTPRIORITY_BITS-1:0] = intpriord ? ~pl_in : pl_in ;</span>
+<span id="L457"><span class="lineNum">     457</span>              : rvdff #(ID_BITS)          claimid_ff  (.*,  .din (claimid_in[ID_BITS-1:00]),     .dout(claimid[ID_BITS-1:00]),    .clk(free_clk));</span>
+<span id="L458"><span class="lineNum">     458</span>              : rvdff  #(INTPRIORITY_BITS) pl_ff      (.*, .din (pl_in_q[INTPRIORITY_BITS-1:0]), .dout(pl[INTPRIORITY_BITS-1:0]), .clk(free_clk));</span>
+<span id="L459"><span class="lineNum">     459</span>              : </span>
+<span id="L460"><span class="lineNum">     460</span> <span class="tlaUNC tlaBgUNC">           0 : logic [INTPRIORITY_BITS-1:0] meipt_inv , meicurpl_inv ;</span></span>
+<span id="L461"><span class="lineNum">     461</span>              : assign meipt_inv[INTPRIORITY_BITS-1:0]    = intpriord ? ~meipt[INTPRIORITY_BITS-1:0]    : meipt[INTPRIORITY_BITS-1:0] ;</span>
+<span id="L462"><span class="lineNum">     462</span>              : assign meicurpl_inv[INTPRIORITY_BITS-1:0] = intpriord ? ~meicurpl[INTPRIORITY_BITS-1:0] : meicurpl[INTPRIORITY_BITS-1:0] ;</span>
+<span id="L463"><span class="lineNum">     463</span>              : assign mexintpend_in = (( selected_int_priority[INTPRIORITY_BITS-1:0] &gt; meipt_inv[INTPRIORITY_BITS-1:0]) &amp;</span>
+<span id="L464"><span class="lineNum">     464</span>              :                         ( selected_int_priority[INTPRIORITY_BITS-1:0] &gt; meicurpl_inv[INTPRIORITY_BITS-1:0]) );</span>
+<span id="L465"><span class="lineNum">     465</span>              : rvdff #(1) mexintpend_ff  (.*, .clk(free_clk), .din (mexintpend_in), .dout(mexintpend));</span>
+<span id="L466"><span class="lineNum">     466</span>              : </span>
+<span id="L467"><span class="lineNum">     467</span>              : assign maxint[INTPRIORITY_BITS-1:0]      =  intpriord ? 0 : 15 ;</span>
+<span id="L468"><span class="lineNum">     468</span>              : assign mhwakeup_in = ( pl_in_q[INTPRIORITY_BITS-1:0] == maxint) ;</span>
+<span id="L469"><span class="lineNum">     469</span>              : rvdff #(1) wake_up_ff  (.*, .clk(free_clk), .din (mhwakeup_in), .dout(mhwakeup));</span>
+<span id="L470"><span class="lineNum">     470</span>              : </span>
+<span id="L471"><span class="lineNum">     471</span>              : </span>
+<span id="L472"><span class="lineNum">     472</span>              : </span>
+<span id="L473"><span class="lineNum">     473</span>              : </span>
+<span id="L474"><span class="lineNum">     474</span>              : </span>
+<span id="L475"><span class="lineNum">     475</span>              : //////////////////////////////////////////////////////////////////////////</span>
+<span id="L476"><span class="lineNum">     476</span>              : //  Reads of register.</span>
+<span id="L477"><span class="lineNum">     477</span>              : //  1- intpending</span>
+<span id="L478"><span class="lineNum">     478</span>              : //////////////////////////////////////////////////////////////////////////</span>
+<span id="L479"><span class="lineNum">     479</span>              : </span>
+<span id="L480"><span class="lineNum">     480</span>              : assign intpend_reg_read     =  addr_intpend_base_match      &amp; picm_rden_ff ;</span>
+<span id="L481"><span class="lineNum">     481</span>              : assign intpriority_reg_read =  raddr_intpriority_base_match &amp; picm_rden_ff;</span>
+<span id="L482"><span class="lineNum">     482</span>              : assign intenable_reg_read   =  raddr_intenable_base_match   &amp; picm_rden_ff;</span>
+<span id="L483"><span class="lineNum">     483</span>              : assign gw_config_reg_read   =  raddr_config_gw_base_match   &amp; picm_rden_ff;</span>
+<span id="L484"><span class="lineNum">     484</span>              : </span>
+<span id="L485"><span class="lineNum">     485</span>              : assign intpend_reg_extended[INTPEND_SIZE-1:0]  = {{INTPEND_SIZE-pt.PIC_TOTAL_INT_PLUS1{1'b0}},extintsrc_req_gw[pt.PIC_TOTAL_INT_PLUS1-1:0]} ;</span>
+<span id="L486"><span class="lineNum">     486</span>              : </span>
+<span id="L487"><span class="lineNum">     487</span>              :    for (i=0; i&lt;(INT_GRPS); i++) begin</span>
+<span id="L488"><span class="lineNum">     488</span>              :             assign intpend_rd_part_out[i] =  (({32{intpend_reg_read &amp; picm_raddr_ff[5:2] == i}}) &amp; intpend_reg_extended[((32*i)+31):(32*i)]) ;</span>
+<span id="L489"><span class="lineNum">     489</span>              :    end</span>
+<span id="L490"><span class="lineNum">     490</span>              : </span>
+<span id="L491"><span class="lineNum">     491</span> <span class="tlaGNC tlaBgGNC">           2 :    always_comb begin : INTPEND_RD</span></span>
+<span id="L492"><span class="lineNum">     492</span> <span class="tlaGNC">           2 :          intpend_rd_out =  '0 ;</span></span>
+<span id="L493"><span class="lineNum">     493</span> <span class="tlaGNC">           2 :          for (int i=0; i&lt;INT_GRPS; i++) begin</span></span>
+<span id="L494"><span class="lineNum">     494</span> <span class="tlaGNC">           4 :                intpend_rd_out |=  intpend_rd_part_out[i] ;</span></span>
+<span id="L495"><span class="lineNum">     495</span>              :          end</span>
+<span id="L496"><span class="lineNum">     496</span>              :    end</span>
+<span id="L497"><span class="lineNum">     497</span>              : </span>
+<span id="L498"><span class="lineNum">     498</span> <span class="tlaGNC">           2 :    always_comb begin : INTEN_RD</span></span>
+<span id="L499"><span class="lineNum">     499</span> <span class="tlaGNC">           2 :          intenable_rd_out =  '0 ;</span></span>
+<span id="L500"><span class="lineNum">     500</span> <span class="tlaGNC">           2 :          intpriority_rd_out =  '0 ;</span></span>
+<span id="L501"><span class="lineNum">     501</span> <span class="tlaGNC">           2 :          gw_config_rd_out =  '0 ;</span></span>
+<span id="L502"><span class="lineNum">     502</span> <span class="tlaGNC">           2 :          for (int i=0; i&lt;pt.PIC_TOTAL_INT_PLUS1; i++) begin</span></span>
+<span id="L503"><span class="lineNum">     503</span> <span class="tlaGNC">     2165376 :               if (intenable_reg_re[i]) begin</span></span>
+<span id="L504"><span class="lineNum">     504</span> <span class="tlaUNC tlaBgUNC">           0 :                intenable_rd_out    =  intenable_reg[i]  ;</span></span>
+<span id="L505"><span class="lineNum">     505</span>              :               end</span>
+<span id="L506"><span class="lineNum">     506</span> <span class="tlaGNC tlaBgGNC">     2165376 :               if (intpriority_reg_re[i]) begin</span></span>
+<span id="L507"><span class="lineNum">     507</span> <span class="tlaUNC tlaBgUNC">           0 :                intpriority_rd_out  =  intpriority_reg[i] ;</span></span>
+<span id="L508"><span class="lineNum">     508</span>              :               end</span>
+<span id="L509"><span class="lineNum">     509</span> <span class="tlaGNC tlaBgGNC">     2165376 :               if (gw_config_reg_re[i]) begin</span></span>
+<span id="L510"><span class="lineNum">     510</span> <span class="tlaUNC tlaBgUNC">           0 :                gw_config_rd_out  =  gw_config_reg[i] ;</span></span>
+<span id="L511"><span class="lineNum">     511</span>              :               end</span>
+<span id="L512"><span class="lineNum">     512</span>              :          end</span>
+<span id="L513"><span class="lineNum">     513</span>              :    end</span>
+<span id="L514"><span class="lineNum">     514</span>              : </span>
+<span id="L515"><span class="lineNum">     515</span>              : </span>
+<span id="L516"><span class="lineNum">     516</span>              :  assign picm_rd_data_in[31:0] = ({32{intpend_reg_read      }} &amp;   intpend_rd_out                                                    ) |</span>
+<span id="L517"><span class="lineNum">     517</span>              :                                 ({32{intpriority_reg_read  }} &amp;  {{32-INTPRIORITY_BITS{1'b0}}, intpriority_rd_out                 } ) |</span>
+<span id="L518"><span class="lineNum">     518</span>              :                                 ({32{intenable_reg_read    }} &amp;  {31'b0 , intenable_rd_out                                        } ) |</span>
+<span id="L519"><span class="lineNum">     519</span>              :                                 ({32{gw_config_reg_read    }} &amp;  {30'b0 , gw_config_rd_out                                        } ) |</span>
+<span id="L520"><span class="lineNum">     520</span>              :                                 ({32{config_reg_re         }} &amp;  {31'b0 , config_reg                                              } ) |</span>
+<span id="L521"><span class="lineNum">     521</span>              :                                 ({32{picm_mken_ff &amp; mask[3]}} &amp;  {30'b0 , 2'b11                                                   } ) |</span>
+<span id="L522"><span class="lineNum">     522</span>              :                                 ({32{picm_mken_ff &amp; mask[2]}} &amp;  {31'b0 , 1'b1                                                    } ) |</span>
+<span id="L523"><span class="lineNum">     523</span>              :                                 ({32{picm_mken_ff &amp; mask[1]}} &amp;  {28'b0 , 4'b1111                                                 } ) |</span>
+<span id="L524"><span class="lineNum">     524</span>              :                                 ({32{picm_mken_ff &amp; mask[0]}} &amp;   32'b0                                                             ) ;</span>
+<span id="L525"><span class="lineNum">     525</span>              : </span>
+<span id="L526"><span class="lineNum">     526</span>              : </span>
+<span id="L527"><span class="lineNum">     527</span>              : assign picm_rd_data[31:0] = picm_bypass_ff ? picm_wr_data_ff[31:0] : picm_rd_data_in[31:0] ;</span>
+<span id="L528"><span class="lineNum">     528</span>              : </span>
+<span id="L529"><span class="lineNum">     529</span> <span class="tlaGNC tlaBgGNC">        2336 : logic [14:0] address;</span></span>
+<span id="L530"><span class="lineNum">     530</span>              : </span>
+<span id="L531"><span class="lineNum">     531</span>              : assign address[14:0] = picm_raddr_ff[14:0];</span>
+<span id="L532"><span class="lineNum">     532</span>              : </span>
+<span id="L533"><span class="lineNum">     533</span>              : `include "pic_map_auto.h"</span>
+<span id="L534"><span class="lineNum">     534</span>              : </span>
+<span id="L535"><span class="lineNum">     535</span>              : endmodule</span>
+<span id="L536"><span class="lineNum">     536</span>              : </span>
+<span id="L537"><span class="lineNum">     537</span>              : </span>
+<span id="L538"><span class="lineNum">     538</span>              : module el2_cmp_and_mux #(parameter ID_BITS=8,</span>
+<span id="L539"><span class="lineNum">     539</span>              :                                INTPRIORITY_BITS = 4)</span>
+<span id="L540"><span class="lineNum">     540</span>              :                     (</span>
+<span id="L541"><span class="lineNum">     541</span> <span class="tlaGNC">          10 :                         input  logic [ID_BITS-1:0]       a_id,</span></span>
+<span id="L542"><span class="lineNum">     542</span> <span class="tlaUNC tlaBgUNC">           0 :                         input  logic [INTPRIORITY_BITS-1:0] a_priority,</span></span>
+<span id="L543"><span class="lineNum">     543</span>              : </span>
+<span id="L544"><span class="lineNum">     544</span> <span class="tlaGNC tlaBgGNC">           2 :                         input  logic [ID_BITS-1:0]       b_id,</span></span>
+<span id="L545"><span class="lineNum">     545</span> <span class="tlaUNC tlaBgUNC">           0 :                         input  logic [INTPRIORITY_BITS-1:0] b_priority,</span></span>
+<span id="L546"><span class="lineNum">     546</span>              : </span>
+<span id="L547"><span class="lineNum">     547</span> <span class="tlaGNC tlaBgGNC">          10 :                         output logic [ID_BITS-1:0]       out_id,</span></span>
+<span id="L548"><span class="lineNum">     548</span> <span class="tlaUNC tlaBgUNC">           0 :                         output logic [INTPRIORITY_BITS-1:0] out_priority</span></span>
+<span id="L549"><span class="lineNum">     549</span>              : </span>
+<span id="L550"><span class="lineNum">     550</span>              :                     );</span>
+<span id="L551"><span class="lineNum">     551</span>              : </span>
+<span id="L552"><span class="lineNum">     552</span> <span class="tlaUNC">           0 : logic   a_is_lt_b ;</span></span>
+<span id="L553"><span class="lineNum">     553</span>              : </span>
+<span id="L554"><span class="lineNum">     554</span>              : assign  a_is_lt_b  = ( a_priority[INTPRIORITY_BITS-1:0] &lt; b_priority[INTPRIORITY_BITS-1:0] ) ;</span>
+<span id="L555"><span class="lineNum">     555</span>              : </span>
+<span id="L556"><span class="lineNum">     556</span>              : assign  out_id[ID_BITS-1:0]                = a_is_lt_b ? b_id[ID_BITS-1:0] :</span>
+<span id="L557"><span class="lineNum">     557</span>              :                                                          a_id[ID_BITS-1:0] ;</span>
+<span id="L558"><span class="lineNum">     558</span>              : assign  out_priority[INTPRIORITY_BITS-1:0] = a_is_lt_b ? b_priority[INTPRIORITY_BITS-1:0] :</span>
+<span id="L559"><span class="lineNum">     559</span>              :                                                          a_priority[INTPRIORITY_BITS-1:0] ;</span>
+<span id="L560"><span class="lineNum">     560</span>              : endmodule // cmp_and_mux</span>
+<span id="L561"><span class="lineNum">     561</span>              : </span>
+<span id="L562"><span class="lineNum">     562</span>              : </span>
+<span id="L563"><span class="lineNum">     563</span>              : module el2_configurable_gw (</span>
+<span id="L564"><span class="lineNum">     564</span> <span class="tlaUNC">           0 :                              input logic gw_clk,</span></span>
+<span id="L565"><span class="lineNum">     565</span> <span class="tlaGNC tlaBgGNC">     8198632 :                              input logic rawclk,</span></span>
+<span id="L566"><span class="lineNum">     566</span> <span class="tlaGNC">          62 :                              input logic clken,</span></span>
+<span id="L567"><span class="lineNum">     567</span> <span class="tlaGNC">          62 :                              input logic rst_l,</span></span>
+<span id="L568"><span class="lineNum">     568</span> <span class="tlaUNC tlaBgUNC">           0 :                              input logic extintsrc_req ,</span></span>
+<span id="L569"><span class="lineNum">     569</span> <span class="tlaUNC">           0 :                              input logic meigwctrl_polarity ,</span></span>
+<span id="L570"><span class="lineNum">     570</span> <span class="tlaUNC">           0 :                              input logic meigwctrl_type ,</span></span>
+<span id="L571"><span class="lineNum">     571</span> <span class="tlaUNC">           0 :                              input logic meigwclr ,</span></span>
+<span id="L572"><span class="lineNum">     572</span>              : </span>
+<span id="L573"><span class="lineNum">     573</span> <span class="tlaUNC">           0 :                              output logic extintsrc_req_config</span></span>
+<span id="L574"><span class="lineNum">     574</span>              :                             );</span>
+<span id="L575"><span class="lineNum">     575</span>              : </span>
+<span id="L576"><span class="lineNum">     576</span>              : </span>
+<span id="L577"><span class="lineNum">     577</span> <span class="tlaUNC">           0 :   logic  gw_int_pending_in, gw_int_pending, extintsrc_req_sync;</span></span>
+<span id="L578"><span class="lineNum">     578</span>              : </span>
+<span id="L579"><span class="lineNum">     579</span>              :   rvsyncss_fpga  #(1) sync_inst (</span>
+<span id="L580"><span class="lineNum">     580</span>              :       .dout        (extintsrc_req_sync),</span>
+<span id="L581"><span class="lineNum">     581</span>              :       .din         (extintsrc_req),</span>
+<span id="L582"><span class="lineNum">     582</span>              :       .*) ;</span>
+<span id="L583"><span class="lineNum">     583</span>              : </span>
+<span id="L584"><span class="lineNum">     584</span>              : </span>
+<span id="L585"><span class="lineNum">     585</span>              :   assign gw_int_pending_in =  (extintsrc_req_sync ^ meigwctrl_polarity) | (gw_int_pending &amp; ~meigwclr) ;</span>
+<span id="L586"><span class="lineNum">     586</span>              :   rvdff_fpga #(1) int_pend_ff        (.*, .clk(gw_clk), .rawclk(rawclk), .clken(clken), .din (gw_int_pending_in),     .dout(gw_int_pending));</span>
+<span id="L587"><span class="lineNum">     587</span>              : </span>
+<span id="L588"><span class="lineNum">     588</span>              : </span>
+<span id="L589"><span class="lineNum">     589</span>              :   assign extintsrc_req_config =  meigwctrl_type ? ((extintsrc_req_sync ^  meigwctrl_polarity) | gw_int_pending) : (extintsrc_req_sync ^  meigwctrl_polarity) ;</span>
+<span id="L590"><span class="lineNum">     590</span>              : </span>
+<span id="L591"><span class="lineNum">     591</span>              : endmodule // configurable_gw</span>
+<span id="L592"><span class="lineNum">     592</span>              : </span>
+<span id="L593"><span class="lineNum">     593</span>              : </span>
+<span id="L594"><span class="lineNum">     594</span>              : </span>
+<span id="L595"><span class="lineNum">     595</span>              : </span>
+<span id="L596"><span class="lineNum">     596</span>              : </span>
+<span id="L597"><span class="lineNum">     597</span>              : </span>
+<span id="L598"><span class="lineNum">     598</span>              : </span>
+<span id="L599"><span class="lineNum">     599</span>              : </span>
+<span id="L600"><span class="lineNum">     600</span>              : </span>
+        </pre>
+</td>
+</tr>
+</table>
+
+</body>
+</html>

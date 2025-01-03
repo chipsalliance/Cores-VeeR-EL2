@@ -1,0 +1,465 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>
+        Full
+        coverage report
+    </title>
+    <link rel="stylesheet" type="text/css" href="cov.css">
+    <style>
+        .container {
+            background-color: rgb(169, 169, 169);
+            width: 100%;
+            min-height: 80%;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <table class="title-header-shadow">
+        <td class="title-container">
+            <table class="title-header">
+                <td class="title-logo">
+                    <a href=index.html>
+                        <img src=_static/white.svg></img>
+                    </a>
+                </td>
+                <td class="title">
+                    Project
+                    Full
+                    coverage report
+                </td>
+            </table>
+        </td>
+    </table>
+    <center>
+        <table class="info-table">
+            <tr class="info-table-view">
+                <td width="10%" class="headerInfo">Current view:</td>
+                <td width="40%" class="headerInfoValue">
+                    <a href=index.html>Cores-VeeR-EL2</a>—Cores-VeeR-EL2—design—lsu—el2_lsu_stbuf.sv
+                </td>
+                <td width=auto></td>
+                <td width="10%"></td>
+                <td width="10%" class="headerCovSummary colTop">Coverage</td>
+                <td width="10%" class="headerCovSummary colTop" title="Covered + Uncovered code">Hit</td>
+                <td width="10%" class="headerCovSummary colTop" title="Exercised code only">Total</td>
+            </tr>
+            <tr>
+                <td class="headerInfo">Test Date:</td>
+                <td class="headerInfoValue">
+                    19-11-2024
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Toggle
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff8e00;">
+        28.0%
+    </td>
+    <td class="headerCovSummaryEntry">
+        21
+    </td>
+    <td class="headerCovSummaryEntry">
+        75
+    </td>
+
+            </tr>
+            <tr>
+                <td class="headerInfo">Test:</td>
+                <td class="headerInfoValue">
+                    axi_csr_mstatus
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Branch
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #00ff00;">
+        100.0%
+    </td>
+    <td class="headerCovSummaryEntry">
+        22
+    </td>
+    <td class="headerCovSummaryEntry">
+        22
+    </td>
+
+            </tr>
+            
+        </table>
+    </center>
+
+    <table border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td><br/></td>
+</tr>
+<tr>
+<td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : // SPDX-License-Identifier: Apache-2.0</span>
+<span id="L2"><span class="lineNum">       2</span>              : // Copyright 2020 Western Digital Corporation or its affiliates.</span>
+<span id="L3"><span class="lineNum">       3</span>              : //</span>
+<span id="L4"><span class="lineNum">       4</span>              : // Licensed under the Apache License, Version 2.0 (the "License");</span>
+<span id="L5"><span class="lineNum">       5</span>              : // you may not use this file except in compliance with the License.</span>
+<span id="L6"><span class="lineNum">       6</span>              : // You may obtain a copy of the License at</span>
+<span id="L7"><span class="lineNum">       7</span>              : //</span>
+<span id="L8"><span class="lineNum">       8</span>              : // http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L9"><span class="lineNum">       9</span>              : //</span>
+<span id="L10"><span class="lineNum">      10</span>              : // Unless required by applicable law or agreed to in writing, software</span>
+<span id="L11"><span class="lineNum">      11</span>              : // distributed under the License is distributed on an "AS IS" BASIS,</span>
+<span id="L12"><span class="lineNum">      12</span>              : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L13"><span class="lineNum">      13</span>              : // See the License for the specific language governing permissions and</span>
+<span id="L14"><span class="lineNum">      14</span>              : // limitations under the License.</span>
+<span id="L15"><span class="lineNum">      15</span>              : </span>
+<span id="L16"><span class="lineNum">      16</span>              : //********************************************************************************</span>
+<span id="L17"><span class="lineNum">      17</span>              : // $Id$</span>
+<span id="L18"><span class="lineNum">      18</span>              : //</span>
+<span id="L19"><span class="lineNum">      19</span>              : //</span>
+<span id="L20"><span class="lineNum">      20</span>              : // Owner:</span>
+<span id="L21"><span class="lineNum">      21</span>              : // Function: Store Buffer</span>
+<span id="L22"><span class="lineNum">      22</span>              : // Comments: Dual writes and single drain</span>
+<span id="L23"><span class="lineNum">      23</span>              : //</span>
+<span id="L24"><span class="lineNum">      24</span>              : //</span>
+<span id="L25"><span class="lineNum">      25</span>              : // DC1 -&gt; DC2 -&gt; DC3 -&gt; DC4 (Commit)</span>
+<span id="L26"><span class="lineNum">      26</span>              : //</span>
+<span id="L27"><span class="lineNum">      27</span>              : // //********************************************************************************</span>
+<span id="L28"><span class="lineNum">      28</span>              : </span>
+<span id="L29"><span class="lineNum">      29</span>              : </span>
+<span id="L30"><span class="lineNum">      30</span>              : module el2_lsu_stbuf</span>
+<span id="L31"><span class="lineNum">      31</span>              : import el2_pkg::*;</span>
+<span id="L32"><span class="lineNum">      32</span>              : #(</span>
+<span id="L33"><span class="lineNum">      33</span>              : `include "el2_param.vh"</span>
+<span id="L34"><span class="lineNum">      34</span>              :  )</span>
+<span id="L35"><span class="lineNum">      35</span>              : (</span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC tlaBgGNC">       50376 :    input logic                           clk,                         // core clock</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">           2 :    input logic                           rst_l,                       // reset</span></span>
+<span id="L38"><span class="lineNum">      38</span>              : </span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">       50376 :    input logic                           lsu_stbuf_c1_clk,            // stbuf clock</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">       50376 :    input logic                           lsu_free_c2_clk,             // free clk</span></span>
+<span id="L41"><span class="lineNum">      41</span>              : </span>
+<span id="L42"><span class="lineNum">      42</span>              :    // Store Buffer input</span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                           store_stbuf_reqvld_r,        // core instruction goes to stbuf</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC tlaBgGNC">        2416 :    input logic                           lsu_commit_r,                // lsu commits</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">        2416 :    input logic                           dec_lsu_valid_raw_d,         // Speculative decode valid</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [pt.DCCM_DATA_WIDTH-1:0]  store_data_hi_r,             // merged data from the dccm for stores. This is used for fwding</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC tlaBgGNC">          12 :    input logic [pt.DCCM_DATA_WIDTH-1:0]  store_data_lo_r,             // merged data from the dccm for stores. This is used for fwding</span></span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [pt.DCCM_DATA_WIDTH-1:0]  store_datafn_hi_r,           // merged data from the dccm for stores</span></span>
+<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC tlaBgGNC">          12 :    input logic [pt.DCCM_DATA_WIDTH-1:0]  store_datafn_lo_r,           // merged data from the dccm for stores</span></span>
+<span id="L50"><span class="lineNum">      50</span>              : </span>
+<span id="L51"><span class="lineNum">      51</span>              :    // Store Buffer output</span>
+<span id="L52"><span class="lineNum">      52</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic                          stbuf_reqvld_any,            // stbuf is draining</span></span>
+<span id="L53"><span class="lineNum">      53</span> <span class="tlaUNC">           0 :    output logic                          stbuf_reqvld_flushed_any,    // Top entry is flushed</span></span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaUNC">           0 :    output logic [pt.LSU_SB_BITS-1:0]     stbuf_addr_any,              // address</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_DATA_WIDTH-1:0] stbuf_data_any,              // stbuf data</span></span>
+<span id="L56"><span class="lineNum">      56</span>              : </span>
+<span id="L57"><span class="lineNum">      57</span> <span class="tlaUNC">           0 :    input  logic                          lsu_stbuf_commit_any,        // pop the stbuf as it commite</span></span>
+<span id="L58"><span class="lineNum">      58</span> <span class="tlaUNC">           0 :    output logic                          lsu_stbuf_full_any,          // stbuf is full</span></span>
+<span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC tlaBgGNC">           2 :    output logic                          lsu_stbuf_empty_any,         // stbuf is empty</span></span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic                          ldst_stbuf_reqvld_r,         // needed for clocking</span></span>
+<span id="L61"><span class="lineNum">      61</span>              : </span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC tlaBgGNC">          40 :    input logic [pt.LSU_SB_BITS-1:0]      lsu_addr_d,                  // lsu address D-stage</span></span>
+<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">          40 :    input logic [31:0]                    lsu_addr_m,                  // lsu address M-stage</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">          40 :    input logic [31:0]                    lsu_addr_r,                  // lsu address R-stage</span></span>
+<span id="L65"><span class="lineNum">      65</span>              : </span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">          40 :    input logic [pt.LSU_SB_BITS-1:0]      end_addr_d,                  // lsu end address D-stage - needed to check unaligned</span></span>
+<span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC">          40 :    input logic [31:0]                    end_addr_m,                  // lsu end address M-stage - needed to check unaligned</span></span>
+<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">          40 :    input logic [31:0]                    end_addr_r,                  // lsu end address R-stage - needed to check unaligned</span></span>
+<span id="L69"><span class="lineNum">      69</span>              : </span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                           ldst_dual_d, ldst_dual_m, ldst_dual_r,</span></span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaUNC">           0 :    input logic                           addr_in_dccm_m,              // address is in dccm</span></span>
+<span id="L72"><span class="lineNum">      72</span> <span class="tlaUNC">           0 :    input logic                           addr_in_dccm_r,              // address is in dccm</span></span>
+<span id="L73"><span class="lineNum">      73</span>              : </span>
+<span id="L74"><span class="lineNum">      74</span>              :    // Forwarding signals</span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaUNC">           0 :    input logic                           lsu_cmpen_m,                 // needed for forwarding stbuf - load</span></span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC tlaBgGNC">         764 :    input el2_lsu_pkt_t                  lsu_pkt_m,                   // LSU packet M-stage</span></span>
+<span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC">         764 :    input el2_lsu_pkt_t                  lsu_pkt_r,                   // LSU packet R-stage</span></span>
+<span id="L78"><span class="lineNum">      78</span>              : </span>
+<span id="L79"><span class="lineNum">      79</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [pt.DCCM_DATA_WIDTH-1:0] stbuf_fwddata_hi_m,          // stbuf data</span></span>
+<span id="L80"><span class="lineNum">      80</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_DATA_WIDTH-1:0] stbuf_fwddata_lo_m,          // stbuf data</span></span>
+<span id="L81"><span class="lineNum">      81</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_BYTE_WIDTH-1:0] stbuf_fwdbyteen_hi_m,        // stbuf data</span></span>
+<span id="L82"><span class="lineNum">      82</span> <span class="tlaUNC">           0 :    output logic [pt.DCCM_BYTE_WIDTH-1:0] stbuf_fwdbyteen_lo_m,        // stbuf data</span></span>
+<span id="L83"><span class="lineNum">      83</span>              : </span>
+<span id="L84"><span class="lineNum">      84</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
+<span id="L85"><span class="lineNum">      85</span>              :    /*verilator coverage_off*/</span>
+<span id="L86"><span class="lineNum">      86</span>              :    input  logic       scan_mode                                       // Scan mode</span>
+<span id="L87"><span class="lineNum">      87</span>              :    /*verilator coverage_on*/</span>
+<span id="L88"><span class="lineNum">      88</span>              : </span>
+<span id="L89"><span class="lineNum">      89</span>              : );</span>
+<span id="L90"><span class="lineNum">      90</span>              : </span>
+<span id="L91"><span class="lineNum">      91</span>              : </span>
+<span id="L92"><span class="lineNum">      92</span>              :    localparam DEPTH      = pt.LSU_STBUF_DEPTH;</span>
+<span id="L93"><span class="lineNum">      93</span>              :    localparam DATA_WIDTH = pt.DCCM_DATA_WIDTH;</span>
+<span id="L94"><span class="lineNum">      94</span>              :    localparam BYTE_WIDTH = pt.DCCM_BYTE_WIDTH;</span>
+<span id="L95"><span class="lineNum">      95</span>              :    localparam DEPTH_LOG2 = $clog2(DEPTH);</span>
+<span id="L96"><span class="lineNum">      96</span>              : </span>
+<span id="L97"><span class="lineNum">      97</span>              :    // These are the fields in the store queue</span>
+<span id="L98"><span class="lineNum">      98</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]                     stbuf_vld;</span></span>
+<span id="L99"><span class="lineNum">      99</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]                     stbuf_dma_kill;</span></span>
+<span id="L100"><span class="lineNum">     100</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0][pt.LSU_SB_BITS-1:0] stbuf_addr;</span></span>
+<span id="L101"><span class="lineNum">     101</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0][BYTE_WIDTH-1:0]     stbuf_byteen;</span></span>
+<span id="L102"><span class="lineNum">     102</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0][DATA_WIDTH-1:0]     stbuf_data;</span></span>
+<span id="L103"><span class="lineNum">     103</span>              : </span>
+<span id="L104"><span class="lineNum">     104</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]                     sel_lo;</span></span>
+<span id="L105"><span class="lineNum">     105</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]                     stbuf_wr_en;</span></span>
+<span id="L106"><span class="lineNum">     106</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]                     stbuf_dma_kill_en;</span></span>
+<span id="L107"><span class="lineNum">     107</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]                     stbuf_reset;</span></span>
+<span id="L108"><span class="lineNum">     108</span> <span class="tlaGNC tlaBgGNC">          40 :    logic [DEPTH-1:0][pt.LSU_SB_BITS-1:0] stbuf_addrin;</span></span>
+<span id="L109"><span class="lineNum">     109</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [DEPTH-1:0][DATA_WIDTH-1:0]     stbuf_datain;</span></span>
+<span id="L110"><span class="lineNum">     110</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0][BYTE_WIDTH-1:0]     stbuf_byteenin;</span></span>
+<span id="L111"><span class="lineNum">     111</span>              : </span>
+<span id="L112"><span class="lineNum">     112</span> <span class="tlaUNC">           0 :    logic [7:0]             store_byteen_ext_r;</span></span>
+<span id="L113"><span class="lineNum">     113</span> <span class="tlaUNC">           0 :    logic [BYTE_WIDTH-1:0]  store_byteen_hi_r;</span></span>
+<span id="L114"><span class="lineNum">     114</span> <span class="tlaGNC tlaBgGNC">         468 :    logic [BYTE_WIDTH-1:0]  store_byteen_lo_r;</span></span>
+<span id="L115"><span class="lineNum">     115</span>              : </span>
+<span id="L116"><span class="lineNum">     116</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                   WrPtrEn, RdPtrEn;</span></span>
+<span id="L117"><span class="lineNum">     117</span> <span class="tlaUNC">           0 :    logic [DEPTH_LOG2-1:0]  WrPtr, RdPtr;</span></span>
+<span id="L118"><span class="lineNum">     118</span> <span class="tlaUNC">           0 :    logic [DEPTH_LOG2-1:0]  NxtWrPtr, NxtRdPtr;</span></span>
+<span id="L119"><span class="lineNum">     119</span> <span class="tlaUNC">           0 :    logic [DEPTH_LOG2-1:0]  WrPtrPlus1, WrPtrPlus2, RdPtrPlus1;</span></span>
+<span id="L120"><span class="lineNum">     120</span>              : </span>
+<span id="L121"><span class="lineNum">     121</span> <span class="tlaUNC">           0 :    logic                   dual_stbuf_write_r;</span></span>
+<span id="L122"><span class="lineNum">     122</span>              : </span>
+<span id="L123"><span class="lineNum">     123</span> <span class="tlaUNC">           0 :    logic                   isdccmst_m, isdccmst_r;</span></span>
+<span id="L124"><span class="lineNum">     124</span> <span class="tlaUNC">           0 :    logic [3:0]             stbuf_numvld_any, stbuf_specvld_any;</span></span>
+<span id="L125"><span class="lineNum">     125</span> <span class="tlaUNC">           0 :    logic [1:0]             stbuf_specvld_m, stbuf_specvld_r;</span></span>
+<span id="L126"><span class="lineNum">     126</span>              : </span>
+<span id="L127"><span class="lineNum">     127</span> <span class="tlaGNC tlaBgGNC">          40 :    logic [pt.LSU_SB_BITS-1:$clog2(BYTE_WIDTH)] cmpaddr_hi_m, cmpaddr_lo_m;</span></span>
+<span id="L128"><span class="lineNum">     128</span>              : </span>
+<span id="L129"><span class="lineNum">     129</span>              :    // variables to detect matching from the store queue</span>
+<span id="L130"><span class="lineNum">     130</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [DEPTH-1:0]                 stbuf_match_hi, stbuf_match_lo;</span></span>
+<span id="L131"><span class="lineNum">     131</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0][BYTE_WIDTH-1:0] stbuf_fwdbyteenvec_hi, stbuf_fwdbyteenvec_lo;</span></span>
+<span id="L132"><span class="lineNum">     132</span> <span class="tlaUNC">           0 :    logic [DATA_WIDTH-1:0]            stbuf_fwddata_hi_pre_m, stbuf_fwddata_lo_pre_m;</span></span>
+<span id="L133"><span class="lineNum">     133</span> <span class="tlaUNC">           0 :    logic [BYTE_WIDTH-1:0]            stbuf_fwdbyteen_hi_pre_m, stbuf_fwdbyteen_lo_pre_m;</span></span>
+<span id="L134"><span class="lineNum">     134</span>              : </span>
+<span id="L135"><span class="lineNum">     135</span>              :    // logic to detect matching from the pipe - needed for store - load forwarding</span>
+<span id="L136"><span class="lineNum">     136</span> <span class="tlaUNC">           0 :    logic [BYTE_WIDTH-1:0]  ld_byte_rhit_lo_lo, ld_byte_rhit_hi_lo, ld_byte_rhit_lo_hi, ld_byte_rhit_hi_hi;</span></span>
+<span id="L137"><span class="lineNum">     137</span> <span class="tlaUNC">           0 :    logic                   ld_addr_rhit_lo_lo, ld_addr_rhit_hi_lo, ld_addr_rhit_lo_hi, ld_addr_rhit_hi_hi;</span></span>
+<span id="L138"><span class="lineNum">     138</span>              : </span>
+<span id="L139"><span class="lineNum">     139</span> <span class="tlaUNC">           0 :    logic [BYTE_WIDTH-1:0]  ld_byte_hit_lo, ld_byte_rhit_lo;</span></span>
+<span id="L140"><span class="lineNum">     140</span> <span class="tlaUNC">           0 :    logic [BYTE_WIDTH-1:0]  ld_byte_hit_hi, ld_byte_rhit_hi;</span></span>
+<span id="L141"><span class="lineNum">     141</span>              : </span>
+<span id="L142"><span class="lineNum">     142</span> <span class="tlaUNC">           0 :    logic [BYTE_WIDTH-1:0]  ldst_byteen_hi_r;</span></span>
+<span id="L143"><span class="lineNum">     143</span> <span class="tlaGNC tlaBgGNC">         574 :    logic [BYTE_WIDTH-1:0]  ldst_byteen_lo_r;</span></span>
+<span id="L144"><span class="lineNum">     144</span>              :    // byte_en flowing down</span>
+<span id="L145"><span class="lineNum">     145</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [7:0]             ldst_byteen_r;</span></span>
+<span id="L146"><span class="lineNum">     146</span> <span class="tlaUNC">           0 :    logic [7:0]             ldst_byteen_ext_r;</span></span>
+<span id="L147"><span class="lineNum">     147</span>              :    // fwd data through the pipe</span>
+<span id="L148"><span class="lineNum">     148</span> <span class="tlaUNC">           0 :    logic [31:0]       ld_fwddata_rpipe_lo;</span></span>
+<span id="L149"><span class="lineNum">     149</span> <span class="tlaUNC">           0 :    logic [31:0]       ld_fwddata_rpipe_hi;</span></span>
+<span id="L150"><span class="lineNum">     150</span>              : </span>
+<span id="L151"><span class="lineNum">     151</span>              :    // coalescing signals</span>
+<span id="L152"><span class="lineNum">     152</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]      store_matchvec_lo_r, store_matchvec_hi_r;</span></span>
+<span id="L153"><span class="lineNum">     153</span> <span class="tlaUNC">           0 :    logic                  store_coalesce_lo_r, store_coalesce_hi_r;</span></span>
+<span id="L154"><span class="lineNum">     154</span>              : </span>
+<span id="L155"><span class="lineNum">     155</span>              :    //----------------------------------------</span>
+<span id="L156"><span class="lineNum">     156</span>              :    // Logic starts here</span>
+<span id="L157"><span class="lineNum">     157</span>              :    //----------------------------------------</span>
+<span id="L158"><span class="lineNum">     158</span>              :    // Create high/low byte enables</span>
+<span id="L159"><span class="lineNum">     159</span>              :    assign store_byteen_ext_r[7:0]           = ldst_byteen_r[7:0] &lt;&lt; lsu_addr_r[1:0];</span>
+<span id="L160"><span class="lineNum">     160</span>              :    assign store_byteen_hi_r[BYTE_WIDTH-1:0] = store_byteen_ext_r[7:4] &amp; {4{lsu_pkt_r.store}};</span>
+<span id="L161"><span class="lineNum">     161</span>              :    assign store_byteen_lo_r[BYTE_WIDTH-1:0] = store_byteen_ext_r[3:0] &amp; {4{lsu_pkt_r.store}};</span>
+<span id="L162"><span class="lineNum">     162</span>              : </span>
+<span id="L163"><span class="lineNum">     163</span>              :    assign RdPtrPlus1[DEPTH_LOG2-1:0]     = RdPtr[DEPTH_LOG2-1:0] + 1'b1;</span>
+<span id="L164"><span class="lineNum">     164</span>              :    assign WrPtrPlus1[DEPTH_LOG2-1:0]     = WrPtr[DEPTH_LOG2-1:0] + 1'b1;</span>
+<span id="L165"><span class="lineNum">     165</span>              :    assign WrPtrPlus2[DEPTH_LOG2-1:0]     = WrPtr[DEPTH_LOG2-1:0] + 2'b10;</span>
+<span id="L166"><span class="lineNum">     166</span>              : </span>
+<span id="L167"><span class="lineNum">     167</span>              :    // ecc error on both hi/lo</span>
+<span id="L168"><span class="lineNum">     168</span>              :    assign dual_stbuf_write_r   = ldst_dual_r &amp; store_stbuf_reqvld_r;</span>
+<span id="L169"><span class="lineNum">     169</span>              :    assign ldst_stbuf_reqvld_r  = ((lsu_commit_r | lsu_pkt_r.dma) &amp; store_stbuf_reqvld_r);</span>
+<span id="L170"><span class="lineNum">     170</span>              : </span>
+<span id="L171"><span class="lineNum">     171</span>              :   // Store Buffer coalescing</span>
+<span id="L172"><span class="lineNum">     172</span>              :    for (genvar i=0; i&lt;DEPTH; i++) begin: FindMatchEntry</span>
+<span id="L173"><span class="lineNum">     173</span>              :        assign store_matchvec_lo_r[i] = (stbuf_addr[i][pt.LSU_SB_BITS-1:$clog2(BYTE_WIDTH)] == lsu_addr_r[pt.LSU_SB_BITS-1:$clog2(BYTE_WIDTH)]) &amp; stbuf_vld[i] &amp; ~stbuf_dma_kill[i] &amp; ~stbuf_reset[i];</span>
+<span id="L174"><span class="lineNum">     174</span>              :        assign store_matchvec_hi_r[i] = (stbuf_addr[i][pt.LSU_SB_BITS-1:$clog2(BYTE_WIDTH)] == end_addr_r[pt.LSU_SB_BITS-1:$clog2(BYTE_WIDTH)]) &amp; stbuf_vld[i] &amp; ~stbuf_dma_kill[i] &amp; dual_stbuf_write_r &amp; ~stbuf_reset[i];</span>
+<span id="L175"><span class="lineNum">     175</span>              :    end: FindMatchEntry</span>
+<span id="L176"><span class="lineNum">     176</span>              : </span>
+<span id="L177"><span class="lineNum">     177</span>              :    assign store_coalesce_lo_r = |store_matchvec_lo_r[DEPTH-1:0];</span>
+<span id="L178"><span class="lineNum">     178</span>              :    assign store_coalesce_hi_r = |store_matchvec_hi_r[DEPTH-1:0];</span>
+<span id="L179"><span class="lineNum">     179</span>              : </span>
+<span id="L180"><span class="lineNum">     180</span>              : </span>
+<span id="L181"><span class="lineNum">     181</span>              :    if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable</span>
+<span id="L182"><span class="lineNum">     182</span>              :       // Allocate new in this entry if :</span>
+<span id="L183"><span class="lineNum">     183</span>              :       // 1. wrptr, single allocate, lo did not coalesce</span>
+<span id="L184"><span class="lineNum">     184</span>              :       // 2. wrptr, double allocate, lo ^ hi coalesced</span>
+<span id="L185"><span class="lineNum">     185</span>              :       // 3. wrptr + 1, double alloacte, niether lo or hi coalesced</span>
+<span id="L186"><span class="lineNum">     186</span>              :       // Also update if there is a hi or a lo coalesce to this entry</span>
+<span id="L187"><span class="lineNum">     187</span>              :       // Store Buffer instantiation</span>
+<span id="L188"><span class="lineNum">     188</span>              :       for (genvar i=0; i&lt;DEPTH; i++) begin: GenStBuf</span>
+<span id="L189"><span class="lineNum">     189</span>              :          assign stbuf_wr_en[i] = ldst_stbuf_reqvld_r &amp; (</span>
+<span id="L190"><span class="lineNum">     190</span>              :                                    ( (i == WrPtr[DEPTH_LOG2-1:0])      &amp;  ~store_coalesce_lo_r)   |                                                    // Allocate : new Lo</span>
+<span id="L191"><span class="lineNum">     191</span>              :                                    ( (i == WrPtr[DEPTH_LOG2-1:0])      &amp;  dual_stbuf_write_r &amp; ~store_coalesce_hi_r) |                               // Allocate : only 1 new Write Either</span>
+<span id="L192"><span class="lineNum">     192</span>              :                                    ( (i == WrPtrPlus1[DEPTH_LOG2-1:0]) &amp;  dual_stbuf_write_r &amp; ~(store_coalesce_lo_r | store_coalesce_hi_r)) |     // Allocate2 : 2 new so Write Hi</span>
+<span id="L193"><span class="lineNum">     193</span>              :                                    store_matchvec_lo_r[i] | store_matchvec_hi_r[i]);                                                                 // Coalesced Write Lo or Hi</span>
+<span id="L194"><span class="lineNum">     194</span>              :          assign stbuf_reset[i] = (lsu_stbuf_commit_any | stbuf_reqvld_flushed_any) &amp; (i == RdPtr[DEPTH_LOG2-1:0]);</span>
+<span id="L195"><span class="lineNum">     195</span>              : </span>
+<span id="L196"><span class="lineNum">     196</span>              :          // Mux select for start/end address</span>
+<span id="L197"><span class="lineNum">     197</span>              :          assign sel_lo[i]                         = ((~ldst_dual_r | store_stbuf_reqvld_r) &amp; (i == WrPtr[DEPTH_LOG2-1:0]) &amp; ~store_coalesce_lo_r) |   // lo allocated new entry</span>
+<span id="L198"><span class="lineNum">     198</span>              :                                                     store_matchvec_lo_r[i];                                                                                                           // lo coalesced in to this entry</span>
+<span id="L199"><span class="lineNum">     199</span>              :          assign stbuf_addrin[i][pt.LSU_SB_BITS-1:0]  = sel_lo[i] ? lsu_addr_r[pt.LSU_SB_BITS-1:0]       : end_addr_r[pt.LSU_SB_BITS-1:0];</span>
+<span id="L200"><span class="lineNum">     200</span>              :          assign stbuf_byteenin[i][BYTE_WIDTH-1:0] = sel_lo[i] ? (stbuf_byteen[i][BYTE_WIDTH-1:0] | store_byteen_lo_r[BYTE_WIDTH-1:0])          : (stbuf_byteen[i][BYTE_WIDTH-1:0] | store_byteen_hi_r[BYTE_WIDTH-1:0]);</span>
+<span id="L201"><span class="lineNum">     201</span>              :          assign stbuf_datain[i][7:0]              = sel_lo[i] ? ((~stbuf_byteen[i][0] | store_byteen_lo_r[0]) ? store_datafn_lo_r[7:0]   : stbuf_data[i][7:0])    :</span>
+<span id="L202"><span class="lineNum">     202</span>              :                                                                 ((~stbuf_byteen[i][0] | store_byteen_hi_r[0]) ? store_datafn_hi_r[7:0]   : stbuf_data[i][7:0]);</span>
+<span id="L203"><span class="lineNum">     203</span>              :          assign stbuf_datain[i][15:8]             = sel_lo[i] ? ((~stbuf_byteen[i][1] | store_byteen_lo_r[1]) ? store_datafn_lo_r[15:8]  : stbuf_data[i][15:8])    :</span>
+<span id="L204"><span class="lineNum">     204</span>              :                                                                 ((~stbuf_byteen[i][1] | store_byteen_hi_r[1]) ? store_datafn_hi_r[15:8]  : stbuf_data[i][15:8]);</span>
+<span id="L205"><span class="lineNum">     205</span>              :          assign stbuf_datain[i][23:16]            = sel_lo[i] ? ((~stbuf_byteen[i][2] | store_byteen_lo_r[2]) ? store_datafn_lo_r[23:16] : stbuf_data[i][23:16])    :</span>
+<span id="L206"><span class="lineNum">     206</span>              :                                                                 ((~stbuf_byteen[i][2] | store_byteen_hi_r[2]) ? store_datafn_hi_r[23:16] : stbuf_data[i][23:16]);</span>
+<span id="L207"><span class="lineNum">     207</span>              :          assign stbuf_datain[i][31:24]            = sel_lo[i] ? ((~stbuf_byteen[i][3] | store_byteen_lo_r[3]) ? store_datafn_lo_r[31:24] : stbuf_data[i][31:24])    :</span>
+<span id="L208"><span class="lineNum">     208</span>              :                                                                 ((~stbuf_byteen[i][3] | store_byteen_hi_r[3]) ? store_datafn_hi_r[31:24] : stbuf_data[i][31:24]);</span>
+<span id="L209"><span class="lineNum">     209</span>              : </span>
+<span id="L210"><span class="lineNum">     210</span>              :          rvdffsc #(.WIDTH(1))              stbuf_vldff         (.din(1'b1),                                .dout(stbuf_vld[i]),                      .en(stbuf_wr_en[i]), .clear(stbuf_reset[i]), .clk(lsu_free_c2_clk), .*);</span>
+<span id="L211"><span class="lineNum">     211</span>              :          rvdffsc #(.WIDTH(1))              stbuf_killff        (.din(1'b1),                                .dout(stbuf_dma_kill[i]),                 .en(stbuf_dma_kill_en[i]), .clear(stbuf_reset[i]), .clk(lsu_free_c2_clk), .*);</span>
+<span id="L212"><span class="lineNum">     212</span>              :          rvdffe  #(.WIDTH(pt.LSU_SB_BITS)) stbuf_addrff        (.din(stbuf_addrin[i][pt.LSU_SB_BITS-1:0]), .dout(stbuf_addr[i][pt.LSU_SB_BITS-1:0]), .en(stbuf_wr_en[i]), .*);</span>
+<span id="L213"><span class="lineNum">     213</span>              :          rvdffsc #(.WIDTH(BYTE_WIDTH))     stbuf_byteenff      (.din(stbuf_byteenin[i][BYTE_WIDTH-1:0]),   .dout(stbuf_byteen[i][BYTE_WIDTH-1:0]),   .en(stbuf_wr_en[i]), .clear(stbuf_reset[i]), .clk(lsu_stbuf_c1_clk), .*);</span>
+<span id="L214"><span class="lineNum">     214</span>              :          rvdffe  #(.WIDTH(DATA_WIDTH))     stbuf_dataff        (.din(stbuf_datain[i][DATA_WIDTH-1:0]),     .dout(stbuf_data[i][DATA_WIDTH-1:0]),     .en(stbuf_wr_en[i]), .*);</span>
+<span id="L215"><span class="lineNum">     215</span>              :       end</span>
+<span id="L216"><span class="lineNum">     216</span>              :    end else begin: Gen_dccm_disable</span>
+<span id="L217"><span class="lineNum">     217</span>              :       assign stbuf_wr_en[DEPTH-1:0] = '0;</span>
+<span id="L218"><span class="lineNum">     218</span>              :       assign stbuf_reset[DEPTH-1:0] = '0;</span>
+<span id="L219"><span class="lineNum">     219</span>              :       assign stbuf_vld[DEPTH-1:0]   = '0;</span>
+<span id="L220"><span class="lineNum">     220</span>              :       assign stbuf_dma_kill[DEPTH-1:0] = '0;</span>
+<span id="L221"><span class="lineNum">     221</span>              :       assign stbuf_addr[DEPTH-1:0]  = '0;</span>
+<span id="L222"><span class="lineNum">     222</span>              :       assign stbuf_byteen[DEPTH-1:0] = '0;</span>
+<span id="L223"><span class="lineNum">     223</span>              :       assign stbuf_data[DEPTH-1:0]   = '0;</span>
+<span id="L224"><span class="lineNum">     224</span>              :    end</span>
+<span id="L225"><span class="lineNum">     225</span>              : </span>
+<span id="L226"><span class="lineNum">     226</span>              :    // Store Buffer drain logic</span>
+<span id="L227"><span class="lineNum">     227</span>              :    assign stbuf_reqvld_flushed_any            = stbuf_vld[RdPtr] &amp; stbuf_dma_kill[RdPtr];</span>
+<span id="L228"><span class="lineNum">     228</span>              :    assign stbuf_reqvld_any                    = stbuf_vld[RdPtr] &amp; ~stbuf_dma_kill[RdPtr] &amp; ~(|stbuf_dma_kill_en[DEPTH-1:0]);  // Don't drain if some kill bit is being set this cycle</span>
+<span id="L229"><span class="lineNum">     229</span>              :    assign stbuf_addr_any[pt.LSU_SB_BITS-1:0]  = stbuf_addr[RdPtr][pt.LSU_SB_BITS-1:0];</span>
+<span id="L230"><span class="lineNum">     230</span>              :    assign stbuf_data_any[DATA_WIDTH-1:0]      = stbuf_data[RdPtr][DATA_WIDTH-1:0];</span>
+<span id="L231"><span class="lineNum">     231</span>              : </span>
+<span id="L232"><span class="lineNum">     232</span>              :    // Update the RdPtr/WrPtr logic</span>
+<span id="L233"><span class="lineNum">     233</span>              :    // Need to revert the WrPtr for flush cases. Also revert the pipe WrPtrs</span>
+<span id="L234"><span class="lineNum">     234</span>              :    assign WrPtrEn                  = (ldst_stbuf_reqvld_r  &amp; ~dual_stbuf_write_r &amp; ~(store_coalesce_hi_r | store_coalesce_lo_r))  |  // writing 1 and did not coalesce</span>
+<span id="L235"><span class="lineNum">     235</span>              :                                      (ldst_stbuf_reqvld_r  &amp;  dual_stbuf_write_r &amp; ~(store_coalesce_hi_r &amp; store_coalesce_lo_r));    // writing 2 and atleast 1 did not coalesce</span>
+<span id="L236"><span class="lineNum">     236</span>              :    assign NxtWrPtr[DEPTH_LOG2-1:0] = (ldst_stbuf_reqvld_r &amp; dual_stbuf_write_r &amp; ~(store_coalesce_hi_r | store_coalesce_lo_r)) ? WrPtrPlus2[DEPTH_LOG2-1:0] : WrPtrPlus1[DEPTH_LOG2-1:0];</span>
+<span id="L237"><span class="lineNum">     237</span>              :    assign RdPtrEn                  = lsu_stbuf_commit_any | stbuf_reqvld_flushed_any;</span>
+<span id="L238"><span class="lineNum">     238</span>              :    assign NxtRdPtr[DEPTH_LOG2-1:0] = RdPtrPlus1[DEPTH_LOG2-1:0];</span>
+<span id="L239"><span class="lineNum">     239</span>              : </span>
+<span id="L240"><span class="lineNum">     240</span> <span class="tlaGNC tlaBgGNC">           2 :    always_comb begin</span></span>
+<span id="L241"><span class="lineNum">     241</span> <span class="tlaGNC">           2 :       stbuf_numvld_any[3:0] = '0;</span></span>
+<span id="L242"><span class="lineNum">     242</span> <span class="tlaGNC">           2 :       for (int i=0; i&lt;DEPTH; i++) begin</span></span>
+<span id="L243"><span class="lineNum">     243</span> <span class="tlaGNC">           8 :          stbuf_numvld_any[3:0] += {3'b0, stbuf_vld[i]};</span></span>
+<span id="L244"><span class="lineNum">     244</span>              :       end</span>
+<span id="L245"><span class="lineNum">     245</span>              :    end</span>
+<span id="L246"><span class="lineNum">     246</span>              : </span>
+<span id="L247"><span class="lineNum">     247</span>              :     // These go to store buffer to detect full</span>
+<span id="L248"><span class="lineNum">     248</span>              :    assign isdccmst_m = lsu_pkt_m.valid &amp; lsu_pkt_m.store &amp; addr_in_dccm_m &amp; ~lsu_pkt_m.dma;</span>
+<span id="L249"><span class="lineNum">     249</span>              :    assign isdccmst_r = lsu_pkt_r.valid &amp; lsu_pkt_r.store &amp; addr_in_dccm_r &amp; ~lsu_pkt_r.dma;</span>
+<span id="L250"><span class="lineNum">     250</span>              : </span>
+<span id="L251"><span class="lineNum">     251</span>              :    assign stbuf_specvld_m[1:0] = {1'b0,isdccmst_m} &lt;&lt; (isdccmst_m &amp; ldst_dual_m);</span>
+<span id="L252"><span class="lineNum">     252</span>              :    assign stbuf_specvld_r[1:0] = {1'b0,isdccmst_r} &lt;&lt; (isdccmst_r &amp; ldst_dual_r);</span>
+<span id="L253"><span class="lineNum">     253</span>              :    assign stbuf_specvld_any[3:0] = stbuf_numvld_any[3:0] +  {2'b0, stbuf_specvld_m[1:0]} + {2'b0, stbuf_specvld_r[1:0]};</span>
+<span id="L254"><span class="lineNum">     254</span>              : </span>
+<span id="L255"><span class="lineNum">     255</span>              :    assign lsu_stbuf_full_any  = (~ldst_dual_d &amp; dec_lsu_valid_raw_d) ? (stbuf_specvld_any[3:0] &gt;= DEPTH) : (stbuf_specvld_any[3:0] &gt;= (DEPTH-1));</span>
+<span id="L256"><span class="lineNum">     256</span>              :    assign lsu_stbuf_empty_any = (stbuf_numvld_any[3:0] == 4'b0);</span>
+<span id="L257"><span class="lineNum">     257</span>              : </span>
+<span id="L258"><span class="lineNum">     258</span>              :    // Load forwarding logic from the store queue</span>
+<span id="L259"><span class="lineNum">     259</span>              :    assign cmpaddr_hi_m[pt.LSU_SB_BITS-1:$clog2(BYTE_WIDTH)] = end_addr_m[pt.LSU_SB_BITS-1:$clog2(BYTE_WIDTH)];</span>
+<span id="L260"><span class="lineNum">     260</span>              : </span>
+<span id="L261"><span class="lineNum">     261</span>              :    assign cmpaddr_lo_m[pt.LSU_SB_BITS-1:$clog2(BYTE_WIDTH)] = lsu_addr_m[pt.LSU_SB_BITS-1:$clog2(BYTE_WIDTH)];</span>
+<span id="L262"><span class="lineNum">     262</span>              : </span>
+<span id="L263"><span class="lineNum">     263</span> <span class="tlaGNC">           2 :    always_comb begin: GenLdFwd</span></span>
+<span id="L264"><span class="lineNum">     264</span> <span class="tlaGNC">           2 :       stbuf_fwdbyteen_hi_pre_m[BYTE_WIDTH-1:0]   = '0;</span></span>
+<span id="L265"><span class="lineNum">     265</span> <span class="tlaGNC">           2 :       stbuf_fwdbyteen_lo_pre_m[BYTE_WIDTH-1:0]   = '0;</span></span>
+<span id="L266"><span class="lineNum">     266</span>              : </span>
+<span id="L267"><span class="lineNum">     267</span> <span class="tlaGNC">           2 :       for (int i=0; i&lt;DEPTH; i++) begin</span></span>
+<span id="L268"><span class="lineNum">     268</span> <span class="tlaGNC">           8 :          stbuf_match_hi[i] = (stbuf_addr[i][pt.LSU_SB_BITS-1:$clog2(BYTE_WIDTH)] == cmpaddr_hi_m[pt.LSU_SB_BITS-1:$clog2(BYTE_WIDTH)]) &amp; stbuf_vld[i] &amp; ~stbuf_dma_kill[i] &amp; addr_in_dccm_m;</span></span>
+<span id="L269"><span class="lineNum">     269</span> <span class="tlaGNC">           8 :          stbuf_match_lo[i] = (stbuf_addr[i][pt.LSU_SB_BITS-1:$clog2(BYTE_WIDTH)] == cmpaddr_lo_m[pt.LSU_SB_BITS-1:$clog2(BYTE_WIDTH)]) &amp; stbuf_vld[i] &amp; ~stbuf_dma_kill[i] &amp; addr_in_dccm_m;</span></span>
+<span id="L270"><span class="lineNum">     270</span>              : </span>
+<span id="L271"><span class="lineNum">     271</span>              :          // Kill the store buffer entry if there is a dma store since it already updated the dccm</span>
+<span id="L272"><span class="lineNum">     272</span> <span class="tlaGNC">           8 :          stbuf_dma_kill_en[i] = (stbuf_match_hi[i] | stbuf_match_lo[i]) &amp; lsu_pkt_m.valid &amp; lsu_pkt_m.dma &amp; lsu_pkt_m.store;</span></span>
+<span id="L273"><span class="lineNum">     273</span>              : </span>
+<span id="L274"><span class="lineNum">     274</span> <span class="tlaGNC">           8 :          for (int j=0; j&lt;BYTE_WIDTH; j++) begin</span></span>
+<span id="L275"><span class="lineNum">     275</span> <span class="tlaGNC">          32 :             stbuf_fwdbyteenvec_hi[i][j] = stbuf_match_hi[i] &amp; stbuf_byteen[i][j] &amp; stbuf_vld[i];</span></span>
+<span id="L276"><span class="lineNum">     276</span> <span class="tlaGNC">          32 :             stbuf_fwdbyteen_hi_pre_m[j]  |= stbuf_fwdbyteenvec_hi[i][j];</span></span>
+<span id="L277"><span class="lineNum">     277</span>              : </span>
+<span id="L278"><span class="lineNum">     278</span> <span class="tlaGNC">          32 :             stbuf_fwdbyteenvec_lo[i][j] = stbuf_match_lo[i] &amp; stbuf_byteen[i][j] &amp; stbuf_vld[i];</span></span>
+<span id="L279"><span class="lineNum">     279</span> <span class="tlaGNC">          32 :             stbuf_fwdbyteen_lo_pre_m[j]  |= stbuf_fwdbyteenvec_lo[i][j];</span></span>
+<span id="L280"><span class="lineNum">     280</span>              :          end</span>
+<span id="L281"><span class="lineNum">     281</span>              :       end</span>
+<span id="L282"><span class="lineNum">     282</span>              :    end // block: GenLdFwd</span>
+<span id="L283"><span class="lineNum">     283</span>              : </span>
+<span id="L284"><span class="lineNum">     284</span> <span class="tlaGNC">           2 :    always_comb begin: GenLdData</span></span>
+<span id="L285"><span class="lineNum">     285</span> <span class="tlaGNC">           2 :       stbuf_fwddata_hi_pre_m[31:0]   = '0;</span></span>
+<span id="L286"><span class="lineNum">     286</span> <span class="tlaGNC">           2 :       stbuf_fwddata_lo_pre_m[31:0]   = '0;</span></span>
+<span id="L287"><span class="lineNum">     287</span>              : </span>
+<span id="L288"><span class="lineNum">     288</span> <span class="tlaGNC">           2 :       for (int i=0; i&lt;DEPTH; i++) begin</span></span>
+<span id="L289"><span class="lineNum">     289</span> <span class="tlaGNC">           8 :          stbuf_fwddata_hi_pre_m[31:0] |= {32{stbuf_match_hi[i]}} &amp; stbuf_data[i][31:0];</span></span>
+<span id="L290"><span class="lineNum">     290</span> <span class="tlaGNC">           8 :          stbuf_fwddata_lo_pre_m[31:0] |= {32{stbuf_match_lo[i]}} &amp; stbuf_data[i][31:0];</span></span>
+<span id="L291"><span class="lineNum">     291</span>              : </span>
+<span id="L292"><span class="lineNum">     292</span>              :       end</span>
+<span id="L293"><span class="lineNum">     293</span>              : </span>
+<span id="L294"><span class="lineNum">     294</span>              :    end // block: GenLdData</span>
+<span id="L295"><span class="lineNum">     295</span>              : </span>
+<span id="L296"><span class="lineNum">     296</span>              :    // Create Hi/Lo signals - needed for the pipe forwarding</span>
+<span id="L297"><span class="lineNum">     297</span>              :    assign ldst_byteen_r[7:0] =  ({8{lsu_pkt_r.by}}    &amp; 8'b0000_0001) |</span>
+<span id="L298"><span class="lineNum">     298</span>              :                                  ({8{lsu_pkt_r.half}}  &amp; 8'b0000_0011) |</span>
+<span id="L299"><span class="lineNum">     299</span>              :                                  ({8{lsu_pkt_r.word}}  &amp; 8'b0000_1111) |</span>
+<span id="L300"><span class="lineNum">     300</span>              :                                  ({8{lsu_pkt_r.dword}} &amp; 8'b1111_1111);</span>
+<span id="L301"><span class="lineNum">     301</span>              : </span>
+<span id="L302"><span class="lineNum">     302</span>              :    assign ldst_byteen_ext_r[7:0] = ldst_byteen_r[7:0] &lt;&lt; lsu_addr_r[1:0];</span>
+<span id="L303"><span class="lineNum">     303</span>              : </span>
+<span id="L304"><span class="lineNum">     304</span>              :    assign ldst_byteen_hi_r[3:0]   = ldst_byteen_ext_r[7:4];</span>
+<span id="L305"><span class="lineNum">     305</span>              :    assign ldst_byteen_lo_r[3:0]   = ldst_byteen_ext_r[3:0];</span>
+<span id="L306"><span class="lineNum">     306</span>              : </span>
+<span id="L307"><span class="lineNum">     307</span>              :    assign ld_addr_rhit_lo_lo = (lsu_addr_m[31:2] == lsu_addr_r[31:2]) &amp; lsu_pkt_r.valid &amp; lsu_pkt_r.store &amp; ~lsu_pkt_r.dma;</span>
+<span id="L308"><span class="lineNum">     308</span>              :    assign ld_addr_rhit_lo_hi = (end_addr_m[31:2] == lsu_addr_r[31:2]) &amp; lsu_pkt_r.valid &amp; lsu_pkt_r.store &amp; ~lsu_pkt_r.dma;</span>
+<span id="L309"><span class="lineNum">     309</span>              :    assign ld_addr_rhit_hi_lo = (lsu_addr_m[31:2] == end_addr_r[31:2]) &amp; lsu_pkt_r.valid &amp; lsu_pkt_r.store &amp; ~lsu_pkt_r.dma &amp; dual_stbuf_write_r;</span>
+<span id="L310"><span class="lineNum">     310</span>              :    assign ld_addr_rhit_hi_hi = (end_addr_m[31:2] == end_addr_r[31:2]) &amp; lsu_pkt_r.valid &amp; lsu_pkt_r.store &amp; ~lsu_pkt_r.dma &amp; dual_stbuf_write_r;</span>
+<span id="L311"><span class="lineNum">     311</span>              : </span>
+<span id="L312"><span class="lineNum">     312</span>              :    for (genvar i=0; i&lt;BYTE_WIDTH; i++) begin</span>
+<span id="L313"><span class="lineNum">     313</span>              :       assign ld_byte_rhit_lo_lo[i] = ld_addr_rhit_lo_lo &amp; ldst_byteen_lo_r[i];</span>
+<span id="L314"><span class="lineNum">     314</span>              :       assign ld_byte_rhit_lo_hi[i] = ld_addr_rhit_lo_hi &amp; ldst_byteen_lo_r[i];</span>
+<span id="L315"><span class="lineNum">     315</span>              :       assign ld_byte_rhit_hi_lo[i] = ld_addr_rhit_hi_lo &amp; ldst_byteen_hi_r[i];</span>
+<span id="L316"><span class="lineNum">     316</span>              :       assign ld_byte_rhit_hi_hi[i] = ld_addr_rhit_hi_hi &amp; ldst_byteen_hi_r[i];</span>
+<span id="L317"><span class="lineNum">     317</span>              : </span>
+<span id="L318"><span class="lineNum">     318</span>              :       assign ld_byte_rhit_lo[i] = ld_byte_rhit_lo_lo[i] | ld_byte_rhit_hi_lo[i];</span>
+<span id="L319"><span class="lineNum">     319</span>              :       assign ld_byte_rhit_hi[i] = ld_byte_rhit_lo_hi[i] | ld_byte_rhit_hi_hi[i];</span>
+<span id="L320"><span class="lineNum">     320</span>              : </span>
+<span id="L321"><span class="lineNum">     321</span>              :        assign ld_fwddata_rpipe_lo[(8*i)+7:(8*i)] = ({8{ld_byte_rhit_lo_lo[i]}} &amp; store_data_lo_r[(8*i)+7:(8*i)]) |</span>
+<span id="L322"><span class="lineNum">     322</span>              :                                                      ({8{ld_byte_rhit_hi_lo[i]}} &amp; store_data_hi_r[(8*i)+7:(8*i)]);</span>
+<span id="L323"><span class="lineNum">     323</span>              : </span>
+<span id="L324"><span class="lineNum">     324</span>              :        assign ld_fwddata_rpipe_hi[(8*i)+7:(8*i)] = ({8{ld_byte_rhit_lo_hi[i]}} &amp; store_data_lo_r[(8*i)+7:(8*i)]) |</span>
+<span id="L325"><span class="lineNum">     325</span>              :                                                      ({8{ld_byte_rhit_hi_hi[i]}} &amp; store_data_hi_r[(8*i)+7:(8*i)]);</span>
+<span id="L326"><span class="lineNum">     326</span>              : </span>
+<span id="L327"><span class="lineNum">     327</span>              :       assign ld_byte_hit_lo[i] = ld_byte_rhit_lo_lo[i] | ld_byte_rhit_hi_lo[i];</span>
+<span id="L328"><span class="lineNum">     328</span>              :       assign ld_byte_hit_hi[i] = ld_byte_rhit_lo_hi[i] | ld_byte_rhit_hi_hi[i];</span>
+<span id="L329"><span class="lineNum">     329</span>              : </span>
+<span id="L330"><span class="lineNum">     330</span>              :       assign stbuf_fwdbyteen_hi_m[i] = ld_byte_hit_hi[i] | stbuf_fwdbyteen_hi_pre_m[i];</span>
+<span id="L331"><span class="lineNum">     331</span>              :       assign stbuf_fwdbyteen_lo_m[i] = ld_byte_hit_lo[i] | stbuf_fwdbyteen_lo_pre_m[i];</span>
+<span id="L332"><span class="lineNum">     332</span>              :       // // Pipe vs Store Queue priority</span>
+<span id="L333"><span class="lineNum">     333</span>              :       assign stbuf_fwddata_lo_m[(8*i)+7:(8*i)] = ld_byte_rhit_lo[i]    ? ld_fwddata_rpipe_lo[(8*i)+7:(8*i)] : stbuf_fwddata_lo_pre_m[(8*i)+7:(8*i)];</span>
+<span id="L334"><span class="lineNum">     334</span>              :       // // Pipe vs Store Queue priority</span>
+<span id="L335"><span class="lineNum">     335</span>              :       assign stbuf_fwddata_hi_m[(8*i)+7:(8*i)] = ld_byte_rhit_hi[i]    ? ld_fwddata_rpipe_hi[(8*i)+7:(8*i)] : stbuf_fwddata_hi_pre_m[(8*i)+7:(8*i)];</span>
+<span id="L336"><span class="lineNum">     336</span>              :    end</span>
+<span id="L337"><span class="lineNum">     337</span>              : </span>
+<span id="L338"><span class="lineNum">     338</span>              :    // Flops</span>
+<span id="L339"><span class="lineNum">     339</span>              :    rvdffs #(.WIDTH(DEPTH_LOG2)) WrPtrff (.din(NxtWrPtr[DEPTH_LOG2-1:0]), .dout(WrPtr[DEPTH_LOG2-1:0]), .en(WrPtrEn), .clk(lsu_stbuf_c1_clk), .*);</span>
+<span id="L340"><span class="lineNum">     340</span>              :    rvdffs #(.WIDTH(DEPTH_LOG2)) RdPtrff (.din(NxtRdPtr[DEPTH_LOG2-1:0]), .dout(RdPtr[DEPTH_LOG2-1:0]), .en(RdPtrEn), .clk(lsu_stbuf_c1_clk), .*);</span>
+<span id="L341"><span class="lineNum">     341</span>              : </span>
+<span id="L342"><span class="lineNum">     342</span>              : `ifdef RV_ASSERT_ON</span>
+<span id="L343"><span class="lineNum">     343</span>              : </span>
+<span id="L344"><span class="lineNum">     344</span>              :    assert_stbuf_overflow: assert #0 (stbuf_specvld_any[2:0] &lt;= DEPTH);</span>
+<span id="L345"><span class="lineNum">     345</span>              :    property stbuf_wren_store_dccm;</span>
+<span id="L346"><span class="lineNum">     346</span>              :       @(posedge clk)  disable iff(~rst_l) (|stbuf_wr_en[DEPTH-1:0]) |-&gt; (lsu_pkt_r.valid &amp; lsu_pkt_r.store &amp; addr_in_dccm_r);</span>
+<span id="L347"><span class="lineNum">     347</span>              :    endproperty</span>
+<span id="L348"><span class="lineNum">     348</span>              :    assert_stbuf_wren_store_dccm: assert property (stbuf_wren_store_dccm) else</span>
+<span id="L349"><span class="lineNum">     349</span>              :       $display("Illegal store buffer write");</span>
+<span id="L350"><span class="lineNum">     350</span>              : </span>
+<span id="L351"><span class="lineNum">     351</span>              : `endif</span>
+<span id="L352"><span class="lineNum">     352</span>              : </span>
+<span id="L353"><span class="lineNum">     353</span>              : endmodule</span>
+<span id="L354"><span class="lineNum">     354</span>              : </span>
+        </pre>
+</td>
+</tr>
+</table>
+
+</body>
+</html>

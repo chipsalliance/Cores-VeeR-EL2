@@ -1,0 +1,754 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>
+        Full
+        coverage report
+    </title>
+    <link rel="stylesheet" type="text/css" href="cov.css">
+    <style>
+        .container {
+            background-color: rgb(169, 169, 169);
+            width: 100%;
+            min-height: 80%;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <table class="title-header-shadow">
+        <td class="title-container">
+            <table class="title-header">
+                <td class="title-logo">
+                    <a href=index.html>
+                        <img src=_static/white.svg></img>
+                    </a>
+                </td>
+                <td class="title">
+                    Project
+                    Full
+                    coverage report
+                </td>
+            </table>
+        </td>
+    </table>
+    <center>
+        <table class="info-table">
+            <tr class="info-table-view">
+                <td width="10%" class="headerInfo">Current view:</td>
+                <td width="40%" class="headerInfoValue">
+                    <a href=index.html>Cores-VeeR-EL2</a>—Cores-VeeR-EL2—design—el2_dma_ctrl.sv
+                </td>
+                <td width=auto></td>
+                <td width="10%"></td>
+                <td width="10%" class="headerCovSummary colTop">Coverage</td>
+                <td width="10%" class="headerCovSummary colTop" title="Covered + Uncovered code">Hit</td>
+                <td width="10%" class="headerCovSummary colTop" title="Exercised code only">Total</td>
+            </tr>
+            <tr>
+                <td class="headerInfo">Test Date:</td>
+                <td class="headerInfoValue">
+                    11-12-2024
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Toggle
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff3f00;">
+        12.4%
+    </td>
+    <td class="headerCovSummaryEntry">
+        20
+    </td>
+    <td class="headerCovSummaryEntry">
+        161
+    </td>
+
+            </tr>
+            <tr>
+                <td class="headerInfo">Test:</td>
+                <td class="headerInfoValue">
+                    riscv-dv__riscv_hint_instr_test
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Branch
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #00ff00;">
+        100.0%
+    </td>
+    <td class="headerCovSummaryEntry">
+        4
+    </td>
+    <td class="headerCovSummaryEntry">
+        4
+    </td>
+
+            </tr>
+            
+        </table>
+    </center>
+
+    <table border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td><br/></td>
+</tr>
+<tr>
+<td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : // SPDX-License-Identifier: Apache-2.0</span>
+<span id="L2"><span class="lineNum">       2</span>              : // Copyright 2020 Western Digital Corporation or its affiliates.</span>
+<span id="L3"><span class="lineNum">       3</span>              : //</span>
+<span id="L4"><span class="lineNum">       4</span>              : // Licensed under the Apache License, Version 2.0 (the "License");</span>
+<span id="L5"><span class="lineNum">       5</span>              : // you may not use this file except in compliance with the License.</span>
+<span id="L6"><span class="lineNum">       6</span>              : // You may obtain a copy of the License at</span>
+<span id="L7"><span class="lineNum">       7</span>              : //</span>
+<span id="L8"><span class="lineNum">       8</span>              : // http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L9"><span class="lineNum">       9</span>              : //</span>
+<span id="L10"><span class="lineNum">      10</span>              : // Unless required by applicable law or agreed to in writing, software</span>
+<span id="L11"><span class="lineNum">      11</span>              : // distributed under the License is distributed on an "AS IS" BASIS,</span>
+<span id="L12"><span class="lineNum">      12</span>              : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L13"><span class="lineNum">      13</span>              : // See the License for the specific language governing permissions and</span>
+<span id="L14"><span class="lineNum">      14</span>              : // limitations under the License.</span>
+<span id="L15"><span class="lineNum">      15</span>              : </span>
+<span id="L16"><span class="lineNum">      16</span>              : //********************************************************************************</span>
+<span id="L17"><span class="lineNum">      17</span>              : // $Id$</span>
+<span id="L18"><span class="lineNum">      18</span>              : //</span>
+<span id="L19"><span class="lineNum">      19</span>              : // Function: Top level VeeR core file</span>
+<span id="L20"><span class="lineNum">      20</span>              : // Comments:</span>
+<span id="L21"><span class="lineNum">      21</span>              : //</span>
+<span id="L22"><span class="lineNum">      22</span>              : //********************************************************************************</span>
+<span id="L23"><span class="lineNum">      23</span>              : </span>
+<span id="L24"><span class="lineNum">      24</span>              : module el2_dma_ctrl </span>
+<span id="L25"><span class="lineNum">      25</span>              : import el2_pkg::*;</span>
+<span id="L26"><span class="lineNum">      26</span>              : #(</span>
+<span id="L27"><span class="lineNum">      27</span>              : `include "el2_param.vh"</span>
+<span id="L28"><span class="lineNum">      28</span>              :  )(</span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC tlaBgGNC">      461448 :    input logic         clk,</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">      461448 :    input logic         free_clk,</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">           3 :    input logic         rst_l,</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">           3 :    input logic         dma_bus_clk_en, // slave bus clock enable</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic         clk_override,</span></span>
+<span id="L34"><span class="lineNum">      34</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
+<span id="L35"><span class="lineNum">      35</span>              :    /*verilator coverage_off*/</span>
+<span id="L36"><span class="lineNum">      36</span>              :    input logic         scan_mode,</span>
+<span id="L37"><span class="lineNum">      37</span>              :    /*verilator coverage_on*/</span>
+<span id="L38"><span class="lineNum">      38</span>              : </span>
+<span id="L39"><span class="lineNum">      39</span>              :    // Debug signals</span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaUNC">           0 :    input logic [31:0]  dbg_cmd_addr,</span></span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaUNC">           0 :    input logic [31:0]  dbg_cmd_wrdata,</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaUNC">           0 :    input logic         dbg_cmd_valid,</span></span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaUNC">           0 :    input logic         dbg_cmd_write, // 1: write command, 0: read_command</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaUNC">           0 :    input logic [1:0]   dbg_cmd_type, // 0:gpr 1:csr 2: memory</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaUNC">           0 :    input logic [1:0]   dbg_cmd_size, // size of the abstract mem access debug command</span></span>
+<span id="L46"><span class="lineNum">      46</span>              : </span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaUNC">           0 :    input  logic        dbg_dma_bubble,   // Debug needs a bubble to send a valid</span></span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaUNC">           0 :    output logic        dma_dbg_ready,    // DMA is ready to accept debug request</span></span>
+<span id="L49"><span class="lineNum">      49</span>              : </span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaUNC">           0 :    output logic        dma_dbg_cmd_done,</span></span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaUNC">           0 :    output logic        dma_dbg_cmd_fail,</span></span>
+<span id="L52"><span class="lineNum">      52</span> <span class="tlaUNC">           0 :    output logic [31:0] dma_dbg_rddata,</span></span>
+<span id="L53"><span class="lineNum">      53</span>              : </span>
+<span id="L54"><span class="lineNum">      54</span>              :    // Core side signals</span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaUNC">           0 :    output logic        dma_dccm_req,  // DMA dccm request (only one of dccm/iccm will be set)</span></span>
+<span id="L56"><span class="lineNum">      56</span> <span class="tlaUNC">           0 :    output logic        dma_iccm_req,  // DMA iccm request</span></span>
+<span id="L57"><span class="lineNum">      57</span> <span class="tlaUNC">           0 :    output logic [2:0]  dma_mem_tag,   // DMA Buffer entry number</span></span>
+<span id="L58"><span class="lineNum">      58</span> <span class="tlaUNC">           0 :    output logic [31:0] dma_mem_addr,  // DMA request address</span></span>
+<span id="L59"><span class="lineNum">      59</span> <span class="tlaUNC">           0 :    output logic [2:0]  dma_mem_sz,    // DMA request size</span></span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaUNC">           0 :    output logic        dma_mem_write, // DMA write to dccm/iccm</span></span>
+<span id="L61"><span class="lineNum">      61</span> <span class="tlaUNC">           0 :    output logic [63:0] dma_mem_wdata, // DMA write data</span></span>
+<span id="L62"><span class="lineNum">      62</span>              : </span>
+<span id="L63"><span class="lineNum">      63</span> <span class="tlaUNC">           0 :    input logic         dccm_dma_rvalid,    // dccm data valid for DMA read</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaUNC">           0 :    input logic         dccm_dma_ecc_error, // ECC error on DMA read</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaUNC">           0 :    input logic [2:0]   dccm_dma_rtag,      // Tag of the DMA req</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaUNC">           0 :    input logic [63:0]  dccm_dma_rdata,     // dccm data for DMA read</span></span>
+<span id="L67"><span class="lineNum">      67</span> <span class="tlaUNC">           0 :    input logic         iccm_dma_rvalid,    // iccm data valid for DMA read</span></span>
+<span id="L68"><span class="lineNum">      68</span> <span class="tlaUNC">           0 :    input logic         iccm_dma_ecc_error, // ECC error on DMA read</span></span>
+<span id="L69"><span class="lineNum">      69</span> <span class="tlaUNC">           0 :    input logic [2:0]   iccm_dma_rtag,      // Tag of the DMA req</span></span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaUNC">           0 :    input logic [63:0]  iccm_dma_rdata,     // iccm data for DMA read</span></span>
+<span id="L71"><span class="lineNum">      71</span>              : </span>
+<span id="L72"><span class="lineNum">      72</span> <span class="tlaUNC">           0 :    output logic        dma_active,         // DMA is busy</span></span>
+<span id="L73"><span class="lineNum">      73</span> <span class="tlaUNC">           0 :    output logic        dma_dccm_stall_any, // stall dccm pipe (bubble) so that DMA can proceed</span></span>
+<span id="L74"><span class="lineNum">      74</span> <span class="tlaUNC">           0 :    output logic        dma_iccm_stall_any, // stall iccm pipe (bubble) so that DMA can proceed</span></span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC tlaBgGNC">       16626 :    input logic         dccm_ready, // dccm ready to accept DMA request</span></span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">        7967 :    input logic         iccm_ready, // iccm ready to accept DMA request</span></span>
+<span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC">           3 :    input logic [2:0]   dec_tlu_dma_qos_prty,    // DMA QoS priority coming from MFDC [18:15]</span></span>
+<span id="L78"><span class="lineNum">      78</span>              : </span>
+<span id="L79"><span class="lineNum">      79</span>              :    // PMU signals</span>
+<span id="L80"><span class="lineNum">      80</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic        dma_pmu_dccm_read,</span></span>
+<span id="L81"><span class="lineNum">      81</span> <span class="tlaUNC">           0 :    output logic        dma_pmu_dccm_write,</span></span>
+<span id="L82"><span class="lineNum">      82</span> <span class="tlaUNC">           0 :    output logic        dma_pmu_any_read,</span></span>
+<span id="L83"><span class="lineNum">      83</span> <span class="tlaUNC">           0 :    output logic        dma_pmu_any_write,</span></span>
+<span id="L84"><span class="lineNum">      84</span>              : </span>
+<span id="L85"><span class="lineNum">      85</span>              :    // AXI Write Channels</span>
+<span id="L86"><span class="lineNum">      86</span> <span class="tlaUNC">           0 :    input  logic                        dma_axi_awvalid,</span></span>
+<span id="L87"><span class="lineNum">      87</span> <span class="tlaGNC tlaBgGNC">           3 :    output logic                        dma_axi_awready,</span></span>
+<span id="L88"><span class="lineNum">      88</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic [pt.DMA_BUS_TAG-1:0]   dma_axi_awid,</span></span>
+<span id="L89"><span class="lineNum">      89</span> <span class="tlaGNC tlaBgGNC">           3 :    input  logic [31:0]                 dma_axi_awaddr,</span></span>
+<span id="L90"><span class="lineNum">      90</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic [2:0]                  dma_axi_awsize,</span></span>
+<span id="L91"><span class="lineNum">      91</span>              : </span>
+<span id="L92"><span class="lineNum">      92</span>              : </span>
+<span id="L93"><span class="lineNum">      93</span> <span class="tlaUNC">           0 :    input  logic                        dma_axi_wvalid,</span></span>
+<span id="L94"><span class="lineNum">      94</span> <span class="tlaGNC tlaBgGNC">           3 :    output logic                        dma_axi_wready,</span></span>
+<span id="L95"><span class="lineNum">      95</span> <span class="tlaGNC">         201 :    input  logic [63:0]                 dma_axi_wdata,</span></span>
+<span id="L96"><span class="lineNum">      96</span> <span class="tlaGNC">         781 :    input  logic [7:0]                  dma_axi_wstrb,</span></span>
+<span id="L97"><span class="lineNum">      97</span>              : </span>
+<span id="L98"><span class="lineNum">      98</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic                        dma_axi_bvalid,</span></span>
+<span id="L99"><span class="lineNum">      99</span> <span class="tlaUNC">           0 :    input  logic                        dma_axi_bready,</span></span>
+<span id="L100"><span class="lineNum">     100</span> <span class="tlaUNC">           0 :    output logic [1:0]                  dma_axi_bresp,</span></span>
+<span id="L101"><span class="lineNum">     101</span> <span class="tlaUNC">           0 :    output logic [pt.DMA_BUS_TAG-1:0]   dma_axi_bid,</span></span>
+<span id="L102"><span class="lineNum">     102</span>              : </span>
+<span id="L103"><span class="lineNum">     103</span>              :    // AXI Read Channels</span>
+<span id="L104"><span class="lineNum">     104</span> <span class="tlaUNC">           0 :    input  logic                        dma_axi_arvalid,</span></span>
+<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC tlaBgGNC">           3 :    output logic                        dma_axi_arready,</span></span>
+<span id="L106"><span class="lineNum">     106</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic [pt.DMA_BUS_TAG-1:0]   dma_axi_arid,</span></span>
+<span id="L107"><span class="lineNum">     107</span> <span class="tlaGNC tlaBgGNC">           3 :    input  logic [31:0]                 dma_axi_araddr,</span></span>
+<span id="L108"><span class="lineNum">     108</span> <span class="tlaUNC tlaBgUNC">           0 :    input  logic [2:0]                  dma_axi_arsize,</span></span>
+<span id="L109"><span class="lineNum">     109</span>              : </span>
+<span id="L110"><span class="lineNum">     110</span> <span class="tlaUNC">           0 :    output logic                        dma_axi_rvalid,</span></span>
+<span id="L111"><span class="lineNum">     111</span> <span class="tlaUNC">           0 :    input  logic                        dma_axi_rready,</span></span>
+<span id="L112"><span class="lineNum">     112</span> <span class="tlaUNC">           0 :    output logic [pt.DMA_BUS_TAG-1:0]   dma_axi_rid,</span></span>
+<span id="L113"><span class="lineNum">     113</span> <span class="tlaUNC">           0 :    output logic [63:0]                 dma_axi_rdata,</span></span>
+<span id="L114"><span class="lineNum">     114</span> <span class="tlaUNC">           0 :    output logic [1:0]                  dma_axi_rresp,</span></span>
+<span id="L115"><span class="lineNum">     115</span> <span class="tlaGNC tlaBgGNC">           3 :    output logic                        dma_axi_rlast</span></span>
+<span id="L116"><span class="lineNum">     116</span>              : );</span>
+<span id="L117"><span class="lineNum">     117</span>              : </span>
+<span id="L118"><span class="lineNum">     118</span>              : </span>
+<span id="L119"><span class="lineNum">     119</span>              :    localparam DEPTH = pt.DMA_BUF_DEPTH;</span>
+<span id="L120"><span class="lineNum">     120</span>              :    localparam DEPTH_PTR = $clog2(DEPTH);</span>
+<span id="L121"><span class="lineNum">     121</span>              :    localparam NACK_COUNT = 7;</span>
+<span id="L122"><span class="lineNum">     122</span>              : </span>
+<span id="L123"><span class="lineNum">     123</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [DEPTH-1:0]        fifo_valid;</span></span>
+<span id="L124"><span class="lineNum">     124</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0][1:0]   fifo_error;</span></span>
+<span id="L125"><span class="lineNum">     125</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]        fifo_error_bus;</span></span>
+<span id="L126"><span class="lineNum">     126</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]        fifo_rpend;</span></span>
+<span id="L127"><span class="lineNum">     127</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]        fifo_done;      // DMA trxn is done in core</span></span>
+<span id="L128"><span class="lineNum">     128</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]        fifo_done_bus;  // DMA trxn is done in core but synced to bus clock</span></span>
+<span id="L129"><span class="lineNum">     129</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0][31:0]  fifo_addr;</span></span>
+<span id="L130"><span class="lineNum">     130</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0][2:0]   fifo_sz;</span></span>
+<span id="L131"><span class="lineNum">     131</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0][7:0]   fifo_byteen;</span></span>
+<span id="L132"><span class="lineNum">     132</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]        fifo_write;</span></span>
+<span id="L133"><span class="lineNum">     133</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]        fifo_posted_write;</span></span>
+<span id="L134"><span class="lineNum">     134</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]        fifo_dbg;</span></span>
+<span id="L135"><span class="lineNum">     135</span>              :    logic [DEPTH-1:0][63:0]  fifo_data;</span>
+<span id="L136"><span class="lineNum">     136</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0][pt.DMA_BUS_TAG-1:0]  fifo_tag;</span></span>
+<span id="L137"><span class="lineNum">     137</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0][pt.DMA_BUS_ID-1:0]   fifo_mid;</span></span>
+<span id="L138"><span class="lineNum">     138</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0][pt.DMA_BUS_PRTY-1:0] fifo_prty;</span></span>
+<span id="L139"><span class="lineNum">     139</span>              : </span>
+<span id="L140"><span class="lineNum">     140</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]        fifo_cmd_en;</span></span>
+<span id="L141"><span class="lineNum">     141</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]        fifo_data_en;</span></span>
+<span id="L142"><span class="lineNum">     142</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]        fifo_pend_en;</span></span>
+<span id="L143"><span class="lineNum">     143</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]        fifo_done_en;</span></span>
+<span id="L144"><span class="lineNum">     144</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]        fifo_done_bus_en;</span></span>
+<span id="L145"><span class="lineNum">     145</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]        fifo_error_en;</span></span>
+<span id="L146"><span class="lineNum">     146</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]        fifo_error_bus_en;</span></span>
+<span id="L147"><span class="lineNum">     147</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0]        fifo_reset;</span></span>
+<span id="L148"><span class="lineNum">     148</span> <span class="tlaUNC">           0 :    logic [DEPTH-1:0][1:0]   fifo_error_in;</span></span>
+<span id="L149"><span class="lineNum">     149</span>              :    logic [DEPTH-1:0][63:0]  fifo_data_in;</span>
+<span id="L150"><span class="lineNum">     150</span>              : </span>
+<span id="L151"><span class="lineNum">     151</span> <span class="tlaUNC">           0 :    logic                    fifo_write_in;</span></span>
+<span id="L152"><span class="lineNum">     152</span> <span class="tlaUNC">           0 :    logic                    fifo_posted_write_in;</span></span>
+<span id="L153"><span class="lineNum">     153</span> <span class="tlaUNC">           0 :    logic                    fifo_dbg_in;</span></span>
+<span id="L154"><span class="lineNum">     154</span> <span class="tlaUNC">           0 :    logic [31:0]             fifo_addr_in;</span></span>
+<span id="L155"><span class="lineNum">     155</span> <span class="tlaUNC">           0 :    logic [2:0]              fifo_sz_in;</span></span>
+<span id="L156"><span class="lineNum">     156</span> <span class="tlaUNC">           0 :    logic [7:0]              fifo_byteen_in;</span></span>
+<span id="L157"><span class="lineNum">     157</span>              : </span>
+<span id="L158"><span class="lineNum">     158</span> <span class="tlaUNC">           0 :    logic [DEPTH_PTR-1:0]    RspPtr, NxtRspPtr;</span></span>
+<span id="L159"><span class="lineNum">     159</span> <span class="tlaUNC">           0 :    logic [DEPTH_PTR-1:0]    WrPtr, NxtWrPtr;</span></span>
+<span id="L160"><span class="lineNum">     160</span> <span class="tlaUNC">           0 :    logic [DEPTH_PTR-1:0]    RdPtr, NxtRdPtr;</span></span>
+<span id="L161"><span class="lineNum">     161</span> <span class="tlaUNC">           0 :    logic                    WrPtrEn, RdPtrEn, RspPtrEn;</span></span>
+<span id="L162"><span class="lineNum">     162</span>              : </span>
+<span id="L163"><span class="lineNum">     163</span> <span class="tlaUNC">           0 :    logic [1:0]              dma_dbg_sz;</span></span>
+<span id="L164"><span class="lineNum">     164</span> <span class="tlaUNC">           0 :    logic [1:0]              dma_dbg_addr;</span></span>
+<span id="L165"><span class="lineNum">     165</span> <span class="tlaUNC">           0 :    logic [31:0]             dma_dbg_mem_rddata;</span></span>
+<span id="L166"><span class="lineNum">     166</span> <span class="tlaUNC">           0 :    logic [31:0]             dma_dbg_mem_wrdata;</span></span>
+<span id="L167"><span class="lineNum">     167</span> <span class="tlaUNC">           0 :    logic                    dma_dbg_cmd_error;</span></span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaUNC">           0 :    logic                    dma_dbg_cmd_done_q;</span></span>
+<span id="L169"><span class="lineNum">     169</span>              : </span>
+<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC tlaBgGNC">           3 :    logic                    fifo_full, fifo_full_spec, fifo_empty;</span></span>
+<span id="L171"><span class="lineNum">     171</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                    dma_address_error, dma_alignment_error;</span></span>
+<span id="L172"><span class="lineNum">     172</span> <span class="tlaUNC">           0 :    logic [3:0]              num_fifo_vld;</span></span>
+<span id="L173"><span class="lineNum">     173</span> <span class="tlaUNC">           0 :    logic                    dma_mem_req;</span></span>
+<span id="L174"><span class="lineNum">     174</span> <span class="tlaUNC">           0 :    logic [31:0]             dma_mem_addr_int;</span></span>
+<span id="L175"><span class="lineNum">     175</span> <span class="tlaUNC">           0 :    logic [2:0]              dma_mem_sz_int;</span></span>
+<span id="L176"><span class="lineNum">     176</span> <span class="tlaUNC">           0 :    logic [7:0]              dma_mem_byteen;</span></span>
+<span id="L177"><span class="lineNum">     177</span> <span class="tlaUNC">           0 :    logic                    dma_mem_addr_in_dccm;</span></span>
+<span id="L178"><span class="lineNum">     178</span> <span class="tlaUNC">           0 :    logic                    dma_mem_addr_in_iccm;</span></span>
+<span id="L179"><span class="lineNum">     179</span> <span class="tlaUNC">           0 :    logic                    dma_mem_addr_in_pic;</span></span>
+<span id="L180"><span class="lineNum">     180</span> <span class="tlaUNC">           0 :    logic                    dma_mem_addr_in_pic_region_nc;</span></span>
+<span id="L181"><span class="lineNum">     181</span> <span class="tlaUNC">           0 :    logic                    dma_mem_addr_in_dccm_region_nc;</span></span>
+<span id="L182"><span class="lineNum">     182</span> <span class="tlaUNC">           0 :    logic                    dma_mem_addr_in_iccm_region_nc;</span></span>
+<span id="L183"><span class="lineNum">     183</span>              : </span>
+<span id="L184"><span class="lineNum">     184</span> <span class="tlaGNC tlaBgGNC">           3 :    logic [2:0]              dma_nack_count, dma_nack_count_d, dma_nack_count_csr;</span></span>
+<span id="L185"><span class="lineNum">     185</span>              : </span>
+<span id="L186"><span class="lineNum">     186</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                    dma_buffer_c1_clken;</span></span>
+<span id="L187"><span class="lineNum">     187</span> <span class="tlaUNC">           0 :    logic                    dma_free_clken;</span></span>
+<span id="L188"><span class="lineNum">     188</span> <span class="tlaGNC tlaBgGNC">      461448 :    logic                    dma_buffer_c1_clk;</span></span>
+<span id="L189"><span class="lineNum">     189</span> <span class="tlaGNC">      461448 :    logic                    dma_free_clk;</span></span>
+<span id="L190"><span class="lineNum">     190</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                    dma_bus_clk;</span></span>
+<span id="L191"><span class="lineNum">     191</span>              : </span>
+<span id="L192"><span class="lineNum">     192</span> <span class="tlaUNC">           0 :    logic                    bus_rsp_valid, bus_rsp_sent;</span></span>
+<span id="L193"><span class="lineNum">     193</span> <span class="tlaUNC">           0 :    logic                    bus_cmd_valid, bus_cmd_sent;</span></span>
+<span id="L194"><span class="lineNum">     194</span> <span class="tlaUNC">           0 :    logic                    bus_cmd_write, bus_cmd_posted_write;</span></span>
+<span id="L195"><span class="lineNum">     195</span> <span class="tlaUNC">           0 :    logic [7:0]              bus_cmd_byteen;</span></span>
+<span id="L196"><span class="lineNum">     196</span> <span class="tlaUNC">           0 :    logic [2:0]              bus_cmd_sz;</span></span>
+<span id="L197"><span class="lineNum">     197</span> <span class="tlaUNC">           0 :    logic [31:0]             bus_cmd_addr;</span></span>
+<span id="L198"><span class="lineNum">     198</span> <span class="tlaUNC">           0 :    logic [63:0]             bus_cmd_wdata;</span></span>
+<span id="L199"><span class="lineNum">     199</span> <span class="tlaUNC">           0 :    logic [pt.DMA_BUS_TAG-1:0]  bus_cmd_tag;</span></span>
+<span id="L200"><span class="lineNum">     200</span> <span class="tlaUNC">           0 :    logic [pt.DMA_BUS_ID-1:0]   bus_cmd_mid;</span></span>
+<span id="L201"><span class="lineNum">     201</span> <span class="tlaUNC">           0 :    logic [pt.DMA_BUS_PRTY-1:0] bus_cmd_prty;</span></span>
+<span id="L202"><span class="lineNum">     202</span> <span class="tlaUNC">           0 :    logic                    bus_posted_write_done;</span></span>
+<span id="L203"><span class="lineNum">     203</span>              : </span>
+<span id="L204"><span class="lineNum">     204</span> <span class="tlaUNC">           0 :    logic                    fifo_full_spec_bus;</span></span>
+<span id="L205"><span class="lineNum">     205</span> <span class="tlaUNC">           0 :    logic                    dbg_dma_bubble_bus;</span></span>
+<span id="L206"><span class="lineNum">     206</span> <span class="tlaUNC">           0 :    logic                    stall_dma_in;</span></span>
+<span id="L207"><span class="lineNum">     207</span> <span class="tlaGNC tlaBgGNC">           3 :    logic                    dma_fifo_ready;</span></span>
+<span id="L208"><span class="lineNum">     208</span>              : </span>
+<span id="L209"><span class="lineNum">     209</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       wrbuf_en, wrbuf_data_en;</span></span>
+<span id="L210"><span class="lineNum">     210</span> <span class="tlaUNC">           0 :    logic                       wrbuf_cmd_sent, wrbuf_rst, wrbuf_data_rst;</span></span>
+<span id="L211"><span class="lineNum">     211</span> <span class="tlaUNC">           0 :    logic                       wrbuf_vld, wrbuf_data_vld;</span></span>
+<span id="L212"><span class="lineNum">     212</span> <span class="tlaUNC">           0 :    logic [pt.DMA_BUS_TAG-1:0]  wrbuf_tag;</span></span>
+<span id="L213"><span class="lineNum">     213</span> <span class="tlaUNC">           0 :    logic [2:0]                 wrbuf_sz;</span></span>
+<span id="L214"><span class="lineNum">     214</span> <span class="tlaUNC">           0 :    logic [31:0]                wrbuf_addr;</span></span>
+<span id="L215"><span class="lineNum">     215</span> <span class="tlaUNC">           0 :    logic [63:0]                wrbuf_data;</span></span>
+<span id="L216"><span class="lineNum">     216</span> <span class="tlaUNC">           0 :    logic [7:0]                 wrbuf_byteen;</span></span>
+<span id="L217"><span class="lineNum">     217</span>              : </span>
+<span id="L218"><span class="lineNum">     218</span> <span class="tlaUNC">           0 :    logic                       rdbuf_en;</span></span>
+<span id="L219"><span class="lineNum">     219</span> <span class="tlaUNC">           0 :    logic                       rdbuf_cmd_sent, rdbuf_rst;</span></span>
+<span id="L220"><span class="lineNum">     220</span> <span class="tlaUNC">           0 :    logic                       rdbuf_vld;</span></span>
+<span id="L221"><span class="lineNum">     221</span> <span class="tlaUNC">           0 :    logic [pt.DMA_BUS_TAG-1:0]  rdbuf_tag;</span></span>
+<span id="L222"><span class="lineNum">     222</span> <span class="tlaUNC">           0 :    logic [2:0]                 rdbuf_sz;</span></span>
+<span id="L223"><span class="lineNum">     223</span> <span class="tlaUNC">           0 :    logic [31:0]                rdbuf_addr;</span></span>
+<span id="L224"><span class="lineNum">     224</span>              : </span>
+<span id="L225"><span class="lineNum">     225</span> <span class="tlaUNC">           0 :    logic                       axi_mstr_prty_in, axi_mstr_prty_en;</span></span>
+<span id="L226"><span class="lineNum">     226</span> <span class="tlaUNC">           0 :    logic                       axi_mstr_priority;</span></span>
+<span id="L227"><span class="lineNum">     227</span> <span class="tlaUNC">           0 :    logic                       axi_mstr_sel;</span></span>
+<span id="L228"><span class="lineNum">     228</span>              : </span>
+<span id="L229"><span class="lineNum">     229</span> <span class="tlaUNC">           0 :    logic                       axi_rsp_valid, axi_rsp_sent;</span></span>
+<span id="L230"><span class="lineNum">     230</span> <span class="tlaUNC">           0 :    logic                       axi_rsp_write;</span></span>
+<span id="L231"><span class="lineNum">     231</span> <span class="tlaUNC">           0 :    logic [pt.DMA_BUS_TAG-1:0]  axi_rsp_tag;</span></span>
+<span id="L232"><span class="lineNum">     232</span> <span class="tlaUNC">           0 :    logic [1:0]                 axi_rsp_error;</span></span>
+<span id="L233"><span class="lineNum">     233</span> <span class="tlaUNC">           0 :    logic [63:0]                axi_rsp_rdata;</span></span>
+<span id="L234"><span class="lineNum">     234</span>              : </span>
+<span id="L235"><span class="lineNum">     235</span>              :    //------------------------LOGIC STARTS HERE---------------------------------</span>
+<span id="L236"><span class="lineNum">     236</span>              : </span>
+<span id="L237"><span class="lineNum">     237</span>              :    // FIFO inputs</span>
+<span id="L238"><span class="lineNum">     238</span>              :    assign fifo_addr_in[31:0]    = dbg_cmd_valid ? dbg_cmd_addr[31:0] : bus_cmd_addr[31:0];</span>
+<span id="L239"><span class="lineNum">     239</span>              :    assign fifo_byteen_in[7:0]   = {8{~dbg_cmd_valid}} &amp; bus_cmd_byteen[7:0];    // Byte enable is used only for bus requests</span>
+<span id="L240"><span class="lineNum">     240</span>              :    assign fifo_sz_in[2:0]       = dbg_cmd_valid ? {1'b0,dbg_cmd_size[1:0]} : bus_cmd_sz[2:0];</span>
+<span id="L241"><span class="lineNum">     241</span>              :    assign fifo_write_in         = dbg_cmd_valid ? dbg_cmd_write : bus_cmd_write;</span>
+<span id="L242"><span class="lineNum">     242</span>              :    assign fifo_posted_write_in  = ~dbg_cmd_valid &amp; bus_cmd_posted_write;</span>
+<span id="L243"><span class="lineNum">     243</span>              :    assign fifo_dbg_in           = dbg_cmd_valid;</span>
+<span id="L244"><span class="lineNum">     244</span>              : </span>
+<span id="L245"><span class="lineNum">     245</span>              :    for (genvar i=0 ;i&lt;DEPTH; i++) begin: GenFifo</span>
+<span id="L246"><span class="lineNum">     246</span>              :       assign fifo_cmd_en[i]   = ((bus_cmd_sent &amp; dma_bus_clk_en) | (dbg_cmd_valid &amp; dbg_cmd_type[1])) &amp; (i == WrPtr[DEPTH_PTR-1:0]);</span>
+<span id="L247"><span class="lineNum">     247</span>              :       assign fifo_data_en[i] = (((bus_cmd_sent &amp; fifo_write_in &amp; dma_bus_clk_en) | (dbg_cmd_valid &amp; dbg_cmd_type[1] &amp; dbg_cmd_write))  &amp; (i == WrPtr[DEPTH_PTR-1:0])) |</span>
+<span id="L248"><span class="lineNum">     248</span>              :                                ((dma_address_error | dma_alignment_error) &amp; (i == RdPtr[DEPTH_PTR-1:0])) |</span>
+<span id="L249"><span class="lineNum">     249</span>              :                                (dccm_dma_rvalid &amp; (i == DEPTH_PTR'(dccm_dma_rtag[2:0]))) |</span>
+<span id="L250"><span class="lineNum">     250</span>              :                                (iccm_dma_rvalid &amp; (i == DEPTH_PTR'(iccm_dma_rtag[2:0])));</span>
+<span id="L251"><span class="lineNum">     251</span>              :       assign fifo_pend_en[i] = (dma_dccm_req | dma_iccm_req) &amp; ~dma_mem_write &amp; (i == RdPtr[DEPTH_PTR-1:0]);</span>
+<span id="L252"><span class="lineNum">     252</span>              :       assign fifo_error_en[i] = ((dma_address_error | dma_alignment_error | dma_dbg_cmd_error) &amp; (i == RdPtr[DEPTH_PTR-1:0])) |</span>
+<span id="L253"><span class="lineNum">     253</span>              :                                 ((dccm_dma_rvalid &amp; dccm_dma_ecc_error) &amp; (i == DEPTH_PTR'(dccm_dma_rtag[2:0]))) |</span>
+<span id="L254"><span class="lineNum">     254</span>              :                                 ((iccm_dma_rvalid &amp; iccm_dma_ecc_error) &amp; (i == DEPTH_PTR'(iccm_dma_rtag[2:0])));</span>
+<span id="L255"><span class="lineNum">     255</span>              :       assign fifo_error_bus_en[i] = (((|fifo_error_in[i][1:0]) &amp; fifo_error_en[i]) | (|fifo_error[i])) &amp; dma_bus_clk_en;</span>
+<span id="L256"><span class="lineNum">     256</span>              :       assign fifo_done_en[i] = ((|fifo_error[i] | fifo_error_en[i] | ((dma_dccm_req | dma_iccm_req) &amp; dma_mem_write)) &amp; (i == RdPtr[DEPTH_PTR-1:0])) |</span>
+<span id="L257"><span class="lineNum">     257</span>              :                                (dccm_dma_rvalid &amp; (i == DEPTH_PTR'(dccm_dma_rtag[2:0]))) |</span>
+<span id="L258"><span class="lineNum">     258</span>              :                                (iccm_dma_rvalid &amp; (i == DEPTH_PTR'(iccm_dma_rtag[2:0])));</span>
+<span id="L259"><span class="lineNum">     259</span>              :       assign fifo_done_bus_en[i] = (fifo_done_en[i] | fifo_done[i]) &amp; dma_bus_clk_en;</span>
+<span id="L260"><span class="lineNum">     260</span>              :       assign fifo_reset[i] = (((bus_rsp_sent | bus_posted_write_done) &amp; dma_bus_clk_en) | dma_dbg_cmd_done) &amp; (i == RspPtr[DEPTH_PTR-1:0]);</span>
+<span id="L261"><span class="lineNum">     261</span>              :       assign fifo_error_in[i]   = (dccm_dma_rvalid &amp; (i == DEPTH_PTR'(dccm_dma_rtag[2:0]))) ? {1'b0,dccm_dma_ecc_error} : (iccm_dma_rvalid &amp; (i == DEPTH_PTR'(iccm_dma_rtag[2:0]))) ? {1'b0,iccm_dma_ecc_error}  :</span>
+<span id="L262"><span class="lineNum">     262</span>              :                                                                                                                 {(dma_address_error | dma_alignment_error | dma_dbg_cmd_error), dma_alignment_error};</span>
+<span id="L263"><span class="lineNum">     263</span>              :       assign fifo_data_in[i]   = (fifo_error_en[i] &amp; (|fifo_error_in[i])) ? {32'b0,fifo_addr[i]} :</span>
+<span id="L264"><span class="lineNum">     264</span>              :                                                         ((dccm_dma_rvalid &amp; (i == DEPTH_PTR'(dccm_dma_rtag[2:0])))  ? dccm_dma_rdata[63:0] : (iccm_dma_rvalid &amp; (i == DEPTH_PTR'(iccm_dma_rtag[2:0]))) ? iccm_dma_rdata[63:0] :</span>
+<span id="L265"><span class="lineNum">     265</span>              :                                                                                                                                                        (dbg_cmd_valid ? {2{dma_dbg_mem_wrdata[31:0]}} : bus_cmd_wdata[63:0]));</span>
+<span id="L266"><span class="lineNum">     266</span>              : </span>
+<span id="L267"><span class="lineNum">     267</span>              :       rvdffsc #(1) fifo_valid_dff (.din(1'b1), .dout(fifo_valid[i]), .en(fifo_cmd_en[i]), .clear(fifo_reset[i]), .clk(dma_free_clk), .*);</span>
+<span id="L268"><span class="lineNum">     268</span>              :       rvdffsc #(2) fifo_error_dff (.din(fifo_error_in[i]), .dout(fifo_error[i]), .en(fifo_error_en[i]), .clear(fifo_reset[i]), .clk(dma_free_clk), .*);</span>
+<span id="L269"><span class="lineNum">     269</span>              :       rvdffsc #(1) fifo_error_bus_dff (.din(1'b1), .dout(fifo_error_bus[i]), .en(fifo_error_bus_en[i]), .clear(fifo_reset[i]), .clk(dma_free_clk), .*);</span>
+<span id="L270"><span class="lineNum">     270</span>              :       rvdffsc #(1) fifo_rpend_dff (.din(1'b1), .dout(fifo_rpend[i]), .en(fifo_pend_en[i]), .clear(fifo_reset[i]), .clk(dma_free_clk), .*);</span>
+<span id="L271"><span class="lineNum">     271</span>              :       rvdffsc #(1) fifo_done_dff (.din(1'b1), .dout(fifo_done[i]), .en(fifo_done_en[i]), .clear(fifo_reset[i]), .clk(dma_free_clk), .*);</span>
+<span id="L272"><span class="lineNum">     272</span>              :       rvdffsc #(1) fifo_done_bus_dff (.din(1'b1), .dout(fifo_done_bus[i]), .en(fifo_done_bus_en[i]), .clear(fifo_reset[i]), .clk(dma_free_clk), .*);</span>
+<span id="L273"><span class="lineNum">     273</span>              :       rvdffe  #(32) fifo_addr_dff (.din(fifo_addr_in[31:0]), .dout(fifo_addr[i]), .en(fifo_cmd_en[i]), .*);</span>
+<span id="L274"><span class="lineNum">     274</span>              :       rvdffs  #(3) fifo_sz_dff (.din(fifo_sz_in[2:0]), .dout(fifo_sz[i]), .en(fifo_cmd_en[i]), .clk(dma_buffer_c1_clk), .*);</span>
+<span id="L275"><span class="lineNum">     275</span>              :       rvdffs  #(8) fifo_byteen_dff (.din(fifo_byteen_in[7:0]), .dout(fifo_byteen[i]), .en(fifo_cmd_en[i]), .clk(dma_buffer_c1_clk), .*);</span>
+<span id="L276"><span class="lineNum">     276</span>              :       rvdffs  #(1) fifo_write_dff (.din(fifo_write_in), .dout(fifo_write[i]), .en(fifo_cmd_en[i]), .clk(dma_buffer_c1_clk), .*);</span>
+<span id="L277"><span class="lineNum">     277</span>              :       rvdffs  #(1) fifo_posted_write_dff (.din(fifo_posted_write_in), .dout(fifo_posted_write[i]), .en(fifo_cmd_en[i]), .clk(dma_buffer_c1_clk), .*);</span>
+<span id="L278"><span class="lineNum">     278</span>              :       rvdffs  #(1) fifo_dbg_dff (.din(fifo_dbg_in), .dout(fifo_dbg[i]), .en(fifo_cmd_en[i]), .clk(dma_buffer_c1_clk), .*);</span>
+<span id="L279"><span class="lineNum">     279</span>              :       rvdffe  #(64) fifo_data_dff (.din(fifo_data_in[i]), .dout(fifo_data[i]), .en(fifo_data_en[i]), .*);</span>
+<span id="L280"><span class="lineNum">     280</span>              :       rvdffs  #(pt.DMA_BUS_TAG) fifo_tag_dff(.din(bus_cmd_tag[pt.DMA_BUS_TAG-1:0]), .dout(fifo_tag[i][pt.DMA_BUS_TAG-1:0]), .en(fifo_cmd_en[i]), .clk(dma_buffer_c1_clk), .*);</span>
+<span id="L281"><span class="lineNum">     281</span>              :       rvdffs  #(pt.DMA_BUS_ID) fifo_mid_dff(.din(bus_cmd_mid[pt.DMA_BUS_ID-1:0]), .dout(fifo_mid[i][pt.DMA_BUS_ID-1:0]), .en(fifo_cmd_en[i]), .clk(dma_buffer_c1_clk), .*);</span>
+<span id="L282"><span class="lineNum">     282</span>              :       rvdffs  #(pt.DMA_BUS_PRTY) fifo_prty_dff(.din(bus_cmd_prty[pt.DMA_BUS_PRTY-1:0]), .dout(fifo_prty[i][pt.DMA_BUS_PRTY-1:0]), .en(fifo_cmd_en[i]), .clk(dma_buffer_c1_clk), .*);</span>
+<span id="L283"><span class="lineNum">     283</span>              :    end</span>
+<span id="L284"><span class="lineNum">     284</span>              : </span>
+<span id="L285"><span class="lineNum">     285</span>              :    // Pointer logic</span>
+<span id="L286"><span class="lineNum">     286</span>              :    assign NxtWrPtr[DEPTH_PTR-1:0] = (WrPtr[DEPTH_PTR-1:0] == (DEPTH-1)) ? '0 : WrPtr[DEPTH_PTR-1:0] + 1'b1;</span>
+<span id="L287"><span class="lineNum">     287</span>              :    assign NxtRdPtr[DEPTH_PTR-1:0] = (RdPtr[DEPTH_PTR-1:0] == (DEPTH-1)) ? '0 : RdPtr[DEPTH_PTR-1:0] + 1'b1;</span>
+<span id="L288"><span class="lineNum">     288</span>              :    assign NxtRspPtr[DEPTH_PTR-1:0] = (RspPtr[DEPTH_PTR-1:0] == (DEPTH-1)) ? '0 : RspPtr[DEPTH_PTR-1:0] + 1'b1;</span>
+<span id="L289"><span class="lineNum">     289</span>              : </span>
+<span id="L290"><span class="lineNum">     290</span>              :    assign WrPtrEn = |fifo_cmd_en[DEPTH-1:0];</span>
+<span id="L291"><span class="lineNum">     291</span>              :    assign RdPtrEn = dma_dccm_req | dma_iccm_req | (dma_address_error | dma_alignment_error | dma_dbg_cmd_error);</span>
+<span id="L292"><span class="lineNum">     292</span>              :    assign RspPtrEn = (dma_dbg_cmd_done | (bus_rsp_sent | bus_posted_write_done) &amp; dma_bus_clk_en);</span>
+<span id="L293"><span class="lineNum">     293</span>              : </span>
+<span id="L294"><span class="lineNum">     294</span>              :    rvdffs #(DEPTH_PTR) WrPtr_dff(.din(NxtWrPtr[DEPTH_PTR-1:0]), .dout(WrPtr[DEPTH_PTR-1:0]), .en(WrPtrEn), .clk(dma_free_clk), .*);</span>
+<span id="L295"><span class="lineNum">     295</span>              :    rvdffs #(DEPTH_PTR) RdPtr_dff(.din(NxtRdPtr[DEPTH_PTR-1:0]), .dout(RdPtr[DEPTH_PTR-1:0]), .en(RdPtrEn), .clk(dma_free_clk), .*);</span>
+<span id="L296"><span class="lineNum">     296</span>              :    rvdffs #(DEPTH_PTR) RspPtr_dff(.din(NxtRspPtr[DEPTH_PTR-1:0]), .dout(RspPtr[DEPTH_PTR-1:0]), .en(RspPtrEn), .clk(dma_free_clk), .*);</span>
+<span id="L297"><span class="lineNum">     297</span>              : </span>
+<span id="L298"><span class="lineNum">     298</span>              :    // Miscellaneous signals</span>
+<span id="L299"><span class="lineNum">     299</span>              :    assign fifo_full = fifo_full_spec_bus;</span>
+<span id="L300"><span class="lineNum">     300</span>              : </span>
+<span id="L301"><span class="lineNum">     301</span> <span class="tlaGNC tlaBgGNC">           3 :    always_comb begin</span></span>
+<span id="L302"><span class="lineNum">     302</span> <span class="tlaGNC">           3 :       num_fifo_vld[3:0] = {3'b0,bus_cmd_sent} - {3'b0,bus_rsp_sent};</span></span>
+<span id="L303"><span class="lineNum">     303</span> <span class="tlaGNC">           3 :       for (int i=0; i&lt;DEPTH; i++) begin</span></span>
+<span id="L304"><span class="lineNum">     304</span> <span class="tlaGNC">          15 :          num_fifo_vld[3:0] += {3'b0,fifo_valid[i]};</span></span>
+<span id="L305"><span class="lineNum">     305</span>              :       end</span>
+<span id="L306"><span class="lineNum">     306</span>              :    end</span>
+<span id="L307"><span class="lineNum">     307</span>              :    assign fifo_full_spec          = (num_fifo_vld[3:0] &gt;= DEPTH);</span>
+<span id="L308"><span class="lineNum">     308</span>              : </span>
+<span id="L309"><span class="lineNum">     309</span>              :    assign dma_fifo_ready = ~(fifo_full | dbg_dma_bubble_bus);</span>
+<span id="L310"><span class="lineNum">     310</span>              : </span>
+<span id="L311"><span class="lineNum">     311</span>              :    // Error logic</span>
+<span id="L312"><span class="lineNum">     312</span>              :    assign dma_address_error = fifo_valid[RdPtr] &amp; ~fifo_done[RdPtr] &amp; ~fifo_dbg[RdPtr] &amp; (~(dma_mem_addr_in_dccm | dma_mem_addr_in_iccm));    // request not for ICCM or DCCM</span>
+<span id="L313"><span class="lineNum">     313</span>              :    assign dma_alignment_error = fifo_valid[RdPtr] &amp; ~fifo_done[RdPtr] &amp; ~fifo_dbg[RdPtr] &amp; ~dma_address_error &amp;</span>
+<span id="L314"><span class="lineNum">     314</span>              :                                 (((dma_mem_sz_int[2:0] == 3'h1) &amp; dma_mem_addr_int[0])                                                             |    // HW size but unaligned</span>
+<span id="L315"><span class="lineNum">     315</span>              :                                  ((dma_mem_sz_int[2:0] == 3'h2) &amp; (|dma_mem_addr_int[1:0]))                                                        |    // W size but unaligned</span>
+<span id="L316"><span class="lineNum">     316</span>              :                                  ((dma_mem_sz_int[2:0] == 3'h3) &amp; (|dma_mem_addr_int[2:0]))                                                        |    // DW size but unaligned</span>
+<span id="L317"><span class="lineNum">     317</span>              :                                  (dma_mem_addr_in_iccm &amp; ~((dma_mem_sz_int[1:0] == 2'b10) | (dma_mem_sz_int[1:0] == 2'b11)))                       |    // ICCM access not word size</span>
+<span id="L318"><span class="lineNum">     318</span>              :                                  (dma_mem_addr_in_dccm &amp; dma_mem_write &amp; ~((dma_mem_sz_int[1:0] == 2'b10) | (dma_mem_sz_int[1:0] == 2'b11)))       |    // DCCM write not word size</span>
+<span id="L319"><span class="lineNum">     319</span>              :                                  (dma_mem_write &amp; (dma_mem_sz_int[2:0] == 3'h2) &amp; (dma_mem_addr_int[2:0] == 3'h0) &amp; (dma_mem_byteen[3:0] != 4'hf)) |    // Write byte enables not aligned for word store</span>
+<span id="L320"><span class="lineNum">     320</span>              :                                  (dma_mem_write &amp; (dma_mem_sz_int[2:0] == 3'h2) &amp; (dma_mem_addr_int[2:0] == 3'h4) &amp; (dma_mem_byteen[7:4] != 4'hf)) |    // Write byte enables not aligned for word store</span>
+<span id="L321"><span class="lineNum">     321</span>              :                                  (dma_mem_write &amp; (dma_mem_sz_int[2:0] == 3'h3) &amp; ~((dma_mem_byteen[7:0] == 8'h0f) | (dma_mem_byteen[7:0] == 8'hf0) | (dma_mem_byteen[7:0] == 8'hff)))); // Write byte enables not aligned for dword store</span>
+<span id="L322"><span class="lineNum">     322</span>              : </span>
+<span id="L323"><span class="lineNum">     323</span>              : </span>
+<span id="L324"><span class="lineNum">     324</span>              :    //Dbg outputs</span>
+<span id="L325"><span class="lineNum">     325</span>              :    assign dma_dbg_ready    = fifo_empty &amp; dbg_dma_bubble;</span>
+<span id="L326"><span class="lineNum">     326</span>              :    assign dma_dbg_cmd_done = (fifo_valid[RspPtr] &amp; fifo_dbg[RspPtr] &amp; fifo_done[RspPtr]);</span>
+<span id="L327"><span class="lineNum">     327</span>              :    assign dma_dbg_cmd_fail     = (|fifo_error[RspPtr] &amp; dma_dbg_cmd_done) ;</span>
+<span id="L328"><span class="lineNum">     328</span>              : </span>
+<span id="L329"><span class="lineNum">     329</span>              :    assign dma_dbg_sz[1:0]          = fifo_sz[RspPtr][1:0];</span>
+<span id="L330"><span class="lineNum">     330</span>              :    assign dma_dbg_addr[1:0]        = fifo_addr[RspPtr][1:0];</span>
+<span id="L331"><span class="lineNum">     331</span>              :    assign dma_dbg_mem_rddata[31:0] = fifo_addr[RspPtr][2] ? fifo_data[RspPtr][63:32] : fifo_data[RspPtr][31:0];</span>
+<span id="L332"><span class="lineNum">     332</span>              :    assign dma_dbg_rddata[31:0]     = ({32{(dma_dbg_sz[1:0] == 2'h0)}} &amp; ((dma_dbg_mem_rddata[31:0] &gt;&gt; 8*dma_dbg_addr[1:0]) &amp; 32'hff)) |</span>
+<span id="L333"><span class="lineNum">     333</span>              :                                      ({32{(dma_dbg_sz[1:0] == 2'h1)}} &amp; ((dma_dbg_mem_rddata[31:0] &gt;&gt; 16*dma_dbg_addr[1]) &amp; 32'hffff)) |</span>
+<span id="L334"><span class="lineNum">     334</span>              :                                      ({32{(dma_dbg_sz[1:0] == 2'h2)}} &amp; dma_dbg_mem_rddata[31:0]);</span>
+<span id="L335"><span class="lineNum">     335</span>              : </span>
+<span id="L336"><span class="lineNum">     336</span>              :    assign dma_dbg_cmd_error = fifo_valid[RdPtr] &amp; ~fifo_done[RdPtr] &amp; fifo_dbg[RdPtr] &amp;</span>
+<span id="L337"><span class="lineNum">     337</span>              :                                  ((~(dma_mem_addr_in_dccm | dma_mem_addr_in_iccm | dma_mem_addr_in_pic)) |             // Address outside of ICCM/DCCM/PIC</span>
+<span id="L338"><span class="lineNum">     338</span>              :                                   ((dma_mem_addr_in_iccm | dma_mem_addr_in_pic) &amp; (dma_mem_sz_int[1:0] != 2'b10)));    // Only word accesses allowed for ICCM/PIC</span>
+<span id="L339"><span class="lineNum">     339</span>              : </span>
+<span id="L340"><span class="lineNum">     340</span>              :    assign dma_dbg_mem_wrdata[31:0] = ({32{dbg_cmd_size[1:0] == 2'h0}} &amp; {4{dbg_cmd_wrdata[7:0]}}) |</span>
+<span id="L341"><span class="lineNum">     341</span>              :                                      ({32{dbg_cmd_size[1:0] == 2'h1}} &amp; {2{dbg_cmd_wrdata[15:0]}}) |</span>
+<span id="L342"><span class="lineNum">     342</span>              :                                      ({32{dbg_cmd_size[1:0] == 2'h2}} &amp; dbg_cmd_wrdata[31:0]);</span>
+<span id="L343"><span class="lineNum">     343</span>              : </span>
+<span id="L344"><span class="lineNum">     344</span>              :    // Block the decode if fifo full</span>
+<span id="L345"><span class="lineNum">     345</span>              :    assign dma_dccm_stall_any = dma_mem_req &amp; (dma_mem_addr_in_dccm | dma_mem_addr_in_pic) &amp; (dma_nack_count &gt;= dma_nack_count_csr);</span>
+<span id="L346"><span class="lineNum">     346</span>              :    assign dma_iccm_stall_any = dma_mem_req &amp; dma_mem_addr_in_iccm &amp; (dma_nack_count &gt;= dma_nack_count_csr);</span>
+<span id="L347"><span class="lineNum">     347</span>              : </span>
+<span id="L348"><span class="lineNum">     348</span>              :    // Used to indicate ready to debug</span>
+<span id="L349"><span class="lineNum">     349</span>              :    assign fifo_empty     = ~((|(fifo_valid[DEPTH-1:0])) | bus_cmd_sent);</span>
+<span id="L350"><span class="lineNum">     350</span>              : </span>
+<span id="L351"><span class="lineNum">     351</span>              :    // Nack counter, stall the lsu pipe if 7 nacks</span>
+<span id="L352"><span class="lineNum">     352</span>              :    assign dma_nack_count_csr[2:0] = dec_tlu_dma_qos_prty[2:0];</span>
+<span id="L353"><span class="lineNum">     353</span>              :    assign dma_nack_count_d[2:0] = (dma_nack_count[2:0] &gt;= dma_nack_count_csr[2:0]) ? ({3{~(dma_dccm_req | dma_iccm_req)}} &amp; dma_nack_count[2:0]) :</span>
+<span id="L354"><span class="lineNum">     354</span>              :                                                                                     (dma_mem_req &amp; ~(dma_dccm_req | dma_iccm_req)) ? (dma_nack_count[2:0] + 1'b1) : 3'b0;</span>
+<span id="L355"><span class="lineNum">     355</span>              : </span>
+<span id="L356"><span class="lineNum">     356</span>              :    rvdffs #(3) nack_count_dff(.din(dma_nack_count_d[2:0]), .dout(dma_nack_count[2:0]), .en(dma_mem_req), .clk(dma_free_clk), .*);</span>
+<span id="L357"><span class="lineNum">     357</span>              : </span>
+<span id="L358"><span class="lineNum">     358</span>              :    // Core outputs</span>
+<span id="L359"><span class="lineNum">     359</span>              :    assign dma_mem_req         = fifo_valid[RdPtr] &amp; ~fifo_rpend[RdPtr] &amp; ~fifo_done[RdPtr] &amp; ~(dma_address_error | dma_alignment_error | dma_dbg_cmd_error);</span>
+<span id="L360"><span class="lineNum">     360</span>              :    assign dma_dccm_req        = dma_mem_req &amp; (dma_mem_addr_in_dccm | dma_mem_addr_in_pic) &amp; dccm_ready;</span>
+<span id="L361"><span class="lineNum">     361</span>              :    assign dma_iccm_req        = dma_mem_req &amp; dma_mem_addr_in_iccm &amp; iccm_ready;</span>
+<span id="L362"><span class="lineNum">     362</span>              :    assign dma_mem_tag[2:0]    = 3'(RdPtr);</span>
+<span id="L363"><span class="lineNum">     363</span>              :    assign dma_mem_addr_int[31:0] = fifo_addr[RdPtr];</span>
+<span id="L364"><span class="lineNum">     364</span>              :    assign dma_mem_sz_int[2:0] = fifo_sz[RdPtr];</span>
+<span id="L365"><span class="lineNum">     365</span>              :    assign dma_mem_addr[31:0]  = (dma_mem_write &amp; ~fifo_dbg[RdPtr] &amp; (dma_mem_byteen[7:0] == 8'hf0)) ? {dma_mem_addr_int[31:3],1'b1,dma_mem_addr_int[1:0]} : dma_mem_addr_int[31:0];</span>
+<span id="L366"><span class="lineNum">     366</span>              :    assign dma_mem_sz[2:0]     = (dma_mem_write &amp; ~fifo_dbg[RdPtr] &amp; ((dma_mem_byteen[7:0] == 8'h0f) | (dma_mem_byteen[7:0] == 8'hf0))) ? 3'h2 : dma_mem_sz_int[2:0];</span>
+<span id="L367"><span class="lineNum">     367</span>              :    assign dma_mem_byteen[7:0] = fifo_byteen[RdPtr];</span>
+<span id="L368"><span class="lineNum">     368</span>              :    assign dma_mem_write       = fifo_write[RdPtr];</span>
+<span id="L369"><span class="lineNum">     369</span>              :    assign dma_mem_wdata[63:0] = fifo_data[RdPtr];</span>
+<span id="L370"><span class="lineNum">     370</span>              : </span>
+<span id="L371"><span class="lineNum">     371</span>              :    // PMU outputs</span>
+<span id="L372"><span class="lineNum">     372</span>              :    assign dma_pmu_dccm_read   = dma_dccm_req &amp; ~dma_mem_write;</span>
+<span id="L373"><span class="lineNum">     373</span>              :    assign dma_pmu_dccm_write  = dma_dccm_req &amp; dma_mem_write;</span>
+<span id="L374"><span class="lineNum">     374</span>              :    assign dma_pmu_any_read    = (dma_dccm_req | dma_iccm_req) &amp; ~dma_mem_write;</span>
+<span id="L375"><span class="lineNum">     375</span>              :    assign dma_pmu_any_write   = (dma_dccm_req | dma_iccm_req) &amp; dma_mem_write;</span>
+<span id="L376"><span class="lineNum">     376</span>              : </span>
+<span id="L377"><span class="lineNum">     377</span>              :    // Address check  dccm</span>
+<span id="L378"><span class="lineNum">     378</span>              :    if (pt.DCCM_ENABLE) begin: Gen_dccm_enable</span>
+<span id="L379"><span class="lineNum">     379</span>              :       rvrangecheck #(.CCM_SADR(pt.DCCM_SADR),</span>
+<span id="L380"><span class="lineNum">     380</span>              :                      .CCM_SIZE(pt.DCCM_SIZE)) addr_dccm_rangecheck (</span>
+<span id="L381"><span class="lineNum">     381</span>              :          .addr(dma_mem_addr_int[31:0]),</span>
+<span id="L382"><span class="lineNum">     382</span>              :          .in_range(dma_mem_addr_in_dccm),</span>
+<span id="L383"><span class="lineNum">     383</span>              :          .in_region(dma_mem_addr_in_dccm_region_nc)</span>
+<span id="L384"><span class="lineNum">     384</span>              :       );</span>
+<span id="L385"><span class="lineNum">     385</span>              :    end else begin: Gen_dccm_disable</span>
+<span id="L386"><span class="lineNum">     386</span>              :       assign dma_mem_addr_in_dccm = '0;</span>
+<span id="L387"><span class="lineNum">     387</span>              :       assign dma_mem_addr_in_dccm_region_nc = '0;</span>
+<span id="L388"><span class="lineNum">     388</span>              :    end // else: !if(pt.ICCM_ENABLE)</span>
+<span id="L389"><span class="lineNum">     389</span>              : </span>
+<span id="L390"><span class="lineNum">     390</span>              :    // Address check  iccm</span>
+<span id="L391"><span class="lineNum">     391</span>              :    if (pt.ICCM_ENABLE) begin: Gen_iccm_enable</span>
+<span id="L392"><span class="lineNum">     392</span>              :       rvrangecheck #(.CCM_SADR(pt.ICCM_SADR),</span>
+<span id="L393"><span class="lineNum">     393</span>              :                      .CCM_SIZE(pt.ICCM_SIZE)) addr_iccm_rangecheck (</span>
+<span id="L394"><span class="lineNum">     394</span>              :          .addr(dma_mem_addr_int[31:0]),</span>
+<span id="L395"><span class="lineNum">     395</span>              :          .in_range(dma_mem_addr_in_iccm),</span>
+<span id="L396"><span class="lineNum">     396</span>              :          .in_region(dma_mem_addr_in_iccm_region_nc)</span>
+<span id="L397"><span class="lineNum">     397</span>              :       );</span>
+<span id="L398"><span class="lineNum">     398</span>              :    end else begin: Gen_iccm_disable</span>
+<span id="L399"><span class="lineNum">     399</span>              :       assign dma_mem_addr_in_iccm = '0;</span>
+<span id="L400"><span class="lineNum">     400</span>              :       assign dma_mem_addr_in_iccm_region_nc = '0;</span>
+<span id="L401"><span class="lineNum">     401</span>              :    end // else: !if(pt.ICCM_ENABLE)</span>
+<span id="L402"><span class="lineNum">     402</span>              : </span>
+<span id="L403"><span class="lineNum">     403</span>              : </span>
+<span id="L404"><span class="lineNum">     404</span>              :    // PIC memory address check</span>
+<span id="L405"><span class="lineNum">     405</span>              :    rvrangecheck #(.CCM_SADR(pt.PIC_BASE_ADDR),</span>
+<span id="L406"><span class="lineNum">     406</span>              :                   .CCM_SIZE(pt.PIC_SIZE)) addr_pic_rangecheck (</span>
+<span id="L407"><span class="lineNum">     407</span>              :       .addr(dma_mem_addr_int[31:0]),</span>
+<span id="L408"><span class="lineNum">     408</span>              :       .in_range(dma_mem_addr_in_pic),</span>
+<span id="L409"><span class="lineNum">     409</span>              :       .in_region(dma_mem_addr_in_pic_region_nc)</span>
+<span id="L410"><span class="lineNum">     410</span>              :     );</span>
+<span id="L411"><span class="lineNum">     411</span>              : </span>
+<span id="L412"><span class="lineNum">     412</span>              :    // Inputs</span>
+<span id="L413"><span class="lineNum">     413</span>              :    rvdff_fpga #(1) fifo_full_bus_ff     (.din(fifo_full_spec),   .dout(fifo_full_spec_bus), .clk(dma_bus_clk), .clken(dma_bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L414"><span class="lineNum">     414</span>              :    rvdff_fpga #(1) dbg_dma_bubble_ff    (.din(dbg_dma_bubble),   .dout(dbg_dma_bubble_bus), .clk(dma_bus_clk), .clken(dma_bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L415"><span class="lineNum">     415</span>              :    rvdff      #(1) dma_dbg_cmd_doneff   (.din(dma_dbg_cmd_done), .dout(dma_dbg_cmd_done_q), .clk(free_clk), .*);</span>
+<span id="L416"><span class="lineNum">     416</span>              : </span>
+<span id="L417"><span class="lineNum">     417</span>              :    // Clock Gating logic</span>
+<span id="L418"><span class="lineNum">     418</span>              :    assign dma_buffer_c1_clken = (bus_cmd_valid &amp; dma_bus_clk_en) | dbg_cmd_valid | clk_override;</span>
+<span id="L419"><span class="lineNum">     419</span>              :    assign dma_free_clken = (bus_cmd_valid | bus_rsp_valid | dbg_cmd_valid | dma_dbg_cmd_done | dma_dbg_cmd_done_q | (|fifo_valid[DEPTH-1:0]) | clk_override);</span>
+<span id="L420"><span class="lineNum">     420</span>              : </span>
+<span id="L421"><span class="lineNum">     421</span>              :    rvoclkhdr dma_buffer_c1cgc ( .en(dma_buffer_c1_clken), .l1clk(dma_buffer_c1_clk), .* );</span>
+<span id="L422"><span class="lineNum">     422</span>              :    rvoclkhdr dma_free_cgc (.en(dma_free_clken), .l1clk(dma_free_clk), .*);</span>
+<span id="L423"><span class="lineNum">     423</span>              : </span>
+<span id="L424"><span class="lineNum">     424</span>              : `ifdef RV_FPGA_OPTIMIZE</span>
+<span id="L425"><span class="lineNum">     425</span>              :    assign dma_bus_clk = 1'b0;</span>
+<span id="L426"><span class="lineNum">     426</span>              : `else</span>
+<span id="L427"><span class="lineNum">     427</span>              :    rvclkhdr  dma_bus_cgc (.en(dma_bus_clk_en), .l1clk(dma_bus_clk), .*);</span>
+<span id="L428"><span class="lineNum">     428</span>              : `endif</span>
+<span id="L429"><span class="lineNum">     429</span>              : </span>
+<span id="L430"><span class="lineNum">     430</span>              :    // Write channel buffer</span>
+<span id="L431"><span class="lineNum">     431</span>              :    assign wrbuf_en       = dma_axi_awvalid &amp; dma_axi_awready;</span>
+<span id="L432"><span class="lineNum">     432</span>              :    assign wrbuf_data_en  = dma_axi_wvalid &amp; dma_axi_wready;</span>
+<span id="L433"><span class="lineNum">     433</span>              :    assign wrbuf_cmd_sent = bus_cmd_sent &amp; bus_cmd_write;</span>
+<span id="L434"><span class="lineNum">     434</span>              :    assign wrbuf_rst      = wrbuf_cmd_sent &amp; ~wrbuf_en;</span>
+<span id="L435"><span class="lineNum">     435</span>              :    assign wrbuf_data_rst = wrbuf_cmd_sent &amp; ~wrbuf_data_en;</span>
+<span id="L436"><span class="lineNum">     436</span>              : </span>
+<span id="L437"><span class="lineNum">     437</span>              :    rvdffsc_fpga  #(.WIDTH(1))              wrbuf_vldff       (.din(1'b1), .dout(wrbuf_vld),      .en(wrbuf_en),      .clear(wrbuf_rst),      .clk(dma_bus_clk), .clken(dma_bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L438"><span class="lineNum">     438</span>              :    rvdffsc_fpga  #(.WIDTH(1))              wrbuf_data_vldff  (.din(1'b1), .dout(wrbuf_data_vld), .en(wrbuf_data_en), .clear(wrbuf_data_rst), .clk(dma_bus_clk), .clken(dma_bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L439"><span class="lineNum">     439</span>              :    rvdffs_fpga   #(.WIDTH(pt.DMA_BUS_TAG)) wrbuf_tagff       (.din(dma_axi_awid[pt.DMA_BUS_TAG-1:0]), .dout(wrbuf_tag[pt.DMA_BUS_TAG-1:0]), .en(wrbuf_en), .clk(dma_bus_clk), .clken(dma_bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L440"><span class="lineNum">     440</span>              :    rvdffs_fpga   #(.WIDTH(3))              wrbuf_szff        (.din(dma_axi_awsize[2:0]),  .dout(wrbuf_sz[2:0]),     .en(wrbuf_en),                  .clk(dma_bus_clk), .clken(dma_bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L441"><span class="lineNum">     441</span>              :    rvdffe        #(.WIDTH(32))             wrbuf_addrff      (.din(dma_axi_awaddr[31:0]), .dout(wrbuf_addr[31:0]),  .en(wrbuf_en &amp; dma_bus_clk_en), .*);</span>
+<span id="L442"><span class="lineNum">     442</span>              :    rvdffe        #(.WIDTH(64))             wrbuf_dataff      (.din(dma_axi_wdata[63:0]),  .dout(wrbuf_data[63:0]),  .en(wrbuf_data_en &amp; dma_bus_clk_en), .*);</span>
+<span id="L443"><span class="lineNum">     443</span>              :    rvdffs_fpga   #(.WIDTH(8))              wrbuf_byteenff    (.din(dma_axi_wstrb[7:0]),   .dout(wrbuf_byteen[7:0]), .en(wrbuf_data_en),             .clk(dma_bus_clk), .clken(dma_bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L444"><span class="lineNum">     444</span>              : </span>
+<span id="L445"><span class="lineNum">     445</span>              :    // Read channel buffer</span>
+<span id="L446"><span class="lineNum">     446</span>              :    assign rdbuf_en    = dma_axi_arvalid &amp; dma_axi_arready;</span>
+<span id="L447"><span class="lineNum">     447</span>              :    assign rdbuf_cmd_sent = bus_cmd_sent &amp; ~bus_cmd_write;</span>
+<span id="L448"><span class="lineNum">     448</span>              :    assign rdbuf_rst   = rdbuf_cmd_sent &amp; ~rdbuf_en;</span>
+<span id="L449"><span class="lineNum">     449</span>              : </span>
+<span id="L450"><span class="lineNum">     450</span>              :    rvdffsc_fpga  #(.WIDTH(1))              rdbuf_vldff  (.din(1'b1), .dout(rdbuf_vld), .en(rdbuf_en), .clear(rdbuf_rst), .clk(dma_bus_clk), .clken(dma_bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L451"><span class="lineNum">     451</span>              :    rvdffs_fpga   #(.WIDTH(pt.DMA_BUS_TAG)) rdbuf_tagff  (.din(dma_axi_arid[pt.DMA_BUS_TAG-1:0]), .dout(rdbuf_tag[pt.DMA_BUS_TAG-1:0]), .en(rdbuf_en), .clk(dma_bus_clk), .clken(dma_bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L452"><span class="lineNum">     452</span>              :    rvdffs_fpga   #(.WIDTH(3))              rdbuf_szff   (.din(dma_axi_arsize[2:0]),  .dout(rdbuf_sz[2:0]),    .en(rdbuf_en), .clk(dma_bus_clk), .clken(dma_bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L453"><span class="lineNum">     453</span>              :    rvdffe       #(.WIDTH(32))              rdbuf_addrff (.din(dma_axi_araddr[31:0]), .dout(rdbuf_addr[31:0]), .en(rdbuf_en &amp; dma_bus_clk_en), .*);</span>
+<span id="L454"><span class="lineNum">     454</span>              : </span>
+<span id="L455"><span class="lineNum">     455</span>              :    assign dma_axi_awready = ~(wrbuf_vld &amp; ~wrbuf_cmd_sent);</span>
+<span id="L456"><span class="lineNum">     456</span>              :    assign dma_axi_wready  = ~(wrbuf_data_vld &amp; ~wrbuf_cmd_sent);</span>
+<span id="L457"><span class="lineNum">     457</span>              :    assign dma_axi_arready = ~(rdbuf_vld &amp; ~rdbuf_cmd_sent);</span>
+<span id="L458"><span class="lineNum">     458</span>              : </span>
+<span id="L459"><span class="lineNum">     459</span>              :    //Generate a single request from read/write channel</span>
+<span id="L460"><span class="lineNum">     460</span>              :    assign bus_cmd_valid                     = (wrbuf_vld &amp; wrbuf_data_vld) | rdbuf_vld;</span>
+<span id="L461"><span class="lineNum">     461</span>              :    assign bus_cmd_sent                      = bus_cmd_valid &amp; dma_fifo_ready;</span>
+<span id="L462"><span class="lineNum">     462</span>              :    assign bus_cmd_write                     = axi_mstr_sel;</span>
+<span id="L463"><span class="lineNum">     463</span>              :    assign bus_cmd_posted_write              = '0;</span>
+<span id="L464"><span class="lineNum">     464</span>              :    assign bus_cmd_addr[31:0]                = axi_mstr_sel ? wrbuf_addr[31:0] : rdbuf_addr[31:0];</span>
+<span id="L465"><span class="lineNum">     465</span>              :    assign bus_cmd_sz[2:0]                   = axi_mstr_sel ? wrbuf_sz[2:0] : rdbuf_sz[2:0];</span>
+<span id="L466"><span class="lineNum">     466</span>              :    assign bus_cmd_wdata[63:0]               = wrbuf_data[63:0];</span>
+<span id="L467"><span class="lineNum">     467</span>              :    assign bus_cmd_byteen[7:0]               = wrbuf_byteen[7:0];</span>
+<span id="L468"><span class="lineNum">     468</span>              :    assign bus_cmd_tag[pt.DMA_BUS_TAG-1:0]   = axi_mstr_sel ? wrbuf_tag[pt.DMA_BUS_TAG-1:0] : rdbuf_tag[pt.DMA_BUS_TAG-1:0];</span>
+<span id="L469"><span class="lineNum">     469</span>              :    assign bus_cmd_mid[pt.DMA_BUS_ID-1:0]    = '0;</span>
+<span id="L470"><span class="lineNum">     470</span>              :    assign bus_cmd_prty[pt.DMA_BUS_PRTY-1:0] = '0;</span>
+<span id="L471"><span class="lineNum">     471</span>              : </span>
+<span id="L472"><span class="lineNum">     472</span>              :    // Sel=1 -&gt; write has higher priority</span>
+<span id="L473"><span class="lineNum">     473</span>              :    assign axi_mstr_sel     = (wrbuf_vld &amp; wrbuf_data_vld &amp; rdbuf_vld) ? axi_mstr_priority : (wrbuf_vld &amp; wrbuf_data_vld);</span>
+<span id="L474"><span class="lineNum">     474</span>              :    assign axi_mstr_prty_in = ~axi_mstr_priority;</span>
+<span id="L475"><span class="lineNum">     475</span>              :    assign axi_mstr_prty_en = bus_cmd_sent;</span>
+<span id="L476"><span class="lineNum">     476</span>              :    rvdffs_fpga #(.WIDTH(1)) mstr_prtyff(.din(axi_mstr_prty_in), .dout(axi_mstr_priority), .en(axi_mstr_prty_en), .clk(dma_bus_clk), .clken(dma_bus_clk_en), .rawclk(clk), .*);</span>
+<span id="L477"><span class="lineNum">     477</span>              : </span>
+<span id="L478"><span class="lineNum">     478</span>              :    assign axi_rsp_valid                   = fifo_valid[RspPtr] &amp; ~fifo_dbg[RspPtr] &amp; fifo_done_bus[RspPtr];</span>
+<span id="L479"><span class="lineNum">     479</span>              :    assign axi_rsp_rdata[63:0]             = fifo_data[RspPtr];</span>
+<span id="L480"><span class="lineNum">     480</span>              :    assign axi_rsp_write                   = fifo_write[RspPtr];</span>
+<span id="L481"><span class="lineNum">     481</span>              :    assign axi_rsp_error[1:0]              = fifo_error[RspPtr][0] ? 2'b10 : (fifo_error[RspPtr][1] ? 2'b11 : 2'b0);</span>
+<span id="L482"><span class="lineNum">     482</span>              :    assign axi_rsp_tag[pt.DMA_BUS_TAG-1:0] = fifo_tag[RspPtr];</span>
+<span id="L483"><span class="lineNum">     483</span>              : </span>
+<span id="L484"><span class="lineNum">     484</span>              :    // AXI response channel signals</span>
+<span id="L485"><span class="lineNum">     485</span>              :    assign dma_axi_bvalid                  = axi_rsp_valid &amp; axi_rsp_write;</span>
+<span id="L486"><span class="lineNum">     486</span>              :    assign dma_axi_bresp[1:0]              = axi_rsp_error[1:0];</span>
+<span id="L487"><span class="lineNum">     487</span>              :    assign dma_axi_bid[pt.DMA_BUS_TAG-1:0] = axi_rsp_tag[pt.DMA_BUS_TAG-1:0];</span>
+<span id="L488"><span class="lineNum">     488</span>              : </span>
+<span id="L489"><span class="lineNum">     489</span>              :    assign dma_axi_rvalid                  = axi_rsp_valid &amp; ~axi_rsp_write;</span>
+<span id="L490"><span class="lineNum">     490</span>              :    assign dma_axi_rresp[1:0]              = axi_rsp_error;</span>
+<span id="L491"><span class="lineNum">     491</span>              :    assign dma_axi_rdata[63:0]             = axi_rsp_rdata[63:0];</span>
+<span id="L492"><span class="lineNum">     492</span>              :    assign dma_axi_rlast                   = 1'b1;</span>
+<span id="L493"><span class="lineNum">     493</span>              :    assign dma_axi_rid[pt.DMA_BUS_TAG-1:0] = axi_rsp_tag[pt.DMA_BUS_TAG-1:0];</span>
+<span id="L494"><span class="lineNum">     494</span>              : </span>
+<span id="L495"><span class="lineNum">     495</span>              :    assign bus_posted_write_done = 1'b0;</span>
+<span id="L496"><span class="lineNum">     496</span>              :    assign bus_rsp_valid      = (dma_axi_bvalid | dma_axi_rvalid);</span>
+<span id="L497"><span class="lineNum">     497</span>              :    assign bus_rsp_sent       = (dma_axi_bvalid &amp; dma_axi_bready) | (dma_axi_rvalid &amp; dma_axi_rready);</span>
+<span id="L498"><span class="lineNum">     498</span>              : </span>
+<span id="L499"><span class="lineNum">     499</span>              :    assign dma_active  = wrbuf_vld | rdbuf_vld | (|fifo_valid[DEPTH-1:0]);</span>
+<span id="L500"><span class="lineNum">     500</span>              : </span>
+<span id="L501"><span class="lineNum">     501</span>              : </span>
+<span id="L502"><span class="lineNum">     502</span>              : `ifdef RV_ASSERT_ON</span>
+<span id="L503"><span class="lineNum">     503</span>              : </span>
+<span id="L504"><span class="lineNum">     504</span>              :    for (genvar i=0; i&lt;DEPTH; i++) begin</span>
+<span id="L505"><span class="lineNum">     505</span>              :       assert_fifo_done_and_novalid: assert #0 (~fifo_done[i] | fifo_valid[i]);</span>
+<span id="L506"><span class="lineNum">     506</span>              :    end</span>
+<span id="L507"><span class="lineNum">     507</span>              : </span>
+<span id="L508"><span class="lineNum">     508</span>              :    // Assertion to check awvalid stays stable during entire bus clock</span>
+<span id="L509"><span class="lineNum">     509</span>              :    property dma_axi_awvalid_stable;</span>
+<span id="L510"><span class="lineNum">     510</span>              :       @(posedge clk) disable iff(~rst_l)  (dma_axi_awvalid != $past(dma_axi_awvalid)) |-&gt; $past(dma_bus_clk_en);</span>
+<span id="L511"><span class="lineNum">     511</span>              :    endproperty</span>
+<span id="L512"><span class="lineNum">     512</span>              :    assert_dma_axi_awvalid_stable: assert property (dma_axi_awvalid_stable) else</span>
+<span id="L513"><span class="lineNum">     513</span>              :       $display("DMA AXI awvalid changed in middle of bus clock");</span>
+<span id="L514"><span class="lineNum">     514</span>              : </span>
+<span id="L515"><span class="lineNum">     515</span>              :    // Assertion to check awid stays stable during entire bus clock</span>
+<span id="L516"><span class="lineNum">     516</span>              :    property dma_axi_awid_stable;</span>
+<span id="L517"><span class="lineNum">     517</span>              :       @(posedge clk) disable iff(~rst_l)  (dma_axi_awvalid &amp; (dma_axi_awid[pt.DMA_BUS_TAG-1:0] != $past(dma_axi_awid[pt.DMA_BUS_TAG-1:0]))) |-&gt; $past(dma_bus_clk_en);</span>
+<span id="L518"><span class="lineNum">     518</span>              :    endproperty</span>
+<span id="L519"><span class="lineNum">     519</span>              :    assert_dma_axi_awid_stable: assert property (dma_axi_awid_stable) else</span>
+<span id="L520"><span class="lineNum">     520</span>              :       $display("DMA AXI awid changed in middle of bus clock");</span>
+<span id="L521"><span class="lineNum">     521</span>              : </span>
+<span id="L522"><span class="lineNum">     522</span>              :    // Assertion to check awaddr stays stable during entire bus clock</span>
+<span id="L523"><span class="lineNum">     523</span>              :    property dma_axi_awaddr_stable;</span>
+<span id="L524"><span class="lineNum">     524</span>              :       @(posedge clk) disable iff(~rst_l)  (dma_axi_awvalid &amp; (dma_axi_awaddr[31:0] != $past(dma_axi_awaddr[31:0]))) |-&gt; $past(dma_bus_clk_en);</span>
+<span id="L525"><span class="lineNum">     525</span>              :    endproperty</span>
+<span id="L526"><span class="lineNum">     526</span>              :    assert_dma_axi_awaddr_stable: assert property (dma_axi_awaddr_stable) else</span>
+<span id="L527"><span class="lineNum">     527</span>              :       $display("DMA AXI awaddr changed in middle of bus clock");</span>
+<span id="L528"><span class="lineNum">     528</span>              : </span>
+<span id="L529"><span class="lineNum">     529</span>              :    // Assertion to check awsize stays stable during entire bus clock</span>
+<span id="L530"><span class="lineNum">     530</span>              :    property dma_axi_awsize_stable;</span>
+<span id="L531"><span class="lineNum">     531</span>              :       @(posedge clk) disable iff(~rst_l)  (dma_axi_awvalid &amp; (dma_axi_awsize[2:0] != $past(dma_axi_awsize[2:0]))) |-&gt; $past(dma_bus_clk_en);</span>
+<span id="L532"><span class="lineNum">     532</span>              :    endproperty</span>
+<span id="L533"><span class="lineNum">     533</span>              :    assert_dma_axi_awsize_stable: assert property (dma_axi_awsize_stable) else</span>
+<span id="L534"><span class="lineNum">     534</span>              :       $display("DMA AXI awsize changed in middle of bus clock");</span>
+<span id="L535"><span class="lineNum">     535</span>              : </span>
+<span id="L536"><span class="lineNum">     536</span>              :    // Assertion to check wstrb stays stable during entire bus clock</span>
+<span id="L537"><span class="lineNum">     537</span>              :    property dma_axi_wstrb_stable;</span>
+<span id="L538"><span class="lineNum">     538</span>              :       @(posedge clk) disable iff(~rst_l)  (dma_axi_wvalid &amp; (dma_axi_wstrb[7:0] != $past(dma_axi_wstrb[7:0]))) |-&gt; $past(dma_bus_clk_en);</span>
+<span id="L539"><span class="lineNum">     539</span>              :    endproperty</span>
+<span id="L540"><span class="lineNum">     540</span>              :    assert_dma_axi_wstrb_stable: assert property (dma_axi_wstrb_stable) else</span>
+<span id="L541"><span class="lineNum">     541</span>              :       $display("DMA AXI wstrb changed in middle of bus clock");</span>
+<span id="L542"><span class="lineNum">     542</span>              : </span>
+<span id="L543"><span class="lineNum">     543</span>              :    // Assertion to check wdata stays stable during entire bus clock</span>
+<span id="L544"><span class="lineNum">     544</span>              :    property dma_axi_wdata_stable;</span>
+<span id="L545"><span class="lineNum">     545</span>              :       @(posedge clk) disable iff(~rst_l)  (dma_axi_wvalid &amp; (dma_axi_wdata[63:0] != $past(dma_axi_wdata[63:0]))) |-&gt; $past(dma_bus_clk_en);</span>
+<span id="L546"><span class="lineNum">     546</span>              :    endproperty</span>
+<span id="L547"><span class="lineNum">     547</span>              :    assert_dma_axi_wdata_stable: assert property (dma_axi_wdata_stable) else</span>
+<span id="L548"><span class="lineNum">     548</span>              :       $display("DMA AXI wdata changed in middle of bus clock");</span>
+<span id="L549"><span class="lineNum">     549</span>              : </span>
+<span id="L550"><span class="lineNum">     550</span>              :    // Assertion to check awvalid stays stable during entire bus clock</span>
+<span id="L551"><span class="lineNum">     551</span>              :    property dma_axi_arvalid_stable;</span>
+<span id="L552"><span class="lineNum">     552</span>              :       @(posedge clk) disable iff(~rst_l)  (dma_axi_arvalid != $past(dma_axi_arvalid)) |-&gt; $past(dma_bus_clk_en);</span>
+<span id="L553"><span class="lineNum">     553</span>              :    endproperty</span>
+<span id="L554"><span class="lineNum">     554</span>              :    assert_dma_axi_arvalid_stable: assert property (dma_axi_arvalid_stable) else</span>
+<span id="L555"><span class="lineNum">     555</span>              :       $display("DMA AXI awvalid changed in middle of bus clock");</span>
+<span id="L556"><span class="lineNum">     556</span>              : </span>
+<span id="L557"><span class="lineNum">     557</span>              :    // Assertion to check awid stays stable during entire bus clock</span>
+<span id="L558"><span class="lineNum">     558</span>              :    property dma_axi_arid_stable;</span>
+<span id="L559"><span class="lineNum">     559</span>              :       @(posedge clk) disable iff(~rst_l)  (dma_axi_arvalid &amp; (dma_axi_arid[pt.DMA_BUS_TAG-1:0] != $past(dma_axi_arid[pt.DMA_BUS_TAG-1:0]))) |-&gt; $past(dma_bus_clk_en);</span>
+<span id="L560"><span class="lineNum">     560</span>              :    endproperty</span>
+<span id="L561"><span class="lineNum">     561</span>              :    assert_dma_axi_arid_stable: assert property (dma_axi_arid_stable) else</span>
+<span id="L562"><span class="lineNum">     562</span>              :       $display("DMA AXI awid changed in middle of bus clock");</span>
+<span id="L563"><span class="lineNum">     563</span>              : </span>
+<span id="L564"><span class="lineNum">     564</span>              :    // Assertion to check awaddr stays stable during entire bus clock</span>
+<span id="L565"><span class="lineNum">     565</span>              :    property dma_axi_araddr_stable;</span>
+<span id="L566"><span class="lineNum">     566</span>              :       @(posedge clk) disable iff(~rst_l)  (dma_axi_arvalid &amp; (dma_axi_araddr[31:0] != $past(dma_axi_araddr[31:0]))) |-&gt; $past(dma_bus_clk_en);</span>
+<span id="L567"><span class="lineNum">     567</span>              :    endproperty</span>
+<span id="L568"><span class="lineNum">     568</span>              :    assert_dma_axi_araddr_stable: assert property (dma_axi_araddr_stable) else</span>
+<span id="L569"><span class="lineNum">     569</span>              :       $display("DMA AXI awaddr changed in middle of bus clock");</span>
+<span id="L570"><span class="lineNum">     570</span>              : </span>
+<span id="L571"><span class="lineNum">     571</span>              :    // Assertion to check awsize stays stable during entire bus clock</span>
+<span id="L572"><span class="lineNum">     572</span>              :    property dma_axi_arsize_stable;</span>
+<span id="L573"><span class="lineNum">     573</span>              :       @(posedge clk) disable iff(~rst_l)  (dma_axi_awvalid &amp; (dma_axi_arsize[2:0] != $past(dma_axi_arsize[2:0]))) |-&gt; $past(dma_bus_clk_en);</span>
+<span id="L574"><span class="lineNum">     574</span>              :    endproperty</span>
+<span id="L575"><span class="lineNum">     575</span>              :    assert_dma_axi_arsize_stable: assert property (dma_axi_arsize_stable) else</span>
+<span id="L576"><span class="lineNum">     576</span>              :       $display("DMA AXI awsize changed in middle of bus clock");</span>
+<span id="L577"><span class="lineNum">     577</span>              : </span>
+<span id="L578"><span class="lineNum">     578</span>              :    // Assertion to check bvalid stays stable during entire bus clock</span>
+<span id="L579"><span class="lineNum">     579</span>              :    property dma_axi_bvalid_stable;</span>
+<span id="L580"><span class="lineNum">     580</span>              :       @(posedge clk) disable iff(~rst_l)  (dma_axi_bvalid != $past(dma_axi_bvalid)) |-&gt; $past(dma_bus_clk_en);</span>
+<span id="L581"><span class="lineNum">     581</span>              :    endproperty</span>
+<span id="L582"><span class="lineNum">     582</span>              :    assert_dma_axi_bvalid_stable: assert property (dma_axi_bvalid_stable) else</span>
+<span id="L583"><span class="lineNum">     583</span>              :       $display("DMA AXI bvalid changed in middle of bus clock");</span>
+<span id="L584"><span class="lineNum">     584</span>              : </span>
+<span id="L585"><span class="lineNum">     585</span>              :    // Assertion to check bvalid stays stable if bready is low</span>
+<span id="L586"><span class="lineNum">     586</span>              :    property dma_axi_bvalid_stable_till_bready;</span>
+<span id="L587"><span class="lineNum">     587</span>              :       @(posedge clk) disable iff(~rst_l)  (~dma_axi_bvalid &amp;&amp; $past(dma_axi_bvalid)) |-&gt; $past(dma_axi_bready);</span>
+<span id="L588"><span class="lineNum">     588</span>              :    endproperty</span>
+<span id="L589"><span class="lineNum">     589</span>              :    assert_dma_axi_bvalid_stable_till_bready: assert property (dma_axi_bvalid_stable_till_bready) else</span>
+<span id="L590"><span class="lineNum">     590</span>              :       $display("DMA AXI bvalid deasserted without bready");</span>
+<span id="L591"><span class="lineNum">     591</span>              : </span>
+<span id="L592"><span class="lineNum">     592</span>              :    // Assertion to check bresp stays stable during entire bus clock</span>
+<span id="L593"><span class="lineNum">     593</span>              :    property dma_axi_bresp_stable;</span>
+<span id="L594"><span class="lineNum">     594</span>              :       @(posedge clk) disable iff(~rst_l)  (dma_axi_bvalid &amp; (dma_axi_bresp[1:0] != $past(dma_axi_bresp[1:0]))) |-&gt; $past(dma_bus_clk_en);</span>
+<span id="L595"><span class="lineNum">     595</span>              :    endproperty</span>
+<span id="L596"><span class="lineNum">     596</span>              :    assert_dma_axi_bresp_stable: assert property (dma_axi_bresp_stable) else</span>
+<span id="L597"><span class="lineNum">     597</span>              :       $display("DMA AXI bresp changed in middle of bus clock");</span>
+<span id="L598"><span class="lineNum">     598</span>              : </span>
+<span id="L599"><span class="lineNum">     599</span>              :    // Assertion to check bid stays stable during entire bus clock</span>
+<span id="L600"><span class="lineNum">     600</span>              :    property dma_axi_bid_stable;</span>
+<span id="L601"><span class="lineNum">     601</span>              :       @(posedge clk) disable iff(~rst_l)  (dma_axi_bvalid &amp; (dma_axi_bid[pt.DMA_BUS_TAG-1:0] != $past(dma_axi_bid[pt.DMA_BUS_TAG-1:0]))) |-&gt; $past(dma_bus_clk_en);</span>
+<span id="L602"><span class="lineNum">     602</span>              :    endproperty</span>
+<span id="L603"><span class="lineNum">     603</span>              :    assert_dma_axi_bid_stable: assert property (dma_axi_bid_stable) else</span>
+<span id="L604"><span class="lineNum">     604</span>              :       $display("DMA AXI bid changed in middle of bus clock");</span>
+<span id="L605"><span class="lineNum">     605</span>              : </span>
+<span id="L606"><span class="lineNum">     606</span>              :    // Assertion to check rvalid stays stable during entire bus clock</span>
+<span id="L607"><span class="lineNum">     607</span>              :    property dma_axi_rvalid_stable;</span>
+<span id="L608"><span class="lineNum">     608</span>              :       @(posedge clk) disable iff(~rst_l)  (dma_axi_rvalid != $past(dma_axi_rvalid)) |-&gt; $past(dma_bus_clk_en);</span>
+<span id="L609"><span class="lineNum">     609</span>              :    endproperty</span>
+<span id="L610"><span class="lineNum">     610</span>              :    assert_dma_axi_rvalid_stable: assert property (dma_axi_rvalid_stable) else</span>
+<span id="L611"><span class="lineNum">     611</span>              :       $display("DMA AXI bvalid changed in middle of bus clock");</span>
+<span id="L612"><span class="lineNum">     612</span>              : </span>
+<span id="L613"><span class="lineNum">     613</span>              :    // Assertion to check rvalid stays stable if bready is low</span>
+<span id="L614"><span class="lineNum">     614</span>              :    property dma_axi_rvalid_stable_till_ready;</span>
+<span id="L615"><span class="lineNum">     615</span>              :       @(posedge clk) disable iff(~rst_l)  (~dma_axi_rvalid &amp;&amp; $past(dma_axi_rvalid)) |-&gt; $past(dma_axi_rready);</span>
+<span id="L616"><span class="lineNum">     616</span>              :    endproperty</span>
+<span id="L617"><span class="lineNum">     617</span>              :    assert_dma_axi_rvalid_stable_till_ready: assert property (dma_axi_rvalid_stable_till_ready) else</span>
+<span id="L618"><span class="lineNum">     618</span>              :       $display("DMA AXI bvalid changed in middle of bus clock");</span>
+<span id="L619"><span class="lineNum">     619</span>              : </span>
+<span id="L620"><span class="lineNum">     620</span>              :    // Assertion to check rresp stays stable during entire bus clock</span>
+<span id="L621"><span class="lineNum">     621</span>              :    property dma_axi_rresp_stable;</span>
+<span id="L622"><span class="lineNum">     622</span>              :       @(posedge clk) disable iff(~rst_l)  (dma_axi_rvalid &amp; (dma_axi_rresp[1:0] != $past(dma_axi_rresp[1:0]))) |-&gt; $past(dma_bus_clk_en);</span>
+<span id="L623"><span class="lineNum">     623</span>              :    endproperty</span>
+<span id="L624"><span class="lineNum">     624</span>              :    assert_dma_axi_rresp_stable: assert property (dma_axi_rresp_stable) else</span>
+<span id="L625"><span class="lineNum">     625</span>              :       $display("DMA AXI bresp changed in middle of bus clock");</span>
+<span id="L626"><span class="lineNum">     626</span>              : </span>
+<span id="L627"><span class="lineNum">     627</span>              :    // Assertion to check rid stays stable during entire bus clock</span>
+<span id="L628"><span class="lineNum">     628</span>              :    property dma_axi_rid_stable;</span>
+<span id="L629"><span class="lineNum">     629</span>              :       @(posedge clk) disable iff(~rst_l)  (dma_axi_rvalid &amp; (dma_axi_rid[pt.DMA_BUS_TAG-1:0] != $past(dma_axi_rid[pt.DMA_BUS_TAG-1:0]))) |-&gt; $past(dma_bus_clk_en);</span>
+<span id="L630"><span class="lineNum">     630</span>              :    endproperty</span>
+<span id="L631"><span class="lineNum">     631</span>              :    assert_dma_axi_rid_stable: assert property (dma_axi_rid_stable) else</span>
+<span id="L632"><span class="lineNum">     632</span>              :       $display("DMA AXI bid changed in middle of bus clock");</span>
+<span id="L633"><span class="lineNum">     633</span>              : </span>
+<span id="L634"><span class="lineNum">     634</span>              :    // Assertion to check rdata stays stable during entire bus clock</span>
+<span id="L635"><span class="lineNum">     635</span>              :    property dma_axi_rdata_stable;</span>
+<span id="L636"><span class="lineNum">     636</span>              :       @(posedge clk) disable iff(~rst_l)  (dma_axi_rvalid &amp; (dma_axi_rdata[63:0] != $past(dma_axi_rdata[63:0]))) |-&gt; $past(dma_bus_clk_en);</span>
+<span id="L637"><span class="lineNum">     637</span>              :    endproperty</span>
+<span id="L638"><span class="lineNum">     638</span>              :    assert_dma_axi_rdata_stable: assert property (dma_axi_rdata_stable) else</span>
+<span id="L639"><span class="lineNum">     639</span>              :       $display("DMA AXI bid changed in middle of bus clock");</span>
+<span id="L640"><span class="lineNum">     640</span>              : </span>
+<span id="L641"><span class="lineNum">     641</span>              : `endif</span>
+<span id="L642"><span class="lineNum">     642</span>              : </span>
+<span id="L643"><span class="lineNum">     643</span>              : endmodule // el2_dma_ctrl</span>
+        </pre>
+</td>
+</tr>
+</table>
+
+</body>
+</html>

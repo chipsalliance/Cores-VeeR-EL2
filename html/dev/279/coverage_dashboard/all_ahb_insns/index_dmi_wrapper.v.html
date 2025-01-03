@@ -1,0 +1,201 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>
+        Full
+        coverage report
+    </title>
+    <link rel="stylesheet" type="text/css" href="cov.css">
+    <style>
+        .container {
+            background-color: rgb(169, 169, 169);
+            width: 100%;
+            min-height: 80%;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <table class="title-header-shadow">
+        <td class="title-container">
+            <table class="title-header">
+                <td class="title-logo">
+                    <a href=index.html>
+                        <img src=_static/white.svg></img>
+                    </a>
+                </td>
+                <td class="title">
+                    Project
+                    Full
+                    coverage report
+                </td>
+            </table>
+        </td>
+    </table>
+    <center>
+        <table class="info-table">
+            <tr class="info-table-view">
+                <td width="10%" class="headerInfo">Current view:</td>
+                <td width="40%" class="headerInfoValue">
+                    <a href=index.html>Cores-VeeR-EL2</a>—Cores-VeeR-EL2—design—dmi—dmi_wrapper.v
+                </td>
+                <td width=auto></td>
+                <td width="10%"></td>
+                <td width="10%" class="headerCovSummary colTop">Coverage</td>
+                <td width="10%" class="headerCovSummary colTop" title="Covered + Uncovered code">Hit</td>
+                <td width="10%" class="headerCovSummary colTop" title="Exercised code only">Total</td>
+            </tr>
+            <tr>
+                <td class="headerInfo">Test Date:</td>
+                <td class="headerInfoValue">
+                    03-12-2024
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Toggle
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff3800;">
+        11.1%
+    </td>
+    <td class="headerCovSummaryEntry">
+        2
+    </td>
+    <td class="headerCovSummaryEntry">
+        18
+    </td>
+
+            </tr>
+            <tr>
+                <td class="headerInfo">Test:</td>
+                <td class="headerInfoValue">
+                    ahb_insns
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Branch
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #a9a9a9;">
+        0.0%
+    </td>
+    <td class="headerCovSummaryEntry">
+        0
+    </td>
+    <td class="headerCovSummaryEntry">
+        0
+    </td>
+
+            </tr>
+            
+        </table>
+    </center>
+
+    <table border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td><br/></td>
+</tr>
+<tr>
+<td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : // SPDX-License-Identifier: Apache-2.0</span>
+<span id="L2"><span class="lineNum">       2</span>              : // Copyright 2018 Western Digital Corporation or it's affiliates.</span>
+<span id="L3"><span class="lineNum">       3</span>              : // </span>
+<span id="L4"><span class="lineNum">       4</span>              : // Licensed under the Apache License, Version 2.0 (the "License");</span>
+<span id="L5"><span class="lineNum">       5</span>              : // you may not use this file except in compliance with the License.</span>
+<span id="L6"><span class="lineNum">       6</span>              : // You may obtain a copy of the License at</span>
+<span id="L7"><span class="lineNum">       7</span>              : // </span>
+<span id="L8"><span class="lineNum">       8</span>              : // http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L9"><span class="lineNum">       9</span>              : // </span>
+<span id="L10"><span class="lineNum">      10</span>              : // Unless required by applicable law or agreed to in writing, software</span>
+<span id="L11"><span class="lineNum">      11</span>              : // distributed under the License is distributed on an "AS IS" BASIS,</span>
+<span id="L12"><span class="lineNum">      12</span>              : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L13"><span class="lineNum">      13</span>              : // See the License for the specific language governing permissions and</span>
+<span id="L14"><span class="lineNum">      14</span>              : // limitations under the License.</span>
+<span id="L15"><span class="lineNum">      15</span>              : //------------------------------------------------------------------------------------</span>
+<span id="L16"><span class="lineNum">      16</span>              : //</span>
+<span id="L17"><span class="lineNum">      17</span>              : //  Copyright Western Digital, 2018</span>
+<span id="L18"><span class="lineNum">      18</span>              : //  Owner : Anusha Narayanamoorthy</span>
+<span id="L19"><span class="lineNum">      19</span>              : //  Description:  </span>
+<span id="L20"><span class="lineNum">      20</span>              : //                Wrapper module for JTAG_TAP and DMI synchronizer</span>
+<span id="L21"><span class="lineNum">      21</span>              : //</span>
+<span id="L22"><span class="lineNum">      22</span>              : //-------------------------------------------------------------------------------------</span>
+<span id="L23"><span class="lineNum">      23</span>              : </span>
+<span id="L24"><span class="lineNum">      24</span>              : module dmi_wrapper(</span>
+<span id="L25"><span class="lineNum">      25</span>              : </span>
+<span id="L26"><span class="lineNum">      26</span>              :   // JTAG signals</span>
+<span id="L27"><span class="lineNum">      27</span> <span class="tlaUNC tlaBgUNC">           0 :   input              trst_n,              // JTAG reset</span></span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaUNC">           0 :   input              tck,                 // JTAG clock</span></span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaUNC">           0 :   input              tms,                 // Test mode select   </span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaUNC">           0 :   input              tdi,                 // Test Data Input</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaUNC">           0 :   output             tdo,                 // Test Data Output           </span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaUNC">           0 :   output             tdoEnable,           // Test Data Output enable             </span></span>
+<span id="L33"><span class="lineNum">      33</span>              : </span>
+<span id="L34"><span class="lineNum">      34</span>              :   // Processor Signals</span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">           2 :   input              core_rst_n,          // Core reset                  </span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">      404508 :   input              core_clk,            // Core clock                  </span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaUNC tlaBgUNC">           0 :   input [31:1]       jtag_id,             // JTAG ID</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaUNC">           0 :   input [31:0]       rd_data,             // 32 bit Read data from  Processor                       </span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaUNC">           0 :   output [31:0]      reg_wr_data,         // 32 bit Write data to Processor                      </span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaUNC">           0 :   output [6:0]       reg_wr_addr,         // 7 bit reg address to Processor                   </span></span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaUNC">           0 :   output             reg_en,              // 1 bit  Read enable to Processor                                    </span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaUNC">           0 :   output             reg_wr_en,           // 1 bit  Write enable to Processor </span></span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaUNC">           0 :   output             dmi_hard_reset  </span></span>
+<span id="L44"><span class="lineNum">      44</span>              : );</span>
+<span id="L45"><span class="lineNum">      45</span>              : </span>
+<span id="L46"><span class="lineNum">      46</span>              : </span>
+<span id="L47"><span class="lineNum">      47</span>              :   </span>
+<span id="L48"><span class="lineNum">      48</span>              : </span>
+<span id="L49"><span class="lineNum">      49</span>              : </span>
+<span id="L50"><span class="lineNum">      50</span>              :   //Wire Declaration</span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaUNC">           0 :   wire                     rd_en;</span></span>
+<span id="L52"><span class="lineNum">      52</span> <span class="tlaUNC">           0 :   wire                     wr_en;</span></span>
+<span id="L53"><span class="lineNum">      53</span> <span class="tlaUNC">           0 :   wire                     dmireset;</span></span>
+<span id="L54"><span class="lineNum">      54</span>              : </span>
+<span id="L55"><span class="lineNum">      55</span>              :  </span>
+<span id="L56"><span class="lineNum">      56</span>              :   //jtag_tap instantiation</span>
+<span id="L57"><span class="lineNum">      57</span>              :  rvjtag_tap i_jtag_tap(</span>
+<span id="L58"><span class="lineNum">      58</span>              :    .trst(trst_n),                      // dedicated JTAG TRST (active low) pad signal or asynchronous active low power on reset</span>
+<span id="L59"><span class="lineNum">      59</span>              :    .tck(tck),                          // dedicated JTAG TCK pad signal</span>
+<span id="L60"><span class="lineNum">      60</span>              :    .tms(tms),                          // dedicated JTAG TMS pad signal</span>
+<span id="L61"><span class="lineNum">      61</span>              :    .tdi(tdi),                          // dedicated JTAG TDI pad signal</span>
+<span id="L62"><span class="lineNum">      62</span>              :    .tdo(tdo),                          // dedicated JTAG TDO pad signal</span>
+<span id="L63"><span class="lineNum">      63</span>              :    .tdoEnable(tdoEnable),              // enable for TDO pad</span>
+<span id="L64"><span class="lineNum">      64</span>              :    .wr_data(reg_wr_data),              // 32 bit Write data</span>
+<span id="L65"><span class="lineNum">      65</span>              :    .wr_addr(reg_wr_addr),              // 7 bit Write address</span>
+<span id="L66"><span class="lineNum">      66</span>              :    .rd_en(rd_en),                      // 1 bit  read enable</span>
+<span id="L67"><span class="lineNum">      67</span>              :    .wr_en(wr_en),                      // 1 bit  Write enable</span>
+<span id="L68"><span class="lineNum">      68</span>              :    .rd_data(rd_data),                  // 32 bit Read data</span>
+<span id="L69"><span class="lineNum">      69</span>              :    .rd_status(2'b0),</span>
+<span id="L70"><span class="lineNum">      70</span>              :    .idle(3'h0),                         // no need to wait to sample data</span>
+<span id="L71"><span class="lineNum">      71</span>              :    .dmi_stat(2'b0),                     // no need to wait or error possible</span>
+<span id="L72"><span class="lineNum">      72</span>              :    .version(4'h1),                      // debug spec 0.13 compliant</span>
+<span id="L73"><span class="lineNum">      73</span>              :    .jtag_id(jtag_id),</span>
+<span id="L74"><span class="lineNum">      74</span>              :    .dmi_hard_reset(dmi_hard_reset),</span>
+<span id="L75"><span class="lineNum">      75</span>              :    .dmi_reset(dmireset)</span>
+<span id="L76"><span class="lineNum">      76</span>              : );</span>
+<span id="L77"><span class="lineNum">      77</span>              : </span>
+<span id="L78"><span class="lineNum">      78</span>              : </span>
+<span id="L79"><span class="lineNum">      79</span>              :   // dmi_jtag_to_core_sync instantiation</span>
+<span id="L80"><span class="lineNum">      80</span>              :   dmi_jtag_to_core_sync i_dmi_jtag_to_core_sync(</span>
+<span id="L81"><span class="lineNum">      81</span>              :     .wr_en(wr_en),                          // 1 bit  Write enable</span>
+<span id="L82"><span class="lineNum">      82</span>              :     .rd_en(rd_en),                          // 1 bit  Read enable</span>
+<span id="L83"><span class="lineNum">      83</span>              : </span>
+<span id="L84"><span class="lineNum">      84</span>              :     .rst_n(core_rst_n),</span>
+<span id="L85"><span class="lineNum">      85</span>              :     .clk(core_clk),</span>
+<span id="L86"><span class="lineNum">      86</span>              :     .reg_en(reg_en),                          // 1 bit  Write interface bit</span>
+<span id="L87"><span class="lineNum">      87</span>              :     .reg_wr_en(reg_wr_en)                          // 1 bit  Write enable</span>
+<span id="L88"><span class="lineNum">      88</span>              :   );</span>
+<span id="L89"><span class="lineNum">      89</span>              : </span>
+<span id="L90"><span class="lineNum">      90</span>              : endmodule</span>
+        </pre>
+</td>
+</tr>
+</table>
+
+</body>
+</html>

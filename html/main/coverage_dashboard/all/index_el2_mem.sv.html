@@ -126,7 +126,7 @@
 <span id="L22"><span class="lineNum">      22</span>              : `include "el2_param.vh"</span>
 <span id="L23"><span class="lineNum">      23</span>              :  )</span>
 <span id="L24"><span class="lineNum">      24</span>              : (</span>
-<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC tlaBgGNC">    67020891 :    input logic         clk,</span></span>
+<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC tlaBgGNC">    67222365 :    input logic         clk,</span></span>
 <span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC">         299 :    input logic         rst_l,</span></span>
 <span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC">           2 :    input logic         dccm_clk_override,</span></span>
 <span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">           2 :    input logic         icm_clk_override,</span></span>
@@ -147,7 +147,7 @@
 <span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">      394484 :    output logic [pt.DCCM_FDATA_WIDTH-1:0]  dccm_rd_data_hi,</span></span>
 <span id="L44"><span class="lineNum">      44</span>              : </span>
 <span id="L45"><span class="lineNum">      45</span>              :    //ICCM ports</span>
-<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">     6313853 :    input logic [pt.ICCM_BITS-1:1]  iccm_rw_addr,</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">     6313985 :    input logic [pt.ICCM_BITS-1:1]  iccm_rw_addr,</span></span>
 <span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">          16 :    input logic                                        iccm_buf_correct_ecc,                    // ICCM is doing a single bit error correct cycle</span></span>
 <span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">          16 :    input logic                                        iccm_correction_state,               // ICCM is doing a single bit error correct cycle</span></span>
 <span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC">         184 :    input logic         iccm_wren,</span></span>
@@ -155,35 +155,35 @@
 <span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">         198 :    input logic [2:0]   iccm_wr_size,</span></span>
 <span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">         324 :    input logic [77:0]  iccm_wr_data,</span></span>
 <span id="L53"><span class="lineNum">      53</span>              : </span>
-<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">      906159 :    output logic [63:0] iccm_rd_data,</span></span>
-<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">      916714 :    output logic [77:0] iccm_rd_data_ecc,</span></span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">      906151 :    output logic [63:0] iccm_rd_data,</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">      916706 :    output logic [77:0] iccm_rd_data_ecc,</span></span>
 <span id="L56"><span class="lineNum">      56</span>              : </span>
 <span id="L57"><span class="lineNum">      57</span>              :    // Icache and Itag Ports</span>
 <span id="L58"><span class="lineNum">      58</span>              : </span>
-<span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC">     6313679 :    input  logic [31:1]  ic_rw_addr,</span></span>
-<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">      691160 :    input  logic [pt.ICACHE_NUM_WAYS-1:0]   ic_tag_valid,</span></span>
-<span id="L61"><span class="lineNum">      61</span> <span class="tlaGNC">       15224 :    input  logic [pt.ICACHE_NUM_WAYS-1:0]   ic_wr_en,</span></span>
-<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">      696161 :    input  logic         ic_rd_en,</span></span>
-<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">     5148675 :    input  logic [63:0] ic_premux_data,      // Premux data to be muxed with each way of the Icache.</span></span>
-<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">     5304928 :    input  logic         ic_sel_premux_data, // Premux data sel</span></span>
+<span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC">     6313819 :    input  logic [31:1]  ic_rw_addr,</span></span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">      691166 :    input  logic [pt.ICACHE_NUM_WAYS-1:0]   ic_tag_valid,</span></span>
+<span id="L61"><span class="lineNum">      61</span> <span class="tlaGNC">       15232 :    input  logic [pt.ICACHE_NUM_WAYS-1:0]   ic_wr_en,</span></span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">      696171 :    input  logic         ic_rd_en,</span></span>
+<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">     5148230 :    input  logic [63:0] ic_premux_data,      // Premux data to be muxed with each way of the Icache.</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">     5304465 :    input  logic         ic_sel_premux_data, // Premux data sel</span></span>
 <span id="L65"><span class="lineNum">      65</span>              : </span>
-<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">     1665471 :    input  logic [pt.ICACHE_BANKS_WAY-1:0][70:0]               ic_wr_data,         // Data to fill to the Icache. With ECC</span></span>
-<span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC">           8 :    input  logic [70:0]               ic_debug_wr_data,   // Debug wr cache.</span></span>
-<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">      922002 :    output logic [70:0]               ic_debug_rd_data ,  // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC</span></span>
-<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC">          40 :    input  logic [pt.ICACHE_INDEX_HI:3]               ic_debug_addr,      // Read/Write addresss to the Icache.</span></span>
-<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC">          16 :    input  logic                      ic_debug_rd_en,     // Icache debug rd</span></span>
-<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">          80 :    input  logic                      ic_debug_wr_en,     // Icache debug wr</span></span>
-<span id="L72"><span class="lineNum">      72</span> <span class="tlaGNC">           6 :    input  logic                      ic_debug_tag_array, // Debug tag array</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">     1665245 :    input  logic [pt.ICACHE_BANKS_WAY-1:0][70:0]               ic_wr_data,         // Data to fill to the Icache. With ECC</span></span>
+<span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC">          10 :    input  logic [70:0]               ic_debug_wr_data,   // Debug wr cache.</span></span>
+<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">      922018 :    output logic [70:0]               ic_debug_rd_data ,  // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC</span></span>
+<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC">          50 :    input  logic [pt.ICACHE_INDEX_HI:3]               ic_debug_addr,      // Read/Write addresss to the Icache.</span></span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC">          20 :    input  logic                      ic_debug_rd_en,     // Icache debug rd</span></span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">         100 :    input  logic                      ic_debug_wr_en,     // Icache debug wr</span></span>
+<span id="L72"><span class="lineNum">      72</span> <span class="tlaGNC">           8 :    input  logic                      ic_debug_tag_array, // Debug tag array</span></span>
 <span id="L73"><span class="lineNum">      73</span> <span class="tlaGNC">         300 :    input  logic [pt.ICACHE_NUM_WAYS-1:0]                ic_debug_way,       // Debug way. Rd or Wr.</span></span>
 <span id="L74"><span class="lineNum">      74</span>              : </span>
-<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">     7885518 :    output logic [63:0]              ic_rd_data ,        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC</span></span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">     7885427 :    output logic [63:0]              ic_rd_data ,        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC</span></span>
 <span id="L76"><span class="lineNum">      76</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [25:0]               ictag_debug_rd_data,// Debug icache tag.</span></span>
 <span id="L77"><span class="lineNum">      77</span>              : </span>
 <span id="L78"><span class="lineNum">      78</span>              : </span>
 <span id="L79"><span class="lineNum">      79</span> <span class="tlaUNC">           0 :    output logic [pt.ICACHE_BANKS_WAY-1:0] ic_eccerr,    // ecc error per bank</span></span>
 <span id="L80"><span class="lineNum">      80</span> <span class="tlaUNC">           0 :    output logic [pt.ICACHE_BANKS_WAY-1:0] ic_parerr,          // parity error per bank</span></span>
-<span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC tlaBgGNC">      622478 :    output logic [pt.ICACHE_NUM_WAYS-1:0]   ic_rd_hit,</span></span>
-<span id="L82"><span class="lineNum">      82</span> <span class="tlaGNC">           4 :    output logic         ic_tag_perr,        // Icache Tag parity error</span></span>
+<span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC tlaBgGNC">      622484 :    output logic [pt.ICACHE_NUM_WAYS-1:0]   ic_rd_hit,</span></span>
+<span id="L82"><span class="lineNum">      82</span> <span class="tlaGNC">           6 :    output logic         ic_tag_perr,        // Icache Tag parity error</span></span>
 <span id="L83"><span class="lineNum">      83</span>              : </span>
 <span id="L84"><span class="lineNum">      84</span>              :    el2_mem_if.veer_sram_src   mem_export,</span>
 <span id="L85"><span class="lineNum">      85</span>              :    el2_mem_if.veer_icache_src icache_export,</span>
@@ -195,7 +195,7 @@
 <span id="L91"><span class="lineNum">      91</span>              : </span>
 <span id="L92"><span class="lineNum">      92</span>              : );</span>
 <span id="L93"><span class="lineNum">      93</span>              : </span>
-<span id="L94"><span class="lineNum">      94</span> <span class="tlaGNC">    67020891 :    logic active_clk;</span></span>
+<span id="L94"><span class="lineNum">      94</span> <span class="tlaGNC">    67222365 :    logic active_clk;</span></span>
 <span id="L95"><span class="lineNum">      95</span>              :    rvoclkhdr active_cg   ( .en(1'b1),         .l1clk(active_clk), .* );</span>
 <span id="L96"><span class="lineNum">      96</span>              : </span>
 <span id="L97"><span class="lineNum">      97</span>              :    el2_mem_if mem_export_local ();</span>

@@ -446,9 +446,9 @@
 <span id="L342"><span class="lineNum">     342</span>              : </span>
 <span id="L343"><span class="lineNum">     343</span>              : </span>
 <span id="L344"><span class="lineNum">     344</span>              : </span>
-<span id="L345"><span class="lineNum">     345</span> <span class="tlaGNC">        3458 :    assign btb_lru_rd_f = use_mp_way ? exu_mp_way_f : |(fetch_wrindex_dec[LRU_SIZE-1:0] &amp; btb_lru_b0_f[LRU_SIZE-1:0]);</span></span>
+<span id="L345"><span class="lineNum">     345</span> <span class="tlaGNC">        4957 :    assign btb_lru_rd_f = use_mp_way ? exu_mp_way_f : |(fetch_wrindex_dec[LRU_SIZE-1:0] &amp; btb_lru_b0_f[LRU_SIZE-1:0]);</span></span>
 <span id="L346"><span class="lineNum">     346</span>              : </span>
-<span id="L347"><span class="lineNum">     347</span> <span class="tlaGNC">        3458 :    assign btb_lru_rd_p1_f = use_mp_way_p1 ? exu_mp_way_f : |(fetch_wrindex_p1_dec[LRU_SIZE-1:0] &amp; btb_lru_b0_f[LRU_SIZE-1:0]);</span></span>
+<span id="L347"><span class="lineNum">     347</span> <span class="tlaGNC">        4957 :    assign btb_lru_rd_p1_f = use_mp_way_p1 ? exu_mp_way_f : |(fetch_wrindex_p1_dec[LRU_SIZE-1:0] &amp; btb_lru_b0_f[LRU_SIZE-1:0]);</span></span>
 <span id="L348"><span class="lineNum">     348</span>              : </span>
 <span id="L349"><span class="lineNum">     349</span>              :    // rotated</span>
 <span id="L350"><span class="lineNum">     350</span>              :    assign btb_vlru_rd_f[1:0] = ( ({2{fetch_start_f[0]}} &amp; {btb_lru_rd_f, btb_lru_rd_f}) |</span>
@@ -710,7 +710,7 @@
 <span id="L606"><span class="lineNum">     606</span>              : </span>
 <span id="L607"><span class="lineNum">     607</span>              :       assign btb_wr_en_way1 = ( ({{exu_mp_way &amp; exu_mp_valid_write &amp; ~dec_tlu_error_wb}}) |</span>
 <span id="L608"><span class="lineNum">     608</span>              :                                 ({{dec_tlu_way_wb &amp; dec_tlu_error_wb}}));</span>
-<span id="L609"><span class="lineNum">     609</span> <span class="tlaGNC">        3456 :       assign btb_wr_addr[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] = dec_tlu_error_wb ? btb_error_addr_wb[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] : exu_mp_addr[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO];</span></span>
+<span id="L609"><span class="lineNum">     609</span> <span class="tlaGNC">        4955 :       assign btb_wr_addr[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] = dec_tlu_error_wb ? btb_error_addr_wb[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] : exu_mp_addr[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO];</span></span>
 <span id="L610"><span class="lineNum">     610</span>              : </span>
 <span id="L611"><span class="lineNum">     611</span>              : </span>
 <span id="L612"><span class="lineNum">     612</span>              :       assign vwayhit_f[1:0] = ( ({2{fetch_start_f[0]}} &amp; {wayhit_f[1:0]}) |</span>
@@ -773,25 +773,25 @@
 <span id="L669"><span class="lineNum">     669</span>              :       end</span>
 <span id="L670"><span class="lineNum">     670</span>              : </span>
 <span id="L671"><span class="lineNum">     671</span>              : </span>
-<span id="L672"><span class="lineNum">     672</span> <span class="tlaGNC">        3456 :     always_comb begin : BTB_rd_mux</span></span>
-<span id="L673"><span class="lineNum">     673</span> <span class="tlaGNC">        3456 :         btb_bank0_rd_data_way0_f[BTB_DWIDTH-1:0] = '0 ;</span></span>
-<span id="L674"><span class="lineNum">     674</span> <span class="tlaGNC">        3456 :         btb_bank0_rd_data_way1_f[BTB_DWIDTH-1:0] = '0 ;</span></span>
-<span id="L675"><span class="lineNum">     675</span> <span class="tlaGNC">        3456 :         btb_bank0_rd_data_way0_p1_f[BTB_DWIDTH-1:0] = '0 ;</span></span>
-<span id="L676"><span class="lineNum">     676</span> <span class="tlaGNC">        3456 :         btb_bank0_rd_data_way1_p1_f[BTB_DWIDTH-1:0] = '0 ;</span></span>
+<span id="L672"><span class="lineNum">     672</span> <span class="tlaGNC">        4955 :     always_comb begin : BTB_rd_mux</span></span>
+<span id="L673"><span class="lineNum">     673</span> <span class="tlaGNC">        4955 :         btb_bank0_rd_data_way0_f[BTB_DWIDTH-1:0] = '0 ;</span></span>
+<span id="L674"><span class="lineNum">     674</span> <span class="tlaGNC">        4955 :         btb_bank0_rd_data_way1_f[BTB_DWIDTH-1:0] = '0 ;</span></span>
+<span id="L675"><span class="lineNum">     675</span> <span class="tlaGNC">        4955 :         btb_bank0_rd_data_way0_p1_f[BTB_DWIDTH-1:0] = '0 ;</span></span>
+<span id="L676"><span class="lineNum">     676</span> <span class="tlaGNC">        4955 :         btb_bank0_rd_data_way1_p1_f[BTB_DWIDTH-1:0] = '0 ;</span></span>
 <span id="L677"><span class="lineNum">     677</span>              : </span>
-<span id="L678"><span class="lineNum">     678</span> <span class="tlaGNC">      884736 :         for (int j=0; j&lt; LRU_SIZE; j++) begin</span></span>
-<span id="L679"><span class="lineNum">     679</span> <span class="tlaGNC">      881280 :           if (btb_rd_addr_f[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] == (pt.BTB_ADDR_HI-pt.BTB_ADDR_LO+1)'(j)) begin</span></span>
+<span id="L678"><span class="lineNum">     678</span> <span class="tlaGNC">     1268480 :         for (int j=0; j&lt; LRU_SIZE; j++) begin</span></span>
+<span id="L679"><span class="lineNum">     679</span> <span class="tlaGNC">     1263525 :           if (btb_rd_addr_f[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] == (pt.BTB_ADDR_HI-pt.BTB_ADDR_LO+1)'(j)) begin</span></span>
 <span id="L680"><span class="lineNum">     680</span>              : </span>
-<span id="L681"><span class="lineNum">     681</span> <span class="tlaGNC">        3456 :            btb_bank0_rd_data_way0_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way0_out[j];</span></span>
-<span id="L682"><span class="lineNum">     682</span> <span class="tlaGNC">        3456 :            btb_bank0_rd_data_way1_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way1_out[j];</span></span>
+<span id="L681"><span class="lineNum">     681</span> <span class="tlaGNC">        4955 :            btb_bank0_rd_data_way0_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way0_out[j];</span></span>
+<span id="L682"><span class="lineNum">     682</span> <span class="tlaGNC">        4955 :            btb_bank0_rd_data_way1_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way1_out[j];</span></span>
 <span id="L683"><span class="lineNum">     683</span>              : </span>
 <span id="L684"><span class="lineNum">     684</span>              :           end</span>
 <span id="L685"><span class="lineNum">     685</span>              :         end</span>
-<span id="L686"><span class="lineNum">     686</span> <span class="tlaGNC">      884736 :         for (int j=0; j&lt; LRU_SIZE; j++) begin</span></span>
-<span id="L687"><span class="lineNum">     687</span> <span class="tlaGNC">      881280 :           if (btb_rd_addr_p1_f[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] == (pt.BTB_ADDR_HI-pt.BTB_ADDR_LO+1)'(j)) begin</span></span>
+<span id="L686"><span class="lineNum">     686</span> <span class="tlaGNC">     1268480 :         for (int j=0; j&lt; LRU_SIZE; j++) begin</span></span>
+<span id="L687"><span class="lineNum">     687</span> <span class="tlaGNC">     1263525 :           if (btb_rd_addr_p1_f[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] == (pt.BTB_ADDR_HI-pt.BTB_ADDR_LO+1)'(j)) begin</span></span>
 <span id="L688"><span class="lineNum">     688</span>              : </span>
-<span id="L689"><span class="lineNum">     689</span> <span class="tlaGNC">        3456 :            btb_bank0_rd_data_way0_p1_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way0_out[j];</span></span>
-<span id="L690"><span class="lineNum">     690</span> <span class="tlaGNC">        3456 :            btb_bank0_rd_data_way1_p1_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way1_out[j];</span></span>
+<span id="L689"><span class="lineNum">     689</span> <span class="tlaGNC">        4955 :            btb_bank0_rd_data_way0_p1_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way0_out[j];</span></span>
+<span id="L690"><span class="lineNum">     690</span> <span class="tlaGNC">        4955 :            btb_bank0_rd_data_way1_p1_f[BTB_DWIDTH-1:0] =  btb_bank0_rd_data_way1_out[j];</span></span>
 <span id="L691"><span class="lineNum">     691</span>              : </span>
 <span id="L692"><span class="lineNum">     692</span>              :           end</span>
 <span id="L693"><span class="lineNum">     693</span>              :         end</span>
@@ -960,7 +960,7 @@
 <span id="L856"><span class="lineNum">     856</span>              : </span>
 <span id="L857"><span class="lineNum">     857</span>              : //       assign bht_bank_wr_data[i][k][j]  = (bht_wr_en2[i] &amp; (bht_wr_addr2[NUM_BHT_LOOP_INNER_HI:pt.BHT_ADDR_LO] == j) &amp; ((bht_wr_addr2[pt.BHT_ADDR_HI: NUM_BHT_LOOP_OUTER_LO]==k) | BHT_NO_ADDR_MATCH)) ? bht_wr_data2[1:0] :</span>
 <span id="L858"><span class="lineNum">     858</span>              : //                                                                                                                      bht_wr_data0[1:0]   ;</span>
-<span id="L859"><span class="lineNum">     859</span> <span class="tlaGNC tlaBgGNC">     1769435 :        assign wdata  = wr1[NUM_BHT_LOOP*k+j] ? bht_wr_data2[1:0] :bht_wr_data0;</span></span>
+<span id="L859"><span class="lineNum">     859</span> <span class="tlaGNC tlaBgGNC">     2536880 :        assign wdata  = wr1[NUM_BHT_LOOP*k+j] ? bht_wr_data2[1:0] :bht_wr_data0;</span></span>
 <span id="L860"><span class="lineNum">     860</span>              : </span>
 <span id="L861"><span class="lineNum">     861</span>              : </span>
 <span id="L862"><span class="lineNum">     862</span>              : </span>
@@ -976,17 +976,17 @@
 <span id="L872"><span class="lineNum">     872</span>              :    end // block: BHT_CLK_GROUP</span>
 <span id="L873"><span class="lineNum">     873</span>              :  end // block: BANKS</span>
 <span id="L874"><span class="lineNum">     874</span>              : </span>
-<span id="L875"><span class="lineNum">     875</span> <span class="tlaGNC">        3456 :     always_comb begin : BHT_rd_mux</span></span>
-<span id="L876"><span class="lineNum">     876</span> <span class="tlaGNC">        3456 :      bht_bank0_rd_data_f[1:0] = '0 ;</span></span>
-<span id="L877"><span class="lineNum">     877</span> <span class="tlaGNC">        3456 :      bht_bank1_rd_data_f[1:0] = '0 ;</span></span>
-<span id="L878"><span class="lineNum">     878</span> <span class="tlaGNC">        3456 :      bht_bank0_rd_data_p1_f[1:0] = '0 ;</span></span>
-<span id="L879"><span class="lineNum">     879</span> <span class="tlaGNC">      884736 :      for (int j=0; j&lt; pt.BHT_ARRAY_DEPTH; j++) begin</span></span>
-<span id="L880"><span class="lineNum">     880</span> <span class="tlaGNC">      881280 :        if (bht_rd_addr_f[pt.BHT_ADDR_HI:pt.BHT_ADDR_LO] == (pt.BHT_ADDR_HI-pt.BHT_ADDR_LO+1)'(j)) begin</span></span>
-<span id="L881"><span class="lineNum">     881</span> <span class="tlaGNC">        3456 :          bht_bank0_rd_data_f[1:0] = bht_bank_rd_data_out[0][j];</span></span>
-<span id="L882"><span class="lineNum">     882</span> <span class="tlaGNC">        3456 :          bht_bank1_rd_data_f[1:0] = bht_bank_rd_data_out[1][j];</span></span>
+<span id="L875"><span class="lineNum">     875</span> <span class="tlaGNC">        4955 :     always_comb begin : BHT_rd_mux</span></span>
+<span id="L876"><span class="lineNum">     876</span> <span class="tlaGNC">        4955 :      bht_bank0_rd_data_f[1:0] = '0 ;</span></span>
+<span id="L877"><span class="lineNum">     877</span> <span class="tlaGNC">        4955 :      bht_bank1_rd_data_f[1:0] = '0 ;</span></span>
+<span id="L878"><span class="lineNum">     878</span> <span class="tlaGNC">        4955 :      bht_bank0_rd_data_p1_f[1:0] = '0 ;</span></span>
+<span id="L879"><span class="lineNum">     879</span> <span class="tlaGNC">     1268480 :      for (int j=0; j&lt; pt.BHT_ARRAY_DEPTH; j++) begin</span></span>
+<span id="L880"><span class="lineNum">     880</span> <span class="tlaGNC">     1263525 :        if (bht_rd_addr_f[pt.BHT_ADDR_HI:pt.BHT_ADDR_LO] == (pt.BHT_ADDR_HI-pt.BHT_ADDR_LO+1)'(j)) begin</span></span>
+<span id="L881"><span class="lineNum">     881</span> <span class="tlaGNC">        4955 :          bht_bank0_rd_data_f[1:0] = bht_bank_rd_data_out[0][j];</span></span>
+<span id="L882"><span class="lineNum">     882</span> <span class="tlaGNC">        4955 :          bht_bank1_rd_data_f[1:0] = bht_bank_rd_data_out[1][j];</span></span>
 <span id="L883"><span class="lineNum">     883</span>              :        end</span>
-<span id="L884"><span class="lineNum">     884</span> <span class="tlaGNC">      881280 :        if (bht_rd_addr_p1_f[pt.BHT_ADDR_HI:pt.BHT_ADDR_LO] == (pt.BHT_ADDR_HI-pt.BHT_ADDR_LO+1)'(j)) begin</span></span>
-<span id="L885"><span class="lineNum">     885</span> <span class="tlaGNC">        3456 :          bht_bank0_rd_data_p1_f[1:0] = bht_bank_rd_data_out[0][j];</span></span>
+<span id="L884"><span class="lineNum">     884</span> <span class="tlaGNC">     1263525 :        if (bht_rd_addr_p1_f[pt.BHT_ADDR_HI:pt.BHT_ADDR_LO] == (pt.BHT_ADDR_HI-pt.BHT_ADDR_LO+1)'(j)) begin</span></span>
+<span id="L885"><span class="lineNum">     885</span> <span class="tlaGNC">        4955 :          bht_bank0_rd_data_p1_f[1:0] = bht_bank_rd_data_out[0][j];</span></span>
 <span id="L886"><span class="lineNum">     886</span>              :        end</span>
 <span id="L887"><span class="lineNum">     887</span>              :       end</span>
 <span id="L888"><span class="lineNum">     888</span>              :     end // block: BHT_rd_mux</span>

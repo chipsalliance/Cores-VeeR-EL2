@@ -156,7 +156,7 @@
 <span id="L52"><span class="lineNum">      52</span>              :     input logic [31:1] rst_vec, // reset vector, from core pins</span>
 <span id="L53"><span class="lineNum">      53</span>              :     /*pragma coverage on*/</span>
 <span id="L54"><span class="lineNum">      54</span>              : </span>
-<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC tlaBgGNC">           3 :     input logic        nmi_int,  // NMI pin</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC tlaBgGNC">           5 :     input logic        nmi_int,  // NMI pin</span></span>
 <span id="L56"><span class="lineNum">      56</span>              :     // nmi_vec is supposed to be connected to a constant in the top level</span>
 <span id="L57"><span class="lineNum">      57</span>              :     /*pragma coverage off*/</span>
 <span id="L58"><span class="lineNum">      58</span>              :     input logic [31:1] nmi_vec,  // NMI vector, from pins</span>
@@ -281,7 +281,7 @@
 <span id="L177"><span class="lineNum">     177</span>              : </span>
 <span id="L178"><span class="lineNum">     178</span> <span class="tlaUNC">           0 :     input logic mexintpend,  // External interrupt pending</span></span>
 <span id="L179"><span class="lineNum">     179</span> <span class="tlaGNC tlaBgGNC">           4 :     input logic timer_int,   // Timer interrupt pending (from pin)</span></span>
-<span id="L180"><span class="lineNum">     180</span> <span class="tlaGNC">           4 :     input logic soft_int,    // Software interrupt pending (from pin)</span></span>
+<span id="L180"><span class="lineNum">     180</span> <span class="tlaGNC">           7 :     input logic soft_int,    // Software interrupt pending (from pin)</span></span>
 <span id="L181"><span class="lineNum">     181</span>              : </span>
 <span id="L182"><span class="lineNum">     182</span> <span class="tlaUNC tlaBgUNC">           0 :     input logic [7:0] pic_claimid,  // PIC claimid</span></span>
 <span id="L183"><span class="lineNum">     183</span> <span class="tlaUNC">           0 :     input logic [3:0] pic_pl,       // PIC priv level</span></span>

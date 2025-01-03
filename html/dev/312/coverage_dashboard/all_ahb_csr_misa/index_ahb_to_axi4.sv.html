@@ -264,24 +264,24 @@
 <span id="L160"><span class="lineNum">     160</span> <span class="tlaGNC">          20 :    logic [63:0]             cmdbuf_wdata;</span></span>
 <span id="L161"><span class="lineNum">     161</span>              : </span>
 <span id="L162"><span class="lineNum">     162</span>              : // FSM to control the bus states and when to block the hready and load the command buffer</span>
-<span id="L163"><span class="lineNum">     163</span> <span class="tlaGNC">        3952 :    always_comb begin</span></span>
-<span id="L164"><span class="lineNum">     164</span> <span class="tlaGNC">        3952 :       buf_nxtstate      = IDLE;</span></span>
-<span id="L165"><span class="lineNum">     165</span> <span class="tlaGNC">        3952 :       buf_state_en      = 1'b0;</span></span>
-<span id="L166"><span class="lineNum">     166</span> <span class="tlaGNC">        3952 :       buf_rdata_en      = 1'b0;              // signal to load the buffer when the core sends read data back</span></span>
-<span id="L167"><span class="lineNum">     167</span> <span class="tlaGNC">        3952 :       buf_read_error_in = 1'b0;              // signal indicating that an error came back with the read from the core</span></span>
-<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC">        3952 :       cmdbuf_wr_en      = 1'b0;              // all clear from the gasket to load the buffer with the command for reads, command/dat for writes</span></span>
-<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC">        3952 :       case (buf_state)</span></span>
-<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">        3714 :          IDLE: begin  // No commands recieved</span></span>
-<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">        3714 :                   buf_nxtstate      = ahb_hwrite ? WR : RD;</span></span>
-<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC">        3714 :                   buf_state_en      = ahb_hready &amp; ahb_htrans[1] &amp; ahb_hsel;                 // only transition on a valid hrtans</span></span>
+<span id="L163"><span class="lineNum">     163</span> <span class="tlaGNC">        5651 :    always_comb begin</span></span>
+<span id="L164"><span class="lineNum">     164</span> <span class="tlaGNC">        5651 :       buf_nxtstate      = IDLE;</span></span>
+<span id="L165"><span class="lineNum">     165</span> <span class="tlaGNC">        5651 :       buf_state_en      = 1'b0;</span></span>
+<span id="L166"><span class="lineNum">     166</span> <span class="tlaGNC">        5651 :       buf_rdata_en      = 1'b0;              // signal to load the buffer when the core sends read data back</span></span>
+<span id="L167"><span class="lineNum">     167</span> <span class="tlaGNC">        5651 :       buf_read_error_in = 1'b0;              // signal indicating that an error came back with the read from the core</span></span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC">        5651 :       cmdbuf_wr_en      = 1'b0;              // all clear from the gasket to load the buffer with the command for reads, command/dat for writes</span></span>
+<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC">        5651 :       case (buf_state)</span></span>
+<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">        5363 :          IDLE: begin  // No commands recieved</span></span>
+<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">        5363 :                   buf_nxtstate      = ahb_hwrite ? WR : RD;</span></span>
+<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC">        5363 :                   buf_state_en      = ahb_hready &amp; ahb_htrans[1] &amp; ahb_hsel;                 // only transition on a valid hrtans</span></span>
 <span id="L173"><span class="lineNum">     173</span>              :           end</span>
-<span id="L174"><span class="lineNum">     174</span> <span class="tlaGNC">          69 :          WR: begin // Write command recieved last cycle</span></span>
-<span id="L175"><span class="lineNum">     175</span> <span class="tlaGNC">        3815 :                   buf_nxtstate      = (ahb_hresp | (ahb_htrans[1:0] == 2'b0) | ~ahb_hsel) ? IDLE : ahb_hwrite  ? WR : RD;</span></span>
-<span id="L176"><span class="lineNum">     176</span> <span class="tlaGNC">          69 :                   buf_state_en      = (~cmdbuf_full | ahb_hresp) ;</span></span>
-<span id="L177"><span class="lineNum">     177</span> <span class="tlaGNC">          69 :                   cmdbuf_wr_en      = ~cmdbuf_full &amp; ~(ahb_hresp | ((ahb_htrans[1:0] == 2'b01) &amp; ahb_hsel));   // Dont send command to the buffer in case of an error or when the master is not ready with the data now.</span></span>
+<span id="L174"><span class="lineNum">     174</span> <span class="tlaGNC">         119 :          WR: begin // Write command recieved last cycle</span></span>
+<span id="L175"><span class="lineNum">     175</span> <span class="tlaGNC">        5464 :                   buf_nxtstate      = (ahb_hresp | (ahb_htrans[1:0] == 2'b0) | ~ahb_hsel) ? IDLE : ahb_hwrite  ? WR : RD;</span></span>
+<span id="L176"><span class="lineNum">     176</span> <span class="tlaGNC">         119 :                   buf_state_en      = (~cmdbuf_full | ahb_hresp) ;</span></span>
+<span id="L177"><span class="lineNum">     177</span> <span class="tlaGNC">         119 :                   cmdbuf_wr_en      = ~cmdbuf_full &amp; ~(ahb_hresp | ((ahb_htrans[1:0] == 2'b01) &amp; ahb_hsel));   // Dont send command to the buffer in case of an error or when the master is not ready with the data now.</span></span>
 <span id="L178"><span class="lineNum">     178</span>              :          end</span>
 <span id="L179"><span class="lineNum">     179</span> <span class="tlaGNC">          57 :          RD: begin // Read command recieved last cycle.</span></span>
-<span id="L180"><span class="lineNum">     180</span> <span class="tlaGNC">        3456 :                  buf_nxtstate      = ahb_hresp ? IDLE :PEND;                                       // If error go to idle, else wait for read data</span></span>
+<span id="L180"><span class="lineNum">     180</span> <span class="tlaGNC">        4955 :                  buf_nxtstate      = ahb_hresp ? IDLE :PEND;                                       // If error go to idle, else wait for read data</span></span>
 <span id="L181"><span class="lineNum">     181</span> <span class="tlaGNC">          57 :                  buf_state_en      = (~cmdbuf_full | ahb_hresp);                                   // only when command can go, or if its an error</span></span>
 <span id="L182"><span class="lineNum">     182</span> <span class="tlaGNC">          57 :                  cmdbuf_wr_en      = ~ahb_hresp &amp; ~cmdbuf_full;                                    // send command only when no error</span></span>
 <span id="L183"><span class="lineNum">     183</span>              :          end</span>
@@ -302,7 +302,7 @@
 <span id="L198"><span class="lineNum">     198</span>              :                                 ({8{ahb_hsize_q[2:0] == 3'b11}} &amp; 8'b1111_1111);</span>
 <span id="L199"><span class="lineNum">     199</span>              : </span>
 <span id="L200"><span class="lineNum">     200</span>              :    // AHB signals</span>
-<span id="L201"><span class="lineNum">     201</span> <span class="tlaGNC">        3456 :    assign ahb_hreadyout       = ahb_hresp ? (ahb_hresp_q &amp; ~ahb_hready_q) :</span></span>
+<span id="L201"><span class="lineNum">     201</span> <span class="tlaGNC">        4955 :    assign ahb_hreadyout       = ahb_hresp ? (ahb_hresp_q &amp; ~ahb_hready_q) :</span></span>
 <span id="L202"><span class="lineNum">     202</span>              :                                          ((~cmdbuf_full | (buf_state == IDLE)) &amp; ~(buf_state == RD | buf_state == PEND)  &amp; ~buf_read_error);</span>
 <span id="L203"><span class="lineNum">     203</span>              : </span>
 <span id="L204"><span class="lineNum">     204</span>              :    assign ahb_hready          = ahb_hreadyout &amp; ahb_hreadyin;</span>

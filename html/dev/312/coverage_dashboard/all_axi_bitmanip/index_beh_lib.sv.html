@@ -123,8 +123,8 @@
 <span id="L19"><span class="lineNum">      19</span>              : module rvdff #( parameter WIDTH=1, SHORT=0 )</span>
 <span id="L20"><span class="lineNum">      20</span>              :    (</span>
 <span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC tlaBgGNC">        7396 :      input logic [WIDTH-1:0] din,</span></span>
-<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">     2380654 :      input logic           clk,</span></span>
-<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">         597 :      input logic                   rst_l,</span></span>
+<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">     2384576 :      input logic           clk,</span></span>
+<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">         598 :      input logic                   rst_l,</span></span>
 <span id="L24"><span class="lineNum">      24</span>              : </span>
 <span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">        6339 :      output logic [WIDTH-1:0] dout</span></span>
 <span id="L26"><span class="lineNum">      26</span>              :      );</span>
@@ -139,11 +139,11 @@
 <span id="L35"><span class="lineNum">      35</span>              :    end</span>
 <span id="L36"><span class="lineNum">      36</span>              : `endif</span>
 <span id="L37"><span class="lineNum">      37</span>              : </span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">     1191680 :    always_ff @(posedge clk or negedge rst_l) begin</span></span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">     1170884 :       if (rst_l == 0)</span></span>
-<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">       20796 :         dout[WIDTH-1:0] &lt;= 0;</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">     1189720 :    always_ff @(posedge clk or negedge rst_l) begin</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">     1168926 :       if (rst_l == 0)</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">       20794 :         dout[WIDTH-1:0] &lt;= 0;</span></span>
 <span id="L41"><span class="lineNum">      41</span>              :       else</span>
-<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">     1170884 :         dout[WIDTH-1:0] &lt;= din[WIDTH-1:0];</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">     1168926 :         dout[WIDTH-1:0] &lt;= din[WIDTH-1:0];</span></span>
 <span id="L43"><span class="lineNum">      43</span>              :    end</span>
 <span id="L44"><span class="lineNum">      44</span>              : </span>
 <span id="L45"><span class="lineNum">      45</span>              : end</span>
@@ -153,7 +153,7 @@
 <span id="L49"><span class="lineNum">      49</span>              : module rvdffs #( parameter WIDTH=1, SHORT=0 )</span>
 <span id="L50"><span class="lineNum">      50</span>              :    (</span>
 <span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">       11372 :      input logic [WIDTH-1:0] din,</span></span>
-<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">        6596 :      input logic             en,</span></span>
+<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">        5593 :      input logic             en,</span></span>
 <span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC">     2184554 :      input logic           clk,</span></span>
 <span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">         556 :      input logic                   rst_l,</span></span>
 <span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">        6339 :      output logic [WIDTH-1:0] dout</span></span>

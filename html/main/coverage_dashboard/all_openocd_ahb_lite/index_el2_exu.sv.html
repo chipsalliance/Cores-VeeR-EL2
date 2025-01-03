@@ -124,7 +124,7 @@
 <span id="L20"><span class="lineNum">      20</span>              : `include "el2_param.vh"</span>
 <span id="L21"><span class="lineNum">      21</span>              : )</span>
 <span id="L22"><span class="lineNum">      22</span>              :   (</span>
-<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC tlaBgGNC">     2528900 :    input logic          clk,                                           // Top level clock</span></span>
+<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC tlaBgGNC">     2528924 :    input logic          clk,                                           // Top level clock</span></span>
 <span id="L24"><span class="lineNum">      24</span> <span class="tlaGNC">           1 :    input logic          rst_l,                                         // Reset</span></span>
 <span id="L25"><span class="lineNum">      25</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
 <span id="L26"><span class="lineNum">      26</span>              :    /*pragma coverage off*/</span>
@@ -134,29 +134,29 @@
 <span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">        6164 :    input logic  [1:0]   dec_data_en,                                   // Clock enable {x,r}, one cycle pulse</span></span>
 <span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">          16 :    input logic  [1:0]   dec_ctl_en,                                    // Clock enable {x,r}, two cycle pulse</span></span>
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">         120 :    input logic  [31:0]  dbg_cmd_wrdata,                                // Debug data   to primary I0 RS1</span></span>
-<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">      754878 :    input el2_alu_pkt_t i0_ap,                                         // DEC alu {valid,predecodes}</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">      754890 :    input el2_alu_pkt_t i0_ap,                                         // DEC alu {valid,predecodes}</span></span>
 <span id="L34"><span class="lineNum">      34</span>              : </span>
 <span id="L35"><span class="lineNum">      35</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic          dec_debug_wdata_rs1_d,                         // Debug select to primary I0 RS1</span></span>
 <span id="L36"><span class="lineNum">      36</span>              : </span>
-<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC tlaBgGNC">      761010 :    input el2_predict_pkt_t dec_i0_predict_p_d,                        // DEC branch predict packet</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC tlaBgGNC">      761022 :    input el2_predict_pkt_t dec_i0_predict_p_d,                        // DEC branch predict packet</span></span>
 <span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">        6117 :    input logic [pt.BHT_GHR_SIZE-1:0] i0_predict_fghr_d,                // DEC predict fghr</span></span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">      754918 :    input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] i0_predict_index_d,     // DEC predict index</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">      754929 :    input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] i0_predict_index_d,     // DEC predict index</span></span>
 <span id="L40"><span class="lineNum">      40</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [pt.BTB_BTAG_SIZE-1:0] i0_predict_btag_d,               // DEC predict branch tag</span></span>
 <span id="L41"><span class="lineNum">      41</span>              : </span>
 <span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC tlaBgGNC">         170 :    input logic  [31:0]  lsu_result_m,                                  // Load result M-stage</span></span>
 <span id="L43"><span class="lineNum">      43</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic  [31:0]  lsu_nonblock_load_data,                        // nonblock load data</span></span>
-<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC tlaBgGNC">       12244 :    input logic          dec_i0_rs1_en_d,                               // Qualify GPR RS1 data</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC tlaBgGNC">       12246 :    input logic          dec_i0_rs1_en_d,                               // Qualify GPR RS1 data</span></span>
 <span id="L45"><span class="lineNum">      45</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic          dec_i0_rs2_en_d,                               // Qualify GPR RS2 data</span></span>
-<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC tlaBgGNC">      380498 :    input logic  [31:0]  gpr_i0_rs1_d,                                  // DEC data gpr</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC tlaBgGNC">      380504 :    input logic  [31:0]  gpr_i0_rs1_d,                                  // DEC data gpr</span></span>
 <span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">        6090 :    input logic  [31:0]  gpr_i0_rs2_d,                                  // DEC data gpr</span></span>
-<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">      754916 :    input logic  [31:0]  dec_i0_immed_d,                                // DEC data immediate</span></span>
-<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC">      377459 :    input logic  [31:0]  dec_i0_result_r,                               // DEC result in R-stage</span></span>
-<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">      761010 :    input logic  [12:1]  dec_i0_br_immed_d,                             // Branch immediate</span></span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">      754928 :    input logic  [31:0]  dec_i0_immed_d,                                // DEC data immediate</span></span>
+<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC">      377465 :    input logic  [31:0]  dec_i0_result_r,                               // DEC result in R-stage</span></span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">      761022 :    input logic  [12:1]  dec_i0_br_immed_d,                             // Branch immediate</span></span>
 <span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">        6162 :    input logic          dec_i0_alu_decode_d,                           // Valid to X-stage ALU</span></span>
-<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">      754912 :    input logic          dec_i0_branch_d,                               // Branch in D-stage</span></span>
+<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">      754924 :    input logic          dec_i0_branch_d,                               // Branch in D-stage</span></span>
 <span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC">        6088 :    input logic          dec_i0_select_pc_d,                            // PC select to RS1</span></span>
-<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">      754918 :    input logic  [31:1]  dec_i0_pc_d,                                   // Instruction PC</span></span>
-<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">      748812 :    input logic  [3:0]   dec_i0_rs1_bypass_en_d,                        // DEC bypass select  1 - X-stage, 0 - dec bypass data</span></span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">      754929 :    input logic  [31:1]  dec_i0_pc_d,                                   // Instruction PC</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">      748824 :    input logic  [3:0]   dec_i0_rs1_bypass_en_d,                        // DEC bypass select  1 - X-stage, 0 - dec bypass data</span></span>
 <span id="L56"><span class="lineNum">      56</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic  [3:0]   dec_i0_rs2_bypass_en_d,                        // DEC bypass select  1 - X-stage, 0 - dec bypass data</span></span>
 <span id="L57"><span class="lineNum">      57</span> <span class="tlaUNC">           0 :    input logic          dec_csr_ren_d,                                 // CSR read select</span></span>
 <span id="L58"><span class="lineNum">      58</span> <span class="tlaGNC tlaBgGNC">           5 :    input logic  [31:0]  dec_csr_rddata_d,                              // CSR read data</span></span>
@@ -166,7 +166,7 @@
 <span id="L62"><span class="lineNum">      62</span> <span class="tlaUNC">           0 :    input el2_div_pkt_t div_p,                                         // DEC {valid, unsigned, rem}</span></span>
 <span id="L63"><span class="lineNum">      63</span> <span class="tlaUNC">           0 :    input logic          dec_div_cancel,                                // Cancel the divide operation</span></span>
 <span id="L64"><span class="lineNum">      64</span>              : </span>
-<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC tlaBgGNC">      754916 :    input logic  [31:1]  pred_correct_npc_x,                            // DEC NPC for correctly predicted branch</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC tlaBgGNC">      754927 :    input logic  [31:1]  pred_correct_npc_x,                            // DEC NPC for correctly predicted branch</span></span>
 <span id="L66"><span class="lineNum">      66</span>              : </span>
 <span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC">           6 :    input logic          dec_tlu_flush_lower_r,                         // Flush divide and secondary ALUs</span></span>
 <span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">           2 :    input logic  [31:1]  dec_tlu_flush_path_r,                          // Redirect target</span></span>
@@ -182,19 +182,19 @@
 <span id="L78"><span class="lineNum">      78</span> <span class="tlaGNC tlaBgGNC">        6128 :    output logic         exu_flush_final,                               // Pipe is being flushed this cycle</span></span>
 <span id="L79"><span class="lineNum">      79</span> <span class="tlaGNC">        6088 :    output logic [31:1]  exu_flush_path_final,                          // Target for the oldest flush source</span></span>
 <span id="L80"><span class="lineNum">      80</span>              : </span>
-<span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC">      377459 :    output logic [31:0]  exu_i0_result_x,                               // Primary ALU result to DEC</span></span>
-<span id="L82"><span class="lineNum">      82</span> <span class="tlaGNC">      754917 :    output logic [31:1]  exu_i0_pc_x,                                   // Primary PC  result to DEC</span></span>
+<span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC">      377465 :    output logic [31:0]  exu_i0_result_x,                               // Primary ALU result to DEC</span></span>
+<span id="L82"><span class="lineNum">      82</span> <span class="tlaGNC">      754928 :    output logic [31:1]  exu_i0_pc_x,                                   // Primary PC  result to DEC</span></span>
 <span id="L83"><span class="lineNum">      83</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [31:0]  exu_csr_rs1_x,                                 // RS1 source for a CSR instruction</span></span>
 <span id="L84"><span class="lineNum">      84</span>              : </span>
-<span id="L85"><span class="lineNum">      85</span> <span class="tlaGNC tlaBgGNC">      754917 :    output logic [31:1]  exu_npc_r,                                     // Divide NPC</span></span>
-<span id="L86"><span class="lineNum">      86</span> <span class="tlaGNC">      748822 :    output logic [1:0]   exu_i0_br_hist_r,                              // to DEC  I0 branch history</span></span>
+<span id="L85"><span class="lineNum">      85</span> <span class="tlaGNC tlaBgGNC">      754929 :    output logic [31:1]  exu_npc_r,                                     // Divide NPC</span></span>
+<span id="L86"><span class="lineNum">      86</span> <span class="tlaGNC">      748832 :    output logic [1:0]   exu_i0_br_hist_r,                              // to DEC  I0 branch history</span></span>
 <span id="L87"><span class="lineNum">      87</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic         exu_i0_br_error_r,                             // to DEC  I0 branch error</span></span>
 <span id="L88"><span class="lineNum">      88</span> <span class="tlaUNC">           0 :    output logic         exu_i0_br_start_error_r,                       // to DEC  I0 branch start error</span></span>
-<span id="L89"><span class="lineNum">      89</span> <span class="tlaGNC tlaBgGNC">        6088 :    output logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] exu_i0_br_index_r,     // to DEC  I0 branch index</span></span>
-<span id="L90"><span class="lineNum">      90</span> <span class="tlaGNC">      748822 :    output logic         exu_i0_br_valid_r,                             // to DEC  I0 branch valid</span></span>
+<span id="L89"><span class="lineNum">      89</span> <span class="tlaGNC tlaBgGNC">        6089 :    output logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] exu_i0_br_index_r,     // to DEC  I0 branch index</span></span>
+<span id="L90"><span class="lineNum">      90</span> <span class="tlaGNC">      748832 :    output logic         exu_i0_br_valid_r,                             // to DEC  I0 branch valid</span></span>
 <span id="L91"><span class="lineNum">      91</span> <span class="tlaGNC">        6120 :    output logic         exu_i0_br_mp_r,                                // to DEC  I0 branch mispredict</span></span>
-<span id="L92"><span class="lineNum">      92</span> <span class="tlaGNC">        6092 :    output logic         exu_i0_br_middle_r,                            // to DEC  I0 branch middle</span></span>
-<span id="L93"><span class="lineNum">      93</span> <span class="tlaGNC">        6087 :    output logic [pt.BHT_GHR_SIZE-1:0]  exu_i0_br_fghr_r,               // to DEC  I0 branch fghr</span></span>
+<span id="L92"><span class="lineNum">      92</span> <span class="tlaGNC">        6093 :    output logic         exu_i0_br_middle_r,                            // to DEC  I0 branch middle</span></span>
+<span id="L93"><span class="lineNum">      93</span> <span class="tlaGNC">        6089 :    output logic [pt.BHT_GHR_SIZE-1:0]  exu_i0_br_fghr_r,               // to DEC  I0 branch fghr</span></span>
 <span id="L94"><span class="lineNum">      94</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic         exu_i0_br_way_r,                               // to DEC  I0 branch way</span></span>
 <span id="L95"><span class="lineNum">      95</span>              : </span>
 <span id="L96"><span class="lineNum">      96</span> <span class="tlaGNC tlaBgGNC">        6122 :    output el2_predict_pkt_t exu_mp_pkt,                               // Mispredict branch packet</span></span>
@@ -205,8 +205,8 @@
 <span id="L101"><span class="lineNum">     101</span>              : </span>
 <span id="L102"><span class="lineNum">     102</span>              : </span>
 <span id="L103"><span class="lineNum">     103</span> <span class="tlaGNC tlaBgGNC">        6120 :    output logic         exu_pmu_i0_br_misp,                            // to PMU - I0 E4 branch mispredict</span></span>
-<span id="L104"><span class="lineNum">     104</span> <span class="tlaGNC">      748824 :    output logic         exu_pmu_i0_br_ataken,                          // to PMU - I0 E4 taken</span></span>
-<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC">      754916 :    output logic         exu_pmu_i0_pc4,                                // to PMU - I0 E4 PC</span></span>
+<span id="L104"><span class="lineNum">     104</span> <span class="tlaGNC">      748834 :    output logic         exu_pmu_i0_br_ataken,                          // to PMU - I0 E4 taken</span></span>
+<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC">      754928 :    output logic         exu_pmu_i0_pc4,                                // to PMU - I0 E4 PC</span></span>
 <span id="L106"><span class="lineNum">     106</span>              : </span>
 <span id="L107"><span class="lineNum">     107</span>              : </span>
 <span id="L108"><span class="lineNum">     108</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic [31:0]  exu_div_result,                                // Divide result</span></span>
@@ -216,50 +216,50 @@
 <span id="L112"><span class="lineNum">     112</span>              : </span>
 <span id="L113"><span class="lineNum">     113</span>              : </span>
 <span id="L114"><span class="lineNum">     114</span>              : </span>
-<span id="L115"><span class="lineNum">     115</span> <span class="tlaGNC tlaBgGNC">      377456 :    logic [31:0]                i0_rs1_bypass_data_d;</span></span>
+<span id="L115"><span class="lineNum">     115</span> <span class="tlaGNC tlaBgGNC">      377464 :    logic [31:0]                i0_rs1_bypass_data_d;</span></span>
 <span id="L116"><span class="lineNum">     116</span> <span class="tlaUNC tlaBgUNC">           0 :    logic [31:0]                i0_rs2_bypass_data_d;</span></span>
-<span id="L117"><span class="lineNum">     117</span> <span class="tlaGNC tlaBgGNC">        6164 :    logic                       i0_rs1_bypass_en_d;</span></span>
+<span id="L117"><span class="lineNum">     117</span> <span class="tlaGNC tlaBgGNC">        6166 :    logic                       i0_rs1_bypass_en_d;</span></span>
 <span id="L118"><span class="lineNum">     118</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       i0_rs2_bypass_en_d;</span></span>
-<span id="L119"><span class="lineNum">     119</span> <span class="tlaGNC tlaBgGNC">      754916 :    logic [31:0]                i0_rs1_d,  i0_rs2_d;</span></span>
-<span id="L120"><span class="lineNum">     120</span> <span class="tlaGNC">      380526 :    logic [31:0]                muldiv_rs1_d;</span></span>
-<span id="L121"><span class="lineNum">     121</span> <span class="tlaGNC">      754916 :    logic [31:1]                pred_correct_npc_r;</span></span>
-<span id="L122"><span class="lineNum">     122</span> <span class="tlaGNC">      742704 :    logic                       i0_pred_correct_upper_r;</span></span>
-<span id="L123"><span class="lineNum">     123</span> <span class="tlaGNC">      754917 :    logic [31:1]                i0_flush_path_upper_r;</span></span>
-<span id="L124"><span class="lineNum">     124</span> <span class="tlaGNC">      754912 :    logic                       x_data_en, x_data_en_q1, x_data_en_q2, r_data_en, r_data_en_q2;</span></span>
+<span id="L119"><span class="lineNum">     119</span> <span class="tlaGNC tlaBgGNC">      754928 :    logic [31:0]                i0_rs1_d,  i0_rs2_d;</span></span>
+<span id="L120"><span class="lineNum">     120</span> <span class="tlaGNC">      380530 :    logic [31:0]                muldiv_rs1_d;</span></span>
+<span id="L121"><span class="lineNum">     121</span> <span class="tlaGNC">      754927 :    logic [31:1]                pred_correct_npc_r;</span></span>
+<span id="L122"><span class="lineNum">     122</span> <span class="tlaGNC">      742714 :    logic                       i0_pred_correct_upper_r;</span></span>
+<span id="L123"><span class="lineNum">     123</span> <span class="tlaGNC">      754929 :    logic [31:1]                i0_flush_path_upper_r;</span></span>
+<span id="L124"><span class="lineNum">     124</span> <span class="tlaGNC">      754922 :    logic                       x_data_en, x_data_en_q1, x_data_en_q2, r_data_en, r_data_en_q2;</span></span>
 <span id="L125"><span class="lineNum">     125</span> <span class="tlaGNC">          16 :    logic                       x_ctl_en,  r_ctl_en;</span></span>
 <span id="L126"><span class="lineNum">     126</span>              : </span>
 <span id="L127"><span class="lineNum">     127</span> <span class="tlaGNC">        6089 :    logic [pt.BHT_GHR_SIZE-1:0] ghr_d_ns, ghr_d;</span></span>
 <span id="L128"><span class="lineNum">     128</span> <span class="tlaGNC">        6089 :    logic [pt.BHT_GHR_SIZE-1:0] ghr_x_ns, ghr_x;</span></span>
-<span id="L129"><span class="lineNum">     129</span> <span class="tlaGNC">      748824 :    logic                       i0_taken_d;</span></span>
-<span id="L130"><span class="lineNum">     130</span> <span class="tlaGNC">      748824 :    logic                       i0_taken_x;</span></span>
-<span id="L131"><span class="lineNum">     131</span> <span class="tlaGNC">      754908 :    logic                       i0_valid_d;</span></span>
-<span id="L132"><span class="lineNum">     132</span> <span class="tlaGNC">      754908 :    logic                       i0_valid_x;</span></span>
+<span id="L129"><span class="lineNum">     129</span> <span class="tlaGNC">      748834 :    logic                       i0_taken_d;</span></span>
+<span id="L130"><span class="lineNum">     130</span> <span class="tlaGNC">      748834 :    logic                       i0_taken_x;</span></span>
+<span id="L131"><span class="lineNum">     131</span> <span class="tlaGNC">      754918 :    logic                       i0_valid_d;</span></span>
+<span id="L132"><span class="lineNum">     132</span> <span class="tlaGNC">      754918 :    logic                       i0_valid_x;</span></span>
 <span id="L133"><span class="lineNum">     133</span> <span class="tlaGNC">        6089 :    logic [pt.BHT_GHR_SIZE-1:0] after_flush_eghr;</span></span>
 <span id="L134"><span class="lineNum">     134</span>              : </span>
 <span id="L135"><span class="lineNum">     135</span> <span class="tlaGNC">        6122 :    el2_predict_pkt_t          final_predict_mp;</span></span>
-<span id="L136"><span class="lineNum">     136</span> <span class="tlaGNC">      761010 :    el2_predict_pkt_t          i0_predict_newp_d;</span></span>
+<span id="L136"><span class="lineNum">     136</span> <span class="tlaGNC">      761022 :    el2_predict_pkt_t          i0_predict_newp_d;</span></span>
 <span id="L137"><span class="lineNum">     137</span>              : </span>
 <span id="L138"><span class="lineNum">     138</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       flush_in_d;</span></span>
-<span id="L139"><span class="lineNum">     139</span> <span class="tlaGNC tlaBgGNC">      377459 :    logic [31:0]                alu_result_x;</span></span>
+<span id="L139"><span class="lineNum">     139</span> <span class="tlaGNC tlaBgGNC">      377465 :    logic [31:0]                alu_result_x;</span></span>
 <span id="L140"><span class="lineNum">     140</span>              : </span>
 <span id="L141"><span class="lineNum">     141</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       mul_valid_x;</span></span>
 <span id="L142"><span class="lineNum">     142</span> <span class="tlaUNC">           0 :    logic [31:0]                mul_result_x;</span></span>
 <span id="L143"><span class="lineNum">     143</span>              : </span>
-<span id="L144"><span class="lineNum">     144</span> <span class="tlaGNC tlaBgGNC">      754916 :    el2_predict_pkt_t          i0_pp_r;</span></span>
+<span id="L144"><span class="lineNum">     144</span> <span class="tlaGNC tlaBgGNC">      754928 :    el2_predict_pkt_t          i0_pp_r;</span></span>
 <span id="L145"><span class="lineNum">     145</span>              : </span>
 <span id="L146"><span class="lineNum">     146</span> <span class="tlaGNC">        6122 :    logic                       i0_flush_upper_d;</span></span>
-<span id="L147"><span class="lineNum">     147</span> <span class="tlaGNC">      754922 :    logic [31:1]                i0_flush_path_d;</span></span>
-<span id="L148"><span class="lineNum">     148</span> <span class="tlaGNC">      761010 :    el2_predict_pkt_t          i0_predict_p_d;</span></span>
-<span id="L149"><span class="lineNum">     149</span> <span class="tlaGNC">      742704 :    logic                       i0_pred_correct_upper_d;</span></span>
+<span id="L147"><span class="lineNum">     147</span> <span class="tlaGNC">      754935 :    logic [31:1]                i0_flush_path_d;</span></span>
+<span id="L148"><span class="lineNum">     148</span> <span class="tlaGNC">      761022 :    el2_predict_pkt_t          i0_predict_p_d;</span></span>
+<span id="L149"><span class="lineNum">     149</span> <span class="tlaGNC">      742714 :    logic                       i0_pred_correct_upper_d;</span></span>
 <span id="L150"><span class="lineNum">     150</span>              : </span>
 <span id="L151"><span class="lineNum">     151</span> <span class="tlaGNC">        6122 :    logic                       i0_flush_upper_x;</span></span>
-<span id="L152"><span class="lineNum">     152</span> <span class="tlaGNC">      754917 :    logic [31:1]                i0_flush_path_x;</span></span>
-<span id="L153"><span class="lineNum">     153</span> <span class="tlaGNC">      754916 :    el2_predict_pkt_t          i0_predict_p_x;</span></span>
-<span id="L154"><span class="lineNum">     154</span> <span class="tlaGNC">      742704 :    logic                       i0_pred_correct_upper_x;</span></span>
-<span id="L155"><span class="lineNum">     155</span> <span class="tlaGNC">      754912 :    logic                       i0_branch_x;</span></span>
+<span id="L152"><span class="lineNum">     152</span> <span class="tlaGNC">      754929 :    logic [31:1]                i0_flush_path_x;</span></span>
+<span id="L153"><span class="lineNum">     153</span> <span class="tlaGNC">      754928 :    el2_predict_pkt_t          i0_predict_p_x;</span></span>
+<span id="L154"><span class="lineNum">     154</span> <span class="tlaGNC">      742714 :    logic                       i0_pred_correct_upper_x;</span></span>
+<span id="L155"><span class="lineNum">     155</span> <span class="tlaGNC">      754924 :    logic                       i0_branch_x;</span></span>
 <span id="L156"><span class="lineNum">     156</span>              : </span>
 <span id="L157"><span class="lineNum">     157</span>              :    localparam PREDPIPESIZE = pt.BTB_ADDR_HI-pt.BTB_ADDR_LO+1+pt.BHT_GHR_SIZE+pt.BTB_BTAG_SIZE;</span>
-<span id="L158"><span class="lineNum">     158</span> <span class="tlaGNC">      754918 :    logic [PREDPIPESIZE-1:0]    predpipe_d, predpipe_x, predpipe_r, final_predpipe_mp;</span></span>
+<span id="L158"><span class="lineNum">     158</span> <span class="tlaGNC">      754929 :    logic [PREDPIPESIZE-1:0]    predpipe_d, predpipe_x, predpipe_r, final_predpipe_mp;</span></span>
 <span id="L159"><span class="lineNum">     159</span>              : </span>
 <span id="L160"><span class="lineNum">     160</span>              : </span>
 <span id="L161"><span class="lineNum">     161</span>              : </span>
@@ -378,7 +378,7 @@
 <span id="L274"><span class="lineNum">     274</span>              : </span>
 <span id="L275"><span class="lineNum">     275</span>              : </span>
 <span id="L276"><span class="lineNum">     276</span>              : </span>
-<span id="L277"><span class="lineNum">     277</span> <span class="tlaGNC">     1240548 :    assign exu_i0_result_x[31:0]    =  (mul_valid_x)  ?  mul_result_x[31:0]  :  alu_result_x[31:0];</span></span>
+<span id="L277"><span class="lineNum">     277</span> <span class="tlaGNC">     1240790 :    assign exu_i0_result_x[31:0]    =  (mul_valid_x)  ?  mul_result_x[31:0]  :  alu_result_x[31:0];</span></span>
 <span id="L278"><span class="lineNum">     278</span>              : </span>
 <span id="L279"><span class="lineNum">     279</span>              : </span>
 <span id="L280"><span class="lineNum">     280</span>              : </span>
@@ -422,11 +422,11 @@
 <span id="L318"><span class="lineNum">     318</span>              :            exu_i0_br_index_r[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO]}=  predpipe_r[PREDPIPESIZE-1:pt.BTB_BTAG_SIZE];</span>
 <span id="L319"><span class="lineNum">     319</span>              : </span>
 <span id="L320"><span class="lineNum">     320</span>              : </span>
-<span id="L321"><span class="lineNum">     321</span> <span class="tlaGNC">     1237469 :    assign final_predict_mp                                  = (i0_flush_upper_x)  ?  i0_predict_p_x  :  '0;</span></span>
+<span id="L321"><span class="lineNum">     321</span> <span class="tlaGNC">     1237710 :    assign final_predict_mp                                  = (i0_flush_upper_x)  ?  i0_predict_p_x  :  '0;</span></span>
 <span id="L322"><span class="lineNum">     322</span>              : </span>
-<span id="L323"><span class="lineNum">     323</span> <span class="tlaGNC">     1237469 :    assign final_predpipe_mp[PREDPIPESIZE-1:0]               = (i0_flush_upper_x)  ?  predpipe_x      :  '0;</span></span>
+<span id="L323"><span class="lineNum">     323</span> <span class="tlaGNC">     1237710 :    assign final_predpipe_mp[PREDPIPESIZE-1:0]               = (i0_flush_upper_x)  ?  predpipe_x      :  '0;</span></span>
 <span id="L324"><span class="lineNum">     324</span>              : </span>
-<span id="L325"><span class="lineNum">     325</span> <span class="tlaGNC">     1239411 :    assign after_flush_eghr[pt.BHT_GHR_SIZE-1:0]             = (i0_flush_upper_x &amp; ~dec_tlu_flush_lower_r)  ?  ghr_d[pt.BHT_GHR_SIZE-1:0]  :  ghr_x[pt.BHT_GHR_SIZE-1:0];</span></span>
+<span id="L325"><span class="lineNum">     325</span> <span class="tlaGNC">     1239646 :    assign after_flush_eghr[pt.BHT_GHR_SIZE-1:0]             = (i0_flush_upper_x &amp; ~dec_tlu_flush_lower_r)  ?  ghr_d[pt.BHT_GHR_SIZE-1:0]  :  ghr_x[pt.BHT_GHR_SIZE-1:0];</span></span>
 <span id="L326"><span class="lineNum">     326</span>              : </span>
 <span id="L327"><span class="lineNum">     327</span>              : </span>
 <span id="L328"><span class="lineNum">     328</span>              :    assign exu_mp_pkt.valid                                  =  final_predict_mp.valid;</span>
@@ -470,7 +470,7 @@
 <span id="L366"><span class="lineNum">     366</span>              :    assign exu_flush_path_final[31:1] = ( {31{ dec_tlu_flush_lower_r                   }} &amp; dec_tlu_flush_path_r[31:1] ) |</span>
 <span id="L367"><span class="lineNum">     367</span>              :                                        ( {31{~dec_tlu_flush_lower_r &amp; i0_flush_upper_d}} &amp; i0_flush_path_d[31:1]      );</span>
 <span id="L368"><span class="lineNum">     368</span>              : </span>
-<span id="L369"><span class="lineNum">     369</span> <span class="tlaGNC">      866923 :    assign exu_npc_r[31:1]            = (i0_pred_correct_upper_r)  ?  pred_correct_npc_r[31:1]    :  i0_flush_path_upper_r[31:1];</span></span>
+<span id="L369"><span class="lineNum">     369</span> <span class="tlaGNC">      867043 :    assign exu_npc_r[31:1]            = (i0_pred_correct_upper_r)  ?  pred_correct_npc_r[31:1]    :  i0_flush_path_upper_r[31:1];</span></span>
 <span id="L370"><span class="lineNum">     370</span>              : </span>
 <span id="L371"><span class="lineNum">     371</span>              : </span>
 <span id="L372"><span class="lineNum">     372</span>              : endmodule // el2_exu</span>

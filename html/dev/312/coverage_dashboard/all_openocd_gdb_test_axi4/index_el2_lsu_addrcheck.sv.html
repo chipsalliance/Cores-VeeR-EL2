@@ -131,7 +131,7 @@
 <span id="L27"><span class="lineNum">      27</span>              : #(</span>
 <span id="L28"><span class="lineNum">      28</span>              : `include "el2_param.vh"</span>
 <span id="L29"><span class="lineNum">      29</span>              :  )(</span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC tlaBgGNC">     2672926 :    input logic          lsu_c2_m_clk,              // clock</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC tlaBgGNC">     2470378 :    input logic          lsu_c2_m_clk,              // clock</span></span>
 <span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">           1 :    input logic          rst_l,                     // reset</span></span>
 <span id="L32"><span class="lineNum">      32</span>              : </span>
 <span id="L33"><span class="lineNum">      33</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [31:0]   start_addr_d,              // start address for lsu</span></span>
@@ -323,7 +323,7 @@
 <span id="L219"><span class="lineNum">     219</span>              :    end</span>
 <span id="L220"><span class="lineNum">     220</span>              : </span>
 <span id="L221"><span class="lineNum">     221</span>              :    assign access_fault_d = (unmapped_access_fault_d | mpu_access_fault_d | picm_access_fault_d | regpred_access_fault_d) &amp; lsu_pkt_d.valid &amp; ~lsu_pkt_d.dma;</span>
-<span id="L222"><span class="lineNum">     222</span> <span class="tlaGNC tlaBgGNC">     5393854 :    assign access_fault_mscause_d[3:0] = unmapped_access_fault_d ? 4'h2 : mpu_access_fault_d ? 4'h3 : regpred_access_fault_d ? 4'h5 : picm_access_fault_d ? 4'h6 : 4'h0;</span></span>
+<span id="L222"><span class="lineNum">     222</span> <span class="tlaGNC tlaBgGNC">     5402990 :    assign access_fault_mscause_d[3:0] = unmapped_access_fault_d ? 4'h2 : mpu_access_fault_d ? 4'h3 : regpred_access_fault_d ? 4'h5 : picm_access_fault_d ? 4'h6 : 4'h0;</span></span>
 <span id="L223"><span class="lineNum">     223</span>              : </span>
 <span id="L224"><span class="lineNum">     224</span>              :    // Misaligned happens due to 2 reasons</span>
 <span id="L225"><span class="lineNum">     225</span>              :    // 0. Region cross</span>
@@ -331,9 +331,9 @@
 <span id="L227"><span class="lineNum">     227</span>              :    assign regcross_misaligned_fault_d = (start_addr_d[31:28] != end_addr_d[31:28]);</span>
 <span id="L228"><span class="lineNum">     228</span>              :    assign sideeffect_misaligned_fault_d = (is_sideeffects_d &amp; ~is_aligned_d);</span>
 <span id="L229"><span class="lineNum">     229</span>              :    assign misaligned_fault_d = (regcross_misaligned_fault_d | (sideeffect_misaligned_fault_d &amp; addr_external_d)) &amp; lsu_pkt_d.valid &amp; ~lsu_pkt_d.dma;</span>
-<span id="L230"><span class="lineNum">     230</span> <span class="tlaGNC">     5393150 :    assign misaligned_fault_mscause_d[3:0] = regcross_misaligned_fault_d ? 4'h2 : sideeffect_misaligned_fault_d ? 4'h1 : 4'h0;</span></span>
+<span id="L230"><span class="lineNum">     230</span> <span class="tlaGNC">     5402302 :    assign misaligned_fault_mscause_d[3:0] = regcross_misaligned_fault_d ? 4'h2 : sideeffect_misaligned_fault_d ? 4'h1 : 4'h0;</span></span>
 <span id="L231"><span class="lineNum">     231</span>              : </span>
-<span id="L232"><span class="lineNum">     232</span> <span class="tlaGNC">     5393150 :    assign exc_mscause_d[3:0] = misaligned_fault_d ? misaligned_fault_mscause_d[3:0] : access_fault_mscause_d[3:0];</span></span>
+<span id="L232"><span class="lineNum">     232</span> <span class="tlaGNC">     5402302 :    assign exc_mscause_d[3:0] = misaligned_fault_d ? misaligned_fault_mscause_d[3:0] : access_fault_mscause_d[3:0];</span></span>
 <span id="L233"><span class="lineNum">     233</span>              : </span>
 <span id="L234"><span class="lineNum">     234</span>              :    // Fast interrupt error logic</span>
 <span id="L235"><span class="lineNum">     235</span>              :    assign fir_dccm_access_error_d    = ((start_addr_in_dccm_region_d &amp; ~start_addr_in_dccm_d) |</span>

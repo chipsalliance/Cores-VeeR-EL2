@@ -130,8 +130,8 @@
 <span id="L26"><span class="lineNum">      26</span>              : #(</span>
 <span id="L27"><span class="lineNum">      27</span>              : `include "el2_param.vh"</span>
 <span id="L28"><span class="lineNum">      28</span>              :  )(</span>
-<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC tlaBgGNC">       14154 :    input logic         clk,</span></span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">       14154 :    input logic         free_clk,</span></span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC tlaBgGNC">       19552 :    input logic         clk,</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">       19552 :    input logic         free_clk,</span></span>
 <span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">           1 :    input logic         rst_l,</span></span>
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">           1 :    input logic         dma_bus_clk_en, // slave bus clock enable</span></span>
 <span id="L33"><span class="lineNum">      33</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic         clk_override,</span></span>
@@ -176,8 +176,8 @@
 <span id="L72"><span class="lineNum">      72</span> <span class="tlaUNC">           0 :    output logic        dma_active,         // DMA is busy</span></span>
 <span id="L73"><span class="lineNum">      73</span> <span class="tlaUNC">           0 :    output logic        dma_dccm_stall_any, // stall dccm pipe (bubble) so that DMA can proceed</span></span>
 <span id="L74"><span class="lineNum">      74</span> <span class="tlaUNC">           0 :    output logic        dma_iccm_stall_any, // stall iccm pipe (bubble) so that DMA can proceed</span></span>
-<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC tlaBgGNC">         239 :    input logic         dccm_ready, // dccm ready to accept DMA request</span></span>
-<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">          93 :    input logic         iccm_ready, // iccm ready to accept DMA request</span></span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC tlaBgGNC">         339 :    input logic         dccm_ready, // dccm ready to accept DMA request</span></span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">         107 :    input logic         iccm_ready, // iccm ready to accept DMA request</span></span>
 <span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC">           1 :    input logic [2:0]   dec_tlu_dma_qos_prty,    // DMA QoS priority coming from MFDC [18:15]</span></span>
 <span id="L78"><span class="lineNum">      78</span>              : </span>
 <span id="L79"><span class="lineNum">      79</span>              :    // PMU signals</span>
@@ -289,8 +289,8 @@
 <span id="L185"><span class="lineNum">     185</span>              : </span>
 <span id="L186"><span class="lineNum">     186</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                    dma_buffer_c1_clken;</span></span>
 <span id="L187"><span class="lineNum">     187</span> <span class="tlaUNC">           0 :    logic                    dma_free_clken;</span></span>
-<span id="L188"><span class="lineNum">     188</span> <span class="tlaGNC tlaBgGNC">       14154 :    logic                    dma_buffer_c1_clk;</span></span>
-<span id="L189"><span class="lineNum">     189</span> <span class="tlaGNC">       14154 :    logic                    dma_free_clk;</span></span>
+<span id="L188"><span class="lineNum">     188</span> <span class="tlaGNC tlaBgGNC">       19552 :    logic                    dma_buffer_c1_clk;</span></span>
+<span id="L189"><span class="lineNum">     189</span> <span class="tlaGNC">       19552 :    logic                    dma_free_clk;</span></span>
 <span id="L190"><span class="lineNum">     190</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                    dma_bus_clk;</span></span>
 <span id="L191"><span class="lineNum">     191</span>              : </span>
 <span id="L192"><span class="lineNum">     192</span> <span class="tlaUNC">           0 :    logic                    bus_rsp_valid, bus_rsp_sent;</span></span>

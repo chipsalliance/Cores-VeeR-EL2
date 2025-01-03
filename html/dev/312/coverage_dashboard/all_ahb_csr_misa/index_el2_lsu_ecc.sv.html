@@ -135,8 +135,8 @@
 <span id="L31"><span class="lineNum">      31</span>              : `include "el2_param.vh"</span>
 <span id="L32"><span class="lineNum">      32</span>              :  )</span>
 <span id="L33"><span class="lineNum">      33</span>              : (</span>
-<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">       14154 :    input logic                           clk,                // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">       14154 :    input logic                           lsu_c2_r_clk,       // clock</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">       19552 :    input logic                           clk,                // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">       19552 :    input logic                           lsu_c2_r_clk,       // clock</span></span>
 <span id="L36"><span class="lineNum">      36</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic                           clk_override,       // Override non-functional clock gating</span></span>
 <span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC tlaBgGNC">           1 :    input logic                           rst_l,              // reset, active low</span></span>
 <span id="L38"><span class="lineNum">      38</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
@@ -144,8 +144,8 @@
 <span id="L40"><span class="lineNum">      40</span>              :    input logic                           scan_mode,          // scan mode</span>
 <span id="L41"><span class="lineNum">      41</span>              :    /*pragma coverage on*/</span>
 <span id="L42"><span class="lineNum">      42</span>              : </span>
-<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">         239 :    input el2_lsu_pkt_t                  lsu_pkt_m,          // packet in m</span></span>
-<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">         239 :    input el2_lsu_pkt_t                  lsu_pkt_r,          // packet in r</span></span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">         339 :    input el2_lsu_pkt_t                  lsu_pkt_m,          // packet in m</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">         339 :    input el2_lsu_pkt_t                  lsu_pkt_r,          // packet in r</span></span>
 <span id="L45"><span class="lineNum">      45</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [pt.DCCM_DATA_WIDTH-1:0]  stbuf_data_any,</span></span>
 <span id="L46"><span class="lineNum">      46</span>              : </span>
 <span id="L47"><span class="lineNum">      47</span> <span class="tlaUNC">           0 :    input logic                           dec_tlu_core_ecc_disable,  // disables the ecc computation and error flagging</span></span>

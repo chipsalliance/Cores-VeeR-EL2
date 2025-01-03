@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    02-01-2025
+                    03-01-2025
                 </td>
                 <td></td>
                 
@@ -83,10 +83,10 @@
         100.0%
     </td>
     <td class="headerCovSummaryEntry">
-        47
+        48
     </td>
     <td class="headerCovSummaryEntry">
-        47
+        48
     </td>
 
             </tr>
@@ -2029,7 +2029,7 @@
 <span id="L1925"><span class="lineNum">    1925</span>              :    rvdffs #(3) mseccfg_ff (.*, .clk(csr_wr_clk), .en(wr_mseccfg_r), .din(mseccfg_ns), .dout(mseccfg));</span>
 <span id="L1926"><span class="lineNum">    1926</span>              : </span>
 <span id="L1927"><span class="lineNum">    1927</span>              :    assign mseccfg_ns = {</span>
-<span id="L1928"><span class="lineNum">    1928</span>              :      pmp_any_region_locked ?</span>
+<span id="L1928"><span class="lineNum">    1928</span> <span class="tlaGNC tlaBgGNC">      299921 :      pmp_any_region_locked ?</span></span>
 <span id="L1929"><span class="lineNum">    1929</span>              :         (dec_csr_wrdata_r[MSECCFG_RLB] &amp; mseccfg[MSECCFG_RLB]) :  // When any PMP region is locked this bit can only be cleared</span>
 <span id="L1930"><span class="lineNum">    1930</span>              :          dec_csr_wrdata_r[MSECCFG_RLB],                           // Otherwise regularly writeable</span>
 <span id="L1931"><span class="lineNum">    1931</span>              :      dec_csr_wrdata_r[MSECCFG_MMWP] |  mseccfg[MSECCFG_MMWP],     // Sticky bit, can only be set but not cleared</span>
@@ -2053,7 +2053,7 @@
 <span id="L1949"><span class="lineNum">    1949</span>              :    //</span>
 <span id="L1950"><span class="lineNum">    1950</span>              :    assign wr_mcgc_r = dec_csr_wen_r_mod &amp; (dec_csr_wraddr_r[11:0] == MCGC);</span>
 <span id="L1951"><span class="lineNum">    1951</span>              : </span>
-<span id="L1952"><span class="lineNum">    1952</span> <span class="tlaGNC tlaBgGNC">      299923 :    assign mcgc_ns[9:0] = wr_mcgc_r ? {~dec_csr_wrdata_r[9], dec_csr_wrdata_r[8:0]} : mcgc_int[9:0];</span></span>
+<span id="L1952"><span class="lineNum">    1952</span> <span class="tlaGNC">      299923 :    assign mcgc_ns[9:0] = wr_mcgc_r ? {~dec_csr_wrdata_r[9], dec_csr_wrdata_r[8:0]} : mcgc_int[9:0];</span></span>
 <span id="L1953"><span class="lineNum">    1953</span>              :    rvdffe #(10)  mcgc_ff (.*, .en(wr_mcgc_r), .din(mcgc_ns[9:0]), .dout(mcgc_int[9:0]));</span>
 <span id="L1954"><span class="lineNum">    1954</span>              : </span>
 <span id="L1955"><span class="lineNum">    1955</span>              :    assign mcgc[9:0] = {~mcgc_int[9], mcgc_int[8:0]};</span>

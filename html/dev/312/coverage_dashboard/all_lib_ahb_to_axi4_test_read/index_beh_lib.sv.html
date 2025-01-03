@@ -51,21 +51,21 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    02-01-2025
+                    03-01-2025
                 </td>
                 <td></td>
                 
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #11ff00;">
-        96.5%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #13ff00;">
+        96.2%
     </td>
     <td class="headerCovSummaryEntry">
-        55
+        50
     </td>
     <td class="headerCovSummaryEntry">
-        57
+        52
     </td>
 
             </tr>
@@ -269,7 +269,7 @@
 <span id="L165"><span class="lineNum">     165</span>              : </span>
 <span id="L166"><span class="lineNum">     166</span>              : module rvdffe #( parameter WIDTH=1, SHORT=0, OVERRIDE=0 )</span>
 <span id="L167"><span class="lineNum">     167</span>              :    (</span>
-<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC tlaBgGNC">         122 :      input  logic [WIDTH-1:0] din,</span></span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC tlaBgGNC">         132 :      input  logic [WIDTH-1:0] din,</span></span>
 <span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC">         404 :      input  logic           en,</span></span>
 <span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">        9138 :      input  logic           clk,</span></span>
 <span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">          10 :      input  logic           rst_l,</span></span>
@@ -277,7 +277,7 @@
 <span id="L173"><span class="lineNum">     173</span>              :      /*pragma coverage off*/</span>
 <span id="L174"><span class="lineNum">     174</span>              :      input  logic             scan_mode,</span>
 <span id="L175"><span class="lineNum">     175</span>              :      /*pragma coverage on*/</span>
-<span id="L176"><span class="lineNum">     176</span> <span class="tlaGNC">         122 :      output logic [WIDTH-1:0] dout</span></span>
+<span id="L176"><span class="lineNum">     176</span> <span class="tlaGNC">         132 :      output logic [WIDTH-1:0] dout</span></span>
 <span id="L177"><span class="lineNum">     177</span>              :      );</span>
 <span id="L178"><span class="lineNum">     178</span>              : </span>
 <span id="L179"><span class="lineNum">     179</span> <span class="tlaGNC">         404 :    logic                      l1clk;</span></span>
@@ -718,16 +718,16 @@
 <span id="L614"><span class="lineNum">     614</span>              : // Check if the S_ADDR &lt;= addr &lt; E_ADDR</span>
 <span id="L615"><span class="lineNum">     615</span>              : module rvrangecheck  #(CCM_SADR = 32'h0,</span>
 <span id="L616"><span class="lineNum">     616</span>              :                        CCM_SIZE  = 128) (</span>
-<span id="L617"><span class="lineNum">     617</span> <span class="tlaGNC">         122 :    input  logic [31:0]   addr,                             // Address to be checked for range</span></span>
-<span id="L618"><span class="lineNum">     618</span> <span class="tlaGNC">          10 :    output logic          in_range,                            // S_ADDR &lt;= start_addr &lt; E_ADDR</span></span>
-<span id="L619"><span class="lineNum">     619</span> <span class="tlaGNC">          10 :    output logic          in_region</span></span>
+<span id="L617"><span class="lineNum">     617</span>              :    input  logic [31:0]   addr,                             // Address to be checked for range</span>
+<span id="L618"><span class="lineNum">     618</span>              :    output logic          in_range,                            // S_ADDR &lt;= start_addr &lt; E_ADDR</span>
+<span id="L619"><span class="lineNum">     619</span>              :    output logic          in_region</span>
 <span id="L620"><span class="lineNum">     620</span>              : );</span>
 <span id="L621"><span class="lineNum">     621</span>              : </span>
 <span id="L622"><span class="lineNum">     622</span>              :    localparam REGION_BITS = 4;</span>
 <span id="L623"><span class="lineNum">     623</span>              :    localparam MASK_BITS = 10 + $clog2(CCM_SIZE);</span>
 <span id="L624"><span class="lineNum">     624</span>              : </span>
-<span id="L625"><span class="lineNum">     625</span> <span class="tlaGNC">           2 :    logic [31:0]          start_addr;</span></span>
-<span id="L626"><span class="lineNum">     626</span> <span class="tlaGNC">           2 :    logic [3:0]           region;</span></span>
+<span id="L625"><span class="lineNum">     625</span>              :    logic [31:0]          start_addr;</span>
+<span id="L626"><span class="lineNum">     626</span>              :    logic [3:0]           region;</span>
 <span id="L627"><span class="lineNum">     627</span>              : </span>
 <span id="L628"><span class="lineNum">     628</span>              :    assign start_addr[31:0]        = CCM_SADR;</span>
 <span id="L629"><span class="lineNum">     629</span>              :    assign region[REGION_BITS-1:0] = start_addr[31:(32-REGION_BITS)];</span>

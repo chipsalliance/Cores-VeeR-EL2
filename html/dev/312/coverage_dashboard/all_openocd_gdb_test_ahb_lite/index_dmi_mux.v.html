@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    02-01-2025
+                    03-01-2025
                 </td>
                 <td></td>
                 
@@ -113,24 +113,24 @@
 <span id="L9"><span class="lineNum">       9</span> <span class="tlaUNC tlaBgUNC">           0 :     input wire uncore_enable,</span></span>
 <span id="L10"><span class="lineNum">      10</span>              : </span>
 <span id="L11"><span class="lineNum">      11</span>              :     // DMI upstream</span>
-<span id="L12"><span class="lineNum">      12</span> <span class="tlaGNC tlaBgGNC">       10170 :     input  wire        dmi_en,</span></span>
-<span id="L13"><span class="lineNum">      13</span> <span class="tlaGNC">        3964 :     input  wire        dmi_wr_en,</span></span>
-<span id="L14"><span class="lineNum">      14</span> <span class="tlaGNC">        2874 :     input  wire [ 6:0] dmi_addr,</span></span>
-<span id="L15"><span class="lineNum">      15</span> <span class="tlaGNC">        2112 :     input  wire [31:0] dmi_wdata,</span></span>
-<span id="L16"><span class="lineNum">      16</span> <span class="tlaGNC">        3330 :     output wire [31:0] dmi_rdata,</span></span>
+<span id="L12"><span class="lineNum">      12</span> <span class="tlaGNC tlaBgGNC">        9388 :     input  wire        dmi_en,</span></span>
+<span id="L13"><span class="lineNum">      13</span> <span class="tlaGNC">        3648 :     input  wire        dmi_wr_en,</span></span>
+<span id="L14"><span class="lineNum">      14</span> <span class="tlaGNC">        2562 :     input  wire [ 6:0] dmi_addr,</span></span>
+<span id="L15"><span class="lineNum">      15</span> <span class="tlaGNC">        1878 :     input  wire [31:0] dmi_wdata,</span></span>
+<span id="L16"><span class="lineNum">      16</span> <span class="tlaGNC">        3144 :     output wire [31:0] dmi_rdata,</span></span>
 <span id="L17"><span class="lineNum">      17</span>              : </span>
 <span id="L18"><span class="lineNum">      18</span>              :     // DMI downstream for core</span>
-<span id="L19"><span class="lineNum">      19</span> <span class="tlaGNC">       10170 :     output wire        dmi_core_en,</span></span>
-<span id="L20"><span class="lineNum">      20</span> <span class="tlaGNC">        3964 :     output wire        dmi_core_wr_en,</span></span>
-<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC">        2874 :     output wire [ 6:0] dmi_core_addr,</span></span>
-<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">        2112 :     output wire [31:0] dmi_core_wdata,</span></span>
-<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">        3330 :     input  wire [31:0] dmi_core_rdata,</span></span>
+<span id="L19"><span class="lineNum">      19</span> <span class="tlaGNC">        9388 :     output wire        dmi_core_en,</span></span>
+<span id="L20"><span class="lineNum">      20</span> <span class="tlaGNC">        3648 :     output wire        dmi_core_wr_en,</span></span>
+<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC">        2562 :     output wire [ 6:0] dmi_core_addr,</span></span>
+<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">        1878 :     output wire [31:0] dmi_core_wdata,</span></span>
+<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">        3144 :     input  wire [31:0] dmi_core_rdata,</span></span>
 <span id="L24"><span class="lineNum">      24</span>              : </span>
 <span id="L25"><span class="lineNum">      25</span>              :     // DMI downstream for uncore</span>
 <span id="L26"><span class="lineNum">      26</span> <span class="tlaUNC tlaBgUNC">           0 :     output wire        dmi_uncore_en,</span></span>
 <span id="L27"><span class="lineNum">      27</span> <span class="tlaUNC">           0 :     output wire        dmi_uncore_wr_en,</span></span>
-<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC tlaBgGNC">        2874 :     output wire [ 6:0] dmi_uncore_addr,</span></span>
-<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">        2112 :     output wire [31:0] dmi_uncore_wdata,</span></span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC tlaBgGNC">        2562 :     output wire [ 6:0] dmi_uncore_addr,</span></span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">        1878 :     output wire [31:0] dmi_uncore_wdata,</span></span>
 <span id="L30"><span class="lineNum">      30</span> <span class="tlaUNC tlaBgUNC">           0 :     input  wire [31:0] dmi_uncore_rdata</span></span>
 <span id="L31"><span class="lineNum">      31</span>              : );</span>
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaUNC">           0 :   logic is_uncore_aperture;</span></span>
@@ -151,7 +151,7 @@
 <span id="L47"><span class="lineNum">      47</span>              :   assign dmi_uncore_wdata   = dmi_wdata;</span>
 <span id="L48"><span class="lineNum">      48</span>              : </span>
 <span id="L49"><span class="lineNum">      49</span>              :   // Read mux</span>
-<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC tlaBgGNC">      455733 :   assign dmi_rdata          = is_uncore_aperture ? dmi_uncore_rdata : dmi_core_rdata;</span></span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC tlaBgGNC">      423266 :   assign dmi_rdata          = is_uncore_aperture ? dmi_uncore_rdata : dmi_core_rdata;</span></span>
 <span id="L51"><span class="lineNum">      51</span>              : </span>
 <span id="L52"><span class="lineNum">      52</span>              : endmodule</span>
         </pre>

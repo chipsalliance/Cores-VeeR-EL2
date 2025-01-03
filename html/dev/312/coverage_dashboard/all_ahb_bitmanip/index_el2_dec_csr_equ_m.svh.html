@@ -51,18 +51,18 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    02-01-2025
+                    03-01-2025
                 </td>
                 <td></td>
                 
     <td class="headerCovSummary rowLeft">
         Toggle
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff2800;">
-        8.0%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff0d00;">
+        2.7%
     </td>
     <td class="headerCovSummaryEntry">
-        6
+        2
     </td>
     <td class="headerCovSummaryEntry">
         75
@@ -72,7 +72,7 @@
             <tr>
                 <td class="headerInfo">Test:</td>
                 <td class="headerInfoValue">
-                    ahb_cmark_iccm
+                    ahb_bitmanip
                 </td>
                 <td></td>
                 
@@ -107,12 +107,12 @@
 <span id="L3"><span class="lineNum">       3</span> <span class="tlaUNC">           0 : logic csr_marchid;</span></span>
 <span id="L4"><span class="lineNum">       4</span> <span class="tlaUNC">           0 : logic csr_mimpid;</span></span>
 <span id="L5"><span class="lineNum">       5</span> <span class="tlaUNC">           0 : logic csr_mhartid;</span></span>
-<span id="L6"><span class="lineNum">       6</span> <span class="tlaGNC tlaBgGNC">           9 : logic csr_mstatus;</span></span>
-<span id="L7"><span class="lineNum">       7</span> <span class="tlaGNC">           2 : logic csr_mtvec;</span></span>
-<span id="L8"><span class="lineNum">       8</span> <span class="tlaUNC tlaBgUNC">           0 : logic csr_mip;</span></span>
+<span id="L6"><span class="lineNum">       6</span> <span class="tlaGNC tlaBgGNC">           1 : logic csr_mstatus;</span></span>
+<span id="L7"><span class="lineNum">       7</span> <span class="tlaUNC tlaBgUNC">           0 : logic csr_mtvec;</span></span>
+<span id="L8"><span class="lineNum">       8</span> <span class="tlaUNC">           0 : logic csr_mip;</span></span>
 <span id="L9"><span class="lineNum">       9</span> <span class="tlaUNC">           0 : logic csr_mie;</span></span>
-<span id="L10"><span class="lineNum">      10</span> <span class="tlaGNC tlaBgGNC">           4 : logic csr_mcyclel;</span></span>
-<span id="L11"><span class="lineNum">      11</span> <span class="tlaUNC tlaBgUNC">           0 : logic csr_mcycleh;</span></span>
+<span id="L10"><span class="lineNum">      10</span> <span class="tlaUNC">           0 : logic csr_mcyclel;</span></span>
+<span id="L11"><span class="lineNum">      11</span> <span class="tlaUNC">           0 : logic csr_mcycleh;</span></span>
 <span id="L12"><span class="lineNum">      12</span> <span class="tlaUNC">           0 : logic csr_minstretl;</span></span>
 <span id="L13"><span class="lineNum">      13</span> <span class="tlaUNC">           0 : logic csr_minstreth;</span></span>
 <span id="L14"><span class="lineNum">      14</span> <span class="tlaUNC">           0 : logic csr_mscratch;</span></span>
@@ -120,8 +120,8 @@
 <span id="L16"><span class="lineNum">      16</span> <span class="tlaUNC">           0 : logic csr_mcause;</span></span>
 <span id="L17"><span class="lineNum">      17</span> <span class="tlaUNC">           0 : logic csr_mscause;</span></span>
 <span id="L18"><span class="lineNum">      18</span> <span class="tlaUNC">           0 : logic csr_mtval;</span></span>
-<span id="L19"><span class="lineNum">      19</span> <span class="tlaGNC tlaBgGNC">           2 : logic csr_mrac;</span></span>
-<span id="L20"><span class="lineNum">      20</span> <span class="tlaUNC tlaBgUNC">           0 : logic csr_dmst;</span></span>
+<span id="L19"><span class="lineNum">      19</span> <span class="tlaUNC">           0 : logic csr_mrac;</span></span>
+<span id="L20"><span class="lineNum">      20</span> <span class="tlaUNC">           0 : logic csr_dmst;</span></span>
 <span id="L21"><span class="lineNum">      21</span> <span class="tlaUNC">           0 : logic csr_mdseac;</span></span>
 <span id="L22"><span class="lineNum">      22</span> <span class="tlaUNC">           0 : logic csr_meihap;</span></span>
 <span id="L23"><span class="lineNum">      23</span> <span class="tlaUNC">           0 : logic csr_meivt;</span></span>
@@ -187,7 +187,7 @@
 <span id="L83"><span class="lineNum">      83</span> <span class="tlaUNC">           0 : logic csr_pmpaddr48;</span></span>
 <span id="L84"><span class="lineNum">      84</span> <span class="tlaUNC">           0 : logic valid_only;</span></span>
 <span id="L85"><span class="lineNum">      85</span> <span class="tlaUNC">           0 : logic presync;</span></span>
-<span id="L86"><span class="lineNum">      86</span> <span class="tlaGNC tlaBgGNC">           5 : logic postsync;</span></span>
+<span id="L86"><span class="lineNum">      86</span> <span class="tlaGNC tlaBgGNC">           1 : logic postsync;</span></span>
 <span id="L87"><span class="lineNum">      87</span>              : assign csr_misa = (!dec_csr_rdaddr_d[11]&amp;!dec_csr_rdaddr_d[6]</span>
 <span id="L88"><span class="lineNum">      88</span>              :     &amp;!dec_csr_rdaddr_d[5]&amp;!dec_csr_rdaddr_d[2]&amp;dec_csr_rdaddr_d[0]);</span>
 <span id="L89"><span class="lineNum">      89</span>              : </span>
@@ -474,7 +474,7 @@
 <span id="L370"><span class="lineNum">     370</span>              :     &amp;!dec_csr_rdaddr_d[2]&amp;dec_csr_rdaddr_d[1]) | (!dec_csr_rdaddr_d[7]</span>
 <span id="L371"><span class="lineNum">     371</span>              :     &amp;dec_csr_rdaddr_d[6]&amp;!dec_csr_rdaddr_d[1]&amp;dec_csr_rdaddr_d[0]);</span>
 <span id="L372"><span class="lineNum">     372</span>              : </span>
-<span id="L373"><span class="lineNum">     373</span> <span class="tlaGNC">           8 : logic legal;</span></span>
+<span id="L373"><span class="lineNum">     373</span> <span class="tlaUNC tlaBgUNC">           0 : logic legal;</span></span>
 <span id="L374"><span class="lineNum">     374</span>              : assign legal = (!dec_csr_rdaddr_d[11]&amp;dec_csr_rdaddr_d[10]&amp;dec_csr_rdaddr_d[9]</span>
 <span id="L375"><span class="lineNum">     375</span>              :     &amp;dec_csr_rdaddr_d[8]&amp;dec_csr_rdaddr_d[7]&amp;dec_csr_rdaddr_d[6]</span>
 <span id="L376"><span class="lineNum">     376</span>              :     &amp;dec_csr_rdaddr_d[4]&amp;!dec_csr_rdaddr_d[3]&amp;!dec_csr_rdaddr_d[2]</span>

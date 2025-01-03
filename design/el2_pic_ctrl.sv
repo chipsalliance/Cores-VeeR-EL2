@@ -63,13 +63,13 @@ localparam EXT_INTR_GW_CONFIG    = pt.PIC_BASE_ADDR + 32'h00004000 ;
 localparam EXT_INTR_GW_CLEAR     = pt.PIC_BASE_ADDR + 32'h00005000 ;
 
 
-localparam INTPEND_SIZE          = (pt.PIC_TOTAL_INT_PLUS1 < 32)  ? 32  :
-                                   (pt.PIC_TOTAL_INT_PLUS1 < 64)  ? 64  :
-                                   (pt.PIC_TOTAL_INT_PLUS1 < 128) ? 128 :
-                                   (pt.PIC_TOTAL_INT_PLUS1 < 256) ? 256 :
-                                   (pt.PIC_TOTAL_INT_PLUS1 < 512) ? 512 :  1024 ;
+localparam INTPEND_SIZE          = (pt.PIC_TOTAL_INT_PLUS1 <= 32)  ? 32  :
+                                   (pt.PIC_TOTAL_INT_PLUS1 <= 64)  ? 64  :
+                                   (pt.PIC_TOTAL_INT_PLUS1 <= 128) ? 128 :
+                                   (pt.PIC_TOTAL_INT_PLUS1 <= 256) ? 256 :
+                                   (pt.PIC_TOTAL_INT_PLUS1 <= 512) ? 512 :  1024 ;
 
-localparam INT_GRPS              =   INTPEND_SIZE / 32 ;
+localparam INT_GRPS              =  INTPEND_SIZE / 32 ;
 localparam INTPRIORITY_BITS      =  4 ;
 localparam ID_BITS               =  8 ;
 localparam int GW_CONFIG[pt.PIC_TOTAL_INT_PLUS1-1:0] = '{default:0} ;

@@ -79,14 +79,14 @@
     <td class="headerCovSummary rowLeft">
         Branch
     </td>
-    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #00ff00;">
-        100.0%
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #a9a9a9;">
+        0.0%
     </td>
     <td class="headerCovSummaryEntry">
-        1
+        0
     </td>
     <td class="headerCovSummaryEntry">
-        1
+        0
     </td>
 
             </tr>
@@ -217,7 +217,7 @@
 <span id="L113"><span class="lineNum">     113</span>              : `ifdef RV_SMEPMP</span>
 <span id="L114"><span class="lineNum">     114</span>              :       assign csr_wdata = raw_wdata &amp; 8'b10011111;</span>
 <span id="L115"><span class="lineNum">     115</span>              : `else</span>
-<span id="L116"><span class="lineNum">     116</span> <span class="tlaGNC tlaBgGNC">      427264 :       assign csr_wdata = raw_wdata[0] ? (raw_wdata &amp; 8'b10011111) : (raw_wdata &amp; 8'b10011101);</span></span>
+<span id="L116"><span class="lineNum">     116</span>              :       assign csr_wdata = raw_wdata[0] ? (raw_wdata &amp; 8'b10011111) : (raw_wdata &amp; 8'b10011101);</span>
 <span id="L117"><span class="lineNum">     117</span>              : `endif</span>
 <span id="L118"><span class="lineNum">     118</span>              : </span>
 <span id="L119"><span class="lineNum">     119</span>              :       rvdffe #(8) pmpcfg_ff (.*, .clk(free_l2clk),</span>

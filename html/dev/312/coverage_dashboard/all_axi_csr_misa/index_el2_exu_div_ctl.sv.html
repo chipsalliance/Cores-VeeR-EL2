@@ -1781,7 +1781,7 @@
 <span id="L1677"><span class="lineNum">    1677</span>              : </span>
 <span id="L1678"><span class="lineNum">    1678</span>              : </span>
 <span id="L1679"><span class="lineNum">    1679</span>              :    assign dw_shortq_raw[6:0]      =  {1'b0,dw_b_enc[5:0]} - {1'b0,dw_a_enc[5:0]} + 7'd1;</span>
-<span id="L1680"><span class="lineNum">    1680</span> <span class="tlaGNC">        3004 :    assign shortq[5:0]             =  dw_shortq_raw[6]  ?  6'd0  :  dw_shortq_raw[5:0];</span></span>
+<span id="L1680"><span class="lineNum">    1680</span> <span class="tlaGNC">        4503 :    assign shortq[5:0]             =  dw_shortq_raw[6]  ?  6'd0  :  dw_shortq_raw[5:0];</span></span>
 <span id="L1681"><span class="lineNum">    1681</span>              : </span>
 <span id="L1682"><span class="lineNum">    1682</span>              :    assign shortq_enable           =  valid_ff &amp; ~shortq[5] &amp; ~(shortq[4:2] ==  3'b111) &amp; ~cancel;</span>
 <span id="L1683"><span class="lineNum">    1683</span>              : </span>
@@ -1819,7 +1819,7 @@
 <span id="L1715"><span class="lineNum">    1715</span>              :                                     ( {5{shortq[4:0] == 5'd00}} &amp; 5'd28);</span>
 <span id="L1716"><span class="lineNum">    1716</span>              : </span>
 <span id="L1717"><span class="lineNum">    1717</span>              : </span>
-<span id="L1718"><span class="lineNum">    1718</span> <span class="tlaGNC">        3004 :    assign shortq_shift[4:0]       = ~shortq_enable     ?  5'd0  :  shortq_decode[4:0];</span></span>
+<span id="L1718"><span class="lineNum">    1718</span> <span class="tlaGNC">        4503 :    assign shortq_shift[4:0]       = ~shortq_enable     ?  5'd0  :  shortq_decode[4:0];</span></span>
 <span id="L1719"><span class="lineNum">    1719</span>              : </span>
 <span id="L1720"><span class="lineNum">    1720</span>              : </span>
 <span id="L1721"><span class="lineNum">    1721</span>              :    // *** *** *** End   : Short Q }}</span>
@@ -1918,7 +1918,7 @@
 <span id="L1814"><span class="lineNum">    1814</span>              :                                     ({5{operand[31:00] ==  {{32{1'b1}}     } }} &amp; 5'd31);</span>
 <span id="L1815"><span class="lineNum">    1815</span>              : </span>
 <span id="L1816"><span class="lineNum">    1816</span>              : </span>
-<span id="L1817"><span class="lineNum">    1817</span> <span class="tlaGNC tlaBgGNC">        6006 : assign cls[4:0]                   =  operand[32]  ?  cls_ones[4:0]  :  cls_zeros[4:0];</span></span>
+<span id="L1817"><span class="lineNum">    1817</span> <span class="tlaGNC tlaBgGNC">        9004 : assign cls[4:0]                   =  operand[32]  ?  cls_ones[4:0]  :  cls_zeros[4:0];</span></span>
 <span id="L1818"><span class="lineNum">    1818</span>              : </span>
 <span id="L1819"><span class="lineNum">    1819</span>              : endmodule // el2_exu_div_cls</span>
         </pre>

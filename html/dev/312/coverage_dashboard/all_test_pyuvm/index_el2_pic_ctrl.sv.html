@@ -136,7 +136,7 @@
 <span id="L32"><span class="lineNum">      32</span> <span class="tlaUNC tlaBgUNC">           0 :                      input  logic                   rst_l,                // Reset for all flops</span></span>
 <span id="L33"><span class="lineNum">      33</span> <span class="tlaUNC">           0 :                      input  logic                   clk_override,         // Clock over-ride for gating</span></span>
 <span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">           1 :                      input  logic                   io_clk_override,      // PIC IO  Clock over-ride for gating</span></span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">           4 :                      input  logic [pt.PIC_TOTAL_INT_PLUS1-1:0]   extintsrc_req,  // Interrupt requests</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">           3 :                      input  logic [pt.PIC_TOTAL_INT_PLUS1-1:0]   extintsrc_req,  // Interrupt requests</span></span>
 <span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">           1 :                      input  logic [31:0]            picm_rdaddr,          // Address of the register</span></span>
 <span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">           1 :                      input  logic [31:0]            picm_wraddr,          // Address of the register</span></span>
 <span id="L38"><span class="lineNum">      38</span> <span class="tlaUNC tlaBgUNC">           0 :                      input  logic [31:0]            picm_wr_data,         // Data to be written to the register</span></span>
@@ -669,7 +669,7 @@
 <span id="L565"><span class="lineNum">     565</span> <span class="tlaGNC tlaBgGNC">         744 :                              input logic rawclk,</span></span>
 <span id="L566"><span class="lineNum">     566</span> <span class="tlaGNC">          31 :                              input logic clken,</span></span>
 <span id="L567"><span class="lineNum">     567</span> <span class="tlaUNC tlaBgUNC">           0 :                              input logic rst_l,</span></span>
-<span id="L568"><span class="lineNum">     568</span> <span class="tlaGNC tlaBgGNC">           4 :                              input logic extintsrc_req ,</span></span>
+<span id="L568"><span class="lineNum">     568</span> <span class="tlaGNC tlaBgGNC">           3 :                              input logic extintsrc_req ,</span></span>
 <span id="L569"><span class="lineNum">     569</span> <span class="tlaUNC tlaBgUNC">           0 :                              input logic meigwctrl_polarity ,</span></span>
 <span id="L570"><span class="lineNum">     570</span> <span class="tlaUNC">           0 :                              input logic meigwctrl_type ,</span></span>
 <span id="L571"><span class="lineNum">     571</span> <span class="tlaUNC">           0 :                              input logic meigwclr ,</span></span>

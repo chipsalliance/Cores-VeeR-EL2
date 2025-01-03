@@ -1050,7 +1050,7 @@
 <span id="L946"><span class="lineNum">     946</span>              : </span>
 <span id="L947"><span class="lineNum">     947</span>              :    assign core_dbg_cmd_done = dma_dbg_cmd_done | dec_dbg_cmd_done;</span>
 <span id="L948"><span class="lineNum">     948</span>              :    assign core_dbg_cmd_fail = dma_dbg_cmd_fail | dec_dbg_cmd_fail;</span>
-<span id="L949"><span class="lineNum">     949</span> <span class="tlaGNC">        8001 :    assign core_dbg_rddata[31:0] = dma_dbg_cmd_done ? dma_dbg_rddata[31:0] : dec_dbg_rddata[31:0];</span></span>
+<span id="L949"><span class="lineNum">     949</span> <span class="tlaGNC">        6886 :    assign core_dbg_rddata[31:0] = dma_dbg_cmd_done ? dma_dbg_rddata[31:0] : dec_dbg_rddata[31:0];</span></span>
 <span id="L950"><span class="lineNum">     950</span>              : </span>
 <span id="L951"><span class="lineNum">     951</span>              :    el2_dbg #(.pt(pt)) dbg (</span>
 <span id="L952"><span class="lineNum">     952</span>              :       .rst_l(core_rst_l),</span>
@@ -1196,10 +1196,10 @@
 <span id="L1092"><span class="lineNum">    1092</span>              :   assign pmp_chan_type[0] = EXEC;</span>
 <span id="L1093"><span class="lineNum">    1093</span>              :   assign ifu_pmp_error    = pmp_chan_err[0];</span>
 <span id="L1094"><span class="lineNum">    1094</span>              :   assign pmp_chan_addr[1] = lsu_pmp_addr_start;</span>
-<span id="L1095"><span class="lineNum">    1095</span> <span class="tlaGNC tlaBgGNC">       26651 :   assign pmp_chan_type[1] = lsu_pmp_we ? WRITE : (lsu_pmp_re ? READ : NONE);</span></span>
+<span id="L1095"><span class="lineNum">    1095</span> <span class="tlaGNC tlaBgGNC">       22695 :   assign pmp_chan_type[1] = lsu_pmp_we ? WRITE : (lsu_pmp_re ? READ : NONE);</span></span>
 <span id="L1096"><span class="lineNum">    1096</span>              :   assign lsu_pmp_error_start = pmp_chan_err[1];</span>
 <span id="L1097"><span class="lineNum">    1097</span>              :   assign pmp_chan_addr[2] = lsu_pmp_addr_end;</span>
-<span id="L1098"><span class="lineNum">    1098</span> <span class="tlaGNC">       26651 :   assign pmp_chan_type[2] = lsu_pmp_we ? WRITE : (lsu_pmp_re ? READ : NONE);</span></span>
+<span id="L1098"><span class="lineNum">    1098</span> <span class="tlaGNC">       22695 :   assign pmp_chan_type[2] = lsu_pmp_we ? WRITE : (lsu_pmp_re ? READ : NONE);</span></span>
 <span id="L1099"><span class="lineNum">    1099</span>              :   assign lsu_pmp_error_end = pmp_chan_err[2];</span>
 <span id="L1100"><span class="lineNum">    1100</span>              : </span>
 <span id="L1101"><span class="lineNum">    1101</span>              :   el2_pmp #(</span>

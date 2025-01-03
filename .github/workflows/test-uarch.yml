@@ -58,6 +58,7 @@ jobs:
           - "block/pmp"
           - "block/dec_pmp_ctl"
           - "block/dmi"
+          - "block/lsu"
           - "block/lsu_tl"
           - "block/dec_tlu_ctl"
     env:

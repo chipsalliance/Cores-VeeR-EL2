@@ -87,72 +87,95 @@ with open(sys.argv[1], 'r') as file:
       print(line)
 EOF
 
-cat <<EOF >> toggle_filter.py
-out = open('coverage_toggle_verilator_filtered.info', 'w')
+cat <<EOF >> brda_filter.py
+def filter(infile, outfile):
+    out = open(outfile, 'w')
 
-with open('coverage_toggle_verilator.info') as f:
-    lines = f.readlines()
-    n = 0
+    with open(infile) as f:
+        lines = f.readlines()
+        n = 0
 
-    while n < len(lines):
-        hits = {}
-        if 'BRDA' in lines[n] and "toggle" in lines[n]:
-            data = lines[n].split(",")[2].split("_")
-            lineno = lines[n].split(",")[0]
-            key = data[1]
-            hit = int(data[2])
-            val = int(lines[n].split(",")[3])
-
-            hits[lineno] = {}
-            hits[lineno][key] = {}
-            hits[lineno][key][0] = []
-            hits[lineno][key][1] = []
-            hits[lineno][key][val].append(hit)
-
-            n += 1
-            while lines[n].startswith(lineno) and "toggle" in lines[n]:
-                lineno = lines[n].split(",")[0]
+        while n < len(lines):
+            hits = {}
+            if 'BRDA' in lines[n]:
                 data = lines[n].split(",")[2].split("_")
+                lineno = lines[n].split(",")[0]
+                typ = data[0]
                 key = data[1]
                 hit = int(data[2])
                 val = int(lines[n].split(",")[3])
 
-                if key not in hits[lineno]:
-                    hits[lineno][key] = {}
-                    hits[lineno][key][0] = []
-                    hits[lineno][key][1] = []
+                hits[lineno] = {}
+                hits[lineno][typ] = {}
+                hits[lineno][typ][key] = {}
+                hits[lineno][typ][key][0] = []
+                hits[lineno][typ][key][1] = []
+                hits[lineno][typ][key][val].append(hit)
 
-                if hit not in hits[lineno][key][val]:
-                    hits[lineno][key][val].append(hit)
+                n += 1
+                while lines[n].startswith(lineno):
+                    lineno = lines[n].split(",")[0]
+                    data = lines[n].split(",")[2].split("_")
+                    typ = data[0]
+                    key = data[1]
+                    hit = int(data[2])
+                    val = int(lines[n].split(",")[3])
+
+                    if typ not in hits[lineno]:
+                        hits[lineno][typ] = {}
+
+                    if key not in hits[lineno][typ]:
+                        hits[lineno][typ][key] = {}
+                        hits[lineno][typ][key][0] = []
+                        hits[lineno][typ][key][1] = []
+
+                    if hit not in hits[lineno][typ][key][val]:
+                        hits[lineno][typ][key][val].append(hit)
+                    n += 1
+
+                # normalize hits
+                for h in hits:
+                    for t in hits[h]:
+                        for l in hits[h][t]:
+                            for v in [0, 1]:
+                                try:
+                                    mi = min(hits[h][t][l][v])
+                                    for i, k in enumerate(hits[h][t][l][v]):
+                                        hits[h][t][l][v][i] -= mi
+                                except ValueError:
+                                    # allow empty lists (no hits or misses)
+                                    pass
+
+                new_hits = {}
+
+                for h in hits:
+                    for t in hits[h]:
+                        for l in hits[h][t]:
+                            for v in [0, 1]:
+                                for k in hits[h][t][l][v]:
+                                    if t not in new_hits:
+                                       new_hits[t] = {}
+                                    if not k in new_hits[t] or new_hits[t][k] != 1:
+                                        new_hits[t][k] = v
+
+
+                for t in new_hits.keys():
+                    for k in sorted(new_hits[t].keys()):
+                        if len(new_hits[t].keys()) > 1:
+                            out.write(f"{lineno},0,{t}_{k},{new_hits[t][k]}\n")
+                        else:
+                            out.write(f"{lineno},0,{t},{new_hits[t][k]}\n")
+            else:
+                out.write(lines[n])
                 n += 1
 
-            # normalize hits
-            for h in hits:
-                for l in hits[h]:
-                    for v in [0, 1]:
-                        try:
-                            mi = min(hits[h][l][v])
-                            for i, k in enumerate(hits[h][l][v]):
-                                hits[h][l][v][i] -= mi
-                        except ValueError:
-                            # allow empty lists (no hits or misses)
-                            pass
+    out.close()
 
-            new_hits = {}
+filter('coverage_branch_verilator.info',
+       'coverage_branch_verilator_filtered.info')
 
-            for h in hits:
-                for l in hits[h]:
-                    for v in [0, 1]:
-                        for k in hits[h][l][v]:
-                            if not k in new_hits or new_hits[k] != 1:
-                                new_hits[k] = v
-
-            for k in sorted(new_hits.keys()):
-                out.write(f"{lineno},0,toggle_{k},{new_hits[k]}\n")
-        else:
-            out.write(lines[n])
-
-        n += 1
+filter('coverage_toggle_verilator.info',
+       'coverage_toggle_verilator_filtered.info')
 EOF
 
 mkdir info_files
@@ -184,9 +207,12 @@ cp _coverage_line.info coverage_line_verilator.info
 cp _coverage_branch.info coverage_branch_verilator.info
 cp _coverage_toggle.info coverage_toggle_verilator.info
 
-python3 toggle_filter.py
+python3 brda_filter.py
 mv coverage_toggle_verilator.info coverage_toggle_verilator_orig.info_
 mv coverage_toggle_verilator_filtered.info coverage_toggle_verilator.info
+
+mv coverage_branch_verilator.info coverage_branch_verilator_orig.info_
+mv coverage_branch_verilator_filtered.info coverage_branch_verilator.info
 
 grep 'SF:' coverage_*.info | cut -d ":" -f 3 | sort | uniq > files.txt
 

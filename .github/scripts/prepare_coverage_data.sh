@@ -44,14 +44,7 @@ elif sys.argv[2] == "--line":
   for f in files:
      print("SF:%s" % f)
      for da in files[f]["da"]:
-       da_line = da[0].split(",")[0]
-       found = False
-       for brda in files[f]["brda"]:
-          brda_line = brda[0].split(",")[0]
-          if da_line == brda_line:
-            found = True
-       if not found:
-         print("DA:%s" % (",".join(da)))
+       print("DA:%s" % (",".join(da)))
      print("end_of_record")
   sys.exit(0)
 EOF

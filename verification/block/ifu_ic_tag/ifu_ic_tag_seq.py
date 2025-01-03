@@ -63,21 +63,21 @@ class IcTagBaseSeqItem(uvm_sequence_item):
         # self.ic_tag_perr = 0
 
     def randomize(self):
-        self.clk_override = random.randint(0, 1)
-        self.dec_tlu_core_ecc_disable = random.randint(0, 1)
+        self.clk_override = 1 #random.randint(0, 1)
+        self.dec_tlu_core_ecc_disable = 1 #random.randint(0, 1)
         self.ic_rw_addr = random.randint(0, 1)
         self.ic_wr_en = random.randint(0, 1)
         self.ic_tag_valid = random.randint(0, 1)
-        self.ic_rd_en = random.randint(0, 1)
-        self.ic_debug_addr = random.randint(0, 1)
-        self.ic_debug_rd_en = random.randint(0, 1)
-        self.ic_debug_wr_en = random.randint(0, 1)
-        self.ic_debug_tag_array = random.randint(0, 1)
-        self.ic_debug_way = random.randint(0, 1)
-        self.ic_tag_data_raw_packed_pre = random.randint(0, 1)
-        self.ic_tag_data_raw_pre = random.randint(0, 1)
-        self.ic_debug_wr_data = random.randint(0, 1)
-        self.scan_mode = random.randint(0, 1)
+        self.ic_rd_en = int(not self.ic_wr_en)
+        self.ic_debug_addr = 0
+        self.ic_debug_rd_en = 0
+        self.ic_debug_wr_en = 0
+        self.ic_debug_tag_array = 0
+        self.ic_debug_way = 0
+        self.ic_tag_data_raw_packed_pre = 0
+        self.ic_tag_data_raw_pre = 0
+        self.ic_debug_wr_data = 0
+        self.scan_mode = 0
 
     def __eq__(self, other):
         pass
@@ -88,8 +88,15 @@ class IcTagBaseSeqItem(uvm_sequence_item):
 
 class IcTagBasicSeq(uvm_sequence):
     async def body(self):
-        items = [IcTagBaseSeqItem("first"), IcTagBaseSeqItem("second")]
-        await self.run_items(items)
+        items = [IcTagBaseSeqItem("seq_item") for i in range(10)]
+        for item in items:
+            await self.start_item(item)
+            item.randomize()
+            if item.ic_wr_en:
+                print(f"Item: Write")
+            else:
+                print(f"Item: Read")
+            await self.finish_item(item)
 
 
 class Sequence(uvm_sequence):
@@ -97,7 +104,6 @@ class Sequence(uvm_sequence):
         super().__init__(name)
 
     async def body(self):
-        await Timer(100, "ns")
-        # seq = IcTagBasicSeq()
-        # seqr = ConfigDB().get(None, "", "seqr")
-        # await seq.start(seqr)
+        seq = IcTagBasicSeq()
+        seqr = ConfigDB().get(None, "", "seqr")
+        await seq.start(seqr)

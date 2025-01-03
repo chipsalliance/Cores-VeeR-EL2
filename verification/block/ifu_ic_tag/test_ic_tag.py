@@ -1,5 +1,6 @@
 import pyuvm
 from testbench import BaseEnv, BaseTest
+from pyuvm import uvm_sequence
 from ifu_ic_tag_seq import Sequence
 
 

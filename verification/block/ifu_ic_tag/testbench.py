@@ -46,7 +46,7 @@ class BaseEnv(uvm_env):
         ConfigDB().set(None, "*", "ICACHE_WAYPOINT", 0)
 
         # Sequencers
-        self.seqr = uvm_sequencer("seqr", self)
+        # self.seqr = uvm_sequencer("seqr", self)
 
         # Agent
         self.agent = IcTagAgent("ic_tag_agent", self)
@@ -55,8 +55,9 @@ class BaseEnv(uvm_env):
         self.scoreboard = Scoreboard("scoreboard", self)
 
     def connect_phase(self):
-        self.agent.driver.seq_item_port.connect(self.seqr.seq_item_export)
-        self.agent.monitor.ap.connect(self.scoreboard.fifo.analysis_export)
+        pass
+        # self.agent.driver.seq_item_port.connect(self.seqr.seq_item_export)
+        # self.agent.monitor.ap.connect(self.scoreboard.fifo.analysis_export)
 
 
 class BaseTest(uvm_test):
@@ -89,15 +90,13 @@ class BaseTest(uvm_test):
     async def run_phase(self):
         self.raise_objection()
 
-
         # Start clocks
         self.start_clock("clk")
         self.start_clock("active_clk")
 
         # Issue reset
-        # breakpoint()
         await self.do_reset()
-        # await self.run()
+        await self.run()
         self.drop_objection()
 
     async def run(self):

@@ -170,11 +170,7 @@ module el2_lsu_wrapper
     input logic [3:0] load,
     input logic [3:0] execute,
     input logic [3:0] m,
-
     input logic [31:0] tdata[4],
-
-    input logic [31:0] lsu_addr_m,         // address
-    input logic [31:0] store_data_m        // store data
 );
 
   // Pack triggers

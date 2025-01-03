@@ -31,7 +31,7 @@ class TlInputItem(uvm_sequence_item):
     """
 
     def __init__(self, data=0, tdata=None, match=0):
-        super().__init__("TlOutputItem")
+        super().__init__("TlInputItem")
 
         self.match = match
         self.data = data
@@ -125,9 +125,6 @@ class TlDriver(uvm_driver):
             it = await self.seq_item_port.get_next_item()
 
             if isinstance(it, TlInputItem):
-                self.dut.lsu_addr_m.value = it.data
-                self.dut.store_data_m.value = it.data
-
                 for i in range(4):
                     self.dut.tdata[i].value = it.tdata[i]
 
@@ -162,12 +159,18 @@ class TlInputMonitor(uvm_component):
 
     async def run_phase(self):
         period = ConfigDB().get(None, "", "TEST_CLK_PERIOD")
+        self.dut.dec_tlu_external_ldfwd_disable.value = 1
+        self.dut.dec_tlu_wb_coalescing_disable.value = 1
+        self.dut.dec_tlu_sideeffect_posted_disable.value = 1
+        self.dut.dec_tlu_core_ecc_disable.value = 1
 
+        self.dut.dec
         while True:
             # Wait for the driver to set the input signals
             await Timer(period, "ns")
 
-            data = int(self.dut.store_data_m.value)
+            # data = int(self.dut.store_data_m.value)
+            data = 0
             tdata = [None] * 4
 
             for i in range(4):
@@ -199,8 +202,16 @@ class TlOutputMonitor(uvm_component):
             await Timer(period, "ns")
 
             matches = int(self.dut.lsu_trigger_match_m.value)
+            lsu_result = int(self.dut.lsu_result_m.value)
+            # TODO provide inputs to cover mscause and expect proper value
+            exc_mscause = int(self.dut.exc_mscause_d.value)
+            # TODO provide inputs to cover access errors and expect proper value
+            dccm_access_er = int(self.dut.fir_dccm_access_error_d)
+            nondccm_access_er = int(self.dut.fir_nondccm_access_error_d)
 
-            self.ap.write(TlOutputItem(matches))
+            self.ap.write(
+                TlOutputItem(matches, lsu_result, exc_mscause, dccm_access_er, nondccm_access_er)
+            )
 
 
 # ==============================================================================

@@ -24,45 +24,39 @@ from pyuvm import *
 
 # ==============================================================================
 
+PMPCFG    = 0x3A0
+PMPADDR0  = 0x3B0
+PMPADDR16 = 0x3C0
+PMPADDR32 = 0x3D0
+PMPADDR48 = 0x3E0
+
+# ==============================================================================
 
 class InputItem(uvm_sequence_item):
     """
     PMP input item
     """
 
-    def __init__(self, dec_csr_wraddr_r=0, dec_csr_wrdata_r=0):
+    RANGE = 16
+
+    def __init__(self, addr=0, data=0):
         super().__init__("InputItem")
 
-        self.dec_csr_wraddr_r = dec_csr_wraddr_r
-        self.dec_csr_wrdata_r = dec_csr_wrdata_r
+        self.addr = addr
+        self.data = data
 
     def randomize(self):
-
-        # CSR
-        dec_csr_wrdata_r = ""
-
-        for _ in range(31):
-            dec_csr_wrdata_r += random.choice(["0", "1"])
-
-        self.dec_csr_wrdata_r = int(dec_csr_wrdata_r, 2)
-
-
-class OutputItem(uvm_sequence_item):
-
-    def __init__(self):
-        super().__init__("OutputItem")
-
+        """
+        Randomize data and address offset
+        """
+        self.addr += random.randint(0, self.RANGE - 1)
+        self.data  = random.randint(0, 0xFFFFFFFF)
 
 # ==============================================================================
-PMPADDR0 = 0x3B0
-PMPADDR16 = 0x3C0
-PMPADDR32 = 0x3D0
-PMPADDR48 = 0x3E0
 
-
-class Driver(uvm_driver):
+class CsrWriteDriver(uvm_driver):
     """
-    PMP dec driver
+    PMP CSR write port driver driver
     """
 
     def __init__(self, *args, **kwargs):
@@ -76,46 +70,93 @@ class Driver(uvm_driver):
             it = await self.seq_item_port.get_next_item()
 
             if isinstance(it, InputItem):
-                # write PMPADDR0
-                self.dut.dec_csr_wen_r_mod.value = 0
+
+                # Write
                 await RisingEdge(self.dut.clk)
                 self.dut.dec_csr_wen_r_mod.value = 1
-                self.dut.dec_csr_wraddr_r.value = PMPADDR0
-                self.dut.dec_csr_wrdata_r.value = it.dec_csr_wrdata_r
+                self.dut.dec_csr_wraddr_r.value = it.addr
+                self.dut.dec_csr_wrdata_r.value = it.data
                 await RisingEdge(self.dut.clk)
-                # write PMPADDR16
                 self.dut.dec_csr_wen_r_mod.value = 0
-                await RisingEdge(self.dut.clk)
-                self.dut.dec_csr_wen_r_mod.value = 1
-                self.dut.dec_csr_wraddr_r.value = PMPADDR16
-                self.dut.dec_csr_wrdata_r.value = it.dec_csr_wrdata_r
-                await RisingEdge(self.dut.clk)
-                # write PMPADDR32
-                self.dut.dec_csr_wen_r_mod.value = 0
-                await RisingEdge(self.dut.clk)
-                self.dut.dec_csr_wen_r_mod.value = 1
-                self.dut.dec_csr_wraddr_r.value = PMPADDR32
-                self.dut.dec_csr_wrdata_r.value = it.dec_csr_wrdata_r
-                await RisingEdge(self.dut.clk)
-                # write PMPADDR48
-                self.dut.dec_csr_wen_r_mod.value = 0
-                await RisingEdge(self.dut.clk)
-                self.dut.dec_csr_wen_r_mod.value = 1
-                self.dut.dec_csr_wraddr_r.value = PMPADDR48
-                self.dut.dec_csr_wrdata_r.value = it.dec_csr_wrdata_r
-                await RisingEdge(self.dut.clk)
-                # give two more cycles so that output monitor can catch the data on the outputs
-                await RisingEdge(self.dut.clk)
-                await RisingEdge(self.dut.clk)
+
             else:
                 raise RuntimeError("Unknown item '{}'".format(type(it)))
 
             self.seq_item_port.item_done()
 
 
-class InputMonitor(uvm_component):
+class CsrReadDriver(uvm_driver):
     """
-    Monitor for inputs
+    PMP CSR read port driver driver
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.dut = kwargs["dut"]
+        del kwargs["dut"]
+        super().__init__(*args, **kwargs)
+
+    async def run_phase(self):
+
+        while True:
+            it = await self.seq_item_port.get_next_item()
+
+            if isinstance(it, InputItem):
+
+                # Read
+                await RisingEdge(self.dut.clk)
+                self.dut.dec_csr_rdaddr_d.value = it.addr
+
+                # Emulate address decoder
+                if it.addr >= PMPADDR48:
+                    self.dut.csr_pmpcfg.value    = 0
+                    self.dut.csr_pmpaddr0.value  = 0
+                    self.dut.csr_pmpaddr16.value = 0
+                    self.dut.csr_pmpaddr32.value = 0
+                    self.dut.csr_pmpaddr48.value = 1
+                elif it.addr >= PMPADDR32:
+                    self.dut.csr_pmpcfg.value    = 0
+                    self.dut.csr_pmpaddr0.value  = 0
+                    self.dut.csr_pmpaddr16.value = 0
+                    self.dut.csr_pmpaddr32.value = 1
+                    self.dut.csr_pmpaddr48.value = 0
+                elif it.addr >= PMPADDR16:
+                    self.dut.csr_pmpcfg.value    = 0
+                    self.dut.csr_pmpaddr0.value  = 0
+                    self.dut.csr_pmpaddr16.value = 1
+                    self.dut.csr_pmpaddr32.value = 0
+                    self.dut.csr_pmpaddr48.value = 0
+                elif it.addr >= PMPADDR0:
+                    self.dut.csr_pmpcfg.value    = 0
+                    self.dut.csr_pmpaddr0.value  = 1
+                    self.dut.csr_pmpaddr16.value = 0
+                    self.dut.csr_pmpaddr32.value = 0
+                    self.dut.csr_pmpaddr48.value = 0
+                elif it.addr >= PMPCFG:
+                    self.dut.csr_pmpcfg.value    = 1
+                    self.dut.csr_pmpaddr0.value  = 0
+                    self.dut.csr_pmpaddr16.value = 0
+                    self.dut.csr_pmpaddr32.value = 0
+                    self.dut.csr_pmpaddr48.value = 0
+
+                await RisingEdge(self.dut.clk)
+
+                # Deselect all
+                self.dut.csr_pmpcfg.value    = 0
+                self.dut.csr_pmpaddr0.value  = 0
+                self.dut.csr_pmpaddr16.value = 0
+                self.dut.csr_pmpaddr32.value = 0
+                self.dut.csr_pmpaddr48.value = 0
+
+            else:
+                raise RuntimeError("Unknown item '{}'".format(type(it)))
+
+            self.seq_item_port.item_done()
+
+# ==============================================================================
+
+class WriteMonitor(uvm_component):
+    """
+    Monitor for CSR write inputs
     """
 
     def __init__(self, *args, **kwargs):
@@ -129,15 +170,20 @@ class InputMonitor(uvm_component):
     async def run_phase(self):
 
         while True:
-            await RisingEdge(self.dut.dec_csr_wen_r_mod)
-            await RisingEdge(self.dut.dec_csr_wen_r_mod)
-            for _ in range(4):
-                await RisingEdge(self.dut.clk)
+
+            # A write to a CSR
+            await RisingEdge(self.dut.clk)
+            if self.dut.dec_csr_wen_r_mod.value:
+                addr = int(self.dut.dec_csr_wraddr_r)
+                data = int(self.dut.dec_csr_wrdata_r)
+
+                item = InputItem(addr, data)
+                self.ap.write(item)
 
 
-class OutputMonitor(uvm_component):
+class ReadMonitor(uvm_component):
     """
-    Monitor for outputs
+    Monitor for CSR read inputs
     """
 
     def __init__(self, *args, **kwargs):
@@ -151,10 +197,15 @@ class OutputMonitor(uvm_component):
     async def run_phase(self):
 
         while True:
-            for _ in range(2):
-                await RisingEdge(self.dut.clk)
 
-            self.ap.write(OutputItem())
+            # A read from a CSR
+            await RisingEdge(self.dut.clk)
+            if self.dut.dec_pmp_read_d.value:
+                addr = int(self.dut.dec_csr_rdaddr_d)
+                data = int(self.dut.dec_pmp_rddata_d)
+
+                item = InputItem(addr, data)
+                self.ap.write(item)
 
 
 # ==============================================================================
@@ -181,31 +232,40 @@ class Scoreboard(uvm_component):
         self.port_out.connect(self.fifo_out.get_export)
 
     def check_phase(self):
-        self.passed = True
+        self.passed = None
+
+        # Get item pairs
+        while True:
+            got_inp, item_inp = self.port_inp.try_get()
+            got_out, item_out = self.port_out.try_get()
+
+            if not got_inp and got_out:
+                self.logger.error("No input item for output item")
+                self.passed = False
+                break
+
+            if got_inp and not got_out:
+                self.logger.error("No output item for input item")
+                self.passed = False
+                break
+
+            if not got_inp and not got_out:
+                break
+
+            if self.passed is None:
+                self.passed = True
+
+            # Compare addresses and data
+            if item_inp.addr != item_out.addr or item_inp.data != item_out.data:
+                istr = f"{item_inp.addr:04X}:{item_inp.data:08X}"
+                ostr = f"{item_out.addr:04X}:{item_out.data:08X}"
+                self.logger.error(f"Mismatch {istr} vs. {ostr}")
+                self.passed = False
 
     def final_phase(self):
         if not self.passed:
             self.logger.critical("{} reports a failure".format(type(self)))
             assert False
-
-
-# ==============================================================================
-
-
-class Sequence(uvm_sequence):
-
-    def __init__(self, name, ops=None):
-        super().__init__(name)
-
-    async def body(self):
-        count = ConfigDB().get(None, "", "TEST_ITERATIONS")
-
-        for i in range(count):
-            item = InputItem()
-            item.randomize()
-
-            await self.start_item(item)
-            await self.finish_item(item)
 
 
 # ==============================================================================
@@ -219,27 +279,29 @@ class BaseEnv(uvm_env):
     def build_phase(self):
         # Config
         ConfigDB().set(None, "*", "TEST_CLK_PERIOD", 1)
-        ConfigDB().set(None, "*", "TEST_ITERATIONS", 1)
+        ConfigDB().set(None, "*", "TEST_ITERATIONS", 10)
 
         # Sequencers
-        self.pmp_seqr = uvm_sequencer("pmp_seqr", self)
+        self.pmp_wr_seqr = uvm_sequencer("pmp_wr_seqr", self)
+        self.pmp_rd_seqr = uvm_sequencer("pmp_rd_seqr", self)
 
-        # Driver
-        self.pmp_drv = Driver("pmp_drv", self, dut=cocotb.top)
+        # Drivers
+        self.pmp_wr_drv = CsrWriteDriver("pmp_wr_drv", self, dut=cocotb.top)
+        self.pmp_rd_drv = CsrReadDriver("pmp_rd_drv", self, dut=cocotb.top)
 
         # Monitors
-        self.inp_mon = InputMonitor("inp_mon", self, dut=cocotb.top)
-        self.out_mon = OutputMonitor("out_mon", self, dut=cocotb.top)
+        self.wr_mon = WriteMonitor("wr_mon", self, dut=cocotb.top)
+        self.rd_mon = ReadMonitor("rd_mon", self, dut=cocotb.top)
 
         # Scoreboard
         self.scoreboard = Scoreboard("scoreboard", self)
 
     def connect_phase(self):
-        self.pmp_drv.seq_item_port.connect(self.pmp_seqr.seq_item_export)
+        self.pmp_wr_drv.seq_item_port.connect(self.pmp_wr_seqr.seq_item_export)
+        self.pmp_rd_drv.seq_item_port.connect(self.pmp_rd_seqr.seq_item_export)
 
-        self.inp_mon.ap.connect(self.scoreboard.fifo_inp.analysis_export)
-        self.out_mon.ap.connect(self.scoreboard.fifo_out.analysis_export)
-
+        self.wr_mon.ap.connect(self.scoreboard.fifo_inp.analysis_export)
+        self.rd_mon.ap.connect(self.scoreboard.fifo_out.analysis_export)
 
 # ==============================================================================
 
@@ -278,6 +340,8 @@ class BaseTest(uvm_test):
 
         # Start clocks
         self.start_clock("clk")
+        self.start_clock("csr_wr_clk")
+        self.start_clock("free_l2clk")
 
         # Issue reset
         await self.do_reset()

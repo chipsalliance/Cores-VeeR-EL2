@@ -169,6 +169,12 @@ jobs:
           sudo apt update
           sudo apt install -y zip unzip
           export PATH=${{ env.LCOV_PATH }}:${PATH}
+          for f in $(ls *_branch.info); do
+            mv $f line.info
+            base_name=$(echo $f | rev | cut -d _ -f 2- | rev)
+            python3 .github/scripts/split_info.py line.info --branch > ${base_name}_branch.info
+            python3 .github/scripts/split_info.py line.info --line > ${base_name}_line.info
+          done
           zip data_toggle_verilator_info.zip *_toggle.info
           zip data_branch_verilator_info.zip *_branch.info
           zip data_line_verilator_info.zip *_line.info

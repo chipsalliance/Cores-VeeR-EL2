@@ -80,7 +80,7 @@ jobs:
           rm -rf public.new/html/main/docs_rendered
           mkdir -p public.new/html/main/docs_rendered
           mv ./docs_rendered/* public.new/html/main/docs_rendered
-          mv data_verilator_info.zip public.new/html/main/
+          mv data_*_verilator_info.zip public.new/html/main/
           mv data.zip public.new/html/main/
           mv data_v.zip public.new/html/main/
           mv data_both.zip public.new/html/main/
@@ -101,7 +101,7 @@ jobs:
           rm -rf public.new/html/dev/${{ github.event.number }}/docs_rendered
           mkdir -p public.new/html/dev/${{ github.event.number }}/docs_rendered
           mv ./docs_rendered/* public.new/html/dev/${{ github.event.number }}/docs_rendered
-          mv data_verilator_info.zip public.new/html/dev/${{ github.event.number }}/
+          mv data_*_verilator_info.zip public.new/html/dev/${{ github.event.number }}/
           mv data.zip public.new/html/dev/${{ github.event.number }}/
           mv data_v.zip public.new/html/dev/${{ github.event.number }}/
           mv data_both.zip public.new/html/dev/${{ github.event.number }}/

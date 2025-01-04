@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    03-01-2025
+                    04-01-2025
                 </td>
                 <td></td>
                 
@@ -123,8 +123,8 @@
 <span id="L19"><span class="lineNum">      19</span>              : module rvdff #( parameter WIDTH=1, SHORT=0 )</span>
 <span id="L20"><span class="lineNum">      20</span>              :    (</span>
 <span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC tlaBgGNC">    20211638 :      input logic [WIDTH-1:0] din,</span></span>
-<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">  1664813912 :      input logic           clk,</span></span>
-<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">        1969 :      input logic                   rst_l,</span></span>
+<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">  1666097290 :      input logic           clk,</span></span>
+<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">        1970 :      input logic                   rst_l,</span></span>
 <span id="L24"><span class="lineNum">      24</span>              : </span>
 <span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">    10450501 :      output logic [WIDTH-1:0] dout</span></span>
 <span id="L26"><span class="lineNum">      26</span>              :      );</span>
@@ -139,11 +139,11 @@
 <span id="L35"><span class="lineNum">      35</span>              :    end</span>
 <span id="L36"><span class="lineNum">      36</span>              : `endif</span>
 <span id="L37"><span class="lineNum">      37</span>              : </span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">   826742952 :    always_ff @(posedge clk or negedge rst_l) begin</span></span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">   814330204 :       if (rst_l == 0)</span></span>
-<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">    12412748 :         dout[WIDTH-1:0] &lt;= 0;</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">   827367707 :    always_ff @(posedge clk or negedge rst_l) begin</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">   814954957 :       if (rst_l == 0)</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">    12412750 :         dout[WIDTH-1:0] &lt;= 0;</span></span>
 <span id="L41"><span class="lineNum">      41</span>              :       else</span>
-<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">   814330204 :         dout[WIDTH-1:0] &lt;= din[WIDTH-1:0];</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">   814954957 :         dout[WIDTH-1:0] &lt;= din[WIDTH-1:0];</span></span>
 <span id="L43"><span class="lineNum">      43</span>              :    end</span>
 <span id="L44"><span class="lineNum">      44</span>              : </span>
 <span id="L45"><span class="lineNum">      45</span>              : end</span>

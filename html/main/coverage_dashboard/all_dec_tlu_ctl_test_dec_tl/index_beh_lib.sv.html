@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    03-01-2025
+                    04-01-2025
                 </td>
                 <td></td>
                 
@@ -122,9 +122,9 @@
 <span id="L18"><span class="lineNum">      18</span>              : </span>
 <span id="L19"><span class="lineNum">      19</span>              : module rvdff #( parameter WIDTH=1, SHORT=0 )</span>
 <span id="L20"><span class="lineNum">      20</span>              :    (</span>
-<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC tlaBgGNC">      645516 :      input logic [WIDTH-1:0] din,</span></span>
+<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC tlaBgGNC">     2228096 :      input logic [WIDTH-1:0] din,</span></span>
 <span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">      820174 :      input logic           clk,</span></span>
-<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">         378 :      input logic                   rst_l,</span></span>
+<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">         966 :      input logic                   rst_l,</span></span>
 <span id="L24"><span class="lineNum">      24</span>              : </span>
 <span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">      205052 :      output logic [WIDTH-1:0] dout</span></span>
 <span id="L26"><span class="lineNum">      26</span>              :      );</span>
@@ -141,7 +141,7 @@
 <span id="L37"><span class="lineNum">      37</span>              : </span>
 <span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">      410112 :    always_ff @(posedge clk or negedge rst_l) begin</span></span>
 <span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">      410088 :       if (rst_l == 0)</span></span>
-<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">         174 :         dout[WIDTH-1:0] &lt;= 0;</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">         462 :         dout[WIDTH-1:0] &lt;= 0;</span></span>
 <span id="L41"><span class="lineNum">      41</span>              :       else</span>
 <span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">      410088 :         dout[WIDTH-1:0] &lt;= din[WIDTH-1:0];</span></span>
 <span id="L43"><span class="lineNum">      43</span>              :    end</span>
@@ -269,10 +269,10 @@
 <span id="L165"><span class="lineNum">     165</span>              : </span>
 <span id="L166"><span class="lineNum">     166</span>              : module rvdffe #( parameter WIDTH=1, SHORT=0, OVERRIDE=0 )</span>
 <span id="L167"><span class="lineNum">     167</span>              :    (</span>
-<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC">      645516 :      input  logic [WIDTH-1:0] din,</span></span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC">     2228096 :      input  logic [WIDTH-1:0] din,</span></span>
 <span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC">       45644 :      input  logic           en,</span></span>
-<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">    10805994 :      input  logic           clk,</span></span>
-<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">         378 :      input  logic           rst_l,</span></span>
+<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">    27615318 :      input  logic           clk,</span></span>
+<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">         966 :      input  logic           rst_l,</span></span>
 <span id="L172"><span class="lineNum">     172</span>              :      // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
 <span id="L173"><span class="lineNum">     173</span>              :      /*pragma coverage off*/</span>
 <span id="L174"><span class="lineNum">     174</span>              :      input  logic             scan_mode,</span>
@@ -873,7 +873,7 @@
 <span id="L769"><span class="lineNum">     769</span>              : `ifndef TECH_SPECIFIC_EC_RV_ICG</span>
 <span id="L770"><span class="lineNum">     770</span>              : module `TEC_RV_ICG</span>
 <span id="L771"><span class="lineNum">     771</span>              :   (</span>
-<span id="L772"><span class="lineNum">     772</span> <span class="tlaGNC tlaBgGNC">    40422422 :    input logic SE, EN, CK,</span></span>
+<span id="L772"><span class="lineNum">     772</span> <span class="tlaGNC tlaBgGNC">    78843734 :    input logic SE, EN, CK,</span></span>
 <span id="L773"><span class="lineNum">     773</span> <span class="tlaGNC">     1462598 :    output Q</span></span>
 <span id="L774"><span class="lineNum">     774</span>              :    );</span>
 <span id="L775"><span class="lineNum">     775</span>              : </span>
@@ -882,9 +882,9 @@
 <span id="L778"><span class="lineNum">     778</span>              : </span>
 <span id="L779"><span class="lineNum">     779</span>              :    assign      enable = EN | SE;</span>
 <span id="L780"><span class="lineNum">     780</span>              : </span>
-<span id="L781"><span class="lineNum">     781</span> <span class="tlaGNC">    40684442 :    always @(CK, enable) begin</span></span>
-<span id="L782"><span class="lineNum">     782</span> <span class="tlaGNC">    20473100 :       if(!CK)</span></span>
-<span id="L783"><span class="lineNum">     783</span> <span class="tlaGNC">    20211342 :         en_ff = enable;</span></span>
+<span id="L781"><span class="lineNum">     781</span> <span class="tlaGNC">    79105946 :    always @(CK, enable) begin</span></span>
+<span id="L782"><span class="lineNum">     782</span> <span class="tlaGNC">    39683852 :       if(!CK)</span></span>
+<span id="L783"><span class="lineNum">     783</span> <span class="tlaGNC">    39422094 :         en_ff = enable;</span></span>
 <span id="L784"><span class="lineNum">     784</span>              :    end</span>
 <span id="L785"><span class="lineNum">     785</span>              :    assign Q = CK &amp; en_ff;</span>
 <span id="L786"><span class="lineNum">     786</span>              : </span>
@@ -895,7 +895,7 @@
 <span id="L791"><span class="lineNum">     791</span>              : module rvclkhdr</span>
 <span id="L792"><span class="lineNum">     792</span>              :   (</span>
 <span id="L793"><span class="lineNum">     793</span> <span class="tlaGNC">      121812 :    input  logic en,</span></span>
-<span id="L794"><span class="lineNum">     794</span> <span class="tlaGNC">    39221756 :    input  logic clk,</span></span>
+<span id="L794"><span class="lineNum">     794</span> <span class="tlaGNC">    77643068 :    input  logic clk,</span></span>
 <span id="L795"><span class="lineNum">     795</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
 <span id="L796"><span class="lineNum">     796</span>              :    /*pragma coverage off*/</span>
 <span id="L797"><span class="lineNum">     797</span>              :    input  logic scan_mode,</span>

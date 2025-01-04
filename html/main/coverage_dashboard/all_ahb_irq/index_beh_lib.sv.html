@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    03-01-2025
+                    04-01-2025
                 </td>
                 <td></td>
                 
@@ -139,11 +139,11 @@
 <span id="L35"><span class="lineNum">      35</span>              :    end</span>
 <span id="L36"><span class="lineNum">      36</span>              : `endif</span>
 <span id="L37"><span class="lineNum">      37</span>              : </span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">     4585410 :    always_ff @(posedge clk or negedge rst_l) begin</span></span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">     4515248 :       if (rst_l == 0)</span></span>
-<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">       70162 :         dout[WIDTH-1:0] &lt;= 0;</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">     5336000 :    always_ff @(posedge clk or negedge rst_l) begin</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">     5254686 :       if (rst_l == 0)</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">       81314 :         dout[WIDTH-1:0] &lt;= 0;</span></span>
 <span id="L41"><span class="lineNum">      41</span>              :       else</span>
-<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">     4515248 :         dout[WIDTH-1:0] &lt;= din[WIDTH-1:0];</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">     5254686 :         dout[WIDTH-1:0] &lt;= din[WIDTH-1:0];</span></span>
 <span id="L43"><span class="lineNum">      43</span>              :    end</span>
 <span id="L44"><span class="lineNum">      44</span>              : </span>
 <span id="L45"><span class="lineNum">      45</span>              : end</span>
@@ -163,7 +163,7 @@
 <span id="L59"><span class="lineNum">      59</span>              :    assign dout = din;</span>
 <span id="L60"><span class="lineNum">      60</span>              : end</span>
 <span id="L61"><span class="lineNum">      61</span>              : else begin : genblock</span>
-<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">     9790337 :    rvdff #(WIDTH) dffs (.din((en) ? din[WIDTH-1:0] : dout[WIDTH-1:0]), .*);</span></span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">    11438955 :    rvdff #(WIDTH) dffs (.din((en) ? din[WIDTH-1:0] : dout[WIDTH-1:0]), .*);</span></span>
 <span id="L63"><span class="lineNum">      63</span>              : end</span>
 <span id="L64"><span class="lineNum">      64</span>              : </span>
 <span id="L65"><span class="lineNum">      65</span>              : endmodule</span>
@@ -184,7 +184,7 @@
 <span id="L80"><span class="lineNum">      80</span>              :    assign dout = din;</span>
 <span id="L81"><span class="lineNum">      81</span>              : end</span>
 <span id="L82"><span class="lineNum">      82</span>              : else begin : genblock</span>
-<span id="L83"><span class="lineNum">      83</span> <span class="tlaGNC">      865845 :    assign din_new = {WIDTH{~clear}} &amp; (en ? din[WIDTH-1:0] : dout[WIDTH-1:0]);</span></span>
+<span id="L83"><span class="lineNum">      83</span> <span class="tlaGNC">     1012441 :    assign din_new = {WIDTH{~clear}} &amp; (en ? din[WIDTH-1:0] : dout[WIDTH-1:0]);</span></span>
 <span id="L84"><span class="lineNum">      84</span>              :    rvdff #(WIDTH) dffsc (.din(din_new[WIDTH-1:0]), .*);</span>
 <span id="L85"><span class="lineNum">      85</span>              : end</span>
 <span id="L86"><span class="lineNum">      86</span>              : endmodule</span>
@@ -641,7 +641,7 @@
 <span id="L537"><span class="lineNum">     537</span>              :    genvar                     i;</span>
 <span id="L538"><span class="lineNum">     538</span>              : </span>
 <span id="L539"><span class="lineNum">     539</span>              :    for ( i = 1; i &lt; WIDTH; i++ )  begin : flip_after_first_one</span>
-<span id="L540"><span class="lineNum">     540</span> <span class="tlaGNC tlaBgGNC">      213659 :       assign dout_temp[i] = (|din[i-1:0]) ? ~din[i] : din[i];</span></span>
+<span id="L540"><span class="lineNum">     540</span> <span class="tlaGNC tlaBgGNC">      248093 :       assign dout_temp[i] = (|din[i-1:0]) ? ~din[i] : din[i];</span></span>
 <span id="L541"><span class="lineNum">     541</span>              :    end : flip_after_first_one</span>
 <span id="L542"><span class="lineNum">     542</span>              : </span>
 <span id="L543"><span class="lineNum">     543</span>              :    assign dout[WIDTH-1:0]  = { dout_temp[WIDTH-1:1], din[0] };</span>
@@ -705,7 +705,7 @@
 <span id="L601"><span class="lineNum">     601</span>              :    genvar                     i;</span>
 <span id="L602"><span class="lineNum">     602</span>              : </span>
 <span id="L603"><span class="lineNum">     603</span>              :    for ( i = 1; i &lt; WIDTH; i++ )  begin : match_after_first_zero</span>
-<span id="L604"><span class="lineNum">     604</span> <span class="tlaGNC tlaBgGNC">     1707728 :       assign matchvec[i] = (&amp;mask[i-1:0] &amp; masken_or_fullmask) ? 1'b1 : (mask[i] == data[i]);</span></span>
+<span id="L604"><span class="lineNum">     604</span> <span class="tlaGNC tlaBgGNC">     1984248 :       assign matchvec[i] = (&amp;mask[i-1:0] &amp; masken_or_fullmask) ? 1'b1 : (mask[i] == data[i]);</span></span>
 <span id="L605"><span class="lineNum">     605</span>              :    end : match_after_first_zero</span>
 <span id="L606"><span class="lineNum">     606</span>              : </span>
 <span id="L607"><span class="lineNum">     607</span>              :    assign match  = &amp;matchvec[WIDTH-1:0];    // all bits either matched or were masked off</span>
@@ -815,7 +815,7 @@
 <span id="L711"><span class="lineNum">     711</span>              :    // Generate the corrected data</span>
 <span id="L712"><span class="lineNum">     712</span>              :    assign din_plus_parity[38:0] = {ecc_in[6], din[31:26], ecc_in[5], din[25:11], ecc_in[4], din[10:4], ecc_in[3], din[3:1], ecc_in[2], din[0], ecc_in[1:0]};</span>
 <span id="L713"><span class="lineNum">     713</span>              : </span>
-<span id="L714"><span class="lineNum">     714</span> <span class="tlaGNC tlaBgGNC">       60620 :    assign dout_plus_parity[38:0] = single_ecc_error ? (error_mask[38:0] ^ din_plus_parity[38:0]) : din_plus_parity[38:0];</span></span>
+<span id="L714"><span class="lineNum">     714</span> <span class="tlaGNC tlaBgGNC">       71072 :    assign dout_plus_parity[38:0] = single_ecc_error ? (error_mask[38:0] ^ din_plus_parity[38:0]) : din_plus_parity[38:0];</span></span>
 <span id="L715"><span class="lineNum">     715</span>              :    assign dout[31:0]             = {dout_plus_parity[37:32], dout_plus_parity[30:16], dout_plus_parity[14:8], dout_plus_parity[6:4], dout_plus_parity[2]};</span>
 <span id="L716"><span class="lineNum">     716</span>              :    assign ecc_out[6:0]           = {(dout_plus_parity[38] ^ (ecc_check[6:0] == 7'b1000000)), dout_plus_parity[31], dout_plus_parity[15], dout_plus_parity[7], dout_plus_parity[3], dout_plus_parity[1:0]};</span>
 <span id="L717"><span class="lineNum">     717</span>              : </span>

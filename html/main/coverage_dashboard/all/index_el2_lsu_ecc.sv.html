@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    03-01-2025
+                    04-01-2025
                 </td>
                 <td></td>
                 
@@ -135,8 +135,8 @@
 <span id="L31"><span class="lineNum">      31</span>              : `include "el2_param.vh"</span>
 <span id="L32"><span class="lineNum">      32</span>              :  )</span>
 <span id="L33"><span class="lineNum">      33</span>              : (</span>
-<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">    67228371 :    input logic                           clk,                // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">    67228371 :    input logic                           lsu_c2_r_clk,       // clock</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC tlaBgGNC">    67430251 :    input logic                           clk,                // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">    67430251 :    input logic                           lsu_c2_r_clk,       // clock</span></span>
 <span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">           2 :    input logic                           clk_override,       // Override non-functional clock gating</span></span>
 <span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">         299 :    input logic                           rst_l,              // reset, active low</span></span>
 <span id="L38"><span class="lineNum">      38</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
@@ -144,8 +144,8 @@
 <span id="L40"><span class="lineNum">      40</span>              :    input logic                           scan_mode,          // scan mode</span>
 <span id="L41"><span class="lineNum">      41</span>              :    /*pragma coverage on*/</span>
 <span id="L42"><span class="lineNum">      42</span>              : </span>
-<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">     2148677 :    input el2_lsu_pkt_t                  lsu_pkt_m,          // packet in m</span></span>
-<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">     2148654 :    input el2_lsu_pkt_t                  lsu_pkt_r,          // packet in r</span></span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">     2148561 :    input el2_lsu_pkt_t                  lsu_pkt_m,          // packet in m</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">     2148538 :    input el2_lsu_pkt_t                  lsu_pkt_r,          // packet in r</span></span>
 <span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">      154578 :    input logic [pt.DCCM_DATA_WIDTH-1:0]  stbuf_data_any,</span></span>
 <span id="L46"><span class="lineNum">      46</span>              : </span>
 <span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">           8 :    input logic                           dec_tlu_core_ecc_disable,  // disables the ecc computation and error flagging</span></span>
@@ -276,8 +276,8 @@
 <span id="L172"><span class="lineNum">     172</span>              :    end</span>
 <span id="L173"><span class="lineNum">     173</span>              : </span>
 <span id="L174"><span class="lineNum">     174</span>              :    // Logic for ECC generation during write</span>
-<span id="L175"><span class="lineNum">     175</span> <span class="tlaGNC">   109034315 :    assign dccm_wdata_lo_any[pt.DCCM_DATA_WIDTH-1:0] = ld_single_ecc_error_r_ff ? sec_data_lo_r_ff[pt.DCCM_DATA_WIDTH-1:0] : (dma_dccm_wen ? dma_dccm_wdata_lo[pt.DCCM_DATA_WIDTH-1:0] : stbuf_data_any[pt.DCCM_DATA_WIDTH-1:0]);</span></span>
-<span id="L176"><span class="lineNum">     176</span> <span class="tlaGNC">   109034315 :    assign dccm_wdata_hi_any[pt.DCCM_DATA_WIDTH-1:0] = ld_single_ecc_error_r_ff ? sec_data_hi_r_ff[pt.DCCM_DATA_WIDTH-1:0] : (dma_dccm_wen ? dma_dccm_wdata_hi[pt.DCCM_DATA_WIDTH-1:0] : 32'h0);</span></span>
+<span id="L175"><span class="lineNum">     175</span> <span class="tlaGNC">   109323341 :    assign dccm_wdata_lo_any[pt.DCCM_DATA_WIDTH-1:0] = ld_single_ecc_error_r_ff ? sec_data_lo_r_ff[pt.DCCM_DATA_WIDTH-1:0] : (dma_dccm_wen ? dma_dccm_wdata_lo[pt.DCCM_DATA_WIDTH-1:0] : stbuf_data_any[pt.DCCM_DATA_WIDTH-1:0]);</span></span>
+<span id="L176"><span class="lineNum">     176</span> <span class="tlaGNC">   109323341 :    assign dccm_wdata_hi_any[pt.DCCM_DATA_WIDTH-1:0] = ld_single_ecc_error_r_ff ? sec_data_hi_r_ff[pt.DCCM_DATA_WIDTH-1:0] : (dma_dccm_wen ? dma_dccm_wdata_hi[pt.DCCM_DATA_WIDTH-1:0] : 32'h0);</span></span>
 <span id="L177"><span class="lineNum">     177</span>              : </span>
 <span id="L178"><span class="lineNum">     178</span>              :    assign sec_data_ecc_hi_r_ff[pt.DCCM_ECC_WIDTH-1:0]  = dccm_wdata_ecc_hi_any[pt.DCCM_ECC_WIDTH-1:0];</span>
 <span id="L179"><span class="lineNum">     179</span>              :    assign sec_data_ecc_lo_r_ff[pt.DCCM_ECC_WIDTH-1:0]  = dccm_wdata_ecc_lo_any[pt.DCCM_ECC_WIDTH-1:0];</span>

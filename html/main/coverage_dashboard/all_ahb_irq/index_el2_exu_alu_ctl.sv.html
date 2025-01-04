@@ -51,7 +51,7 @@
             <tr>
                 <td class="headerInfo">Test Date:</td>
                 <td class="headerInfoValue">
-                    03-01-2025
+                    04-01-2025
                 </td>
                 <td></td>
                 
@@ -353,7 +353,7 @@
 <span id="L249"><span class="lineNum">     249</span>              : </span>
 <span id="L250"><span class="lineNum">     250</span> <span class="tlaGNC tlaBgGNC">        1089 :    logic        [31:0]    bm;</span></span>
 <span id="L251"><span class="lineNum">     251</span>              : </span>
-<span id="L252"><span class="lineNum">     252</span> <span class="tlaGNC">        4858 :    assign bm[31:0]            = ( ap.sub )  ?  ~b_in[31:0]  :  b_in[31:0];</span></span>
+<span id="L252"><span class="lineNum">     252</span> <span class="tlaGNC">        5154 :    assign bm[31:0]            = ( ap.sub )  ?  ~b_in[31:0]  :  b_in[31:0];</span></span>
 <span id="L253"><span class="lineNum">     253</span>              : </span>
 <span id="L254"><span class="lineNum">     254</span>              :    assign {cout, aout[31:0]}  = {1'b0, zba_a_in[31:0]} + {1'b0, bm[31:0]} + {32'b0, ap.sub};</span>
 <span id="L255"><span class="lineNum">     255</span>              : </span>
@@ -438,16 +438,16 @@
 <span id="L334"><span class="lineNum">     334</span>              :    integer                i;</span>
 <span id="L335"><span class="lineNum">     335</span> <span class="tlaUNC">           0 :    logic                  found;</span></span>
 <span id="L336"><span class="lineNum">     336</span>              : </span>
-<span id="L337"><span class="lineNum">     337</span> <span class="tlaGNC tlaBgGNC">       23422 :    always_comb</span></span>
-<span id="L338"><span class="lineNum">     338</span> <span class="tlaGNC">       23422 :      begin</span></span>
-<span id="L339"><span class="lineNum">     339</span> <span class="tlaGNC">       23422 :         bitmanip_lzd_os[31:0]   =  bitmanip_lzd_in[31:0];</span></span>
-<span id="L340"><span class="lineNum">     340</span> <span class="tlaGNC">       23422 :         bitmanip_dw_lzd_enc[5:0]=  6'b0;</span></span>
-<span id="L341"><span class="lineNum">     341</span> <span class="tlaGNC">       23422 :         found = 1'b0;</span></span>
+<span id="L337"><span class="lineNum">     337</span> <span class="tlaGNC tlaBgGNC">       27533 :    always_comb</span></span>
+<span id="L338"><span class="lineNum">     338</span> <span class="tlaGNC">       27533 :      begin</span></span>
+<span id="L339"><span class="lineNum">     339</span> <span class="tlaGNC">       27533 :         bitmanip_lzd_os[31:0]   =  bitmanip_lzd_in[31:0];</span></span>
+<span id="L340"><span class="lineNum">     340</span> <span class="tlaGNC">       27533 :         bitmanip_dw_lzd_enc[5:0]=  6'b0;</span></span>
+<span id="L341"><span class="lineNum">     341</span> <span class="tlaGNC">       27533 :         found = 1'b0;</span></span>
 <span id="L342"><span class="lineNum">     342</span>              : </span>
-<span id="L343"><span class="lineNum">     343</span> <span class="tlaGNC">      749504 :         for (int i=0; i&lt;32; i++) begin</span></span>
-<span id="L344"><span class="lineNum">     344</span> <span class="tlaGNC">      749504 :           if (bitmanip_lzd_os[31] == 1'b0 &amp;&amp; found == 0) begin</span></span>
-<span id="L345"><span class="lineNum">     345</span> <span class="tlaGNC">      749504 :               bitmanip_dw_lzd_enc[5:0]=  bitmanip_dw_lzd_enc[5:0] + 6'b00_0001;</span></span>
-<span id="L346"><span class="lineNum">     346</span> <span class="tlaGNC">      749504 :               bitmanip_lzd_os[31:0]   =  bitmanip_lzd_os[31:0] &lt;&lt; 1;</span></span>
+<span id="L343"><span class="lineNum">     343</span> <span class="tlaGNC">      881056 :         for (int i=0; i&lt;32; i++) begin</span></span>
+<span id="L344"><span class="lineNum">     344</span> <span class="tlaGNC">      881056 :           if (bitmanip_lzd_os[31] == 1'b0 &amp;&amp; found == 0) begin</span></span>
+<span id="L345"><span class="lineNum">     345</span> <span class="tlaGNC">      881056 :               bitmanip_dw_lzd_enc[5:0]=  bitmanip_dw_lzd_enc[5:0] + 6'b00_0001;</span></span>
+<span id="L346"><span class="lineNum">     346</span> <span class="tlaGNC">      881056 :               bitmanip_lzd_os[31:0]   =  bitmanip_lzd_os[31:0] &lt;&lt; 1;</span></span>
 <span id="L347"><span class="lineNum">     347</span>              :            end</span>
 <span id="L348"><span class="lineNum">     348</span>              :            else</span>
 <span id="L349"><span class="lineNum">     349</span> <span class="tlaUNC tlaBgUNC">           0 :               found=1'b1;</span></span>
@@ -577,7 +577,7 @@
 <span id="L473"><span class="lineNum">     473</span>              :    assign sel_shift           =  ap.sll  | ap.srl | ap.sra | ap_rol | ap_ror;</span>
 <span id="L474"><span class="lineNum">     474</span>              :    assign sel_adder           = (ap.add  | ap.sub | ap_zba) &amp; ~ap.slt &amp; ~ap_min &amp; ~ap_max;</span>
 <span id="L475"><span class="lineNum">     475</span>              :    assign sel_pc              =  ap.jal  | pp_in.pcall | pp_in.pja | pp_in.pret;</span>
-<span id="L476"><span class="lineNum">     476</span> <span class="tlaGNC tlaBgGNC">        6886 :    assign csr_write_data[31:0]= (ap.csr_imm)  ?  b_in[31:0]  :  a_in[31:0];</span></span>
+<span id="L476"><span class="lineNum">     476</span> <span class="tlaGNC tlaBgGNC">        8001 :    assign csr_write_data[31:0]= (ap.csr_imm)  ?  b_in[31:0]  :  a_in[31:0];</span></span>
 <span id="L477"><span class="lineNum">     477</span>              : </span>
 <span id="L478"><span class="lineNum">     478</span>              :    assign slt_one             =  ap.slt &amp; lt;</span>
 <span id="L479"><span class="lineNum">     479</span>              : </span>
@@ -634,7 +634,7 @@
 <span id="L530"><span class="lineNum">     530</span>              : </span>
 <span id="L531"><span class="lineNum">     531</span>              : </span>
 <span id="L532"><span class="lineNum">     532</span>              :    // for any_jal adder output is the flush path</span>
-<span id="L533"><span class="lineNum">     533</span> <span class="tlaGNC">       23280 :    assign flush_path_out[31:1]= (any_jal) ? aout[31:1] : pcout[31:1];</span></span>
+<span id="L533"><span class="lineNum">     533</span> <span class="tlaGNC">       27398 :    assign flush_path_out[31:1]= (any_jal) ? aout[31:1] : pcout[31:1];</span></span>
 <span id="L534"><span class="lineNum">     534</span>              : </span>
 <span id="L535"><span class="lineNum">     535</span>              : </span>
 <span id="L536"><span class="lineNum">     536</span>              :    // pcall and pret are included here</span>

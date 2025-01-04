@@ -58,7 +58,13 @@ endif
 
 include $(shell cocotb-config --makefiles)/Makefile.sim
 
+ifeq ($(PMP_TEST),)
+    EXTRA_CONFIG_OPTS = ""
+else
+    EXTRA_CONFIG_OPTS = "-set=pmp_entries=64"
+endif
+
 # Rules for generating VeeR config
 $(CFGDIR)/common_defines.vh:
-	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0 -set=pmp_entries=64
+	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0 $(EXTRA_CONFIG_OPTS)
 

@@ -17,6 +17,7 @@ jobs:
                "icache", "bitmanip"]
         coverage: ["branch", "toggle"] #TODO: add functional coverage
         priv: ["0", "1"]
+        cache_waypack: ["0", "1"]
         tb_extra_args: ["--test-halt"]
         exclude:
           # These tests require user mode
@@ -87,7 +88,7 @@ jobs:
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
-          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }}
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} ${{ matrix.cache_waypack }}
 
       - name: Prepare coverage data
         shell: bash
@@ -96,7 +97,7 @@ jobs:
           sis -d convert --dat-dir ${TEST_PATH}/
           mkdir -p results
           mv ${TEST_PATH}/coverage.info \
-             results/coverage_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.coverage }}.info
+             results/coverage_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.coverage }}_${{ matrix.waypack }}.info
 
       - name: Pack artifacts
         if: always()

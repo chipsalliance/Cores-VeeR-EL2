@@ -18,6 +18,7 @@ jobs:
                "dside_core_local_access_unmapped_address_error", "dbus_nonblocking_load_error", "internal_timer_ints", "ebreak_ecall", "illegal_instruction",
                "clk_override", "core_pause"]
         coverage: ["branch", "toggle"] #TODO: add functional coverage
+        cache_waypack: ["0", "1"]
         priv: ["0"]
     env:
       DEBIAN_FRONTEND: "noninteractive"
@@ -60,7 +61,7 @@ jobs:
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
-          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }}
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} ${{ matrix.cache_waypack }}
 
       - name: Prepare coverage data
         shell: bash
@@ -69,7 +70,7 @@ jobs:
           sis -d convert --dat-dir ${TEST_PATH}/
           mkdir -p results
           mv ${TEST_PATH}/coverage.info \
-             results/coverage_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.coverage }}.info
+             results/coverage_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.coverage }}_${{ matrix.waypack }}.info
 
       - name: Pack artifacts
         if: always()

@@ -76,11 +76,11 @@ class CsrWriteDriver(uvm_driver):
 
                 # Write
                 await RisingEdge(self.dut.clk)
-                self.dut.dec_csr_wen_r_mod.value = 1
+                self.dut.dec_csr_wen_r.value = 1
                 self.dut.dec_csr_wraddr_r.value = it.addr
                 self.dut.dec_csr_wrdata_r.value = it.data
                 await RisingEdge(self.dut.clk)
-                self.dut.dec_csr_wen_r_mod.value = 0
+                self.dut.dec_csr_wen_r.value = 0
 
             else:
                 raise RuntimeError("Unknown item '{}'".format(type(it)))
@@ -109,46 +109,8 @@ class CsrReadDriver(uvm_driver):
                 await RisingEdge(self.dut.clk)
                 self.dut.dec_csr_rdaddr_d.value = it.addr
 
-                # Emulate address decoder
-                if it.addr >= PMPADDR48:
-                    self.dut.csr_pmpcfg.value = 0
-                    self.dut.csr_pmpaddr0.value = 0
-                    self.dut.csr_pmpaddr16.value = 0
-                    self.dut.csr_pmpaddr32.value = 0
-                    self.dut.csr_pmpaddr48.value = 1
-                elif it.addr >= PMPADDR32:
-                    self.dut.csr_pmpcfg.value = 0
-                    self.dut.csr_pmpaddr0.value = 0
-                    self.dut.csr_pmpaddr16.value = 0
-                    self.dut.csr_pmpaddr32.value = 1
-                    self.dut.csr_pmpaddr48.value = 0
-                elif it.addr >= PMPADDR16:
-                    self.dut.csr_pmpcfg.value = 0
-                    self.dut.csr_pmpaddr0.value = 0
-                    self.dut.csr_pmpaddr16.value = 1
-                    self.dut.csr_pmpaddr32.value = 0
-                    self.dut.csr_pmpaddr48.value = 0
-                elif it.addr >= PMPADDR0:
-                    self.dut.csr_pmpcfg.value = 0
-                    self.dut.csr_pmpaddr0.value = 1
-                    self.dut.csr_pmpaddr16.value = 0
-                    self.dut.csr_pmpaddr32.value = 0
-                    self.dut.csr_pmpaddr48.value = 0
-                elif it.addr >= PMPCFG:
-                    self.dut.csr_pmpcfg.value = 1
-                    self.dut.csr_pmpaddr0.value = 0
-                    self.dut.csr_pmpaddr16.value = 0
-                    self.dut.csr_pmpaddr32.value = 0
-                    self.dut.csr_pmpaddr48.value = 0
-
                 await RisingEdge(self.dut.clk)
-
-                # Deselect all
-                self.dut.csr_pmpcfg.value = 0
-                self.dut.csr_pmpaddr0.value = 0
-                self.dut.csr_pmpaddr16.value = 0
-                self.dut.csr_pmpaddr32.value = 0
-                self.dut.csr_pmpaddr48.value = 0
+                self.dut.dec_csr_rdaddr_d.value = 0
 
             else:
                 raise RuntimeError("Unknown item '{}'".format(type(it)))
@@ -178,7 +140,7 @@ class WriteMonitor(uvm_component):
 
             # A write to a CSR
             await RisingEdge(self.dut.clk)
-            if self.dut.dec_csr_wen_r_mod.value:
+            if self.dut.dec_csr_wen_r.value:
                 addr = int(self.dut.dec_csr_wraddr_r)
                 data = int(self.dut.dec_csr_wrdata_r)
 
@@ -205,9 +167,10 @@ class ReadMonitor(uvm_component):
 
             # A read from a CSR
             await RisingEdge(self.dut.clk)
-            if self.dut.dec_pmp_read_d.value:
+            addr = int(self.dut.dec_csr_rdaddr_d) & 0x3f0
+            if addr in [PMPCFG, PMPADDR0, PMPADDR16, PMPADDR32, PMPADDR48]:
                 addr = int(self.dut.dec_csr_rdaddr_d)
-                data = int(self.dut.dec_pmp_rddata_d)
+                data = int(self.dut.dec_csr_rddata_d)
 
                 item = InputItem(addr, data)
                 self.ap.write(item)

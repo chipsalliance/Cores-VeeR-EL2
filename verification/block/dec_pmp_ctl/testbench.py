@@ -284,7 +284,7 @@ class BaseEnv(uvm_env):
     def build_phase(self):
         # Config
         ConfigDB().set(None, "*", "TEST_CLK_PERIOD", 1)
-        ConfigDB().set(None, "*", "TEST_ITERATIONS", 10)
+        ConfigDB().set(None, "*", "TEST_ITERATIONS", 5000)
 
         # Sequencers
         self.pmp_wr_seqr = uvm_sequencer("pmp_wr_seqr", self)

@@ -167,7 +167,7 @@ class ReadMonitor(uvm_component):
 
             # A read from a CSR
             await RisingEdge(self.dut.clk)
-            addr = int(self.dut.dec_csr_rdaddr_d) & 0x3f0
+            addr = int(self.dut.dec_csr_rdaddr_d) & 0x3F0
             if addr in [PMPCFG, PMPADDR0, PMPADDR16, PMPADDR32, PMPADDR48]:
                 addr = int(self.dut.dec_csr_rdaddr_d)
                 data = int(self.dut.dec_csr_rddata_d)

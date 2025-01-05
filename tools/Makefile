@@ -261,7 +261,7 @@ picolibc:
 	$(MAKE) -f ${RV_ROOT}/tools/picolibc.mk all
 
 ifeq ($(shell which $(GCC_PREFIX)-gcc 2> /dev/null),)
-program.hex: picolibc ${BUILD_DIR}/defines.h
+program.hex: ${HEX_DIR}/$(TEST).hex
 	@echo " !!! No $(GCC_PREFIX)-gcc in path, using canned hex files !!"
 	cp ${HEX_DIR}/$(TEST).hex program.hex
 else

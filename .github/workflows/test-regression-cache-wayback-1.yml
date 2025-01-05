@@ -1,4 +1,4 @@
-name: Regression tests
+name: Regression tests cache wayback 1
 
 on:
   workflow_call:
@@ -17,7 +17,7 @@ jobs:
                "icache", "bitmanip"]
         coverage: ["branch", "toggle"] #TODO: add functional coverage
         priv: ["0", "1"]
-        cache_waypack: ["0", "1"]
+        cache_waypack: ["1"]
         tb_extra_args: ["--test-halt"]
         exclude:
           # These tests require user mode
@@ -88,7 +88,7 @@ jobs:
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
-          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} ${{ matrix.cache_waypack }}
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 1
 
       - name: Prepare coverage data
         shell: bash
@@ -103,7 +103,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: regression_tests_coverage_data
+          name: regression_tests_coverage_data_cache_wayback_1
           path: results/*.info
 
   custom-regression-tests:

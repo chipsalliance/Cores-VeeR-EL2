@@ -25,6 +25,18 @@ jobs:
       - name: Download coverage reports
         uses: actions/download-artifact@v3
         with:
+          name: regression_tests_coverage_data_cache_wayback_0
+          path: ./
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: regression_tests_coverage_data_cache_wayback_1
+          path: ./
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
           name: verification_tests_coverage_data
           path: ./
 
@@ -119,6 +131,18 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: regression_tests_coverage_data
+          path: ./
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: regression_tests_coverage_data_cache_wayback_0
+          path: ./
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: regression_tests_coverage_data_cache_wayback_1
           path: ./
 
       - name: Download coverage reports

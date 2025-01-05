@@ -186,7 +186,7 @@ ${BUILD_DIR}/defines.h:
 	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/veer.config -target=$(target) $(CONF_PARAMS)
 
 verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
-	$(VERILATOR)  --cc -CFLAGS "${CFLAGS}" $(defines) \
+	$(VERILATOR)  --cc -CFLAGS "${CFLAGS}" --coverage-max-width 20000 $(defines) \
 	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist \
 	  $(VERILATOR_SKIP_WARNINGS) ${TBFILES} --top-module tb_top \
 	  -exe $(TB_VERILATOR_SRCS) --autoflush --timing $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE) -fno-table

@@ -38,6 +38,7 @@ else
 endif
 
 ifeq ($(SIM), verilator)
+    COMPILE_ARGS += --coverage-max-width 20000
     COMPILE_ARGS += --timing
     COMPILE_ARGS += -Wall -Wno-fatal
 

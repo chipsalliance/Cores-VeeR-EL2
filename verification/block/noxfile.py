@@ -317,6 +317,19 @@ def pmp_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["pmp_random"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_pmp_random",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def pmp_random_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["dec_tlu_ctl"])
 @nox.parametrize(
     "testName",

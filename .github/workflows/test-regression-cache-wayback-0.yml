@@ -1,4 +1,4 @@
-name: Regression exceptions tests
+name: Regression tests cache wayback 0
 
 on:
   workflow_call:
@@ -6,20 +6,46 @@ on:
 jobs:
 
   regression-tests:
-    name: Regression exceptions tests
+    name: Regression tests
     runs-on: ubuntu-latest
     container: ghcr.io/antmicro/cores-veer-el2:20250103160559
     strategy:
       matrix:
-        bus: ["axi"]
-        test: ["machine_external_ints", "dbus_store_error", "lsu_trigger_hit", "machine_external_vec_ints", "dside_pic_access_error",
-               "iside_fetch_precise_bus_error", "dside_access_region_prediction_error", "cmark", "iside_core_local_unmapped_address_error",
-               "dside_access_across_region_boundary", "nmi_pin_assertion", "dside_size_misaligned_access_to_non_idempotent_address",
-               "dside_core_local_access_unmapped_address_error", "dbus_nonblocking_load_error", "internal_timer_ints", "ebreak_ecall", "illegal_instruction",
-               "clk_override", "core_pause"]
+        bus: ["axi", "ahb"]
+        test: ["hello_world", "hello_world_dccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
+               "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters", "pmp", "write_unaligned",
+               "icache", "bitmanip"]
         coverage: ["branch", "toggle"] #TODO: add functional coverage
-        cache_waypack: ["0", "1"]
-        priv: ["0"]
+        priv: ["0", "1"]
+        cache_waypack: ["0"]
+        tb_extra_args: ["--test-halt"]
+        exclude:
+          # These tests require user mode
+          - priv: "0"
+            test: "csr_mseccfg"
+          - priv: "0"
+            test: "csr_access"
+          - priv: "0"
+            test: "csr_mstatus"
+          - priv: "0"
+            test: "modesw"
+          - priv: "0"
+            test: "insns"
+          - priv: "0"
+            test: "perf_counters"
+          # end tests which require user mode
+        include:
+          # Use hello_world_iccm for testing '--test-lsu-clk-ratio'
+          - test: "hello_world_iccm"
+            bus: "axi"
+            coverage: "branch"
+            priv: "0"
+            tb_extra_args: "--test-halt --test-lsu-clk-ratio"
+          - test: "hello_world_iccm"
+            bus: "axi"
+            coverage: "toggle"
+            priv: "0"
+            tb_extra_args: "--test-halt --test-lsu-clk-ratio"
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/regression/.cache/"
@@ -61,7 +87,8 @@ jobs:
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
-          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} ${{ matrix.cache_waypack }}
+          export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
 
       - name: Prepare coverage data
         shell: bash
@@ -70,26 +97,12 @@ jobs:
           sis -d convert --dat-dir ${TEST_PATH}/
           mkdir -p results
           mv ${TEST_PATH}/coverage.info \
-             results/coverage_exceptions_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.waypack }}_${{ matrix.coverage }}.info
+             results/coverage_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.priv }}_0_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: regression_tests_coverage_data
+          name: regression_tests_coverage_data_cache_wayback_0
           path: results/*.info
 
-  custom-regression-exceptions-tests:
-    name: Custom regression exceptions tests
-    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: centos:8
-    env:
-      GHA_EXTERNAL_DISK: additional-tools
-      GHA_SA: gh-sa-veer-uploader
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Run tests
-        run: _secret_custom_regression_exceptions_tests

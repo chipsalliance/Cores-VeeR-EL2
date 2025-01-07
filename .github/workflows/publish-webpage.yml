@@ -17,16 +17,6 @@ jobs:
       - name: Setup repository
         uses: actions/checkout@v3
 
-      - name: Setup python
-        uses: actions/setup-python@v4
-
-      - name: Install coverage dependencies
-        run: |
-          python3 -m venv .venv
-          source .venv/bin/activate
-          pip install -r .github/scripts/requirements-coverage.txt
-          echo "PATH=$PATH" >> $GITHUB_ENV
-
       - name: Print metadata
         run: |
           run_information="Repository: ${{ github.repository }} Commit SHA:${{ github.sha }} Workflow: ${{ github.workflow }} Run:${{ github.run_id }}"

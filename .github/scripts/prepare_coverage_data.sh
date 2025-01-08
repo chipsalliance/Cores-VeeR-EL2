@@ -85,19 +85,6 @@ def filter(infile, outfile):
                         hits[lineno][typ][key][val].append(hit)
                     n += 1
 
-                # normalize hits
-                for h in hits:
-                    for t in hits[h]:
-                        for l in hits[h][t]:
-                            for v in [0, 1]:
-                                try:
-                                    mi = min(hits[h][t][l][v])
-                                    for i, k in enumerate(hits[h][t][l][v]):
-                                        hits[h][t][l][v][i] -= mi
-                                except ValueError:
-                                    # allow empty lists (no hits or misses)
-                                    pass
-
                 new_hits = {}
 
                 for h in hits:

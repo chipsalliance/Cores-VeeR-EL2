@@ -65,6 +65,10 @@ endif
 VERILATOR_NOIMPLICIT := -Wno-IMPLICITSTATIC
 VERILATOR_VERSION    := $(subst .,,$(word 2,$(shell $(VERILATOR) --version)))
 
+ifneq ($(TB_MAX_CYCLES),)
+	VERILATOR_EXTRA_ARGS := -GMAX_CYCLES=$(TB_MAX_CYCLES)
+endif
+
 ifeq ("$(.SHELLSTATUS)", "0")
     $(shell test $(VERILATOR_VERSION) -lt 5006)
     ifeq ("$(.SHELLSTATUS)", "0")
@@ -188,7 +192,7 @@ ${BUILD_DIR}/defines.h:
 verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	$(VERILATOR)  --cc -CFLAGS "${CFLAGS}" --coverage-max-width 20000 $(defines) \
 	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist \
-	  $(VERILATOR_SKIP_WARNINGS) ${TBFILES} --top-module tb_top \
+	  $(VERILATOR_SKIP_WARNINGS) $(VERILATOR_EXTRA_ARGS) ${TBFILES} --top-module tb_top \
 	  -exe $(TB_VERILATOR_SRCS) --autoflush --timing $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE) -fno-table
 	cp ${RV_ROOT}/testbench/test_tb_top.cpp obj_dir/
 	$(MAKE) -e -C obj_dir/ -f Vtb_top.mk $(VERILATOR_MAKE_FLAGS)

@@ -19,6 +19,7 @@
 module tb_top
     import tb_top_pkg::*;
 #(
+    parameter int MAX_CYCLES = 2_000_000,
     `include "el2_param.vh"
 );
 
@@ -34,6 +35,7 @@ module tb_top
 module tb_top
     import tb_top_pkg::*;
 #(
+    parameter int MAX_CYCLES = 2_000_000,
     `include "el2_param.vh"
 ) (
     input bit                   core_clk,
@@ -764,8 +766,6 @@ module tb_top
     assign mailbox_data  = lmem.wdata;
 
     assign mailbox_data_val = mailbox_data[7:0] > 8'h5 && mailbox_data[7:0] < 8'h7f;
-
-    parameter MAX_CYCLES = 2_000_000;
 
     integer fd, tp, el;
     logic next_dbus_error;

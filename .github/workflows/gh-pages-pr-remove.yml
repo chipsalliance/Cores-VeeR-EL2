@@ -7,7 +7,7 @@ on:
       - completed
 
 env:
-  ROOT_DIR: './public.old'
+  ROOT_DIR: './public.new'
 
 jobs:
   remove:
@@ -52,12 +52,6 @@ jobs:
         run: |
           rm -rf ${{ env.ROOT_DIR }}/html/dev/${{ steps.PR.outputs.number }}
           rm -rf ${{ env.ROOT_DIR }}/doctrees/dev/${{ steps.PR.outputs.number }}
-          sis -d webpage \
-            --include-documentation \
-            --doc-project-name "Cores VeeR EL2" \
-            --loc-github-ref-name ${{ github.ref_name }} \
-            --loc-github-event-name ${{ github.event_name }} \
-            --pr-number ${{ steps.PR.outputs.number }}
 
       - name: Add redirect index page
         run: |

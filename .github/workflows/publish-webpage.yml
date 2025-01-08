@@ -9,21 +9,13 @@ jobs:
     concurrency:
       group: gh-pages
     runs-on: ubuntu-latest
+    container:
+      image: debian:trixie
     permissions:
       contents: write
     steps:
       - name: Setup repository
         uses: actions/checkout@v3
-
-      - name: Setup python
-        uses: actions/setup-python@v4
-
-      - name: Install coverage dependencies
-        run: |
-          python3 -m venv .venv
-          source .venv/bin/activate
-          pip install -r .github/scripts/requirements-coverage.txt
-          echo "PATH=$PATH" >> $GITHUB_ENV
 
       - name: Print metadata
         run: |
@@ -62,24 +54,38 @@ jobs:
 
       - name: Preserve only valid items
         run: |
-          mkdir -p ./public.old
-          mv ./public.checkout/doctrees ./public.old/ | true
-          mv ./public.checkout/html ./public.old/ | true
+          mkdir -p ./public.new
+          mv ./public.checkout/doctrees ./public.new/ | true
+          mv ./public.checkout/html ./public.new/ | true
 
       - name: Update webpage
         if: github.event_name != 'pull_request'
         run: |
+          apt -y update
+          apt -y install nodejs npm python3 zip git
+
           mv coverage_dashboard/*.zip .
-          sis -d webpage \
-            --include-documentation \
-            --doc-project-name "Cores VeeR EL2" \
-            --loc-github-ref-name ${{ github.ref_name }} \
-            --loc-github-event-name ${{ github.event_name }} \
-            --pr-number 0
-          # use docs from the artifact
+
+          # get coverview
+          git clone https://github.com/antmicro/coverview
+          cd coverview
+          npm install
+          npm run build
+          unzip ../data.zip -d data
+          python3 embed.py --inject-data data
+          cd ../
+
+          # dashboard
+          rm -rf public.new/html/main/coverage_dashboard*
+          mkdir -p public.new/html/main/coverage_dashboard/all
+          cp -a coverview/dist/* public.new/html/main/coverage_dashboard/all
+
+          #docs
           rm -rf public.new/html/main/docs_rendered
           mkdir -p public.new/html/main/docs_rendered
           mv ./docs_rendered/* public.new/html/main/docs_rendered
+
+          # data
           mv data_*_verilator_info.zip public.new/html/main/
           mv data.zip public.new/html/main/
           mv data_v.zip public.new/html/main/
@@ -90,17 +96,31 @@ jobs:
       - name: Update webpage PR
         if: github.event_name == 'pull_request'
         run: |
+          apt -y update
+          apt -y install nodejs npm python3 zip git
+
           mv coverage_dashboard/*.zip .
-          sis -d webpage \
-            --include-documentation \
-            --doc-project-name "Cores VeeR EL2" \
-            --loc-github-ref-name ${{ github.ref_name }} \
-            --loc-github-event-name ${{ github.event_name }} \
-            --pr-number ${{ github.event.number }}
-          # use docs from the artifact
+
+          # get coverview
+          git clone https://github.com/antmicro/coverview
+          cd coverview
+          npm install
+          npm run build
+          unzip ../data.zip -d data
+          python3 embed.py --inject-data data
+          cd ../
+
+          # dashboard
+          rm -rf public.new/html/dev/${{ github.event.number }}/coverage_dashboard*
+          mkdir -p public.new/html/dev/${{ github.event.number }}/coverage_dashboard/all
+          cp -a coverview/dist/* public.new/html/dev/${{ github.event.number }}/coverage_dashboard/all
+
+          # docs
           rm -rf public.new/html/dev/${{ github.event.number }}/docs_rendered
           mkdir -p public.new/html/dev/${{ github.event.number }}/docs_rendered
           mv ./docs_rendered/* public.new/html/dev/${{ github.event.number }}/docs_rendered
+
+          # data
           mv data_*_verilator_info.zip public.new/html/dev/${{ github.event.number }}/
           mv data.zip public.new/html/dev/${{ github.event.number }}/
           mv data_v.zip public.new/html/dev/${{ github.event.number }}/

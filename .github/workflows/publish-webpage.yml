@@ -54,9 +54,9 @@ jobs:
 
       - name: Preserve only valid items
         run: |
-          mkdir -p ./public.old
-          mv ./public.checkout/doctrees ./public.old/ | true
-          mv ./public.checkout/html ./public.old/ | true
+          mkdir -p ./public.new
+          mv ./public.checkout/doctrees ./public.new/ | true
+          mv ./public.checkout/html ./public.new/ | true
 
       - name: Update webpage
         if: github.event_name != 'pull_request'

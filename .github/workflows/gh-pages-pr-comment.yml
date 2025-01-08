@@ -38,5 +38,5 @@ jobs:
               issue_number: ${{ steps.PR.outputs.number }},
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Links to coverage and verification reports for this PR (#${{ steps.PR.outputs.number }}) are available at ${{ env.WEB_URL }}'
+              body: 'Coverage report for this PR is available at ${{ env.WEB_URL }}/html/dev/${{ steps.PR.outputs.number }}/coverage_dashboard/all, documentation is available at ${{ env.WEB_URL }}/html/dev/${{ steps.PR.outputs.number }}/docs_rendered/html'
             })

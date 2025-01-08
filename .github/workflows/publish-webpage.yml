@@ -61,8 +61,8 @@ jobs:
       - name: Update webpage
         if: github.event_name != 'pull_request'
         run: |
-          sudo apt -y update
-          sudo apt -y install nodejs npm python3 zip git
+          apt -y update
+          apt -y install nodejs npm python3 zip git
 
           mv coverage_dashboard/*.zip .
 
@@ -96,8 +96,8 @@ jobs:
       - name: Update webpage PR
         if: github.event_name == 'pull_request'
         run: |
-          sudo apt -y update
-          sudo apt -y install nodejs npm python3 zip git
+          apt -y update
+          apt -y install nodejs npm python3 zip git
 
           mv coverage_dashboard/*.zip .
 

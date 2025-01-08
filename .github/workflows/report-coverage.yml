@@ -202,6 +202,7 @@ jobs:
           zip data_toggle_verilator_info.zip *_toggle.info
           zip data_branch_verilator_info.zip *_branch.info
           zip data_line_verilator_info.zip *_line.info
+          mkdir report
           cp data.zip report
           cp data_v.zip report
           cp data_both.zip report

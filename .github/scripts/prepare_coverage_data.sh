@@ -89,14 +89,15 @@ def filter(infile, outfile):
                 for h in hits:
                     for t in hits[h]:
                         for l in hits[h][t]:
-                            for v in [0, 1]:
-                                try:
-                                    mi = min(hits[h][t][l][v])
+                            all_bits = hits[h][t][l][0] + hits[h][t][l][1]
+                            try:
+                                mi = min(all_bits)
+                                for v in [0, 1]:
                                     for i, k in enumerate(hits[h][t][l][v]):
                                         hits[h][t][l][v][i] -= mi
-                                except ValueError:
-                                    # allow empty lists (no hits or misses)
-                                    pass
+                            except ValueError:
+                                # allow empty lists (no hits or misses)
+                                pass
 
                 new_hits = {}
 
@@ -109,7 +110,6 @@ def filter(infile, outfile):
                                        new_hits[t] = {}
                                     if not k in new_hits[t] or new_hits[t][k] != 1:
                                         new_hits[t][k] = v
-
 
                 for t in new_hits.keys():
                     for k in sorted(new_hits[t].keys()):

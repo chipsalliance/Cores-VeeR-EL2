@@ -264,3 +264,27 @@ jobs:
           path: |
             data_v.zip
             data_both.zip
+
+  custom-coverage-report-merged:
+    name: Custom coverage report merger
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: debian:trixie
+    needs: [custom-coverage-report]
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Generate custom report
+        run: _secret_custom_report_merger
+
+      - name: Pack artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: data_v2
+          path: |
+            data_both2.zip

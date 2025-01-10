@@ -9,6 +9,9 @@
 #define PMP_W     (1<<1)
 #define PMP_R     (1<<0)
 
+#define PMP_MODE_MASK (3<<3)
+#define PMP_RWX_MASK  (7)
+
 #define CSR_PMPCFG_BASE 0x3A0
 #define CSR_PMPADDR_BASE 0x3B0
 

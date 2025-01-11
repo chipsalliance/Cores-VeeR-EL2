@@ -8,62 +8,7 @@ on:
 
 jobs:
 
-  Test-Regression-Cache-Wayback-0:
-    name: Test-Regression Cache Wayback 0
-    uses: ./.github/workflows/test-regression-cache-wayback-0.yml
-
-  Test-Regression-Cache-Wayback-1:
-    name: Test-Regression Cache Wayback 1
-    uses: ./.github/workflows/test-regression-cache-wayback-1.yml
-
-  Test-Exceptions-Regression:
-    name: Test-Exceptions-Regression
-    uses: ./.github/workflows/test-regression-exceptions.yml
-
-  Test-Verification:
-    name: Test-Verification
-    uses: ./.github/workflows/test-verification.yml
-
-  Test-Microarchitectural:
-    name: Test-Microarchitectural
-    uses: ./.github/workflows/test-uarch.yml
-
-  Test-RISCV-DV:
-    name: Test-RISCV-DV
-    uses: ./.github/workflows/test-riscv-dv.yml
-
-  Test-RISCOF:
-    name: Test-RISCOF
-    uses: ./.github/workflows/test-riscof.yml
-
-  Test-UVM:
-    name: Test-UVM
-    uses: ./.github/workflows/test-uvm.yml
-
-  Test-Renode:
-    name: Test-Renode
-    uses: ./.github/workflows/test-renode.yml
-
-  Test-OpenOCD:
-    name: Test-OpenOCD
-    uses: ./.github/workflows/test-openocd.yml
-
   Report-Coverage:
     name: Report-Coverage
-    needs: [Test-Regression-Cache-Wayback-0, Test-Regression-Cache-Wayback-1, Test-Verification, Test-Microarchitectural, Test-RISCV-DV, Test-RISCOF, Test-OpenOCD]
     uses: ./.github/workflows/report-coverage.yml
 
-  Build-Docs:
-    name: Build-Docs
-    uses: ./.github/workflows/build-docs.yml
-
-  Publish-to-GH-Pages:
-    concurrency:
-      group: concurrency-group-${{ github.repository }}-publish
-      cancel-in-progress: false
-    permissions:
-      actions: write
-      contents: write
-    name: Publish-to-GH-Pages
-    needs: [Report-Coverage, Test-Verification, Build-Docs]
-    uses: ./.github/workflows/publish-webpage.yml

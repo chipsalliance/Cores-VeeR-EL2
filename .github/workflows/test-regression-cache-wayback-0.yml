@@ -107,3 +107,43 @@ jobs:
           name: regression_tests_coverage_data_cache_wayback_0
           path: results/*.info
 
+  custom-regression-tests:
+    name: Custom regression tests
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    strategy:
+      matrix:
+        bus: ["axi", "ahb"]
+        test: ["hello_world", "hello_world_dccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
+               "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters", "pmp", "write_unaligned",
+               "icache", "bitmanip"]
+        priv: ["0", "1"]
+        exclude:
+          # These tests require user mode
+          - priv: "0"
+            test: "csr_mseccfg"
+          - priv: "0"
+            test: "csr_access"
+          - priv: "0"
+            test: "csr_mstatus"
+          - priv: "0"
+            test: "modesw"
+          - priv: "0"
+            test: "insns"
+          - priv: "0"
+            test: "perf_counters"
+          # end tests which require user mode
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Run tests
+        run: _secret_custom_regression_tests_wayback_0
+        env:
+          TEST: ${{ matrix.test }}
+          BUS: ${{ matrix.bus }}
+          PRIV: ${{ matrix.priv }}

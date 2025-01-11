@@ -51,9 +51,15 @@ run_regression_test(){
     touch ${LOG}
     DIR="run_${NAME}_${COVERAGE}_${USER_MODE}"
 
+    if [ "$NAME" = "pmp_random" ]; then
+        EXTRA_ARGS='TB_MAX_CYCLES=8000000'
+    else
+        EXTRA_ARGS=
+    fi
+
     # Run the test
     mkdir -p ${DIR}
-    make -j`nproc` -C ${DIR} -f $RV_ROOT/tools/Makefile verilator CONF_PARAMS="${PARAMS}" TEST=${NAME} COVERAGE=${COVERAGE} 2>&1 | tee ${LOG}
+    make -j`nproc` -C ${DIR} -f $RV_ROOT/tools/Makefile verilator $EXTRA_ARGS CONF_PARAMS="${PARAMS}" TEST=${NAME} COVERAGE=${COVERAGE} 2>&1 | tee ${LOG}
     if [ ! -f "${DIR}/coverage.dat" ]; then
         echo -e "${COLOR_WHITE}Test '${NAME}' ${COLOR_RED}FAILED${COLOR_CLEAR}"
         exit 1

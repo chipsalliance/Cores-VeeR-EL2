@@ -25,6 +25,7 @@ endif
 VEER_TARGET     = default
 VEER_CONF       = -set build_axi4 \
                   -set reset_vec=0x80000000 \
+                  -set fpga_optimize=0 \
                   $(VEER_EXTRA_CONF)
 
 # Coverage reporting

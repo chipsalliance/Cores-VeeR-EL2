@@ -46,7 +46,7 @@ ifeq ($(SIM), verilator)
     EXTRA_ARGS   += $(VERILATOR_COVERAGE)
     EXTRA_ARGS   += -I$(CFGDIR) -Wno-DECLFILENAME
 else ifeq ($(SIM), vcs)
-    EXTRA_ARGS   += +incdir+$(CFGDIR) -assert svaext -cm line+cond+fsm+tgl+branch
+    EXTRA_ARGS   += +incdir+$(CFGDIR) -assert svaext -cm line+cond+fsm+tgl+branch +vcs+lic+wait
 endif
 
 COCOTB_HDL_TIMEUNIT         = 1ns

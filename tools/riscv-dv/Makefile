@@ -25,6 +25,7 @@ endif
 VEER_TARGET     = default
 VEER_CONF       = -set build_axi4 \
                   -set reset_vec=0x80000000 \
+                  -set fpga_optimize=0 \
                   $(VEER_EXTRA_CONF)
 
 # Coverage reporting
@@ -42,7 +43,7 @@ endif
 
 VERILATOR       = verilator
 VERILATOR_CFLAGS= "-std=c++14"
-VERILATOR_INC   = -I$(WORK_DIR) -I$(RV_ROOT)/testbench 
+VERILATOR_INC   = -I$(WORK_DIR) -I$(RV_ROOT)/testbench
 VERILATOR_EXE   = $(RV_ROOT)/testbench/test_tb_top.cpp
 
 HDL_FILES = $(WORK_DIR)/common_defines.vh \
@@ -118,7 +119,7 @@ $(WORK_DIR)/verilator/Vtb_top.mk: $(WORK_DIR)/defines.h
 	$(VERILATOR) --cc -CFLAGS $(VERILATOR_CFLAGS) $(VERILATOR_INC) \
         $(HDL_FILES) -f $(RV_ROOT)/testbench/flist --top-module tb_top \
 		-exe $(VERILATOR_EXE) -Wno-WIDTH -Wno-UNOPTFLAT $(VERILATOR_NOIMPLICIT) --autoflush \
-		--timing $(VERILATOR_COVERAGE) -fno-table \
+		--timing $(VERILATOR_COVERAGE) -fno-table -Wno-LATCH\
 		-Mdir $(WORK_DIR)/verilator
 
 $(WORK_DIR)/verilator/Vtb_top: $(WORK_DIR)/verilator/Vtb_top.mk

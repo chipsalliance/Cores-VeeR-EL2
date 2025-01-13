@@ -1,4 +1,4 @@
-name: Regression tests cache wayback 0
+name: Regression tests cache waypack 0
 
 on:
   workflow_call:
@@ -104,7 +104,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: regression_tests_coverage_data_cache_wayback_0
+          name: regression_tests_coverage_data_cache_waypack_0
           path: results/*.info
 
   custom-regression-tests:

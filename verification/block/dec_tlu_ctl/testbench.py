@@ -40,6 +40,7 @@ class TlInputItem(uvm_sequence_item):
         mtsel=0,
         csr_addr=0,
         dec_csr_rddata_d=0,
+        ifu_ic_debug_rd_data=0,
     ):
         super().__init__("TlOutputItem")
 
@@ -50,6 +51,7 @@ class TlInputItem(uvm_sequence_item):
         self.mtsel = mtsel
         self.csr_addr = csr_addr
         self.dec_csr_rddata_d = dec_csr_rddata_d
+        self.ifu_ic_debug_rd_data = ifu_ic_debug_rd_data
 
     def randomize(self, test):
 
@@ -116,6 +118,11 @@ class TlInputItem(uvm_sequence_item):
             self.csr_addr = random.choice(
                 [csrs.DICAD0, csrs.DICAD0H, csrs.DICAWICS, csrs.DPC, csrs.DCSR]
             )
+        elif test == "debug_ic_cache":
+            value = ""
+            for _ in range(71):
+                value += random.choice(["0", "1"])
+            self.ifu_ic_debug_rd_data = int(value, 2)
 
 
 class TlOutputItem(uvm_sequence_item):
@@ -124,7 +131,14 @@ class TlOutputItem(uvm_sequence_item):
     """
 
     def __init__(
-        self, dec_tlu_meihap=0, mtdata1=0, mtdata2=0, mtsel=0, trigger_pkt_any=0, dec_csr_rddata_d=0
+        self,
+        dec_tlu_meihap=0,
+        mtdata1=0,
+        mtdata2=0,
+        mtsel=0,
+        trigger_pkt_any=0,
+        dec_csr_rddata_d=0,
+        ifu_ic_debug_rd_data=0,
     ):
         super().__init__("TlOutputItem")
         self.dec_tlu_meihap = dec_tlu_meihap
@@ -133,6 +147,7 @@ class TlOutputItem(uvm_sequence_item):
         self.mtsel = mtsel
         self.trigger_pkt_any = trigger_pkt_any
         self.dec_csr_rddata_d = dec_csr_rddata_d
+        self.ifu_ic_debug_rd_data = ifu_ic_debug_rd_data
 
 
 # ==============================================================================
@@ -200,6 +215,14 @@ class TlDriver(uvm_driver):
                     await self.write_csr(it.csr_addr, it.dec_csr_wrdata_r)
                     # read it back
                     await self.read_csr(it.csr_addr)
+                elif test == "debug_ic_cache":
+                    self.dut.ifu_ic_debug_rd_data_valid.value = 1
+                    self.dut.ifu_ic_debug_rd_data.value = it.ifu_ic_debug_rd_data
+                    await RisingEdge(self.dut.clk)
+                    self.dut.ifu_ic_debug_rd_data_valid.value = 0
+                    await self.read_csr(csrs.DICAD0)
+                    await self.read_csr(csrs.DICAD0H)
+                    await self.read_csr(csrs.DICAD1)
             else:
                 raise RuntimeError("Unknown item '{}'".format(type(it)))
 
@@ -260,6 +283,16 @@ class TlInputMonitor(uvm_component):
                 csr_addr = int(self.dut.dec_csr_wraddr_r.value)
                 csr_value = int(self.dut.dec_csr_wrdata_r.value)
                 self.ap.write(TlInputItem(csr_addr=csr_addr, dec_csr_wrdata_r=csr_value))
+            elif test == "debug_ic_cache":
+                # wait for reg write
+                await RisingEdge(self.dut.ifu_ic_debug_rd_data_valid)
+                ic_debug_rd_data = int(self.dut.ifu_ic_debug_rd_data.value)
+                self.ap.write(TlInputItem(ifu_ic_debug_rd_data=ic_debug_rd_data))
+                # wait for reads
+                await RisingEdge(self.dut.clk)
+                await RisingEdge(self.dut.clk)
+                await RisingEdge(self.dut.clk)
+                await RisingEdge(self.dut.clk)
 
 
 class TlOutputMonitor(uvm_component):
@@ -317,6 +350,19 @@ class TlOutputMonitor(uvm_component):
                     await RisingEdge(self.dut.clk)
                 dec_csr_rddata_d = int(self.dut.dec_csr_rddata_d.value)
                 self.ap.write(TlOutputItem(dec_csr_rddata_d=dec_csr_rddata_d))
+            elif test == "debug_ic_cache":
+                # wait for read
+                # read dicad0, dicad0h, and dicad1
+                await RisingEdge(self.dut.ifu_ic_debug_rd_data_valid)
+                await RisingEdge(self.dut.clk)
+                await RisingEdge(self.dut.clk)
+                dicad0 = int(self.dut.dec_csr_rddata_d.value)
+                await RisingEdge(self.dut.clk)
+                dicad0h = int(self.dut.dec_csr_rddata_d.value)
+                await RisingEdge(self.dut.clk)
+                dicad1 = int(self.dut.dec_csr_rddata_d.value)
+                ifu_ic_debug_rd_data = dicad0 | (dicad0h << 32) | (dicad1 << 64)
+                self.ap.write(TlOutputItem(ifu_ic_debug_rd_data=ifu_ic_debug_rd_data))
 
 
 # ==============================================================================
@@ -342,7 +388,7 @@ class TlScoreboard(uvm_component):
         self.port_inp.connect(self.fifo_inp.get_export)
         self.port_out.connect(self.fifo_out.get_export)
 
-    def check_phase(self):
+    def check_phase(self):  # noqa: C901
         # Get item pairs
         while True:
             got_inp, item_inp = self.port_inp.try_get()
@@ -506,6 +552,19 @@ class TlScoreboard(uvm_component):
                     self.logger.error(
                         "reg_val[{}] {} != {} (should be {})".format(
                             hex(csr), hex(reg_val_i), hex(reg_val_o), hex(reg_val_i)
+                        )
+                    )
+                    self.passed = False
+            elif test == "debug_ic_cache":
+                ifu_ic_debug_rd_data_in = item_inp.ifu_ic_debug_rd_data
+                ifu_ic_debug_rd_data_out = item_out.ifu_ic_debug_rd_data
+
+                if ifu_ic_debug_rd_data_in != ifu_ic_debug_rd_data_out:
+                    self.logger.error(
+                        "read_data {} != {} (should be {})".format(
+                            hex(ifu_ic_debug_rd_data_in),
+                            hex(ifu_ic_debug_rd_data_out),
+                            hex(ifu_ic_debug_rd_data_in),
                         )
                     )
                     self.passed = False

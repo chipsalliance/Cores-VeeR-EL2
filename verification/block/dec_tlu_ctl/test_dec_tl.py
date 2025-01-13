@@ -52,3 +52,14 @@ class TestDebugCSRs(BaseTest):
 
     async def run(self):
         await self.seq.start(self.env.tl_seqr)
+
+
+@pyuvm.test()
+class TestDebugICCache(BaseTest):
+    def end_of_elaboration_phase(self):
+        super().end_of_elaboration_phase()
+        ConfigDB().set(None, "*", "TEST", "debug_ic_cache")
+        self.seq = TlSequence("stimulus")
+
+    async def run(self):
+        await self.seq.start(self.env.tl_seqr)

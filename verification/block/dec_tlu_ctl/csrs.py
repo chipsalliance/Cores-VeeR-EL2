@@ -33,6 +33,7 @@ MDCCMECT = 0x7F2
 # debug mode CSRs
 DICAD0 = 0x7C9
 DICAD0H = 0x7CC
+DICAD1 = 0x7CA
 DICAWICS = 0x7C8
 DPC = 0x7B1
 DCSR = 0x7B0  # upper 4 bits hardcoded to 0x4

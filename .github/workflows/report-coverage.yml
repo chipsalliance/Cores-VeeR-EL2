@@ -288,3 +288,6 @@ jobs:
           name: data_v2
           path: |
             data_both2.zip
+            data_v_line.zip.xz
+            data_v_toggle.zip.xz
+            data_v_branch.zip.xz

@@ -27,7 +27,7 @@ CONFIG := $(RV_ROOT)/configs
 # -------------------------------------
 # VeeR Configuration
 # -------------------------------------
-CONF_PARAMS = -set build_axi4
+CONF_PARAMS ?= -set build_axi4
 
 # Check for RV_ROOT
 ifeq (,$(wildcard ${RV_ROOT}/configs/veer.config))
@@ -106,5 +106,5 @@ $(SIM_BUILD)/simv: $(VERILOG_SOURCES) $(SIM_BUILD)/pli.tab $(CUSTOM_COMPILE_DEPS
 	$(COMPILE_ARGS) $(VERILOG_SOURCES) -f $(SIM_FLIST_FILE)
 
 $(CFGDIR)/common_defines.vh:
-	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0 $(EXTRA_CONFIG_OPTS)
+	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0 $(CONF_PARAMS) $(EXTRA_CONFIG_OPTS)
 	echo '`undef RV_ASSERT_ON' >> $(CFGDIR)/common_defines.vh

@@ -19,6 +19,9 @@ def pytest_addoption(parser):
     parser.addoption(
         "--sim", action="store", default="verilator", help="--sim=<verilator, vcs>",type=type_checker_sim
     )
+    parser.addoption(
+        "--conf_params", action="store", default="-set build_axi4", help="--conf_params='...'"
+    )
 
 @pytest.fixture
 def coverage_opt(request):
@@ -27,3 +30,7 @@ def coverage_opt(request):
 @pytest.fixture
 def sim_opt(request):
     return request.config.getoption("--sim")
+
+@pytest.fixture
+def conf_params(request):
+    return request.config.getoption("--conf_params")

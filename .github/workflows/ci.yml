@@ -8,13 +8,13 @@ on:
 
 jobs:
 
-  Test-Regression-Cache-Wayback-0:
-    name: Test-Regression Cache Wayback 0
-    uses: ./.github/workflows/test-regression-cache-wayback-0.yml
+  Test-Regression-Cache-Waypack-0:
+    name: Test-Regression Cache Waypack 0
+    uses: ./.github/workflows/test-regression-cache-waypack-0.yml
 
-  Test-Regression-Cache-Wayback-1:
-    name: Test-Regression Cache Wayback 1
-    uses: ./.github/workflows/test-regression-cache-wayback-1.yml
+  Test-Regression-Cache-Waypack-1:
+    name: Test-Regression Cache Waypack 1
+    uses: ./.github/workflows/test-regression-cache-waypack-1.yml
 
   Test-Exceptions-Regression:
     name: Test-Exceptions-Regression
@@ -50,7 +50,7 @@ jobs:
 
   Report-Coverage:
     name: Report-Coverage
-    needs: [Test-Regression-Cache-Wayback-0, Test-Regression-Cache-Wayback-1, Test-Verification, Test-Microarchitectural, Test-RISCV-DV, Test-RISCOF, Test-OpenOCD]
+    needs: [Test-Regression-Cache-Waypack-0, Test-Regression-Cache-Waypack-1, Test-Verification, Test-Microarchitectural, Test-RISCV-DV, Test-RISCOF, Test-OpenOCD]
     uses: ./.github/workflows/report-coverage.yml
 
   Build-Docs:

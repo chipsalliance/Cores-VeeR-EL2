@@ -28,6 +28,12 @@ jobs:
           name: coverage_report
           path: ./coverage_dashboard
 
+      - name: Download coverage reports merged
+        uses: actions/download-artifact@v3
+        with:
+          name: data_v2
+          path: ./data_v_merged
+
       - name: Download docs
         uses: actions/download-artifact@v3
         with:
@@ -65,6 +71,8 @@ jobs:
           apt -y install nodejs npm python3 zip git
 
           mv coverage_dashboard/*.zip .
+          mv data_v_merged/*.zip .
+          mv data_v_merged/*.zip.xz .
 
           # get coverview
           git clone https://github.com/antmicro/coverview
@@ -90,6 +98,10 @@ jobs:
           mv data.zip public.new/html/main/
           mv data_v.zip public.new/html/main/
           mv data_both.zip public.new/html/main/
+          mv data_both2.zip public.new/html/main/
+          mv data_v_line.zip.xz public.new/html/main/
+          mv data_v_toggle.zip.xz public.new/html/main/
+          mv data_v_branch.zip.xz public.new/html/main/
           echo ${GITHUB_RUN_ID} > public.new/html/main/run_id
           tar -acf webpage.tar.gz public.new
 
@@ -100,6 +112,8 @@ jobs:
           apt -y install nodejs npm python3 zip git
 
           mv coverage_dashboard/*.zip .
+          mv data_v_merged/*zip .
+          mv data_v_merged/*zip.xz .
 
           # get coverview
           git clone https://github.com/antmicro/coverview
@@ -125,6 +139,10 @@ jobs:
           mv data.zip public.new/html/dev/${{ github.event.number }}/
           mv data_v.zip public.new/html/dev/${{ github.event.number }}/
           mv data_both.zip public.new/html/dev/${{ github.event.number }}/
+          mv data_both2.zip public.new/html/dev/${{ github.event.number }}/
+          mv data_v_line.zip.xz public.new/html/dev/${{ github.event.number }}/
+          mv data_v_toggle.zip.xz public.new/html/dev/${{ github.event.number }}/
+          mv data_v_branch.zip.xz public.new/html/dev/${{ github.event.number }}/
           echo ${GITHUB_RUN_ID} > public.new/html/dev/${{ github.event.number }}/run_id
           tar -acf webpage.tar.gz public.new
 

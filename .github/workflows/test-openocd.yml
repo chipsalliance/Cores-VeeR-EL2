@@ -76,8 +76,7 @@ jobs:
           make -C gdb_test -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
             CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }} -j$(nproc)
           cd gdb_test
-          ${RV_ROOT}/.github/scripts/gdb_test.sh \
-            /bin/bash -c 'cd ${RV_ROOT}/.github/scripts && ./dump_and_compare.sh' || true
+          ${RV_ROOT}/.github/scripts/gdb_test.sh
           pkill openocd || true
 
       - name: Prepare coverage data

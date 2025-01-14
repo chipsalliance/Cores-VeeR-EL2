@@ -1,3 +1,6 @@
+# Dbus Store Error Address Capture register
+MDSEAC = 0xFC0
+
 MEICPCT = 0xBCA
 MEIVT = 0xBC8
 # MTSEL (R/W)
@@ -30,6 +33,12 @@ MINSTRETL = 0xB02
 MINSTRETH = 0xB82
 MCYCLEL = 0xB00
 MCYCLEH = 0xB80
+
+# hardware performance monitors
+MHPME3 = 0x323
+MHPME4 = 0x324
+MHPME5 = 0x325
+MHPME6 = 0x326
 
 MICECT = 0x7F0
 MICCMECT = 0x7F1

@@ -6,11 +6,12 @@ import subprocess
 class TestPyUVM():
 
     @pytest.mark.parametrize("UVM_TEST", ["test_irq.test_irq"])
-    def test_pyuvm(self, UVM_TEST, coverage_opt):
+    def test_pyuvm(self, UVM_TEST, coverage_opt, sim_opt):
 
         os.environ["UVM_TEST"] = UVM_TEST
         py_command = []
-        py_command += [f"COVERAGE={coverage_opt}"]
+        py_command += [f"COVERAGE_TYPE={coverage_opt}"]
+        py_command += [f"SIM={sim_opt}"]
         py_command += [
             "make all",
         ]

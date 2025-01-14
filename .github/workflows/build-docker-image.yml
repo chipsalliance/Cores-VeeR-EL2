@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     env:
-      VERILATOR_VERSION: branch-cov-comments
+      VERILATOR_VERSION: toggle-coverage-index
       VERILATOR_UVM_VERSION: 7ca2d6470a
       OPENOCD_VERSION: riscv-nohalt-rebase
       RENODE_VERSION: 1.15.3+20240924gitc7bc336bb

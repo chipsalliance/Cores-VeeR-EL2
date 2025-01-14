@@ -33,6 +33,28 @@ class TestMtdata(BaseTest):
 
 
 @pyuvm.test()
+class TestMhpme(BaseTest):
+    def end_of_elaboration_phase(self):
+        super().end_of_elaboration_phase()
+        ConfigDB().set(None, "*", "TEST", "mhpme")
+        self.seq = TlSequence("stimulus")
+
+    async def run(self):
+        await self.seq.start(self.env.tl_seqr)
+
+
+@pyuvm.test()
+class TestMdseac(BaseTest):
+    def end_of_elaboration_phase(self):
+        super().end_of_elaboration_phase()
+        ConfigDB().set(None, "*", "TEST", "mdseac")
+        self.seq = TlSequence("stimulus")
+
+    async def run(self):
+        await self.seq.start(self.env.tl_seqr)
+
+
+@pyuvm.test()
 class TestCsrAccess(BaseTest):
     def end_of_elaboration_phase(self):
         super().end_of_elaboration_phase()

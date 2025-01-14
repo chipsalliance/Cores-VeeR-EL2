@@ -38,9 +38,11 @@ class TlInputItem(uvm_sequence_item):
         mtdata1=0,
         mtdata2=0,
         mtsel=0,
+        mdeau=0,
         csr_addr=0,
         dec_csr_rddata_d=0,
         ifu_ic_debug_rd_data=0,
+        lsu_imprecise_error_addr_any=0,
     ):
         super().__init__("TlOutputItem")
 
@@ -50,8 +52,11 @@ class TlInputItem(uvm_sequence_item):
         self.mtdata2 = mtdata2
         self.mtsel = mtsel
         self.csr_addr = csr_addr
+        self.mtsel = mtsel
+        self.mdeau = mdeau
         self.dec_csr_rddata_d = dec_csr_rddata_d
         self.ifu_ic_debug_rd_data = ifu_ic_debug_rd_data
+        self.lsu_imprecise_error_addr_any = lsu_imprecise_error_addr_any
 
     def randomize(self, test):
 
@@ -67,6 +72,19 @@ class TlInputItem(uvm_sequence_item):
 
             self.pic_claimid = int(pic_claimid, 2)
             self.dec_csr_wrdata_r = int(dec_csr_wrdata_r, 2) << 10
+        elif test == "mhpme":
+            value = ""
+            for _ in range(10):
+                value += random.choice(["0", "1"])
+            self.dec_csr_wrdata_r = int(value, 2)
+            self.csr_addr = random.choice(
+                [
+                    csrs.MHPME3,
+                    csrs.MHPME4,
+                    csrs.MHPME5,
+                    csrs.MHPME6,
+                ]
+            )
         elif test == "mtdata":
             # bits 31:28 are hardcoded to 0x2
             mtdata1 = "0010"
@@ -86,6 +104,16 @@ class TlInputItem(uvm_sequence_item):
             for _ in range(2):
                 mtsel += random.choice(["0", "1"])
             self.mtsel = int(mtsel, 2)
+        elif test == "mdseac":
+            mdeau = ""
+            for _ in range(32):
+                mdeau += random.choice(["0", "1"])
+            self.mdeau = int(mdeau, 2)
+            value = ""
+            for _ in range(32):
+                value += random.choice(["0", "1"])
+            self.lsu_imprecise_error_addr_any = int(value, 2)
+            self.csr_addr = csrs.MDSEAC
         elif test == "csrs_access":
             value = ""
             for _ in range(32):
@@ -108,6 +136,11 @@ class TlInputItem(uvm_sequence_item):
                     csrs.MICECT,
                     csrs.MICCMECT,
                     csrs.MDCCMECT,
+                    csrs.MTVEC,
+                    csrs.MHPME3,
+                    csrs.MHPME4,
+                    csrs.MHPME5,
+                    csrs.MHPME6,
                 ]
             )
         elif test == "debug_csrs_access":
@@ -176,6 +209,12 @@ class TlDriver(uvm_driver):
         await RisingEdge(self.dut.clk)
         self.dut.dec_csr_wen_r.value = 0
 
+    async def do_reset(self):
+        self.dut.rst_l.value = 0
+        await ClockCycles(self.dut.clk, 2)
+        await FallingEdge(self.dut.clk)
+        self.dut.rst_l.value = 1
+
     async def run_phase(self):
 
         while True:
@@ -201,7 +240,23 @@ class TlDriver(uvm_driver):
                     await self.write_csr(csrs.MTSEL, it.mtsel)
                     await self.write_csr(csrs.MTDATA1, it.mtdata1)
                     await self.write_csr(csrs.MTDATA2, it.mtdata2)
-                elif test == "csrs_access":
+                elif test == "mdseac":
+                    # Write to unlock register
+                    await self.write_csr(csrs.MDEAU, it.mdeau)
+                    if self.dut.mdseac_locked_f.value:
+                        await FallingEdge(self.dut.mdseac_locked_f)
+                    await RisingEdge(self.dut.clk)
+                    # Write error
+                    self.dut.lsu_imprecise_error_addr_any.value = it.lsu_imprecise_error_addr_any
+                    self.dut.lsu_imprecise_error_store_any.value = 1
+                    await RisingEdge(self.dut.clk)
+                    self.dut.lsu_imprecise_error_store_any.value = 0
+                    await RisingEdge(self.dut.clk)
+                    # Read the MDSEAC register
+                    await self.read_csr(it.csr_addr)
+                    # Perform reset to clear the error
+                    await self.do_reset()
+                elif test in ["csrs_access", "mhpme"]:
                     # write a perf counter
                     await self.write_csr(it.csr_addr, it.dec_csr_wrdata_r)
                     # read it back
@@ -266,7 +321,17 @@ class TlInputMonitor(uvm_component):
                 await RisingEdge(self.dut.dec_csr_wen_r)
                 mtdata2 = int(self.dut.dec_csr_wrdata_r.value)
                 self.ap.write(TlInputItem(mtdata1=mtdata1, mtdata2=mtdata2, mtsel=mtsel))
-            elif test == "csrs_access":
+            elif test == "mdseac":
+                await RisingEdge(self.dut.lsu_imprecise_error_store_any)
+                await RisingEdge(self.dut.clk)
+                csr_addr = int(self.dut.dec_csr_rdaddr_d.value)
+                lsu_imprecise_error_addr_any = int(self.dut.lsu_imprecise_error_addr_any.value)
+                self.ap.write(
+                    TlInputItem(
+                        csr_addr=csr_addr, lsu_imprecise_error_addr_any=lsu_imprecise_error_addr_any
+                    )
+                )
+            elif test in ["csrs_access", "mhpme"]:
                 # wait for reg write
                 await RisingEdge(self.dut.dec_csr_wen_r)
                 await RisingEdge(self.dut.clk)
@@ -331,7 +396,15 @@ class TlOutputMonitor(uvm_component):
                     await RisingEdge(self.dut.clk)
                 trigger_pkt_any = int(self.dut.trigger_pkt_any.value)
                 self.ap.write(TlOutputItem(trigger_pkt_any=trigger_pkt_any))
-            elif test == "csrs_access":
+            elif test == "mdseac":
+                # Wait for when the error address is set
+                await RisingEdge(self.dut.lsu_imprecise_error_store_any)
+                # Wait for read
+                for _ in range(3):
+                    await RisingEdge(self.dut.clk)
+                dec_csr_rddata_d = int(self.dut.dec_csr_rddata_d.value)
+                self.ap.write(TlOutputItem(dec_csr_rddata_d=dec_csr_rddata_d))
+            elif test in ["csrs_access", "mhpme"]:
                 # wait for reg write
                 await RisingEdge(self.dut.dec_csr_wen_r)
                 # wait for read
@@ -389,6 +462,15 @@ class TlScoreboard(uvm_component):
         self.port_out.connect(self.fifo_out.get_export)
 
     def check_phase(self):  # noqa: C901
+        def mhpme_zero_event(reg_val_i):
+            return (
+                (reg_val_i > 516)
+                | ((reg_val_i < 512) & (reg_val_i > 56))
+                | ((reg_val_i < 54) & (reg_val_i > 50))
+                | (reg_val_i == 29)
+                | (reg_val_i == 33)
+            )
+
         # Get item pairs
         while True:
             got_inp, item_inp = self.port_inp.try_get()
@@ -501,6 +583,32 @@ class TlScoreboard(uvm_component):
                     self.logger.error("m {} != {} (should be {})".format(m_i, m_o, m_i))
                     self.passed = False
 
+            elif test == "mhpme":
+                csr = item_inp.csr_addr
+                perf_reg_val_i = item_inp.dec_csr_wrdata_r
+                perf_reg_val_o = item_out.dec_csr_rddata_d
+
+                perf_reg_val_i = 0 if mhpme_zero_event(perf_reg_val_i) else perf_reg_val_i
+
+                if perf_reg_val_i != perf_reg_val_o:
+                    self.logger.error(
+                        "reg_val[{}] {} != {} (should be {})".format(
+                            hex(csr), hex(perf_reg_val_i), hex(perf_reg_val_o), hex(perf_reg_val_i)
+                        )
+                    )
+                    self.passed = False
+            elif test == "mdseac":
+                csr = item_inp.csr_addr
+                error_val_i = item_inp.lsu_imprecise_error_addr_any
+                mdseac_val_o = item_out.dec_csr_rddata_d
+
+                if error_val_i != mdseac_val_o:
+                    self.logger.error(
+                        "reg_val[{}] {} != {} (should be {})".format(
+                            hex(csr), hex(error_val_i), hex(mdseac_val_o), hex(error_val_i)
+                        )
+                    )
+                    self.passed = False
             elif test == "csrs_access":
                 csr = item_inp.csr_addr
                 perf_reg_val_i = item_inp.dec_csr_wrdata_r
@@ -509,6 +617,11 @@ class TlScoreboard(uvm_component):
                     if ((perf_reg_val_i >> 27) & 0x1F) > 26:
                         perf_reg_val_i = perf_reg_val_i & 0x07FFFFFF
                         perf_reg_val_i = perf_reg_val_i | (26 << 27)
+                if csr == csrs.MTVEC:
+                    perf_reg_val_i = perf_reg_val_i & 0xFFFFFFFD
+                if csr in [csrs.MHPME3, csrs.MHPME4, csrs.MHPME5, csrs.MHPME6]:
+                    perf_reg_val_i = 0 if mhpme_zero_event(perf_reg_val_i) else perf_reg_val_i
+
                 if perf_reg_val_i != perf_reg_val_o:
                     self.logger.error(
                         "reg_val[{}] {} != {} (should be {})".format(

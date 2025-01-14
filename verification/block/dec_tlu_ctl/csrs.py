@@ -1,3 +1,8 @@
+# Dbus Error Address Unlock register
+MDEAU = 0xBC0
+# Dbus Store Error Address Capture register
+MDSEAC = 0xFC0
+
 MEICPCT = 0xBCA
 MEIVT = 0xBC8
 # MTSEL (R/W)
@@ -12,6 +17,11 @@ MTDATA1 = 0x7A1
 # [31:0] : Trigger Data 2
 MTDATA2 = 0x7A2
 
+# [31:2] BASE : Trap vector base address
+# [1] - Reserved, not implemented, reads zero
+# [0]  MODE : 0 = Direct, 1 = Asyncs
+MTVEC = 0x305
+
 # performance counters
 MHPMC3 = 0xB03
 MHPMC3H = 0xB83
@@ -25,6 +35,12 @@ MINSTRETL = 0xB02
 MINSTRETH = 0xB82
 MCYCLEL = 0xB00
 MCYCLEH = 0xB80
+
+# hardware performance monitors
+MHPME3 = 0x323
+MHPME4 = 0x324
+MHPME5 = 0x325
+MHPME6 = 0x326
 
 MICECT = 0x7F0
 MICCMECT = 0x7F1

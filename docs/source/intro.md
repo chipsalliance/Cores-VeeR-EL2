@@ -1,6 +1,6 @@
 # RISC-V VeeR EL2 Programmer's Reference Manual
 
-**Revision:** 1.4 December 22, 2022
+**Revision:** 2.0  January 14, 2025
 
 ![CHIPS Alliance logo](img/logo.png)
 ![VeeR project logo](img/VeeR-logo-white-rgb.png)
@@ -93,6 +93,12 @@ See the License for the specific language governing permissions and limitations 
     - clarified that correctable error counter/threshold registers are always instantiated (sections [I-Cache Error Counter/Threshold Register (micect)](error-protection.md#i-cache-error-counter-threshold-register-micect), [Iccm Correctable Error Counter/Threshold Register (miccmect)](error-protection.md#iccm-correctable-error-counter-threshold-register-miccmect), and [Dccm Correctable Error Counter/Threshold Register (mdccmect)](error-protection.md#dccm-correctable-error-counter-threshold-register-mdccmect))
     - corrected PIC I/O power reduction feature description ([](interrupts.md#power-reduction))
     - incremented mimpid register value from '3' to '4' ({numref}`tab-veer-el2-core-specific-std-rv-machine-information-csrs`)
+* - 2.0
+  - Jan 14, 2025
+    - Extended the core with support for RISC-V User privilege level
+    - Extended the core with support for PMP and ePMP functionalities
+    - ICache memory is now exported from the main core and can be provided at SoC integration level
+    - Extended the repository with a number of tests covering various core configurations
 :::
 
 ## Reference Documents

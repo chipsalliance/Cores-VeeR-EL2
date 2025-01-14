@@ -1,3 +1,5 @@
+# Dbus Error Address Unlock register
+MDEAU = 0xBC0
 # Dbus Store Error Address Capture register
 MDSEAC = 0xFC0
 

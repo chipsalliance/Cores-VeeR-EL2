@@ -14,7 +14,7 @@ class TestPyUVM():
         py_command += [f"SIM={sim_opt}"]
         py_command += [f"CONF_PARAMS='{conf_params}'"]
         py_command += [
-            "make all",
+            "make clean all",
         ]
         py_command = " ".join(py_command)
 

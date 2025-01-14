@@ -12,6 +12,11 @@ MTDATA1 = 0x7A1
 # [31:0] : Trigger Data 2
 MTDATA2 = 0x7A2
 
+# [31:2] BASE : Trap vector base address
+# [1] - Reserved, not implemented, reads zero
+# [0]  MODE : 0 = Direct, 1 = Asyncs
+MTVEC = 0x305
+
 # performance counters
 MHPMC3 = 0xB03
 MHPMC3H = 0xB83

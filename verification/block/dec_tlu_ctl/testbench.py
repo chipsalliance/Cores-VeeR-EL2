@@ -108,6 +108,7 @@ class TlInputItem(uvm_sequence_item):
                     csrs.MICECT,
                     csrs.MICCMECT,
                     csrs.MDCCMECT,
+                    csrs.MTVEC,
                 ]
             )
         elif test == "debug_csrs_access":
@@ -509,6 +510,9 @@ class TlScoreboard(uvm_component):
                     if ((perf_reg_val_i >> 27) & 0x1F) > 26:
                         perf_reg_val_i = perf_reg_val_i & 0x07FFFFFF
                         perf_reg_val_i = perf_reg_val_i | (26 << 27)
+                if csr == csrs.MTVEC:
+                    perf_reg_val_i = perf_reg_val_i & 0xFFFFFFFD
+
                 if perf_reg_val_i != perf_reg_val_o:
                     self.logger.error(
                         "reg_val[{}] {} != {} (should be {})".format(

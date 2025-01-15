@@ -291,3 +291,23 @@ jobs:
             data_v_line.zip.xz
             data_v_toggle.zip.xz
             data_v_branch.zip.xz
+
+  custom-coverage-report-mapped:
+    name: Custom coverage mapped report
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    needs: [custom-coverage-report]
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Prepare Environment
+        run: _secret_prepare_env
+
+      - name: Generate custom mapped report
+        run: _secret_custom_report_mapfile

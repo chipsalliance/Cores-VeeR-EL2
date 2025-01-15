@@ -21,6 +21,8 @@ MTDATA2 = 0x7A2
 # [1] - Reserved, not implemented, reads zero
 # [0]  MODE : 0 = Direct, 1 = Asyncs
 MTVEC = 0x305
+# Region Access Control Register, 16 regions
+MRAC = 0x7C0
 
 # performance counters
 MHPMC3 = 0xB03

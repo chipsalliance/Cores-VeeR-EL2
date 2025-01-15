@@ -143,6 +143,10 @@ class TlInputItem(uvm_sequence_item):
                     csrs.MHPME6,
                     csrs.MRAC,
                     csrs.MEIPT,
+                    csrs.MCOUNTINHIBIT,
+                    csrs.MFDHT,
+                    csrs.MEICURPL,
+                    csrs.MFDC,
                 ]
             )
         elif test == "debug_csrs_access":
@@ -639,6 +643,14 @@ class TlScoreboard(uvm_component):
                     perf_reg_val_i = mrac_prevent_11_pairs(perf_reg_val_i)
                 if csr == csrs.MEIPT:
                     perf_reg_val_i &= 0xF  # Upper 28 bits reserved
+                if csr == csrs.MCOUNTINHIBIT:
+                    perf_reg_val_i &= 0x7D  # mcountinhibit[1] reserved
+                if csr == csrs.MFDHT:
+                    perf_reg_val_i &= 0x3F  # mfdht[5:0]
+                if csr == csrs.MEICURPL:
+                    perf_reg_val_i &= 0xF  # meicurpl[3:0]
+                if csr == csrs.MFDC:
+                    perf_reg_val_i &= 0x71FBF
 
                 if perf_reg_val_i != perf_reg_val_o:
                     self.logger.error(

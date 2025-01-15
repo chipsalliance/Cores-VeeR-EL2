@@ -95,10 +95,10 @@ See the License for the specific language governing permissions and limitations 
     - incremented mimpid register value from '3' to '4' ({numref}`tab-veer-el2-core-specific-std-rv-machine-information-csrs`)
 * - 2.0
   - Jan 14, 2025
-    - Extended the core with support for RISC-V User privilege level
-    - Extended the core with support for PMP and ePMP functionalities
-    - ICache memory is now exported from the main core and can be provided at SoC integration level
-    - Extended the repository with a number of tests covering various core configurations
+  - Changes:
+    - Added description of PMP and ePMP functionalities
+    - Added description of RISC-V User privilege level
+    - Added information on verification, debugging and running Tock
 :::
 
 ## Reference Documents

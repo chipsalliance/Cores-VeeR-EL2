@@ -1,5 +1,13 @@
 # Release notes
 
+## 2.0
+
+* Extended the core with support for RISC-V User privilege level
+* Extended the core with support for PMP and ePMP functionalities
+* ICache memory is now exported from the main core and can be provided at SoC integration level
+* Many smaller changes and bugfixes
+* Extended the repository with an array of tests and CI covering various core configurations
+
 ## 1.4
 
 * Upgraded bit-manipulation support for Zba, Zbb, Zbc, Zbe, Zbf, Zbp, Zbr, Zbs to `0.94` draft spec.

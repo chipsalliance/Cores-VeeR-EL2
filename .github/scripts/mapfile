@@ -1,0 +1,32 @@
+map el2_exu_alu_ctl el2_exu_alu_ctl_wrapper.alu tb_top.rvtop_wrapper.rvtop.veer.exu.i_alu
+map el2_exu_mul_ctl el2_exu_mul_ctl_wrapper.mul tb_top.rvtop_wrapper.rvtop.veer.exu.i_mul
+map el2_exu_div_ctl el2_exu_div_ctl_wrapper.div tb_top.rvtop_wrapper.rvtop.veer.exu.i_div
+
+map dmi_jtag_to_core_sync dmi_test_wrapper.wrapper.i_dmi_jtag_to_core_sync tb_top.rvtop_wrapper.rvtop.dmi_wrapper.i_dmi_jtag_to_core_sync
+
+map rvjtag_tap dmi_test_wrapper.wrapper.i_jtag_tap tb_top.rvtop_wrapper.rvtop.dmi_wrapper.i_jtag_tap
+
+map el2_ifu_iccm_mem el2_ifu_iccm_mem_wrapper.mem tb_top.rvtop_wrapper.rvtop.mem.iccm.iccm
+map el2_lsu_dccm_mem el2_lsu_dccm_mem_wrapper.mem tb_top.rvtop_wrapper.rvtop.mem.Gen_dccm_enable.dccm
+map el2_ifu_compress_ctl el2_ifu_compress_ctl tb_top.rvtop_wrapper.rvtop.veer.ifu.aln.compress0
+
+map el2_pic_ctrl el2_pic_ctrl tb_top.rvtop_wrapper.rvtop.veer.pic_ctrl_inst
+map el2_pmp el2_pmp_wrapper.pmp tb_top.rvtop_wrapper.rvtop.veer.pmp
+map el2_dec_ib_ctl el2_dec_ib_ctl_wrapper.tu tb_top.rvtop_wrapper.rvtop.veer.dec.instbuff
+map el2_dec_trigger el2_dec_trigger_wrapper.tu tb_top.rvtop_wrapper.rvtop.veer.dec.dec_trigger
+map el2_dma_ctrl el2_dma_ctrl tb_top.rvtop_wrapper.rvtop.veer.dma_ctrl
+
+map dmi_mux dmi_test_wrapper.mux tb_top.rvtop_wrapper.rvtop.dmi_mux
+map dmi_wrapper dmi_test_wrapper.wrapper tb_top.rvtop_wrapper.rvtop.dmi_wrapper
+
+map el2_configurable_gw 'el2_pic_ctrl.IO_CLK_GRP[0].GW[1].gw_inst' 'tb_top.rvtop_wrapper.rvtop.veer.pic_ctrl_inst.IO_CLK_GRP[0].GW[1].gw_inst'
+map el2_configurable_gw 'el2_pic_ctrl.IO_CLK_GRP[0].GW[2].gw_inst' 'tb_top.rvtop_wrapper.rvtop.veer.pic_ctrl_inst.IO_CLK_GRP[0].GW[2].gw_inst'
+map el2_configurable_gw 'el2_pic_ctrl.IO_CLK_GRP[0].GW[3].gw_inst' 'tb_top.rvtop_wrapper.rvtop.veer.pic_ctrl_inst.IO_CLK_GRP[0].GW[3].gw_inst'
+map el2_configurable_gw 'el2_pic_ctrl.IO_CLK_GRP[1].GW[0].gw_inst' 'tb_top.rvtop_wrapper.rvtop.veer.pic_ctrl_inst.IO_CLK_GRP[1].GW[0].gw_inst'
+map el2_configurable_gw 'el2_pic_ctrl.IO_CLK_GRP[1].GW[1].gw_inst' 'tb_top.rvtop_wrapper.rvtop.veer.pic_ctrl_inst.IO_CLK_GRP[1].GW[1].gw_inst'
+map el2_configurable_gw 'el2_pic_ctrl.IO_CLK_GRP[1].GW[2].gw_inst' 'tb_top.rvtop_wrapper.rvtop.veer.pic_ctrl_inst.IO_CLK_GRP[1].GW[2].gw_inst'
+map el2_configurable_gw 'el2_pic_ctrl.IO_CLK_GRP[1].GW[3].gw_inst' 'tb_top.rvtop_wrapper.rvtop.veer.pic_ctrl_inst.IO_CLK_GRP[1].GW[3].gw_inst'
+
+map el2_cmp_and_mux 'el2_pic_ctrl.genblock.LEVEL[0].COMPARE[0].cmp_l1' 'tb_top.rvtop_wrapper.rvtop.veer.pic_ctrl_inst.genblock.LEVEL[0].COMPARE[0].cmp_l1'
+map el2_cmp_and_mux 'el2_pic_ctrl.genblock.LEVEL[0].COMPARE[1].cmp_l1' 'tb_top.rvtop_wrapper.rvtop.veer.pic_ctrl_inst.genblock.LEVEL[0].COMPARE[1].cmp_l1'
+

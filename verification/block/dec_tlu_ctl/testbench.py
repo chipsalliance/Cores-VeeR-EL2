@@ -142,6 +142,7 @@ class TlInputItem(uvm_sequence_item):
                     csrs.MHPME5,
                     csrs.MHPME6,
                     csrs.MRAC,
+                    csrs.MEIPT,
                 ]
             )
         elif test == "debug_csrs_access":
@@ -472,10 +473,10 @@ class TlScoreboard(uvm_component):
                 | (reg_val_i == 33)
             )
 
-        def mrac_prevent_11_pairs(value):
-            def get_bit(value, i):
-                return (value >> i) & 1
+        def get_bit(value, i):
+            return (value >> i) & 1
 
+        def mrac_prevent_11_pairs(value):
             new_value = 0
             for i in reversed(range(0, 31, 2)):
                 new_value = new_value << 2
@@ -636,6 +637,8 @@ class TlScoreboard(uvm_component):
                     perf_reg_val_i = 0 if mhpme_zero_event(perf_reg_val_i) else perf_reg_val_i
                 if csr == csrs.MRAC:
                     perf_reg_val_i = mrac_prevent_11_pairs(perf_reg_val_i)
+                if csr == csrs.MEIPT:
+                    perf_reg_val_i &= 0xF  # Upper 28 bits reserved
 
                 if perf_reg_val_i != perf_reg_val_o:
                     self.logger.error(

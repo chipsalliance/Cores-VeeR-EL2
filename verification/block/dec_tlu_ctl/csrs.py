@@ -17,6 +17,8 @@ MTDATA1 = 0x7A1
 # [31:0] : Trigger Data 2
 MTDATA2 = 0x7A2
 
+# External Interrupt Priority Threshold
+MEIPT = 0xBC9
 # [31:2] BASE : Trap vector base address
 # [1] - Reserved, not implemented, reads zero
 # [0]  MODE : 0 = Direct, 1 = Asyncs

@@ -70,12 +70,6 @@ cp _coverage_line.info coverage_line_verilator.info
 cp _coverage_branch.info coverage_branch_verilator.info
 cp _coverage_toggle.info coverage_toggle_verilator.info
 
-mv coverage_toggle_verilator.info coverage_toggle_verilator_orig.info_
-mv coverage_toggle_verilator_filtered.info coverage_toggle_verilator.info
-
-mv coverage_branch_verilator.info coverage_branch_verilator_orig.info_
-mv coverage_branch_verilator_filtered.info coverage_branch_verilator.info
-
 grep 'SF:' coverage_*.info | cut -d ":" -f 3 | sort | uniq > files.txt
 
 if [ -z "${GITHUB_HEAD_REF}" ]; then

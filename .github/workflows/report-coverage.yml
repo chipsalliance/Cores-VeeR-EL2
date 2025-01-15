@@ -92,10 +92,8 @@ jobs:
         with:
           name: verilator_coverage_data
           path: |
-            coverage_toggle_verilator_orig.info_
             coverage_toggle_verilator.info
             coverage_line_verilator.info
-            coverage_branch_verilator_orig.info_
             coverage_branch_verilator.info
 
       - name: Pack artifacts

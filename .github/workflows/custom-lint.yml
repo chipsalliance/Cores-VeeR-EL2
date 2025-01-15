@@ -1,0 +1,22 @@
+name: Custom lint
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+jobs:
+  run-lint:
+    name: Run lint
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    env:
+      GHA_EXTERNAL_DISK: additional-tools-3
+      GHA_SA: gh-sa-veer-uploader
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Run lint
+        run: _secret_lint
+

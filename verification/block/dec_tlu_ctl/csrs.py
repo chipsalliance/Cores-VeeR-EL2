@@ -17,11 +17,18 @@ MTDATA1 = 0x7A1
 # [31:0] : Trigger Data 2
 MTDATA2 = 0x7A2
 
+# External Interrupt Priority Threshold
+MEIPT = 0xBC9
 # [31:2] BASE : Trap vector base address
 # [1] - Reserved, not implemented, reads zero
 # [0]  MODE : 0 = Direct, 1 = Asyncs
 MTVEC = 0x305
-
+# Region Access Control Register, 16 regions
+MRAC = 0x7C0
+MCOUNTINHIBIT = 0x320
+MFDHT = 0x7CE
+MEICURPL = 0xBCC
+MFDC = 0xBCC
 # performance counters
 MHPMC3 = 0xB03
 MHPMC3H = 0xB83

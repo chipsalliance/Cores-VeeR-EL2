@@ -141,6 +141,12 @@ class TlInputItem(uvm_sequence_item):
                     csrs.MHPME4,
                     csrs.MHPME5,
                     csrs.MHPME6,
+                    csrs.MRAC,
+                    csrs.MEIPT,
+                    csrs.MCOUNTINHIBIT,
+                    csrs.MFDHT,
+                    csrs.MEICURPL,
+                    csrs.MFDC,
                 ]
             )
         elif test == "debug_csrs_access":
@@ -471,6 +477,18 @@ class TlScoreboard(uvm_component):
                 | (reg_val_i == 33)
             )
 
+        def get_bit(value, i):
+            return (value >> i) & 1
+
+        def mrac_prevent_11_pairs(value):
+            new_value = 0
+            for i in reversed(range(0, 31, 2)):
+                new_value = new_value << 2
+                b0 = get_bit(value, i)
+                b1 = get_bit(value, i + 1)
+                new_value |= (b1 << 1) | (b0 & (not b1))
+            return new_value
+
         # Get item pairs
         while True:
             got_inp, item_inp = self.port_inp.try_get()
@@ -621,6 +639,18 @@ class TlScoreboard(uvm_component):
                     perf_reg_val_i = perf_reg_val_i & 0xFFFFFFFD
                 if csr in [csrs.MHPME3, csrs.MHPME4, csrs.MHPME5, csrs.MHPME6]:
                     perf_reg_val_i = 0 if mhpme_zero_event(perf_reg_val_i) else perf_reg_val_i
+                if csr == csrs.MRAC:
+                    perf_reg_val_i = mrac_prevent_11_pairs(perf_reg_val_i)
+                if csr == csrs.MEIPT:
+                    perf_reg_val_i &= 0xF  # Upper 28 bits reserved
+                if csr == csrs.MCOUNTINHIBIT:
+                    perf_reg_val_i &= 0x7D  # mcountinhibit[1] reserved
+                if csr == csrs.MFDHT:
+                    perf_reg_val_i &= 0x3F  # mfdht[5:0]
+                if csr == csrs.MEICURPL:
+                    perf_reg_val_i &= 0xF  # meicurpl[3:0]
+                if csr == csrs.MFDC:
+                    perf_reg_val_i &= 0x71FBF
 
                 if perf_reg_val_i != perf_reg_val_o:
                     self.logger.error(

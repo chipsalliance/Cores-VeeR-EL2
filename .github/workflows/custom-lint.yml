@@ -1,0 +1,28 @@
+name: Custom lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  run-lint:
+    name: Run lint
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    env:
+      GHA_EXTERNAL_DISK: additional-tools-all
+      GHA_SA: gh-sa-veer-uploader
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Set secrets version
+        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
+
+      - name: Run lint
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_lint

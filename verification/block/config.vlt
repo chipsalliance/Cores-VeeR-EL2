@@ -1,0 +1,99 @@
+`verilator_config
+
+// Unnamed blocks do not influence logic
+lint_off -rule GENUNNAMED
+
+// Unconnected IC memory output pins
+lint_off -rule PINCONNECTEMPTY -file "*/el2_ifu_ic_mem.sv"
+
+// These require revisit to remove multiple definitions of variables with same names
+lint_off -rule VARHIDDEN -file "*/axi4_to_ahb.sv"
+lint_off -rule VARHIDDEN -file "*/el2_ifu_bp_ctl.sv"
+lint_off -rule VARHIDDEN -file "*/el2_ifu_mem_ctl.sv"
+lint_off -rule VARHIDDEN -file "*/el2_exu_alu_ctl.sv"
+lint_off -rule VARHIDDEN -file "*/el2_pic_ctrl.sv"
+
+// Width related warning require explicit type casting
+lint_off -rule WIDTHTRUNC -file "*/ahb_to_axi4.sv"
+lint_off -rule WIDTHTRUNC -file "*/axi4_to_ahb.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_dma_ctrl.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_ifu_ifc_ctl.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_ifu_bp_ctl.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_ifu_aln_ctl.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_dec_decode_ctl.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_dec_ib_ctl.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_dec_tlu_ctl.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_dec_trigger.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_lib.sv"
+lint_off -rule WIDTHTRUNC -file "*/beh_lib.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_lsu_bus_buffer.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_dec_pmp_ctl.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_lsu_addrcheck.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_lsu_dccm_ctl.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_lsu_dccm_mem.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_lsu_trigger.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_ifu_iccm_mem.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_ifu_mem_ctl.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_exu.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_exu_alu_ctl.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_exu_div_ctl.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_exu_mul_ctl.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_dbg.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_pic_ctrl.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_pmp.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_mem_if.sv"
+
+lint_off -rule WIDTHEXPAND -file "*/el2_exu.sv"
+lint_off -rule WIDTHEXPAND -file "*/el2_pic_ctrl.sv"
+lint_off -rule WIDTHEXPAND -file "*/el2_ifu_bp_ctl.sv"
+lint_off -rule WIDTHEXPAND -file "*/el2_ifu_mem_ctl.sv"
+lint_off -rule WIDTHEXPAND -file "*/el2_ifu_iccm_mem.sv"
+lint_off -rule WIDTHEXPAND -file "*/el2_lsu_addrcheck.sv"
+lint_off -rule WIDTHEXPAND -file "*/el2_lsu_bus_buffer.sv"
+lint_off -rule WIDTHEXPAND -file "*/el2_lsu_stbuf.sv"
+lint_off -rule WIDTHEXPAND -file "*/el2_lsu_dccm_ctl.sv"
+lint_off -rule WIDTHEXPAND -file "*/el2_lsu_dccm_mem.sv"
+lint_off -rule WIDTHEXPAND -file "*/el2_exu_mul_ctl.sv"
+lint_off -rule WIDTHEXPAND -file "*/el2_dec_tlu_ctl.sv"
+lint_off -rule WIDTHEXPAND -file "*/el2_dma_ctrl.sv"
+lint_off -rule WIDTHEXPAND -file "*/el2_dbg.sv"
+
+// Unused parameters are probably safe to remove from RTL
+lint_off -rule UNUSEDPARAM -file "*/axi4_to_ahb.sv"
+lint_off -rule UNUSEDPARAM -file "*/el2_ifu.sv"
+lint_off -rule UNUSEDPARAM -file "*/el2_pic_ctrl.sv"
+lint_off -rule UNUSEDPARAM -file "*/el2_dma_ctrl.sv"
+lint_off -rule UNUSEDPARAM -file "*/el2_ifu_bp_ctl.sv"
+lint_off -rule UNUSEDPARAM -file "*/el2_ifu_mem_ctl.sv"
+lint_off -rule UNUSEDPARAM -file "*/el2_dec_tlu_ctl.sv"
+lint_off -rule UNUSEDPARAM -file "*/el2_lsu_dccm_ctl.sv"
+lint_off -rule UNUSEDPARAM -file "*/el2_lsu_dccm_mem.sv"
+
+// Gated clock, expected latch
+lint_off -rule LATCH -file "*/beh_lib.sv" -lines 781
+
+lint_off -rule BLKSEQ -file "*/beh_lib.sv" -lines 783
+
+// The Verilator reports that `core_rst_l` is being used in sync and async nets,
+// pointing to `rvdff` module as a source of the problem. Since the `rvdff` looks
+// unrelated to `core_rst_l`, it requires a closer investigation.
+lint_off -rule SYNCASYNCNET -file "*/el2_veer.sv" -lines 35
+
+// Logic that might be not optimal for event based model used by Verilator
+lint_off -rule UNOPTFLAT -file "*/axi4_to_ahb.sv"
+lint_off -rule UNOPTFLAT -file "*/el2_ifu_ifc_ctl.sv"
+lint_off -rule UNOPTFLAT -file "*/el2_dec_decode_ctl.sv"
+lint_off -rule UNOPTFLAT -file "*/el2_exu_mul_ctl.sv"
+lint_off -rule UNOPTFLAT -file "*/el2_exu_div_ctl.sv"
+lint_off -rule UNOPTFLAT -file "*/el2_lsu.sv"
+lint_off -rule UNOPTFLAT -file "*/el2_lsu_lsc_ctl.sv"
+lint_off -rule UNOPTFLAT -file "*/el2_pic_ctrl.sv"
+
+// Warnings related to the generated `el2_param.vh`
+lint_off -rule UNUSEDPARAM -file "*/el2_ifu_compress_ctl.sv"
+lint_off -rule UNUSEDPARAM -file "*/el2_dec_gpr_ctl.sv"
+lint_off -rule UNUSEDPARAM -file "*/el2_dec_trigger.sv"
+lint_off -rule UNUSEDPARAM -file "*/el2_lsu_trigger.sv"
+lint_off -rule UNUSEDPARAM -file "*/el2_lsu_clkdomain.sv"
+
+lint_off -rule WIDTHTRUNC -file "*/el2_ifu_compress_ctl.sv"

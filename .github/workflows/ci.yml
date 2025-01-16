@@ -11,6 +11,8 @@ jobs:
   Test-Regression-Cache-Waypack-0:
     name: Test-Regression Cache Waypack 0
     uses: ./.github/workflows/test-regression-cache-waypack-0.yml
+    with:
+      waypack: 0
 
   Test-Regression-Cache-Waypack-1:
     name: Test-Regression Cache Waypack 1
@@ -48,22 +50,7 @@ jobs:
     name: Test-OpenOCD
     uses: ./.github/workflows/test-openocd.yml
 
-  Report-Coverage:
-    name: Report-Coverage
-    needs: [Test-Regression-Cache-Waypack-0, Test-Regression-Cache-Waypack-1, Test-Verification, Test-Microarchitectural, Test-RISCV-DV, Test-RISCOF, Test-OpenOCD]
-    uses: ./.github/workflows/report-coverage.yml
-
   Build-Docs:
     name: Build-Docs
     uses: ./.github/workflows/build-docs.yml
 
-  Publish-to-GH-Pages:
-    concurrency:
-      group: concurrency-group-${{ github.repository }}-publish
-      cancel-in-progress: false
-    permissions:
-      actions: write
-      contents: write
-    name: Publish-to-GH-Pages
-    needs: [Report-Coverage, Test-Verification, Build-Docs]
-    uses: ./.github/workflows/publish-webpage.yml

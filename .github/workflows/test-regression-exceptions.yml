@@ -3,6 +3,10 @@ name: Regression exceptions tests
 on:
   workflow_call:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
 
   regression-tests:
@@ -74,9 +78,9 @@ jobs:
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: regression_tests_coverage_data
+          name: regression_tests_coverage_data-${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.coverage }}_${{matrix.priv}}_${{matrix.cache_waypack}}
           path: results/*.info
 
   custom-regression-exceptions-tests:
@@ -91,5 +95,10 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Set secrets version
+        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
+
       - name: Run tests
-        run: _secret_custom_regression_exceptions_tests
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_custom_regression_exceptions_tests

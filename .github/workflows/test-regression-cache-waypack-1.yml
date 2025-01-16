@@ -3,6 +3,10 @@ name: Regression tests cache waypack 1
 on:
   workflow_call:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
 
   regression-tests:
@@ -102,9 +106,9 @@ jobs:
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: regression_tests_coverage_data_cache_waypack_1
+          name: regression_tests_coverage_data_cache_waypack_1_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.priv }}_${{ matrix.coverage }}
           path: results/*.info
 
   custom-regression-tests:
@@ -141,9 +145,14 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Set secrets version
+        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
+
       - name: Run tests
-        run: _secret_custom_regression_tests_waypack_1
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
         env:
+          SECRET_NAME: _secret_dcls_regression
+          DCLS_ENABLE: "1"
           TEST: ${{ matrix.test }}
           BUS: ${{ matrix.bus }}
           PRIV: ${{ matrix.priv }}

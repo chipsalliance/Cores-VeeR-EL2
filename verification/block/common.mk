@@ -40,21 +40,41 @@ endif
 ifeq ($(SIM), verilator)
     COMPILE_ARGS += --coverage-max-width 20000
     COMPILE_ARGS += --timing
-    COMPILE_ARGS += -Wall -Wno-fatal
+    COMPILE_ARGS += -Wall
+    COMPILE_ARGS += $(CURDIR)/config.vlt
 
     EXTRA_ARGS   += --trace --trace-structs
     EXTRA_ARGS   += $(VERILATOR_COVERAGE)
     EXTRA_ARGS   += -I$(CFGDIR) -Wno-DECLFILENAME
+
+    # Include test specific Verilator config if it exists
+    ifneq ("$(wildcard $(TEST_DIR)/config.vlt)","")
+        COMPILE_ARGS += $(TEST_DIR)/config.vlt
+    endif
+
+    PARALLEL_THREADS := $(shell echo $$(( $(shell nproc) - 1 )))
+    BUILD_ARGS += -j $(PARALLEL_THREADS)
+
 else ifeq ($(SIM), vcs)
-    EXTRA_ARGS   += +incdir+$(CFGDIR) -assert svaext -cm line+cond+fsm+tgl+branch +vcs+lic+wait
+    ifneq ($(CM_FILE),)
+        EXTRA_ARGS += -cm_hier $(TEST_DIR)/$(CM_FILE)
+    endif
+    EXTRA_ARGS += +incdir+$(CFGDIR) +incdir+$(SRCDIR)/include -assert svaext -cm line+cond+fsm+tgl+branch +vcs+lic+wait
+endif
+
+# Produces verilog.dump VCD file
+ifneq ($(VCS_DEBUG),)
+    EXTRA_ARGS = +vcs+dumpon +vcs+dumpvars
 endif
 
 COCOTB_HDL_TIMEUNIT         = 1ns
 COCOTB_HDL_TIMEPRECISION    = 10ps
 
 # Build directory
-ifneq ($(COVERAGE_TYPE),)
-    SIM_BUILD := sim-build-$(COVERAGE_TYPE)
+ifeq ($(COVERAGE_TYPE),"")
+    SIM_BUILD ?= sim-build
+else
+    SIM_BUILD ?= sim-build-$(COVERAGE_TYPE)
 endif
 
 include $(shell cocotb-config --makefiles)/Makefile.sim
@@ -65,7 +85,10 @@ else
     EXTRA_CONFIG_OPTS = "-set=pmp_entries=64"
 endif
 
+ifneq ($(DEC_TEST),)
+    EXTRA_CONFIG_OPTS += "-set=fast_interrupt_redirect=0"
+endif
+
 # Rules for generating VeeR config
 $(CFGDIR)/common_defines.vh:
-	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0 $(EXTRA_CONFIG_OPTS)
-
+	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0 $(EXTRA_CONFIG_OPTS) $(EXTRA_VEER_CONFIG)

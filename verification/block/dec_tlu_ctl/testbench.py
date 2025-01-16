@@ -6,6 +6,7 @@ import math
 import os
 import random
 import struct
+from dataclasses import dataclass
 
 import csrs
 import pyuvm
@@ -25,6 +26,38 @@ from pyuvm import *
 
 # ==============================================================================
 
+csr_list = [getattr(csrs, mod) for mod in dir(csrs) if isinstance(getattr(csrs, mod), csrs.CSR)]
+
+
+@dataclass
+class TriggerAnyPktT:
+    select: int = 0
+    match: int = 0
+    store: int = 0
+    load: int = 0
+    execute: int = 0
+    m: int = 0
+    tdata2: int = 0
+
+    @staticmethod
+    def get_from_dut(dut):
+        trigger_pkt_any_select = int(dut.trigger_pkt_any_select.value)
+        trigger_pkt_any_match = int(dut.trigger_pkt_any_match.value)
+        trigger_pkt_any_store = int(dut.trigger_pkt_any_store.value)
+        trigger_pkt_any_load = int(dut.trigger_pkt_any_load.value)
+        trigger_pkt_any_execute = int(dut.trigger_pkt_any_execute.value)
+        trigger_pkt_any_m = int(dut.trigger_pkt_any_m.value)
+        trigger_pkt_any_tdata2 = int(dut.trigger_pkt_any_tdata2.value)
+        return TriggerAnyPktT(
+            trigger_pkt_any_select,
+            trigger_pkt_any_match,
+            trigger_pkt_any_store,
+            trigger_pkt_any_load,
+            trigger_pkt_any_execute,
+            trigger_pkt_any_m,
+            trigger_pkt_any_tdata2,
+        )
+
 
 class TlInputItem(uvm_sequence_item):
     """
@@ -38,9 +71,11 @@ class TlInputItem(uvm_sequence_item):
         mtdata1=0,
         mtdata2=0,
         mtsel=0,
+        mdeau=0,
         csr_addr=0,
         dec_csr_rddata_d=0,
         ifu_ic_debug_rd_data=0,
+        lsu_imprecise_error_addr_any=0,
     ):
         super().__init__("TlOutputItem")
 
@@ -50,8 +85,11 @@ class TlInputItem(uvm_sequence_item):
         self.mtdata2 = mtdata2
         self.mtsel = mtsel
         self.csr_addr = csr_addr
+        self.mtsel = mtsel
+        self.mdeau = mdeau
         self.dec_csr_rddata_d = dec_csr_rddata_d
         self.ifu_ic_debug_rd_data = ifu_ic_debug_rd_data
+        self.lsu_imprecise_error_addr_any = lsu_imprecise_error_addr_any
 
     def randomize(self, test):
 
@@ -67,6 +105,19 @@ class TlInputItem(uvm_sequence_item):
 
             self.pic_claimid = int(pic_claimid, 2)
             self.dec_csr_wrdata_r = int(dec_csr_wrdata_r, 2) << 10
+        elif test == "mhpme":
+            value = ""
+            for _ in range(10):
+                value += random.choice(["0", "1"])
+            self.dec_csr_wrdata_r = int(value, 2)
+            self.csr_addr = random.choice(
+                [
+                    csrs.MHPME3,
+                    csrs.MHPME4,
+                    csrs.MHPME5,
+                    csrs.MHPME6,
+                ]
+            )
         elif test == "mtdata":
             # bits 31:28 are hardcoded to 0x2
             mtdata1 = "0010"
@@ -86,6 +137,16 @@ class TlInputItem(uvm_sequence_item):
             for _ in range(2):
                 mtsel += random.choice(["0", "1"])
             self.mtsel = int(mtsel, 2)
+        elif test == "mdseac":
+            mdeau = ""
+            for _ in range(32):
+                mdeau += random.choice(["0", "1"])
+            self.mdeau = int(mdeau, 2)
+            value = ""
+            for _ in range(32):
+                value += random.choice(["0", "1"])
+            self.lsu_imprecise_error_addr_any = int(value, 2)
+            self.csr_addr = csrs.MDSEAC
         elif test == "csrs_access":
             value = ""
             for _ in range(32):
@@ -108,6 +169,17 @@ class TlInputItem(uvm_sequence_item):
                     csrs.MICECT,
                     csrs.MICCMECT,
                     csrs.MDCCMECT,
+                    csrs.MTVEC,
+                    csrs.MHPME3,
+                    csrs.MHPME4,
+                    csrs.MHPME5,
+                    csrs.MHPME6,
+                    csrs.MRAC,
+                    csrs.MEIPT,
+                    csrs.MCOUNTINHIBIT,
+                    csrs.MFDHT,
+                    csrs.MEICURPL,
+                    csrs.MFDC,
                 ]
             )
         elif test == "debug_csrs_access":
@@ -176,6 +248,12 @@ class TlDriver(uvm_driver):
         await RisingEdge(self.dut.clk)
         self.dut.dec_csr_wen_r.value = 0
 
+    async def do_reset(self):
+        self.dut.rst_l.value = 0
+        await ClockCycles(self.dut.clk, 2)
+        await FallingEdge(self.dut.clk)
+        self.dut.rst_l.value = 1
+
     async def run_phase(self):
 
         while True:
@@ -201,7 +279,23 @@ class TlDriver(uvm_driver):
                     await self.write_csr(csrs.MTSEL, it.mtsel)
                     await self.write_csr(csrs.MTDATA1, it.mtdata1)
                     await self.write_csr(csrs.MTDATA2, it.mtdata2)
-                elif test == "csrs_access":
+                elif test == "mdseac":
+                    # Write to unlock register
+                    await self.write_csr(csrs.MDEAU, it.mdeau)
+                    if self.dut.dut.mdseac_locked_f.value:
+                        await FallingEdge(self.dut.mdseac_locked_f)
+                    await RisingEdge(self.dut.clk)
+                    # Write error
+                    self.dut.lsu_imprecise_error_addr_any.value = it.lsu_imprecise_error_addr_any
+                    self.dut.lsu_imprecise_error_store_any.value = 1
+                    await RisingEdge(self.dut.clk)
+                    self.dut.lsu_imprecise_error_store_any.value = 0
+                    await RisingEdge(self.dut.clk)
+                    # Read the MDSEAC register
+                    await self.read_csr(it.csr_addr)
+                    # Perform reset to clear the error
+                    await self.do_reset()
+                elif test in ["csrs_access", "mhpme"]:
                     # write a perf counter
                     await self.write_csr(it.csr_addr, it.dec_csr_wrdata_r)
                     # read it back
@@ -220,6 +314,7 @@ class TlDriver(uvm_driver):
                     self.dut.ifu_ic_debug_rd_data.value = it.ifu_ic_debug_rd_data
                     await RisingEdge(self.dut.clk)
                     self.dut.ifu_ic_debug_rd_data_valid.value = 0
+                    self.dut.ifu_ic_debug_rd_data.value = 0
                     await self.read_csr(csrs.DICAD0)
                     await self.read_csr(csrs.DICAD0H)
                     await self.read_csr(csrs.DICAD1)
@@ -260,13 +355,26 @@ class TlInputMonitor(uvm_component):
                 self.ap.write(TlInputItem(pic_claimid=pic_claimid, dec_csr_wrdata_r=meivt))
             elif test == "mtdata":
                 await RisingEdge(self.dut.dec_csr_wen_r)
+                await RisingEdge(self.dut.clk)
                 mtsel = int(self.dut.dec_csr_wrdata_r.value)
                 await RisingEdge(self.dut.dec_csr_wen_r)
+                await RisingEdge(self.dut.clk)
                 mtdata1 = int(self.dut.dec_csr_wrdata_r.value)
                 await RisingEdge(self.dut.dec_csr_wen_r)
+                await RisingEdge(self.dut.clk)
                 mtdata2 = int(self.dut.dec_csr_wrdata_r.value)
                 self.ap.write(TlInputItem(mtdata1=mtdata1, mtdata2=mtdata2, mtsel=mtsel))
-            elif test == "csrs_access":
+            elif test == "mdseac":
+                await RisingEdge(self.dut.lsu_imprecise_error_store_any)
+                await RisingEdge(self.dut.clk)
+                csr_addr = int(self.dut.dec_csr_rdaddr_d.value)
+                lsu_imprecise_error_addr_any = int(self.dut.lsu_imprecise_error_addr_any.value)
+                self.ap.write(
+                    TlInputItem(
+                        csr_addr=csr_addr, lsu_imprecise_error_addr_any=lsu_imprecise_error_addr_any
+                    )
+                )
+            elif test in ["csrs_access", "mhpme"]:
                 # wait for reg write
                 await RisingEdge(self.dut.dec_csr_wen_r)
                 await RisingEdge(self.dut.clk)
@@ -286,13 +394,9 @@ class TlInputMonitor(uvm_component):
             elif test == "debug_ic_cache":
                 # wait for reg write
                 await RisingEdge(self.dut.ifu_ic_debug_rd_data_valid)
+                await RisingEdge(self.dut.clk)
                 ic_debug_rd_data = int(self.dut.ifu_ic_debug_rd_data.value)
                 self.ap.write(TlInputItem(ifu_ic_debug_rd_data=ic_debug_rd_data))
-                # wait for reads
-                await RisingEdge(self.dut.clk)
-                await RisingEdge(self.dut.clk)
-                await RisingEdge(self.dut.clk)
-                await RisingEdge(self.dut.clk)
 
 
 class TlOutputMonitor(uvm_component):
@@ -329,9 +433,17 @@ class TlOutputMonitor(uvm_component):
                 # wait for the outputs
                 for _ in range(2):
                     await RisingEdge(self.dut.clk)
-                trigger_pkt_any = int(self.dut.trigger_pkt_any.value)
+                trigger_pkt_any = TriggerAnyPktT.get_from_dut(self.dut)
                 self.ap.write(TlOutputItem(trigger_pkt_any=trigger_pkt_any))
-            elif test == "csrs_access":
+            elif test == "mdseac":
+                # Wait for when the error address is set
+                await RisingEdge(self.dut.lsu_imprecise_error_store_any)
+                # Wait for read
+                for _ in range(3):
+                    await RisingEdge(self.dut.clk)
+                dec_csr_rddata_d = int(self.dut.dec_csr_rddata_d.value)
+                self.ap.write(TlOutputItem(dec_csr_rddata_d=dec_csr_rddata_d))
+            elif test in ["csrs_access", "mhpme"]:
                 # wait for reg write
                 await RisingEdge(self.dut.dec_csr_wen_r)
                 # wait for read
@@ -354,8 +466,8 @@ class TlOutputMonitor(uvm_component):
                 # wait for read
                 # read dicad0, dicad0h, and dicad1
                 await RisingEdge(self.dut.ifu_ic_debug_rd_data_valid)
-                await RisingEdge(self.dut.clk)
-                await RisingEdge(self.dut.clk)
+                for _ in range(2):
+                    await RisingEdge(self.dut.clk)
                 dicad0 = int(self.dut.dec_csr_rddata_d.value)
                 await RisingEdge(self.dut.clk)
                 dicad0h = int(self.dut.dec_csr_rddata_d.value)
@@ -432,18 +544,12 @@ class TlScoreboard(uvm_component):
                     )
                     self.passed = False
             elif test == "mtdata":
-
-                pkt_any_mask = 0x3FFFFFFFFF
                 tdata2_mask = 0xFFFFFFFF
-                flags_mask = 0x3F
-                flags_shift = 32
-
                 mtsel = item_inp.mtsel
-                pkt_any_shift = mtsel * 38
 
                 mtdata1_i = item_inp.mtdata1
                 mtdata2_i = item_inp.mtdata2
-                trigger_pkt_any = ((item_out.trigger_pkt_any) >> pkt_any_shift) & pkt_any_mask
+                trigger_pkt_any = item_out.trigger_pkt_any
 
                 select_i = (mtdata1_i >> 19) & 1
                 match_i = (mtdata1_i >> 7) & 1
@@ -452,16 +558,14 @@ class TlScoreboard(uvm_component):
                 execute_i = ((mtdata1_i >> 2) & 1) & ~((mtdata1_i >> 19) & 1)
                 m_i = (mtdata1_i >> 6) & 1
 
-                flags_o = (trigger_pkt_any >> flags_shift) & flags_mask
+                select_o = (trigger_pkt_any.select >> mtsel) & 1
+                match_o = (trigger_pkt_any.match >> mtsel) & 1
+                store_o = (trigger_pkt_any.store >> mtsel) & 1
+                load_o = (trigger_pkt_any.load >> mtsel) & 1
+                execute_o = (trigger_pkt_any.execute >> mtsel) & 1
+                m_o = (trigger_pkt_any.m >> mtsel) & 1
 
-                select_o = (flags_o >> 5) & 1
-                match_o = (flags_o >> 4) & 1
-                store_o = (flags_o >> 3) & 1
-                load_o = (flags_o >> 2) & 1
-                execute_o = (flags_o >> 1) & 1
-                m_o = (flags_o) & 1
-
-                mtdata2_o = trigger_pkt_any & tdata2_mask
+                mtdata2_o = (trigger_pkt_any.tdata2 >> (mtsel * 32)) & tdata2_mask
 
                 if mtdata2_i != mtdata2_o:
                     self.logger.error(
@@ -501,14 +605,44 @@ class TlScoreboard(uvm_component):
                     self.logger.error("m {} != {} (should be {})".format(m_i, m_o, m_i))
                     self.passed = False
 
+            elif test == "mhpme":
+                csr = item_inp.csr_addr
+                perf_reg_val_i = item_inp.dec_csr_wrdata_r
+                perf_reg_val_o = item_out.dec_csr_rddata_d
+
+                mhpme_lst = [csrs.MHPME3, csrs.MHPME4, csrs.MHPME5, csrs.MHPME6]
+                c = [c for c in mhpme_lst if c == csr][0]
+                perf_reg_val_i = c.out(perf_reg_val_i)
+
+                if perf_reg_val_i != perf_reg_val_o:
+                    self.logger.error(
+                        "reg_val[{}] {} != {} (should be {})".format(
+                            hex(csr), hex(perf_reg_val_i), hex(perf_reg_val_o), hex(perf_reg_val_i)
+                        )
+                    )
+                    self.passed = False
+            elif test == "mdseac":
+                csr = item_inp.csr_addr
+                error_val_i = item_inp.lsu_imprecise_error_addr_any
+                mdseac_val_o = item_out.dec_csr_rddata_d
+
+                if error_val_i != mdseac_val_o:
+                    self.logger.error(
+                        "reg_val[{}] {} != {} (should be {})".format(
+                            hex(csr), hex(error_val_i), hex(mdseac_val_o), hex(error_val_i)
+                        )
+                    )
+                    self.passed = False
             elif test == "csrs_access":
                 csr = item_inp.csr_addr
                 perf_reg_val_i = item_inp.dec_csr_wrdata_r
                 perf_reg_val_o = item_out.dec_csr_rddata_d
-                if csr in [csrs.MICECT, csrs.MICCMECT, csrs.MDCCMECT]:
-                    if ((perf_reg_val_i >> 27) & 0x1F) > 26:
-                        perf_reg_val_i = perf_reg_val_i & 0x07FFFFFF
-                        perf_reg_val_i = perf_reg_val_i | (26 << 27)
+
+                for c in csr_list:
+                    if c == csr:
+                        perf_reg_val_i = c.out(perf_reg_val_i)
+                        break
+
                 if perf_reg_val_i != perf_reg_val_o:
                     self.logger.error(
                         "reg_val[{}] {} != {} (should be {})".format(
@@ -521,32 +655,13 @@ class TlScoreboard(uvm_component):
                 csr = item_inp.csr_addr
                 reg_val_i = item_inp.dec_csr_wrdata_r
                 reg_val_o = item_out.dec_csr_rddata_d
+
                 if csr == csrs.DCSR:
-                    reg_val_i = (reg_val_i & 0xFFFF) | (0x4 << 28)
-                    reg_val_i = (reg_val_i & 0xFFFFFFFC) | 0x3
-                    reg_val_i = reg_val_i & ~(1 << 14)  # reserved
-                    reg_val_i = reg_val_i & ~(1 << 13)  # ebreaks (0 for VeeR-EL2)
-                    reg_val_i = reg_val_i & ~(1 << 12)  # ebreaku (0 for VeeR-EL2)
-                    reg_val_i = reg_val_i & ~(1 << 9)  # stoptime (0 for VeeR-EL2)
-                    reg_val_i = reg_val_i & ~(1 << 8)  # reserved
-                    reg_val_i = (reg_val_i & ~(1 << 7)) | (1 << 7)
-                    reg_val_i = (reg_val_i & ~(1 << 6)) | (1 << 6)
-                    reg_val_i = reg_val_i & ~(1 << 5)  # reserved
-                    reg_val_i = reg_val_i & ~(1 << 4)  # reserved
-                    reg_val_i = reg_val_i & ~(1 << 3)  # reserved
+                    reg_val_i = csrs.DCSR.out(reg_val_i)
                 elif csr == csrs.DPC:
-                    # align DPC
-                    reg_val_i = reg_val_i & ~(0x1)
+                    reg_val_i = csrs.DPC.out(reg_val_i)
                 elif csr == csrs.DICAWICS:
-                    reg_val_i = reg_val_i & 0x1FFFFFF
-                    reg_val_i = reg_val_i & ~(1 << 23)
-                    reg_val_i = reg_val_i & ~(1 << 22)
-                    reg_val_i = reg_val_i & ~(1 << 19)
-                    reg_val_i = reg_val_i & ~(1 << 18)
-                    reg_val_i = reg_val_i & ~(1 << 17)
-                    reg_val_i = reg_val_i & ~(1 << 2)
-                    reg_val_i = reg_val_i & ~(1 << 1)
-                    reg_val_i = reg_val_i & ~(1 << 0)
+                    reg_val_i = csrs.DICAWICS.out(reg_val_i)
 
                 if reg_val_i != reg_val_o:
                     self.logger.error(
@@ -662,6 +777,87 @@ class BaseTest(uvm_test):
 
     async def run_phase(self):
         self.raise_objection()
+
+        cocotb.top.rst_vec.value = 0
+        cocotb.top.nmi_int.value = 0
+        cocotb.top.nmi_vec.value = 0
+        cocotb.top.i_cpu_halt_req.value = 0
+        cocotb.top.i_cpu_run_req.value = 0
+        cocotb.top.lsu_fastint_stall_any.value = 0
+        cocotb.top.ifu_pmu_instr_aligned.value = 0
+        cocotb.top.ifu_pmu_fetch_stall.value = 0
+        cocotb.top.ifu_pmu_ic_miss.value = 0
+        cocotb.top.ifu_pmu_ic_hit.value = 0
+        cocotb.top.ifu_pmu_bus_error.value = 0
+        cocotb.top.ifu_pmu_bus_busy.value = 0
+        cocotb.top.ifu_pmu_bus_trxn.value = 0
+        cocotb.top.dec_pmu_instr_decoded.value = 0
+        cocotb.top.dec_pmu_decode_stall.value = 0
+        cocotb.top.dec_pmu_presync_stall.value = 0
+        cocotb.top.dec_pmu_postsync_stall.value = 0
+        cocotb.top.lsu_store_stall_any.value = 0
+        cocotb.top.dma_dccm_stall_any.value = 0
+        cocotb.top.dma_iccm_stall_any.value = 0
+        cocotb.top.exu_pmu_i0_br_misp.value = 0
+        cocotb.top.exu_pmu_i0_br_ataken.value = 0
+        cocotb.top.exu_pmu_i0_pc4.value = 0
+        cocotb.top.lsu_pmu_bus_trxn.value = 0
+        cocotb.top.lsu_pmu_bus_misaligned.value = 0
+        cocotb.top.lsu_pmu_bus_error.value = 0
+        cocotb.top.lsu_pmu_bus_busy.value = 0
+        cocotb.top.lsu_pmu_load_external_m.value = 0
+        cocotb.top.lsu_pmu_store_external_m.value = 0
+        cocotb.top.dma_pmu_dccm_read.value = 0
+        cocotb.top.dma_pmu_dccm_write.value = 0
+        cocotb.top.dma_pmu_any_read.value = 0
+        cocotb.top.dma_pmu_any_write.value = 0
+        cocotb.top.lsu_fir_addr.value = 0
+        cocotb.top.lsu_fir_error.value = 0
+        cocotb.top.iccm_dma_sb_error.value = 0
+        cocotb.top.lsu_single_ecc_error_incr.value = 0
+        cocotb.top.dec_pause_state.value = 0
+        cocotb.top.lsu_imprecise_error_store_any.value = 0
+        cocotb.top.lsu_imprecise_error_load_any.value = 0
+        cocotb.top.lsu_imprecise_error_addr_any.value = 0
+        cocotb.top.dec_csr_wen_unq_d.value = 0
+        cocotb.top.dec_csr_any_unq_d.value = 0
+        cocotb.top.dec_csr_rdaddr_d.value = 0
+        cocotb.top.dec_csr_wen_r.value = 0
+        cocotb.top.dec_csr_rdaddr_r.value = 0
+        cocotb.top.dec_csr_wraddr_r.value = 0
+        cocotb.top.dec_csr_wrdata_r.value = 0
+        cocotb.top.dec_csr_stall_int_ff.value = 0
+        cocotb.top.dec_tlu_i0_valid_r.value = 0
+        cocotb.top.exu_npc_r.value = 0
+        cocotb.top.dec_tlu_i0_pc_r.value = 0
+        cocotb.top.dec_illegal_inst.value = 0
+        cocotb.top.dec_i0_decode_d.value = 0
+        cocotb.top.exu_i0_br_hist_r.value = 0
+        cocotb.top.exu_i0_br_error_r.value = 0
+        cocotb.top.exu_i0_br_start_error_r.value = 0
+        cocotb.top.exu_i0_br_valid_r.value = 0
+        cocotb.top.exu_i0_br_mp_r.value = 0
+        cocotb.top.exu_i0_br_middle_r.value = 0
+        cocotb.top.exu_i0_br_way_r.value = 0
+        cocotb.top.dbg_halt_req.value = 0
+        cocotb.top.dbg_resume_req.value = 0
+        cocotb.top.ifu_miss_state_idle.value = 0
+        cocotb.top.lsu_idle_any.value = 0
+        cocotb.top.dec_div_active.value = 0
+        cocotb.top.ifu_ic_error_start.value = 0
+        cocotb.top.ifu_iccm_rd_ecc_single_err.value = 0
+        cocotb.top.ifu_ic_debug_rd_data.value = 0
+        cocotb.top.ifu_ic_debug_rd_data_valid.value = 0
+        cocotb.top.pic_claimid.value = 0
+        cocotb.top.pic_pl.value = 0
+        cocotb.top.mhwakeup.value = 0
+        cocotb.top.mexintpend.value = 0
+        cocotb.top.timer_int.value = 0
+        cocotb.top.soft_int.value = 0
+        cocotb.top.core_id.value = 0
+        cocotb.top.mpc_debug_halt_req.value = 0
+        cocotb.top.mpc_debug_run_req.value = 0
+        cocotb.top.mpc_reset_run_req.value = 0
 
         # Start clocks
         self.start_clock("free_l2clk")

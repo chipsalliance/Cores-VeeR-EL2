@@ -9,7 +9,7 @@ mkdir -p build
 cd build
 for test in ${tests}; do
     test_name=$(basename ${test})
-    make CFLAGS=-DUSE_HTIF=false -f ${RV_ROOT}/tools/Makefile TEST=${test_name} program.hex
+    make CFLAGS=-DUSE_HTIF=false -f ${RV_ROOT}/tools/Makefile TEST=${test_name} USER_MODE=1 program.hex
     mv ${test_name}.exe ../${test_name}.elf
     make -f ${RV_ROOT}/tools/Makefile clean
 done

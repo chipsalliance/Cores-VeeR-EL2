@@ -365,7 +365,7 @@ class AXI4LiteSubordinateBFM(uvm_component):
         self.axi_awready.value = 0
         self.axi_wready.value = 0
         self.axi_arready.value = 0
-        self.axi_rready.value = 0
+        self.axi_rvalid.value = 0
 
     async def _wait(self, signal, max_cycles=200):
         """

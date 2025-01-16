@@ -10,7 +10,7 @@ jobs:
 #--------------#
   generate-config:
     name: Generate configs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       test-types: ${{ steps.test-types.outputs.tests }}
       test-include-generate: ${{ steps.test-types.outputs.include-generate }}
@@ -84,7 +84,7 @@ jobs:
 
   run-tests:
     name: Run RISC-V DV tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20250116082447
     needs: [ generate-config, generate-code ]
     strategy:

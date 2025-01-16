@@ -6,7 +6,7 @@ on:
 jobs:
   lint:
     name: Lint microarchitectural tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20250116082447
     steps:
       - name: Setup repository
@@ -37,7 +37,7 @@ jobs:
           popd
   tests:
     name: Microarchitectural tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20250116082447
     strategy:
       matrix:

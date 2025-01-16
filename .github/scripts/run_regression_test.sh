@@ -3,6 +3,19 @@
 SELF_DIR="$(dirname $(readlink -f ${BASH_SOURCE[0]}))"
 . ${SELF_DIR}/common.inc.sh
 
+trap report_status EXIT
+
+report_status(){
+    rc=$?
+    if [ $rc != 0 ]; then
+        echo -e "${COLOR_WHITE}Test '${NAME}' ${COLOR_RED}FAILED${COLOR_CLEAR}"
+    else
+        mv ${DIR}/coverage.dat ${RESULTS_DIR}/
+        echo -e "${COLOR_WHITE}Test '${NAME}' ${COLOR_GREEN}SUCCEEDED${COLOR_CLEAR}"
+    fi
+    exit $rc
+}
+
 run_regression_test(){
     # Run a regression test with coverage collection enabled
     # Args:
@@ -60,14 +73,6 @@ run_regression_test(){
     # Run the test
     mkdir -p ${DIR}
     make -j`nproc` -C ${DIR} -f $RV_ROOT/tools/Makefile verilator $EXTRA_ARGS CONF_PARAMS="${PARAMS}" TEST=${NAME} COVERAGE=${COVERAGE} 2>&1 | tee ${LOG}
-    if [ ! -f "${DIR}/coverage.dat" ]; then
-        echo -e "${COLOR_WHITE}Test '${NAME}' ${COLOR_RED}FAILED${COLOR_CLEAR}"
-        exit 1
-    else
-        mv ${DIR}/coverage.dat ${RESULTS_DIR}/
-        echo -e "${COLOR_WHITE}Test '${NAME}' ${COLOR_GREEN}SUCCEEDED${COLOR_CLEAR}"
-        exit 0
-    fi
 }
 
 # Example usage

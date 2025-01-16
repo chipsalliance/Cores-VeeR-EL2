@@ -3,6 +3,10 @@ name: VeeR-EL2 verification
 on:
   workflow_call:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   tests:
     name: Verification tests
@@ -95,15 +99,41 @@ jobs:
 
       - name: Upload pytest-html artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: verification_dashboard
+          name: verification_dashboard_${{ matrix.test }}_${{ matrix.coverage }}
           path: |
             webpage_*
 
       - name: Upload coverage artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: verification_tests_coverage_data
+          name: verification_tests_coverage_data_${{ matrix.test }}_${{ matrix.coverage }}
           path: results/*.info
+
+  custom-verification-tests:
+    name: Custom verification tests
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    strategy:
+      matrix:
+        bus: ["axi", "ahb"]
+        test: ["test_pyuvm"]
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Set secrets version
+        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
+
+      - name: Run tests
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_custom_verification_tests
+          TEST: ${{ matrix.test }}
+          BUS: ${{ matrix.bus }}

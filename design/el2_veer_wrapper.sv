@@ -885,6 +885,7 @@ import el2_pkg::*;
                              );
 
 
+   logic unused_dmi_hard_reset;
    //  JTAG/DMI instance
    dmi_wrapper  dmi_wrapper (
     // JTAG signals
@@ -903,7 +904,7 @@ import el2_pkg::*;
     .reg_wr_addr (dmi_addr),        // Write address to Processor
     .reg_en      (dmi_en),          // Write interface bit to Processor
     .reg_wr_en   (dmi_wr_en),       // Write enable to Processor
-    .dmi_hard_reset   ()
+    .dmi_hard_reset   (unused_dmi_hard_reset)
    );
 
    // DMI core/uncore mux

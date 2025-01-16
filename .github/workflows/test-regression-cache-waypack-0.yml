@@ -96,6 +96,7 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+          echo "FULL_NAME=${{ matrix.bus }}-${{ matrix.test }}-${{ matrix.priv == 0 && 'm' || 'mu' }}-waypack${WAYPACK}" >> $GITHUB_ENV
 
       - name: Run tests
         shell: bash
@@ -118,7 +119,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: regression_tests_coverage_data_cache_waypack_0_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.priv }}_${{ matrix.coverage }}
+          name: regression_tests_coverage_data_cache_waypack_${{env.FULL_NAME}}_${{ matrix.coverage }}
           path: results/*.info
 
   custom-regression-tests:

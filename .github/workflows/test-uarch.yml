@@ -144,16 +144,16 @@ jobs:
 
       - name: Upload coverage data artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: uarch_tests_coverage_data
+          name: uarch_tests_coverage_data-${{ matrix.test }}
           path: ./results/*.info
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: uarch_tests_logs
+          name: uarch_tests_logs-${{ matrix.test }}
           path: |
             verification/${{ matrix.test }}/*.log
             verification/${{ matrix.test }}/*.vcd.zip

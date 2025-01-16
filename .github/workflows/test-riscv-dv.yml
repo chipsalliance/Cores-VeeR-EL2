@@ -77,9 +77,9 @@ jobs:
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: riscv-dv_generated_code_${{ matrix.version }}
+          name: riscv-dv_generated_code_${{ matrix.test }}_${{ matrix.version }}
           path: tools/riscv-dv/work/**/asm_test/*.S
 
   run-tests:
@@ -153,9 +153,9 @@ jobs:
           pip install -r third_party/riscv-dv/requirements.txt
 
       - name: Download Code Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: riscv-dv_generated_code_${{ matrix.version }}
+          name: riscv-dv_generated_code_${{ matrix.test }}_${{ matrix.version }}
           path: tools/riscv-dv/work/
 
       - name: Run test
@@ -197,16 +197,16 @@ jobs:
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: riscv-dv_coverage_data
+          name: riscv-dv_coverage_data-${{ matrix.coverage }}_${{matrix.priv}}_${{ matrix.test }}-${{ matrix.iss }}-${{ matrix.version }}
           path: results/*.info
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: artifacts-${{matrix.priv}}_${{ matrix.test }}-${{ matrix.iss }}-${{ matrix.version }}
+          name: artifacts-${{ matrix.coverage }}_${{ matrix.priv }}_${{ matrix.test }}-${{ matrix.iss }}-${{ matrix.version }}
           path: tools/riscv-dv/work/test_*
 
   run-custom-tests:
@@ -233,9 +233,9 @@ jobs:
           submodules: recursive
 
       - name: Download Code Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: riscv-dv_generated_code_${{ matrix.version }}
+          name: riscv-dv_generated_code_${{ matrix.test }}_${{ matrix.version }}
           path: tools/riscv-dv/work/
 
       - name: Prepare Environment

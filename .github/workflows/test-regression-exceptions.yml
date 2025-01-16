@@ -74,9 +74,9 @@ jobs:
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: regression_tests_coverage_data
+          name: regression_tests_coverage_data-${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.coverage }}_${{matrix.priv}}_${{matrix.cache_waypack}}
           path: results/*.info
 
   custom-regression-exceptions-tests:

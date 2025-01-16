@@ -70,7 +70,7 @@ jobs:
           sis -d convert --dat-dir ${TEST_PATH}/
           mkdir -p results
           mv ${TEST_PATH}/coverage.info \
-             results/coverage_exceptions_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.waypack }}_${{ matrix.coverage }}.info
+             results/coverage_exceptions_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.cache_waypack }}_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()

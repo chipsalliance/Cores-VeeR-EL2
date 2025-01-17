@@ -15,126 +15,96 @@
 # limitations under the License.
 #
 
+TOPLEVEL_LANG    = verilog
+SIM             ?= verilator
+WAVES           ?= 1
 NPROC = $$((`nproc`-1))
 
+#Paths
+CURDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+CFGDIR := $(abspath $(CURDIR)/snapshots/default)
+CONFIG := $(RV_ROOT)/configs
 # -------------------------------------
 # VeeR Configuration
 # -------------------------------------
-CONF_PARAMS = -set build_axi4
-
-# Allow snapshot override
-target = default
-snapshot = $(target)
+CONF_PARAMS ?= -set build_axi4
 
 # Check for RV_ROOT
 ifeq (,$(wildcard ${RV_ROOT}/configs/veer.config))
 $(error env var RV_ROOT does not point to a valid dir! Exiting!)
 endif
 
-# Allow tool override
-VEER_CONFIG = ${RV_ROOT}/configs/veer.config
-BUILD_DIR = snapshots/${snapshot}
-
-# If define files do not exist, then run veer.config.
-${BUILD_DIR}/defines.h:
-	BUILD_PATH=${BUILD_DIR} ${VEER_CONFIG} -target=$(target) $(CONF_PARAMS)
-	echo '`undef RV_ASSERT_ON' >> ${BUILD_DIR}/common_defines.vh
-
-# -------------------------------------
-# cocotb setup
-# -------------------------------------
-COCOTB_DIR = ${RV_ROOT}/third_party/cocotb
-COCOTB_SHARE_DIR = ${COCOTB_DIR}/cocotb/share
-
-COCOTB_HDL_TIMEUNIT ?= 1ns
-COCOTB_HDL_TIMEPRECISION ?= 1ps
-
 # -------------------------------------
 # Testbench setup
 # -------------------------------------
-UVM_TEST ?= test_irq.test_irq
-SIM_DIR ?= sim
+MODULE ?= test_irq.test_irq
+TEST_FILES = $(CURDIR)/test_irq/test_irq.py
+TOPLEVEL = veer_wrapper
+SIM_BUILD ?= sim
 
-TOP_MODULE = veer_wrapper
+VERILOG_SOURCES = \
+    $(CFGDIR)/common_defines.vh \
+    $(RV_ROOT)/design/include/el2_def.sv \
+    $(CFGDIR)/el2_pdef.vh
 
-VERILOG_DEFINE_FILES = $(BUILD_DIR)/common_defines.vh
-VERILOG_DEFINE_FILES += ${RV_ROOT}/design/include/el2_def.sv
-VERILOG_DEFINE_FILES += $(BUILD_DIR)/el2_pdef.vh
-
-VERILOG_INCLUDE_DIRS = ${BUILD_DIR}
+SIM_FLIST_FILE = $(RV_ROOT)/testbench/flist
 
 # -------------------------------------
 # Compilation/simulation configuration
 # -------------------------------------
-VERILATOR = verilator
-VERILATOR_SIM_DEBUG ?= 0
-VERILATOR_TRACE ?= 0
-
-EXTRA_ARGS += --timescale $(COCOTB_HDL_TIMEUNIT)/$(COCOTB_HDL_TIMEPRECISION) --timing
-COMPILE_ARGS += -CFLAGS -std=c++20 --vpi --public-flat-rw --prefix Vtop -o Vtop
-COMPILE_ARGS += -LDFLAGS "-Wl,-rpath,$(shell cocotb-config --lib-dir) -L$(shell cocotb-config --lib-dir) -lcocotbvpi_verilator"
-COMPILE_ARGS += $(addprefix +incdir+, $(VERILOG_INCLUDE_DIRS))
-WARNING_ARGS += -Wno-WIDTH -Wno-UNOPTFLAT
-
-FLIST_FILE = ${RV_ROOT}/testbench/flist
-
-ifeq ($(VERILATOR_SIM_DEBUG), 1)
-  COMPILE_ARGS += --debug -CFLAGS "-DVL_DEBUG -DVERILATOR_SIM_DEBUG -g"
-  PLUSARGS += +verilator+debug
-  BUILD_ARGS += OPT_FAST=-Og OPT_SLOW=-Og OPT_GLOBAL=-Og
-endif
-
-ifeq ($(VERILATOR_TRACE),1)
-  EXTRA_ARGS += --trace --trace-structs
-endif
 
 # Coverage reporting
-COVERAGE ?= all
-ifeq ("$(COVERAGE)", "all")
+COVERAGE_TYPE?= all
+ifeq ("$(COVERAGE_TYPE)", "all")
     VERILATOR_COVERAGE = --coverage
-else ifeq ("$(COVERAGE)", "branch")
+else ifeq ("$(COVERAGE_TYPE)", "branch")
     VERILATOR_COVERAGE = --coverage-line
-else ifeq ("$(COVERAGE)", "toggle")
+else ifeq ("$(COVERAGE_TYPE)", "toggle")
     VERILATOR_COVERAGE = --coverage-toggle
-else ifeq ("$(COVERAGE)", "functional")
+else ifeq ("$(COVERAGE_TYPE)", "functional")
     VERILATOR_COVERAGE = --coverage-user
-else ifneq ("$(COVERAGE)", "")
-    $(error Unknown COVERAGE value '$(COVERAGE)')
+else
+    VERILATOR_COVERAGE = ""
 endif
+
+ifeq ($(SIM), verilator)
+    COMPILE_ARGS += --coverage-max-width 20000
+    COMPILE_ARGS += --timing
+    COMPILE_ARGS += -Wall -Wno-fatal
+
+    EXTRA_ARGS   += --trace --trace-structs
+    EXTRA_ARGS   += $(VERILATOR_COVERAGE)
+    EXTRA_ARGS   += -I$(CFGDIR) -Wno-DECLFILENAME
+else ifeq ($(SIM), vcs)
+    EXTRA_ARGS   += +incdir+$(CFGDIR) -assert svaext -cm line+cond+fsm+tgl+branch +vcs+lic+wait
+    PLUSARGS     += +dumpon
+endif
+
+COCOTB_HDL_TIMEUNIT ?= 1ns
+COCOTB_HDL_TIMEPRECISION ?= 1ps
+
+# Build directory
+ifneq ($(COVERAGE_TYPE),)
+    SIM_BUILD := sim-build-$(COVERAGE_TYPE)
+endif
+
+BUILD_ARGS = -j$(NPROC)
 
 # -------------------------------------
 # Make PyUVM test with Verilator
 # -------------------------------------
-$(SIM_DIR):
-	mkdir -p $@
+include $(shell cocotb-config --makefiles)/Makefile.sim
 
-$(SIM_DIR)/Vtop.mk: $(COCOTB_SHARE_DIR)/lib/verilator/verilator.cpp | $(SIM_DIR)
-	$(VERILATOR) --cc --exe -Mdir $(SIM_DIR) \
-	${COMPILE_ARGS} ${EXTRA_ARGS} \
-	${VERILOG_DEFINE_FILES} -f ${FLIST_FILE} \
-	${WARNING_ARGS} \
-	--top-module $(TOP_MODULE) \
-	$(VERILATOR_COVERAGE) \
-	$(COCOTB_SHARE_DIR)/lib/verilator/verilator.cpp
+$(SIM_BUILD)/Vtop.mk: $(VERILOG_SOURCES) $(CUSTOM_COMPILE_DEPS) $(COCOTB_SHARE_DIR)/lib/verilator/verilator.cpp | $(SIM_BUILD)
+	$(CMD) -cc --exe -Mdir $(SIM_BUILD) -DCOCOTB_SIM=1 $(TOPMODULE_ARG) $(COMPILE_ARGS) $(EXTRA_ARGS) $(VERILOG_SOURCES) -f $(SIM_FLIST_FILE) $(COCOTB_SHARE_DIR)/lib/verilator/verilator.cpp
 
-$(SIM_DIR)/Vtop: $(SIM_DIR)/Vtop.mk
-	$(MAKE) -j${NPROC} -C $(SIM_DIR) $(BUILD_ARGS) -f Vtop.mk
+$(SIM_BUILD)/simv: $(VERILOG_SOURCES) $(SIM_BUILD)/pli.tab $(CUSTOM_COMPILE_DEPS) | $(SIM_BUILD)
+	cd $(SIM_BUILD) && \
+	$(CMD) -top $(TOPLEVEL) $(PLUSARGS) +acc+1 +vpi -P pli.tab +define+COCOTB_SIM=1 -sverilog \
+  -timescale=$(COCOTB_HDL_TIMEUNIT)/$(COCOTB_HDL_TIMEPRECISION) \
+  $(EXTRA_ARGS) -debug -load $(shell cocotb-config --lib-name-path vpi vcs) \
+	$(COMPILE_ARGS) $(VERILOG_SOURCES) -f $(SIM_FLIST_FILE)
 
-verilator-pyuvm: ${BUILD_DIR}/defines.h $(SIM_DIR)/Vtop.mk $(SIM_DIR)/Vtop
-	MODULE=$(UVM_TEST) $(SIM_DIR)/Vtop
-
-# -------------------------------------
-# Standard recipes
-# -------------------------------------
-
-all: clean verilator-pyuvm
-
-clean:
-	rm -rf obj_dir assets sim snapshots coverage.dat results.xml console.log exec.log *.cpp.s *.dis *.exe *.o *.map *.hex trace_port.csv verilator-cocotb-build
-
-help:
-	@echo Make sure the environment variable RV_ROOT is set.
-	@echo Expected usage: make verilator-pyuvm
-
-.PHONY: help clean
-
+$(CFGDIR)/common_defines.vh:
+	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0 $(CONF_PARAMS) $(EXTRA_CONFIG_OPTS)
+	echo '`undef RV_ASSERT_ON' >> $(CFGDIR)/common_defines.vh

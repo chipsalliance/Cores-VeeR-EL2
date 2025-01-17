@@ -107,3 +107,25 @@ jobs:
         with:
           name: verification_tests_coverage_data
           path: results/*.info
+
+  custom-verification-tests:
+    name: Custom verification tests
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    strategy:
+      matrix:
+        bus: ["axi", "ahb"]
+        test: ["test_pyuvm"]
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Run tests
+        run: _secret_custom_verification_tests
+        env:
+          TEST: ${{ matrix.test }}
+          BUS: ${{ matrix.bus }}

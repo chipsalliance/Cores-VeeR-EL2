@@ -7,7 +7,7 @@ jobs:
   tests:
     name: UVM tests
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20250103160559
+    container: ghcr.io/antmicro/cores-veer-el2:20250116082447
     env:
       CCACHE_DIR: "/opt/uvm/.cache/"
       DEBIAN_FRONTEND: "noninteractive"

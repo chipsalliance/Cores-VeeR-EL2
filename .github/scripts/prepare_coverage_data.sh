@@ -39,7 +39,7 @@ with open(sys.argv[1], 'r') as file:
       print(line)
 EOF
 
-cat <<EOF >> brda_filter.py
+cat <<EOF >> brda_br_filter.py
 def filter(infile, outfile):
     out = open(outfile, 'w')
 
@@ -125,6 +125,62 @@ def filter(infile, outfile):
 
 filter('coverage_branch_verilator.info',
        'coverage_branch_verilator_filtered.info')
+EOF
+
+cat <<EOF >> brda_tog_filter.py
+from collections import defaultdict
+
+def field_order(field):
+    chunks = field.split(".")
+    new_chunks = []
+
+    for c in chunks:
+        fields = c.split("_")
+        new_fields = []
+
+        for f in fields:
+            try:
+                new_fields.append(str(int(f)).zfill(100))
+            except ValueError:
+                new_fields.append(f)
+        new_chunks.append("_".join(new_fields))
+
+    return ".".join(new_chunks)
+
+def filter(infile, outfile):
+    out = open(outfile, 'w')
+
+    with open(infile) as f:
+        lines = f.readlines()
+        n = 0
+
+        while n < len(lines):
+            hits = {}
+            if 'BRDA' in lines[n]:
+                lineno = lines[n].split(",")[0]
+                data = lines[n].split(",")[2]
+                val = int(lines[n].split(",")[3])
+
+                hits = defaultdict(int)
+                hits[data] = hits[data] + val
+
+                n += 1
+                while lines[n].startswith(lineno):
+                    lineno = lines[n].split(",")[0]
+                    data = lines[n].split(",")[2]
+                    val = int(lines[n].split(",")[3])
+
+                    hits[data] = hits[data] + val
+
+                    n += 1
+
+                for d in sorted(hits.keys(), key=field_order):
+                    out.write(f"{lineno},0,{d},{1 if hits[d] else 0}\n")
+            else:
+                out.write(lines[n])
+                n += 1
+
+    out.close()
 
 filter('coverage_toggle_verilator.info',
        'coverage_toggle_verilator_filtered.info')
@@ -159,7 +215,8 @@ cp _coverage_line.info coverage_line_verilator.info
 cp _coverage_branch.info coverage_branch_verilator.info
 cp _coverage_toggle.info coverage_toggle_verilator.info
 
-python3 brda_filter.py
+python3 brda_br_filter.py
+python3 brda_tog_filter.py
 mv coverage_toggle_verilator.info coverage_toggle_verilator_orig.info_
 mv coverage_toggle_verilator_filtered.info coverage_toggle_verilator.info
 

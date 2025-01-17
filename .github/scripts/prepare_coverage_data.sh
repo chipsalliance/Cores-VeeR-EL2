@@ -131,26 +131,21 @@ cat <<EOF >> brda_tog_filter.py
 from collections import defaultdict
 
 def field_order(field):
-    fields = field.split("_")
-    dims = 0
+    chunks = field.split(".")
+    new_chunks = []
 
-    for f in fields[-1:]:
-        try:
-            int(f)
-            dims += 1
-        except ValueError:
-            pass
+    for c in chunks:
+        fields = c.split("_")
+        new_fields = []
 
-    if dims == 0:
-        return 0
+        for f in fields:
+            try:
+                new_fields.append(str(int(f)).zfill(100))
+            except ValueError:
+                new_fields.append(f)
+        new_chunks.append("_".join(new_fields))
 
-    ret = 0
-    for i, v in enumerate(fields[-dims:]):
-        mul = 1000**dims
-        dims = dims - 1
-        ret += int(v) * mul
-
-    return ret
+    return ".".join(new_chunks)
 
 def filter(infile, outfile):
     out = open(outfile, 'w')

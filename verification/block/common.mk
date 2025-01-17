@@ -51,6 +51,10 @@ ifeq ($(SIM), verilator)
     ifneq ("$(wildcard $(TEST_DIR)/config.vlt)","")
         COMPILE_ARGS += $(TEST_DIR)/config.vlt
     endif
+
+    PARALLEL_THREADS := $(shell echo $$(( $(shell nproc) - 1 )))
+    BUILD_ARGS += -j $(PARALLEL_THREADS)
+
 else ifeq ($(SIM), vcs)
     EXTRA_ARGS   += +incdir+$(CFGDIR) +incdir+$(SRCDIR)/include -assert svaext -cm line+cond+fsm+tgl+branch +vcs+lic+wait
 endif

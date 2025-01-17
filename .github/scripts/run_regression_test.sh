@@ -27,7 +27,10 @@ run_regression_test(){
     echo -e "${COLOR_WHITE} USER_MODE      = ${USER_MODE}${COLOR_CLEAR}"
     echo -e "${COLOR_WHITE} ICACHE_WAYPACK = ${ICACHE_WAYPACK}${COLOR_CLEAR}"
 
-    COMMON_PARAMS="-set bitmanip_zba -set bitmanip_zbb -set bitmanip_zbc -set bitmanip_zbe -set bitmanip_zbf -set bitmanip_zbp -set bitmanip_zbr -set bitmanip_zbs -set=fpga_optimize=0 -set=lockstep_enable=1 -set=lockstep_regfile_enable=1"
+    COMMON_PARAMS="-set bitmanip_zba -set bitmanip_zbb -set bitmanip_zbc -set bitmanip_zbe -set bitmanip_zbf -set bitmanip_zbp -set bitmanip_zbr -set bitmanip_zbs -set=fpga_optimize=0"
+    if [[ "${DCLS_ENABLE}" == "1" ]]; then
+        COMMON_PARAMS="-set lockstep_enable=1 -set lockstep_regfile_enable=1 ${COMMON_PARAMS}"
+    fi
 
     if [[ "${USER_MODE}" == "1" ]]; then
         COMMON_PARAMS="-set=user_mode=1 -set=smepmp=1 ${COMMON_PARAMS}"

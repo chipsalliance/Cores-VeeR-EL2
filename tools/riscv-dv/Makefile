@@ -16,18 +16,20 @@ WORK_DIR       ?= work
 TEST_DIR        = $(WORK_DIR)/test_$(RISCV_DV_TEST)
 SIM_DIR         = $(TEST_DIR)/hdl_sim
 
+VEER_EXTRA_CONF = ""
+
 ifeq ($(findstring u, $(RISCV_DV_PRIV)), u)
-	VEER_EXTRA_CONF = "-set=user_mode=1 -set=smepmp=1"
-else
-	VEER_EXTRA_CONF = ""
+	VEER_EXTRA_CONF += "-set=user_mode=1 -set=smepmp=1"
+endif
+
+ifeq ($(DCLS_ENABLE),"1")
+	VEER_EXTRA_CONF += "-set lockstep_enable=1 -set lockstep_regfile_enable=1 $(VEER_EXTRA_CONF)"
 endif
 
 VEER_TARGET     = default
 VEER_CONF       = -set build_axi4 \
                   -set reset_vec=0x80000000 \
                   -set fpga_optimize=0 \
-				  -set lockstep_enable=1 \
-				  -set lockstep_regfile_enable=1 \
                   $(VEER_EXTRA_CONF)
 
 # Coverage reporting

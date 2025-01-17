@@ -17,6 +17,7 @@ jobs:
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/openocd-tests/.cache/"
+      DCLS_ENABLE: "1"
 
     steps:
       - name: Install utils
@@ -58,9 +59,12 @@ jobs:
         run: |
           export PATH=/opt/verilator/bin:/opt/openocd/bin:$PATH
           export RV_ROOT=$(pwd)
+          if  [[ "${DCLS_ENABLE}" == "1" ]]; then
+            VEER_OPTS="-set lockstep_enable=1 -set lockstep_regfile_enable=1"
+          fi
           mkdir run
           make -C run -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
-            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }} -j$(nproc)
+            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test $VEER_OPTS" COVERAGE=${{ matrix.coverage }} -j$(nproc)
           cd run
           ${RV_ROOT}/.github/scripts/openocd_test.sh \
             -f ${RV_ROOT}/testbench/openocd_scripts/verilator-rst.cfg \
@@ -72,9 +76,12 @@ jobs:
           # TODO GDB is in /opt/riscv and a separate toolchain is installed with apt. Make this better.
           export PATH=/opt/riscv/bin:/opt/verilator/bin:/opt/openocd/bin:$PATH
           export RV_ROOT=$(pwd)
+          if  [[ "${DCLS_ENABLE}" == "1" ]]; then
+            VEER_OPTS="-set lockstep_enable=1 -set lockstep_regfile_enable=1"
+          fi
           mkdir gdb_test
           make -C gdb_test -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
-            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test" COVERAGE=${{ matrix.coverage }} -j$(nproc)
+            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test $VEER_OPTS" COVERAGE=${{ matrix.coverage }} -j$(nproc)
           cd gdb_test
           ${RV_ROOT}/.github/scripts/gdb_test.sh
           pkill openocd || true

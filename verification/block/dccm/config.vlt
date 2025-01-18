@@ -1,0 +1,7 @@
+`verilator_config
+
+lint_off -rule PINCONNECTEMPTY -file "*/el2_lsu_dccm_mem_wrapper.sv"
+
+lint_off -rule WIDTHTRUNC -file "*/el2_lsu_dccm_mem_wrapper.sv"
+
+lint_off -rule IMPORTSTAR -file "*/el2_mem_if.sv"

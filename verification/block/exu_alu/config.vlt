@@ -1,0 +1,5 @@
+`verilator_config
+
+lint_off -rule WIDTHTRUNC -file "*/el2_exu_alu_ctl_wrapper.sv"
+
+lint_off -rule UNUSEDPARAM -file "*/el2_exu_alu_ctl_wrapper.sv"

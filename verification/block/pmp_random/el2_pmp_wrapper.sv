@@ -16,13 +16,13 @@ module el2_pmp_wrapper
 
     input  logic              [            31:0] pmp_chan_addr[PMP_CHANNELS],
     input  el2_pmp_type_pkt_t                    pmp_chan_type[PMP_CHANNELS],
-    output logic              [0:PMP_CHANNELS-1] pmp_chan_err
+    output logic              [PMP_CHANNELS-1:0] pmp_chan_err
 );
   logic pmp_chan_err_unpacked[PMP_CHANNELS];
   el2_pmp_cfg_pkt_t pmp_pmpcfg_int [pt.PMP_ENTRIES];
 
   for (genvar c = 0; c < PMP_CHANNELS; c++) begin
-    assign pmp_chan_err[c] = pmp_chan_err_unpacked[c];
+    assign pmp_chan_err[PMP_CHANNELS-1-c] = pmp_chan_err_unpacked[c];
   end
 
   for (genvar e = 0; e < pt.PMP_ENTRIES; e++) begin

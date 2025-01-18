@@ -40,14 +40,21 @@ endif
 ifeq ($(SIM), verilator)
     COMPILE_ARGS += --coverage-max-width 20000
     COMPILE_ARGS += --timing
-    COMPILE_ARGS += -Wall -Wno-fatal
+    COMPILE_ARGS += -Wall
+    COMPILE_ARGS += $(CURDIR)/config.vlt
 
     EXTRA_ARGS   += --trace --trace-structs
     EXTRA_ARGS   += $(VERILATOR_COVERAGE)
     EXTRA_ARGS   += -I$(CFGDIR) -Wno-DECLFILENAME
+
+    # Include test specific Verilator config if it exists
+    ifneq ("$(wildcard $(TEST_DIR)/config.vlt)","")
+        COMPILE_ARGS += $(TEST_DIR)/config.vlt
+    endif
 else ifeq ($(SIM), vcs)
     EXTRA_ARGS   += +incdir+$(CFGDIR) +incdir+$(SRCDIR)/include -assert svaext -cm line+cond+fsm+tgl+branch +vcs+lic+wait
 endif
+
 
 COCOTB_HDL_TIMEUNIT         = 1ns
 COCOTB_HDL_TIMEPRECISION    = 10ps
@@ -68,4 +75,3 @@ endif
 # Rules for generating VeeR config
 $(CFGDIR)/common_defines.vh:
 	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0 $(EXTRA_CONFIG_OPTS)
-

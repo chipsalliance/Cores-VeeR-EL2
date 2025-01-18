@@ -2,8 +2,8 @@ null  :=
 space := $(null) #
 comma := ,
 
-CURDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-SRCDIR := $(abspath $(CURDIR)../../../../design)
+TEST_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+SRCDIR := $(abspath $(TEST_DIR)../../../../design)
 
 TEST_FILES   = $(sort $(wildcard test_*.py))
 
@@ -12,7 +12,7 @@ TOPLEVEL     = el2_pmp_wrapper
 PMP_TEST := 1
 
 VERILOG_SOURCES  = \
-    $(CURDIR)/pmp/el2_pmp_wrapper.sv \
+    $(TEST_DIR)/el2_pmp_wrapper.sv \
     $(SRCDIR)/el2_pmp.sv
 
-include $(CURDIR)/../common.mk
+include $(TEST_DIR)/../common.mk

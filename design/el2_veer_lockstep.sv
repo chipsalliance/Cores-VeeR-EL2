@@ -1053,6 +1053,7 @@ module el2_veer_lockstep
       .nmi_vec(shadow_core_inputs.nmi_vec),
       .core_rst_l(shadow_core_outputs.core_rst_l),
 
+      // we use those clocks from main core
       .active_l2clk(),
       .free_l2clk  (),
 

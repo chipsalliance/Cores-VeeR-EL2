@@ -16,8 +16,9 @@
 //********************************************************************************
 
 
+interface el2_regfile_if
 import el2_pkg::*;
-interface el2_regfile_if ();
+();
   typedef struct packed {
     // General Purpose Registers
     logic [31:0] ra; // Return address

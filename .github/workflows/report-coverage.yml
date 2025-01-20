@@ -83,6 +83,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
+          name: verilator_coverage_single_data
+          path: verilator_coverage_single_data.tar.gz
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
           name: verilator_coverage_data
           path: |
             coverage_toggle_verilator_orig.info_

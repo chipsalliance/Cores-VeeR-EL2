@@ -188,7 +188,9 @@ EOF
 
 mkdir info_files
 mv *.info info_files
+tar acf verilator_coverage_single_data.tar.gz info_files
 cd info_files
+ls
 git clone https://github.com/linux-test-project/lcov -b v2.3-beta
 PATH="`pwd`/lcov/bin:$PATH"
 

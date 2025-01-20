@@ -160,12 +160,38 @@ jobs:
     name: Run custom Microarchitectural tests
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: centos:8
+    strategy:
+      matrix:
+        test:
+          - "block/pic"
+          - "block/pic_gw"
+          - "block/dma"
+          - "block/ifu_compress"
+          - "block/dec_tl"
+          - "block/dec_ib"
+          - "block/exu_alu"
+          - "block/exu_mul"
+          - "block/exu_div"
+          - "block/iccm"
+          - "block/dccm"
+          - "block/lib_axi4_to_ahb"
+          - "block/lib_ahb_to_axi4"
+          - "block/pmp"
+          - "block/pmp_random"
+          - "block/dec_pmp_ctl"
+          - "block/dmi"
+          - "block/lsu_tl"
+          - "block/dec_tlu_ctl"
     env:
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader
+      TEST: ${{ matrix.test }}
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
       - name: Perform custom tests
         run: _secret_custom_uarch
+        env:
+          TEST: ${{ matrix.test }}
+

@@ -336,6 +336,8 @@ if(pt.BTB_ENABLE==1) begin
    assign exu_mp_pkt.pc4                                    =  final_predict_mp.pc4;
    assign exu_mp_pkt.hist[1:0]                              =  final_predict_mp.hist[1:0];
    assign exu_mp_pkt.toffset[11:0]                          =  final_predict_mp.toffset[11:0];
+   assign exu_mp_pkt.br_error                               =  '0;
+   assign exu_mp_pkt.br_start_error                         =  '0;
 
    assign exu_mp_fghr[pt.BHT_GHR_SIZE-1:0]                  =  after_flush_eghr[pt.BHT_GHR_SIZE-1:0];
 

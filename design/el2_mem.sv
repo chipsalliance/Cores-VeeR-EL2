@@ -161,6 +161,7 @@ else  begin
    assign   ictag_debug_rd_data  = '0 ;
    assign   ic_debug_rd_data  = '0 ;
    assign   ic_eccerr      = '0;
+   assign   ic_parerr      = '0;
 end // else: !if( pt.ICACHE_ENABLE )
 
 

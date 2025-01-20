@@ -231,6 +231,12 @@ import el2_pkg::*;
       logic [63:32] lsu_ld_data_m_nc, lsu_ld_data_corr_m_nc;
       logic [31:0]  lsu_ld_data_corr_m;
 
+      assign lsu_ld_data_r        = '0;
+      assign dccm_rdata_lo_r      = '0;
+      assign dccm_rdata_hi_r      = '0;
+      assign dccm_data_ecc_lo_r   = '0;
+      assign dccm_data_ecc_hi_r   = '0;
+
       assign dccm_dma_rvalid      = lsu_pkt_m.valid & lsu_pkt_m.load & lsu_pkt_m.dma;
       assign dccm_dma_ecc_error   = lsu_double_ecc_error_m;
       assign dccm_dma_rtag[2:0]   = dma_mem_tag_m[2:0];

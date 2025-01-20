@@ -11,7 +11,7 @@ jobs:
     container: ghcr.io/antmicro/cores-veer-el2:20250116082447
     strategy:
       matrix:
-        bus: ["axi"]
+        bus: ["axi", "ahb"]
         test: ["machine_external_ints", "dbus_store_error", "lsu_trigger_hit", "machine_external_vec_ints", "dside_pic_access_error",
                "iside_fetch_precise_bus_error", "dside_access_region_prediction_error", "cmark", "iside_core_local_unmapped_address_error",
                "dside_access_across_region_boundary", "nmi_pin_assertion", "dside_size_misaligned_access_to_non_idempotent_address",

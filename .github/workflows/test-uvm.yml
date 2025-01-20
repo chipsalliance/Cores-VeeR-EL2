@@ -24,7 +24,7 @@ jobs:
 
       - name: Setup environment
         run: |
-          echo "/opt/verilator_uvm/bin" >> $GITHUB_PATH
+          echo "/opt/verilator/bin" >> $GITHUB_PATH
           RV_ROOT=`pwd`
           echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
           PYTHONUNBUFFERED=1

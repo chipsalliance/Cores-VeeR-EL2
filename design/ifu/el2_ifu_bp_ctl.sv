@@ -822,7 +822,10 @@ end // if (!pt.BTB_FULLYA)
                     .dout(btb_used[pt.BTB_SIZE-1:0]));
 
 end // block: fa
-
+else begin
+   assign ifu_bp_fa_index_f[1] = '0;
+   assign ifu_bp_fa_index_f[0] = '0;
+end
 
    //-----------------------------------------------------------------------------
    // BHT

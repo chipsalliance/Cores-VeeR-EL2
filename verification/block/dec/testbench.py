@@ -10,6 +10,7 @@ import cocotb
 import csrs
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles, FallingEdge, RisingEdge
+from csrs import get_bit
 from pyuvm import (
     ConfigDB,
     uvm_analysis_port,
@@ -26,6 +27,10 @@ from pyuvm import (
 )
 
 # ==============================================================================
+
+
+def log_mismatch_error(logger, name, expected, got):
+    logger.error(f"{name} {hex(expected)} != {hex(got)} (should be {hex(expected)})")
 
 
 csr_list = [getattr(csrs, mod) for mod in dir(csrs) if isinstance(getattr(csrs, mod), csrs.CSR)]
@@ -91,6 +96,9 @@ class DecInputItem(uvm_sequence_item):
         csrw_instr=0,
         csrr_instr=0,
         csr_addr=0,
+        mtdata1=0,
+        mtdata2=0,
+        mtsel=0,
     ):
         super().__init__("DecInputItem")
         self.dec_csr_wrdata_r = dec_csr_wrdata_r
@@ -99,9 +107,25 @@ class DecInputItem(uvm_sequence_item):
         self.csrr_instr = csrr_instr
         self.pic_claimid = pic_claimid
         self.ifu_ic_debug_rd_data = ifu_ic_debug_rd_data
+        self.mtdata1 = mtdata1
+        self.mtdata2 = mtdata2
+        self.mtsel = mtsel
 
     def randomize(self, test):
-        if test == "csr_access":
+        if test == "mtdata":
+            # bits 31:28 are hardcoded to 0x2
+            mtdata1 = "0010"
+            for _ in range(28):
+                mtdata1 += random.choice(["0", "1"])
+            # set DMODE (bit 27) to 0 so that the settings are actually taken into account
+            # in the list, bits are numbered from 0
+            tmp = list(mtdata1)
+            tmp[31 - 27] = "0"
+            mtdata1 = "".join(tmp)
+            self.mtdata1 = int(mtdata1, 2)
+            self.mtdata2 = randint(32)
+            self.mtsel = randint(2)
+        elif test == "csr_access":
             self.csr_addr = random.choice(
                 [
                     csrs.MCOUNTINHIBIT,
@@ -147,12 +171,14 @@ class DecOutputItem(uvm_sequence_item):
         csrr_instr=0,
         dec_csr_wrdata_r=0,
         dec_csr_rddata_d=0,
+        trigger_pkt_any=0,
         ifu_ic_debug_rd_data=0,
     ):
         super().__init__("DecOutputItem")
         self.csrr_instr = csrr_instr
         self.dec_csr_wrdata_r = dec_csr_wrdata_r
         self.dec_csr_rddata_d = dec_csr_rddata_d
+        self.trigger_pkt_any = trigger_pkt_any
         self.ifu_ic_debug_rd_data = ifu_ic_debug_rd_data
 
 
@@ -190,13 +216,17 @@ class DecDriver(uvm_driver):
         self.dut.exu_i0_result_x.value = 0
 
     async def run_phase(self):
-
         while True:
             it = await self.seq_item_port.get_next_item()
-
             if isinstance(it, DecInputItem):
                 test = ConfigDB().get(self, "", "TEST")
-                if test in ["csr_access"]:
+                if test == "mtdata":
+                    await self.write_csr(WriteCSRInst(csrs.MTSEL).encode(), it.mtsel)
+                    await self.write_csr(WriteCSRInst(csrs.MTDATA1).encode(), it.mtdata1)
+                    await self.write_csr(WriteCSRInst(csrs.MTDATA2).encode(), it.mtdata2)
+                    for _ in range(4):
+                        await RisingEdge(self.dut.clk)
+                elif test in ["csr_access"]:
                     # Write CSR
                     await self.write_csr(it.csrw_instr, it.dec_csr_wrdata_r)
                     for _ in range(2):
@@ -234,14 +264,27 @@ class DecInputMonitor(uvm_component):
     async def run_phase(self):
         while True:
             test = ConfigDB().get(self, "", "TEST")
-            if test in ["csr_access"]:
+            if test == "mtdata":
+                await RisingEdge(self.dut.ifu_i0_valid)
+                for _ in range(2):
+                    await RisingEdge(self.dut.clk)
+                mtsel = int(self.dut.exu_i0_result_x.value)
+                await RisingEdge(self.dut.ifu_i0_valid)
+                for _ in range(2):
+                    await RisingEdge(self.dut.clk)
+                mtdata1 = int(self.dut.exu_i0_result_x.value)
+                await RisingEdge(self.dut.ifu_i0_valid)
+                for _ in range(2):
+                    await RisingEdge(self.dut.clk)
+                mtdata2 = int(self.dut.exu_i0_result_x.value)
+                self.ap.write(DecInputItem(mtdata1=mtdata1, mtdata2=mtdata2, mtsel=mtsel))
+            elif test in ["csr_access"]:
                 # Wait for CSR write
                 await RisingEdge(self.dut.ifu_i0_valid)
                 csrw_instr = int(self.dut.ifu_i0_instr.value)
                 for _ in range(2):
                     await RisingEdge(self.dut.clk)
                 dec_csr_wrdata_r = int(self.dut.exu_i0_result_x.value)
-
                 # Wait for CSR read
                 await RisingEdge(self.dut.ifu_i0_valid)
                 csrr_instr = int(self.dut.ifu_i0_instr.value)
@@ -278,7 +321,16 @@ class DecOutputMonitor(uvm_component):
     async def run_phase(self):
         while True:
             test = ConfigDB().get(self, "", "TEST")
-            if test in ["csr_access"]:
+            if test == "mtdata":
+                # Wait for CSR writes
+                for _ in range(3):
+                    await RisingEdge(self.dut.ifu_i0_valid)
+                # Wait for the outputs
+                for _ in range(4):
+                    await RisingEdge(self.dut.clk)
+                trigger_pkt_any = int(self.dut.trigger_pkt_any.value)
+                self.ap.write(DecOutputItem(trigger_pkt_any=trigger_pkt_any))
+            elif test in ["csr_access"]:
                 # Wait for CSR write
                 await RisingEdge(self.dut.ifu_i0_valid)
                 for _ in range(2):
@@ -357,7 +409,60 @@ class DecScoreboard(uvm_component):
                 self.passed = True
 
             test = ConfigDB().get(self, "", "TEST")
-            if test == "csr_access":
+            if test == "mtdata":
+                pkt_any_mask = 0x3FFFFFFFFF
+                tdata2_mask = 0xFFFFFFFF
+                flags_mask = 0x3F
+                flags_shift = 32
+
+                mtsel = item_inp.mtsel
+                pkt_any_shift = mtsel * 38
+
+                mtdata1_i = item_inp.mtdata1
+                mtdata2_i = item_inp.mtdata2
+                trigger_pkt_any = ((item_out.trigger_pkt_any) >> pkt_any_shift) & pkt_any_mask
+
+                select_i = get_bit(mtdata1_i, 19)
+                match_i = get_bit(mtdata1_i, 7)
+                store_i = get_bit(mtdata1_i, 1)
+                load_i = get_bit(mtdata1_i, 0) & ~get_bit(mtdata1_i, 19)
+                execute_i = get_bit(mtdata1_i, 2) & ~get_bit(mtdata1_i, 19)
+                m_i = get_bit(mtdata1_i, 6)
+
+                flags_o = (trigger_pkt_any >> flags_shift) & flags_mask
+
+                select_o = get_bit(flags_o, 5)
+                match_o = get_bit(flags_o, 4)
+                store_o = get_bit(flags_o, 3)
+                load_o = get_bit(flags_o, 2)
+                execute_o = get_bit(flags_o, 1)
+                m_o = get_bit(flags_o, 0)
+
+                mtdata2_o = trigger_pkt_any & tdata2_mask
+
+                if mtdata2_i != mtdata2_o:
+                    log_mismatch_error(self.logger, "mtdata2", mtdata2_i, mtdata2_o)
+                    self.passed = False
+                if select_i != select_o:
+                    log_mismatch_error(self.logger, "select", select_i, select_o)
+                    self.passed = False
+                if match_i != match_o:
+                    log_mismatch_error(self.logger, "match", match_i, match_o)
+                    self.passed = False
+                if store_i != store_o:
+                    log_mismatch_error(self.logger, "store", store_i, store_o)
+                    self.passed = False
+                if load_i != load_o:
+                    log_mismatch_error(self.logger, "load", load_i, load_o)
+                    self.passed = False
+                if execute_i != execute_o:
+                    log_mismatch_error(self.logger, "execute", execute_i, execute_o)
+                    self.passed = False
+                if m_i != m_o:
+                    log_mismatch_error(self.logger, "m", m_i, m_o)
+                    self.passed = False
+
+            elif test == "csr_access":
                 i0 = item_inp.csrw_instr
                 i1 = item_inp.csrr_instr
 
@@ -390,23 +495,16 @@ class DecScoreboard(uvm_component):
                         break
 
                 if data_in != data_out:
-                    self.logger.error(
-                        "reg_val[{}] {} != {} (should be {})".format(
-                            hex(csr), hex(data_in), hex(data_out), hex(data_in)
-                        )
-                    )
+                    log_mismatch_error(self.logger, f"reg_val[{hex(csr)}]", data_in, data_out)
                     self.passed = False
+
             elif test == "debug_ic_cache":
                 ifu_ic_debug_rd_data_in = item_inp.ifu_ic_debug_rd_data
                 ifu_ic_debug_rd_data_out = item_out.ifu_ic_debug_rd_data
 
                 if ifu_ic_debug_rd_data_in != ifu_ic_debug_rd_data_out:
-                    self.logger.error(
-                        "read_data {} != {} (should be {})".format(
-                            hex(ifu_ic_debug_rd_data_in),
-                            hex(ifu_ic_debug_rd_data_out),
-                            hex(ifu_ic_debug_rd_data_in),
-                        )
+                    log_mismatch_error(
+                        self.logger, "read_data", ifu_ic_debug_rd_data_in, ifu_ic_debug_rd_data_out
                     )
                     self.passed = False
 

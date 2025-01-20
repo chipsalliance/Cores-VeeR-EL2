@@ -61,6 +61,7 @@ jobs:
           - "block/dmi"
           - "block/lsu_tl"
           - "block/dec_tlu_ctl"
+          - "block/dec"
     env:
       CCACHE_DIR: "/opt/verification/.cache/"
       DEBIAN_FRONTEND: "noninteractive"
@@ -182,6 +183,7 @@ jobs:
           - "block/dmi"
           - "block/lsu_tl"
           - "block/dec_tlu_ctl"
+          - "block/dec"
     env:
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader

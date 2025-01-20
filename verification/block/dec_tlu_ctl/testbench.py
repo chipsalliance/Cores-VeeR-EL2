@@ -25,6 +25,8 @@ from pyuvm import *
 
 # ==============================================================================
 
+csr_list = [getattr(csrs, mod) for mod in dir(csrs) if isinstance(getattr(csrs, mod), csrs.CSR)]
+
 
 class TlInputItem(uvm_sequence_item):
     """
@@ -468,27 +470,6 @@ class TlScoreboard(uvm_component):
         self.port_out.connect(self.fifo_out.get_export)
 
     def check_phase(self):  # noqa: C901
-        def mhpme_zero_event(reg_val_i):
-            return (
-                (reg_val_i > 516)
-                | ((reg_val_i < 512) & (reg_val_i > 56))
-                | ((reg_val_i < 54) & (reg_val_i > 50))
-                | (reg_val_i == 29)
-                | (reg_val_i == 33)
-            )
-
-        def get_bit(value, i):
-            return (value >> i) & 1
-
-        def mrac_prevent_11_pairs(value):
-            new_value = 0
-            for i in reversed(range(0, 31, 2)):
-                new_value = new_value << 2
-                b0 = get_bit(value, i)
-                b1 = get_bit(value, i + 1)
-                new_value |= (b1 << 1) | (b0 & (not b1))
-            return new_value
-
         # Get item pairs
         while True:
             got_inp, item_inp = self.port_inp.try_get()
@@ -606,7 +587,9 @@ class TlScoreboard(uvm_component):
                 perf_reg_val_i = item_inp.dec_csr_wrdata_r
                 perf_reg_val_o = item_out.dec_csr_rddata_d
 
-                perf_reg_val_i = 0 if mhpme_zero_event(perf_reg_val_i) else perf_reg_val_i
+                mhpme_lst = [csrs.MHPME3, csrs.MHPME4, csrs.MHPME5, csrs.MHPME6]
+                c = [c for c in mhpme_lst if c == csr][0]
+                perf_reg_val_i = c.out(perf_reg_val_i)
 
                 if perf_reg_val_i != perf_reg_val_o:
                     self.logger.error(
@@ -631,26 +614,11 @@ class TlScoreboard(uvm_component):
                 csr = item_inp.csr_addr
                 perf_reg_val_i = item_inp.dec_csr_wrdata_r
                 perf_reg_val_o = item_out.dec_csr_rddata_d
-                if csr in [csrs.MICECT, csrs.MICCMECT, csrs.MDCCMECT]:
-                    if ((perf_reg_val_i >> 27) & 0x1F) > 26:
-                        perf_reg_val_i = perf_reg_val_i & 0x07FFFFFF
-                        perf_reg_val_i = perf_reg_val_i | (26 << 27)
-                if csr == csrs.MTVEC:
-                    perf_reg_val_i = perf_reg_val_i & 0xFFFFFFFD
-                if csr in [csrs.MHPME3, csrs.MHPME4, csrs.MHPME5, csrs.MHPME6]:
-                    perf_reg_val_i = 0 if mhpme_zero_event(perf_reg_val_i) else perf_reg_val_i
-                if csr == csrs.MRAC:
-                    perf_reg_val_i = mrac_prevent_11_pairs(perf_reg_val_i)
-                if csr == csrs.MEIPT:
-                    perf_reg_val_i &= 0xF  # Upper 28 bits reserved
-                if csr == csrs.MCOUNTINHIBIT:
-                    perf_reg_val_i &= 0x7D  # mcountinhibit[1] reserved
-                if csr == csrs.MFDHT:
-                    perf_reg_val_i &= 0x3F  # mfdht[5:0]
-                if csr == csrs.MEICURPL:
-                    perf_reg_val_i &= 0xF  # meicurpl[3:0]
-                if csr == csrs.MFDC:
-                    perf_reg_val_i &= 0x71FBF
+
+                for c in csr_list:
+                    if c == csr:
+                        perf_reg_val_i = c.out(perf_reg_val_i)
+                        break
 
                 if perf_reg_val_i != perf_reg_val_o:
                     self.logger.error(
@@ -664,32 +632,13 @@ class TlScoreboard(uvm_component):
                 csr = item_inp.csr_addr
                 reg_val_i = item_inp.dec_csr_wrdata_r
                 reg_val_o = item_out.dec_csr_rddata_d
+
                 if csr == csrs.DCSR:
-                    reg_val_i = (reg_val_i & 0xFFFF) | (0x4 << 28)
-                    reg_val_i = (reg_val_i & 0xFFFFFFFC) | 0x3
-                    reg_val_i = reg_val_i & ~(1 << 14)  # reserved
-                    reg_val_i = reg_val_i & ~(1 << 13)  # ebreaks (0 for VeeR-EL2)
-                    reg_val_i = reg_val_i & ~(1 << 12)  # ebreaku (0 for VeeR-EL2)
-                    reg_val_i = reg_val_i & ~(1 << 9)  # stoptime (0 for VeeR-EL2)
-                    reg_val_i = reg_val_i & ~(1 << 8)  # reserved
-                    reg_val_i = (reg_val_i & ~(1 << 7)) | (1 << 7)
-                    reg_val_i = (reg_val_i & ~(1 << 6)) | (1 << 6)
-                    reg_val_i = reg_val_i & ~(1 << 5)  # reserved
-                    reg_val_i = reg_val_i & ~(1 << 4)  # reserved
-                    reg_val_i = reg_val_i & ~(1 << 3)  # reserved
+                    reg_val_i = csrs.DCSR.out(reg_val_i)
                 elif csr == csrs.DPC:
-                    # align DPC
-                    reg_val_i = reg_val_i & ~(0x1)
+                    reg_val_i = csrs.DPC.out(reg_val_i)
                 elif csr == csrs.DICAWICS:
-                    reg_val_i = reg_val_i & 0x1FFFFFF
-                    reg_val_i = reg_val_i & ~(1 << 23)
-                    reg_val_i = reg_val_i & ~(1 << 22)
-                    reg_val_i = reg_val_i & ~(1 << 19)
-                    reg_val_i = reg_val_i & ~(1 << 18)
-                    reg_val_i = reg_val_i & ~(1 << 17)
-                    reg_val_i = reg_val_i & ~(1 << 2)
-                    reg_val_i = reg_val_i & ~(1 << 1)
-                    reg_val_i = reg_val_i & ~(1 << 0)
+                    reg_val_i = csrs.DICAWICS.out(reg_val_i)
 
                 if reg_val_i != reg_val_o:
                     self.logger.error(

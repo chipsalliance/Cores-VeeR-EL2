@@ -90,6 +90,7 @@ class DecInputItem(uvm_sequence_item):
 
     def __init__(
         self,
+        pic_pl=0,
         pic_claimid=0,
         exu_i0_result_x=0,
         ifu_ic_debug_rd_data=0,
@@ -105,6 +106,7 @@ class DecInputItem(uvm_sequence_item):
         self.csr_addr = csr_addr
         self.csrw_instr = csrw_instr
         self.csrr_instr = csrr_instr
+        self.pic_pl = pic_pl
         self.pic_claimid = pic_claimid
         self.ifu_ic_debug_rd_data = ifu_ic_debug_rd_data
         self.mtdata1 = mtdata1
@@ -170,6 +172,11 @@ class DecInputItem(uvm_sequence_item):
             self.csr_addr = random.choice(
                 [csrs.DICAD0, csrs.DICAD0H, csrs.DICAWICS, csrs.DPC, csrs.DCSR]
             )
+            self.csrw_instr = WriteCSRInst(self.csr_addr).encode()
+            self.csrr_instr = ReadCSRInst(self.csr_addr).encode()
+        elif test == "meicidpl":
+            self.pic_pl = randint(4)
+            self.csr_addr = csrs.MEICIDPL
             self.csrw_instr = WriteCSRInst(self.csr_addr).encode()
             self.csrr_instr = ReadCSRInst(self.csr_addr).encode()
 
@@ -271,6 +278,12 @@ class DecDriver(uvm_driver):
                     await ClockCycles(self.dut.clk, 2)
                     await self.read_csr(it.csrr_instr)
                     await ClockCycles(self.dut.clk, 2)
+                elif test == "meicidpl":
+                    self.dut.pic_pl.value = it.pic_pl
+                    await self.write_csr(it.csrw_instr, 0)
+                    await ClockCycles(self.dut.clk, 2)
+                    await self.read_csr(it.csrr_instr)
+                    await RisingEdge(self.dut.clk)
             else:
                 raise RuntimeError("Unknown item '{}'".format(type(it)))
 
@@ -344,6 +357,13 @@ class DecInputMonitor(uvm_component):
                 # Await CSR read
                 await RisingEdge(self.dut.ifu_i0_valid)
                 self.ap.write(DecInputItem(csr_addr=csr_addr, exu_i0_result_x=exu_i0_result_x))
+            elif test == "meicidpl":
+                await RisingEdge(self.dut.ifu_i0_valid)
+                csr_addr = int(self.dut.ifu_i0_instr.value) >> 20
+                await ClockCycles(self.dut.clk, 2)
+                exu_i0_result_x = int(self.dut.exu_i0_result_x.value)
+                await RisingEdge(self.dut.ifu_i0_valid)
+                self.ap.write(DecInputItem(csr_addr=csr_addr, exu_i0_result_x=exu_i0_result_x))
 
 
 class DecOutputMonitor(uvm_component):
@@ -409,6 +429,18 @@ class DecOutputMonitor(uvm_component):
                 await RisingEdge(self.dut.clk)
                 dec_csr_rddata_d = int(self.dut.dec_csr_rddata_d.value)
                 self.ap.write(DecOutputItem(dec_csr_rddata_d=dec_csr_rddata_d))
+            elif test == "meicidpl":
+                for _ in range(2):
+                    await RisingEdge(self.dut.ifu_i0_valid)
+                csrr_instr = int(self.dut.ifu_i0_instr.value)
+                await RisingEdge(self.dut.clk)
+                dec_csr_rddata_d = int(self.dut.dec_csr_rddata_d.value)
+                self.ap.write(
+                    DecOutputItem(
+                        csrr_instr=csrr_instr,
+                        dec_csr_rddata_d=dec_csr_rddata_d,
+                    )
+                )
 
 
 # ==============================================================================
@@ -579,6 +611,14 @@ class DecScoreboard(uvm_component):
                     if c == csr:
                         reg_val_i = c.out(reg_val_i)
                         break
+                if reg_val_i != reg_val_o:
+                    log_mismatch_error(self.logger, f"reg_val[{hex(csr)}]", reg_val_i, reg_val_o)
+                    self.passed = False
+
+            elif test == "meicidpl":
+                reg_val_i = item_inp.exu_i0_result_x
+                reg_val_o = item_out.dec_csr_rddata_d
+                reg_val_i = csrs.MEICIDPL.out(reg_val_i)
                 if reg_val_i != reg_val_o:
                     log_mismatch_error(self.logger, f"reg_val[{hex(csr)}]", reg_val_i, reg_val_o)
                     self.passed = False

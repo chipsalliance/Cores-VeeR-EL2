@@ -91,7 +91,7 @@ class DecInputItem(uvm_sequence_item):
     def __init__(
         self,
         pic_claimid=0,
-        dec_csr_wrdata_r=0,
+        exu_i0_result_x=0,
         ifu_ic_debug_rd_data=0,
         csrw_instr=0,
         csrr_instr=0,
@@ -101,7 +101,7 @@ class DecInputItem(uvm_sequence_item):
         mtsel=0,
     ):
         super().__init__("DecInputItem")
-        self.dec_csr_wrdata_r = dec_csr_wrdata_r
+        self.exu_i0_result_x = exu_i0_result_x
         self.csr_addr = csr_addr
         self.csrw_instr = csrw_instr
         self.csrr_instr = csrr_instr
@@ -154,7 +154,7 @@ class DecInputItem(uvm_sequence_item):
                     csrs.MTVEC,
                 ]
             )
-            self.dec_csr_wrdata_r = randint()
+            self.exu_i0_result_x = randint()
             self.csrw_instr = WriteCSRInst(self.csr_addr).encode()
             self.csrr_instr = ReadCSRInst(self.csr_addr).encode()
         elif test == "debug_ic_cache":
@@ -202,6 +202,7 @@ class DecDriver(uvm_driver):
         self.dut.ifu_i0_instr.value = instr
         await RisingEdge(self.dut.clk)
         self.dut.ifu_i0_valid.value = 0
+        self.dut.ifu_i0_instr.value = 0
 
     async def write_csr(self, instr, data):
         self.dut.ifu_i0_valid.value = 0
@@ -227,7 +228,7 @@ class DecDriver(uvm_driver):
                     await ClockCycles(self.dut.clk, 4)
                 elif test in ["csr_access"]:
                     # Write CSR
-                    await self.write_csr(it.csrw_instr, it.dec_csr_wrdata_r)
+                    await self.write_csr(it.csrw_instr, it.exu_i0_result_x)
                     await ClockCycles(self.dut.clk, 2)
                     # Read the CSR back
                     await self.read_csr(it.csrr_instr)
@@ -278,7 +279,7 @@ class DecInputMonitor(uvm_component):
                 await RisingEdge(self.dut.ifu_i0_valid)
                 csrw_instr = int(self.dut.ifu_i0_instr.value)
                 await ClockCycles(self.dut.clk, 2)
-                dec_csr_wrdata_r = int(self.dut.exu_i0_result_x.value)
+                exu_i0_result_x = int(self.dut.exu_i0_result_x.value)
                 # Wait for CSR read
                 await RisingEdge(self.dut.ifu_i0_valid)
                 csrr_instr = int(self.dut.ifu_i0_instr.value)
@@ -286,7 +287,7 @@ class DecInputMonitor(uvm_component):
                     DecInputItem(
                         csrw_instr=csrw_instr,
                         csrr_instr=csrr_instr,
-                        dec_csr_wrdata_r=dec_csr_wrdata_r,
+                        exu_i0_result_x=exu_i0_result_x,
                     )
                 )
             elif test == "debug_ic_cache":
@@ -325,7 +326,7 @@ class DecOutputMonitor(uvm_component):
             elif test in ["csr_access"]:
                 # Wait for CSR write
                 await RisingEdge(self.dut.ifu_i0_valid)
-                await ClockCycles(self.dut.clk, 2)
+                await ClockCycles(self.dut.clk, 3)
                 dec_csr_wrdata_r = int(self.dut.dec_csr_wrdata_r.value)
                 # Wait for CSR read
                 await RisingEdge(self.dut.ifu_i0_valid)
@@ -463,14 +464,13 @@ class DecScoreboard(uvm_component):
                     self.passed = False
 
                 csr = rd_addr
-                data_w0 = item_inp.dec_csr_wrdata_r
-                data_w1 = item_inp.dec_csr_wrdata_r
+                data_w0 = item_inp.exu_i0_result_x
+                data_w1 = item_out.dec_csr_wrdata_r
 
                 if data_w0 != data_w1:
                     self.logger.error(
-                        "Sampled from 'dec_csr_wrdata_r': {} != {} (should be {})".format(
-                            hex(data_w0), hex(data_w1), hex(data_w0)
-                        )
+                        "Sampled 'exu_i0_result_x' differs from following 'dec_csr_wrdata_r':"
+                        f" {hex(data_w0)} != {hex(data_w1)} (should be {hex(data_w0)})"
                     )
                     self.passed = False
 

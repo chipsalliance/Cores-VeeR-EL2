@@ -79,7 +79,7 @@ jobs:
           pip install -r .github/scripts/requirements-coverage.txt
           python3 -m pip install meson nox
 
-      - name: Install prerequisities
+      - name: Install prerequisites
         run: |
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
             autoconf automake autotools-dev \
@@ -93,7 +93,7 @@ jobs:
             ninja-build \
             patchutils python3 python3-dev python3-pip \
             texinfo \
-            zlib1g zlib1g-dev
+            zip zlib1g zlib1g-dev
 
       - name: Setup environment
         shell: bash
@@ -122,6 +122,7 @@ jobs:
           pushd ${TEST_PATH}
             nox -s ${TEST_NAME}_verify
           popd
+          zip verification/${{ matrix.test }}/dump.vcd.zip verification/${{ matrix.test }}/dump.vcd
 
       - name: Prepare coverage data
         shell: bash
@@ -155,7 +156,7 @@ jobs:
           name: uarch_tests_logs
           path: |
             verification/${{ matrix.test }}/*.log
-            verification/${{ matrix.test }}/*.vcd
+            verification/${{ matrix.test }}/*.vcd.zip
 
   custom_tests:
     name: Run custom Microarchitectural tests

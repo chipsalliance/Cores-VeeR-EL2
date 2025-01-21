@@ -18,14 +18,6 @@ ifeq ($(shell which $(VERILATOR)),)
 $(error Verilator not found! Exiting!)
 endif
 
-# Check Verilator version
-VERILATOR_VERSION := $(shell $(VERILATOR) --version)
-VERILATOR_RECOMMENDED_COMMIT := df36e9ca2
-ifeq ($(findstring $(VERILATOR_RECOMMENDED_COMMIT),$(VERILATOR_VERSION)),)
-$(warning Using $(VERILATOR_VERSION))
-$(warning It is recommended to use Verilator revision: https://github.com/antmicro/verilator-1/commit/$(VERILATOR_RECOMMENDED_COMMIT))
-endif
-
 UVM_ROOT ?= uvm
 UVM_TEST ?= mem_wr_rd_test
 SNAPSHOT = verilator-uvm

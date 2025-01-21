@@ -246,6 +246,7 @@ export COMMIT=$GITHUB_SHA
 } < files.txt > sources.txt
 
 git clone https://github.com/antmicro/info-process
+./info-process/info-process.py --set-block-ids coverage_toggle_verilator.info
 ./info-process/info-process.py --add-two-way-toggles --add-missing-brda-entries coverage_toggle_verilator.info
 
 mkdir test_data

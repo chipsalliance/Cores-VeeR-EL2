@@ -224,13 +224,11 @@ class DecDriver(uvm_driver):
                     await self.write_csr(WriteCSRInst(csrs.MTSEL).encode(), it.mtsel)
                     await self.write_csr(WriteCSRInst(csrs.MTDATA1).encode(), it.mtdata1)
                     await self.write_csr(WriteCSRInst(csrs.MTDATA2).encode(), it.mtdata2)
-                    for _ in range(4):
-                        await RisingEdge(self.dut.clk)
+                    await ClockCycles(self.dut.clk, 4)
                 elif test in ["csr_access"]:
                     # Write CSR
                     await self.write_csr(it.csrw_instr, it.dec_csr_wrdata_r)
-                    for _ in range(2):
-                        await RisingEdge(self.dut.clk)
+                    await ClockCycles(self.dut.clk, 2)
                     # Read the CSR back
                     await self.read_csr(it.csrr_instr)
                     await RisingEdge(self.dut.clk)
@@ -266,24 +264,20 @@ class DecInputMonitor(uvm_component):
             test = ConfigDB().get(self, "", "TEST")
             if test == "mtdata":
                 await RisingEdge(self.dut.ifu_i0_valid)
-                for _ in range(2):
-                    await RisingEdge(self.dut.clk)
+                await ClockCycles(self.dut.clk, 2)
                 mtsel = int(self.dut.exu_i0_result_x.value)
                 await RisingEdge(self.dut.ifu_i0_valid)
-                for _ in range(2):
-                    await RisingEdge(self.dut.clk)
+                await ClockCycles(self.dut.clk, 2)
                 mtdata1 = int(self.dut.exu_i0_result_x.value)
                 await RisingEdge(self.dut.ifu_i0_valid)
-                for _ in range(2):
-                    await RisingEdge(self.dut.clk)
+                await ClockCycles(self.dut.clk, 2)
                 mtdata2 = int(self.dut.exu_i0_result_x.value)
                 self.ap.write(DecInputItem(mtdata1=mtdata1, mtdata2=mtdata2, mtsel=mtsel))
             elif test in ["csr_access"]:
                 # Wait for CSR write
                 await RisingEdge(self.dut.ifu_i0_valid)
                 csrw_instr = int(self.dut.ifu_i0_instr.value)
-                for _ in range(2):
-                    await RisingEdge(self.dut.clk)
+                await ClockCycles(self.dut.clk, 2)
                 dec_csr_wrdata_r = int(self.dut.exu_i0_result_x.value)
                 # Wait for CSR read
                 await RisingEdge(self.dut.ifu_i0_valid)
@@ -301,8 +295,7 @@ class DecInputMonitor(uvm_component):
                 ic_debug_rd_data = int(self.dut.ifu_ic_debug_rd_data.value)
                 self.ap.write(DecInputItem(ifu_ic_debug_rd_data=ic_debug_rd_data))
                 # Wait for CSR reads
-                for _ in range(4):
-                    await RisingEdge(self.dut.clk)
+                await ClockCycles(self.dut.clk, 4)
 
 
 class DecOutputMonitor(uvm_component):
@@ -326,15 +319,13 @@ class DecOutputMonitor(uvm_component):
                 for _ in range(3):
                     await RisingEdge(self.dut.ifu_i0_valid)
                 # Wait for the outputs
-                for _ in range(4):
-                    await RisingEdge(self.dut.clk)
+                await ClockCycles(self.dut.clk, 4)
                 trigger_pkt_any = int(self.dut.trigger_pkt_any.value)
                 self.ap.write(DecOutputItem(trigger_pkt_any=trigger_pkt_any))
             elif test in ["csr_access"]:
                 # Wait for CSR write
                 await RisingEdge(self.dut.ifu_i0_valid)
-                for _ in range(2):
-                    await RisingEdge(self.dut.clk)
+                await ClockCycles(self.dut.clk, 2)
                 dec_csr_wrdata_r = int(self.dut.dec_csr_wrdata_r.value)
                 # Wait for CSR read
                 await RisingEdge(self.dut.ifu_i0_valid)
@@ -350,14 +341,11 @@ class DecOutputMonitor(uvm_component):
                 )
             elif test == "debug_ic_cache":
                 await RisingEdge(self.dut.ifu_ic_debug_rd_data_valid)
-                for _ in range(3):
-                    await RisingEdge(self.dut.clk)
+                await ClockCycles(self.dut.clk, 3)
                 dicad0 = int(self.dut.dec_csr_rddata_d.value)
-                for _ in range(2):
-                    await RisingEdge(self.dut.clk)
+                await ClockCycles(self.dut.clk, 2)
                 dicad0h = int(self.dut.dec_csr_rddata_d.value)
-                for _ in range(2):
-                    await RisingEdge(self.dut.clk)
+                await ClockCycles(self.dut.clk, 2)
                 dicad1 = int(self.dut.dec_csr_rddata_d.value)
                 ifu_ic_debug_rd_data = dicad0 | (dicad0h << 32) | (dicad1 << 64)
                 self.ap.write(DecOutputItem(ifu_ic_debug_rd_data=ifu_ic_debug_rd_data))

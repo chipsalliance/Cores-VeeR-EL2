@@ -159,6 +159,13 @@ class DecInputItem(uvm_sequence_item):
             self.csrr_instr = ReadCSRInst(self.csr_addr).encode()
         elif test == "debug_ic_cache":
             self.ifu_ic_debug_rd_data = randint(71)
+        elif test == "debug_csrs_access":
+            self.exu_i0_result_x = randint(32)
+            self.csr_addr = random.choice(
+                [csrs.DICAD0, csrs.DICAD0H, csrs.DICAWICS, csrs.DPC, csrs.DCSR]
+            )
+            self.csrw_instr = WriteCSRInst(self.csr_addr).encode()
+            self.csrr_instr = ReadCSRInst(self.csr_addr).encode()
 
 
 class DecOutputItem(uvm_sequence_item):
@@ -241,6 +248,11 @@ class DecDriver(uvm_driver):
                     await self.read_csr(ReadCSRInst(csrs.DICAD0).encode())
                     await self.read_csr(ReadCSRInst(csrs.DICAD0H).encode())
                     await self.read_csr(ReadCSRInst(csrs.DICAD1).encode())
+                elif test == "debug_csrs_access":
+                    await self.write_csr(it.csrw_instr, it.exu_i0_result_x)
+                    await ClockCycles(self.dut.clk, 2)
+                    await self.read_csr(it.csrr_instr)
+                    await ClockCycles(self.dut.clk, 2)
             else:
                 raise RuntimeError("Unknown item '{}'".format(type(it)))
 
@@ -297,6 +309,14 @@ class DecInputMonitor(uvm_component):
                 self.ap.write(DecInputItem(ifu_ic_debug_rd_data=ic_debug_rd_data))
                 # Wait for CSR reads
                 await ClockCycles(self.dut.clk, 4)
+            elif test == "debug_csrs_access":
+                await RisingEdge(self.dut.ifu_i0_valid)
+                csr_addr = int(self.dut.ifu_i0_instr.value) >> 20
+                await ClockCycles(self.dut.clk, 2)
+                exu_i0_result_x = int(self.dut.exu_i0_result_x.value)
+                # Await CSR read
+                await RisingEdge(self.dut.ifu_i0_valid)
+                self.ap.write(DecInputItem(csr_addr=csr_addr, exu_i0_result_x=exu_i0_result_x))
 
 
 class DecOutputMonitor(uvm_component):
@@ -350,6 +370,12 @@ class DecOutputMonitor(uvm_component):
                 dicad1 = int(self.dut.dec_csr_rddata_d.value)
                 ifu_ic_debug_rd_data = dicad0 | (dicad0h << 32) | (dicad1 << 64)
                 self.ap.write(DecOutputItem(ifu_ic_debug_rd_data=ifu_ic_debug_rd_data))
+            elif test == "debug_csrs_access":
+                for _ in range(2):
+                    await RisingEdge(self.dut.ifu_i0_valid)
+                await RisingEdge(self.dut.clk)
+                dec_csr_rddata_d = int(self.dut.dec_csr_rddata_d.value)
+                self.ap.write(DecOutputItem(dec_csr_rddata_d=dec_csr_rddata_d))
 
 
 # ==============================================================================
@@ -496,6 +522,20 @@ class DecScoreboard(uvm_component):
                     )
                     self.passed = False
 
+            elif test == "debug_csrs_access":
+                csr = item_inp.csr_addr
+                reg_val_i = item_inp.exu_i0_result_x
+                reg_val_o = item_out.dec_csr_rddata_d
+
+                dbg_csrs = [csrs.DICAD0, csrs.DICAD0H, csrs.DICAWICS, csrs.DPC, csrs.DCSR]
+                for c in dbg_csrs:
+                    if c == csr:
+                        reg_val_i = c.out(reg_val_i)
+                        break
+                if reg_val_i != reg_val_o:
+                    log_mismatch_error(self.logger, f"reg_val[{hex(csr)}]", reg_val_i, reg_val_o)
+                    self.passed = False
+
     def final_phase(self):
         if not self.passed:
             self.logger.critical("{} reports a failure".format(type(self)))
@@ -581,6 +621,13 @@ class BaseTest(uvm_test):
         clock = Clock(sig, period, units="ns")
         cocotb.start_soon(clock.start(start_high=False))
 
+    async def enter_debug_mode(self):
+        cocotb.top.dbg_halt_req.value = 1
+        await ClockCycles(cocotb.top.clk, 2)
+        cocotb.top.dbg_halt_req.value = 0
+        if not cocotb.top.o_debug_mode_status.value:
+            await RisingEdge(cocotb.top.o_debug_mode_status)
+
     async def do_reset(self):
         cocotb.top.rst_l.value = 0
         await ClockCycles(cocotb.top.clk, 2)
@@ -588,6 +635,7 @@ class BaseTest(uvm_test):
         cocotb.top.rst_l.value = 1
 
     async def run_phase(self):
+        test = ConfigDB().get(self, "", "TEST")
         self.raise_objection()
 
         # Start clocks
@@ -598,12 +646,18 @@ class BaseTest(uvm_test):
 
         # Enable run after reset
         cocotb.top.mpc_reset_run_req.value = 1
+        # Drive status indicators of non-included modules
+        cocotb.top.lsu_idle_any.value = 1
+        cocotb.top.ifu_miss_state_idle.value = 1
 
         # Issue reset
         await self.do_reset()
 
         # Wait some cycles
         await ClockCycles(cocotb.top.clk, 2)
+
+        if test == "debug_csrs_access":
+            await self.enter_debug_mode()
 
         # Run the actual test
         await self.run()

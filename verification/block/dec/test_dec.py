@@ -37,3 +37,9 @@ class TestCsrAccess(DecTluCtlTest):
 class TestDebugICCache(DecTluCtlTest):
     def __init__(self, name, parent, env_class=BaseEnv):
         super().__init__("debug_ic_cache", name, parent, env_class)
+
+
+@pyuvm.test()
+class TestDebugCSRs(DecTluCtlTest):
+    def __init__(self, name, parent, env_class=BaseEnv):
+        super().__init__("debug_csrs_access", name, parent, env_class)

@@ -251,7 +251,7 @@ class TlDriver(uvm_driver):
                 elif test == "mdseac":
                     # Write to unlock register
                     await self.write_csr(csrs.MDEAU, it.mdeau)
-                    if self.dut.mdseac_locked_f.value:
+                    if self.dut.dut.mdseac_locked_f.value:
                         await FallingEdge(self.dut.mdseac_locked_f)
                     await RisingEdge(self.dut.clk)
                     # Write error
@@ -754,6 +754,87 @@ class BaseTest(uvm_test):
 
     async def run_phase(self):
         self.raise_objection()
+
+        cocotb.top.rst_vec.value = 0
+        cocotb.top.nmi_int.value = 0
+        cocotb.top.nmi_vec.value = 0
+        cocotb.top.i_cpu_halt_req.value = 0
+        cocotb.top.i_cpu_run_req.value = 0
+        cocotb.top.lsu_fastint_stall_any.value = 0
+        cocotb.top.ifu_pmu_instr_aligned.value = 0
+        cocotb.top.ifu_pmu_fetch_stall.value = 0
+        cocotb.top.ifu_pmu_ic_miss.value = 0
+        cocotb.top.ifu_pmu_ic_hit.value = 0
+        cocotb.top.ifu_pmu_bus_error.value = 0
+        cocotb.top.ifu_pmu_bus_busy.value = 0
+        cocotb.top.ifu_pmu_bus_trxn.value = 0
+        cocotb.top.dec_pmu_instr_decoded.value = 0
+        cocotb.top.dec_pmu_decode_stall.value = 0
+        cocotb.top.dec_pmu_presync_stall.value = 0
+        cocotb.top.dec_pmu_postsync_stall.value = 0
+        cocotb.top.lsu_store_stall_any.value = 0
+        cocotb.top.dma_dccm_stall_any.value = 0
+        cocotb.top.dma_iccm_stall_any.value = 0
+        cocotb.top.exu_pmu_i0_br_misp.value = 0
+        cocotb.top.exu_pmu_i0_br_ataken.value = 0
+        cocotb.top.exu_pmu_i0_pc4.value = 0
+        cocotb.top.lsu_pmu_bus_trxn.value = 0
+        cocotb.top.lsu_pmu_bus_misaligned.value = 0
+        cocotb.top.lsu_pmu_bus_error.value = 0
+        cocotb.top.lsu_pmu_bus_busy.value = 0
+        cocotb.top.lsu_pmu_load_external_m.value = 0
+        cocotb.top.lsu_pmu_store_external_m.value = 0
+        cocotb.top.dma_pmu_dccm_read.value = 0
+        cocotb.top.dma_pmu_dccm_write.value = 0
+        cocotb.top.dma_pmu_any_read.value = 0
+        cocotb.top.dma_pmu_any_write.value = 0
+        cocotb.top.lsu_fir_addr.value = 0
+        cocotb.top.lsu_fir_error.value = 0
+        cocotb.top.iccm_dma_sb_error.value = 0
+        cocotb.top.lsu_single_ecc_error_incr.value = 0
+        cocotb.top.dec_pause_state.value = 0
+        cocotb.top.lsu_imprecise_error_store_any.value = 0
+        cocotb.top.lsu_imprecise_error_load_any.value = 0
+        cocotb.top.lsu_imprecise_error_addr_any.value = 0
+        cocotb.top.dec_csr_wen_unq_d.value = 0
+        cocotb.top.dec_csr_any_unq_d.value = 0
+        cocotb.top.dec_csr_rdaddr_d.value = 0
+        cocotb.top.dec_csr_wen_r.value = 0
+        cocotb.top.dec_csr_rdaddr_r.value = 0
+        cocotb.top.dec_csr_wraddr_r.value = 0
+        cocotb.top.dec_csr_wrdata_r.value = 0
+        cocotb.top.dec_csr_stall_int_ff.value = 0
+        cocotb.top.dec_tlu_i0_valid_r.value = 0
+        cocotb.top.exu_npc_r.value = 0
+        cocotb.top.dec_tlu_i0_pc_r.value = 0
+        cocotb.top.dec_illegal_inst.value = 0
+        cocotb.top.dec_i0_decode_d.value = 0
+        cocotb.top.exu_i0_br_hist_r.value = 0
+        cocotb.top.exu_i0_br_error_r.value = 0
+        cocotb.top.exu_i0_br_start_error_r.value = 0
+        cocotb.top.exu_i0_br_valid_r.value = 0
+        cocotb.top.exu_i0_br_mp_r.value = 0
+        cocotb.top.exu_i0_br_middle_r.value = 0
+        cocotb.top.exu_i0_br_way_r.value = 0
+        cocotb.top.dbg_halt_req.value = 0
+        cocotb.top.dbg_resume_req.value = 0
+        cocotb.top.ifu_miss_state_idle.value = 0
+        cocotb.top.lsu_idle_any.value = 0
+        cocotb.top.dec_div_active.value = 0
+        cocotb.top.ifu_ic_error_start.value = 0
+        cocotb.top.ifu_iccm_rd_ecc_single_err.value = 0
+        cocotb.top.ifu_ic_debug_rd_data.value = 0
+        cocotb.top.ifu_ic_debug_rd_data_valid.value = 0
+        cocotb.top.pic_claimid.value = 0
+        cocotb.top.pic_pl.value = 0
+        cocotb.top.mhwakeup.value = 0
+        cocotb.top.mexintpend.value = 0
+        cocotb.top.timer_int.value = 0
+        cocotb.top.soft_int.value = 0
+        cocotb.top.core_id.value = 0
+        cocotb.top.mpc_debug_halt_req.value = 0
+        cocotb.top.mpc_debug_run_req.value = 0
+        cocotb.top.mpc_reset_run_req.value = 0
 
         # Start clocks
         self.start_clock("free_l2clk")

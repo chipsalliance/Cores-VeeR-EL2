@@ -9,6 +9,7 @@ TEST_FILES   = $(sort $(wildcard test_*.py))
 
 MODULE      ?= $(subst $(space),$(comma),$(subst .py,,$(TEST_FILES)))
 TOPLEVEL     = el2_dec
+DEC_TEST    := 1
 
 EXTRA_ARGS = -I$(SRCDIR)/include/
 

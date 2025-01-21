@@ -22,6 +22,12 @@ class DecTluCtlTest(BaseTest):
 
 
 @pyuvm.test()
+class TestMeihap(DecTluCtlTest):
+    def __init__(self, name, parent, env_class=BaseEnv):
+        super().__init__("meihap", name, parent, env_class)
+
+
+@pyuvm.test()
 class TestMtdata(DecTluCtlTest):
     def __init__(self, name, parent, env_class=BaseEnv):
         super().__init__("mtdata", name, parent, env_class)

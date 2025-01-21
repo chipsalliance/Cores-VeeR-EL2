@@ -112,7 +112,13 @@ class DecInputItem(uvm_sequence_item):
         self.mtsel = mtsel
 
     def randomize(self, test):
-        if test == "mtdata":
+        if test == "meihap":
+            self.pic_claimid = randint(8)
+            self.exu_i0_result_x = randint(22) << 10
+            self.csr_addr = csrs.MEIVT
+            self.csrw_instr = WriteCSRInst(self.csr_addr).encode()
+            self.csrr_instr = ReadCSRInst(self.csr_addr).encode()
+        elif test == "mtdata":
             # bits 31:28 are hardcoded to 0x2
             mtdata1 = "0010"
             for _ in range(28):
@@ -178,6 +184,7 @@ class DecOutputItem(uvm_sequence_item):
         csrr_instr=0,
         dec_csr_wrdata_r=0,
         dec_csr_rddata_d=0,
+        dec_tlu_meihap=0,
         trigger_pkt_any=0,
         ifu_ic_debug_rd_data=0,
     ):
@@ -185,6 +192,7 @@ class DecOutputItem(uvm_sequence_item):
         self.csrr_instr = csrr_instr
         self.dec_csr_wrdata_r = dec_csr_wrdata_r
         self.dec_csr_rddata_d = dec_csr_rddata_d
+        self.dec_tlu_meihap = dec_tlu_meihap
         self.trigger_pkt_any = trigger_pkt_any
         self.ifu_ic_debug_rd_data = ifu_ic_debug_rd_data
 
@@ -228,7 +236,17 @@ class DecDriver(uvm_driver):
             it = await self.seq_item_port.get_next_item()
             if isinstance(it, DecInputItem):
                 test = ConfigDB().get(self, "", "TEST")
-                if test == "mtdata":
+                if test == "meihap":
+                    # Write MEIVT
+                    await self.write_csr(it.csrw_instr, it.exu_i0_result_x)
+                    await ClockCycles(self.dut.clk, 2)
+                    # Write pic_claimid via MEICPCT
+                    self.dut.pic_claimid.value = it.pic_claimid
+                    instr = WriteCSRInst(csrs.MEICPCT).encode()
+                    await self.write_csr(instr, it.exu_i0_result_x)
+                    # Allow output monitor to catch the data on the outputs
+                    await ClockCycles(self.dut.clk, 2)
+                elif test == "mtdata":
                     await self.write_csr(WriteCSRInst(csrs.MTSEL).encode(), it.mtsel)
                     await self.write_csr(WriteCSRInst(csrs.MTDATA1).encode(), it.mtdata1)
                     await self.write_csr(WriteCSRInst(csrs.MTDATA2).encode(), it.mtdata2)
@@ -275,7 +293,16 @@ class DecInputMonitor(uvm_component):
     async def run_phase(self):
         while True:
             test = ConfigDB().get(self, "", "TEST")
-            if test == "mtdata":
+            if test == "meihap":
+                await RisingEdge(self.dut.ifu_i0_valid)
+                await ClockCycles(self.dut.clk, 2)
+                exu_i0_result_x = int(self.dut.exu_i0_result_x.value)
+                await RisingEdge(self.dut.ifu_i0_valid)
+                pic_claimid = int(self.dut.pic_claimid.value)
+                self.ap.write(
+                    DecInputItem(pic_claimid=pic_claimid, exu_i0_result_x=exu_i0_result_x)
+                )
+            elif test == "mtdata":
                 await RisingEdge(self.dut.ifu_i0_valid)
                 await ClockCycles(self.dut.clk, 2)
                 mtsel = int(self.dut.exu_i0_result_x.value)
@@ -335,7 +362,13 @@ class DecOutputMonitor(uvm_component):
     async def run_phase(self):
         while True:
             test = ConfigDB().get(self, "", "TEST")
-            if test == "mtdata":
+            if test == "meihap":
+                for _ in range(2):
+                    await RisingEdge(self.dut.ifu_i0_valid)
+                await ClockCycles(self.dut.clk, 4)
+                dec_tlu_meihap = int(self.dut.dec_tlu_meihap.value)
+                self.ap.write(DecOutputItem(dec_tlu_meihap=dec_tlu_meihap))
+            elif test == "mtdata":
                 # Wait for CSR writes
                 for _ in range(3):
                     await RisingEdge(self.dut.ifu_i0_valid)
@@ -424,7 +457,21 @@ class DecScoreboard(uvm_component):
                 self.passed = True
 
             test = ConfigDB().get(self, "", "TEST")
-            if test == "mtdata":
+            if test == "meihap":
+                pic_claimid_i = item_inp.pic_claimid
+                pic_claimid_o = item_out.dec_tlu_meihap & 0xFF
+                meivt_i = item_inp.exu_i0_result_x >> 12
+                meivt_o = item_out.dec_tlu_meihap >> 10
+
+                if pic_claimid_i != pic_claimid_o:
+                    log_mismatch_error(self.logger, "pic_claimid", pic_claimid_i, pic_claimid_o)
+                    self.passed = False
+
+                if meivt_i != meivt_o:
+                    log_mismatch_error(self.logger, "meivt", meivt_i, meivt_o)
+                    self.passed = False
+
+            elif test == "mtdata":
                 pkt_any_mask = 0x3FFFFFFFFF
                 tdata2_mask = 0xFFFFFFFF
                 flags_mask = 0x3F

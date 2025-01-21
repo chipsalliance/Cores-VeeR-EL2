@@ -789,12 +789,10 @@ class BaseTest(uvm_test):
         cocotb.top.ifu_i0_icaf_type.value = 0
         cocotb.top.ifu_i0_icaf_second.value = 0
         cocotb.top.ifu_i0_dbecc.value = 0
-        cocotb.top.i0_brp.value = 0
         cocotb.top.ifu_i0_bp_index.value = 0
         cocotb.top.ifu_i0_bp_fghr.value = 0
         cocotb.top.ifu_i0_bp_btag.value = 0
         cocotb.top.ifu_i0_fa_index.value = 0
-        cocotb.top.lsu_error_pkt_r.value = 0
         cocotb.top.lsu_single_ecc_error_incr.value = 0
         cocotb.top.lsu_imprecise_error_load_any.value = 0
         cocotb.top.lsu_imprecise_error_store_any.value = 0

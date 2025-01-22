@@ -124,7 +124,16 @@ import el2_pkg::*;
    input  logic ifu_miss_state_idle, // I-side miss buffer empty
    input  logic lsu_idle_any, // lsu is idle
    input  logic dec_div_active, // oop div is active
-   output el2_trigger_pkt_t  [3:0] trigger_pkt_any, // trigger info for trigger blocks
+
+   // el2_trigger_pkt_t broken down to allow driving from cocotb by both SIMs
+   // info needed by debug trigger blocks
+   output logic [3:0]       trigger_pkt_any_select,
+   output logic [3:0]       trigger_pkt_any_match,
+   output logic [3:0]       trigger_pkt_any_store,
+   output logic [3:0]       trigger_pkt_any_load,
+   output logic [3:0]       trigger_pkt_any_execute,
+   output logic [3:0]       trigger_pkt_any_m,
+   output logic [3:0][31:0] trigger_pkt_any_tdata2,
 
    input logic  ifu_ic_error_start,     // IC single bit error
    input logic  ifu_iccm_rd_ecc_single_err, // ICCM single bit error
@@ -241,6 +250,18 @@ import el2_pkg::*;
 
    el2_lsu_error_pkt_t lsu_error_pkt_r;
    el2_trap_pkt_t dec_tlu_packet_r;
+
+   el2_trigger_pkt_t [3:0] trigger_pkt_any;
+     // Unwrap structure support both simulators
+     for (genvar i = 0; i < 4; i++) begin : g_unwrap_el2_trigger_pkt_t
+       assign trigger_pkt_any_select[i] = trigger_pkt_any[i][37];
+       assign trigger_pkt_any_match[i] = trigger_pkt_any[i][36];
+       assign trigger_pkt_any_store[i] = trigger_pkt_any[i][35];
+       assign trigger_pkt_any_load[i] = trigger_pkt_any[i][34];
+       assign trigger_pkt_any_execute[i] = trigger_pkt_any[i][33];
+       assign trigger_pkt_any_m[i] = trigger_pkt_any[i][32];
+       assign trigger_pkt_any_tdata2[i] = trigger_pkt_any[i][31:0];
+     end
 
    assign lsu_error_pkt_r = '0;
    assign dec_tlu_packet_r = '0;

@@ -181,7 +181,15 @@ module el2_dec_wrapper
     output logic dec_dbg_cmd_done,  // abstract command is done
     output logic dec_dbg_cmd_fail,  // abstract command failed (illegal reg address)
 
-    output el2_trigger_pkt_t [3:0] trigger_pkt_any,  // info needed by debug trigger blocks
+    // el2_trigger_pkt_t broken down to allow driving from cocotb by both SIMs
+    // info needed by debug trigger blocks
+    output logic [3:0]       trigger_pkt_any_select,
+    output logic [3:0]       trigger_pkt_any_match,
+    output logic [3:0]       trigger_pkt_any_store,
+    output logic [3:0]       trigger_pkt_any_load,
+    output logic [3:0]       trigger_pkt_any_execute,
+    output logic [3:0]       trigger_pkt_any_m,
+    output logic [3:0][31:0] trigger_pkt_any_tdata2,
 
     output logic       dec_tlu_force_halt,       // halt has been forced
     // Debug end
@@ -304,14 +312,22 @@ module el2_dec_wrapper
 
 );
 
+  el2_br_pkt_t i0_brp;  // branch packet
+  el2_lsu_error_pkt_t lsu_error_pkt_r;  // LSU exception/error packet
+  el2_trigger_pkt_t [3:0] trigger_pkt_any;
+  // Unwrap structure support both simulators
+  for (genvar i = 0; i < 4; i++) begin : g_unwrap_el2_trigger_pkt_t
+    assign trigger_pkt_any_select[i] = trigger_pkt_any[i][37];
+    assign trigger_pkt_any_match[i] = trigger_pkt_any[i][36];
+    assign trigger_pkt_any_store[i] = trigger_pkt_any[i][35];
+    assign trigger_pkt_any_load[i] = trigger_pkt_any[i][34];
+    assign trigger_pkt_any_execute[i] = trigger_pkt_any[i][33];
+    assign trigger_pkt_any_m[i] = trigger_pkt_any[i][32];
+    assign trigger_pkt_any_tdata2[i] = trigger_pkt_any[i][31:0];
+  end
 
-el2_br_pkt_t i0_brp; // branch packet
-el2_lsu_error_pkt_t lsu_error_pkt_r; // LSU exception/error packet
+  assign i0_brp = '0;
+  assign lsu_error_pkt_r = '0;
 
-assign i0_brp = '0;
-assign lsu_error_pkt_r = '0;
-
-el2_dec dut (
-.*
-);
+  el2_dec dut (.*);
 endmodule

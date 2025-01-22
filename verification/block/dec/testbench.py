@@ -29,6 +29,36 @@ from pyuvm import (
 # ==============================================================================
 
 
+@dataclass
+class TriggerAnyPktT:
+    select: int = 0
+    match: int = 0
+    store: int = 0
+    load: int = 0
+    execute: int = 0
+    m: int = 0
+    tdata2: int = 0
+
+    @staticmethod
+    def get_from_dut(dut):
+        trigger_pkt_any_select = int(dut.trigger_pkt_any_select.value)
+        trigger_pkt_any_match = int(dut.trigger_pkt_any_match.value)
+        trigger_pkt_any_store = int(dut.trigger_pkt_any_store.value)
+        trigger_pkt_any_load = int(dut.trigger_pkt_any_load.value)
+        trigger_pkt_any_execute = int(dut.trigger_pkt_any_execute.value)
+        trigger_pkt_any_m = int(dut.trigger_pkt_any_m.value)
+        trigger_pkt_any_tdata2 = int(dut.trigger_pkt_any_tdata2.value)
+        return TriggerAnyPktT(
+            trigger_pkt_any_select,
+            trigger_pkt_any_match,
+            trigger_pkt_any_store,
+            trigger_pkt_any_load,
+            trigger_pkt_any_execute,
+            trigger_pkt_any_m,
+            trigger_pkt_any_tdata2,
+        )
+
+
 def log_mismatch_error(logger, name, expected, got):
     logger.error(f"{name} {hex(expected)} != {hex(got)} (should be {hex(expected)})")
 
@@ -192,7 +222,7 @@ class DecOutputItem(uvm_sequence_item):
         dec_csr_wrdata_r=0,
         dec_csr_rddata_d=0,
         dec_tlu_meihap=0,
-        trigger_pkt_any=0,
+        trigger_pkt_any=TriggerAnyPktT(),
         ifu_ic_debug_rd_data=0,
     ):
         super().__init__("DecOutputItem")
@@ -394,7 +424,7 @@ class DecOutputMonitor(uvm_component):
                     await RisingEdge(self.dut.ifu_i0_valid)
                 # Wait for the outputs
                 await ClockCycles(self.dut.clk, 4)
-                trigger_pkt_any = int(self.dut.trigger_pkt_any.value)
+                trigger_pkt_any = TriggerAnyPktT.get_from_dut(self.dut)
                 self.ap.write(DecOutputItem(trigger_pkt_any=trigger_pkt_any))
             elif test in ["csr_access"]:
                 # Wait for CSR write
@@ -504,17 +534,12 @@ class DecScoreboard(uvm_component):
                     self.passed = False
 
             elif test == "mtdata":
-                pkt_any_mask = 0x3FFFFFFFFF
                 tdata2_mask = 0xFFFFFFFF
-                flags_mask = 0x3F
-                flags_shift = 32
-
                 mtsel = item_inp.mtsel
-                pkt_any_shift = mtsel * 38
 
                 mtdata1_i = item_inp.mtdata1
                 mtdata2_i = item_inp.mtdata2
-                trigger_pkt_any = ((item_out.trigger_pkt_any) >> pkt_any_shift) & pkt_any_mask
+                trigger_pkt_any = item_out.trigger_pkt_any
 
                 select_i = get_bit(mtdata1_i, 19)
                 match_i = get_bit(mtdata1_i, 7)
@@ -523,16 +548,14 @@ class DecScoreboard(uvm_component):
                 execute_i = get_bit(mtdata1_i, 2) & ~get_bit(mtdata1_i, 19)
                 m_i = get_bit(mtdata1_i, 6)
 
-                flags_o = (trigger_pkt_any >> flags_shift) & flags_mask
+                select_o = get_bit(trigger_pkt_any.select, mtsel)
+                match_o = get_bit(trigger_pkt_any.match, mtsel)
+                store_o = get_bit(trigger_pkt_any.store, mtsel)
+                load_o = get_bit(trigger_pkt_any.load, mtsel)
+                execute_o = get_bit(trigger_pkt_any.execute, mtsel)
+                m_o = get_bit(trigger_pkt_any.m, mtsel)
 
-                select_o = get_bit(flags_o, 5)
-                match_o = get_bit(flags_o, 4)
-                store_o = get_bit(flags_o, 3)
-                load_o = get_bit(flags_o, 2)
-                execute_o = get_bit(flags_o, 1)
-                m_o = get_bit(flags_o, 0)
-
-                mtdata2_o = trigger_pkt_any & tdata2_mask
+                mtdata2_o = (trigger_pkt_any.tdata2 >> (mtsel * 32)) & tdata2_mask
 
                 if mtdata2_i != mtdata2_o:
                     log_mismatch_error(self.logger, "mtdata2", mtdata2_i, mtdata2_o)

@@ -314,6 +314,7 @@ class TlDriver(uvm_driver):
                     self.dut.ifu_ic_debug_rd_data.value = it.ifu_ic_debug_rd_data
                     await RisingEdge(self.dut.clk)
                     self.dut.ifu_ic_debug_rd_data_valid.value = 0
+                    self.dut.ifu_ic_debug_rd_data.value = 0
                     await self.read_csr(csrs.DICAD0)
                     await self.read_csr(csrs.DICAD0H)
                     await self.read_csr(csrs.DICAD1)
@@ -354,10 +355,13 @@ class TlInputMonitor(uvm_component):
                 self.ap.write(TlInputItem(pic_claimid=pic_claimid, dec_csr_wrdata_r=meivt))
             elif test == "mtdata":
                 await RisingEdge(self.dut.dec_csr_wen_r)
+                await RisingEdge(self.dut.clk)
                 mtsel = int(self.dut.dec_csr_wrdata_r.value)
                 await RisingEdge(self.dut.dec_csr_wen_r)
+                await RisingEdge(self.dut.clk)
                 mtdata1 = int(self.dut.dec_csr_wrdata_r.value)
                 await RisingEdge(self.dut.dec_csr_wen_r)
+                await RisingEdge(self.dut.clk)
                 mtdata2 = int(self.dut.dec_csr_wrdata_r.value)
                 self.ap.write(TlInputItem(mtdata1=mtdata1, mtdata2=mtdata2, mtsel=mtsel))
             elif test == "mdseac":
@@ -390,13 +394,9 @@ class TlInputMonitor(uvm_component):
             elif test == "debug_ic_cache":
                 # wait for reg write
                 await RisingEdge(self.dut.ifu_ic_debug_rd_data_valid)
+                await RisingEdge(self.dut.clk)
                 ic_debug_rd_data = int(self.dut.ifu_ic_debug_rd_data.value)
                 self.ap.write(TlInputItem(ifu_ic_debug_rd_data=ic_debug_rd_data))
-                # wait for reads
-                await RisingEdge(self.dut.clk)
-                await RisingEdge(self.dut.clk)
-                await RisingEdge(self.dut.clk)
-                await RisingEdge(self.dut.clk)
 
 
 class TlOutputMonitor(uvm_component):
@@ -466,8 +466,8 @@ class TlOutputMonitor(uvm_component):
                 # wait for read
                 # read dicad0, dicad0h, and dicad1
                 await RisingEdge(self.dut.ifu_ic_debug_rd_data_valid)
-                await RisingEdge(self.dut.clk)
-                await RisingEdge(self.dut.clk)
+                for _ in range(2):
+                    await RisingEdge(self.dut.clk)
                 dicad0 = int(self.dut.dec_csr_rddata_d.value)
                 await RisingEdge(self.dut.clk)
                 dicad0h = int(self.dut.dec_csr_rddata_d.value)

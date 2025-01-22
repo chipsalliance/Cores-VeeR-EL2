@@ -272,6 +272,19 @@ def dccm_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["dcls"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_lockstep",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def dcls_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["lib_axi4_to_ahb"])
 @nox.parametrize(
     "testName",

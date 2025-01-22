@@ -1,4 +1,5 @@
 $RV_ROOT/design/el2_veer_wrapper.sv
+$RV_ROOT/design/el2_veer_lockstep.sv
 $RV_ROOT/design/el2_mem.sv
 $RV_ROOT/design/el2_pic_ctrl.sv
 $RV_ROOT/design/el2_veer.sv

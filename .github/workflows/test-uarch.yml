@@ -62,6 +62,7 @@ jobs:
           - "block/lsu_tl"
           - "block/dec_tlu_ctl"
           - "block/dec"
+          - "block/dcls"
     env:
       CCACHE_DIR: "/opt/verification/.cache/"
       DEBIAN_FRONTEND: "noninteractive"

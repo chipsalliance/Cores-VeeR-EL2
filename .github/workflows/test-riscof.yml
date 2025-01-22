@@ -17,6 +17,7 @@ jobs:
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscof/.cache/"
+      DCLS_ENABLE: "1"
 
     steps:
       - name: Install utils
@@ -74,9 +75,12 @@ jobs:
             $RV_ROOT/configs/veer.config
             VEER_OPTS=""
             if  [[ "${{ matrix.priv }}" == *"u"* ]]; then
-              VEER_OPTS="-set=user_mode=1 -set=smepmp=1"
+              VEER_OPTS+="-set=user_mode=1 -set=smepmp=1"
             fi
-            make -f $RV_ROOT/tools/Makefile verilator-build CONF_PARAMS="-set build_axi4 $VEER_OPTS" COVERAGE=${{ matrix.coverage }}
+            if  [[ "${DCLS_ENABLE}" == "1" ]]; then
+              VEER_OPTS+="-set lockstep_enable=1 -set lockstep_regfile_enable=1 ${VEER_OPTS}"
+            fi
+            make -f $RV_ROOT/tools/Makefile verilator-build CONF_PARAMS="-set build_axi4 ${VEER_OPTS}" COVERAGE=${{ matrix.coverage }}
           popd
 
       - name: Run tests, collect coverage

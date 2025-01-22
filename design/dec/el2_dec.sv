@@ -327,6 +327,10 @@ module el2_dec
     output logic dec_tlu_dccm_clk_override,   // override DCCM clock domain gating
     output logic dec_tlu_icm_clk_override,    // override ICCM clock domain gating
 
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+    el2_regfile_if.veer_rf_src regfile,
+`endif
+
     output logic dec_tlu_i0_commit_cmt,  // committed i0 instruction
     // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
     /*pragma coverage off*/
@@ -429,14 +433,52 @@ module el2_dec
 
   el2_dec_decode_ctl #(.pt(pt)) decode (.*);
 
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+      el2_regfile_if regfile_if ();
+      assign regfile.gpr.ra = regfile_if.gpr.ra;
+      assign regfile.gpr.sp = regfile_if.gpr.sp;
+      assign regfile.gpr.fp = regfile_if.gpr.fp;
+      assign regfile.gpr.a0 = regfile_if.gpr.a0;
+      assign regfile.gpr.a1 = regfile_if.gpr.a1;
+      assign regfile.gpr.a2 = regfile_if.gpr.a2;
+      assign regfile.gpr.a3 = regfile_if.gpr.a3;
+      assign regfile.gpr.a4 = regfile_if.gpr.a4;
+      assign regfile.gpr.a5 = regfile_if.gpr.a5;
+      assign regfile.gpr.a6 = regfile_if.gpr.a6;
+      assign regfile.gpr.a7 = regfile_if.gpr.a7;
 
-  el2_dec_tlu_ctl #(.pt(pt)) tlu (.*);
+      assign regfile.tlu.pc        = regfile_if.tlu.pc;
+      assign regfile.tlu.npc       = regfile_if.tlu.npc;
+      assign regfile.tlu.mstatus   = regfile_if.tlu.mstatus;
+      assign regfile.tlu.mie       = regfile_if.tlu.mie;
+      assign regfile.tlu.mtvec     = regfile_if.tlu.mtvec;
+      assign regfile.tlu.mscratch  = regfile_if.tlu.mscratch;
+      assign regfile.tlu.mepc      = regfile_if.tlu.mepc;
+      assign regfile.tlu.mcause    = regfile_if.tlu.mcause;
+      assign regfile.tlu.mtval     = regfile_if.tlu.mtval;
+      assign regfile.tlu.mip       = regfile_if.tlu.mip;
+      assign regfile.tlu.mcyclel   = regfile_if.tlu.mcyclel;
+      assign regfile.tlu.mcycleh   = regfile_if.tlu.mcycleh;
+      assign regfile.tlu.minstretl = regfile_if.tlu.minstretl;
+      assign regfile.tlu.minstreth = regfile_if.tlu.minstreth;
+      assign regfile.tlu.mrac      = regfile_if.tlu.mrac;
+`endif
+
+  el2_dec_tlu_ctl #(.pt(pt)
+  ) tlu (
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+      .regfile(regfile_if.veer_tlu_rf),
+`endif
+      .*);
 
 
   el2_dec_gpr_ctl #(
       .pt(pt)
   ) arf (
       .*,
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+      .regfile(regfile_if.veer_gpr_rf),
+`endif
       // inputs
       .raddr0(dec_i0_rs1_d[4:0]),
       .raddr1(dec_i0_rs2_d[4:0]),

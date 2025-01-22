@@ -72,6 +72,10 @@ else
     EXTRA_CONFIG_OPTS = "-set=pmp_entries=64"
 endif
 
+ifneq ($(DEC_TEST),)
+    EXTRA_CONFIG_OPTS += "-set=fast_interrupt_redirect=0"
+endif
+
 # Rules for generating VeeR config
 $(CFGDIR)/common_defines.vh:
 	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0 $(EXTRA_CONFIG_OPTS)

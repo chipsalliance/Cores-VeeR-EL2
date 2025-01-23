@@ -13,6 +13,6 @@ TOPLEVEL     = ahb_to_axi4_wrapper
 
 VERILOG_SOURCES  = \
     $(SRCDIR)/lib/ahb_to_axi4.sv \
-    $(CURDIR)/lib_ahb_to_axi4/ahb_to_axi4_wrapper.sv
+    $(TEST_DIR)/ahb_to_axi4_wrapper.sv
 
 include $(TEST_DIR)/../common.mk

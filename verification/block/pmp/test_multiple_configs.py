@@ -83,10 +83,10 @@ class TestSequence(BaseSequence):
             await self.pmp_seqr.start_item(item)
             await self.pmp_seqr.finish_item(item)
 
-        self.checkRangeBoundary(LOWER_BOUNDARY)
+        await self.checkRangeBoundary(LOWER_BOUNDARY)
         for _ in range(test_iterations):
             await self.randomAccessInAddrRange(LOWER_BOUNDARY, UPPER_BOUNDARY)
-        self.checkRangeBoundary(UPPER_BOUNDARY)
+        await self.checkRangeBoundary(UPPER_BOUNDARY)
 
 
 # ==============================================================================

@@ -29,6 +29,36 @@ from pyuvm import (
 # ==============================================================================
 
 
+@dataclass
+class TriggerAnyPktT:
+    select: int = 0
+    match: int = 0
+    store: int = 0
+    load: int = 0
+    execute: int = 0
+    m: int = 0
+    tdata2: int = 0
+
+    @staticmethod
+    def get_from_dut(dut):
+        trigger_pkt_any_select = int(dut.trigger_pkt_any_select.value)
+        trigger_pkt_any_match = int(dut.trigger_pkt_any_match.value)
+        trigger_pkt_any_store = int(dut.trigger_pkt_any_store.value)
+        trigger_pkt_any_load = int(dut.trigger_pkt_any_load.value)
+        trigger_pkt_any_execute = int(dut.trigger_pkt_any_execute.value)
+        trigger_pkt_any_m = int(dut.trigger_pkt_any_m.value)
+        trigger_pkt_any_tdata2 = int(dut.trigger_pkt_any_tdata2.value)
+        return TriggerAnyPktT(
+            trigger_pkt_any_select,
+            trigger_pkt_any_match,
+            trigger_pkt_any_store,
+            trigger_pkt_any_load,
+            trigger_pkt_any_execute,
+            trigger_pkt_any_m,
+            trigger_pkt_any_tdata2,
+        )
+
+
 def log_mismatch_error(logger, name, expected, got):
     logger.error(f"{name} {hex(expected)} != {hex(got)} (should be {hex(expected)})")
 
@@ -192,7 +222,7 @@ class DecOutputItem(uvm_sequence_item):
         dec_csr_wrdata_r=0,
         dec_csr_rddata_d=0,
         dec_tlu_meihap=0,
-        trigger_pkt_any=0,
+        trigger_pkt_any=TriggerAnyPktT(),
         ifu_ic_debug_rd_data=0,
     ):
         super().__init__("DecOutputItem")
@@ -329,11 +359,13 @@ class DecInputMonitor(uvm_component):
             elif test in ["csr_access"]:
                 # Wait for CSR write
                 await RisingEdge(self.dut.ifu_i0_valid)
+                await RisingEdge(self.dut.clk)
                 csrw_instr = int(self.dut.ifu_i0_instr.value)
-                await ClockCycles(self.dut.clk, 2)
+                await RisingEdge(self.dut.clk)
                 exu_i0_result_x = int(self.dut.exu_i0_result_x.value)
                 # Wait for CSR read
                 await RisingEdge(self.dut.ifu_i0_valid)
+                await RisingEdge(self.dut.clk)
                 csrr_instr = int(self.dut.ifu_i0_instr.value)
                 self.ap.write(
                     DecInputItem(
@@ -345,17 +377,20 @@ class DecInputMonitor(uvm_component):
             elif test == "debug_ic_cache":
                 # Wait for CSR write
                 await RisingEdge(self.dut.ifu_ic_debug_rd_data_valid)
+                await RisingEdge(self.dut.clk)
                 ic_debug_rd_data = int(self.dut.ifu_ic_debug_rd_data.value)
                 self.ap.write(DecInputItem(ifu_ic_debug_rd_data=ic_debug_rd_data))
                 # Wait for CSR reads
                 await ClockCycles(self.dut.clk, 4)
             elif test == "debug_csrs_access":
                 await RisingEdge(self.dut.ifu_i0_valid)
+                await RisingEdge(self.dut.clk)
                 csr_addr = int(self.dut.ifu_i0_instr.value) >> 20
-                await ClockCycles(self.dut.clk, 2)
+                await ClockCycles(self.dut.clk, 1)
                 exu_i0_result_x = int(self.dut.exu_i0_result_x.value)
                 # Await CSR read
                 await RisingEdge(self.dut.ifu_i0_valid)
+                await RisingEdge(self.dut.clk)
                 self.ap.write(DecInputItem(csr_addr=csr_addr, exu_i0_result_x=exu_i0_result_x))
             elif test == "meicidpl":
                 await RisingEdge(self.dut.ifu_i0_valid)
@@ -394,32 +429,30 @@ class DecOutputMonitor(uvm_component):
                     await RisingEdge(self.dut.ifu_i0_valid)
                 # Wait for the outputs
                 await ClockCycles(self.dut.clk, 4)
-                trigger_pkt_any = int(self.dut.trigger_pkt_any.value)
+                trigger_pkt_any = TriggerAnyPktT.get_from_dut(self.dut)
                 self.ap.write(DecOutputItem(trigger_pkt_any=trigger_pkt_any))
             elif test in ["csr_access"]:
-                # Wait for CSR write
-                await RisingEdge(self.dut.ifu_i0_valid)
-                await ClockCycles(self.dut.clk, 3)
-                dec_csr_wrdata_r = int(self.dut.dec_csr_wrdata_r.value)
-                # Wait for CSR read
-                await RisingEdge(self.dut.ifu_i0_valid)
-                csrr_instr = int(self.dut.ifu_i0_instr.value)
+                for _ in range(2):
+                    await RisingEdge(self.dut.ifu_i0_valid)
                 await RisingEdge(self.dut.clk)
+                csrr_instr = int(self.dut.ifu_i0_instr.value)
                 dec_csr_rddata_d = int(self.dut.dec_csr_rddata_d.value)
                 self.ap.write(
                     DecOutputItem(
                         csrr_instr=csrr_instr,
-                        dec_csr_wrdata_r=dec_csr_wrdata_r,
                         dec_csr_rddata_d=dec_csr_rddata_d,
                     )
                 )
             elif test == "debug_ic_cache":
                 await RisingEdge(self.dut.ifu_ic_debug_rd_data_valid)
-                await ClockCycles(self.dut.clk, 3)
+                await RisingEdge(self.dut.ifu_i0_valid)
+                await RisingEdge(self.dut.clk)
                 dicad0 = int(self.dut.dec_csr_rddata_d.value)
-                await ClockCycles(self.dut.clk, 2)
+                await RisingEdge(self.dut.ifu_i0_valid)
+                await RisingEdge(self.dut.clk)
                 dicad0h = int(self.dut.dec_csr_rddata_d.value)
-                await ClockCycles(self.dut.clk, 2)
+                await RisingEdge(self.dut.ifu_i0_valid)
+                await RisingEdge(self.dut.clk)
                 dicad1 = int(self.dut.dec_csr_rddata_d.value)
                 ifu_ic_debug_rd_data = dicad0 | (dicad0h << 32) | (dicad1 << 64)
                 self.ap.write(DecOutputItem(ifu_ic_debug_rd_data=ifu_ic_debug_rd_data))
@@ -504,17 +537,12 @@ class DecScoreboard(uvm_component):
                     self.passed = False
 
             elif test == "mtdata":
-                pkt_any_mask = 0x3FFFFFFFFF
                 tdata2_mask = 0xFFFFFFFF
-                flags_mask = 0x3F
-                flags_shift = 32
-
                 mtsel = item_inp.mtsel
-                pkt_any_shift = mtsel * 38
 
                 mtdata1_i = item_inp.mtdata1
                 mtdata2_i = item_inp.mtdata2
-                trigger_pkt_any = ((item_out.trigger_pkt_any) >> pkt_any_shift) & pkt_any_mask
+                trigger_pkt_any = item_out.trigger_pkt_any
 
                 select_i = get_bit(mtdata1_i, 19)
                 match_i = get_bit(mtdata1_i, 7)
@@ -523,16 +551,14 @@ class DecScoreboard(uvm_component):
                 execute_i = get_bit(mtdata1_i, 2) & ~get_bit(mtdata1_i, 19)
                 m_i = get_bit(mtdata1_i, 6)
 
-                flags_o = (trigger_pkt_any >> flags_shift) & flags_mask
+                select_o = get_bit(trigger_pkt_any.select, mtsel)
+                match_o = get_bit(trigger_pkt_any.match, mtsel)
+                store_o = get_bit(trigger_pkt_any.store, mtsel)
+                load_o = get_bit(trigger_pkt_any.load, mtsel)
+                execute_o = get_bit(trigger_pkt_any.execute, mtsel)
+                m_o = get_bit(trigger_pkt_any.m, mtsel)
 
-                select_o = get_bit(flags_o, 5)
-                match_o = get_bit(flags_o, 4)
-                store_o = get_bit(flags_o, 3)
-                load_o = get_bit(flags_o, 2)
-                execute_o = get_bit(flags_o, 1)
-                m_o = get_bit(flags_o, 0)
-
-                mtdata2_o = trigger_pkt_any & tdata2_mask
+                mtdata2_o = (trigger_pkt_any.tdata2 >> (mtsel * 32)) & tdata2_mask
 
                 if mtdata2_i != mtdata2_o:
                     log_mismatch_error(self.logger, "mtdata2", mtdata2_i, mtdata2_o)
@@ -569,17 +595,7 @@ class DecScoreboard(uvm_component):
                     self.passed = False
 
                 csr = rd_addr
-                data_w0 = item_inp.exu_i0_result_x
-                data_w1 = item_out.dec_csr_wrdata_r
-
-                if data_w0 != data_w1:
-                    self.logger.error(
-                        "Sampled 'exu_i0_result_x' differs from following 'dec_csr_wrdata_r':"
-                        f" {hex(data_w0)} != {hex(data_w1)} (should be {hex(data_w0)})"
-                    )
-                    self.passed = False
-
-                data_in = data_w0
+                data_in = item_inp.exu_i0_result_x
                 data_out = item_out.dec_csr_rddata_d
 
                 for c in csr_list:

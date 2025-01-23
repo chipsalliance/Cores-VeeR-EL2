@@ -6,6 +6,7 @@ import math
 import os
 import random
 import struct
+from dataclasses import dataclass
 
 import csrs
 import pyuvm
@@ -26,6 +27,36 @@ from pyuvm import *
 # ==============================================================================
 
 csr_list = [getattr(csrs, mod) for mod in dir(csrs) if isinstance(getattr(csrs, mod), csrs.CSR)]
+
+
+@dataclass
+class TriggerAnyPktT:
+    select: int = 0
+    match: int = 0
+    store: int = 0
+    load: int = 0
+    execute: int = 0
+    m: int = 0
+    tdata2: int = 0
+
+    @staticmethod
+    def get_from_dut(dut):
+        trigger_pkt_any_select = int(dut.trigger_pkt_any_select.value)
+        trigger_pkt_any_match = int(dut.trigger_pkt_any_match.value)
+        trigger_pkt_any_store = int(dut.trigger_pkt_any_store.value)
+        trigger_pkt_any_load = int(dut.trigger_pkt_any_load.value)
+        trigger_pkt_any_execute = int(dut.trigger_pkt_any_execute.value)
+        trigger_pkt_any_m = int(dut.trigger_pkt_any_m.value)
+        trigger_pkt_any_tdata2 = int(dut.trigger_pkt_any_tdata2.value)
+        return TriggerAnyPktT(
+            trigger_pkt_any_select,
+            trigger_pkt_any_match,
+            trigger_pkt_any_store,
+            trigger_pkt_any_load,
+            trigger_pkt_any_execute,
+            trigger_pkt_any_m,
+            trigger_pkt_any_tdata2,
+        )
 
 
 class TlInputItem(uvm_sequence_item):
@@ -283,6 +314,7 @@ class TlDriver(uvm_driver):
                     self.dut.ifu_ic_debug_rd_data.value = it.ifu_ic_debug_rd_data
                     await RisingEdge(self.dut.clk)
                     self.dut.ifu_ic_debug_rd_data_valid.value = 0
+                    self.dut.ifu_ic_debug_rd_data.value = 0
                     await self.read_csr(csrs.DICAD0)
                     await self.read_csr(csrs.DICAD0H)
                     await self.read_csr(csrs.DICAD1)
@@ -323,10 +355,13 @@ class TlInputMonitor(uvm_component):
                 self.ap.write(TlInputItem(pic_claimid=pic_claimid, dec_csr_wrdata_r=meivt))
             elif test == "mtdata":
                 await RisingEdge(self.dut.dec_csr_wen_r)
+                await RisingEdge(self.dut.clk)
                 mtsel = int(self.dut.dec_csr_wrdata_r.value)
                 await RisingEdge(self.dut.dec_csr_wen_r)
+                await RisingEdge(self.dut.clk)
                 mtdata1 = int(self.dut.dec_csr_wrdata_r.value)
                 await RisingEdge(self.dut.dec_csr_wen_r)
+                await RisingEdge(self.dut.clk)
                 mtdata2 = int(self.dut.dec_csr_wrdata_r.value)
                 self.ap.write(TlInputItem(mtdata1=mtdata1, mtdata2=mtdata2, mtsel=mtsel))
             elif test == "mdseac":
@@ -359,13 +394,9 @@ class TlInputMonitor(uvm_component):
             elif test == "debug_ic_cache":
                 # wait for reg write
                 await RisingEdge(self.dut.ifu_ic_debug_rd_data_valid)
+                await RisingEdge(self.dut.clk)
                 ic_debug_rd_data = int(self.dut.ifu_ic_debug_rd_data.value)
                 self.ap.write(TlInputItem(ifu_ic_debug_rd_data=ic_debug_rd_data))
-                # wait for reads
-                await RisingEdge(self.dut.clk)
-                await RisingEdge(self.dut.clk)
-                await RisingEdge(self.dut.clk)
-                await RisingEdge(self.dut.clk)
 
 
 class TlOutputMonitor(uvm_component):
@@ -402,7 +433,7 @@ class TlOutputMonitor(uvm_component):
                 # wait for the outputs
                 for _ in range(2):
                     await RisingEdge(self.dut.clk)
-                trigger_pkt_any = int(self.dut.trigger_pkt_any.value)
+                trigger_pkt_any = TriggerAnyPktT.get_from_dut(self.dut)
                 self.ap.write(TlOutputItem(trigger_pkt_any=trigger_pkt_any))
             elif test == "mdseac":
                 # Wait for when the error address is set
@@ -435,8 +466,8 @@ class TlOutputMonitor(uvm_component):
                 # wait for read
                 # read dicad0, dicad0h, and dicad1
                 await RisingEdge(self.dut.ifu_ic_debug_rd_data_valid)
-                await RisingEdge(self.dut.clk)
-                await RisingEdge(self.dut.clk)
+                for _ in range(2):
+                    await RisingEdge(self.dut.clk)
                 dicad0 = int(self.dut.dec_csr_rddata_d.value)
                 await RisingEdge(self.dut.clk)
                 dicad0h = int(self.dut.dec_csr_rddata_d.value)
@@ -513,18 +544,12 @@ class TlScoreboard(uvm_component):
                     )
                     self.passed = False
             elif test == "mtdata":
-
-                pkt_any_mask = 0x3FFFFFFFFF
                 tdata2_mask = 0xFFFFFFFF
-                flags_mask = 0x3F
-                flags_shift = 32
-
                 mtsel = item_inp.mtsel
-                pkt_any_shift = mtsel * 38
 
                 mtdata1_i = item_inp.mtdata1
                 mtdata2_i = item_inp.mtdata2
-                trigger_pkt_any = ((item_out.trigger_pkt_any) >> pkt_any_shift) & pkt_any_mask
+                trigger_pkt_any = item_out.trigger_pkt_any
 
                 select_i = (mtdata1_i >> 19) & 1
                 match_i = (mtdata1_i >> 7) & 1
@@ -533,16 +558,14 @@ class TlScoreboard(uvm_component):
                 execute_i = ((mtdata1_i >> 2) & 1) & ~((mtdata1_i >> 19) & 1)
                 m_i = (mtdata1_i >> 6) & 1
 
-                flags_o = (trigger_pkt_any >> flags_shift) & flags_mask
+                select_o = (trigger_pkt_any.select >> mtsel) & 1
+                match_o = (trigger_pkt_any.match >> mtsel) & 1
+                store_o = (trigger_pkt_any.store >> mtsel) & 1
+                load_o = (trigger_pkt_any.load >> mtsel) & 1
+                execute_o = (trigger_pkt_any.execute >> mtsel) & 1
+                m_o = (trigger_pkt_any.m >> mtsel) & 1
 
-                select_o = (flags_o >> 5) & 1
-                match_o = (flags_o >> 4) & 1
-                store_o = (flags_o >> 3) & 1
-                load_o = (flags_o >> 2) & 1
-                execute_o = (flags_o >> 1) & 1
-                m_o = (flags_o) & 1
-
-                mtdata2_o = trigger_pkt_any & tdata2_mask
+                mtdata2_o = (trigger_pkt_any.tdata2 >> (mtsel * 32)) & tdata2_mask
 
                 if mtdata2_i != mtdata2_o:
                     self.logger.error(

@@ -7,7 +7,7 @@ jobs:
 
   tests:
     name: Run OpenOCD tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20250116082447
     strategy:
       fail-fast: false
@@ -94,9 +94,9 @@ jobs:
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: openocd_coverage_data
+          name: openocd_coverage_data_${{ matrix.bus }}_${{ matrix.coverage }}
           path: results/*.info
 
   custom-openocd-tests:

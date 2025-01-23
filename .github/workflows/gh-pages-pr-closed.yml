@@ -10,7 +10,7 @@ jobs:
     name: PR Remove
     concurrency:
       group: gh-pages
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
@@ -20,7 +20,7 @@ jobs:
           echo "number=${{ github.event.number }}" >> delete_pr_number.txt
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: delete_pr_number
           path: ./delete_pr_number.txt

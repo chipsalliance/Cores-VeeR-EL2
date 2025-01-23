@@ -6,7 +6,7 @@ on:
 jobs:
   lint:
     name: Lint microarchitectural tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20250116082447
     steps:
       - name: Setup repository
@@ -37,31 +37,51 @@ jobs:
           popd
   tests:
     name: Microarchitectural tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20250116082447
     strategy:
       matrix:
-        test:
-          - "block/pic"
-          - "block/pic_gw"
-          - "block/dma"
-          - "block/ifu_compress"
-          - "block/dec_tl"
-          - "block/dec_ib"
-          - "block/exu_alu"
-          - "block/exu_mul"
-          - "block/exu_div"
-          - "block/iccm"
-          - "block/dccm"
-          - "block/lib_axi4_to_ahb"
-          - "block/lib_ahb_to_axi4"
-          - "block/pmp"
-          - "block/pmp_random"
-          - "block/dec_pmp_ctl"
-          - "block/dmi"
-          - "block/lsu_tl"
-          - "block/dec_tlu_ctl"
-          - "block/dec"
+        include:
+          - test: "block/pic"
+            artifact: "block_pic"
+          - test: "block/pic_gw"
+            artifact: "block_pic_gw"
+          - test: "block/dma"
+            artifact: "block_dma"
+          - test: "block/ifu_compress"
+            artifact: "block_ifu_compress"
+          - test: "block/dec_tl"
+            artifact: "block_dec_tl"
+          - test: "block/dec_ib"
+            artifact: "block_dec_ib"
+          - test: "block/exu_alu"
+            artifact: "block_exu_alu"
+          - test: "block/exu_mul"
+            artifact: "block_exu_mul"
+          - test: "block/exu_div"
+            artifact: "block_exu_div"
+          - test: "block/iccm"
+            artifact: "block_iccm"
+          - test: "block/dccm"
+            artifact: "block_dccm"
+          - test: "block/lib_axi4_to_ahb"
+            artifact: "block_lib_axi4_to_ahb"
+          - test: "block/lib_ahb_to_axi4"
+            artifact: "block_lib_ahb_to_axi4"
+          - test: "block/pmp"
+            artifact: "block_pmp"
+          - test: "block/pmp_random"
+            artifact: "block_pmp_random"
+          - test: "block/dec_pmp_ctl"
+            artifact: "block_dec_pmp_ctl"
+          - test: "block/dmi"
+            artifact: "block_dmi"
+          - test: "block/lsu_tl"
+            artifact: "block_lsu_tl"
+          - test: "block/dec_tlu_ctl"
+            artifact: "block_dec_tlu_ctl"
+          - test: "block/dec"
+            artifact: "block_dec"
     env:
       CCACHE_DIR: "/opt/verification/.cache/"
       DEBIAN_FRONTEND: "noninteractive"
@@ -144,16 +164,16 @@ jobs:
 
       - name: Upload coverage data artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: uarch_tests_coverage_data
+          name: uarch_tests_coverage_data-${{ matrix.artifact }}
           path: ./results/*.info
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: uarch_tests_logs
+          name: uarch_tests_logs-${{ matrix.artifact }}
           path: |
             verification/${{ matrix.test }}/*.log
             verification/${{ matrix.test }}/*.vcd.zip

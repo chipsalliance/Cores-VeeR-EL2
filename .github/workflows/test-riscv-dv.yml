@@ -10,7 +10,7 @@ jobs:
 #--------------#
   generate-config:
     name: Generate configs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       test-types: ${{ steps.test-types.outputs.tests }}
       test-include-generate: ${{ steps.test-types.outputs.include-generate }}
@@ -77,14 +77,14 @@ jobs:
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: riscv-dv_generated_code_${{ matrix.version }}
+          name: riscv-dv_generated_code_${{ matrix.test }}_${{ matrix.version }}
           path: tools/riscv-dv/work/**/asm_test/*.S
 
   run-tests:
     name: Run RISC-V DV tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20250116082447
     needs: [ generate-config, generate-code ]
     strategy:
@@ -153,9 +153,9 @@ jobs:
           pip install -r third_party/riscv-dv/requirements.txt
 
       - name: Download Code Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: riscv-dv_generated_code_${{ matrix.version }}
+          name: riscv-dv_generated_code_${{ matrix.test }}_${{ matrix.version }}
           path: tools/riscv-dv/work/
 
       - name: Run test
@@ -193,20 +193,20 @@ jobs:
           sis -d convert --dat-dir ${RV_ROOT}/tools/riscv-dv/work/
           mkdir -p results
           mv ${RV_ROOT}/tools/riscv-dv/work/coverage.info \
-             results/coverage_riscv-dv_${{matrix.priv}}_${{ matrix.test }}_${{ matrix.coverage }}.info
+             results/coverage_riscv-dv_${{matrix.priv}}_${{ matrix.test }}_${{ matrix.iss }}_${{ matrix.version }}_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: riscv-dv_coverage_data
+          name: riscv-dv_coverage_data-${{ matrix.coverage }}_${{matrix.priv}}_${{ matrix.test }}-${{ matrix.iss }}-${{ matrix.version }}
           path: results/*.info
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: artifacts-${{matrix.priv}}_${{ matrix.test }}-${{ matrix.iss }}-${{ matrix.version }}
+          name: artifacts-${{ matrix.coverage }}_${{ matrix.priv }}_${{ matrix.test }}-${{ matrix.iss }}-${{ matrix.version }}
           path: tools/riscv-dv/work/test_*
 
   run-custom-tests:
@@ -233,9 +233,9 @@ jobs:
           submodules: recursive
 
       - name: Download Code Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: riscv-dv_generated_code_${{ matrix.version }}
+          name: riscv-dv_generated_code_${{ matrix.test }}_${{ matrix.version }}
           path: tools/riscv-dv/work/
 
       - name: Prepare Environment

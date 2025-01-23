@@ -7,7 +7,7 @@ jobs:
 
   regression-tests:
     name: Regression exceptions tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20250116082447
     strategy:
       matrix:
@@ -70,13 +70,13 @@ jobs:
           sis -d convert --dat-dir ${TEST_PATH}/
           mkdir -p results
           mv ${TEST_PATH}/coverage.info \
-             results/coverage_exceptions_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.waypack }}_${{ matrix.coverage }}.info
+             results/coverage_exceptions_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.cache_waypack }}_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: regression_tests_coverage_data
+          name: regression_tests_coverage_data-${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.coverage }}_${{matrix.priv}}_${{matrix.cache_waypack}}
           path: results/*.info
 
   custom-regression-exceptions-tests:

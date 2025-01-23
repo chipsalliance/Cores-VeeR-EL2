@@ -6,7 +6,7 @@ on:
 jobs:
   tests:
     name: Verification tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20250116082447
     strategy:
       matrix:
@@ -95,17 +95,17 @@ jobs:
 
       - name: Upload pytest-html artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: verification_dashboard
+          name: verification_dashboard_${{ matrix.test }}_${{ matrix.coverage }}
           path: |
             webpage_*
 
       - name: Upload coverage artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: verification_tests_coverage_data
+          name: verification_tests_coverage_data_${{ matrix.test }}_${{ matrix.coverage }}
           path: results/*.info
 
   custom-verification-tests:

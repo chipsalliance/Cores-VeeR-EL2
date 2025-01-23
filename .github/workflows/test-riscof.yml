@@ -7,7 +7,7 @@ jobs:
 
   tests:
     name: Run RISCOF tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20250116082447
     strategy:
       fail-fast: false
@@ -110,16 +110,16 @@ jobs:
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: riscof_coverage_data
+          name: riscof_coverage_data_${{matrix.priv}}_${{ matrix.coverage }}
           path: riscof/coverage/*.info
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: riscof-report
+          name: riscof-report_${{matrix.priv}}_${{ matrix.coverage }}
           path: |
             riscof/riscof_work/report.html
             riscof/riscof_work/style.css

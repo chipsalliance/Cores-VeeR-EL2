@@ -5,7 +5,7 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20250116082447
     strategy:
       fail-fast: false
@@ -38,7 +38,10 @@ jobs:
 
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: renode_results
-          path: tools/renode/logs/*log
+          path: |
+            tools/renode/log.html
+            tools/renode/report.html
+            tools/renode/robot_output.xml

@@ -6,7 +6,7 @@ on:
 jobs:
   tests:
     name: UVM tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20250116082447
     env:
       CCACHE_DIR: "/opt/uvm/.cache/"
@@ -40,7 +40,7 @@ jobs:
 
       - name: Upload test output
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: uvm_test_output
           path: test.out

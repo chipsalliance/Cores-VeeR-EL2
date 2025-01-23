@@ -7,7 +7,7 @@ jobs:
 
   merge-verilator-reports:
     name: Merge Verilator info data
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20250116082447
     env:
       DEBIAN_FRONTEND: "noninteractive"
@@ -17,51 +17,59 @@ jobs:
           submodules: recursive
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: regression_tests_coverage_data
+          pattern: regression_tests_coverage_data-*
+          merge-multiple: true
           path: ./
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: regression_tests_coverage_data_cache_waypack_0
+          pattern: regression_tests_coverage_data_cache_waypack_0*
+          merge-multiple: true
           path: ./
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: regression_tests_coverage_data_cache_waypack_1
+          pattern: regression_tests_coverage_data_cache_waypack_1*
+          merge-multiple: true
           path: ./
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: verification_tests_coverage_data
+          pattern: verification_tests_coverage_data*
+          merge-multiple: true
           path: ./
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: uarch_tests_coverage_data
+          pattern: uarch_tests_coverage_data*
+          merge-multiple: true
           path: ./
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: riscv-dv_coverage_data
+          pattern: riscv-dv_coverage_data*
+          merge-multiple: true
           path: ./
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: riscof_coverage_data
+          pattern: riscof_coverage_data*
+          merge-multiple: true
           path: ./
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: openocd_coverage_data
+          pattern: openocd_coverage_data*
+          merge-multiple: true
           path: ./
 
       - name: Merge data
@@ -73,7 +81,14 @@ jobs:
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
+        with:
+          name: verilator_coverage_single_data
+          path: verilator_coverage_single_data.tar.gz
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: verilator_coverage_data
           path: |
@@ -85,7 +100,7 @@ jobs:
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverview_data
           path: |
@@ -93,7 +108,7 @@ jobs:
 
   coverage-report:
     name: Coverage report
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20250116082447
     needs: [merge-verilator-reports, custom-coverage-report]
     env:
@@ -128,61 +143,69 @@ jobs:
           popd
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: regression_tests_coverage_data
+          pattern: regression_tests_coverage_data-*
+          merge-multiple: true
           path: ./
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: regression_tests_coverage_data_cache_waypack_0
+          pattern: regression_tests_coverage_data_cache_waypack_0*
+          merge-multiple: true
           path: ./
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: regression_tests_coverage_data_cache_waypack_1
+          pattern: regression_tests_coverage_data_cache_waypack_1*
+          merge-multiple: true
           path: ./
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: verification_tests_coverage_data
+          pattern: verification_tests_coverage_data*
+          merge-multiple: true
           path: ./
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: uarch_tests_coverage_data
+          pattern: uarch_tests_coverage_data*
+          merge-multiple: true
           path: ./
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: riscv-dv_coverage_data
+          pattern: riscv-dv_coverage_data*
+          merge-multiple: true
           path: ./
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: riscof_coverage_data
+          pattern: riscof_coverage_data*
+          merge-multiple: true
           path: ./
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: openocd_coverage_data
+          pattern: openocd_coverage_data*
+          merge-multiple: true
           path: ./
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: coverview_data
           path: ./
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: data_v
           path: ./
@@ -216,14 +239,14 @@ jobs:
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage_report
           path: ./report
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: combined_coverage_data
           path: |
@@ -246,7 +269,7 @@ jobs:
           submodules: recursive
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: verilator_coverage_data
           path: ./
@@ -258,7 +281,7 @@ jobs:
         run: _secret_custom_report
 
       - name: Pack artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: data_v
           path: |
@@ -283,7 +306,7 @@ jobs:
         run: _secret_custom_report_merger
 
       - name: Pack artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: data_v2
           path: |

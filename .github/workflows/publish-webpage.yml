@@ -8,7 +8,7 @@ jobs:
     name: Build and Main Deploy
     concurrency:
       group: gh-pages
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: debian:trixie
     permissions:
@@ -23,33 +23,35 @@ jobs:
           echo $run_information
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: coverage_report
           path: ./coverage_dashboard
 
       - name: Download coverage reports merged
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: data_v2
           path: ./data_v_merged
 
       - name: Download docs
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: docs
           path: ./docs_rendered
 
       - name: Download verification reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: verification_dashboard
+          pattern: verification_dashboard*
+          merge-multiple: true
           path: ./verification_dashboard
 
       - name: Download RISCOF report
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: riscof-report
+          pattern: riscof-report*
+          merge-multiple: true
           path: ./riscof_dashboard
 
       - name: Checkout gh-pages
@@ -163,7 +165,7 @@ jobs:
           echo "number=${{ github.event.number }}" >> pr_number.txt
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: github.event_name == 'pull_request'
         with:
           name: pr_number
@@ -171,7 +173,7 @@ jobs:
 
       - name: Pack webpage as an artifact
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: webpage
           path: ./webpage.tar.gz

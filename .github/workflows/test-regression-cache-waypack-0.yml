@@ -7,7 +7,7 @@ jobs:
 
   regression-tests:
     name: Regression tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20250116082447
     strategy:
       matrix:
@@ -102,9 +102,9 @@ jobs:
 
       - name: Pack artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: regression_tests_coverage_data_cache_waypack_0
+          name: regression_tests_coverage_data_cache_waypack_0_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.priv }}_${{ matrix.coverage }}
           path: results/*.info
 
   custom-regression-tests:

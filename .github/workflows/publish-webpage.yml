@@ -73,6 +73,7 @@ jobs:
           apt -y install nodejs npm python3 zip git
 
           mv coverage_dashboard/*.zip .
+          mv coverage_dashboard/*.zip.xz .
           mv data_v_merged/*.zip .
           mv data_v_merged/*.zip.xz .
 
@@ -114,6 +115,7 @@ jobs:
           apt -y install nodejs npm python3 zip git
 
           mv coverage_dashboard/*.zip .
+          mv coverage_dashboard/*.zip.xz .
           mv data_v_merged/*zip .
           mv data_v_merged/*zip.xz .
 

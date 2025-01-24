@@ -45,6 +45,9 @@ VERILATOR       = verilator
 VERILATOR_CFLAGS= "-std=c++14"
 VERILATOR_INC   = -I$(WORK_DIR) -I$(RV_ROOT)/testbench
 VERILATOR_EXE   = $(RV_ROOT)/testbench/test_tb_top.cpp
+# Set `TB_SILENT_FAIL` as generated instruction sequences may cause TB errors
+# Errors are to be reported when execution flows discrepancy is encountered
+VERILATOR_EXTRA_DEFS = +define+TB_SILENT_FAIL
 
 HDL_FILES = $(WORK_DIR)/common_defines.vh \
             $(WORK_DIR)/el2_pdef.vh \
@@ -116,7 +119,7 @@ $(WORK_DIR)/defines.h: | $(WORK_DIR)
 
 # Verilated testbench rules
 $(WORK_DIR)/verilator/Vtb_top.mk: $(WORK_DIR)/defines.h
-	$(VERILATOR) --cc -CFLAGS $(VERILATOR_CFLAGS) $(VERILATOR_INC) \
+	$(VERILATOR) --cc -CFLAGS $(VERILATOR_CFLAGS) $(VERILATOR_INC) $(VERILATOR_EXTRA_DEFS)\
         $(HDL_FILES) -f $(RV_ROOT)/testbench/flist --top-module tb_top \
 		-exe $(VERILATOR_EXE) -Wno-WIDTH -Wno-UNOPTFLAT $(VERILATOR_NOIMPLICIT) --autoflush \
 		--timing $(VERILATOR_COVERAGE) -fno-table -Wno-LATCH\

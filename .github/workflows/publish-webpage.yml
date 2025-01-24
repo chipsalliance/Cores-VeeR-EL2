@@ -73,6 +73,7 @@ jobs:
           apt -y install nodejs npm python3 zip git
 
           mv coverage_dashboard/*.zip .
+          mv coverage_dashboard/*.zip.xz .
           mv data_v_merged/*.zip .
           mv data_v_merged/*.zip.xz .
 
@@ -96,7 +97,7 @@ jobs:
           mv ./docs_rendered/* public.new/html/main/docs_rendered
 
           # data
-          mv data_*_verilator_info.zip public.new/html/main/
+          mv data_*_verilator_info.zip.xz public.new/html/main/
           mv data.zip public.new/html/main/
           mv data_v.zip public.new/html/main/
           mv data_both.zip public.new/html/main/
@@ -114,6 +115,7 @@ jobs:
           apt -y install nodejs npm python3 zip git
 
           mv coverage_dashboard/*.zip .
+          mv coverage_dashboard/*.zip.xz .
           mv data_v_merged/*zip .
           mv data_v_merged/*zip.xz .
 
@@ -137,7 +139,7 @@ jobs:
           mv ./docs_rendered/* public.new/html/dev/${{ github.event.number }}/docs_rendered
 
           # data
-          mv data_*_verilator_info.zip public.new/html/dev/${{ github.event.number }}/
+          mv data_*_verilator_info.zip.xz public.new/html/dev/${{ github.event.number }}/
           mv data.zip public.new/html/dev/${{ github.event.number }}/
           mv data_v.zip public.new/html/dev/${{ github.event.number }}/
           mv data_both.zip public.new/html/dev/${{ github.event.number }}/

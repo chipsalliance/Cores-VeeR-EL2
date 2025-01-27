@@ -775,6 +775,16 @@ module tb_top
     logic [1:0] ifu_axi_rresp_override;
 
     always @(negedge core_clk) begin
+        // Custom test commands
+        // Available commands (that can be written into address mem_mailbox_testcmd) are:
+        // 8'h80 - trigger NMI
+        // 8'h81 - set NMI handler address (mailbox_data[31:8] is the address of a handler,
+        //         i.e. it must be 256 byte-aligned)
+        // 8'h82 - trigger data bus error on the next load/store
+        nmi_assert_int <= nmi_assert_int >> 1;
+        soft_int <= 0;
+        timer_int <= 0;
+        extintsrc_req[1] <= 0;
         cycleCnt <= cycleCnt+1;
         // Test timeout monitor
         if(cycleCnt == MAX_CYCLES) begin
@@ -874,17 +884,6 @@ module tb_top
                 $fatal;
             `endif // TB_SILENT_FAIL
         end
-
-        // Custom test commands
-        // Available commands (that can be written into address mem_mailbox_testcmd) are:
-        // 8'h80 - trigger NMI
-        // 8'h81 - set NMI handler address (mailbox_data[31:8] is the address of a handler,
-        //         i.e. it must be 256 byte-aligned)
-        // 8'h82 - trigger data bus error on the next load/store
-        nmi_assert_int <= nmi_assert_int >> 1;
-        soft_int <= 0;
-        timer_int <= 0;
-        extintsrc_req[1] <= 0;
     end
 
     `ifdef RV_BUILD_AXI4

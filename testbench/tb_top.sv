@@ -114,7 +114,7 @@ module tb_top
     logic                       rst_l;
 `endif
     logic                       porst_l;
-    logic [pt.PIC_TOTAL_INT:1]  ext_int;
+    logic [pt.PIC_TOTAL_INT:1]  extintsrc_req;
     logic                       nmi_int;
     logic                       timer_int;
     logic                       soft_int;
@@ -122,8 +122,6 @@ module tb_top
     logic        [31:0]         reset_vector;
     logic        [31:0]         nmi_vector;
     logic        [31:1]         jtag_id;
-
-    logic [pt.PIC_TOTAL_INT:1]  extintsrc_req;
 
     logic        [31:0]         ic_haddr        ;
     logic        [2:0]          ic_hburst       ;
@@ -805,12 +803,12 @@ module tb_top
         if(mailbox_write && (mailbox_data[7:0] >= 8'h80 && mailbox_data[7:0] < 8'h87)) begin
             if (mailbox_data[7:0] == 8'h80) begin
                 if (mailbox_data[15:8] > 0 && mailbox_data[15:8] < pt.PIC_TOTAL_INT && nmi_assert_int == 4'b0000)
-                    ext_int[mailbox_data[15:8]] <= 1'b0;
+                    extintsrc_req[mailbox_data[15:8]] <= 1'b0;
                 nmi_assert_int <= 4'b1111;
             end
             if (mailbox_data[7:0] == 8'h81) begin
                 if (mailbox_data[15:8] > 0 && mailbox_data[15:8] < pt.PIC_TOTAL_INT)
-                    ext_int[mailbox_data[15:8]] <= 1'b1;
+                    extintsrc_req[mailbox_data[15:8]] <= 1'b1;
                 nmi_vector[31:1] <= {mailbox_data[31:8], 7'h00};
             end
             if (mailbox_data[7:0] == 8'h82 && nmi_assert_int == 4'b0000) begin
@@ -834,7 +832,7 @@ module tb_top
             end
         end
         if(mailbox_write && (mailbox_data[7:0] == 8'h90)) begin
-            ext_int        <= {pt.PIC_TOTAL_INT-1{1'b0}};
+            extintsrc_req  <= {pt.PIC_TOTAL_INT-1{1'b0}};
             nmi_assert_int <= 4'b0000;
             timer_int      <= 1'b0;
             soft_int       <= 1'b0;
@@ -992,9 +990,9 @@ module tb_top
         abi_reg[30] = "t5";
         abi_reg[31] = "t6";
 
-        ext_int     = {pt.PIC_TOTAL_INT-1{1'b0}};
-        timer_int   = 0;
-        soft_int    = 0;
+        extintsrc_req = {pt.PIC_TOTAL_INT-1{1'b0}};
+        timer_int     = 0;
+        soft_int      = 0;
 
     // tie offs
         jtag_id[31:28] = 4'b1;
@@ -1003,7 +1001,6 @@ module tb_top
         reset_vector   = `RV_RESET_VEC;
         nmi_assert_int = 0;
         nmi_vector     = 32'hee000000;
-        extintsrc_req  = 0;
 
         $readmemh("program.hex",  lmem.mem);
         $readmemh("program.hex",  imem.mem);
@@ -1325,7 +1322,7 @@ veer_wrapper rvtop_wrapper (
     .dma_axi_rlast          (dma_axi_rlast),
 `endif
     .timer_int              ( timer_int ),
-    .extintsrc_req          ( ext_int ),
+    .extintsrc_req          ( extintsrc_req ),
 
     .lsu_bus_clk_en         (lsu_bus_clk_en),// Clock ratio b/w cpu core clk & AHB master interface
     .ifu_bus_clk_en         ( 1'b1  ),// Clock ratio b/w cpu core clk & AHB master interface

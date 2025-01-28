@@ -39,16 +39,20 @@ with open(sys.argv[1], 'r') as file:
       print(line)
 EOF
 
+git clone https://github.com/antmicro/info-process
+cd info-process
+git checkout 7c030a4625049726e998065e227e06bac77519d8
+PATH="`pwd`:$PATH"
+cd ..
+
 mkdir info_files
 mv *.info info_files
 tar acf verilator_coverage_single_data.tar.gz info_files
 cd info_files
 ls
-git clone https://github.com/linux-test-project/lcov -b v2.3-beta
-PATH="`pwd`/lcov/bin:$PATH"
 
-ls *_toggle.info | xargs ./info-process/info-merge.py --output coverage_toggle_verilator.info
-ls *_branch.info | xargs ./info-process/info-merge.py --output coverage_line_verilator.info
+ls *_toggle.info | xargs info-merge.py --output coverage_toggle_verilator.info
+ls *_branch.info | xargs info-merge.py --output coverage_line_verilator.info
 
 cp coverage_toggle_verilator.info ../
 cp coverage_line_verilator.info ../
@@ -92,9 +96,8 @@ export COMMIT=$GITHUB_SHA
                 done
 } < files.txt > sources.txt
 
-git clone https://github.com/antmicro/info-process
-./info-process/info-process.py --set-block-ids coverage_toggle_verilator.info
-./info-process/info-process.py --add-two-way-toggles --add-missing-brda-entries coverage_toggle_verilator.info
+info-process.py --set-block-ids coverage_toggle_verilator.info
+info-process.py --add-two-way-toggles --add-missing-brda-entries coverage_toggle_verilator.info
 
 mkdir test_data
 cp coverage_line_*.info coverage_toggle_*.info coverage_branch_* sources.txt test_data

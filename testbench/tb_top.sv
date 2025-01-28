@@ -114,7 +114,7 @@ module tb_top
     logic                       rst_l;
 `endif
     logic                       porst_l;
-    logic [pt.PIC_TOTAL_INT:1]  ext_int;
+    logic [pt.PIC_TOTAL_INT:1]  extintsrc_req;
     logic                       nmi_int;
     logic                       timer_int;
     logic                       soft_int;
@@ -122,8 +122,6 @@ module tb_top
     logic        [31:0]         reset_vector;
     logic        [31:0]         nmi_vector;
     logic        [31:1]         jtag_id;
-
-    logic [pt.PIC_TOTAL_INT:1]  extintsrc_req;
 
     logic        [31:0]         ic_haddr        ;
     logic        [2:0]          ic_hburst       ;
@@ -775,6 +773,10 @@ module tb_top
     logic [1:0] ifu_axi_rresp_override;
 
     always @(negedge core_clk) begin
+        nmi_assert_int <= nmi_assert_int >> 1;
+        soft_int <= 0;
+        timer_int <= 0;
+        extintsrc_req[1] <= 0;
         cycleCnt <= cycleCnt+1;
         // Test timeout monitor
         if(cycleCnt == MAX_CYCLES) begin
@@ -791,16 +793,19 @@ module tb_top
         // data[7:0] == 0x81 - set ext irq line index given by data[15:8]
         // data[7:0] == 0x82 - clean NMI, timer and soft irq lines to bits data[8:10]
         // data[7:0] == 0x83 - set NMI, timer and soft irq lines to bits data[8:10]
+        // data[7:0] == 0x86 - Trigger external interrupt
+        // data[7:0] == 0x87 - (AXI4) Trigger data bus error on the next load/store
+        // data[7:0] == 0x88 - (AXI4) Trigger instruction bus error on the next load/store
         // data[7:0] == 0x90 - clear all interrupt request signals
         if(mailbox_write && (mailbox_data[7:0] >= 8'h80 && mailbox_data[7:0] < 8'h87)) begin
             if (mailbox_data[7:0] == 8'h80) begin
                 if (mailbox_data[15:8] > 0 && mailbox_data[15:8] < pt.PIC_TOTAL_INT && nmi_assert_int == 4'b0000)
-                    ext_int[mailbox_data[15:8]] <= 1'b0;
+                    extintsrc_req[mailbox_data[15:8]] <= 1'b0;
                 nmi_assert_int <= 4'b1111;
             end
             if (mailbox_data[7:0] == 8'h81) begin
                 if (mailbox_data[15:8] > 0 && mailbox_data[15:8] < pt.PIC_TOTAL_INT)
-                    ext_int[mailbox_data[15:8]] <= 1'b1;
+                    extintsrc_req[mailbox_data[15:8]] <= 1'b1;
                 nmi_vector[31:1] <= {mailbox_data[31:8], 7'h00};
             end
             if (mailbox_data[7:0] == 8'h82 && nmi_assert_int == 4'b0000) begin
@@ -824,11 +829,12 @@ module tb_top
             end
         end
         if(mailbox_write && (mailbox_data[7:0] == 8'h90)) begin
-            ext_int        <= {pt.PIC_TOTAL_INT-1{1'b0}};
+            extintsrc_req  <= {pt.PIC_TOTAL_INT-1{1'b0}};
             nmi_assert_int <= 4'b0000;
             timer_int      <= 1'b0;
             soft_int       <= 1'b0;
         end
+        // end
         // ECC error injection
         if(mailbox_write && (mailbox_data[7:0] == 8'he0)) begin
             $display("Injecting single bit ICCM error");
@@ -868,28 +874,21 @@ module tb_top
         end
         else if(mailbox_write && mailbox_data[7:0] == 8'h1) begin
             $display("TEST_FAILED");
-            $finish;
+            `ifdef TB_SILENT_FAIL
+                $finish;
+            `else
+                $fatal;
+            `endif // TB_SILENT_FAIL
         end
-
-        // Custom test commands
-        // Available commands (that can be written into address mem_mailbox_testcmd) are:
-        // 8'h80 - trigger NMI
-        // 8'h81 - set NMI handler address (mailbox_data[31:8] is the address of a handler,
-        //         i.e. it must be 256 byte-aligned)
-        // 8'h82 - trigger data bus error on the next load/store
-        nmi_assert_int <= nmi_assert_int >> 1;
-        soft_int <= 0;
-        timer_int <= 0;
-        extintsrc_req[1] <= 0;
     end
 
     `ifdef RV_BUILD_AXI4
     // this needs to be a separate block due to sensitivity to other signals
     always @(negedge core_clk or lsu_axi_bvalid or lsu_axi_rvalid or ifu_axi_rvalid or ifu_axi_rid) begin
-        if (mailbox_write && mailbox_data[7:0] == 8'h82)
+        if (mailbox_write && mailbox_data[7:0] == 8'h87)
             // wait for current transaction that to complete to not trigger error on it
             @(negedge lsu_axi_bvalid) next_dbus_error <= 1;
-        if (mailbox_write && mailbox_data[7:0] == 8'h83)
+        if (mailbox_write && mailbox_data[7:0] == 8'h88)
             @(negedge ifu_axi_rvalid or ifu_axi_rid) next_ibus_error <= 1;
         // turn off forcing dbus error after a transaction
         if (next_dbus_error)
@@ -989,9 +988,9 @@ module tb_top
         abi_reg[30] = "t5";
         abi_reg[31] = "t6";
 
-        ext_int     = {pt.PIC_TOTAL_INT-1{1'b0}};
-        timer_int   = 0;
-        soft_int    = 0;
+        extintsrc_req = {pt.PIC_TOTAL_INT-1{1'b0}};
+        timer_int     = 0;
+        soft_int      = 0;
 
     // tie offs
         jtag_id[31:28] = 4'b1;
@@ -1000,7 +999,6 @@ module tb_top
         reset_vector   = `RV_RESET_VEC;
         nmi_assert_int = 0;
         nmi_vector     = 32'hee000000;
-        extintsrc_req  = 0;
 
         $readmemh("program.hex",  lmem.mem);
         $readmemh("program.hex",  imem.mem);
@@ -1322,7 +1320,7 @@ veer_wrapper rvtop_wrapper (
     .dma_axi_rlast          (dma_axi_rlast),
 `endif
     .timer_int              ( timer_int ),
-    .extintsrc_req          ( ext_int ),
+    .extintsrc_req          ( extintsrc_req ),
 
     .lsu_bus_clk_en         (lsu_bus_clk_en),// Clock ratio b/w cpu core clk & AHB master interface
     .ifu_bus_clk_en         ( 1'b1  ),// Clock ratio b/w cpu core clk & AHB master interface

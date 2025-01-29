@@ -46,6 +46,17 @@ run_regression_test(){
         COMMON_PARAMS="-set=user_mode=1 -set=smepmp=1 ${COMMON_PARAMS}"
     fi
 
+    # DLCS_ENABLE may not be set
+    set +u
+    if [[ -z "${DCLS_ENABLE}" ]]; then
+        DCLS_ENABLE="0"
+    fi
+    set -u
+
+    if [[ "${DCLS_ENABLE}" ==  "1" ]]; then
+        COMMON_PARAMS="-set lockstep_enable=1 -set lockstep_regfile_enable=1 ${COMMON_PARAMS}"
+    fi
+
     COMMON_PARAMS="-set=icache_waypack=${ICACHE_WAYPACK} ${COMMON_PARAMS}"
 
     if [[ "${BUS}" == "axi" ]]; then

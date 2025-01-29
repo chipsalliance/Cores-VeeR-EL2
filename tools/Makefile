@@ -271,9 +271,16 @@ picolibc:
 	$(MAKE) -f ${RV_ROOT}/tools/picolibc.mk all
 
 ifeq ($(shell which $(GCC_PREFIX)-gcc 2> /dev/null),)
-program.hex: ${HEX_DIR}/$(TEST).hex
+program.hex: ${BUILD_DIR}/defines.h
 	@echo " !!! No $(GCC_PREFIX)-gcc in path, using canned hex files !!"
-	cp ${HEX_DIR}/$(TEST).hex program.hex
+	$(eval USER_MODE := $(if $(shell grep "define \+RV_USER_MODE \+1" ${BUILD_DIR}/defines.h),1,0))
+	stat ${HEX_DIR}/user_mode${USER_MODE}/$(TEST).hex >/dev/null 2>&1; \
+	if [ $$? -eq 0 ]; then \
+		cp ${HEX_DIR}/user_mode${USER_MODE}/$(TEST).hex program.hex; \
+	else \
+		echo "Canned hex not found: ${HEX_DIR}/user_mode${USER_MODE}/$(TEST).hex"; \
+		exit 1; \
+	fi
 else
 ifneq (,$(wildcard $(TEST_DIR)/$(TEST).makefile))
 program.hex: picolibc

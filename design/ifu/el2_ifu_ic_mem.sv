@@ -285,19 +285,19 @@ import el2_pkg::*;
     logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0][pt.ICACHE_NUM_BYPASS_WIDTH-1:0] wrptr_in_up;
     logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0][pt.ICACHE_NUM_BYPASS-1:0]       sel_bypass_up;
     logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0][pt.ICACHE_NUM_BYPASS-1:0]       sel_bypass_ff_up;
-    logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0][(71*pt.ICACHE_NUM_WAYS)-1:0]    sel_bypass_data_up;
+    logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0][71-1:0]                         sel_bypass_data_up;
     logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0]                                 any_bypass_up;
     logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0]                                 any_addr_match_up;
 
    for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: WAYS
       for (genvar k=0; k<pt.ICACHE_BANKS_WAY; k++) begin: BANKS_WAY   // 16B subbank
       if (pt.ICACHE_ECC) begin : ECC1
-        logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] [71-1:0]        wb_dout_pre_up;           // data and its bit enables
-        logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] [pt.ICACHE_NUM_BYPASS-1:0] [71-1:0]  wb_dout_hold_up;
+        logic                            [71-1:0]  wb_dout_pre_up;    // data and its bit enables
+        logic [pt.ICACHE_NUM_BYPASS-1:0] [71-1:0]  wb_dout_hold_up;
 
         // Use exported ICache interface.
         always_comb begin
-          wb_dout_pre_up[i][k] = icache_export.wb_dout_pre_up[i][k];
+          wb_dout_pre_up = icache_export.wb_dout_pre_up[i][k];
         end
         if (pt.ICACHE_BYPASS_ENABLE == 1) begin
           assign wrptr_in_up[i][k] = (wrptr_up[i][k] == (pt.ICACHE_NUM_BYPASS-1)) ? '0 : (wrptr_up[i][k] + 1'd1);
@@ -332,7 +332,7 @@ import el2_pkg::*;
                .*, .en(write_bypass_en_up[i][k][l]), .din(ic_b_rw_addr_up[i][k]), .dout(wb_index_hold_up[i][k][l])
             );
             rvdffe #(71) rd_data_hold_ff (
-               .*, .en(write_bypass_en_ff_up[i][k][l]), .din(wb_dout_pre_up[i][k]), .dout(wb_dout_hold_up[i][k][l])
+               .*, .en(write_bypass_en_ff_up[i][k][l]), .din(wb_dout_pre_up), .dout(wb_dout_hold_up[l])
             );
           end
           always_comb begin
@@ -340,25 +340,25 @@ import el2_pkg::*;
             sel_bypass_data_up[i][k] = '0;
             for (int l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin
               any_bypass_up[i][k]      |=  sel_bypass_ff_up[i][k][l];
-              sel_bypass_data_up[i][k] |= (sel_bypass_ff_up[i][k][l]) ? wb_dout_hold_up[i][k][l] : '0;
+              sel_bypass_data_up[i][k] |= (sel_bypass_ff_up[i][k][l]) ? wb_dout_hold_up[l] : '0;
             end
-            wb_dout[i][k]   =   any_bypass_up[i][k] ?  sel_bypass_data_up[i][k] :  wb_dout_pre_up[i][k];
+            wb_dout[i][k]   =   any_bypass_up[i][k] ?  sel_bypass_data_up[i][k] :  wb_dout_pre_up;
           end
         end
         else begin
-          assign wb_dout[i][k]                      =   wb_dout_pre_up[i][k];
+          assign wb_dout[i][k]                      =   wb_dout_pre_up;
           assign ic_bank_way_clken_final_up[i][k]   =  ic_bank_way_clken[k][i];
         end
 
       end // if (pt.ICACHE_ECC)
 
      else  begin  : ECC0
-        logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] [68-1:0]        wb_dout_pre_up;           // data and its bit enables
-        logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] [pt.ICACHE_NUM_BYPASS-1:0] [68-1:0]  wb_dout_hold_up;
+        logic [pt.ICACHE_BANKS_WAY-1:0] [68-1:0]        wb_dout_pre_up;           // data and its bit enables
+        logic [pt.ICACHE_NUM_BYPASS-1:0] [68-1:0]  wb_dout_hold_up;
 
         // Use exported ICache interface.
         always_comb begin
-           wb_dout_pre_up[i][k][68-1:0] = icache_export.wb_dout_pre_up[i][k][68-1:0];
+           wb_dout_pre_up[k][68-1:0] = icache_export.wb_dout_pre_up[i][k][68-1:0];
         end
         if (pt.ICACHE_BYPASS_ENABLE == 1) begin
           assign wrptr_in_up[i][k] = (wrptr_up[i][k] == (pt.ICACHE_NUM_BYPASS-1)) ? '0 : (wrptr_up[i][k] + 1'd1);
@@ -393,7 +393,7 @@ import el2_pkg::*;
                .*, .en(write_bypass_en_up[i][k][l]), .din(ic_b_rw_addr_up[i][k]), .dout(wb_index_hold_up[i][k][l])
             );
             rvdffe #(68) rd_data_hold_ff (
-               .*, .en(write_bypass_en_ff_up[i][k][l]), .din(wb_dout_pre_up[i][k]), .dout(wb_dout_hold_up[i][k][l])
+               .*, .en(write_bypass_en_ff_up[i][k][l]), .din(wb_dout_pre_up[k]), .dout(wb_dout_hold_up[k][l])
             );
           end
           always_comb begin
@@ -401,13 +401,13 @@ import el2_pkg::*;
             sel_bypass_data_up[i][k] = '0;
             for (int l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin
               any_bypass_up[i][k]      |=  sel_bypass_ff_up[i][k][l];
-              sel_bypass_data_up[i][k] |= (sel_bypass_ff_up[i][k][l]) ? wb_dout_hold_up[i][k][l] : '0;
+              sel_bypass_data_up[i][k] |= (sel_bypass_ff_up[i][k][l]) ? wb_dout_hold_up[k][l] : '0;
             end
-            wb_dout[i][k]   =   any_bypass_up[i][k] ?  sel_bypass_data_up[i][k] :  wb_dout_pre_up[i][k];
+            wb_dout[i][k]   =   any_bypass_up[i][k] ?  sel_bypass_data_up[i][k] :  wb_dout_pre_up[k];
           end
         end
         else begin
-          assign wb_dout[i][k]                      =   wb_dout_pre_up[i][k];
+          assign wb_dout[i][k]                      =   wb_dout_pre_up[k];
           assign ic_bank_way_clken_final_up[i][k]   =  ic_bank_way_clken[k][i];
         end
 
@@ -433,18 +433,18 @@ import el2_pkg::*;
  // generate IC DATA PACKED SRAMS for 2/4 ways
   for (genvar k=0; k<pt.ICACHE_BANKS_WAY; k++) begin: BANKS_WAY   // 16B subbank
      if (pt.ICACHE_ECC) begin : ECC1
-        logic [pt.ICACHE_BANKS_WAY-1:0] [(71*pt.ICACHE_NUM_WAYS)-1:0]        wb_packeddout, ic_b_sb_bit_en_vec, wb_packeddout_pre;           // data and its bit enables
+        logic [(71*pt.ICACHE_NUM_WAYS)-1:0]        wb_packeddout, ic_b_sb_bit_en_vec, wb_packeddout_pre;           // data and its bit enables
 
-        logic [pt.ICACHE_BANKS_WAY-1:0] [pt.ICACHE_NUM_BYPASS-1:0] [(71*pt.ICACHE_NUM_WAYS)-1:0]  wb_packeddout_hold;
+        logic [pt.ICACHE_NUM_BYPASS-1:0] [(71*pt.ICACHE_NUM_WAYS)-1:0]  wb_packeddout_hold;
 
         // Use exported ICache interface.
         always_comb begin
-          icache_export.ic_b_sb_bit_en_vec[k] = ic_b_sb_bit_en_vec[k];
-          wb_packeddout_pre[k] = icache_export.wb_packeddout_pre[k];
+          icache_export.ic_b_sb_bit_en_vec[k] = ic_b_sb_bit_en_vec;
+          wb_packeddout_pre = icache_export.wb_packeddout_pre[k];
         end
 
         for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: BITEN
-           assign ic_b_sb_bit_en_vec[k][(71*i)+70:71*i] = {71{ic_b_sb_wren[k][i]}};
+           assign ic_b_sb_bit_en_vec[(71*i)+70:71*i] = {71{ic_b_sb_wren[k][i]}};
         end
 
         // SRAMS with ECC (single/double detect; no correct)
@@ -485,7 +485,7 @@ import el2_pkg::*;
                 .*, .en(write_bypass_en[k][l]), .din (ic_b_rw_addr[k]), .dout(wb_index_hold[k][l])
             );
             rvdffe #((71*pt.ICACHE_NUM_WAYS)) rd_data_hold_ff (
-                .*, .en(write_bypass_en_ff[k][l]), .din (wb_packeddout_pre[k]), .dout(wb_packeddout_hold[k][l])
+                .*, .en(write_bypass_en_ff[k][l]), .din (wb_packeddout_pre), .dout(wb_packeddout_hold[l])
             );
           end // block: BYPASS
 
@@ -495,36 +495,36 @@ import el2_pkg::*;
 
             for (int l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin
               any_bypass[k]      |=  sel_bypass_ff[k][l];
-              sel_bypass_data[k] |= (sel_bypass_ff[k][l]) ? wb_packeddout_hold[k][l] : '0;
+              sel_bypass_data[k] |= (sel_bypass_ff[k][l]) ? wb_packeddout_hold[l] : '0;
             end
-              wb_packeddout[k]   =   any_bypass[k] ?  sel_bypass_data[k] :  wb_packeddout_pre[k];
+              wb_packeddout   =   any_bypass[k] ?  sel_bypass_data[k] :  wb_packeddout_pre;
           end // always_comb begin
         end // if (pt.ICACHE_BYPASS_ENABLE == 1)
         else begin
-            assign wb_packeddout[k]   =   wb_packeddout_pre[k];
+            assign wb_packeddout   =   wb_packeddout_pre;
             assign ic_bank_way_clken_final[k]   =  |ic_bank_way_clken[k];
         end
 
         for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: WAYS
-           assign wb_dout[i][k][70:0]  = wb_packeddout[k][(71*i)+70:71*i];
+           assign wb_dout[i][k][70:0]  = wb_packeddout[(71*i)+70:71*i];
         end : WAYS
 
      end // if (pt.ICACHE_ECC)
 
 
      else  begin  : ECC0
-        logic [pt.ICACHE_BANKS_WAY-1:0] [(68*pt.ICACHE_NUM_WAYS)-1:0]        wb_packeddout, ic_b_sb_bit_en_vec, wb_packeddout_pre;           // data and its bit enables
+        logic [(68*pt.ICACHE_NUM_WAYS)-1:0]        wb_packeddout, ic_b_sb_bit_en_vec, wb_packeddout_pre;           // data and its bit enables
 
-        logic [pt.ICACHE_BANKS_WAY-1:0] [pt.ICACHE_NUM_BYPASS-1:0] [(68*pt.ICACHE_NUM_WAYS)-1:0]  wb_packeddout_hold;
+        logic [pt.ICACHE_NUM_BYPASS-1:0] [(68*pt.ICACHE_NUM_WAYS)-1:0]  wb_packeddout_hold;
 
         // Use exported ICache interface.
         always_comb begin
-           icache_export.ic_b_sb_bit_en_vec[k] = ic_b_sb_bit_en_vec[k];
-           wb_packeddout_pre[k] = icache_export.wb_packeddout_pre[k];
+           icache_export.ic_b_sb_bit_en_vec[k] = ic_b_sb_bit_en_vec;
+           wb_packeddout_pre = icache_export.wb_packeddout_pre[k];
         end
 
         for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: BITEN
-           assign ic_b_sb_bit_en_vec[k][(68*i)+67:68*i] = {68{ic_b_sb_wren[k][i]}};
+           assign ic_b_sb_bit_en_vec[(68*i)+67:68*i] = {68{ic_b_sb_wren[k][i]}};
         end
 
         // SRAMs with parity
@@ -565,7 +565,7 @@ import el2_pkg::*;
                 .*, .en(write_bypass_en[k][l]), .din (ic_b_rw_addr[k]), .dout(wb_index_hold[k][l])
             );
             rvdffe #((68*pt.ICACHE_NUM_WAYS)) rd_data_hold_ff (
-                .*, .en(write_bypass_en_ff[k][l]), .din (wb_packeddout_pre[k]), .dout(wb_packeddout_hold[k][l])
+                .*, .en(write_bypass_en_ff[k][l]), .din (wb_packeddout_pre), .dout(wb_packeddout_hold[l])
             );
           end // block: BYPASS
 
@@ -575,18 +575,18 @@ import el2_pkg::*;
 
             for (int l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin
               any_bypass[k]      |=  sel_bypass_ff[k][l];
-              sel_bypass_data[k] |= (sel_bypass_ff[k][l]) ? wb_packeddout_hold[k][l] : '0;
+              sel_bypass_data[k] |= (sel_bypass_ff[k][l]) ? wb_packeddout_hold[l] : '0;
             end
-              wb_packeddout[k]   =   any_bypass[k] ?  sel_bypass_data[k] :  wb_packeddout_pre[k];
+              wb_packeddout   =   any_bypass[k] ?  sel_bypass_data[k] :  wb_packeddout_pre;
           end // always_comb
         end // if (pt.ICACHE_BYPASS_ENABLE == 1)
         else begin
-            assign wb_packeddout[k]   =   wb_packeddout_pre[k];
+            assign wb_packeddout   =   wb_packeddout_pre;
             assign ic_bank_way_clken_final[k]   =  |ic_bank_way_clken[k];
         end
 
         for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: WAYS
-           assign wb_dout[i][k][67:0]  = wb_packeddout[k][(68*i)+67:68*i];
+           assign wb_dout[i][k][67:0]  = wb_packeddout[(68*i)+67:68*i];
         end
      end // block: ECC0
      end // block: BANKS_WAY
@@ -900,7 +900,7 @@ end // block: OTHERS
     for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: WAYS
 
       if (pt.ICACHE_ECC) begin  : ECC1
-        logic [pt.ICACHE_NUM_WAYS-1:0] [pt.ICACHE_TAG_NUM_BYPASS-1:0][25 :0] wb_dout_hold;
+        logic [pt.ICACHE_TAG_NUM_BYPASS-1:0][25 :0] wb_dout_hold;
 
         if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin
           assign wrptr_in[i] = (wrptr[i] == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr[i] + 1'd1);
@@ -938,7 +938,7 @@ end // block: OTHERS
                   .*, .en(write_bypass_en[i][l]), .din (ic_b_rw_addr[i]), .dout(wb_index_hold[i][l])
             );
             rvdffe #(26) rd_data_hold_ff (
-                  .*, .en(write_bypass_en_ff[i][l]), .din (ic_tag_data_raw_pre[i][26-1:0]), .dout(wb_dout_hold[i][l])
+                  .*, .en(write_bypass_en_ff[i][l]), .din (ic_tag_data_raw_pre[i][26-1:0]), .dout(wb_dout_hold[l])
             );
           end // block: BYPASS
 
@@ -948,7 +948,7 @@ end // block: OTHERS
 
             for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin
               any_bypass[i]      |=  sel_bypass_ff[i][l];
-              sel_bypass_data[i] |= (sel_bypass_ff[i][l]) ? wb_dout_hold[i][l] : '0;
+              sel_bypass_data[i] |= (sel_bypass_ff[i][l]) ? wb_dout_hold[l] : '0;
             end
             ic_tag_data_raw[i]   =   any_bypass[i] ?  sel_bypass_data[i] :  ic_tag_data_raw_pre[i];
           end // always_comb
@@ -975,7 +975,7 @@ end // block: OTHERS
         assign ic_tag_way_perr[i]= ic_tag_single_ecc_error[i] | ic_tag_double_ecc_error[i]  ;
       end
       else  begin : ECC0
-        logic [pt.ICACHE_NUM_WAYS-1:0] [pt.ICACHE_TAG_NUM_BYPASS-1:0][21 :0] wb_dout_hold;
+        logic [pt.ICACHE_TAG_NUM_BYPASS-1:0][21 :0] wb_dout_hold;
         assign ic_tag_data_raw_pre[i][25:22] = '0 ;
 
         if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin
@@ -1014,7 +1014,7 @@ end // block: OTHERS
                   .*, .en(write_bypass_en[i][l]), .din (ic_b_rw_addr[i]), .dout(wb_index_hold[i][l])
             );
             rvdffe #(22) rd_data_hold_ff (
-                  .*, .en(write_bypass_en_ff[i][l]), .din (ic_tag_data_raw_pre[i][22-1:0]), .dout(wb_dout_hold[i][l])
+                  .*, .en(write_bypass_en_ff[i][l]), .din (ic_tag_data_raw_pre[i][22-1:0]), .dout(wb_dout_hold[l])
             );
           end // block: BYPASS
 
@@ -1024,7 +1024,7 @@ end // block: OTHERS
 
             for (int l=0; l<pt.ICACHE_TAG_NUM_BYPASS; l++) begin
               any_bypass[i]      |=  sel_bypass_ff[i][l];
-              sel_bypass_data[i] |= (sel_bypass_ff[i][l]) ? wb_dout_hold[i][l] : '0;
+              sel_bypass_data[i] |= (sel_bypass_ff[i][l]) ? wb_dout_hold[l] : '0;
             end
             ic_tag_data_raw[i]   =   any_bypass[i] ?  sel_bypass_data[i] :  ic_tag_data_raw_pre[i];
           end // always_comb

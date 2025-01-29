@@ -8,7 +8,7 @@ jobs:
   merge-verilator-reports:
     name: Merge Verilator info data
     runs-on: ubuntu-24.04
-    container: ghcr.io/antmicro/cores-veer-el2:20250116082447
+    container: ghcr.io/antmicro/cores-veer-el2:20250123123840
     env:
       DEBIAN_FRONTEND: "noninteractive"
     steps:
@@ -92,10 +92,8 @@ jobs:
         with:
           name: verilator_coverage_data
           path: |
-            coverage_toggle_verilator_orig.info_
             coverage_toggle_verilator.info
             coverage_line_verilator.info
-            coverage_branch_verilator_orig.info_
             coverage_branch_verilator.info
 
       - name: Pack artifacts
@@ -109,7 +107,7 @@ jobs:
   coverage-report:
     name: Coverage report
     runs-on: ubuntu-24.04
-    container: ghcr.io/antmicro/cores-veer-el2:20250116082447
+    container: ghcr.io/antmicro/cores-veer-el2:20250123123840
     needs: [merge-verilator-reports, custom-coverage-report]
     env:
       DEBIAN_FRONTEND: "noninteractive"
@@ -223,15 +221,18 @@ jobs:
             python3 .github/scripts/split_info.py line.info --line > ${base_name}_line.info
           done
           zip data_toggle_verilator_info.zip *_toggle.info
+          xz data_toggle_verilator_info.zip
           zip data_branch_verilator_info.zip *_branch.info
+          xz data_branch_verilator_info.zip
           zip data_line_verilator_info.zip *_line.info
+          xz data_line_verilator_info.zip
           mkdir report
           cp data.zip report
           cp data_v.zip report
           cp data_both.zip report
-          cp data_toggle_verilator_info.zip report
-          cp data_branch_verilator_info.zip report
-          cp data_line_verilator_info.zip report
+          cp data_toggle_verilator_info.zip.xz report
+          cp data_branch_verilator_info.zip.xz report
+          cp data_line_verilator_info.zip.xz report
 
 
           cat *_toggle.info > coverage.toggle.info

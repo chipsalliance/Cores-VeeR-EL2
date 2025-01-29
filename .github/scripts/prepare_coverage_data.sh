@@ -39,163 +39,20 @@ with open(sys.argv[1], 'r') as file:
       print(line)
 EOF
 
-cat <<EOF >> brda_br_filter.py
-def filter(infile, outfile):
-    out = open(outfile, 'w')
-
-    with open(infile) as f:
-        lines = f.readlines()
-        n = 0
-
-        while n < len(lines):
-            hits = {}
-            if 'BRDA' in lines[n]:
-                data = lines[n].split(",")[2].split("_")
-                lineno = lines[n].split(",")[0]
-                typ = data[0]
-                key = data[1]
-                hit = int(data[2])
-                val = int(lines[n].split(",")[3])
-
-                hits[lineno] = {}
-                hits[lineno][typ] = {}
-                hits[lineno][typ][key] = {}
-                hits[lineno][typ][key][0] = []
-                hits[lineno][typ][key][1] = []
-                hits[lineno][typ][key][val].append(hit)
-
-                n += 1
-                while lines[n].startswith(lineno):
-                    lineno = lines[n].split(",")[0]
-                    data = lines[n].split(",")[2].split("_")
-                    typ = data[0]
-                    key = data[1]
-                    hit = int(data[2])
-                    val = int(lines[n].split(",")[3])
-
-                    if typ not in hits[lineno]:
-                        hits[lineno][typ] = {}
-
-                    if key not in hits[lineno][typ]:
-                        hits[lineno][typ][key] = {}
-                        hits[lineno][typ][key][0] = []
-                        hits[lineno][typ][key][1] = []
-
-                    if hit not in hits[lineno][typ][key][val]:
-                        hits[lineno][typ][key][val].append(hit)
-                    n += 1
-
-                # normalize hits
-                for h in hits:
-                    for t in hits[h]:
-                        for l in hits[h][t]:
-                            all_bits = hits[h][t][l][0] + hits[h][t][l][1]
-                            try:
-                                mi = min(all_bits)
-                                for v in [0, 1]:
-                                    for i, k in enumerate(hits[h][t][l][v]):
-                                        hits[h][t][l][v][i] -= mi
-                            except ValueError:
-                                # allow empty lists (no hits or misses)
-                                pass
-
-                new_hits = {}
-
-                for h in hits:
-                    for t in hits[h]:
-                        for l in hits[h][t]:
-                            for v in [0, 1]:
-                                for k in hits[h][t][l][v]:
-                                    if t not in new_hits:
-                                       new_hits[t] = {}
-                                    if not k in new_hits[t] or new_hits[t][k] != 1:
-                                        new_hits[t][k] = v
-
-                for t in new_hits.keys():
-                    for k in sorted(new_hits[t].keys()):
-                        if len(new_hits[t].keys()) > 1:
-                            out.write(f"{lineno},0,{t}_{k},{new_hits[t][k]}\n")
-                        else:
-                            out.write(f"{lineno},0,{t},{new_hits[t][k]}\n")
-            else:
-                out.write(lines[n])
-                n += 1
-
-    out.close()
-
-filter('coverage_branch_verilator.info',
-       'coverage_branch_verilator_filtered.info')
-EOF
-
-cat <<EOF >> brda_tog_filter.py
-from collections import defaultdict
-
-def field_order(field):
-    chunks = field.split(".")
-    new_chunks = []
-
-    for c in chunks:
-        fields = c.split("_")
-        new_fields = []
-
-        for f in fields:
-            try:
-                new_fields.append(str(int(f)).zfill(100))
-            except ValueError:
-                new_fields.append(f)
-        new_chunks.append("_".join(new_fields))
-
-    return ".".join(new_chunks)
-
-def filter(infile, outfile):
-    out = open(outfile, 'w')
-
-    with open(infile) as f:
-        lines = f.readlines()
-        n = 0
-
-        while n < len(lines):
-            hits = {}
-            if 'BRDA' in lines[n]:
-                lineno = lines[n].split(",")[0]
-                data = lines[n].split(",")[2]
-                val = int(lines[n].split(",")[3])
-
-                hits = defaultdict(int)
-                hits[data] = hits[data] + val
-
-                n += 1
-                while lines[n].startswith(lineno):
-                    lineno = lines[n].split(",")[0]
-                    data = lines[n].split(",")[2]
-                    val = int(lines[n].split(",")[3])
-
-                    hits[data] = hits[data] + val
-
-                    n += 1
-
-                for d in sorted(hits.keys(), key=field_order):
-                    out.write(f"{lineno},0,{d},{1 if hits[d] else 0}\n")
-            else:
-                out.write(lines[n])
-                n += 1
-
-    out.close()
-
-filter('coverage_toggle_verilator.info',
-       'coverage_toggle_verilator_filtered.info')
-EOF
+git clone https://github.com/antmicro/info-process
+cd info-process
+git checkout 7c030a4625049726e998065e227e06bac77519d8
+PATH="`pwd`:$PATH"
+cd ..
 
 mkdir info_files
 mv *.info info_files
 tar acf verilator_coverage_single_data.tar.gz info_files
 cd info_files
 ls
-git clone https://github.com/linux-test-project/lcov -b v2.3-beta
-PATH="`pwd`/lcov/bin:$PATH"
 
-ls *_toggle.info | xargs printf -- '-a %s\n' | xargs echo | awk '{ print "lcov "$0" -j --ignore-errors inconsistent --rc lcov_branch_coverage=1 -o coverage_toggle_verilator.info" }' | bash
-ls *_branch.info | xargs printf -- '-a %s\n' | xargs echo | awk '{ print "lcov "$0" -j --ignore-errors inconsistent --rc lcov_branch_coverage=1 -o coverage_line_verilator.info" }' | bash
+ls *_toggle.info | xargs info-merge.py --output coverage_toggle_verilator.info
+ls *_branch.info | xargs info-merge.py --output coverage_line_verilator.info
 
 cp coverage_toggle_verilator.info ../
 cp coverage_line_verilator.info ../
@@ -216,14 +73,6 @@ python3 preprocess.py coverage_branch_verilator.info --filter "design/" > _cover
 cp _coverage_line.info coverage_line_verilator.info
 cp _coverage_branch.info coverage_branch_verilator.info
 cp _coverage_toggle.info coverage_toggle_verilator.info
-
-python3 brda_br_filter.py
-python3 brda_tog_filter.py
-mv coverage_toggle_verilator.info coverage_toggle_verilator_orig.info_
-mv coverage_toggle_verilator_filtered.info coverage_toggle_verilator.info
-
-mv coverage_branch_verilator.info coverage_branch_verilator_orig.info_
-mv coverage_branch_verilator_filtered.info coverage_branch_verilator.info
 
 grep 'SF:' coverage_*.info | cut -d ":" -f 3 | sort | uniq > files.txt
 
@@ -247,9 +96,8 @@ export COMMIT=$GITHUB_SHA
                 done
 } < files.txt > sources.txt
 
-git clone https://github.com/antmicro/info-process
-./info-process/info-process.py --set-block-ids coverage_toggle_verilator.info
-./info-process/info-process.py --add-two-way-toggles --add-missing-brda-entries coverage_toggle_verilator.info
+info-process.py --set-block-ids coverage_toggle_verilator.info
+info-process.py --add-two-way-toggles --add-missing-brda-entries coverage_toggle_verilator.info
 
 mkdir test_data
 cp coverage_line_*.info coverage_toggle_*.info coverage_branch_* sources.txt test_data

@@ -13,7 +13,7 @@
     
     
       
-        <title>13. CSR Address Map - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
+        <title>14. CSR Address Map - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
       
     
     
@@ -88,7 +88,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              13. CSR Address Map
+              14. CSR Address Map
             
           </span>
         </div>
@@ -249,6 +249,22 @@
     <li class="md-nav__item">
       <a href="error-protection.html" class="md-nav__link">
         <span class="md-ellipsis">Memory Error Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dual-core-lock-step.html" class="md-nav__link">
+        <span class="md-ellipsis">Dual-<wbr>Core Lockstep <wbr>(DCLS)</span>
       </a>
     </li>
   
@@ -633,11 +649,11 @@
                   
 
 
-<h1 id="csr-address-map"><span class="section-number">13. </span>CSR Address Map<a class="headerlink" href="#csr-address-map" title="Link to this heading">¶</a></h1>
-<h2 id="standard-risc-v-csrs"><span class="section-number">13.1. </span>Standard RISC-V CSRs<a class="headerlink" href="#standard-risc-v-csrs" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="#tab-veer-el2-core-specific-std-rv-machine-information-csrs"><span class="std std-numref">Table 13.1</span></a> lists the VeeR EL2 core-specific standard RISC-V Machine Information CSRs.</p>
+<h1 id="csr-address-map"><span class="section-number">14. </span>CSR Address Map<a class="headerlink" href="#csr-address-map" title="Link to this heading">¶</a></h1>
+<h2 id="standard-risc-v-csrs"><span class="section-number">14.1. </span>Standard RISC-V CSRs<a class="headerlink" href="#standard-risc-v-csrs" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="#tab-veer-el2-core-specific-std-rv-machine-information-csrs"><span class="std std-numref">Table 14.1</span></a> lists the VeeR EL2 core-specific standard RISC-V Machine Information CSRs.</p>
 <table class="docutils data align-default" id="tab-veer-el2-core-specific-std-rv-machine-information-csrs">
-<caption><span class="caption-number">Table 13.1 </span><span class="caption-text">VeeR EL2 Core-Specific Standard RISC-V Machine Information CSRs</span><a class="headerlink" href="#tab-veer-el2-core-specific-std-rv-machine-information-csrs" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 14.1 </span><span class="caption-text">VeeR EL2 Core-Specific Standard RISC-V Machine Information CSRs</span><a class="headerlink" href="#tab-veer-el2-core-specific-std-rv-machine-information-csrs" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Number</strong></p></td>
 <td><p><strong>Privilege</strong></p></td>
@@ -679,9 +695,9 @@
 </tr>
 </tbody>
 </table>
-<p><a class="reference internal" href="#tab-veer-el2-std-risc-v-csr-address-map"><span class="std std-numref">Table 13.2</span></a> lists the VeeR EL2 standard RISC-V CSR address map.</p>
+<p><a class="reference internal" href="#tab-veer-el2-std-risc-v-csr-address-map"><span class="std std-numref">Table 14.2</span></a> lists the VeeR EL2 standard RISC-V CSR address map.</p>
 <table class="docutils data align-default" id="tab-veer-el2-std-risc-v-csr-address-map">
-<caption><span class="caption-number">Table 13.2 </span><span class="caption-text">VeeR EL2 Standard RISC-V CSR Address Map</span><a class="headerlink" href="#tab-veer-el2-std-risc-v-csr-address-map" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 14.2 </span><span class="caption-text">VeeR EL2 Standard RISC-V CSR Address Map</span><a class="headerlink" href="#tab-veer-el2-std-risc-v-csr-address-map" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Number</strong></p></td>
 <td><p><strong>Privilege</strong></p></td>
@@ -877,10 +893,10 @@
 </tr>
 </tbody>
 </table>
-<h2 id="non-standard-risc-v-csrs"><span class="section-number">13.2. </span>Non-Standard RISC-V CSRs<a class="headerlink" href="#non-standard-risc-v-csrs" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="#tab-veer-el2-non-std-risc-v-csr-address-map"><span class="std std-numref">Table 13.3</span></a> summarizes the VeeR EL2 non-standard RISC-V CSR address map.</p>
+<h2 id="non-standard-risc-v-csrs"><span class="section-number">14.2. </span>Non-Standard RISC-V CSRs<a class="headerlink" href="#non-standard-risc-v-csrs" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="#tab-veer-el2-non-std-risc-v-csr-address-map"><span class="std std-numref">Table 14.3</span></a> summarizes the VeeR EL2 non-standard RISC-V CSR address map.</p>
 <table class="docutils data align-default" id="tab-veer-el2-non-std-risc-v-csr-address-map">
-<caption><span class="caption-number">Table 13.3 </span><span class="caption-text">VeeR EL2 Non-Standard RISC-V CSR Address Map</span><a class="headerlink" href="#tab-veer-el2-non-std-risc-v-csr-address-map" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 14.3 </span><span class="caption-text">VeeR EL2 Non-Standard RISC-V CSR Address Map</span><a class="headerlink" href="#tab-veer-el2-non-std-risc-v-csr-address-map" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Number</strong></p></td>
 <td><p><strong>Privilege</strong></p></td>
@@ -1107,7 +1123,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="adaptations.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 12. Standard RISC-V CSRs with Core-Specific Adaptations" rel="prev">
+        <a href="adaptations.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 13. Standard RISC-V CSRs with Core-Specific Adaptations" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1116,20 +1132,20 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              12. Standard RISC-V CSRs with Core-Specific Adaptations
+              13. Standard RISC-V CSRs with Core-Specific Adaptations
             </div>
           </div>
         </a>
       
       
         
-        <a href="interrupt-priority.html" class="md-footer__link md-footer__link--next" aria-label="Next: 14. Interrupt Priorities" rel="next">
+        <a href="interrupt-priority.html" class="md-footer__link md-footer__link--next" aria-label="Next: 15. Interrupt Priorities" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              14. Interrupt Priorities
+              15. Interrupt Priorities
             </div>
           </div>
           <div class="md-footer__button md-icon">

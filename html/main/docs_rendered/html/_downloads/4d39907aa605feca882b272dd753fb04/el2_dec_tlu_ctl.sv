@@ -247,6 +247,10 @@ import el2_pkg::*;
    output logic  dec_tlu_dccm_clk_override, // override DCCM clock domain gating
    output logic  dec_tlu_icm_clk_override,  // override ICCM clock domain gating
 
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+   el2_regfile_if.veer_tlu_rf regfile,
+`endif
+
 `ifdef RV_USER_MODE
 
    // Privilege mode
@@ -2919,6 +2923,25 @@ assign dec_csr_legal_d = ( dec_csr_any_unq_d &
                            ~(dec_csr_wen_unq_d & (csr_mvendorid | csr_marchid | csr_mimpid | csr_mhartid | csr_mdseac | csr_meihap)) // that's not a write to a RO CSR
                            );
    // CSR read mux
+logic [31:0] mstatus_rf, mie_rf, mtvec_rf, mscratch_rf, mepc_rf, mcause_rf, mtval_rf, mip_rf, mcyclel_rf, mcycleh_rf, minstretl_rf, minstreth_rf, mrac_rf;
+`ifdef RV_USER_MODE
+assign mstatus_rf = {14'b0, mstatus[MSTATUS_MPRV], 4'b0, ~mstatus[MSTATUS_MPP], ~mstatus[MSTATUS_MPP], 3'b0, mstatus[MSTATUS_MPIE], 3'b0, mstatus[MSTATUS_MIE], 3'b0};
+`else
+assign mstatus_rf = {19'b0, 2'b11, 3'b0, mstatus[MSTATUS_MPIE], 3'b0, mstatus[MSTATUS_MIE], 3'b0};
+`endif
+assign mie_rf = {1'b0, mie[5:3], 16'b0, mie[2], 3'b0, mie[1], 3'b0, mie[0], 3'b0};
+assign mtvec_rf = {mtvec[30:1], 1'b0, mtvec[0]};
+assign mscratch_rf = mscratch[31:0];
+assign mepc_rf = {mepc[31:1], 1'b0};
+assign mcause_rf = mcause[31:0];
+assign mtval_rf = mtval[31:0];
+assign mip_rf = {1'b0, mip[5:3], 16'b0, mip[2], 3'b0, mip[1], 3'b0, mip[0], 3'b0};
+assign mcyclel_rf = mcyclel[31:0];
+assign mcycleh_rf = mcycleh_inc[31:0];
+assign minstretl_rf = minstretl_read[31:0];
+assign minstreth_rf = minstreth_read[31:0];
+assign mrac_rf = mrac[31:0];
+
 assign dec_csr_rddata_d[31:0] = (
 `ifdef RV_USER_MODE
                                   ({32{csr_misa}}      & 32'h40101104) |
@@ -2929,24 +2952,20 @@ assign dec_csr_rddata_d[31:0] = (
                                   ({32{csr_marchid}}   & 32'h00000010) |
                                   ({32{csr_mimpid}}    & 32'h4) |
                                   ({32{csr_mhartid}}   & {core_id[31:4], 4'b0}) |
-`ifdef RV_USER_MODE
-                                  ({32{csr_mstatus}}   & {14'b0, mstatus[MSTATUS_MPRV], 4'b0, ~mstatus[MSTATUS_MPP], ~mstatus[MSTATUS_MPP], 3'b0, mstatus[MSTATUS_MPIE], 3'b0, mstatus[MSTATUS_MIE], 3'b0}) |
-`else
-                                  ({32{csr_mstatus}}   & {19'b0, 2'b11, 3'b0, mstatus[MSTATUS_MPIE], 3'b0, mstatus[MSTATUS_MIE], 3'b0}) |
-`endif
-                                  ({32{csr_mtvec}}     & {mtvec[30:1], 1'b0, mtvec[0]}) |
-                                  ({32{csr_mip}}       & {1'b0, mip[5:3], 16'b0, mip[2], 3'b0, mip[1], 3'b0, mip[0], 3'b0}) |
-                                  ({32{csr_mie}}       & {1'b0, mie[5:3], 16'b0, mie[2], 3'b0, mie[1], 3'b0, mie[0], 3'b0}) |
-                                  ({32{csr_mcyclel}}   & mcyclel[31:0]) |
-                                  ({32{csr_mcycleh}}   & mcycleh_inc[31:0]) |
-                                  ({32{csr_minstretl}} & minstretl_read[31:0]) |
-                                  ({32{csr_minstreth}} & minstreth_read[31:0]) |
-                                  ({32{csr_mscratch}}  & mscratch[31:0]) |
-                                  ({32{csr_mepc}}      & {mepc[31:1], 1'b0}) |
-                                  ({32{csr_mcause}}    & mcause[31:0]) |
+                                  ({32{csr_mstatus}}   & mstatus_rf[31:0]) |
+                                  ({32{csr_mtvec}}     & mtvec_rf) |
+                                  ({32{csr_mip}}       & mip_rf) |
+                                  ({32{csr_mie}}       & mie_rf) |
+                                  ({32{csr_mcyclel}}   & mcyclel_rf) |
+                                  ({32{csr_mcycleh}}   & mcycleh_rf) |
+                                  ({32{csr_minstretl}} & minstretl_rf) |
+                                  ({32{csr_minstreth}} & minstreth_rf) |
+                                  ({32{csr_mscratch}}  & mscratch_rf) |
+                                  ({32{csr_mepc}}      & mepc_rf) |
+                                  ({32{csr_mcause}}    & mcause_rf) |
                                   ({32{csr_mscause}}   & {28'b0, mscause[3:0]}) |
-                                  ({32{csr_mtval}}     & mtval[31:0]) |
-                                  ({32{csr_mrac}}      & mrac[31:0]) |
+                                  ({32{csr_mtval}}     & mtval_rf) |
+                                  ({32{csr_mrac}}      & mrac_rf) |
                                   ({32{csr_mdseac}}    & mdseac[31:0]) |
                                   ({32{csr_meivt}}     & {meivt[31:10], 10'b0}) |
                                   ({32{csr_meihap}}    & {meivt[31:10], meihap[9:2], 2'b0}) |
@@ -3006,7 +3025,24 @@ assign dec_csr_rddata_d[31:0] = (
                                   ({32{dec_pmp_read_d}} & dec_pmp_rddata_d[31:0])
                                   );
 
-
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+   // Expose the register file
+   assign regfile.tlu.pc = pc_r;
+   assign regfile.tlu.npc = npc_r;
+   assign regfile.tlu.mstatus = mstatus_rf;
+   assign regfile.tlu.mie = mie_rf;
+   assign regfile.tlu.mtvec = mtvec_rf;
+   assign regfile.tlu.mscratch = mscratch_rf;
+   assign regfile.tlu.mepc = mepc_rf;
+   assign regfile.tlu.mcause = mcause_rf;
+   assign regfile.tlu.mtval = mtval_rf;
+   assign regfile.tlu.mip = mip_rf;
+   assign regfile.tlu.mcyclel = mcyclel_rf;
+   assign regfile.tlu.mcycleh = mcycleh_rf;
+   assign regfile.tlu.minstretl = minstretl_rf;
+   assign regfile.tlu.minstreth = minstreth_rf;
+   assign regfile.tlu.mrac = mrac_rf;
+`endif
 
 endmodule // el2_dec_tlu_ctl
 

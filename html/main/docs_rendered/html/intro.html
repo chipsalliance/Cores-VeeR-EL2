@@ -315,6 +315,22 @@
   
   
     <li class="md-nav__item">
+      <a href="dual-core-lock-step.html" class="md-nav__link">
+        <span class="md-ellipsis">Dual-<wbr>Core Lockstep <wbr>(DCLS)</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="timers.html" class="md-nav__link">
         <span class="md-ellipsis">Internal Timers</span>
       </a>
@@ -681,7 +697,7 @@ See the License for the specific language governing permissions and limitations 
 <li><p>added note that mscause values are subject to change (section <a class="reference internal" href="memory-map.html#machine-secondary-cause-register-mscause"><span class="std std-ref">Machine Secondary Cause Register (mscause)</span></a>)</p></li>
 <li><p>added note that uninitialized DCCM may cause loads to get incorrect data (section <a class="reference internal" href="error-protection.html#error-detection-and-handling"><span class="std std-ref">Error Detection and Handling</span></a>)</p></li>
 <li><p>added Debug Module reset description (section <a class="reference internal" href="clocks.html#debug-module-reset-dbg-rst-l"><span class="std std-ref">Debug Module Reset (dbg_rst_l)</span></a>)</p></li>
-<li><p>updated port list (<a class="reference internal" href="complex-ports.html#tab-core-complex-signals"><span class="std std-numref">Table 16.1</span></a>):</p>
+<li><p>updated port list (<a class="reference internal" href="complex-ports.html#tab-core-complex-signals"><span class="std std-numref">Table 17.1</span></a>):</p>
 <ul>
 <li><p>added dbg_rst_l signal</p></li>
 <li><p>added footnote clarifying trace port signals</p></li>
@@ -700,7 +716,7 @@ See the License for the specific language governing permissions and limitations 
 <li><p>removed note that mscause values are subject to change in <a class="reference internal" href="memory-map.html#machine-secondary-cause-register-mscause"><span class="std std-ref">Machine Secondary Cause Register (mscause)</span></a></p></li>
 <li><p>updated mscause values (<a class="reference internal" href="memory-map.html#tab-machine-secondary-cause-register"><span class="std std-numref">Table 3.10</span></a>)</p></li>
 <li><p>added <a class="reference internal" href="timers.html"><span class="std std-doc">Internal Timers chapter</span></a> and references throughout document</p></li>
-<li><p>incremented mimpid register value from ‘1’ to ‘2’ (<a class="reference internal" href="csrs.html#tab-veer-el2-core-specific-std-rv-machine-information-csrs"><span class="std std-numref">Table 13.1</span></a>)</p></li>
+<li><p>incremented mimpid register value from ‘1’ to ‘2’ (<a class="reference internal" href="csrs.html#tab-veer-el2-core-specific-std-rv-machine-information-csrs"><span class="std std-numref">Table 14.1</span></a>)</p></li>
 </ul>
 </td>
 </tr>
@@ -709,7 +725,7 @@ See the License for the specific language governing permissions and limitations 
 <td><p>Changes:</p>
 <ul class="simple">
 <li><p>updated versions of RISC-V Base ISA <a class="reference internal" href="#ref-1"><span class="xref myst">[1]</span></a> and Privileged <a class="reference internal" href="#ref-2"><span class="xref myst">[2]</span></a> and link to RISC-V Debug <a class="reference internal" href="#ref-3"><span class="xref myst">[3]</span></a> specifications (Reference Documents)</p></li>
-<li><p>added RISC-V Bit-manipulation sub-extensions (Reference Documents, sections  <a class="reference internal" href="overview.html#features"><span class="std std-ref">Features</span></a> and <a class="reference internal" href="overview.html#standard-extensions"><span class="std std-ref">Standard Extensions</span></a>, and <a class="reference internal" href="performance.html#tab-list-of-countable-events"><span class="std std-numref">Table 8.1</span></a>)</p></li>
+<li><p>added RISC-V Bit-manipulation sub-extensions (Reference Documents, sections  <a class="reference internal" href="overview.html#features"><span class="std std-ref">Features</span></a> and <a class="reference internal" href="overview.html#standard-extensions"><span class="std std-ref">Standard Extensions</span></a>, and <a class="reference internal" href="performance.html#tab-list-of-countable-events"><span class="std std-numref">Table 9.1</span></a>)</p></li>
 <li><p>added footnote that misaligned accesses to side-effect regions trigger a misaligned exception instead of the recommended access fault exception (<a class="reference internal" href="memory-map.html#tab-handling-misaligned-addresses"><span class="std std-numref">Table 3.3</span></a>)</p></li>
 <li><p>added note to mdseac register description clarifying captured address in <a class="reference internal" href="memory-map.html#d-bus-first-error-address-capture-register-mdseac"><span class="std std-ref">D-Bus First Error Address Capture Register (mdseac)</span></a></p></li>
 <li><p>clarified that mscause value of ‘0’ indicates no additional information available (<a class="reference internal" href="memory-map.html#machine-secondary-cause-register-mscause"><span class="std std-ref">Machine Secondary Cause Register (mscause)</span></a>)</p></li>
@@ -717,26 +733,26 @@ See the License for the specific language governing permissions and limitations 
 <li><p>added note that NMIs are fatal (<a class="reference internal" href="memory-map.html#non-maskable-interrupt-nmi-signal-and-vector"><span class="std std-ref">Non-Maskable Interrupt (NMI) Signal and Vector</span></a>)</p></li>
 <li><p>added note that mitcnt0/1 register is not cleared if write to it coincides with internal timer interrupt (<a class="reference internal" href="timers.html#internal-timer-counter-0-1-register-mitcnt0-1"><span class="std std-ref">Internal Timer Counter 0 / 1 Register (mitcnt0/1)</span></a>)</p></li>
 <li><p>clarified note that debug single-step action is delayed while MPC debug halted (<a class="reference internal" href="power.html#power-states"><span class="std std-ref">Power States</span></a>)</p></li>
-<li><p>added cross-references to debug CSR descriptions (<a class="reference internal" href="power.html#tab-core-activity-states"><span class="std std-numref">Table 6.2</span></a>, <a class="reference internal" href="power.html#tab-veer-el2-multi-core-debug-ctrl-status-signals"><span class="std std-numref">Table 6.4</span></a>, <a class="reference internal" href="csrs.html#tab-veer-el2-std-risc-v-csr-address-map"><span class="std std-numref">Table 13.2</span></a>, and sections <a class="reference internal" href="performance.html#count-impacting-conditions"><span class="std std-ref">Count-Impacting Conditions</span></a> and <a class="reference internal" href="clocks.html#core-complex-reset-to-debug-mode"><span class="std std-ref">Core Complex Reset to Debug Mode</span></a>)</p></li>
+<li><p>added cross-references to debug CSR descriptions (<a class="reference internal" href="power.html#tab-core-activity-states"><span class="std std-numref">Table 7.2</span></a>, <a class="reference internal" href="power.html#tab-veer-el2-multi-core-debug-ctrl-status-signals"><span class="std std-numref">Table 7.4</span></a>, <a class="reference internal" href="csrs.html#tab-veer-el2-std-risc-v-csr-address-map"><span class="std std-numref">Table 14.2</span></a>, and sections <a class="reference internal" href="performance.html#count-impacting-conditions"><span class="std std-ref">Count-Impacting Conditions</span></a> and <a class="reference internal" href="clocks.html#core-complex-reset-to-debug-mode"><span class="std std-ref">Core Complex Reset to Debug Mode</span></a>)</p></li>
 <li><p>added note that debug single-stepping stays pending while MPC debug halted (<a class="reference internal" href="power.html#single-stepping"><span class="std std-ref">Single Stepping</span></a>)</p></li>
 <li><p>removed note that PMU halt or run request may not be acknowledged if already in requested activity state (<a class="reference internal" href="power.html#power-control-and-status-signals"><span class="std std-ref">Power Control and Status Signals</span></a>)</p></li>
-<li><p>amended debug_mode_status signal description (<a class="reference internal" href="power.html#tab-veer-el2-multi-core-debug-ctrl-status-signals"><span class="std std-numref">Table 6.4</span></a>)</p></li>
+<li><p>amended debug_mode_status signal description (<a class="reference internal" href="power.html#tab-veer-el2-multi-core-debug-ctrl-status-signals"><span class="std std-numref">Table 7.4</span></a>)</p></li>
 <li><p>added note that mpc_debug_run_req is required to exit Debug Mode if entered after reset using mpc_reset_run_req (<a class="reference internal" href="power.html#multi-core-debug-control-and-status-signals"><span class="std std-ref">Multi-Core Debug Control and Status Signals</span></a>)</p></li>
-<li><p>added PIC I/O power reduction feature description (sections <a class="reference internal" href="interrupts.html#features"><span class="std std-ref">Features</span></a>, <a class="reference internal" href="interrupts.html#power-reduction"><span class="std std-ref">Power Reduction</span></a>, and <a class="reference internal" href="interrupts.html#external-interrupt-pending-registers-meipx"><span class="std std-ref">External Interrupt Pending Registers (meipX)</span></a> and <a class="reference internal" href="core-control.html#tab-clock-gating-cr"><span class="std std-numref">Table 11.2</span></a>)</p></li>
+<li><p>added PIC I/O power reduction feature description (sections <a class="reference internal" href="interrupts.html#features"><span class="std std-ref">Features</span></a>, <a class="reference internal" href="interrupts.html#power-reduction"><span class="std std-ref">Power Reduction</span></a>, and <a class="reference internal" href="interrupts.html#external-interrupt-pending-registers-meipx"><span class="std std-ref">External Interrupt Pending Registers (meipX)</span></a> and <a class="reference internal" href="core-control.html#tab-clock-gating-cr"><span class="std std-numref">Table 12.2</span></a>)</p></li>
 <li><p>added note that spurious interrupts may be captured for disabled external interrupts (<a class="reference internal" href="interrupts.html#gateway"><span class="std std-ref">Gateway</span></a>)</p></li>
 <li><p>added note that edge-triggered interrupt lines must be tied off to inactive state (<a class="reference internal" href="interrupts.html#gateway"><span class="std std-ref">Gateway</span></a>)</p></li>
 <li><p>fixed gateway initialization macro example (<a class="reference internal" href="interrupts.html#example-interrupt-macros"><span class="std std-ref">Example Interrupt Macros</span></a>)</p></li>
 <li><p>added note that mtime and mtimecmp registers must be provided by SoC (<a class="reference internal" href="performance.html#standard-risc-v-registers"><span class="std std-ref">Standard RISC-V Registers</span></a>)</p></li>
 <li><p>changed value when writing unsupported event number to mhpmevent3-6 registers to ‘0’ (<a class="reference internal" href="performance.html#events"><span class="std std-ref">Events</span></a>)</p></li>
-<li><p>added note that index field does not have WARL behavior (<a class="reference internal" href="cache.html#tab-cache-array-dicawics"><span class="std std-numref">Table 9.1</span></a>)</p></li>
+<li><p>added note that index field does not have WARL behavior (<a class="reference internal" href="cache.html#tab-cache-array-dicawics"><span class="std std-numref">Table 10.1</span></a>)</p></li>
 <li><p>added <a class="reference internal" href="debugging.html"><span class="std std-doc">Debug Support chapter</span></a></p></li>
-<li><p>added ‘trace disable’ bit to mfdc register (<a class="reference internal" href="core-control.html#tab-feature-disable-cr"><span class="std std-numref">Table 11.1</span></a>)</p></li>
-<li><p>clarified effect of sepd bit of mfdc register (<a class="reference internal" href="core-control.html#tab-feature-disable-cr"><span class="std std-numref">Table 11.1</span></a>)</p></li>
+<li><p>added ‘trace disable’ bit to mfdc register (<a class="reference internal" href="core-control.html#tab-feature-disable-cr"><span class="std std-numref">Table 12.1</span></a>)</p></li>
+<li><p>clarified effect of sepd bit of mfdc register (<a class="reference internal" href="core-control.html#tab-feature-disable-cr"><span class="std std-numref">Table 12.1</span></a>)</p></li>
 <li><p>added note regarding physical design considerations for rst_l signal (<a class="reference internal" href="clocks.html#core-complex-reset-rst-l"><span class="std std-ref">Core Complex Reset (rst_l)</span></a>)</p></li>
 <li><p>updated ‘Reset to Debug-Mode’ description (<a class="reference internal" href="clocks.html#core-complex-reset-to-debug-mode"><span class="std std-ref">Core Complex Reset to Debug Mode</span></a>)</p></li>
-<li><p>updated trace port interrupt/exception signaling to new optimized scheme (<a class="reference internal" href="complex-ports.html#tab-core-complex-signals"><span class="std std-numref">Table 16.1</span></a>)</p></li>
+<li><p>updated trace port interrupt/exception signaling to new optimized scheme (<a class="reference internal" href="complex-ports.html#tab-core-complex-signals"><span class="std std-numref">Table 17.1</span></a>)</p></li>
 <li><p>added erratum for abstract command register read capability (<a class="reference internal" href="errata.html#debug-abstract-command-register-may-return-non-zero-value-on-read"><span class="std std-ref">Debug Abstract Command Register May Return Non-Zero Value On Read</span></a>)</p></li>
-<li><p>incremented mimpid register value from ‘2’ to ‘3’ (<a class="reference internal" href="csrs.html#tab-veer-el2-core-specific-std-rv-machine-information-csrs"><span class="std std-numref">Table 13.1</span></a>)</p></li>
+<li><p>incremented mimpid register value from ‘2’ to ‘3’ (<a class="reference internal" href="csrs.html#tab-veer-el2-core-specific-std-rv-machine-information-csrs"><span class="std std-numref">Table 14.1</span></a>)</p></li>
 </ul>
 </td>
 </tr>
@@ -751,7 +767,7 @@ See the License for the specific language governing permissions and limitations 
 <li><p>added footnote that load/store access crossing upper boundary of DCCM or PIC memory range report base address of access in mtval register (Footnote 22)</p></li>
 <li><p>clarified that correctable error counter/threshold registers are always instantiated (sections <a class="reference internal" href="error-protection.html#i-cache-error-counter-threshold-register-micect"><span class="std std-ref">I-Cache Error Counter/Threshold Register (micect)</span></a>, <a class="reference internal" href="error-protection.html#iccm-correctable-error-counter-threshold-register-miccmect"><span class="std std-ref">Iccm Correctable Error Counter/Threshold Register (miccmect)</span></a>, and <a class="reference internal" href="error-protection.html#dccm-correctable-error-counter-threshold-register-mdccmect"><span class="std std-ref">Dccm Correctable Error Counter/Threshold Register (mdccmect)</span></a>)</p></li>
 <li><p>corrected PIC I/O power reduction feature description (<a class="reference internal" href="interrupts.html#power-reduction"><span class="std std-ref">Power Reduction</span></a>)</p></li>
-<li><p>incremented mimpid register value from ‘3’ to ‘4’ (<a class="reference internal" href="csrs.html#tab-veer-el2-core-specific-std-rv-machine-information-csrs"><span class="std std-numref">Table 13.1</span></a>)</p></li>
+<li><p>incremented mimpid register value from ‘3’ to ‘4’ (<a class="reference internal" href="csrs.html#tab-veer-el2-core-specific-std-rv-machine-information-csrs"><span class="std std-numref">Table 14.1</span></a>)</p></li>
 </ul>
 </td>
 </tr>

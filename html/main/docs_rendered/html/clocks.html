@@ -13,7 +13,7 @@
     
     
       
-        <title>15. Clock And Reset - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
+        <title>16. Clock And Reset - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
       
     
     
@@ -88,7 +88,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              15. Clock And Reset
+              16. Clock And Reset
             
           </span>
         </div>
@@ -249,6 +249,22 @@
     <li class="md-nav__item">
       <a href="error-protection.html" class="md-nav__link">
         <span class="md-ellipsis">Memory Error Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dual-core-lock-step.html" class="md-nav__link">
+        <span class="md-ellipsis">Dual-<wbr>Core Lockstep <wbr>(DCLS)</span>
       </a>
     </li>
   
@@ -701,9 +717,9 @@
                   
 
 
-<h1 id="clock-and-reset"><span class="section-number">15. </span>Clock And Reset<a class="headerlink" href="#clock-and-reset" title="Link to this heading">¶</a></h1>
+<h1 id="clock-and-reset"><span class="section-number">16. </span>Clock And Reset<a class="headerlink" href="#clock-and-reset" title="Link to this heading">¶</a></h1>
 <p>This chapter describes clocking and reset signals used by the VeeR EL2 core complex.</p>
-<h2 id="features"><span class="section-number">15.1. </span>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
+<h2 id="features"><span class="section-number">16.1. </span>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
 <p>The VeeR EL2 core complex’s clock and reset features are:</p>
 <ul class="simple">
 <li><p>Support for independent clock ratios for four separate system bus interfaces</p>
@@ -727,81 +743,81 @@
 </ul>
 </li>
 </ul>
-<h2 id="clocking"><span class="section-number">15.2. </span>Clocking<a class="headerlink" href="#clocking" title="Link to this heading">¶</a></h2>
-<h3 id="regular-operation"><span class="section-number">15.2.1. </span>Regular Operation<a class="headerlink" href="#regular-operation" title="Link to this heading">¶</a></h3>
+<h2 id="clocking"><span class="section-number">16.2. </span>Clocking<a class="headerlink" href="#clocking" title="Link to this heading">¶</a></h2>
+<h3 id="regular-operation"><span class="section-number">16.2.1. </span>Regular Operation<a class="headerlink" href="#regular-operation" title="Link to this heading">¶</a></h3>
 <p>The VeeR EL2 core complex is driven by a single clock (<code class="docutils literal notranslate"><span class="pre">clk</span></code>).
-All input and output signals, except those listed in <a class="reference internal" href="#tab-core-complex-async-signals"><span class="std std-numref">Table 15.1</span></a>, are synchronous to <code class="docutils literal notranslate"><span class="pre">clk</span></code>.</p>
+All input and output signals, except those listed in <a class="reference internal" href="#tab-core-complex-async-signals"><span class="std std-numref">Table 16.1</span></a>, are synchronous to <code class="docutils literal notranslate"><span class="pre">clk</span></code>.</p>
 <p>The core complex provides three master system bus interfaces (for instruction fetch, load/store data, and debug) as well as one slave (DMA) system bus interface.
 The SoC controls the clock ratio for each system bus interface via the clock enable signal (<code class="docutils literal notranslate"><span class="pre">*_bus_clk_en</span></code>).
 The clock ratios selected by the SoC may be the same or different for each system bus.</p>
-<p><a class="reference internal" href="#fig-data-timing-relationship"><span class="std std-numref">Fig. 15.1</span></a> depicts the conceptual relationship of the clock (<code class="docutils literal notranslate"><span class="pre">clk</span></code>), system bus enable (<code class="docutils literal notranslate"><span class="pre">*_bus_clk_en</span></code>) used to select the clock ratio for each system bus, and the data (<code class="docutils literal notranslate"><span class="pre">*data</span></code>) of the respective system bus.</p>
+<p><a class="reference internal" href="#fig-data-timing-relationship"><span class="std std-numref">Fig. 16.1</span></a> depicts the conceptual relationship of the clock (<code class="docutils literal notranslate"><span class="pre">clk</span></code>), system bus enable (<code class="docutils literal notranslate"><span class="pre">*_bus_clk_en</span></code>) used to select the clock ratio for each system bus, and the data (<code class="docutils literal notranslate"><span class="pre">*data</span></code>) of the respective system bus.</p>
 <figure class="align-default" id="fig-data-timing-relationship">
 <img alt="Data Timing Relationship" src="_images/clock_timing.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 15.1 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 16.1 </span><span class="caption-text"><span class="caption-text">
 Conceptual Clock, Clock-Enable, and Data Timing Relationship</span><a class="headerlink" href="#fig-data-timing-relationship" title="Permalink to this image">¶</a></figcaption>
 </figure>
 <p>Note that the clock net is not explicitly buffered, as the clock tree is expected to be synthesized during place-androute.
 The achievable clock frequency depends on the configuration, the sizes and configuration of I-cache and I/DCCMs, and the silicon implementation technology.</p>
-<h3 id="system-bus-to-core-clock-ratios"><span class="section-number">15.2.2. </span>System Bus-to-Core Clock Ratios<a class="headerlink" href="#system-bus-to-core-clock-ratios" title="Link to this heading">¶</a></h3>
-<p><a class="reference internal" href="#fig-1-1-bus2core-clock-ratio"><span class="std std-numref">Fig. 15.2</span></a> to <a class="reference internal" href="#fig-1-8-bus2core-clock-ratio"><span class="std std-numref">Fig. 15.9</span></a> depict the timing relationships of clock, clock-enable, and data for the supported system bus clock ratios from 1:1 (i.e. the system bus and core run at the same rate) to 1:8 (i.e. the system bus runs eight times slower than the core).</p>
+<h3 id="system-bus-to-core-clock-ratios"><span class="section-number">16.2.2. </span>System Bus-to-Core Clock Ratios<a class="headerlink" href="#system-bus-to-core-clock-ratios" title="Link to this heading">¶</a></h3>
+<p><a class="reference internal" href="#fig-1-1-bus2core-clock-ratio"><span class="std std-numref">Fig. 16.2</span></a> to <a class="reference internal" href="#fig-1-8-bus2core-clock-ratio"><span class="std std-numref">Fig. 16.9</span></a> depict the timing relationships of clock, clock-enable, and data for the supported system bus clock ratios from 1:1 (i.e. the system bus and core run at the same rate) to 1:8 (i.e. the system bus runs eight times slower than the core).</p>
 <figure class="align-default" id="fig-1-1-bus2core-clock-ratio">
 <img alt="1 1 Bus-to-Core Clock Ratio" src="_images/1_1_bus2core_clock_ratio.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 15.2 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 16.2 </span><span class="caption-text"><span class="caption-text">
 1:1 System Bus-to-Core Clock Ratio</span><a class="headerlink" href="#fig-1-1-bus2core-clock-ratio" title="Permalink to this image">¶</a></figcaption>
 </figure>
 <figure class="align-default" id="fig-1-2-bus2core-clock-ratio">
 <img alt="1 2 Bus-to-Core Clock Ratio" src="_images/1_2_bus2core_clock_ratio.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 15.3 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 16.3 </span><span class="caption-text"><span class="caption-text">
 1:2 System Bus-to-Core Clock Ratio</span><a class="headerlink" href="#fig-1-2-bus2core-clock-ratio" title="Permalink to this image">¶</a></figcaption>
 </figure>
 <figure class="align-default" id="fig-1-3-bus2core-clock-ratio">
 <img alt="1 3 Bus-to-Core Clock Ratio" src="_images/1_3_bus2core_clock_ratio.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 15.4 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 16.4 </span><span class="caption-text"><span class="caption-text">
 1:3 System Bus-to-Core Clock Ratio</span><a class="headerlink" href="#fig-1-3-bus2core-clock-ratio" title="Permalink to this image">¶</a></figcaption>
 </figure>
 <figure class="align-default" id="fig-1-4-bus2core-clock-ratio">
 <img alt="1 4 Bus-to-Core Clock Ratio" src="_images/1_4_bus2core_clock_ratio.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 15.5 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 16.5 </span><span class="caption-text"><span class="caption-text">
 1:4 System Bus-to-Core Clock Ratio</span><a class="headerlink" href="#fig-1-4-bus2core-clock-ratio" title="Permalink to this image">¶</a></figcaption>
 </figure>
 <figure class="align-default" id="fig-1-5-bus2core-clock-ratio">
 <img alt="1 5 Bus-to-Core Clock Ratio" src="_images/1_5_bus2core_clock_ratio.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 15.6 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 16.6 </span><span class="caption-text"><span class="caption-text">
 1:5 System Bus-to-Core Clock Ratio</span><a class="headerlink" href="#fig-1-5-bus2core-clock-ratio" title="Permalink to this image">¶</a></figcaption>
 </figure>
 <figure class="align-default" id="fig-1-6-bus2core-clock-ratio">
 <img alt="1 6 Bus-to-Core Clock Ratio" src="_images/1_6_bus2core_clock_ratio.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 15.7 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 16.7 </span><span class="caption-text"><span class="caption-text">
 1:6 System Bus-to-Core Clock Ratio</span><a class="headerlink" href="#fig-1-6-bus2core-clock-ratio" title="Permalink to this image">¶</a></figcaption>
 </figure>
 <figure class="align-default" id="fig-1-7-bus2core-clock-ratio">
 <img alt="1 7 Bus-to-Core Clock Ratio" src="_images/1_7_bus2core_clock_ratio.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 15.8 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 16.8 </span><span class="caption-text"><span class="caption-text">
 1:7 System Bus-to-Core Clock Ratio</span><a class="headerlink" href="#fig-1-7-bus2core-clock-ratio" title="Permalink to this image">¶</a></figcaption>
 </figure>
 <figure class="align-default" id="fig-1-8-bus2core-clock-ratio">
 <img alt="1 8 Bus-to-Core Clock Ratio" src="_images/1_8_bus2core_clock_ratio.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 15.9 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 16.9 </span><span class="caption-text"><span class="caption-text">
 1:8 System Bus-to-Core Clock Ratio</span><a class="headerlink" href="#fig-1-8-bus2core-clock-ratio" title="Permalink to this image">¶</a></figcaption>
 </figure>
-<h3 id="asynchronous-signals"><span class="section-number">15.2.3. </span>Asynchronous Signals<a class="headerlink" href="#asynchronous-signals" title="Link to this heading">¶</a></h3>
-<p><a class="reference internal" href="#tab-core-complex-async-signals"><span class="std std-numref">Table 15.1</span></a> provides a list of signals which are asynchronous to the core clock (<code class="docutils literal notranslate"><span class="pre">clk</span></code>).
+<h3 id="asynchronous-signals"><span class="section-number">16.2.3. </span>Asynchronous Signals<a class="headerlink" href="#asynchronous-signals" title="Link to this heading">¶</a></h3>
+<p><a class="reference internal" href="#tab-core-complex-async-signals"><span class="std std-numref">Table 16.1</span></a> provides a list of signals which are asynchronous to the core clock (<code class="docutils literal notranslate"><span class="pre">clk</span></code>).
 Signals which are inputs to the core complex are synchronized to <code class="docutils literal notranslate"><span class="pre">clk</span></code> in the core complex logic.
 Signals which are outputs of the core complex must be synchronized outside of the core complex logic if the respective receiving clock domain is driven by a different clock than <code class="docutils literal notranslate"><span class="pre">clk</span></code>.</p>
 <p>Note that each asynchronous input passes through a two-stage synchronizer.
 The signal must be asserted for at least two full <code class="docutils literal notranslate"><span class="pre">clk</span></code> cycles to guarantee it is detected by the core complex logic.
 Shorter pulses might be dropped by the synchronizer circuit.</p>
 <table class="docutils data align-default" id="tab-core-complex-async-signals">
-<caption><span class="caption-number">Table 15.1 </span><span class="caption-text">Core Complex Asynchronous Signals</span><a class="headerlink" href="#tab-core-complex-async-signals" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 16.1 </span><span class="caption-text">Core Complex Asynchronous Signals</span><a class="headerlink" href="#tab-core-complex-async-signals" title="Link to this table">¶</a></caption>
 <thead>
 <tr class="row-odd"><th class="head"><p>Signal</p></th>
 <th class="head"><p>Dir</p></th>
@@ -879,16 +895,16 @@ Shorter pulses might be dropped by the synchronizer circuit.</p>
 </tr>
 </tbody>
 </table>
-<h2 id="reset"><span class="section-number">15.3. </span>Reset<a class="headerlink" href="#reset" title="Link to this heading">¶</a></h2>
+<h2 id="reset"><span class="section-number">16.3. </span>Reset<a class="headerlink" href="#reset" title="Link to this heading">¶</a></h2>
 <p>The VeeR EL2 core complex provides two reset signals, the core complex reset, see <a class="reference internal" href="#core-complex-reset-rst-l"><span class="std std-ref">Core Complex Reset (rst_l)</span></a> and the Debug Module reset, see <a class="reference internal" href="#debug-module-reset-dbg-rst-l"><span class="std std-ref">Debug Module Reset (dbg_rst_l)</span></a>.</p>
-<h3 id="core-complex-reset-rst-l"><span class="section-number">15.3.1. </span>Core Complex Reset (rst_l)<a class="headerlink" href="#core-complex-reset-rst-l" title="Link to this heading">¶</a></h3>
-<p>As shown in <a class="reference internal" href="#fig-clock-reset-timing"><span class="std std-numref">Fig. 15.10</span></a>, the core complex reset signal (<code class="docutils literal notranslate"><span class="pre">rst_l</span></code>) is active-low, may be asynchronously asserted, but must be synchronously deasserted to avoid any glitches.
+<h3 id="core-complex-reset-rst-l"><span class="section-number">16.3.1. </span>Core Complex Reset (rst_l)<a class="headerlink" href="#core-complex-reset-rst-l" title="Link to this heading">¶</a></h3>
+<p>As shown in <a class="reference internal" href="#fig-clock-reset-timing"><span class="std std-numref">Fig. 16.10</span></a>, the core complex reset signal (<code class="docutils literal notranslate"><span class="pre">rst_l</span></code>) is active-low, may be asynchronously asserted, but must be synchronously deasserted to avoid any glitches.
 The <code class="docutils literal notranslate"><span class="pre">rst_l</span></code> input signal is not synchronized to the core clock (<code class="docutils literal notranslate"><span class="pre">clk</span></code>) inside the core complex logic.
 All core complex flops are reset asynchronously.</p>
 <figure class="align-default" id="fig-clock-reset-timing">
 <img alt="Clock Reset Timing" src="_images/clock_reset_timing.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 15.10 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 16.10 </span><span class="caption-text"><span class="caption-text">
 Conceptual Clock and Reset Timing Relationship</span><a class="headerlink" href="#fig-clock-reset-timing" title="Permalink to this image">¶</a></figcaption>
 </figure>
 <p>Note that the core complex clock (<code class="docutils literal notranslate"><span class="pre">clk</span></code>) must be stable before the core complex reset (<code class="docutils literal notranslate"><span class="pre">rst_l</span></code>) is deasserted.</p>
@@ -900,17 +916,17 @@ Conceptual Clock and Reset Timing Relationship</span><a class="headerlink" href=
 <p class="admonition-title">Note</p>
 <p>The core complex reset signal resets the entire VeeR EL2 core complex, except the Debug Module.</p>
 </div>
-<h3 id="debug-module-reset-dbg-rst-l"><span class="section-number">15.3.2. </span>Debug Module Reset (dbg_rst_l)<a class="headerlink" href="#debug-module-reset-dbg-rst-l" title="Link to this heading">¶</a></h3>
+<h3 id="debug-module-reset-dbg-rst-l"><span class="section-number">16.3.2. </span>Debug Module Reset (dbg_rst_l)<a class="headerlink" href="#debug-module-reset-dbg-rst-l" title="Link to this heading">¶</a></h3>
 <p>The Debug Module reset signal (<code class="docutils literal notranslate"><span class="pre">dbg_rst_l</span></code>) is an active-low signal which resets the VeeR EL2 core complex’s Debug Module as well as the synchronizers between the JTAG interface and the core complex.
 The Debug Module reset signal may be connected to the power-on reset signal of the SoC.
 This allows an external debugger to interact with the Debug Module when the core complex reset signal (<code class="docutils literal notranslate"><span class="pre">rst_l</span></code>) is still asserted.</p>
 <p>If this layered reset functionality is not required, the <code class="docutils literal notranslate"><span class="pre">dbg_rst_l</span></code> signal may be tied to the <code class="docutils literal notranslate"><span class="pre">rst_l</span></code> signal outside the core complex.</p>
-<h3 id="debugger-initiating-reset-via-jtag-interface"><span class="section-number">15.3.3. </span>Debugger Initiating Reset via JTAG Interface<a class="headerlink" href="#debugger-initiating-reset-via-jtag-interface" title="Link to this heading">¶</a></h3>
+<h3 id="debugger-initiating-reset-via-jtag-interface"><span class="section-number">16.3.3. </span>Debugger Initiating Reset via JTAG Interface<a class="headerlink" href="#debugger-initiating-reset-via-jtag-interface" title="Link to this heading">¶</a></h3>
 <p>A debugger may also initiate a reset of the core complex logic via the JTAG interface.
 Note that such a reset assertion is not visible to the SoC.
 Resetting the core complex while the core is accessing any SoC memory locations may result in unpredictable behavior.
 Recovery may require an assertion of the SoC master reset.</p>
-<h3 id="core-complex-reset-to-debug-mode"><span class="section-number">15.3.4. </span>Core Complex Reset to Debug Mode<a class="headerlink" href="#core-complex-reset-to-debug-mode" title="Link to this heading">¶</a></h3>
+<h3 id="core-complex-reset-to-debug-mode"><span class="section-number">16.3.4. </span>Core Complex Reset to Debug Mode<a class="headerlink" href="#core-complex-reset-to-debug-mode" title="Link to this heading">¶</a></h3>
 <p>The RISC-V Debug specification <a class="reference internal" href="intro.html#ref-3"><span class="std std-ref">[3]</span></a> states a requirement that the debugger must be able to be in control from the first executed instruction of a program after a reset.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">dmcontrol</span></code> register, see <a class="reference internal" href="debugging.html#debug-module-control-register-dmcontrol"><span class="std std-ref">Debug Module Control Register (dmcontrol)</span></a>, of the Debug Module controls the core-complex-internal ndmreset (non-debug module reset) signal.
 This signal resets the core complex (except for the Debug Module and Debug Transport Module).</p>
@@ -968,7 +984,7 @@ This signal resets the core complex (except for the Debug Module and Debug Trans
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="interrupt-priority.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 14. Interrupt Priorities" rel="prev">
+        <a href="interrupt-priority.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 15. Interrupt Priorities" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -977,20 +993,20 @@ This signal resets the core complex (except for the Debug Module and Debug Trans
               <span class="md-footer__direction">
                 Previous
               </span>
-              14. Interrupt Priorities
+              15. Interrupt Priorities
             </div>
           </div>
         </a>
       
       
         
-        <a href="complex-ports.html" class="md-footer__link md-footer__link--next" aria-label="Next: 16. Complex Port List" rel="next">
+        <a href="complex-ports.html" class="md-footer__link md-footer__link--next" aria-label="Next: 17. Complex Port List" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              16. Complex Port List
+              17. Complex Port List
             </div>
           </div>
           <div class="md-footer__button md-icon">

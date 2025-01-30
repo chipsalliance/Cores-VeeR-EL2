@@ -13,7 +13,7 @@
     
     
       
-        <title>24. Running Tock OS - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
+        <title>25. Running Tock OS - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
       
     
     
@@ -88,7 +88,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              24. Running Tock OS
+              25. Running Tock OS
             
           </span>
         </div>
@@ -249,6 +249,22 @@
     <li class="md-nav__item">
       <a href="error-protection.html" class="md-nav__link">
         <span class="md-ellipsis">Memory Error Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dual-core-lock-step.html" class="md-nav__link">
+        <span class="md-ellipsis">Dual-<wbr>Core Lockstep <wbr>(DCLS)</span>
       </a>
     </li>
   
@@ -681,9 +697,9 @@
                   
 
 
-<h1 id="running-tock-os"><span class="section-number">24. </span>Running Tock OS<a class="headerlink" href="#running-tock-os" title="Link to this heading">¶</a></h1>
+<h1 id="running-tock-os"><span class="section-number">25. </span>Running Tock OS<a class="headerlink" href="#running-tock-os" title="Link to this heading">¶</a></h1>
 <p>This chapter describes the steps necessary to build a <a class="reference external" href="https://github.com/tock/tock">Tock OS</a> application for the VeeR EL2 core, along with instructions for running it in simulation using <a class="reference external" href="https://github.com/verilator/verilator">Verilator</a>.</p>
-<h2 id="prerequisites"><span class="section-number">24.1. </span>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
+<h2 id="prerequisites"><span class="section-number">25.1. </span>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
 <p>Install build dependencies:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><code><span class="n">apt</span> <span class="n">install</span> <span class="n">curl</span> <span class="n">make</span> <span class="n">build</span><span class="o">-</span><span class="n">essential</span> <span class="n">gcc</span><span class="o">-</span><span class="n">riscv64</span><span class="o">-</span><span class="n">unknown</span><span class="o">-</span><span class="n">elf</span> <span class="n">wget</span> <span class="n">unzip</span> <span class="n">python3</span><span class="o">-</span><span class="n">pip</span>
 </code></pre></div>
@@ -693,12 +709,12 @@
 </code></pre></div>
 </div>
 <p>For detailed information on installing Tock OS, refer to the project’s <a class="reference external" href="https://book.tockos.org/">documentation</a>.</p>
-<h2 id="fetching-sources"><span class="section-number">24.2. </span>Fetching sources<a class="headerlink" href="#fetching-sources" title="Link to this heading">¶</a></h2>
+<h2 id="fetching-sources"><span class="section-number">25.2. </span>Fetching sources<a class="headerlink" href="#fetching-sources" title="Link to this heading">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><code><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">tock</span><span class="o">/</span><span class="n">tock</span><span class="o">.</span><span class="n">git</span>
 <span class="n">cd</span> <span class="n">tock</span>
 </code></pre></div>
 </div>
-<h2 id="running-simulation-in-verilator"><span class="section-number">24.3. </span>Running simulation in Verilator<a class="headerlink" href="#running-simulation-in-verilator" title="Link to this heading">¶</a></h2>
+<h2 id="running-simulation-in-verilator"><span class="section-number">25.3. </span>Running simulation in Verilator<a class="headerlink" href="#running-simulation-in-verilator" title="Link to this heading">¶</a></h2>
 <p>In order to compile Tock OS and start simulation, run:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><code><span class="n">make</span> <span class="o">-</span><span class="n">C</span> <span class="n">boards</span><span class="o">/</span><span class="n">veer_el2_sim</span> <span class="n">sim</span>
 </code></pre></div>
@@ -712,18 +728,18 @@
 <span class="n">Entering</span> <span class="n">main</span> <span class="n">loop</span><span class="o">.</span>
 </code></pre></div>
 </div>
-<h2 id="running-simulation-in-verilator-with-applications"><span class="section-number">24.4. </span>Running simulation in Verilator with applications<a class="headerlink" href="#running-simulation-in-verilator-with-applications" title="Link to this heading">¶</a></h2>
-<h3 id="building-tock"><span class="section-number">24.4.1. </span>Building Tock<a class="headerlink" href="#building-tock" title="Link to this heading">¶</a></h3>
+<h2 id="running-simulation-in-verilator-with-applications"><span class="section-number">25.4. </span>Running simulation in Verilator with applications<a class="headerlink" href="#running-simulation-in-verilator-with-applications" title="Link to this heading">¶</a></h2>
+<h3 id="building-tock"><span class="section-number">25.4.1. </span>Building Tock<a class="headerlink" href="#building-tock" title="Link to this heading">¶</a></h3>
 <p>In order to compile Tock, run:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><code><span class="n">make</span> <span class="o">-</span><span class="n">C</span> <span class="n">boards</span><span class="o">/</span><span class="n">veer_el2_sim</span>
 </code></pre></div>
 </div>
-<h3 id="building-an-application"><span class="section-number">24.4.2. </span>Building an application<a class="headerlink" href="#building-an-application" title="Link to this heading">¶</a></h3>
+<h3 id="building-an-application"><span class="section-number">25.4.2. </span>Building an application<a class="headerlink" href="#building-an-application" title="Link to this heading">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><code>git clone https://github.com/tock/libtock-c.git
 make -C libtock-c/examples/c_hello -j$(nproc)
 </code></pre></div>
 </div>
-<h3 id="providing-a-verilog-file-for-simulation"><span class="section-number">24.4.3. </span>Providing a verilog file for simulation<a class="headerlink" href="#providing-a-verilog-file-for-simulation" title="Link to this heading">¶</a></h3>
+<h3 id="providing-a-verilog-file-for-simulation"><span class="section-number">25.4.3. </span>Providing a verilog file for simulation<a class="headerlink" href="#providing-a-verilog-file-for-simulation" title="Link to this heading">¶</a></h3>
 <p>The testbench for Verilator requires a single file with a program (<code class="docutils literal notranslate"><span class="pre">program.hex</span></code>), so it’s necessary to combine the kernel and applications into a single binary first.</p>
 <p>You can use Tockloader to create a binary file representing flash with the kernel, and then install the application:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><code><span class="n">tockloader</span> <span class="n">flash</span> <span class="o">--</span><span class="n">board</span> <span class="n">veer_el2_sim</span> <span class="o">--</span><span class="n">flash</span><span class="o">-</span><span class="n">file</span> <span class="o">./</span><span class="n">veer_el2_sim</span><span class="o">.</span><span class="n">bin</span> <span class="o">--</span><span class="n">address</span> <span class="mh">0x20000000</span> <span class="o">./</span><span class="n">target</span><span class="o">/</span><span class="n">riscv32imc</span><span class="o">-</span><span class="n">unknown</span><span class="o">-</span><span class="n">none</span><span class="o">-</span><span class="n">elf</span><span class="o">/</span><span class="n">release</span><span class="o">/</span><span class="n">veer_el2_sim</span><span class="o">.</span><span class="n">bin</span>
@@ -732,7 +748,7 @@ make -C libtock-c/examples/c_hello -j$(nproc)
 </code></pre></div>
 </div>
 <p>Now <code class="docutils literal notranslate"><span class="pre">program.hex</span></code> is ready for use in simulation.</p>
-<h3 id="starting-simulation-in-verilator"><span class="section-number">24.4.4. </span>Starting simulation in Verilator<a class="headerlink" href="#starting-simulation-in-verilator" title="Link to this heading">¶</a></h3>
+<h3 id="starting-simulation-in-verilator"><span class="section-number">25.4.4. </span>Starting simulation in Verilator<a class="headerlink" href="#starting-simulation-in-verilator" title="Link to this heading">¶</a></h3>
 <p>Clone the Cores-VeeR-EL2 repository:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><code><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">chipsalliance</span><span class="o">/</span><span class="n">Cores</span><span class="o">-</span><span class="n">VeeR</span><span class="o">-</span><span class="n">EL2</span><span class="o">.</span><span class="n">git</span>
 <span class="n">cd</span> <span class="n">Cores</span><span class="o">-</span><span class="n">VeeR</span><span class="o">-</span><span class="n">EL2</span>
@@ -799,7 +815,7 @@ Hello World!
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="simulation-debugging.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 23. Interactive Debugging in Simulation" rel="prev">
+        <a href="simulation-debugging.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 24. Interactive Debugging in Simulation" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -808,7 +824,7 @@ Hello World!
               <span class="md-footer__direction">
                 Previous
               </span>
-              23. Interactive Debugging in Simulation
+              24. Interactive Debugging in Simulation
             </div>
           </div>
         </a>

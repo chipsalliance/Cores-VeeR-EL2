@@ -13,7 +13,7 @@
     
     
       
-        <title>20. Physical Memory Protection - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
+        <title>21. Physical Memory Protection - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
       
     
     
@@ -88,7 +88,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              20. Physical Memory Protection
+              21. Physical Memory Protection
             
           </span>
         </div>
@@ -249,6 +249,22 @@
     <li class="md-nav__item">
       <a href="error-protection.html" class="md-nav__link">
         <span class="md-ellipsis">Memory Error Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dual-core-lock-step.html" class="md-nav__link">
+        <span class="md-ellipsis">Dual-<wbr>Core Lockstep <wbr>(DCLS)</span>
       </a>
     </li>
   
@@ -681,24 +697,24 @@
                   
 
 
-<h1 id="physical-memory-protection"><span class="section-number">20. </span>Physical Memory Protection<a class="headerlink" href="#physical-memory-protection" title="Link to this heading">¶</a></h1>
+<h1 id="physical-memory-protection"><span class="section-number">21. </span>Physical Memory Protection<a class="headerlink" href="#physical-memory-protection" title="Link to this heading">¶</a></h1>
 <p>The Physical Memory Protection unit implemented in the VeeR EL2 Core is compliant with “Section 3.7 Physical Memory Protection” of <a class="reference internal" href="intro.html#ref-5"><span class="std std-ref">[5]</span></a>.</p>
 <p>RISC-V introduces additional regulatory documents regarding memory protection:</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/riscv/riscv-spmp/blob/main/rv-spmp-spec.pdf">Supervisor mode PMP (SPMP)</a></p></li>
 <li><p><a class="reference external" href="https://github.com/riscv/riscv-tee/blob/main/Smepmp/Smepmp.pdf">PMP enhancements (Smepmp)</a></p></li>
 </ul>
-<h2 id="theory-of-operation"><span class="section-number">20.1. </span>Theory of Operation<a class="headerlink" href="#theory-of-operation" title="Link to this heading">¶</a></h2>
+<h2 id="theory-of-operation"><span class="section-number">21.1. </span>Theory of Operation<a class="headerlink" href="#theory-of-operation" title="Link to this heading">¶</a></h2>
 <p>The PMP module adds a set of CSRs which define memory regions and Read/Write/Execute (RWX) access permissions.
 For each memory access, the PMP module checks if accessed memory is on the allowlist.
 In case of impermissible memory access, a precise exception is thrown and execution flow is switched to the trap handler.
 The PMP distinguishes 3 types of memory accesses: instruction fetch, data load and data store.</p>
-<h2 id="physical-memory-protection-csrs"><span class="section-number">20.2. </span>Physical Memory Protection CSRs<a class="headerlink" href="#physical-memory-protection-csrs" title="Link to this heading">¶</a></h2>
+<h2 id="physical-memory-protection-csrs"><span class="section-number">21.2. </span>Physical Memory Protection CSRs<a class="headerlink" href="#physical-memory-protection-csrs" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">pmpcfgX</span></code> and <code class="docutils literal notranslate"><span class="pre">pmpaddrX</span></code> CSRs are implemented in the <a class="reference download internal" download="" href="_downloads/4d39907aa605feca882b272dd753fb04/el2_dec_tlu_ctl.sv"><span class="xref download myst"><em>el2_dec_tlu_ctl</em> module</span></a>.
 CSR address decoding is generated from either <a class="reference download internal" download="" href="_downloads/bf4883a73cb84f64f5fbf648ddf24379/csrdecode_m"><span class="xref download myst"><em>csrdecode_m</em></span></a> (Machine mode) or <a class="reference download internal" download="" href="_downloads/545b7a6a7188f827b88dfe9a1767e018/csrdecode_mu"><span class="xref download myst"><em>csrdecode_mu</em></span></a> (Machine and User mode) description file.</p>
 <p>The number of <code class="docutils literal notranslate"><span class="pre">pmpcfgX</span></code> registers is always 4 times smaller than the number of PMP entries, which are configurable using the <code class="docutils literal notranslate"><span class="pre">-set=pmp_entires=N</span></code> option, where <em>N</em> can be 0, 16 or 64.</p>
 <table class="docutils data align-left" id="tab-riscv-pmp-csr-configuration-table">
-<caption><span class="caption-number">Table 20.1 </span><span class="caption-text">CSR configurations for RV-32</span><a class="headerlink" href="#tab-riscv-pmp-csr-configuration-table" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 21.1 </span><span class="caption-text">CSR configurations for RV-32</span><a class="headerlink" href="#tab-riscv-pmp-csr-configuration-table" title="Link to this table">¶</a></caption>
 <thead>
 <tr class="row-odd"><th class="head"><p>Number of PMP entries</p></th>
 <th class="head"><p>Number of <em>pmpcfgX</em> CSRs</p></th>
@@ -720,10 +736,10 @@ CSR address decoding is generated from either <a class="reference download inter
 </tr>
 </tbody>
 </table>
-<h3 id="configuration-registers-pmpcfgx"><span class="section-number">20.2.1. </span>Configuration Registers (pmpcfgX)<a class="headerlink" href="#configuration-registers-pmpcfgx" title="Link to this heading">¶</a></h3>
+<h3 id="configuration-registers-pmpcfgx"><span class="section-number">21.2.1. </span>Configuration Registers (pmpcfgX)<a class="headerlink" href="#configuration-registers-pmpcfgx" title="Link to this heading">¶</a></h3>
 <p>Each <code class="docutils literal notranslate"><span class="pre">pmpcfgX</span></code> register holds a configuration for four PMP entries, with a byte used for each entry.</p>
 <table class="docutils data align-left" id="tab-riscv-pmpcfgx-register">
-<caption><span class="caption-number">Table 20.2 </span><span class="caption-text">Decoding of the <em>pmpcfgX</em> register</span><a class="headerlink" href="#tab-riscv-pmpcfgx-register" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 21.2 </span><span class="caption-text">Decoding of the <em>pmpcfgX</em> register</span><a class="headerlink" href="#tab-riscv-pmpcfgx-register" title="Link to this table">¶</a></caption>
 <thead>
 <tr class="row-odd"><th class="head"><p><strong>Bit</strong></p></th>
 <th class="head"><p>7</p></th>
@@ -758,7 +774,7 @@ CSR address decoding is generated from either <a class="reference download inter
 <li><p><em>W</em> - write permission; when set to <em>1</em>, allows data store to the corresponding address region; otherwise memory access will result in a store access-fault exception</p></li>
 <li><p><em>R</em> - read permission; when set to <em>1</em>, allows data load from the corresponding address region; otherwise memory access will result in a load access-fault exception.</p></li>
 </ul>
-<h3 id="address-registers-pmpaddrx"><span class="section-number">20.2.2. </span>Address Registers (pmpaddrX)<a class="headerlink" href="#address-registers-pmpaddrx" title="Link to this heading">¶</a></h3>
+<h3 id="address-registers-pmpaddrx"><span class="section-number">21.2.2. </span>Address Registers (pmpaddrX)<a class="headerlink" href="#address-registers-pmpaddrx" title="Link to this heading">¶</a></h3>
 <p>PMP address registers (<code class="docutils literal notranslate"><span class="pre">pmpaddrX</span></code>) encode bits 33 to 2 (<code class="docutils literal notranslate"><span class="pre">address[33:2]</span></code>) in physical memory.
 This address defines protected memory region boundaries, further interpreted according to address matching values encoded by bits 4 and 3 of the <code class="docutils literal notranslate"><span class="pre">pmpcfgX</span></code> register:</p>
 <ul class="simple">
@@ -767,10 +783,10 @@ This address defines protected memory region boundaries, further interpreted acc
 <li><p><em>10</em> NA4 Naturally aligned four-byte region</p></li>
 <li><p><em>11</em> NAPOT Naturally aligned power-of-two region, &gt;=8 bytes</p></li>
 </ul>
-<h2 id="exceptions"><span class="section-number">20.3. </span>Exceptions<a class="headerlink" href="#exceptions" title="Link to this heading">¶</a></h2>
+<h2 id="exceptions"><span class="section-number">21.3. </span>Exceptions<a class="headerlink" href="#exceptions" title="Link to this heading">¶</a></h2>
 <p>In case of impermissible memory access, an exception is raised and the exception code is stored in the <code class="docutils literal notranslate"><span class="pre">mcause</span></code> CSR register (<em>0x342</em>).</p>
 <table class="docutils data align-default" id="tab-riscv-pmp-exceptions">
-<caption><span class="caption-number">Table 20.3 </span><span class="caption-text">PMP related exception codes</span><a class="headerlink" href="#tab-riscv-pmp-exceptions" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 21.3 </span><span class="caption-text">PMP related exception codes</span><a class="headerlink" href="#tab-riscv-pmp-exceptions" title="Link to this table">¶</a></caption>
 <colgroup>
 <col style="width: 21.9%" />
 <col style="width: 21.9%" />
@@ -798,7 +814,7 @@ This address defines protected memory region boundaries, further interpreted acc
 </tbody>
 </table>
 <p>Whenever a PMP access fault exception is raised, the machine secondary cause register (<code class="docutils literal notranslate"><span class="pre">mscause</span></code>) value is <em>0x03</em> indicating “access out of MPU range”.</p>
-<h2 id="pmp-module"><span class="section-number">20.4. </span>PMP module<a class="headerlink" href="#pmp-module" title="Link to this heading">¶</a></h2>
+<h2 id="pmp-module"><span class="section-number">21.4. </span>PMP module<a class="headerlink" href="#pmp-module" title="Link to this heading">¶</a></h2>
 <p>The PMP module is implemented in <a class="reference download internal" download="" href="_downloads/ca1904209f5a6f77a9f5c7547b144e4c/el2_pmp.sv"><span class="xref download myst">el2_pmp.sv</span></a>.
 It is meant to be connected to the:</p>
 <ul class="simple">
@@ -818,17 +834,17 @@ It is meant to be connected to the:</p>
 <figure class="align-default" id="riscv-pmp-block-diagram">
 <img alt="riscv_pmp_block_diagram" src="_images/19-riscv_pmp_block_diagram.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 20.1 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 21.1 </span><span class="caption-text"><span class="caption-text">
 PMP integration with other modules of the VeeR EL2 core.</span><a class="headerlink" href="#riscv-pmp-block-diagram" title="Permalink to this image">¶</a></figcaption>
 </figure>
-<h2 id="verification"><span class="section-number">20.5. </span>Verification<a class="headerlink" href="#verification" title="Link to this heading">¶</a></h2>
+<h2 id="verification"><span class="section-number">21.5. </span>Verification<a class="headerlink" href="#verification" title="Link to this heading">¶</a></h2>
 <p>The PMP module is tested with:</p>
 <ul class="simple">
 <li><p><a class="reference download internal" download="" href="_downloads/7f997c89bb8db6febe6729010b5c5034/testbench.py"><span class="xref download myst">RTL tests</span></a></p></li>
 <li><p><a class="reference download internal" download="" href="_downloads/b7ecad5961b0c92e92cfdaf65b072c95/main.c"><span class="xref download myst">software smoke tests</span></a></p></li>
 <li><p><a class="reference download internal" download="" href="_downloads/c15d42e747ac634cf85448f593a106a4/test-riscv-dv.yml"><span class="xref download myst">RISC-V DV tests</span></a></p></li>
 </ul>
-<h2 id="pmp-check-example"><span class="section-number">20.6. </span>PMP check example<a class="headerlink" href="#pmp-check-example" title="Link to this heading">¶</a></h2>
+<h2 id="pmp-check-example"><span class="section-number">21.6. </span>PMP check example<a class="headerlink" href="#pmp-check-example" title="Link to this heading">¶</a></h2>
 <p>In this example we enforce the following permissions:</p>
 <ul class="simple">
 <li><p><em>0x00000000</em> - <em>0x00000FFF</em> - deny reads, writes, execution</p></li>
@@ -883,7 +899,7 @@ On the other hand, all memory accesses to the second region (<em>0x00001000</em>
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="errata.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 19. Errata" rel="prev">
+        <a href="errata.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 20. Errata" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -892,20 +908,20 @@ On the other hand, all memory accesses to the second region (<em>0x00001000</em>
               <span class="md-footer__direction">
                 Previous
               </span>
-              19. Errata
+              20. Errata
             </div>
           </div>
         </a>
       
       
         
-        <a href="user-mode.html" class="md-footer__link md-footer__link--next" aria-label="Next: 21. User Mode" rel="next">
+        <a href="user-mode.html" class="md-footer__link md-footer__link--next" aria-label="Next: 22. User Mode" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              21. User Mode
+              22. User Mode
             </div>
           </div>
           <div class="md-footer__button md-icon">

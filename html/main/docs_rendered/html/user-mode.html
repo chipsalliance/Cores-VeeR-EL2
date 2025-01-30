@@ -13,7 +13,7 @@
     
     
       
-        <title>21. User Mode - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
+        <title>22. User Mode - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
       
     
     
@@ -88,7 +88,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              21. User Mode
+              22. User Mode
             
           </span>
         </div>
@@ -249,6 +249,22 @@
     <li class="md-nav__item">
       <a href="error-protection.html" class="md-nav__link">
         <span class="md-ellipsis">Memory Error Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dual-core-lock-step.html" class="md-nav__link">
+        <span class="md-ellipsis">Dual-<wbr>Core Lockstep <wbr>(DCLS)</span>
       </a>
     </li>
   
@@ -675,7 +691,7 @@
                   
 
 
-<h1 id="user-mode"><span class="section-number">21. </span>User Mode<a class="headerlink" href="#user-mode" title="Link to this heading">¶</a></h1>
+<h1 id="user-mode"><span class="section-number">22. </span>User Mode<a class="headerlink" href="#user-mode" title="Link to this heading">¶</a></h1>
 <p>Originally, VeeR EL2 only implemented machine mode, and user mode support was added for the Caliptra project.
 By default the VeeR EL2 Core is configured in machine mode only, so to enable user mode, use the <code class="docutils literal notranslate"><span class="pre">-set</span></code> option in <a class="reference download internal" download="" href="_downloads/e2b2ce37745a96f0e502f7ecc4260018/veer.config"><span class="xref download myst">the config script</span></a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><code><span class="n">veer</span><span class="o">.</span><span class="n">config</span> <span class="o">-</span><span class="nb">set</span><span class="o">=</span><span class="n">user_mode</span><span class="o">=</span><span class="mi">1</span>
@@ -683,30 +699,30 @@ By default the VeeR EL2 Core is configured in machine mode only, so to enable us
 </div>
 <p>With this option enabled, the <em>RV_USER_MODE</em> macro is defined.
 All code related to user mode is guarded by <em>ifdef RV_USER_MODE</em> / <em>endif</em> blocks.</p>
-<h2 id="machine-isa-register-misa"><span class="section-number">21.1. </span>Machine ISA Register (misa)<a class="headerlink" href="#machine-isa-register-misa" title="Link to this heading">¶</a></h2>
+<h2 id="machine-isa-register-misa"><span class="section-number">22.1. </span>Machine ISA Register (misa)<a class="headerlink" href="#machine-isa-register-misa" title="Link to this heading">¶</a></h2>
 <p>The read-only <code class="docutils literal notranslate"><span class="pre">misa</span></code> register provides information about features and instruction sets supported by the core.
 In the user mode configuration, the U bit (20) is set.</p>
-<h2 id="machine-status-register-mstatus"><span class="section-number">21.2. </span>Machine Status Register (mstatus)<a class="headerlink" href="#machine-status-register-mstatus" title="Link to this heading">¶</a></h2>
+<h2 id="machine-status-register-mstatus"><span class="section-number">22.2. </span>Machine Status Register (mstatus)<a class="headerlink" href="#machine-status-register-mstatus" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">mstatus</span></code> register is extended with the following fields:</p>
 <ul class="simple">
 <li><p><em>MPP</em> - 2-bit wide field - stores the previous core operating mode after entering an exception handler. It is implemented with a single FF (permissible if supervisor mode is not present in the design). The FF stores an inverted value, so that upon core reset, the field indicates machine mode (<em>2’b11</em>)</p></li>
 <li><p><em>MPEV</em> - allows temporarily changing the effective privilege mode for load and store instructions</p></li>
 </ul>
-<h2 id="machine-environment-configuration-registers-menvcfg-menvcfgh"><span class="section-number">21.3. </span>Machine Environment Configuration Registers (menvcfg,menvcfgh)<a class="headerlink" href="#machine-environment-configuration-registers-menvcfg-menvcfgh" title="Link to this heading">¶</a></h2>
+<h2 id="machine-environment-configuration-registers-menvcfg-menvcfgh"><span class="section-number">22.3. </span>Machine Environment Configuration Registers (menvcfg,menvcfgh)<a class="headerlink" href="#machine-environment-configuration-registers-menvcfg-menvcfgh" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">menvcfg</span></code> and <code class="docutils literal notranslate"><span class="pre">menvcfgh</span></code> registers control the behavior of <em>FENCE</em> instruction flavors and contain bits relevant to the Sstc, Zicboz and Zicbom extensions.
 None of these extensions are supported by the VeeR EL2 core and the core is in-order, so this register pair is read-only and all-zero.</p>
-<h2 id="user-mode-performance-counters-cycle-cycleh-instret-instreth"><span class="section-number">21.4. </span>User Mode Performance Counters (cycle, cycleh, instret, instreth)<a class="headerlink" href="#user-mode-performance-counters-cycle-cycleh-instret-instreth" title="Link to this heading">¶</a></h2>
+<h2 id="user-mode-performance-counters-cycle-cycleh-instret-instreth"><span class="section-number">22.4. </span>User Mode Performance Counters (cycle, cycleh, instret, instreth)<a class="headerlink" href="#user-mode-performance-counters-cycle-cycleh-instret-instreth" title="Link to this heading">¶</a></h2>
 <p>In order to enable performance monitoring in user mode, unprivileged shadow copies of <code class="docutils literal notranslate"><span class="pre">mcycle</span></code> and <code class="docutils literal notranslate"><span class="pre">minstret</span></code> registers are implemented: <code class="docutils literal notranslate"><span class="pre">cycle</span></code> and <code class="docutils literal notranslate"><span class="pre">instret</span></code>.
 These are read-only registers accessible from user mode.
 Access to the shadow copies can be restricted by the <code class="docutils literal notranslate"><span class="pre">mcounteren</span></code> CSR.
 The <code class="docutils literal notranslate"><span class="pre">cycleh</span></code> and <code class="docutils literal notranslate"><span class="pre">instreth</span></code> registers are upper 32-bits of the <code class="docutils literal notranslate"><span class="pre">cycle</span></code> and <code class="docutils literal notranslate"><span class="pre">instret</span></code> registers, respectively.</p>
-<h2 id="machine-counter-enable-register-mcounteren"><span class="section-number">21.5. </span>Machine Counter-Enable Register (mcounteren)<a class="headerlink" href="#machine-counter-enable-register-mcounteren" title="Link to this heading">¶</a></h2>
+<h2 id="machine-counter-enable-register-mcounteren"><span class="section-number">22.5. </span>Machine Counter-Enable Register (mcounteren)<a class="headerlink" href="#machine-counter-enable-register-mcounteren" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">mcounteren</span></code> register controls access to the user mode shadow copies of the performance counters.
 Only software running in machine mode can change the <code class="docutils literal notranslate"><span class="pre">mcounteren</span></code> register, so that it can grant/deny permission to specific counters for user mode applications.</p>
-<h2 id="machine-security-configuration-register-mseccfg-mseccfgh"><span class="section-number">21.6. </span>Machine Security Configuration Register (mseccfg, mseccfgh)<a class="headerlink" href="#machine-security-configuration-register-mseccfg-mseccfgh" title="Link to this heading">¶</a></h2>
+<h2 id="machine-security-configuration-register-mseccfg-mseccfgh"><span class="section-number">22.6. </span>Machine Security Configuration Register (mseccfg, mseccfgh)<a class="headerlink" href="#machine-security-configuration-register-mseccfg-mseccfgh" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">mseccfg</span></code> and <code class="docutils literal notranslate"><span class="pre">mseccfgh</span></code> registers control PMP’s behavior when Smepmp is enabled.
 The <em>RLB</em>, <em>MMWP</em> and <em>MML</em> bits are implemented, whereas others are read-only zero.</p>
-<h2 id="privilege-mode-transitions-and-exception-handling"><span class="section-number">21.7. </span>Privilege Mode Transitions and Exception Handling<a class="headerlink" href="#privilege-mode-transitions-and-exception-handling" title="Link to this heading">¶</a></h2>
+<h2 id="privilege-mode-transitions-and-exception-handling"><span class="section-number">22.7. </span>Privilege Mode Transitions and Exception Handling<a class="headerlink" href="#privilege-mode-transitions-and-exception-handling" title="Link to this heading">¶</a></h2>
 <p>The VeeR EL2 core only implements machine and user mode, so only 2 mode transitions are possible:</p>
 <ul class="simple">
 <li><p>When <code class="docutils literal notranslate"><span class="pre">mret</span></code> is executed, the operating mode is changed to the value of the <em>mstatus.MPP</em> field.</p></li>
@@ -718,7 +734,7 @@ The <em>RLB</em>, <em>MMWP</em> and <em>MML</em> bits are implemented, whereas o
 <li><p>11 (0xb) for <em>ECALL.M</em>, if ECALL is executed in machine mode</p></li>
 <li><p>8 (0x8) for <em>ECALL.U</em>, if ECALL is executed in user mode</p></li>
 </ul>
-<h2 id="pmp-enhancements-for-memory-access-and-execution-prevention-on-machine-mode"><span class="section-number">21.8. </span>PMP Enhancements for Memory Access and Execution Prevention on Machine Mode<a class="headerlink" href="#pmp-enhancements-for-memory-access-and-execution-prevention-on-machine-mode" title="Link to this heading">¶</a></h2>
+<h2 id="pmp-enhancements-for-memory-access-and-execution-prevention-on-machine-mode"><span class="section-number">22.8. </span>PMP Enhancements for Memory Access and Execution Prevention on Machine Mode<a class="headerlink" href="#pmp-enhancements-for-memory-access-and-execution-prevention-on-machine-mode" title="Link to this heading">¶</a></h2>
 <p>Document <a class="reference internal" href="intro.html#ref-6"><span class="std std-ref">[6]</span></a> defines an extension to PMP’s behavior.</p>
 <p>Smepmp (extended PMP) support is enabled with the <code class="docutils literal notranslate"><span class="pre">-set=smepmp=1</span></code> option:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><code><span class="n">veer</span><span class="o">.</span><span class="n">config</span> <span class="o">-</span><span class="nb">set</span><span class="o">=</span><span class="n">user_mode</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="nb">set</span><span class="o">=</span><span class="n">smepmp</span><span class="o">=</span><span class="mi">1</span>
@@ -757,7 +773,7 @@ The Smepmp extension can only be used together with the user mode configuration.
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="physical-memory-protection.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 20. Physical Memory Protection" rel="prev">
+        <a href="physical-memory-protection.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 21. Physical Memory Protection" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -766,20 +782,20 @@ The Smepmp extension can only be used together with the user mode configuration.
               <span class="md-footer__direction">
                 Previous
               </span>
-              20. Physical Memory Protection
+              21. Physical Memory Protection
             </div>
           </div>
         </a>
       
       
         
-        <a href="verification.html" class="md-footer__link md-footer__link--next" aria-label="Next: 22. Verification" rel="next">
+        <a href="verification.html" class="md-footer__link md-footer__link--next" aria-label="Next: 23. Verification" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              22. Verification
+              23. Verification
             </div>
           </div>
           <div class="md-footer__button md-icon">

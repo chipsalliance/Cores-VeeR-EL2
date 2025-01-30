@@ -1,0 +1,352 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>
+        Full
+        coverage report
+    </title>
+    <link rel="stylesheet" type="text/css" href="cov.css">
+    <style>
+        .container {
+            background-color: rgb(169, 169, 169);
+            width: 100%;
+            min-height: 80%;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <table class="title-header-shadow">
+        <td class="title-container">
+            <table class="title-header">
+                <td class="title-logo">
+                    <a href=index.html>
+                        <img src=_static/white.svg></img>
+                    </a>
+                </td>
+                <td class="title">
+                    Project
+                    Full
+                    coverage report
+                </td>
+            </table>
+        </td>
+    </table>
+    <center>
+        <table class="info-table">
+            <tr class="info-table-view">
+                <td width="10%" class="headerInfo">Current view:</td>
+                <td width="40%" class="headerInfoValue">
+                    <a href=index.html>Cores-VeeR-EL2</a>—Cores-VeeR-EL2—design—lsu—el2_lsu_addrcheck.sv
+                </td>
+                <td width=auto></td>
+                <td width="10%"></td>
+                <td width="10%" class="headerCovSummary colTop">Coverage</td>
+                <td width="10%" class="headerCovSummary colTop" title="Covered + Uncovered code">Hit</td>
+                <td width="10%" class="headerCovSummary colTop" title="Exercised code only">Total</td>
+            </tr>
+            <tr>
+                <td class="headerInfo">Test Date:</td>
+                <td class="headerInfoValue">
+                    03-12-2024
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Toggle
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #ff7c00;">
+        24.5%
+    </td>
+    <td class="headerCovSummaryEntry">
+        12
+    </td>
+    <td class="headerCovSummaryEntry">
+        49
+    </td>
+
+            </tr>
+            <tr>
+                <td class="headerInfo">Test:</td>
+                <td class="headerInfoValue">
+                    ahb_csr_access
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Branch
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #a9a9a9;">
+        0.0%
+    </td>
+    <td class="headerCovSummaryEntry">
+        0
+    </td>
+    <td class="headerCovSummaryEntry">
+        0
+    </td>
+
+            </tr>
+            
+        </table>
+    </center>
+
+    <table border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td><br/></td>
+</tr>
+<tr>
+<td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : // SPDX-License-Identifier: Apache-2.0</span>
+<span id="L2"><span class="lineNum">       2</span>              : // Copyright 2020 Western Digital Corporation or its affiliates.</span>
+<span id="L3"><span class="lineNum">       3</span>              : //</span>
+<span id="L4"><span class="lineNum">       4</span>              : // Licensed under the Apache License, Version 2.0 (the "License");</span>
+<span id="L5"><span class="lineNum">       5</span>              : // you may not use this file except in compliance with the License.</span>
+<span id="L6"><span class="lineNum">       6</span>              : // You may obtain a copy of the License at</span>
+<span id="L7"><span class="lineNum">       7</span>              : //</span>
+<span id="L8"><span class="lineNum">       8</span>              : // http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L9"><span class="lineNum">       9</span>              : //</span>
+<span id="L10"><span class="lineNum">      10</span>              : // Unless required by applicable law or agreed to in writing, software</span>
+<span id="L11"><span class="lineNum">      11</span>              : // distributed under the License is distributed on an "AS IS" BASIS,</span>
+<span id="L12"><span class="lineNum">      12</span>              : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L13"><span class="lineNum">      13</span>              : // See the License for the specific language governing permissions and</span>
+<span id="L14"><span class="lineNum">      14</span>              : // limitations under the License.</span>
+<span id="L15"><span class="lineNum">      15</span>              : </span>
+<span id="L16"><span class="lineNum">      16</span>              : //********************************************************************************</span>
+<span id="L17"><span class="lineNum">      17</span>              : // $Id$</span>
+<span id="L18"><span class="lineNum">      18</span>              : //</span>
+<span id="L19"><span class="lineNum">      19</span>              : //</span>
+<span id="L20"><span class="lineNum">      20</span>              : // Owner:</span>
+<span id="L21"><span class="lineNum">      21</span>              : // Function: Checks the memory map for the address</span>
+<span id="L22"><span class="lineNum">      22</span>              : // Comments:</span>
+<span id="L23"><span class="lineNum">      23</span>              : //</span>
+<span id="L24"><span class="lineNum">      24</span>              : //********************************************************************************</span>
+<span id="L25"><span class="lineNum">      25</span>              : module el2_lsu_addrcheck</span>
+<span id="L26"><span class="lineNum">      26</span>              : import el2_pkg::*;</span>
+<span id="L27"><span class="lineNum">      27</span>              : #(</span>
+<span id="L28"><span class="lineNum">      28</span>              : `include "el2_param.vh"</span>
+<span id="L29"><span class="lineNum">      29</span>              :  )(</span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC tlaBgGNC">    17330748 :    input logic          lsu_c2_m_clk,              // clock</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">           2 :    input logic          rst_l,                     // reset</span></span>
+<span id="L32"><span class="lineNum">      32</span>              : </span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">       31880 :    input logic [31:0]   start_addr_d,              // start address for lsu</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">       31880 :    input logic [31:0]   end_addr_d,                // end address for lsu</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">       53508 :    input el2_lsu_pkt_t lsu_pkt_d,                 // packet in d</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic [31:0]   dec_tlu_mrac_ff,           // CSR read</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC tlaBgGNC">       31880 :    input logic [3:0]    rs1_region_d,              // address rs operand [31:28]</span></span>
+<span id="L38"><span class="lineNum">      38</span>              : </span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">       31880 :    input logic [31:0]   rs1_d,                     // address rs operand</span></span>
+<span id="L40"><span class="lineNum">      40</span>              : </span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic         is_sideeffects_m,          // is sideffects space</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaUNC">           0 :    output logic         addr_in_dccm_d,            // address in dccm</span></span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaUNC">           0 :    output logic         addr_in_pic_d,             // address in pic</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC tlaBgGNC">           2 :    output logic         addr_external_d,           // address in external</span></span>
+<span id="L45"><span class="lineNum">      45</span>              : </span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaUNC tlaBgUNC">           0 :    output logic         access_fault_d,            // access fault</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaUNC">           0 :    output logic         misaligned_fault_d,        // misaligned</span></span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaUNC">           0 :    output logic [3:0]   exc_mscause_d,             // mscause for access/misaligned faults</span></span>
+<span id="L49"><span class="lineNum">      49</span>              : </span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaUNC">           0 :    output logic         fir_dccm_access_error_d,   // Fast interrupt dccm access error</span></span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaUNC">           0 :    output logic         fir_nondccm_access_error_d,// Fast interrupt dccm access error</span></span>
+<span id="L52"><span class="lineNum">      52</span>              : </span>
+<span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC tlaBgGNC">       49140 :     input logic lsu_pmp_error_start,</span></span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">       49140 :     input logic lsu_pmp_error_end,</span></span>
+<span id="L55"><span class="lineNum">      55</span>              : </span>
+<span id="L56"><span class="lineNum">      56</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
+<span id="L57"><span class="lineNum">      57</span>              :    /*verilator coverage_off*/</span>
+<span id="L58"><span class="lineNum">      58</span>              :    input  logic         scan_mode                  // Scan mode</span>
+<span id="L59"><span class="lineNum">      59</span>              :    /*verilator coverage_on*/</span>
+<span id="L60"><span class="lineNum">      60</span>              : );</span>
+<span id="L61"><span class="lineNum">      61</span>              : </span>
+<span id="L62"><span class="lineNum">      62</span>              : </span>
+<span id="L63"><span class="lineNum">      63</span> <span class="tlaUNC tlaBgUNC">           0 :    logic        non_dccm_access_ok;</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC tlaBgGNC">           2 :    logic        is_sideeffects_d, is_aligned_d;</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaUNC tlaBgUNC">           0 :    logic        start_addr_in_dccm_d, end_addr_in_dccm_d;</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaUNC">           0 :    logic        start_addr_in_dccm_region_d, end_addr_in_dccm_region_d;</span></span>
+<span id="L67"><span class="lineNum">      67</span> <span class="tlaUNC">           0 :    logic        start_addr_in_pic_d, end_addr_in_pic_d;</span></span>
+<span id="L68"><span class="lineNum">      68</span> <span class="tlaUNC">           0 :    logic        start_addr_in_pic_region_d, end_addr_in_pic_region_d;</span></span>
+<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC tlaBgGNC">       31880 :    logic [4:0]  csr_idx;</span></span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaUNC tlaBgUNC">           0 :    logic        addr_in_iccm;</span></span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaUNC">           0 :    logic        start_addr_dccm_or_pic;</span></span>
+<span id="L72"><span class="lineNum">      72</span> <span class="tlaUNC">           0 :    logic        base_reg_dccm_or_pic;</span></span>
+<span id="L73"><span class="lineNum">      73</span> <span class="tlaUNC">           0 :    logic        unmapped_access_fault_d, mpu_access_fault_d, picm_access_fault_d, regpred_access_fault_d;</span></span>
+<span id="L74"><span class="lineNum">      74</span> <span class="tlaUNC">           0 :    logic        regcross_misaligned_fault_d, sideeffect_misaligned_fault_d;</span></span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaUNC">           0 :    logic [3:0]  access_fault_mscause_d;</span></span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaUNC">           0 :    logic [3:0]  misaligned_fault_mscause_d;</span></span>
+<span id="L77"><span class="lineNum">      77</span>              : </span>
+<span id="L78"><span class="lineNum">      78</span>              :    if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable</span>
+<span id="L79"><span class="lineNum">      79</span>              :       // Start address check</span>
+<span id="L80"><span class="lineNum">      80</span>              :       rvrangecheck #(.CCM_SADR(pt.DCCM_SADR),</span>
+<span id="L81"><span class="lineNum">      81</span>              :                      .CCM_SIZE(pt.DCCM_SIZE)) start_addr_dccm_rangecheck (</span>
+<span id="L82"><span class="lineNum">      82</span>              :          .addr(start_addr_d[31:0]),</span>
+<span id="L83"><span class="lineNum">      83</span>              :          .in_range(start_addr_in_dccm_d),</span>
+<span id="L84"><span class="lineNum">      84</span>              :          .in_region(start_addr_in_dccm_region_d)</span>
+<span id="L85"><span class="lineNum">      85</span>              :       );</span>
+<span id="L86"><span class="lineNum">      86</span>              : </span>
+<span id="L87"><span class="lineNum">      87</span>              :       // End address check</span>
+<span id="L88"><span class="lineNum">      88</span>              :       rvrangecheck #(.CCM_SADR(pt.DCCM_SADR),</span>
+<span id="L89"><span class="lineNum">      89</span>              :                      .CCM_SIZE(pt.DCCM_SIZE)) end_addr_dccm_rangecheck (</span>
+<span id="L90"><span class="lineNum">      90</span>              :          .addr(end_addr_d[31:0]),</span>
+<span id="L91"><span class="lineNum">      91</span>              :          .in_range(end_addr_in_dccm_d),</span>
+<span id="L92"><span class="lineNum">      92</span>              :          .in_region(end_addr_in_dccm_region_d)</span>
+<span id="L93"><span class="lineNum">      93</span>              :       );</span>
+<span id="L94"><span class="lineNum">      94</span>              :    end else begin: Gen_dccm_disable // block: Gen_dccm_enable</span>
+<span id="L95"><span class="lineNum">      95</span>              :       assign start_addr_in_dccm_d = '0;</span>
+<span id="L96"><span class="lineNum">      96</span>              :       assign start_addr_in_dccm_region_d = '0;</span>
+<span id="L97"><span class="lineNum">      97</span>              :       assign end_addr_in_dccm_d = '0;</span>
+<span id="L98"><span class="lineNum">      98</span>              :       assign end_addr_in_dccm_region_d = '0;</span>
+<span id="L99"><span class="lineNum">      99</span>              :    end</span>
+<span id="L100"><span class="lineNum">     100</span>              : </span>
+<span id="L101"><span class="lineNum">     101</span>              :    if (pt.ICCM_ENABLE == 1) begin : check_iccm</span>
+<span id="L102"><span class="lineNum">     102</span>              :       assign addr_in_iccm =  (start_addr_d[31:28] == pt.ICCM_REGION);</span>
+<span id="L103"><span class="lineNum">     103</span>              :    end else begin</span>
+<span id="L104"><span class="lineNum">     104</span>              :      assign addr_in_iccm = 1'b0;</span>
+<span id="L105"><span class="lineNum">     105</span>              :    end</span>
+<span id="L106"><span class="lineNum">     106</span>              : </span>
+<span id="L107"><span class="lineNum">     107</span>              :    // PIC memory check</span>
+<span id="L108"><span class="lineNum">     108</span>              :    // Start address check</span>
+<span id="L109"><span class="lineNum">     109</span>              :    rvrangecheck #(.CCM_SADR(pt.PIC_BASE_ADDR),</span>
+<span id="L110"><span class="lineNum">     110</span>              :                   .CCM_SIZE(pt.PIC_SIZE)) start_addr_pic_rangecheck (</span>
+<span id="L111"><span class="lineNum">     111</span>              :       .addr(start_addr_d[31:0]),</span>
+<span id="L112"><span class="lineNum">     112</span>              :       .in_range(start_addr_in_pic_d),</span>
+<span id="L113"><span class="lineNum">     113</span>              :       .in_region(start_addr_in_pic_region_d)</span>
+<span id="L114"><span class="lineNum">     114</span>              :    );</span>
+<span id="L115"><span class="lineNum">     115</span>              : </span>
+<span id="L116"><span class="lineNum">     116</span>              :    // End address check</span>
+<span id="L117"><span class="lineNum">     117</span>              :    rvrangecheck #(.CCM_SADR(pt.PIC_BASE_ADDR),</span>
+<span id="L118"><span class="lineNum">     118</span>              :                   .CCM_SIZE(pt.PIC_SIZE)) end_addr_pic_rangecheck (</span>
+<span id="L119"><span class="lineNum">     119</span>              :       .addr(end_addr_d[31:0]),</span>
+<span id="L120"><span class="lineNum">     120</span>              :       .in_range(end_addr_in_pic_d),</span>
+<span id="L121"><span class="lineNum">     121</span>              :       .in_region(end_addr_in_pic_region_d)</span>
+<span id="L122"><span class="lineNum">     122</span>              :    );</span>
+<span id="L123"><span class="lineNum">     123</span>              : </span>
+<span id="L124"><span class="lineNum">     124</span>              :    assign start_addr_dccm_or_pic  = start_addr_in_dccm_region_d | start_addr_in_pic_region_d;</span>
+<span id="L125"><span class="lineNum">     125</span>              :    assign base_reg_dccm_or_pic    = (|((rs1_region_d[3:0] == pt.DCCM_REGION) &amp; pt.DCCM_ENABLE)) | (rs1_region_d[3:0] == pt.PIC_REGION);</span>
+<span id="L126"><span class="lineNum">     126</span>              :    assign addr_in_dccm_d          = (start_addr_in_dccm_d &amp; end_addr_in_dccm_d);</span>
+<span id="L127"><span class="lineNum">     127</span>              :    assign addr_in_pic_d           = (start_addr_in_pic_d &amp; end_addr_in_pic_d);</span>
+<span id="L128"><span class="lineNum">     128</span>              : </span>
+<span id="L129"><span class="lineNum">     129</span>              :    assign addr_external_d   = ~(start_addr_in_dccm_region_d | start_addr_in_pic_region_d);</span>
+<span id="L130"><span class="lineNum">     130</span>              :    assign csr_idx[4:0]       = {start_addr_d[31:28], 1'b1};</span>
+<span id="L131"><span class="lineNum">     131</span>              :    assign is_sideeffects_d = dec_tlu_mrac_ff[csr_idx] &amp; ~(start_addr_in_dccm_region_d | start_addr_in_pic_region_d | addr_in_iccm) &amp; lsu_pkt_d.valid &amp; (lsu_pkt_d.store | lsu_pkt_d.load);  //every region has the 2 LSB indicating ( 1: sideeffects/no_side effects, and 0: cacheable ). Ignored in internal regions</span>
+<span id="L132"><span class="lineNum">     132</span>              :    assign is_aligned_d    = (lsu_pkt_d.word &amp; (start_addr_d[1:0] == 2'b0)) |</span>
+<span id="L133"><span class="lineNum">     133</span>              :                                                             (lsu_pkt_d.half &amp; (start_addr_d[0] == 1'b0)) |</span>
+<span id="L134"><span class="lineNum">     134</span>              :                                                             lsu_pkt_d.by;</span>
+<span id="L135"><span class="lineNum">     135</span>              : </span>
+<span id="L136"><span class="lineNum">     136</span> <span class="tlaUNC">           0 :    logic ACCESS0_STARTOK;</span></span>
+<span id="L137"><span class="lineNum">     137</span> <span class="tlaUNC">           0 :    logic ACCESS1_STARTOK;</span></span>
+<span id="L138"><span class="lineNum">     138</span> <span class="tlaUNC">           0 :    logic ACCESS2_STARTOK;</span></span>
+<span id="L139"><span class="lineNum">     139</span> <span class="tlaUNC">           0 :    logic ACCESS3_STARTOK;</span></span>
+<span id="L140"><span class="lineNum">     140</span> <span class="tlaUNC">           0 :    logic ACCESS4_STARTOK;</span></span>
+<span id="L141"><span class="lineNum">     141</span> <span class="tlaUNC">           0 :    logic ACCESS5_STARTOK;</span></span>
+<span id="L142"><span class="lineNum">     142</span> <span class="tlaUNC">           0 :    logic ACCESS6_STARTOK;</span></span>
+<span id="L143"><span class="lineNum">     143</span> <span class="tlaUNC">           0 :    logic ACCESS7_STARTOK;</span></span>
+<span id="L144"><span class="lineNum">     144</span> <span class="tlaUNC">           0 :    logic ACCESS0_ENDOK;</span></span>
+<span id="L145"><span class="lineNum">     145</span> <span class="tlaUNC">           0 :    logic ACCESS1_ENDOK;</span></span>
+<span id="L146"><span class="lineNum">     146</span> <span class="tlaUNC">           0 :    logic ACCESS2_ENDOK;</span></span>
+<span id="L147"><span class="lineNum">     147</span> <span class="tlaUNC">           0 :    logic ACCESS3_ENDOK;</span></span>
+<span id="L148"><span class="lineNum">     148</span> <span class="tlaUNC">           0 :    logic ACCESS4_ENDOK;</span></span>
+<span id="L149"><span class="lineNum">     149</span> <span class="tlaUNC">           0 :    logic ACCESS5_ENDOK;</span></span>
+<span id="L150"><span class="lineNum">     150</span> <span class="tlaUNC">           0 :    logic ACCESS6_ENDOK;</span></span>
+<span id="L151"><span class="lineNum">     151</span> <span class="tlaUNC">           0 :    logic ACCESS7_ENDOK;</span></span>
+<span id="L152"><span class="lineNum">     152</span>              : </span>
+<span id="L153"><span class="lineNum">     153</span>              :    assign ACCESS0_STARTOK = pt.DATA_ACCESS_ENABLE0 &amp; ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK0)) == (pt.DATA_ACCESS_ADDR0 | pt.DATA_ACCESS_MASK0);</span>
+<span id="L154"><span class="lineNum">     154</span>              :    assign ACCESS1_STARTOK = pt.DATA_ACCESS_ENABLE1 &amp; ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK1)) == (pt.DATA_ACCESS_ADDR1 | pt.DATA_ACCESS_MASK1);</span>
+<span id="L155"><span class="lineNum">     155</span>              :    assign ACCESS2_STARTOK = pt.DATA_ACCESS_ENABLE2 &amp; ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK2)) == (pt.DATA_ACCESS_ADDR2 | pt.DATA_ACCESS_MASK2);</span>
+<span id="L156"><span class="lineNum">     156</span>              :    assign ACCESS3_STARTOK = pt.DATA_ACCESS_ENABLE3 &amp; ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK3)) == (pt.DATA_ACCESS_ADDR3 | pt.DATA_ACCESS_MASK3);</span>
+<span id="L157"><span class="lineNum">     157</span>              :    assign ACCESS4_STARTOK = pt.DATA_ACCESS_ENABLE4 &amp; ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK4)) == (pt.DATA_ACCESS_ADDR4 | pt.DATA_ACCESS_MASK4);</span>
+<span id="L158"><span class="lineNum">     158</span>              :    assign ACCESS5_STARTOK = pt.DATA_ACCESS_ENABLE5 &amp; ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK5)) == (pt.DATA_ACCESS_ADDR5 | pt.DATA_ACCESS_MASK5);</span>
+<span id="L159"><span class="lineNum">     159</span>              :    assign ACCESS6_STARTOK = pt.DATA_ACCESS_ENABLE6 &amp; ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK6)) == (pt.DATA_ACCESS_ADDR6 | pt.DATA_ACCESS_MASK6);</span>
+<span id="L160"><span class="lineNum">     160</span>              :    assign ACCESS7_STARTOK = pt.DATA_ACCESS_ENABLE7 &amp; ((start_addr_d[31:0] | pt.DATA_ACCESS_MASK7)) == (pt.DATA_ACCESS_ADDR7 | pt.DATA_ACCESS_MASK7);</span>
+<span id="L161"><span class="lineNum">     161</span>              :    assign ACCESS0_ENDOK   = pt.DATA_ACCESS_ENABLE0 &amp; ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK0)) == (pt.DATA_ACCESS_ADDR0 | pt.DATA_ACCESS_MASK0);</span>
+<span id="L162"><span class="lineNum">     162</span>              :    assign ACCESS1_ENDOK   = pt.DATA_ACCESS_ENABLE1 &amp; ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK1)) == (pt.DATA_ACCESS_ADDR1 | pt.DATA_ACCESS_MASK1);</span>
+<span id="L163"><span class="lineNum">     163</span>              :    assign ACCESS2_ENDOK   = pt.DATA_ACCESS_ENABLE2 &amp; ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK2)) == (pt.DATA_ACCESS_ADDR2 | pt.DATA_ACCESS_MASK2);</span>
+<span id="L164"><span class="lineNum">     164</span>              :    assign ACCESS3_ENDOK   = pt.DATA_ACCESS_ENABLE3 &amp; ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK3)) == (pt.DATA_ACCESS_ADDR3 | pt.DATA_ACCESS_MASK3);</span>
+<span id="L165"><span class="lineNum">     165</span>              :    assign ACCESS4_ENDOK   = pt.DATA_ACCESS_ENABLE4 &amp; ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK4)) == (pt.DATA_ACCESS_ADDR4 | pt.DATA_ACCESS_MASK4);</span>
+<span id="L166"><span class="lineNum">     166</span>              :    assign ACCESS5_ENDOK   = pt.DATA_ACCESS_ENABLE5 &amp; ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK5)) == (pt.DATA_ACCESS_ADDR5 | pt.DATA_ACCESS_MASK5);</span>
+<span id="L167"><span class="lineNum">     167</span>              :    assign ACCESS6_ENDOK   = pt.DATA_ACCESS_ENABLE6 &amp; ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK6)) == (pt.DATA_ACCESS_ADDR6 | pt.DATA_ACCESS_MASK6);</span>
+<span id="L168"><span class="lineNum">     168</span>              :    assign ACCESS7_ENDOK   = pt.DATA_ACCESS_ENABLE7 &amp; ((end_addr_d[31:0]   | pt.DATA_ACCESS_MASK7)) == (pt.DATA_ACCESS_ADDR7 | pt.DATA_ACCESS_MASK7);</span>
+<span id="L169"><span class="lineNum">     169</span>              : </span>
+<span id="L170"><span class="lineNum">     170</span>              :   if (pt.PMP_ENTRIES == 0) begin</span>
+<span id="L171"><span class="lineNum">     171</span>              :    assign non_dccm_access_ok = (~(|{pt.DATA_ACCESS_ENABLE0,pt.DATA_ACCESS_ENABLE1,pt.DATA_ACCESS_ENABLE2,pt.DATA_ACCESS_ENABLE3,pt.DATA_ACCESS_ENABLE4,pt.DATA_ACCESS_ENABLE5,pt.DATA_ACCESS_ENABLE6,pt.DATA_ACCESS_ENABLE7})) |</span>
+<span id="L172"><span class="lineNum">     172</span>              :                                (( ACCESS0_STARTOK|</span>
+<span id="L173"><span class="lineNum">     173</span>              :                                   ACCESS1_STARTOK|</span>
+<span id="L174"><span class="lineNum">     174</span>              :                                   ACCESS2_STARTOK|</span>
+<span id="L175"><span class="lineNum">     175</span>              :                                   ACCESS3_STARTOK|</span>
+<span id="L176"><span class="lineNum">     176</span>              :                                   ACCESS4_STARTOK|</span>
+<span id="L177"><span class="lineNum">     177</span>              :                                   ACCESS5_STARTOK|</span>
+<span id="L178"><span class="lineNum">     178</span>              :                                   ACCESS6_STARTOK|</span>
+<span id="L179"><span class="lineNum">     179</span>              :                                  ACCESS7_STARTOK)   &amp;</span>
+<span id="L180"><span class="lineNum">     180</span>              :                                 ( ACCESS0_ENDOK|</span>
+<span id="L181"><span class="lineNum">     181</span>              :                                   ACCESS1_ENDOK|</span>
+<span id="L182"><span class="lineNum">     182</span>              :                                   ACCESS2_ENDOK|</span>
+<span id="L183"><span class="lineNum">     183</span>              :                                   ACCESS3_ENDOK|</span>
+<span id="L184"><span class="lineNum">     184</span>              :                                   ACCESS4_ENDOK|</span>
+<span id="L185"><span class="lineNum">     185</span>              :                                   ACCESS5_ENDOK|</span>
+<span id="L186"><span class="lineNum">     186</span>              :                                   ACCESS6_ENDOK|</span>
+<span id="L187"><span class="lineNum">     187</span>              :                                  ACCESS7_ENDOK));</span>
+<span id="L188"><span class="lineNum">     188</span>              :   end</span>
+<span id="L189"><span class="lineNum">     189</span>              : </span>
+<span id="L190"><span class="lineNum">     190</span>              :    // Access fault logic</span>
+<span id="L191"><span class="lineNum">     191</span>              :    // 0. Unmapped local memory : Addr in dccm region but not in dccm offset OR Addr in picm region but not in picm offset OR DCCM -&gt; PIC cross when DCCM/PIC in same region</span>
+<span id="L192"><span class="lineNum">     192</span>              :    // 1. Uncorrectable (double bit) ECC error</span>
+<span id="L193"><span class="lineNum">     193</span>              :    // 3. Address is not in a populated non-dccm region</span>
+<span id="L194"><span class="lineNum">     194</span>              :    // 5. Region predication access fault: Base Address in DCCM/PIC and Final address in non-DCCM/non-PIC region or vice versa</span>
+<span id="L195"><span class="lineNum">     195</span>              :    // 6. Ld/St access to picm are not word aligned or word size</span>
+<span id="L196"><span class="lineNum">     196</span>              :    assign regpred_access_fault_d  = (start_addr_dccm_or_pic ^ base_reg_dccm_or_pic);                   // 5. Region predication access fault: Base Address in DCCM/PIC and Final address in non-DCCM/non-PIC region or vice versa</span>
+<span id="L197"><span class="lineNum">     197</span>              :    assign picm_access_fault_d     = (addr_in_pic_d &amp; ((start_addr_d[1:0] != 2'b0) | ~lsu_pkt_d.word));                                               // 6. Ld/St access to picm are not word aligned or word size</span>
+<span id="L198"><span class="lineNum">     198</span>              : </span>
+<span id="L199"><span class="lineNum">     199</span>              :    if (pt.DCCM_ENABLE &amp; (pt.DCCM_REGION == pt.PIC_REGION)) begin</span>
+<span id="L200"><span class="lineNum">     200</span>              :       assign unmapped_access_fault_d = ((start_addr_in_dccm_region_d &amp; ~(start_addr_in_dccm_d | start_addr_in_pic_d)) |   // 0. Addr in dccm/pic region but not in dccm/pic offset</span>
+<span id="L201"><span class="lineNum">     201</span>              :                                         (end_addr_in_dccm_region_d &amp; ~(end_addr_in_dccm_d | end_addr_in_pic_d))       |   // 0. Addr in dccm/pic region but not in dccm/pic offset</span>
+<span id="L202"><span class="lineNum">     202</span>              :                                         (start_addr_in_dccm_d &amp; end_addr_in_pic_d)                                    |   // 0. DCCM -&gt; PIC cross when DCCM/PIC in same region</span>
+<span id="L203"><span class="lineNum">     203</span>              :                                         (start_addr_in_pic_d  &amp; end_addr_in_dccm_d));                                     // 0. DCCM -&gt; PIC cross when DCCM/PIC in same region</span>
+<span id="L204"><span class="lineNum">     204</span>              :     if (pt.PMP_ENTRIES &gt; 0) begin</span>
+<span id="L205"><span class="lineNum">     205</span>              :       assign mpu_access_fault_d   = (lsu_pmp_error_start | lsu_pmp_error_end);                                         // X. Address is in blocked region</span>
+<span id="L206"><span class="lineNum">     206</span>              :     end else begin</span>
+<span id="L207"><span class="lineNum">     207</span>              :       assign mpu_access_fault_d   = (~start_addr_in_dccm_region_d &amp; ~non_dccm_access_ok);                              // 3. Address is not in a populated non-dccm region</span>
+<span id="L208"><span class="lineNum">     208</span>              :     end</span>
+<span id="L209"><span class="lineNum">     209</span>              :    end else begin</span>
+<span id="L210"><span class="lineNum">     210</span>              :       assign unmapped_access_fault_d = ((start_addr_in_dccm_region_d &amp; ~start_addr_in_dccm_d)                              |   // 0. Addr in dccm region but not in dccm offset</span>
+<span id="L211"><span class="lineNum">     211</span>              :                                         (end_addr_in_dccm_region_d &amp; ~end_addr_in_dccm_d)                                  |   // 0. Addr in dccm region but not in dccm offset</span>
+<span id="L212"><span class="lineNum">     212</span>              :                                         (start_addr_in_pic_region_d &amp; ~start_addr_in_pic_d)                                |   // 0. Addr in picm region but not in picm offset</span>
+<span id="L213"><span class="lineNum">     213</span>              :                                         (end_addr_in_pic_region_d &amp; ~end_addr_in_pic_d));                                      // 0. Addr in picm region but not in picm offset</span>
+<span id="L214"><span class="lineNum">     214</span>              :     if (pt.PMP_ENTRIES &gt; 0) begin</span>
+<span id="L215"><span class="lineNum">     215</span>              :       assign mpu_access_fault_d   = (lsu_pmp_error_start | lsu_pmp_error_end);                                              // X. Address is in blocked region</span>
+<span id="L216"><span class="lineNum">     216</span>              :     end else begin</span>
+<span id="L217"><span class="lineNum">     217</span>              :       assign mpu_access_fault_d   = (~start_addr_in_pic_region_d &amp; ~start_addr_in_dccm_region_d &amp; ~non_dccm_access_ok);     // 3. Address is not in a populated non-dccm region</span>
+<span id="L218"><span class="lineNum">     218</span>              :     end</span>
+<span id="L219"><span class="lineNum">     219</span>              :    end</span>
+<span id="L220"><span class="lineNum">     220</span>              : </span>
+<span id="L221"><span class="lineNum">     221</span>              :    assign access_fault_d = (unmapped_access_fault_d | mpu_access_fault_d | picm_access_fault_d | regpred_access_fault_d) &amp; lsu_pkt_d.valid &amp; ~lsu_pkt_d.dma;</span>
+<span id="L222"><span class="lineNum">     222</span>              :    assign access_fault_mscause_d[3:0] = unmapped_access_fault_d ? 4'h2 : mpu_access_fault_d ? 4'h3 : regpred_access_fault_d ? 4'h5 : picm_access_fault_d ? 4'h6 : 4'h0;</span>
+<span id="L223"><span class="lineNum">     223</span>              : </span>
+<span id="L224"><span class="lineNum">     224</span>              :    // Misaligned happens due to 2 reasons</span>
+<span id="L225"><span class="lineNum">     225</span>              :    // 0. Region cross</span>
+<span id="L226"><span class="lineNum">     226</span>              :    // 1. sideeffects access which are not aligned</span>
+<span id="L227"><span class="lineNum">     227</span>              :    assign regcross_misaligned_fault_d = (start_addr_d[31:28] != end_addr_d[31:28]);</span>
+<span id="L228"><span class="lineNum">     228</span>              :    assign sideeffect_misaligned_fault_d = (is_sideeffects_d &amp; ~is_aligned_d);</span>
+<span id="L229"><span class="lineNum">     229</span>              :    assign misaligned_fault_d = (regcross_misaligned_fault_d | (sideeffect_misaligned_fault_d &amp; addr_external_d)) &amp; lsu_pkt_d.valid &amp; ~lsu_pkt_d.dma;</span>
+<span id="L230"><span class="lineNum">     230</span>              :    assign misaligned_fault_mscause_d[3:0] = regcross_misaligned_fault_d ? 4'h2 : sideeffect_misaligned_fault_d ? 4'h1 : 4'h0;</span>
+<span id="L231"><span class="lineNum">     231</span>              : </span>
+<span id="L232"><span class="lineNum">     232</span>              :    assign exc_mscause_d[3:0] = misaligned_fault_d ? misaligned_fault_mscause_d[3:0] : access_fault_mscause_d[3:0];</span>
+<span id="L233"><span class="lineNum">     233</span>              : </span>
+<span id="L234"><span class="lineNum">     234</span>              :    // Fast interrupt error logic</span>
+<span id="L235"><span class="lineNum">     235</span>              :    assign fir_dccm_access_error_d    = ((start_addr_in_dccm_region_d &amp; ~start_addr_in_dccm_d) |</span>
+<span id="L236"><span class="lineNum">     236</span>              :                                                                                 (end_addr_in_dccm_region_d   &amp; ~end_addr_in_dccm_d)) &amp; lsu_pkt_d.valid &amp; lsu_pkt_d.fast_int;</span>
+<span id="L237"><span class="lineNum">     237</span>              :    assign fir_nondccm_access_error_d = ~(start_addr_in_dccm_region_d &amp; end_addr_in_dccm_region_d) &amp; lsu_pkt_d.valid &amp; lsu_pkt_d.fast_int;</span>
+<span id="L238"><span class="lineNum">     238</span>              : </span>
+<span id="L239"><span class="lineNum">     239</span>              :    rvdff #(.WIDTH(1))   is_sideeffects_mff (.din(is_sideeffects_d), .dout(is_sideeffects_m), .clk(lsu_c2_m_clk), .*);</span>
+<span id="L240"><span class="lineNum">     240</span>              : </span>
+<span id="L241"><span class="lineNum">     241</span>              : endmodule // el2_lsu_addrcheck</span>
+        </pre>
+</td>
+</tr>
+</table>
+
+</body>
+</html>

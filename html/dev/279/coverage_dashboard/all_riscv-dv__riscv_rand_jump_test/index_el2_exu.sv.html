@@ -1,0 +1,483 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>
+        Full
+        coverage report
+    </title>
+    <link rel="stylesheet" type="text/css" href="cov.css">
+    <style>
+        .container {
+            background-color: rgb(169, 169, 169);
+            width: 100%;
+            min-height: 80%;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <table class="title-header-shadow">
+        <td class="title-container">
+            <table class="title-header">
+                <td class="title-logo">
+                    <a href=index.html>
+                        <img src=_static/white.svg></img>
+                    </a>
+                </td>
+                <td class="title">
+                    Project
+                    Full
+                    coverage report
+                </td>
+            </table>
+        </td>
+    </table>
+    <center>
+        <table class="info-table">
+            <tr class="info-table-view">
+                <td width="10%" class="headerInfo">Current view:</td>
+                <td width="40%" class="headerInfoValue">
+                    <a href=index.html>Cores-VeeR-EL2</a>—Cores-VeeR-EL2—design—exu—el2_exu.sv
+                </td>
+                <td width=auto></td>
+                <td width="10%"></td>
+                <td width="10%" class="headerCovSummary colTop">Coverage</td>
+                <td width="10%" class="headerCovSummary colTop" title="Covered + Uncovered code">Hit</td>
+                <td width="10%" class="headerCovSummary colTop" title="Exercised code only">Total</td>
+            </tr>
+            <tr>
+                <td class="headerInfo">Test Date:</td>
+                <td class="headerInfoValue">
+                    03-12-2024
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Toggle
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #33ff00;">
+        89.9%
+    </td>
+    <td class="headerCovSummaryEntry">
+        89
+    </td>
+    <td class="headerCovSummaryEntry">
+        99
+    </td>
+
+            </tr>
+            <tr>
+                <td class="headerInfo">Test:</td>
+                <td class="headerInfoValue">
+                    riscv-dv__riscv_rand_jump_test
+                </td>
+                <td></td>
+                
+    <td class="headerCovSummary rowLeft">
+        Branch
+    </td>
+    <td class="headerCovSummaryEntry" style="color: #0E1116; background-color: #00ff00;">
+        100.0%
+    </td>
+    <td class="headerCovSummaryEntry">
+        3
+    </td>
+    <td class="headerCovSummaryEntry">
+        3
+    </td>
+
+            </tr>
+            
+        </table>
+    </center>
+
+    <table border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td><br/></td>
+</tr>
+<tr>
+<td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : // SPDX-License-Identifier: Apache-2.0</span>
+<span id="L2"><span class="lineNum">       2</span>              : // Copyright 2020 Western Digital Corporation or its affiliates.</span>
+<span id="L3"><span class="lineNum">       3</span>              : //</span>
+<span id="L4"><span class="lineNum">       4</span>              : // Licensed under the Apache License, Version 2.0 (the "License");</span>
+<span id="L5"><span class="lineNum">       5</span>              : // you may not use this file except in compliance with the License.</span>
+<span id="L6"><span class="lineNum">       6</span>              : // You may obtain a copy of the License at</span>
+<span id="L7"><span class="lineNum">       7</span>              : //</span>
+<span id="L8"><span class="lineNum">       8</span>              : // http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L9"><span class="lineNum">       9</span>              : //</span>
+<span id="L10"><span class="lineNum">      10</span>              : // Unless required by applicable law or agreed to in writing, software</span>
+<span id="L11"><span class="lineNum">      11</span>              : // distributed under the License is distributed on an "AS IS" BASIS,</span>
+<span id="L12"><span class="lineNum">      12</span>              : // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L13"><span class="lineNum">      13</span>              : // See the License for the specific language governing permissions and</span>
+<span id="L14"><span class="lineNum">      14</span>              : // limitations under the License.</span>
+<span id="L15"><span class="lineNum">      15</span>              : </span>
+<span id="L16"><span class="lineNum">      16</span>              : </span>
+<span id="L17"><span class="lineNum">      17</span>              : module el2_exu</span>
+<span id="L18"><span class="lineNum">      18</span>              : import el2_pkg::*;</span>
+<span id="L19"><span class="lineNum">      19</span>              : #(</span>
+<span id="L20"><span class="lineNum">      20</span>              : `include "el2_param.vh"</span>
+<span id="L21"><span class="lineNum">      21</span>              : )</span>
+<span id="L22"><span class="lineNum">      22</span>              :   (</span>
+<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC tlaBgGNC">      254328 :    input logic          clk,                                           // Top level clock</span></span>
+<span id="L24"><span class="lineNum">      24</span> <span class="tlaGNC">           6 :    input logic          rst_l,                                         // Reset</span></span>
+<span id="L25"><span class="lineNum">      25</span>              :    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.</span>
+<span id="L26"><span class="lineNum">      26</span>              :    /*verilator coverage_off*/</span>
+<span id="L27"><span class="lineNum">      27</span>              :    input logic          scan_mode,                                     // Scan control</span>
+<span id="L28"><span class="lineNum">      28</span>              :    /*verilator coverage_on*/</span>
+<span id="L29"><span class="lineNum">      29</span>              : </span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">       38628 :    input logic  [1:0]   dec_data_en,                                   // Clock enable {x,r}, one cycle pulse</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">       38608 :    input logic  [1:0]   dec_ctl_en,                                    // Clock enable {x,r}, two cycle pulse</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic  [31:0]  dbg_cmd_wrdata,                                // Debug data   to primary I0 RS1</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaUNC">           0 :    input el2_alu_pkt_t i0_ap,                                         // DEC alu {valid,predecodes}</span></span>
+<span id="L34"><span class="lineNum">      34</span>              : </span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaUNC">           0 :    input logic          dec_debug_wdata_rs1_d,                         // Debug select to primary I0 RS1</span></span>
+<span id="L36"><span class="lineNum">      36</span>              : </span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC tlaBgGNC">         204 :    input el2_predict_pkt_t dec_i0_predict_p_d,                        // DEC branch predict packet</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">          64 :    input logic [pt.BHT_GHR_SIZE-1:0] i0_predict_fghr_d,                // DEC predict fghr</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">        1184 :    input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] i0_predict_index_d,     // DEC predict index</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">         150 :    input logic [pt.BTB_BTAG_SIZE-1:0] i0_predict_btag_d,               // DEC predict branch tag</span></span>
+<span id="L41"><span class="lineNum">      41</span>              : </span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic  [31:0]  lsu_result_m,                                  // Load result M-stage</span></span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC tlaBgGNC">         824 :    input logic  [31:0]  lsu_nonblock_load_data,                        // nonblock load data</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">       31382 :    input logic          dec_i0_rs1_en_d,                               // Qualify GPR RS1 data</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">       18514 :    input logic          dec_i0_rs2_en_d,                               // Qualify GPR RS2 data</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">        6352 :    input logic  [31:0]  gpr_i0_rs1_d,                                  // DEC data gpr</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">        7296 :    input logic  [31:0]  gpr_i0_rs2_d,                                  // DEC data gpr</span></span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">        3340 :    input logic  [31:0]  dec_i0_immed_d,                                // DEC data immediate</span></span>
+<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC">        4288 :    input logic  [31:0]  dec_i0_result_r,                               // DEC result in R-stage</span></span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic  [12:1]  dec_i0_br_immed_d,                             // Branch immediate</span></span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC tlaBgGNC">       28544 :    input logic          dec_i0_alu_decode_d,                           // Valid to X-stage ALU</span></span>
+<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">        4212 :    input logic          dec_i0_branch_d,                               // Branch in D-stage</span></span>
+<span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC">        1092 :    input logic          dec_i0_select_pc_d,                            // PC select to RS1</span></span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">          18 :    input logic  [31:1]  dec_i0_pc_d,                                   // Instruction PC</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic  [3:0]   dec_i0_rs1_bypass_en_d,                        // DEC bypass select  1 - X-stage, 0 - dec bypass data</span></span>
+<span id="L56"><span class="lineNum">      56</span> <span class="tlaGNC tlaBgGNC">           8 :    input logic  [3:0]   dec_i0_rs2_bypass_en_d,                        // DEC bypass select  1 - X-stage, 0 - dec bypass data</span></span>
+<span id="L57"><span class="lineNum">      57</span> <span class="tlaGNC">         568 :    input logic          dec_csr_ren_d,                                 // CSR read select</span></span>
+<span id="L58"><span class="lineNum">      58</span> <span class="tlaGNC">          16 :    input logic  [31:0]  dec_csr_rddata_d,                              // CSR read data</span></span>
+<span id="L59"><span class="lineNum">      59</span>              : </span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">       32362 :    input logic          dec_qual_lsu_d,                                // LSU instruction at D.  Use to quiet LSU operands</span></span>
+<span id="L61"><span class="lineNum">      61</span> <span class="tlaUNC tlaBgUNC">           0 :    input el2_mul_pkt_t mul_p,                                         // DEC {valid, operand signs, low, operand bypass}</span></span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC tlaBgGNC">        1152 :    input el2_div_pkt_t div_p,                                         // DEC {valid, unsigned, rem}</span></span>
+<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">          60 :    input logic          dec_div_cancel,                                // Cancel the divide operation</span></span>
+<span id="L64"><span class="lineNum">      64</span>              : </span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">         242 :    input logic  [31:1]  pred_correct_npc_x,                            // DEC NPC for correctly predicted branch</span></span>
+<span id="L66"><span class="lineNum">      66</span>              : </span>
+<span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC">         944 :    input logic          dec_tlu_flush_lower_r,                         // Flush divide and secondary ALUs</span></span>
+<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">         436 :    input logic  [31:1]  dec_tlu_flush_path_r,                          // Redirect target</span></span>
+<span id="L69"><span class="lineNum">      69</span>              : </span>
+<span id="L70"><span class="lineNum">      70</span>              : </span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaUNC tlaBgUNC">           0 :    input logic         dec_extint_stall,                               // External stall mux select</span></span>
+<span id="L72"><span class="lineNum">      72</span> <span class="tlaUNC">           0 :    input logic [31:2]  dec_tlu_meihap,                                 // External stall mux data</span></span>
+<span id="L73"><span class="lineNum">      73</span>              : </span>
+<span id="L74"><span class="lineNum">      74</span>              : </span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC tlaBgGNC">        2782 :    output logic [31:0]  exu_lsu_rs1_d,                                 // LSU operand</span></span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">         452 :    output logic [31:0]  exu_lsu_rs2_d,                                 // LSU operand</span></span>
+<span id="L77"><span class="lineNum">      77</span>              : </span>
+<span id="L78"><span class="lineNum">      78</span> <span class="tlaGNC">        3020 :    output logic         exu_flush_final,                               // Pipe is being flushed this cycle</span></span>
+<span id="L79"><span class="lineNum">      79</span> <span class="tlaGNC">        1460 :    output logic [31:1]  exu_flush_path_final,                          // Target for the oldest flush source</span></span>
+<span id="L80"><span class="lineNum">      80</span>              : </span>
+<span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC">        5600 :    output logic [31:0]  exu_i0_result_x,                               // Primary ALU result to DEC</span></span>
+<span id="L82"><span class="lineNum">      82</span> <span class="tlaGNC">           6 :    output logic [31:1]  exu_i0_pc_x,                                   // Primary PC  result to DEC</span></span>
+<span id="L83"><span class="lineNum">      83</span> <span class="tlaGNC">          24 :    output logic [31:0]  exu_csr_rs1_x,                                 // RS1 source for a CSR instruction</span></span>
+<span id="L84"><span class="lineNum">      84</span>              : </span>
+<span id="L85"><span class="lineNum">      85</span> <span class="tlaGNC">           6 :    output logic [31:1]  exu_npc_r,                                     // Divide NPC</span></span>
+<span id="L86"><span class="lineNum">      86</span> <span class="tlaGNC">         120 :    output logic [1:0]   exu_i0_br_hist_r,                              // to DEC  I0 branch history</span></span>
+<span id="L87"><span class="lineNum">      87</span> <span class="tlaGNC">         240 :    output logic         exu_i0_br_error_r,                             // to DEC  I0 branch error</span></span>
+<span id="L88"><span class="lineNum">      88</span> <span class="tlaGNC">         100 :    output logic         exu_i0_br_start_error_r,                       // to DEC  I0 branch start error</span></span>
+<span id="L89"><span class="lineNum">      89</span> <span class="tlaGNC">         204 :    output logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] exu_i0_br_index_r,     // to DEC  I0 branch index</span></span>
+<span id="L90"><span class="lineNum">      90</span> <span class="tlaGNC">         404 :    output logic         exu_i0_br_valid_r,                             // to DEC  I0 branch valid</span></span>
+<span id="L91"><span class="lineNum">      91</span> <span class="tlaGNC">        1772 :    output logic         exu_i0_br_mp_r,                                // to DEC  I0 branch mispredict</span></span>
+<span id="L92"><span class="lineNum">      92</span> <span class="tlaGNC">        8202 :    output logic         exu_i0_br_middle_r,                            // to DEC  I0 branch middle</span></span>
+<span id="L93"><span class="lineNum">      93</span> <span class="tlaGNC">          16 :    output logic [pt.BHT_GHR_SIZE-1:0]  exu_i0_br_fghr_r,               // to DEC  I0 branch fghr</span></span>
+<span id="L94"><span class="lineNum">      94</span> <span class="tlaGNC">        5176 :    output logic         exu_i0_br_way_r,                               // to DEC  I0 branch way</span></span>
+<span id="L95"><span class="lineNum">      95</span>              : </span>
+<span id="L96"><span class="lineNum">      96</span> <span class="tlaGNC">          40 :    output el2_predict_pkt_t exu_mp_pkt,                               // Mispredict branch packet</span></span>
+<span id="L97"><span class="lineNum">      97</span> <span class="tlaGNC">         168 :    output logic [pt.BHT_GHR_SIZE-1:0]  exu_mp_eghr,                    // Mispredict global history</span></span>
+<span id="L98"><span class="lineNum">      98</span> <span class="tlaGNC">          16 :    output logic [pt.BHT_GHR_SIZE-1:0]  exu_mp_fghr,                    // Mispredict fghr</span></span>
+<span id="L99"><span class="lineNum">      99</span> <span class="tlaGNC">         980 :    output logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO]  exu_mp_index,         // Mispredict index</span></span>
+<span id="L100"><span class="lineNum">     100</span> <span class="tlaGNC">         756 :    output logic [pt.BTB_BTAG_SIZE-1:0]  exu_mp_btag,                   // Mispredict btag</span></span>
+<span id="L101"><span class="lineNum">     101</span>              : </span>
+<span id="L102"><span class="lineNum">     102</span>              : </span>
+<span id="L103"><span class="lineNum">     103</span> <span class="tlaGNC">        1772 :    output logic         exu_pmu_i0_br_misp,                            // to PMU - I0 E4 branch mispredict</span></span>
+<span id="L104"><span class="lineNum">     104</span> <span class="tlaGNC">        1924 :    output logic         exu_pmu_i0_br_ataken,                          // to PMU - I0 E4 taken</span></span>
+<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC">        8362 :    output logic         exu_pmu_i0_pc4,                                // to PMU - I0 E4 PC</span></span>
+<span id="L106"><span class="lineNum">     106</span>              : </span>
+<span id="L107"><span class="lineNum">     107</span>              : </span>
+<span id="L108"><span class="lineNum">     108</span> <span class="tlaGNC">         556 :    output logic [31:0]  exu_div_result,                                // Divide result</span></span>
+<span id="L109"><span class="lineNum">     109</span> <span class="tlaGNC">        2252 :    output logic         exu_div_wren                                   // Divide write enable to GPR</span></span>
+<span id="L110"><span class="lineNum">     110</span>              :   );</span>
+<span id="L111"><span class="lineNum">     111</span>              : </span>
+<span id="L112"><span class="lineNum">     112</span>              : </span>
+<span id="L113"><span class="lineNum">     113</span>              : </span>
+<span id="L114"><span class="lineNum">     114</span>              : </span>
+<span id="L115"><span class="lineNum">     115</span> <span class="tlaGNC">          32 :    logic [31:0]                i0_rs1_bypass_data_d;</span></span>
+<span id="L116"><span class="lineNum">     116</span> <span class="tlaGNC">           8 :    logic [31:0]                i0_rs2_bypass_data_d;</span></span>
+<span id="L117"><span class="lineNum">     117</span> <span class="tlaGNC">         220 :    logic                       i0_rs1_bypass_en_d;</span></span>
+<span id="L118"><span class="lineNum">     118</span> <span class="tlaGNC">          68 :    logic                       i0_rs2_bypass_en_d;</span></span>
+<span id="L119"><span class="lineNum">     119</span> <span class="tlaGNC">        5980 :    logic [31:0]                i0_rs1_d,  i0_rs2_d;</span></span>
+<span id="L120"><span class="lineNum">     120</span> <span class="tlaGNC">        5980 :    logic [31:0]                muldiv_rs1_d;</span></span>
+<span id="L121"><span class="lineNum">     121</span> <span class="tlaGNC">         242 :    logic [31:1]                pred_correct_npc_r;</span></span>
+<span id="L122"><span class="lineNum">     122</span> <span class="tlaGNC">        1892 :    logic                       i0_pred_correct_upper_r;</span></span>
+<span id="L123"><span class="lineNum">     123</span> <span class="tlaGNC">           6 :    logic [31:1]                i0_flush_path_upper_r;</span></span>
+<span id="L124"><span class="lineNum">     124</span> <span class="tlaGNC">         568 :    logic                       x_data_en, x_data_en_q1, x_data_en_q2, r_data_en, r_data_en_q2;</span></span>
+<span id="L125"><span class="lineNum">     125</span> <span class="tlaGNC">       38608 :    logic                       x_ctl_en,  r_ctl_en;</span></span>
+<span id="L126"><span class="lineNum">     126</span>              : </span>
+<span id="L127"><span class="lineNum">     127</span> <span class="tlaGNC">          16 :    logic [pt.BHT_GHR_SIZE-1:0] ghr_d_ns, ghr_d;</span></span>
+<span id="L128"><span class="lineNum">     128</span> <span class="tlaGNC">          16 :    logic [pt.BHT_GHR_SIZE-1:0] ghr_x_ns, ghr_x;</span></span>
+<span id="L129"><span class="lineNum">     129</span> <span class="tlaGNC">        2092 :    logic                       i0_taken_d;</span></span>
+<span id="L130"><span class="lineNum">     130</span> <span class="tlaGNC">        2092 :    logic                       i0_taken_x;</span></span>
+<span id="L131"><span class="lineNum">     131</span> <span class="tlaGNC">         416 :    logic                       i0_valid_d;</span></span>
+<span id="L132"><span class="lineNum">     132</span> <span class="tlaGNC">         416 :    logic                       i0_valid_x;</span></span>
+<span id="L133"><span class="lineNum">     133</span> <span class="tlaGNC">          16 :    logic [pt.BHT_GHR_SIZE-1:0] after_flush_eghr;</span></span>
+<span id="L134"><span class="lineNum">     134</span>              : </span>
+<span id="L135"><span class="lineNum">     135</span> <span class="tlaGNC">          40 :    el2_predict_pkt_t          final_predict_mp;</span></span>
+<span id="L136"><span class="lineNum">     136</span> <span class="tlaGNC">         204 :    el2_predict_pkt_t          i0_predict_newp_d;</span></span>
+<span id="L137"><span class="lineNum">     137</span>              : </span>
+<span id="L138"><span class="lineNum">     138</span> <span class="tlaUNC tlaBgUNC">           0 :    logic                       flush_in_d;</span></span>
+<span id="L139"><span class="lineNum">     139</span> <span class="tlaGNC tlaBgGNC">        4980 :    logic [31:0]                alu_result_x;</span></span>
+<span id="L140"><span class="lineNum">     140</span>              : </span>
+<span id="L141"><span class="lineNum">     141</span> <span class="tlaGNC">        2260 :    logic                       mul_valid_x;</span></span>
+<span id="L142"><span class="lineNum">     142</span> <span class="tlaGNC">         322 :    logic [31:0]                mul_result_x;</span></span>
+<span id="L143"><span class="lineNum">     143</span>              : </span>
+<span id="L144"><span class="lineNum">     144</span> <span class="tlaGNC">          92 :    el2_predict_pkt_t          i0_pp_r;</span></span>
+<span id="L145"><span class="lineNum">     145</span>              : </span>
+<span id="L146"><span class="lineNum">     146</span> <span class="tlaGNC">        2076 :    logic                       i0_flush_upper_d;</span></span>
+<span id="L147"><span class="lineNum">     147</span> <span class="tlaGNC">          18 :    logic [31:1]                i0_flush_path_d;</span></span>
+<span id="L148"><span class="lineNum">     148</span> <span class="tlaGNC">         204 :    el2_predict_pkt_t          i0_predict_p_d;</span></span>
+<span id="L149"><span class="lineNum">     149</span> <span class="tlaGNC">        1892 :    logic                       i0_pred_correct_upper_d;</span></span>
+<span id="L150"><span class="lineNum">     150</span>              : </span>
+<span id="L151"><span class="lineNum">     151</span> <span class="tlaGNC">        2076 :    logic                       i0_flush_upper_x;</span></span>
+<span id="L152"><span class="lineNum">     152</span> <span class="tlaGNC">           6 :    logic [31:1]                i0_flush_path_x;</span></span>
+<span id="L153"><span class="lineNum">     153</span> <span class="tlaGNC">          92 :    el2_predict_pkt_t          i0_predict_p_x;</span></span>
+<span id="L154"><span class="lineNum">     154</span> <span class="tlaGNC">        1892 :    logic                       i0_pred_correct_upper_x;</span></span>
+<span id="L155"><span class="lineNum">     155</span> <span class="tlaGNC">        4212 :    logic                       i0_branch_x;</span></span>
+<span id="L156"><span class="lineNum">     156</span>              : </span>
+<span id="L157"><span class="lineNum">     157</span>              :    localparam PREDPIPESIZE = pt.BTB_ADDR_HI-pt.BTB_ADDR_LO+1+pt.BHT_GHR_SIZE+pt.BTB_BTAG_SIZE;</span>
+<span id="L158"><span class="lineNum">     158</span> <span class="tlaGNC">          16 :    logic [PREDPIPESIZE-1:0]    predpipe_d, predpipe_x, predpipe_r, final_predpipe_mp;</span></span>
+<span id="L159"><span class="lineNum">     159</span>              : </span>
+<span id="L160"><span class="lineNum">     160</span>              : </span>
+<span id="L161"><span class="lineNum">     161</span>              : </span>
+<span id="L162"><span class="lineNum">     162</span>              : </span>
+<span id="L163"><span class="lineNum">     163</span>              :    rvdffpcie #(31)                       i_flush_path_x_ff    (.*, .clk(clk),        .en ( x_data_en     ),  .din ( i0_flush_path_d[31:1]         ),  .dout( i0_flush_path_x[31:1]      ) );</span>
+<span id="L164"><span class="lineNum">     164</span>              :    rvdffe #(32)                          i_csr_rs1_x_ff       (.*, .clk(clk),        .en ( x_data_en_q1  ),  .din ( i0_rs1_d[31:0]                ),  .dout( exu_csr_rs1_x[31:0]        ) );</span>
+<span id="L165"><span class="lineNum">     165</span>              :    rvdffppe #($bits(el2_predict_pkt_t)) i_predictpacket_x_ff (.*, .clk(clk),        .en ( x_data_en     ),  .din ( i0_predict_p_d                ),  .dout( i0_predict_p_x             ) );</span>
+<span id="L166"><span class="lineNum">     166</span>              :    rvdffe #(PREDPIPESIZE)                i_predpipe_x_ff      (.*, .clk(clk),        .en ( x_data_en_q2  ),  .din ( predpipe_d                    ),  .dout( predpipe_x                 ) );</span>
+<span id="L167"><span class="lineNum">     167</span>              :    rvdffe #(PREDPIPESIZE)                i_predpipe_r_ff      (.*, .clk(clk),        .en ( r_data_en_q2  ),  .din ( predpipe_x                    ),  .dout( predpipe_r                 ) );</span>
+<span id="L168"><span class="lineNum">     168</span>              : </span>
+<span id="L169"><span class="lineNum">     169</span>              :    rvdffe #(4+pt.BHT_GHR_SIZE)          i_x_ff               (.*, .clk(clk),        .en ( x_ctl_en      ),  .din ({i0_valid_d,i0_taken_d,i0_flush_upper_d,i0_pred_correct_upper_d,ghr_x_ns[pt.BHT_GHR_SIZE-1:0]} ),</span>
+<span id="L170"><span class="lineNum">     170</span>              :                                                                                                             .dout({i0_valid_x,i0_taken_x,i0_flush_upper_x,i0_pred_correct_upper_x,ghr_x[pt.BHT_GHR_SIZE-1:0]}    ) );</span>
+<span id="L171"><span class="lineNum">     171</span>              : </span>
+<span id="L172"><span class="lineNum">     172</span>              :    rvdffppe #($bits(el2_predict_pkt_t)+1) i_r_ff0         (.*, .clk(clk),        .en ( r_ctl_en      ),  .din ({i0_pred_correct_upper_x, i0_predict_p_x}),</span>
+<span id="L173"><span class="lineNum">     173</span>              :                                                                                                           .dout({i0_pred_correct_upper_r, i0_pp_r       }) );</span>
+<span id="L174"><span class="lineNum">     174</span>              : </span>
+<span id="L175"><span class="lineNum">     175</span>              :    rvdffpcie #(31)                      i_flush_r_ff         (.*, .clk(clk),        .en ( r_data_en     ),  .din ( i0_flush_path_x[31:1]         ),  .dout( i0_flush_path_upper_r[31:1]) );</span>
+<span id="L176"><span class="lineNum">     176</span>              :    rvdffpcie #(31)                      i_npc_r_ff           (.*, .clk(clk),        .en ( r_data_en     ),  .din ( pred_correct_npc_x[31:1]      ),  .dout( pred_correct_npc_r[31:1]   ) );</span>
+<span id="L177"><span class="lineNum">     177</span>              : </span>
+<span id="L178"><span class="lineNum">     178</span>              :    rvdffie #(pt.BHT_GHR_SIZE+2,1)       i_misc_ff            (.*, .clk(clk),                                .din ({ghr_d_ns[pt.BHT_GHR_SIZE-1:0], mul_p.valid, dec_i0_branch_d}),</span>
+<span id="L179"><span class="lineNum">     179</span>              :                                                                                                             .dout({ghr_d[pt.BHT_GHR_SIZE-1:0]   , mul_valid_x, i0_branch_x}) );</span>
+<span id="L180"><span class="lineNum">     180</span>              : </span>
+<span id="L181"><span class="lineNum">     181</span>              : </span>
+<span id="L182"><span class="lineNum">     182</span>              : </span>
+<span id="L183"><span class="lineNum">     183</span>              : </span>
+<span id="L184"><span class="lineNum">     184</span>              : </span>
+<span id="L185"><span class="lineNum">     185</span>              :    assign predpipe_d[PREDPIPESIZE-1:0]</span>
+<span id="L186"><span class="lineNum">     186</span>              :                                    = {i0_predict_fghr_d, i0_predict_index_d, i0_predict_btag_d};</span>
+<span id="L187"><span class="lineNum">     187</span>              : </span>
+<span id="L188"><span class="lineNum">     188</span>              : </span>
+<span id="L189"><span class="lineNum">     189</span>              :    assign i0_rs1_bypass_en_d       = dec_i0_rs1_bypass_en_d[0] | dec_i0_rs1_bypass_en_d[1] | dec_i0_rs1_bypass_en_d[2] | dec_i0_rs1_bypass_en_d[3];</span>
+<span id="L190"><span class="lineNum">     190</span>              :    assign i0_rs2_bypass_en_d       = dec_i0_rs2_bypass_en_d[0] | dec_i0_rs2_bypass_en_d[1] | dec_i0_rs2_bypass_en_d[2] | dec_i0_rs2_bypass_en_d[3];</span>
+<span id="L191"><span class="lineNum">     191</span>              : </span>
+<span id="L192"><span class="lineNum">     192</span>              :    assign i0_rs1_bypass_data_d[31:0]=({32{dec_i0_rs1_bypass_en_d[0]}} &amp; dec_i0_result_r[31:0]       ) |</span>
+<span id="L193"><span class="lineNum">     193</span>              :                                      ({32{dec_i0_rs1_bypass_en_d[1]}} &amp; lsu_result_m[31:0]          ) |</span>
+<span id="L194"><span class="lineNum">     194</span>              :                                      ({32{dec_i0_rs1_bypass_en_d[2]}} &amp; exu_i0_result_x[31:0]       ) |</span>
+<span id="L195"><span class="lineNum">     195</span>              :                                      ({32{dec_i0_rs1_bypass_en_d[3]}} &amp; lsu_nonblock_load_data[31:0]);</span>
+<span id="L196"><span class="lineNum">     196</span>              : </span>
+<span id="L197"><span class="lineNum">     197</span>              :    assign i0_rs2_bypass_data_d[31:0]=({32{dec_i0_rs2_bypass_en_d[0]}} &amp; dec_i0_result_r[31:0]       ) |</span>
+<span id="L198"><span class="lineNum">     198</span>              :                                      ({32{dec_i0_rs2_bypass_en_d[1]}} &amp; lsu_result_m[31:0]          ) |</span>
+<span id="L199"><span class="lineNum">     199</span>              :                                      ({32{dec_i0_rs2_bypass_en_d[2]}} &amp; exu_i0_result_x[31:0]       ) |</span>
+<span id="L200"><span class="lineNum">     200</span>              :                                      ({32{dec_i0_rs2_bypass_en_d[3]}} &amp; lsu_nonblock_load_data[31:0]);</span>
+<span id="L201"><span class="lineNum">     201</span>              : </span>
+<span id="L202"><span class="lineNum">     202</span>              : </span>
+<span id="L203"><span class="lineNum">     203</span>              :    assign i0_rs1_d[31:0]           = ({32{ i0_rs1_bypass_en_d                                           }}             &amp; i0_rs1_bypass_data_d[31:0]) |</span>
+<span id="L204"><span class="lineNum">     204</span>              :                                      ({32{~i0_rs1_bypass_en_d &amp;  dec_i0_select_pc_d                     }}             &amp; {dec_i0_pc_d[31:1],1'b0}  ) |    // for jal's</span>
+<span id="L205"><span class="lineNum">     205</span>              :                                      ({32{~i0_rs1_bypass_en_d &amp;  dec_debug_wdata_rs1_d                  }}             &amp; dbg_cmd_wrdata[31:0]      ) |</span>
+<span id="L206"><span class="lineNum">     206</span>              :                                      ({32{~i0_rs1_bypass_en_d &amp; ~dec_debug_wdata_rs1_d &amp; dec_i0_rs1_en_d}}             &amp; gpr_i0_rs1_d[31:0]        );</span>
+<span id="L207"><span class="lineNum">     207</span>              : </span>
+<span id="L208"><span class="lineNum">     208</span>              :    assign i0_rs2_d[31:0]           = ({32{~i0_rs2_bypass_en_d &amp; dec_i0_rs2_en_d}}                                      &amp; gpr_i0_rs2_d[31:0]        ) |</span>
+<span id="L209"><span class="lineNum">     209</span>              :                                      ({32{~i0_rs2_bypass_en_d                  }}                                      &amp; dec_i0_immed_d[31:0]      ) |</span>
+<span id="L210"><span class="lineNum">     210</span>              :                                      ({32{ i0_rs2_bypass_en_d                  }}                                      &amp; i0_rs2_bypass_data_d[31:0]);</span>
+<span id="L211"><span class="lineNum">     211</span>              : </span>
+<span id="L212"><span class="lineNum">     212</span>              : </span>
+<span id="L213"><span class="lineNum">     213</span>              :    assign exu_lsu_rs1_d[31:0]      = ({32{~i0_rs1_bypass_en_d &amp; ~dec_extint_stall &amp; dec_i0_rs1_en_d &amp; dec_qual_lsu_d}} &amp; gpr_i0_rs1_d[31:0]        ) |</span>
+<span id="L214"><span class="lineNum">     214</span>              :                                      ({32{ i0_rs1_bypass_en_d &amp; ~dec_extint_stall                   &amp; dec_qual_lsu_d}} &amp; i0_rs1_bypass_data_d[31:0]) |</span>
+<span id="L215"><span class="lineNum">     215</span>              :                                      ({32{                       dec_extint_stall                   &amp; dec_qual_lsu_d}} &amp; {dec_tlu_meihap[31:2],2'b0});</span>
+<span id="L216"><span class="lineNum">     216</span>              : </span>
+<span id="L217"><span class="lineNum">     217</span>              :    assign exu_lsu_rs2_d[31:0]      = ({32{~i0_rs2_bypass_en_d &amp; ~dec_extint_stall &amp; dec_i0_rs2_en_d &amp; dec_qual_lsu_d}} &amp; gpr_i0_rs2_d[31:0]        ) |</span>
+<span id="L218"><span class="lineNum">     218</span>              :                                      ({32{ i0_rs2_bypass_en_d &amp; ~dec_extint_stall                   &amp; dec_qual_lsu_d}} &amp; i0_rs2_bypass_data_d[31:0]);</span>
+<span id="L219"><span class="lineNum">     219</span>              : </span>
+<span id="L220"><span class="lineNum">     220</span>              : </span>
+<span id="L221"><span class="lineNum">     221</span>              :    assign muldiv_rs1_d[31:0]       = ({32{~i0_rs1_bypass_en_d &amp; dec_i0_rs1_en_d}}                                      &amp; gpr_i0_rs1_d[31:0]        ) |</span>
+<span id="L222"><span class="lineNum">     222</span>              :                                      ({32{ i0_rs1_bypass_en_d                  }}                                      &amp; i0_rs1_bypass_data_d[31:0]);</span>
+<span id="L223"><span class="lineNum">     223</span>              : </span>
+<span id="L224"><span class="lineNum">     224</span>              : </span>
+<span id="L225"><span class="lineNum">     225</span>              :    assign x_data_en                =  dec_data_en[1];</span>
+<span id="L226"><span class="lineNum">     226</span>              :    assign x_data_en_q1             =  dec_data_en[1] &amp; dec_csr_ren_d;</span>
+<span id="L227"><span class="lineNum">     227</span>              :    assign x_data_en_q2             =  dec_data_en[1] &amp; dec_i0_branch_d;</span>
+<span id="L228"><span class="lineNum">     228</span>              :    assign r_data_en                =  dec_data_en[0];</span>
+<span id="L229"><span class="lineNum">     229</span>              :    assign r_data_en_q2             =  dec_data_en[0] &amp; i0_branch_x;</span>
+<span id="L230"><span class="lineNum">     230</span>              :    assign x_ctl_en                 =  dec_ctl_en[1];</span>
+<span id="L231"><span class="lineNum">     231</span>              :    assign r_ctl_en                 =  dec_ctl_en[0];</span>
+<span id="L232"><span class="lineNum">     232</span>              : </span>
+<span id="L233"><span class="lineNum">     233</span>              : </span>
+<span id="L234"><span class="lineNum">     234</span>              : </span>
+<span id="L235"><span class="lineNum">     235</span>              : </span>
+<span id="L236"><span class="lineNum">     236</span>              :    el2_exu_alu_ctl #(.pt(pt)) i_alu  (.*,</span>
+<span id="L237"><span class="lineNum">     237</span>              :                           .enable            ( x_data_en                   ),   // I</span>
+<span id="L238"><span class="lineNum">     238</span>              :                           .pp_in             ( i0_predict_newp_d           ),   // I</span>
+<span id="L239"><span class="lineNum">     239</span>              :                           .valid_in          ( dec_i0_alu_decode_d         ),   // I</span>
+<span id="L240"><span class="lineNum">     240</span>              :                           .flush_upper_x     ( i0_flush_upper_x            ),   // I</span>
+<span id="L241"><span class="lineNum">     241</span>              :                           .flush_lower_r     ( dec_tlu_flush_lower_r       ),   // I</span>
+<span id="L242"><span class="lineNum">     242</span>              :                           .a_in              ( i0_rs1_d[31:0]              ),   // I</span>
+<span id="L243"><span class="lineNum">     243</span>              :                           .b_in              ( i0_rs2_d[31:0]              ),   // I</span>
+<span id="L244"><span class="lineNum">     244</span>              :                           .pc_in             ( dec_i0_pc_d[31:1]           ),   // I</span>
+<span id="L245"><span class="lineNum">     245</span>              :                           .brimm_in          ( dec_i0_br_immed_d[12:1]     ),   // I</span>
+<span id="L246"><span class="lineNum">     246</span>              :                           .ap                ( i0_ap                       ),   // I</span>
+<span id="L247"><span class="lineNum">     247</span>              :                           .csr_ren_in        ( dec_csr_ren_d               ),   // I</span>
+<span id="L248"><span class="lineNum">     248</span>              :                           .csr_rddata_in     ( dec_csr_rddata_d[31:0]      ),   // I</span>
+<span id="L249"><span class="lineNum">     249</span>              :                           .result_ff         ( alu_result_x[31:0]          ),   // O</span>
+<span id="L250"><span class="lineNum">     250</span>              :                           .flush_upper_out   ( i0_flush_upper_d            ),   // O</span>
+<span id="L251"><span class="lineNum">     251</span>              :                           .flush_final_out   ( exu_flush_final             ),   // O</span>
+<span id="L252"><span class="lineNum">     252</span>              :                           .flush_path_out    ( i0_flush_path_d[31:1]       ),   // O</span>
+<span id="L253"><span class="lineNum">     253</span>              :                           .predict_p_out     ( i0_predict_p_d              ),   // O</span>
+<span id="L254"><span class="lineNum">     254</span>              :                           .pred_correct_out  ( i0_pred_correct_upper_d     ),   // O</span>
+<span id="L255"><span class="lineNum">     255</span>              :                           .pc_ff             ( exu_i0_pc_x[31:1]           ));  // O</span>
+<span id="L256"><span class="lineNum">     256</span>              : </span>
+<span id="L257"><span class="lineNum">     257</span>              : </span>
+<span id="L258"><span class="lineNum">     258</span>              : </span>
+<span id="L259"><span class="lineNum">     259</span>              :    el2_exu_mul_ctl #(.pt(pt)) i_mul   (.*,</span>
+<span id="L260"><span class="lineNum">     260</span>              :                           .mul_p             ( mul_p              &amp; {$bits(el2_mul_pkt_t){mul_p.valid}} ),   // I</span>
+<span id="L261"><span class="lineNum">     261</span>              :                           .rs1_in            ( muldiv_rs1_d[31:0] &amp; {32{mul_p.valid}}                    ),   // I</span>
+<span id="L262"><span class="lineNum">     262</span>              :                           .rs2_in            ( i0_rs2_d[31:0]     &amp; {32{mul_p.valid}}                    ),   // I</span>
+<span id="L263"><span class="lineNum">     263</span>              :                           .result_x          ( mul_result_x[31:0]                                        ));  // O</span>
+<span id="L264"><span class="lineNum">     264</span>              : </span>
+<span id="L265"><span class="lineNum">     265</span>              : </span>
+<span id="L266"><span class="lineNum">     266</span>              : </span>
+<span id="L267"><span class="lineNum">     267</span>              :    el2_exu_div_ctl #(.pt(pt)) i_div   (.*,</span>
+<span id="L268"><span class="lineNum">     268</span>              :                           .cancel            ( dec_div_cancel              ),   // I</span>
+<span id="L269"><span class="lineNum">     269</span>              :                           .dp                ( div_p                       ),   // I</span>
+<span id="L270"><span class="lineNum">     270</span>              :                           .dividend          ( muldiv_rs1_d[31:0]          ),   // I</span>
+<span id="L271"><span class="lineNum">     271</span>              :                           .divisor           ( i0_rs2_d[31:0]              ),   // I</span>
+<span id="L272"><span class="lineNum">     272</span>              :                           .finish_dly        ( exu_div_wren                ),   // O</span>
+<span id="L273"><span class="lineNum">     273</span>              :                           .out               ( exu_div_result[31:0]        ));  // O</span>
+<span id="L274"><span class="lineNum">     274</span>              : </span>
+<span id="L275"><span class="lineNum">     275</span>              : </span>
+<span id="L276"><span class="lineNum">     276</span>              : </span>
+<span id="L277"><span class="lineNum">     277</span>              :    assign exu_i0_result_x[31:0]    =  (mul_valid_x)  ?  mul_result_x[31:0]  :  alu_result_x[31:0];</span>
+<span id="L278"><span class="lineNum">     278</span>              : </span>
+<span id="L279"><span class="lineNum">     279</span>              : </span>
+<span id="L280"><span class="lineNum">     280</span>              : </span>
+<span id="L281"><span class="lineNum">     281</span>              : </span>
+<span id="L282"><span class="lineNum">     282</span> <span class="tlaGNC">           6 :    always_comb begin</span></span>
+<span id="L283"><span class="lineNum">     283</span> <span class="tlaGNC">           6 :       i0_predict_newp_d            =  dec_i0_predict_p_d;</span></span>
+<span id="L284"><span class="lineNum">     284</span> <span class="tlaGNC">           6 :       i0_predict_newp_d.boffset    =  dec_i0_pc_d[1];  // from the start of inst</span></span>
+<span id="L285"><span class="lineNum">     285</span>              :    end</span>
+<span id="L286"><span class="lineNum">     286</span>              : </span>
+<span id="L287"><span class="lineNum">     287</span>              : </span>
+<span id="L288"><span class="lineNum">     288</span>              :    assign exu_pmu_i0_br_misp       =  i0_pp_r.misp;</span>
+<span id="L289"><span class="lineNum">     289</span>              :    assign exu_pmu_i0_br_ataken     =  i0_pp_r.ataken;</span>
+<span id="L290"><span class="lineNum">     290</span>              :    assign exu_pmu_i0_pc4           =  i0_pp_r.pc4;</span>
+<span id="L291"><span class="lineNum">     291</span>              : </span>
+<span id="L292"><span class="lineNum">     292</span>              : </span>
+<span id="L293"><span class="lineNum">     293</span>              :    assign i0_valid_d               =  i0_predict_p_d.valid  &amp; dec_i0_alu_decode_d &amp; ~dec_tlu_flush_lower_r;</span>
+<span id="L294"><span class="lineNum">     294</span>              :    assign i0_taken_d               = (i0_predict_p_d.ataken &amp; dec_i0_alu_decode_d);</span>
+<span id="L295"><span class="lineNum">     295</span>              : </span>
+<span id="L296"><span class="lineNum">     296</span>              : if(pt.BTB_ENABLE==1) begin</span>
+<span id="L297"><span class="lineNum">     297</span>              :    // maintain GHR at D</span>
+<span id="L298"><span class="lineNum">     298</span>              :    assign ghr_d_ns[pt.BHT_GHR_SIZE-1:0]</span>
+<span id="L299"><span class="lineNum">     299</span>              :                                    = ({pt.BHT_GHR_SIZE{~dec_tlu_flush_lower_r &amp;  i0_valid_d}} &amp; {ghr_d[pt.BHT_GHR_SIZE-2:0], i0_taken_d}) |</span>
+<span id="L300"><span class="lineNum">     300</span>              :                                      ({pt.BHT_GHR_SIZE{~dec_tlu_flush_lower_r &amp; ~i0_valid_d}} &amp;  ghr_d[pt.BHT_GHR_SIZE-1:0]             ) |</span>
+<span id="L301"><span class="lineNum">     301</span>              :                                      ({pt.BHT_GHR_SIZE{ dec_tlu_flush_lower_r              }} &amp;  ghr_x[pt.BHT_GHR_SIZE-1:0]             );</span>
+<span id="L302"><span class="lineNum">     302</span>              : </span>
+<span id="L303"><span class="lineNum">     303</span>              :    // maintain GHR at X</span>
+<span id="L304"><span class="lineNum">     304</span>              :    assign ghr_x_ns[pt.BHT_GHR_SIZE-1:0]</span>
+<span id="L305"><span class="lineNum">     305</span>              :                                    = ({pt.BHT_GHR_SIZE{ i0_valid_x}} &amp; {ghr_x[pt.BHT_GHR_SIZE-2:0], i0_taken_x}) |</span>
+<span id="L306"><span class="lineNum">     306</span>              :                                      ({pt.BHT_GHR_SIZE{~i0_valid_x}} &amp;  ghr_x[pt.BHT_GHR_SIZE-1:0]             ) ;</span>
+<span id="L307"><span class="lineNum">     307</span>              : </span>
+<span id="L308"><span class="lineNum">     308</span>              : </span>
+<span id="L309"><span class="lineNum">     309</span>              :    assign exu_i0_br_valid_r                                 =  i0_pp_r.valid;</span>
+<span id="L310"><span class="lineNum">     310</span>              :    assign exu_i0_br_mp_r                                    =  i0_pp_r.misp;</span>
+<span id="L311"><span class="lineNum">     311</span>              :    assign exu_i0_br_way_r                                   =  i0_pp_r.way;</span>
+<span id="L312"><span class="lineNum">     312</span>              :    assign exu_i0_br_hist_r[1:0]                             =  {2{i0_pp_r.valid}} &amp; i0_pp_r.hist[1:0];</span>
+<span id="L313"><span class="lineNum">     313</span>              :    assign exu_i0_br_error_r                                 =  i0_pp_r.br_error;</span>
+<span id="L314"><span class="lineNum">     314</span>              :    assign exu_i0_br_middle_r                                =  i0_pp_r.pc4 ^ i0_pp_r.boffset;</span>
+<span id="L315"><span class="lineNum">     315</span>              :    assign exu_i0_br_start_error_r                           =  i0_pp_r.br_start_error;</span>
+<span id="L316"><span class="lineNum">     316</span>              : </span>
+<span id="L317"><span class="lineNum">     317</span>              :    assign {exu_i0_br_fghr_r[pt.BHT_GHR_SIZE-1:0],</span>
+<span id="L318"><span class="lineNum">     318</span>              :            exu_i0_br_index_r[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO]}=  predpipe_r[PREDPIPESIZE-1:pt.BTB_BTAG_SIZE];</span>
+<span id="L319"><span class="lineNum">     319</span>              : </span>
+<span id="L320"><span class="lineNum">     320</span>              : </span>
+<span id="L321"><span class="lineNum">     321</span>              :    assign final_predict_mp                                  = (i0_flush_upper_x)  ?  i0_predict_p_x  :  '0;</span>
+<span id="L322"><span class="lineNum">     322</span>              : </span>
+<span id="L323"><span class="lineNum">     323</span>              :    assign final_predpipe_mp[PREDPIPESIZE-1:0]               = (i0_flush_upper_x)  ?  predpipe_x      :  '0;</span>
+<span id="L324"><span class="lineNum">     324</span>              : </span>
+<span id="L325"><span class="lineNum">     325</span>              :    assign after_flush_eghr[pt.BHT_GHR_SIZE-1:0]             = (i0_flush_upper_x &amp; ~dec_tlu_flush_lower_r)  ?  ghr_d[pt.BHT_GHR_SIZE-1:0]  :  ghr_x[pt.BHT_GHR_SIZE-1:0];</span>
+<span id="L326"><span class="lineNum">     326</span>              : </span>
+<span id="L327"><span class="lineNum">     327</span>              : </span>
+<span id="L328"><span class="lineNum">     328</span>              :    assign exu_mp_pkt.valid                                  =  final_predict_mp.valid;</span>
+<span id="L329"><span class="lineNum">     329</span>              :    assign exu_mp_pkt.way                                    =  final_predict_mp.way;</span>
+<span id="L330"><span class="lineNum">     330</span>              :    assign exu_mp_pkt.misp                                   =  final_predict_mp.misp;</span>
+<span id="L331"><span class="lineNum">     331</span>              :    assign exu_mp_pkt.pcall                                  =  final_predict_mp.pcall;</span>
+<span id="L332"><span class="lineNum">     332</span>              :    assign exu_mp_pkt.pja                                    =  final_predict_mp.pja;</span>
+<span id="L333"><span class="lineNum">     333</span>              :    assign exu_mp_pkt.pret                                   =  final_predict_mp.pret;</span>
+<span id="L334"><span class="lineNum">     334</span>              :    assign exu_mp_pkt.ataken                                 =  final_predict_mp.ataken;</span>
+<span id="L335"><span class="lineNum">     335</span>              :    assign exu_mp_pkt.boffset                                =  final_predict_mp.boffset;</span>
+<span id="L336"><span class="lineNum">     336</span>              :    assign exu_mp_pkt.pc4                                    =  final_predict_mp.pc4;</span>
+<span id="L337"><span class="lineNum">     337</span>              :    assign exu_mp_pkt.hist[1:0]                              =  final_predict_mp.hist[1:0];</span>
+<span id="L338"><span class="lineNum">     338</span>              :    assign exu_mp_pkt.toffset[11:0]                          =  final_predict_mp.toffset[11:0];</span>
+<span id="L339"><span class="lineNum">     339</span>              : </span>
+<span id="L340"><span class="lineNum">     340</span>              :    assign exu_mp_fghr[pt.BHT_GHR_SIZE-1:0]                  =  after_flush_eghr[pt.BHT_GHR_SIZE-1:0];</span>
+<span id="L341"><span class="lineNum">     341</span>              : </span>
+<span id="L342"><span class="lineNum">     342</span>              :    assign {exu_mp_index[pt.BTB_ADDR_HI:pt.BTB_ADDR_LO],</span>
+<span id="L343"><span class="lineNum">     343</span>              :            exu_mp_btag[pt.BTB_BTAG_SIZE-1:0]}               =  final_predpipe_mp[PREDPIPESIZE-pt.BHT_GHR_SIZE-1:0];</span>
+<span id="L344"><span class="lineNum">     344</span>              : </span>
+<span id="L345"><span class="lineNum">     345</span>              :    assign exu_mp_eghr[pt.BHT_GHR_SIZE-1:0]                  =  final_predpipe_mp[PREDPIPESIZE-1:pt.BTB_ADDR_HI-pt.BTB_ADDR_LO+pt.BTB_BTAG_SIZE+1]; // mp ghr for bht write</span>
+<span id="L346"><span class="lineNum">     346</span>              : end // if (pt.BTB_ENABLE==1)</span>
+<span id="L347"><span class="lineNum">     347</span>              : else begin</span>
+<span id="L348"><span class="lineNum">     348</span>              :    assign ghr_d_ns = '0;</span>
+<span id="L349"><span class="lineNum">     349</span>              :    assign ghr_x_ns = '0;</span>
+<span id="L350"><span class="lineNum">     350</span>              :    assign exu_mp_pkt = '0;</span>
+<span id="L351"><span class="lineNum">     351</span>              :    assign exu_mp_eghr = '0;</span>
+<span id="L352"><span class="lineNum">     352</span>              :    assign exu_mp_fghr = '0;</span>
+<span id="L353"><span class="lineNum">     353</span>              :    assign exu_mp_index = '0;</span>
+<span id="L354"><span class="lineNum">     354</span>              :    assign exu_mp_btag = '0;</span>
+<span id="L355"><span class="lineNum">     355</span>              :    assign exu_i0_br_hist_r = '0;</span>
+<span id="L356"><span class="lineNum">     356</span>              :    assign exu_i0_br_error_r = '0;</span>
+<span id="L357"><span class="lineNum">     357</span>              :    assign exu_i0_br_start_error_r = '0;</span>
+<span id="L358"><span class="lineNum">     358</span>              :    assign exu_i0_br_index_r = '0;</span>
+<span id="L359"><span class="lineNum">     359</span>              :    assign exu_i0_br_valid_r = '0;</span>
+<span id="L360"><span class="lineNum">     360</span>              :    assign exu_i0_br_mp_r = '0;</span>
+<span id="L361"><span class="lineNum">     361</span>              :    assign exu_i0_br_middle_r = '0;</span>
+<span id="L362"><span class="lineNum">     362</span>              :    assign exu_i0_br_fghr_r = '0;</span>
+<span id="L363"><span class="lineNum">     363</span>              :    assign exu_i0_br_way_r = '0;</span>
+<span id="L364"><span class="lineNum">     364</span>              : end // else: !if(pt.BTB_ENABLE==1)</span>
+<span id="L365"><span class="lineNum">     365</span>              : </span>
+<span id="L366"><span class="lineNum">     366</span>              :    assign exu_flush_path_final[31:1] = ( {31{ dec_tlu_flush_lower_r                   }} &amp; dec_tlu_flush_path_r[31:1] ) |</span>
+<span id="L367"><span class="lineNum">     367</span>              :                                        ( {31{~dec_tlu_flush_lower_r &amp; i0_flush_upper_d}} &amp; i0_flush_path_d[31:1]      );</span>
+<span id="L368"><span class="lineNum">     368</span>              : </span>
+<span id="L369"><span class="lineNum">     369</span>              :    assign exu_npc_r[31:1]            = (i0_pred_correct_upper_r)  ?  pred_correct_npc_r[31:1]    :  i0_flush_path_upper_r[31:1];</span>
+<span id="L370"><span class="lineNum">     370</span>              : </span>
+<span id="L371"><span class="lineNum">     371</span>              : </span>
+<span id="L372"><span class="lineNum">     372</span>              : endmodule // el2_exu</span>
+        </pre>
+</td>
+</tr>
+</table>
+
+</body>
+</html>

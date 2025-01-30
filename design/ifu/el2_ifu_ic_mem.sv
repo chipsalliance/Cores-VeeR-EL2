@@ -205,10 +205,10 @@ import el2_pkg::*;
 
 
    logic [pt.ICACHE_BANKS_WAY-1:0]                 [31 : pt.ICACHE_DATA_INDEX_LO] ic_b_rw_addr;
-   logic [pt.ICACHE_BANKS_WAY-1:0]                 [31 : pt.ICACHE_DATA_INDEX_LO] ic_b_rw_addr_index_only;
+   logic [pt.ICACHE_BANKS_WAY-1:0]  [pt.ICACHE_INDEX_HI : pt.ICACHE_DATA_INDEX_LO] ic_b_rw_addr_index_only;
 
    logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0]                 [31 : pt.ICACHE_DATA_INDEX_LO] ic_b_rw_addr_up;
-   logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0]                 [31 : pt.ICACHE_DATA_INDEX_LO] ic_b_rw_addr_index_only_up;
+   logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0] [pt.ICACHE_INDEX_HI : pt.ICACHE_DATA_INDEX_LO] ic_b_rw_addr_index_only_up;
 
 
 

@@ -82,6 +82,8 @@ jobs:
             artifact: "block_dec_tlu_ctl"
           - test: "block/dec"
             artifact: "block_dec"
+          - test: "block/dcls"
+            artifact: "block_dcls"
     env:
       CCACHE_DIR: "/opt/verification/.cache/"
       DEBIAN_FRONTEND: "noninteractive"

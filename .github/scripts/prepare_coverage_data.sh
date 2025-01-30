@@ -70,6 +70,17 @@ python3 preprocess.py coverage_line_verilator.info --filter "design/" > _coverag
 python3 preprocess.py coverage_toggle_verilator.info --filter "design/" > _coverage_toggle.info
 python3 preprocess.py coverage_branch_verilator.info --filter "design/" > _coverage_branch.info
 
+if [ -z "${DCLS_ENABLE}" ]; then
+        # filter out lockstep module, if DCLS tests are not enabled
+        python3 info-process/info-process.py --filter-out 'lockstep' $(realpath _coverage_toggle.info)
+        python3 info-process/info-process.py --filter-out 'lockstep' $(realpath _coverage_line.info)
+        python3 info-process/info-process.py --filter-out 'lockstep' $(realpath _coverage_branch.info)
+
+        python3 info-process/info-process.py --filter-out 'el2_regfile_if' $(realpath _coverage_toggle.info)
+        python3 info-process/info-process.py --filter-out 'el2_regfile_if' $(realpath _coverage_line.info)
+        python3 info-process/info-process.py --filter-out 'el2_regfile_if' $(realpath _coverage_branch.info)
+fi
+
 cp _coverage_line.info coverage_line_verilator.info
 cp _coverage_branch.info coverage_branch_verilator.info
 cp _coverage_toggle.info coverage_toggle_verilator.info

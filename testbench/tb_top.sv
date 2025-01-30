@@ -1400,6 +1400,12 @@ veer_wrapper rvtop_wrapper (
     .dccm_ecc_single_error  (),
     .dccm_ecc_double_error  (),
 
+`ifdef RV_LOCKSTEP_ENABLE
+    .disable_corruption_detection_i ('0),
+    .lockstep_err_injection_en_i    ('0),
+    .corruption_detected_o          (),
+`endif
+
     .soft_int               (soft_int),
     .core_id                ('0),
     .scan_mode              ( 1'b0 ),         // To enable scan mode

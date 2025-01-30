@@ -51,6 +51,10 @@ ifeq ($(SIM), verilator)
     ifneq ("$(wildcard $(TEST_DIR)/config.vlt)","")
         COMPILE_ARGS += $(TEST_DIR)/config.vlt
     endif
+
+    PARALLEL_THREADS := $(shell echo $$(( $(shell nproc) - 1 )))
+    BUILD_ARGS += -j $(PARALLEL_THREADS)
+
 else ifeq ($(SIM), vcs)
     EXTRA_ARGS   += +incdir+$(CFGDIR) +incdir+$(SRCDIR)/include -assert svaext -cm line+cond+fsm+tgl+branch +vcs+lic+wait
 endif
@@ -78,4 +82,4 @@ endif
 
 # Rules for generating VeeR config
 $(CFGDIR)/common_defines.vh:
-	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0 $(EXTRA_CONFIG_OPTS)
+	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0 $(EXTRA_CONFIG_OPTS) $(EXTRA_VEER_CONFIG)

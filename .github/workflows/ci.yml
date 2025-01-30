@@ -8,6 +8,10 @@ on:
 
 jobs:
 
+  Test-DCLS:
+    name: Test-DCLS-Regression
+    uses: ./.github/workflows/test-regression-dcls.yml
+
   Test-Regression-Cache-Waypack-0:
     name: Test-Regression Cache Waypack 0
     uses: ./.github/workflows/test-regression-cache-waypack-0.yml

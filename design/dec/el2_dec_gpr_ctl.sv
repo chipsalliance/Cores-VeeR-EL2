@@ -39,6 +39,10 @@ import el2_pkg::*;
     output logic [31:0] rd0,         // read data
     output logic [31:0] rd1,
 
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+    el2_regfile_if.veer_gpr_rf regfile,
+`endif
+
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
    /*pragma coverage off*/
     input  logic        scan_mode
@@ -49,6 +53,20 @@ import el2_pkg::*;
    logic [31:1] [31:0] gpr_in;
    logic [31:1] w0v,w1v,w2v;
    logic [31:1] gpr_wr_en;
+
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+   assign regfile.gpr.ra = gpr_out[1][31:0]; // x1
+   assign regfile.gpr.sp = gpr_out[2][31:0]; // x2
+   assign regfile.gpr.fp = gpr_out[8][31:0]; // x8
+   assign regfile.gpr.a0 = gpr_out[10][31:0]; // x10
+   assign regfile.gpr.a1 = gpr_out[11][31:0]; // x11
+   assign regfile.gpr.a2 = gpr_out[12][31:0]; // x12
+   assign regfile.gpr.a3 = gpr_out[13][31:0]; // x13
+   assign regfile.gpr.a4 = gpr_out[14][31:0]; // x14
+   assign regfile.gpr.a5 = gpr_out[15][31:0]; // x15
+   assign regfile.gpr.a6 = gpr_out[16][31:0]; // x16
+   assign regfile.gpr.a7 = gpr_out[17][31:0]; // x17
+`endif
 
    // GPR Write Enables
    assign gpr_wr_en[31:1] = (w0v[31:1] | w1v[31:1] | w2v[31:1]);

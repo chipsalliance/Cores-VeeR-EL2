@@ -9,34 +9,37 @@ pip install git+https://github.com/antmicro/info-process@12d2522f
 mkdir info_files
 mv *.info info_files
 tar acf verilator_coverage_single_data.tar.gz info_files
-cd info_files
-ls
+ls info_files
 
-ls *_toggle.info | xargs info-process merge --output coverage_toggle_verilator.info
-ls *_branch.info | xargs info-process merge --output coverage_line_verilator.info
+# Source path transformations are needed before merging to have matching paths in `.desc` files.
+find info_files -name '*.info' -exec info-process transform --strip-file-prefix '.*Cores-VeeR-EL2/' --filter 'design/' {} \;
 
-cp coverage_toggle_verilator.info ../
-cp coverage_line_verilator.info ../
+# Filter out lockstep and el2_regfile_if modules if DCLS tests are not enabled
+if [ -z "${DCLS_ENABLE}" ]; then
+    find info_files -name '*.info' -exec info-process transform --filter-out '(lockstep|el2_regfile_if)' {} \;
+fi
 
-cd ../
-rm -rf info_files
-
-mv coverage_line_verilator.info line.info
-python3 .github/scripts/split_info.py line.info --branch > coverage_branch_verilator.info
-python3 .github/scripts/split_info.py line.info --line > coverage_line_verilator.info
-rm line.info
-
-for INFO in *.info
+# Split branch and line before merging to have correct data in `.desc` files.
+for FILE in info_files/*_branch.info
 do
-    info-process transform --strip-file-prefix '.*Cores-VeeR-EL2/' --filter 'design/' --normalize-hit-counts $INFO
+    mv $FILE temp.info
+    python3 .github/scripts/split_info.py temp.info --branch >$FILE
+    python3 .github/scripts/split_info.py temp.info --line >${FILE%%_branch.info}_line.info
+    rm temp.info
+done
 
-    # Filter out `lockstep` and `el2_regfile_if` modules if DCLS tests are not enabled
-    if [ -z "${DCLS_ENABLE}" ]; then
-        info-process transform --filter-out '(lockstep|el2_regfile_if)' $INFO
-    fi
+for TYPE in branch line toggle
+do
+    info-process merge --output coverage_${TYPE}_verilator.info \
+        --test-list tests_${TYPE}_verilator.desc --test-list-strip coverage_,_$TYPE.info \
+        info_files/*_$TYPE.info
+
+    info-process transform --normalize-hit-counts coverage_${TYPE}_verilator.info
 done
 
 info-process transform --set-block-ids --add-two-way-toggles --add-missing-brda-entries coverage_toggle_verilator.info
+
+rm -rf info_files
 
 grep 'SF:' coverage_*.info | cut -d ":" -f 3 | sort | uniq > files.txt
 
@@ -61,7 +64,7 @@ export COMMIT=$GITHUB_SHA
 } < files.txt > sources.txt
 
 mkdir test_data
-cp coverage_line_*.info coverage_toggle_*.info coverage_branch_* sources.txt test_data
+cp *.desc *.info sources.txt test_data
 
 # add logo
 cp docs/dashboard-styles/assets/chips-alliance-logo-mono.svg test_data/logo.svg

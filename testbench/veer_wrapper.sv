@@ -248,7 +248,7 @@ module veer_wrapper
     input  logic [63:0] lsu_hrdata,
     input  logic        lsu_hready,
     input  logic        lsu_hresp,
-    // Debug Syster Bus AHB
+    // Debug System Bus AHB
     output logic [31:0] sb_haddr,
     output logic [ 2:0] sb_hburst,
     output logic        sb_hmastlock,

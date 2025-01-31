@@ -768,9 +768,6 @@ module tb_top
     integer fd, tp, el;
     logic next_dbus_error;
     logic next_ibus_error;
-    logic [1:0] lsu_axi_rresp_override;
-    logic [1:0] lsu_axi_bresp_override;
-    logic [1:0] ifu_axi_rresp_override;
 
     always @(negedge core_clk or negedge rst_l) begin
         if (rst_l == 0) begin
@@ -907,10 +904,11 @@ module tb_top
         if (next_ibus_error)
             @(negedge ifu_axi_rvalid or ifu_axi_rid) next_ibus_error <= 0;
     end
-    `endif
 
+    logic [1:0] lsu_axi_rresp_override;
+    logic [1:0] lsu_axi_bresp_override;
+    logic [1:0] ifu_axi_rresp_override;
     always_comb begin
-        `ifdef RV_BUILD_AXI4
         lsu_axi_rresp_override = lsu_axi_rresp;
         lsu_axi_bresp_override = lsu_axi_bresp;
         ifu_axi_rresp_override = ifu_axi_rresp;
@@ -925,8 +923,8 @@ module tb_top
             if (ifu_axi_rvalid)
                 ifu_axi_rresp_override = 2'b10;
         end
-        `endif
     end
+    `endif
 
     // nmi_int must be asserted for at least two clock cycles and then deasserted for
     // at least two clock cycles - see RISC-V VeeR EL2 Programmer's Reference Manual section 2.16

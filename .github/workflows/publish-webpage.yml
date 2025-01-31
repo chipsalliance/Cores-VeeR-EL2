@@ -31,7 +31,7 @@ jobs:
       - name: Download coverage reports merged
         uses: actions/download-artifact@v4
         with:
-          name: data_v2
+          name: data_v
           path: ./data_v_merged
 
       - name: Download docs
@@ -99,9 +99,7 @@ jobs:
           # data
           mv data_*_verilator_info.zip.xz public.new/html/main/
           mv data.zip public.new/html/main/
-          mv data_v.zip public.new/html/main/
           mv data_both.zip public.new/html/main/
-          mv data_both2.zip public.new/html/main/
           mv data_v_line.zip.xz public.new/html/main/
           mv data_v_toggle.zip.xz public.new/html/main/
           mv data_v_branch.zip.xz public.new/html/main/
@@ -141,9 +139,7 @@ jobs:
           # data
           mv data_*_verilator_info.zip.xz public.new/html/dev/${{ github.event.number }}/
           mv data.zip public.new/html/dev/${{ github.event.number }}/
-          mv data_v.zip public.new/html/dev/${{ github.event.number }}/
           mv data_both.zip public.new/html/dev/${{ github.event.number }}/
-          mv data_both2.zip public.new/html/dev/${{ github.event.number }}/
           mv data_v_line.zip.xz public.new/html/dev/${{ github.event.number }}/
           mv data_v_toggle.zip.xz public.new/html/dev/${{ github.event.number }}/
           mv data_v_branch.zip.xz public.new/html/dev/${{ github.event.number }}/

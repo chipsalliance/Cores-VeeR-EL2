@@ -778,10 +778,15 @@ module tb_top
         timer_int <= 0;
         extintsrc_req[1] <= 0;
         cycleCnt <= cycleCnt+1;
-        // Test timeout monitor
+        // timeout monitor
         if(cycleCnt == MAX_CYCLES) begin
-            $display ("Hit max cycle count (%0d) .. stopping",cycleCnt);
-            $finish;
+            $display ("Hit max cycle count (%0d) .. stopping", cycleCnt);
+            $display("TEST_FAILED");
+            `ifdef TB_SILENT_FAIL
+                $finish;
+            `else
+                $fatal;
+            `endif // TB_SILENT_FAIL
         end
         // console Monitor
         if( mailbox_data_val & mailbox_write) begin

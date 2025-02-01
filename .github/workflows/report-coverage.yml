@@ -92,9 +92,8 @@ jobs:
         with:
           name: verilator_coverage_data
           path: |
-            coverage_toggle_verilator.info
-            coverage_line_verilator.info
-            coverage_branch_verilator.info
+            *.info
+            *.desc
 
       - name: Pack artifacts
         if: always()
@@ -202,12 +201,6 @@ jobs:
           name: coverview_data
           path: ./
 
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          name: data_v
-          path: ./
-
       - name: Generate reports
         shell: bash
         run: |
@@ -228,8 +221,6 @@ jobs:
           xz data_line_verilator_info.zip
           mkdir report
           cp data.zip report
-          cp data_v.zip report
-          cp data_both.zip report
           cp data_toggle_verilator_info.zip.xz report
           cp data_branch_verilator_info.zip.xz report
           cp data_line_verilator_info.zip.xz report
@@ -281,14 +272,6 @@ jobs:
       - name: Generate custom report
         run: _secret_custom_report
 
-      - name: Pack artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: data_v
-          path: |
-            data_v.zip
-            data_both.zip
-
   custom-coverage-report-merged:
     name: Custom coverage report merger
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
@@ -303,15 +286,21 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Download coverage reports
+        uses: actions/download-artifact@v4
+        with:
+          name: verilator_coverage_data
+          path: ./
+
       - name: Generate custom report
         run: _secret_custom_report_merger
 
       - name: Pack artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: data_v2
+          name: data_v
           path: |
-            data_both2.zip
+            data_both.zip
             data_v_line.zip.xz
             data_v_toggle.zip.xz
             data_v_branch.zip.xz

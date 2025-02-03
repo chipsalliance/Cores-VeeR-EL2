@@ -13,7 +13,7 @@
     
     
       
-        <title>6. Power Management and Multi-Core Debug Control - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
+        <title>7. Power Management and Multi-Core Debug Control - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
       
     
     
@@ -88,7 +88,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              6. Power Management and Multi-Core Debug Control
+              7. Power Management and Multi-Core Debug Control
             
           </span>
         </div>
@@ -249,6 +249,22 @@
     <li class="md-nav__item">
       <a href="error-protection.html" class="md-nav__link">
         <span class="md-ellipsis">Memory Error Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dual-core-lock-step.html" class="md-nav__link">
+        <span class="md-ellipsis">Dual-<wbr>Core Lockstep <wbr>(DCLS)</span>
       </a>
     </li>
   
@@ -844,9 +860,9 @@
                   
 
 
-<h1 id="power-management-and-multi-core-debug-control"><span class="section-number">6. </span>Power Management and Multi-Core Debug Control<a class="headerlink" href="#power-management-and-multi-core-debug-control" title="Link to this heading">¶</a></h1>
+<h1 id="power-management-and-multi-core-debug-control"><span class="section-number">7. </span>Power Management and Multi-Core Debug Control<a class="headerlink" href="#power-management-and-multi-core-debug-control" title="Link to this heading">¶</a></h1>
 <p>This chapter specifies the power management and multi-core debug control functionality provided or supported by the VeeR EL2 core. Also documented in this chapter is how debug may interfere with core power management.</p>
-<h2 id="features"><span class="section-number">6.1. </span>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
+<h2 id="features"><span class="section-number">7.1. </span>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
 <p>VeeR EL2 supports and provides the following power management and multi-core debug control features:</p>
 <ul class="simple">
 <li><p>Support for three system-level power states: Active (C0), Sleep (C3), Power Off (C6)</p></li>
@@ -860,16 +876,16 @@
 <li><p>Signals indicating that core is in Debug Mode and core hit a breakpoint</p></li>
 <li><p>PAUSE feature to help avoid firmware spinning</p></li>
 </ul>
-<h2 id="core-control-interfaces"><span class="section-number">6.2. </span>Core Control Interfaces<a class="headerlink" href="#core-control-interfaces" title="Link to this heading">¶</a></h2>
+<h2 id="core-control-interfaces"><span class="section-number">7.2. </span>Core Control Interfaces<a class="headerlink" href="#core-control-interfaces" title="Link to this heading">¶</a></h2>
 <p>VeeR EL2 provides two control interfaces, one for power management and one for multi-core debug control, which enable the core to be controlled by other SoC blocks.</p>
-<h3 id="power-management"><span class="section-number">6.2.1. </span>Power Management<a class="headerlink" href="#power-management" title="Link to this heading">¶</a></h3>
+<h3 id="power-management"><span class="section-number">7.2.1. </span>Power Management<a class="headerlink" href="#power-management" title="Link to this heading">¶</a></h3>
 <p>The power management interface enables an SoC-based Power Management Unit (PMU) to:</p>
 <ul class="simple">
 <li><p>Halt (i.e., enter low-power sleep state) or restart (i.e., resume execution) the core, and</p></li>
 <li><p>get an indication when the core has gracefully entered the sleep state.</p></li>
 </ul>
-<p>The power management interface signals are described in <a class="reference internal" href="#tab-veer-el2-power-ctrl-status-signals"><span class="std std-numref">Table 6.3</span></a>.</p>
-<h3 id="multi-core-debug-control"><span class="section-number">6.2.2. </span>Multi-Core Debug Control<a class="headerlink" href="#multi-core-debug-control" title="Link to this heading">¶</a></h3>
+<p>The power management interface signals are described in <a class="reference internal" href="#tab-veer-el2-power-ctrl-status-signals"><span class="std std-numref">Table 7.3</span></a>.</p>
+<h3 id="multi-core-debug-control"><span class="section-number">7.2.2. </span>Multi-Core Debug Control<a class="headerlink" href="#multi-core-debug-control" title="Link to this heading">¶</a></h3>
 <p>The multi-core debug control interface enables an SoC-based Multi-Processor Controller (MPC) to:</p>
 <ul class="simple">
 <li><p>Control the reset state of the core (i.e., either start executing or enter Debug Mode),</p></li>
@@ -877,15 +893,15 @@
 <li><p>get an indication when the core is in Debug Mode, and</p></li>
 <li><p>cross-trigger other cores when this core has entered Debug Mode due to a software or a hardware breakpoint.</p></li>
 </ul>
-<p>The multi-core debug control interface signals are described in <a class="reference internal" href="#tab-veer-el2-multi-core-debug-ctrl-status-signals"><span class="std std-numref">Table 6.4</span></a>.</p>
-<h2 id="power-states"><span class="section-number">6.3. </span>Power States<a class="headerlink" href="#power-states" title="Link to this heading">¶</a></h2>
+<p>The multi-core debug control interface signals are described in <a class="reference internal" href="#tab-veer-el2-multi-core-debug-ctrl-status-signals"><span class="std std-numref">Table 7.4</span></a>.</p>
+<h2 id="power-states"><span class="section-number">7.3. </span>Power States<a class="headerlink" href="#power-states" title="Link to this heading">¶</a></h2>
 <p>From a system’s perspective, the core may be placed in one of three power states: Active (C0), Sleep (C3), and Power Off (C6).
 Active and Sleep states require hardware support from the core, but in the Power Off state the core is power-gated so no special hardware support is needed.</p>
-<p><a class="reference internal" href="#fig-activity-states"><span class="std std-numref">Fig. 6.1</span></a> depicts and <a class="reference internal" href="#tab-core-activity-states"><span class="std std-numref">Table 6.2</span></a> describes the core activity states as well as the events to transition between them.</p>
+<p><a class="reference internal" href="#fig-activity-states"><span class="std std-numref">Fig. 7.1</span></a> depicts and <a class="reference internal" href="#tab-core-activity-states"><span class="std std-numref">Table 7.2</span></a> describes the core activity states as well as the events to transition between them.</p>
 <figure class="align-default" id="fig-activity-states">
 <img alt="Activity states" src="_images/activity_states.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 6.1 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 7.1 </span><span class="caption-text"><span class="caption-text">
 VeeR EL2 Core Activity States</span><a class="headerlink" href="#fig-activity-states" title="Permalink to this image">¶</a></figcaption>
 </figure>
 <div class="admonition note">
@@ -894,7 +910,7 @@ VeeR EL2 Core Activity States</span><a class="headerlink" href="#fig-activity-st
 Note that the store queue and the DMA FIFO might not be empty due to on-going DMA transactions.</p>
 </div>
 <table class="docutils data align-default" id="tab-debug-resume-requests">
-<caption><span class="caption-number">Table 6.1 </span><span class="caption-text">Debug Resume Requests</span><a class="headerlink" href="#tab-debug-resume-requests" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 7.1 </span><span class="caption-text">Debug Resume Requests</span><a class="headerlink" href="#tab-debug-resume-requests" title="Link to this table">¶</a></caption>
 <thead>
 <tr class="row-odd"><th class="head"><p>Core-Internal State</p></th>
 <th class="head"></th>
@@ -1066,7 +1082,7 @@ Likewise, hardware ignores MPC Debug Run requests if the corresponding ‘MPC Ha
 <p>An MPC Debug Halt request may only be signaled when the core is either not in Debug Mode or is already in Debug Mode due to a previous Core Debug Halt request or a debug breakpoint or trigger. Also, an MPC Debug Run request may only be signaled when the core is in Debug Mode due to either a previous MPC Debug Halt request, a previous Core Debug Halt request, or a debug breakpoint or trigger. Issuing more than one MPC Debug Halt requests in succession or more than one MPC Debug Run requests in succession is a protocol violation.</p>
 </div>
 <table class="docutils data align-default" id="tab-core-activity-states">
-<caption><span class="caption-number">Table 6.2 </span><span class="caption-text">Core Activity States</span><a class="headerlink" href="#tab-core-activity-states" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 7.2 </span><span class="caption-text">Core Activity States</span><a class="headerlink" href="#tab-core-activity-states" title="Link to this table">¶</a></caption>
 <thead>
 <tr class="row-odd"><th class="head"></th>
 <th class="head"><p><strong>Active (C0)</strong></p></th>
@@ -1139,7 +1155,7 @@ Likewise, hardware ignores MPC Debug Run requests if the corresponding ‘MPC Ha
 </tr>
 </tbody>
 </table>
-<h2 id="power-control"><span class="section-number">6.4. </span>Power Control<a class="headerlink" href="#power-control" title="Link to this heading">¶</a></h2>
+<h2 id="power-control"><span class="section-number">7.4. </span>Power Control<a class="headerlink" href="#power-control" title="Link to this heading">¶</a></h2>
 <p>The priority order of simultaneous halt requests is as follows:</p>
 <ol class="arabic simple">
 <li><p>Any core debug halt action:</p>
@@ -1167,7 +1183,7 @@ However, it is not possible for a core firmware-initiated halt request to be pen
 These two sources may interfere with each other and need to be carefully coordinated on a higher level outside the core.
 Unintended behavior might occur if simultaneous debug operations from these two sources are not synchronized (e.g., MPC requesting a resume during the execution of an abstract command initiated by the debugger attached to the JTAG port).</p>
 </div>
-<h3 id="debug-mode"><span class="section-number">6.4.1. </span>Debug Mode<a class="headerlink" href="#debug-mode" title="Link to this heading">¶</a></h3>
+<h3 id="debug-mode"><span class="section-number">7.4.1. </span>Debug Mode<a class="headerlink" href="#debug-mode" title="Link to this heading">¶</a></h3>
 <p>Debug Mode must be able to seize control of the core.
 Therefore, debug has higher priority than power control.</p>
 <p>Debug Mode is entered under any of the following conditions:</p>
@@ -1184,14 +1200,14 @@ Therefore, debug has higher priority than power control.</p>
 <li><p>Multi-core debug run request (from MPC)</p></li>
 </ul>
 <p>The state ‘db-halt’ is the only halt state allowed while in Debug Mode.</p>
-<h4 id="single-stepping"><span class="section-number">6.4.1.1. </span>Single Stepping<a class="headerlink" href="#single-stepping" title="Link to this heading">¶</a></h4>
+<h4 id="single-stepping"><span class="section-number">7.4.1.1. </span>Single Stepping<a class="headerlink" href="#single-stepping" title="Link to this heading">¶</a></h4>
 <p>A few notes about executing single-stepped instructions:</p>
 <ul class="simple">
 <li><p>Executing instructions which attempt to exit Debug Mode are ignored (e.g., writing to the <code class="docutils literal notranslate"><span class="pre">mpmc</span></code> register requesting to halt the core does not transition the core to the pmu/fw-halt state).</p></li>
 <li><p>Accesses to D-mode registers are illegal, even though the core is in Debug Mode.</p></li>
 <li><p>A core debug single-step action initiated in the time period between an MPC Debug Halt request and an MPC Debug Run request is stalled but stays pending until an MPC Debug Run request is issued.</p></li>
 </ul>
-<h4 id="forced-debug-halt"><span class="section-number">6.4.1.2. </span>Forced Debug Halt<a class="headerlink" href="#forced-debug-halt" title="Link to this heading">¶</a></h4>
+<h4 id="forced-debug-halt"><span class="section-number">7.4.1.2. </span>Forced Debug Halt<a class="headerlink" href="#forced-debug-halt" title="Link to this heading">¶</a></h4>
 <p>Upon receiving a debug halt request (i.e., either a Core Debug or MPC Debug Halt request, or a breakpoint or trigger to Debug Mode), the core is typically quiesced before the Debug Halt (db-halt) state is entered.
 However, LSU or IFU bus transactions may not complete due to SoC or other issues outside the core which may stop the core from executing.
 This may prevent the core from entering the Debug Halt state after a debug halt request has been received.
@@ -1201,8 +1217,8 @@ Once the debugger has control of the core, it may read a status register (see <a
 <p class="admonition-title">Note</p>
 <p>This feature is targeted at allowing a debugger to take control of a hung core. Therefore, the timeout period should be set high enough to cover any reasonable delay incurred by any access to SoC memory locations and devices. This should include potential additional delays due to congestion in the interconnect and other possible temporary conditions. If the timeout period is long enough for all outstanding transactions to gracefully finish, program execution may be resumed after debugging has been performed. However, if any outstanding transactions are prematurely forced to terminate, successfully resuming program execution after debug should not be expected because the data of terminated transactions may have been lost and possibly even a reset of the SoC might be necessary to bring the system back into a consistent state.</p>
 </div>
-<h3 id="core-power-and-multi-core-debug-control-and-status-signals"><span class="section-number">6.4.2. </span>Core Power and Multi-Core Debug Control and Status Signals<a class="headerlink" href="#core-power-and-multi-core-debug-control-and-status-signals" title="Link to this heading">¶</a></h3>
-<p><a class="reference internal" href="#fig-debug-csrs"><span class="std std-numref">Fig. 6.2</span></a> depicts the power and multi-core debug control and status signals which connect the VeeR EL2 core to the PMU and MPC IPs.
+<h3 id="core-power-and-multi-core-debug-control-and-status-signals"><span class="section-number">7.4.2. </span>Core Power and Multi-Core Debug Control and Status Signals<a class="headerlink" href="#core-power-and-multi-core-debug-control-and-status-signals" title="Link to this heading">¶</a></h3>
+<p><a class="reference internal" href="#fig-debug-csrs"><span class="std std-numref">Fig. 7.2</span></a> depicts the power and multi-core debug control and status signals which connect the VeeR EL2 core to the PMU and MPC IPs.
 Signals from the PMU and MPC to the core are asynchronous and must be synchronized to the core clock domain.
 Similarly, signals from the core are asynchronous to the PMU and MPC clock domains and must be synchronized to the PMU’s or MPC’s clock, respectively.</p>
 <div class="admonition note">
@@ -1212,13 +1228,13 @@ Similarly, signals from the core are asynchronous to the PMU and MPC clock domai
 <figure class="align-default" id="fig-debug-csrs">
 <img alt="Debug CSRS" src="_images/debug_csrs.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 6.2 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 7.2 </span><span class="caption-text"><span class="caption-text">
 VeeR EL2 Power and Multi-Core Debug Control and Status Signals</span><a class="headerlink" href="#fig-debug-csrs" title="Permalink to this image">¶</a></figcaption>
 </figure>
-<h4 id="power-control-and-status-signals"><span class="section-number">6.4.2.1. </span>Power Control and Status Signals<a class="headerlink" href="#power-control-and-status-signals" title="Link to this heading">¶</a></h4>
-<p>There are three types of signals between the Power Management Unit and the VeeR EL2 core, as described in <a class="reference internal" href="#tab-veer-el2-power-ctrl-status-signals"><span class="std std-numref">Table 6.3</span></a>. All signals are active-high.</p>
+<h4 id="power-control-and-status-signals"><span class="section-number">7.4.2.1. </span>Power Control and Status Signals<a class="headerlink" href="#power-control-and-status-signals" title="Link to this heading">¶</a></h4>
+<p>There are three types of signals between the Power Management Unit and the VeeR EL2 core, as described in <a class="reference internal" href="#tab-veer-el2-power-ctrl-status-signals"><span class="std std-numref">Table 7.3</span></a>. All signals are active-high.</p>
 <table class="docutils data align-default" id="tab-veer-el2-power-ctrl-status-signals">
-<caption><span class="caption-number">Table 6.3 </span><span class="caption-text">VeeR EL2 Power Control and Status Signals</span><a class="headerlink" href="#tab-veer-el2-power-ctrl-status-signals" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 7.3 </span><span class="caption-text">VeeR EL2 Power Control and Status Signals</span><a class="headerlink" href="#tab-veer-el2-power-ctrl-status-signals" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Signal(s)</strong></p></td>
 <td><p><strong>Description</strong></p></td>
@@ -1244,17 +1260,17 @@ VeeR EL2 Power and Multi-Core Debug Control and Status Signals</span><a class="h
 <p class="admonition-title">Note</p>
 <p>Power control protocol violations (e.g., simultaneously sending a run and a halt request) may lead to unexpected behavior.</p>
 </div>
-<p><a class="reference internal" href="#fig-csr-timing"><span class="std std-numref">Fig. 6.3</span></a> depicts conceptual timing diagrams of a halt and a run request. Note that entering Debug Mode is an asynchronous event relative to power control commands sent by the PMU. Debug Mode has higher priority and can interrupt and override PMU requests.</p>
+<p><a class="reference internal" href="#fig-csr-timing"><span class="std std-numref">Fig. 7.3</span></a> depicts conceptual timing diagrams of a halt and a run request. Note that entering Debug Mode is an asynchronous event relative to power control commands sent by the PMU. Debug Mode has higher priority and can interrupt and override PMU requests.</p>
 <figure class="align-default" id="fig-csr-timing">
 <img alt="CSR Timing" src="_images/csr_timing.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 6.3 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 7.3 </span><span class="caption-text"><span class="caption-text">
 VeeR EL2 Power Control and Status Interface Timing Diagrams</span><a class="headerlink" href="#fig-csr-timing" title="Permalink to this image">¶</a></figcaption>
 </figure>
-<h4 id="multi-core-debug-control-and-status-signals"><span class="section-number">6.4.2.2. </span>Multi-Core Debug Control and Status Signals<a class="headerlink" href="#multi-core-debug-control-and-status-signals" title="Link to this heading">¶</a></h4>
-<p>There are five types of signals between the Multi-Processor Controller and the VeeR EL2 core, as described in <a class="reference internal" href="#tab-veer-el2-multi-core-debug-ctrl-status-signals"><span class="std std-numref">Table 6.4</span></a>. All signals are active-high.</p>
+<h4 id="multi-core-debug-control-and-status-signals"><span class="section-number">7.4.2.2. </span>Multi-Core Debug Control and Status Signals<a class="headerlink" href="#multi-core-debug-control-and-status-signals" title="Link to this heading">¶</a></h4>
+<p>There are five types of signals between the Multi-Processor Controller and the VeeR EL2 core, as described in <a class="reference internal" href="#tab-veer-el2-multi-core-debug-ctrl-status-signals"><span class="std std-numref">Table 7.4</span></a>. All signals are active-high.</p>
 <table class="docutils data align-default" id="tab-veer-el2-multi-core-debug-ctrl-status-signals">
-<caption><span class="caption-number">Table 6.4 </span><span class="caption-text">VeeR EL2 Multi-Core Debug Control and Status Signals</span><a class="headerlink" href="#tab-veer-el2-multi-core-debug-ctrl-status-signals" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 7.4 </span><span class="caption-text">VeeR EL2 Multi-Core Debug Control and Status Signals</span><a class="headerlink" href="#tab-veer-el2-multi-core-debug-ctrl-status-signals" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Signal(s)</strong></p></td>
 <td><p><strong>Description</strong></p></td>
@@ -1311,23 +1327,23 @@ VeeR EL2 Power Control and Status Interface Timing Diagrams</span><a class="head
 <p class="admonition-title">Note</p>
 <p>If Debug Mode is entered at reset by setting the <code class="docutils literal notranslate"><span class="pre">mpc_reset_run_req</span></code> signal to ‘0’, only a run request issued on the <code class="docutils literal notranslate"><span class="pre">mpc_debug_run_req/ack</span></code> interface allows the core to exit Debug Mode. A core debug resume request issued by the debugger does not transition the core out of Debug Mode.</p>
 </div>
-<p><a class="reference internal" href="#fig-multicore-csr-timing"><span class="std std-numref">Fig. 6.4</span></a> depicts conceptual timing diagrams of a halt and a run request.</p>
+<p><a class="reference internal" href="#fig-multicore-csr-timing"><span class="std std-numref">Fig. 7.4</span></a> depicts conceptual timing diagrams of a halt and a run request.</p>
 <figure class="align-default" id="fig-multicore-csr-timing">
 <img alt="Multi-Core CSR Timing" src="_images/multicore_csr_timing.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 6.4 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 7.4 </span><span class="caption-text"><span class="caption-text">
 VeeR EL2 Multi-Core Debug Control and Status Interface Timing Diagrams</span><a class="headerlink" href="#fig-multicore-csr-timing" title="Permalink to this image">¶</a></figcaption>
 </figure>
-<p><a class="reference internal" href="#fig-breakpoint-timing"><span class="std std-numref">Fig. 6.5</span></a> depicts conceptual timing diagrams of the breakpoint indication.</p>
+<p><a class="reference internal" href="#fig-breakpoint-timing"><span class="std std-numref">Fig. 7.5</span></a> depicts conceptual timing diagrams of the breakpoint indication.</p>
 <figure class="align-default" id="fig-breakpoint-timing">
 <img alt="Breakpoint Indication Timing" src="_images/breakpoint_timing.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 6.5 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 7.5 </span><span class="caption-text"><span class="caption-text">
 VeeR EL2 Breakpoint Indication Timing Diagrams</span><a class="headerlink" href="#fig-breakpoint-timing" title="Permalink to this image">¶</a></figcaption>
 </figure>
-<h3 id="debug-scenarios"><span class="section-number">6.4.3. </span>Debug Scenarios<a class="headerlink" href="#debug-scenarios" title="Link to this heading">¶</a></h3>
+<h3 id="debug-scenarios"><span class="section-number">7.4.3. </span>Debug Scenarios<a class="headerlink" href="#debug-scenarios" title="Link to this heading">¶</a></h3>
 <p>The following mixed core debug and MPC debug scenarios are supported by the core:</p>
-<h4 id="scenario-1-core-halt-mpc-halt-mpc-run-core-resume"><span class="section-number">6.4.3.1. </span>Scenario 1: Core Halt → MPC Halt → MPC Run → Core Resume<a class="headerlink" href="#scenario-1-core-halt-mpc-halt-mpc-run-core-resume" title="Link to this heading">¶</a></h4>
+<h4 id="scenario-1-core-halt-mpc-halt-mpc-run-core-resume"><span class="section-number">7.4.3.1. </span>Scenario 1: Core Halt → MPC Halt → MPC Run → Core Resume<a class="headerlink" href="#scenario-1-core-halt-mpc-halt-mpc-run-core-resume" title="Link to this heading">¶</a></h4>
 <ol class="arabic simple">
 <li><p>Core debugger asserts a Debug Halt request which results in the core transitioning into Debug Halt state (db-halt).</p></li>
 <li><p>In the system, another processor hits a breakpoint. The MPC signals a Debug Halt request to all processors to halt.</p></li>
@@ -1337,7 +1353,7 @@ VeeR EL2 Breakpoint Indication Timing Diagrams</span><a class="headerlink" href=
 <li><p>When core debugger sends a Debug Resume request, the core then transitions to the Running state and deasserts the <code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> signal.</p></li>
 <li><p>Finally, core acknowledges MPC Debug Run request.</p></li>
 </ol>
-<h4 id="scenario-2-core-halt-mpc-halt-core-resume-mpc-run"><span class="section-number">6.4.3.2. </span>Scenario 2: Core Halt → MPC Halt → Core Resume → MPC Run<a class="headerlink" href="#scenario-2-core-halt-mpc-halt-core-resume-mpc-run" title="Link to this heading">¶</a></h4>
+<h4 id="scenario-2-core-halt-mpc-halt-core-resume-mpc-run"><span class="section-number">7.4.3.2. </span>Scenario 2: Core Halt → MPC Halt → Core Resume → MPC Run<a class="headerlink" href="#scenario-2-core-halt-mpc-halt-core-resume-mpc-run" title="Link to this heading">¶</a></h4>
 <ol class="arabic simple">
 <li><p>Core debugger asserts a Debug Halt request which results in the core transitioning into Debug Halt state (db-halt).</p></li>
 <li><p>In the system, another processor hits a breakpoint. The MPC signals Debug Halt request to all processors to halt.</p></li>
@@ -1348,7 +1364,7 @@ The <code class="docutils literal notranslate"><span class="pre">debug_mode_stat
 <li><p>When MPC signals a Debug Run request, the core then transitions to the Running state and deasserts the <code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> signal.</p></li>
 <li><p>Finally, core acknowledges MPC Debug Run request.</p></li>
 </ol>
-<h4 id="scenario-3-mpc-halt-core-halt-core-resume-mpc-run"><span class="section-number">6.4.3.3. </span>Scenario 3: Mpc Halt → Core Halt → Core Resume → Mpc Run<a class="headerlink" href="#scenario-3-mpc-halt-core-halt-core-resume-mpc-run" title="Link to this heading">¶</a></h4>
+<h4 id="scenario-3-mpc-halt-core-halt-core-resume-mpc-run"><span class="section-number">7.4.3.3. </span>Scenario 3: Mpc Halt → Core Halt → Core Resume → Mpc Run<a class="headerlink" href="#scenario-3-mpc-halt-core-halt-core-resume-mpc-run" title="Link to this heading">¶</a></h4>
 <ol class="arabic simple">
 <li><p>MPC asserts a Debug Halt request which results in the core transitioning into Debug Halt state (db-halt).</p></li>
 <li><p>Core acknowledges this Debug Halt request.</p></li>
@@ -1358,7 +1374,7 @@ The <code class="docutils literal notranslate"><span class="pre">debug_mode_stat
 <li><p>When MPC signals a Debug Run request, the core then transitions to the Running state and deasserts the <code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> signal.</p></li>
 <li><p>Finally, core acknowledges MPC Debug Run request.</p></li>
 </ol>
-<h4 id="scenario-4-mpc-halt-core-halt-mpc-run-core-resume"><span class="section-number">6.4.3.4. </span>Scenario 4: MPC Halt → Core Halt → MPC Run → Core Resume<a class="headerlink" href="#scenario-4-mpc-halt-core-halt-mpc-run-core-resume" title="Link to this heading">¶</a></h4>
+<h4 id="scenario-4-mpc-halt-core-halt-mpc-run-core-resume"><span class="section-number">7.4.3.4. </span>Scenario 4: MPC Halt → Core Halt → MPC Run → Core Resume<a class="headerlink" href="#scenario-4-mpc-halt-core-halt-mpc-run-core-resume" title="Link to this heading">¶</a></h4>
 <ol class="arabic simple">
 <li><p>MPC asserts a Debug Halt request which results in the core transitioning into Debug Halt state (db-halt).</p></li>
 <li><p>Core acknowledges this Debug Halt request.</p></li>
@@ -1368,10 +1384,10 @@ The <code class="docutils literal notranslate"><span class="pre">debug_mode_stat
 <li><p>The core then transitions to the Running state and deasserts the <code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> signal.</p></li>
 <li><p>Finally, core acknowledges MPC Debug Run request.</p></li>
 </ol>
-<h4 id="summary"><span class="section-number">6.4.3.5. </span>Summary<a class="headerlink" href="#summary" title="Link to this heading">¶</a></h4>
+<h4 id="summary"><span class="section-number">7.4.3.5. </span>Summary<a class="headerlink" href="#summary" title="Link to this heading">¶</a></h4>
 <p>For the core to exit out of Debug Halt state (db-halt) in cases where it has received debug halt requests from both core debugger and MPC, it must receive debug run requests from both the core debugger as well as the MPC, irrespective of the order in which debug halt requests came from both sources.
 Until then, the core remains halted and the <code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> signal remains asserted.</p>
-<h3 id="core-wake-up-events"><span class="section-number">6.4.4. </span>Core Wake-Up Events<a class="headerlink" href="#core-wake-up-events" title="Link to this heading">¶</a></h3>
+<h3 id="core-wake-up-events"><span class="section-number">7.4.4. </span>Core Wake-Up Events<a class="headerlink" href="#core-wake-up-events" title="Link to this heading">¶</a></h3>
 <p>When not in Debug Mode (i.e., the core is in pmu/fw-halt state), the core is woken up on several events:</p>
 <ul class="simple">
 <li><p>PMU run request</p></li>
@@ -1385,16 +1401,16 @@ Until then, the core remains halted and the <code class="docutils literal notran
 The internal timers are part of the core and internally connected as well.
 The standard RISC-V software and timer interrupt as well as NMI signals are external to the core and originate in the SoC.
 If desired, these signals can be routed through the PMU and further qualified there.</p>
-<h3 id="core-firmware-initiated-halt"><span class="section-number">6.4.5. </span>Core Firmware-Initiated Halt<a class="headerlink" href="#core-firmware-initiated-halt" title="Link to this heading">¶</a></h3>
+<h3 id="core-firmware-initiated-halt"><span class="section-number">7.4.5. </span>Core Firmware-Initiated Halt<a class="headerlink" href="#core-firmware-initiated-halt" title="Link to this heading">¶</a></h3>
 <p>The firmware running on the core may also initiate a halt by writing a ‘1’ to the <em>halt</em> field of the <code class="docutils literal notranslate"><span class="pre">mpmc</span></code> register (see <a class="reference internal" href="#power-management-control-register-mpmc"><span class="std std-ref">Power Management Control Register (mpmc)</span></a>).
 The core is quiesced before indicating that it has gracefully halted.</p>
-<h3 id="dma-operations-while-halted"><span class="section-number">6.4.6. </span>DMA Operations While Halted<a class="headerlink" href="#dma-operations-while-halted" title="Link to this heading">¶</a></h3>
+<h3 id="dma-operations-while-halted"><span class="section-number">7.4.6. </span>DMA Operations While Halted<a class="headerlink" href="#dma-operations-while-halted" title="Link to this heading">¶</a></h3>
 <p>When the core is halted in the ‘pmu/fw-halt’ or the ‘db-halt’ state, DMA operations are supported.</p>
-<h3 id="external-interrupts-while-halted"><span class="section-number">6.4.7. </span>External Interrupts While Halted<a class="headerlink" href="#external-interrupts-while-halted" title="Link to this heading">¶</a></h3>
+<h3 id="external-interrupts-while-halted"><span class="section-number">7.4.7. </span>External Interrupts While Halted<a class="headerlink" href="#external-interrupts-while-halted" title="Link to this heading">¶</a></h3>
 <p>All non-highest-priority external interrupts are temporarily ignored while halted.
 Only external interrupts which activate the <code class="docutils literal notranslate"><span class="pre">mhwakeup</span></code> signal (see <a class="reference internal" href="interrupts.html#regular-operation"><span class="std std-ref">Regular Operation</span></a>, Steps 13 and 14) are honored, if the core is enabled to service external interrupts (i.e., the <em>mie</em> bit of the <code class="docutils literal notranslate"><span class="pre">mstatus</span></code> and the <em>meie</em> bit of the <code class="docutils literal notranslate"><span class="pre">mie</span></code> standard RISC-V registers are both set, otherwise the core remains in the ‘pmu/fw-halt’ state).
 External interrupts which are still pending and have a sufficiently high priority to be signaled to the core are serviced once the core is back in the Running state.</p>
-<h2 id="control-status-registers"><span class="section-number">6.5. </span>Control/Status Registers<a class="headerlink" href="#control-status-registers" title="Link to this heading">¶</a></h2>
+<h2 id="control-status-registers"><span class="section-number">7.5. </span>Control/Status Registers<a class="headerlink" href="#control-status-registers" title="Link to this heading">¶</a></h2>
 <p>A summary of platform-specific control/status registers in CSR space:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#power-management-control-register-mpmc"><span class="std std-ref">Power Management Control Register (mpmc)</span></a></p></li>
@@ -1404,7 +1420,7 @@ External interrupts which are still pending and have a sufficiently high priorit
 </ul>
 <p>All reserved and unused bits in these control/status registers must be hardwired to ‘0’.
 Unless otherwise noted, all read/write control/status registers must have WARL (Write Any value, Read Legal value) behavior.</p>
-<h3 id="power-management-control-register-mpmc"><span class="section-number">6.5.1. </span>Power Management Control Register (mpmc)<a class="headerlink" href="#power-management-control-register-mpmc" title="Link to this heading">¶</a></h3>
+<h3 id="power-management-control-register-mpmc"><span class="section-number">7.5.1. </span>Power Management Control Register (mpmc)<a class="headerlink" href="#power-management-control-register-mpmc" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">mpmc</span></code> register provides core power management control functionality.
 It allows the firmware running on the core to initiate a transition to the Halted (pmu/fw-halt) state.
 While entering the Halted state, interrupts may optionally be enabled atomically.</p>
@@ -1425,7 +1441,7 @@ Exiting the Halted (pmu/fw-halt) state does not clear the <em>mie</em> bit of th
 </div>
 <p>This register is mapped to the non-standard read/write CSR address space.</p>
 <table class="docutils data align-default" id="tab-power-mgmt-ctrl-register">
-<caption><span class="caption-number">Table 6.5 </span><span class="caption-text">Power Management Control Register (mpmc, at CSR 0x7C6)</span><a class="headerlink" href="#tab-power-mgmt-ctrl-register" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 7.5 </span><span class="caption-text">Power Management Control Register (mpmc, at CSR 0x7C6)</span><a class="headerlink" href="#tab-power-mgmt-ctrl-register" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Field</strong></p></td>
 <td><p><strong>Bits</strong></p></td>
@@ -1460,7 +1476,7 @@ Exiting the Halted (pmu/fw-halt) state does not clear the <em>mie</em> bit of th
 </tr>
 </tbody>
 </table>
-<h3 id="core-pause-control-register-mcpc"><span class="section-number">6.5.2. </span>Core Pause Control Register (mcpc)<a class="headerlink" href="#core-pause-control-register-mcpc" title="Link to this heading">¶</a></h3>
+<h3 id="core-pause-control-register-mcpc"><span class="section-number">7.5.2. </span>Core Pause Control Register (mcpc)<a class="headerlink" href="#core-pause-control-register-mcpc" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">mcpc</span></code> register supports functions to temporarily stop the core from executing instructions.
 This helps to save core power since busy-waiting loops can be avoided in the firmware.</p>
 <p>PAUSE stops the core from executing instructions for a specified number <a class="footnote-reference brackets" href="#fn-power-1" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> of clock ticks or until an interrupt is received.</p>
@@ -1492,7 +1508,7 @@ Currently, the WFI instruction is implemented as NOP, which is a fully RISC-V-co
 <p>The <em>pause</em> field of the <code class="docutils literal notranslate"><span class="pre">mcpc</span></code> register has WAR0 (Write Any value, Read 0) behavior, as also indicated in the ‘Access’ column.</p>
 <p>This register is mapped to the non-standard read/write CSR address space.</p>
 <table class="docutils data align-default" id="tab-core-pause-ctrl-register">
-<caption><span class="caption-number">Table 6.6 </span><span class="caption-text">Core Pause Control Register (mcpc, at CSR 0x7C2)</span><a class="headerlink" href="#tab-core-pause-ctrl-register" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 7.6 </span><span class="caption-text">Core Pause Control Register (mcpc, at CSR 0x7C2)</span><a class="headerlink" href="#tab-core-pause-ctrl-register" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Field</strong></p></td>
 <td><p><strong>Bits</strong></p></td>
@@ -1510,7 +1526,7 @@ Currently, the WFI instruction is implemented as NOP, which is a fully RISC-V-co
 </tr>
 </tbody>
 </table>
-<h3 id="forced-debug-halt-threshold-register-mfdht"><span class="section-number">6.5.3. </span>Forced Debug Halt Threshold Register (mfdht)<a class="headerlink" href="#forced-debug-halt-threshold-register-mfdht" title="Link to this heading">¶</a></h3>
+<h3 id="forced-debug-halt-threshold-register-mfdht"><span class="section-number">7.5.3. </span>Forced Debug Halt Threshold Register (mfdht)<a class="headerlink" href="#forced-debug-halt-threshold-register-mfdht" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">mfdht</span></code> register hosts the enable bit of the forced debug halt mechanism as well as the power-of-two exponent of the timeout threshold.
 When enabled, if a debug halt request is received and LSU and/or IFU bus transactions are pending, an internal timeout counter starts incrementing with each core clock and keeps incrementing until the Debug Halt <em>(db-halt)</em> state is entered.
 If all ongoing bus transactions complete within the timeout period and the core is quiesced, the Debug Halt state is entered as usual.
@@ -1526,7 +1542,7 @@ In addition, when entering the Debug Halt state in either case, the <code class=
 </div>
 <p>This register is mapped to the non-standard read/write CSR address space.</p>
 <table class="docutils data align-default" id="tab-forced-debug-halt-thld-register">
-<caption><span class="caption-number">Table 6.7 </span><span class="caption-text">Forced Debug Halt Threshold Register (mfdht, at CSR 0x7CE)</span><a class="headerlink" href="#tab-forced-debug-halt-thld-register" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 7.7 </span><span class="caption-text">Forced Debug Halt Threshold Register (mfdht, at CSR 0x7CE)</span><a class="headerlink" href="#tab-forced-debug-halt-thld-register" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Field</strong></p></td>
 <td><p><strong>Bits</strong></p></td>
@@ -1559,7 +1575,7 @@ In addition, when entering the Debug Halt state in either case, the <code class=
 </tr>
 </tbody>
 </table>
-<h3 id="forced-debug-halt-status-register-mfdhs"><span class="section-number">6.5.4. </span>Forced Debug Halt Status Register (mfdhs)<a class="headerlink" href="#forced-debug-halt-status-register-mfdhs" title="Link to this heading">¶</a></h3>
+<h3 id="forced-debug-halt-status-register-mfdhs"><span class="section-number">7.5.4. </span>Forced Debug Halt Status Register (mfdhs)<a class="headerlink" href="#forced-debug-halt-status-register-mfdhs" title="Link to this heading">¶</a></h3>
 <p>The mfdhs register provides status information if any LSU and/or IFU bus transactions have been prematurely terminated when the Debug Halt (db-halt) state has been entered.
 A debugger may read this register to inquire if any bus transactions have been terminated and data may have been lost while entering the Debug Halt state.
 If both status bits are ‘0’ indicates that the core was properly quiesced.</p>
@@ -1569,7 +1585,7 @@ If both status bits are ‘0’ indicates that the core was properly quiesced.</
 </div>
 <p>This register is mapped to the non-standard read/write CSR address space.</p>
 <table class="docutils data align-default" id="tab-forced-debug-halt-status-register">
-<caption><span class="caption-number">Table 6.8 </span><span class="caption-text">Forced Debug Halt Status Register (mfdhs, at CSR 0x7CF)</span><a class="headerlink" href="#tab-forced-debug-halt-status-register" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 7.8 </span><span class="caption-text">Forced Debug Halt Status Register (mfdhs, at CSR 0x7CF)</span><a class="headerlink" href="#tab-forced-debug-halt-status-register" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Field</strong></p></td>
 <td><p><strong>Bits</strong></p></td>
@@ -1621,7 +1637,7 @@ If both status bits are ‘0’ indicates that the core was properly quiesced.</
   <small>
     
       Last update:
-      2025-01-30
+      2025-02-03
     
   </small>
 </div>
@@ -1645,7 +1661,7 @@ If both status bits are ‘0’ indicates that the core was properly quiesced.</
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="timers.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 5. Internal Timers" rel="prev">
+        <a href="timers.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 6. Internal Timers" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1654,20 +1670,20 @@ If both status bits are ‘0’ indicates that the core was properly quiesced.</
               <span class="md-footer__direction">
                 Previous
               </span>
-              5. Internal Timers
+              6. Internal Timers
             </div>
           </div>
         </a>
       
       
         
-        <a href="interrupts.html" class="md-footer__link md-footer__link--next" aria-label="Next: 7. External Interrupts" rel="next">
+        <a href="interrupts.html" class="md-footer__link md-footer__link--next" aria-label="Next: 8. External Interrupts" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              7. External Interrupts
+              8. External Interrupts
             </div>
           </div>
           <div class="md-footer__button md-icon">

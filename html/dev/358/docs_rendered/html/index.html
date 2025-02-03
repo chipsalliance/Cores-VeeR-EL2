@@ -263,6 +263,22 @@
   
   
     <li class="md-nav__item">
+      <a href="dual-core-lock-step.html" class="md-nav__link">
+        <span class="md-ellipsis">Dual-<wbr>Core Lockstep <wbr>(DCLS)</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="timers.html" class="md-nav__link">
         <span class="md-ellipsis">Internal Timers</span>
       </a>
@@ -632,135 +648,142 @@
 <li class="toctree-l2"><a class="reference internal" href="error-protection.html#core-error-counter-threshold-registers">4.5. Core Error Counter/Threshold Registers</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="timers.html">5. Internal Timers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="timers.html#features">5.1. Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="timers.html#description">5.2. Description</a></li>
-<li class="toctree-l2"><a class="reference internal" href="timers.html#internal-timer-local-interrupts">5.3. Internal Timer Local Interrupts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="timers.html#control-status-registers">5.4. Control/Status Registers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dual-core-lock-step.html">5. Dual-Core Lockstep (DCLS)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dual-core-lock-step.html#veer-el2-dcls-overview">5.1. VeeR EL2 DCLS Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dual-core-lock-step.html#shadow-core-control">5.2. Shadow Core Control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dual-core-lock-step.html#configuration">5.3. Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dual-core-lock-step.html#validation-plan">5.4. Validation Plan</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="power.html">6. Power Management and Multi-Core Debug Control</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="power.html#features">6.1. Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="power.html#core-control-interfaces">6.2. Core Control Interfaces</a></li>
-<li class="toctree-l2"><a class="reference internal" href="power.html#power-states">6.3. Power States</a></li>
-<li class="toctree-l2"><a class="reference internal" href="power.html#power-control">6.4. Power Control</a></li>
-<li class="toctree-l2"><a class="reference internal" href="power.html#control-status-registers">6.5. Control/Status Registers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timers.html">6. Internal Timers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="timers.html#features">6.1. Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timers.html#description">6.2. Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timers.html#internal-timer-local-interrupts">6.3. Internal Timer Local Interrupts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timers.html#control-status-registers">6.4. Control/Status Registers</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="interrupts.html">7. External Interrupts</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="interrupts.html#features">7.1. Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="interrupts.html#naming-convention">7.2. Naming Convention</a></li>
-<li class="toctree-l2"><a class="reference internal" href="interrupts.html#overview-of-major-functional-units">7.3. Overview of Major Functional Units</a></li>
-<li class="toctree-l2"><a class="reference internal" href="interrupts.html#pic-block-diagram">7.4. PIC Block Diagram</a></li>
-<li class="toctree-l2"><a class="reference internal" href="interrupts.html#theory-of-operation">7.5. Theory Of Operation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="interrupts.html#support-for-vectored-external-interrupts">7.6. Support for Vectored External Interrupts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="interrupts.html#interrupt-chaining">7.7. Interrupt Chaining</a></li>
-<li class="toctree-l2"><a class="reference internal" href="interrupts.html#interrupt-nesting">7.8. Interrupt Nesting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="interrupts.html#power-reduction">7.9. Power Reduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="interrupts.html#performance-targets">7.10. Performance Targets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="interrupts.html#configurability">7.11. Configurability</a></li>
-<li class="toctree-l2"><a class="reference internal" href="interrupts.html#pic-control-status-registers">7.12. PIC Control/Status Registers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="interrupts.html#pic-csr-address-map">7.13. PIC CSR Address Map</a></li>
-<li class="toctree-l2"><a class="reference internal" href="interrupts.html#pic-memory-mapped-register-address-map">7.14. PIC Memory-Mapped Register Address Map</a></li>
-<li class="toctree-l2"><a class="reference internal" href="interrupts.html#interrupt-enable-disable-code-samples">7.15. Interrupt Enable/Disable Code Samples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="power.html">7. Power Management and Multi-Core Debug Control</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="power.html#features">7.1. Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="power.html#core-control-interfaces">7.2. Core Control Interfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="power.html#power-states">7.3. Power States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="power.html#power-control">7.4. Power Control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="power.html#control-status-registers">7.5. Control/Status Registers</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="performance.html">8. Performance Monitoring</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="performance.html#features">8.1. Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="performance.html#control-status-registers">8.2. Control/Status Registers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="performance.html#counters">8.3. Counters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="performance.html#count-impacting-conditions">8.4. Count-Impacting Conditions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="performance.html#events">8.5. Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupts.html">8. External Interrupts</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="interrupts.html#features">8.1. Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interrupts.html#naming-convention">8.2. Naming Convention</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interrupts.html#overview-of-major-functional-units">8.3. Overview of Major Functional Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interrupts.html#pic-block-diagram">8.4. PIC Block Diagram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interrupts.html#theory-of-operation">8.5. Theory Of Operation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interrupts.html#support-for-vectored-external-interrupts">8.6. Support for Vectored External Interrupts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interrupts.html#interrupt-chaining">8.7. Interrupt Chaining</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interrupts.html#interrupt-nesting">8.8. Interrupt Nesting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interrupts.html#power-reduction">8.9. Power Reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interrupts.html#performance-targets">8.10. Performance Targets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interrupts.html#configurability">8.11. Configurability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interrupts.html#pic-control-status-registers">8.12. PIC Control/Status Registers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interrupts.html#pic-csr-address-map">8.13. PIC CSR Address Map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interrupts.html#pic-memory-mapped-register-address-map">8.14. PIC Memory-Mapped Register Address Map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interrupts.html#interrupt-enable-disable-code-samples">8.15. Interrupt Enable/Disable Code Samples</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="cache.html">9. Cache Control</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="cache.html#features">9.1. Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cache.html#feature-descriptions">9.2. Feature Descriptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cache.html#use-cases">9.3. Use Cases</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cache.html#theory-of-operation">9.4. Theory Of Operation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cache.html#i-cache-control-status-registers">9.5. I-Cache Control/Status Registers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">9. Performance Monitoring</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="performance.html#features">9.1. Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance.html#control-status-registers">9.2. Control/Status Registers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance.html#counters">9.3. Counters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance.html#count-impacting-conditions">9.4. Count-Impacting Conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance.html#events">9.5. Events</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="debugging.html">10. Debug Support</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="debugging.html#control-status-registers">10.1. Control/Status Registers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cache.html">10. Cache Control</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cache.html#features">10.1. Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cache.html#feature-descriptions">10.2. Feature Descriptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cache.html#use-cases">10.3. Use Cases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cache.html#theory-of-operation">10.4. Theory Of Operation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cache.html#i-cache-control-status-registers">10.5. I-Cache Control/Status Registers</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="core-control.html">11. Low-Level Core Control</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="core-control.html#control-status-registers">11.1. Control/Status Registers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">11. Debug Support</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html#control-status-registers">11.1. Control/Status Registers</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="adaptations.html">12. Standard RISC-V CSRs with Core-Specific Adaptations</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="adaptations.html#machine-interrupt-enable-mie-and-machine-interrupt-pending-mip-registers">12.1. Machine Interrupt Enable (mie) and Machine Interrupt Pending (mip) Registers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="adaptations.html#machine-cause-register-mcause">12.2. Machine Cause Register (mcause)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="adaptations.html#machine-hardware-thread-id-register-mhartid">12.3. Machine Hardware Thread ID Register (mhartid)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core-control.html">12. Low-Level Core Control</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="core-control.html#control-status-registers">12.1. Control/Status Registers</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="csrs.html">13. CSR Address Map</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="csrs.html#standard-risc-v-csrs">13.1. Standard RISC-V CSRs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="csrs.html#non-standard-risc-v-csrs">13.2. Non-Standard RISC-V CSRs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adaptations.html">13. Standard RISC-V CSRs with Core-Specific Adaptations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="adaptations.html#machine-interrupt-enable-mie-and-machine-interrupt-pending-mip-registers">13.1. Machine Interrupt Enable (mie) and Machine Interrupt Pending (mip) Registers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adaptations.html#machine-cause-register-mcause">13.2. Machine Cause Register (mcause)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adaptations.html#machine-hardware-thread-id-register-mhartid">13.3. Machine Hardware Thread ID Register (mhartid)</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="interrupt-priority.html">14. Interrupt Priorities</a></li>
-<li class="toctree-l1"><a class="reference internal" href="clocks.html">15. Clock And Reset</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="clocks.html#features">15.1. Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="clocks.html#clocking">15.2. Clocking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="clocks.html#reset">15.3. Reset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="csrs.html">14. CSR Address Map</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="csrs.html#standard-risc-v-csrs">14.1. Standard RISC-V CSRs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="csrs.html#non-standard-risc-v-csrs">14.2. Non-Standard RISC-V CSRs</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="complex-ports.html">16. Complex Port List</a></li>
-<li class="toctree-l1"><a class="reference internal" href="build-args.html">17. Build Arguments</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="build-args.html#memory-protection-build-arguments">17.1. Memory Protection Build Arguments</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-args.html#core-memory-related-build-arguments">17.2. Core Memory-Related Build Arguments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt-priority.html">15. Interrupt Priorities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">16. Clock And Reset</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="clocks.html#features">16.1. Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clocks.html#clocking">16.2. Clocking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clocks.html#reset">16.3. Reset</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tests.html">18. Compliance Test Suite Failures</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tests.html#i-misalign-ldst-01">18.1. <em>I-MISALIGN_LDST-01</em></a></li>
-<li class="toctree-l2"><a class="reference internal" href="tests.html#i-misalign-jmp-01">18.2. <em>I-MISALIGN_JMP-01</em></a></li>
-<li class="toctree-l2"><a class="reference internal" href="tests.html#i-fence-i-01-and-fence-i">18.3. <em>I-FENCE.I-01 and fence_i</em></a></li>
-<li class="toctree-l2"><a class="reference internal" href="tests.html#breakpoint">18.4. <em>Breakpoint</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="complex-ports.html">17. Complex Port List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build-args.html">18. Build Arguments</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="build-args.html#memory-protection-build-arguments">18.1. Memory Protection Build Arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-args.html#core-memory-related-build-arguments">18.2. Core Memory-Related Build Arguments</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="errata.html">19. Errata</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="errata.html#back-to-back-write-transactions-not-supported-on-ahb-lite-bus">19.1. Back-To-Back Write Transactions Not Supported on AHB-Lite Bus</a></li>
-<li class="toctree-l2"><a class="reference internal" href="errata.html#debug-abstract-command-register-may-return-non-zero-value-on-read">19.2. Debug Abstract Command Register May Return Non-Zero Value On Read</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">19. Compliance Test Suite Failures</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#i-misalign-ldst-01">19.1. <em>I-MISALIGN_LDST-01</em></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#i-misalign-jmp-01">19.2. <em>I-MISALIGN_JMP-01</em></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#i-fence-i-01-and-fence-i">19.3. <em>I-FENCE.I-01 and fence_i</em></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#breakpoint">19.4. <em>Breakpoint</em></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="physical-memory-protection.html">20. Physical Memory Protection</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="physical-memory-protection.html#theory-of-operation">20.1. Theory of Operation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="physical-memory-protection.html#physical-memory-protection-csrs">20.2. Physical Memory Protection CSRs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="physical-memory-protection.html#exceptions">20.3. Exceptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="physical-memory-protection.html#pmp-module">20.4. PMP module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="physical-memory-protection.html#verification">20.5. Verification</a></li>
-<li class="toctree-l2"><a class="reference internal" href="physical-memory-protection.html#pmp-check-example">20.6. PMP check example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="errata.html">20. Errata</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="errata.html#back-to-back-write-transactions-not-supported-on-ahb-lite-bus">20.1. Back-To-Back Write Transactions Not Supported on AHB-Lite Bus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="errata.html#debug-abstract-command-register-may-return-non-zero-value-on-read">20.2. Debug Abstract Command Register May Return Non-Zero Value On Read</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="user-mode.html">21. User Mode</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="user-mode.html#machine-isa-register-misa">21.1. Machine ISA Register (misa)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user-mode.html#machine-status-register-mstatus">21.2. Machine Status Register (mstatus)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user-mode.html#machine-environment-configuration-registers-menvcfg-menvcfgh">21.3. Machine Environment Configuration Registers (menvcfg,menvcfgh)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user-mode.html#user-mode-performance-counters-cycle-cycleh-instret-instreth">21.4. User Mode Performance Counters (cycle, cycleh, instret, instreth)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user-mode.html#machine-counter-enable-register-mcounteren">21.5. Machine Counter-Enable Register (mcounteren)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user-mode.html#machine-security-configuration-register-mseccfg-mseccfgh">21.6. Machine Security Configuration Register (mseccfg, mseccfgh)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user-mode.html#privilege-mode-transitions-and-exception-handling">21.7. Privilege Mode Transitions and Exception Handling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user-mode.html#pmp-enhancements-for-memory-access-and-execution-prevention-on-machine-mode">21.8. PMP Enhancements for Memory Access and Execution Prevention on Machine Mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physical-memory-protection.html">21. Physical Memory Protection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="physical-memory-protection.html#theory-of-operation">21.1. Theory of Operation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="physical-memory-protection.html#physical-memory-protection-csrs">21.2. Physical Memory Protection CSRs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="physical-memory-protection.html#exceptions">21.3. Exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="physical-memory-protection.html#pmp-module">21.4. PMP module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="physical-memory-protection.html#verification">21.5. Verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="physical-memory-protection.html#pmp-check-example">21.6. PMP check example</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="verification.html">22. Verification</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="verification.html#rtl-level-tests">22.1. RTL-level tests</a></li>
-<li class="toctree-l2"><a class="reference internal" href="verification.html#software-execution-tests">22.2. Software execution tests</a></li>
-<li class="toctree-l2"><a class="reference internal" href="verification.html#riscv-dv-verification">22.3. RISCV-DV verification</a></li>
-<li class="toctree-l2"><a class="reference internal" href="verification.html#verification-coverage">22.4. Verification coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-mode.html">22. User Mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user-mode.html#machine-isa-register-misa">22.1. Machine ISA Register (misa)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-mode.html#machine-status-register-mstatus">22.2. Machine Status Register (mstatus)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-mode.html#machine-environment-configuration-registers-menvcfg-menvcfgh">22.3. Machine Environment Configuration Registers (menvcfg,menvcfgh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-mode.html#user-mode-performance-counters-cycle-cycleh-instret-instreth">22.4. User Mode Performance Counters (cycle, cycleh, instret, instreth)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-mode.html#machine-counter-enable-register-mcounteren">22.5. Machine Counter-Enable Register (mcounteren)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-mode.html#machine-security-configuration-register-mseccfg-mseccfgh">22.6. Machine Security Configuration Register (mseccfg, mseccfgh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-mode.html#privilege-mode-transitions-and-exception-handling">22.7. Privilege Mode Transitions and Exception Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-mode.html#pmp-enhancements-for-memory-access-and-execution-prevention-on-machine-mode">22.8. PMP Enhancements for Memory Access and Execution Prevention on Machine Mode</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="simulation-debugging.html">23. Interactive Debugging in Simulation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="simulation-debugging.html#automation">23.1. Automation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verification.html">23. Verification</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="verification.html#rtl-level-tests">23.1. RTL-level tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="verification.html#software-execution-tests">23.2. Software execution tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="verification.html#riscv-dv-verification">23.3. RISCV-DV verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="verification.html#verification-coverage">23.4. Verification coverage</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tock.html">24. Running Tock OS</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tock.html#prerequisites">24.1. Prerequisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tock.html#fetching-sources">24.2. Fetching sources</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tock.html#running-simulation-in-verilator">24.3. Running simulation in Verilator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tock.html#running-simulation-in-verilator-with-applications">24.4. Running simulation in Verilator with applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation-debugging.html">24. Interactive Debugging in Simulation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="simulation-debugging.html#automation">24.1. Automation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tock.html">25. Running Tock OS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tock.html#prerequisites">25.1. Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tock.html#fetching-sources">25.2. Fetching sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tock.html#running-simulation-in-verilator">25.3. Running simulation in Verilator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tock.html#running-simulation-in-verilator-with-applications">25.4. Running simulation in Verilator with applications</a></li>
 </ul>
 </li>
 </ul>
@@ -772,7 +795,7 @@
   <small>
     
       Last update:
-      2025-01-30
+      2025-02-03
     
   </small>
 </div>

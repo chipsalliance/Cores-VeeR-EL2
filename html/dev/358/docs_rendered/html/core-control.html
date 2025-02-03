@@ -13,7 +13,7 @@
     
     
       
-        <title>11. Low-Level Core Control - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
+        <title>12. Low-Level Core Control - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
       
     
     
@@ -88,7 +88,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              11. Low-Level Core Control
+              12. Low-Level Core Control
             
           </span>
         </div>
@@ -249,6 +249,22 @@
     <li class="md-nav__item">
       <a href="error-protection.html" class="md-nav__link">
         <span class="md-ellipsis">Memory Error Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dual-core-lock-step.html" class="md-nav__link">
+        <span class="md-ellipsis">Dual-<wbr>Core Lockstep <wbr>(DCLS)</span>
       </a>
     </li>
   
@@ -646,9 +662,9 @@
                   
 
 
-<h1 id="low-level-core-control"><span class="section-number">11. </span>Low-Level Core Control<a class="headerlink" href="#low-level-core-control" title="Link to this heading">¶</a></h1>
+<h1 id="low-level-core-control"><span class="section-number">12. </span>Low-Level Core Control<a class="headerlink" href="#low-level-core-control" title="Link to this heading">¶</a></h1>
 <p>This chapter describes some low-level core control registers.</p>
-<h2 id="control-status-registers"><span class="section-number">11.1. </span>Control/Status Registers<a class="headerlink" href="#control-status-registers" title="Link to this heading">¶</a></h2>
+<h2 id="control-status-registers"><span class="section-number">12.1. </span>Control/Status Registers<a class="headerlink" href="#control-status-registers" title="Link to this heading">¶</a></h2>
 <p>A summary of platform-specific control/status registers in CSR space:</p>
 <ul class="simple">
 <li><p>Feature Disable Control Register (mfdc), see <a class="reference internal" href="#feature-disable-control-register-mfdc"><span class="std std-ref">Feature Disable Control Register (mfdc)</span></a></p></li>
@@ -656,7 +672,7 @@
 </ul>
 <p>All reserved and unused bits in these control/status registers must be hardwired to ‘0’.
 Unless otherwise noted, all read/write control/status registers must have WARL (Write Any value, Read Legal value) behavior.</p>
-<h3 id="feature-disable-control-register-mfdc"><span class="section-number">11.1.1. </span>Feature Disable Control Register (mfdc)<a class="headerlink" href="#feature-disable-control-register-mfdc" title="Link to this heading">¶</a></h3>
+<h3 id="feature-disable-control-register-mfdc"><span class="section-number">12.1.1. </span>Feature Disable Control Register (mfdc)<a class="headerlink" href="#feature-disable-control-register-mfdc" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">mfdc</span></code> register hosts low-level core control bits to disable specific features.
 This may be useful in case a feature intended to increase core performance should prove to have problems.</p>
 <div class="admonition note">
@@ -669,7 +685,7 @@ This may be useful in case a feature intended to increase core performance shoul
 </div>
 <p>This register is mapped to the non-standard read/write CSR address space.</p>
 <table class="docutils data align-default" id="tab-feature-disable-cr">
-<caption><span class="caption-number">Table 11.1 </span><span class="caption-text">Feature Disable Control Register (mfdc, at CSR 0x7F9). Field Bits Description</span><a class="headerlink" href="#tab-feature-disable-cr" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 12.1 </span><span class="caption-text">Feature Disable Control Register (mfdc, at CSR 0x7F9). Field Bits Description</span><a class="headerlink" href="#tab-feature-disable-cr" title="Link to this table">¶</a></caption>
 <thead>
 <tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
 <th class="head"><p><strong>Bits</strong></p></th>
@@ -802,7 +818,7 @@ This may be useful in case a feature intended to increase core performance shoul
 </tr>
 </tbody>
 </table>
-<h3 id="clock-gating-control-register-mcgc"><span class="section-number">11.1.2. </span>Clock Gating Control Register (mcgc)<a class="headerlink" href="#clock-gating-control-register-mcgc" title="Link to this heading">¶</a></h3>
+<h3 id="clock-gating-control-register-mcgc"><span class="section-number">12.1.2. </span>Clock Gating Control Register (mcgc)<a class="headerlink" href="#clock-gating-control-register-mcgc" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">mcgc</span></code> register hosts low-level core control bits to override clock gating for specific units.
 This may be useful in case a unit intended to be clock gated should prove to have problems when in lower power mode.</p>
 <div class="admonition note">
@@ -812,7 +828,7 @@ Firmware may turn off clock gating (i.e., set the clock gating override bit) for
 </div>
 <p>This register is mapped to the non-standard read/write CSR address space.</p>
 <table class="docutils data align-default" id="tab-clock-gating-cr">
-<caption><span class="caption-number">Table 11.2 </span><span class="caption-text">Clock Gating Control Register (mcgc, at CSR 0x7F8). Field Bits Description</span><a class="headerlink" href="#tab-clock-gating-cr" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 12.2 </span><span class="caption-text">Clock Gating Control Register (mcgc, at CSR 0x7F8). Field Bits Description</span><a class="headerlink" href="#tab-clock-gating-cr" title="Link to this table">¶</a></caption>
 <thead>
 <tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
 <th class="head"><p><strong>Bits</strong></p></th>
@@ -947,7 +963,7 @@ Firmware may turn off clock gating (i.e., set the clock gating override bit) for
   <small>
     
       Last update:
-      2025-01-30
+      2025-02-03
     
   </small>
 </div>
@@ -971,7 +987,7 @@ Firmware may turn off clock gating (i.e., set the clock gating override bit) for
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="debugging.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 10. Debug Support" rel="prev">
+        <a href="debugging.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 11. Debug Support" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -980,20 +996,20 @@ Firmware may turn off clock gating (i.e., set the clock gating override bit) for
               <span class="md-footer__direction">
                 Previous
               </span>
-              10. Debug Support
+              11. Debug Support
             </div>
           </div>
         </a>
       
       
         
-        <a href="adaptations.html" class="md-footer__link md-footer__link--next" aria-label="Next: 12. Standard RISC-V CSRs with Core-Specific Adaptations" rel="next">
+        <a href="adaptations.html" class="md-footer__link md-footer__link--next" aria-label="Next: 13. Standard RISC-V CSRs with Core-Specific Adaptations" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              12. Standard RISC-V CSRs with Core-Specific Adaptations
+              13. Standard RISC-V CSRs with Core-Specific Adaptations
             </div>
           </div>
           <div class="md-footer__button md-icon">

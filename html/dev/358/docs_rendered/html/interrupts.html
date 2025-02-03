@@ -13,7 +13,7 @@
     
     
       
-        <title>7. External Interrupts - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
+        <title>8. External Interrupts - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
       
     
     
@@ -88,7 +88,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              7. External Interrupts
+              8. External Interrupts
             
           </span>
         </div>
@@ -249,6 +249,22 @@
     <li class="md-nav__item">
       <a href="error-protection.html" class="md-nav__link">
         <span class="md-ellipsis">Memory Error Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dual-core-lock-step.html" class="md-nav__link">
+        <span class="md-ellipsis">Dual-<wbr>Core Lockstep <wbr>(DCLS)</span>
       </a>
     </li>
   
@@ -968,14 +984,14 @@
                   
 
 
-<h1 id="external-interrupts"><span class="section-number">7. </span>External Interrupts<a class="headerlink" href="#external-interrupts" title="Link to this heading">¶</a></h1>
+<h1 id="external-interrupts"><span class="section-number">8. </span>External Interrupts<a class="headerlink" href="#external-interrupts" title="Link to this heading">¶</a></h1>
 <p>See <em>Chapter 7, Platform-Level Interrupt Controller (PLIC)</em> in <a class="reference internal" href="intro.html#ref-2-plic"><span class="std std-ref">[2 (PLIC)]</span></a> for general information.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Even though this specification is modeled to a large extent after the RISC-V PLIC (Platform-Level Interrupt Controller) specification, this interrupt controller is associated with the core, not the platform.
 Therefore, the more general term PIC (Programmable Interrupt Controller) is used.</p>
 </div>
-<h2 id="features"><span class="section-number">7.1. </span>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
+<h2 id="features"><span class="section-number">8.1. </span>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
 <p>The PIC provides these core-level external interrupt features:</p>
 <ul class="simple">
 <li><p>Up to 255 global (core-external) interrupt sources (from 1 (highest) to 255 (lowest)) with separate enable control for each source</p></li>
@@ -989,19 +1005,19 @@ Therefore, the more general term PIC (Programmable Interrupt Controller) is used
 <li><p>Support for interrupt chaining and nested interrupts</p></li>
 <li><p>Power reduction feature for disabled external interrupts</p></li>
 </ul>
-<h2 id="naming-convention"><span class="section-number">7.2. </span>Naming Convention<a class="headerlink" href="#naming-convention" title="Link to this heading">¶</a></h2>
-<h3 id="unit-signal-and-register-naming"><span class="section-number">7.2.1. </span>Unit, Signal, and Register Naming<a class="headerlink" href="#unit-signal-and-register-naming" title="Link to this heading">¶</a></h3>
+<h2 id="naming-convention"><span class="section-number">8.2. </span>Naming Convention<a class="headerlink" href="#naming-convention" title="Link to this heading">¶</a></h2>
+<h3 id="unit-signal-and-register-naming"><span class="section-number">8.2.1. </span>Unit, Signal, and Register Naming<a class="headerlink" href="#unit-signal-and-register-naming" title="Link to this heading">¶</a></h3>
 <p><strong>S suffix:</strong> Unit, signal, and register names which have an S suffix indicate an entity specific to an interrupt source.</p>
 <p><strong>X suffix:</strong> Register names which have an X suffix indicate a consolidated register for multiple interrupt sources.</p>
-<h3 id="address-map-naming"><span class="section-number">7.2.2. </span>Address Map Naming<a class="headerlink" href="#address-map-naming" title="Link to this heading">¶</a></h3>
+<h3 id="address-map-naming"><span class="section-number">8.2.2. </span>Address Map Naming<a class="headerlink" href="#address-map-naming" title="Link to this heading">¶</a></h3>
 <p><strong>Control/status register:</strong> A control/status register mapped to either the memory or the CSR address space.</p>
 <p><strong>Memory-mapped register:</strong> Register which is mapped to RISC-V’s 32-bit memory address space.</p>
 <p><strong>Register in CSR address space:</strong> Register which is mapped to RISC-V’s 12-bit CSR address space.</p>
-<h2 id="overview-of-major-functional-units"><span class="section-number">7.3. </span>Overview of Major Functional Units<a class="headerlink" href="#overview-of-major-functional-units" title="Link to this heading">¶</a></h2>
-<h3 id="external-interrupt-source"><span class="section-number">7.3.1. </span>External Interrupt Source<a class="headerlink" href="#external-interrupt-source" title="Link to this heading">¶</a></h3>
+<h2 id="overview-of-major-functional-units"><span class="section-number">8.3. </span>Overview of Major Functional Units<a class="headerlink" href="#overview-of-major-functional-units" title="Link to this heading">¶</a></h2>
+<h3 id="external-interrupt-source"><span class="section-number">8.3.1. </span>External Interrupt Source<a class="headerlink" href="#external-interrupt-source" title="Link to this heading">¶</a></h3>
 <p>All functional units on the chip which generate interrupts to be handled by the RISC-V core are referred to as external interrupt sources.
 External interrupt sources indicate an interrupt request by sending an asynchronous signal to the PIC.</p>
-<h3 id="gateway"><span class="section-number">7.3.2. </span>Gateway<a class="headerlink" href="#gateway" title="Link to this heading">¶</a></h3>
+<h3 id="gateway"><span class="section-number">8.3.2. </span>Gateway<a class="headerlink" href="#gateway" title="Link to this heading">¶</a></h3>
 <p>Each external interrupt source connects to a dedicated gateway.
 The gateway is responsible for synchronizing the interrupt request to the core’s clock domain, and for converting the request signal to a common interrupt request format (i.e., active-high and level-triggered) for the PIC.
 The PIC core can only handle one single interrupt request per interrupt source at a time.</p>
@@ -1018,7 +1034,7 @@ To reduce the probability of reporting spurious interrupts, firmware should clea
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The gateway does not implement any edge-detection logic (e.g., an edge-triggered flop) to convert the interrupt request to a level-triggered interrupt signal (see <a class="reference internal" href="#fig-configurable-gatewat-diagram"><span class="std std-numref">Fig. 7.3</span></a>).
+<p>The gateway does not implement any edge-detection logic (e.g., an edge-triggered flop) to convert the interrupt request to a level-triggered interrupt signal (see <a class="reference internal" href="#fig-configurable-gatewat-diagram"><span class="std std-numref">Fig. 8.3</span></a>).
 Therefore, the interrupt request input signal must be set to the inactive level (i.e., to ‘0’ for an active-high interrupt and to ‘1’ for an active-low interrupt) to avoid an interrupt request being continuously reported as pending, even after the gateway’s IP latch has been cleared.
 Consequently, if the gateway of an unused interrupt request input is programmed to an “active-high” polarity, the interrupt input signal must be tied off to ‘0’.
 Similarly, if the polarity is programmed to “active-low”, the interrupt input signal must be tied off to ‘1’.</p>
@@ -1028,7 +1044,7 @@ Similarly, if the polarity is programmed to “active-low”, the interrupt inpu
 <p>For asynchronous interrupt sources, the pulse duration of an interrupt request must be at least two full clock cycles of the receiving (i.e., PIC core) clock domain to guarantee it will be recognized as an interrupt request.
 Shorter pulses might be dropped by the synchronizer circuit.</p>
 </div>
-<h3 id="pic-core"><span class="section-number">7.3.3. </span>PIC Core<a class="headerlink" href="#pic-core" title="Link to this heading">¶</a></h3>
+<h3 id="pic-core"><span class="section-number">8.3.3. </span>PIC Core<a class="headerlink" href="#pic-core" title="Link to this heading">¶</a></h3>
 <p>The PIC core’s responsibility is to evaluate all pending and enabled interrupt requests and to pick the highest-priority request with the lowest interrupt source ID.
 It then compares this priority with a programmable priority threshold and, to support nested interrupts, the priority of the interrupt handler if one is currently running.
 If the picked request’s priority is higher than both thresholds, it sends an interrupt notification to the core.
@@ -1038,21 +1054,21 @@ The PIC core also provides the interrupt source ID of the picked request in a st
 <p class="admonition-title">Note</p>
 <p>Different levels in the evaluation tree may be staged wherever necessary to meet timing, provided that all signals of a request (ID, priority, etc.) are equally staged.</p>
 </div>
-<h3 id="interrupt-target"><span class="section-number">7.3.4. </span>Interrupt Target<a class="headerlink" href="#interrupt-target" title="Link to this heading">¶</a></h3>
+<h3 id="interrupt-target"><span class="section-number">8.3.4. </span>Interrupt Target<a class="headerlink" href="#interrupt-target" title="Link to this heading">¶</a></h3>
 <p>The interrupt target is a specific RISC-V hart context. For the VeeR EL2 core, the interrupt target is the M privilege mode of the hart.</p>
-<h2 id="pic-block-diagram"><span class="section-number">7.4. </span>PIC Block Diagram<a class="headerlink" href="#pic-block-diagram" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="#fig-pic-block-diagram"><span class="std std-numref">Fig. 7.1</span></a> depicts a high-level view of the PIC.
-A simple gateway for asynchronous, level-triggered interrupt sources is shown in <a class="reference internal" href="#fig-gateway-for-asynchronous"><span class="std std-numref">Fig. 7.2</span></a>, whereas <a class="reference internal" href="#fig-configurable-gatewat-diagram"><span class="std std-numref">Fig. 7.3</span></a> depicts conceptually the internal functional blocks of a configurable gateway.
-<a class="reference internal" href="#fig-comparator"><span class="std std-numref">Fig. 7.4</span></a> shows a single comparator which is the building block to form the evaluation tree logic in the PIC core.</p>
+<h2 id="pic-block-diagram"><span class="section-number">8.4. </span>PIC Block Diagram<a class="headerlink" href="#pic-block-diagram" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="#fig-pic-block-diagram"><span class="std std-numref">Fig. 8.1</span></a> depicts a high-level view of the PIC.
+A simple gateway for asynchronous, level-triggered interrupt sources is shown in <a class="reference internal" href="#fig-gateway-for-asynchronous"><span class="std std-numref">Fig. 8.2</span></a>, whereas <a class="reference internal" href="#fig-configurable-gatewat-diagram"><span class="std std-numref">Fig. 8.3</span></a> depicts conceptually the internal functional blocks of a configurable gateway.
+<a class="reference internal" href="#fig-comparator"><span class="std std-numref">Fig. 8.4</span></a> shows a single comparator which is the building block to form the evaluation tree logic in the PIC core.</p>
 <figure class="align-default" id="fig-pic-block-diagram">
 <img alt="PIC Block Diagram" src="_images/pic_diagram.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 7.1 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 8.1 </span><span class="caption-text"><span class="caption-text">
 PIC Block Diagram</span><a class="headerlink" href="#fig-pic-block-diagram" title="Permalink to this image">¶</a></figcaption>
 </figure>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>For R/W control/status registers with double-borders in <a class="reference internal" href="#fig-pic-block-diagram"><span class="std std-numref">Fig. 7.1</span></a>, the outputs of the registers are conditionally bit-wise inverted, depending on the priority order set in the <em><code class="docutils literal notranslate"><span class="pre">priord</span></code></em> bit of the <code class="docutils literal notranslate"><span class="pre">mpiccfg</span></code> register. This is necessary to support the reverse priority order feature.</p>
+<p>For R/W control/status registers with double-borders in <a class="reference internal" href="#fig-pic-block-diagram"><span class="std std-numref">Fig. 8.1</span></a>, the outputs of the registers are conditionally bit-wise inverted, depending on the priority order set in the <em><code class="docutils literal notranslate"><span class="pre">priord</span></code></em> bit of the <code class="docutils literal notranslate"><span class="pre">mpiccfg</span></code> register. This is necessary to support the reverse priority order feature.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1061,27 +1077,27 @@ PIC Block Diagram</span><a class="headerlink" href="#fig-pic-block-diagram" titl
 <figure class="align-default" id="fig-gateway-for-asynchronous">
 <img alt="Gateway for Asynchronous, Level-triggered Interrupt sources" src="_images/gateway.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 7.2 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 8.2 </span><span class="caption-text"><span class="caption-text">
 Gateway for Asynchronous, Level-triggered Interrupt Sources</span><a class="headerlink" href="#fig-gateway-for-asynchronous" title="Permalink to this image">¶</a></figcaption>
 </figure>
 <figure class="align-default" id="fig-configurable-gatewat-diagram">
 <img alt="Configurable Gateway Diagram" src="_images/gateway_diagram.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 7.3 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 8.3 </span><span class="caption-text"><span class="caption-text">
 Conceptual Block Diagram of a Configurable Gateway</span><a class="headerlink" href="#fig-configurable-gatewat-diagram" title="Permalink to this image">¶</a></figcaption>
 </figure>
 <figure class="align-default" id="fig-comparator">
 <img alt="Comparator" src="_images/comparator.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 7.4 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 8.4 </span><span class="caption-text"><span class="caption-text">
 Comparator</span><a class="headerlink" href="#fig-comparator" title="Permalink to this image">¶</a></figcaption>
 </figure>
-<h2 id="theory-of-operation"><span class="section-number">7.5. </span>Theory Of Operation<a class="headerlink" href="#theory-of-operation" title="Link to this heading">¶</a></h2>
+<h2 id="theory-of-operation"><span class="section-number">8.5. </span>Theory Of Operation<a class="headerlink" href="#theory-of-operation" title="Link to this heading">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Interrupts must be disabled (i.e., the <em><code class="docutils literal notranslate"><span class="pre">mie</span></code></em> bit in the standard RISC-V <code class="docutils literal notranslate"><span class="pre">mstatus</span></code> register must be cleared) before changing the standard RISC-V <code class="docutils literal notranslate"><span class="pre">mtvec</span></code> register or the PIC’s <code class="docutils literal notranslate"><span class="pre">meicurpl</span></code> and <code class="docutils literal notranslate"><span class="pre">meipt</span></code> registers, or unexpected behavior may occur.</p>
 </div>
-<h3 id="initialization"><span class="section-number">7.5.1. </span>Initialization<a class="headerlink" href="#initialization" title="Link to this heading">¶</a></h3>
+<h3 id="initialization"><span class="section-number">8.5.1. </span>Initialization<a class="headerlink" href="#initialization" title="Link to this heading">¶</a></h3>
 <p>The control registers must be initialized in the following sequence:</p>
 <ol class="arabic simple">
 <li><p>Configure the priority order by writing the <em><code class="docutils literal notranslate"><span class="pre">priord</span></code></em> bit of the <code class="docutils literal notranslate"><span class="pre">mpiccfg</span></code> register.</p></li>
@@ -1092,7 +1108,7 @@ Comparator</span><a class="headerlink" href="#fig-comparator" title="Permalink t
 <li><p>Initialize the nesting priority thresholds by writing ‘0’ (or ‘15’ for reversed priority order) to the <em>clidpri</em> field of the <code class="docutils literal notranslate"><span class="pre">meicidpl</span></code> and the <em>currpri</em> field of the <code class="docutils literal notranslate"><span class="pre">meicurpl</span></code> registers.</p></li>
 <li><p>Enable interrupts for the appropriate external interrupt sources by setting the <em>inten</em> bit of the <code class="docutils literal notranslate"><span class="pre">meieS</span></code> registers for each interrupt source S.</p></li>
 </ol>
-<h3 id="regular-operation"><span class="section-number">7.5.2. </span>Regular Operation<a class="headerlink" href="#regular-operation" title="Link to this heading">¶</a></h3>
+<h3 id="regular-operation"><span class="section-number">8.5.2. </span>Regular Operation<a class="headerlink" href="#regular-operation" title="Link to this heading">¶</a></h3>
 <p>A step-by-step description of interrupt control and delivery:</p>
 <ol class="arabic simple">
 <li><p>The external interrupt source S signals an interrupt request to its gateway by activating the corresponding <code class="docutils literal notranslate"><span class="pre">exintsrc_req[S]</span></code> signal.</p></li>
@@ -1147,7 +1163,7 @@ Comparator</span><a class="headerlink" href="#fig-comparator" title="Permalink t
 </li>
 <li><p>Firmware may update the content of the <code class="docutils literal notranslate"><span class="pre">meihap</span></code> and <code class="docutils literal notranslate"><span class="pre">meicidpl</span></code> registers by writing to the <code class="docutils literal notranslate"><span class="pre">meicpct</span></code> register to trigger a new capture.</p></li>
 </ol>
-<h2 id="support-for-vectored-external-interrupts"><span class="section-number">7.6. </span>Support for Vectored External Interrupts<a class="headerlink" href="#support-for-vectored-external-interrupts" title="Link to this heading">¶</a></h2>
+<h2 id="support-for-vectored-external-interrupts"><span class="section-number">8.6. </span>Support for Vectored External Interrupts<a class="headerlink" href="#support-for-vectored-external-interrupts" title="Link to this heading">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The RISC-V standard defines support for vectored interrupts down to an interrupt class level (i.e., timer, software, and external interrupts for each privilege level), but not to the granularity of individual external interrupt sources (as described in this section).
@@ -1162,10 +1178,10 @@ The external interrupt vector table resides either in the DCCM, SoC memory, or a
 <figure class="align-default" id="fig-vectored-external-interrupts">
 <img alt="Vectored External Interrupts" src="_images/vei.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 7.5 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 8.5 </span><span class="caption-text"><span class="caption-text">
 Vectored External Interrupts</span><a class="headerlink" href="#fig-vectored-external-interrupts" title="Permalink to this image">¶</a></figcaption>
 </figure>
-<p><a class="reference internal" href="#fig-vectored-external-interrupts"><span class="std std-numref">Fig. 7.5</span></a> depicts the steps from taking the external interrupt to starting to execute the interrupt source-specific handler. When the core takes an external interrupt, the initiated external interrupt handler executes the following operations:</p>
+<p><a class="reference internal" href="#fig-vectored-external-interrupts"><span class="std std-numref">Fig. 8.5</span></a> depicts the steps from taking the external interrupt to starting to execute the interrupt source-specific handler. When the core takes an external interrupt, the initiated external interrupt handler executes the following operations:</p>
 <ol class="arabic simple">
 <li><p>Save register(s) used in this handler on the stack</p></li>
 <li><p>Store to the <code class="docutils literal notranslate"><span class="pre">meicpct</span></code> control/status register to capture a consistent claim ID / priority level pair</p></li>
@@ -1183,18 +1199,18 @@ Vectored External Interrupts</span><a class="headerlink" href="#fig-vectored-ext
 </div>
 <p>It is possible in some corner cases that the captured claim ID read from the meihap register is 0 (i.e., no interrupt request is pending).
 To keep the interrupt latency at a minimum, the external interrupt handler above should not check for this condition.
-Instead, the pointer stored at the base address of the external interrupt vector table (i.e., pointer 0) must point to a ‘no-interrupt’ handler, as shown in <a class="reference internal" href="#fig-vectored-external-interrupts"><span class="std std-numref">Fig. 7.5</span></a> above.
+Instead, the pointer stored at the base address of the external interrupt vector table (i.e., pointer 0) must point to a ‘no-interrupt’ handler, as shown in <a class="reference internal" href="#fig-vectored-external-interrupts"><span class="std std-numref">Fig. 8.5</span></a> above.
 That handler can be as simple as executing a return from interrupt (i.e., <code class="docutils literal notranslate"><span class="pre">mret</span></code>) instruction.</p>
 <p>Note that it is possible for multiple interrupt sources to share the same interrupt handler by populating their respective interrupt vector table entries with the same pointer to that handler.</p>
-<h3 id="fast-interrupt-redirect"><span class="section-number">7.6.1. </span>Fast Interrupt Redirect<a class="headerlink" href="#fast-interrupt-redirect" title="Link to this heading">¶</a></h3>
+<h3 id="fast-interrupt-redirect"><span class="section-number">8.6.1. </span>Fast Interrupt Redirect<a class="headerlink" href="#fast-interrupt-redirect" title="Link to this heading">¶</a></h3>
 <p>VeeR EL2 provides fast interrupt handing through interrupt redirection by hardware.
 The fast interrupt redirect feature is configured with a build argument to the core.</p>
 <p>If this feature is instantiated, hardware automatically captures a consistent claim ID / priority level pair once at least one qualifying external interrupt is pending and external interrupts are enabled (i.e., the <em>meie</em> bit in the <code class="docutils literal notranslate"><span class="pre">mie</span></code> register and the <em>mie</em> bit in the <code class="docutils literal notranslate"><span class="pre">mstatus</span></code> register are set).
-Following conceptually the same flow as shown in <a class="reference internal" href="#fig-vectored-external-interrupts"><span class="std std-numref">Fig. 7.5</span></a>, hardware uses the content of the meihap register to lookup the start address of the corresponding Interrupt Service Routine (ISR) by stalling decode and creating a bubble in the LSU pipeline.
+Following conceptually the same flow as shown in <a class="reference internal" href="#fig-vectored-external-interrupts"><span class="std std-numref">Fig. 8.5</span></a>, hardware uses the content of the meihap register to lookup the start address of the corresponding Interrupt Service Routine (ISR) by stalling decode and creating a bubble in the LSU pipeline.
 This bubble allows the core to access the external interrupt vector table in the DCCM to get the start address of the interrupt source-specific ISR.
 Once the start address of the ISR is known, hardware creates an interrupt flush and redirects directly to the corresponding ISR.
 If the hardware lookup of the ISR’s start address fails for any reason, a non-maskable interrupt (NMI, see <a class="reference internal" href="memory-map.html#non-maskable-interrupt-nmi-signal-and-vector"><span class="std std-ref">Non-Maskable Interrupt (NMI) Signal and Vector</span></a>) is taken.
-The reason for the lookup failure is reported in the mcause register (see <a class="reference internal" href="adaptations.html#tab-machine-cause-register"><span class="std std-numref">Table 12.3</span></a>) so firmware may determine which error condition has occurred.</p>
+The reason for the lookup failure is reported in the mcause register (see <a class="reference internal" href="adaptations.html#tab-machine-cause-register"><span class="std std-numref">Table 13.3</span></a>) so firmware may determine which error condition has occurred.</p>
 <p>The fast-interrupt-redirect-related NMI failure modes are:</p>
 <ul class="simple">
 <li><p>Double-bit uncorrectable ECC error on access (<code class="docutils literal notranslate"><span class="pre">mcause</span></code> value: 0xF000_1000)</p></li>
@@ -1212,8 +1228,8 @@ All other interrupts are still following the standard flow.</p>
 <p>The fast interrupt redirect feature is not compatible with interrupt chaining concept described in <a class="reference internal" href="#interrupt-chaining"><span class="std std-ref">Interrupt Chaining</span></a> below.
 The <code class="docutils literal notranslate"><span class="pre">meicpct</span></code> register (see <a class="reference internal" href="#external-interrupt-claim-id-priority-level-capture-trigger-register-meicpct"><span class="std std-ref">External Interrupt Claim ID / Priority Level Capture Trigger Register (meicpct)</span></a>) to capture the latest interrupt evaluation result is not present if the fast interrupt redirect mechanism is instantiated because the capturing of the claim ID / priority level pair is initiated in hardware, instead of firmware.</p>
 </div>
-<h2 id="interrupt-chaining"><span class="section-number">7.7. </span>Interrupt Chaining<a class="headerlink" href="#interrupt-chaining" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="#fig-interrupt-chaining"><span class="std std-numref">Fig. 7.6</span></a> depicts the concept of chaining interrupts.
+<h2 id="interrupt-chaining"><span class="section-number">8.7. </span>Interrupt Chaining<a class="headerlink" href="#interrupt-chaining" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="#fig-interrupt-chaining"><span class="std std-numref">Fig. 8.6</span></a> depicts the concept of chaining interrupts.
 The goal of chaining is to reduce the overhead of pushing and popping state to and from the stack while handling a series of Interrupt Service Routines (ISR) of the same priority level.
 The first ISR of the chain saves the state common to all interrupt handlers of this priority level to the stack and then services its interrupt.
 If this handler needs to save additional state, it does so immediately after saving the common state and then restores only the additional state when done.
@@ -1229,10 +1245,10 @@ If the fast interrupt redirect mechanism is instantiated, interrupt chaining can
 <figure class="align-default" id="fig-interrupt-chaining">
 <img alt="Interrupt Chaining" src="_images/interrupt_chaining.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 7.6 </span><span class="caption-text"><span class="caption-text">
+<p><span class="caption-number">Fig. 8.6 </span><span class="caption-text"><span class="caption-text">
 Concept of Interrupt Chaining</span><a class="headerlink" href="#fig-interrupt-chaining" title="Permalink to this image">¶</a></figcaption>
 </figure>
-<h2 id="interrupt-nesting"><span class="section-number">7.8. </span>Interrupt Nesting<a class="headerlink" href="#interrupt-nesting" title="Link to this heading">¶</a></h2>
+<h2 id="interrupt-nesting"><span class="section-number">8.8. </span>Interrupt Nesting<a class="headerlink" href="#interrupt-nesting" title="Link to this heading">¶</a></h2>
 <p>Support for multiple levels of nested interrupts helps to provide a more deterministic interrupt latency at higher priority levels.
 To achieve this, a running interrupt handler with lower priority must be preemptable by a higher-priority interrupt.
 The state of the preempted handler is saved before the higher priority interrupt is executed, so that it can continue its execution at the point it was interrupted.</p>
@@ -1269,7 +1285,7 @@ mret           // return from interrupt, reenable interrupts
 </li>
 <li><p>The interrupted code continues to execute.</p></li>
 </ol>
-<h2 id="power-reduction"><span class="section-number">7.9. </span>Power Reduction<a class="headerlink" href="#power-reduction" title="Link to this heading">¶</a></h2>
+<h2 id="power-reduction"><span class="section-number">8.9. </span>Power Reduction<a class="headerlink" href="#power-reduction" title="Link to this heading">¶</a></h2>
 <p>The synchronizer and interrupt capture flops in the gateway of each external interrupt source are clocked every clock cycle even if the external interrupt request input signal is not changing.
 These few flops cumulatively may consume a noticeable amount of the overall power of the VeeR EL2 core.
 VeeR EL2 implements a clock gating feature which turns off the clock to the synchronizer and interrupt capture flops for disabled external interrupt to reduce power consumption.
@@ -1281,20 +1297,20 @@ But if all four external interrupts of a group are disabled, the synchronizer an
 The current status of pending external interrupt requests which are disabled may no longer be visible in the <code class="docutils literal notranslate"><span class="pre">meipX</span></code> registers (see <a class="reference internal" href="#external-interrupt-pending-registers-meipx"><span class="std std-ref">External Interrupt Pending Registers (meipX)</span></a>).</p>
 <p>Depending on the interrupt servicing method, this may be of no consequence.
 However, for example, reliably polling the interrupt status of disabled interrupts periodically is no longer possible.</p>
-<p>The <em>picio</em> bit of the <code class="docutils literal notranslate"><span class="pre">mcgc</span></code> register (see <a class="reference internal" href="core-control.html#tab-clock-gating-cr"><span class="std std-numref">Table 11.2</span></a>) controls this power saving feature. Setting the <em>picio</em> control bit to ‘0’ turns this feature on.</p>
+<p>The <em>picio</em> bit of the <code class="docutils literal notranslate"><span class="pre">mcgc</span></code> register (see <a class="reference internal" href="core-control.html#tab-clock-gating-cr"><span class="std std-numref">Table 12.2</span></a>) controls this power saving feature. Setting the <em>picio</em> control bit to ‘0’ turns this feature on.</p>
 <p>Note that the default value of this clock gating feature is off (i.e., the <em>picio</em> bit is ‘1’).
 If the current status of pending external interrupt requests must be continuously reported in the meipX registers even for external interrupts which are disabled, this feature must remain turned off.</p>
-<h2 id="performance-targets"><span class="section-number">7.10. </span>Performance Targets<a class="headerlink" href="#performance-targets" title="Link to this heading">¶</a></h2>
+<h2 id="performance-targets"><span class="section-number">8.10. </span>Performance Targets<a class="headerlink" href="#performance-targets" title="Link to this heading">¶</a></h2>
 <p>The target latency through the PIC, including the clock domain crossing latency incurred by the gateway, is 4 core clock cycles.</p>
-<h2 id="configurability"><span class="section-number">7.11. </span>Configurability<a class="headerlink" href="#configurability" title="Link to this heading">¶</a></h2>
+<h2 id="configurability"><span class="section-number">8.11. </span>Configurability<a class="headerlink" href="#configurability" title="Link to this heading">¶</a></h2>
 <p>Typical implementations require fewer than 255 external interrupt sources.
 Code should only be generated for functionality needed by the implementation.</p>
-<h3 id="rules"><span class="section-number">7.11.1. </span>Rules<a class="headerlink" href="#rules" title="Link to this heading">¶</a></h3>
+<h3 id="rules"><span class="section-number">8.11.1. </span>Rules<a class="headerlink" href="#rules" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>The IDs of external interrupt sources must start at 1 and be contiguous.</p></li>
 <li><p>All unused register bits must be hardwired to ‘0’.</p></li>
 </ul>
-<h3 id="build-arguments"><span class="section-number">7.11.2. </span>Build Arguments<a class="headerlink" href="#build-arguments" title="Link to this heading">¶</a></h3>
+<h3 id="build-arguments"><span class="section-number">8.11.2. </span>Build Arguments<a class="headerlink" href="#build-arguments" title="Link to this heading">¶</a></h3>
 <p>The PIC build arguments are:</p>
 <ul class="simple">
 <li><p><strong>PIC base address for memory-mapped control/status registers (PIC_base_addr)</strong></p>
@@ -1308,8 +1324,8 @@ Code should only be generated for functionality needed by the implementation.</p
 </ul>
 </li>
 </ul>
-<h3 id="impact-on-generated-code"><span class="section-number">7.11.3. </span>Impact on Generated Code<a class="headerlink" href="#impact-on-generated-code" title="Link to this heading">¶</a></h3>
-<h4 id="external-interrupt-sources"><span class="section-number">7.11.3.1. </span>External Interrupt Sources<a class="headerlink" href="#external-interrupt-sources" title="Link to this heading">¶</a></h4>
+<h3 id="impact-on-generated-code"><span class="section-number">8.11.3. </span>Impact on Generated Code<a class="headerlink" href="#impact-on-generated-code" title="Link to this heading">¶</a></h3>
+<h4 id="external-interrupt-sources"><span class="section-number">8.11.3.1. </span>External Interrupt Sources<a class="headerlink" href="#external-interrupt-sources" title="Link to this heading">¶</a></h4>
 <p>The number of required external interrupt sources has an impact on the following:</p>
 <ul class="simple">
 <li><p>General impact:</p>
@@ -1349,11 +1365,11 @@ Code should only be generated for functionality needed by the implementation.</p
 </ul>
 </li>
 </ul>
-<h4 id="further-optimizations"><span class="section-number">7.11.3.2. </span>Further Optimizations<a class="headerlink" href="#further-optimizations" title="Link to this heading">¶</a></h4>
+<h4 id="further-optimizations"><span class="section-number">8.11.3.2. </span>Further Optimizations<a class="headerlink" href="#further-optimizations" title="Link to this heading">¶</a></h4>
 <p>Register fields, bus widths, and comparator MUXs are sized to cover the maximum external interrupt source IDs of 255.
 For approximately every halving of the number of interrupt sources, it would be possible to reduce the number of register fields holding source IDs, bus widths carrying source IDs, and source ID MUXs in the comparators by one.
 However, the overall reduction in logic is quite small, so it might not be worth the effort.</p>
-<h2 id="pic-control-status-registers"><span class="section-number">7.12. </span>PIC Control/Status Registers<a class="headerlink" href="#pic-control-status-registers" title="Link to this heading">¶</a></h2>
+<h2 id="pic-control-status-registers"><span class="section-number">8.12. </span>PIC Control/Status Registers<a class="headerlink" href="#pic-control-status-registers" title="Link to this heading">¶</a></h2>
 <p>A summary of the PIC control/status registers in CSR address space:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#external-interrupt-priority-threshold-register-meipt"><span class="std std-ref">External Interrupt Priority Threshold Register (meipt)</span></a></p></li>
@@ -1385,11 +1401,11 @@ However, the overall reduction in logic is quite small, so it might not be worth
 <p class="admonition-title">Note</p>
 <p>Accessing unused addresses within the 32KB PIC address range do not trigger an unmapped address exception. Reads to unmapped addresses return 0, writes to unmapped addresses are silently dropped.</p>
 </div>
-<h3 id="pic-configuration-register-mpiccfg"><span class="section-number">7.12.1. </span>PIC Configuration Register (mpiccfg)<a class="headerlink" href="#pic-configuration-register-mpiccfg" title="Link to this heading">¶</a></h3>
+<h3 id="pic-configuration-register-mpiccfg"><span class="section-number">8.12.1. </span>PIC Configuration Register (mpiccfg)<a class="headerlink" href="#pic-configuration-register-mpiccfg" title="Link to this heading">¶</a></h3>
 <p>The PIC configuration register is used to select the operational parameters of the PIC.</p>
 <p>This 32-bit register is an idempotent memory-mapped control register.</p>
 <table class="docutils data align-default" id="tab-pic-configuration-register">
-<caption><span class="caption-number">Table 7.1 </span><span class="caption-text">PIC Configuration Register (mpiccfg, at PIC_base_addr+0x3000)</span><a class="headerlink" href="#tab-pic-configuration-register" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 8.1 </span><span class="caption-text">PIC Configuration Register (mpiccfg, at PIC_base_addr+0x3000)</span><a class="headerlink" href="#tab-pic-configuration-register" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Field</strong></p></td>
 <td><p><strong>Bits</strong></p></td>
@@ -1416,7 +1432,7 @@ However, the overall reduction in logic is quite small, so it might not be worth
 </tr>
 </tbody>
 </table>
-<h3 id="external-interrupt-priority-level-registers-meipls"><span class="section-number">7.12.2. </span>External Interrupt Priority Level Registers (meiplS)<a class="headerlink" href="#external-interrupt-priority-level-registers-meipls" title="Link to this heading">¶</a></h3>
+<h3 id="external-interrupt-priority-level-registers-meipls"><span class="section-number">8.12.2. </span>External Interrupt Priority Level Registers (meiplS)<a class="headerlink" href="#external-interrupt-priority-level-registers-meipls" title="Link to this heading">¶</a></h3>
 <p>There are 255 priority level registers, one for each external interrupt source.
 Implementing individual priority level registers allows a debugger to autonomously discover how many priority level bits are supported for this interrupt source.
 Firmware must initialize the priority level for each used interrupt source.
@@ -1428,7 +1444,7 @@ This is necessary to support the reverse priority order feature.</p>
 </div>
 <p>These 32-bit registers are idempotent memory-mapped control registers.</p>
 <table class="docutils data align-default" id="tab-external-interrupt-priority-level-register">
-<caption><span class="caption-number">Table 7.2 </span><span class="caption-text">External Interrupt Priority Level Register S=1..255 (meiplS, at PIC_base_addr+S*4)</span><a class="headerlink" href="#tab-external-interrupt-priority-level-register" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 8.2 </span><span class="caption-text">External Interrupt Priority Level Register S=1..255 (meiplS, at PIC_base_addr+S*4)</span><a class="headerlink" href="#tab-external-interrupt-priority-level-register" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Field</strong></p></td>
 <td><p><strong>Bits</strong></p></td>
@@ -1465,7 +1481,7 @@ This is necessary to support the reverse priority order feature.</p>
 </tr>
 </tbody>
 </table>
-<h3 id="external-interrupt-pending-registers-meipx"><span class="section-number">7.12.3. </span>External Interrupt Pending Registers (meipX)<a class="headerlink" href="#external-interrupt-pending-registers-meipx" title="Link to this heading">¶</a></h3>
+<h3 id="external-interrupt-pending-registers-meipx"><span class="section-number">8.12.3. </span>External Interrupt Pending Registers (meipX)<a class="headerlink" href="#external-interrupt-pending-registers-meipx" title="Link to this heading">¶</a></h3>
 <p>Eight external interrupt pending registers are needed to report the current status of up to 255 independent external interrupt sources.
 Each bit of these registers corresponds to an interrupt pending indication of a single external interrupt source.
 These registers only provide the status of pending interrupts and cannot be written.</p>
@@ -1473,11 +1489,11 @@ These registers only provide the status of pending interrupts and cannot be writ
 <p class="admonition-title">Note</p>
 <p>In VeeR EL2, by default, the status of disabled external interrupt requests are continuously reported in these registers.
 To reduce power, the gateway’s synchronizer and interrupt capture flops of disabled external interrupts may be gated (see <a class="reference internal" href="#power-reduction"><span class="std std-ref">Power Reduction</span></a>).
-However, if an up-to-date status of all pending interrupt requests is important, this clock gating feature controlled by the <em>picio</em> bit in the <code class="docutils literal notranslate"><span class="pre">mcgc</span></code> register (see <a class="reference internal" href="core-control.html#tab-clock-gating-cr"><span class="std std-numref">Table 11.2</span></a>) must remain off.</p>
+However, if an up-to-date status of all pending interrupt requests is important, this clock gating feature controlled by the <em>picio</em> bit in the <code class="docutils literal notranslate"><span class="pre">mcgc</span></code> register (see <a class="reference internal" href="core-control.html#tab-clock-gating-cr"><span class="std std-numref">Table 12.2</span></a>) must remain off.</p>
 </div>
 <p>These 32-bit registers are idempotent memory-mapped status registers.</p>
 <table class="docutils data align-default" id="tab-external-interrupt-pending-register">
-<caption><span class="caption-number">Table 7.3 </span><span class="caption-text">External Interrupt Pending Register X=0..7 (meipX, at PIC_base_addr+0x1000+X*4)</span><a class="headerlink" href="#tab-external-interrupt-pending-register" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 8.3 </span><span class="caption-text">External Interrupt Pending Register X=0..7 (meipX, at PIC_base_addr+0x1000+X*4)</span><a class="headerlink" href="#tab-external-interrupt-pending-register" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Field</strong></p></td>
 <td><p><strong>Bits</strong></p></td>
@@ -1516,7 +1532,7 @@ However, if an up-to-date status of all pending interrupt requests is important,
 </tr>
 </tbody>
 </table>
-<h3 id="external-interrupt-enable-registers-meies"><span class="section-number">7.12.4. </span>External Interrupt Enable Registers (meieS)<a class="headerlink" href="#external-interrupt-enable-registers-meies" title="Link to this heading">¶</a></h3>
+<h3 id="external-interrupt-enable-registers-meies"><span class="section-number">8.12.4. </span>External Interrupt Enable Registers (meieS)<a class="headerlink" href="#external-interrupt-enable-registers-meies" title="Link to this heading">¶</a></h3>
 <p>Each of the up to 255 independently controlled external interrupt sources has a dedicated interrupt enable register.</p>
 <p>Separate registers per interrupt source were chosen for ease-of-use and compatibility with existing controllers.</p>
 <div class="admonition note">
@@ -1525,7 +1541,7 @@ However, if an up-to-date status of all pending interrupt requests is important,
 </div>
 <p>These 32-bit registers are idempotent memory-mapped control registers.</p>
 <table class="docutils data align-default" id="tab-external-interrupt-enable-register">
-<caption><span class="caption-number">Table 7.4 </span><span class="caption-text">External Interrupt Enable Register <em>S=1..255</em> (meieS, at PIC_base_addr+0x2000+S*4)</span><a class="headerlink" href="#tab-external-interrupt-enable-register" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 8.4 </span><span class="caption-text">External Interrupt Enable Register <em>S=1..255</em> (meieS, at PIC_base_addr+0x2000+S*4)</span><a class="headerlink" href="#tab-external-interrupt-enable-register" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Field</strong></p></td>
 <td><p><strong>Bits</strong></p></td>
@@ -1552,7 +1568,7 @@ However, if an up-to-date status of all pending interrupt requests is important,
 </tr>
 </tbody>
 </table>
-<h3 id="external-interrupt-priority-threshold-register-meipt"><span class="section-number">7.12.5. </span>External Interrupt Priority Threshold Register (meipt)<a class="headerlink" href="#external-interrupt-priority-threshold-register-meipt" title="Link to this heading">¶</a></h3>
+<h3 id="external-interrupt-priority-threshold-register-meipt"><span class="section-number">8.12.5. </span>External Interrupt Priority Threshold Register (meipt)<a class="headerlink" href="#external-interrupt-priority-threshold-register-meipt" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">meipt</span></code> register is used to set the interrupt target’s priority threshold.
 Interrupt notifications are sent to a target only for external interrupt sources with a priority level strictly higher than this target’s threshold.
 Hosting the threshold in a separate register allows a debugger to autonomously discover how many priority threshold level bits are supported.</p>
@@ -1563,7 +1579,7 @@ This is necessary to support the reverse priority order feature.</p>
 </div>
 <p>This 32-bit register is mapped to the non-standard read/write CSR address space.</p>
 <table class="docutils data align-default" id="tab-external-interrupt-priority-threshold-register">
-<caption><span class="caption-number">Table 7.5 </span><span class="caption-text">External Interrupt Priority Threshold Register (<code class="docutils literal notranslate"><span class="pre">meipt</span></code>, at CSR 0xBC9)</span><a class="headerlink" href="#tab-external-interrupt-priority-threshold-register" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 8.5 </span><span class="caption-text">External Interrupt Priority Threshold Register (<code class="docutils literal notranslate"><span class="pre">meipt</span></code>, at CSR 0xBC9)</span><a class="headerlink" href="#tab-external-interrupt-priority-threshold-register" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Field</strong></p></td>
 <td><p><strong>Bits</strong></p></td>
@@ -1602,12 +1618,12 @@ This is necessary to support the reverse priority order feature.</p>
 </tr>
 </tbody>
 </table>
-<h3 id="external-interrupt-vector-table-register-meivt"><span class="section-number">7.12.6. </span>External Interrupt Vector Table Register (meivt)<a class="headerlink" href="#external-interrupt-vector-table-register-meivt" title="Link to this heading">¶</a></h3>
+<h3 id="external-interrupt-vector-table-register-meivt"><span class="section-number">8.12.6. </span>External Interrupt Vector Table Register (meivt)<a class="headerlink" href="#external-interrupt-vector-table-register-meivt" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">meivt</span></code> register is used to set the base address of the external vectored interrupt address table.
 The value written to the <em>base</em> field of the meivt register appears in the <em>base</em> field of the <code class="docutils literal notranslate"><span class="pre">meihap</span></code> register.</p>
 <p>This 32-bit register is mapped to the non-standard read-write CSR address space.</p>
 <table class="docutils data align-default" id="tab-external-interrupt-vector-table-register">
-<caption><span class="caption-number">Table 7.6 </span><span class="caption-text">External Interrupt Vector Table Register (meivt, at CSR 0xBC8)</span><a class="headerlink" href="#tab-external-interrupt-vector-table-register" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 8.6 </span><span class="caption-text">External Interrupt Vector Table Register (meivt, at CSR 0xBC8)</span><a class="headerlink" href="#tab-external-interrupt-vector-table-register" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Field</strong></p></td>
 <td><p><strong>Bits</strong></p></td>
@@ -1629,7 +1645,7 @@ The value written to the <em>base</em> field of the meivt register appears in th
 </tr>
 </tbody>
 </table>
-<h3 id="external-interrupt-handler-address-pointer-register-meihap"><span class="section-number">7.12.7. </span>External Interrupt Handler Address Pointer Register (meihap)<a class="headerlink" href="#external-interrupt-handler-address-pointer-register-meihap" title="Link to this heading">¶</a></h3>
+<h3 id="external-interrupt-handler-address-pointer-register-meihap"><span class="section-number">8.12.7. </span>External Interrupt Handler Address Pointer Register (meihap)<a class="headerlink" href="#external-interrupt-handler-address-pointer-register-meihap" title="Link to this heading">¶</a></h3>
 <p>The meihap register provides a pointer into the vectored external interrupt table for the highest-priority pending external interrupt.
 The winning claim ID is captured in the <em>claimid</em> field of the meihap register when firmware writes to the <code class="docutils literal notranslate"><span class="pre">meicpct</span></code> register to claim an external interrupt.
 The priority level of the external interrupt source corresponding to the <em>claimid</em> field of this register is simultaneously captured in the <em>clidpri</em> field of the <code class="docutils literal notranslate"><span class="pre">meicidpl</span></code> register.
@@ -1644,7 +1660,7 @@ The external interrupt handler then loads the interrupt handler’s starting add
 </div>
 <p>This 32-bit register is mapped to the non-standard read-only CSR address space.</p>
 <table class="docutils data align-default" id="tab-external-interrupt-handler-address-pointer-register">
-<caption><span class="caption-number">Table 7.7 </span><span class="caption-text">External Interrupt Handler Address Pointer Register (meihap, at CSR 0xFC8)</span><a class="headerlink" href="#tab-external-interrupt-handler-address-pointer-register" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 8.7 </span><span class="caption-text">External Interrupt Handler Address Pointer Register (meihap, at CSR 0xFC8)</span><a class="headerlink" href="#tab-external-interrupt-handler-address-pointer-register" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Field</strong></p></td>
 <td><p><strong>Bits</strong></p></td>
@@ -1672,7 +1688,7 @@ The external interrupt handler then loads the interrupt handler’s starting add
 </tr>
 </tbody>
 </table>
-<h3 id="external-interrupt-claim-id-priority-level-capture-trigger-register-meicpct"><span class="section-number">7.12.8. </span>External Interrupt Claim ID / Priority Level Capture Trigger Register (meicpct)<a class="headerlink" href="#external-interrupt-claim-id-priority-level-capture-trigger-register-meicpct" title="Link to this heading">¶</a></h3>
+<h3 id="external-interrupt-claim-id-priority-level-capture-trigger-register-meicpct"><span class="section-number">8.12.8. </span>External Interrupt Claim ID / Priority Level Capture Trigger Register (meicpct)<a class="headerlink" href="#external-interrupt-claim-id-priority-level-capture-trigger-register-meicpct" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">meicpct</span></code> register is used to trigger the simultaneous capture of the currently highest-priority interrupt source ID (in the <em>claimid</em> field of the <code class="docutils literal notranslate"><span class="pre">meihap</span></code> register) and its corresponding priority level (in the <em>clidpri</em> field of the <code class="docutils literal notranslate"><span class="pre">meicidpl</span></code> register) by writing to this register.
 Since the PIC core is constantly evaluating the currently highest-priority pending interrupt, this mechanism provides a consistent snapshot of the highest-priority source requesting an interrupt and its associated priority level.
 This is important to support nested interrupts.</p>
@@ -1689,7 +1705,7 @@ It is write-only and solely serves as the trigger to simultaneously capture the 
 </div>
 <p>This 32-bit register is mapped to the non-standard read/write CSR address space.</p>
 <table class="docutils data align-default" id="tab-external-interrupt-claim-id">
-<caption><span class="caption-number">Table 7.8 </span><span class="caption-text">External Interrupt Claim ID / Priority Level Capture Trigger Register (<code class="docutils literal notranslate"><span class="pre">meicpct</span></code>, at CSR 0xBCA)</span><a class="headerlink" href="#tab-external-interrupt-claim-id" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 8.8 </span><span class="caption-text">External Interrupt Claim ID / Priority Level Capture Trigger Register (<code class="docutils literal notranslate"><span class="pre">meicpct</span></code>, at CSR 0xBCA)</span><a class="headerlink" href="#tab-external-interrupt-claim-id" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Field</strong></p></td>
 <td><p><strong>Bits</strong></p></td>
@@ -1705,7 +1721,7 @@ It is write-only and solely serves as the trigger to simultaneously capture the 
 </tr>
 </tbody>
 </table>
-<h3 id="external-interrupt-claim-id-s-priority-level-register-meicidpl"><span class="section-number">7.12.9. </span>External Interrupt Claim ID’s Priority Level Register (meicidpl)<a class="headerlink" href="#external-interrupt-claim-id-s-priority-level-register-meicidpl" title="Link to this heading">¶</a></h3>
+<h3 id="external-interrupt-claim-id-s-priority-level-register-meicidpl"><span class="section-number">8.12.9. </span>External Interrupt Claim ID’s Priority Level Register (meicidpl)<a class="headerlink" href="#external-interrupt-claim-id-s-priority-level-register-meicidpl" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">meicidpl</span></code> register captures the priority level corresponding to the interrupt source indicated in the <em>claimid</em> field of the <code class="docutils literal notranslate"><span class="pre">meihap</span></code> register when firmware writes to the <code class="docutils literal notranslate"><span class="pre">meicpct</span></code> register.
 Since the PIC core is constantly evaluating the currently highest-priority pending interrupt, this mechanism provides a consistent snapshot of the highest-priority source requesting an interrupt and its associated priority level.
 This is important to support nested interrupts.</p>
@@ -1716,7 +1732,7 @@ This is necessary to support the reverse priority order feature.</p>
 </div>
 <p>This 32-bit register is mapped to the non-standard read/write CSR address space.</p>
 <table class="docutils data align-default" id="tab-external-interrupt-claim-id-priority-level-register">
-<caption><span class="caption-number">Table 7.9 </span><span class="caption-text">External Interrupt Claim ID’s Priority Level Register (<code class="docutils literal notranslate"><span class="pre">meicidpl</span></code>, at CSR 0xBCB)</span><a class="headerlink" href="#tab-external-interrupt-claim-id-priority-level-register" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 8.9 </span><span class="caption-text">External Interrupt Claim ID’s Priority Level Register (<code class="docutils literal notranslate"><span class="pre">meicidpl</span></code>, at CSR 0xBCB)</span><a class="headerlink" href="#tab-external-interrupt-claim-id-priority-level-register" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Field</strong></p></td>
 <td><p><strong>Bits</strong></p></td>
@@ -1738,7 +1754,7 @@ This is necessary to support the reverse priority order feature.</p>
 </tr>
 </tbody>
 </table>
-<h3 id="external-interrupt-current-priority-level-register-meicurpl"><span class="section-number">7.12.10. </span>External Interrupt Current Priority Level Register (meicurpl)<a class="headerlink" href="#external-interrupt-current-priority-level-register-meicurpl" title="Link to this heading">¶</a></h3>
+<h3 id="external-interrupt-current-priority-level-register-meicurpl"><span class="section-number">8.12.10. </span>External Interrupt Current Priority Level Register (meicurpl)<a class="headerlink" href="#external-interrupt-current-priority-level-register-meicurpl" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">meicurpl</span></code> register is used to set the interrupt target’s priority threshold for nested interrupts.
 Interrupt notifications are signaled to the core only for external interrupt sources with a priority level strictly higher than the thresholds indicated in this register and the <code class="docutils literal notranslate"><span class="pre">meipt</span></code> register.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">meicurpl</span></code> register is written by firmware, and not updated by hardware.
@@ -1755,7 +1771,7 @@ This is necessary to support the reverse priority order feature.</p>
 </div>
 <p>This 32-bit register is mapped to the non-standard read/write CSR address space.</p>
 <table class="docutils data align-default" id="tab-external-interrupt-current-priority-level-register">
-<caption><span class="caption-number">Table 7.10 </span><span class="caption-text">External Interrupt Current Priority Level Register (meicurpl, at CSR 0xBCC)</span><a class="headerlink" href="#tab-external-interrupt-current-priority-level-register" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 8.10 </span><span class="caption-text">External Interrupt Current Priority Level Register (meicurpl, at CSR 0xBCC)</span><a class="headerlink" href="#tab-external-interrupt-current-priority-level-register" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Field</strong></p></td>
 <td><p><strong>Bits</strong></p></td>
@@ -1777,7 +1793,7 @@ This is necessary to support the reverse priority order feature.</p>
 </tr>
 </tbody>
 </table>
-<h3 id="external-interrupt-gateway-configuration-registers-meigwctrls"><span class="section-number">7.12.11. </span>External Interrupt Gateway Configuration Registers (meigwctrlS)<a class="headerlink" href="#external-interrupt-gateway-configuration-registers-meigwctrls" title="Link to this heading">¶</a></h3>
+<h3 id="external-interrupt-gateway-configuration-registers-meigwctrls"><span class="section-number">8.12.11. </span>External Interrupt Gateway Configuration Registers (meigwctrlS)<a class="headerlink" href="#external-interrupt-gateway-configuration-registers-meigwctrls" title="Link to this heading">¶</a></h3>
 <p>Each configurable gateway has a dedicated configuration register to control the interrupt type (i.e., edge- vs. level-triggered) as well as the interrupt signal polarity (i.e., low-to-high vs. high-to-low transition for edge-triggered interrupts, active-high vs. -low for level-triggered interrupts).</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1785,7 +1801,7 @@ This is necessary to support the reverse priority order feature.</p>
 </div>
 <p>These 32-bit registers are idempotent memory-mapped control registers.</p>
 <table class="docutils data align-default" id="tab-external-interrupt-gateway-configuration-register">
-<caption><span class="caption-number">Table 7.11 </span><span class="caption-text">External Interrupt Gateway Configuration Register S=1..255 (meigwctrlS, at PIC_base_addr+0x4000+S*4)</span><a class="headerlink" href="#tab-external-interrupt-gateway-configuration-register" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 8.11 </span><span class="caption-text">External Interrupt Gateway Configuration Register S=1..255 (meigwctrlS, at PIC_base_addr+0x4000+S*4)</span><a class="headerlink" href="#tab-external-interrupt-gateway-configuration-register" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Field</strong></p></td>
 <td><p><strong>Bits</strong></p></td>
@@ -1823,7 +1839,7 @@ This is necessary to support the reverse priority order feature.</p>
 </tr>
 </tbody>
 </table>
-<h3 id="external-interrupt-gateway-clear-registers-meigwclrs"><span class="section-number">7.12.12. </span>External Interrupt Gateway Clear Registers (meigwclrS)<a class="headerlink" href="#external-interrupt-gateway-clear-registers-meigwclrs" title="Link to this heading">¶</a></h3>
+<h3 id="external-interrupt-gateway-clear-registers-meigwclrs"><span class="section-number">8.12.12. </span>External Interrupt Gateway Clear Registers (meigwclrS)<a class="headerlink" href="#external-interrupt-gateway-clear-registers-meigwclrs" title="Link to this heading">¶</a></h3>
 <p>Each configurable gateway has a dedicated clear register to reset its interrupt pending (IP) bit.
 For edge-triggered interrupts, firmware must clear the gateway’s IP bit while servicing the external interrupt of source ID S by writing to the <code class="docutils literal notranslate"><span class="pre">meigwclrS</span></code> register.</p>
 <div class="admonition note">
@@ -1838,7 +1854,7 @@ It is write-only and solely serves as the trigger to clear the interrupt pending
 </div>
 <p>These 32-bit registers are idempotent memory-mapped control registers.</p>
 <table class="docutils data align-default" id="tab-external-interrupt-gateway-clear-register">
-<caption><span class="caption-number">Table 7.12 </span><span class="caption-text">External Interrupt Gateway Clear Register <em>S=1..255</em> (meigwclrS, at PIC_base_addr+0x5000+S*4)</span><a class="headerlink" href="#tab-external-interrupt-gateway-clear-register" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 8.12 </span><span class="caption-text">External Interrupt Gateway Clear Register <em>S=1..255</em> (meigwclrS, at PIC_base_addr+0x5000+S*4)</span><a class="headerlink" href="#tab-external-interrupt-gateway-clear-register" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Field</strong></p></td>
 <td><p><strong>Bits</strong></p></td>
@@ -1854,10 +1870,10 @@ It is write-only and solely serves as the trigger to clear the interrupt pending
 </tr>
 </tbody>
 </table>
-<h2 id="pic-csr-address-map"><span class="section-number">7.13. </span>PIC CSR Address Map<a class="headerlink" href="#pic-csr-address-map" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="#tab-pic-non-standard-risc-v-csr-address-map"><span class="std std-numref">Table 7.13</span></a> summarizes the PIC non-standard RISC-V CSR address map.</p>
+<h2 id="pic-csr-address-map"><span class="section-number">8.13. </span>PIC CSR Address Map<a class="headerlink" href="#pic-csr-address-map" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="#tab-pic-non-standard-risc-v-csr-address-map"><span class="std std-numref">Table 8.13</span></a> summarizes the PIC non-standard RISC-V CSR address map.</p>
 <table class="docutils data align-default" id="tab-pic-non-standard-risc-v-csr-address-map">
-<caption><span class="caption-number">Table 7.13 </span><span class="caption-text">PIC Non-standard RISC-V CSR Address Map</span><a class="headerlink" href="#tab-pic-non-standard-risc-v-csr-address-map" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 8.13 </span><span class="caption-text">PIC Non-standard RISC-V CSR Address Map</span><a class="headerlink" href="#tab-pic-non-standard-risc-v-csr-address-map" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Number</strong></p></td>
 <td><p><strong>Privilege</strong></p></td>
@@ -1903,10 +1919,10 @@ It is write-only and solely serves as the trigger to clear the interrupt pending
 </tr>
 </tbody>
 </table>
-<h2 id="pic-memory-mapped-register-address-map"><span class="section-number">7.14. </span>PIC Memory-Mapped Register Address Map<a class="headerlink" href="#pic-memory-mapped-register-address-map" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="#tab-pic-memory-mapped-register-address-map"><span class="std std-numref">Table 7.14</span></a> summarizes the PIC memory-mapped register address map.</p>
+<h2 id="pic-memory-mapped-register-address-map"><span class="section-number">8.14. </span>PIC Memory-Mapped Register Address Map<a class="headerlink" href="#pic-memory-mapped-register-address-map" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="#tab-pic-memory-mapped-register-address-map"><span class="std std-numref">Table 8.14</span></a> summarizes the PIC memory-mapped register address map.</p>
 <table class="docutils data align-default" id="tab-pic-memory-mapped-register-address-map">
-<caption><span class="caption-number">Table 7.14 </span><span class="caption-text">PIC Memory-mapped Register Address Map</span><a class="headerlink" href="#tab-pic-memory-mapped-register-address-map" title="Link to this table">¶</a></caption>
+<caption><span class="caption-number">Table 8.14 </span><span class="caption-text">PIC Memory-mapped Register Address Map</span><a class="headerlink" href="#tab-pic-memory-mapped-register-address-map" title="Link to this table">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p><strong>Address Offset from PIC_base_addr</strong></p></td>
 <td><p><strong>Address Offset from PIC_base_addr</strong></p></td>
@@ -2118,8 +2134,8 @@ It is write-only and solely serves as the trigger to clear the interrupt pending
 <p class="admonition-title">Note</p>
 <p><span class="math notranslate nohighlight">\(X_{max}\)</span> = (<span class="math notranslate nohighlight">\(S_{max}\)</span> + 31) // 32, whereas // is an integer division ignoring the remainder</p>
 </div>
-<h2 id="interrupt-enable-disable-code-samples"><span class="section-number">7.15. </span>Interrupt Enable/Disable Code Samples<a class="headerlink" href="#interrupt-enable-disable-code-samples" title="Link to this heading">¶</a></h2>
-<h3 id="example-interrupt-flows"><span class="section-number">7.15.1. </span>Example Interrupt Flows<a class="headerlink" href="#example-interrupt-flows" title="Link to this heading">¶</a></h3>
+<h2 id="interrupt-enable-disable-code-samples"><span class="section-number">8.15. </span>Interrupt Enable/Disable Code Samples<a class="headerlink" href="#interrupt-enable-disable-code-samples" title="Link to this heading">¶</a></h2>
+<h3 id="example-interrupt-flows"><span class="section-number">8.15.1. </span>Example Interrupt Flows<a class="headerlink" href="#example-interrupt-flows" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>Macro flow to enable interrupt source id 5 with priority set to 7, threshold set to 1, and gateway configured for edge-triggered/active-low interrupt source:</p>
 <div class="highlight-asm notranslate"><div class="highlight"><pre><span></span><code><span class="nf">disable_ext_int</span><span class="w">      </span><span class="c1">// Disable interrupts (MIE[meip]=0)</span>
@@ -2165,7 +2181,7 @@ It is write-only and solely serves as the trigger to clear the interrupt pending
 </div>
 </li>
 </ul>
-<h3 id="example-interrupt-macros"><span class="section-number">7.15.2. </span>Example Interrupt Macros<a class="headerlink" href="#example-interrupt-macros" title="Link to this heading">¶</a></h3>
+<h3 id="example-interrupt-macros"><span class="section-number">8.15.2. </span>Example Interrupt Macros<a class="headerlink" href="#example-interrupt-macros" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>Disable external interrupt:</p>
 <div class="highlight-asm notranslate"><div class="highlight"><pre><span></span><code><span class="w"> </span><span class="na">.macro</span><span class="w"> </span><span class="no">disable_ext_int</span>
@@ -2272,7 +2288,7 @@ It is write-only and solely serves as the trigger to clear the interrupt pending
   <small>
     
       Last update:
-      2025-01-30
+      2025-02-03
     
   </small>
 </div>
@@ -2296,7 +2312,7 @@ It is write-only and solely serves as the trigger to clear the interrupt pending
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="power.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 6. Power Management and Multi-Core Debug Control" rel="prev">
+        <a href="power.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 7. Power Management and Multi-Core Debug Control" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -2305,20 +2321,20 @@ It is write-only and solely serves as the trigger to clear the interrupt pending
               <span class="md-footer__direction">
                 Previous
               </span>
-              6. Power Management and Multi-Core Debug Control
+              7. Power Management and Multi-Core Debug Control
             </div>
           </div>
         </a>
       
       
         
-        <a href="performance.html" class="md-footer__link md-footer__link--next" aria-label="Next: 8. Performance Monitoring" rel="next">
+        <a href="performance.html" class="md-footer__link md-footer__link--next" aria-label="Next: 9. Performance Monitoring" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              8. Performance Monitoring
+              9. Performance Monitoring
             </div>
           </div>
           <div class="md-footer__button md-icon">

@@ -97,7 +97,7 @@ jobs:
         coverage: ["branch", "toggle"] #TODO: add functional coverage
         version: [ uvm ]
         # TODO use separate privilege modes configurations for generating the VeeR model
-        priv: ["", "u"]
+        priv: ["m", "mu"]
         include: ${{ fromJSON(needs.generate-config.outputs.test-include-run) }}
         exclude:
             # Bitmanip tests are temporarily disabled in Renode
@@ -219,7 +219,7 @@ jobs:
       matrix:
         test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
         version: [ uvm ]
-        priv: ["", "u"]
+        priv: ["m", "mu"]
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"

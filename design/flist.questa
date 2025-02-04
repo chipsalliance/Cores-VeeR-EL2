@@ -59,6 +59,7 @@ $RV_ROOT/design/dmi/dmi_wrapper.v
 $RV_ROOT/design/dmi/dmi_jtag_to_core_sync.v
 $RV_ROOT/design/dmi/rvjtag_tap.v
 $RV_ROOT/design/lib/el2_lib.sv
+$RV_ROOT/design/lib/el2_mem_if.sv
 $RV_ROOT/design/lib/beh_lib.sv
 $RV_ROOT/design/lib/mem_lib.sv
 $RV_ROOT/design/lib/ahb_to_axi4.sv

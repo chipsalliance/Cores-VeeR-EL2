@@ -40,7 +40,7 @@ endif
 ifeq ($(SIM), verilator)
     COMPILE_ARGS += --coverage-max-width 20000
     COMPILE_ARGS += --timing
-    COMPILE_ARGS += -Wall
+    COMPILE_ARGS += -Wall -Wno-SIDEEFFECT
     COMPILE_ARGS += $(CURDIR)/config.vlt
 
     EXTRA_ARGS   += --trace --trace-structs

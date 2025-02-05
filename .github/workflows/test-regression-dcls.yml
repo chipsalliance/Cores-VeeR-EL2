@@ -123,7 +123,7 @@ jobs:
           submodules: recursive
 
       - name: Run tests
-        run: _secret_dcls_regression
+        run: _secret_dcls_regression_72464
         env:
           DCLS_ENABLE: "1"
           TEST: ${{ matrix.test }}

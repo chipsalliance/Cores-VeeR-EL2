@@ -69,5 +69,5 @@ jobs:
       actions: write
       contents: write
     name: Publish-to-GH-Pages
-    needs: [Report-Coverage, Test-Verification, Build-Docs]
+    needs: [Report-Coverage, Build-Docs]
     uses: ./.github/workflows/publish-webpage.yml

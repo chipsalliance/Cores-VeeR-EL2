@@ -246,6 +246,6 @@ jobs:
           pip3 install -r third_party/riscv-dv/requirements.txt
 
       - name: Perform custom tests
-        run: _secret_custom_run_72464
+        run: _secret_custom_run
         env:
           RISCV_DV_TEST: ${{ matrix.test }}

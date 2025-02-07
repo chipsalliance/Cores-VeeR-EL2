@@ -65,7 +65,7 @@ jobs:
         run: _secret_prepare_env
 
       - name: Generate custom reports
-        run: _secret_custom_report
+        run: _secret_custom_report_mapfile_tmp
 
       - name: Pack artifacts
         uses: actions/upload-artifact@v4

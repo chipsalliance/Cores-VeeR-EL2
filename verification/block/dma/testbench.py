@@ -387,7 +387,7 @@ class Axi4LiteBFM(uvm_component):
             if signal.value != 0:
                 break
         else:
-            raise RuntimeError("{} timeout".format(str(signal)))
+            raise RuntimeError("{} timeout".format(signal._name))
 
     async def write(self, addr, data):
         """
@@ -611,7 +611,7 @@ class DebugInterfaceBFM(uvm_component):
             if signal.value != 0:
                 break
         else:
-            raise RuntimeError("{} timeout".format(str(signal)))
+            raise RuntimeError("{} timeout".format(signal._name))
 
     async def write(self, addr, data):
         """

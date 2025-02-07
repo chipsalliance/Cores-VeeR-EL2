@@ -52,7 +52,6 @@ jobs:
     name: Custom coverage reports
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: centos:8
-    needs: [merge-verilator-reports]
     env:
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader

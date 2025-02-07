@@ -18,7 +18,6 @@ pipRequirementsPath = "requirements.txt"
 
 # Coverage types to collect
 coverageTypes = [
-    "all",
     "branch",
     "toggle",
 ]

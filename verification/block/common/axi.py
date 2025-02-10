@@ -152,7 +152,7 @@ class Axi4LiteMonitor(uvm_component):
 
                 if arid in xfers:
                     self.logger.error(
-                        "Read request for a pending transaction, arid={}".format(awid)
+                        "Read request for a pending transaction, arid={}".format(arid)
                     )
 
                 else:

@@ -495,7 +495,7 @@ class Axi4LiteBFM(uvm_component):
         """
 
         # Send read request
-        await self._wait(self.axi_awready)
+        await self._wait(self.axi_arready)
         self.axi_arvalid.value = 1
         self.axi_araddr.value = addr
         self.axi_arid.value = 1

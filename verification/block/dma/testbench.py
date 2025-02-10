@@ -388,10 +388,10 @@ class Axi4LiteBFM(uvm_component):
 
     async def _wait(self, signal, max_cycles=200):
         """
-        Waits for a signal to be asserted for at most max_cycles.
+        Waits for a signal to be asserted in at most max_cycles.
         Raises an exception if it does not
         """
-        for i in range(max_cycles):
+        for _ in range(max_cycles):
             await RisingEdge(self.axi_clk)
             if signal.value != 0:
                 break
@@ -422,24 +422,19 @@ class Axi4LiteBFM(uvm_component):
                     break
 
         # Send write request
-        # timeout needs to be fairly high to allow requests to complete in all randomized scenarios
-        await self._wait(self.axi_awready, max_cycles=300)
         self.axi_awvalid.value = 1
         self.axi_awaddr.value = addr
         self.axi_awid.value = awid
         self.axi_awsize.value = int(math.ceil(math.log2(self.dwidth)))
-
-        await RisingEdge(self.axi_clk)
+        # timeout needs to be fairly high to allow requests to complete in all randomized scenarios
+        await self._wait(self.axi_awready)
         self.axi_awvalid.value = 0
 
         # Send data
+        self.axi_wvalid.value = 1
         data_len = len(data)
         data_ptr = 0
         while data_len > 0:
-            # Wait for ready
-            await self._wait(self.axi_wready)
-            self.axi_wvalid.value = 1
-
             # Get data
             xfer_len = min(self.swidth, data_len)
             xfer_data = data[data_ptr : data_ptr + xfer_len]
@@ -459,17 +454,14 @@ class Axi4LiteBFM(uvm_component):
             self.axi_wdata.value = wdata
             self.axi_wstrb.value = wstrb
 
-        # Wait for the last ready
-        await self._wait(self.axi_wready)
-
-        # Deassert wvalid
+            # Wait for ready
+            await self._wait(self.axi_wready)
         self.axi_wvalid.value = 0
 
     async def write_handler(self):
         """
         A handler for write transfer completion
         """
-
         # Accept responses
         self.axi_bready.value = 1
 
@@ -504,23 +496,19 @@ class Axi4LiteBFM(uvm_component):
         """
 
         # Send read request
-        await self._wait(self.axi_arready)
-        self.axi_arvalid.value = 1
         self.axi_araddr.value = addr
         self.axi_arid.value = 1
         self.axi_arsize.value = int(math.ceil(math.log2(self.dwidth)))
-
-        await RisingEdge(self.axi_clk)
+        self.axi_arvalid.value = 1
+        await self._wait(self.axi_arready)
         self.axi_arvalid.value = 0
 
-        # Receive data
         self.axi_rready.value = 1
-
         data = bytearray()
         rresp = None
 
         while True:
-            # Wait for valid
+            # Receive data
             await self._wait(self.axi_rvalid)
 
             # Get the data
@@ -530,8 +518,8 @@ class Axi4LiteBFM(uvm_component):
             if self.axi_rlast.value:
                 break
 
-        self.axi_rready.value = 0
         rresp = int(self.axi_rresp.value)
+        self.axi_rready.value = 0
 
         self.logger.debug(
             "RD: 0x{:08X} {} 0b{:03b}".format(addr, ["0x{:02X}".format(b) for b in data], rresp)

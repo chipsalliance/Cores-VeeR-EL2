@@ -1,16 +1,11 @@
 # Copyright (c) 2023 Antmicro <www.antmicro.com>
 # SPDX-License-Identifier: Apache-2.0
 
-import random
 import struct
 from collections import defaultdict
 
-import pyuvm
-from cocotb.triggers import ClockCycles
-from pyuvm import *
+from pyuvm import ConfigDB, uvm_component, uvm_get_port, uvm_tlm_analysis_fifo
 from testbench import (
-    BaseEnv,
-    BaseTest,
     BusReadItem,
     BusWriteItem,
     DebugReadItem,

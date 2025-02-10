@@ -4,17 +4,9 @@
 from collections import defaultdict
 
 import pyuvm
-from cocotb.triggers import ClockCycles
-from pyuvm import *
+from pyuvm import ConfigDB, uvm_component, uvm_get_port, uvm_tlm_analysis_fifo
 from sequences import AnyMemReadSequence
-from testbench import (
-    BaseEnv,
-    BaseTest,
-    BusReadItem,
-    BusWriteItem,
-    MemReadItem,
-    MemWriteItem,
-)
+from testbench import BaseEnv, BaseTest, BusReadItem, MemReadItem
 
 # =============================================================================
 

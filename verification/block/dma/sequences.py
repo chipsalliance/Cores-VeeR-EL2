@@ -4,18 +4,10 @@
 import random
 import struct
 
+import cocotb
 from cocotb.triggers import ClockCycles
-from pyuvm import *
-from testbench import (
-    BaseEnv,
-    BaseTest,
-    BusReadItem,
-    BusWriteItem,
-    DebugReadItem,
-    DebugWriteItem,
-    MemReadItem,
-    MemWriteItem,
-)
+from pyuvm import ConfigDB, uvm_sequence
+from testbench import BusReadItem, BusWriteItem
 
 # =============================================================================
 

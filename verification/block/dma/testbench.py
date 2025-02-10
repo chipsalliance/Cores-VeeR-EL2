@@ -1,24 +1,27 @@
 # Copyright (c) 2023 Antmicro
 # SPDX-License-Identifier: Apache-2.0
 
+import logging
 import math
 import os
 import random
 import struct
 
-import pyuvm
+import cocotb
 from axi import Axi4LiteMonitor, BusReadItem, BusWriteItem
 from cocotb.clock import Clock
-from cocotb.triggers import (
-    ClockCycles,
-    Event,
-    FallingEdge,
-    First,
-    Lock,
-    RisingEdge,
-    Timer,
+from cocotb.triggers import ClockCycles, FallingEdge, Lock, RisingEdge
+from pyuvm import (
+    ConfigDB,
+    uvm_analysis_port,
+    uvm_component,
+    uvm_driver,
+    uvm_env,
+    uvm_report_object,
+    uvm_sequence_item,
+    uvm_sequencer,
+    uvm_test,
 )
-from pyuvm import *
 from utils import collect_bytes, collect_signals
 
 # ==============================================================================

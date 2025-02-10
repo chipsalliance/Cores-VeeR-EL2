@@ -1,8 +1,9 @@
 # Copyright (c) 2023 Antmicro
 # SPDX-License-Identifier: Apache-2.0
 
+import cocotb
 from cocotb.triggers import RisingEdge
-from pyuvm import *
+from pyuvm import uvm_analysis_port, uvm_component, uvm_sequence_item
 from utils import collect_bytes
 
 # ==============================================================================

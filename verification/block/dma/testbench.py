@@ -258,6 +258,12 @@ class CoreMemoryMonitor(uvm_component):
 
     async def run_phase(self):
         req_pending = False
+        is_iccm = False
+        is_dccm = False
+        req_wr = False
+        req_addr = 0
+        req_data = 0
+        req_size = 0
 
         while True:
             await RisingEdge(self.bfm.clk)

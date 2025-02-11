@@ -22,7 +22,7 @@ from pyuvm import (
     uvm_sequencer,
     uvm_test,
 )
-from utils import collect_bytes, collect_signals
+from utils import collect_bytes, collect_signals, smallest_number_of_trials
 
 # ==============================================================================
 
@@ -386,6 +386,9 @@ class Axi4LiteBFM(uvm_component):
 
         self.wr_xfers = {i: self.Transfer(i) for i in range(1 << len(self.axi_awid))}
 
+    def build_phase(self):
+        self.busy_timeout = ConfigDB().get(self, "", "MEM_BUSY_TIMEOUT")
+
     async def _wait(self, signal, max_cycles=200):
         """
         Waits for a signal to be asserted in at most max_cycles.
@@ -426,8 +429,7 @@ class Axi4LiteBFM(uvm_component):
         self.axi_awaddr.value = addr
         self.axi_awid.value = awid
         self.axi_awsize.value = int(math.ceil(math.log2(self.dwidth)))
-        # timeout needs to be fairly high to allow requests to complete in all randomized scenarios
-        await self._wait(self.axi_awready)
+        await self._wait(self.axi_awready, self.busy_timeout)
         self.axi_awvalid.value = 0
 
         # Send data
@@ -454,8 +456,7 @@ class Axi4LiteBFM(uvm_component):
             self.axi_wdata.value = wdata
             self.axi_wstrb.value = wstrb
 
-            # Wait for ready
-            await self._wait(self.axi_wready)
+            await self._wait(self.axi_wready, self.busy_timeout)
         self.axi_wvalid.value = 0
 
     async def write_handler(self):
@@ -500,7 +501,7 @@ class Axi4LiteBFM(uvm_component):
         self.axi_arid.value = 1
         self.axi_arsize.value = int(math.ceil(math.log2(self.dwidth)))
         self.axi_arvalid.value = 1
-        await self._wait(self.axi_arready)
+        await self._wait(self.axi_arready, self.busy_timeout)
         self.axi_arvalid.value = 0
 
         self.axi_rready.value = 1
@@ -509,7 +510,7 @@ class Axi4LiteBFM(uvm_component):
 
         while True:
             # Receive data
-            await self._wait(self.axi_rvalid)
+            await self._wait(self.axi_rvalid, self.busy_timeout)
 
             # Get the data
             data.extend(collect_bytes(self.axi_rdata))
@@ -597,6 +598,7 @@ class DebugInterfaceBFM(uvm_component):
             ConfigDB().get(self, "", "DBG_BUSY_MIN"),
             ConfigDB().get(self, "", "DBG_BUSY_MAX"),
         )
+        self.busy_timeout = ConfigDB().get(self, "", "DBG_BUSY_TIMEOUT")
 
     async def _wait(self, signal, max_cycles=150):
         """
@@ -617,7 +619,7 @@ class DebugInterfaceBFM(uvm_component):
         """
 
         # Wait for ready
-        await self._wait(self.dma_dbg_ready)
+        await self._wait(self.dma_dbg_ready, self.busy_timeout)
 
         # Issue the command
         self.dbg_cmd_valid.value = 1
@@ -642,7 +644,7 @@ class DebugInterfaceBFM(uvm_component):
         """
 
         # Wait for ready
-        await self._wait(self.dma_dbg_ready)
+        await self._wait(self.dma_dbg_ready, self.busy_timeout)
 
         # Issue the command
         self.dbg_cmd_valid.value = 1
@@ -861,6 +863,23 @@ class BaseEnv(uvm_env):
         ConfigDB().set(self.dbg_bfm, "", "DBG_BUSY_PROB", 0.05)
         ConfigDB().set(self.dbg_bfm, "", "DBG_BUSY_MIN", 10)
         ConfigDB().set(self.dbg_bfm, "", "DBG_BUSY_MAX", 25)
+
+        dbg_busy_prob = ConfigDB().get(self.dbg_bfm, "", "DBG_BUSY_PROB")
+        dbg_busy_max = ConfigDB().get(self.dbg_bfm, "", "DBG_BUSY_MAX")
+        dbg_trials = smallest_number_of_trials(1 - dbg_busy_prob, 10, 99.99) * dbg_busy_max
+        ConfigDB().set(self.dbg_bfm, "", "DBG_BUSY_TIMEOUT", dbg_trials)
+
+        mem_busy_prob = min(
+            ConfigDB().get(self.mem_bfm, "", "DCCM_BUSY_PROB"),
+            ConfigDB().get(self.mem_bfm, "", "ICCM_BUSY_PROB"),
+        )
+        mem_busy_max = ConfigDB().get(self.mem_bfm, "", "MEM_BUSY_MAX")
+        busy_max = max(mem_busy_max, dbg_busy_max)
+
+        # Probability AXI4Lite transaction going through
+        joint_prob = (1 - mem_busy_prob) * dbg_busy_prob
+        mem_trials = smallest_number_of_trials(joint_prob, 10, 99.99) * busy_max
+        ConfigDB().set(self.axi_bfm, "", "MEM_BUSY_TIMEOUT", mem_trials)
 
     def connect_phase(self):
         self.axi_drv.seq_item_port.connect(self.axi_seqr.seq_item_export)

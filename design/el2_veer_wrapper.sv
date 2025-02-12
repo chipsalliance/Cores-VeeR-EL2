@@ -334,7 +334,7 @@ import el2_pkg::*;
    input logic                             lsu_hready,
    input logic                             lsu_hresp,
    /*pragma coverage on*/
-   // Debug Syster Bus AHB
+   // Debug System Bus AHB
    output logic [31:0]                     sb_haddr,
    /* exclude signals that are tied to constant value in axi4_to_ahb.sv */
    /*pragma coverage off*/
@@ -548,7 +548,7 @@ import el2_pkg::*;
    logic [63:0]              lsu_hrdata;
    logic                     lsu_hready;
    logic                     lsu_hresp;
-   // Debug Syster Bus AHB
+   // Debug System Bus AHB
    logic [31:0]              sb_haddr;
    logic [2:0]               sb_hburst;
    logic                     sb_hmastlock;

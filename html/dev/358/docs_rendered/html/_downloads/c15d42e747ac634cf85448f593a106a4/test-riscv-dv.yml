@@ -97,7 +97,7 @@ jobs:
         coverage: ["branch", "toggle"] #TODO: add functional coverage
         version: [ uvm ]
         # TODO use separate privilege modes configurations for generating the VeeR model
-        priv: ["m", "mu"]
+        priv: ["", "u"]
         include: ${{ fromJSON(needs.generate-config.outputs.test-include-run) }}
         exclude:
             # Bitmanip tests are temporarily disabled in Renode

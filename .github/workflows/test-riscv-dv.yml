@@ -218,8 +218,8 @@ jobs:
       fail-fast: false
       matrix:
         test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
-        coverage: ["branch", "toggle"] #TODO: add functional coverage
         version: [ uvm ]
+        priv: ["m", "mu"]
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"
@@ -241,11 +241,8 @@ jobs:
       - name: Prepare Environment
         run: _secret_prepare_env
 
-      - name: Install Python deps
-        run: |
-          pip3 install -r third_party/riscv-dv/requirements.txt
-
       - name: Perform custom tests
-        run: _secret_custom_run
+        run: _secret_custom_riscv_dv
         env:
           RISCV_DV_TEST: ${{ matrix.test }}
+          RISCV_DV_PRIV: ${{ matrix.priv }}

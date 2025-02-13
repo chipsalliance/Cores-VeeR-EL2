@@ -54,7 +54,17 @@ jobs:
 
   Report-Coverage:
     name: Report-Coverage
-    needs: [Test-Regression-Cache-Waypack-0, Test-Regression-Cache-Waypack-1, Test-Verification, Test-Microarchitectural, Test-RISCV-DV, Test-RISCOF, Test-OpenOCD]
+    needs: [
+      Test-DCLS,
+      Test-Regression-Cache-Waypack-0,
+      Test-Regression-Cache-Waypack-1,
+      Test-Exceptions-Regression,
+      Test-Verification,
+      Test-Microarchitectural,
+      Test-RISCV-DV,
+      Test-RISCOF,
+      Test-OpenOCD
+    ]
     uses: ./.github/workflows/report-coverage.yml
 
   Build-Docs:
@@ -69,5 +79,5 @@ jobs:
       actions: write
       contents: write
     name: Publish-to-GH-Pages
-    needs: [Report-Coverage, Test-Verification, Build-Docs]
+    needs: [Report-Coverage, Build-Docs]
     uses: ./.github/workflows/publish-webpage.yml

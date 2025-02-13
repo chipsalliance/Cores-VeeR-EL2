@@ -226,7 +226,7 @@ import el2_pkg::*;
    logic                       axi_mstr_priority;
    logic                       axi_mstr_sel;
 
-   logic                       axi_rsp_valid, axi_rsp_sent;
+   logic                       axi_rsp_valid;
    logic                       axi_rsp_write;
    logic [pt.DMA_BUS_TAG-1:0]  axi_rsp_tag;
    logic [1:0]                 axi_rsp_error;

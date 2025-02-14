@@ -826,7 +826,7 @@ class BaseEnv(uvm_env):
 
         ConfigDB().set(None, "*", "ICCM_SIZE", 0x10000)
         ConfigDB().set(None, "*", "DCCM_SIZE", 0x10000)
-        ConfigDB().set(None, "*", "PIC_SIZE", 0x20)
+        ConfigDB().set(None, "*", "PIC_SIZE", 0x8000)
 
         ConfigDB().set(None, "*", "ADDR_ALIGN", len(cocotb.top.dma_axi_wdata) // 8)
 

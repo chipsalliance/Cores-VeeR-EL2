@@ -243,6 +243,7 @@ class WriteScoreboard(uvm_component):
                     self.passed = False
 
                 if item.mem == "ICCM":
+                    assert item.addr >= 0 and item.addr < self.iccm_size
                     iccm_writes[
                         (
                             item.addr,
@@ -250,6 +251,7 @@ class WriteScoreboard(uvm_component):
                         )
                     ] += 1
                 elif item.mem == "DCCM":
+                    assert item.addr >= 0 and item.addr < self.dccm_size
                     dccm_writes[
                         (
                             item.addr,

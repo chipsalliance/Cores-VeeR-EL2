@@ -10,7 +10,7 @@ import struct
 import cocotb
 from axi import Axi4LiteMonitor, BusReadItem, BusWriteItem
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, FallingEdge, Lock, RisingEdge
+from cocotb.triggers import ClockCycles, FallingEdge, Lock, ReadOnly, RisingEdge
 from pyuvm import (
     ConfigDB,
     uvm_analysis_port,
@@ -267,6 +267,7 @@ class CoreMemoryMonitor(uvm_component):
 
         while True:
             await RisingEdge(self.bfm.clk)
+            await ReadOnly()
 
             # Monitor reads which happen one cycle after a request
             if req_pending and not req_wr:

@@ -25,14 +25,14 @@ jobs:
       - name: Download coverage reports
         uses: actions/download-artifact@v4
         with:
-          name: coverage_report
-          path: ./coverage_dashboard
+          name: data_verilator
+          path: data_verilator/
 
       - name: Download coverage reports merged
         uses: actions/download-artifact@v4
         with:
-          name: data_v
-          path: ./data_v_merged
+          name: data_both
+          path: data_both/
 
       - name: Download docs
         uses: actions/download-artifact@v4
@@ -67,83 +67,54 @@ jobs:
           mv ./public.checkout/html ./public.new/ | true
 
       - name: Update webpage
-        if: github.event_name != 'pull_request'
         run: |
+          set -eux
+          set -o pipefail
+
           apt -y update
           apt -y install nodejs npm python3 zip git
-
-          mv coverage_dashboard/*.zip .
-          mv coverage_dashboard/*.zip.xz .
-          mv data_v_merged/*.zip .
-          mv data_v_merged/*.zip.xz .
 
           # get coverview
           git clone https://github.com/antmicro/coverview
           cd coverview
           npm install
           npm run build
-          unzip ../data.zip -d data
+          cp -r ../data_verilator data
           python3 embed.py --inject-data data
           cd ../
 
-          # dashboard
-          rm -rf public.new/html/main/coverage_dashboard*
-          mkdir -p public.new/html/main/coverage_dashboard/all
-          cp -a coverview/dist/* public.new/html/main/coverage_dashboard/all
-
-          #docs
-          rm -rf public.new/html/main/docs_rendered
-          mkdir -p public.new/html/main/docs_rendered
-          mv ./docs_rendered/* public.new/html/main/docs_rendered
-
-          # data
-          mv data_*_verilator_info.zip.xz public.new/html/main/
-          mv data.zip public.new/html/main/
-          mv data_both.zip public.new/html/main/
-          mv data_v_line.zip.xz public.new/html/main/
-          mv data_v_toggle.zip.xz public.new/html/main/
-          mv data_v_branch.zip.xz public.new/html/main/
-          echo ${GITHUB_RUN_ID} > public.new/html/main/run_id
-          tar -acf webpage.tar.gz public.new
-
-      - name: Update webpage PR
-        if: github.event_name == 'pull_request'
-        run: |
-          apt -y update
-          apt -y install nodejs npm python3 zip git
-
-          mv coverage_dashboard/*.zip .
-          mv coverage_dashboard/*.zip.xz .
-          mv data_v_merged/*zip .
-          mv data_v_merged/*zip.xz .
-
-          # get coverview
-          git clone https://github.com/antmicro/coverview
-          cd coverview
-          npm install
-          npm run build
-          unzip ../data.zip -d data
-          python3 embed.py --inject-data data
-          cd ../
+          echo "Event: $GITHUB_EVENT_NAME, ref: $GITHUB_REF_NAME)"
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]
+          then
+            TARGET_DIR=public.new/html/dev/${{ github.event.number }}
+          elif [ "$GITHUB_REF_NAME" = main ]
+          then
+            TARGET_DIR=public.new/html/main
+          else
+            # Currently deploying is only possible in PRs and on main but let's
+            # better keep things safe in case that's changed in the future by
+            # using another target dir in other cases.
+            TARGET_DIR=public.new/html/other
+          fi
+          TARGET_DIR=`realpath $TARGET_DIR`
 
           # dashboard
-          rm -rf public.new/html/dev/${{ github.event.number }}/coverage_dashboard*
-          mkdir -p public.new/html/dev/${{ github.event.number }}/coverage_dashboard/all
-          cp -a coverview/dist/* public.new/html/dev/${{ github.event.number }}/coverage_dashboard/all
+          rm -rf $TARGET_DIR/coverage_dashboard*
+          mkdir -p $TARGET_DIR/coverage_dashboard/all
+          cp -a coverview/dist/* $TARGET_DIR/coverage_dashboard/all
 
           # docs
-          rm -rf public.new/html/dev/${{ github.event.number }}/docs_rendered
-          mkdir -p public.new/html/dev/${{ github.event.number }}/docs_rendered
-          mv ./docs_rendered/* public.new/html/dev/${{ github.event.number }}/docs_rendered
+          rm -rf $TARGET_DIR/docs_rendered
+          mkdir -p $TARGET_DIR/docs_rendered
+          mv ./docs_rendered/* $TARGET_DIR/docs_rendered
 
           # data
-          mv data_*_verilator_info.zip.xz public.new/html/dev/${{ github.event.number }}/
-          mv data.zip public.new/html/dev/${{ github.event.number }}/
-          mv data_both.zip public.new/html/dev/${{ github.event.number }}/
-          mv data_v_line.zip.xz public.new/html/dev/${{ github.event.number }}/
-          mv data_v_toggle.zip.xz public.new/html/dev/${{ github.event.number }}/
-          mv data_v_branch.zip.xz public.new/html/dev/${{ github.event.number }}/
-          echo ${GITHUB_RUN_ID} > public.new/html/dev/${{ github.event.number }}/run_id
+          cd data_verilator
+          zip $TARGET_DIR/data.zip *
+          cd ../data_both
+          zip $TARGET_DIR/data_both.zip *
+          cd ..
+          echo ${GITHUB_RUN_ID} > $TARGET_DIR/run_id
           tar -acf webpage.tar.gz public.new
 
       - name: Add redirect index page

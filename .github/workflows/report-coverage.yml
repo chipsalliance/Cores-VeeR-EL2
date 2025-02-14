@@ -4,7 +4,6 @@ on:
   workflow_call:
 
 jobs:
-
   merge-verilator-reports:
     name: Merge Verilator info data
     runs-on: ubuntu-24.04
@@ -19,64 +18,20 @@ jobs:
       - name: Download coverage reports
         uses: actions/download-artifact@v4
         with:
-          pattern: regression_tests_coverage_data-*
+          pattern: "*coverage_data*"
           merge-multiple: true
           path: ./
 
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: regression_tests_coverage_data_cache_waypack_0*
-          merge-multiple: true
-          path: ./
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: regression_tests_coverage_data_cache_waypack_1*
-          merge-multiple: true
-          path: ./
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: verification_tests_coverage_data*
-          merge-multiple: true
-          path: ./
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: uarch_tests_coverage_data*
-          merge-multiple: true
-          path: ./
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: riscv-dv_coverage_data*
-          merge-multiple: true
-          path: ./
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: riscof_coverage_data*
-          merge-multiple: true
-          path: ./
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: openocd_coverage_data*
-          merge-multiple: true
-          path: ./
+      - name: Setup info-process
+        shell: bash
+        run: .github/scripts/info_process_setup.sh
 
       - name: Merge data
         shell: bash
         run: |
-          sudo apt update
-          sudo apt install -y zip unzip
+          mkdir info_files_verilator
+          mv *.info info_files_verilator/
+          export SIM=verilator
           .github/scripts/prepare_coverage_data.sh
 
       - name: Pack artifacts
@@ -84,173 +39,19 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: verilator_coverage_single_data
-          path: verilator_coverage_single_data.tar.gz
+          path: verilator_coverage_single_data.tar.xz
 
       - name: Pack artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: verilator_coverage_data
-          path: |
-            *.info
-            *.desc
+          name: data_verilator
+          path: data_verilator/*
 
-      - name: Pack artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverview_data
-          path: |
-            data.zip
-
-  coverage-report:
-    name: Coverage report
-    runs-on: ubuntu-24.04
-    container: ghcr.io/antmicro/cores-veer-el2:20250123123840
-    needs: [merge-verilator-reports, custom-coverage-report]
-    env:
-      DEBIAN_FRONTEND: "noninteractive"
-
-    steps:
-      - name: Setup repository
-        uses: actions/checkout@v3
-
-      - name: Install coverage dependencies
-        shell: bash
-        run: |
-          python3 -m venv .venv
-          source .venv/bin/activate
-          pip install -r .github/scripts/requirements-coverage.txt
-          echo "PATH=$PATH" >> $GITHUB_ENV
-
-        # This step is needed to have the same VeeR codebase as used in tests
-      - name: Configure VeeR
-        shell: bash
-        run: |
-          export RV_ROOT=`pwd`
-          make defines.h -f $RV_ROOT/tools/Makefile
-
-      - name: Setup lcov
-        shell: bash
-        run: |
-          git clone https://github.com/linux-test-project/lcov
-          pushd lcov
-            git checkout v2.1
-            echo "LCOV_PATH=`realpath bin`" >> "$GITHUB_ENV"
-          popd
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: regression_tests_coverage_data-*
-          merge-multiple: true
-          path: ./
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: regression_tests_coverage_data_cache_waypack_0*
-          merge-multiple: true
-          path: ./
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: regression_tests_coverage_data_cache_waypack_1*
-          merge-multiple: true
-          path: ./
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: verification_tests_coverage_data*
-          merge-multiple: true
-          path: ./
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: uarch_tests_coverage_data*
-          merge-multiple: true
-          path: ./
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: riscv-dv_coverage_data*
-          merge-multiple: true
-          path: ./
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: riscof_coverage_data*
-          merge-multiple: true
-          path: ./
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: openocd_coverage_data*
-          merge-multiple: true
-          path: ./
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          name: coverview_data
-          path: ./
-
-      - name: Generate reports
-        shell: bash
-        run: |
-          sudo apt update
-          sudo apt install -y zip unzip
-          export PATH=${{ env.LCOV_PATH }}:${PATH}
-          for f in $(ls *_branch.info); do
-            mv $f line.info
-            base_name=$(echo $f | rev | cut -d _ -f 2- | rev)
-            python3 .github/scripts/split_info.py line.info --branch > ${base_name}_branch.info
-            python3 .github/scripts/split_info.py line.info --line > ${base_name}_line.info
-          done
-          zip data_toggle_verilator_info.zip *_toggle.info
-          xz data_toggle_verilator_info.zip
-          zip data_branch_verilator_info.zip *_branch.info
-          xz data_branch_verilator_info.zip
-          zip data_line_verilator_info.zip *_line.info
-          xz data_line_verilator_info.zip
-          mkdir report
-          cp data.zip report
-          cp data_toggle_verilator_info.zip.xz report
-          cp data_branch_verilator_info.zip.xz report
-          cp data_line_verilator_info.zip.xz report
-
-
-          cat *_toggle.info > coverage.toggle.info
-          cat *_branch.info > coverage.branch.info
-
-      - name: Pack artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage_report
-          path: ./report
-
-      - name: Pack artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: combined_coverage_data
-          path: |
-            coverage.toggle.info
-            coverage.branch.info
-
-
-  custom-coverage-report:
-    name: Custom coverage report
+  custom-coverage-reports:
+    name: Custom coverage reports
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: centos:8
-    needs: [merge-verilator-reports]
     env:
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader
@@ -259,25 +60,26 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          name: verilator_coverage_data
-          path: ./
 
       - name: Prepare Environment
         run: _secret_prepare_env
 
-      - name: Generate custom report
+      - name: Generate custom reports
         run: _secret_custom_report
 
-  custom-coverage-report-merged:
-    name: Custom coverage report merger
+      - name: Pack artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: info_files_v_mapped
+          path: info_files_v/*
+
+  both-coverage-reports:
+    name: Coverage reports merger
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: debian:trixie
-    needs: [custom-coverage-report]
+    needs: [merge-verilator-reports, custom-coverage-reports]
     env:
+      DEBIAN_FRONTEND: noninteractive
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader
 
@@ -286,41 +88,63 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          name: verilator_coverage_data
-          path: ./
+      - name: Extract custom coverage
+        run: _secret_extract_custom_coverage
 
-      - name: Generate custom report
-        run: _secret_custom_report_merger
+      - name: Setup info-process
+        shell: bash
+        run: .github/scripts/info_process_setup.sh
+
+      - name: Prepare custom coverage
+        run: |
+          export SIM=v
+          .github/scripts/prepare_coverage_data.sh
+          # info_files_v_mapped uses the same dir.
+          rm -rf info_files_v
+
+      - name: Pack artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: v_coverage_single_data
+          path: v_coverage_single_data.tar.xz
 
       - name: Pack artifacts
         uses: actions/upload-artifact@v4
         with:
           name: data_v
-          path: |
-            data_both.zip
-            data_v_line.zip.xz
-            data_v_toggle.zip.xz
-            data_v_branch.zip.xz
+          path: data_v/*
 
-  custom-coverage-report-mapped:
-    name: Custom coverage mapped report
-    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: centos:8
-    needs: [custom-coverage-report]
-    env:
-      GHA_EXTERNAL_DISK: additional-tools
-      GHA_SA: gh-sa-veer-uploader
-
-    steps:
-      - uses: actions/checkout@v3
+      - name: Download Verilator data
+        uses: actions/download-artifact@v4
         with:
-          submodules: recursive
+          name: data_verilator
+          path: data_verilator/
 
-      - name: Prepare Environment
-        run: _secret_prepare_env
+      - name: Create merged package
+        run: |
+          .github/scripts/create_merged_package.sh
+          rm -rf data_verilator
+          rm -rf data_v
 
-      - name: Generate custom mapped report
-        run: _secret_custom_report_mapfile
+      - name: Pack artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: data_both
+          path: data_both/*
+
+      - name: Download V mapped info files
+        uses: actions/download-artifact@v4
+        with:
+          name: info_files_v_mapped
+          path: info_files_v
+
+      - name: Prepare custom coverage
+        run: |
+          export SIM=v
+          .github/scripts/prepare_coverage_data.sh
+
+      - name: Pack artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: data_v_mapped
+          path: data_v/*

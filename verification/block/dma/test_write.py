@@ -1,11 +1,7 @@
 # Copyright (c) 2023 Antmicro <www.antmicro.com>
 # SPDX-License-Identifier: Apache-2.0
 
-import random
-import struct
-
 import pyuvm
-from pyuvm import *
 from scoreboards import WriteScoreboard
 from sequences import AnyMemWriteSequence, MemWriteSequence
 from testbench import BaseEnv, BaseTest

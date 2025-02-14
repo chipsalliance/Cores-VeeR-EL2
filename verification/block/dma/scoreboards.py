@@ -1,16 +1,11 @@
 # Copyright (c) 2023 Antmicro <www.antmicro.com>
 # SPDX-License-Identifier: Apache-2.0
 
-import random
 import struct
 from collections import defaultdict
 
-import pyuvm
-from cocotb.triggers import ClockCycles
-from pyuvm import *
+from pyuvm import ConfigDB, uvm_component, uvm_get_port, uvm_tlm_analysis_fifo
 from testbench import (
-    BaseEnv,
-    BaseTest,
     BusReadItem,
     BusWriteItem,
     DebugReadItem,
@@ -248,6 +243,7 @@ class WriteScoreboard(uvm_component):
                     self.passed = False
 
                 if item.mem == "ICCM":
+                    assert item.addr >= 0 and item.addr < self.iccm_size
                     iccm_writes[
                         (
                             item.addr,
@@ -255,6 +251,7 @@ class WriteScoreboard(uvm_component):
                         )
                     ] += 1
                 elif item.mem == "DCCM":
+                    assert item.addr >= 0 and item.addr < self.dccm_size
                     dccm_writes[
                         (
                             item.addr,

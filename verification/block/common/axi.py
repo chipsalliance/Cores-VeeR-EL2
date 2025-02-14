@@ -1,8 +1,9 @@
 # Copyright (c) 2023 Antmicro
 # SPDX-License-Identifier: Apache-2.0
 
+import cocotb
 from cocotb.triggers import RisingEdge
-from pyuvm import *
+from pyuvm import uvm_analysis_port, uvm_component, uvm_sequence_item
 from utils import collect_bytes
 
 # ==============================================================================
@@ -152,7 +153,7 @@ class Axi4LiteMonitor(uvm_component):
 
                 if arid in xfers:
                     self.logger.error(
-                        "Read request for a pending transaction, arid={}".format(awid)
+                        "Read request for a pending transaction, arid={}".format(arid)
                     )
 
                 else:

@@ -2,8 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import pyuvm
-from cocotb.triggers import ClockCycles
-from pyuvm import *
 from scoreboards import AccessScoreboard
 from sequences import InvalidAddressSequence
 from testbench import BaseEnv, BaseTest

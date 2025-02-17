@@ -64,10 +64,8 @@ module el2_lsu_dccm_mem
    logic [pt.DCCM_NUM_BANKS-1:0]                                        wren_bank;
    logic [pt.DCCM_NUM_BANKS-1:0]                                        rden_bank;
    logic [pt.DCCM_NUM_BANKS-1:0] [pt.DCCM_BITS-1:(pt.DCCM_BANK_BITS+2)] addr_bank;
-   logic [pt.DCCM_BITS-1:(pt.DCCM_BANK_BITS+DCCM_WIDTH_BITS)]           rd_addr_even, rd_addr_odd;
    logic                                                                rd_unaligned, wr_unaligned;
    logic [pt.DCCM_NUM_BANKS-1:0] [pt.DCCM_FDATA_WIDTH-1:0]              dccm_bank_dout;
-   logic [pt.DCCM_FDATA_WIDTH-1:0]                                      wrdata;
 
    logic [pt.DCCM_NUM_BANKS-1:0][pt.DCCM_FDATA_WIDTH-1:0]               wr_data_bank;
 

@@ -2,13 +2,14 @@ null  :=
 space := $(null) #
 comma := ,
 
-CURDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-SRCDIR := $(abspath $(CURDIR)../../../../design)
+TEST_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+SRCDIR := $(abspath $(TEST_DIR)../../../../design)
 
 TEST_FILES   = $(sort $(wildcard test_*.py))
 
 MODULE      ?= $(subst $(space),$(comma),$(subst .py,,$(TEST_FILES)))
 TOPLEVEL     = el2_veer_lockstep_wrapper
+CM_FILE      = cm.cfg
 
 EXTRA_VEER_CONFIG = -set lockstep_enable=1 -set lockstep_regfile_enable=1
 
@@ -62,6 +63,6 @@ VERILOG_SOURCES  = \
 	${SRCDIR}/dmi/rvjtag_tap.v \
 	${SRCDIR}/lib/el2_lib.sv \
 	$(SRCDIR)/el2_veer_lockstep.sv \
-	$(CURDIR)/dcls/el2_veer_lockstep_wrapper.sv
+	$(TEST_DIR)/el2_veer_lockstep_wrapper.sv
 
-include $(CURDIR)/../common.mk
+include $(TEST_DIR)/../common.mk

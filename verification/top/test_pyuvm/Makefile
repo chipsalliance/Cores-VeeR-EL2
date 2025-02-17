@@ -41,6 +41,7 @@ MODULE ?= test_irq.test_irq
 TEST_FILES = $(CURDIR)/test_irq/test_irq.py
 TOPLEVEL = veer_wrapper
 SIM_BUILD ?= sim
+CM_FILE ?= cm.cfg
 
 VERILOG_SOURCES = \
     $(CFGDIR)/common_defines.vh \
@@ -76,7 +77,7 @@ ifeq ($(SIM), verilator)
     EXTRA_ARGS   += $(VERILATOR_COVERAGE)
     EXTRA_ARGS   += -I$(CFGDIR) -Wno-DECLFILENAME
 else ifeq ($(SIM), vcs)
-    EXTRA_ARGS   += +incdir+$(CFGDIR) -assert svaext -cm line+cond+fsm+tgl+branch +vcs+lic+wait
+    EXTRA_ARGS   += +incdir+$(CFGDIR) -assert svaext -cm line+cond+fsm+tgl+branch +vcs+lic+wait -cm_libs yv -cm_hier $(CURDIR)/$(CM_FILE)
     PLUSARGS     += +dumpon
 endif
 

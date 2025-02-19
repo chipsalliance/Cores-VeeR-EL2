@@ -257,8 +257,8 @@ vcs: program.hex vcs-build
 	./simv $(DEBUG_PLUS) +vcs+lic+wait  -l vcs.log
 
 vlog: program.hex ${TBFILES} ${BUILD_DIR}/defines.h
-	$(VLOG) -l vlog.log -sv -mfcu +incdir+${BUILD_DIR}+${RV_ROOT}/design/include+${RV_ROOT}/design/lib \
-        $(ASSERT_DEFINES) $(defines) -f ${RV_ROOT}/testbench/flist ${TBFILES} -R +nowarn3829 +nowarn2583 ${DEBUG_PLUS}
+	$(VLOG) -l vlog.log -sv -mfcu +incdir+${BUILD_DIR}+${RV_ROOT}/design/include+${RV_ROOT}/design/lib -ccflags "${CFLAGS}"\
+        $(ASSERT_DEFINES) $(defines) -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -R +nowarn3829 +nowarn2583 ${DEBUG_PLUS} -suppress 14408 -suppress 16154
 
 riviera: program.hex riviera-build
 	vsim -c -lib work ${DEBUG_PLUS} ${RIVIERA_DEBUG} tb_top -do "run -all; exit" -l riviera.log

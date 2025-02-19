@@ -163,8 +163,6 @@ import el2_pkg::*;
 
    logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO]          firstpc_hash, secondpc_hash;
 
-   logic                                          first_legal;
-
    logic [1:0]                                    wrptr, wrptr_in;
    logic [1:0]                                    rdptr, rdptr_in;
    logic [2:0]                                    qwen;

@@ -43,8 +43,10 @@ then
     done
 fi
 
-for TYPE in branch line toggle
+for TYPE in branch line toggle cond
 do
+    if [ $SIM = verilator ] && [ $TYPE = cond ]; then continue; fi
+
     _sort_opt=''
     _transform_extra_opts=''
     if [ $SIM = verilator ] && [ $TYPE = toggle ]

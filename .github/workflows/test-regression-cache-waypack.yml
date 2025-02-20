@@ -1,4 +1,4 @@
-name: Regression tests cache waypack 1
+name: Regression tests cache waypack $WAYPACK
 
 on:
   workflow_call:
@@ -88,7 +88,7 @@ jobs:
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
-          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 1
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} $WAYPACK
 
       - name: Prepare coverage data
         shell: bash
@@ -98,13 +98,13 @@ jobs:
           mkdir -p results
           if [ ${{ matrix.priv }} -eq 0 ]; then PRIV_STRING=user; else PRIV_STRING=priv; fi
           mv ${TEST_PATH}/coverage.info \
-             results/coverage_${{ matrix.bus }}-${{ matrix.test }}-$PRIV_STRING-waypack1_${{ matrix.coverage }}.info
+             results/coverage_${{ matrix.bus }}-${{ matrix.test }}-$PRIV_STRING-waypack${WAYPACK}_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: regression_tests_coverage_data_cache_waypack_1_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.priv }}_${{ matrix.coverage }}
+          name: regression_tests_coverage_data_cache_waypack_${WAYPACK}_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.priv }}_${{ matrix.coverage }}
           path: results/*.info
 
   custom-regression-tests:
@@ -147,4 +147,3 @@ jobs:
           TEST: ${{ matrix.test }}
           BUS: ${{ matrix.bus }}
           PRIV: ${{ matrix.priv }}
-          WAYPACK: 1

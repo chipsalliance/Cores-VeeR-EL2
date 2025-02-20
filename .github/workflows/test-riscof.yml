@@ -92,10 +92,15 @@ jobs:
       - name: Prepare coverage data
         shell: bash
         run: |
+          if [[ "${{ matrix.priv }}" =~ u ]]; then
+            PRIV_STRING=user
+          else
+            PRIV_STRING=priv
+          fi
           export PATH=/opt/verilator/bin:$PATH
           sis -d convert --dat-dir riscof/coverage/
           mv riscof/coverage/coverage.info \
-             riscof/coverage/coverage_riscof_${{matrix.priv}}_${{ matrix.coverage }}.info
+             riscof/coverage/coverage_riscof-${PRIV_STRING}_${{ matrix.coverage }}.info
 
       - name: Prepare report
         shell: bash

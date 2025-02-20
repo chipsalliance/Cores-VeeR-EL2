@@ -56,6 +56,7 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/verification/top/${{ matrix.test }}
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+          echo "HTML_FILE=${FULL_NAME}_${{ matrix.COVERAGE }}.html" >>$GITHUB_ENV
 
 
       - name: Run ${{ matrix.test }}
@@ -66,7 +67,6 @@ jobs:
           pip3 install -r $RV_ROOT/verification/top/requirements.txt
           PYTEST_STYLE_SRC_DIR=$RV_ROOT/.github/scripts/pytest/
           PYTEST_CSS=${PYTEST_STYLE_SRC_DIR}/css/styles.css
-          HTML_FILE=${FULL_NAME}_${{ matrix.COVERAGE }}.html
           if [ ${{ matrix.bus }} = axi ]; then
               CONF_PARAMS='-set build_axi4'
           else
@@ -84,8 +84,8 @@ jobs:
           pushd $RV_ROOT
             WEBPAGE_DIR=webpage_${FULL_NAME}_${{ matrix.COVERAGE }}
             mkdir -p $WEBPAGE_DIR
-            mv ${TEST_PATH}/${{ matrix.test }}_${{ matrix.COVERAGE }}.html $WEBPAGE_DIR
-            mv ${TEST_PATH}/assets $WEBPAGE_DIR
+            mv ${TEST_PATH}/$HTML_FILE $WEBPAGE_DIR/
+            mv ${TEST_PATH}/assets $WEBPAGE_DIR/
             JS_SCRIPT_DIR=$RV_ROOT/.github/scripts/pytest/script
             mv $JS_SCRIPT_DIR $WEBPAGE_DIR
           popd
@@ -104,15 +104,14 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: verification_dashboard_${FULL_NAME}_${{ matrix.coverage }}
-          path: |
-            webpage_*
+          name: verification_dashboard_${{ env.FULL_NAME }}_${{ matrix.coverage }}
+          path: webpage_*
 
       - name: Upload coverage artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: verification_tests_coverage_data_${FULL_NAME}_${{ matrix.coverage }}
+          name: verification_tests_coverage_data_${{ env.FULL_NAME }}_${{ matrix.coverage }}
           path: results/*.info
 
   custom-verification-tests:

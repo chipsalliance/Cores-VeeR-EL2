@@ -3,6 +3,10 @@ name: Test-OpenOCD
 on:
   workflow_call:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
 
   tests:
@@ -46,7 +50,6 @@ jobs:
           submodules: recursive
 
       - name: Install coverage dependencies
-        shell: bash
         run: |
           python3 -m venv .venv
           source .venv/bin/activate
@@ -54,7 +57,6 @@ jobs:
           echo "PATH=$PATH" >> $GITHUB_ENV
 
       - name: Build verilated simulation
-        shell: bash
         run: |
           export PATH=/opt/verilator/bin:/opt/openocd/bin:$PATH
           export RV_ROOT=$(pwd)
@@ -80,7 +82,6 @@ jobs:
           pkill openocd || true
 
       - name: Prepare coverage data
-        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=$(pwd)

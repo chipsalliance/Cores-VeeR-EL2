@@ -3,6 +3,10 @@ name: RISCOF tests
 on:
   workflow_call:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
 
   tests:
@@ -31,7 +35,6 @@ jobs:
           submodules: recursive
 
       - name: Install coverage dependencies
-        shell: bash
         run: |
           python3 -m venv .venv
           source .venv/bin/activate
@@ -43,7 +46,6 @@ jobs:
           pip3 install git+https://github.com/riscv/riscof@a25e315
 
       - name: Clone tests
-        shell: bash
         run: |
           mkdir -p riscof
           pushd riscof
@@ -54,7 +56,6 @@ jobs:
           popd
 
       - name: Configure RISCOF
-        shell: bash
         run: |
           pushd riscof
             # Copy RISCOF configuration
@@ -66,7 +67,6 @@ jobs:
           popd
 
       - name: Build VeeR model
-        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
@@ -80,7 +80,6 @@ jobs:
           popd
 
       - name: Run tests, collect coverage
-        shell: bash
         run: |
           export PATH=/opt/verilator/bin:/opt/spike/bin:$PATH
           pushd riscof
@@ -90,7 +89,6 @@ jobs:
           popd
 
       - name: Prepare coverage data
-        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
           sis -d convert --dat-dir riscof/coverage/
@@ -98,7 +96,6 @@ jobs:
              riscof/coverage/coverage_riscof_${{matrix.priv}}_${{ matrix.coverage }}.info
 
       - name: Prepare report
-        shell: bash
         run: |
           PYTEST_STYLE_SRC_DIR=$(pwd)/.github/scripts/pytest/
           PYTEST_CSS=${PYTEST_STYLE_SRC_DIR}/css/styles.css

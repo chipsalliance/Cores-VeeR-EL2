@@ -3,6 +3,10 @@ name: Coverage report
 on:
   workflow_call:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   merge-verilator-reports:
     name: Merge Verilator info data
@@ -23,11 +27,9 @@ jobs:
           path: ./
 
       - name: Setup info-process
-        shell: bash
         run: .github/scripts/info_process_setup.sh
 
       - name: Merge data
-        shell: bash
         run: |
           mkdir info_files_verilator
           mv *.info info_files_verilator/
@@ -92,7 +94,6 @@ jobs:
         run: _secret_extract_custom_coverage
 
       - name: Setup info-process
-        shell: bash
         run: .github/scripts/info_process_setup.sh
 
       - name: Prepare custom coverage

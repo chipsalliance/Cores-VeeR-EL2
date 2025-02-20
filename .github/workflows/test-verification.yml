@@ -3,6 +3,10 @@ name: VeeR-EL2 verification
 on:
   workflow_call:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   tests:
     name: Verification tests
@@ -22,7 +26,6 @@ jobs:
           submodules: recursive
 
       - name: Install coverage dependencies
-        shell: bash
         run: |
           python3 -m venv .venv
           source .venv/bin/activate
@@ -45,7 +48,6 @@ jobs:
             zlib1g zlib1g-dev
 
       - name: Setup environment
-        shell: bash
         run: |
           echo "/opt/verilator/bin" >> $GITHUB_PATH
           RV_ROOT=`pwd`
@@ -57,7 +59,6 @@ jobs:
 
 
       - name: Run ${{ matrix.test }}
-        shell: bash
         run: |
           source .venv/bin/activate
           pip3 install meson
@@ -71,7 +72,6 @@ jobs:
           popd
 
       - name: Prepare pytest-html data
-        shell: bash
         run: |
           source .venv/bin/activate
           pushd $RV_ROOT
@@ -84,7 +84,6 @@ jobs:
           popd
 
       - name: Prepare coverage data
-        shell: bash
         run: |
           source .venv/bin/activate
           export PATH=/opt/verilator/bin:$PATH

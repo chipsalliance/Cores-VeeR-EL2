@@ -192,8 +192,22 @@ jobs:
         run: |
           sis -d convert --dat-dir ${RV_ROOT}/tools/riscv-dv/work/
           mkdir -p results
+
+          if [[ ${{ matrix.priv }} =~ u ]]; then
+              PRIV_STRING=user
+          else
+              PRIV_STRING=priv
+          fi
+
+          # FULL_NAME example: riscv_dv-ebreak_test_1-user-renode-uvm
+          test=${{ matrix.test }}
+          TEST_NAME=${test/riscv_/}
+          TEST_NAME=${TEST_NAME/_test_veer/}
+          TEST_NAME=${TEST_NAME//_test/}
+          FULL_NAME=riscv-dv-$TEST_NAME-$PRIV_STRING-${{ matrix.iss }}-${{ matrix.version }}
+
           mv ${RV_ROOT}/tools/riscv-dv/work/coverage.info \
-             results/coverage_riscv-dv_${{matrix.priv}}_${{ matrix.test }}_${{ matrix.iss }}_${{ matrix.version }}_${{ matrix.coverage }}.info
+             results/coverage_${FULL_NAME}_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()
@@ -218,7 +232,6 @@ jobs:
       fail-fast: false
       matrix:
         test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
-        version: [ uvm ]
         priv: ["m", "mu"]
     env:
       DEBIAN_FRONTEND: "noninteractive"
@@ -235,7 +248,7 @@ jobs:
       - name: Download Code Artifact
         uses: actions/download-artifact@v4
         with:
-          name: riscv-dv_generated_code_${{ matrix.test }}_${{ matrix.version }}
+          name: riscv-dv_generated_code_${{ matrix.test }}_uvm
           path: tools/riscv-dv/work/
 
       - name: Prepare Environment

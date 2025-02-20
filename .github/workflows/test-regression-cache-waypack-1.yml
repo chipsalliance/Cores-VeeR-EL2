@@ -142,8 +142,9 @@ jobs:
           submodules: recursive
 
       - name: Run tests
-        run: _secret_custom_regression_tests_waypack_1
+        run: _secret_custom_regression_tests_waypack
         env:
           TEST: ${{ matrix.test }}
           BUS: ${{ matrix.bus }}
           PRIV: ${{ matrix.priv }}
+          WAYPACK: 1

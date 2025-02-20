@@ -255,7 +255,8 @@ jobs:
         run: _secret_prepare_env
 
       - name: Perform custom tests
-        run: _secret_custom_riscv_dv
+        run: _secret_custom_report_mapfile_tmp
         env:
           RISCV_DV_TEST: ${{ matrix.test }}
           RISCV_DV_PRIV: ${{ matrix.priv }}
+          SECRET_NAME: _secret_custom_riscv_dv

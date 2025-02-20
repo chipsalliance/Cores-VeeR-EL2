@@ -92,4 +92,6 @@ jobs:
           submodules: recursive
 
       - name: Run tests
-        run: _secret_custom_regression_exceptions_tests
+        run: _secret_custom_report_mapfile_tmp
+        env:
+          SECRET_NAME: _secret_custom_regression_exceptions_tests

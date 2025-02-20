@@ -3,6 +3,10 @@ name: Regression exceptions tests
 on:
   workflow_call:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
 
   regression-tests:
@@ -37,7 +41,6 @@ jobs:
           submodules: recursive
 
       - name: Install coverage dependencies
-        shell: bash
         run: |
           python3 -m venv .venv
           source .venv/bin/activate
@@ -45,7 +48,6 @@ jobs:
           echo "PATH=$PATH" >> $GITHUB_ENV
 
       - name: Setup environment
-        shell: bash
         run: |
           echo "/opt/verilator/bin" >> $GITHUB_PATH
           RV_ROOT=`pwd`
@@ -56,7 +58,6 @@ jobs:
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
 
       - name: Run tests
-        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
@@ -64,7 +65,6 @@ jobs:
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} $PRIV ${{ matrix.cache_waypack }}
 
       - name: Prepare coverage data
-        shell: bash
         run: |
           source .venv/bin/activate
           sis -d convert --dat-dir ${TEST_PATH}/

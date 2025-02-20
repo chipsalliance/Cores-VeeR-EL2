@@ -1,10 +1,16 @@
-name: Regression tests cache waypack $WAYPACK
+name: Regression tests cache waypack
 
 on:
   workflow_call:
+    inputs:
+      waypack:
+        required: true
+        type: number
+
+env:
+  WAYPACK: ${{ inputs.waypack }}
 
 jobs:
-
   regression-tests:
     name: Regression tests
     runs-on: ubuntu-24.04
@@ -104,7 +110,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: regression_tests_coverage_data_cache_waypack_${WAYPACK}_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.priv }}_${{ matrix.coverage }}
+          name: regression_tests_coverage_data_cache_waypack_${{ inputs.waypack }}_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.priv }}_${{ matrix.coverage }}
           path: results/*.info
 
   custom-regression-tests:

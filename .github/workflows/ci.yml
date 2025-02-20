@@ -15,14 +15,14 @@ jobs:
   Test-Regression-Cache-Waypack-0:
     name: Test-Regression Cache Waypack 0
     uses: ./.github/workflows/test-regression-cache-waypack.yml
-    env:
-      WAYPACK: 0
+    with:
+      waypack: 0
 
   Test-Regression-Cache-Waypack-1:
     name: Test-Regression Cache Waypack 1
     uses: ./.github/workflows/test-regression-cache-waypack.yml
-    env:
-      WAYPACK: 1
+    with:
+      waypack: 1
 
   Test-Exceptions-Regression:
     name: Test-Exceptions-Regression

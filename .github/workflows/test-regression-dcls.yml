@@ -123,9 +123,10 @@ jobs:
           submodules: recursive
 
       - name: Run tests
-        run: _secret_dcls_regression
+        run: _secret_custom_report_mapfile_tmp
         env:
           DCLS_ENABLE: "1"
           TEST: ${{ matrix.test }}
           BUS: ${{ matrix.bus }}
           PRIV: ${{ matrix.priv }}
+          SECRET_NAME: _secret_dcls_regression

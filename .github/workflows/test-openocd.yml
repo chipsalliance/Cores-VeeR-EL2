@@ -88,9 +88,9 @@ jobs:
           sis -d convert --dat-dir ${RV_ROOT}/gdb_test
           mkdir -p results
           mv ${RV_ROOT}/run/coverage.info \
-             results/coverage_openocd_${{ matrix.bus }}_${{ matrix.coverage }}.info
+             results/coverage_${{ matrix.bus }}-openocd_${{ matrix.coverage }}.info
           mv ${RV_ROOT}/gdb_test/coverage.info \
-             results/coverage_openocd_gdb_test_${{ matrix.bus }}_${{ matrix.coverage }}.info
+             results/coverage_${{ matrix.bus }}-openocd-gdb_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()
@@ -106,7 +106,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        bus: ["axi4"]
+        bus: ["axi4", "ahb_lite"]
     env:
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader

@@ -97,8 +97,9 @@ jobs:
           source .venv/bin/activate
           sis -d convert --dat-dir ${TEST_PATH}/
           mkdir -p results
+          if [ ${{ matrix.priv }} -eq 0 ]; then PRIV_STRING=user; else PRIV_STRING=priv; fi
           mv ${TEST_PATH}/coverage.info \
-             results/coverage_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.priv }}_0_${{ matrix.coverage }}.info
+             results/coverage_${{ matrix.bus }}-${{ matrix.test }}-$PRIV_STRING-waypack0_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()

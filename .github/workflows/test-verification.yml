@@ -20,7 +20,7 @@ jobs:
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/regression/.cache/"
-      FULL_NAME: "${{ matrix.bus }}-verification-${{ matrix.test }}"
+      FULL_NAME: "${{ matrix.bus }}-verification-${{ matrix.test }}_${{ matrix.COVERAGE }}"
     steps:
       - name: Setup repository
         uses: actions/checkout@v3
@@ -58,7 +58,7 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/verification/top/${{ matrix.test }}
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
-          echo "HTML_FILE=${FULL_NAME}_${{ matrix.COVERAGE }}.html" >> $GITHUB_ENV
+          echo "HTML_FILE=${FULL_NAME}.html" >> $GITHUB_ENV
 
 
       - name: Run ${{ matrix.test }}
@@ -82,7 +82,7 @@ jobs:
         run: |
           source .venv/bin/activate
           pushd $RV_ROOT
-            WEBPAGE_DIR=webpage_${FULL_NAME}_${{ matrix.COVERAGE }}
+            WEBPAGE_DIR=webpage_${FULL_NAME}
             mkdir -p $WEBPAGE_DIR
             mv ${TEST_PATH}/$HTML_FILE $WEBPAGE_DIR
             mv ${TEST_PATH}/assets $WEBPAGE_DIR
@@ -97,20 +97,20 @@ jobs:
           sis -d convert --dat-dir ${TEST_PATH}
           mkdir -p results
           mv ${TEST_PATH}/coverage.info \
-             results/coverage_${FULL_NAME/test_/}_${{ matrix.coverage }}.info
+             results/coverage_${FULL_NAME/test_/}.info
 
       - name: Upload pytest-html artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: verification_dashboard_${{ env.FULL_NAME }}_${{ matrix.coverage }}
+          name: verification_dashboard_${{ env.FULL_NAME }}
           path: webpage_*
 
       - name: Upload coverage artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: verification_tests_coverage_data_${{ env.FULL_NAME }}_${{ matrix.coverage }}
+          name: verification_tests_coverage_data_${{ env.FULL_NAME }}
           path: results/*.info
 
   custom-verification-tests:

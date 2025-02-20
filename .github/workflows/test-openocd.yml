@@ -88,10 +88,17 @@ jobs:
           sis -d convert --dat-dir ${RV_ROOT}/run
           sis -d convert --dat-dir ${RV_ROOT}/gdb_test
           mkdir -p results
+
+          if [ ${{ matrix.bus }} = axi4 ]; then
+              BUS_NAME=axi
+          elif [ ${{ matrix.bus }} = ahb_lite ]; then
+              BUS_NAME=ahb
+          fi
+
           mv ${RV_ROOT}/run/coverage.info \
-             results/coverage_openocd_${{ matrix.bus }}_${{ matrix.coverage }}.info
+             results/coverage_${BUS_NAME}-openocd_${{ matrix.coverage }}.info
           mv ${RV_ROOT}/gdb_test/coverage.info \
-             results/coverage_openocd_gdb_test_${{ matrix.bus }}_${{ matrix.coverage }}.info
+             results/coverage_${BUS_NAME}-openocd-gdb_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()

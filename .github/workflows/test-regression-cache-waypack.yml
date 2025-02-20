@@ -1,10 +1,16 @@
-name: Regression tests cache waypack 0
+name: Regression tests cache waypack
 
 on:
   workflow_call:
+    inputs:
+      waypack:
+        required: true
+        type: number
+
+env:
+  WAYPACK: ${{ inputs.waypack }}
 
 jobs:
-
   regression-tests:
     name: Regression tests
     runs-on: ubuntu-24.04
@@ -18,7 +24,6 @@ jobs:
                "icache", "bitmanip"]
         coverage: ["branch", "toggle"] #TODO: add functional coverage
         priv: ["0", "1"]
-        cache_waypack: ["0"]
         tb_extra_args: ["--test-halt"]
         exclude:
           # These tests require user mode
@@ -89,7 +94,7 @@ jobs:
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
-          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} $WAYPACK
 
       - name: Prepare coverage data
         shell: bash
@@ -98,13 +103,13 @@ jobs:
           sis -d convert --dat-dir ${TEST_PATH}/
           mkdir -p results
           mv ${TEST_PATH}/coverage.info \
-             results/coverage_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.priv }}_0_${{ matrix.coverage }}.info
+             results/coverage_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.priv }}_${{ inputs.waypack }}_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: regression_tests_coverage_data_cache_waypack_0_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.priv }}_${{ matrix.coverage }}
+          name: regression_tests_coverage_data_cache_waypack_${{ inputs.waypack }}_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.priv }}_${{ matrix.coverage }}
           path: results/*.info
 
   custom-regression-tests:
@@ -142,7 +147,7 @@ jobs:
           submodules: recursive
 
       - name: Run tests
-        run: _secret_custom_regression_tests_waypack_0
+        run: _secret_custom_regression_tests_waypack
         env:
           TEST: ${{ matrix.test }}
           BUS: ${{ matrix.bus }}

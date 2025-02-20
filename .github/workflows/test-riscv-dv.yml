@@ -193,7 +193,7 @@ jobs:
           sis -d convert --dat-dir ${RV_ROOT}/tools/riscv-dv/work/
           mkdir -p results
 
-          if [[ ${{ matrix.priv }} =~ u ]]; then
+          if [[ "${{ matrix.priv }}" =~ u ]]; then
               PRIV_STRING=user
           else
               PRIV_STRING=priv

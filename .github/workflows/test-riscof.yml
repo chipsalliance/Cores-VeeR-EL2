@@ -93,7 +93,7 @@ jobs:
           export PATH=/opt/verilator/bin:$PATH
           sis -d convert --dat-dir riscof/coverage/
           mv riscof/coverage/coverage.info \
-             riscof/coverage/coverage_riscof_${{matrix.priv}}_${{ matrix.coverage }}.info
+             riscof/coverage/coverage_riscof-${{ contains(matrix.priv, 'u') && 'user' || 'priv' }}_${{ matrix.coverage }}.info
 
       - name: Prepare report
         run: |

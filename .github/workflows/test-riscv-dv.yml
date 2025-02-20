@@ -189,6 +189,7 @@ jobs:
           popd
 
       - name: Prepare coverage data
+        shell: bash
         run: |
           sis -d convert --dat-dir ${RV_ROOT}/tools/riscv-dv/work/
           mkdir -p results

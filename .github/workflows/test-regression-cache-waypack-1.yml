@@ -22,17 +22,17 @@ jobs:
         tb_extra_args: ["--test-halt"]
         exclude:
           # These tests require user mode
-          - priv: "0"
+          - priv: "1"
             test: "csr_mseccfg"
-          - priv: "0"
+          - priv: "1"
             test: "csr_access"
-          - priv: "0"
+          - priv: "1"
             test: "csr_mstatus"
-          - priv: "0"
+          - priv: "1"
             test: "modesw"
-          - priv: "0"
+          - priv: "1"
             test: "insns"
-          - priv: "0"
+          - priv: "1"
             test: "perf_counters"
           # end tests which require user mode
         include:
@@ -120,17 +120,17 @@ jobs:
         priv: ["0", "1"]
         exclude:
           # These tests require user mode
-          - priv: "0"
+          - priv: "1"
             test: "csr_mseccfg"
-          - priv: "0"
+          - priv: "1"
             test: "csr_access"
-          - priv: "0"
+          - priv: "1"
             test: "csr_mstatus"
-          - priv: "0"
+          - priv: "1"
             test: "modesw"
-          - priv: "0"
+          - priv: "1"
             test: "insns"
-          - priv: "0"
+          - priv: "1"
             test: "perf_counters"
           # end tests which require user mode
     env:

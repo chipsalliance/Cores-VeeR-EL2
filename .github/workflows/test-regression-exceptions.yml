@@ -23,7 +23,7 @@ jobs:
                "clk_override", "core_pause"]
         coverage: ["branch", "toggle"] #TODO: add functional coverage
         cache_waypack: ["0", "1"]
-        priv: ["0"]
+        priv: ["1"]
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/regression/.cache/"

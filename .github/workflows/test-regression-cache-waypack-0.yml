@@ -18,7 +18,6 @@ jobs:
                "icache", "bitmanip"]
         coverage: ["branch", "toggle"] #TODO: add functional coverage
         priv: ["0", "1"]
-        cache_waypack: ["0"]
         tb_extra_args: ["--test-halt"]
         exclude:
           # These tests require user mode

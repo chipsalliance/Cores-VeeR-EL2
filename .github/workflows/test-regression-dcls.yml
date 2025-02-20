@@ -1,4 +1,4 @@
-name: Regression tests cache waypack 0
+name: Regression tests DCLS
 
 on:
   workflow_call:
@@ -18,7 +18,6 @@ jobs:
                "icache", "bitmanip"]
         coverage: ["branch"]
         priv: ["0", "1"]
-        cache_waypack: ["0"]
         tb_extra_args: ["--test-halt"]
         exclude:
           # These tests require user mode

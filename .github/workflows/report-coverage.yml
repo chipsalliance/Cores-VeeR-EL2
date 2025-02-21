@@ -121,6 +121,13 @@ jobs:
           name: data_verilator
           path: data_verilator/
 
+      - name: Compare tests
+        run: |
+          cat data_v/*.desc | grep '^TEST:' | sed 's#.*,##' | sed 's#;#\n#g' | sort | uniq >tests_v
+          cat data_verilator/*.desc | grep '^TEST:' | sed 's#.*,##' | sed 's#;#\n#g' | sort | uniq >tests_verilator
+          # `|| true` because it's only needed for informational purposes, a difference is not a reason to fail.
+          diff -yt tests_v tests_verilator || true
+
       - name: Create merged package
         run: |
           .github/scripts/create_merged_package.sh

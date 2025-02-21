@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         bus: ["axi", "ahb"]
-        test: ["hello_world", "hello_world_dccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
+        test: ["hello_world", "hello_world_dccm", "hello_world_iccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
                "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters",
                "pmp", "pmp_random", "write_unaligned",
                "icache", "bitmanip"]
@@ -30,6 +30,9 @@ jobs:
         priv: ["0", "1"]
         tb_extra_args: ["--test-halt"]
         exclude:
+          # Tested below with '--test-lsu-clk-ratio'
+          - priv: "1"
+            test: "hello_world_iccm"
           # These tests require user mode
           - priv: "1"
             test: "csr_mseccfg"
@@ -120,8 +123,9 @@ jobs:
     strategy:
       matrix:
         bus: ["axi", "ahb"]
-        test: ["hello_world", "hello_world_dccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
-               "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters", "pmp", "write_unaligned",
+        test: ["hello_world", "hello_world_dccm", "hello_world_iccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
+               "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters",
+               "pmp", "pmp_random", "write_unaligned",
                "icache", "bitmanip"]
         priv: ["0", "1"]
         exclude:

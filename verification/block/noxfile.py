@@ -374,6 +374,7 @@ def dec_tlu_ctl_verify(session, blockName, testName, coverage):
     [
         "test_jtag_ir",
         "test_dmi_read_write",
+        "test_dmi_tap_fsm",
     ],
 )
 @nox.parametrize("coverage", coverageTypes)

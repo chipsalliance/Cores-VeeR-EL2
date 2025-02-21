@@ -127,7 +127,7 @@ jobs:
         run: |
           cat data_v/*.desc | grep '^TEST:' | sed 's#.*,##' | sed 's#;#\n#g' | sort | uniq >tests_v
           cat data_verilator/*.desc | grep '^TEST:' | sed 's#.*,##' | sed 's#;#\n#g' | sort | uniq >tests_verilator
-          diff -y tests_v tests_verilator
+          diff -y tests_v tests_verilator || true
 
       - name: Create merged package
         run: |

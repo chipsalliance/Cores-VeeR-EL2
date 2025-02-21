@@ -59,6 +59,10 @@ else ifeq ($(SIM), vcs)
     EXTRA_ARGS   += +incdir+$(CFGDIR) +incdir+$(SRCDIR)/include -assert svaext -cm line+cond+fsm+tgl+branch +vcs+lic+wait
 endif
 
+# Produces verilog.dump VCD file
+ifneq ($(VCS_DEBUG),)
+    EXTRA_ARGS = +vcs+dumpon +vcs+dumpvars
+endif
 
 COCOTB_HDL_TIMEUNIT         = 1ns
 COCOTB_HDL_TIMEPRECISION    = 10ps

@@ -61,7 +61,7 @@ jobs:
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
-          PRIV=0
+          PRIV=1
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} $PRIV ${{ matrix.cache_waypack }}
 
       - name: Prepare coverage data

@@ -199,12 +199,12 @@ jobs:
               PRIV_STRING=priv
           fi
 
-          # FULL_NAME example: riscv_dv-ebreak_test_1-user-renode-uvm
+          # FULL_NAME example: riscv_dv-ebreak-priv-renode-uvm
           test=${{ matrix.test }}
           TEST_NAME=${test/riscv_/}
           TEST_NAME=${TEST_NAME/_test_veer/}
           TEST_NAME=${TEST_NAME//_test/}
-          FULL_NAME=riscv-dv-$TEST_NAME-$PRIV_STRING-${{ matrix.iss }}-${{ matrix.version }}
+          FULL_NAME=riscv_dv-$TEST_NAME-$PRIV_STRING-${{ matrix.iss }}-${{ matrix.version }}
 
           mv ${RV_ROOT}/tools/riscv-dv/work/coverage.info \
              results/coverage_${FULL_NAME}_${{ matrix.coverage }}.info

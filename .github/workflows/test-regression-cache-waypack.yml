@@ -28,11 +28,8 @@ jobs:
                "icache", "bitmanip"]
         coverage: ["branch", "toggle"] #TODO: add functional coverage
         priv: ["0", "1"]
-        tb_extra_args: ["--test-halt"]
+        tb_extra_args: ["--test-halt"]  # hello_world_iccm will also have --test-lsu-clk-ratio
         exclude:
-          # Tested below with '--test-lsu-clk-ratio'
-          - priv: "1"
-            test: "hello_world_iccm"
           # These tests require user mode
           - priv: "1"
             test: "csr_mseccfg"
@@ -47,18 +44,6 @@ jobs:
           - priv: "1"
             test: "perf_counters"
           # end tests which require user mode
-        include:
-          # Use hello_world_iccm for testing '--test-lsu-clk-ratio'
-          - test: "hello_world_iccm"
-            bus: "axi"
-            coverage: "branch"
-            priv: "1"
-            tb_extra_args: "--test-halt --test-lsu-clk-ratio"
-          - test: "hello_world_iccm"
-            bus: "axi"
-            coverage: "toggle"
-            priv: "1"
-            tb_extra_args: "--test-halt --test-lsu-clk-ratio"
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/regression/.cache/"
@@ -98,6 +83,10 @@ jobs:
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
+          # Use hello_world_iccm for testing '--test-lsu-clk-ratio'
+          if [ ${{ matrix.test }} = hello_world_iccm ]; then
+              export TB_EXTRA_ARGS="$TB_EXTRA_ARGS --test-lsu-clk-ratio"
+          fi
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} $WAYPACK
 
       - name: Prepare coverage data

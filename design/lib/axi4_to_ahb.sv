@@ -161,7 +161,6 @@ import el2_pkg::*;
    logic                       trxn_done;
    logic [2:0]                 buf_cmd_byte_ptr, buf_cmd_byte_ptrQ, buf_cmd_nxtbyte_ptr;
    logic                       buf_cmd_byte_ptr_en;
-   logic                       found;
 
    logic                       slave_valid_pre;
    logic                       ahb_hready_q;

@@ -1,10 +1,20 @@
-name: Regression tests cache waypack 0
+name: Regression tests cache waypack
 
 on:
   workflow_call:
+    inputs:
+      waypack:
+        required: true
+        type: number
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  WAYPACK: ${{ inputs.waypack }}
 
 jobs:
-
   regression-tests:
     name: Regression tests
     runs-on: ubuntu-24.04
@@ -12,14 +22,12 @@ jobs:
     strategy:
       matrix:
         bus: ["axi", "ahb"]
-        test: ["hello_world", "hello_world_dccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
+        test: ["hello_world", "hello_world_dccm", "hello_world_iccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
                "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters",
-               "pmp", "pmp_random", "write_unaligned",
-               "icache", "bitmanip"]
+               "pmp", "pmp_random", "write_unaligned", "icache", "bitmanip"]
         coverage: ["branch", "toggle"] #TODO: add functional coverage
         priv: ["0", "1"]
-        cache_waypack: ["0"]
-        tb_extra_args: ["--test-halt"]
+        tb_extra_args: ["--test-halt"]  # hello_world_iccm will also have --test-lsu-clk-ratio
         exclude:
           # These tests require user mode
           - priv: "0"
@@ -35,18 +43,6 @@ jobs:
           - priv: "0"
             test: "perf_counters"
           # end tests which require user mode
-        include:
-          # Use hello_world_iccm for testing '--test-lsu-clk-ratio'
-          - test: "hello_world_iccm"
-            bus: "axi"
-            coverage: "branch"
-            priv: "0"
-            tb_extra_args: "--test-halt --test-lsu-clk-ratio"
-          - test: "hello_world_iccm"
-            bus: "axi"
-            coverage: "toggle"
-            priv: "0"
-            tb_extra_args: "--test-halt --test-lsu-clk-ratio"
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/regression/.cache/"
@@ -65,7 +61,6 @@ jobs:
           submodules: recursive
 
       - name: Install coverage dependencies
-        shell: bash
         run: |
           python3 -m venv .venv
           source .venv/bin/activate
@@ -73,7 +68,6 @@ jobs:
           echo "PATH=$PATH" >> $GITHUB_ENV
 
       - name: Setup environment
-        shell: bash
         run: |
           echo "/opt/verilator/bin" >> $GITHUB_PATH
           RV_ROOT=`pwd`
@@ -82,29 +76,31 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+          echo "FULL_NAME=${{ matrix.bus }}-${{ matrix.test }}-${{ matrix.priv == 0 && 'm' || 'mu' }}-waypack${WAYPACK}_${{ matrix.coverage }}" >> $GITHUB_ENV
 
       - name: Run tests
-        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
-          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+          # Use hello_world_iccm for testing '--test-lsu-clk-ratio'
+          if [ ${{ matrix.test }} = hello_world_iccm ]; then
+              export TB_EXTRA_ARGS="$TB_EXTRA_ARGS --test-lsu-clk-ratio"
+          fi
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} $WAYPACK
 
       - name: Prepare coverage data
-        shell: bash
         run: |
           source .venv/bin/activate
           sis -d convert --dat-dir ${TEST_PATH}/
           mkdir -p results
-          mv ${TEST_PATH}/coverage.info \
-             results/coverage_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.priv }}_0_${{ matrix.coverage }}.info
+          mv ${TEST_PATH}/coverage.info results/coverage_${FULL_NAME}.info
 
       - name: Pack artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: regression_tests_coverage_data_cache_waypack_0_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.priv }}_${{ matrix.coverage }}
+          name: regression_tests_coverage_data_cache_waypack_${{ env.FULL_NAME }}
           path: results/*.info
 
   custom-regression-tests:
@@ -114,7 +110,7 @@ jobs:
     strategy:
       matrix:
         bus: ["axi", "ahb"]
-        test: ["hello_world", "hello_world_dccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
+        test: ["hello_world", "hello_world_dccm", "hello_world_iccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
                "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters", "pmp", "write_unaligned",
                "icache", "bitmanip"]
         priv: ["0", "1"]
@@ -142,7 +138,7 @@ jobs:
           submodules: recursive
 
       - name: Run tests
-        run: _secret_custom_regression_tests_waypack_0
+        run: _secret_custom_regression_tests_waypack
         env:
           TEST: ${{ matrix.test }}
           BUS: ${{ matrix.bus }}

@@ -3,6 +3,10 @@ name: Test-OpenOCD
 on:
   workflow_call:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
 
   tests:
@@ -46,7 +50,6 @@ jobs:
           submodules: recursive
 
       - name: Install coverage dependencies
-        shell: bash
         run: |
           python3 -m venv .venv
           source .venv/bin/activate
@@ -54,7 +57,6 @@ jobs:
           echo "PATH=$PATH" >> $GITHUB_ENV
 
       - name: Build verilated simulation
-        shell: bash
         run: |
           export PATH=/opt/verilator/bin:/opt/openocd/bin:$PATH
           export RV_ROOT=$(pwd)
@@ -80,17 +82,23 @@ jobs:
           pkill openocd || true
 
       - name: Prepare coverage data
-        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=$(pwd)
           sis -d convert --dat-dir ${RV_ROOT}/run
           sis -d convert --dat-dir ${RV_ROOT}/gdb_test
           mkdir -p results
+
+          if [ ${{ matrix.bus }} = axi4 ]; then
+              BUS_NAME=axi
+          elif [ ${{ matrix.bus }} = ahb_lite ]; then
+              BUS_NAME=ahb
+          fi
+
           mv ${RV_ROOT}/run/coverage.info \
-             results/coverage_openocd_${{ matrix.bus }}_${{ matrix.coverage }}.info
+             results/coverage_${BUS_NAME}-openocd_${{ matrix.coverage }}.info
           mv ${RV_ROOT}/gdb_test/coverage.info \
-             results/coverage_openocd_gdb_test_${{ matrix.bus }}_${{ matrix.coverage }}.info
+             results/coverage_${BUS_NAME}-openocd-gdb_${{ matrix.coverage }}.info
 
       - name: Pack artifacts
         if: always()

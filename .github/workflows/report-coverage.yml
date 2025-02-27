@@ -3,6 +3,10 @@ name: Coverage report
 on:
   workflow_call:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   merge-verilator-reports:
     name: Merge Verilator info data
@@ -23,11 +27,9 @@ jobs:
           path: ./
 
       - name: Setup info-process
-        shell: bash
         run: .github/scripts/info_process_setup.sh
 
       - name: Merge data
-        shell: bash
         run: |
           mkdir info_files_verilator
           mv *.info info_files_verilator/
@@ -92,7 +94,6 @@ jobs:
         run: _secret_extract_custom_coverage
 
       - name: Setup info-process
-        shell: bash
         run: .github/scripts/info_process_setup.sh
 
       - name: Prepare custom coverage
@@ -119,6 +120,13 @@ jobs:
         with:
           name: data_verilator
           path: data_verilator/
+
+      - name: Compare tests
+        run: |
+          cat data_v/*.desc | grep '^TEST:' | sed 's#.*,##' | sed 's#;#\n#g' | sort | uniq >tests_v
+          cat data_verilator/*.desc | grep '^TEST:' | sed 's#.*,##' | sed 's#;#\n#g' | sort | uniq >tests_verilator
+          # `|| true` because it's only needed for informational purposes, a difference is not a reason to fail.
+          diff -yt tests_v tests_verilator || true
 
       - name: Create merged package
         run: |

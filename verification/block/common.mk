@@ -68,8 +68,10 @@ COCOTB_HDL_TIMEUNIT         = 1ns
 COCOTB_HDL_TIMEPRECISION    = 10ps
 
 # Build directory
-ifneq ($(COVERAGE_TYPE),)
-    SIM_BUILD := sim-build-$(COVERAGE_TYPE)
+ifeq ($(COVERAGE_TYPE),"")
+    SIM_BUILD ?= sim-build
+else
+    SIM_BUILD ?= sim-build-$(COVERAGE_TYPE)
 endif
 
 include $(shell cocotb-config --makefiles)/Makefile.sim

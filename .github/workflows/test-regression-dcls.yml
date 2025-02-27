@@ -1,7 +1,11 @@
-name: Regression tests cache waypack 0
+name: Regression tests DCLS
 
 on:
   workflow_call:
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
 
@@ -18,7 +22,6 @@ jobs:
                "icache", "bitmanip"]
         coverage: ["branch"]
         priv: ["0", "1"]
-        cache_waypack: ["0"]
         tb_extra_args: ["--test-halt"]
         exclude:
           # These tests require user mode
@@ -61,7 +64,6 @@ jobs:
           submodules: recursive
 
       - name: Install coverage dependencies
-        shell: bash
         run: |
           python3 -m venv .venv
           source .venv/bin/activate
@@ -69,7 +71,6 @@ jobs:
           echo "PATH=$PATH" >> $GITHUB_ENV
 
       - name: Setup environment
-        shell: bash
         run: |
           echo "/opt/verilator/bin" >> $GITHUB_PATH
           RV_ROOT=`pwd`
@@ -80,7 +81,6 @@ jobs:
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
 
       - name: Run tests
-        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`

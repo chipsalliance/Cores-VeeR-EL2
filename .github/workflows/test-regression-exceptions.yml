@@ -3,6 +3,10 @@ name: Regression exceptions tests
 on:
   workflow_call:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
 
   regression-tests:
@@ -38,7 +42,6 @@ jobs:
           submodules: recursive
 
       - name: Install coverage dependencies
-        shell: bash
         run: |
           python3 -m venv .venv
           source .venv/bin/activate
@@ -46,7 +49,6 @@ jobs:
           echo "PATH=$PATH" >> $GITHUB_ENV
 
       - name: Setup environment
-        shell: bash
         run: |
           echo "/opt/verilator/bin" >> $GITHUB_PATH
           RV_ROOT=`pwd`
@@ -55,28 +57,27 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+          echo "FULL_NAME=${{ matrix.bus }}-exceptions-${{ matrix.test }}-waypack${{ matrix.cache_waypack }}_${{ matrix.coverage }}" >> $GITHUB_ENV
 
       - name: Run tests
-        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} ${{ matrix.cache_waypack }}
 
       - name: Prepare coverage data
-        shell: bash
         run: |
           source .venv/bin/activate
           sis -d convert --dat-dir ${TEST_PATH}/
           mkdir -p results
           mv ${TEST_PATH}/coverage.info \
-             results/coverage_exceptions_${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.cache_waypack }}_${{ matrix.coverage }}.info
+             results/coverage_${FULL_NAME}.info
 
       - name: Pack artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: regression_tests_coverage_data-${{ matrix.bus }}_${{ matrix.test }}_${{ matrix.coverage }}_${{matrix.priv}}_${{matrix.cache_waypack}}
+          name: regression_tests_coverage_data-${{ env.FULL_NAME }}
           path: results/*.info
 
   custom-regression-exceptions-tests:

@@ -3,6 +3,10 @@ name: RISCV-DV tests
 on:
   workflow_call:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
 
 #--------------#
@@ -59,7 +63,6 @@ jobs:
           RISCV_DV_TEST: ${{ matrix.test }}
 
       - name: Generate code (pyflow)
-        shell: bash
         run: |
           export RV_ROOT=`realpath .`
           pushd tools/riscv-dv
@@ -128,7 +131,6 @@ jobs:
       # As of July 9th, 2024 `ubuntu:latest` comes with riscv64-unknown-elf-gcc
       # 10.0.2. We need a newer version for bitmanip extension support.
       - name: Install cross-compiler
-        shell: bash
         run: |
           echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
@@ -141,7 +143,6 @@ jobs:
           submodules: recursive
 
       - name: Install coverage dependencies
-        shell: bash
         run: |
           python3 -m venv .venv
           source .venv/bin/activate
@@ -159,7 +160,6 @@ jobs:
           path: tools/riscv-dv/work/
 
       - name: Run test
-        shell: bash
         run: |
           ls tools/riscv-dv/work
           export PATH=/opt/verilator/bin:$PATH
@@ -192,21 +192,25 @@ jobs:
         run: |
           sis -d convert --dat-dir ${RV_ROOT}/tools/riscv-dv/work/
           mkdir -p results
+
+          FULL_NAME=riscv_dv-${{ matrix.test }}-m${{ matrix.priv }}-${{ matrix.iss }}-${{ matrix.version }}_${{ matrix.coverage }}
+          echo "FULL_NAME=$FULL_NAME" >> $GITHUB_ENV
+
           mv ${RV_ROOT}/tools/riscv-dv/work/coverage.info \
-             results/coverage_riscv-dv_${{matrix.priv}}_${{ matrix.test }}_${{ matrix.iss }}_${{ matrix.version }}_${{ matrix.coverage }}.info
+             results/coverage_${FULL_NAME}.info
 
       - name: Pack artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: riscv-dv_coverage_data-${{ matrix.coverage }}_${{matrix.priv}}_${{ matrix.test }}-${{ matrix.iss }}-${{ matrix.version }}
+          name: coverage_data-${{ env.FULL_NAME }}
           path: results/*.info
 
       - name: Pack artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: artifacts-${{ matrix.coverage }}_${{ matrix.priv }}_${{ matrix.test }}-${{ matrix.iss }}-${{ matrix.version }}
+          name: artifacts-${{ env.FULL_NAME }}
           path: tools/riscv-dv/work/test_*
 
   run-custom-tests:
@@ -218,7 +222,6 @@ jobs:
       fail-fast: false
       matrix:
         test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
-        version: [ uvm ]
         priv: ["m", "mu"]
     env:
       DEBIAN_FRONTEND: "noninteractive"
@@ -235,7 +238,7 @@ jobs:
       - name: Download Code Artifact
         uses: actions/download-artifact@v4
         with:
-          name: riscv-dv_generated_code_${{ matrix.test }}_${{ matrix.version }}
+          name: riscv-dv_generated_code_${{ matrix.test }}_uvm
           path: tools/riscv-dv/work/
 
       - name: Prepare Environment

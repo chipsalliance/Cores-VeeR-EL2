@@ -3,6 +3,10 @@ name: VeeR-EL2 Microarchitectural tests
 on:
   workflow_call:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   lint:
     name: Lint microarchitectural tests
@@ -15,7 +19,6 @@ jobs:
           submodules: recursive
 
       - name: Setup environment
-        shell: bash
         run: |
           RV_ROOT=`pwd`
           echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
@@ -29,7 +32,6 @@ jobs:
           source .venv/bin/activate
           python3 -m pip install nox
       - name: Lint
-        shell: bash
         run: |
           source .venv/bin/activate
           pushd ${TEST_PATH}
@@ -94,7 +96,6 @@ jobs:
           submodules: recursive
 
       - name: Install coverage dependencies
-        shell: bash
         run: |
           python3 -m venv .venv
           source .venv/bin/activate
@@ -118,7 +119,6 @@ jobs:
             zip zlib1g zlib1g-dev
 
       - name: Setup environment
-        shell: bash
         run: |
           echo "/opt/verilator/bin" >> $GITHUB_PATH
           RV_ROOT=`pwd`
@@ -138,7 +138,6 @@ jobs:
           echo "RANDOM_SEED=1377424946" >> $GITHUB_ENV
 
       - name: Run ${{ matrix.test }}
-        shell: bash
         run: |
           source .venv/bin/activate
           pushd ${TEST_PATH}
@@ -147,7 +146,6 @@ jobs:
           zip verification/${{ matrix.test }}/dump.vcd.zip verification/${{ matrix.test }}/dump.vcd
 
       - name: Prepare coverage data
-        shell: bash
         run: |
           export PATH=/opt/verilator/bin:$PATH
           source .venv/bin/activate
@@ -158,7 +156,9 @@ jobs:
           # Prefix coverage results
           pushd results
             for OLD_NAME in *.info; do
-              NEW_NAME=${OLD_NAME/coverage_/coverage_${TEST_NAME}_}
+              # e.g. coverage_uarch-dma-ecc_line.info instead of coverage_test_ecc_line.info
+              NEW_NAME=${OLD_NAME/coverage_/coverage_uarch-${TEST_NAME}-}
+              NEW_NAME=${NEW_NAME/test_/}
               echo "renaming '${OLD_NAME}' to '${NEW_NAME}'"
               mv ${OLD_NAME} ${NEW_NAME}
             done

@@ -195,24 +195,26 @@ jobs:
           sis -d convert --dat-dir ${RV_ROOT}/tools/riscv-dv/work/
           mkdir -p results
 
-          FULL_NAME=riscv_dv-${{ matrix.test }}-m${{ matrix.priv }}-${{ matrix.iss }}-${{ matrix.version }}_${{ matrix.coverage }}
+          FULL_NAME=riscv_dv-${{ matrix.test }}-m${{ matrix.priv }}-${{ matrix.iss }}-${{ matrix.version }}
           echo "FULL_NAME=$FULL_NAME" >> $GITHUB_ENV
 
-          mv ${RV_ROOT}/tools/riscv-dv/work/coverage.info \
-             results/coverage_${FULL_NAME}.info
+          for ((i=0; i<ITERATIONS; i++)); do
+            cp ${RV_ROOT}/tools/riscv-dv/work/*/hdl_sim/*_$i/coverage.info \
+               results/coverage_${FULL_NAME}-iter${i}_${{ matrix.coverage }}.info
+          done
 
       - name: Pack artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage_data-${{ env.FULL_NAME }}
+          name: coverage_data-${{ env.FULL_NAME }}-${{ matrix.coverage }}
           path: results/*.info
 
       - name: Pack artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: artifacts-${{ env.FULL_NAME }}
+          name: artifacts-${{ env.FULL_NAME }}-${{ matrix.coverage }}
           path: tools/riscv-dv/work/test_*
 
   run-custom-tests:

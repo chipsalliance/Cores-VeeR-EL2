@@ -23,6 +23,7 @@ jobs:
       test-types: ${{ steps.test-types.outputs.tests }}
       test-include-generate: ${{ steps.test-types.outputs.include-generate }}
       test-include-run: ${{ steps.test-types.outputs.include-run }}
+      test-exclude-run: ${{ steps.test-types.outputs.exclude-run }}
       hash: ${{ steps.hash.outputs.files-hash }}
     steps:
       - uses: actions/checkout@v4
@@ -34,6 +35,7 @@ jobs:
           echo "tests=$(python3 .github/scripts/riscv_dv_parse_testlist.py tools/riscv-dv/testlist.yaml)" | tee -a $GITHUB_OUTPUT
           echo "include-generate=$(python3 .github/scripts/riscv_dv_matrix_include.py generate)" | tee -a $GITHUB_OUTPUT
           echo "include-run=$(python3 .github/scripts/riscv_dv_matrix_include.py run)" | tee -a $GITHUB_OUTPUT
+          echo "exclude-run=[{'iss': 'renode', 'test': 'riscv_bitmanip_full_test_veer'}, {'iss': 'renode', 'test': 'riscv_bitmanip_balanced_test_veer'}, {'iss': 'renode', 'test': 'riscv_illegal_instr_test'}, {'iss': 'renode', 'test': 'riscv_hint_instr_test'}, {'iss': 'renode', 'test': 'riscv_ebreak_test', 'priv': 'mu'}, {'iss': 'renode', 'test': 'riscv_ebreak_debug_mode_test', 'priv': 'mu'}]" | tee -a $GITHUB_OUTPUT
       - id: hash
         run: |
           echo "files-hash=$(.github/scripts/get_code_hash.sh)" | tee -a $GITHUB_OUTPUT
@@ -105,20 +107,7 @@ jobs:
         version: [ uvm ]
         priv: ["m", "mu"]
         include: ${{ fromJSON(needs.generate-config.outputs.test-include-run) }}
-        exclude:
-            # Bitmanip tests are temporarily disabled in Renode
-            # until the extension implementation is complete
-            - iss: renode
-              test: riscv_bitmanip_full_test_veer
-            - iss: renode
-              test: riscv_bitmanip_balanced_test_veer
-            # Disable illegal instr test, until illegal instruction handling is improved
-            # since there remain few edge cases to be resolved here
-            - iss: renode
-              test: riscv_illegal_instr_test
-
-            - iss: renode
-              test: riscv_hint_instr_test
+        exclude: ${{ fromJSON(needs.generate-config.outputs.test-exclude-run) }}
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"
@@ -225,7 +214,13 @@ jobs:
       fail-fast: false
       matrix:
         test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
+        iss:
+          - spike
+          - renode
+        version: [ uvm ]
         priv: ["m", "mu"]
+        include: ${{ fromJSON(needs.generate-config.outputs.test-include-run) }}
+        exclude: ${{ fromJSON(needs.generate-config.outputs.test-exclude-run) }}
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"
@@ -241,7 +236,7 @@ jobs:
       - name: Download Code Artifact
         uses: actions/download-artifact@v4
         with:
-          name: riscv-dv_generated_code_${{ matrix.test }}_uvm
+          name: riscv-dv_generated_code_${{ matrix.test }}_${{ matrix.version }}
           path: tools/riscv-dv/work/
 
       - name: Prepare Environment
@@ -252,3 +247,5 @@ jobs:
         env:
           RISCV_DV_TEST: ${{ matrix.test }}
           RISCV_DV_PRIV: ${{ matrix.priv }}
+          RISCV_DV_ISS: ${{ matrix.iss }}
+          VERSION: ${{ matrix.version }}

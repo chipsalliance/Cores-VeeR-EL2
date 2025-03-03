@@ -150,6 +150,7 @@ jobs:
       - name: Run test
         run: |
           ls tools/riscv-dv/work
+          export FULL_NAME=riscv_dv-${{ matrix.test }}-${{ matrix.priv }}-${{ matrix.iss }}-${{ matrix.version }}
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`realpath .`
           export RISCV_GCC=riscv64-unknown-elf-gcc
@@ -158,6 +159,7 @@ jobs:
           export SPIKE_PATH=/opt/spike/bin
           export RENODE_PATH=/opt/renode/renode
 
+          echo "FULL_NAME=${FULL_NAME}" >> $GITHUB_ENV
           echo "RV_ROOT=${RV_ROOT}" >> ${GITHUB_ENV}
           echo "PATH=${PATH}"       >> ${GITHUB_ENV}
 
@@ -178,9 +180,6 @@ jobs:
         run: |
           sis -d convert --dat-dir ${RV_ROOT}/tools/riscv-dv/work/
           mkdir -p results
-
-          FULL_NAME=riscv_dv-${{ matrix.test }}-${{ matrix.priv }}-${{ matrix.iss }}-${{ matrix.version }}
-          echo "FULL_NAME=$FULL_NAME" >> $GITHUB_ENV
 
           for ((i=0; i<RISCV_DV_ITER; i++)); do
             cp ${RV_ROOT}/tools/riscv-dv/work/*/hdl_sim/*_$i/coverage.info \

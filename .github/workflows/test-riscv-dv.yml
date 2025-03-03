@@ -7,6 +7,10 @@ defaults:
   run:
     shell: bash
 
+env:
+  RISCV_DV_ITER: 3
+  RISCV_DV_SEED: 999
+
 jobs:
 
 #--------------#
@@ -68,8 +72,8 @@ jobs:
           pushd tools/riscv-dv
             make -j`nproc` \
               RISCV_DV_TEST=${{ matrix.test }} \
-              RISCV_DV_ITER=3 \
-              RISCV_DV_SEED=999 \
+              RISCV_DV_ITER=$RISCV_DV_ITER \
+              RISCV_DV_SEED=$RISCV_DV_SEED \
               generate
           popd
 
@@ -178,8 +182,8 @@ jobs:
             make -j`nproc` \
               RISCV_DV_TEST=${{ matrix.test }} \
               RISCV_DV_ISS=${{ matrix.iss }} \
-              RISCV_DV_ITER=3 \
-              RISCV_DV_SEED=999 \
+              RISCV_DV_ITER=$RISCV_DV_ITER \
+              RISCV_DV_SEED=$RISCV_DV_SEED \
               COVERAGE=${{ matrix.coverage }} \
               RISCV_DV_PRIV=${{ matrix.priv }} \
               run

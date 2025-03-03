@@ -63,12 +63,13 @@ jobs:
         run: _secret_prepare_env
 
       - name: Generate code
-        id: riscv_dv_test
+        if: matrix.version == 'uvm'
         run: _secret_generate_code
         env:
           RISCV_DV_TEST: ${{ matrix.test }}
 
       - name: Generate code (pyflow)
+        if: matrix.version == 'pyflow'
         run: |
           export RV_ROOT=`realpath .`
           pushd tools/riscv-dv
@@ -78,11 +79,6 @@ jobs:
               RISCV_DV_SEED=$RISCV_DV_SEED \
               generate
           popd
-
-      - name: Use fallback code
-        run: |
-          mkdir -p tools/riscv-dv/work/
-          cp -r .github/assets/riscv_dv/${{ matrix.version  }}/* tools/riscv-dv/work/
 
       - name: Pack artifacts
         if: always()

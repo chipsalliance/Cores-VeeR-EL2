@@ -101,8 +101,7 @@ jobs:
           - renode
         coverage: ["branch", "toggle"] #TODO: add functional coverage
         version: [ uvm ]
-        # TODO use separate privilege modes configurations for generating the VeeR model
-        priv: ["", "u"]
+        priv: ["m", "mu"]
         include: ${{ fromJSON(needs.generate-config.outputs.test-include-run) }}
         exclude:
             # Bitmanip tests are temporarily disabled in Renode
@@ -178,8 +177,6 @@ jobs:
           ${RISCV_GCC} --version
 
           pushd tools/riscv-dv
-            # TODO use privilege mode from matrix,
-            # find a way to structure the files with `u` and `mu` properly
             make -j`nproc` \
               RISCV_DV_TEST=${{ matrix.test }} \
               RISCV_DV_ISS=${{ matrix.iss }} \
@@ -195,7 +192,7 @@ jobs:
           sis -d convert --dat-dir ${RV_ROOT}/tools/riscv-dv/work/
           mkdir -p results
 
-          FULL_NAME=riscv_dv-${{ matrix.test }}-m${{ matrix.priv }}-${{ matrix.iss }}-${{ matrix.version }}
+          FULL_NAME=riscv_dv-${{ matrix.test }}-${{ matrix.priv }}-${{ matrix.iss }}-${{ matrix.version }}
           echo "FULL_NAME=$FULL_NAME" >> $GITHUB_ENV
 
           for ((i=0; i<ITERATIONS; i++)); do

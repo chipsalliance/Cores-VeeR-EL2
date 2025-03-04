@@ -1,3 +1,5 @@
+SHELL           = /bin/bash -o pipefail
+
 GCC_PREFIX     ?= riscv64-unknown-elf
 
 RISCV_DV_PATH   = $(RV_ROOT)/third_party/riscv-dv
@@ -148,6 +150,10 @@ $(TEST_DIR)/iss_sim.log: $(TEST_DIR)/compile.log | $(TEST_DIR)
 	# Compile, simulate
 	PYTHONPATH=$(RISCV_DV_PATH)/pygen python3 $(RISCV_DV_PATH)/run.py $(RISCV_DV_ARGS) $(RISCV_DV_SIM_ARGS) \
     --steps iss_sim 2>&1 | tee $@
+	if grep -q ERROR $(TEST_DIR)/iss_sim.log; then \
+		echo "ISS simulation failed"; \
+		exit 1; \
+	fi
 
 # Tests are built by `run.py` script, they shouldn't be constructed by this Makefile directly
 %.o:

@@ -214,7 +214,7 @@ jobs:
     name: Run custom RISC-V DV tests
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: centos:8
-    needs: [ generate-config, generate-code ]
+    needs: [ generate-config, run-tests ]
     strategy:
       fail-fast: false
       matrix:
@@ -238,11 +238,26 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Download Code Artifact
+      - run: echo "FULL_NAME=riscv_dv-${{ matrix.test }}-${{ matrix.priv }}-${{ matrix.iss }}-${{ matrix.version }}" >> $GITHUB_ENV
+
+      # To avoid compiling code and running ISS on CentOS, let's just get
+      # compiled code and ISS logs from the artifacts of Verilator tests.
+      - name: Download Code and ISS logs
         uses: actions/download-artifact@v4
         with:
-          name: riscv-dv_generated_code_${{ matrix.test }}_${{ matrix.version }}
-          path: tools/riscv-dv/work/
+          # Code and ISS logs will be the same for all metrics, let's take them from branch jobs.
+          name: artifacts-${{ env.FULL_NAME }}-branch
+          path: verilator-artifacts
+
+      - name: Move Code and ISS logs to workdir
+        run: |
+          SRC_DIR=verilator-artifacts/test_${{ matrix.test }}
+          TEST_DIR=tools/riscv-dv/work/test_${{ matrix.test }}
+
+          mkdir -p $TEST_DIR/asm_test
+          cp $SRC_DIR/asm_test/*.hex $TEST_DIR/asm_test/
+          cp -r $SRC_DIR/${{ matrix.iss }}_sim $TEST_DIR/
+          rm -rf verilator-artifacts
 
       - name: Prepare Environment
         run: _secret_prepare_env

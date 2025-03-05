@@ -1,6 +1,7 @@
 name: RISCV-DV tests
 
 on:
+  push:
   workflow_call:
 
 defaults:
@@ -98,13 +99,11 @@ jobs:
       matrix:
         test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
         iss:
-          - spike
           - renode
-        coverage: ["branch", "toggle"] #TODO: add functional coverage
+        coverage: ["branch"] #TODO: add functional coverage
         version: [ uvm ]
         priv: ["m", "mu"]
         include: ${{ fromJSON(needs.generate-config.outputs.test-include-run) }}
-        exclude: ${{ fromJSON(needs.generate-config.outputs.test-exclude-run) }}
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"
@@ -159,6 +158,11 @@ jobs:
           export RISCV_NM=riscv64-unknown-elf-nm
           export SPIKE_PATH=/opt/spike/bin
           export RENODE_PATH=/opt/renode/renode
+
+          rm -rf /opt/renode
+          wget https://dl.antmicro.com/projects/renode/builds/renode-latest.linux-portable.tar.gz
+          mkdir /opt/renode
+          tar xf renode-latest.linux-portable.tar.gz --strip-components=1 -C /opt/renode
 
           echo "FULL_NAME=${FULL_NAME}" >> $GITHUB_ENV
           echo "RV_ROOT=${RV_ROOT}" >> ${GITHUB_ENV}

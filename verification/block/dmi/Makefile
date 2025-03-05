@@ -9,6 +9,7 @@ TEST_FILES   = $(sort $(wildcard test_*.py))
 
 MODULE      ?= $(subst $(space),$(comma),$(subst .py,,$(TEST_FILES)))
 TOPLEVEL     = dmi_test_wrapper
+CM_FILE      = cm.cfg
 
 VERILOG_SOURCES  = \
     $(TEST_DIR)/dmi_test_wrapper.sv \

@@ -79,7 +79,7 @@ jobs:
           cd coverview
           npm install
           npm run build
-          cp -r ../data_verilator data
+          cp -r ../data_both data
           python3 embed.py --inject-data data
           cd ../
 

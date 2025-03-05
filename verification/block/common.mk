@@ -56,7 +56,10 @@ ifeq ($(SIM), verilator)
     BUILD_ARGS += -j $(PARALLEL_THREADS)
 
 else ifeq ($(SIM), vcs)
-    EXTRA_ARGS   += +incdir+$(CFGDIR) +incdir+$(SRCDIR)/include -assert svaext -cm line+cond+fsm+tgl+branch +vcs+lic+wait
+    ifneq ($(CM_FILE),)
+        EXTRA_ARGS += -cm_hier $(TEST_DIR)/$(CM_FILE)
+    endif
+    EXTRA_ARGS += +incdir+$(CFGDIR) +incdir+$(SRCDIR)/include -assert svaext -cm line+cond+fsm+tgl+branch +vcs+lic+wait
 endif
 
 # Produces verilog.dump VCD file

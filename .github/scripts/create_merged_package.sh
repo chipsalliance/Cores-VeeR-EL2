@@ -31,10 +31,10 @@ END
 
 _out_dir=data_both
 
-# The order of INFO files influences order of datasets in config.json
-# which is why `data_verilator` is before `data_v`.
+# The order of INFO files influences order of datasets that will be
+# generated based on passed INFO files and added to config.json.
 info-process pack --output $_out_dir --config config.json \
-    --coverage-files data_verilator/*.info data_v/*.info \
+    --coverage-files data_v/*.info data_verilator/*.info \
     --description-files data_verilator/*.desc data_v/*.desc \
     --extra-files data_v/logo.svg
 

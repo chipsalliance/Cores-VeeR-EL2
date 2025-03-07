@@ -13,12 +13,14 @@ if __name__ == "__main__":
         matrix = run_tests['strategy']['matrix']
         isses = matrix['iss']
         coverages = matrix['coverage']
+        privs = matrix['priv']
         result = [{
             "test": test,
             "iss": iss,
             "coverage": coverage,
             "version": "pyflow",
-        } for test, iss, coverage in product(RISCV_DV_TESTS, isses, coverages)]
+            "priv": priv,
+        } for test, iss, coverage, priv in product(RISCV_DV_TESTS, isses, coverages, privs)]
         print(dumps(result))
     elif sys.argv[1].strip() == 'generate':
         print(dumps(

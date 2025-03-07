@@ -7,6 +7,9 @@ defaults:
   run:
     shell: bash
 
+env:
+  SECRETS_VERSION: 1
+
 jobs:
   merge-verilator-reports:
     name: Merge Verilator info data
@@ -64,10 +67,14 @@ jobs:
           submodules: recursive
 
       - name: Prepare Environment
-        run: _secret_prepare_env
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_prepare_env
 
       - name: Generate custom reports
-        run: _secret_custom_report
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_custom_report
 
       - name: Pack artifacts
         uses: actions/upload-artifact@v4
@@ -91,7 +98,9 @@ jobs:
           submodules: recursive
 
       - name: Extract custom coverage
-        run: _secret_extract_custom_coverage
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_extract_custom_coverage
 
       - name: Setup info-process
         run: .github/scripts/info_process_setup.sh

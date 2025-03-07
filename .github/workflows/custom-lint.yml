@@ -6,6 +6,9 @@ on:
       - main
   pull_request:
 
+env:
+  SECRETS_VERSION: 1
+
 jobs:
   run-lint:
     name: Run lint
@@ -20,5 +23,6 @@ jobs:
           submodules: recursive
 
       - name: Run lint
-        run: _secret_lint
-
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_lint

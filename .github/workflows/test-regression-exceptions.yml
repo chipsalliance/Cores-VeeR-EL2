@@ -7,6 +7,9 @@ defaults:
   run:
     shell: bash
 
+env:
+  SECRETS_VERSION: 1
+
 jobs:
   regression-tests:
     name: Regression exceptions tests
@@ -92,4 +95,6 @@ jobs:
           submodules: recursive
 
       - name: Run tests
-        run: _secret_custom_regression_exceptions_tests
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_custom_regression_exceptions_tests

@@ -10,6 +10,7 @@ defaults:
 env:
   ITERATIONS: 3
   SEED: 999
+  SECRETS_VERSION: 1
 
 jobs:
   generate-config:
@@ -68,12 +69,15 @@ jobs:
           submodules: recursive
 
       - name: Prepare Environment
-        run: _secret_prepare_env
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_prepare_env
 
       - name: Generate code
         if: matrix.version == 'uvm'
-        run: _secret_generate_code
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
         env:
+          SECRET_NAME: _secret_generate_code
           RISCV_DV_TEST: ${{ matrix.test }}
           RISCV_DV_ITER: ${{ env.ITERATIONS }}
           RISCV_DV_SEED: ${{ env.SEED }}
@@ -260,11 +264,14 @@ jobs:
           rm -rf verilator-artifacts
 
       - name: Prepare Environment
-        run: _secret_prepare_env
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_prepare_env
 
       - name: Perform custom tests
-        run: _secret_custom_riscv_dv
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
         env:
+          SECRET_NAME: _secret_custom_riscv_dv
           RISCV_DV_ITER: ${{ env.ITERATIONS }}
           RISCV_DV_TEST: ${{ matrix.test }}
           RISCV_DV_PRIV: ${{ matrix.priv }}

@@ -7,6 +7,9 @@ defaults:
   run:
     shell: bash
 
+env:
+  SECRETS_VERSION: 1
+
 jobs:
   lint:
     name: Lint microarchitectural tests
@@ -218,8 +221,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+
       - name: Perform custom tests
-        run: _secret_custom_uarch
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
         env:
+          SECRET_NAME: _secret_custom_uarch
           TEST: ${{ matrix.test }}
 

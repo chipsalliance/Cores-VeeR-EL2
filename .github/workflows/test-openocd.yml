@@ -7,6 +7,9 @@ defaults:
   run:
     shell: bash
 
+env:
+  SECRETS_VERSION: 1
+
 jobs:
   tests:
     name: Run OpenOCD tests
@@ -123,6 +126,7 @@ jobs:
           submodules: recursive
 
       - name: Run tests
-        run: _secret_custom_openocd_tests
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
         env:
+          SECRET_NAME: _secret_custom_openocd_tests
           BUS: ${{ matrix.bus }}

@@ -8,7 +8,6 @@ defaults:
     shell: bash
 
 jobs:
-
   tests:
     name: Run OpenOCD tests
     runs-on: ubuntu-24.04

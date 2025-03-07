@@ -1,9 +1,11 @@
 name: Custom lint
+
 on:
   push:
     branches:
       - main
   pull_request:
+
 jobs:
   run-lint:
     name: Run lint

@@ -7,11 +7,11 @@ defaults:
   run:
     shell: bash
 
-jobs:
+env:
+  ITERATIONS: 3
+  SEED: 999
 
-#--------------#
-#    Tests
-#--------------#
+jobs:
   generate-config:
     name: Generate configs
     runs-on: ubuntu-24.04
@@ -61,6 +61,8 @@ jobs:
         run: _secret_generate_code
         env:
           RISCV_DV_TEST: ${{ matrix.test }}
+          RISCV_DV_ITER: ${{ env.ITERATIONS }}
+          RISCV_DV_SEED: ${{ env.SEED }}
 
       - name: Generate code (pyflow)
         run: |
@@ -68,8 +70,8 @@ jobs:
           pushd tools/riscv-dv
             make -j`nproc` \
               RISCV_DV_TEST=${{ matrix.test }} \
-              RISCV_DV_ITER=3 \
-              RISCV_DV_SEED=999 \
+              RISCV_DV_ITER=$ITERATIONS \
+              RISCV_DV_SEED=$SEED \
               generate
           popd
 
@@ -181,8 +183,8 @@ jobs:
             make -j`nproc` \
               RISCV_DV_TEST=${{ matrix.test }} \
               RISCV_DV_ISS=${{ matrix.iss }} \
-              RISCV_DV_ITER=3 \
-              RISCV_DV_SEED=999 \
+              RISCV_DV_ITER=$ITERATIONS \
+              RISCV_DV_SEED=$SEED \
               COVERAGE=${{ matrix.coverage }} \
               RISCV_DV_PRIV=${{ matrix.priv }} \
               run

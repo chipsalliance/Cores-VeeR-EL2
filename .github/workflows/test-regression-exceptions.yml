@@ -8,7 +8,6 @@ defaults:
     shell: bash
 
 jobs:
-
   regression-tests:
     name: Regression exceptions tests
     runs-on: ubuntu-24.04

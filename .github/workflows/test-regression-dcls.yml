@@ -8,7 +8,6 @@ defaults:
     shell: bash
 
 jobs:
-
   regression-tests:
     name: Regression tests
     runs-on: ubuntu-latest

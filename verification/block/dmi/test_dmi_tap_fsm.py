@@ -116,8 +116,8 @@ TEST_PATH = [
 @cocotb.test()
 async def test_full_tap_fsm(dut):
     """Exercise all possible TAP FSM states via TMS and TCK."""
-    clock = Clock(dut.tck, 10, units="ns")  # 100 MHz clock
-    cocotb.start_soon(clock.start())  # Start the clock
+    cocotb.start_soon(Clock(dut.tck, 3, units="ns").start())
+    cocotb.start_soon(Clock(dut.core_clk, 1, units="ns").start())
 
     # Assert tms to ensure entering the test with `TEST_LOGIC_RESET_STATE`
     dut.tms.value = 1

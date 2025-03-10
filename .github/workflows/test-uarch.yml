@@ -11,7 +11,7 @@ jobs:
   lint:
     name: Lint microarchitectural tests
     runs-on: ubuntu-24.04
-    container: ghcr.io/antmicro/cores-veer-el2:20250123123840
+    container: ghcr.io/antmicro/cores-veer-el2:20250228170942
     steps:
       - name: Setup repository
         uses: actions/checkout@v3
@@ -40,7 +40,7 @@ jobs:
   tests:
     name: Microarchitectural tests
     runs-on: ubuntu-24.04
-    container: ghcr.io/antmicro/cores-veer-el2:20250123123840
+    container: ghcr.io/antmicro/cores-veer-el2:20250228170942
     strategy:
       matrix:
         include:

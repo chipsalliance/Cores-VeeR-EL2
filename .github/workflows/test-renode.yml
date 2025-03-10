@@ -6,7 +6,7 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-24.04
-    container: ghcr.io/antmicro/cores-veer-el2:20250123123840
+    container: ghcr.io/antmicro/cores-veer-el2:20250228170942
     strategy:
       fail-fast: false
     env:

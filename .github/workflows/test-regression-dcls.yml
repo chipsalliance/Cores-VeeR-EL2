@@ -12,7 +12,7 @@ jobs:
   regression-tests:
     name: Regression tests
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20250116082447
+    container: ghcr.io/antmicro/cores-veer-el2:20250228170942
     strategy:
       matrix:
         bus: ["axi", "ahb"]

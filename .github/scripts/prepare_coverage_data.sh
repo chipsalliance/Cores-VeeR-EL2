@@ -36,17 +36,15 @@ then
     # Split branch and line before merging to have correct data in `.desc` files.
     for FILE in info_files_$SIM/*_branch.info
     do
-        mv $FILE temp.info
-        python3 .github/scripts/split_info.py temp.info --branch >$FILE
-        python3 .github/scripts/split_info.py temp.info --line >${FILE%%_branch.info}_line.info
-        rm temp.info
+        info-process extract --coverage-type line --output ${FILE%%_branch.info}_line.info $FILE
+        info-process extract --coverage-type cond --output ${FILE%%_branch.info}_cond.info $FILE
+        # Extract branch coverage last, so that it can happen in-place
+        info-process extract --coverage-type branch --output $FILE $FILE
     done
 fi
 
 for TYPE in branch line toggle cond
 do
-    if [ $SIM = verilator ] && [ $TYPE = cond ]; then continue; fi
-
     _sort_opt=''
     _transform_extra_opts=''
     if [ $SIM = verilator ] && [ $TYPE = toggle ]

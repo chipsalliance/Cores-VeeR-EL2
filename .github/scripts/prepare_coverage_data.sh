@@ -37,6 +37,7 @@ then
     for FILE in info_files_$SIM/*_branch.info
     do
         info-process extract --coverage-type line --output ${FILE%%_branch.info}_line.info $FILE
+        info-process extract --coverage-type cond --output ${FILE%%_branch.info}_cond.info $FILE
         # Extract branch coverage last, so that it can happen in-place
         info-process extract --coverage-type branch --output $FILE $FILE
     done
@@ -44,8 +45,6 @@ fi
 
 for TYPE in branch line toggle cond
 do
-    if [ $SIM = verilator ] && [ $TYPE = cond ]; then continue; fi
-
     _sort_opt=''
     _transform_extra_opts=''
     if [ $SIM = verilator ] && [ $TYPE = toggle ]

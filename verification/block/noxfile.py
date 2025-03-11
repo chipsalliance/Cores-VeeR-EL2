@@ -202,7 +202,7 @@ def ifu_compress_verify(session, blockName, testName, coverage):
 
 @nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["ifu_mem_ctl"])
-@nox.parametrize("testName", ["test_miss", "test_err"])
+@nox.parametrize("testName", ["test_miss", "test_err", "test_err_stop"])
 @nox.parametrize("coverage", coverageTypes)
 def ifu_mem_ctl_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)

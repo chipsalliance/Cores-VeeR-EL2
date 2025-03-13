@@ -11,7 +11,7 @@ jobs:
   merge-verilator-reports:
     name: Merge Verilator info data
     runs-on: ubuntu-24.04
-    container: ghcr.io/antmicro/cores-veer-el2:20250123123840
+    container: ghcr.io/antmicro/cores-veer-el2:20250228170942
     env:
       DEBIAN_FRONTEND: "noninteractive"
     steps:

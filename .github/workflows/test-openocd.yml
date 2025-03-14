@@ -8,7 +8,6 @@ defaults:
     shell: bash
 
 jobs:
-
   tests:
     name: Run OpenOCD tests
     runs-on: ubuntu-24.04
@@ -123,7 +122,11 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Set secrets version
+        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
+
       - name: Run tests
-        run: _secret_custom_openocd_tests
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
         env:
+          SECRET_NAME: _secret_custom_openocd_tests
           BUS: ${{ matrix.bus }}

@@ -1,3 +1,5 @@
+SHELL           = /bin/bash -o pipefail
+
 GCC_PREFIX     ?= riscv64-unknown-elf
 
 RISCV_DV_PATH   = $(RV_ROOT)/third_party/riscv-dv
@@ -7,6 +9,7 @@ RISCV_DV_TEST  ?= riscv_arithmetic_basic_test
 RISCV_DV_SEED  ?= 999
 RISCV_DV_ITER  ?= 1
 RISCV_DV_BATCH ?= 1
+RISCV_DV_PRIV  ?= m
 
 export RISCV_GCC ?=     $(GCC_PREFIX)-gcc
 export RISCV_OBJCOPY ?= $(GCC_PREFIX)-objcopy
@@ -75,7 +78,7 @@ ifeq ($(findstring u, $(RISCV_DV_PRIV)), u)
 endif
 
 RISCV_DV_SIM_ARGS= \
-    --priv m${RISCV_DV_PRIV}
+    --priv ${RISCV_DV_PRIV}
 
 # Append Renode-specific options
 ifeq ("$(RISCV_DV_ISS)", "renode")
@@ -148,6 +151,10 @@ $(TEST_DIR)/iss_sim.log: $(TEST_DIR)/compile.log | $(TEST_DIR)
 	# Compile, simulate
 	PYTHONPATH=$(RISCV_DV_PATH)/pygen python3 $(RISCV_DV_PATH)/run.py $(RISCV_DV_ARGS) $(RISCV_DV_SIM_ARGS) \
     --steps iss_sim 2>&1 | tee $@
+	if grep -q ERROR $(TEST_DIR)/iss_sim.log; then \
+		echo "ISS simulation failed"; \
+		exit 1; \
+	fi
 
 # Tests are built by `run.py` script, they shouldn't be constructed by this Makefile directly
 %.o:
@@ -168,7 +175,6 @@ $(SIM_DIR)/%.log: $(TEST_DIR)/asm_test/%.hex $(TEST_DIR)/asm_test/%.sym $(WORK_D
 	cp $(basename $<).sym $(basename $@)/program.sym
 	cd $(basename $@) && $(abspath $(WORK_DIR)/verilator/Vtb_top) --symbols program.sym --mailbox-sym tohost
 	mv $(basename $@)/exec.log $@
-	if [ -f "$(basename $@)/coverage.dat" ]; then mv $(basename $@)/coverage.dat $(basename $@)-coverage.dat; fi
 
 # Log conversion rules
 $(TEST_DIR)/spike_sim/%.csv: $(TEST_DIR)/spike_sim/%.log
@@ -187,15 +193,6 @@ $(TEST_DIR)/comp_%.log: $(TEST_DIR)/$(RISCV_DV_ISS)_sim/%.csv $(SIM_DIR)/%.csv
 		--csv_file_1 $(word 1, $^) --csv_name_1 ISS --csv_file_2 $(word 2, $^) --csv_name_2 HDL \
 		--in_order_mode 1 --log $@ --verbose 10 --mismatch_print_limit 20
 	cat $@
-
-# Coverage data aggregation
-$(WORK_DIR)/coverage.dat:
-	FILES=`find $(SIM_DIR)/ -name "*coverage.dat"`; \
-	if [ "$${FILES}" != "" ]; then \
-		verilator_coverage -write $@ $${FILES}; \
-	else \
-		touch $@ ; \
-	fi
 
 %.sv: %.py
 	./$< $(RISCV_DV_PATH) $(RV_ROOT) > $@
@@ -217,8 +214,6 @@ run:
 	find $(TEST_DIR)/$(RISCV_DV_ISS)_sim -name "*.log" | sed 's|sim/|sim/../comp_|g' | xargs realpath --relative-to=$(PWD) | xargs $(MAKE) -f $(MAKEFILE)
 	# Check for errors
 	for F in $(TEST_DIR)/comp_*.log; do grep "\[PASSED\]" $$F; if [ $$? -ne 0 ]; then exit 255; fi; done
-	# Aggregate coverage data
-	$(MAKE) $(WORK_DIR)/coverage.dat
 
 clean:
 	rm -rf $(TEST_DIR)

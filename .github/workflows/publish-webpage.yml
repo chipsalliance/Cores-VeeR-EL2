@@ -74,15 +74,6 @@ jobs:
           apt -y update
           apt -y install nodejs npm python3 zip git
 
-          # get coverview
-          git clone https://github.com/antmicro/coverview
-          cd coverview
-          npm install
-          npm run build
-          cp -r ../data_both data
-          python3 embed.py --inject-data data
-          cd ../
-
           echo "Event: $GITHUB_EVENT_NAME, ref: $GITHUB_REF_NAME)"
           if [ "$GITHUB_EVENT_NAME" = pull_request ]
           then
@@ -98,6 +89,23 @@ jobs:
           fi
           TARGET_DIR=`realpath $TARGET_DIR`
 
+          mkdir -p $TARGET_DIR
+
+          # data
+          cd data_verilator
+          zip $TARGET_DIR/data.zip *
+          cd ../data_both
+          zip $TARGET_DIR/data_both.zip *
+          cd ..
+
+          # get coverview
+          git clone https://github.com/antmicro/coverview
+          cd coverview
+          npm install
+          npm run build
+          python3 embed.py --inject-data $TARGET_DIR/data_both.zip
+          cd ..
+
           # dashboard
           rm -rf $TARGET_DIR/coverage_dashboard*
           mkdir -p $TARGET_DIR/coverage_dashboard/all
@@ -108,12 +116,6 @@ jobs:
           mkdir -p $TARGET_DIR/docs_rendered
           mv ./docs_rendered/* $TARGET_DIR/docs_rendered
 
-          # data
-          cd data_verilator
-          zip $TARGET_DIR/data.zip *
-          cd ../data_both
-          zip $TARGET_DIR/data_both.zip *
-          cd ..
           echo ${GITHUB_RUN_ID} > $TARGET_DIR/run_id
           tar -acf webpage.tar.gz public.new
 

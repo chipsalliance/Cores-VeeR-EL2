@@ -137,9 +137,13 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Set secrets version
+        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
+
       - name: Run tests
-        run: _secret_custom_regression_tests_waypack
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
         env:
+          SECRET_NAME: _secret_custom_regression_tests_waypack
           TEST: ${{ matrix.test }}
           BUS: ${{ matrix.bus }}
           PRIV: ${{ matrix.priv }}

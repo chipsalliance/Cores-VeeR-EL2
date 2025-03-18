@@ -1,9 +1,11 @@
 name: Custom lint
+
 on:
   push:
     branches:
       - main
   pull_request:
+
 jobs:
   run-lint:
     name: Run lint
@@ -17,6 +19,10 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Run lint
-        run: _secret_lint
+      - name: Set secrets version
+        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
 
+      - name: Run lint
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_lint

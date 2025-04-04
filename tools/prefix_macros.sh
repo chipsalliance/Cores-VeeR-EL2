@@ -71,8 +71,8 @@ OUTPUT_EL2_PARAM=$DEFINES_PATH/"$PREFIX"el2_param.vh
 OUTPUT_EL2_PDEF=$DEFINES_PATH/"$PREFIX"el2_pdef.vh
 echo "Adding prefix to VeeR config struct in $OUTPUT_EL2_PARAM and $OUTPUT_EL2_PDEF"
 
-sed "$STRUCT_REPLACE_REGEX" "$EL2_PARAM" >$DEFINES_PATH/"$PREFIX"el2_param.vh
-sed "$STRUCT_REPLACE_REGEX" "$EL2_PDEF" >$DEFINES_PATH/"$PREFIX"el2_pdef.vh
+sed "$STRUCT_REPLACE_REGEX" "$EL2_PARAM" >$OUTPUT_EL2_PARAM
+sed "$STRUCT_REPLACE_REGEX" "$EL2_PDEF" >$OUTPUT_EL2_PDEF
 sed -i "$STRUCT_REPLACE_REGEX" $DESIGN_FILES
 
 # Replace renamed macros in RTL sources
@@ -120,5 +120,15 @@ perl -pi -e "s/(?<!${PREFIX})EL2_IC_TAG_PACKED_SRAM/${PREFIX}EL2_IC_TAG_PACKED_S
 perl -pi -e "s/(?<!${PREFIX})EL2_IC_TAG_SRAM/${PREFIX}EL2_IC_TAG_SRAM/g" $EL2_IFU_IC_MEM
 perl -pi -e "s/(?<!${PREFIX})EL2_PACKED_IC_DATA_SRAM/${PREFIX}EL2_PACKED_IC_DATA_SRAM/g" $EL2_IFU_IC_MEM
 perl -pi -e "s/(?<!${PREFIX})EL2_IC_DATA_SRAM/${PREFIX}EL2_IC_DATA_SRAM/g" $EL2_IFU_IC_MEM
+
+# Add prefix to design file names
+echo "Adding prefix to VeeR design file names"
+for FILE_SRC in $DESIGN_FILES; do
+    FILE_DIR="$(dirname -- "$(realpath "$FILE_SRC")")"
+    FILE_NAME="$(basename "$FILE_SRC")"
+    FILE_DEST="$FILE_DIR"/"$PREFIX""$FILE_NAME"
+    echo "Renaming $FILE_SRC to $FILE_DEST"
+    mv "$FILE_SRC" "$FILE_DEST"
+done
 
 echo "Script finished successfully"

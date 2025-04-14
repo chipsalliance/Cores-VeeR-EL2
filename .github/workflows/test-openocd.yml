@@ -84,8 +84,7 @@ jobs:
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=$(pwd)
-          sis -d convert --dat-dir ${RV_ROOT}/run
-          sis -d convert --dat-dir ${RV_ROOT}/gdb_test
+
           mkdir -p results
 
           if [ ${{ matrix.bus }} = axi4 ]; then
@@ -94,10 +93,10 @@ jobs:
               BUS_NAME=ahb
           fi
 
-          mv ${RV_ROOT}/run/coverage.info \
-             results/coverage_${BUS_NAME}-openocd_${{ matrix.coverage }}.info
-          mv ${RV_ROOT}/gdb_test/coverage.info \
-             results/coverage_${BUS_NAME}-openocd-gdb_${{ matrix.coverage }}.info
+          .github/scripts/convert_dat.sh ${RV_ROOT}/run/coverage.dat \
+             results/coverage_${BUS_NAME}-openocd_${{ matrix.coverage }}
+          .github/scripts/convert_dat.sh ${RV_ROOT}/gdb_test/coverage.dat \
+             results/coverage_${BUS_NAME}-openocd-gdb_${{ matrix.coverage }}
 
       - name: Pack artifacts
         if: always()

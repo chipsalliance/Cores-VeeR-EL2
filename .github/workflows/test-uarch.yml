@@ -151,9 +151,11 @@ jobs:
         run: |
           export PATH=/opt/verilator/bin:$PATH
           source .venv/bin/activate
-          sis -d convert --dat-dir ${TEST_PATH}/${TEST_NAME}/
+
           mkdir -p results
-          mv ${TEST_PATH}/${TEST_NAME}/*.info results/
+          for FILE in ${TEST_PATH}/${TEST_NAME}/*.dat; do
+            .github/scripts/convert_dat.sh "${FILE}" "results/$(basename "${FILE}" .dat)"
+          done
 
           # Prefix coverage results
           pushd results

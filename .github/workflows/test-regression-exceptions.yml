@@ -67,10 +67,9 @@ jobs:
       - name: Prepare coverage data
         run: |
           source .venv/bin/activate
-          sis -d convert --dat-dir ${TEST_PATH}/
           mkdir -p results
-          mv ${TEST_PATH}/coverage.info \
-             results/coverage_${FULL_NAME}.info
+          .github/scripts/convert_dat.sh ${TEST_PATH}/coverage.dat \
+             results/coverage_${FULL_NAME}
 
       - name: Pack artifacts
         if: always()

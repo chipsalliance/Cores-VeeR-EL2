@@ -91,9 +91,8 @@ jobs:
       - name: Prepare coverage data
         run: |
           export PATH=/opt/verilator/bin:$PATH
-          sis -d convert --dat-dir riscof/coverage/
-          mv riscof/coverage/coverage.info \
-             riscof/coverage/coverage_riscof-m${{ matrix.priv }}_${{ matrix.coverage }}.info
+          .github/scripts/convert_dat.sh riscof/coverage/coverage.dat \
+             riscof/coverage/coverage_riscof-m${{ matrix.priv }}_${{ matrix.coverage }}
 
       - name: Prepare report
         run: |

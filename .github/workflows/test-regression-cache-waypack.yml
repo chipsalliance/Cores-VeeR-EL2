@@ -25,7 +25,7 @@ jobs:
         test: ["hello_world", "hello_world_dccm", "hello_world_iccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
                "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters",
                "pmp", "pmp_random", "write_unaligned", "icache", "bitmanip"]
-        coverage: ["branch", "toggle"] #TODO: add functional coverage
+        coverage: ["all"]
         priv: ["0", "1"]
         tb_extra_args: ["--test-halt"]  # hello_world_iccm will also have --test-lsu-clk-ratio
         exclude:
@@ -76,7 +76,7 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
-          echo "FULL_NAME=${{ matrix.bus }}-${{ matrix.test }}-${{ matrix.priv == 0 && 'm' || 'mu' }}-waypack${WAYPACK}_${{ matrix.coverage }}" >> $GITHUB_ENV
+          echo "FULL_NAME=${{ matrix.bus }}-${{ matrix.test }}-${{ matrix.priv == 0 && 'm' || 'mu' }}-waypack${WAYPACK}" >> $GITHUB_ENV
 
       - name: Run tests
         run: |
@@ -99,7 +99,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: regression_tests_coverage_data_cache_waypack_${{ env.FULL_NAME }}
+          name: regression_tests_coverage_data_cache_waypack_${{ env.FULL_NAME }}_${{ matrix.coverage }}
           path: results/*.info
 
   custom-regression-tests:

@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        coverage: ["branch", "toggle"] #TODO: add functional coverage
+        coverage: ["all"]
         priv: ["", "u"]
     env:
       DEBIAN_FRONTEND: "noninteractive"
@@ -92,7 +92,7 @@ jobs:
         run: |
           export PATH=/opt/verilator/bin:$PATH
           .github/scripts/convert_dat.sh riscof/coverage/coverage.dat \
-             riscof/coverage/coverage_riscof-m${{ matrix.priv }}_${{ matrix.coverage }}
+             riscof/coverage/coverage_riscof-m${{ matrix.priv }}
 
       - name: Prepare report
         run: |

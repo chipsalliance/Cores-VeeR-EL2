@@ -149,12 +149,13 @@ jobs:
 
       - name: Prepare coverage data
         run: |
+          shopt -s extglob
           export PATH=/opt/verilator/bin:$PATH
           source .venv/bin/activate
 
           mkdir -p results
           for FILE in ${TEST_PATH}/${TEST_NAME}/*.dat; do
-            .github/scripts/convert_dat.sh "${FILE}" "results/$(basename "${FILE}" .dat)"
+            .github/scripts/convert_dat.sh "${FILE}" "results/$(basename "${FILE%_@(all|branch|toggle).dat}")"
           done
 
           # Prefix coverage results

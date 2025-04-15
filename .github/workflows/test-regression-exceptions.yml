@@ -20,7 +20,7 @@ jobs:
                "dside_access_across_region_boundary", "nmi_pin_assertion", "dside_size_misaligned_access_to_non_idempotent_address",
                "dside_core_local_access_unmapped_address_error", "dbus_nonblocking_load_error", "internal_timer_ints", "ebreak_ecall", "illegal_instruction",
                "clk_override", "core_pause"]
-        coverage: ["branch", "toggle"] #TODO: add functional coverage
+        coverage: ["all"]
         cache_waypack: ["0", "1"]
         priv: ["0"]
     env:
@@ -56,7 +56,7 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
-          echo "FULL_NAME=${{ matrix.bus }}-exceptions-${{ matrix.test }}-waypack${{ matrix.cache_waypack }}_${{ matrix.coverage }}" >> $GITHUB_ENV
+          echo "FULL_NAME=${{ matrix.bus }}-exceptions-${{ matrix.test }}-waypack${{ matrix.cache_waypack }}" >> $GITHUB_ENV
 
       - name: Run tests
         run: |
@@ -75,7 +75,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: regression_tests_coverage_data-${{ env.FULL_NAME }}
+          name: regression_tests_coverage_data-${{ env.FULL_NAME }}_${{ matrix.coverage }}
           path: results/*.info
 
   custom-regression-exceptions-tests:

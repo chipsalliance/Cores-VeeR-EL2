@@ -18,8 +18,7 @@ pipRequirementsPath = "requirements.txt"
 
 # Coverage types to collect
 coverageTypes = [
-    "branch",
-    "toggle",
+    "all",
 ]
 
 # Used lint tools

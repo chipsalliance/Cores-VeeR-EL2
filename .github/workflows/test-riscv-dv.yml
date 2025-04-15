@@ -115,7 +115,7 @@ jobs:
         iss:
           - spike
           - renode
-        coverage: ["branch", "toggle"] #TODO: add functional coverage
+        coverage: ["all"]
         version: [ uvm ]
         priv: ["m", "mu"]
         include: ${{ fromJSON(needs.generate-config.outputs.test-include-run) }}
@@ -198,7 +198,7 @@ jobs:
 
           for ((i=0; i<ITERATIONS; i++)); do
             .github/scripts/convert_dat.sh ${RV_ROOT}/tools/riscv-dv/work/*/hdl_sim/*_$i/coverage.dat \
-               results/coverage_${FULL_NAME}-iter${i}_${{ matrix.coverage }}
+               results/coverage_${FULL_NAME}-iter${i}
           done
 
       - name: Pack artifacts
@@ -250,8 +250,7 @@ jobs:
       - name: Download Code and ISS logs
         uses: actions/download-artifact@v4
         with:
-          # Code and ISS logs will be the same for all metrics, let's take them from branch jobs.
-          name: artifacts-${{ env.FULL_NAME }}-branch
+          name: artifacts-${{ env.FULL_NAME }}-all
           path: verilator-artifacts
 
       - name: Move Code and ISS logs to workdir

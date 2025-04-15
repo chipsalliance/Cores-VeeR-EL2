@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        coverage: ["branch", "toggle"] #TODO: add functional coverage
+        coverage: ["all"]
         bus: ["axi4", "ahb_lite"]
     env:
       DEBIAN_FRONTEND: "noninteractive"
@@ -94,9 +94,9 @@ jobs:
           fi
 
           .github/scripts/convert_dat.sh ${RV_ROOT}/run/coverage.dat \
-             results/coverage_${BUS_NAME}-openocd_${{ matrix.coverage }}
+             results/coverage_${BUS_NAME}-openocd
           .github/scripts/convert_dat.sh ${RV_ROOT}/gdb_test/coverage.dat \
-             results/coverage_${BUS_NAME}-openocd-gdb_${{ matrix.coverage }}
+             results/coverage_${BUS_NAME}-openocd-gdb
 
       - name: Pack artifacts
         if: always()

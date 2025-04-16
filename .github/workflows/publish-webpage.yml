@@ -124,11 +124,12 @@ jobs:
           cp .github/scripts/indexgen/index_redirect/index.html ./public.new/
 
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: peaceiris/actions-gh-pages@v4
+        if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'pull_request' }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public.new
+          force_orphan: true
 
       - name: Save PR number
         if: github.event_name == 'pull_request'

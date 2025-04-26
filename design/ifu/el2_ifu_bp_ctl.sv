@@ -848,6 +848,8 @@ end
                                     (bht_wr_en2[i] & ((bht_wr_addr2[pt.BHT_ADDR_HI: NUM_BHT_LOOP_OUTER_LO]==k) |  BHT_NO_ADDR_MATCH));
 `ifndef RV_FPGA_OPTIMIZE
      rvclkhdr bht_bank_grp_cgc ( .en(bht_bank_clken[i][k]), .l1clk(bht_bank_clk[i][k]), .* ); // ifndef RV_FPGA_OPTIMIZE
+`else
+     assign bht_bank_clk[i][k] = clk;
 `endif
 
      for (j=0 ; j<NUM_BHT_LOOP ; j++) begin : BHT_FLOPS

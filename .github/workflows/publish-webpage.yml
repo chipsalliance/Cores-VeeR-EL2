@@ -77,17 +77,16 @@ jobs:
           echo "Event: $GITHUB_EVENT_NAME, ref: $GITHUB_REF_NAME)"
           if [ "$GITHUB_EVENT_NAME" = pull_request ]
           then
-            TARGET_DIR=public.new/html/dev/${{ github.event.number }}
+            TARGET_DIR="${PWD}/public.new/html/dev/${{ github.event.number }}"
           elif [ "$GITHUB_REF_NAME" = main ]
           then
-            TARGET_DIR=public.new/html/main
+            TARGET_DIR="${PWD}/public.new/html/main"
           else
             # Currently deploying is only possible in PRs and on main but let's
             # better keep things safe in case that's changed in the future by
             # using another target dir in other cases.
-            TARGET_DIR=public.new/html/other
+            TARGET_DIR="${PWD}/public.new/html/other"
           fi
-          TARGET_DIR=`realpath $TARGET_DIR`
 
           mkdir -p $TARGET_DIR
 

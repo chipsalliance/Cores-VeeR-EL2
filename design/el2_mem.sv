@@ -98,8 +98,7 @@ import el2_pkg::*;
 
    assign mem_export_local.clk = clk;
 
-   assign mem_export      .clk                = mem_export_local.clk;
-
+   assign mem_export      .clk                = clk;
    assign mem_export      .iccm_clken         = mem_export_local.iccm_clken;
    assign mem_export      .iccm_wren_bank     = mem_export_local.iccm_wren_bank;
    assign mem_export      .iccm_addr_bank     = mem_export_local.iccm_addr_bank;

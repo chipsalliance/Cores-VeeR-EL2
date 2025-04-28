@@ -98,6 +98,7 @@ module el2_dec_pmp_ctl
    //  [7:0] : PMP entry (x*4 + 0) configuration
 
    localparam PMPCFG       = 12'h3a0;
+   localparam PMP_ENTRIES_WIDTH = $clog2(pt.PMP_ENTRIES);
 
    assign wr_pmpcfg_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:4] == PMPCFG[11:4]);
    assign wr_pmpcfg_group = dec_csr_wraddr_r[3:0]; // selects group of 4 pmpcfg entries (group 1 -> entries 4-7; up to 16 groups)
@@ -161,19 +162,27 @@ module el2_dec_pmp_ctl
    end
 
    // CSR read mux
+   logic [5:0] pmp_pmpcfg_rdata_selector [4];
+   logic [5:0] dec_pmp_rdata_selector [4];
 
    assign pmp_quarter_rdaddr     = dec_csr_rdaddr_d[3:0];
-   assign pmp_pmpcfg_rddata      = { pmp_pmpcfg[{pmp_quarter_rdaddr, 2'h3}],
-                                     pmp_pmpcfg[{pmp_quarter_rdaddr, 2'h2}],
-                                     pmp_pmpcfg[{pmp_quarter_rdaddr, 2'h1}],
-                                     pmp_pmpcfg[{pmp_quarter_rdaddr, 2'h0}]
+
+   for (genvar i = 0; i < 4; i++) begin: gen_csr_selector
+     assign pmp_pmpcfg_rdata_selector[i] = {pmp_quarter_rdaddr, 2'(i)};
+     assign dec_pmp_rdata_selector[i] = {2'(i), pmp_quarter_rdaddr};
+   end
+
+   assign pmp_pmpcfg_rddata      = { pmp_pmpcfg[pmp_pmpcfg_rdata_selector[3][PMP_ENTRIES_WIDTH-1:0]],
+                                     pmp_pmpcfg[pmp_pmpcfg_rdata_selector[2][PMP_ENTRIES_WIDTH-1:0]],
+                                     pmp_pmpcfg[pmp_pmpcfg_rdata_selector[1][PMP_ENTRIES_WIDTH-1:0]],
+                                     pmp_pmpcfg[pmp_pmpcfg_rdata_selector[0][PMP_ENTRIES_WIDTH-1:0]]
                                      };
    assign dec_pmp_read_d         = csr_pmpcfg | csr_pmpaddr0 | csr_pmpaddr16 | csr_pmpaddr32 | csr_pmpaddr48;
    assign dec_pmp_rddata_d[31:0] = ( ({32{csr_pmpcfg}}    & pmp_pmpcfg_rddata) |
-                                     ({32{csr_pmpaddr0}}  & pmp_pmpaddr[{2'h0, pmp_quarter_rdaddr}]) |
-                                     ({32{csr_pmpaddr16}} & pmp_pmpaddr[{2'h1, pmp_quarter_rdaddr}]) |
-                                     ({32{csr_pmpaddr32}} & pmp_pmpaddr[{2'h2, pmp_quarter_rdaddr}]) |
-                                     ({32{csr_pmpaddr48}} & pmp_pmpaddr[{2'h3, pmp_quarter_rdaddr}])
+                                     ({32{csr_pmpaddr0}}  & pmp_pmpaddr[dec_pmp_rdata_selector[0][PMP_ENTRIES_WIDTH-1:0]]) |
+                                     ({32{csr_pmpaddr16}} & pmp_pmpaddr[dec_pmp_rdata_selector[1][PMP_ENTRIES_WIDTH-1:0]]) |
+                                     ({32{csr_pmpaddr32}} & pmp_pmpaddr[dec_pmp_rdata_selector[2][PMP_ENTRIES_WIDTH-1:0]]) |
+                                     ({32{csr_pmpaddr48}} & pmp_pmpaddr[dec_pmp_rdata_selector[3][PMP_ENTRIES_WIDTH-1:0]])
                                      );
 
 endmodule // dec_pmp_ctl

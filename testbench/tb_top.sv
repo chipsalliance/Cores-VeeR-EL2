@@ -1410,8 +1410,8 @@ veer_wrapper rvtop_wrapper (
     .dccm_ecc_double_error  (),
 
 `ifdef RV_LOCKSTEP_ENABLE
-    .disable_corruption_detection_i ('0),
-    .lockstep_err_injection_en_i    ('0),
+    .disable_corruption_detection_i (el2_mubi_pkg::El2MuBiFalse),
+    .lockstep_err_injection_en_i    (el2_mubi_pkg::El2MuBiFalse),
     .corruption_detected_o          (),
 `endif
 

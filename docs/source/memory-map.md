@@ -55,14 +55,14 @@ Furthermore, it is recommended that all core-local memories are mapped to the sa
 
 ## Memory Type Access Properties
 
-{numref}`tab-access-properites-memory-type` specifies the access properties of each memory type. During system boot, firmware must initialize the properties of each region based on the memory type present in that region.
+{numref}`tab-access-properties-memory-type` specifies the access properties of each memory type. During system boot, firmware must initialize the properties of each region based on the memory type present in that region.
 
 :::{note}
 Some memory-mapped I/O and control/status registers may have no side effects (i.e., are idempotent), but characterizing all these registers as having potentially side effects (i.e., are non-idempotent) is safe.
 :::
 
 :::{list-table} Access Properties for each Memory Type
-:name: tab-access-properites-memory-type
+:name: tab-access-properties-memory-type
 :header-rows: 1
 
 * - **Region**

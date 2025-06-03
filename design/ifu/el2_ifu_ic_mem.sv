@@ -32,7 +32,7 @@ import el2_pkg::*;
       input logic [31:1]                            ic_rw_addr,
       input logic [pt.ICACHE_NUM_WAYS-1:0]          ic_wr_en  ,         // Which way to write
       input logic                                   ic_rd_en  ,         // Read enable
-      input logic [pt.ICACHE_INDEX_HI:3]            ic_debug_addr,      // Read/Write addresss to the Icache.
+      input logic [pt.ICACHE_INDEX_HI:3]            ic_debug_addr,      // Read/Write address to the Icache.
       input logic                                   ic_debug_rd_en,     // Icache debug rd
       input logic                                   ic_debug_wr_en,     // Icache debug wr
       input logic                                   ic_debug_tag_array, // Debug tag array
@@ -131,7 +131,7 @@ import el2_pkg::*;
       output logic [70:0]                             ic_debug_rd_data ,  // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
       output logic [pt.ICACHE_BANKS_WAY-1:0] ic_parerr,
       output logic [pt.ICACHE_BANKS_WAY-1:0] ic_eccerr,    // ecc error per bank
-      input logic [pt.ICACHE_INDEX_HI:3]     ic_debug_addr,     // Read/Write addresss to the Icache.
+      input logic [pt.ICACHE_INDEX_HI:3]     ic_debug_addr,     // Read/Write address to the Icache.
       input logic                            ic_debug_rd_en,      // Icache debug rd
       input logic                            ic_debug_wr_en,      // Icache debug wr
       input logic                            ic_debug_tag_array,  // Debug tag array

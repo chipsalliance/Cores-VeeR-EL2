@@ -124,7 +124,7 @@ import el2_pkg::*;
    output logic                      ic_sel_premux_data, // Select premux data
 
 
-   output logic [pt.ICACHE_INDEX_HI:3]               ic_debug_addr,      // Read/Write addresss to the Icache.
+   output logic [pt.ICACHE_INDEX_HI:3]               ic_debug_addr,      // Read/Write address to the Icache.
    output logic                      ic_debug_rd_en,     // Icache debug rd
    output logic                      ic_debug_wr_en,     // Icache debug wr
    output logic                      ic_debug_tag_array, // Debug tag array

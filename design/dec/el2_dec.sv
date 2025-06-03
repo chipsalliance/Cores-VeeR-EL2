@@ -138,7 +138,7 @@ module el2_dec
     input logic        [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] ifu_i0_bp_index,  // BP index
     input logic        [          pt.BHT_GHR_SIZE-1:0] ifu_i0_bp_fghr,   // BP FGHR
     input logic        [         pt.BTB_BTAG_SIZE-1:0] ifu_i0_bp_btag,   // BP tag
-    input logic        [      $clog2(pt.BTB_SIZE)-1:0] ifu_i0_fa_index,  // Fully associt btb index
+    input logic        [      $clog2(pt.BTB_SIZE)-1:0] ifu_i0_fa_index,  // Fully associative btb index
 
     input el2_lsu_error_pkt_t lsu_error_pkt_r,           // LSU exception/error packet
     input logic               lsu_single_ecc_error_incr, // LSU inc SB error counter
@@ -280,7 +280,7 @@ module el2_dec
     output logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] i0_predict_index_d,  // DEC predict index
     output logic [pt.BTB_BTAG_SIZE-1:0] i0_predict_btag_d,  // DEC predict branch tag
 
-    output logic [$clog2(pt.BTB_SIZE)-1:0] dec_fa_error_index,  // Fully associt btb error index
+    output logic [$clog2(pt.BTB_SIZE)-1:0] dec_fa_error_index,  // Fully associative btb error index
 
     output logic dec_lsu_valid_raw_d,
 
@@ -398,7 +398,7 @@ module el2_dec
   logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] dec_i0_bp_index;
   logic [pt.BHT_GHR_SIZE-1:0] dec_i0_bp_fghr;
   logic [pt.BTB_BTAG_SIZE-1:0] dec_i0_bp_btag;
-  logic [$clog2(pt.BTB_SIZE)-1:0] dec_i0_bp_fa_index;  // Fully associt btb index
+  logic [$clog2(pt.BTB_SIZE)-1:0] dec_i0_bp_fa_index;  // Fully associative btb index
 
   logic [31:1] dec_tlu_i0_pc_r;
   logic dec_tlu_i0_kill_writeb_wb;

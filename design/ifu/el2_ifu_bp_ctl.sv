@@ -107,7 +107,7 @@ import el2_pkg::*;
    logic exu_mp_valid_write;
    logic exu_mp_ataken;
    logic exu_mp_valid; // conditional branch mispredict
-   logic exu_mp_boffset; // branch offsett
+   logic exu_mp_boffset; // branch offset
    logic exu_mp_pc4; // branch is a 4B inst
    logic exu_mp_call; // branch is a call inst
    logic exu_mp_ret; // branch is a ret inst

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2018 Western Digital Corporation or it's affiliates.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 // http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,7 @@
 //
 //  Copyright Western Digital, 2018
 //  Owner : Anusha Narayanamoorthy
-//  Description:  
+//  Description:
 //                Wrapper module for JTAG_TAP and DMI synchronizer
 //
 //-------------------------------------------------------------------------------------
@@ -26,28 +26,28 @@ module dmi_wrapper(
   // JTAG signals
   input              trst_n,              // JTAG reset
   input              tck,                 // JTAG clock
-  input              tms,                 // Test mode select   
+  input              tms,                 // Test mode select
   input              tdi,                 // Test Data Input
-  output             tdo,                 // Test Data Output           
-  output             tdoEnable,           // Test Data Output enable             
+  output             tdo,                 // Test Data Output
+  output             tdoEnable,           // Test Data Output enable
 
   // Processor Signals
-  input              core_rst_n,          // Core reset                  
-  input              core_clk,            // Core clock                  
+  input              core_rst_n,          // Core reset
+  input              core_clk,            // Core clock
   //jtag_id is supposed to be connected to a constant in the top level
   /* pragma coverage off*/
   input [31:1]       jtag_id,             // JTAG ID
   /* pragma coverage on*/
-  input [31:0]       rd_data,             // 32 bit Read data from  Processor                       
-  output [31:0]      reg_wr_data,         // 32 bit Write data to Processor                      
-  output [6:0]       reg_wr_addr,         // 7 bit reg address to Processor                   
-  output             reg_en,              // 1 bit  Read enable to Processor                                    
-  output             reg_wr_en,           // 1 bit  Write enable to Processor 
-  output             dmi_hard_reset  
+  input [31:0]       rd_data,             // 32 bit Read data from  Processor
+  output [31:0]      reg_wr_data,         // 32 bit Write data to Processor
+  output [6:0]       reg_wr_addr,         // 7 bit reg address to Processor
+  output             reg_en,              // 1 bit  Read enable to Processor
+  output             reg_wr_en,           // 1 bit  Write enable to Processor
+  output             dmi_hard_reset
 );
 
 
-  
+
 
 
   //Wire Declaration
@@ -55,7 +55,7 @@ module dmi_wrapper(
   wire                     wr_en;
   wire                     dmireset;
 
- 
+
   //jtag_tap instantiation
  rvjtag_tap i_jtag_tap(
    .trst(trst_n),                      // dedicated JTAG TRST (active low) pad signal or asynchronous active low power on reset

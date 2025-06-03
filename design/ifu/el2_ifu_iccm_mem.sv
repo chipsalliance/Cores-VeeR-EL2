@@ -65,7 +65,7 @@ import el2_pkg::*;
    logic [1:0]                           addr_incr;
    logic [pt.ICCM_NUM_BANKS-1:0] [38:0]  iccm_bank_wr_data_vec;
 
-   // logic to handle hard persisten faults
+   // logic to handle hard persistent faults
    logic [1:0] [pt.ICCM_BITS-1:2]        redundant_address;
    logic [1:0] [38:0]                    redundant_data;
    logic [1:0]                           redundant_valid;

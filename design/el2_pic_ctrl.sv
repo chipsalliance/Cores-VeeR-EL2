@@ -42,7 +42,7 @@ import el2_pkg::*;
                      input  logic [3:0]             meicurpl,             // Current Priority Level
                      input  logic [3:0]             meipt,                // Current Priority Threshold
 
-                     output logic                   mexintpend,           // External Inerrupt request to the core
+                     output logic                   mexintpend,           // External interrupt request to the core
                      output logic [7:0]             claimid,              // Claim Id of the requested interrupt
                      output logic [3:0]             pl,                   // Priority level of the requested interrupt
                      output logic [31:0]            picm_rd_data,         // Read data of the register

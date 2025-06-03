@@ -33,6 +33,8 @@ THE SOFTWARE.
  */
 module axi_crossbar_wrap_2x1 #
 (
+    parameter S_COUNT = 2,
+    parameter M_COUNT = 1,
     // Width of data bus in bits
     parameter DATA_WIDTH = 32,
     // Width of address bus in bits
@@ -277,9 +279,6 @@ module axi_crossbar_wrap_2x1 #
     input  wire                     m00_axi_rvalid,
     output wire                     m00_axi_rready
 );
-
-localparam S_COUNT = 2;
-localparam M_COUNT = 1;
 
 // parameter sizing helpers
 function [ADDR_WIDTH*M_REGIONS-1:0] w_a_r(input [ADDR_WIDTH*M_REGIONS-1:0] val);

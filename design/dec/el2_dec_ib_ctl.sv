@@ -29,7 +29,7 @@ import el2_pkg::*;
    input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] ifu_i0_bp_index,    // BP index
    input logic [pt.BHT_GHR_SIZE-1:0] ifu_i0_bp_fghr,               // BP FGHR
    input logic [pt.BTB_BTAG_SIZE-1:0] ifu_i0_bp_btag,              // BP tag
-   input logic [$clog2(pt.BTB_SIZE)-1:0] ifu_i0_fa_index,          // Fully associt btb index
+   input logic [$clog2(pt.BTB_SIZE)-1:0] ifu_i0_fa_index,          // Fully associative btb index
 
    input logic       ifu_i0_pc4,                                   // i0 is 4B inst else 2B
    input logic       ifu_i0_valid,                                 // i0 valid from ifu
@@ -56,7 +56,7 @@ import el2_pkg::*;
    output logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] dec_i0_bp_index,   // i0 branch index
    output logic [pt.BHT_GHR_SIZE-1:0] dec_i0_bp_fghr,              // BP FGHR
    output logic [pt.BTB_BTAG_SIZE-1:0] dec_i0_bp_btag,             // BP tag
-   output logic [$clog2(pt.BTB_SIZE)-1:0] dec_i0_bp_fa_index,          // Fully associt btb index
+   output logic [$clog2(pt.BTB_SIZE)-1:0] dec_i0_bp_fa_index,          // Fully associative btb index
 
    output logic dec_i0_icaf_d,                                     // i0 instruction access fault at decode
    output logic dec_i0_icaf_second_d,                              // i0 instruction access fault on second 2B of 4B inst

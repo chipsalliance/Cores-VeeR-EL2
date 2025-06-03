@@ -101,7 +101,7 @@ module el2_veer_lockstep
     input logic ic_sel_premux_data,  // Select premux data
 
 
-    input logic [  pt.ICACHE_INDEX_HI:3] ic_debug_addr,       // Read/Write addresss to the Icache.
+    input logic [  pt.ICACHE_INDEX_HI:3] ic_debug_addr,       // Read/Write address to the Icache.
     input logic                          ic_debug_rd_en,      // Icache debug rd
     input logic                          ic_debug_wr_en,      // Icache debug wr
     input logic                          ic_debug_tag_array,  // Debug tag array

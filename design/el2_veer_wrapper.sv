@@ -480,7 +480,7 @@ import el2_pkg::*;
    logic [pt.ICACHE_NUM_WAYS-1:0]   ic_rd_hit;      // ic_rd_hit[3:0]
    logic         ic_tag_perr;                       // Ic tag parity error
 
-   logic [pt.ICACHE_INDEX_HI:3]  ic_debug_addr;     // Read/Write addresss to the Icache.
+   logic [pt.ICACHE_INDEX_HI:3]  ic_debug_addr;     // Read/Write address to the Icache.
    logic         ic_debug_rd_en;                    // Icache debug rd
    logic         ic_debug_wr_en;                    // Icache debug wr
    logic         ic_debug_tag_array;                // Debug tag array

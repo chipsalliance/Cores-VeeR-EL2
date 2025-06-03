@@ -130,7 +130,7 @@ import el2_pkg::*;
 
 
 //   I$ & ITAG Ports
-   output logic [31:1]               ic_rw_addr,         // Read/Write addresss to the Icache.
+   output logic [31:1]               ic_rw_addr,         // Read/Write address to the Icache.
    output logic [pt.ICACHE_NUM_WAYS-1:0]                ic_wr_en,           // Icache write enable, when filling the Icache.
    output logic                      ic_rd_en,           // Icache read  enable.
 
@@ -145,7 +145,7 @@ import el2_pkg::*;
    input  logic [pt.ICACHE_BANKS_WAY-1:0] ic_eccerr,    //
    input  logic [pt.ICACHE_BANKS_WAY-1:0] ic_parerr,
 
-   output logic [pt.ICACHE_INDEX_HI:3]               ic_debug_addr,      // Read/Write addresss to the Icache.
+   output logic [pt.ICACHE_INDEX_HI:3]               ic_debug_addr,      // Read/Write address to the Icache.
    output logic                      ic_debug_rd_en,     // Icache debug rd
    output logic                      ic_debug_wr_en,     // Icache debug wr
    output logic                      ic_debug_tag_array, // Debug tag array

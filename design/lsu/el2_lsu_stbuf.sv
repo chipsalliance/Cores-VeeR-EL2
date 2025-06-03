@@ -54,7 +54,7 @@ import el2_pkg::*;
    output logic [pt.LSU_SB_BITS-1:0]     stbuf_addr_any,              // address
    output logic [pt.DCCM_DATA_WIDTH-1:0] stbuf_data_any,              // stbuf data
 
-   input  logic                          lsu_stbuf_commit_any,        // pop the stbuf as it commite
+   input  logic                          lsu_stbuf_commit_any,        // pop the stbuf as it commits
    output logic                          lsu_stbuf_full_any,          // stbuf is full
    output logic                          lsu_stbuf_empty_any,         // stbuf is empty
    output logic                          ldst_stbuf_reqvld_r,         // needed for clocking

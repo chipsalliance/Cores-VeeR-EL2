@@ -83,7 +83,7 @@ import el2_pkg::*;
    output logic [pt.BHT_GHR_SIZE-1:0]             ifu_i0_bp_fghr,           // BP FGHR
    output logic [pt.BTB_BTAG_SIZE-1:0]            ifu_i0_bp_btag,           // BP tag
 
-   output logic [$clog2(pt.BTB_SIZE)-1:0]         ifu_i0_fa_index,          // Fully associt btb index
+   output logic [$clog2(pt.BTB_SIZE)-1:0]         ifu_i0_fa_index,          // Fully associative btb index
 
    output logic                                   ifu_pmu_instr_aligned,    // number of inst aligned this cycle
 

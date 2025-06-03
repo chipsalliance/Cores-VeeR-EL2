@@ -5,7 +5,7 @@
 * **Description**:
 The AHB-Lite bus interface for LSU is not optimized for write performance.
 Each aligned store is issued to the bus as a single write transaction followed by an idle cycle.
-Each unaligned store is issued to the bus as multiple backto-back byte write transactions followed by an idle cycle.
+Each unaligned store is issued to the bus as multiple back-to-back byte write transactions followed by an idle cycle.
 These idle cycles limit the achievable bus utilization for writes.
 * **Symptoms**: Potential performance impact for writes with AHB-Lite bus.
 * **Workaround**: None.

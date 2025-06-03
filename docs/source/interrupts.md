@@ -55,7 +55,7 @@ All current SoC IP interrupts are asynchronous and level-triggered.
 Therefore, the gateway's only function for SoC IP interrupts is to synchronize the request to the core clock domain.
 There is no state kept in the gateway.
 
-A gateway suitable for ASIC-external interrupts must provide programmability for interrupt type (i.e., edge- vs. leveltriggered) as well as interrupt signal polarity (i.e., low-to-high vs. high-to-low transition for edge-triggered interrupts, active-high vs. -low for level-triggered interrupts).
+A gateway suitable for ASIC-external interrupts must provide programmability for interrupt type (i.e., edge- vs. level-triggered) as well as interrupt signal polarity (i.e., low-to-high vs. high-to-low transition for edge-triggered interrupts, active-high vs. -low for level-triggered interrupts).
 For edge-triggered interrupts, the gateway must latch the interrupt request in an interrupt pending (IP) flop to convert the edge- to a level-triggered interrupt signal.
 Firmware must clear the IP flop while handling the interrupt.
 
@@ -65,7 +65,7 @@ To reduce the probability of reporting spurious interrupts, firmware should clea
 :::
 
 :::{note}
-The gateway does not implement any edge-detection logic (e.g., an edge-triggered flop) to convert the interrupt request to a level-triggered interrupt signal (see {numref}`fig-configurable-gatewat-diagram`).
+The gateway does not implement any edge-detection logic (e.g., an edge-triggered flop) to convert the interrupt request to a level-triggered interrupt signal (see {numref}`fig-configurable-gateway-diagram`).
 Therefore, the interrupt request input signal must be set to the inactive level (i.e., to '0' for an active-high interrupt and to '1' for an active-low interrupt) to avoid an interrupt request being continuously reported as pending, even after the gateway's IP latch has been cleared.
 Consequently, if the gateway of an unused interrupt request input is programmed to an "active-high" polarity, the interrupt input signal must be tied off to '0'.
 Similarly, if the polarity is programmed to "active-low", the interrupt input signal must be tied off to '1'.
@@ -95,7 +95,7 @@ The interrupt target is a specific RISC-V hart context. For the VeeR EL2 core, t
 ## PIC Block Diagram
 
 {numref}`fig-pic-block-diagram` depicts a high-level view of the PIC.
-A simple gateway for asynchronous, level-triggered interrupt sources is shown in {numref}`fig-gateway-for-asynchronous`, whereas {numref}`fig-configurable-gatewat-diagram` depicts conceptually the internal functional blocks of a configurable gateway.
+A simple gateway for asynchronous, level-triggered interrupt sources is shown in {numref}`fig-gateway-for-asynchronous`, whereas {numref}`fig-configurable-gateway-diagram` depicts conceptually the internal functional blocks of a configurable gateway.
 {numref}`fig-comparator` shows a single comparator which is the building block to form the evaluation tree logic in the PIC core.
 
 :::{figure-md} fig-pic-block-diagram
@@ -118,7 +118,7 @@ The PIC logic always operates in regular priority order. When in reverse priorit
 Gateway for Asynchronous, Level-triggered Interrupt Sources
 :::
 
-:::{figure-md} fig-configurable-gatewat-diagram
+:::{figure-md} fig-configurable-gateway-diagram
 ![Configurable Gateway Diagram](img/gateway_diagram.png)
 
 Conceptual Block Diagram of a Configurable Gateway

@@ -27,7 +27,7 @@ Outputs and the register file from the main core are delayed by `DELAY` cycles a
 
 The Dual Core Lockstep module will report an error when detected by asserting a single bit output signal.
 It is up to the integrator to provide a logic to handle the detected error.
-The error can be artifficially injected by using [Shadow Core Control](#shadow-core-control) capabilities.
+The error can be artificially injected by using [Shadow Core Control](#shadow-core-control) capabilities.
 The corruption error will be reported always when all of the following requirements are met:
 * Input and Output signals of both Main Core and Shadow Core differ OR an error injection feature is enabled,
 * The Shadow Core is out of reset,

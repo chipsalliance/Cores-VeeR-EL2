@@ -414,9 +414,9 @@ import el2_pkg::*;
 
 `ifdef RV_LOCKSTEP_ENABLE
    // Shadow Core control
-   input logic  disable_corruption_detection_i,
-   input logic  lockstep_err_injection_en_i,
-   output logic corruption_detected_o,
+   input el2_mubi_pkg::el2_mubi_t disable_corruption_detection_i,
+   input el2_mubi_pkg::el2_mubi_t lockstep_err_injection_en_i,
+   output el2_mubi_pkg::el2_mubi_t corruption_detected_o,
 `endif
 
    // external MPC halt/run interface

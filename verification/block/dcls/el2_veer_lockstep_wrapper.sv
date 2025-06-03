@@ -3,6 +3,7 @@
 
 module el2_veer_lockstep_wrapper
   import el2_pkg::*;
+  import el2_mubi_pkg::*;
 #(
     `include "el2_param.vh"
 ) (
@@ -14,11 +15,11 @@ module el2_veer_lockstep_wrapper
     output logic shadow_dbg_reset,
 
     // Shadow Core control
-    input logic disable_corruption_detection_i,
-    input logic lockstep_err_injection_en_i,
+    input el2_mubi_t disable_corruption_detection_i,
+    input el2_mubi_t lockstep_err_injection_en_i,
 
     // Equivalency Checker
-    output logic corruption_detected_o
+    output el2_mubi_t corruption_detected_o
 );
   logic core_rst_l;   // This is "rst_l | dbg_rst_l"
 

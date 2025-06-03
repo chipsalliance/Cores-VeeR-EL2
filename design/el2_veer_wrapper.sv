@@ -417,6 +417,8 @@ import el2_pkg::*;
    input logic  disable_corruption_detection_i,
    input logic  lockstep_err_injection_en_i,
    output logic corruption_detected_o,
+   // Trace mux selector
+   input logic shadow_core_trace_sel_i;
 `endif
 
    // external MPC halt/run interface
@@ -857,7 +859,7 @@ import el2_pkg::*;
    assign ifu_axi_bvalid = '0;
    assign ifu_axi_bresp[1:0] = '0;
    assign ifu_axi_bid[pt.IFU_BUS_TAG-1:0] = '0;
- 
+
    /*pragma coverage on*/
 
 `endif //  `ifdef RV_BUILD_AHB_LITE
@@ -880,12 +882,28 @@ import el2_pkg::*;
    el2_regfile_if regfile ();
 `endif
 
+   // Trace interface
+   logic [31:0] main_trace_rv_i_insn_ip;
+   logic [31:0] main_trace_rv_i_address_ip;
+   logic main_trace_rv_i_valid_ip;
+   logic main_trace_rv_i_exception_ip;
+   logic [4:0] main_trace_rv_i_ecause_ip;
+   logic main_trace_rv_i_interrupt_ip;
+   logic [31:0] main_trace_rv_i_tval_ip;
+
    // Instantiate the el2_veer core
    el2_veer #(.pt(pt)) veer (
                                 .clk(clk),
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
                                 .regfile(regfile.veer_rf_src),
 `endif
+                                .trace_rv_i_insn_ip(main_trace_rv_i_insn_ip),
+                                .trace_rv_i_address_ip(main_trace_rv_i_address_ip),
+                                .trace_rv_i_valid_ip(main_trace_rv_i_valid_ip),
+                                .trace_rv_i_exception_ip(main_trace_rv_i_exception_ip),
+                                .trace_rv_i_ecause_ip(main_trace_rv_i_ecause_ip),
+                                .trace_rv_i_interrupt_ip(main_trace_rv_i_interrupt_ip),
+                                .trace_rv_i_tval_ip(main_trace_rv_i_tval_ip),
                                 .*
                                 );
 
@@ -894,13 +912,56 @@ import el2_pkg::*;
       $display("Dual Core Lockstep enabled!\n");
    end
 
+   // Shadow Core trace interface
+   logic [31:0] shadow_trace_rv_i_insn_ip;
+   logic [31:0] shadow_trace_rv_i_address_ip;
+   logic shadow_trace_rv_i_valid_ip;
+   logic shadow_trace_rv_i_exception_ip;
+   logic [4:0] shadow_trace_rv_i_ecause_ip;
+   logic shadow_trace_rv_i_interrupt_ip;
+   logic [31:0] shadow_trace_rv_i_tval_ip;
+
+   always_comb begin: trace_interface_mux
+     if (shadow_core_trace_sel_i) begin
+       trace_rv_i_insn_ip = shadow_trace_rv_i_insn_ip;
+       trace_rv_i_address_ip = shadow_trace_rv_i_address_ip;
+       trace_rv_i_valid_ip = shadow_trace_rv_i_valid_ip;
+       trace_rv_i_exception_ip = shadow_trace_rv_i_exception_ip;
+       trace_rv_i_ecause_ip = shadow_trace_rv_i_ecause_ip;
+       trace_rv_i_interrupt_ip = shadow_trace_rv_i_interrupt_ip;
+       trace_rv_i_tval_ip = shadow_trace_rv_i_tval_ip;
+     else
+       trace_rv_i_insn_ip = main_trace_rv_i_insn_ip;
+       trace_rv_i_address_ip = main_trace_rv_i_address_ip;
+       trace_rv_i_valid_ip = main_trace_rv_i_valid_ip;
+       trace_rv_i_exception_ip = main_trace_rv_i_exception_ip;
+       trace_rv_i_ecause_ip = main_trace_rv_i_ecause_ip;
+       trace_rv_i_interrupt_ip = main_trace_rv_i_interrupt_ip;
+       trace_rv_i_tval_ip = main_trace_rv_i_tval_ip;
+     end
+   end
    el2_veer_lockstep #(.pt(pt)) lockstep (
                                 .clk(clk),
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
                                 .main_core_regfile(regfile.veer_rf_sink),
 `endif // `ifdef RV_LOCKSTEP_REGFILE_ENABLE
+                                .trace_rv_i_insn_ip(main_trace_rv_i_insn_ip),
+                                .trace_rv_i_address_ip(main_trace_rv_i_address_ip),
+                                .trace_rv_i_valid_ip(main_trace_rv_i_valid_ip),
+                                .trace_rv_i_exception_ip(main_trace_rv_i_exception_ip),
+                                .trace_rv_i_ecause_ip(main_trace_rv_i_ecause_ip),
+                                .trace_rv_i_interrupt_ip(main_trace_rv_i_interrupt_ip),
+                                .trace_rv_i_tval_ip(main_trace_rv_i_tval_ip),
                                 .*
                                 );
+`else
+       trace_rv_i_insn_ip = main_trace_rv_i_insn_ip;
+       trace_rv_i_address_ip = main_trace_rv_i_address_ip;
+       trace_rv_i_valid_ip = main_trace_rv_i_valid_ip;
+       trace_rv_i_exception_ip = main_trace_rv_i_exception_ip;
+       trace_rv_i_ecause_ip = main_trace_rv_i_ecause_ip;
+       trace_rv_i_interrupt_ip = main_trace_rv_i_interrupt_ip;
+       trace_rv_i_tval_ip = main_trace_rv_i_tval_ip;
 `endif // `ifdef RV_LOCKSTEP_ENABLE
 
    // Instantiate the mem

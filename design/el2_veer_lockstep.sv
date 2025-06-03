@@ -30,6 +30,13 @@ module el2_veer_lockstep
     input logic trace_rv_i_interrupt_ip,
     input logic [31:0] trace_rv_i_tval_ip,
 
+    output logic [31:0] shadow_trace_rv_i_insn_ip,
+    output logic [31:0] shadow_trace_rv_i_address_ip,
+    output logic shadow_trace_rv_i_valid_ip,
+    output logic shadow_trace_rv_i_exception_ip,
+    output logic [4:0] shadow_trace_rv_i_ecause_ip,
+    output logic shadow_trace_rv_i_interrupt_ip,
+    output logic [31:0] shadow_trace_rv_i_tval_ip,
 
     input logic dccm_clk_override,
     input logic icm_clk_override,
@@ -681,6 +688,15 @@ module el2_veer_lockstep
 
   assign shadow_core_inputs = delay_input_d[LockstepDelay];
   assign delayed_main_core_outputs = delay_output_d[LockstepDelay];
+
+  // connect shadow core trace outputs
+  assign shadow_trace_rv_i_insn_ip = shadow_core_outputs.trace_rv_i_insn_ip;
+  assign shadow_trace_rv_i_address_ip = shadow_core_outputs.trace_rv_i_address_ip;
+  assign shadow_trace_rv_i_valid_ip = shadow_core_outputs.trace_rv_i_valid_ip;
+  assign shadow_trace_rv_i_exception_ip = shadow_core_outputs.trace_rv_i_exception_ip;
+  assign shadow_trace_rv_i_ecause_ip = shadow_core_outputs.trace_rv_i_ecause_ip;
+  assign shadow_trace_rv_i_interrupt_ip = shadow_core_outputs.trace_rv_i_interrupt_ip;
+  assign shadow_trace_rv_i_tval_ip = shadow_core_outputs.trace_rv_i_tval_ip;
 
   // Capture input
   assign main_core_inputs.rst_vec = rst_vec;

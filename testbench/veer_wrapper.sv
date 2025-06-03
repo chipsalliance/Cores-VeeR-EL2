@@ -351,6 +351,8 @@ module veer_wrapper
     input logic  disable_corruption_detection_i,
     input logic  lockstep_err_injection_en_i,
     output logic corruption_detected_o,
+    // Trace mux selector
+    input logic shadow_core_trace_sel_i;
 `endif
 
     // external MPC halt/run interface

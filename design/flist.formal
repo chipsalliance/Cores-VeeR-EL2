@@ -18,6 +18,7 @@ $RV_ROOT/design/include/el2_def.sv
 +incdir+/wdc/apps/mentor/questa/formal/2019.2/share/MODIFIED/dw/dw_datapath
         /wdc/apps/mentor/questa/formal/2019.2/share/MODIFIED/dw/dw.remodel.v
 
+$RV_ROOT/design/el2_mubi_pkg.sv
 $RV_ROOT/design/el2_veer_wrapper.sv
 $RV_ROOT/design/el2_veer_lockstep.sv
 $RV_ROOT/design/el2_mem.sv

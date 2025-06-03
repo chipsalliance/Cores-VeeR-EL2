@@ -4,6 +4,7 @@
 
 module el2_veer_lockstep
   import el2_pkg::*;
+  import el2_mubi_pkg::*;
 #(
     `include "el2_param.vh"
 ) (
@@ -373,13 +374,12 @@ module el2_veer_lockstep
     input logic                      scan_mode,
 
     // Shadow Core control
-    input logic disable_corruption_detection_i,
-    input logic lockstep_err_injection_en_i,
+    input el2_mubi_t disable_corruption_detection_i,
+    input el2_mubi_t lockstep_err_injection_en_i,
 
     // Equivalency Checker output
-    output logic corruption_detected_o
+    output el2_mubi_t corruption_detected_o
 );
-
   localparam int unsigned LockstepDelay = pt.LOCKSTEP_DELAY;  // Delay I/O; in clock cycles
 
   // Outputs
@@ -1358,27 +1358,42 @@ module el2_veer_lockstep
       .soft_int(shadow_core_inputs.soft_int),
       .scan_mode(shadow_core_inputs.scan_mode)
   );
-
   // Equivalence Check
   logic rst_n;
   assign rst_n = rst_shadow & rst_dbg_shadow;
 
-  logic corruption_detected, outputs_corrupted;
+  logic outputs_corrupted;
+  el2_mubi_t corruption_detected;
   assign outputs_corrupted = delayed_main_core_outputs != shadow_core_outputs;
 
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
   logic regfile_corrupted;
   assign regfile_corrupted   = (delayed_main_core_regfile[LockstepDelay].gpr != shadow_core_regfile.gpr)
                              | (delayed_main_core_regfile[LockstepDelay].tlu != shadow_core_regfile.tlu);
-  assign corruption_detected = outputs_corrupted | regfile_corrupted;
+  assign corruption_detected = mubi_from_bool(outputs_corrupted | regfile_corrupted);
 `else
-  assign corruption_detected = outputs_corrupted;
+  assign corruption_detected = mubi_from_bool(outputs_corrupted);
 `endif
 
-// Report corruption if all of the below requirements are fulfilled:
-// - IOs of Main Core and Shadow Core differ OR error injection is enabled
-// - Shadow Core is out of reset
-// - Shadow Core is enabled
-assign corruption_detected_o = ((corruption_detected | lockstep_err_injection_en_i) & rst_n) & ~disable_corruption_detection_i;
+  el2_mubi_t err_injection_invalid, disable_detection_invalid;
+  assign err_injection_invalid = mubi_check_invalid(lockstep_err_injection_en_i);
+  assign disable_detection_invalid = mubi_check_invalid(disable_corruption_detection_i);
 
+  // Report corruption if one of the scenarios is fulfilled:
+  // Scenario I:
+  // - Shadow Core is out of reset
+  // - Shadow Core is enabled
+  // - One of:
+  //    * IOs (or regfiles if enabled) of Main Core and Shadow Core differ
+  //    * error injection (`lockstep_err_injection_en_i`) is enabled
+  //    * `lockstep_err_injection_en_i` drives invalid multibit encoding
+  // Scenario II:
+  // - Shadow Core is out of reset
+  // - `disable_corruption_detection_i` drives invalid multibit encoding
+  el2_mubi_t any_corruption, case0, case1;
+
+  assign any_corruption = mubi_or(mubi_or(corruption_detected, lockstep_err_injection_en_i), err_injection_invalid);
+  assign case0 = mubi_and(any_corruption, ~disable_corruption_detection_i);
+  assign case1 = disable_detection_invalid;
+  assign corruption_detected_o = mubi_and(mubi_or(case0, case1), mubi_from_bool(rst_n));
 endmodule : el2_veer_lockstep

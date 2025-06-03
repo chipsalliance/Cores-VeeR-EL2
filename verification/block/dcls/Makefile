@@ -11,7 +11,8 @@ MODULE      ?= $(subst $(space),$(comma),$(subst .py,,$(TEST_FILES)))
 TOPLEVEL     = el2_veer_lockstep_wrapper
 CM_FILE      = cm.cfg
 
-EXTRA_VEER_CONFIG = -set lockstep_enable=1 -set lockstep_regfile_enable=1
+# Override MUBI values to be able to test them in the testbench
+EXTRA_VEER_CONFIG = -set lockstep_enable=1 -set lockstep_regfile_enable=1 -set mubi_width=4 -set mubi_true=0x6 -set mubi_false=0x9
 
 VERILOG_INCLUDE_DIRS += \
 	${RV_ROOT}/testbench \
@@ -20,6 +21,7 @@ VERILOG_INCLUDE_DIRS += \
 VERILOG_SOURCES  = \
 	${SRCDIR}/lib/el2_mem_if.sv \
 	${SRCDIR}/lib/el2_regfile_if.sv \
+	${SRCDIR}/el2_mubi_pkg.sv \
 	${SRCDIR}/el2_veer_wrapper.sv \
 	${SRCDIR}/el2_mem.sv \
 	${SRCDIR}/el2_pic_ctrl.sv \

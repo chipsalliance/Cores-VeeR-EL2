@@ -991,19 +991,19 @@ module el2_veer_lockstep
 
   // Delay the inputs and outputs
   always_ff @(posedge clk or negedge rst_l) begin
-      if (~rst_l) begin
-        delay_input_d[0]  <= veer_inputs_t'(0);
-        delay_output_d[0] <= veer_outputs_t'(0);
-      end else begin
-        delay_input_d[0]  <= main_core_inputs;
-        delay_output_d[0] <= main_core_outputs;
-      end
+    if (~rst_l) begin
+      delay_input_d[0]  <= veer_inputs_t'(0);
+      delay_output_d[0] <= veer_outputs_t'(0);
+    end else begin
+      delay_input_d[0]  <= main_core_inputs;
+      delay_output_d[0] <= main_core_outputs;
     end
+  end
   for (genvar i = 0; i < LockstepDelay; i++) begin
     always_ff @(posedge clk or negedge rst_l) begin
       if (!rst_l) begin
-          delay_input_d[i+1]  <= veer_inputs_t'(0);
-          delay_output_d[i+1] <= veer_outputs_t'(0);
+        delay_input_d[i+1]  <= veer_inputs_t'(0);
+        delay_output_d[i+1] <= veer_outputs_t'(0);
       end else begin
         delay_input_d[i+1]  <= delay_input_d[i];
         delay_output_d[i+1] <= delay_output_d[i];
@@ -1028,8 +1028,8 @@ module el2_veer_lockstep
   for (genvar i = 0; i < LockstepDelay; i++) begin
     always_ff @(posedge clk or negedge rst_l) begin
       if (!rst_l) begin
-          delayed_main_core_regfile[i+1].gpr <= '0;
-          delayed_main_core_regfile[i+1].tlu <= '0;
+        delayed_main_core_regfile[i+1].gpr <= '0;
+        delayed_main_core_regfile[i+1].tlu <= '0;
       end else begin
         delayed_main_core_regfile[i+1].gpr <= delayed_main_core_regfile[i].gpr;
         delayed_main_core_regfile[i+1].tlu <= delayed_main_core_regfile[i].tlu;

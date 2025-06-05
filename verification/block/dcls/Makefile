@@ -64,6 +64,8 @@ VERILOG_SOURCES  = \
 	${SRCDIR}/dmi/dmi_jtag_to_core_sync.v \
 	${SRCDIR}/dmi/rvjtag_tap.v \
 	${SRCDIR}/lib/el2_lib.sv \
+	${SRCDIR}/lib/axi4_to_ahb.sv \
+	${SRCDIR}/lib/ahb_to_axi4.sv \
 	$(SRCDIR)/el2_veer_lockstep.sv \
 	$(TEST_DIR)/el2_veer_lockstep_wrapper.sv
 

@@ -16,7 +16,7 @@ jobs:
       matrix:
         bus: ["axi", "ahb"]
         # run some subset of regression tests on DCLS configutation
-        test: ["hello_world", "hello_world_dccm", "dhry", "ecc",
+        test: ["hello_world", "hello_world_dccm", "dcls", "dhry", "ecc",
                "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "perf_counters",
                "icache", "bitmanip"]
         coverage: ["branch"]
@@ -94,7 +94,7 @@ jobs:
       matrix:
         bus: ["axi", "ahb"]
         # run some subset of regression tests on DCLS configutation
-        test: ["hello_world", "hello_world_dccm", "dhry", "ecc",
+        test: ["hello_world", "hello_world_dccm", "dcls", "dhry", "ecc",
                "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "perf_counters",
                "icache", "bitmanip"]
         priv: ["0", "1"]

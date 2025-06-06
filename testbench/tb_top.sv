@@ -38,24 +38,29 @@ module tb_top
     parameter int MAX_CYCLES = 2_000_000,
     `include "el2_param.vh"
 ) (
-    input bit                   core_clk,
-    input bit                   rst_l,
-    input bit [31:0]            mem_signature_begin,
-    input bit [31:0]            mem_signature_end,
-    input bit [31:0]            mem_mailbox,
-    input bit                   i_cpu_halt_req,    // Async halt req to CPU
-    output bit                  o_cpu_halt_ack,    // core response to halt
-    output bit                  o_cpu_halt_status, // 1'b1 indicates core is halted
-    input bit                   i_cpu_run_req,     // Async restart req to CPU
-    output bit                  o_cpu_run_ack,     // Core response to run req
-    input bit                   mpc_debug_halt_req,
-    output bit                  mpc_debug_halt_ack,
-    input bit                   mpc_debug_run_req,
-    output bit                  mpc_debug_run_ack,
-    output bit                  o_debug_mode_status,
-    input bit                   lsu_bus_clk_en
+    input bit                       core_clk,
+    input bit                       rst_l,
+    input bit [31:0]                mem_signature_begin,
+    input bit [31:0]                mem_signature_end,
+    input bit [31:0]                mem_mailbox,
+    input bit                       i_cpu_halt_req,    // Async halt req to CPU
+    output bit                      o_cpu_halt_ack,    // core response to halt
+    output bit                      o_cpu_halt_status, // 1'b1 indicates core is halted
+    input bit                       i_cpu_run_req,     // Async restart req to CPU
+    output bit                      o_cpu_run_ack,     // Core response to run req
+    input bit                       mpc_debug_halt_req,
+    output bit                      mpc_debug_halt_ack,
+    input bit                       mpc_debug_run_req,
+    output bit                      mpc_debug_run_ack,
+    output bit                      o_debug_mode_status,
+    input bit                       lsu_bus_clk_en
 );
 `endif
+`ifdef RV_LOCKSTEP_ENABLE
+    el2_mubi_pkg::el2_mubi_t disable_corruption_detection_i;
+    el2_mubi_pkg::el2_mubi_t lockstep_err_injection_en_i;
+    el2_mubi_pkg::el2_mubi_t corruption_detected_o;
+`endif // RV_LOCKSTEP_ENABLE
 
 `ifdef RV_BUILD_AHB_LITE
     // Use AXI memory (lmem) even if VeeR is configured for AHB because it goes to axi bridge anyway.
@@ -768,12 +773,16 @@ module tb_top
     integer fd, tp, el;
     logic next_dbus_error;
     logic next_ibus_error;
+    logic inject_veer_in_dist, inject_lockstep_in_dist;
+    logic [8:0] inject_veer_in_dist_no, inject_lockstep_in_dist_no;
 
     always @(negedge core_clk or negedge rst_l) begin
         if (rst_l == 0) begin
             error_injection_mode <= '0;
             next_dbus_error <= '0;
             next_ibus_error <= '0;
+            inject_veer_in_dist <= '0;
+            inject_lockstep_in_dist <= '0;
         end else begin
             nmi_assert_int <= nmi_assert_int >> 1;
             soft_int <= 0;
@@ -841,7 +850,19 @@ module tb_top
                 timer_int      <= 1'b0;
                 soft_int       <= 1'b0;
             end
-            // end
+            `ifdef RV_LOCKSTEP_ENABLE
+                // data[7:0] == 0x91 - Inject error to VeeR core input
+                // Overridden signal ID is passed through mailbox_data[15:8]
+                if (mailbox_write && (mailbox_data[7:0] == 8'h91)) begin
+                    inject_veer_in_dist <= 1'b1;
+                    inject_veer_in_dist_no <= mailbox_data[15:8];
+                end
+                // data[7:0] == 0x92 - Inject error to Lockstep VeeR core input
+                if (mailbox_write && (mailbox_data[7:0] == 8'h92)) begin
+                    inject_lockstep_in_dist <= 1'b1;
+                    inject_lockstep_in_dist_no <= mailbox_data[15:8];
+                end
+            `endif // RV_LOCKSTEP_ENABLE
             // ECC error injection
             if(mailbox_write && (mailbox_data[7:0] == 8'he0)) begin
                 $display("Injecting single bit ICCM error");
@@ -864,12 +885,36 @@ module tb_top
                 error_injection_mode <= '0;
             end
             // Memory signature dump
-            if(mailbox_write && (mailbox_data[7:0] == 8'hFF || mailbox_data[7:0] == 8'h01)) begin
+            if(mailbox_write && (mailbox_data[7:0] == 8'hFF || mailbox_data[7:0] == 8'hFE || mailbox_data[7:0] == 8'h01)) begin
                 if (mem_signature_begin < mem_signature_end) begin
                     dump_signature();
                 end
             end
             // End Of test monitor
+            if (mailbox_write && (mailbox_data[7:0] == 8'hFE)) begin
+                `ifdef RV_LOCKSTEP_ENABLE
+                // Corruption injection should cause the `corruption_detected_o` to be asserted
+                // The reason why it's determined here is that it's on the system integrating VeeR
+                // to determine exact behavior and status report of this indicator
+                    if (corruption_detected_o != el2_mubi_pkg::El2MuBiTrue) begin
+                        $display("No core corruption detected..\n");
+                        $display("TEST_FAILED");
+                        `ifdef TB_SILENT_FAIL
+                            $finish;
+                        `else
+                            $fatal;
+                        `endif // TB_SILENT_FAIL
+                    end else begin
+                        $display("Core corruption has been detected..\n");
+                        $display("TEST_PASSED");
+                        $finish;
+                    end
+                `else
+                    $display("DCLS feature is disabled. No corruption will be detected.\n");
+                    $display("TEST_PASSED");
+                    $finish;
+                `endif // RV_LOCKSTEP_ENABLE
+            end
             if(mailbox_write && mailbox_data[7:0] == 8'hff) begin
                 $display("TEST_PASSED");
                 $display("\nFinished : minstret = %0d, mcycle = %0d", `DEC.tlu.minstretl[31:0],`DEC.tlu.mcyclel[31:0]);
@@ -925,6 +970,238 @@ module tb_top
         end
     end
     `endif
+
+`ifdef RV_LOCKSTEP_ENABLE
+`define VEER rvtop_wrapper.rvtop.veer
+`define LOCKSTEP rvtop_wrapper.rvtop.lockstep
+// Injected values should be randomized & it should be ensured that they're different
+// to what's their current value
+    always_comb begin: inject_corruption
+        if (inject_lockstep_in_dist) begin: inject_lockstep_corruption
+            case (inject_lockstep_in_dist_no)
+                0: force `LOCKSTEP.rst_vec = '1;
+                1: force `LOCKSTEP.nmi_int = '1;
+                2: force `LOCKSTEP.nmi_vec = '1;
+                3: force `LOCKSTEP.i_cpu_halt_req = '1;
+                4: force `LOCKSTEP.i_cpu_run_req = '1;
+                5: force `LOCKSTEP.core_id = '1;
+                6: force `LOCKSTEP.mpc_debug_halt_req = '1;
+                7: force `LOCKSTEP.mpc_debug_run_req = '1;
+                8: force `LOCKSTEP.mpc_reset_run_req = '1;
+                9: force `LOCKSTEP.dccm_rd_data_lo = '1;
+                10: force `LOCKSTEP.dccm_rd_data_hi = '1;
+                11: force `LOCKSTEP.iccm_rd_data = '1;
+                12: force `LOCKSTEP.iccm_rd_data_ecc = '1;
+                13: force `LOCKSTEP.ic_rd_data = '1;
+                14: force `LOCKSTEP.ic_debug_rd_data = '1;
+                15: force `LOCKSTEP.ictag_debug_rd_data = '1;
+                16: force `LOCKSTEP.ic_eccerr = '1;
+                17: force `LOCKSTEP.ic_parerr = '1;
+                18: force `LOCKSTEP.ic_rd_hit = '1;
+                19: force `LOCKSTEP.ic_tag_perr = '1;
+                20: force `LOCKSTEP.lsu_bus_clk_en = '1;
+                21: force `LOCKSTEP.ifu_bus_clk_en = '1;
+                22: force `LOCKSTEP.dbg_bus_clk_en = '1;
+                23: force `LOCKSTEP.dma_bus_clk_en = '1;
+                24: force `LOCKSTEP.dmi_reg_en = '1;
+                25: force `LOCKSTEP.dmi_reg_addr = '1;
+                26: force `LOCKSTEP.dmi_reg_wr_en = '1;
+                27: force `LOCKSTEP.dmi_reg_wdata = '1;
+                28: force `LOCKSTEP.extintsrc_req = '1;
+                29: force `LOCKSTEP.timer_int = '1;
+                30: force `LOCKSTEP.soft_int = '1;
+                31: force `LOCKSTEP.scan_mode = '1;
+            `ifdef RV_BUILD_AXI4
+                32: force `LOCKSTEP.lsu_axi_awready = '1;
+                33: force `LOCKSTEP.lsu_axi_wready = '1;
+                34: force `LOCKSTEP.lsu_axi_bvalid = '1;
+                35: force `LOCKSTEP.lsu_axi_bresp = '1;
+                36: force `LOCKSTEP.lsu_axi_bid = '1;
+                37: force `LOCKSTEP.lsu_axi_arready = '1;
+                38: force `LOCKSTEP.lsu_axi_rvalid = '1;
+                39: force `LOCKSTEP.lsu_axi_rid = '1;
+                40: force `LOCKSTEP.lsu_axi_rdata = '1;
+                41: force `LOCKSTEP.lsu_axi_rresp = '1;
+                42: force `LOCKSTEP.lsu_axi_rlast = '1;
+                43: force `LOCKSTEP.ifu_axi_wready = '1;
+                44: force `LOCKSTEP.ifu_axi_bvalid = '1;
+                45: force `LOCKSTEP.ifu_axi_bresp = '1;
+                46: force `LOCKSTEP.ifu_axi_bid = '1;
+                47: force `LOCKSTEP.ifu_axi_arready = '1;
+                48: force `LOCKSTEP.ifu_axi_rvalid = '1;
+                49: force `LOCKSTEP.ifu_axi_rid = '1;
+                50: force `LOCKSTEP.ifu_axi_rdata = '1;
+                51: force `LOCKSTEP.ifu_axi_rresp = '1;
+                52: force `LOCKSTEP.ifu_axi_rlast = '1;
+                53: force `LOCKSTEP.sb_axi_awready = '1;
+                54: force `LOCKSTEP.sb_axi_wready = '1;
+                55: force `LOCKSTEP.sb_axi_bvalid = '1;
+                56: force `LOCKSTEP.sb_axi_bresp = '1;
+                57: force `LOCKSTEP.sb_axi_bid = '1;
+                58: force `LOCKSTEP.sb_axi_arready = '1;
+                59: force `LOCKSTEP.sb_axi_rvalid = '1;
+                60: force `LOCKSTEP.sb_axi_rid = '1;
+                61: force `LOCKSTEP.sb_axi_rdata = '1;
+                62: force `LOCKSTEP.sb_axi_rresp = '1;
+                63: force `LOCKSTEP.sb_axi_rlast = '1;
+                64: force `LOCKSTEP.dma_axi_awvalid = '1;
+                65: force `LOCKSTEP.dma_axi_awid = '1;
+                66: force `LOCKSTEP.dma_axi_awaddr = '1;
+                67: force `LOCKSTEP.dma_axi_awsize = '1;
+                68: force `LOCKSTEP.dma_axi_awprot = '1;
+                69: force `LOCKSTEP.dma_axi_awlen = '1;
+                70: force `LOCKSTEP.dma_axi_awburst = '1;
+                71: force `LOCKSTEP.dma_axi_wvalid = '1;
+                72: force `LOCKSTEP.dma_axi_wdata = '1;
+                73: force `LOCKSTEP.dma_axi_wstrb = '1;
+                74: force `LOCKSTEP.dma_axi_wlast = '1;
+                75: force `LOCKSTEP.dma_axi_bready = '1;
+                76: force `LOCKSTEP.dma_axi_arvalid = '1;
+                77: force `LOCKSTEP.dma_axi_arid = '1;
+                78: force `LOCKSTEP.dma_axi_araddr = '1;
+                79: force `LOCKSTEP.dma_axi_arsize = '1;
+                80: force `LOCKSTEP.dma_axi_arprot = '1;
+                81: force `LOCKSTEP.dma_axi_arlen = '1;
+                82: force `LOCKSTEP.dma_axi_arburst = '1;
+                83: force `LOCKSTEP.dma_axi_rready = '1;
+            `endif
+            `ifdef RV_BUILD_AHB_LITE
+                32: force `LOCKSTEP.hrdata = '1;
+                33: force `LOCKSTEP.hready = '1;
+                34: force `LOCKSTEP.hresp = '1;
+                35: force `LOCKSTEP.lsu_hrdata = '1;
+                36: force `LOCKSTEP.lsu_hready = '1;
+                37: force `LOCKSTEP.lsu_hresp = '1;
+                38: force `LOCKSTEP.sb_hrdata = '1;
+                39: force `LOCKSTEP.sb_hready = '1;
+                40: force `LOCKSTEP.sb_hresp = '1;
+                41: force `LOCKSTEP.dma_hsel = '1;
+                42: force `LOCKSTEP.dma_haddr = '1;
+                43: force `LOCKSTEP.dma_hburst = '1;
+                44: force `LOCKSTEP.dma_hmastlock = '1;
+                45: force `LOCKSTEP.dma_hprot = '1;
+                46: force `LOCKSTEP.dma_hsize = '1;
+                47: force `LOCKSTEP.dma_htrans = '1;
+                48: force `LOCKSTEP.dma_hwrite = '1;
+                49: force `LOCKSTEP.dma_hwdata = '1;
+                50: force `LOCKSTEP.dma_hreadyin = '1;
+            `endif
+                default: force `LOCKSTEP.lockstep_err_injection_en_i = '1;
+            endcase
+        end else if (inject_veer_in_dist) begin: inject_veer_corruption
+          case (inject_lockstep_in_dist_no)
+                0: force `VEER.rst_vec = '1;
+                1: force `VEER.nmi_int = '1;
+                2: force `VEER.nmi_vec = '1;
+                3: force `VEER.i_cpu_halt_req = '1;
+                4: force `VEER.i_cpu_run_req = '1;
+                5: force `VEER.core_id = '1;
+                6: force `VEER.mpc_debug_halt_req = '1;
+                7: force `VEER.mpc_debug_run_req = '1;
+                8: force `VEER.mpc_reset_run_req = '1;
+                9: force `VEER.dccm_rd_data_lo = '1;
+                10: force `VEER.dccm_rd_data_hi = '1;
+                11: force `VEER.iccm_rd_data = '1;
+                12: force `VEER.iccm_rd_data_ecc = '1;
+                13: force `VEER.ic_rd_data = '1;
+                14: force `VEER.ic_debug_rd_data = '1;
+                15: force `VEER.ictag_debug_rd_data = '1;
+                16: force `VEER.ic_eccerr = '1;
+                17: force `VEER.ic_parerr = '1;
+                18: force `VEER.ic_rd_hit = '1;
+                19: force `VEER.ic_tag_perr = '1;
+                20: force `VEER.lsu_bus_clk_en = '1;
+                21: force `VEER.ifu_bus_clk_en = '1;
+                22: force `VEER.dbg_bus_clk_en = '1;
+                23: force `VEER.dma_bus_clk_en = '1;
+                24: force `VEER.dmi_reg_en = '1;
+                25: force `VEER.dmi_reg_addr = '1;
+                26: force `VEER.dmi_reg_wr_en = '1;
+                27: force `VEER.dmi_reg_wdata = '1;
+                28: force `VEER.extintsrc_req = '1;
+                29: force `VEER.timer_int = '1;
+                30: force `VEER.soft_int = '1;
+                31: force `VEER.scan_mode = '1;
+            `ifdef RV_BUILD_AXI4
+                32: force `VEER.lsu_axi_awready = '1;
+                33: force `VEER.lsu_axi_wready = '1;
+                34: force `VEER.lsu_axi_bvalid = '1;
+                35: force `VEER.lsu_axi_bresp = '1;
+                36: force `VEER.lsu_axi_bid = '1;
+                37: force `VEER.lsu_axi_arready = '1;
+                38: force `VEER.lsu_axi_rvalid = '1;
+                39: force `VEER.lsu_axi_rid = '1;
+                40: force `VEER.lsu_axi_rdata = '1;
+                41: force `VEER.lsu_axi_rresp = '1;
+                42: force `VEER.lsu_axi_rlast = '1;
+                43: force `VEER.ifu_axi_wready = '1;
+                44: force `VEER.ifu_axi_bvalid = '1;
+                45: force `VEER.ifu_axi_bresp = '1;
+                46: force `VEER.ifu_axi_bid = '1;
+                47: force `VEER.ifu_axi_arready = '1;
+                48: force `VEER.ifu_axi_rvalid = '1;
+                49: force `VEER.ifu_axi_rid = '1;
+                50: force `VEER.ifu_axi_rdata = '1;
+                51: force `VEER.ifu_axi_rresp = '1;
+                52: force `VEER.ifu_axi_rlast = '1;
+                53: force `VEER.sb_axi_awready = '1;
+                54: force `VEER.sb_axi_wready = '1;
+                55: force `VEER.sb_axi_bvalid = '1;
+                56: force `VEER.sb_axi_bresp = '1;
+                57: force `VEER.sb_axi_bid = '1;
+                58: force `VEER.sb_axi_arready = '1;
+                59: force `VEER.sb_axi_rvalid = '1;
+                60: force `VEER.sb_axi_rid = '1;
+                61: force `VEER.sb_axi_rdata = '1;
+                62: force `VEER.sb_axi_rresp = '1;
+                63: force `VEER.sb_axi_rlast = '1;
+                64: force `VEER.dma_axi_awvalid = '1;
+                65: force `VEER.dma_axi_awid = '1;
+                66: force `VEER.dma_axi_awaddr = '1;
+                67: force `VEER.dma_axi_awsize = '1;
+                68: force `VEER.dma_axi_awprot = '1;
+                69: force `VEER.dma_axi_awlen = '1;
+                70: force `VEER.dma_axi_awburst = '1;
+                71: force `VEER.dma_axi_wvalid = '1;
+                72: force `VEER.dma_axi_wdata = '1;
+                73: force `VEER.dma_axi_wstrb = '1;
+                74: force `VEER.dma_axi_wlast = '1;
+                75: force `VEER.dma_axi_bready = '1;
+                76: force `VEER.dma_axi_arvalid = '1;
+                77: force `VEER.dma_axi_arid = '1;
+                78: force `VEER.dma_axi_araddr = '1;
+                79: force `VEER.dma_axi_arsize = '1;
+                80: force `VEER.dma_axi_arprot = '1;
+                81: force `VEER.dma_axi_arlen = '1;
+                82: force `VEER.dma_axi_arburst = '1;
+                83: force `VEER.dma_axi_rready = '1;
+            `endif
+            `ifdef RV_BUILD_AHB_LITE
+                32: force `VEER.hrdata = '1;
+                33: force `VEER.hready = '1;
+                34: force `VEER.hresp = '1;
+                35: force `VEER.lsu_hrdata = '1;
+                36: force `VEER.lsu_hready = '1;
+                37: force `VEER.lsu_hresp = '1;
+                38: force `VEER.sb_hrdata = '1;
+                39: force `VEER.sb_hready = '1;
+                40: force `VEER.sb_hresp = '1;
+                41: force `VEER.dma_hsel = '1;
+                42: force `VEER.dma_haddr = '1;
+                43: force `VEER.dma_hburst = '1;
+                44: force `VEER.dma_hmastlock = '1;
+                45: force `VEER.dma_hprot = '1;
+                46: force `VEER.dma_hsize = '1;
+                47: force `VEER.dma_htrans = '1;
+                48: force `VEER.dma_hwrite = '1;
+                49: force `VEER.dma_hwdata = '1;
+                50: force `VEER.dma_hreadyin = '1;
+            `endif
+                default: force `LOCKSTEP.lockstep_err_injection_en_i = '1;
+            endcase
+        end
+    end
+`endif // RV_LOCKSTEP_ENABLE
 
     // nmi_int must be asserted for at least two clock cycles and then deasserted for
     // at least two clock cycles - see RISC-V VeeR EL2 Programmer's Reference Manual section 2.16
@@ -1410,9 +1687,9 @@ veer_wrapper rvtop_wrapper (
     .dccm_ecc_double_error  (),
 
 `ifdef RV_LOCKSTEP_ENABLE
-    .disable_corruption_detection_i (el2_mubi_pkg::El2MuBiFalse),
-    .lockstep_err_injection_en_i    (el2_mubi_pkg::El2MuBiFalse),
-    .corruption_detected_o          (),
+    .disable_corruption_detection_i (disable_corruption_detection_i),
+    .lockstep_err_injection_en_i    (lockstep_err_injection_en_i),
+    .corruption_detected_o          (corruption_detected_o),
 `endif
 
     .soft_int               (soft_int),

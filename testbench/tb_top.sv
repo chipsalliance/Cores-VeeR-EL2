@@ -60,6 +60,8 @@ module tb_top
     el2_mubi_pkg::el2_mubi_t disable_corruption_detection_i;
     el2_mubi_pkg::el2_mubi_t lockstep_err_injection_en_i;
     el2_mubi_pkg::el2_mubi_t corruption_detected_o;
+    assign disable_corruption_detection_i = el2_mubi_pkg::El2MuBiFalse;
+    assign lockstep_err_injection_en_i = el2_mubi_pkg::El2MuBiFalse;
 `endif // RV_LOCKSTEP_ENABLE
 
 `ifdef RV_BUILD_AHB_LITE

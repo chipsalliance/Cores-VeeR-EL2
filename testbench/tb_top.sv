@@ -1091,7 +1091,7 @@ module tb_top
                 default: force `LOCKSTEP.lockstep_err_injection_en_i = '1;
             endcase
         end else if (inject_veer_in_dist) begin: inject_veer_corruption
-          case (inject_lockstep_in_dist_no)
+          case (inject_veer_in_dist_no)
                 0: force `VEER.rst_vec = '1;
                 1: force `VEER.nmi_int = '1;
                 2: force `VEER.nmi_vec = '1;

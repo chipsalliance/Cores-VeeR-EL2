@@ -16,11 +16,11 @@ void user_main ();
 int main () {
     printf("Hello VeeR\n");
 
-    int r = 42;
+    int r = 1;
 
     printf("Injecting error into signal of ID %0d\n", r);
     // Inject error
-    tohost = r << 8 | CMD_INJ_VEER;
+    tohost = r << 8 | CMD_INJ_LOCKSTEP;
 
     return 0;
 }

@@ -43,6 +43,14 @@ module el2_veer_lockstep_wrapper
   logic trace_rv_i_interrupt_ip;
   logic [31:0] trace_rv_i_tval_ip;
 
+  logic [31:0] shadow_core_trace_rv_i_insn_ip;
+  logic [31:0] shadow_core_trace_rv_i_address_ip;
+  logic shadow_core_trace_rv_i_valid_ip;
+  logic shadow_core_trace_rv_i_exception_ip;
+  logic [4:0] shadow_core_trace_rv_i_ecause_ip;
+  logic shadow_core_trace_rv_i_interrupt_ip;
+  logic [31:0] shadow_core_trace_rv_i_tval_ip;
+
 
   logic dccm_clk_override;
   logic icm_clk_override;

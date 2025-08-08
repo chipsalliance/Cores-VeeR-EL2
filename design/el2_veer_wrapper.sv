@@ -413,6 +413,15 @@ import el2_pkg::*;
    el2_mem_if.veer_sram_src                el2_mem_export,
 
 `ifdef RV_LOCKSTEP_ENABLE
+   // Shadow Core trace
+   output logic [31:0] shadow_core_trace_rv_i_insn_ip,
+   output logic [31:0] shadow_core_trace_rv_i_address_ip,
+   output logic shadow_core_trace_rv_i_valid_ip,
+   output logic shadow_core_trace_rv_i_exception_ip,
+   output logic [4:0] shadow_core_trace_rv_i_ecause_ip,
+   output logic shadow_core_trace_rv_i_interrupt_ip,
+   output logic [31:0] shadow_core_trace_rv_i_tval_ip,
+
    // Shadow Core control
    input el2_mubi_pkg::el2_mubi_t disable_corruption_detection_i,
    input el2_mubi_pkg::el2_mubi_t lockstep_err_injection_en_i,

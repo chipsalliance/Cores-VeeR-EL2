@@ -31,7 +31,6 @@ module el2_veer_lockstep
     input logic trace_rv_i_interrupt_ip,
     input logic [31:0] trace_rv_i_tval_ip,
 
-
     input logic dccm_clk_override,
     input logic icm_clk_override,
     input logic dec_tlu_core_ecc_disable,
@@ -372,6 +371,15 @@ module el2_veer_lockstep
     input logic                      timer_int,
     input logic                      soft_int,
     input logic                      scan_mode,
+
+    // Shadow Core trace
+    output logic [31:0] shadow_core_trace_rv_i_insn_ip,
+    output logic [31:0] shadow_core_trace_rv_i_address_ip,
+    output logic shadow_core_trace_rv_i_valid_ip,
+    output logic shadow_core_trace_rv_i_exception_ip,
+    output logic [4:0] shadow_core_trace_rv_i_ecause_ip,
+    output logic shadow_core_trace_rv_i_interrupt_ip,
+    output logic [31:0] shadow_core_trace_rv_i_tval_ip,
 
     // Shadow Core control
     input el2_mubi_t disable_corruption_detection_i,
@@ -1358,6 +1366,16 @@ module el2_veer_lockstep
       .soft_int(shadow_core_inputs.soft_int),
       .scan_mode(shadow_core_inputs.scan_mode)
   );
+
+  // Trace
+  assign shadow_core_trace_rv_i_insn_ip = shadow_core_outputs.trace_rv_i_insn_ip;
+  assign shadow_core_trace_rv_i_address_ip = shadow_core_outputs.trace_rv_i_address_ip;
+  assign shadow_core_trace_rv_i_valid_ip = shadow_core_outputs.trace_rv_i_valid_ip;
+  assign shadow_core_trace_rv_i_exception_ip = shadow_core_outputs.trace_rv_i_exception_ip;
+  assign shadow_core_trace_rv_i_ecause_ip = shadow_core_outputs.trace_rv_i_ecause_ip;
+  assign shadow_core_trace_rv_i_interrupt_ip = shadow_core_outputs.trace_rv_i_interrupt_ip;
+  assign shadow_core_trace_rv_i_tval_ip = shadow_core_outputs.trace_rv_i_tval_ip;
+
   // Equivalence Check
   logic rst_n;
   assign rst_n = rst_shadow & rst_dbg_shadow;

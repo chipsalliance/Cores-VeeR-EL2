@@ -57,7 +57,7 @@ lint_off -rule WIDTHEXPAND -file "*/el2_exu_mul_ctl.sv"
 lint_off -rule WIDTHEXPAND -file "*/el2_dec_tlu_ctl.sv"
 lint_off -rule WIDTHEXPAND -file "*/el2_dma_ctrl.sv"
 lint_off -rule WIDTHEXPAND -file "*/el2_dbg.sv"
-lint_off -rule WIDTHEXPAND -file "*/el2_veer_lockstep.sv" -lines 383
+lint_off -rule WIDTHEXPAND -file "*/el2_veer_lockstep.sv" -lines 391
 
 // Unused parameters are probably safe to remove from RTL
 lint_off -rule UNUSEDPARAM -file "*/axi4_to_ahb.sv"
@@ -81,7 +81,7 @@ lint_off -rule BLKSEQ -file "*/beh_lib.sv" -lines 783
 lint_off -rule SYNCASYNCNET -file "*/el2_veer.sv" -lines 41
 
 // Unused clocks from shadow core
-lint_off -rule PINCONNECTEMPTY -file "*/el2_veer_lockstep.sv" -lines 1057-1058
+lint_off -rule PINCONNECTEMPTY -file "*/el2_veer_lockstep.sv" -lines 1065-1066
 
 // Logic that might be not optimal for event based model used by Verilator
 lint_off -rule UNOPTFLAT -file "*/axi4_to_ahb.sv"

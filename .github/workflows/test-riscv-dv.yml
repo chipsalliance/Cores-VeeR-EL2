@@ -145,6 +145,8 @@ jobs:
         with:
           submodules: recursive
 
+      - run: git -C third_party/riscv-dv apply ../../riscv-dv-update.patch
+
       - name: Install coverage dependencies
         run: |
           python3 -m venv .venv
@@ -268,6 +270,8 @@ jobs:
         run: _secret_combined_${{ env.SECRETS_VERSION }}
         env:
           SECRET_NAME: _secret_prepare_env
+
+      - run: yum -y install git && git -C third_party/riscv-dv apply ../../riscv-dv-update.patch
 
       - name: Perform custom tests
         run: _secret_combined_${{ env.SECRETS_VERSION }}

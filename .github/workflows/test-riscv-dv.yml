@@ -114,11 +114,13 @@ jobs:
       matrix:
         test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
         iss:
+          - spike
           - renode
         coverage: ["all"]
         version: [ uvm ]
         priv: ["m", "mu"]
         include: ${{ fromJSON(needs.generate-config.outputs.test-include-run) }}
+        exclude: ${{ fromJSON(needs.generate-config.outputs.test-exclude-run) }}
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"
@@ -231,6 +233,7 @@ jobs:
         version: [ uvm ]
         priv: ["m", "mu"]
         include: ${{ fromJSON(needs.generate-config.outputs.test-include-run-custom) }}
+        exclude: ${{ fromJSON(needs.generate-config.outputs.test-exclude-run) }}
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscv-dv/.cache/"

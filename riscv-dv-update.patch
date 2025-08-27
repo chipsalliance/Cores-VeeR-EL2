@@ -82,10 +82,10 @@ index 351cf29..76040c5 100644
      return trace
  
 diff --git a/scripts/renode_wrapper.py b/scripts/renode_wrapper.py
-index 16c097f..5a9a276 100644
+index 16c097f..76f7184 100644
 --- a/scripts/renode_wrapper.py
 +++ b/scripts/renode_wrapper.py
-@@ -29,8 +29,15 @@ machine LoadPlatformDescription @{repl}
+@@ -29,11 +29,18 @@ machine LoadPlatformDescription @{repl}
  
  sysbus LoadELF @{elf}
  
@@ -101,7 +101,8 @@ index 16c097f..5a9a276 100644
 +cpu SetHookAtBlockEnd $PRINT_REGDUMP
  cpu InstallCustomInstructionHandlerFromString "00000000000000000000000001110011" "print('ECALL:');"
  
- emulation RunFor "0.001"
--- 
-2.47.2
-
+-emulation RunFor "0.001"
++emulation RunFor "0.0008"
+ 
+ quit
+ """

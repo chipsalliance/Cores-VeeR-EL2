@@ -38,8 +38,6 @@ jobs:
           echo "include-run=$(python3 .github/scripts/riscv_dv_matrix_include.py run-tests)" | tee -a $GITHUB_OUTPUT
           echo "include-run-custom=$(python3 .github/scripts/riscv_dv_matrix_include.py run-custom-tests)" | tee -a $GITHUB_OUTPUT
           echo "exclude-run=[ \
-            {'iss': 'renode', 'test': 'riscv_bitmanip_full_test_veer'}, \
-            {'iss': 'renode', 'test': 'riscv_bitmanip_balanced_test_veer'}, \
             {'iss': 'renode', 'test': 'riscv_illegal_instr_test'}, \
             {'iss': 'renode', 'test': 'riscv_hint_instr_test'}, \
             {'iss': 'renode', 'test': 'riscv_ebreak_test', 'priv': 'mu'}, \

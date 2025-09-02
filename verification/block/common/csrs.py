@@ -132,3 +132,5 @@ DPC = CSR(0x7B1, lambda _: _ & ~(0x1))
 DCSR = CSR(0x7B0, _dcsr)  # upper 4 bits hardcoded to 0x4
 
 MEICIDPL = CSR(0xBCB, lambda _: _ & 0xF)
+
+MISA = CSR(0x301)

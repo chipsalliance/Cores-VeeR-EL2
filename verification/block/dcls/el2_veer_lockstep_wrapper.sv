@@ -523,6 +523,8 @@ module el2_veer_lockstep_wrapper
       .*
   );
 
+  el2_veer_lockstep_cov_bind dcls_coverage();
+
   assign shadow_reset = lockstep.rst_shadow;
   assign shadow_dbg_reset = lockstep.rst_dbg_shadow;
 endmodule

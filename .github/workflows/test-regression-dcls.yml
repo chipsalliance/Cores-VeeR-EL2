@@ -19,7 +19,7 @@ jobs:
         test: ["hello_world", "hello_world_dccm", "dcls", "dhry", "ecc",
                "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "perf_counters",
                "icache", "bitmanip"]
-        coverage: ["branch"]
+        coverage: ["all"]
         priv: ["0", "1"]
         tb_extra_args: ["--test-halt"]
         exclude:

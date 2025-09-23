@@ -20,6 +20,7 @@ interface el2_veer_lockstep_cov_if
 );
 
     covergroup el2_veer_lockstep_error_source @(posedge clk iff rst_n);
+        option.per_instance = 1;
         `ifdef RV_LOCKSTEP_REGFILE_ENABLE
         regfile_corruption_detected_cp: coverpoint regfile_corrupted &
             mubi_check_true(corruption_detected_o);
@@ -36,6 +37,7 @@ interface el2_veer_lockstep_cov_if
 
     covergroup el2_veer_lockstep_error_disable @(posedge clk iff
         (rst_n & mubi_check_true(disable_corruption_detection_i)));
+        option.per_instance = 1;
         `ifdef RV_LOCKSTEP_REGFILE_ENABLE
         regfile_corruption_disabled_cp: coverpoint regfile_corrupted &
             mubi_check_false(corruption_detected_o);
@@ -53,6 +55,7 @@ interface el2_veer_lockstep_cov_if
 
     // ICCM
     covergroup el2_veer_lockstep_iccm_differ @(posedge clk iff rst_n);
+        option.per_instance = 1;
         `SINGLE_BIN_FOR(icm_clk_override)
         `SINGLE_BIN_FOR(iccm_rw_addr)
         `SINGLE_BIN_FOR(iccm_wren)
@@ -67,6 +70,7 @@ interface el2_veer_lockstep_cov_if
 
     // DCCM
     covergroup el2_veer_lockstep_dccm_differ @(posedge clk iff rst_n);
+        option.per_instance = 1;
         `SINGLE_BIN_FOR(dccm_wren)
         `SINGLE_BIN_FOR(dccm_rden)
         `SINGLE_BIN_FOR(dccm_clk_override)
@@ -82,6 +86,7 @@ interface el2_veer_lockstep_cov_if
 
     // Trace
     covergroup el2_veer_lockstep_trace_differ  @(posedge clk iff rst_n);
+        option.per_instance = 1;
         `SINGLE_BIN_FOR(trace_rv_i_insn_ip)
         `SINGLE_BIN_FOR(trace_rv_i_address_ip)
         `SINGLE_BIN_FOR(trace_rv_i_valid_ip)
@@ -93,6 +98,7 @@ interface el2_veer_lockstep_cov_if
 
     // LSU
     covergroup el2_veer_lockstep_lsu_differ  @(posedge clk iff rst_n);
+        option.per_instance = 1;
     `ifdef RV_BUILD_AXI4
         `SINGLE_BIN_FOR(lsu_axi_awvalid)
         `SINGLE_BIN_FOR(lsu_axi_awid)
@@ -137,6 +143,7 @@ interface el2_veer_lockstep_cov_if
 
     // IFU
     covergroup el2_veer_lockstep_ifu_differ  @(posedge clk iff rst_n);
+        option.per_instance = 1;
     `ifdef RV_BUILD_AXI4
         `SINGLE_BIN_FOR(ifu_axi_awvalid)
         `SINGLE_BIN_FOR(ifu_axi_awid)
@@ -181,6 +188,7 @@ interface el2_veer_lockstep_cov_if
 
     // DMA
     covergroup el2_veer_lockstep_dma_differ  @(posedge clk iff rst_n);
+        option.per_instance = 1;
     `ifdef RV_BUILD_AXI4
         `SINGLE_BIN_FOR(dma_axi_awready)
         `SINGLE_BIN_FOR(dma_axi_wready)
@@ -204,6 +212,7 @@ interface el2_veer_lockstep_cov_if
 
     // Debug SB
     covergroup el2_veer_lockstep_sb_differ  @(posedge clk iff rst_n);
+        option.per_instance = 1;
     `ifdef RV_BUILD_AXI4
         `SINGLE_BIN_FOR(sb_axi_awvalid)
         `SINGLE_BIN_FOR(sb_axi_awid)
@@ -248,6 +257,7 @@ interface el2_veer_lockstep_cov_if
 
     // Instruction Cache
     covergroup el2_veer_lockstep_ic_differ @(posedge clk iff rst_n);
+        option.per_instance = 1;
         `SINGLE_BIN_FOR(ic_rw_addr)
         `SINGLE_BIN_FOR(ic_tag_valid)
         `SINGLE_BIN_FOR(ic_wr_en)
@@ -265,6 +275,7 @@ interface el2_veer_lockstep_cov_if
 
     // Miscellaneous outputs
     covergroup el2_veer_lockstep_miscellaneous_differ @(posedge clk iff rst_n);
+        option.per_instance = 1;
         `SINGLE_BIN_FOR(core_rst_l)
         `SINGLE_BIN_FOR(dec_tlu_core_ecc_disable)
         `SINGLE_BIN_FOR(o_cpu_halt_ack)
@@ -281,15 +292,18 @@ interface el2_veer_lockstep_cov_if
         `SINGLE_BIN_FOR(dmi_reg_rdata)
     endgroup
 
-    el2_veer_lockstep_error_source el2_veer_lockstep_error_source_cg = new();
-    el2_veer_lockstep_error_disable el2_veer_lockstep_error_disable_cg = new();
-    el2_veer_lockstep_trace_differ el2_veer_lockstep_trace_differ_cg = new();
-    el2_veer_lockstep_lsu_differ el2_veer_lockstep_lsu_differ_cg = new();
-    el2_veer_lockstep_ifu_differ el2_veer_lockstep_ifu_differ_cg = new();
-    el2_veer_lockstep_dma_differ el2_veer_lockstep_dma_differ_cg = new();
-    el2_veer_lockstep_sb_differ el2_veer_lockstep_sb_differ_cg = new();
-    el2_veer_lockstep_ic_differ el2_veer_lockstep_ic_differ_cg = new();
-    el2_veer_lockstep_miscellaneous_differ el2_veer_lockstep_miscellaneous_differ_cg = new();
+    initial begin
+        el2_veer_lockstep_error_source el2_veer_lockstep_error_source_cg = new();
+        el2_veer_lockstep_error_disable el2_veer_lockstep_error_disable_cg = new();
+        el2_veer_lockstep_trace_differ el2_veer_lockstep_trace_differ_cg = new();
+        el2_veer_lockstep_lsu_differ el2_veer_lockstep_lsu_differ_cg = new();
+        el2_veer_lockstep_ifu_differ el2_veer_lockstep_ifu_differ_cg = new();
+        el2_veer_lockstep_dma_differ el2_veer_lockstep_dma_differ_cg = new();
+        el2_veer_lockstep_sb_differ el2_veer_lockstep_sb_differ_cg = new();
+        el2_veer_lockstep_ic_differ el2_veer_lockstep_ic_differ_cg = new();
+        el2_veer_lockstep_miscellaneous_differ el2_veer_lockstep_miscellaneous_differ_cg = new();
+        $display("Lockstep coverage created");
+    end
 
 endinterface
 

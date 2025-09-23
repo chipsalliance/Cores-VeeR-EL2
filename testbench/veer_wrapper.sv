@@ -424,6 +424,11 @@ module veer_wrapper
   assign mem_export.ic_tag_data_raw_packed_pre = ic_tag_data_raw_packed_pre;
   assign mem_export.ic_tag_data_raw_pre = ic_tag_data_raw_pre;
 
+  // Functional coverage
+`ifdef FCOV
+  el2_veer_lockstep_cov_bind dcls_coverage();
+`endif
+
   el2_veer_wrapper rvtop (
       .el2_mem_export(mem_export.veer_sram_src),
       .el2_icache_export(mem_export.veer_icache_src),

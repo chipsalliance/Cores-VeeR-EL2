@@ -2,6 +2,7 @@
 
 interface el2_veer_lockstep_cov_if
   import el2_mubi_pkg::*;
+  import el2_lockstep_pkg::*;
 #(
     `include "el2_param.vh"
 ) (
@@ -52,7 +53,7 @@ interface el2_veer_lockstep_cov_if
 
     // ICCM
     covergroup el2_veer_lockstep_iccm_differ @(posedge clk iff rst_n);
-        `SINGLE_BIN_FOR(icm_gate)
+        `SINGLE_BIN_FOR(icm_clk_override)
         `SINGLE_BIN_FOR(iccm_rw_addr)
         `SINGLE_BIN_FOR(iccm_wren)
         `SINGLE_BIN_FOR(iccm_rden)
@@ -66,14 +67,15 @@ interface el2_veer_lockstep_cov_if
 
     // DCCM
     covergroup el2_veer_lockstep_dccm_differ @(posedge clk iff rst_n);
-        `SINGLE_BIN_FOR(dccm_gate)
-        `SINGLE_BIN_FOR(dccm_rw_addr)
         `SINGLE_BIN_FOR(dccm_wren)
         `SINGLE_BIN_FOR(dccm_rden)
-        `SINGLE_BIN_FOR(dccm_wr_size)
-        `SINGLE_BIN_FOR(dccm_wr_data)
-        `SINGLE_BIN_FOR(dccm_buf_correct_ecc)
-        `SINGLE_BIN_FOR(dccm_correction_state)
+        `SINGLE_BIN_FOR(dccm_clk_override)
+        `SINGLE_BIN_FOR(dccm_wr_addr_lo)
+        `SINGLE_BIN_FOR(dccm_wr_addr_hi)
+        `SINGLE_BIN_FOR(dccm_rd_addr_lo)
+        `SINGLE_BIN_FOR(dccm_rd_addr_hi)
+        `SINGLE_BIN_FOR(dccm_wr_data_lo)
+        `SINGLE_BIN_FOR(dccm_wr_data_hi)
         `SINGLE_BIN_FOR(dccm_ecc_single_error)
         `SINGLE_BIN_FOR(dccm_ecc_double_error)
     endgroup
@@ -102,7 +104,7 @@ interface el2_veer_lockstep_cov_if
         `SINGLE_BIN_FOR(lsu_axi_awlock)
         `SINGLE_BIN_FOR(lsu_axi_awcache)
         `SINGLE_BIN_FOR(lsu_axi_awprot)
-        `SINGLE_BIN_FOR(lsu_axi_awqos) 
+        `SINGLE_BIN_FOR(lsu_axi_awqos)
         `SINGLE_BIN_FOR(lsu_axi_wvalid)
         `SINGLE_BIN_FOR(lsu_axi_wdata)
         `SINGLE_BIN_FOR(lsu_axi_wstrb)
@@ -146,7 +148,7 @@ interface el2_veer_lockstep_cov_if
         `SINGLE_BIN_FOR(ifu_axi_awlock)
         `SINGLE_BIN_FOR(ifu_axi_awcache)
         `SINGLE_BIN_FOR(ifu_axi_awprot)
-        `SINGLE_BIN_FOR(ifu_axi_awqos) 
+        `SINGLE_BIN_FOR(ifu_axi_awqos)
         `SINGLE_BIN_FOR(ifu_axi_wvalid)
         `SINGLE_BIN_FOR(ifu_axi_wdata)
         `SINGLE_BIN_FOR(ifu_axi_wstrb)
@@ -213,7 +215,7 @@ interface el2_veer_lockstep_cov_if
         `SINGLE_BIN_FOR(sb_axi_awlock)
         `SINGLE_BIN_FOR(sb_axi_awcache)
         `SINGLE_BIN_FOR(sb_axi_awprot)
-        `SINGLE_BIN_FOR(sb_axi_awqos) 
+        `SINGLE_BIN_FOR(sb_axi_awqos)
         `SINGLE_BIN_FOR(sb_axi_wvalid)
         `SINGLE_BIN_FOR(sb_axi_wdata)
         `SINGLE_BIN_FOR(sb_axi_wstrb)

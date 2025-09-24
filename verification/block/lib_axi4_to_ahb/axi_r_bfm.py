@@ -15,8 +15,8 @@ class AXIReadChannelBFM(metaclass=utility_classes.Singleton):
         self.dut = cocotb.top
         self.rst_n = cocotb.top.rst_l
         self.clk = cocotb.top.clk
-        self.req_driver_q = UVMQueue()
-        self.rsp_driver_q = UVMQueue()
+        self.req_driver_q = UVMQueue(maxsize=1)
+        self.rsp_driver_q = UVMQueue(maxsize=1)
         self.req_monitor_q = UVMQueue(maxsize=0)
         self.rsp_monitor_q = UVMQueue(maxsize=0)
         self.TIMEOUT_THRESHOLD = 20

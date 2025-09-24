@@ -58,43 +58,18 @@ module tb_top
 `endif
 
 `ifdef RV_BUILD_AHB_LITE
-    // Use AXI memory (lmem) even if VeeR is configured for AHB because it goes to axi bridge anyway.
-    logic                       lmem_axi_awvalid;
-    logic                       lmem_axi_awready;
-    logic [pt.LSU_BUS_TAG-1:0]  lmem_axi_awid;
-    logic [31:0]                lmem_axi_awaddr;
-    logic [2:0]                 lmem_axi_awsize;
-    logic [2:0]                 lmem_axi_awprot;
-    logic [7:0]                 lmem_axi_awlen;
-    logic [1:0]                 lmem_axi_awburst;
+    logic                       lmem_hsel;
+    logic        [31:0]         lmem_haddr;
+    logic        [2:0]          lmem_hburst;
+    logic                       lmem_hmastlock;
+    logic        [3:0]          lmem_hprot;
+    logic        [2:0]          lmem_hsize;
+    logic        [1:0]          lmem_htrans;
+    logic                       lmem_hwrite;
+    logic                       lmem_hreadyout;
+    logic                       lmem_hreadyin;
 
-    logic                       lmem_axi_wvalid;
-    logic                       lmem_axi_wready;
-    logic [63:0]                lmem_axi_wdata;
-    logic [7:0]                 lmem_axi_wstrb;
-    logic                       lmem_axi_wlast;
-
-    logic                       lmem_axi_bvalid;
-    logic                       lmem_axi_bready;
-    logic [1:0]                 lmem_axi_bresp;
-    logic [pt.LSU_BUS_TAG-1:0]  lmem_axi_bid;
-
-    logic                       lmem_axi_arvalid;
-    logic                       lmem_axi_arready;
-    logic [pt.LSU_BUS_TAG-1:0]  lmem_axi_arid;
-    logic [31:0]                lmem_axi_araddr;
-    logic [2:0]                 lmem_axi_arsize;
-    logic [2:0]                 lmem_axi_arprot;
-    logic [7:0]                 lmem_axi_arlen;
-    logic [1:0]                 lmem_axi_arburst;
-
-    logic                       lmem_axi_rvalid;
-    logic                       lmem_axi_rready;
-    logic [pt.LSU_BUS_TAG-1:0]  lmem_axi_rid;
-    logic [63:0]                lmem_axi_rdata;
-    logic [1:0]                 lmem_axi_rresp;
-    logic                       lmem_axi_rlast;
-
+    logic                       dma_hsel;
     logic        [31:0]         dma_haddr;
     logic        [2:0]          dma_hburst;
     logic                       dma_hmastlock;
@@ -192,6 +167,11 @@ module tb_top
     logic                       mailbox_write;
     logic        [63:0]         mailbox_data;
 
+    logic        [63:0]         lmem_hrdata       ;
+    logic        [63:0]         lmem_hwdata       ;
+    logic                       lmem_hready       ;
+    logic                       lmem_hresp        ;
+
     logic        [63:0]         dma_hrdata       ;
     logic        [63:0]         dma_hwdata       ;
     logic                       dma_hready       ;
@@ -203,6 +183,7 @@ module tb_top
     int                         cycleCnt;
     logic                       mailbox_data_val;
 
+    wire                        lmem_hready_out;
     wire                        dma_hready_out;
     int                         commit_count;
 
@@ -759,9 +740,16 @@ module tb_top
 
 `define DEC rvtop_wrapper.rvtop.veer.dec
 
-    // `lmem` is an instance of AXI memory even if VeeR uses AHB.
+`ifdef RV_BUILD_AHB_LITE
+    always_ff @(posedge core_clk)
+        mailbox_write <= lmem.HSEL && lmem.HREADY && lmem.HADDR == mem_mailbox && rst_l;
+    assign mailbox_data  = lmem.HWDATA;
+`endif
+
+`ifdef RV_BUILD_AXI4
     assign mailbox_write = lmem.awvalid && lmem.awaddr == mem_mailbox && rst_l;
     assign mailbox_data  = lmem.wdata;
+`endif
 
     assign mailbox_data_val = mailbox_data[7:0] > 8'h5 && mailbox_data[7:0] < 8'h7f;
 
@@ -1143,7 +1131,7 @@ veer_wrapper rvtop_wrapper (
 
     .dma_hrdata             ( dma_hrdata    ),
     .dma_hresp              ( dma_hresp     ),
-    .dma_hsel               ( 1'b1            ),
+    .dma_hsel               ( dma_hsel      ),
     .dma_hreadyin           ( dma_hready_out  ),
     .dma_hreadyout          ( dma_hready_out  ),
 `endif // RV_BUILD_AHB_LITE
@@ -1457,44 +1445,28 @@ ahb_sif imem (
      .HRDATA(ic_hrdata[63:0])
 );
 
-// Use AXI memory even if VeeR is configured for AHB because it goes to axi bridge anyway.
-defparam lmem.TAGW = 4;
-axi_slv lmem(
-    .aclk(core_clk),
-    .rst_l(rst_l),
+ahb_sif #(
+    .MAX_DELAY(1),
+    .MIN_DELAY(1)
+)lmem(
+     // Inputs
+     .HCLK(core_clk),
+     .HRESETn(rst_l),
 
-    .arvalid(lmem_axi_arvalid),
-    .arready(lmem_axi_arready),
-    .araddr(lmem_axi_araddr),
-    .arid(lmem_axi_arid),
-    .arlen(lmem_axi_arlen),
-    .arburst(lmem_axi_arburst),
-    .arsize(lmem_axi_arsize),
+     .HSEL(lmem_hsel),
+     .HADDR(lmem_haddr),
+     .HBURST(lmem_hburst),
+     .HPROT(lmem_hprot),
+     .HWRITE(lmem_hwrite),
+     .HWDATA(lmem_hwdata),
+     .HTRANS(lmem_htrans),
+     .HSIZE(lmem_hsize),
+     .HREADY(lmem_hready_out),
 
-    .rvalid(lmem_axi_rvalid),
-    .rready(lmem_axi_rready),
-    .rdata(lmem_axi_rdata),
-    .rresp(lmem_axi_rresp),
-    .rid(lmem_axi_rid),
-    .rlast(lmem_axi_rlast),
-
-    .awvalid(lmem_axi_awvalid),
-    .awready(lmem_axi_awready),
-    .awaddr(lmem_axi_awaddr),
-    .awid(lmem_axi_awid),
-    .awlen(lmem_axi_awlen),
-    .awburst(lmem_axi_awburst),
-    .awsize(lmem_axi_awsize),
-
-    .wdata(lmem_axi_wdata),
-    .wstrb(lmem_axi_wstrb),
-    .wvalid(lmem_axi_wvalid),
-    .wready(lmem_axi_wready),
-
-    .bvalid(lmem_axi_bvalid),
-    .bready(lmem_axi_bready),
-    .bresp(lmem_axi_bresp),
-    .bid(lmem_axi_bid)
+     // Outputs
+     .HREADYOUT(lmem_hready_out),
+     .HRESP(lmem_hresp),
+     .HRDATA(lmem_hrdata)
 );
 
 ahb_lsu_dma_bridge #(.pt(pt)) bridge (
@@ -1514,36 +1486,21 @@ ahb_lsu_dma_bridge #(.pt(pt)) bridge (
     .m_ahb_hrdata(mux_hrdata[63:0]),
     .m_ahb_hreadyout(mux_hreadyout),
     .m_ahb_hresp(mux_hresp),
-    
-    .s0_axi_awvalid(lmem_axi_awvalid),
-    .s0_axi_awready(lmem_axi_awready),
-    .s0_axi_awid(lmem_axi_awid),
-    .s0_axi_awaddr(lmem_axi_awaddr),
-    .s0_axi_awsize(lmem_axi_awsize),
 
-    .s0_axi_wvalid(lmem_axi_wvalid),
-    .s0_axi_wready(lmem_axi_wready),
-    .s0_axi_wdata(lmem_axi_wdata),
-    .s0_axi_wstrb(lmem_axi_wstrb),
+    .s0_ahb_hsel(lmem_hsel),
+    .s0_ahb_haddr(lmem_haddr),
+    .s0_ahb_hburst(lmem_hburst),
+    .s0_ahb_hmastlock(lmem_hmastlock),
+    .s0_ahb_hprot(lmem_hprot),
+    .s0_ahb_hsize(lmem_hsize),
+    .s0_ahb_htrans(lmem_htrans),
+    .s0_ahb_hwrite(lmem_hwrite),
+    .s0_ahb_hwdata(lmem_hwdata),
+    .s0_ahb_hrdata(lmem_hrdata),
+    .s0_ahb_hready(lmem_hready_out),
+    .s0_ahb_hresp(lmem_hresp),
 
-    .s0_axi_bvalid(lmem_axi_bvalid),
-    .s0_axi_bready(lmem_axi_bready),
-    .s0_axi_bresp(lmem_axi_bresp),
-    .s0_axi_bid(lmem_axi_bid),
-
-    .s0_axi_arvalid(lmem_axi_arvalid),
-    .s0_axi_arready(lmem_axi_arready),
-    .s0_axi_arid(lmem_axi_arid),
-    .s0_axi_araddr(lmem_axi_araddr),
-    .s0_axi_arsize(lmem_axi_arsize),
-
-    .s0_axi_rvalid(lmem_axi_rvalid),
-    .s0_axi_rready(lmem_axi_rready),
-    .s0_axi_rid(lmem_axi_rid),
-    .s0_axi_rdata(lmem_axi_rdata),
-    .s0_axi_rresp(lmem_axi_rresp),
-    .s0_axi_rlast(lmem_axi_rlast),
-
+    .s1_ahb_hsel(dma_hsel),
     .s1_ahb_haddr(dma_haddr),
     .s1_ahb_hburst(dma_hburst),
     .s1_ahb_hmastlock(dma_hmastlock),

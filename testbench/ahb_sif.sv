@@ -16,7 +16,10 @@
 //
 `ifdef RV_BUILD_AHB_LITE
 
-module ahb_sif (
+module ahb_sif #(
+    parameter int MAX_DELAY = -1,
+    parameter int MIN_DELAY = 0
+) (
     input logic [63:0] HWDATA,
     input logic HCLK,
     input logic HSEL,
@@ -75,31 +78,36 @@ module ahb_sif (
       if (strb_lat[0]) mem[{laddr[31:3], 3'd0}] = HWDATA[07:00];
     end
     if (HREADY & HSEL & |HTRANS) begin
+      if (MAX_DELAY < 0) begin
 `ifdef VERILATOR
-      if (iws_rand & ~HPROT[0]) iws = $random & 15;
-      if (dws_rand & HPROT[0]) dws = $random & 15;
+        if (iws_rand & ~HPROT[0]) iws = $random & 15;
+        if (dws_rand & HPROT[0]) dws = $random & 15;
 `else
-      if (iws_rand & ~HPROT[0])
-        ok = std::randomize(
-            iws
-        ) with {
-          iws dist {
-            0 := 10,
-            [1 : 3] :/ 2,
-            [4 : 15] :/ 1
+        if (iws_rand & ~HPROT[0])
+          ok = std::randomize(
+              iws
+          ) with {
+            iws dist {
+              0 := 10,
+              [1 : 3] :/ 2,
+              [4 : 15] :/ 1
+            };
           };
-        };
-      if (dws_rand & HPROT[0])
-        ok = std::randomize(
-            dws
-        ) with {
-          dws dist {
-            0 := 10,
-            [1 : 3] :/ 2,
-            [4 : 15] :/ 1
+        if (dws_rand & HPROT[0])
+          ok = std::randomize(
+              dws
+          ) with {
+            dws dist {
+              0 := 10,
+              [1 : 3] :/ 2,
+              [4 : 15] :/ 1
+            };
           };
-        };
 `endif
+      end else begin
+        if (~HPROT[0]) iws = MIN_DELAY + $random % (MAX_DELAY-MIN_DELAY+1);
+        if (HPROT[0]) dws = MIN_DELAY + $random % (MAX_DELAY-MIN_DELAY+1);
+      end
     end
   end
 
@@ -120,14 +128,14 @@ module ahb_sif (
         write <= HWRITE & |HTRANS;
         if (|HTRANS & ~HWRITE)
           rdata <= {
-            mem[{addr[31:3], 3'd7}],
-            mem[{addr[31:3], 3'd6}],
-            mem[{addr[31:3], 3'd5}],
-            mem[{addr[31:3], 3'd4}],
-            mem[{addr[31:3], 3'd3}],
-            mem[{addr[31:3], 3'd2}],
-            mem[{addr[31:3], 3'd1}],
-            mem[{addr[31:3], 3'd0}]
+            mem[{addr[31:3], 3'd7}] & {8{strb[7]}},
+            mem[{addr[31:3], 3'd6}] & {8{strb[6]}},
+            mem[{addr[31:3], 3'd5}] & {8{strb[5]}},
+            mem[{addr[31:3], 3'd4}] & {8{strb[4]}},
+            mem[{addr[31:3], 3'd3}] & {8{strb[3]}},
+            mem[{addr[31:3], 3'd2}] & {8{strb[2]}},
+            mem[{addr[31:3], 3'd1}] & {8{strb[1]}},
+            mem[{addr[31:3], 3'd0}] & {8{strb[0]}}
           };
         strb_lat <= strb;
       end
@@ -240,4 +248,3 @@ module axi_slv #(
      end
   end
 endmodule
-

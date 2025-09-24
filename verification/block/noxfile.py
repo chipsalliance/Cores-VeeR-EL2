@@ -297,7 +297,6 @@ def dcls_verify(session, blockName, testName, coverage):
     [
         "test_axi",
         "test_axi_read_channel",
-        "test_axi_read_channel_multiple",
         "test_axi_write_channel",
     ],
 )

@@ -326,7 +326,7 @@ import el2_pkg::*;
                   cmd_done        = buf_state_en & ~master_valid;                     // last one of the stream should not send a htrans
                   bypass_en       = master_ready & master_valid & (buf_nxtstate == STREAM_RD) & buf_state_en;
                   buf_cmd_byte_ptr[2:0] = bypass_en ? master_addr[2:0] : buf_addr[2:0];
-                  ahb_htrans[1:0] = {2{~((buf_nxtstate != STREAM_RD) & buf_state_en)}};
+                  ahb_htrans[1:0] = 2'b10 & {2{~((buf_nxtstate != STREAM_RD) & buf_state_en)}};
                   slvbuf_wr_en    = buf_wr_en;                                         // shifting the contents from the buf to slv_buf for streaming cases
          end // case: STREAM_RD
          STREAM_ERR_RD: begin

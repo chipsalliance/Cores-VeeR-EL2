@@ -25,8 +25,7 @@ jobs:
         bus: ["axi", "ahb"]
         test: ["hello_world", "hello_world_dccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
                "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters",
-               "pmp", "pmp_random", "write_unaligned",
-               "icache", "bitmanip"]
+               "pmp", "pmp_random", "write_unaligned", "icache", "bitmanip", "read_after_read"]
         coverage: ["branch", "toggle"] #TODO: add functional coverage
         priv: ["0", "1"]
         cache_waypack: ["0"]
@@ -46,6 +45,10 @@ jobs:
           - priv: "0"
             test: "perf_counters"
           # end tests which require user mode
+          # These tests require AHB bus
+          - bus: "axi"
+            test: "read_after_read"
+          # end tests which require AHB bus
         include:
           # Use hello_world_iccm for testing '--test-lsu-clk-ratio'
           - test: "hello_world_iccm"
@@ -127,7 +130,7 @@ jobs:
         bus: ["axi", "ahb"]
         test: ["hello_world", "hello_world_dccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
                "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters", "pmp", "write_unaligned",
-               "icache", "bitmanip"]
+               "icache", "bitmanip", "read_after_read"]
         priv: ["0", "1"]
         exclude:
           # These tests require user mode
@@ -144,6 +147,10 @@ jobs:
           - priv: "0"
             test: "perf_counters"
           # end tests which require user mode
+          # These tests require AHB bus
+          - bus: "axi"
+            test: "read_after_read"
+          # end tests which require AHB bus
     env:
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader

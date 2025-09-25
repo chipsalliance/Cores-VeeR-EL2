@@ -1,0 +1,2 @@
+TEST_CFLAGS = -g -O3 -falign-functions=16
+OFILES = crt0.o read_after_read.o

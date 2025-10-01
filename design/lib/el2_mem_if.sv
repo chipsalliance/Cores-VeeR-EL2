@@ -119,7 +119,8 @@ interface el2_mem_if #(
   );
 
   modport veer_icache_src(
-      output clk,
+      // cache uses the same clk as sram, we do not define clk port in this modport,
+      // assuming the clk will be connected in sram_src
       // data
       output ic_b_sb_wren, ic_b_sb_bit_en_vec, ic_sb_wr_data, ic_rw_addr_bank_q, ic_bank_way_clken_final, ic_bank_way_clken_final_up,
       input wb_packeddout_pre, wb_dout_pre_up,

@@ -62,7 +62,7 @@ interface el2_mem_if #(
 
   //////////////////////////////////////////
   // ICACHE TAG
-  logic [pt.ICACHE_NUM_WAYS-1:0]                     ic_tag_clken_final;
+  logic                                              ic_tag_clken_final;
   logic [pt.ICACHE_NUM_WAYS-1:0]                     ic_tag_wren_q;
   logic [(26*pt.ICACHE_NUM_WAYS)-1 :0]               ic_tag_wren_biten_vec;
   logic [(26*pt.ICACHE_NUM_WAYS)-1 :0]               ic_tag_data_raw_packed_pre;

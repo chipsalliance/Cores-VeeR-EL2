@@ -616,7 +616,7 @@ import el2_pkg::*;
       assign wb_dout_way[i][63:0] = (ic_rw_addr_ff[2:1] == 2'b00) ? wb_dout_way_pre[i][63:0]   :
                                     (ic_rw_addr_ff[2:1] == 2'b01) ?{wb_dout_way_pre[i][86:71], wb_dout_way_pre[i][63:16]} :
                                     (ic_rw_addr_ff[2:1] == 2'b10) ?{wb_dout_way_pre[i][102:71],wb_dout_way_pre[i][63:32]} :
-                                                                   {wb_dout_way_pre[i][119:71],wb_dout_way_pre[i][63:48]};
+                                                                   {wb_dout_way_pre[i][118:71],wb_dout_way_pre[i][63:48]};
 
       assign wb_dout_way_with_premux[i][63:0]  =  ic_sel_premux_data ? ic_premux_data[63:0] : wb_dout_way[i][63:0] ;
    end

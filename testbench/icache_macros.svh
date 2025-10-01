@@ -29,7 +29,7 @@
 `define EL2_IC_TAG_SRAM(depth,width,i)                                              \
    ram_``depth``x``width  ic_way_tag (                                              \
       .CLK (el2_mem_export.clk),                                                    \
-      .ME(el2_mem_export.ic_tag_clken_final[i]),                                    \
+      .ME(el2_mem_export.ic_tag_clken_final),                                       \
       .WE (el2_mem_export.ic_tag_wren_q[i]),                                        \
       .D  (el2_mem_export.ic_tag_wr_data[``width-1:0]),                             \
       .ADR(el2_mem_export.ic_rw_addr_q[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO]), \

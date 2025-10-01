@@ -429,6 +429,7 @@ import el2_pkg::*;
     logic [pt.ICACHE_BANKS_WAY-1:0][(71*pt.ICACHE_NUM_WAYS)-1:0]  sel_bypass_data;
     logic [pt.ICACHE_BANKS_WAY-1:0]                               any_bypass;
     logic [pt.ICACHE_BANKS_WAY-1:0]                               any_addr_match;
+    assign ic_bank_way_clken_final_up = '0;
 
  // generate IC DATA PACKED SRAMS for 2/4 ways
   for (genvar k=0; k<pt.ICACHE_BANKS_WAY; k++) begin: BANKS_WAY   // 16B subbank

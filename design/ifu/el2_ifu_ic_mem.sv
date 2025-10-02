@@ -1077,11 +1077,6 @@ end // block: OTHERS
     logic                                any_addr_match;
     logic                                ic_tag_clken_final;
 
-    // Use exported ICache interface.
-    always_comb begin
-      icache_export.ic_tag_clken_final = ic_tag_clken_final;
-    end
-
    if (pt.ICACHE_ECC) begin  : ECC1
     logic [(26*pt.ICACHE_NUM_WAYS)-1 :0]  ic_tag_data_raw_packed, ic_tag_wren_biten_vec, ic_tag_data_raw_packed_pre;           // data and its bit enables
     logic [pt.ICACHE_TAG_NUM_BYPASS-1:0][(26*pt.ICACHE_NUM_WAYS)-1 :0] wb_packeddout_hold;
@@ -1094,6 +1089,10 @@ end // block: OTHERS
 
     for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: BITEN
       assign ic_tag_wren_biten_vec[(26*i)+25:26*i] = {26{ic_tag_wren_q[i]}};
+      // Use exported ICache interface.
+      always_comb begin
+        icache_export.ic_tag_clken_final[i] = ic_tag_clken_final;
+      end
     end
 
     if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS

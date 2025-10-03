@@ -108,9 +108,22 @@ interface el2_veer_lockstep_cov_if
     endgroup
 
     // LSU
-    covergroup el2_veer_lockstep_lsu_differ  @(posedge clk iff rst_n);
+    `ifdef RV_BUILD_AHB_LITE
+    covergroup el2_veer_lockstep_lsu_ahb_differ  @(posedge clk iff rst_n);
         option.per_instance = 1;
+        `SINGLE_BIN_FOR(lsu_haddr)
+        `SINGLE_BIN_FOR(lsu_hburst)
+        `SINGLE_BIN_FOR(lsu_hmastlock)
+        `SINGLE_BIN_FOR(lsu_hprot)
+        `SINGLE_BIN_FOR(lsu_hsize)
+        `SINGLE_BIN_FOR(lsu_htrans)
+        `SINGLE_BIN_FOR(lsu_hwrite)
+    endgroup
+    `endif
+
     `ifdef RV_BUILD_AXI4
+    covergroup el2_veer_lockstep_lsu_axi_differ  @(posedge clk iff rst_n);
+        option.per_instance = 1;
         `SINGLE_BIN_FOR(lsu_axi_awvalid)
         `SINGLE_BIN_FOR(lsu_axi_awid)
         `SINGLE_BIN_FOR(lsu_axi_awaddr)
@@ -139,23 +152,26 @@ interface el2_veer_lockstep_cov_if
         `SINGLE_BIN_FOR(lsu_axi_arprot)
         `SINGLE_BIN_FOR(lsu_axi_arqos)
         `SINGLE_BIN_FOR(lsu_axi_rready)
-    `endif
-
-    `ifdef RV_BUILD_AHB_LITE
-        `SINGLE_BIN_FOR(lsu_haddr)
-        `SINGLE_BIN_FOR(lsu_hburst)
-        `SINGLE_BIN_FOR(lsu_hmastlock)
-        `SINGLE_BIN_FOR(lsu_hprot)
-        `SINGLE_BIN_FOR(lsu_hsize)
-        `SINGLE_BIN_FOR(lsu_htrans)
-        `SINGLE_BIN_FOR(lsu_hwrite)
-    `endif
     endgroup
+    `endif
 
     // IFU
-    covergroup el2_veer_lockstep_ifu_differ  @(posedge clk iff rst_n);
+    `ifdef RV_BUILD_AHB_LITE
+    covergroup el2_veer_lockstep_ifu_ahb_differ  @(posedge clk iff rst_n);
         option.per_instance = 1;
+        `SINGLE_BIN_FOR(haddr)
+        `SINGLE_BIN_FOR(hburst)
+        `SINGLE_BIN_FOR(hmastlock)
+        `SINGLE_BIN_FOR(hprot)
+        `SINGLE_BIN_FOR(hsize)
+        `SINGLE_BIN_FOR(htrans)
+        `SINGLE_BIN_FOR(hwrite)
+    endgroup
+    `endif
+
     `ifdef RV_BUILD_AXI4
+    covergroup el2_veer_lockstep_ifu_axi_differ  @(posedge clk iff rst_n);
+        option.per_instance = 1;
         `SINGLE_BIN_FOR(ifu_axi_awvalid)
         `SINGLE_BIN_FOR(ifu_axi_awid)
         `SINGLE_BIN_FOR(ifu_axi_awaddr)
@@ -184,23 +200,22 @@ interface el2_veer_lockstep_cov_if
         `SINGLE_BIN_FOR(ifu_axi_arprot)
         `SINGLE_BIN_FOR(ifu_axi_arqos)
         `SINGLE_BIN_FOR(ifu_axi_rready)
-    `endif
-
-    `ifdef RV_BUILD_AHB_LITE
-        `SINGLE_BIN_FOR(haddr)
-        `SINGLE_BIN_FOR(hburst)
-        `SINGLE_BIN_FOR(hmastlock)
-        `SINGLE_BIN_FOR(hprot)
-        `SINGLE_BIN_FOR(hsize)
-        `SINGLE_BIN_FOR(htrans)
-        `SINGLE_BIN_FOR(hwrite)
-    `endif
     endgroup
+    `endif
 
     // DMA
-    covergroup el2_veer_lockstep_dma_differ  @(posedge clk iff rst_n);
+    `ifdef RV_BUILD_AHB_LITE
+    covergroup el2_veer_lockstep_dma_ahb_differ  @(posedge clk iff rst_n);
         option.per_instance = 1;
+        `SINGLE_BIN_FOR(dma_hrdata)
+        `SINGLE_BIN_FOR(dma_hreadyout)
+        `SINGLE_BIN_FOR(dma_hresp)
+    endgroup
+    `endif
+
     `ifdef RV_BUILD_AXI4
+    covergroup el2_veer_lockstep_dma_axi_differ  @(posedge clk iff rst_n);
+        option.per_instance = 1;
         `SINGLE_BIN_FOR(dma_axi_awready)
         `SINGLE_BIN_FOR(dma_axi_wready)
         `SINGLE_BIN_FOR(dma_axi_bvalid)
@@ -212,19 +227,26 @@ interface el2_veer_lockstep_cov_if
         `SINGLE_BIN_FOR(dma_axi_rdata)
         `SINGLE_BIN_FOR(dma_axi_rresp)
         `SINGLE_BIN_FOR(dma_axi_rlast)
-    `endif
-
-    `ifdef RV_BUILD_AHB_LITE
-        `SINGLE_BIN_FOR(dma_hrdata)
-        `SINGLE_BIN_FOR(dma_hreadyout)
-        `SINGLE_BIN_FOR(dma_hresp)
-    `endif
     endgroup
+    `endif
 
     // Debug SB
-    covergroup el2_veer_lockstep_sb_differ  @(posedge clk iff rst_n);
+    `ifdef RV_BUILD_AHB_LITE
+    covergroup el2_veer_lockstep_sb_ahb_differ  @(posedge clk iff rst_n);
         option.per_instance = 1;
+        `SINGLE_BIN_FOR(sb_haddr)
+        `SINGLE_BIN_FOR(sb_hburst)
+        `SINGLE_BIN_FOR(sb_hmastlock)
+        `SINGLE_BIN_FOR(sb_hprot)
+        `SINGLE_BIN_FOR(sb_hsize)
+        `SINGLE_BIN_FOR(sb_htrans)
+        `SINGLE_BIN_FOR(sb_hwrite)
+    endgroup
+    `endif
+
     `ifdef RV_BUILD_AXI4
+    covergroup el2_veer_lockstep_sb_axi_differ  @(posedge clk iff rst_n);
+        option.per_instance = 1;
         `SINGLE_BIN_FOR(sb_axi_awvalid)
         `SINGLE_BIN_FOR(sb_axi_awid)
         `SINGLE_BIN_FOR(sb_axi_awaddr)
@@ -253,18 +275,8 @@ interface el2_veer_lockstep_cov_if
         `SINGLE_BIN_FOR(sb_axi_arprot)
         `SINGLE_BIN_FOR(sb_axi_arqos)
         `SINGLE_BIN_FOR(sb_axi_rready)
-    `endif
-
-    `ifdef RV_BUILD_AHB_LITE
-        `SINGLE_BIN_FOR(sb_haddr)
-        `SINGLE_BIN_FOR(sb_hburst)
-        `SINGLE_BIN_FOR(sb_hmastlock)
-        `SINGLE_BIN_FOR(sb_hprot)
-        `SINGLE_BIN_FOR(sb_hsize)
-        `SINGLE_BIN_FOR(sb_htrans)
-        `SINGLE_BIN_FOR(sb_hwrite)
-    `endif
     endgroup
+    `endif
 
     // Instruction Cache
     covergroup el2_veer_lockstep_ic_differ @(posedge clk iff rst_n);
@@ -307,10 +319,18 @@ interface el2_veer_lockstep_cov_if
         el2_veer_lockstep_error_source el2_veer_lockstep_error_source_cg = new();
         el2_veer_lockstep_error_disable el2_veer_lockstep_error_disable_cg = new();
         el2_veer_lockstep_trace_differ el2_veer_lockstep_trace_differ_cg = new();
-        el2_veer_lockstep_lsu_differ el2_veer_lockstep_lsu_differ_cg = new();
-        el2_veer_lockstep_ifu_differ el2_veer_lockstep_ifu_differ_cg = new();
-        el2_veer_lockstep_dma_differ el2_veer_lockstep_dma_differ_cg = new();
-        el2_veer_lockstep_sb_differ el2_veer_lockstep_sb_differ_cg = new();
+    `ifdef RV_BUILD_AXI4
+        el2_veer_lockstep_lsu_axi_differ el2_veer_lockstep_lsu_axi_differ_cg = new();
+        el2_veer_lockstep_ifu_axi_differ el2_veer_lockstep_ifu_axi_differ_cg = new();
+        el2_veer_lockstep_dma_axi_differ el2_veer_lockstep_dma_axi_differ_cg = new();
+        el2_veer_lockstep_sb_axi_differ el2_veer_lockstep_sb_axi_differ_cg = new();
+    `endif
+    `ifdef RV_BUILD_AHB_LITE
+        el2_veer_lockstep_lsu_ahb_differ el2_veer_lockstep_lsu_ahb_differ_cg = new();
+        el2_veer_lockstep_ifu_ahb_differ el2_veer_lockstep_ifu_ahb_differ_cg = new();
+        el2_veer_lockstep_dma_ahb_differ el2_veer_lockstep_dma_ahb_differ_cg = new();
+        el2_veer_lockstep_sb_ahb_differ el2_veer_lockstep_sb_ahb_differ_cg = new();
+    `endif
         el2_veer_lockstep_ic_differ el2_veer_lockstep_ic_differ_cg = new();
         el2_veer_lockstep_miscellaneous_differ el2_veer_lockstep_miscellaneous_differ_cg = new();
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE

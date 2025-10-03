@@ -8,17 +8,33 @@ on:
 
 jobs:
 
-  Test-Regression-Cache-Waypack-0:
+  Test-Regression-Cache-Waypack-0-num-ways-2:
     name: Test-Regression Cache Waypack 0
     uses: ./.github/workflows/test-regression-cache-waypack-0.yml
     with:
       waypack: 0
+      num_ways: 2
 
-  Test-Regression-Cache-Waypack-1:
+  Test-Regression-Cache-Waypack-0-num-ways-4:
+    name: Test-Regression Cache Waypack 0
+    uses: ./.github/workflows/test-regression-cache-waypack-0.yml
+    with:
+      waypack: 0
+      num_ways: 4
+
+  Test-Regression-Cache-Waypack-1-num-ways-2:
     name: Test-Regression Cache Waypack 1
     uses: ./.github/workflows/test-regression-cache-waypack-0.yml
     with:
       waypack: 1
+      num_ways: 2
+
+  Test-Regression-Cache-Waypack-1-num-ways-4:
+    name: Test-Regression Cache Waypack 1
+    uses: ./.github/workflows/test-regression-cache-waypack-0.yml
+    with:
+      waypack: 1
+      num_ways: 4
 
   Test-Exceptions-Regression:
     name: Test-Exceptions-Regression

@@ -977,7 +977,6 @@ end // block: OTHERS
       end
       else  begin : ECC0
         logic [pt.ICACHE_NUM_WAYS-1:0] [pt.ICACHE_TAG_NUM_BYPASS-1:0][21 :0] wb_dout_hold;
-        assign ic_tag_data_raw_pre[i][25:22] = '0 ;
 
         if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin
           assign wrptr_in[i] = (wrptr[i] == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr[i] + 1'd1);

@@ -10,6 +10,8 @@ interface el2_veer_lockstep_cov_if
     input logic        rst_n,
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
     input logic        regfile_corrupted,
+    el2_regfile_if.veer_rf_sink delayed_main_core_regfile,
+    el2_regfile_if.veer_rf_sink shadow_core_regfile,
 `endif
     input logic        outputs_corrupted,
     input el2_mubi_t   corruption_detected_o,
@@ -29,9 +31,9 @@ interface el2_veer_lockstep_cov_if
             mubi_check_true(corruption_detected_o);
         inject_error_cp: coverpoint mubi_check_true(lockstep_err_injection_en_i) &
             mubi_check_true(corruption_detected_o);
-        invalid_inject_detected_cp: coverpoint mubi_check_invalid(lockstep_err_injection_en_i) &
+        invalid_inject_detected_cp: coverpoint mubi_check_true(mubi_check_invalid(lockstep_err_injection_en_i)) &
             mubi_check_true(corruption_detected_o);
-        invalid_disable_detected_cp: coverpoint mubi_check_invalid(disable_corruption_detection_i) &
+        invalid_disable_detected_cp: coverpoint mubi_check_true(mubi_check_invalid(disable_corruption_detection_i)) &
             mubi_check_true(corruption_detected_o);
     endgroup
 
@@ -46,12 +48,21 @@ interface el2_veer_lockstep_cov_if
             mubi_check_false(corruption_detected_o);
         inject_error_disabled_cp: coverpoint mubi_check_true(lockstep_err_injection_en_i) &
             mubi_check_false(corruption_detected_o);
-        invalid_inject_disabled_cp: coverpoint mubi_check_invalid(lockstep_err_injection_en_i) &
+        invalid_inject_disabled_cp: coverpoint mubi_check_true(mubi_check_invalid(lockstep_err_injection_en_i)) &
             mubi_check_false(corruption_detected_o);
     endgroup
 
 `define SINGLE_BIN_FOR(name) name: coverpoint \
     delayed_main_core_outputs.name ^ shadow_core_outputs.name {bins diff = {[1:$]};}
+
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+    // Reg IF
+    covergroup el2_veer_lockstep_reg_differ @(posedge clk iff rst_n);
+        option.per_instance = 1;
+        gpr: coverpoint delayed_main_core_regfile.gpr ^ shadow_core_regfile.gpr {bins diff = {[1:$]};}
+        tlu: coverpoint delayed_main_core_regfile.tlu ^ shadow_core_regfile.tlu {bins diff = {[1:$]};}
+    endgroup
+`endif
 
     // ICCM
     covergroup el2_veer_lockstep_iccm_differ @(posedge clk iff rst_n);
@@ -302,6 +313,9 @@ interface el2_veer_lockstep_cov_if
         el2_veer_lockstep_sb_differ el2_veer_lockstep_sb_differ_cg = new();
         el2_veer_lockstep_ic_differ el2_veer_lockstep_ic_differ_cg = new();
         el2_veer_lockstep_miscellaneous_differ el2_veer_lockstep_miscellaneous_differ_cg = new();
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+        el2_veer_lockstep_reg_differ el2_veer_lockstep_reg_differ_cg = new();
+`endif
         $display("Lockstep coverage created");
     end
 

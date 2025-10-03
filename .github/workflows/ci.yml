@@ -13,28 +13,28 @@ jobs:
     uses: ./.github/workflows/test-regression-dcls.yml
 
   Test-Regression-Cache-Waypack-0-num-ways-2:
-    name: Test-Regression Cache Waypack 0
+    name: Test-Regression Cache Waypack 0 Num Ways 2
     uses: ./.github/workflows/test-regression-cache-waypack.yml
     with:
       waypack: 0
       num_ways: 2
 
   Test-Regression-Cache-Waypack-0-num-ways-4:
-    name: Test-Regression Cache Waypack 0
+    name: Test-Regression Cache Waypack 0 Num Ways 4
     uses: ./.github/workflows/test-regression-cache-waypack.yml
     with:
       waypack: 0
       num_ways: 4
 
   Test-Regression-Cache-Waypack-1-num-ways-2:
-    name: Test-Regression Cache Waypack 1
+    name: Test-Regression Cache Waypack 1 Num Ways 2
     uses: ./.github/workflows/test-regression-cache-waypack.yml
     with:
       waypack: 1
       num_ways: 2
 
   Test-Regression-Cache-Waypack-1-num-ways-4:
-    name: Test-Regression Cache Waypack 1
+    name: Test-Regression Cache Waypack 1 Num Ways 4
     uses: ./.github/workflows/test-regression-cache-waypack.yml
     with:
       waypack: 1

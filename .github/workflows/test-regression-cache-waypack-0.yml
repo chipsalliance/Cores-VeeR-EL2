@@ -6,6 +6,9 @@ on:
       waypack:
         required: true
         type: number
+      num_ways:
+        required: true
+        type: number
 
 defaults:
   run:
@@ -13,6 +16,7 @@ defaults:
 
 env:
   WAYPACK: ${{ inputs.waypack }}
+  NUM_WAYS: ${{ inputs.num_ways }}
 
 jobs:
 
@@ -96,7 +100,7 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
-          echo "FULL_NAME=${{ matrix.bus }}-${{ matrix.test }}-${{ matrix.priv == 0 && 'm' || 'mu' }}-waypack${WAYPACK}" >> $GITHUB_ENV
+          echo "FULL_NAME=${{ matrix.bus }}-${{ matrix.test }}-${{ matrix.priv == 0 && 'm' || 'mu' }}-waypack${WAYPACK}-num-ways${NUM_WAYS}" >> $GITHUB_ENV
 
       - name: Run tests
         shell: bash

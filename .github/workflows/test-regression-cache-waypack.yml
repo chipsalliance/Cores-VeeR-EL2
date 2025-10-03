@@ -113,6 +113,7 @@ jobs:
                "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters", "pmp", "write_unaligned",
                "icache", "bitmanip"]
         priv: ["0", "1"]
+        ecc: ["0", "1"]
         exclude:
           # These tests require user mode
           - priv: "0"
@@ -146,3 +147,4 @@ jobs:
           TEST: ${{ matrix.test }}
           BUS: ${{ matrix.bus }}
           PRIV: ${{ matrix.priv }}
+          ECC: ${{ matrix.ecc }}

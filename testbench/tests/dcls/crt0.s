@@ -7,6 +7,10 @@ _start:
         # Setup stack
         la sp, STACK
 
+        # Setup trap handler
+        la t0, _trap_handler
+        csrw mtvec, t0
+
         # Call main()
         call main
 
@@ -24,6 +28,17 @@ _finish:
         .rept 10
         nop
         .endr
+
+.global _trap_handler
+_trap_handler:
+    call trap_handler
+    j _start
+
+.section .text.nmi
+.align 4
+_nmi:
+    la t0, _trap_handler
+    jr t0
 
 .section .data.io
 .global tohost

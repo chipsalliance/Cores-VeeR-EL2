@@ -67,8 +67,6 @@ module tb_top
     el2_mubi_pkg::el2_mubi_t disable_corruption_detection_i;
     el2_mubi_pkg::el2_mubi_t lockstep_err_injection_en_i;
     el2_mubi_pkg::el2_mubi_t corruption_detected_o;
-    assign disable_corruption_detection_i = el2_mubi_pkg::El2MuBiFalse;
-    assign lockstep_err_injection_en_i = el2_mubi_pkg::El2MuBiFalse;
 `endif // RV_LOCKSTEP_ENABLE
 
 `ifdef RV_BUILD_AHB_LITE
@@ -776,8 +774,6 @@ module tb_top
     logic next_dbus_error;
     logic next_ibus_error;
     logic inject_veer_in_dist, inject_lockstep_in_dist;
-    logic update_disable_corruption_detection;
-    logic update_lockstep_err_injection_en;
     logic clear_inject_in_dist;
     logic [8:0] inject_veer_in_dist_no, inject_lockstep_in_dist_no;
 
@@ -789,9 +785,11 @@ module tb_top
             inject_veer_in_dist <= '0;
             inject_lockstep_in_dist <= '0;
             clear_inject_in_dist <= '0;
-            update_disable_corruption_detection <= '0;
-            update_lockstep_err_injection_en <= '0;
             rst_l_cmd <= '1;
+        `ifdef RV_LOCKSTEP_ENABLE
+            disable_corruption_detection_i <= el2_mubi_pkg::El2MuBiFalse;
+            lockstep_err_injection_en_i <= el2_mubi_pkg::El2MuBiFalse;
+        `endif // RV_LOCKSTEP_ENABLE
         end else begin
             nmi_assert_int <= nmi_assert_int >> 1;
             soft_int <= 0;
@@ -875,19 +873,15 @@ module tb_top
                 inject_lockstep_in_dist_no <= mailbox_data[15:8];
             end
             if (mailbox_write && (mailbox_data[7:0] == 8'h93)) begin
-                update_lockstep_err_injection_en <= 1'b1;
-                inject_lockstep_in_dist_no <= mailbox_data[15:8];
+                lockstep_err_injection_en_i <= mailbox_data[15:8];
             end
             if (mailbox_write && (mailbox_data[7:0] == 8'h94)) begin
-                update_disable_corruption_detection <= 1'b1;
-                inject_lockstep_in_dist_no <= mailbox_data[15:8];
+                disable_corruption_detection_i <= mailbox_data[15:8];
             end
             if (mailbox_write && (mailbox_data[7:0] == 8'h95)) begin
                 clear_inject_in_dist <= 1'b1;
                 inject_veer_in_dist <= 1'b0;
                 inject_lockstep_in_dist <= 1'b0;
-                update_lockstep_err_injection_en <= 1'b0;
-                update_disable_corruption_detection <= 1'b0;
             end
         `endif // RV_LOCKSTEP_ENABLE
             if(mailbox_write && (mailbox_data[7:0] == 8'h96)) begin

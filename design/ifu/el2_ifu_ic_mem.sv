@@ -1237,8 +1237,19 @@ end // block: OTHERS
    else  begin : ECC0
     logic [(22*pt.ICACHE_NUM_WAYS)-1 :0]  ic_tag_data_raw_packed, ic_tag_wren_biten_vec, ic_tag_data_raw_packed_pre;           // data and its bit enables
     logic [pt.ICACHE_TAG_NUM_BYPASS-1:0][(22*pt.ICACHE_NUM_WAYS)-1 :0] wb_packeddout_hold;
+
+    // Use exported ICache interface.
+    always_comb begin
+      icache_export.ic_tag_wren_biten_vec = ic_tag_wren_biten_vec;
+      ic_tag_data_raw_packed_pre = icache_export.ic_tag_data_raw_packed_pre;
+    end
+
     for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: BITEN
         assign ic_tag_wren_biten_vec[(22*i)+21:22*i] = {22{ic_tag_wren_q[i]}};
+        // Use exported ICache interface.
+        always_comb begin
+          icache_export.ic_tag_clken_final[i] = ic_tag_clken_final;
+        end
      end
       if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
         if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin

@@ -1,5 +1,13 @@
 // Macros for ICache
 
+`define EL2_TIE_OFF_PACKED                                \
+   assign el2_mem_export.ic_tag_data_raw_packed_pre = '0; \
+   assign el2_mem_export.wb_packeddout_pre = '0;
+
+`define EL2_TIE_OFF_NON_PACKED                     \
+   assign el2_mem_export.ic_tag_data_raw_pre = '0; \
+   assign el2_mem_export.wb_dout_pre_up = '0;
+
 `define EL2_IC_TAG_PACKED_SRAM(depth,width)                                                       \
    ram_be_``depth``x``width  ic_way_tag (                                                         \
       .CLK (el2_mem_export.clk),                                                                  \

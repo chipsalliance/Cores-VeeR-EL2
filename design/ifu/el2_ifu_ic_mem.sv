@@ -289,7 +289,10 @@ import el2_pkg::*;
     logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0]                                 any_bypass_up;
     logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0]                                 any_addr_match_up;
 
-   for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: WAYS
+    assign ic_bank_way_clken_final = '0;
+    assign icache_export.ic_b_sb_bit_en_vec = '0;
+
+    for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: WAYS
       for (genvar k=0; k<pt.ICACHE_BANKS_WAY; k++) begin: BANKS_WAY   // 16B subbank
       if (pt.ICACHE_ECC) begin : ECC1
         logic                            [71-1:0]  wb_dout_pre_up;    // data and its bit enables
@@ -894,6 +897,11 @@ end // block: OTHERS
     logic [pt.ICACHE_NUM_WAYS-1:0]        any_addr_match;
     logic [pt.ICACHE_NUM_WAYS-1:0]        ic_tag_clken_final;
 
+    // Use exported ICache interface.
+    always_comb begin
+      icache_export.ic_tag_clken_final = ic_tag_clken_final;
+      icache_export.ic_tag_wren_biten_vec = '0;
+    end
     for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: WAYS
 
       if (pt.ICACHE_ECC) begin  : ECC1

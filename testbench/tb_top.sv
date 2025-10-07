@@ -2416,6 +2416,7 @@ end : Gen_iccm_enable
 
 // ICACHE DATA
  if (pt.ICACHE_WAYPACK == 0 ) begin : PACKED_0
+    `EL2_TIE_OFF_PACKED
     for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin: WAYS
       for (genvar k=0; k<pt.ICACHE_BANKS_WAY; k++) begin: BANKS_WAY   // 16B subbank
       if (pt.ICACHE_ECC) begin : ECC1
@@ -2479,6 +2480,7 @@ end : Gen_iccm_enable
  // WAY PACKED
  else begin : PACKED_10
 
+ `EL2_TIE_OFF_NON_PACKED
  // generate IC DATA PACKED SRAMS for 2/4 ways
   for (genvar k=0; k<pt.ICACHE_BANKS_WAY; k++) begin: BANKS_WAY   // 16B subbank
      if (pt.ICACHE_ECC) begin : ECC1

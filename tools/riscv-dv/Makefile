@@ -7,6 +7,7 @@ RISCV_DV_TEST  ?= riscv_arithmetic_basic_test
 RISCV_DV_SEED  ?= 999
 RISCV_DV_ITER  ?= 1
 RISCV_DV_BATCH ?= 1
+RISCV_DV_PRIV  ?= m
 
 export RISCV_GCC ?=     $(GCC_PREFIX)-gcc
 export RISCV_OBJCOPY ?= $(GCC_PREFIX)-objcopy
@@ -75,7 +76,7 @@ ifeq ($(findstring u, $(RISCV_DV_PRIV)), u)
 endif
 
 RISCV_DV_SIM_ARGS= \
-    --priv m${RISCV_DV_PRIV}
+    --priv ${RISCV_DV_PRIV}
 
 # Append Renode-specific options
 ifeq ("$(RISCV_DV_ISS)", "renode")

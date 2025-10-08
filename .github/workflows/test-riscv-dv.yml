@@ -192,22 +192,6 @@ jobs:
               run
           popd
 
-      - name: Prepare coverage data
-        run: |
-          mkdir -p results
-
-          for ((i=0; i<ITERATIONS; i++)); do
-            .github/scripts/convert_dat.sh ${RV_ROOT}/tools/riscv-dv/work/*/hdl_sim/*_$i/coverage.dat \
-               results/coverage_${FULL_NAME}-iter${i}
-          done
-
-      - name: Pack artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage_data-${{ env.FULL_NAME }}-${{ matrix.coverage }}
-          path: results/*.info
-
       - name: Pack artifacts
         if: always()
         uses: actions/upload-artifact@v4

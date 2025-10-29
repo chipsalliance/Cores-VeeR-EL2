@@ -34,8 +34,11 @@ else begin
       #0 $strobe("CG: %0t %m din %x dout %x clk %b width %d",$time,din,dout,clk,WIDTH);
    end
 `endif
-
+`ifdef RV_SYNC_RESET
+   always_ff @(posedge clk) begin
+`else
    always_ff @(posedge clk or negedge rst_l) begin
+`endif
       if (rst_l == 0)
         dout[WIDTH-1:0] <= 0;
       else
@@ -792,6 +795,7 @@ module rvclkhdr
   (
    input  logic en,
    input  logic clk,
+   input  logic rst_l,
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
    /*pragma coverage off*/
    input  logic scan_mode,
@@ -799,13 +803,21 @@ module rvclkhdr
    output logic l1clk
    );
 
+   logic en_int;
+`ifdef RV_SYNC_RESET
+   assign en_int = en | !rst_l;
+`else
+   assign en_int = en;
+`endif
+
    logic   SE;
    assign       SE = 0;
 
+
 `ifdef TECH_SPECIFIC_EC_RV_ICG
-   `USER_EC_RV_ICG clkhdr ( .*, .EN(en), .CK(clk), .Q(l1clk));
+   `USER_EC_RV_ICG clkhdr ( .*, .EN(en_int), .CK(clk), .Q(l1clk));
 `else
-   `TEC_RV_ICG clkhdr ( .*, .EN(en), .CK(clk), .Q(l1clk));
+   `TEC_RV_ICG clkhdr ( .*, .EN(en_int), .CK(clk), .Q(l1clk));
 `endif
 
 endmodule // rvclkhdr
@@ -815,12 +827,19 @@ module rvoclkhdr
   (
    input  logic en,
    input  logic clk,
+   input  logic rst_l,
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
    /*pragma coverage off*/
    input  logic scan_mode,
    /*pragma coverage on*/
    output logic l1clk
    );
+   logic en_int;
+`ifdef RV_SYNC_RESET
+   assign en_int = en | !rst_l;
+`else
+   assign en_int = en;
+`endif
 
    logic   SE;
    assign       SE = 0;
@@ -829,9 +848,9 @@ module rvoclkhdr
    assign l1clk = clk;
 `else
    `ifdef TECH_SPECIFIC_EC_RV_ICG
-      `USER_EC_RV_ICG clkhdr ( .*, .EN(en), .CK(clk), .Q(l1clk));
+      `USER_EC_RV_ICG clkhdr ( .*, .EN(en_int), .CK(clk), .Q(l1clk));
    `else
-      `TEC_RV_ICG clkhdr ( .*, .EN(en), .CK(clk), .Q(l1clk));
+      `TEC_RV_ICG clkhdr ( .*, .EN(en_int), .CK(clk), .Q(l1clk));
     `endif
 `endif
 

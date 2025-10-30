@@ -973,7 +973,11 @@ module el2_veer_lockstep
   assign rst_shadow = &rst_shadow_sr;
   assign rst_dbg_shadow = &rst_dbg_shadow_sr;
 
-  always_ff @(posedge clk or negedge rst_l) begin
+`ifdef RV_SYNC_RESET
+   always_ff @(posedge clk) begin
+`else
+   always_ff @(posedge clk or negedge rst_l) begin
+`endif
     if (!rst_l) begin
       rst_shadow_sr <= '0;
     end else begin
@@ -981,7 +985,11 @@ module el2_veer_lockstep
     end
   end
 
-  always_ff @(posedge clk or negedge dbg_rst_l) begin
+`ifdef RV_SYNC_RESET
+   always_ff @(posedge clk) begin
+`else
+   always_ff @(posedge clk or negedge dbg_rst_l) begin
+`endif
     if (!dbg_rst_l) begin
       rst_dbg_shadow_sr <= '0;
     end else begin
@@ -990,7 +998,11 @@ module el2_veer_lockstep
   end
 
   // Delay the inputs and outputs
-  always_ff @(posedge clk or negedge rst_l) begin
+`ifdef RV_SYNC_RESET
+   always_ff @(posedge clk) begin
+`else
+   always_ff @(posedge clk or negedge rst_l) begin
+`endif
       if (~rst_l) begin
         delay_input_d[0]  <= veer_inputs_t'(0);
         delay_output_d[0] <= veer_outputs_t'(0);
@@ -1000,7 +1012,11 @@ module el2_veer_lockstep
       end
     end
   for (genvar i = 0; i < LockstepDelay; i++) begin
+`ifdef RV_SYNC_RESET
+    always_ff @(posedge clk) begin
+`else
     always_ff @(posedge clk or negedge rst_l) begin
+`endif
       if (!rst_l) begin
           delay_input_d[i+1]  <= veer_inputs_t'(0);
           delay_output_d[i+1] <= veer_outputs_t'(0);
@@ -1016,7 +1032,11 @@ module el2_veer_lockstep
 
   el2_regfile_if delayed_main_core_regfile[LockstepDelay:0] ();
 
+`ifdef RV_SYNC_RESET
+  always_ff @(posedge clk) begin
+`else
   always_ff @(posedge clk or negedge rst_l) begin
+`endif
     if (!rst_l) begin
       delayed_main_core_regfile[0].gpr <= '0;
       delayed_main_core_regfile[0].tlu <= '0;
@@ -1026,7 +1046,11 @@ module el2_veer_lockstep
     end
   end
   for (genvar i = 0; i < LockstepDelay; i++) begin
+`ifdef RV_SYNC_RESET
+    always_ff @(posedge clk) begin
+`else
     always_ff @(posedge clk or negedge rst_l) begin
+`endif
       if (!rst_l) begin
           delayed_main_core_regfile[i+1].gpr <= '0;
           delayed_main_core_regfile[i+1].tlu <= '0;

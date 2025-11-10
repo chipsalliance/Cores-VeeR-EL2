@@ -16,6 +16,7 @@ defaults:
 
 env:
   WAYPACK: ${{ inputs.waypack }}
+  SYNC_RESET: ${{ inputs.sync_reset }}
 
 jobs:
   regression-tests:

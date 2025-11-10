@@ -44,6 +44,7 @@ jobs:
             bus: "axi"
             coverage: "branch"
             priv: "0"
+            sync_reset: "1"
             tb_extra_args: "--test-halt --test-lsu-clk-ratio"
     env:
       DEBIAN_FRONTEND: "noninteractive"

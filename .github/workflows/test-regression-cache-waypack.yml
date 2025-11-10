@@ -6,6 +6,9 @@ on:
       waypack:
         required: true
         type: number
+      sync_reset:
+        required: true
+        type: number
 
 defaults:
   run:
@@ -76,7 +79,7 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
-          echo "FULL_NAME=${{ matrix.bus }}-${{ matrix.test }}-${{ matrix.priv == 0 && 'm' || 'mu' }}-waypack${WAYPACK}" >> $GITHUB_ENV
+          echo "FULL_NAME=${{ matrix.bus }}-${{ matrix.test }}-${{ matrix.priv == 0 && 'm' || 'mu' }}-waypack${WAYPACK}-sync_reset${SYNC_RESET}" >> $GITHUB_ENV
 
       - name: Run tests
         run: |
@@ -87,7 +90,7 @@ jobs:
           if [ ${{ matrix.test }} = hello_world_iccm ]; then
               export TB_EXTRA_ARGS="$TB_EXTRA_ARGS --test-lsu-clk-ratio"
           fi
-          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} $WAYPACK
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} $WAYPACK $SYNC_RESET
 
       - name: Prepare coverage data
         run: |

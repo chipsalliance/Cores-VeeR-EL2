@@ -103,5 +103,5 @@ run_regression_test(){
 # SYNC_RESET=1
 # run_regression_test.sh $RESULTS_DIR $BUS $NAME $COVERAGE $USER_MODE $ICACHE_WAYPACK $SYNC_RESET
 
-check_args_count $# 6
+check_args_count $# 7
 run_regression_test "$@"

@@ -46,7 +46,11 @@ assign reg_wr_en = c_wr_en;
 
 
 // synchronizers  
-always @ ( posedge clk or negedge rst_n) begin
+`ifdef RV_SYNC_RESET
+always_ff @(posedge clk) begin
+`else
+always_ff @(posedge clk or negedge rst_n) begin
+`endif
     if(!rst_n) begin
         rden <= '0;
         wren <= '0;

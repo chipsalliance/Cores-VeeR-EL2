@@ -23,6 +23,7 @@ jobs:
         coverage: ["all"]
         cache_waypack: ["0", "1"]
         priv: ["0"]
+        sync_reset: ["0", "1"]
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/regression/.cache/"
@@ -56,13 +57,13 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
-          echo "FULL_NAME=${{ matrix.bus }}-exceptions-${{ matrix.test }}-waypack${{ matrix.cache_waypack }}" >> $GITHUB_ENV
+          echo "FULL_NAME=${{ matrix.bus }}-exceptions-${{ matrix.test }}-waypack${{ matrix.cache_waypack }}-sync_reset${{ matrix.sync_reset}}" >> $GITHUB_ENV
 
       - name: Run tests
         run: |
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
-          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} ${{ matrix.cache_waypack }}
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} ${{ matrix.cache_waypack }} ${{ matrix.sync_reset}}
 
       - name: Prepare coverage data
         run: |

@@ -25,13 +25,15 @@ run_regression_test(){
     # COVERAGE -
     # USER_MODE - '1' for user mode, '0' for without user mode
     # CACHE WAYPACK -
-    check_args_count $# 6
+    # SYNC_RESET - '1' sync reset, '0' async reset
+    check_args_count $# 7
     RESULTS_DIR=$1
     BUS=$2
     NAME=$3
     COVERAGE=$4
     USER_MODE=$5
     ICACHE_WAYPACK=$6
+    SYNC_RESET=$7
     echo -e "${COLOR_WHITE}========== running test '${NAME}' =========${COLOR_CLEAR}"
     echo -e "${COLOR_WHITE} RESULTS_DIR    = ${RESULTS_DIR}${COLOR_CLEAR}"
     echo -e "${COLOR_WHITE} SYSTEM BUS     = ${BUS}${COLOR_CLEAR}"
@@ -39,6 +41,7 @@ run_regression_test(){
     echo -e "${COLOR_WHITE} COVERAGE       = ${COVERAGE}${COLOR_CLEAR}"
     echo -e "${COLOR_WHITE} USER_MODE      = ${USER_MODE}${COLOR_CLEAR}"
     echo -e "${COLOR_WHITE} ICACHE_WAYPACK = ${ICACHE_WAYPACK}${COLOR_CLEAR}"
+    echo -e "${COLOR_WHITE} SYNC_RESET     = ${SYNC_RESET}${COLOR_CLEAR}"
 
     COMMON_PARAMS="-set bitmanip_zba -set bitmanip_zbb -set bitmanip_zbc -set bitmanip_zbe -set bitmanip_zbf -set bitmanip_zbp -set bitmanip_zbr -set bitmanip_zbs -set=fpga_optimize=0"
 
@@ -55,6 +58,10 @@ run_regression_test(){
 
     if [[ "${DCLS_ENABLE}" ==  "1" ]]; then
         COMMON_PARAMS="-set lockstep_enable=1 -set lockstep_regfile_enable=1 ${COMMON_PARAMS}"
+    fi
+    
+    if [[ "${SYNC_RESET}" == "1" ]]; then
+        COMMON_PARAMS="-set=sync_reset=1 ${COMMON_PARAMS}"
     fi
 
     COMMON_PARAMS="-set=icache_waypack=${ICACHE_WAYPACK} ${COMMON_PARAMS}"
@@ -92,7 +99,9 @@ run_regression_test(){
 # NAME=hello_world
 # COVERAGE=branch
 # USER_MODE=1
-# run_regression_test.sh $RESULTS_DIR $BUS $NAME $COVERAGE $USER_MODE
+# ICACHE_WAYPACK=0
+# SYNC_RESET=1
+# run_regression_test.sh $RESULTS_DIR $BUS $NAME $COVERAGE $USER_MODE $ICACHE_WAYPACK $SYNC_RESET
 
-check_args_count $# 6
+check_args_count $# 7
 run_regression_test "$@"

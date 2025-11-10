@@ -21,6 +21,7 @@ jobs:
                "icache", "bitmanip"]
         coverage: ["branch"]
         priv: ["0", "1"]
+        sync_reset: ["1"]
         tb_extra_args: ["--test-halt"]
         exclude:
           # These tests require user mode
@@ -43,6 +44,7 @@ jobs:
             bus: "axi"
             coverage: "branch"
             priv: "0"
+            sync_reset: "1"
             tb_extra_args: "--test-halt --test-lsu-clk-ratio"
     env:
       DEBIAN_FRONTEND: "noninteractive"
@@ -84,7 +86,7 @@ jobs:
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
-          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0 ${{ matrix.sync_reset }}
 
   custom-regression-tests:
     name: Custom regression tests

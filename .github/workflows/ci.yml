@@ -17,12 +17,14 @@ jobs:
     uses: ./.github/workflows/test-regression-cache-waypack.yml
     with:
       waypack: 0
+      sync_reset: 1
 
   Test-Regression-Cache-Waypack-1:
     name: Test-Regression Cache Waypack 1
     uses: ./.github/workflows/test-regression-cache-waypack.yml
     with:
       waypack: 1
+      sync_reset: 0
 
   Test-Exceptions-Regression:
     name: Test-Exceptions-Regression

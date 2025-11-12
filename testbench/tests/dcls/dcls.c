@@ -25,11 +25,11 @@
 volatile uint32_t boot_count __attribute__((section(".dccm.persistent"))) = 0;
 
 extern uint32_t tohost;
-volatile uint32_t *threshold    = (RV_PIC_BASE_ADDR + RV_PIC_MEIPT_OFFSET);
-volatile uint32_t *gateway      = (RV_PIC_BASE_ADDR + RV_PIC_MEIGWCTRL_OFFSET);
-volatile uint32_t *clr_gateway  = (RV_PIC_BASE_ADDR + RV_PIC_MEIGWCLR_OFFSET);
-volatile uint32_t *priority     = (RV_PIC_BASE_ADDR + RV_PIC_MEIPL_OFFSET);
-volatile uint32_t *enable       = (RV_PIC_BASE_ADDR + RV_PIC_MEIE_OFFSET);
+volatile uint32_t *threshold    = (uint32_t *)(RV_PIC_BASE_ADDR + RV_PIC_MEIPT_OFFSET);
+volatile uint32_t *gateway      = (uint32_t *)(RV_PIC_BASE_ADDR + RV_PIC_MEIGWCTRL_OFFSET);
+volatile uint32_t *clr_gateway  = (uint32_t *)(RV_PIC_BASE_ADDR + RV_PIC_MEIGWCLR_OFFSET);
+volatile uint32_t *priority     = (uint32_t *)(RV_PIC_BASE_ADDR + RV_PIC_MEIPL_OFFSET);
+volatile uint32_t *enable       = (uint32_t *)(RV_PIC_BASE_ADDR + RV_PIC_MEIE_OFFSET);
 
 // ============================================================================
 

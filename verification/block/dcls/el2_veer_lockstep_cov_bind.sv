@@ -1,6 +1,8 @@
 module el2_veer_lockstep_cov_bind
 #(
+`ifdef FCOV
     `include "el2_param.vh"
+`endif
 ) ();
 `ifdef FCOV
     bind el2_veer_lockstep el2_veer_lockstep_cov_if el2_veer_lockstep_cov(

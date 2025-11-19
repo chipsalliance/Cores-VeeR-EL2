@@ -389,7 +389,7 @@ module el2_veer_lockstep
     // Equivalency Checker output
     output el2_mubi_t corruption_detected_o
 );
-  localparam int unsigned LockstepDelay = pt.LOCKSTEP_DELAY;  // Delay I/O; in clock cycles
+  localparam int unsigned LockstepDelay = 32'(pt.LOCKSTEP_DELAY);  // Delay I/O; in clock cycles
 
   veer_inputs_t main_core_inputs;
   veer_inputs_t [LockstepDelay:0] delay_input_d;

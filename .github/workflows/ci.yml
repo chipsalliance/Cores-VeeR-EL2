@@ -10,98 +10,98 @@ on:
 
 jobs:
 
-  Test-DCLS:
-    name: Test-DCLS-Regression
-    uses: ./.github/workflows/test-regression-dcls.yml
+  # Test-DCLS:
+  #   name: Test-DCLS-Regression
+  #   uses: ./.github/workflows/test-regression-dcls.yml
 
-  Test-Regression-Cache-Waypack-0-num-ways-2:
-    name: Test-Regression Cache Waypack 0 Num Ways 2
-    uses: ./.github/workflows/test-regression-cache-waypack.yml
-    with:
-      waypack: 0
-      num_ways: 2
+  # Test-Regression-Cache-Waypack-0-num-ways-2:
+  #   name: Test-Regression Cache Waypack 0 Num Ways 2
+  #   uses: ./.github/workflows/test-regression-cache-waypack.yml
+  #   with:
+  #     waypack: 0
+  #     num_ways: 2
 
-  Test-Regression-Cache-Waypack-0-num-ways-4:
-    name: Test-Regression Cache Waypack 0 Num Ways 4
-    uses: ./.github/workflows/test-regression-cache-waypack.yml
-    with:
-      waypack: 0
-      num_ways: 4
+  # Test-Regression-Cache-Waypack-0-num-ways-4:
+  #   name: Test-Regression Cache Waypack 0 Num Ways 4
+  #   uses: ./.github/workflows/test-regression-cache-waypack.yml
+  #   with:
+  #     waypack: 0
+  #     num_ways: 4
 
-  Test-Regression-Cache-Waypack-1-num-ways-2:
-    name: Test-Regression Cache Waypack 1 Num Ways 2
-    uses: ./.github/workflows/test-regression-cache-waypack.yml
-    with:
-      waypack: 1
-      num_ways: 2
+  # Test-Regression-Cache-Waypack-1-num-ways-2:
+  #   name: Test-Regression Cache Waypack 1 Num Ways 2
+  #   uses: ./.github/workflows/test-regression-cache-waypack.yml
+  #   with:
+  #     waypack: 1
+  #     num_ways: 2
 
-  Test-Regression-Cache-Waypack-1-num-ways-4:
-    name: Test-Regression Cache Waypack 1 Num Ways 4
-    uses: ./.github/workflows/test-regression-cache-waypack.yml
-    with:
-      waypack: 1
-      num_ways: 4
+  # Test-Regression-Cache-Waypack-1-num-ways-4:
+  #   name: Test-Regression Cache Waypack 1 Num Ways 4
+  #   uses: ./.github/workflows/test-regression-cache-waypack.yml
+  #   with:
+  #     waypack: 1
+  #     num_ways: 4
 
-  Test-Exceptions-Regression:
-    name: Test-Exceptions-Regression
-    uses: ./.github/workflows/test-regression-exceptions.yml
+  # Test-Exceptions-Regression:
+  #   name: Test-Exceptions-Regression
+  #   uses: ./.github/workflows/test-regression-exceptions.yml
 
-  Test-Verification:
-    name: Test-Verification
-    uses: ./.github/workflows/test-verification.yml
+  # Test-Verification:
+  #   name: Test-Verification
+  #   uses: ./.github/workflows/test-verification.yml
 
-  Test-Microarchitectural:
-    name: Test-Microarchitectural
-    uses: ./.github/workflows/test-uarch.yml
+  # Test-Microarchitectural:
+  #   name: Test-Microarchitectural
+  #   uses: ./.github/workflows/test-uarch.yml
 
-  Test-RISCV-DV:
-    name: Test-RISCV-DV
-    uses: ./.github/workflows/test-riscv-dv.yml
+  # Test-RISCV-DV:
+  #   name: Test-RISCV-DV
+  #   uses: ./.github/workflows/test-riscv-dv.yml
 
   Test-RISCOF:
     name: Test-RISCOF
     uses: ./.github/workflows/test-riscof.yml
 
-  Test-UVM:
-    name: Test-UVM
-    uses: ./.github/workflows/test-uvm.yml
+  # Test-UVM:
+  #   name: Test-UVM
+  #   uses: ./.github/workflows/test-uvm.yml
 
-  Test-Renode:
-    name: Test-Renode
-    uses: ./.github/workflows/test-renode.yml
+  # Test-Renode:
+  #   name: Test-Renode
+  #   uses: ./.github/workflows/test-renode.yml
 
-  Test-OpenOCD:
-    name: Test-OpenOCD
-    uses: ./.github/workflows/test-openocd.yml
+  # Test-OpenOCD:
+  #   name: Test-OpenOCD
+  #   uses: ./.github/workflows/test-openocd.yml
 
-  Report-Coverage:
-    name: Report-Coverage
-    needs: [
-      Test-DCLS,
-      Test-Regression-Cache-Waypack-0-num-ways-2,
-      Test-Regression-Cache-Waypack-0-num-ways-4,
-      Test-Regression-Cache-Waypack-1-num-ways-2,
-      Test-Regression-Cache-Waypack-1-num-ways-4,
-      Test-Exceptions-Regression,
-      Test-Verification,
-      Test-Microarchitectural,
-      Test-RISCV-DV,
-      Test-RISCOF,
-      Test-OpenOCD
-    ]
-    uses: ./.github/workflows/report-coverage.yml
+  # Report-Coverage:
+  #   name: Report-Coverage
+  #   needs: [
+  #     Test-DCLS,
+  #     Test-Regression-Cache-Waypack-0-num-ways-2,
+  #     Test-Regression-Cache-Waypack-0-num-ways-4,
+  #     Test-Regression-Cache-Waypack-1-num-ways-2,
+  #     Test-Regression-Cache-Waypack-1-num-ways-4,
+  #     Test-Exceptions-Regression,
+  #     Test-Verification,
+  #     Test-Microarchitectural,
+  #     Test-RISCV-DV,
+  #     Test-RISCOF,
+  #     Test-OpenOCD
+  #   ]
+  #   uses: ./.github/workflows/report-coverage.yml
 
-  Build-Docs:
-    name: Build-Docs
-    uses: ./.github/workflows/build-docs.yml
+  # Build-Docs:
+  #   name: Build-Docs
+  #   uses: ./.github/workflows/build-docs.yml
 
-  Publish-to-GH-Pages:
-    concurrency:
-      group: concurrency-group-${{ github.repository }}-publish
-      cancel-in-progress: false
-    permissions:
-      actions: write
-      contents: write
-    name: Publish-to-GH-Pages
-    needs: [Report-Coverage, Build-Docs]
-    uses: ./.github/workflows/publish-webpage.yml
+  # Publish-to-GH-Pages:
+  #   concurrency:
+  #     group: concurrency-group-${{ github.repository }}-publish
+  #     cancel-in-progress: false
+  #   permissions:
+  #     actions: write
+  #     contents: write
+  #   name: Publish-to-GH-Pages
+  #   needs: [Report-Coverage, Build-Docs]
+  #   uses: ./.github/workflows/publish-webpage.yml

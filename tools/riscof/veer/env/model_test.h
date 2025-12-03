@@ -17,7 +17,11 @@
     sw x1, tohost, t5;                                                        \
     j write_tohost;
 
-#define RVMODEL_BOOT
+#define RVMODEL_BOOT \
+  /* Length of RVMODEL_BOOT must be the same in both VeeR and Spike, to align PC */ \
+  .rept 4;           \
+  nop;               \
+  .endr;
 
 //RV_COMPLIANCE_DATA_BEGIN
 #define RVMODEL_DATA_BEGIN                                              \

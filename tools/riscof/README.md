@@ -53,11 +53,6 @@ cd work
 riscof --verbose info arch-test --clone
 ```
 
-There are tests that include RISC-V `Zicsr` extension which cannot be disabled. Since VeeR-EL2 Core does not support this extension they need to be removed manually. This is a temporary workaround:
-```
-rm -rf riscv-arch-test/riscv-test-suite/rv32i_m/privilege/
-```
-
 5. Configure RISCOF
 
 Copy RISCOF configuration from VeeR-EL2 Core repository to the working directory and build the test list:

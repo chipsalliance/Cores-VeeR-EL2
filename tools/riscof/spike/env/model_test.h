@@ -17,7 +17,14 @@
     sw x1, tohost, t5;                                                        \
     j write_tohost;
 
-#define RVMODEL_BOOT
+#define MTIMECMP_BASE 0x2004000
+
+#define RVMODEL_BOOT      \
+  /* Set MTIMECMP to UINT64_MAX so that there isn't a timer interrupt pending in MIP */ \
+  li t0, -1;              \
+  la t1, MTIMECMP_BASE;   \
+  sw t0, (t1);            \
+  sw t0, 4(t1);
 
 //RV_COMPLIANCE_DATA_BEGIN
 #define RVMODEL_DATA_BEGIN                                              \

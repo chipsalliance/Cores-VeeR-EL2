@@ -17,7 +17,6 @@ jobs:
       fail-fast: false
       matrix:
         coverage: ["all"]
-        priv: ["", "u"]
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/riscof/.cache/"
@@ -27,7 +26,16 @@ jobs:
         run: |
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
             git ccache python3-minimal python3-pip device-tree-compiler \
-            gcc-riscv64-unknown-elf build-essential ninja-build
+            build-essential ninja-build
+
+      # ghcr.io/antmicro/cores-veer-el2:20250411084921 is ubuntu-22.04.5 which has a riscv toolchain
+      # without the support for the Zicsr extension
+      - name: Install cross-compiler
+        run: |
+          echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+            gcc-riscv64-unknown-elf
+          riscv64-unknown-elf-gcc --version
 
       - name: Setup repository
         uses: actions/checkout@v2
@@ -50,9 +58,16 @@ jobs:
           mkdir -p riscof
           pushd riscof
             riscof --verbose info arch-test --clone
-            # FIXME: It seems impossible to turn off Zicsr extension. A
-            # temporary solution is to remove the tests.
-            rm -rf riscv-arch-test/riscv-test-suite/rv32i_m/privilege/
+          popd
+
+      - name: Skip tests
+        run: |
+          pushd riscof/riscv-arch-test/riscv-test-suite
+            # This test accesses memory at address 0x0.
+            # These accesses fail on Spike because it has a debug module in range [0x0; 0x1000).
+            # VeeR doesn't have such restrictions, so they don't fail, which results in a test failure.
+            rm -f rv32i_m/pmp/src/pmpm_cfg_A_tor_zero.S
+            rm -f rv32i_m/pmp/src/pmpzca_misaligned_na4.S
           popd
 
       - name: Configure RISCOF
@@ -71,11 +86,7 @@ jobs:
           export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
           pushd riscof
-            $RV_ROOT/configs/veer.config
-            VEER_OPTS=""
-            if  [[ "${{ matrix.priv }}" == *"u"* ]]; then
-              VEER_OPTS="-set=user_mode=1 -set=smepmp=1"
-            fi
+            VEER_OPTS="-set=user_mode=1 -set=smepmp=1"
             make -f $RV_ROOT/tools/Makefile verilator-build CONF_PARAMS="-set build_axi4 $VEER_OPTS" COVERAGE=${{ matrix.coverage }}
           popd
 
@@ -92,7 +103,7 @@ jobs:
         run: |
           export PATH=/opt/verilator/bin:$PATH
           .github/scripts/convert_dat.sh riscof/coverage/coverage.dat \
-             riscof/coverage/coverage_riscof-m${{ matrix.priv }}
+             riscof/coverage/coverage_riscof-m
 
       - name: Prepare report
         run: |
@@ -108,16 +119,26 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: riscof_coverage_data_m${{matrix.priv}}_${{ matrix.coverage }}
+          name: riscof_coverage_data_m_${{ matrix.coverage }}
           path: riscof/coverage/*.info
 
       - name: Pack artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: riscof-report_m${{matrix.priv}}_${{ matrix.coverage }}
+          name: riscof-report_m_${{ matrix.coverage }}
           path: |
             riscof/riscof_work/report.html
             riscof/riscof_work/style.css
             riscof/riscof_work/assets
             riscof/riscof_work/script
+            riscof/riscof_work/rv*
+            !riscof/riscof_work/**/coverage.dat
+
+      - name: Check failure
+        run: |
+          if res=$(grep -no riscof/riscof_work/report.html -e "<tbody.*failed"); then
+            echo "Number of failed RISCOF tests: $(wc -l <<< "$res")" >&2
+            echo "Check the report in artifacts for details." >&2
+            exit 1
+          fi

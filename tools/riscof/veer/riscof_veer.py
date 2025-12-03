@@ -149,6 +149,12 @@ class veer(pluginTemplate):
           # substitute all variables in the commands that we created in the initialize
           # function
           isa  = testentry['isa'].lower()
+
+          # Force the zicsr extension to -march.
+          # Some tests seem to depend on it in order to compile at all, despite it not being in testentry?
+          if "zicsr" not in isa:
+             isa += "_zicsr"
+
           cmds = [
             self.compile_cmd.format(isa, self.xlen, test, elf, compile_macros),
             self.convert_cmd.format(isa, self.xlen, test, elf),
@@ -169,8 +175,8 @@ class veer(pluginTemplate):
             ]
 
           # concatenate all commands that need to be executed within a make-target.
-          execute  = 'cd ' + testentry['work_dir'] + '; '
-          execute += '; '.join(cmds + simcmd)
+          execute  = 'cd ' + testentry['work_dir'] + '&& '
+          execute += '&& '.join(cmds + simcmd)
 
           # create a target. The makeutil will create a target with the name "TARGET<num>" where num
           # starts from 0 and increments automatically for each new target that is added
@@ -178,7 +184,7 @@ class veer(pluginTemplate):
 
       # once the make-targets are done and the makefile has been created, run all the targets in
       # parallel using the make command set above.
-      make.execute_all(self.work_dir)
+      make.execute_all(self.work_dir, timeout=7200)
 
       # if target runs are not required then we simply exit as this point after running all
       # the makefile targets.

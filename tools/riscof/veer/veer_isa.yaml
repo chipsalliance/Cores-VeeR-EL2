@@ -1,9 +1,10 @@
 hart_ids: [0]
 hart0:
-  ISA: RV32IMC
+  ISA: RV32IMCZicsr
   physical_addr_sz: 32
   User_Spec_Version: '2.3'
   supported_xlen: [32]
+  hw_data_misaligned_support: true
   misa:
    reset-val: 0x40001104
    rv32:

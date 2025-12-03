@@ -141,6 +141,9 @@ class spike(pluginTemplate):
           # signature file.
           sig_file = os.path.join(test_dir, self.name[:-1] + ".signature")
 
+          # Save Spike's execution log
+          exec_log_file = os.path.join(test_dir, "exec.log")
+
           # for each test there are specific compile macros that need to be enabled. The macros in
           # the testList node only contain the macros/values. For the gcc toolchain we need to
           # prefix with "-D". The following does precisely that.
@@ -148,19 +151,26 @@ class spike(pluginTemplate):
 
           # substitute all variables in the compile command that we created in the initialize
           # function
-          cmd = self.compile_cmd.format(testentry['isa'].lower(), self.xlen, test, elf, compile_macros)
+          isa = testentry['isa'].lower()
+
+          # Force the zicsr extension to -march.
+          # Some tests seem to depend on it in order to compile at all, despite it not being in testentry?
+          if "zicsr" not in isa:
+            isa += "_zicsr"
+
+          cmd = self.compile_cmd.format(isa, self.xlen, test, elf, compile_macros)
 
 	  # if the user wants to disable running the tests and only compile the tests, then
 	  # the "else" clause is executed below assigning the sim command to simple no action
 	  # echo statement.
           if self.target_run:
             # set up the simulation command. Template is for spike. Please change.
-            simcmd = self.dut_exe + ' --isa={0} +signature={1} +signature-granularity=4 {2}'.format(self.isa, sig_file, elf)
+            simcmd = self.dut_exe + ' -l --log={3} --misaligned --isa={0} +signature={1} +signature-granularity=4 {2}'.format(self.isa, sig_file, elf, exec_log_file)
           else:
             simcmd = 'echo "NO RUN"'
 
           # concatenate all commands that need to be executed within a make-target.
-          execute = '@cd {0}; {1}; {2};'.format(testentry['work_dir'], cmd, simcmd)
+          execute = '@cd {0}&& {1}&& {2}'.format(testentry['work_dir'], cmd, simcmd)
 
           # create a target. The makeutil will create a target with the name "TARGET<num>" where num
           # starts from 0 and increments automatically for each new target that is added
@@ -168,7 +178,7 @@ class spike(pluginTemplate):
 
       # once the make-targets are done and the makefile has been created, run all the targets in
       # parallel using the make command set above.
-      make.execute_all(self.work_dir)
+      make.execute_all(self.work_dir, timeout=7200)
 
       # if target runs are not required then we simply exit as this point after running all
       # the makefile targets.

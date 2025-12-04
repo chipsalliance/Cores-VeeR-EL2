@@ -87,7 +87,13 @@ import el2_pkg::*;
 
    output logic                                   ifu_pmu_instr_aligned,    // number of inst aligned this cycle
 
-   output logic [15:0]                            ifu_i0_cinst              // 16b compress inst for i0
+   output logic [15:0]                            ifu_i0_cinst,              // 16b compress inst for i0
+
+   // To check if the instruction is allowed to execute according to PMP region configuration
+   output logic [31:0] ifu_pmp_addr_start,
+   output logic [31:0] ifu_pmp_addr_end,
+   input logic ifu_pmp_error_start,
+   input logic ifu_pmp_error_end
    );
 
 
@@ -553,14 +559,17 @@ end
    assign ifu_i0_valid       = (first4B & alignval[1]) |
                                (first2B & alignval[0]);
 
+   assign ifu_pmp_addr_start = {ifu_i0_pc, 1'b0};
+   assign ifu_pmp_addr_end = ifu_pmp_addr_start + (ifu_i0_pc4 ? 'd3 : 'd1);
+
    // inst access fault on any byte of inst results in access fault for the inst
-   assign ifu_i0_icaf        = (first4B & (|alignicaf[1:0])) |
-                               (first2B &   alignicaf[0]   );
+   assign ifu_i0_icaf        = (first4B & (|alignicaf[1:0] | ifu_pmp_error_start | ifu_pmp_error_end)) |
+                               (first2B &   (alignicaf[0] | ifu_pmp_error_start));
 
    assign ifu_i0_icaf_type[1:0] = (first4B & ~f0val[1] & f0val[0] & ~alignicaf[0] & ~aligndbecc[0]) ? f1ictype[1:0] : f0ictype[1:0];
 
 
-   assign icaf_eff[1:0] = alignicaf[1:0] | aligndbecc[1:0];
+   assign icaf_eff[1:0] = alignicaf[1:0] | aligndbecc[1:0] | {ifu_pmp_error_end, ifu_pmp_error_start};
 
    assign ifu_i0_icaf_second = first4B & ~icaf_eff[0] & icaf_eff[1];
 

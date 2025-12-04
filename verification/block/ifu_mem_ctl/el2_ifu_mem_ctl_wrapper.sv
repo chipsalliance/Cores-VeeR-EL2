@@ -172,8 +172,6 @@ module el2_ifu_mem_ctl_wrapper
     output logic iccm_buf_correct_ecc,
     output logic iccm_correction_state,
 
-    input logic ifu_pmp_error,
-
     input logic scan_mode
 );
   el2_cache_debug_pkt_t dec_tlu_ic_diag_pkt;

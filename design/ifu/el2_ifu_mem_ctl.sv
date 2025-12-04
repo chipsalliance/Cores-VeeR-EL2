@@ -191,7 +191,8 @@ import el2_pkg::*;
    output logic                      iccm_buf_correct_ecc,
    output logic                      iccm_correction_state,
 
-   input  logic                      ifu_pmp_error,
+   input  logic                      ifu_pmp_error_start,
+   input  logic                      ifu_pmp_error_end,
 
 
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
@@ -447,6 +448,9 @@ import el2_pkg::*;
    logic   ifu_bus_rvalid_unq;
    logic   bus_cmd_beat_en;
 
+   logic   ifu_pmp_error_second_half_bf;
+   logic   ifu_pmp_error_second_half_f;
+
 
 // ---- Clock gating section -----
 // c1 clock enables
@@ -648,7 +652,7 @@ import el2_pkg::*;
    rvdff_fpga #(1) ifu_iccm_acc_ff     (.*, .clk(fetch_bf_f_c1_clk), .clken(fetch_bf_f_c1_clken), .rawclk(clk),   .din(ifc_iccm_access_bf),      .dout(ifc_iccm_access_f));
    rvdff_fpga #(1) ifu_iccm_reg_acc_ff (.*, .clk(fetch_bf_f_c1_clk), .clken(fetch_bf_f_c1_clken), .rawclk(clk),   .din(ifc_region_acc_fault_final_bf), .dout(ifc_region_acc_fault_final_f));
    rvdff_fpga #(1) rgn_acc_ff          (.*, .clk(fetch_bf_f_c1_clk), .clken(fetch_bf_f_c1_clken), .rawclk(clk),   .din(ifc_region_acc_fault_bf),       .dout(ifc_region_acc_fault_f));
-
+   rvdff_fpga #(1) ifu_pmp_error_second_half_ff (.*, .clk(fetch_bf_f_c1_clk), .clken(fetch_bf_f_c1_clken), .rawclk(clk),   .din(ifu_pmp_error_second_half_bf), .dout(ifu_pmp_error_second_half_f));
 
    assign ifu_ic_req_addr_f[31:3]  = {miss_addr[31:pt.ICACHE_BEAT_ADDR_HI+1] , ic_req_addr_bits_hi_3[pt.ICACHE_BEAT_ADDR_HI:3] };
    assign ifu_ic_mb_empty          = (((miss_state == HIT_U_MISS) | (miss_state == STREAM)) & ~(bus_ifu_wr_en_ff & last_beat)) |  ~miss_pending ;
@@ -798,7 +802,7 @@ end
 
 
 assign fetch_req_f_qual       = ic_hit_f & ~exu_flush_final;
-assign ic_access_fault_f[1:0]  = ({2{ifc_region_acc_fault_final_f}} | ifc_bus_acc_fault_f[1:0])  & {2{~exu_flush_final}};
+assign ic_access_fault_f[1:0]  = ({{ifu_pmp_error_second_half_f, ifc_region_acc_fault_final_f}} | ifc_bus_acc_fault_f[1:0])  & {2{~exu_flush_final}};
 assign ic_access_fault_type_f[1:0] = |iccm_rd_ecc_double_err       ? 2'b01 :
                                      ifc_region_acc_fault_f        ? 2'b10 :
                                      ifc_region_acc_fault_memory_f ? 2'b11 :  2'b00 ;
@@ -1428,7 +1432,7 @@ if (pt.ICACHE_ENABLE == 1 ) begin: icache_enabled
                                                 way_status_new[pt.ICACHE_STATUS_BITS-1:0] ;
 
    rvdffe #(.WIDTH(pt.ICACHE_INDEX_HI-pt.ICACHE_TAG_INDEX_LO+1),.OVERRIDE(1)) perr_dat_ff    (.din(ifu_ic_rw_int_addr_ff[pt.ICACHE_INDEX_HI:pt.ICACHE_TAG_INDEX_LO]), .dout(perr_ic_index_ff[pt.ICACHE_INDEX_HI : pt.ICACHE_TAG_INDEX_LO]), .en(perr_sb_write_status),  .*);
-                                          
+
    rvdffie #(.WIDTH(pt.ICACHE_TAG_LO-pt.ICACHE_TAG_INDEX_LO+1+pt.ICACHE_STATUS_BITS),.OVERRIDE(1))  status_misc_ff
      (.*,
       .clk(free_l2clk),
@@ -1683,7 +1687,7 @@ logic ACCESS5_okay;
 logic ACCESS6_okay;
 logic ACCESS7_okay;
 
-assign ACCESS0_okay = pt.INST_ACCESS_ENABLE0 & ((({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK0)) == (pt.INST_ACCESS_ADDR0 | pt.INST_ACCESS_MASK0)); 
+assign ACCESS0_okay = pt.INST_ACCESS_ENABLE0 & ((({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK0)) == (pt.INST_ACCESS_ADDR0 | pt.INST_ACCESS_MASK0));
 assign ACCESS1_okay = pt.INST_ACCESS_ENABLE1 & ((({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK1)) == (pt.INST_ACCESS_ADDR1 | pt.INST_ACCESS_MASK1));
 assign ACCESS2_okay = pt.INST_ACCESS_ENABLE2 & ((({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK2)) == (pt.INST_ACCESS_ADDR2 | pt.INST_ACCESS_MASK2));
 assign ACCESS3_okay = pt.INST_ACCESS_ENABLE3 & ((({ifc_fetch_addr_bf[31:1],1'b0} | pt.INST_ACCESS_MASK3)) == (pt.INST_ACCESS_ADDR3 | pt.INST_ACCESS_MASK3));
@@ -1695,7 +1699,8 @@ assign ACCESS7_okay = pt.INST_ACCESS_ENABLE7 & ((({ifc_fetch_addr_bf[31:1],1'b0}
 
 // memory protection  - equation to look identical to the LSU equation
    if (pt.PMP_ENTRIES != 0) begin : g_ifc_access_check_pmp
-      assign ifc_region_acc_okay = ~ifu_pmp_error;
+      assign ifu_pmp_error_second_half_bf = ~ifu_pmp_error_start & ifu_pmp_error_end;
+      assign ifc_region_acc_okay = ~(ifu_pmp_error_start | ifu_pmp_error_end);
       assign ifc_region_acc_fault_memory_bf = ~ifc_region_acc_okay & ifc_fetch_req_bf;
    end
    else begin : g_ifc_access_check

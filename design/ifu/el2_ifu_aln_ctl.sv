@@ -562,7 +562,7 @@ end
 
    assign icaf_eff[1:0] = alignicaf[1:0] | aligndbecc[1:0];
 
-   assign ifu_i0_icaf_second = first4B & ~icaf_eff[0] & icaf_eff[1];
+   assign ifu_i0_icaf_second = icaf_eff[1];
 
    assign ifu_i0_dbecc       = (first4B & (|aligndbecc[1:0])) |
                                (first2B &   aligndbecc[0]   );

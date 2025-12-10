@@ -172,7 +172,8 @@ module el2_ifu_mem_ctl_wrapper
     output logic iccm_buf_correct_ecc,
     output logic iccm_correction_state,
 
-    input logic ifu_pmp_error,
+    input logic ifu_pmp_error_start,
+    input logic ifu_pmp_error_end,
 
     input logic scan_mode
 );

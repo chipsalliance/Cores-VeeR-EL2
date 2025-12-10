@@ -100,7 +100,8 @@ async def initialize(dut):
     dut.icache_rd_valid.value = 0
     dut.icache_wr_valid.value = 0
     dut.dec_tlu_core_ecc_disable.value = 0
-    dut.ifu_pmp_error.value = 0
+    dut.ifu_pmp_error_start.value = 0
+    dut.ifu_pmp_error_end.value = 0
     dut.scan_mode.value = 0
 
     cocotb.start_soon(Clock(dut.clk, 1, units="ns").start())

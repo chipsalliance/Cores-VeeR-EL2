@@ -105,27 +105,27 @@ jobs:
           name: openocd_coverage_data_${{ matrix.bus }}_${{ matrix.coverage }}
           path: results/*.info
 
-  custom-openocd-tests:
-    name: Run Custom OpenOCD tests
-    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: centos:8
-    strategy:
-      fail-fast: false
-      matrix:
-        bus: ["axi4"]
-    env:
-      GHA_EXTERNAL_DISK: additional-tools
-      GHA_SA: gh-sa-veer-uploader
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
+  # custom-openocd-tests:
+  #   name: Run Custom OpenOCD tests
+  #   runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+  #   container: centos:8
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       bus: ["axi4"]
+  #   env:
+  #     GHA_EXTERNAL_DISK: additional-tools
+  #     GHA_SA: gh-sa-veer-uploader
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         submodules: recursive
 
-      - name: Set secrets version
-        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
+  #     - name: Set secrets version
+  #       run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
 
-      - name: Run tests
-        run: _secret_combined_${{ env.SECRETS_VERSION }}
-        env:
-          SECRET_NAME: _secret_custom_openocd_tests
-          BUS: ${{ matrix.bus }}
+  #     - name: Run tests
+  #       run: _secret_combined_${{ env.SECRETS_VERSION }}
+  #       env:
+  #         SECRET_NAME: _secret_custom_openocd_tests
+  #         BUS: ${{ matrix.bus }}

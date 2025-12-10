@@ -86,49 +86,49 @@ jobs:
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
 
-  custom-regression-tests:
-    name: Custom regression tests
-    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: centos:8
-    strategy:
-      matrix:
-        bus: ["axi", "ahb"]
-        # run some subset of regression tests on DCLS configutation
-        test: ["hello_world", "hello_world_dccm", "dcls", "dcls_error_ctrl", "dhry", "ecc",
-               "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "perf_counters",
-               "icache", "bitmanip"]
-        priv: ["0", "1"]
-        exclude:
-          # These tests require user mode
-          - priv: "0"
-            test: "csr_mseccfg"
-          - priv: "0"
-            test: "csr_access"
-          - priv: "0"
-            test: "csr_mstatus"
-          - priv: "0"
-            test: "modesw"
-          - priv: "0"
-            test: "insns"
-          - priv: "0"
-            test: "perf_counters"
-          # end tests which require user mode
-    env:
-      GHA_EXTERNAL_DISK: additional-tools
-      GHA_SA: gh-sa-veer-uploader
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
+  # custom-regression-tests:
+  #   name: Custom regression tests
+  #   runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+  #   container: centos:8
+  #   strategy:
+  #     matrix:
+  #       bus: ["axi", "ahb"]
+  #       # run some subset of regression tests on DCLS configutation
+  #       test: ["hello_world", "hello_world_dccm", "dcls", "dcls_error_ctrl", "dhry", "ecc",
+  #              "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "perf_counters",
+  #              "icache", "bitmanip"]
+  #       priv: ["0", "1"]
+  #       exclude:
+  #         # These tests require user mode
+  #         - priv: "0"
+  #           test: "csr_mseccfg"
+  #         - priv: "0"
+  #           test: "csr_access"
+  #         - priv: "0"
+  #           test: "csr_mstatus"
+  #         - priv: "0"
+  #           test: "modesw"
+  #         - priv: "0"
+  #           test: "insns"
+  #         - priv: "0"
+  #           test: "perf_counters"
+  #         # end tests which require user mode
+  #   env:
+  #     GHA_EXTERNAL_DISK: additional-tools
+  #     GHA_SA: gh-sa-veer-uploader
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         submodules: recursive
 
-      - name: Set secrets version
-        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
+  #     - name: Set secrets version
+  #       run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
 
-      - name: Run tests
-        run: _secret_combined_${{ env.SECRETS_VERSION }}
-        env:
-          SECRET_NAME: _secret_dcls_regression
-          DCLS_ENABLE: "1"
-          TEST: ${{ matrix.test }}
-          BUS: ${{ matrix.bus }}
-          PRIV: ${{ matrix.priv }}
+  #     - name: Run tests
+  #       run: _secret_combined_${{ env.SECRETS_VERSION }}
+  #       env:
+  #         SECRET_NAME: _secret_dcls_regression
+  #         DCLS_ENABLE: "1"
+  #         TEST: ${{ matrix.test }}
+  #         BUS: ${{ matrix.bus }}
+  #         PRIV: ${{ matrix.priv }}

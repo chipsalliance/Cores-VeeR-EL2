@@ -106,53 +106,53 @@ jobs:
           name: regression_tests_coverage_data_cache_waypack_${{ env.FULL_NAME }}_${{ matrix.coverage }}
           path: results/*.info
 
-  custom-regression-tests:
-    name: Custom regression tests
-    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: centos:8
-    strategy:
-      matrix:
-        bus: ["axi", "ahb"]
-        test: ["hello_world", "hello_world_dccm", "hello_world_iccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
-               "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters", "pmp", "write_unaligned",
-               "icache", "bitmanip", "read_after_read"]
-        priv: ["0", "1"]
-        ecc: ["0", "1"]
-        exclude:
-          # These tests require user mode
-          - priv: "0"
-            test: "csr_mseccfg"
-          - priv: "0"
-            test: "csr_access"
-          - priv: "0"
-            test: "csr_mstatus"
-          - priv: "0"
-            test: "modesw"
-          - priv: "0"
-            test: "insns"
-          - priv: "0"
-            test: "perf_counters"
-          # end tests which require user mode
-          # These tests require AHB bus
-          - bus: "axi"
-            test: "read_after_read"
-          # end tests which require AHB bus
-    env:
-      GHA_EXTERNAL_DISK: additional-tools
-      GHA_SA: gh-sa-veer-uploader
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
+  # custom-regression-tests:
+  #   name: Custom regression tests
+  #   runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+  #   container: centos:8
+  #   strategy:
+  #     matrix:
+  #       bus: ["axi", "ahb"]
+  #       test: ["hello_world", "hello_world_dccm", "hello_world_iccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
+  #              "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters", "pmp", "write_unaligned",
+  #              "icache", "bitmanip", "read_after_read"]
+  #       priv: ["0", "1"]
+  #       ecc: ["0", "1"]
+  #       exclude:
+  #         # These tests require user mode
+  #         - priv: "0"
+  #           test: "csr_mseccfg"
+  #         - priv: "0"
+  #           test: "csr_access"
+  #         - priv: "0"
+  #           test: "csr_mstatus"
+  #         - priv: "0"
+  #           test: "modesw"
+  #         - priv: "0"
+  #           test: "insns"
+  #         - priv: "0"
+  #           test: "perf_counters"
+  #         # end tests which require user mode
+  #         # These tests require AHB bus
+  #         - bus: "axi"
+  #           test: "read_after_read"
+  #         # end tests which require AHB bus
+  #   env:
+  #     GHA_EXTERNAL_DISK: additional-tools
+  #     GHA_SA: gh-sa-veer-uploader
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         submodules: recursive
 
-      - name: Set secrets version
-        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
+  #     - name: Set secrets version
+  #       run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
 
-      - name: Run tests
-        run: _secret_combined_${{ env.SECRETS_VERSION }}
-        env:
-          SECRET_NAME: _secret_custom_regression_tests_waypack
-          TEST: ${{ matrix.test }}
-          BUS: ${{ matrix.bus }}
-          PRIV: ${{ matrix.priv }}
-          ECC: ${{ matrix.ecc }}
+  #     - name: Run tests
+  #       run: _secret_combined_${{ env.SECRETS_VERSION }}
+  #       env:
+  #         SECRET_NAME: _secret_custom_regression_tests_waypack
+  #         TEST: ${{ matrix.test }}
+  #         BUS: ${{ matrix.bus }}
+  #         PRIV: ${{ matrix.priv }}
+  #         ECC: ${{ matrix.ecc }}

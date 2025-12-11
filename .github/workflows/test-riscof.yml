@@ -67,7 +67,6 @@ jobs:
             # These accesses fail on Spike because it has a debug module in range [0x0; 0x1000).
             # VeeR doesn't have such restrictions, so they don't fail, which results in a test failure.
             rm -f rv32i_m/pmp/src/pmpm_cfg_A_tor_zero.S
-            rm -f rv32i_m/pmp/src/pmpzca_misaligned_na4.S
           popd
 
       - name: Configure RISCOF

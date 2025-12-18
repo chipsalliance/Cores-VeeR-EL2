@@ -396,7 +396,7 @@ import el2_pkg::*;
                .*, .en(write_bypass_en_up[i][k][l]), .din(ic_b_rw_addr_up[i][k]), .dout(wb_index_hold_up[i][k][l])
             );
             rvdffe #(68) rd_data_hold_ff (
-               .*, .en(write_bypass_en_ff_up[i][k][l]), .din(wb_dout_pre_up[k]), .dout(wb_dout_hold_up[k][l])
+               .*, .en(write_bypass_en_ff_up[i][k][l]), .din(wb_dout_pre_up[k]), .dout(wb_dout_hold_up[l])
             );
           end
           always_comb begin
@@ -404,7 +404,7 @@ import el2_pkg::*;
             sel_bypass_data_up[i][k] = '0;
             for (int l=0; l<pt.ICACHE_NUM_BYPASS; l++) begin
               any_bypass_up[i][k]      |=  sel_bypass_ff_up[i][k][l];
-              sel_bypass_data_up[i][k] |= (sel_bypass_ff_up[i][k][l]) ? wb_dout_hold_up[k][l] : '0;
+              sel_bypass_data_up[i][k] |= (sel_bypass_ff_up[i][k][l]) ? wb_dout_hold_up[l] : '0;
             end
             wb_dout[i][k]   =   any_bypass_up[i][k] ?  sel_bypass_data_up[i][k] :  wb_dout_pre_up[k];
           end

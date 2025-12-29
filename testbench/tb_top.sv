@@ -199,6 +199,11 @@ module tb_top
 
     logic dmi_core_enable;
 
+    logic [7:0] rst_l_cmd;
+    logic rst_l_combined;
+
+    assign rst_l_combined = rst_l & (&rst_l_cmd);
+
     always_comb dmi_core_enable = ~(o_cpu_halt_status);
 
    `ifdef RV_OPENOCD_TEST
@@ -209,7 +214,7 @@ module tb_top
         .AHB_NO_OPT(1) //Prevent address and data phase overlap between initiators
     ) u_sb_lsu_ahb_mux (
         .hclk                (core_clk),
-        .hreset_n            (rst_l),
+        .hreset_n            (rst_l_combined),
         .force_bus_idle      (),
         // Initiator 0
         .hsel_i_0            (1'b1      ),
@@ -532,7 +537,7 @@ module tb_top
         .M00_ADDR_WIDTH(32)
     ) u_axi_crossbar (
                       .clk(core_clk),
-                      .rst(!rst_l),
+                      .rst(!rst_l_combined),
 
                       // LSU
                       .s00_axi_arvalid(lsu_axi_arvalid),
@@ -742,12 +747,12 @@ module tb_top
 
 `ifdef RV_BUILD_AHB_LITE
     always_ff @(posedge core_clk)
-        mailbox_write <= lmem.HSEL && lmem.HREADY && lmem.HADDR == mem_mailbox && rst_l;
+        mailbox_write <= lmem.HSEL && lmem.HREADY && lmem.HADDR == mem_mailbox && rst_l_combined;
     assign mailbox_data  = lmem.HWDATA;
 `endif
 
 `ifdef RV_BUILD_AXI4
-    assign mailbox_write = lmem.awvalid && lmem.awaddr == mem_mailbox && rst_l;
+    assign mailbox_write = lmem.awvalid && lmem.awaddr == mem_mailbox && rst_l_combined;
     assign mailbox_data  = lmem.wdata;
 `endif
 
@@ -762,12 +767,14 @@ module tb_top
             error_injection_mode <= '0;
             next_dbus_error <= '0;
             next_ibus_error <= '0;
+            rst_l_cmd <= '1;
         end else begin
             nmi_assert_int <= nmi_assert_int >> 1;
             soft_int <= 0;
             timer_int <= 0;
             extintsrc_req[1] <= 0;
             cycleCnt <= cycleCnt+1;
+            rst_l_cmd <= {rst_l_cmd[6:0], rst_l_cmd[0]};
             // timeout monitor
             if(cycleCnt == MAX_CYCLES) begin
                 $display ("Hit max cycle count (%0d) .. stopping", cycleCnt);
@@ -830,6 +837,10 @@ module tb_top
                 soft_int       <= 1'b0;
             end
             // end
+            if(mailbox_write && (mailbox_data[7:0] == 8'h96)) begin
+                $display("Reset all");
+                rst_l_cmd <= 8'b1;
+            end
             // ECC error injection
             if(mailbox_write && (mailbox_data[7:0] == 8'he0)) begin
                 $display("Injecting single bit ICCM error");
@@ -1064,7 +1075,7 @@ module tb_top
    // RTL instance
    //=========================================================================-
 veer_wrapper rvtop_wrapper (
-    .rst_l                  ( rst_l         ),
+    .rst_l                  ( rst_l_combined),
     .dbg_rst_l              ( porst_l       ),
     .clk                    ( core_clk      ),
     .rst_vec                ( reset_vector[31:1]),
@@ -1435,7 +1446,7 @@ ahb_sif imem (
      .HTRANS(ic_htrans),
      .HSIZE(ic_hsize),
      .HREADY(ic_hready),
-     .HRESETn(rst_l),
+     .HRESETn(rst_l_combined),
      .HADDR(ic_haddr),
      .HBURST(ic_hburst),
 
@@ -1451,7 +1462,7 @@ ahb_sif #(
 )lmem(
      // Inputs
      .HCLK(core_clk),
-     .HRESETn(rst_l),
+     .HRESETn(rst_l_combined),
 
      .HSEL(lmem_hsel),
      .HADDR(lmem_haddr),
@@ -1471,7 +1482,7 @@ ahb_sif #(
 
 ahb_lsu_dma_bridge #(.pt(pt)) bridge (
     .clk(core_clk),
-    .reset_l(rst_l),
+    .reset_l(rst_l_combined),
 
     .m_ahb_haddr(mux_haddr[31:0]),
     .m_ahb_hburst(mux_hburst),
@@ -1518,7 +1529,7 @@ ahb_lsu_dma_bridge #(.pt(pt)) bridge (
 `ifdef RV_BUILD_AXI4
 axi_slv #(.TAGW(`RV_IFU_BUS_TAG)) imem(
     .aclk(core_clk),
-    .rst_l(rst_l),
+    .rst_l(rst_l_combined),
     .arvalid(ifu_axi_arvalid),
     .arready(ifu_axi_arready),
     .araddr(ifu_axi_araddr),
@@ -1558,7 +1569,7 @@ defparam lmem.TAGW = RV_MUX_BUS_TAG;
 //axi_slv #(.TAGW(`RV_LSU_BUS_TAG)) lmem(
 axi_slv  lmem(
     .aclk(core_clk),
-    .rst_l(rst_l),
+    .rst_l(rst_l_combined),
     .arvalid(lmem_axi_arvalid),
     .arready(lmem_axi_arready),
     .araddr(mux_axi_araddr),
@@ -1595,7 +1606,7 @@ axi_slv  lmem(
 
 axi_lsu_dma_bridge # (RV_MUX_BUS_TAG, RV_MUX_BUS_TAG) bridge(
     .clk(core_clk),
-    .reset_l(rst_l),
+    .reset_l(rst_l_combined),
 
     .m_arvalid(mux_axi_arvalid),
     .m_arid(mux_axi_arid),
@@ -2782,7 +2793,7 @@ jtagdpi #(
     .ListenPort     (5000)
 ) jtagdpi (
     .clk_i          (core_clk),
-    .rst_ni         (rst_l),
+    .rst_ni         (rst_l_combined),
     .jtag_tck       (jtag_tck),
     .jtag_tms       (jtag_tms),
     .jtag_tdi       (jtag_tdi),

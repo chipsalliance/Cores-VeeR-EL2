@@ -60,10 +60,10 @@ VERILOG_SOURCES  = \
 	${SRCDIR}/lsu/el2_lsu_dccm_ctl.sv \
 	${SRCDIR}/lsu/el2_lsu_trigger.sv \
 	${SRCDIR}/dbg/el2_dbg.sv \
-	${SRCDIR}/dmi/dmi_mux.v \
-	${SRCDIR}/dmi/dmi_wrapper.v \
-	${SRCDIR}/dmi/dmi_jtag_to_core_sync.v \
-	${SRCDIR}/dmi/rvjtag_tap.v \
+	${SRCDIR}/dmi/dmi_mux.sv \
+	${SRCDIR}/dmi/dmi_wrapper.sv \
+	${SRCDIR}/dmi/dmi_jtag_to_core_sync.sv \
+	${SRCDIR}/dmi/rvjtag_tap.sv \
 	${SRCDIR}/lib/el2_lib.sv \
 	${SRCDIR}/lib/axi4_to_ahb.sv \
 	${SRCDIR}/lib/ahb_to_axi4.sv \

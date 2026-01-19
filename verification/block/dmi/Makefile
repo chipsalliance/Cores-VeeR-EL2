@@ -13,10 +13,10 @@ CM_FILE      = cm.cfg
 
 VERILOG_SOURCES  = \
     $(TEST_DIR)/dmi_test_wrapper.sv \
-    $(SRCDIR)/dmi/rvjtag_tap.v \
-    $(SRCDIR)/dmi/dmi_mux.v \
-    $(SRCDIR)/dmi/dmi_jtag_to_core_sync.v \
-    $(SRCDIR)/dmi/dmi_wrapper.v
+    $(SRCDIR)/dmi/rvjtag_tap.sv \
+    $(SRCDIR)/dmi/dmi_mux.sv \
+    $(SRCDIR)/dmi/dmi_jtag_to_core_sync.sv \
+    $(SRCDIR)/dmi/dmi_wrapper.sv
 
 include $(TEST_DIR)/../common.mk
 

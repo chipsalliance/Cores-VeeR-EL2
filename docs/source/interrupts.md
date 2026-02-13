@@ -372,7 +372,7 @@ The number of required external interrupt sources has an impact on the following
 
 * General impact:
     * Signal pins:
-        * `exintsrc_req[S]`
+        * `extintsrc_req[S]`
     * Registers:
         * `meiplS`
         * `meipX`

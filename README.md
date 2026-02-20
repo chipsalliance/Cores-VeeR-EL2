@@ -42,8 +42,37 @@ Files under the [tools](tools/) directory may be available under a different lic
 
 - Verilator **(4.106 or later)** must be installed on the system if running with Verilator
 - If adding/removing instructions, [`espresso`](https://github.com/chipsalliance/espresso/tree/master) must be installed (used by `tools/coredecode`). Remember to checkout on `3.x` branch.
-- RISCV tool chain (based on gcc version 8.3 or higher) must be
-installed so that it can be used to prepare RISCV binaries to run.
+- RISCV tool chain (based on gcc version 8.3 or higher) must be installed so that it can be used to prepare RISCV binaries to run.
+- [**Verible**](https://github.com/chipsalliance/verible) is used for SystemVerilog linting and formatting.
+- **Python 3.10+** is required for verification, documentation, and linting.
+
+### Python Environment Setup
+
+It is recommended to use a virtual environment (venv) or Conda to manage Python dependencies.
+
+#### Using `venv`
+```bash
+# Create a virtual environment
+python3 -m venv .venv
+
+# Activate it
+source .venv/bin/activate
+
+# Install all project dependencies
+pip install -r requirements.txt
+```
+
+#### Using `Conda`
+```bash
+# Create a conda environment
+conda create -n veer-el2 python=3.12
+
+# Activate it
+conda activate veer-el2
+
+# Install dependencies
+pip install -r requirements.txt
+```
 
 ## Quickstart guide
 

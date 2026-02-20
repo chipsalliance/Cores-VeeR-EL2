@@ -24,6 +24,7 @@ jobs:
     steps:
       - name: Install utils
         run: |
+          echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
              ccache ninja-build gcc-riscv64-unknown-elf
           pip3 install meson

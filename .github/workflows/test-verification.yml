@@ -35,6 +35,7 @@ jobs:
 
       - name: Install prerequisities
         run: |
+          echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
             autoconf automake autotools-dev \
             bc bison build-essential \

@@ -14,7 +14,7 @@ jobs:
     container: ghcr.io/antmicro/cores-veer-el2:20250411084921
     steps:
       - name: Setup repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -93,7 +93,7 @@ jobs:
       DEBIAN_FRONTEND: "noninteractive"
     steps:
       - name: Setup repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -218,7 +218,7 @@ jobs:
       GHA_SA: gh-sa-veer-uploader
       TEST: ${{ matrix.test }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 

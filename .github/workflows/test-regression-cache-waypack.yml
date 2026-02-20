@@ -60,7 +60,7 @@ jobs:
           pip3 install meson
 
       - name: Setup repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -141,7 +141,7 @@ jobs:
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 

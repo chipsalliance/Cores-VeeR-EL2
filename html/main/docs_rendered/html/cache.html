@@ -1,0 +1,1442 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>10. Cache Control - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
+      
+    
+    
+      
+        
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="_static/sphinx_immaterial_theme.c5589c0bd87d933a4.min.css?v=eeeb54bc" />
+        <link rel="stylesheet" type="text/css" href="_static/main.css" />
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="white">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="RISC-V VeeR EL2 Programmer&#39;s Reference Manual  documentation" class="md-header__button md-logo" aria-label="RISC-V VeeR EL2 Programmer's Reference Manual  documentation" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            RISC-V VeeR EL2 Programmer's Reference Manual  documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              10. Cache Control
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="white"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="RISC-V VeeR EL2 Programmer&#39;s Reference Manual  documentation" class="md-nav__button md-logo" aria-label="RISC-V VeeR EL2 Programmer's Reference Manual  documentation" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    RISC-V VeeR EL2 Programmer's Reference Manual  documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="intro.html" class="md-nav__link">
+        <span class="md-ellipsis">RISC-<wbr>V Vee<wbr>R EL2 Programmer’s Reference Manual</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="overview.html" class="md-nav__link">
+        <span class="md-ellipsis">Core Overview</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="memory-map.html" class="md-nav__link">
+        <span class="md-ellipsis">Memory Map</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="error-protection.html" class="md-nav__link">
+        <span class="md-ellipsis">Memory Error Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dual-core-lock-step.html" class="md-nav__link">
+        <span class="md-ellipsis">Dual-<wbr>Core Lockstep <wbr>(DCLS)</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="timers.html" class="md-nav__link">
+        <span class="md-ellipsis">Internal Timers</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="power.html" class="md-nav__link">
+        <span class="md-ellipsis">Power Management and Multi-<wbr>Core Debug Control</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="interrupts.html" class="md-nav__link">
+        <span class="md-ellipsis">External Interrupts</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="performance.html" class="md-nav__link">
+        <span class="md-ellipsis">Performance Monitoring</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          <span class="md-ellipsis">Cache Control</span>
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        <span class="md-ellipsis">Cache Control</span>
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">Features</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#feature-descriptions" class="md-nav__link">
+    <span class="md-ellipsis">Feature Descriptions</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Feature Descriptions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cache-flushing" class="md-nav__link">
+    <span class="md-ellipsis">Cache Flushing</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enabling-disabling-i-cache" class="md-nav__link">
+    <span class="md-ellipsis">Enabling/Disabling I-<wbr>Cache</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-access" class="md-nav__link">
+    <span class="md-ellipsis">Diagnostic Access</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-cases" class="md-nav__link">
+    <span class="md-ellipsis">Use Cases</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#theory-of-operation" class="md-nav__link">
+    <span class="md-ellipsis">Theory Of Operation</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Theory Of Operation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#read-a-chunk-of-an-i-cache-cache-line" class="md-nav__link">
+    <span class="md-ellipsis">Read a Chunk of an I-<wbr>cache Cache Line</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write-a-chunk-of-an-i-cache-cache-line" class="md-nav__link">
+    <span class="md-ellipsis">Write a Chunk of an I-<wbr>Cache Cache Line</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read-or-write-a-full-i-cache-cache-line" class="md-nav__link">
+    <span class="md-ellipsis">Read or Write a Full I-<wbr>Cache Cache Line</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read-a-tag-and-status-information-of-an-i-cache-cache-line" class="md-nav__link">
+    <span class="md-ellipsis">Read a Tag and Status Information of an I-<wbr>cache Cache Line</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write-a-tag-and-status-information-of-an-i-cache-cache-line" class="md-nav__link">
+    <span class="md-ellipsis">Write a Tag and Status Information of an I-<wbr>Cache Cache Line</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#i-cache-control-status-registers" class="md-nav__link">
+    <span class="md-ellipsis">I-<wbr>Cache Control/Status Registers</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="I-Cache Control/Status Registers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#i-cache-array-way-index-selection-register-dicawics" class="md-nav__link">
+    <span class="md-ellipsis">I-<wbr>Cache Array/Way/Index Selection Register <wbr>(dicawics)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#i-cache-array-data-0-register-dicad0" class="md-nav__link">
+    <span class="md-ellipsis">I-<wbr>Cache Array Data 0 Register <wbr>(dicad0)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#i-cache-array-data-0-high-register-dicad0h" class="md-nav__link">
+    <span class="md-ellipsis">I-<wbr>Cache Array Data 0 High Register <wbr>(dicad0h)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#i-cache-array-data-1-register-dicad1" class="md-nav__link">
+    <span class="md-ellipsis">I-<wbr>Cache Array Data 1 Register <wbr>(dicad1)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#i-cache-array-go-register-dicago" class="md-nav__link">
+    <span class="md-ellipsis">I-<wbr>Cache Array Go Register <wbr>(dicago)</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="debugging.html" class="md-nav__link">
+        <span class="md-ellipsis">Debug Support</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="core-control.html" class="md-nav__link">
+        <span class="md-ellipsis">Low-<wbr>Level Core Control</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="adaptations.html" class="md-nav__link">
+        <span class="md-ellipsis">Standard RISC-<wbr>V CSRs with Core-<wbr>Specific Adaptations</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="csrs.html" class="md-nav__link">
+        <span class="md-ellipsis">CSR Address Map</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="interrupt-priority.html" class="md-nav__link">
+        <span class="md-ellipsis">Interrupt Priorities</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="clocks.html" class="md-nav__link">
+        <span class="md-ellipsis">Clock And Reset</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="complex-ports.html" class="md-nav__link">
+        <span class="md-ellipsis">Complex Port List</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="build-args.html" class="md-nav__link">
+        <span class="md-ellipsis">Build Arguments</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tests.html" class="md-nav__link">
+        <span class="md-ellipsis">Compliance Test Suite Failures</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="errata.html" class="md-nav__link">
+        <span class="md-ellipsis">Errata</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="physical-memory-protection.html" class="md-nav__link">
+        <span class="md-ellipsis">Physical Memory Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="user-mode.html" class="md-nav__link">
+        <span class="md-ellipsis">User Mode</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="verification.html" class="md-nav__link">
+        <span class="md-ellipsis">Verification</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="simulation-debugging.html" class="md-nav__link">
+        <span class="md-ellipsis">Interactive Debugging in Simulation</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tock.html" class="md-nav__link">
+        <span class="md-ellipsis">Running Tock OS</span>
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                  
+
+
+<h1 id="cache-control"><span class="section-number">10. </span>Cache Control<a class="headerlink" href="#cache-control" title="Link to this heading">¶</a></h1>
+<p>This chapter describes the features to control the VeeR EL2 core’s instruction cache (I-cache).</p>
+<h2 id="features"><span class="section-number">10.1. </span>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
+<p>The VeeR EL2’s I-cache control features are:</p>
+<ul class="simple">
+<li><p>Flushing the I-cache</p></li>
+<li><p>Capability to enable/disable I-cache</p></li>
+<li><p>Diagnostic access to data, tag, and status information of the I-cache</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The I-cache is an optional core feature. Instantiation of the I-cache is controlled by the RV_ICACHE_ENABLE build argument.</p>
+</div>
+<h2 id="feature-descriptions"><span class="section-number">10.2. </span>Feature Descriptions<a class="headerlink" href="#feature-descriptions" title="Link to this heading">¶</a></h2>
+<h3 id="cache-flushing"><span class="section-number">10.2.1. </span>Cache Flushing<a class="headerlink" href="#cache-flushing" title="Link to this heading">¶</a></h3>
+<p>As described in <a class="reference internal" href="memory-map.html#memory-synchronization-trigger-register-dmst"><span class="std std-ref">Memory Synchronization Trigger Register (dmst)</span></a>, a debugger may initiate an operation that is equivalent to a <code class="docutils literal notranslate"><span class="pre">fence.i</span></code> instruction by writing a ‘1’ to the <em>fence_i</em> field of the <code class="docutils literal notranslate"><span class="pre">dmst</span></code> register.
+As part of executing this operation, the I-cache is flushed (i.e., all entries in the I-cache are invalidated).</p>
+<h3 id="enabling-disabling-i-cache"><span class="section-number">10.2.2. </span>Enabling/Disabling I-Cache<a class="headerlink" href="#enabling-disabling-i-cache" title="Link to this heading">¶</a></h3>
+<p>As described in <a class="reference internal" href="memory-map.html#region-access-control-register-mrac"><span class="std std-ref">Region Access Control Register (mrac)</span></a>, each of the 16 memory regions has two control bits which are hosted in the <code class="docutils literal notranslate"><span class="pre">mrac</span></code> register.
+One of these control bits, <em>cacheable</em>, controls if accesses to that region may be cached.
+If the <em>cacheable</em> bits of all 16 regions are set to ‘0’, the I-cache is effectively turned off.</p>
+<h3 id="diagnostic-access"><span class="section-number">10.2.3. </span>Diagnostic Access<a class="headerlink" href="#diagnostic-access" title="Link to this heading">¶</a></h3>
+<p>For firmware as well as hardware debug, direct access to the raw content of the data array, tag array, and status bits of the I-cache may be important.
+Instructions stored in the cache, the tag of a cache line as well as status information including a line’s valid bit and a set’s LRU bits can be manipulated.
+It is also possible to inject a parity/ECC error in the data or tag array to check error recovery.
+Five control registers are used to provide read/write diagnostic access to the two arrays and status bits.
+The <code class="docutils literal notranslate"><span class="pre">dicawics</span></code> register controls the selection of the array, way, and index of a cache line.
+The <code class="docutils literal notranslate"><span class="pre">dicad0/0h/1</span></code> and <code class="docutils literal notranslate"><span class="pre">dicago</span></code> registers are used to perform a read or write access to the selected array location.
+See sections <a class="reference internal" href="#i-cache-array-way-index-selection-register-dicawics"><span class="std std-ref">I-Cache Array/Way/Index Selection Register (dicawics)</span></a> - <a class="reference internal" href="#i-cache-array-go-register-dicago"><span class="std std-ref">I-Cache Array Go Register (dicago)</span></a> for more detailed information.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The instructions and the tags are stored in parity/ECC-protected SRAM arrays. The status bits are stored in flops.</p>
+</div>
+<h2 id="use-cases"><span class="section-number">10.3. </span>Use Cases<a class="headerlink" href="#use-cases" title="Link to this heading">¶</a></h2>
+<p>The I-cache control features can be broadly divided into two categories:</p>
+<ol class="arabic simple">
+<li><p>Debug Support A few examples how diagnostic accesses (<a class="reference internal" href="#diagnostic-access"><span class="std std-ref">Diagnostic Access</span></a>) may be useful for debug:</p>
+<ul class="simple">
+<li><p>Generating an I-cache dump (e.g., to investigate performance issues).</p></li>
+<li><p>Injecting parity/ECC errors in the data or tag array of the I-cache.</p></li>
+<li><p>Diagnosing stuck-at bits in the data or tag array of the I-cache.</p></li>
+<li><p>Preloading the I-cache if a hardware bug prevents instruction fetching from memory.</p></li>
+</ul>
+</li>
+<li><p>Performance Evaluation</p>
+<ul class="simple">
+<li><p>To evaluate the performance advantage of the I-cache, it is useful to run code with and without the cache enabled.
+Enabling and disabling the I-cache (<a class="reference internal" href="#enabling-disabling-i-cache"><span class="std std-ref">Enabling/Disabling I-Cache</span></a>) is an essential feature for this.</p></li>
+</ul>
+</li>
+</ol>
+<h2 id="theory-of-operation"><span class="section-number">10.4. </span>Theory Of Operation<a class="headerlink" href="#theory-of-operation" title="Link to this heading">¶</a></h2>
+<h3 id="read-a-chunk-of-an-i-cache-cache-line"><span class="section-number">10.4.1. </span>Read a Chunk of an I-cache Cache Line<a class="headerlink" href="#read-a-chunk-of-an-i-cache-cache-line" title="Link to this heading">¶</a></h3>
+<p>The following steps must be performed to read a 64-bit chunk of instruction data and its associated 4 parity / 7 ECC bits in an I-cache cache line:</p>
+<ol class="arabic simple">
+<li><p>Write array/way/address information which location to access in the I-cache to the <code class="docutils literal notranslate"><span class="pre">dicawics</span></code> register:</p>
+<ul class="simple">
+<li><p><em>array</em> field: 0 (i.e., I-cache data array),</p></li>
+<li><p><em>way</em> field: way to be accessed (i.e., 0..1 for 2-way or 0..3 for 4-way set-associative cache), and</p></li>
+<li><p><em>index</em> field: index of cache line to be accessed.</p></li>
+</ul>
+</li>
+<li><p>Read the <code class="docutils literal notranslate"><span class="pre">dicago</span></code> register which causes a read access from the I-cache data array at the location selected by the dicawics register.</p></li>
+<li><p>Read the <code class="docutils literal notranslate"><span class="pre">dicad0</span></code> and <code class="docutils literal notranslate"><span class="pre">dicad0h</span></code> registers to get the selected 64-bit cache line chunk (<em>instr</em> fields), and read the <code class="docutils literal notranslate"><span class="pre">dicad1</span></code> register to get the associated parity/ECC bits (<em>parity0/1/2/3</em> / <em>ecc</em> fields).</p></li>
+</ol>
+<h3 id="write-a-chunk-of-an-i-cache-cache-line"><span class="section-number">10.4.2. </span>Write a Chunk of an I-Cache Cache Line<a class="headerlink" href="#write-a-chunk-of-an-i-cache-cache-line" title="Link to this heading">¶</a></h3>
+<p>The following steps must be performed to write a 64-bit chunk of instruction data and its associated 4 parity / 7 ECC bits in an I-cache cache line:</p>
+<ol class="arabic simple">
+<li><p>Write array/way/address information which location to access in the I-cache to the <code class="docutils literal notranslate"><span class="pre">dicawics</span></code> register:</p>
+<ul class="simple">
+<li><p><em>array</em> field: 0 (i.e., I-cache data array),</p></li>
+<li><p><em>way</em> field: way to be accessed (i.e., 0..1 for 2-way or 0..3 for 4-way set-associative cache), and</p></li>
+<li><p><em>index</em> field: index of cache line to be accessed.</p></li>
+</ul>
+</li>
+<li><p>Write the new instruction data to the <em>instr</em> fields of the <code class="docutils literal notranslate"><span class="pre">dicad0</span></code> and <code class="docutils literal notranslate"><span class="pre">dicad0h</span></code> registers, and write the calculated correct instruction parity/ECC bits (unless error injection should be performed) to the <em>parity0/1/2/3</em> / <em>ecc</em> and fields of the dicad1 register.</p></li>
+<li><p>Write a ‘1’ to the go field of the dicago register which causes a write access to the I-cache data array copying the information stored in the <code class="docutils literal notranslate"><span class="pre">dicad0/0h/1</span></code> registers to the location selected by the <code class="docutils literal notranslate"><span class="pre">dicawics</span></code> register.</p></li>
+</ol>
+<h3 id="read-or-write-a-full-i-cache-cache-line"><span class="section-number">10.4.3. </span>Read or Write a Full I-Cache Cache Line<a class="headerlink" href="#read-or-write-a-full-i-cache-cache-line" title="Link to this heading">¶</a></h3>
+<p>The following steps must be performed to read or write instruction data and associated parity/ECC bits of a full Icache cache line:</p>
+<ol class="arabic simple">
+<li><p>Start with an index naturally aligned to the 64- or 32-byte cache line size (i.e., <em>index[5:3]</em> = ‘000’ for 64-byte or <em>index[4:3]</em> = ‘00’ for 32-byte).</p></li>
+<li><p>Perform steps in <a class="reference internal" href="#read-a-chunk-of-an-i-cache-cache-line"><span class="std std-ref">Read a Chunk of an I-cache Cache Line</span></a> to read or <a class="reference internal" href="#write-a-chunk-of-an-i-cache-cache-line"><span class="std std-ref">Write a Chunk of an I-Cache Cache Line</span></a> to write.</p></li>
+<li><p>Increment the index.</p></li>
+<li><p>Go back to step 2.) for a total of 8 (for 64-byte line size) or 4 (for 32-byte line size) iterations.</p></li>
+</ol>
+<h3 id="read-a-tag-and-status-information-of-an-i-cache-cache-line"><span class="section-number">10.4.4. </span>Read a Tag and Status Information of an I-cache Cache Line<a class="headerlink" href="#read-a-tag-and-status-information-of-an-i-cache-cache-line" title="Link to this heading">¶</a></h3>
+<p>The following steps must be performed to read the tag, tag’s parity/ECC bit(s), and status information of an I-cache cache line:</p>
+<ol class="arabic simple">
+<li><p>Write array/way/address information which location to access in the I-cache to the <code class="docutils literal notranslate"><span class="pre">dicawics</span></code> register:</p>
+<ul class="simple">
+<li><p><em>array</em> field: 1 (i.e., I-cache tag array and status),</p></li>
+<li><p><em>way</em> field: way to be accessed (i.e., 0..1 for 2-way or 0..3 for 4-way set-associative cache), and</p></li>
+<li><p><em>index</em> field: index of cache line to be accessed.</p></li>
+</ul>
+</li>
+<li><p>Read the <code class="docutils literal notranslate"><span class="pre">dicago</span></code> register which causes a read access from the I-cache tag array and status bits at the location selected by the <code class="docutils literal notranslate"><span class="pre">dicawics</span></code> register.</p></li>
+<li><p>Read the <code class="docutils literal notranslate"><span class="pre">dicad0</span></code> register to get the selected cache line’s tag (<em>tag</em> field) and valid bit (<em>valid</em> field) as well as the set’s LRU bits (<em>lru</em> field), and read the <code class="docutils literal notranslate"><span class="pre">dicad1</span></code> register to get the tag’s parity/ECC bit(s) (<em>parity0</em> / <em>ecc</em> field).</p></li>
+</ol>
+<h3 id="write-a-tag-and-status-information-of-an-i-cache-cache-line"><span class="section-number">10.4.5. </span>Write a Tag and Status Information of an I-Cache Cache Line<a class="headerlink" href="#write-a-tag-and-status-information-of-an-i-cache-cache-line" title="Link to this heading">¶</a></h3>
+<p>The following steps must be performed to write the tag, tag’s parity/ECC bit, and status information of an I-cache cache line:</p>
+<ol class="arabic simple">
+<li><p>Write array/way/address information which location to access in the I-cache to the <code class="docutils literal notranslate"><span class="pre">dicawics</span></code> register:</p>
+<ul class="simple">
+<li><p><em>array</em> field: 1 (i.e., I-cache tag array and status),</p></li>
+<li><p><em>way</em> field: way to be accessed (i.e., 0..1 for 2-way or 0..3 for 4-way set-associative cache), and</p></li>
+<li><p><em>index</em> field: index of cache line to be accessed.</p></li>
+</ul>
+</li>
+<li><p>Write the new tag, valid, and LRU information to the <em>tag, valid</em>, and <em>lru</em> fields of the <code class="docutils literal notranslate"><span class="pre">dicad0</span></code> register, and write the calculated correct tag parity/ECC bit (unless error injection should be performed) to the <em>parity0</em> / <em>ecc</em> field of the <code class="docutils literal notranslate"><span class="pre">dicad1</span></code> register.</p></li>
+<li><p>Write a ‘1’ to the <em>go</em> field of the <code class="docutils literal notranslate"><span class="pre">dicago</span></code> register which causes a write access to the I-cache tag array and status bits copying the information stored in the dicad0/1 registers to the location selected by the <code class="docutils literal notranslate"><span class="pre">dicawics</span></code> register.</p></li>
+</ol>
+<h2 id="i-cache-control-status-registers"><span class="section-number">10.5. </span>I-Cache Control/Status Registers<a class="headerlink" href="#i-cache-control-status-registers" title="Link to this heading">¶</a></h2>
+<p>A summary of the I-cache control/status registers in CSR address space:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#i-cache-array-way-index-selection-register-dicawics"><span class="std std-ref">I-Cache Array/Way/Index Selection Register (dicawics)</span></a></p></li>
+<li><p><a class="reference internal" href="#i-cache-array-data-0-register-dicad0"><span class="std std-ref">I-Cache Array Data 0 Register (dicad0)</span></a></p></li>
+<li><p><a class="reference internal" href="#i-cache-array-data-0-high-register-dicad0h"><span class="std std-ref">I-Cache Array Data 0 High Register (dicad0h)</span></a></p></li>
+<li><p><a class="reference internal" href="#i-cache-array-data-1-register-dicad1"><span class="std std-ref">I-Cache Array Data 1 Register (dicad1)</span></a></p></li>
+<li><p><a class="reference internal" href="#i-cache-array-go-register-dicago"><span class="std std-ref">I-Cache Array Go Register (dicago)</span></a></p></li>
+</ul>
+<p>All reserved and unused bits in these control/status registers must be hardwired to ‘0’.
+Unless otherwise noted, all read/write control/status registers must have WARL (Write Any value, Read Legal value) behavior.</p>
+<h3 id="i-cache-array-way-index-selection-register-dicawics"><span class="section-number">10.5.1. </span>I-Cache Array/Way/Index Selection Register (dicawics)<a class="headerlink" href="#i-cache-array-way-index-selection-register-dicawics" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">dicawics</span></code> register is used to select a specific location in either the data array or the tag array / status of the Icache.
+In addition to selecting the array, the location in the array must be specified by providing the way, and index.
+Once selected, the <code class="docutils literal notranslate"><span class="pre">dicad0/0h/1</span></code> registers (see <a class="reference internal" href="#i-cache-array-data-0-register-dicad0"><span class="std std-ref">I-Cache Array Data 0 Register (dicad0)</span></a>, <a class="reference internal" href="#i-cache-array-data-0-high-register-dicad0h"><span class="std std-ref">I-Cache Array Data 0 High Register (dicad0h)</span></a>, and <a class="reference internal" href="#i-cache-array-data-1-register-dicad1"><span class="std std-ref">I-Cache Array Data 1 Register (dicad1)</span></a>) hold the information read from or to be written to the specified location, and the dicago register (see <a class="reference internal" href="#i-cache-array-go-register-dicago"><span class="std std-ref">I-Cache Array Go Register (dicago)</span></a>) is used to control the read/write access to the specified I-cache array.</p>
+<p>The cache line size of the I-cache is either 64 or 32 bytes.
+The <code class="docutils literal notranslate"><span class="pre">dicawics</span></code> register addresses a 64-bit chunk of instruction data or a cache line tag with its associated status.
+Each 64-bit instruction data chunk is protected either with four parity bits (each covering 16 consecutive instruction data bits) or with 7-bit ECC (covering all 64 instruction data bits).
+There are 8 such chunks in a 64-byte or 4 such chunks in a 32-byte cache line.
+Each cache line tag is protected either with a single parity bit or with 5-bit ECC.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This register is accessible in <strong>Debug Mode only</strong>. Attempting to access this register in machine mode raises an illegal instruction exception.</p>
+</div>
+<p>This register is mapped to the non-standard read-write CSR address space.</p>
+<table class="docutils data align-default" id="tab-cache-array-dicawics">
+<caption><span class="caption-number">Table 10.1 </span><span class="caption-text">I-Cache Array/Way/Index Selection Register (dicawics, at CSR 0x7C8)</span><a class="headerlink" href="#tab-cache-array-dicawics" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>31:25</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>array</p></td>
+<td><p>24</p></td>
+<td><p>Array select:</p>
+<p>0: I-cache data array (incl. parity/ECC bits)</p>
+<p>1: I-cache tag array (incl. parity/ECC bits) and status (incl. valid and  LRU bits)</p>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>23:22</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>way</p></td>
+<td><p>21:20</p></td>
+<td><p>Way select:</p>
+<p>Four-way set-associative cache: <em>way[21:20]</em></p>
+<p>Two-way set-associative cache: <em>way[20]</em> (<em>way[21]</em> reserved, must be 0)</p>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>19:17</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>index <a class="footnote-reference brackets" href="#fn-cache-1" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>16:3</p></td>
+<td><p>Index address bits select</p>
+<p><strong>Notes:</strong></p>
+<ul class="simple">
+<li><p>Index bits are right-justified:</p>
+<ul>
+<li><p>For 4-way set-associative cache, <em>index[16]</em> and other unused upper  bits (for I-cache sizes smaller than 256KB) must be 0</p></li>
+<li><p>For 2-way set-associative cache, unused upper bits (for I-cache  sizes smaller than 256KB) must be 0</p></li>
+</ul>
+</li>
+<li><p>For tag array and status access:</p>
+<ul>
+<li><p>For 64-byte cache line size, bits 5..3 are ignored by hardware</p></li>
+<li><p>For 32-byte cache line size, bits 4..3 are ignored by hardware</p></li>
+</ul>
+</li>
+<li><p>This field does not have WARL behavior</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>2:0</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="i-cache-array-data-0-register-dicad0"><span class="section-number">10.5.2. </span>I-Cache Array Data 0 Register (dicad0)<a class="headerlink" href="#i-cache-array-data-0-register-dicad0" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">dicad0</span></code> register, in combination with the <code class="docutils literal notranslate"><span class="pre">dicad0h/1</span></code> registers (see <a class="reference internal" href="#i-cache-array-data-0-high-register-dicad0h"><span class="std std-ref">I-Cache Array Data 0 High Register (dicad0h)</span></a> and <a class="reference internal" href="#i-cache-array-data-1-register-dicad1"><span class="std std-ref">I-Cache Array Data 1 Register (dicad1)</span></a>), is used to store information read from or to be written to the I-cache array location specified with the <code class="docutils literal notranslate"><span class="pre">dicawics</span></code> register (see <a class="reference internal" href="#i-cache-array-way-index-selection-register-dicawics"><span class="std std-ref">I-Cache Array/Way/Index Selection Register (dicawics)</span></a>).
+Triggering a read or write access of the I-cache array is controlled by the <code class="docutils literal notranslate"><span class="pre">dicago</span></code> register (see <a class="reference internal" href="#i-cache-array-go-register-dicago"><span class="std std-ref">I-Cache Array Go Register (dicago)</span></a>).</p>
+<p>The layout of the dicad0 register is different for the data array and the tag array / status, as described in <a class="reference internal" href="#tab-cache-array-dicad0"><span class="std std-numref">Table 10.2</span></a> below.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>During normal operation, the parity/ECC bits over the 64-bit instruction data as well as the tag are generated and checked by hardware.
+However, to enable error injection, the parity/ECC bits must be computed by software for I-cache data and tag array diagnostic writes.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This register is accessible in <strong>Debug Mode only</strong>.
+Attempting to access this register in machine mode raises an illegal instruction exception.</p>
+</div>
+<p>This register is mapped to the non-standard read-write CSR address space.</p>
+<table class="docutils data align-default" id="tab-cache-array-dicad0">
+<caption><span class="caption-number">Table 10.2 </span><span class="caption-text">I-Cache Array Data 0 Register (dicad0, at CSR 0x7C9)</span><a class="headerlink" href="#tab-cache-array-dicad0" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset|</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>I-cache data array</strong></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>instr</p></td>
+<td><p>31:0</p></td>
+<td><p>Instruction data</p>
+<p>31:16: instruction data bytes 3/2 (protected by <em>parity1</em> / <em>ecc</em>)</p>
+<p>15:0: instruction data bytes 1/0 (protected by <em>parity0</em> / <em>ecc</em>)</p>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>I-cache tag array and status bits</strong></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>tag</p></td>
+<td><p>31:11</p></td>
+<td><p>Tag</p>
+<p><strong>Note:</strong></p>
+<p>Tag bits are right-justified; unused higher bits (for I-cache sizes larger than 8KB) must be 0</p>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Unused</p></td>
+<td><p>10:7</p></td>
+<td><p>Unused</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>lru</p></td>
+<td><p>6:4</p></td>
+<td><p>Pseudo LRU bits (same bits are accessed independent of selected way):</p>
+<p>Four-way set-associative cache:</p>
+<ul class="simple">
+<li><p><em>lru[4]</em>: way0/1 / way2/3 selection</p>
+<ul>
+<li><p>0: way0/1</p></li>
+<li><p>1: way2/3</p></li>
+</ul>
+</li>
+<li><p><em>lru[5]</em>: way0 / way1 selection</p>
+<ul>
+<li><p>0: way0</p></li>
+<li><p>1: way1</p></li>
+</ul>
+</li>
+<li><p><em>lru[6]</em>: way2 / way3 selection</p>
+<ul>
+<li><p>0: way2</p></li>
+<li><p>1: way3</p></li>
+</ul>
+</li>
+</ul>
+<p>Two-way set-associative cache:</p>
+<ul class="simple">
+<li><p><em>lru[4]</em>: way0 / way1 selection</p>
+<ul>
+<li><p>0: way0</p></li>
+<li><p>1: way1</p></li>
+<li><p><em>lru[6:5]</em>: Reserved (must be 0)</p></li>
+</ul>
+</li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Unused</p></td>
+<td><p>3:1</p></td>
+<td><p>Unused</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>valid</p></td>
+<td><p>0</p></td>
+<td><p>Cache line valid/invalid:</p>
+<ul class="simple">
+<li><p>0: cache line invalid</p></li>
+<li><p>1: cache line valid</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="i-cache-array-data-0-high-register-dicad0h"><span class="section-number">10.5.3. </span>I-Cache Array Data 0 High Register (dicad0h)<a class="headerlink" href="#i-cache-array-data-0-high-register-dicad0h" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">dicad0h</span></code> register, in combination with the <code class="docutils literal notranslate"><span class="pre">dicad0</span></code> and <code class="docutils literal notranslate"><span class="pre">dicad1</span></code> registers (see <a class="reference internal" href="#i-cache-array-data-0-register-dicad0"><span class="std std-ref">I-Cache Array Data 0 Register (dicad0)</span></a> and <a class="reference internal" href="#i-cache-array-data-1-register-dicad1"><span class="std std-ref">I-Cache Array Data 1 Register (dicad1)</span></a>), is used to store information read from or to be written to the I-cache array location specified with the <code class="docutils literal notranslate"><span class="pre">dicawics</span></code> register (see <a class="reference internal" href="#i-cache-array-way-index-selection-register-dicawics"><span class="std std-ref">I-Cache Array/Way/Index Selection Register (dicawics)</span></a>).
+Triggering a read or write access of the I-cache array is controlled by the dicago register (see <a class="reference internal" href="#i-cache-array-go-register-dicago"><span class="std std-ref">I-Cache Array Go Register (dicago)</span></a>).
+The layout of the <code class="docutils literal notranslate"><span class="pre">dicad0h</span></code> register is described in <a class="reference internal" href="#tab-cache-array-dicad0h"><span class="std std-numref">Table 10.3</span></a> below.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>During normal operation, the parity/ECC bits over the 64-bit instruction data as well as the tag are generated and checked by hardware.
+However, to enable error injection, the parity/ECC bits must be computed by software for I-cache data and tag array diagnostic writes.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This register is accessible in <strong>Debug Mode only</strong>.
+Attempting to access this register in machine mode raises an illegal instruction exception.</p>
+</div>
+<p>This register is mapped to the non-standard read-write CSR address space.</p>
+<table class="docutils data align-default" id="tab-cache-array-dicad0h">
+<caption><span class="caption-number">Table 10.3 </span><span class="caption-text">I-Cache Array Data 0 High Register (dicad0h, at CSR 0x7CC)</span><a class="headerlink" href="#tab-cache-array-dicad0h" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>instr</p></td>
+<td><p>31:0</p></td>
+<td><p>Instruction data</p>
+<p>31:16: instruction data bytes 7/6 (protected by <em>parity3</em> / <em>ecc</em>)</p>
+<p>15:0: instruction data bytes 5/4 (protected by <em>parity2</em> / <em>ecc</em>)</p>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="i-cache-array-data-1-register-dicad1"><span class="section-number">10.5.4. </span>I-Cache Array Data 1 Register (dicad1)<a class="headerlink" href="#i-cache-array-data-1-register-dicad1" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">dicad1</span></code> register, in combination with the <code class="docutils literal notranslate"><span class="pre">dicad0/0h</span></code> registers (see <a class="reference internal" href="#i-cache-array-data-0-register-dicad0"><span class="std std-ref">I-Cache Array Data 0 Register (dicad0)</span></a> and <a class="reference internal" href="#i-cache-array-data-0-high-register-dicad0h"><span class="std std-ref">I-Cache Array Data 0 High Register (dicad0h)</span></a>), is used to store information read from or to be written to the I-cache array location specified with the <code class="docutils literal notranslate"><span class="pre">dicawics</span></code> register (see <a class="reference internal" href="#i-cache-array-way-index-selection-register-dicawics"><span class="std std-ref">I-Cache Array/Way/Index Selection Register (dicawics)</span></a>).
+Triggering a read or write access of the I-cache array is controlled by the <code class="docutils literal notranslate"><span class="pre">dicago</span></code> register (see <a class="reference internal" href="#i-cache-array-go-register-dicago"><span class="std std-ref">I-Cache Array Go Register (dicago)</span></a>).</p>
+<p>The layout of the <code class="docutils literal notranslate"><span class="pre">dicad1</span></code> register is described in <a class="reference internal" href="#tab-cache-array-dicad1"><span class="std std-numref">Table 10.4</span></a> below.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>During normal operation, the parity/ECC bits over the 64-bit instruction data as well as the tag are generated and checked by hardware.
+However, to enable error injection, the parity/ECC bits must be computed by software for I-cache data and tag array diagnostic writes.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This register is accessible in <strong>Debug Mode only</strong>.
+Attempting to access this register in machine mode raises an illegal instruction exception.</p>
+</div>
+<p>This register is mapped to the non-standard read-write CSR address space.</p>
+<table class="docutils data align-default" id="tab-cache-array-dicad1">
+<caption><span class="caption-number">Table 10.4 </span><span class="caption-text">I-Cache Array Data 1 Register (dicad1, at CSR 0x7CA).</span><a class="headerlink" href="#tab-cache-array-dicad1" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Parity</strong></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Instruction data</strong></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>31:4</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>parity3</p></td>
+<td><p>3</p></td>
+<td><p>Even parity for I-cache data bytes 7/6 (<em>instr[31:16]</em> in <code class="docutils literal notranslate"><span class="pre">dicad0h</span></code>)</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>parity2</p></td>
+<td><p>2</p></td>
+<td><p>Even parity for I-cache data bytes 5/4 (<em>instr[15:0]</em> in <code class="docutils literal notranslate"><span class="pre">dicad0h</span></code>)</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>parity1</p></td>
+<td><p>1</p></td>
+<td><p>Even parity for I-cache data bytes 3/2 (<em>instr[31:16]</em> in <code class="docutils literal notranslate"><span class="pre">dicad0</span></code>)</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>parity0</p></td>
+<td><p>0</p></td>
+<td><p>Even parity for I-cache data bytes 1/0 (<em>instr[15:0]</em> in <code class="docutils literal notranslate"><span class="pre">dicad0</span></code>)</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Tag</strong></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>31:1</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>parity0</p></td>
+<td><p>0</p></td>
+<td><p>Even parity for I-cache tag (tag)</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>ECC</strong></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Instruction data</strong></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>31:7</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>ecc</p></td>
+<td><p>6:0</p></td>
+<td><p>ECC for I-cache data bytes 7/6/5/4/3/2/1/0 (<em>instr[31:0]</em> in <code class="docutils literal notranslate"><span class="pre">dicad0h</span></code> and <em>instr[31:0]</em> in <code class="docutils literal notranslate"><span class="pre">dicad0</span></code>)</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Tag</strong></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Reserved</p></td>
+<td><p>31:5</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>ecc</p></td>
+<td><p>4:0</p></td>
+<td><p>ECC for I-cache tag (tag)</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="i-cache-array-go-register-dicago"><span class="section-number">10.5.5. </span>I-Cache Array Go Register (dicago)<a class="headerlink" href="#i-cache-array-go-register-dicago" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">dicago</span></code> register is used to trigger a read from or write to the I-cache array location specified with the <code class="docutils literal notranslate"><span class="pre">dicawics</span></code> register (see <a class="reference internal" href="#i-cache-array-way-index-selection-register-dicawics"><span class="std std-ref">I-Cache Array/Way/Index Selection Register (dicawics)</span></a>).
+Reading the <code class="docutils literal notranslate"><span class="pre">dicago</span></code> register populates the <code class="docutils literal notranslate"><span class="pre">dicad0/dicad0h/dicad1</span></code> registers (see <a class="reference internal" href="#i-cache-array-data-0-register-dicad0"><span class="std std-ref">I-Cache Array Data 0 Register (dicad0)</span></a>, <a class="reference internal" href="#i-cache-array-data-0-high-register-dicad0h"><span class="std std-ref">I-Cache Array Data 0 High Register (dicad0h)</span></a>, and <a class="reference internal" href="#i-cache-array-data-1-register-dicad1"><span class="std std-ref">I-Cache Array Data 1 Register (dicad1)</span></a>) with the information read from the I-cache array.
+Writing a ‘1’ to the go field of the dicago register copies the information stored in the dicad0/dicad0h /dicad1 registers to the I-cache array.
+The layout of the dicago register is described in <a class="reference internal" href="#tab-cache-array-dicago"><span class="std std-numref">Table 10.5</span></a> below.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This register is accessible in <strong>Debug Mode only</strong>. Attempting to access this register in machine mode raises an illegal instruction exception.</p>
+</div>
+<p>The <em>go</em> field of the <code class="docutils literal notranslate"><span class="pre">dicago</span></code> register has W1R0 (Write 1, Read 0) behavior, as also indicated in the ‘Access’ column.</p>
+<p>This register is mapped to the non-standard read-write CSR address space.</p>
+<table class="docutils data align-default" id="tab-cache-array-dicago">
+<caption><span class="caption-number">Table 10.5 </span><span class="caption-text">I-Cache Array Go Register (dicago, at CSR 0x7CB)</span><a class="headerlink" href="#tab-cache-array-dicago" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>31:1</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>go</p></td>
+<td><p>0</p></td>
+<td><p>Read triggers an I-cache read, write-1 triggers an I-cache write</p></td>
+<td><p>R0/W1</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="fn-cache-1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>VeeR EL2’s I-cache supports four- or two-way set-associativity and cache line sizes of 64 or 32 bytes. Each way is subdivided into 2 banks, and each bank is 8 bytes wide. A bank is selected by index[3], and index[2:0] address a byte of the 8-byte wide bank.</p>
+</aside>
+</aside>
+
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      2025-12-22
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="performance.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 9. Performance Monitoring" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              9. Performance Monitoring
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="debugging.html" class="md-footer__link md-footer__link--next" aria-label="Next: 11. Debug Support" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              11. Debug Support
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        Copyright &#169; 2025 CHIPS Alliance The Linux Foundation®.
+        
+    </div>
+  
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+      
+      
+    
+    <a href="https://github.com/antmicro" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/antmicro" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["toc.integrate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+      
+        <script src="_static/sphinx_immaterial_theme.f9d9eeeb247ace16c.min.js?v=8ec58cb5"></script>
+    
+  </body>
+</html>

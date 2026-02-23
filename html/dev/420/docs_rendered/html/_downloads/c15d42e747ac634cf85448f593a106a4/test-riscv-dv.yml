@@ -1,0 +1,282 @@
+name: RISCV-DV tests
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  ITERATIONS: 3
+  SEED: 999
+
+jobs:
+  generate-config:
+    name: Generate configs
+    runs-on: ubuntu-24.04
+    outputs:
+      test-types: ${{ steps.test-types.outputs.tests }}
+      test-include-generate: ${{ steps.test-types.outputs.include-generate }}
+      test-include-run: ${{ steps.test-types.outputs.include-run }}
+      test-include-run-custom: ${{ steps.test-types.outputs.include-run-custom }}
+      # The same exclude can be used in both `run-tests` and `run-custom-tests` jobs cause they
+      # exclude all matrix entries with matching keys regardless of other keys so it doesn't matter
+      # that matrix in `run-tests` has twice the entries from `run-tests-custom` due to `coverage`.
+      test-exclude-run: ${{ steps.test-types.outputs.exclude-run }}
+      hash: ${{ steps.hash.outputs.files-hash }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - id: test-types
+        run: |
+          python3 -m pip install pyyaml
+          echo "tests=$(python3 .github/scripts/riscv_dv_parse_testlist.py tools/riscv-dv/testlist.yaml)" | tee -a $GITHUB_OUTPUT
+          echo "include-generate=$(python3 .github/scripts/riscv_dv_matrix_include.py generate)" | tee -a $GITHUB_OUTPUT
+          echo "include-run=$(python3 .github/scripts/riscv_dv_matrix_include.py run-tests)" | tee -a $GITHUB_OUTPUT
+          echo "include-run-custom=$(python3 .github/scripts/riscv_dv_matrix_include.py run-custom-tests)" | tee -a $GITHUB_OUTPUT
+          echo "exclude-run=[ \
+            {'iss': 'renode', 'test': 'riscv_bitmanip_full_test_veer'}, \
+            {'iss': 'renode', 'test': 'riscv_bitmanip_balanced_test_veer'}, \
+            {'iss': 'renode', 'test': 'riscv_illegal_instr_test'}, \
+            {'iss': 'renode', 'test': 'riscv_hint_instr_test'}, \
+            {'iss': 'renode', 'test': 'riscv_ebreak_test', 'priv': 'mu'}, \
+            {'iss': 'renode', 'test': 'riscv_ebreak_debug_mode_test', 'priv': 'mu'} \
+          ]" | tee -a $GITHUB_OUTPUT
+      - id: hash
+        run: |
+          echo "files-hash=$(.github/scripts/get_code_hash.sh)" | tee -a $GITHUB_OUTPUT
+
+  generate-code:
+    name: Generate code for tests
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    needs: generate-config
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
+        version: [ uvm ]
+        include: ${{ fromJSON(needs.generate-config.outputs.test-include-generate) }}
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
+      CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Set secrets version
+        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
+
+      - name: Prepare Environment
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_prepare_env
+
+      - name: Generate code
+        if: matrix.version == 'uvm'
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_generate_code
+          RISCV_DV_TEST: ${{ matrix.test }}
+          RISCV_DV_ITER: ${{ env.ITERATIONS }}
+          RISCV_DV_SEED: ${{ env.SEED }}
+
+      - name: Generate code (pyflow)
+        if: matrix.version == 'pyflow'
+        run: |
+          export RV_ROOT=`realpath .`
+          pushd tools/riscv-dv
+            make -j`nproc` \
+              RISCV_DV_TEST=${{ matrix.test }} \
+              RISCV_DV_ITER=$ITERATIONS \
+              RISCV_DV_SEED=$SEED \
+              generate
+          popd
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: riscv-dv_generated_code_${{ matrix.test }}_${{ matrix.version }}
+          path: tools/riscv-dv/work/**/asm_test/*.S
+
+  run-tests:
+    name: Run RISC-V DV tests
+    runs-on: ubuntu-24.04
+    container: ghcr.io/antmicro/cores-veer-el2:20250411084921
+    needs: [ generate-config, generate-code ]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
+        iss:
+          - spike
+          - renode
+        coverage: ["all"]
+        version: [ uvm ]
+        priv: ["m", "mu"]
+        include: ${{ fromJSON(needs.generate-config.outputs.test-include-run) }}
+        exclude: ${{ fromJSON(needs.generate-config.outputs.test-exclude-run) }}
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/riscv-dv/.cache/"
+      CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
+
+    steps:
+      - name: Install utils
+        run: |
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+            git ccache device-tree-compiler python3-minimal python3-pip \
+            libboost-all-dev
+
+      # As of July 9th, 2024 `ubuntu:latest` comes with riscv64-unknown-elf-gcc
+      # 10.0.2. We need a newer version for bitmanip extension support.
+      - name: Install cross-compiler
+        run: |
+          echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+            gcc-riscv64-unknown-elf
+          riscv64-unknown-elf-gcc --version
+
+      - name: Setup repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install coverage dependencies
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -r .github/scripts/requirements-coverage.txt
+          echo "PATH=$PATH" >> $GITHUB_ENV
+
+      - name: Install Python deps
+        run: |
+          pip install -r third_party/riscv-dv/requirements.txt
+
+      - name: Download Code Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: riscv-dv_generated_code_${{ matrix.test }}_${{ matrix.version }}
+          path: tools/riscv-dv/work/
+
+      - name: Run test
+        run: |
+          ls tools/riscv-dv/work
+          export FULL_NAME=riscv_dv-${{ matrix.test }}-${{ matrix.priv }}-${{ matrix.iss }}-${{ matrix.version }}
+          export PATH=/opt/verilator/bin:$PATH
+          export RV_ROOT=`realpath .`
+          export RISCV_GCC=riscv64-unknown-elf-gcc
+          export RISCV_OBJCOPY=riscv64-unknown-elf-objcopy
+          export RISCV_NM=riscv64-unknown-elf-nm
+          export SPIKE_PATH=/opt/spike/bin
+          export RENODE_PATH=/opt/renode/renode
+
+          echo "FULL_NAME=${FULL_NAME}" >> $GITHUB_ENV
+          echo "RV_ROOT=${RV_ROOT}" >> ${GITHUB_ENV}
+          echo "PATH=${PATH}"       >> ${GITHUB_ENV}
+
+          ${RISCV_GCC} --version
+
+          pushd tools/riscv-dv
+            make -j`nproc` \
+              RISCV_DV_TEST=${{ matrix.test }} \
+              RISCV_DV_ISS=${{ matrix.iss }} \
+              RISCV_DV_ITER=$ITERATIONS \
+              RISCV_DV_SEED=$SEED \
+              COVERAGE=${{ matrix.coverage }} \
+              RISCV_DV_PRIV=${{ matrix.priv }} \
+              run
+          popd
+
+      - name: Prepare coverage data
+        run: |
+          mkdir -p results
+
+          for ((i=0; i<ITERATIONS; i++)); do
+            .github/scripts/convert_dat.sh ${RV_ROOT}/tools/riscv-dv/work/*/hdl_sim/*_$i/coverage.dat \
+               results/coverage_${FULL_NAME}-iter${i}
+          done
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage_data-${{ env.FULL_NAME }}-${{ matrix.coverage }}
+          path: results/*.info
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-${{ env.FULL_NAME }}-${{ matrix.coverage }}
+          path: tools/riscv-dv/work/test_*
+
+  run-custom-tests:
+    name: Run custom RISC-V DV tests
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    needs: [ generate-config, run-tests ]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJSON(needs.generate-config.outputs.test-types) }}
+        iss:
+          - spike
+          - renode
+        version: [ uvm ]
+        priv: ["m", "mu"]
+        include: ${{ fromJSON(needs.generate-config.outputs.test-include-run-custom) }}
+        exclude: ${{ fromJSON(needs.generate-config.outputs.test-exclude-run) }}
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/riscv-dv/.cache/"
+      GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
+      CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - run: echo "FULL_NAME=riscv_dv-${{ matrix.test }}-${{ matrix.priv }}-${{ matrix.iss }}-${{ matrix.version }}" >> $GITHUB_ENV
+
+      # To avoid compiling code and running ISS on CentOS, let's just get
+      # compiled code and ISS logs from the artifacts of Verilator tests.
+      - name: Download Code and ISS logs
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts-${{ env.FULL_NAME }}-all
+          path: verilator-artifacts
+
+      - name: Move Code and ISS logs to workdir
+        run: |
+          SRC_DIR=verilator-artifacts/test_${{ matrix.test }}
+          TEST_DIR=tools/riscv-dv/work/test_${{ matrix.test }}
+
+          mkdir -p $TEST_DIR/asm_test
+          cp $SRC_DIR/asm_test/*.hex $TEST_DIR/asm_test/
+          cp -r $SRC_DIR/${{ matrix.iss }}_sim $TEST_DIR/
+          rm -rf verilator-artifacts
+
+      - name: Set secrets version
+        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
+
+      - name: Prepare Environment
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_prepare_env
+
+      - name: Perform custom tests
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_custom_riscv_dv
+          RISCV_DV_ITER: ${{ env.ITERATIONS }}
+          RISCV_DV_TEST: ${{ matrix.test }}
+          RISCV_DV_PRIV: ${{ matrix.priv }}
+          RISCV_DV_ISS: ${{ matrix.iss }}
+          VERSION: ${{ matrix.version }}

@@ -11,7 +11,8 @@ MODULE      ?= $(subst $(space),$(comma),$(subst .py,,$(TEST_FILES)))
 TOPLEVEL     = el2_veer_lockstep_wrapper
 CM_FILE      = cm.cfg
 
-EXTRA_VEER_CONFIG = -set lockstep_enable=1 -set lockstep_regfile_enable=1
+# Override MUBI values to be able to test them in the testbench
+EXTRA_VEER_CONFIG = -set lockstep_enable=1 -set lockstep_regfile_enable=1 -set mubi_width=4 -set mubi_true=0x6 -set mubi_false=0x9
 
 VERILOG_INCLUDE_DIRS += \
 	${RV_ROOT}/testbench \
@@ -20,6 +21,7 @@ VERILOG_INCLUDE_DIRS += \
 VERILOG_SOURCES  = \
 	${SRCDIR}/lib/el2_mem_if.sv \
 	${SRCDIR}/lib/el2_regfile_if.sv \
+	${SRCDIR}/el2_mubi_pkg.sv \
 	${SRCDIR}/el2_veer_wrapper.sv \
 	${SRCDIR}/el2_mem.sv \
 	${SRCDIR}/el2_pic_ctrl.sv \
@@ -62,7 +64,12 @@ VERILOG_SOURCES  = \
 	${SRCDIR}/dmi/dmi_jtag_to_core_sync.v \
 	${SRCDIR}/dmi/rvjtag_tap.v \
 	${SRCDIR}/lib/el2_lib.sv \
+	${SRCDIR}/lib/axi4_to_ahb.sv \
+	${SRCDIR}/lib/ahb_to_axi4.sv \
+	$(SRCDIR)/el2_lockstep_pkg.sv \
 	$(SRCDIR)/el2_veer_lockstep.sv \
+	$(TEST_DIR)/el2_veer_lockstep_cov_if.sv \
+	$(TEST_DIR)/el2_veer_lockstep_cov_bind.sv \
 	$(TEST_DIR)/el2_veer_lockstep_wrapper.sv
 
 include $(TEST_DIR)/../common.mk

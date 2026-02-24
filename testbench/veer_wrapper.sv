@@ -348,9 +348,17 @@ module veer_wrapper
     output logic dccm_ecc_double_error,
 
 `ifdef RV_LOCKSTEP_ENABLE
-    input logic  disable_corruption_detection_i,
-    input logic  lockstep_err_injection_en_i,
-    output logic corruption_detected_o,
+    output logic [31:0] shadow_core_trace_rv_i_insn_ip,
+    output logic [31:0] shadow_core_trace_rv_i_address_ip,
+    output logic shadow_core_trace_rv_i_valid_ip,
+    output logic shadow_core_trace_rv_i_exception_ip,
+    output logic [4:0] shadow_core_trace_rv_i_ecause_ip,
+    output logic shadow_core_trace_rv_i_interrupt_ip,
+    output logic [31:0] shadow_core_trace_rv_i_tval_ip,
+
+    input el2_mubi_pkg::el2_mubi_t  disable_corruption_detection_i,
+    input el2_mubi_pkg::el2_mubi_t  lockstep_err_injection_en_i,
+    output el2_mubi_pkg::el2_mubi_t corruption_detected_o,
 `endif
 
     // external MPC halt/run interface
@@ -415,6 +423,11 @@ module veer_wrapper
   assign ic_rw_addr_q = mem_export.ic_rw_addr_q;
   assign mem_export.ic_tag_data_raw_packed_pre = ic_tag_data_raw_packed_pre;
   assign mem_export.ic_tag_data_raw_pre = ic_tag_data_raw_pre;
+
+  // Functional coverage
+`ifdef FCOV
+  el2_veer_lockstep_cov_bind dcls_coverage();
+`endif
 
   el2_veer_wrapper rvtop (
       .el2_mem_export(mem_export.veer_sram_src),

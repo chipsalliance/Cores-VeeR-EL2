@@ -4,6 +4,8 @@
 
 module el2_veer_lockstep
   import el2_pkg::*;
+  import el2_mubi_pkg::*;
+  import el2_lockstep_pkg::*;
 #(
     `include "el2_param.vh"
 ) (
@@ -29,7 +31,6 @@ module el2_veer_lockstep
     input logic [4:0] trace_rv_i_ecause_ip,
     input logic trace_rv_i_interrupt_ip,
     input logic [31:0] trace_rv_i_tval_ip,
-
 
     input logic dccm_clk_override,
     input logic icm_clk_override,
@@ -101,7 +102,7 @@ module el2_veer_lockstep
     input logic ic_sel_premux_data,  // Select premux data
 
 
-    input logic [  pt.ICACHE_INDEX_HI:3] ic_debug_addr,       // Read/Write addresss to the Icache.
+    input logic [  pt.ICACHE_INDEX_HI:3] ic_debug_addr,       // Read/Write address to the Icache.
     input logic                          ic_debug_rd_en,      // Icache debug rd
     input logic                          ic_debug_wr_en,      // Icache debug wr
     input logic                          ic_debug_tag_array,  // Debug tag array
@@ -372,303 +373,23 @@ module el2_veer_lockstep
     input logic                      soft_int,
     input logic                      scan_mode,
 
+    // Shadow Core trace
+    output logic [31:0] shadow_core_trace_rv_i_insn_ip,
+    output logic [31:0] shadow_core_trace_rv_i_address_ip,
+    output logic shadow_core_trace_rv_i_valid_ip,
+    output logic shadow_core_trace_rv_i_exception_ip,
+    output logic [4:0] shadow_core_trace_rv_i_ecause_ip,
+    output logic shadow_core_trace_rv_i_interrupt_ip,
+    output logic [31:0] shadow_core_trace_rv_i_tval_ip,
+
     // Shadow Core control
-    input logic disable_corruption_detection_i,
-    input logic lockstep_err_injection_en_i,
+    input el2_mubi_t disable_corruption_detection_i,
+    input el2_mubi_t lockstep_err_injection_en_i,
 
     // Equivalency Checker output
-    output logic corruption_detected_o
+    output el2_mubi_t corruption_detected_o
 );
-
-  localparam int unsigned LockstepDelay = pt.LOCKSTEP_DELAY;  // Delay I/O; in clock cycles
-
-  // Outputs
-  typedef struct packed {
-    logic                                 core_rst_l;
-    logic [31:0]                          trace_rv_i_insn_ip;
-    logic [31:0]                          trace_rv_i_address_ip;
-    logic                                 trace_rv_i_valid_ip;
-    logic                                 trace_rv_i_exception_ip;
-    logic [4:0]                           trace_rv_i_ecause_ip;
-    logic                                 trace_rv_i_interrupt_ip;
-    logic [31:0]                          trace_rv_i_tval_ip;
-    logic                                 dccm_clk_override;
-    logic                                 icm_clk_override;
-    logic                                 dec_tlu_core_ecc_disable;
-    logic                                 o_cpu_halt_ack;
-    logic                                 o_cpu_halt_status;
-    logic                                 o_cpu_run_ack;
-    logic                                 o_debug_mode_status;
-    logic                                 mpc_debug_halt_ack;
-    logic                                 mpc_debug_run_ack;
-    logic                                 debug_brkpt_status;
-    logic                                 dec_tlu_perfcnt0;
-    logic                                 dec_tlu_perfcnt1;
-    logic                                 dec_tlu_perfcnt2;
-    logic                                 dec_tlu_perfcnt3;
-    logic                                 dccm_wren;
-    logic                                 dccm_rden;
-    logic [pt.DCCM_BITS-1:0]              dccm_wr_addr_lo;
-    logic [pt.DCCM_BITS-1:0]              dccm_wr_addr_hi;
-    logic [pt.DCCM_BITS-1:0]              dccm_rd_addr_lo;
-    logic [pt.DCCM_BITS-1:0]              dccm_rd_addr_hi;
-    logic [pt.DCCM_FDATA_WIDTH-1:0]       dccm_wr_data_lo;
-    logic [pt.DCCM_FDATA_WIDTH-1:0]       dccm_wr_data_hi;
-    logic [pt.ICCM_BITS-1:1]              iccm_rw_addr;
-    logic                                 iccm_wren;
-    logic                                 iccm_rden;
-    logic [2:0]                           iccm_wr_size;
-    logic [77:0]                          iccm_wr_data;
-    logic                                 iccm_buf_correct_ecc;
-    logic                                 iccm_correction_state;
-    logic [31:1]                          ic_rw_addr;
-    logic [pt.ICACHE_NUM_WAYS-1:0]        ic_tag_valid;
-    logic [pt.ICACHE_NUM_WAYS-1:0]        ic_wr_en;
-    logic                                 ic_rd_en;
-    logic [pt.ICACHE_BANKS_WAY-1:0][70:0] ic_wr_data;
-    logic [70:0]                          ic_debug_wr_data;
-    logic [63:0]                          ic_premux_data;
-    logic                                 ic_sel_premux_data;
-    logic [pt.ICACHE_INDEX_HI:3]          ic_debug_addr;
-    logic                                 ic_debug_rd_en;
-    logic                                 ic_debug_wr_en;
-    logic                                 ic_debug_tag_array;
-    logic [pt.ICACHE_NUM_WAYS-1:0]        ic_debug_way;
-    logic                                 lsu_axi_awvalid;
-    logic [pt.LSU_BUS_TAG-1:0]            lsu_axi_awid;
-    logic [31:0]                          lsu_axi_awaddr;
-    logic [3:0]                           lsu_axi_awregion;
-    logic [7:0]                           lsu_axi_awlen;
-    logic [2:0]                           lsu_axi_awsize;
-    logic [1:0]                           lsu_axi_awburst;
-    logic                                 lsu_axi_awlock;
-    logic [3:0]                           lsu_axi_awcache;
-    logic [2:0]                           lsu_axi_awprot;
-    logic [3:0]                           lsu_axi_awqos;
-    logic                                 lsu_axi_wvalid;
-    logic [63:0]                          lsu_axi_wdata;
-    logic [7:0]                           lsu_axi_wstrb;
-    logic                                 lsu_axi_wlast;
-    logic                                 lsu_axi_bready;
-    logic                                 lsu_axi_arvalid;
-    logic [pt.LSU_BUS_TAG-1:0]            lsu_axi_arid;
-    logic [31:0]                          lsu_axi_araddr;
-    logic [3:0]                           lsu_axi_arregion;
-    logic [7:0]                           lsu_axi_arlen;
-    logic [2:0]                           lsu_axi_arsize;
-    logic [1:0]                           lsu_axi_arburst;
-    logic                                 lsu_axi_arlock;
-    logic [3:0]                           lsu_axi_arcache;
-    logic [2:0]                           lsu_axi_arprot;
-    logic [3:0]                           lsu_axi_arqos;
-    logic                                 lsu_axi_rready;
-    logic                                 ifu_axi_awvalid;
-    logic [pt.IFU_BUS_TAG-1:0]            ifu_axi_awid;
-    logic [31:0]                          ifu_axi_awaddr;
-    logic [3:0]                           ifu_axi_awregion;
-    logic [7:0]                           ifu_axi_awlen;
-    logic [2:0]                           ifu_axi_awsize;
-    logic [1:0]                           ifu_axi_awburst;
-    logic                                 ifu_axi_awlock;
-    logic [3:0]                           ifu_axi_awcache;
-    logic [2:0]                           ifu_axi_awprot;
-    logic [3:0]                           ifu_axi_awqos;
-    logic                                 ifu_axi_wvalid;
-    logic [63:0]                          ifu_axi_wdata;
-    logic [7:0]                           ifu_axi_wstrb;
-    logic                                 ifu_axi_wlast;
-    logic                                 ifu_axi_bready;
-    logic                                 ifu_axi_arvalid;
-    logic [pt.IFU_BUS_TAG-1:0]            ifu_axi_arid;
-    logic [31:0]                          ifu_axi_araddr;
-    logic [3:0]                           ifu_axi_arregion;
-    logic [7:0]                           ifu_axi_arlen;
-    logic [2:0]                           ifu_axi_arsize;
-    logic [1:0]                           ifu_axi_arburst;
-    logic                                 ifu_axi_arlock;
-    logic [3:0]                           ifu_axi_arcache;
-    logic [2:0]                           ifu_axi_arprot;
-    logic [3:0]                           ifu_axi_arqos;
-    logic                                 ifu_axi_rready;
-    logic                                 sb_axi_awvalid;
-    logic [pt.SB_BUS_TAG-1:0]             sb_axi_awid;
-    logic [31:0]                          sb_axi_awaddr;
-    logic [3:0]                           sb_axi_awregion;
-    logic [7:0]                           sb_axi_awlen;
-    logic [2:0]                           sb_axi_awsize;
-    logic [1:0]                           sb_axi_awburst;
-    logic                                 sb_axi_awlock;
-    logic [3:0]                           sb_axi_awcache;
-    logic [2:0]                           sb_axi_awprot;
-    logic [3:0]                           sb_axi_awqos;
-    logic                                 sb_axi_wvalid;
-    logic [63:0]                          sb_axi_wdata;
-    logic [7:0]                           sb_axi_wstrb;
-    logic                                 sb_axi_wlast;
-    logic                                 sb_axi_bready;
-    logic                                 sb_axi_arvalid;
-    logic [pt.SB_BUS_TAG-1:0]             sb_axi_arid;
-    logic [31:0]                          sb_axi_araddr;
-    logic [3:0]                           sb_axi_arregion;
-    logic [7:0]                           sb_axi_arlen;
-    logic [2:0]                           sb_axi_arsize;
-    logic [1:0]                           sb_axi_arburst;
-    logic                                 sb_axi_arlock;
-    logic [3:0]                           sb_axi_arcache;
-    logic [2:0]                           sb_axi_arprot;
-    logic [3:0]                           sb_axi_arqos;
-    logic                                 sb_axi_rready;
-    logic                                 dma_axi_awready;
-    logic                                 dma_axi_wready;
-    logic                                 dma_axi_bvalid;
-    logic [1:0]                           dma_axi_bresp;
-    logic [pt.DMA_BUS_TAG-1:0]            dma_axi_bid;
-    logic                                 dma_axi_arready;
-    logic                                 dma_axi_rvalid;
-    logic [pt.DMA_BUS_TAG-1:0]            dma_axi_rid;
-    logic [63:0]                          dma_axi_rdata;
-    logic [1:0]                           dma_axi_rresp;
-    logic                                 dma_axi_rlast;
-    logic [31:0]                          haddr;
-    logic [2:0]                           hburst;
-    logic                                 hmastlock;
-    logic [3:0]                           hprot;
-    logic [2:0]                           hsize;
-    logic [1:0]                           htrans;
-    logic                                 hwrite;
-    logic [31:0]                          lsu_haddr;
-    logic [2:0]                           lsu_hburst;
-    logic                                 lsu_hmastlock;
-    logic [3:0]                           lsu_hprot;
-    logic [2:0]                           lsu_hsize;
-    logic [1:0]                           lsu_htrans;
-    logic                                 lsu_hwrite;
-    logic [63:0]                          lsu_hwdata;
-    logic [31:0]                          sb_haddr;
-    logic [2:0]                           sb_hburst;
-    logic                                 sb_hmastlock;
-    logic [3:0]                           sb_hprot;
-    logic [2:0]                           sb_hsize;
-    logic [1:0]                           sb_htrans;
-    logic                                 sb_hwrite;
-    logic [63:0]                          sb_hwdata;
-    logic [63:0]                          dma_hrdata;
-    logic                                 dma_hreadyout;
-    logic                                 dma_hresp;
-    logic [31:0]                          dmi_reg_rdata;
-    logic                                 iccm_ecc_single_error;
-    logic                                 iccm_ecc_double_error;
-    logic                                 dccm_ecc_single_error;
-    logic                                 dccm_ecc_double_error;
-  } veer_outputs_t;
-
-  // Inputs
-  typedef struct packed {
-    logic [31:1]                    rst_vec;
-    logic                           nmi_int;
-    logic [31:1]                    nmi_vec;
-    logic                           i_cpu_halt_req;
-    logic                           i_cpu_run_req;
-    logic [31:4]                    core_id;
-    logic                           mpc_debug_halt_req;
-    logic                           mpc_debug_run_req;
-    logic                           mpc_reset_run_req;
-    logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_rd_data_lo;
-    logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_rd_data_hi;
-    logic [63:0]                    iccm_rd_data;
-    logic [77:0]                    iccm_rd_data_ecc;
-    logic [63:0]                    ic_rd_data;
-    logic [70:0]                    ic_debug_rd_data;
-    logic [25:0]                    ictag_debug_rd_data;
-    logic [pt.ICACHE_BANKS_WAY-1:0] ic_eccerr;
-    logic [pt.ICACHE_BANKS_WAY-1:0] ic_parerr;
-    logic [pt.ICACHE_NUM_WAYS-1:0]  ic_rd_hit;
-    logic                           ic_tag_perr;
-    logic                           lsu_axi_awready;
-    logic                           lsu_axi_wready;
-    logic                           lsu_axi_bvalid;
-    logic [1:0]                     lsu_axi_bresp;
-    logic [pt.LSU_BUS_TAG-1:0]      lsu_axi_bid;
-    logic                           lsu_axi_arready;
-    logic                           lsu_axi_rvalid;
-    logic [pt.LSU_BUS_TAG-1:0]      lsu_axi_rid;
-    logic [63:0]                    lsu_axi_rdata;
-    logic [1:0]                     lsu_axi_rresp;
-    logic                           lsu_axi_rlast;
-    logic                           ifu_axi_awready;
-    logic                           ifu_axi_wready;
-    logic                           ifu_axi_bvalid;
-    logic [1:0]                     ifu_axi_bresp;
-    logic [pt.IFU_BUS_TAG-1:0]      ifu_axi_bid;
-    logic                           ifu_axi_arready;
-    logic                           ifu_axi_rvalid;
-    logic [pt.IFU_BUS_TAG-1:0]      ifu_axi_rid;
-    logic [63:0]                    ifu_axi_rdata;
-    logic [1:0]                     ifu_axi_rresp;
-    logic                           ifu_axi_rlast;
-    logic                           sb_axi_awready;
-    logic                           sb_axi_wready;
-    logic                           sb_axi_bvalid;
-    logic [1:0]                     sb_axi_bresp;
-    logic [pt.SB_BUS_TAG-1:0]       sb_axi_bid;
-    logic                           sb_axi_arready;
-    logic                           sb_axi_rvalid;
-    logic [pt.SB_BUS_TAG-1:0]       sb_axi_rid;
-    logic [63:0]                    sb_axi_rdata;
-    logic [1:0]                     sb_axi_rresp;
-    logic                           sb_axi_rlast;
-    logic                           dma_axi_awvalid;
-    logic [pt.DMA_BUS_TAG-1:0]      dma_axi_awid;
-    logic [31:0]                    dma_axi_awaddr;
-    logic [2:0]                     dma_axi_awsize;
-    logic [2:0]                     dma_axi_awprot;
-    logic [7:0]                     dma_axi_awlen;
-    logic [1:0]                     dma_axi_awburst;
-    logic                           dma_axi_wvalid;
-    logic [63:0]                    dma_axi_wdata;
-    logic [7:0]                     dma_axi_wstrb;
-    logic                           dma_axi_wlast;
-    logic                           dma_axi_bready;
-    logic                           dma_axi_arvalid;
-    logic [pt.DMA_BUS_TAG-1:0]      dma_axi_arid;
-    logic [31:0]                    dma_axi_araddr;
-    logic [2:0]                     dma_axi_arsize;
-    logic [2:0]                     dma_axi_arprot;
-    logic [7:0]                     dma_axi_arlen;
-    logic [1:0]                     dma_axi_arburst;
-    logic                           dma_axi_rready;
-    logic [63:0]                    hrdata;
-    logic                           hready;
-    logic                           hresp;
-    logic [63:0]                    lsu_hrdata;
-    logic                           lsu_hready;
-    logic                           lsu_hresp;
-    logic [63:0]                    sb_hrdata;
-    logic                           sb_hready;
-    logic                           sb_hresp;
-    logic                           dma_hsel;
-    logic [31:0]                    dma_haddr;
-    logic [2:0]                     dma_hburst;
-    logic                           dma_hmastlock;
-    logic [3:0]                     dma_hprot;
-    logic [2:0]                     dma_hsize;
-    logic [1:0]                     dma_htrans;
-    logic                           dma_hwrite;
-    logic [63:0]                    dma_hwdata;
-    logic                           dma_hreadyin;
-    logic                           lsu_bus_clk_en;
-    logic                           ifu_bus_clk_en;
-    logic                           dbg_bus_clk_en;
-    logic                           dma_bus_clk_en;
-    logic                           dmi_reg_en;
-    logic [6:0]                     dmi_reg_addr;
-    logic                           dmi_reg_wr_en;
-    logic [31:0]                    dmi_reg_wdata;
-    logic [pt.PIC_TOTAL_INT:1]      extintsrc_req;
-    logic                           timer_int;
-    logic                           soft_int;
-    logic                           scan_mode;
-  } veer_inputs_t;
+  localparam int unsigned LockstepDelay = 32'(pt.LOCKSTEP_DELAY);  // Delay I/O; in clock cycles
 
   veer_inputs_t main_core_inputs;
   veer_inputs_t [LockstepDelay:0] delay_input_d;
@@ -991,19 +712,19 @@ module el2_veer_lockstep
 
   // Delay the inputs and outputs
   always_ff @(posedge clk or negedge rst_l) begin
-      if (~rst_l) begin
-        delay_input_d[0]  <= veer_inputs_t'(0);
-        delay_output_d[0] <= veer_outputs_t'(0);
-      end else begin
-        delay_input_d[0]  <= main_core_inputs;
-        delay_output_d[0] <= main_core_outputs;
-      end
+    if (~rst_l) begin
+      delay_input_d[0]  <= veer_inputs_t'(0);
+      delay_output_d[0] <= veer_outputs_t'(0);
+    end else begin
+      delay_input_d[0]  <= main_core_inputs;
+      delay_output_d[0] <= main_core_outputs;
     end
+  end
   for (genvar i = 0; i < LockstepDelay; i++) begin
     always_ff @(posedge clk or negedge rst_l) begin
       if (!rst_l) begin
-          delay_input_d[i+1]  <= veer_inputs_t'(0);
-          delay_output_d[i+1] <= veer_outputs_t'(0);
+        delay_input_d[i+1]  <= veer_inputs_t'(0);
+        delay_output_d[i+1] <= veer_outputs_t'(0);
       end else begin
         delay_input_d[i+1]  <= delay_input_d[i];
         delay_output_d[i+1] <= delay_output_d[i];
@@ -1028,8 +749,8 @@ module el2_veer_lockstep
   for (genvar i = 0; i < LockstepDelay; i++) begin
     always_ff @(posedge clk or negedge rst_l) begin
       if (!rst_l) begin
-          delayed_main_core_regfile[i+1].gpr <= '0;
-          delayed_main_core_regfile[i+1].tlu <= '0;
+        delayed_main_core_regfile[i+1].gpr <= '0;
+        delayed_main_core_regfile[i+1].tlu <= '0;
       end else begin
         delayed_main_core_regfile[i+1].gpr <= delayed_main_core_regfile[i].gpr;
         delayed_main_core_regfile[i+1].tlu <= delayed_main_core_regfile[i].tlu;
@@ -1359,26 +1080,51 @@ module el2_veer_lockstep
       .scan_mode(shadow_core_inputs.scan_mode)
   );
 
+  // Trace
+  assign shadow_core_trace_rv_i_insn_ip = shadow_core_outputs.trace_rv_i_insn_ip;
+  assign shadow_core_trace_rv_i_address_ip = shadow_core_outputs.trace_rv_i_address_ip;
+  assign shadow_core_trace_rv_i_valid_ip = shadow_core_outputs.trace_rv_i_valid_ip;
+  assign shadow_core_trace_rv_i_exception_ip = shadow_core_outputs.trace_rv_i_exception_ip;
+  assign shadow_core_trace_rv_i_ecause_ip = shadow_core_outputs.trace_rv_i_ecause_ip;
+  assign shadow_core_trace_rv_i_interrupt_ip = shadow_core_outputs.trace_rv_i_interrupt_ip;
+  assign shadow_core_trace_rv_i_tval_ip = shadow_core_outputs.trace_rv_i_tval_ip;
+
   // Equivalence Check
   logic rst_n;
   assign rst_n = rst_shadow & rst_dbg_shadow;
 
-  logic corruption_detected, outputs_corrupted;
+  logic outputs_corrupted;
+  el2_mubi_t corruption_detected;
   assign outputs_corrupted = delayed_main_core_outputs != shadow_core_outputs;
 
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
   logic regfile_corrupted;
   assign regfile_corrupted   = (delayed_main_core_regfile[LockstepDelay].gpr != shadow_core_regfile.gpr)
                              | (delayed_main_core_regfile[LockstepDelay].tlu != shadow_core_regfile.tlu);
-  assign corruption_detected = outputs_corrupted | regfile_corrupted;
+  assign corruption_detected = mubi_from_bool(outputs_corrupted | regfile_corrupted);
 `else
-  assign corruption_detected = outputs_corrupted;
+  assign corruption_detected = mubi_from_bool(outputs_corrupted);
 `endif
 
-// Report corruption if all of the below requirements are fulfilled:
-// - IOs of Main Core and Shadow Core differ OR error injection is enabled
-// - Shadow Core is out of reset
-// - Shadow Core is enabled
-assign corruption_detected_o = ((corruption_detected | lockstep_err_injection_en_i) & rst_n) & ~disable_corruption_detection_i;
+  el2_mubi_t err_injection_invalid, disable_detection_invalid;
+  assign err_injection_invalid = mubi_check_invalid(lockstep_err_injection_en_i);
+  assign disable_detection_invalid = mubi_check_invalid(disable_corruption_detection_i);
 
+  // Report corruption if one of the scenarios is fulfilled:
+  // Scenario I:
+  // - Shadow Core is out of reset
+  // - Shadow Core is enabled
+  // - One of:
+  //    * IOs (or regfiles if enabled) of Main Core and Shadow Core differ
+  //    * error injection (`lockstep_err_injection_en_i`) is enabled
+  //    * `lockstep_err_injection_en_i` drives invalid multibit encoding
+  // Scenario II:
+  // - Shadow Core is out of reset
+  // - `disable_corruption_detection_i` drives invalid multibit encoding
+  el2_mubi_t any_corruption, case0, case1;
+
+  assign any_corruption = mubi_or(mubi_or(corruption_detected, lockstep_err_injection_en_i), err_injection_invalid);
+  assign case0 = mubi_and(any_corruption, ~disable_corruption_detection_i);
+  assign case1 = disable_detection_invalid;
+  assign corruption_detected_o = mubi_and(mubi_or(case0, case1), mubi_from_bool(rst_n));
 endmodule : el2_veer_lockstep

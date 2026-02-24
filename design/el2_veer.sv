@@ -124,7 +124,7 @@ import el2_pkg::*;
    output logic                      ic_sel_premux_data, // Select premux data
 
 
-   output logic [pt.ICACHE_INDEX_HI:3]               ic_debug_addr,      // Read/Write addresss to the Icache.
+   output logic [pt.ICACHE_INDEX_HI:3]               ic_debug_addr,      // Read/Write address to the Icache.
    output logic                      ic_debug_rd_en,     // Icache debug rd
    output logic                      ic_debug_wr_en,     // Icache debug wr
    output logic                      ic_debug_tag_array, // Debug tag array
@@ -1355,7 +1355,39 @@ import el2_pkg::*;
          .*
       );
 
-   end
+  end else begin : g_tie_unused_ahb
+    always_comb begin
+      haddr = '0;
+      hburst = '0;
+      hmastlock = '0;
+      hprot = '0;
+      hsize = '0;
+      htrans = '0;
+      hwrite = '0;
+
+      lsu_haddr = '0;
+      lsu_hburst = '0;
+      lsu_hmastlock = '0;
+      lsu_hprot = '0;
+      lsu_hsize = '0;
+      lsu_htrans = '0;
+      lsu_hwrite = '0;
+      lsu_hwdata = '0;
+
+      sb_haddr = '0;
+      sb_hburst = '0;
+      sb_hmastlock = '0;
+      sb_hprot = '0;
+      sb_hsize = '0;
+      sb_htrans = '0;
+      sb_hwrite = '0;
+      sb_hwdata = '0;
+
+      dma_hrdata = '0;
+      dma_hreadyout = '0;
+      dma_hresp = '0;
+    end
+  end
 
    // Drive the final AXI inputs
    assign lsu_axi_awready_int                 = pt.BUILD_AHB_LITE ? lsu_axi_awready_ahb : lsu_axi_awready;

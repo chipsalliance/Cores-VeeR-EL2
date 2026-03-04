@@ -1,0 +1,5 @@
+(228_verification_dashboard)=
+# Verification tests dashboard
+
+## Test reports
+ * [RISCOF tests report](external:verification_dashboard/riscof/report.html)

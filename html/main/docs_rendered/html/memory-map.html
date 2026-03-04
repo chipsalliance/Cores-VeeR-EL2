@@ -1,0 +1,2643 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>3. Memory Map - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
+      
+    
+    
+      
+        
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="_static/sphinx_immaterial_theme.c5589c0bd87d933a4.min.css?v=eeeb54bc" />
+        <link rel="stylesheet" type="text/css" href="_static/main.css" />
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="white">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="RISC-V VeeR EL2 Programmer&#39;s Reference Manual  documentation" class="md-header__button md-logo" aria-label="RISC-V VeeR EL2 Programmer's Reference Manual  documentation" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            RISC-V VeeR EL2 Programmer's Reference Manual  documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              3. Memory Map
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="white"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="RISC-V VeeR EL2 Programmer&#39;s Reference Manual  documentation" class="md-nav__button md-logo" aria-label="RISC-V VeeR EL2 Programmer's Reference Manual  documentation" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    RISC-V VeeR EL2 Programmer's Reference Manual  documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="intro.html" class="md-nav__link">
+        <span class="md-ellipsis">RISC-<wbr>V Vee<wbr>R EL2 Programmer’s Reference Manual</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="overview.html" class="md-nav__link">
+        <span class="md-ellipsis">Core Overview</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          <span class="md-ellipsis">Memory Map</span>
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        <span class="md-ellipsis">Memory Map</span>
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#address-regions" class="md-nav__link">
+    <span class="md-ellipsis">Address Regions</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#access-properties" class="md-nav__link">
+    <span class="md-ellipsis">Access Properties</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#memory-types" class="md-nav__link">
+    <span class="md-ellipsis">Memory Types</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Memory Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-local" class="md-nav__link">
+    <span class="md-ellipsis">Core Local</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Local">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#iccm-and-dccm" class="md-nav__link">
+    <span class="md-ellipsis">ICCM and DCCM</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#local-memory-mapped-control-status-registers" class="md-nav__link">
+    <span class="md-ellipsis">Local Memory-<wbr>Mapped Control/Status Registers</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accessed-via-system-bus" class="md-nav__link">
+    <span class="md-ellipsis">Accessed via System Bus</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Accessed via System Bus">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-roms" class="md-nav__link">
+    <span class="md-ellipsis">System ROMs</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system-srams" class="md-nav__link">
+    <span class="md-ellipsis">System SRAMs</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system-memory-mapped-i-o" class="md-nav__link">
+    <span class="md-ellipsis">System Memory-<wbr>Mapped I/O</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mapping-restrictions" class="md-nav__link">
+    <span class="md-ellipsis">Mapping Restrictions</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#memory-type-access-properties" class="md-nav__link">
+    <span class="md-ellipsis">Memory Type Access Properties</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#memory-access-ordering" class="md-nav__link">
+    <span class="md-ellipsis">Memory Access Ordering</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Memory Access Ordering">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#load-to-load-and-store-to-store-ordering" class="md-nav__link">
+    <span class="md-ellipsis">Load-<wbr>To-<wbr>Load and Store-<wbr>To-<wbr>Store Ordering</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load-store-ordering" class="md-nav__link">
+    <span class="md-ellipsis">Load/Store Ordering</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Load/Store Ordering">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#accesses-with-potential-side-effects-i-e-non-idempotent" class="md-nav__link">
+    <span class="md-ellipsis">Accesses with Potential Side Effects <wbr>(i.<wbr>e.<wbr>, Non-<wbr>Idempotent)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accesses-with-no-side-effects-i-e-idempotent" class="md-nav__link">
+    <span class="md-ellipsis">Accesses with No Side Effects <wbr>(i.<wbr>e.<wbr>, Idempotent)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ordering-of-store-load-with-no-side-effects-i-e-idempotent" class="md-nav__link">
+    <span class="md-ellipsis">Ordering of Store -<wbr> Load with No Side Effects <wbr>(i.<wbr>e.<wbr>, Idempotent)</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fencing" class="md-nav__link">
+    <span class="md-ellipsis">Fencing</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fencing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#instructions" class="md-nav__link">
+    <span class="md-ellipsis">Instructions</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data" class="md-nav__link">
+    <span class="md-ellipsis">Data</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imprecise-data-bus-errors" class="md-nav__link">
+    <span class="md-ellipsis">Imprecise Data Bus Errors</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#memory-protection" class="md-nav__link">
+    <span class="md-ellipsis">Memory Protection</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exception-handling" class="md-nav__link">
+    <span class="md-ellipsis">Exception Handling</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Exception Handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#imprecise-bus-error-non-maskable-interrupt" class="md-nav__link">
+    <span class="md-ellipsis">Imprecise Bus Error Non-<wbr>Maskable Interrupt</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#correctable-error-local-interrupt" class="md-nav__link">
+    <span class="md-ellipsis">Correctable Error Local Interrupt</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rules-for-core-local-memory-accesses" class="md-nav__link">
+    <span class="md-ellipsis">Rules for Core-<wbr>Local Memory Accesses</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#core-local-d-bus-access-prediction" class="md-nav__link">
+    <span class="md-ellipsis">Core-<wbr>Local / D-<wbr>Bus Access Prediction</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unmapped-addresses" class="md-nav__link">
+    <span class="md-ellipsis">Unmapped Addresses</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#misaligned-accesses" class="md-nav__link">
+    <span class="md-ellipsis">Misaligned Accesses</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uncorrectable-ecc-errors" class="md-nav__link">
+    <span class="md-ellipsis">Uncorrectable Ecc Errors</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#correctable-ecc-parity-errors" class="md-nav__link">
+    <span class="md-ellipsis">Correctable Ecc/Parity Errors</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#control-status-registers" class="md-nav__link">
+    <span class="md-ellipsis">Control/Status Registers</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Control/Status Registers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#region-access-control-register-mrac" class="md-nav__link">
+    <span class="md-ellipsis">Region Access Control Register <wbr>(mrac)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-synchronization-trigger-register-dmst" class="md-nav__link">
+    <span class="md-ellipsis">Memory Synchronization Trigger Register <wbr>(dmst)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d-bus-first-error-address-capture-register-mdseac" class="md-nav__link">
+    <span class="md-ellipsis">D-<wbr>Bus First Error Address Capture Register <wbr>(mdseac)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d-bus-error-address-unlock-register-mdeau" class="md-nav__link">
+    <span class="md-ellipsis">D-<wbr>Bus Error Address Unlock Register <wbr>(mdeau)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#machine-secondary-cause-register-mscause" class="md-nav__link">
+    <span class="md-ellipsis">Machine Secondary Cause Register <wbr>(mscause)</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#memory-address-map" class="md-nav__link">
+    <span class="md-ellipsis">Memory Address Map</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behavior-of-loads-to-side-effect-addresses" class="md-nav__link">
+    <span class="md-ellipsis">Behavior of Loads to Side-<wbr>Effect Addresses</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#partial-writes" class="md-nav__link">
+    <span class="md-ellipsis">Partial Writes</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#expected-soc-behavior-for-accesses" class="md-nav__link">
+    <span class="md-ellipsis">Expected So<wbr>C Behavior for Accesses</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#speculative-bus-accesses" class="md-nav__link">
+    <span class="md-ellipsis">Speculative Bus Accesses</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Speculative Bus Accesses">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#id26" class="md-nav__link">
+    <span class="md-ellipsis">Instructions</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#id27" class="md-nav__link">
+    <span class="md-ellipsis">Data</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dma-slave-port" class="md-nav__link">
+    <span class="md-ellipsis">DMA Slave Port</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DMA Slave Port">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#access" class="md-nav__link">
+    <span class="md-ellipsis">Access</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write-alignment-rules" class="md-nav__link">
+    <span class="md-ellipsis">Write Alignment Rules</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quality-of-service" class="md-nav__link">
+    <span class="md-ellipsis">Quality Of Service</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ordering-of-core-and-dma-accesses" class="md-nav__link">
+    <span class="md-ellipsis">Ordering Of Core and DMA Accesses</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reset-signal-and-vector" class="md-nav__link">
+    <span class="md-ellipsis">Reset Signal and Vector</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-maskable-interrupt-nmi-signal-and-vector" class="md-nav__link">
+    <span class="md-ellipsis">Non-<wbr>Maskable Interrupt <wbr>(NMI) Signal and Vector</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#software-interrupts" class="md-nav__link">
+    <span class="md-ellipsis">Software Interrupts</span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="error-protection.html" class="md-nav__link">
+        <span class="md-ellipsis">Memory Error Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dual-core-lock-step.html" class="md-nav__link">
+        <span class="md-ellipsis">Dual-<wbr>Core Lockstep <wbr>(DCLS)</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="timers.html" class="md-nav__link">
+        <span class="md-ellipsis">Internal Timers</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="power.html" class="md-nav__link">
+        <span class="md-ellipsis">Power Management and Multi-<wbr>Core Debug Control</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="interrupts.html" class="md-nav__link">
+        <span class="md-ellipsis">External Interrupts</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="performance.html" class="md-nav__link">
+        <span class="md-ellipsis">Performance Monitoring</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cache.html" class="md-nav__link">
+        <span class="md-ellipsis">Cache Control</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="debugging.html" class="md-nav__link">
+        <span class="md-ellipsis">Debug Support</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="core-control.html" class="md-nav__link">
+        <span class="md-ellipsis">Low-<wbr>Level Core Control</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="adaptations.html" class="md-nav__link">
+        <span class="md-ellipsis">Standard RISC-<wbr>V CSRs with Core-<wbr>Specific Adaptations</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="csrs.html" class="md-nav__link">
+        <span class="md-ellipsis">CSR Address Map</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="interrupt-priority.html" class="md-nav__link">
+        <span class="md-ellipsis">Interrupt Priorities</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="clocks.html" class="md-nav__link">
+        <span class="md-ellipsis">Clock And Reset</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="complex-ports.html" class="md-nav__link">
+        <span class="md-ellipsis">Complex Port List</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="build-args.html" class="md-nav__link">
+        <span class="md-ellipsis">Build Arguments</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tests.html" class="md-nav__link">
+        <span class="md-ellipsis">Compliance Test Suite Failures</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="errata.html" class="md-nav__link">
+        <span class="md-ellipsis">Errata</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="physical-memory-protection.html" class="md-nav__link">
+        <span class="md-ellipsis">Physical Memory Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="user-mode.html" class="md-nav__link">
+        <span class="md-ellipsis">User Mode</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="verification.html" class="md-nav__link">
+        <span class="md-ellipsis">Verification</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="simulation-debugging.html" class="md-nav__link">
+        <span class="md-ellipsis">Interactive Debugging in Simulation</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tock.html" class="md-nav__link">
+        <span class="md-ellipsis">Running Tock OS</span>
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                  
+
+
+<h1 id="memory-map"><span class="section-number">3. </span>Memory Map<a class="headerlink" href="#memory-map" title="Link to this heading">¶</a></h1>
+<p>This chapter describes the memory map as well as the various memories and their properties of the VeeR EL2 core.</p>
+<h2 id="address-regions"><span class="section-number">3.1. </span>Address Regions<a class="headerlink" href="#address-regions" title="Link to this heading">¶</a></h2>
+<p>The 32-bit address space is subdivided into sixteen fixed-sized, contiguous 256MB regions.
+Each region has a set of access control bits associated with it (<a class="reference internal" href="#region-access-control-register-mrac"><span class="std std-ref">Region Access Control Register (mrac)</span></a>).</p>
+<h2 id="access-properties"><span class="section-number">3.2. </span>Access Properties<a class="headerlink" href="#access-properties" title="Link to this heading">¶</a></h2>
+<p>Each region has two access properties which can be independently controlled. They are:</p>
+<ul class="simple">
+<li><p><strong>Cacheable:</strong> Indicates if this region is allowed to be cached or not.</p></li>
+<li><p><strong>Side effect:</strong> Indicates if read/write accesses to this region may have side effects (i.e., non-idempotent accesses which may potentially have side effects on any read/write access; typical for I/O, speculative or redundant accesses must be avoided) or have no side effects (i.e., idempotent accesses which have no side effects even if the same access is performed multiple times; typical for memory).
+Note that stores with potential side effects (i.e., to non-idempotent addresses) cannot be combined with other stores in the core’s unified read/write buffer.</p></li>
+</ul>
+<h2 id="memory-types"><span class="section-number">3.3. </span>Memory Types<a class="headerlink" href="#memory-types" title="Link to this heading">¶</a></h2>
+<p>There are two different classes of memory types mapped into the core’s 32-bit address range, core local and system bus attached.</p>
+<h3 id="core-local"><span class="section-number">3.3.1. </span>Core Local<a class="headerlink" href="#core-local" title="Link to this heading">¶</a></h3>
+<h4 id="iccm-and-dccm"><span class="section-number">3.3.1.1. </span>ICCM and DCCM<a class="headerlink" href="#iccm-and-dccm" title="Link to this heading">¶</a></h4>
+<p>Two dedicated memories, one for instruction and the other for data, are tightly coupled to the core.
+These memories provide low-latency access and SECDED ECC protection.
+Their respective sizes (4, 8, 16, 32, 48 <a class="footnote-reference brackets" href="#fn-iccm-dccm-1" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>, 64, 128, 256, or 512KB) are set as arguments at build time of the core.</p>
+<h4 id="local-memory-mapped-control-status-registers"><span class="section-number">3.3.1.2. </span>Local Memory-Mapped Control/Status Registers<a class="headerlink" href="#local-memory-mapped-control-status-registers" title="Link to this heading">¶</a></h4>
+<p>To provide control for regular operation, the core requires a number of memory-mapped control/status registers.
+For example, some external interrupt functions are controlled and serviced with accesses to various registers while the system is running.</p>
+<h3 id="accessed-via-system-bus"><span class="section-number">3.3.2. </span>Accessed via System Bus<a class="headerlink" href="#accessed-via-system-bus" title="Link to this heading">¶</a></h3>
+<h4 id="system-roms"><span class="section-number">3.3.2.1. </span>System ROMs<a class="headerlink" href="#system-roms" title="Link to this heading">¶</a></h4>
+<p>The SoC may host ROMs which are mapped to the core’s memory address range and accessed via the system bus.
+Both instruction and data accesses are supported to system ROMs.</p>
+<h4 id="system-srams"><span class="section-number">3.3.2.2. </span>System SRAMs<a class="headerlink" href="#system-srams" title="Link to this heading">¶</a></h4>
+<p>The SoC hosts a variety of SRAMs which are mapped to the core’s memory address range and accessed via the system bus.</p>
+<h4 id="system-memory-mapped-i-o"><span class="section-number">3.3.2.3. </span>System Memory-Mapped I/O<a class="headerlink" href="#system-memory-mapped-i-o" title="Link to this heading">¶</a></h4>
+<p>The SoC hosts a variety of I/O device interfaces which are mapped to the core’s memory address range and accessed via the system bus.</p>
+<h3 id="mapping-restrictions"><span class="section-number">3.3.3. </span>Mapping Restrictions<a class="headerlink" href="#mapping-restrictions" title="Link to this heading">¶</a></h3>
+<p>Core-local memories and system bus-attached memories must be mapped to different regions. Mapping both classes of memory types to the same region is not allowed.</p>
+<p>Furthermore, it is recommended that all core-local memories are mapped to the same region.</p>
+<h2 id="memory-type-access-properties"><span class="section-number">3.4. </span>Memory Type Access Properties<a class="headerlink" href="#memory-type-access-properties" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="#tab-access-properites-memory-type"><span class="std std-numref">Table 3.1</span></a> specifies the access properties of each memory type. During system boot, firmware must initialize the properties of each region based on the memory type present in that region.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some memory-mapped I/O and control/status registers may have no side effects (i.e., are idempotent), but characterizing all these registers as having potentially side effects (i.e., are non-idempotent) is safe.</p>
+</div>
+<table class="docutils data align-default" id="tab-access-properites-memory-type">
+<caption><span class="caption-number">Table 3.1 </span><span class="caption-text">Access Properties for each Memory Type</span><a class="headerlink" href="#tab-access-properites-memory-type" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Region</strong></p></th>
+<th class="head"><p><strong>Memory Type</strong></p></th>
+<th class="head"><p><strong>Cacheable</strong></p></th>
+<th class="head"><p><strong>Side Effect</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Core Local</strong></p></td>
+<td><p>ICCM</p></td>
+<td><p>No</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>Core Local</p></td>
+<td><p>DCCM</p></td>
+<td><p>No</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>Core Local</p></td>
+<td><p>Memory-mapped control/status registers</p></td>
+<td><p>No</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>Accessed via System Bus</p></td>
+<td><p>ROMs</p></td>
+<td><p>Yes</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>Accessed via System Bus</p></td>
+<td><p>SRAMs</p></td>
+<td><p>Yes</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>Accessed via System Bus</p></td>
+<td><p>I/Os</p></td>
+<td><p>No</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p>Accessed via System Bus</p></td>
+<td><p>Memory-mapped control/status registers</p></td>
+<td><p>No</p></td>
+<td><p>Yes</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>‘Cacheable = Yes’ and ‘Side Effect = Yes’ is an illegal combination.</p>
+</div>
+<h2 id="memory-access-ordering"><span class="section-number">3.5. </span>Memory Access Ordering<a class="headerlink" href="#memory-access-ordering" title="Link to this heading">¶</a></h2>
+<p>Loads and stores to system bus-attached memory (i.e. accesses with no side effects, idempotent) and devices (i.e. accesses with potential side effects, non-idempotent) pass through a unified read/write buffer.
+The buffer is implemented as a FIFO.</p>
+<h3 id="load-to-load-and-store-to-store-ordering"><span class="section-number">3.5.1. </span>Load-To-Load and Store-To-Store Ordering<a class="headerlink" href="#load-to-load-and-store-to-store-ordering" title="Link to this heading">¶</a></h3>
+<p>All loads are sent to the system bus interface in program order. Also, all stores are sent to the system bus interface in program order.</p>
+<h3 id="load-store-ordering"><span class="section-number">3.5.2. </span>Load/Store Ordering<a class="headerlink" href="#load-store-ordering" title="Link to this heading">¶</a></h3>
+<h4 id="accesses-with-potential-side-effects-i-e-non-idempotent"><span class="section-number">3.5.2.1. </span>Accesses with Potential Side Effects (i.e., Non-Idempotent)<a class="headerlink" href="#accesses-with-potential-side-effects-i-e-non-idempotent" title="Link to this heading">¶</a></h4>
+<p>When a load with potential side effects (i.e., non-idempotent) enters the buffer, the entire unified buffer is emptied, i.e., both stores with no side effects (i.e., idempotent) and with potential side effects (i.e., non-idempotent) are drained out.
+Loads with potential side effects (i.e., non-idempotent) are sent out to the system bus with their exact size.</p>
+<p>Stores with potential side effects (i.e., non-idempotent) are neither coalesced nor forwarded to a load.</p>
+<h4 id="accesses-with-no-side-effects-i-e-idempotent"><span class="section-number">3.5.2.2. </span>Accesses with No Side Effects (i.e., Idempotent)<a class="headerlink" href="#accesses-with-no-side-effects-i-e-idempotent" title="Link to this heading">¶</a></h4>
+<p>Loads with no side effects (i.e., idempotent) are always issued as double-words and check the contents of the unified buffer:</p>
+<ol class="arabic simple">
+<li><p><strong>Full address match</strong> (all load bytes present in the unified buffer): Data is forwarded from the unified buffer.
+The load does not go out to the system bus.</p></li>
+<li><p><strong>Partial address match</strong> (some of the load bytes are in the unified buffer): The entire unified buffer is emptied, then the load request goes to the system bus.</p></li>
+<li><p><strong>No match</strong> (none of the bytes are in the unified buffer): The load is presented to the system bus interface without waiting for the stores to drain.</p></li>
+</ol>
+<h4 id="ordering-of-store-load-with-no-side-effects-i-e-idempotent"><span class="section-number">3.5.2.3. </span>Ordering of Store - Load with No Side Effects (i.e., Idempotent)<a class="headerlink" href="#ordering-of-store-load-with-no-side-effects-i-e-idempotent" title="Link to this heading">¶</a></h4>
+<p>A <code class="docutils literal notranslate"><span class="pre">fence</span></code> instruction is required to order an older store before a younger load with no side effects (i.e., idempotent).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All memory-mapped register writes must be followed by a <code class="docutils literal notranslate"><span class="pre">fence</span></code> instruction to enforce ordering and synchronization.</p>
+</div>
+<h3 id="fencing"><span class="section-number">3.5.3. </span>Fencing<a class="headerlink" href="#fencing" title="Link to this heading">¶</a></h3>
+<h4 id="instructions"><span class="section-number">3.5.3.1. </span>Instructions<a class="headerlink" href="#instructions" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">fence.i</span></code> instruction operates on the instruction memory and/or I-cache.
+This instruction causes a flush, a flash invalidation of the I-cache, and a refetch of the next program counter (RFNPC).
+The refetch is guaranteed to miss the I-cache.
+Note that since the <code class="docutils literal notranslate"><span class="pre">fence.i</span></code> instruction is used to synchronize the instruction and data streams, it also includes the functionality of the <code class="docutils literal notranslate"><span class="pre">fence</span></code> instruction (see <a class="reference internal" href="#data"><span class="std std-ref">Data</span></a>).</p>
+<h4 id="data"><span class="section-number">3.5.3.2. </span>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">fence</span></code> instruction is implemented conservatively in VeeR EL2 to keep the implementation simple.
+It always performs the most conservative fencing, independent of the instruction’s arguments.
+The <code class="docutils literal notranslate"><span class="pre">fence</span></code> instruction is presynced to make sure that there are no instructions in the LSU pipe.
+It stalls until the LSU indicates that the store buffer and unified buffer have been fully drained (i.e., are empty).
+The <code class="docutils literal notranslate"><span class="pre">fence</span></code> instruction is only committed after all LSU buffers are idle and all outstanding bus transactions are completed.</p>
+<h3 id="imprecise-data-bus-errors"><span class="section-number">3.5.4. </span>Imprecise Data Bus Errors<a class="headerlink" href="#imprecise-data-bus-errors" title="Link to this heading">¶</a></h3>
+<p>All store errors as well as non-blocking load errors on the system bus are imprecise.
+The address of the first occurring imprecise data system bus error is logged and a non-maskable interrupt (NMI) is flagged for the first reported error only.
+For stores, if there are other stores in the unified buffer behind the store which had the error, these stores are sent out on the system bus and any error responses are ignored.
+Similarly, for non-blocking loads, any error responses on subsequent loads sent out on the system bus are ignored.
+NMIs are fatal, architectural state is lost, and the core needs to be reset.
+The reset also unlocks the first error address capture register again.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is possible to unlock the first error address capture register with a write to an unlock register as well (see <a class="reference internal" href="#d-bus-error-address-unlock-register-mdeau"><span class="std std-ref">D-Bus Error Address Unlock Register (mdeau)</span></a> for more details), but this may result in unexpected behavior.</p>
+</div>
+<h2 id="memory-protection"><span class="section-number">3.6. </span>Memory Protection<a class="headerlink" href="#memory-protection" title="Link to this heading">¶</a></h2>
+<p>To eliminate issuing speculative accesses to the IFU and LSU bus interfaces, VeeR EL2 provides a rudimentary memory protection mechanism for instruction and data accesses outside of the ICCM and DCCM memory regions.
+Separate core build arguments for instructions and data are provided by the Memory Protection Unit (MPU) to enable and configure up to 8 address windows each.</p>
+<p>An instruction fetch to a non-ICCM region must fall within the address range of at least one instruction access window for the access to be forwarded to the IFU bus interface.
+If at least one instruction access window is enabled, nonspeculative fetch requests which are not within the address range of any enabled instruction access window cause a precise instruction access fault exception.
+If none of the 8 instruction access windows is enabled, the memory protection mechanism for instruction accesses is turned off.
+For the ICCM region, accesses within the ICCM’s address range are allowed.
+However, any access not within the ICCM’s address range results in a precise instruction access fault exception.</p>
+<p>Similarly, a load/store access to a non-DCCM or non-PIC memory-mapped control register region must fall within the address range of at least one data access window for the access to be forwarded to the LSU bus interface.
+If at least one data access window is enabled, non-speculative load/store requests which are not within the address range of any enabled data access window cause a precise load/store address misaligned or access fault exception.
+If none of the 8 data access windows is enabled, the memory protection mechanism for data accesses is turned off.
+For the DCCM and PIC memory-mapped control register region(s), accesses within the DCCM’s or the PIC memory-mapped control register’s address range are allowed.
+However, any access not within the DCCM’s or PIC memory-mapped control register’s address range results in a precise load/store address misaligned or access fault exception.</p>
+<p>The configuration parameters for each of the 8 instruction and 8 data access windows are:</p>
+<ul class="simple">
+<li><p>Enable/disable instruction/data access window 0..7,</p></li>
+<li><p>a base address of the window (which must be 64B-aligned), and</p></li>
+<li><p>a mask specifying the size of the window (which must be an integer-multiple of 64 bytes minus 1).</p></li>
+</ul>
+<p>See <a class="reference internal" href="build-args.html#memory-protection-build-arguments"><span class="std std-ref">Memory Protection Build Arguments</span></a> for more information.</p>
+<h2 id="exception-handling"><span class="section-number">3.7. </span>Exception Handling<a class="headerlink" href="#exception-handling" title="Link to this heading">¶</a></h2>
+<p>Capturing the faulting effective address causing an exception helps assist firmware in handling the exception and/or provides additional information for firmware debugging.
+For precise exceptions, the faulting effective address is captured in the standard RISC-V <code class="docutils literal notranslate"><span class="pre">mtval</span></code> register (see Section 3.1.17 in <a class="reference internal" href="intro.html#ref-2"><span class="std std-ref">[2]</span></a>).
+For imprecise exceptions, the address of the first occurrence of the error is captured in a platform-specific error address capture register (see <a class="reference internal" href="#d-bus-first-error-address-capture-register-mdseac"><span class="std std-ref">D-Bus First Error Address Capture Register (mdseac)</span></a>).</p>
+<h3 id="imprecise-bus-error-non-maskable-interrupt"><span class="section-number">3.7.1. </span>Imprecise Bus Error Non-Maskable Interrupt<a class="headerlink" href="#imprecise-bus-error-non-maskable-interrupt" title="Link to this heading">¶</a></h3>
+<p>Store bus errors are fatal and cause a non-maskable interrupt (NMI).
+The store bus error NMI has an <code class="docutils literal notranslate"><span class="pre">mcause</span></code> value of 0xF000_0000.</p>
+<p>Likewise, non-blocking load bus errors are fatal and cause a non-maskable interrupt (NMI).
+The non-blocking load bus error NMI has an <code class="docutils literal notranslate"><span class="pre">mcause</span></code> value of 0xF000_0001.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The address of the first store or non-blocking load error on the D-bus is captured in the <code class="docutils literal notranslate"><span class="pre">mdseac</span></code> register (see <a class="reference internal" href="#d-bus-first-error-address-capture-register-mdseac"><span class="std std-ref">D-Bus First Error Address Capture Register (mdseac)</span></a>).
+The register is unlocked either by resetting the core after the NMI has been handled or by a write to the <code class="docutils literal notranslate"><span class="pre">mdeau</span></code> register (see <a class="reference internal" href="#d-bus-error-address-unlock-register-mdeau"><span class="std std-ref">D-Bus Error Address Unlock Register (mdeau)</span></a>).
+While the <code class="docutils literal notranslate"><span class="pre">mdseac</span></code> register is locked, subsequent D-bus errors are gated (i.e., they do not cause another NMI), but NMI requests originating external to the core are still honored.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The AXI4 bus is able to report a load bus error and a store bus error simultaneously.
+If store and non-blocking load bus errors are reported in the same clock cycle, the store bus error has higher priority.</p>
+</div>
+<h3 id="correctable-error-local-interrupt"><span class="section-number">3.7.2. </span>Correctable Error Local Interrupt<a class="headerlink" href="#correctable-error-local-interrupt" title="Link to this heading">¶</a></h3>
+<p>I-cache parity/ECC errors, ICCM correctable ECC errors, and DCCM correctable ECC errors are counted in separate correctable error counters (see sections <a class="reference internal" href="error-protection.html#i-cache-error-counter-threshold-register-micect"><span class="std std-ref">I-Cache Error Counter/Threshold Register (micect)</span></a>, <a class="reference internal" href="error-protection.html#iccm-correctable-error-counter-threshold-register-miccmect"><span class="std std-ref">Iccm Correctable Error Counter/Threshold Register (miccmect)</span></a>, and <a class="reference internal" href="error-protection.html#dccm-correctable-error-counter-threshold-register-mdccmect"><span class="std std-ref">Dccm Correctable Error Counter/Threshold Register (mdccmect)</span></a>, respectively).
+Each counter also has its separate programmable error threshold.
+If any of these counters has reached its threshold, a correctable error local interrupt is signaled.
+Firmware should determine which of the counters has reached the threshold and reset that counter.</p>
+<p>A local-to-the-core interrupt for correctable errors has pending (<em>mceip</em>) and enable (<em>mceie</em>) bits in bit position 30 of the standard RISC-V <code class="docutils literal notranslate"><span class="pre">mip</span></code> (see <a class="reference internal" href="adaptations.html#tab-machine-interrupt-pending-register"><span class="std std-numref">Table 13.2</span></a>) and <code class="docutils literal notranslate"><span class="pre">mie</span></code> (see <a class="reference internal" href="adaptations.html#tab-machine-interrupt-enable-register"><span class="std std-numref">Table 13.1</span></a>) registers, respectively.
+The priority is lower than the RISC-V External interrupt, but higher than the RISC-V Software and Timer interrupts, (see <a class="reference internal" href="interrupt-priority.html#tab-veer-el2-platform-specific-and-std-risc-v-interrupt-priorities"><span class="std std-numref">Table 15.1</span></a>).
+The correctable error local interrupt has an <code class="docutils literal notranslate"><span class="pre">mcause</span></code> value of 0x8000_001E (see <a class="reference internal" href="adaptations.html#tab-machine-cause-register"><span class="std std-numref">Table 13.3</span></a>).</p>
+<h3 id="rules-for-core-local-memory-accesses"><span class="section-number">3.7.3. </span>Rules for Core-Local Memory Accesses<a class="headerlink" href="#rules-for-core-local-memory-accesses" title="Link to this heading">¶</a></h3>
+<p>The rules for instruction fetch and load/store accesses to core-local memories are:</p>
+<ol class="arabic simple">
+<li><p>An instruction fetch access to a region</p>
+<ol class="arabic simple">
+<li><p>containing one or more ICCM sub-region(s)causes an exception if</p>
+<ol class="arabic simple">
+<li><p>the access is not completely within the ICCM sub-region, or</p></li>
+<li><p>the boundary of an ICCM to a non-ICCM sub-region and vice versa is crossed, even if the region contains a DCCM/PIC memory-mapped control register sub-region.</p></li>
+</ol>
+</li>
+<li><p>not containing an ICCM sub-region goes out to the system bus, even if the region contains a DCCM/PIC memory-mapped control register sub-region.</p></li>
+</ol>
+</li>
+<li><p>A load/store access to a region</p>
+<ol class="arabic simple">
+<li><p>containing one or more DCCM/PIC memory-mapped control register sub-region(s) causes an exception if</p>
+<ol class="arabic simple">
+<li><p>the access is not completely within the DCCM/PIC memory-mapped control register subregion, or</p></li>
+<li><p>the boundary of</p>
+<ol class="arabic simple">
+<li><p>a DCCM to a non-DCCM sub-region and vice versa, or</p></li>
+<li><p>a PIC memory-mapped control register sub-region is crossed, even if the region contains an ICCM sub-region.</p></li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>not containing a DCCM/PIC memory-mapped control register sub-region goes out to the system bus, even if the region contains an ICCM sub-region.</p></li>
+</ol>
+</li>
+</ol>
+<h3 id="core-local-d-bus-access-prediction"><span class="section-number">3.7.4. </span>Core-Local / D-Bus Access Prediction<a class="headerlink" href="#core-local-d-bus-access-prediction" title="Link to this heading">¶</a></h3>
+<p>In VeeR EL2, a prediction is made early in the pipeline if the access is to a core-local address (i.e., DCCM or PIC memory-mapped register) or to the D-bus (i.e., a memory or register address of the SoC).
+The prediction is based on the base address (i.e., value of register <em>rs1</em>) of the load/store instruction.
+Later in the pipeline, the actual address is calculated also taking the offset into account (i.e., value of register <em>rs1 + offset</em>).
+A mismatch of the predicted and the actual destination (i.e., a core-local or a D-bus access) results in a load/store access fault exception.</p>
+<h3 id="unmapped-addresses"><span class="section-number">3.7.5. </span>Unmapped Addresses<a class="headerlink" href="#unmapped-addresses" title="Link to this heading">¶</a></h3>
+<table class="docutils data align-default" id="tab-handling-unmapped-addresses">
+<caption><span class="caption-number">Table 3.2 </span><span class="caption-text">Handling of Unmapped Addresses</span><a class="headerlink" href="#tab-handling-unmapped-addresses" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Core/Bus</strong></p></th>
+<th class="head"><p><strong>Side Effect</strong></p></th>
+<th class="head"><p><strong>Action</strong></p></th>
+<th class="head"><p><strong>Comments</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Fetch</p></td>
+<td><p>Core</p></td>
+<td><p>N/A</p></td>
+<td><p>Instruction access fault exception <a class="footnote-reference brackets" href="#fn-unmapped-address-1" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>, <a class="footnote-reference brackets" href="#fn-unmapped-address-2" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
+<td><p>Precise exception (e.g., address out-of-range)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Fetch</p></td>
+<td><p>Bus</p></td>
+<td><p>N/A</p></td>
+<td><p>Instruction access fault exception <a class="footnote-reference brackets" href="#fn-unmapped-address-1" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
+<td><p>Precise exception (e.g., address out-of-range)</p></td>
+</tr>
+<tr class="row-even"><td><p>Load</p></td>
+<td><p>Core</p></td>
+<td><p>No</p></td>
+<td><p>Load access fault exception <a class="footnote-reference brackets" href="#fn-unmapped-address-3" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a>, <a class="footnote-reference brackets" href="#fn-unmapped-address-4" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
+<td><p>Precise exception (e.g., address out-of-range)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Load</p></td>
+<td><p>Bus</p></td>
+<td><p>No</p></td>
+<td><p>non-blocking load bus error nmi (see <a class="reference internal" href="#imprecise-bus-error-non-maskable-interrupt"><span class="std std-ref">Imprecise Bus Error Non-Maskable Interrupt</span></a>)</p></td>
+<td><ul class="simple">
+<li><p>imprecise, fatal</p></li>
+<li><p>capture load address in core bus interface</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>Load</p></td>
+<td><p>Bus</p></td>
+<td><p>Yes</p></td>
+<td><p>non-blocking load bus error nmi (see <a class="reference internal" href="#imprecise-bus-error-non-maskable-interrupt"><span class="std std-ref">Imprecise Bus Error Non-Maskable Interrupt</span></a>)</p></td>
+<td><ul class="simple">
+<li><p>imprecise, fatal</p></li>
+<li><p>capture load address in core bus interface</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>Store</p></td>
+<td><p>Core</p></td>
+<td><p>No</p></td>
+<td><p>Store/AMO <a class="footnote-reference brackets" href="#fn-unmapped-address-5" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a> access fault exception <a class="footnote-reference brackets" href="#fn-unmapped-address-3" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a>, <a class="footnote-reference brackets" href="#fn-unmapped-address-4" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
+<td><p>Precise exception</p></td>
+</tr>
+<tr class="row-even"><td><p>Store</p></td>
+<td><p>Bus</p></td>
+<td><p>No</p></td>
+<td><p>Store bus error NMI (see <a class="reference internal" href="#imprecise-bus-error-non-maskable-interrupt"><span class="std std-ref">Imprecise Bus Error Non-Maskable Interrupt</span></a>)</p></td>
+<td><ul class="simple">
+<li><p>Imprecise, fatal</p></li>
+<li><p>Capture store address in core bus interface</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>Store</p></td>
+<td><p>Bus</p></td>
+<td><p>Yes</p></td>
+<td><p>Store bus error NMI (see <a class="reference internal" href="#imprecise-bus-error-non-maskable-interrupt"><span class="std std-ref">Imprecise Bus Error Non-Maskable Interrupt</span></a>)</p></td>
+<td><ul class="simple">
+<li><p>Imprecise, fatal</p></li>
+<li><p>Capture store address in core bus interface</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>DMA Read / DMA Write</p></td>
+<td><p>Bus</p></td>
+<td><p>N/A</p></td>
+<td><p>DMA slave bus error</p></td>
+<td><p>Send error response to master</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is recommended to provide address gaps between different memories to ensure unmapped address</p>
+</div>
+<h3 id="misaligned-accesses"><span class="section-number">3.7.6. </span>Misaligned Accesses<a class="headerlink" href="#misaligned-accesses" title="Link to this heading">¶</a></h3>
+<p>General notes:</p>
+<ul class="simple">
+<li><p>The core performs a misalignment check during the address calculation.</p></li>
+<li><p>Accesses across region boundaries always cause a misaligned exception.</p></li>
+<li><p>Splitting a load/store from/to an address with no side effects (i.e., idempotent) is not of concern for VeeR EL2.</p></li>
+</ul>
+<table class="docutils data align-default" id="tab-handling-misaligned-addresses">
+<caption><span class="caption-number">Table 3.3 </span><span class="caption-text">Handling of Misaligned Accesses</span><a class="headerlink" href="#tab-handling-misaligned-addresses" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Core/Bus</strong></p></th>
+<th class="head"><p><strong>Side Effect</strong></p></th>
+<th class="head"><p><strong>Region Cross</strong></p></th>
+<th class="head"><p><strong>Action</strong></p></th>
+<th class="head"><p><strong>Comments</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Fetch</p></td>
+<td><p>Core</p></td>
+<td><p>N/A</p></td>
+<td><p>No</p></td>
+<td><p>N/A</p></td>
+<td><p>Not possible <a class="footnote-reference brackets" href="#fn-misaligned-accesses-1" id="id10" role="doc-noteref"><span class="fn-bracket">[</span>7<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Fetch</p></td>
+<td><p>Bus</p></td>
+<td><p>N/A</p></td>
+<td><p>No</p></td>
+<td><p>N/A</p></td>
+<td><p>Not possible <a class="footnote-reference brackets" href="#fn-misaligned-accesses-1" id="id11" role="doc-noteref"><span class="fn-bracket">[</span>7<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>Load</p></td>
+<td><p>Core</p></td>
+<td><p>No</p></td>
+<td><p>No</p></td>
+<td><p>Load split into multiple DCCM read accesses</p></td>
+<td><p>Split performed by core</p></td>
+</tr>
+<tr class="row-odd"><td><p>Load</p></td>
+<td><p>Bus</p></td>
+<td><p>No</p></td>
+<td><p>No</p></td>
+<td><p>Load split into multiple bus transactions</p></td>
+<td><p>Split performed by core</p></td>
+</tr>
+<tr class="row-even"><td><p>Load</p></td>
+<td><p>Bus</p></td>
+<td><p>Yes <a class="footnote-reference brackets" href="#fn-misaligned-accesses-2" id="id12" role="doc-noteref"><span class="fn-bracket">[</span>8<span class="fn-bracket">]</span></a></p></td>
+<td><p>No</p></td>
+<td><p>Load address misaligned exception</p></td>
+<td><p>Precise exception</p></td>
+</tr>
+<tr class="row-odd"><td><p>Store</p></td>
+<td><p>Core</p></td>
+<td><p>No</p></td>
+<td><p>No</p></td>
+<td><p>Store split into multiple DCCM write accesses</p></td>
+<td><p>Split performed by core</p></td>
+</tr>
+<tr class="row-even"><td><p>Store</p></td>
+<td><p>Bus</p></td>
+<td><p>No</p></td>
+<td><p>No</p></td>
+<td><p>Store split into multiple bus transactions</p></td>
+<td><p>Split performed by core</p></td>
+</tr>
+<tr class="row-odd"><td><p>Store</p></td>
+<td><p>Bus</p></td>
+<td><p>Yes <a class="footnote-reference brackets" href="#fn-misaligned-accesses-2" id="id13" role="doc-noteref"><span class="fn-bracket">[</span>8<span class="fn-bracket">]</span></a></p></td>
+<td><p>No</p></td>
+<td><p>Store/AMO address misaligned exception</p></td>
+<td><p>Precise exception</p></td>
+</tr>
+<tr class="row-even"><td><p>Fetch</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+<td><p>Yes</p></td>
+<td><p>N/A</p></td>
+<td><p>Not possible <a class="footnote-reference brackets" href="#fn-misaligned-accesses-1" id="id14" role="doc-noteref"><span class="fn-bracket">[</span>7<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Load</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+<td><p>Yes</p></td>
+<td><p>Load address misaligned exception</p></td>
+<td><p>Precise exception</p></td>
+</tr>
+<tr class="row-even"><td><p>Store</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+<td><p>Yes</p></td>
+<td><p>Store/AMO address misaligned exception</p></td>
+<td><p>Precise exception</p></td>
+</tr>
+<tr class="row-odd"><td><p>DMA Read</p></td>
+<td><p>Bus</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+<td><p>DMA slave bus error</p></td>
+<td><p>Send error response to master</p></td>
+</tr>
+<tr class="row-even"><td><p>DMA Write <a class="footnote-reference brackets" href="#fn-misaligned-accesses-3" id="id15" role="doc-noteref"><span class="fn-bracket">[</span>9<span class="fn-bracket">]</span></a></p></td>
+<td><p>Bus</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+<td><p>DMA slave bus error</p></td>
+<td><p>Send error response to master</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="uncorrectable-ecc-errors"><span class="section-number">3.7.7. </span>Uncorrectable Ecc Errors<a class="headerlink" href="#uncorrectable-ecc-errors" title="Link to this heading">¶</a></h3>
+<table class="docutils data align-default" id="tab-handling-uncorrectable-ecc-errors">
+<caption><span class="caption-number">Table 3.4 </span><span class="caption-text">Handling of Uncorrectable ECC Errors</span><a class="headerlink" href="#tab-handling-uncorrectable-ecc-errors" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Core/Bus</strong></p></th>
+<th class="head"><p><strong>Side Effect</strong></p></th>
+<th class="head"><p><strong>Action</strong></p></th>
+<th class="head"><p><strong>Comments</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Fetch</p></td>
+<td><p>Core</p></td>
+<td><p>N/A</p></td>
+<td><p>Instruction access fault exception</p></td>
+<td><p>Precise exception (i.e., for oldest instruction in pipeline only)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Fetch</p></td>
+<td><p>Bus</p></td>
+<td><p>N/A</p></td>
+<td><p>Instruction access fault exception</p></td>
+<td><p>Precise exception (i.e., for oldest instruction in pipeline only)</p></td>
+</tr>
+<tr class="row-even"><td><p>Load</p></td>
+<td><p>Core</p></td>
+<td><p>No</p></td>
+<td><p>Load access fault exception</p></td>
+<td><p>Precise exception (i.e., for non-speculative load only)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Load</p></td>
+<td><p>Core</p></td>
+<td><p>Yes</p></td>
+<td><p>Load access fault exception</p></td>
+<td><p>Precise exception (i.e., for non-speculative load only)</p></td>
+</tr>
+<tr class="row-even"><td><p>Load</p></td>
+<td><p>Bus</p></td>
+<td><p>No</p></td>
+<td><p>Non-blocking load bus error NMI (see <a class="reference internal" href="#imprecise-bus-error-non-maskable-interrupt"><span class="std std-ref">Imprecise Bus Error Non-Maskable Interrupt</span></a>)</p></td>
+<td><ul class="simple">
+<li><p>Imprecise, fatal</p></li>
+<li><p>Capture load address in core bus interface</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>Load</p></td>
+<td><p>Bus</p></td>
+<td><p>Yes</p></td>
+<td><p>Non-blocking load bus error NMI (see <a class="reference internal" href="#imprecise-bus-error-non-maskable-interrupt"><span class="std std-ref">Imprecise Bus Error Non-Maskable Interrupt</span></a>)</p></td>
+<td><ul class="simple">
+<li><p>Imprecise, fatal</p></li>
+<li><p>Capture load address in core bus interface</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>Store</p></td>
+<td><p>Core</p></td>
+<td><p>No</p></td>
+<td><p>Store/AMO access fault exception</p></td>
+<td><p>Precise exception (i.e., for non-speculative store only)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Store</p></td>
+<td><p>Core</p></td>
+<td><p>Yes</p></td>
+<td><p>Store/AMO access fault exception</p></td>
+<td><p>Precise exception (i.e., for non-speculative store only)</p></td>
+</tr>
+<tr class="row-even"><td><p>Store</p></td>
+<td><p>Bus</p></td>
+<td><p>No</p></td>
+<td><p>Store bus error NMI (see <a class="reference internal" href="#imprecise-bus-error-non-maskable-interrupt"><span class="std std-ref">Imprecise Bus Error Non-Maskable Interrupt</span></a>)</p></td>
+<td><ul class="simple">
+<li><p>Imprecise, fatal</p></li>
+<li><p>Capture store address in core bus interface</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>Store</p></td>
+<td><p>Bus</p></td>
+<td><p>Yes</p></td>
+<td><p>Store bus error NMI (see <a class="reference internal" href="#imprecise-bus-error-non-maskable-interrupt"><span class="std std-ref">Imprecise Bus Error Non-Maskable Interrupt</span></a>)</p></td>
+<td><ul class="simple">
+<li><p>Imprecise, fatal</p></li>
+<li><p>Capture store address in core bus interface</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>DMA Read</p></td>
+<td><p>Bus</p></td>
+<td><p>N/A</p></td>
+<td><p>DMA slave bus error</p></td>
+<td><p>Send error response to master</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>DMA write accesses to the ICCM or DCCM always overwrite entire 32-bit words and their corresponding ECC bits.
+Therefore, ECC bits are never checked and errors not detected on DMA writes.</p>
+</div>
+<h3 id="correctable-ecc-parity-errors"><span class="section-number">3.7.8. </span>Correctable Ecc/Parity Errors<a class="headerlink" href="#correctable-ecc-parity-errors" title="Link to this heading">¶</a></h3>
+<table class="docutils data align-default" id="tab-handling-correctable-ecc-errors">
+<caption><span class="caption-number">Table 3.5 </span><span class="caption-text">Handling of Correctable ECC/Parity Errors Access Core/Bus Side Effect Action</span><a class="headerlink" href="#tab-handling-correctable-ecc-errors" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Core/Bus</strong></p></th>
+<th class="head"><p><strong>Side Effect</strong></p></th>
+<th class="head"><p><strong>Action</strong></p></th>
+<th class="head"><p><strong>Comments</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Fetch</p></td>
+<td><p>Core</p></td>
+<td><p>N/A</p></td>
+<td><p>For I-cache accesses:</p>
+<ul class="simple">
+<li><p>Increment correctable I-cache error counter in core</p></li>
+<li><p>If I-cache error threshold reached, signal correctable error local interrupt (see <a class="reference internal" href="error-protection.html#i-cache-error-counter-threshold-register-micect"><span class="std std-ref">I-Cache Error Counter/Threshold Register (micect)</span></a>)</p></li>
+<li><p>Invalidate all cache lines of set</p></li>
+<li><p>Perform RFPC flush</p></li>
+<li><p>Flush core pipeline</p></li>
+<li><p>Refetch cache line from SoC memory</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p>For all fetches from I-cache (i.e., out of pipeline, independent of actual instruction execution)</p></li>
+<li><p>For I-cache with tag/instruction ECC protection, single- and double-bit errors are recoverable</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>Fetch</p></td>
+<td><p>Core</p></td>
+<td><p>N/A</p></td>
+<td><p>For ICCM accesses:</p>
+<ul class="simple">
+<li><p>Increment correctable ICCM error counter in core</p></li>
+<li><p>If ICCM error threshold reached, signal correctable error local interrupt (see <a class="reference internal" href="error-protection.html#iccm-correctable-error-counter-threshold-register-miccmect"><span class="std std-ref">Iccm Correctable Error Counter/Threshold Register (miccmect)</span></a>)</p></li>
+<li><p>Perform RFPC flush</p></li>
+<li><p>Flush core pipeline</p></li>
+<li><p>Write corrected data back to ICCM</p></li>
+<li><p>Refetch instruction(s) from ICCM</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p>For all fetches from ICCM (i.e., out of pipeline, independent of actual instruction execution)</p></li>
+<li><p>ICCM errors trigger an RFPC (ReFetch PC) flush since in-line correction would require an additional cycle</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>Fetch</p></td>
+<td><p>Bus</p></td>
+<td><p>N/A</p></td>
+<td><ul class="simple">
+<li><p>Increment correctable error counter in SoC</p></li>
+<li><p>If error threshold reached, signal external interrupt</p></li>
+<li><p>Write corrected data back to SoC memory</p></li>
+</ul>
+</td>
+<td><p>Errors in SoC memories are corrected at memory boundary and autonomously written back to memory array</p></td>
+</tr>
+<tr class="row-odd"><td><p>Load</p></td>
+<td><p>Core</p></td>
+<td><p>No</p></td>
+<td><ul class="simple">
+<li><p>Increment correctable DCCM error counter in core</p></li>
+<li><p>If DCCM error threshold reached, signal correctable error local interrupt (see <a class="reference internal" href="error-protection.html#dccm-correctable-error-counter-threshold-register-mdccmect"><span class="std std-ref">Dccm Correctable Error Counter/Threshold Register (mdccmect)</span></a>)</p></li>
+<li><p>Write corrected data back to DCCM</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p>For non-speculative accesses only</p></li>
+<li><p>DCCM errors are in-line corrected and written back to DCCM</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>Load</p></td>
+<td><p>Core</p></td>
+<td><p>Yes</p></td>
+<td><ul class="simple">
+<li><p>Increment correctable DCCM error counter in core</p></li>
+<li><p>If DCCM error threshold reached, signal correctable error local interrupt (see <a class="reference internal" href="error-protection.html#dccm-correctable-error-counter-threshold-register-mdccmect"><span class="std std-ref">Dccm Correctable Error Counter/Threshold Register (mdccmect)</span></a>)</p></li>
+<li><p>Write corrected data back to DCCM</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p>For non-speculative accesses only</p></li>
+<li><p>DCCM errors are in-line corrected and written back to DCCM</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>Load</p></td>
+<td><p>Bus</p></td>
+<td><p>No</p></td>
+<td><ul class="simple">
+<li><p>Increment correctable error counter in SoC</p></li>
+<li><p>If error threshold reached, signal external interrupt</p></li>
+<li><p>Write corrected data back to SoC memory</p></li>
+</ul>
+</td>
+<td><p>Errors in SoC memories are corrected at memory boundary and autonomously written back to memory array</p></td>
+</tr>
+<tr class="row-even"><td><p>Load</p></td>
+<td><p>Bus</p></td>
+<td><p>Yes</p></td>
+<td><ul class="simple">
+<li><p>Increment correctable error counter in SoC</p></li>
+<li><p>If error threshold reached, signal external interrupt</p></li>
+<li><p>Write corrected data back to SoC memory</p></li>
+</ul>
+</td>
+<td><p>Errors in SoC memories are corrected at memory boundary and autonomously written back to memory array</p></td>
+</tr>
+<tr class="row-odd"><td><p>Store</p></td>
+<td><p>Core</p></td>
+<td><p>No</p></td>
+<td><ul class="simple">
+<li><p>Increment correctable dccm error counter in core</p></li>
+<li><p>If dccm error threshold reached, signal correctable error local interrupt (see <a class="reference internal" href="error-protection.html#dccm-correctable-error-counter-threshold-register-mdccmect"><span class="std std-ref">Dccm Correctable Error Counter/Threshold Register (mdccmect)</span></a>)</p></li>
+<li><p>Write corrected data back to dccm</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p>For non-speculative accesses only</p></li>
+<li><p>Dccm errors are in-line corrected and written back to dccm</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>Store</p></td>
+<td><p>Core</p></td>
+<td><p>Yes</p></td>
+<td><ul class="simple">
+<li><p>Increment correctable dccm error counter in core</p></li>
+<li><p>If dccm error threshold reached, signal correctable error local interrupt (see <a class="reference internal" href="error-protection.html#dccm-correctable-error-counter-threshold-register-mdccmect"><span class="std std-ref">Dccm Correctable Error Counter/Threshold Register (mdccmect)</span></a>)</p></li>
+<li><p>Write corrected data back to dccm</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p>For non-speculative accesses only</p></li>
+<li><p>Dccm errors are in-line corrected and written back to dccm</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>Store</p></td>
+<td><p>Bus</p></td>
+<td><p>No</p></td>
+<td><ul class="simple">
+<li><p>Increment correctable error counter in SoC</p></li>
+<li><p>If error threshold reached, signal external interrupt</p></li>
+<li><p>Write corrected data back to SoC memory</p></li>
+</ul>
+</td>
+<td><p>Errors in SoC memories are corrected at memory boundary and autonomously written back to memory array</p></td>
+</tr>
+<tr class="row-even"><td><p>Store</p></td>
+<td><p>Bus</p></td>
+<td><p>Yes</p></td>
+<td><ul class="simple">
+<li><p>Increment correctable error counter in SoC</p></li>
+<li><p>If error threshold reached, signal external interrupt</p></li>
+<li><p>Write corrected data back to SoC memory</p></li>
+</ul>
+</td>
+<td><p>Errors in SoC memories are corrected at memory boundary and autonomously written back to memory array</p></td>
+</tr>
+<tr class="row-odd"><td><p>DMA Read</p></td>
+<td><p>Bus</p></td>
+<td><p>N/A</p></td>
+<td><p>For ICCM accesses:</p>
+<ul class="simple">
+<li><p>Increment correctable ICCM error counter in core</p></li>
+<li><p>If ICCM error threshold reached, signal correctable error local interrupt (see <a class="reference internal" href="error-protection.html#iccm-correctable-error-counter-threshold-register-miccmect"><span class="std std-ref">Iccm Correctable Error Counter/Threshold Register (miccmect)</span></a>)</p></li>
+<li><p>Write corrected data back to ICCM</p></li>
+</ul>
+</td>
+<td><p>DMA read access errors to ICCM are in-line corrected and written back to ICCM</p></td>
+</tr>
+<tr class="row-even"><td><p>DMA Read</p></td>
+<td><p>Bus</p></td>
+<td><p>N/A</p></td>
+<td><p>For DCCM accesses:</p>
+<ul class="simple">
+<li><p>Increment correctable DCCM error counter in core</p></li>
+<li><p>If DCCM error threshold reached, signal correctable error local interrupt (see <a class="reference internal" href="error-protection.html#dccm-correctable-error-counter-threshold-register-mdccmect"><span class="std std-ref">Dccm Correctable Error Counter/Threshold Register (mdccmect)</span></a>)</p></li>
+<li><p>Write corrected data back to DCCM</p></li>
+</ul>
+</td>
+<td><p>DMA read access errors to DCCM are in-line corrected and written back to DCCM</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Counted errors could be from different, unknown memory locations.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>DMA write accesses to the ICCM or DCCM always overwrite entire 32-bit words and their corresponding ECC bits.
+Therefore, ECC bits are never checked and errors not detected on DMA writes.</p>
+</div>
+<h2 id="control-status-registers"><span class="section-number">3.8. </span>Control/Status Registers<a class="headerlink" href="#control-status-registers" title="Link to this heading">¶</a></h2>
+<p>A summary of platform-specific control/status registers in CSR space:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#region-access-control-register-mrac"><span class="std std-ref">Region Access Control Register (mrac)</span></a></p></li>
+<li><p><a class="reference internal" href="#memory-synchronization-trigger-register-dmst"><span class="std std-ref">Memory Synchronization Trigger Register (dmst)</span></a></p></li>
+<li><p><a class="reference internal" href="#d-bus-first-error-address-capture-register-mdseac"><span class="std std-ref">D-Bus First Error Address Capture Register (mdseac)</span></a></p></li>
+<li><p><a class="reference internal" href="#d-bus-error-address-unlock-register-mdeau"><span class="std std-ref">D-Bus Error Address Unlock Register (mdeau)</span></a></p></li>
+<li><p><a class="reference internal" href="#machine-secondary-cause-register-mscause"><span class="std std-ref">Machine Secondary Cause Register (mscause)</span></a></p></li>
+</ul>
+<p>All reserved and unused bits in these control/status registers must be hardwired to ‘0’. Unless otherwise noted, all read/write control/status registers must have WARL (Write Any value, Read Legal value) behavior.</p>
+<h3 id="region-access-control-register-mrac"><span class="section-number">3.8.1. </span>Region Access Control Register (mrac)<a class="headerlink" href="#region-access-control-register-mrac" title="Link to this heading">¶</a></h3>
+<p>A single region access control register is sufficient to provide independent control for 16 address regions.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To guarantee that updates to the <code class="docutils literal notranslate"><span class="pre">mrac</span></code> register are in effect, if a region being updated is in the load/store space, a <code class="docutils literal notranslate"><span class="pre">fence</span></code> instruction is required.
+Likewise, if a region being updated is in the instruction space, a <code class="docutils literal notranslate"><span class="pre">fence.i</span></code> instruction (which flushes the I-cache) is required.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <em>sideeffect</em> access control bits are ignored by the core for load/store accesses to addresses mapped to core-local memories (i.e., DCCM and ICCM) and PIC memory-mapped control registers as well as for all instruction fetch accesses.
+The <em>cacheable</em> access control bits are ignored for instruction fetch accesses from addresses mapped to the ICCM, but not for any other addresses.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The combination ‘11’ (i.e., side effect and cacheable) is illegal. Writing ‘11’ is mapped by hardware to the legal value ‘10’ (i.e., side effect and non-cacheable).</p>
+</div>
+<p>This register is mapped to the non-standard read/write CSR address space.</p>
+<table class="docutils data align-default" id="tab-region-access-control-register">
+<caption><span class="caption-number">Table 3.6 </span><span class="caption-text">Region Access Control Register (mrac, at CSR 0x7C0)</span><a class="headerlink" href="#tab-region-access-control-register" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Y = 0..15 (= Region)</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>sideeffectY</p></td>
+<td><p>Y*2+1</p></td>
+<td><p>Side effect indication for region Y:</p>
+<ul class="simple">
+<li><p>0: No side effects (idempotent)</p></li>
+<li><p>1: Side effects possible (non-idempotent)</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>cacheableY</p></td>
+<td><p>Y*2</p></td>
+<td><p>Caching control for region Y:</p>
+<ul class="simple">
+<li><p>0: Caching not allowed</p></li>
+<li><p>1: Caching allowed</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="memory-synchronization-trigger-register-dmst"><span class="section-number">3.8.2. </span>Memory Synchronization Trigger Register (dmst)<a class="headerlink" href="#memory-synchronization-trigger-register-dmst" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">dmst</span></code> register provides triggers to force the synchronization of memory accesses. Specifically, it allows a debugger to initiate operations that are equivalent to the <code class="docutils literal notranslate"><span class="pre">fence.i</span></code> (see <a class="reference internal" href="#instructions"><span class="std std-ref">Instructions</span></a>) and <code class="docutils literal notranslate"><span class="pre">fence</span></code> (see <a class="reference internal" href="#data"><span class="std std-ref">Data</span></a>) instructions.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This register is accessible in <strong>Debug Mode only</strong>. Attempting to access this register in machine mode raises an illegal instruction exception.</p>
+</div>
+<p>The <em>fence_i</em> and <em>fence</em> fields of the <code class="docutils literal notranslate"><span class="pre">dmst</span></code> register have W1R0 (Write 1, Read 0) behavior, as also indicated in the
+‘Access’ column.</p>
+<p>This register is mapped to the non-standard read/write CSR address space.</p>
+<table class="docutils data align-default" id="tab-memory-synchronization-trigger-register">
+<caption><span class="caption-number">Table 3.7 </span><span class="caption-text">Memory Synchronization Trigger Register (dmst, at CSR 0x7C4)</span><a class="headerlink" href="#tab-memory-synchronization-trigger-register" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>31:2</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>fence</p></td>
+<td><p>1</p></td>
+<td><p>Trigger operation equivalent to <code class="docutils literal notranslate"><span class="pre">fence</span></code> instruction</p></td>
+<td><p>R0/W1</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>fence_i</p></td>
+<td><p>0</p></td>
+<td><p>Trigger operation equivalent to <code class="docutils literal notranslate"><span class="pre">fence.i</span></code> instruction</p></td>
+<td><p>R0/W1</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="d-bus-first-error-address-capture-register-mdseac"><span class="section-number">3.8.3. </span>D-Bus First Error Address Capture Register (mdseac)<a class="headerlink" href="#d-bus-first-error-address-capture-register-mdseac" title="Link to this heading">¶</a></h3>
+<p>The address of the first occurrence of a store or non-blocking load error on the D-bus is captured in the <code class="docutils literal notranslate"><span class="pre">mdseac</span></code> register. Latching the address also locks the register.
+While the <code class="docutils literal notranslate"><span class="pre">mdseac</span></code> register is locked, subsequent D-bus errors are gated (i.e., they do not cause another NMI), but NMI requests originating external to the core are still honored.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">mdseac</span></code> register is unlocked by either a core reset (which is the safer option) or by writing to the <code class="docutils literal notranslate"><span class="pre">mdeau</span></code> register (see <a class="reference internal" href="#d-bus-error-address-unlock-register-mdeau"><span class="std std-ref">D-Bus Error Address Unlock Register (mdeau)</span></a>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The address captured in this register is the target (i.e., base) address of the store or non-blocking load which experienced an error.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The NMI handler may use the value stored in the <code class="docutils literal notranslate"><span class="pre">mcause</span></code> register to differentiate between a D-bus store error, a D-bus non-blocking load error, and a core-external event triggering an NMI.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Capturing an address of a store or non-blocking load D-bus error in the <code class="docutils literal notranslate"><span class="pre">mdseac</span></code> register is independent of the actual taking of an NMI due to the bus error.
+For example, if a request on the NMI pin arrives just prior to the detection of a store or non-blocking load error on the D-bus, the address of the bus error may still be logged in the <code class="docutils literal notranslate"><span class="pre">mdseac</span></code> register.</p>
+</div>
+<p>This register is mapped to the non-standard read-only CSR address space.</p>
+<table class="docutils data align-default" id="tab-d-bus-first-error-address-capture-register">
+<caption><span class="caption-number">Table 3.8 </span><span class="caption-text">D-Bus First Error Address Capture Register (mdseac, at CSR 0xFC0)</span><a class="headerlink" href="#tab-d-bus-first-error-address-capture-register" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>erraddr</p></td>
+<td><p>31:0</p></td>
+<td><p>Address of first occurrence of D-bus store or non-blocking load error</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="d-bus-error-address-unlock-register-mdeau"><span class="section-number">3.8.4. </span>D-Bus Error Address Unlock Register (mdeau)<a class="headerlink" href="#d-bus-error-address-unlock-register-mdeau" title="Link to this heading">¶</a></h3>
+<p>Writing to the <code class="docutils literal notranslate"><span class="pre">mdeau</span></code> register unlocks the <code class="docutils literal notranslate"><span class="pre">mdseac</span></code> register (see <a class="reference internal" href="#d-bus-first-error-address-capture-register-mdseac"><span class="std std-ref">D-Bus First Error Address Capture Register (mdseac)</span></a>) after a D-bus error address has been captured.
+This write access also reenables the signaling of an NMI for a subsequent D-bus error.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Nested NMIs might destroy core state and, therefore, receiving an NMI should still be considered fatal.
+Issuing a core reset is a safer option to deal with a D-bus error.</p>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">mdeau</span></code> register has WAR0 (Write Any value, Read 0) behavior.
+Writing ‘0’ is recommended.</p>
+<p>This register is mapped to the non-standard read/write CSR address space.</p>
+<table class="docutils data align-default" id="tab-d-bus-error-address-unlock-register">
+<caption><span class="caption-number">Table 3.9 </span><span class="caption-text">D-Bus Error Address Unlock Register (mdeau, at CSR 0xBC0)</span><a class="headerlink" href="#tab-d-bus-error-address-unlock-register" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>erraddr</p></td>
+<td><p>31:0</p></td>
+<td><p>Address of first occurrence of D-bus store or non-blocking load error</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="machine-secondary-cause-register-mscause"><span class="section-number">3.8.5. </span>Machine Secondary Cause Register (mscause)<a class="headerlink" href="#machine-secondary-cause-register-mscause" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">mscause</span></code> register, in conjunction with the standard RISC-V <code class="docutils literal notranslate"><span class="pre">mcause</span></code> register (see <a class="reference internal" href="adaptations.html#machine-cause-register-mcause"><span class="std std-ref">Machine Cause Register (mcause)</span></a>), allows the determination of the exact cause of a trap for cases where multiple, different conditions share a single trap code.
+The standard RISC-V mcause register provides the trap code and the <code class="docutils literal notranslate"><span class="pre">mscause</span></code> register provides supporting information about the trap to disambiguate different sources.
+A value of ‘0’ indicates that there is no additional information available.
+<a class="reference internal" href="#tab-machine-secondary-cause-register"><span class="std std-numref">Table 3.10</span></a> lists VeeR EL2’s standard exceptions/interrupts (regular text), platform-specific local interrupts (italic text), and NMI causes (bold text).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">mscause</span></code> register has WLRL (Write Legal value, Read Legal value) behavior.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>VeeR EL2 implements only the 4 least-significant bits of the mscause register (i.e., <code class="docutils literal notranslate"><span class="pre">mscause[3:0]</span></code>).
+Writes to all higher bits are ignored, reads return 0 for those bits.</p>
+</div>
+<p>This register is mapped to the non-standard read/write CSR address space.</p>
+<table class="docutils data align-default" id="tab-machine-secondary-cause-register">
+<caption><span class="caption-number">Table 3.10 </span><span class="caption-text">Machine Secondary Cause Register (mscause, at CSR 0x7FF)</span><a class="headerlink" href="#tab-machine-secondary-cause-register" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>mcause</strong></p></th>
+<th class="head"><p><strong>mcause Description</strong></p></th>
+<th class="head"><p><strong>mscause (Rel. Priority)</strong> <a class="footnote-reference brackets" href="#fn-mscause-register-1" id="id16" role="doc-noteref"><span class="fn-bracket">[</span>10<span class="fn-bracket">]</span></a></p></th>
+<th class="head"><p><strong>mscause Description</strong></p></th>
+<th class="head"><p><strong>Section(s)</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Exceptions</strong></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>0x1</p></td>
+<td><p>Instruction access fault</p></td>
+<td><p>0x9 (2)</p></td>
+<td><p>I-side fetch precise bus error</p></td>
+<td><p><a class="reference internal" href="#unmapped-addresses"><span class="std std-ref">Unmapped Addresses</span></a> and <a class="reference internal" href="error-protection.html#error-detection-and-handling"><span class="std std-ref">Error Detection and Handling</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>0x1</p></td>
+<td><p>Instruction access fault</p></td>
+<td><p>0x1 (3)</p></td>
+<td><p>I-side ICCM double-bit ECC error</p></td>
+<td><p><a class="reference internal" href="#uncorrectable-ecc-errors"><span class="std std-ref">Uncorrectable Ecc Errors</span></a> and <a class="reference internal" href="error-protection.html#error-detection-and-handling"><span class="std std-ref">Error Detection and Handling</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x1</p></td>
+<td><p>Instruction access fault</p></td>
+<td><p>0x2 (0)</p></td>
+<td><p>I-side core-local <a class="footnote-reference brackets" href="#fn-mscause-register-2" id="id17" role="doc-noteref"><span class="fn-bracket">[</span>11<span class="fn-bracket">]</span></a> unmapped address error</p></td>
+<td><p><a class="reference internal" href="#unmapped-addresses"><span class="std std-ref">Unmapped Addresses</span></a> and <a class="reference internal" href="error-protection.html#error-detection-and-handling"><span class="std std-ref">Error Detection and Handling</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>0x1</p></td>
+<td><p>Instruction access fault</p></td>
+<td><p>0x3 (1)</p></td>
+<td><p>I-side access out of MPU range</p></td>
+<td><p><a class="reference internal" href="#memory-protection"><span class="std std-ref">Memory Protection</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x2</p></td>
+<td><p>Illegal instruction</p></td>
+<td><p>0x0</p></td>
+<td><p>None</p></td>
+<td><p>N/A</p></td>
+</tr>
+<tr class="row-even"><td><p>0x3</p></td>
+<td><p>Breakpoint</p></td>
+<td><p>0x2</p></td>
+<td><p>ebreak (not to Debug Mode)</p></td>
+<td><p>N/A</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x3</p></td>
+<td><p>Breakpoint</p></td>
+<td><p>0x1</p></td>
+<td><p>Trigger hit <a class="footnote-reference brackets" href="#fn-mscause-register-3" id="id18" role="doc-noteref"><span class="fn-bracket">[</span>12<span class="fn-bracket">]</span></a> (not to Debug Mode)</p></td>
+<td><p>N/A</p></td>
+</tr>
+<tr class="row-even"><td><p>0x4</p></td>
+<td><p>Load address misaligned</p></td>
+<td><p>0x2 (0)</p></td>
+<td><p>D-side load across region boundary</p></td>
+<td><p><a class="reference internal" href="#misaligned-accesses"><span class="std std-ref">Misaligned Accesses</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x4</p></td>
+<td><p>Load address misaligned</p></td>
+<td><p>0x1 (1)</p></td>
+<td><p>D-side size-misaligned load to non-idempotent address</p></td>
+<td><p><a class="reference internal" href="#misaligned-accesses"><span class="std std-ref">Misaligned Accesses</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>0x5</p></td>
+<td><p>Load access fault</p></td>
+<td><p>0x2 (0)</p></td>
+<td><p>D-side core-local <a class="footnote-reference brackets" href="#fn-mscause-register-4" id="id19" role="doc-noteref"><span class="fn-bracket">[</span>13<span class="fn-bracket">]</span></a>, <a class="footnote-reference brackets" href="#fn-mscause-register-5" id="id20" role="doc-noteref"><span class="fn-bracket">[</span>14<span class="fn-bracket">]</span></a> load unmapped address error</p></td>
+<td><p><a class="reference internal" href="#unmapped-addresses"><span class="std std-ref">Unmapped Addresses</span></a> and <a class="reference internal" href="error-protection.html#error-detection-and-handling"><span class="std std-ref">Error Detection and Handling</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x5</p></td>
+<td><p>Load access fault</p></td>
+<td><p>0x1 (4)</p></td>
+<td><p>D-side DCCM load double-bit ECC error</p></td>
+<td><p><a class="reference internal" href="#uncorrectable-ecc-errors"><span class="std std-ref">Uncorrectable Ecc Errors</span></a> and <a class="reference internal" href="error-protection.html#error-detection-and-handling"><span class="std std-ref">Error Detection and Handling</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>0x5</p></td>
+<td><p>Load access fault</p></td>
+<td><p>0x3 (1)</p></td>
+<td><p>D-side load access out of MPU range</p></td>
+<td><p><a class="reference internal" href="#memory-protection"><span class="std std-ref">Memory Protection</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x5</p></td>
+<td><p>Load access fault</p></td>
+<td><p>0x5 (2)</p></td>
+<td><p>D-side load region prediction error</p></td>
+<td><p><a class="reference internal" href="#core-local-d-bus-access-prediction"><span class="std std-ref">Core-Local / D-Bus Access Prediction</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>0x5</p></td>
+<td><p>Load access fault</p></td>
+<td><p>0x6 (3)</p></td>
+<td><p>D-side PIC <a class="footnote-reference brackets" href="#fn-mscause-register-6" id="id21" role="doc-noteref"><span class="fn-bracket">[</span>15<span class="fn-bracket">]</span></a> load access error</p></td>
+<td><p><a class="reference internal" href="#unmapped-addresses"><span class="std std-ref">Unmapped Addresses</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x6</p></td>
+<td><p>Store/AMO address misaligned</p></td>
+<td><p>0x2 (0)</p></td>
+<td><p>D-side store across region boundary</p></td>
+<td><p><a class="reference internal" href="#misaligned-accesses"><span class="std std-ref">Misaligned Accesses</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>0x6</p></td>
+<td><p>Store/AMO address misaligned</p></td>
+<td><p>0x1 (1)</p></td>
+<td><p>D-side size-misaligned store to non-idempotent address</p></td>
+<td><p><a class="reference internal" href="#misaligned-accesses"><span class="std std-ref">Misaligned Accesses</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x7</p></td>
+<td><p>Store/AMO access fault</p></td>
+<td><p>0x2 (0)</p></td>
+<td><p>D-side core-local <a class="footnote-reference brackets" href="#fn-mscause-register-4" id="id22" role="doc-noteref"><span class="fn-bracket">[</span>13<span class="fn-bracket">]</span></a>, <a class="footnote-reference brackets" href="#fn-mscause-register-5" id="id23" role="doc-noteref"><span class="fn-bracket">[</span>14<span class="fn-bracket">]</span></a> store unmapped address error</p></td>
+<td><p><a class="reference internal" href="#unmapped-addresses"><span class="std std-ref">Unmapped Addresses</span></a> and <a class="reference internal" href="error-protection.html#error-detection-and-handling"><span class="std std-ref">Error Detection and Handling</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>0x7</p></td>
+<td><p>Store/AMO access fault</p></td>
+<td><p>0x1 (4)</p></td>
+<td><p>D-side DCCM store double- bit ECC error</p></td>
+<td><p><a class="reference internal" href="#uncorrectable-ecc-errors"><span class="std std-ref">Uncorrectable Ecc Errors</span></a> and <a class="reference internal" href="error-protection.html#error-detection-and-handling"><span class="std std-ref">Error Detection and Handling</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x7</p></td>
+<td><p>Store/AMO access fault</p></td>
+<td><p>0x3 (1)</p></td>
+<td><p>D-side store access out of MPU range</p></td>
+<td><p><a class="reference internal" href="#memory-protection"><span class="std std-ref">Memory Protection</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>0x7</p></td>
+<td><p>Store/AMO access fault</p></td>
+<td><p>0x5 (2)</p></td>
+<td><p>D-side store region prediction error</p></td>
+<td><p><a class="reference internal" href="#core-local-d-bus-access-prediction"><span class="std std-ref">Core-Local / D-Bus Access Prediction</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x7</p></td>
+<td><p>Store/AMO access fault</p></td>
+<td><p>0x6 (3)</p></td>
+<td><p>D-side PIC <a class="footnote-reference brackets" href="#fn-mscause-register-6" id="id24" role="doc-noteref"><span class="fn-bracket">[</span>15<span class="fn-bracket">]</span></a> store access error</p></td>
+<td><p><a class="reference internal" href="#unmapped-addresses"><span class="std std-ref">Unmapped Addresses</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>0xB</p></td>
+<td><p>Environment call from M- mode</p></td>
+<td><p>0x0</p></td>
+<td><p>None</p></td>
+<td><p>N/A</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Interrupts</strong></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>0x8000_0003</p></td>
+<td><p>Machine software interrupt</p></td>
+<td><p>0x0</p></td>
+<td><p>Machine software</p></td>
+<td><p><a class="reference internal" href="#software-interrupts"><span class="std std-ref">Software Interrupts</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x8000_0007</p></td>
+<td><p>Machine timer <a class="footnote-reference brackets" href="#fn-mscause-register-7" id="id25" role="doc-noteref"><span class="fn-bracket">[</span>16<span class="fn-bracket">]</span></a> interrupt</p></td>
+<td><p>0x0</p></td>
+<td><p>Machine timer</p></td>
+<td><p>N/A</p></td>
+</tr>
+<tr class="row-even"><td><p>0x8000_000B</p></td>
+<td><p>Machine external interrupt</p></td>
+<td><p>0x0</p></td>
+<td><p>External interrupt</p></td>
+<td><p><a class="reference internal" href="interrupts.html"><span class="std std-doc">External Interrupts</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><em>0x8000_001C</em></p></td>
+<td><p><em>Machine internal timer 1 local interrupt</em></p></td>
+<td><p>0x0</p></td>
+<td><p><em>Internal timer 1 local interrupt</em></p></td>
+<td><p><a class="reference internal" href="timers.html#internal-timer-local-interrupts"><span class="std std-ref">Internal Timer Local Interrupts</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><em>0x8000_001D</em></p></td>
+<td><p><em>Machine internal timer 0 local interrupt</em></p></td>
+<td><p>0x0</p></td>
+<td><p><em>Internal timer 0 local interrupt</em></p></td>
+<td><p><a class="reference internal" href="timers.html#internal-timer-local-interrupts"><span class="std std-ref">Internal Timer Local Interrupts</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><em>0x8000_001E</em></p></td>
+<td><p><em>Machine correctable error local interrupt</em></p></td>
+<td><p>0x0</p></td>
+<td><p><em>Correctable error local interrupt</em></p></td>
+<td><p><a class="reference internal" href="#correctable-error-local-interrupt"><span class="std std-ref">Correctable Error Local Interrupt</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>0x0000_0000</strong></p></td>
+<td><p><strong>NMI</strong></p></td>
+<td><p><strong>0x0</strong></p></td>
+<td><p><strong>NMI pin assertion</strong></p></td>
+<td><p><a class="reference internal" href="#non-maskable-interrupt-nmi-signal-and-vector"><span class="std std-ref">Non-Maskable Interrupt (NMI) Signal and Vector</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>0xF000_0000</strong></p></td>
+<td><p><strong>NMI</strong></p></td>
+<td><p><strong>0x0</strong></p></td>
+<td><p><strong>D-bus store error</strong></p></td>
+<td><p><a class="reference internal" href="#imprecise-bus-error-non-maskable-interrupt"><span class="std std-ref">Imprecise Bus Error Non-Maskable Interrupt</span></a> and <a class="reference internal" href="#non-maskable-interrupt-nmi-signal-and-vector"><span class="std std-ref">Non-Maskable Interrupt (NMI) Signal and Vector</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>0xF000_0001</strong></p></td>
+<td><p><strong>NMI</strong></p></td>
+<td><p><strong>0x0</strong></p></td>
+<td><p><strong>D-bus non-blocking load error</strong></p></td>
+<td><p><a class="reference internal" href="#imprecise-bus-error-non-maskable-interrupt"><span class="std std-ref">Imprecise Bus Error Non-Maskable Interrupt</span></a> and <a class="reference internal" href="#non-maskable-interrupt-nmi-signal-and-vector"><span class="std std-ref">Non-Maskable Interrupt (NMI) Signal and Vector</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>0xF000_1000</strong></p></td>
+<td><p><strong>NMI</strong></p></td>
+<td><p><strong>0x0</strong></p></td>
+<td><p><strong>Fast Interrupt double-bit ECC error</strong></p></td>
+<td><p><a class="reference internal" href="interrupts.html#fast-interrupt-redirect"><span class="std std-ref">Fast Interrupt Redirect</span></a> and <a class="reference internal" href="#non-maskable-interrupt-nmi-signal-and-vector"><span class="std std-ref">Non-Maskable Interrupt (NMI) Signal and Vector</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>0xF000_1001</strong></p></td>
+<td><p><strong>NMI</strong></p></td>
+<td><p><strong>0x0</strong></p></td>
+<td><p><strong>Fast Interrupt DCCM region access error</strong></p></td>
+<td><p><a class="reference internal" href="interrupts.html#fast-interrupt-redirect"><span class="std std-ref">Fast Interrupt Redirect</span></a> and <a class="reference internal" href="#non-maskable-interrupt-nmi-signal-and-vector"><span class="std std-ref">Non-Maskable Interrupt (NMI) Signal and Vector</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>0xF000_1002</strong></p></td>
+<td><p><strong>NMI</strong></p></td>
+<td><p><strong>0x0</strong></p></td>
+<td><p><strong>Fast Interrupt non-DCCM region</strong></p></td>
+<td><p><a class="reference internal" href="interrupts.html#fast-interrupt-redirect"><span class="std std-ref">Fast Interrupt Redirect</span></a> and <a class="reference internal" href="#non-maskable-interrupt-nmi-signal-and-vector"><span class="std std-ref">Non-Maskable Interrupt (NMI) Signal and Vector</span></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All other values are reserved.</p>
+</div>
+<h2 id="memory-address-map"><span class="section-number">3.9. </span>Memory Address Map<a class="headerlink" href="#memory-address-map" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="#tab-veer-el2-memory-address-map"><span class="std std-numref">Table 3.11</span></a> summarizes an example of the VeeR EL2 memory address map, including regions as well as start and end addresses for the various memory types.</p>
+<table class="docutils data align-default" id="tab-veer-el2-memory-address-map">
+<caption><span class="caption-number">Table 3.11 </span><span class="caption-text">VeeR EL2 Memory Address Map (Example)</span><a class="headerlink" href="#tab-veer-el2-memory-address-map" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Region</strong></p></th>
+<th class="head"><p><strong>Start Address</strong></p></th>
+<th class="head"><p><strong>End Address</strong></p></th>
+<th class="head"><p><strong>Memory Type</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0x0</p></td>
+<td><p>0x0000_0000</p></td>
+<td><p>0x0003_FFFF</p></td>
+<td><p>Reserved</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x0</p></td>
+<td><p>0x0004_0000</p></td>
+<td><p>0x0005_FFFF</p></td>
+<td><p>ICCM (region: 0, offset: 0x4000, size: 128KB)</p></td>
+</tr>
+<tr class="row-even"><td><p>0x0</p></td>
+<td><p>0x0006_0000</p></td>
+<td><p>0x0007_FFFF</p></td>
+<td><p>Reserved</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x0</p></td>
+<td><p>0x0008_0000</p></td>
+<td><p>0x0009_FFFF</p></td>
+<td><p>DCCM (region: 0, offset: 0x8000, size: 128KB)</p></td>
+</tr>
+<tr class="row-even"><td><p>0x0</p></td>
+<td><p>0x000A_0000</p></td>
+<td><p>0x0FFF_FFFF</p></td>
+<td><p>Reserved</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x1</p></td>
+<td><p>0x1000_0000</p></td>
+<td><p>0x1FFF_FFFF</p></td>
+<td><p>System memory-mapped CSRs</p></td>
+</tr>
+<tr class="row-even"><td><p>0x2</p></td>
+<td><p>0x2000_0000</p></td>
+<td><p>0x2FFF_FFFF</p></td>
+<td><p>System SRAMs, system ROMs, and system memory-mapped I/O device interfaces</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x3</p></td>
+<td><p>0x3000_0000</p></td>
+<td><p>0x3FFF_FFFF</p></td>
+<td><p>System SRAMs, system ROMs, and system memory-mapped I/O device interfaces</p></td>
+</tr>
+<tr class="row-even"><td><p>0x4</p></td>
+<td><p>0x4000_0000</p></td>
+<td><p>0x4FFF_FFFF</p></td>
+<td><p>System SRAMs, system ROMs, and system memory-mapped I/O device interfaces</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x5</p></td>
+<td><p>0x5000_0000</p></td>
+<td><p>0x5FFF_FFFF</p></td>
+<td><p>System SRAMs, system ROMs, and system memory-mapped I/O device interfaces</p></td>
+</tr>
+<tr class="row-even"><td><p>0x6</p></td>
+<td><p>0x6000_0000</p></td>
+<td><p>0x6FFF_FFFF</p></td>
+<td><p>System SRAMs, system ROMs, and system memory-mapped I/O device interfaces</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x7</p></td>
+<td><p>0x7000_0000</p></td>
+<td><p>0x7FFF_FFFF</p></td>
+<td><p>System SRAMs, system ROMs, and system memory-mapped I/O device interfaces</p></td>
+</tr>
+<tr class="row-even"><td><p>0x8</p></td>
+<td><p>0x8000_0000</p></td>
+<td><p>0x8FFF_FFFF</p></td>
+<td><p>System SRAMs, system ROMs, and system memory-mapped I/O device interfaces</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x9</p></td>
+<td><p>0x9000_0000</p></td>
+<td><p>0x9FFF_FFFF</p></td>
+<td><p>System SRAMs, system ROMs, and system memory-mapped I/O device interfaces</p></td>
+</tr>
+<tr class="row-even"><td><p>0xA</p></td>
+<td><p>0xA000_0000</p></td>
+<td><p>0xAFFF_FFFF</p></td>
+<td><p>System SRAMs, system ROMs, and system memory-mapped I/O device interfaces</p></td>
+</tr>
+<tr class="row-odd"><td><p>0xB</p></td>
+<td><p>0xB000_0000</p></td>
+<td><p>0xBFFF_FFFF</p></td>
+<td><p>System SRAMs, system ROMs, and system memory-mapped I/O device interfaces</p></td>
+</tr>
+<tr class="row-even"><td><p>0xC</p></td>
+<td><p>0xC000_0000</p></td>
+<td><p>0xCFFF_FFFF</p></td>
+<td><p>System SRAMs, system ROMs, and system memory-mapped I/O device interfaces</p></td>
+</tr>
+<tr class="row-odd"><td><p>0xD</p></td>
+<td><p>0xD000_0000</p></td>
+<td><p>0xDFFF_FFFF</p></td>
+<td><p>System SRAMs, system ROMs, and system memory-mapped I/O device interfaces</p></td>
+</tr>
+<tr class="row-even"><td><p>0xE</p></td>
+<td><p>0xE000_0000</p></td>
+<td><p>0xEFFF_FFFF</p></td>
+<td><p>System SRAMs, system ROMs, and system memory-mapped I/O device interfaces</p></td>
+</tr>
+<tr class="row-odd"><td><p>0xF</p></td>
+<td><p>0xF000_0000</p></td>
+<td><p>0xFFFF_FFFF</p></td>
+<td><p>System SRAMs, system ROMs, and system memory-mapped I/O device interfaces</p></td>
+</tr>
+</tbody>
+</table>
+<h2 id="behavior-of-loads-to-side-effect-addresses"><span class="section-number">3.10. </span>Behavior of Loads to Side-Effect Addresses<a class="headerlink" href="#behavior-of-loads-to-side-effect-addresses" title="Link to this heading">¶</a></h2>
+<p>Loads with potential side-effects do not stall the pipeline and may be committed before the data is returned from the system bus.
+Other loads and stores in the pipeline continue to be executed unless an instruction uses data from a pending side-effect load.
+Stalling the instruction control flow until a side-effect load has completed may be accomplished by either issuing a fence instruction or by generating a dependency on the load’s data.</p>
+<h2 id="partial-writes"><span class="section-number">3.11. </span>Partial Writes<a class="headerlink" href="#partial-writes" title="Link to this heading">¶</a></h2>
+<p>Rules for partial writes handling are:</p>
+<ul class="simple">
+<li><p><strong>Core-local addresses:</strong> The core performs a read-modify-write operation and updates ECC to core-local memories (i.e., I- and DCCMs).</p></li>
+<li><p><strong>SoC addresses:</strong> The core indicates the valid bytes for each bus write transaction.
+The addressed SoC memory or device performs a read-modify-write operation and updates its ECC.</p></li>
+</ul>
+<h2 id="expected-soc-behavior-for-accesses"><span class="section-number">3.12. </span>Expected SoC Behavior for Accesses<a class="headerlink" href="#expected-soc-behavior-for-accesses" title="Link to this heading">¶</a></h2>
+<p>The VeeR EL2 core expects that the SoC responds to all system bus access requests it receives from the core.
+System bus accesses include instruction fetches, load/store data accesses as well as debug system bus accesses.
+A response may either be returning the requested data (e.g., instructions sent back to the core for fetches or data for loads), an acknowledgement indicating the successful completion of a bus transaction (e.g., acknowledging a store), an error response (e.g., an error indication in response to an attempt to access an unmapped address).
+If the SoC does not respond to every single bus transaction, the core may hang.</p>
+<h2 id="speculative-bus-accesses"><span class="section-number">3.13. </span>Speculative Bus Accesses<a class="headerlink" href="#speculative-bus-accesses" title="Link to this heading">¶</a></h2>
+<p>Deep core pipelines require a certain degree of speculation to maximize performance.
+The sections below describe instruction and data speculation in the VeeR EL2 core.
+Note that speculative accesses to memory addresses with side effects may be entirely avoided by adding the buildargument-selected and -configured memory protection mechanism described in <a class="reference internal" href="#memory-protection"><span class="std std-ref">Memory Protection</span></a>.</p>
+<h3 id="id26"><span class="section-number">3.13.1. </span>Instructions<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h3>
+<p>Instruction cache misses on VeeR EL2 are speculative in nature.
+The core may issue speculatively fetch accesses on the IFU bus interface for an instruction cache miss in the following cases:</p>
+<ul class="simple">
+<li><p>due to an earlier exception or interrupt,</p></li>
+<li><p>due to an earlier branch mispredict,</p></li>
+<li><p>due to an incorrect branch prediction, and</p></li>
+<li><p>due to an incorrect Return Address Stack (RAS) prediction.</p></li>
+</ul>
+<p>Issuing speculative accesses on the IFU bus interface is benign as long as the platform is able to handle accesses to unimplemented memory and to prevent accesses to SoC components with read side effects by returning random data and/or a bus error condition.
+The decision of which addresses are unimplemented and which addresses with potential side effects need to be protected is left to the platform.</p>
+<p>Instruction fetch speculation can be limited, though not entirely avoided, by turning off the core’s branch predictor including the return address stack.
+Writing a ‘1’ to the <em>bpd</em> bit in the <code class="docutils literal notranslate"><span class="pre">mfdc</span></code> register (see <a class="reference internal" href="core-control.html#tab-feature-disable-cr"><span class="std std-numref">Table 12.1</span></a>) disables branch prediction including RAS.</p>
+<h3 id="id27"><span class="section-number">3.13.2. </span>Data<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h3>
+<p>The VeeR EL2 core does not issue any speculative data accesses on the LSU bus interface.</p>
+<h2 id="dma-slave-port"><span class="section-number">3.14. </span>DMA Slave Port<a class="headerlink" href="#dma-slave-port" title="Link to this heading">¶</a></h2>
+<p>The Direct Memory Access (DMA) slave port is used for read/write accesses to core-local memories initiated by external masters.
+For example, external masters could be DMA controllers or other CPU cores located in the SoC.</p>
+<h3 id="access"><span class="section-number">3.14.1. </span>Access<a class="headerlink" href="#access" title="Link to this heading">¶</a></h3>
+<p>The DMA slave port allows read/write access to the core’s ICCM and DCCM.
+However, the PIC memory-mapped control registers are not accessible via the DMA port.</p>
+<h3 id="write-alignment-rules"><span class="section-number">3.14.2. </span>Write Alignment Rules<a class="headerlink" href="#write-alignment-rules" title="Link to this heading">¶</a></h3>
+<p>For writes to the ICCM and DCCM through the DMA slave port, accesses must be 32- or 64-bit aligned, and 32 bits (word) or 64 bits (double-word), respectively, wide to avoid read-modify-write operations for ECC generation.</p>
+<p>More specifically, DMA write accesses to the ICCM or DCCM must have a 32- or 64-bit access size and be aligned to their respective size.
+The only write byte enable values allowed for AXI4 are 0x0F, 0xF0, and 0xFF.</p>
+<h3 id="quality-of-service"><span class="section-number">3.14.3. </span>Quality Of Service<a class="headerlink" href="#quality-of-service" title="Link to this heading">¶</a></h3>
+<p>Accesses to the ICCM and DCCM by the core have higher priority if the DMA FIFO is not full.
+However, to avoid starvation, the DMA slave port’s DMA controller may periodically request a stall to get access to the pipe if a DMA request is continuously blocked.</p>
+<p>The <em>dqc</em> field in the <code class="docutils literal notranslate"><span class="pre">mfdc</span></code> register (see <a class="reference internal" href="core-control.html#tab-feature-disable-cr"><span class="std std-numref">Table 12.1</span></a>) specifies the maximum number of clock cycles a DMA access request waits at the head of the DMA FIFO before requesting a bubble to access the pipe.
+For example, if <em>dqc</em> is 0, a DMA access requests a bubble immediately (i.e., in the same cycle); if <em>dqc</em> is 7 (the default value), a waiting DMA access requests a bubble on the 8th cycle.
+For a DMA access to the ICCM, it may take up to 3 additional cycles25 before the access is granted.
+Similarly, for a DMA access to the DCCM, it may take up to 4 additional cycles before the access is granted.</p>
+<h3 id="ordering-of-core-and-dma-accesses"><span class="section-number">3.14.4. </span>Ordering Of Core and DMA Accesses<a class="headerlink" href="#ordering-of-core-and-dma-accesses" title="Link to this heading">¶</a></h3>
+<p>Accesses to the DCCM or ICCM by the core and the DMA slave port are asynchronous events relative to one another.
+There are no ordering guarantees between the core and the DMA slave port accessing the same or different addresses.</p>
+<h2 id="reset-signal-and-vector"><span class="section-number">3.15. </span>Reset Signal and Vector<a class="headerlink" href="#reset-signal-and-vector" title="Link to this heading">¶</a></h2>
+<p>The core provides a 31-bit wide input bus at its periphery for a reset vector.
+The SoC must provide the reset vector on the <code class="docutils literal notranslate"><span class="pre">rst_vec[31:1]</span></code> bus, which could be hardwired or from a register.
+The <code class="docutils literal notranslate"><span class="pre">rst_l</span></code> input signal is active-low, asynchronously asserted, and synchronously deasserted (see also <a class="reference internal" href="clocks.html#reset"><span class="std std-ref">Reset</span></a>).
+When the core is reset, it fetches the first instruction to be executed from the address provided on the reset vector bus.
+Note that the applied reset vector must be pointing to the ICCM, if enabled, or a valid memory address, which is within an enabled instruction access window if the memory protection mechanism (see <a class="reference internal" href="#memory-protection"><span class="std std-ref">Memory Protection</span></a>) is used.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The core’s 31 general-purpose registers (<code class="docutils literal notranslate"><span class="pre">x1</span> <span class="pre">-</span> <span class="pre">x31</span></code>) are cleared on reset.</p>
+</div>
+<h2 id="non-maskable-interrupt-nmi-signal-and-vector"><span class="section-number">3.16. </span>Non-Maskable Interrupt (NMI) Signal and Vector<a class="headerlink" href="#non-maskable-interrupt-nmi-signal-and-vector" title="Link to this heading">¶</a></h2>
+<p>The core provides a 31-bit wide input bus at its periphery for a non-maskable interrupt (NMI) vector.
+The SoC must provide the NMI vector on the <code class="docutils literal notranslate"><span class="pre">nmi_vec[31:1]</span></code> bus, either hardwired or sourced from a register.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>NMI is entirely separate from the other interrupts and not affected by the selection of Direct vs Vectored mode.</p>
+</div>
+<p>The SoC may trigger an NMI by asserting the low-to-high edge-triggered, <code class="docutils literal notranslate"><span class="pre">asynchronous</span> <span class="pre">nmi_int</span></code> input signal.
+This signal must be asserted for at least two full core clock cycles to guarantee it is detected by the core since shorter pulses might be dropped by the synchronizer circuit.
+Furthermore, the <code class="docutils literal notranslate"><span class="pre">nmi_int</span></code> signal must be deasserted for a minimum of two full core clock cycles and then reasserted to signal the next NMI request to the core.
+If the SoC does not use the pin-asserted NMI feature, it must hardwire the <code class="docutils literal notranslate"><span class="pre">nmi_int</span></code> input signal to 0.</p>
+<p>In addition to NMIs triggered by the SoC, a core-internal NMI request is signaled when a D-bus store or non-blocking load error has been detected.</p>
+<p>When the core receives either an SoC-triggered or a core-internal NMI request, it fetches the next instruction to be executed from the address provided on the NMI vector bus.
+The reason for the NMI request is reported in the <code class="docutils literal notranslate"><span class="pre">mcause</span></code> register according to <a class="reference internal" href="#tab-summary-nmi-mcause-values"><span class="std std-numref">Table 3.12</span></a>.</p>
+<table class="docutils data align-default" id="tab-summary-nmi-mcause-values">
+<caption><span class="caption-number">Table 3.12 </span><span class="caption-text">Summary of NMI mcause Values</span><a class="headerlink" href="#tab-summary-nmi-mcause-values" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Value mcause[31:0]</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Section</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0x0000_0000</p></td>
+<td><p>NMI pin assertion (<code class="docutils literal notranslate"><span class="pre">nmi_int</span></code> input signal)</p></td>
+<td><p>see above</p></td>
+</tr>
+<tr class="row-odd"><td><p>0xF000_0000</p></td>
+<td><p>Machine D-bus store error NMI</p></td>
+<td><p><a class="reference internal" href="#imprecise-bus-error-non-maskable-interrupt"><span class="std std-ref">Imprecise Bus Error Non-Maskable Interrupt</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>0xF000_0001</p></td>
+<td><p>Machine D-bus non-blocking load error NMI</p></td>
+<td><p><a class="reference internal" href="#imprecise-bus-error-non-maskable-interrupt"><span class="std std-ref">Imprecise Bus Error Non-Maskable Interrupt</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0xF000_1000</p></td>
+<td><p>Machine Fast Interrupt double-bit ECC error NMI</p></td>
+<td><p><a class="reference internal" href="interrupts.html#fast-interrupt-redirect"><span class="std std-ref">Fast Interrupt Redirect</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>0xF000_1001</p></td>
+<td><p>Machine Fast Interrupt DCCM region access error NMI</p></td>
+<td><p><a class="reference internal" href="interrupts.html#fast-interrupt-redirect"><span class="std std-ref">Fast Interrupt Redirect</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0xF000_1002</p></td>
+<td><p>Machine Fast Interrupt non-DCCM region NMI</p></td>
+<td><p><a class="reference internal" href="interrupts.html#fast-interrupt-redirect"><span class="std std-ref">Fast Interrupt Redirect</span></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>NMIs are typically fatal! Section 3.4 of the RISC-V Privileged specification <a class="reference internal" href="intro.html#ref-2"><span class="std std-ref">[2]</span></a> states that NMIs are only used for hardware error conditions and cause an immediate jump to the address at the NMI vector running in M-mode regardless of the state of a hart’s interrupt enable bits. The NMI can thus overwrite state in an active M-mode interrupt handler and normal program execution cannot resume. Unlike resets, NMIs do not reset hart state, enabling diagnosis, reporting, and possible containment of the hardware error. Because NMIs are not maskable, the NMI handling routine performing diagnosis and reporting is itself susceptible to further NMIs, possibly making any such activity meaningless and erroneous in the face of error storms.</p>
+</div>
+<h2 id="software-interrupts"><span class="section-number">3.17. </span>Software Interrupts<a class="headerlink" href="#software-interrupts" title="Link to this heading">¶</a></h2>
+<p>The VeeR EL2 core provides a software-interrupt input signal for its hart (see <code class="docutils literal notranslate"><span class="pre">soft_int</span></code> in <a class="reference internal" href="complex-ports.html#tab-core-complex-signals"><span class="std std-numref">Table 17.1</span></a>).
+The <code class="docutils literal notranslate"><span class="pre">soft_int</span></code> signal is an active-high, level-sensitive, asynchronous input signal which feeds the <em>msip</em> (machine software-interrupt pending) bit of the standard RISC-V <code class="docutils literal notranslate"><span class="pre">mip</span></code> register (see <a class="reference internal" href="adaptations.html#tab-machine-interrupt-pending-register"><span class="std std-numref">Table 13.2</span></a>).
+When the <em>msie</em> (machine software-interrupt enable) bit of the standard RISC-V <code class="docutils literal notranslate"><span class="pre">mie</span></code> register (see <a class="reference internal" href="adaptations.html#tab-machine-interrupt-enable-register"><span class="std std-numref">Table 13.1</span></a>) is set, a machine software interrupt occurs if the <em>msip</em> bit of the <code class="docutils literal notranslate"><span class="pre">mip</span></code> register is asserted.</p>
+<p>The SoC must implement Machine Software Interrupt (MSI) memory-mapped I/O registers.
+These registers provide interrupt control bits which are directly connected to the respective <code class="docutils literal notranslate"><span class="pre">soft_int</span></code> pins of each core.
+Writing to the corresponding bit of one of these registers enables remote harts to trigger machine-mode interprocessor interrupts.</p>
+<p>Each hart can read its own <code class="docutils literal notranslate"><span class="pre">mhartid</span></code> register (see <a class="reference internal" href="adaptations.html#machine-hardware-thread-id-register-mhartid"><span class="std std-ref">Machine Hardware Thread ID Register (mhartid)</span></a>) to determine the memory address of the associated memory-mapped MSI register within the platform.
+In this manner, an interrupt service routine can reset the corresponding memory-mapped MSI register bit before returning from a software interrupt.</p>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="fn-iccm-dccm-1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>DCCM only</p>
+</aside>
+<aside class="footnote brackets" id="fn-unmapped-address-1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id2">1</a>,<a role="doc-backlink" href="#id4">2</a>)</span>
+<p>If any byte of an instruction is from an unmapped address, an instruction access fault precise exception is flagged.</p>
+</aside>
+<aside class="footnote brackets" id="fn-unmapped-address-2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
+<p>Exception also flagged for fetches to the DCCM address range if located in the same region, or if located in different regions and no SoC address is a match.</p>
+</aside>
+<aside class="footnote brackets" id="fn-unmapped-address-3" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id5">1</a>,<a role="doc-backlink" href="#id8">2</a>)</span>
+<p>Exception also flagged for PIC load/store not word-sized or address not word-aligned.</p>
+</aside>
+<aside class="footnote brackets" id="fn-unmapped-address-4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id6">1</a>,<a role="doc-backlink" href="#id9">2</a>)</span>
+<p>Exception also flagged for loads/stores to the ICCM address range if located in the same region, or if located in different regions and no SoC address is a match.</p>
+</aside>
+<aside class="footnote brackets" id="fn-unmapped-address-5" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">6</a><span class="fn-bracket">]</span></span>
+<p>AMO refers to the RISC-V “A” (atomics) extension, which is not implemented in VeeR EL2.</p>
+</aside>
+<aside class="footnote brackets" id="fn-misaligned-accesses-1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>7<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id10">1</a>,<a role="doc-backlink" href="#id11">2</a>,<a role="doc-backlink" href="#id14">3</a>)</span>
+<p>Accesses to the I-cache or ICCM initiated by fetches never cross 16B boundaries. I-cache fills are always aligned to 64B. Misaligned accesses are therefore not possible.</p>
+</aside>
+<aside class="footnote brackets" id="fn-misaligned-accesses-2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>8<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id12">1</a>,<a role="doc-backlink" href="#id13">2</a>)</span>
+<p>The RISC-V Privileged specification recommends that misaligned accesses to regions with potential side-effects should trigger an access fault exception, instead of a misaligned exception (see Section 3.5.6 in <a class="reference internal" href="intro.html#ref-2"><span class="std std-ref">[2]</span></a>). Note that VeeR EL2 triggers a misaligned exception in this case. To avoid potential side-effects, the exception handler should not emulate a misaligned access using multiple smaller aligned accesses.</p>
+</aside>
+<aside class="footnote brackets" id="fn-misaligned-accesses-3" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id15">9</a><span class="fn-bracket">]</span></span>
+<p>This case is in violation with the write alignment rules specified in section <a class="reference internal" href="#write-alignment-rules"><span class="std std-ref">Write Alignment Rules</span></a>.</p>
+</aside>
+<aside class="footnote brackets" id="fn-mscause-register-1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id16">10</a><span class="fn-bracket">]</span></span>
+<p>Relative priority of load/store exceptions (0: highest priority).</p>
+</aside>
+<aside class="footnote brackets" id="fn-mscause-register-2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id17">11</a><span class="fn-bracket">]</span></span>
+<p>Fetch access not within ICCM address range.</p>
+</aside>
+<aside class="footnote brackets" id="fn-mscause-register-3" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id18">12</a><span class="fn-bracket">]</span></span>
+<p>Trigger hit can also be observed in <em>hit</em> bit of mcontrol register (see <a class="reference internal" href="debugging.html#tab-mcontrol"><span class="std std-numref">Table 11.20</span></a>).</p>
+</aside>
+<aside class="footnote brackets" id="fn-mscause-register-4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>13<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id19">1</a>,<a role="doc-backlink" href="#id22">2</a>)</span>
+<p>Load/store access not within DCCM or PIC memory-mapped register address ranges.</p>
+</aside>
+<aside class="footnote brackets" id="fn-mscause-register-5" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>14<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id20">1</a>,<a role="doc-backlink" href="#id23">2</a>)</span>
+<p>If a load or store access crosses the upper boundary of either the DCCM or PIC memory-mapped register address range, the error address reported in the mtval register is the base address of the access, not the address of the first byte outside the DCCM or PIC range. Note that firmware cannot recover from this access fault independent of which address is reported.</p>
+</aside>
+<aside class="footnote brackets" id="fn-mscause-register-6" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>15<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id21">1</a>,<a role="doc-backlink" href="#id24">2</a>)</span>
+<p>PIC load/store not word-sized or address not word-aligned.</p>
+</aside>
+<aside class="footnote brackets" id="fn-mscause-register-7" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id25">16</a><span class="fn-bracket">]</span></span>
+<p>Core external timer</p>
+</aside>
+</aside>
+
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      2025-12-22
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="overview.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 2. Core Overview" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              2. Core Overview
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="error-protection.html" class="md-footer__link md-footer__link--next" aria-label="Next: 4. Memory Error Protection" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              4. Memory Error Protection
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        Copyright &#169; 2025 CHIPS Alliance The Linux Foundation®.
+        
+    </div>
+  
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+      
+      
+    
+    <a href="https://github.com/antmicro" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/antmicro" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["toc.integrate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+      
+        <script src="_static/sphinx_immaterial_theme.f9d9eeeb247ace16c.min.js?v=8ec58cb5"></script>
+    
+  </body>
+</html>

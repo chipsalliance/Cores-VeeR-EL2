@@ -1,0 +1,2733 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>11. Debug Support - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
+      
+    
+    
+      
+        
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="_static/sphinx_immaterial_theme.c5589c0bd87d933a4.min.css?v=eeeb54bc" />
+        <link rel="stylesheet" type="text/css" href="_static/main.css" />
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="white">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="RISC-V VeeR EL2 Programmer&#39;s Reference Manual  documentation" class="md-header__button md-logo" aria-label="RISC-V VeeR EL2 Programmer's Reference Manual  documentation" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            RISC-V VeeR EL2 Programmer's Reference Manual  documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              11. Debug Support
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="white"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="RISC-V VeeR EL2 Programmer&#39;s Reference Manual  documentation" class="md-nav__button md-logo" aria-label="RISC-V VeeR EL2 Programmer's Reference Manual  documentation" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    RISC-V VeeR EL2 Programmer's Reference Manual  documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="intro.html" class="md-nav__link">
+        <span class="md-ellipsis">RISC-<wbr>V Vee<wbr>R EL2 Programmer’s Reference Manual</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="overview.html" class="md-nav__link">
+        <span class="md-ellipsis">Core Overview</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="memory-map.html" class="md-nav__link">
+        <span class="md-ellipsis">Memory Map</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="error-protection.html" class="md-nav__link">
+        <span class="md-ellipsis">Memory Error Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dual-core-lock-step.html" class="md-nav__link">
+        <span class="md-ellipsis">Dual-<wbr>Core Lockstep <wbr>(DCLS)</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="timers.html" class="md-nav__link">
+        <span class="md-ellipsis">Internal Timers</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="power.html" class="md-nav__link">
+        <span class="md-ellipsis">Power Management and Multi-<wbr>Core Debug Control</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="interrupts.html" class="md-nav__link">
+        <span class="md-ellipsis">External Interrupts</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="performance.html" class="md-nav__link">
+        <span class="md-ellipsis">Performance Monitoring</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cache.html" class="md-nav__link">
+        <span class="md-ellipsis">Cache Control</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          <span class="md-ellipsis">Debug Support</span>
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        <span class="md-ellipsis">Debug Support</span>
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#control-status-registers" class="md-nav__link">
+    <span class="md-ellipsis">Control/Status Registers</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Control/Status Registers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#control-status-registers-in-jtag-address-space" class="md-nav__link">
+    <span class="md-ellipsis">Control/Status Registers in JTAG Address Space</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Control/Status Registers in JTAG Address Space">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#idcode-register-idcode" class="md-nav__link">
+    <span class="md-ellipsis">IDCODE Register <wbr>(IDCODE)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dtm-control-and-status-register-dtmcs" class="md-nav__link">
+    <span class="md-ellipsis">DTM Control and Status Register <wbr>(dtmcs)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-module-interface-access-register-dmi" class="md-nav__link">
+    <span class="md-ellipsis">Debug Module Interface Access Register <wbr>(dmi)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bypass-register-bypass" class="md-nav__link">
+    <span class="md-ellipsis">BYPASS Register <wbr>(BYPASS)</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#control-status-registers-in-debug-module-interface-address-space" class="md-nav__link">
+    <span class="md-ellipsis">Control/Status Registers in Debug Module Interface Address Space</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-module-control-register-dmcontrol" class="md-nav__link">
+    <span class="md-ellipsis">Debug Module Control Register <wbr>(dmcontrol)</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Debug Module Control Register (dmcontrol)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#debug-module-status-register-dmstatus" class="md-nav__link">
+    <span class="md-ellipsis">Debug Module Status Register <wbr>(dmstatus)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#halt-summary-0-register-haltsum0" class="md-nav__link">
+    <span class="md-ellipsis">Halt Summary 0 Register <wbr>(haltsum0)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#abstract-control-and-status-register-abstractcs" class="md-nav__link">
+    <span class="md-ellipsis">Abstract Control and Status Register <wbr>(abstractcs)</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#abstract-command-register-command" class="md-nav__link">
+    <span class="md-ellipsis">Abstract Command Register <wbr>(command)</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Abstract Command Register (command)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#abstract-command-autoexec-register-abstractauto" class="md-nav__link">
+    <span class="md-ellipsis">Abstract Command Autoexec Register <wbr>(abstractauto)</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#abstract-data-0-1-registers-data0-1" class="md-nav__link">
+    <span class="md-ellipsis">Abstract Data 0 / 1 Registers <wbr>(data0/1)</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Abstract Data 0 / 1 Registers (data0/1)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-bus-access-control-and-status-register-sbcs" class="md-nav__link">
+    <span class="md-ellipsis">System Bus Access Control and Status Register <wbr>(sbcs)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system-bus-address-31-0-register-sbaddress0" class="md-nav__link">
+    <span class="md-ellipsis">System Bus Address 31:<wbr>0 Register <wbr>(sbaddress0)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system-bus-data-31-0-register-sbdata0" class="md-nav__link">
+    <span class="md-ellipsis">System Bus Data 31:<wbr>0 Register <wbr>(sbdata0)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system-bus-data-63-32-register-sbdata1" class="md-nav__link">
+    <span class="md-ellipsis">System Bus Data 63:<wbr>32 Register <wbr>(sbdata1)</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#control-status-registers-in-risc-v-csr-address-space" class="md-nav__link">
+    <span class="md-ellipsis">Control/Status Registers in RISC-<wbr>V CSR Address Space</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Control/Status Registers in RISC-V CSR Address Space">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#trigger-select-register-tselect" class="md-nav__link">
+    <span class="md-ellipsis">Trigger Select Register <wbr>(tselect)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trigger-data-1-register-tdata1" class="md-nav__link">
+    <span class="md-ellipsis">Trigger Data 1 Register <wbr>(tdata1)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#match-control-register-mcontrol" class="md-nav__link">
+    <span class="md-ellipsis">Match Control Register <wbr>(mcontrol)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trigger-data-2-register-tdata2" class="md-nav__link">
+    <span class="md-ellipsis">Trigger Data 2 Register <wbr>(tdata2)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-control-and-status-register-dcsr" class="md-nav__link">
+    <span class="md-ellipsis">Debug Control and Status Register <wbr>(dcsr)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-pc-register-dpc" class="md-nav__link">
+    <span class="md-ellipsis">Debug PC Register <wbr>(dpc)</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="core-control.html" class="md-nav__link">
+        <span class="md-ellipsis">Low-<wbr>Level Core Control</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="adaptations.html" class="md-nav__link">
+        <span class="md-ellipsis">Standard RISC-<wbr>V CSRs with Core-<wbr>Specific Adaptations</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="csrs.html" class="md-nav__link">
+        <span class="md-ellipsis">CSR Address Map</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="interrupt-priority.html" class="md-nav__link">
+        <span class="md-ellipsis">Interrupt Priorities</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="clocks.html" class="md-nav__link">
+        <span class="md-ellipsis">Clock And Reset</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="complex-ports.html" class="md-nav__link">
+        <span class="md-ellipsis">Complex Port List</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="build-args.html" class="md-nav__link">
+        <span class="md-ellipsis">Build Arguments</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tests.html" class="md-nav__link">
+        <span class="md-ellipsis">Compliance Test Suite Failures</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="errata.html" class="md-nav__link">
+        <span class="md-ellipsis">Errata</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="physical-memory-protection.html" class="md-nav__link">
+        <span class="md-ellipsis">Physical Memory Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="user-mode.html" class="md-nav__link">
+        <span class="md-ellipsis">User Mode</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="verification.html" class="md-nav__link">
+        <span class="md-ellipsis">Verification</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="simulation-debugging.html" class="md-nav__link">
+        <span class="md-ellipsis">Interactive Debugging in Simulation</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tock.html" class="md-nav__link">
+        <span class="md-ellipsis">Running Tock OS</span>
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                  
+
+
+<h1 id="debug-support"><span class="section-number">11. </span>Debug Support<a class="headerlink" href="#debug-support" title="Link to this heading">¶</a></h1>
+<p>The VeeR EL2 core conforms to the “RISC-V Debug Specification 0.13.2, with JTAG DTM” document <a class="reference internal" href="intro.html#ref-3"><span class="std std-ref">[3]</span></a>.
+This chapter provides a description of the implemented debug-related control and status register definitions.
+For a RISC-V debug overview and detailed feature descriptions, refer to corresponding sections in <a class="reference internal" href="intro.html#ref-3"><span class="std std-ref">[3]</span></a>.</p>
+<h2 id="control-status-registers"><span class="section-number">11.1. </span>Control/Status Registers<a class="headerlink" href="#control-status-registers" title="Link to this heading">¶</a></h2>
+<p>The RISC-V Debug architecture defines three separate address spaces: JTAG, Debug Module Interface, and RISC-V CSR.
+The registers associated with these three address spaces are described in the following sections:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#control-status-registers-in-jtag-address-space"><span class="std std-ref">Control/Status Registers in JTAG Address Space</span></a></p></li>
+<li><p><a class="reference internal" href="#control-status-registers-in-debug-module-interface-address-space"><span class="std std-ref">Control/Status Registers in Debug Module Interface Address Space</span></a></p></li>
+<li><p><a class="reference internal" href="#control-status-registers-in-risc-v-csr-address-space"><span class="std std-ref">Control/Status Registers in RISC-V CSR Address Space</span></a></p></li>
+</ul>
+<h3 id="control-status-registers-in-jtag-address-space"><span class="section-number">11.1.1. </span>Control/Status Registers in JTAG Address Space<a class="headerlink" href="#control-status-registers-in-jtag-address-space" title="Link to this heading">¶</a></h3>
+<p><a class="reference internal" href="#tab-registers-jtag"><span class="std std-numref">Table 11.1</span></a> summarizes the control/status registers in the JTAG Debug Transport Module address space.</p>
+<p>Addresses shown below are in the 5-bit JTAG address space.
+A control/status register is addressed by setting the 5bit JTAG IR register.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The core complex clock (<code class="docutils literal notranslate"><span class="pre">clk</span></code>) frequency must be at least twice the JTAG clock (<code class="docutils literal notranslate"><span class="pre">jtag_tck</span></code>) frequency for the JTAG data to pass correctly through the clock domain crossing synchronizers.</p>
+</div>
+<table class="docutils data align-default" id="tab-registers-jtag">
+<caption><span class="caption-number">Table 11.1 </span><span class="caption-text">Registers in JTAG Debug Transport Module Address Space</span><a class="headerlink" href="#tab-registers-jtag" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>JTAG DTM Address</strong></p></th>
+<th class="head"><p><strong>Name</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Section</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0x01</p></td>
+<td><p>IDCODE</p></td>
+<td><p>TAG IDCODE</p></td>
+<td><p><a class="reference internal" href="#idcode-register-idcode"><span class="std std-ref">IDCODE Register (IDCODE)</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x10</p></td>
+<td><p>dtmcs</p></td>
+<td><p>DTM control and status</p></td>
+<td><p><a class="reference internal" href="#dtm-control-and-status-register-dtmcs"><span class="std std-ref">DTM Control and Status Register (dtmcs)</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>0x11</p></td>
+<td><p>dmi</p></td>
+<td><p>Debug module interface access</p></td>
+<td><p><a class="reference internal" href="#debug-module-interface-access-register-dmi"><span class="std std-ref">Debug Module Interface Access Register (dmi)</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x1F</p></td>
+<td><p>BYPASS</p></td>
+<td><p>JTAG BYPASS</p></td>
+<td><p><a class="reference internal" href="#bypass-register-bypass"><span class="std std-ref">BYPASS Register (BYPASS)</span></a></p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="idcode-register-idcode"><span class="section-number">11.1.1.1. </span>IDCODE Register (IDCODE)<a class="headerlink" href="#idcode-register-idcode" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">IDCODE</span></code> register is a standard JTAG register.
+It is selected in the JTAG TAP controller’s IR register when the TAP state machine is reset.
+The <code class="docutils literal notranslate"><span class="pre">IDCODE</span></code> register’s definition is exactly as defined in IEEE Std 1149.1-2013.</p>
+<p>This register is read-only.</p>
+<p>This register is mapped to the 5-bit JTAG address space.</p>
+<table class="docutils data align-default" id="tab-idcode-registers">
+<caption><span class="caption-number">Table 11.2 </span><span class="caption-text">IDCODE Register (IDCODE, at JTAG 0x01)</span><a class="headerlink" href="#tab-idcode-registers" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>version</p></td>
+<td><p>31:28</p></td>
+<td><p>Identifies release version of this part</p></td>
+<td><p>R</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">jtag_id[31:28]</span></code> value</p>
+<p>(see <a class="reference internal" href="complex-ports.html"><span class="std std-doc">Complex Port List</span></a>)</p>
+</td>
+</tr>
+<tr class="row-odd"><td><p>partnum</p></td>
+<td><p>27:12</p></td>
+<td><p>Identifies designer’s part number of this part</p></td>
+<td><p>R</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">jtag_id[27:12]</span></code> value</p>
+<p>(see <a class="reference internal" href="complex-ports.html"><span class="std std-doc">Complex Port List</span></a>)</p>
+</td>
+</tr>
+<tr class="row-even"><td><p>manufid</p></td>
+<td><p>11:1</p></td>
+<td><p>Identifies designer/manufacturer of this part</p></td>
+<td><p>R</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">jtag_id[11:1]</span></code> value</p>
+<p>(see <a class="reference internal" href="complex-ports.html"><span class="std std-doc">Complex Port List</span></a>)</p>
+</td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>Must be ‘1’</p></td>
+<td><p>R</p></td>
+<td><p>1</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="dtm-control-and-status-register-dtmcs"><span class="section-number">11.1.1.2. </span>DTM Control and Status Register (dtmcs)<a class="headerlink" href="#dtm-control-and-status-register-dtmcs" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">dtmcs</span></code> register controls and provides status of the Debug Transport Module (DTM).</p>
+<p>This register is mapped to the 5-bit JTAG address space.</p>
+<table class="docutils data align-default" id="tab-dtmcs">
+<caption><span class="caption-number">Table 11.3 </span><span class="caption-text">DTM Control and Status Register (dtmcs, at JTAG 0x10)</span><a class="headerlink" href="#tab-dtmcs" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>31:18</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>dmihardreset</p></td>
+<td><p>17</p></td>
+<td><p>Not implemented</p>
+<p><strong>Note</strong>: Hard reset of DTM not required in VeeR EL2 because DMI accesses always succeed. Writes to this bit ignored.</p>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>dmireset</p></td>
+<td><p>16</p></td>
+<td><p>Not implemented</p>
+<p><strong>Note</strong>: Reset of DTM’s error state not required in VeeR EL2 because DMI accesses always succeed. Writes to this bit ignored.</p>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Reserved</p></td>
+<td><p>15</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>idle</p></td>
+<td><p>14:12</p></td>
+<td><p>Hint to debugger of minimum number of cycles debugger should spend in Run-Test/Idle after every DMI scan to avoid a ‘busy’ return code (<em>dmistat</em> of 3). Debugger must still check <em>dmistat</em> when necessary:</p>
+<ul class="simple">
+<li><p>0: Not necessary to enter Run-Test/Idle at all.</p></li>
+</ul>
+<p>Other values not implemented.</p>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>dmistat</p></td>
+<td><p>11:10</p></td>
+<td><p>DMI status:</p>
+<ul class="simple">
+<li><p>0: No error</p></li>
+<li><p>1: Reserved</p></li>
+<li><p>2..3: Not implemented (DMI accesses always succeed)</p></li>
+</ul>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>abits</p></td>
+<td><p>9:4</p></td>
+<td><p>Size of address field in <code class="docutils literal notranslate"><span class="pre">dmi</span></code> register (see <a class="reference internal" href="#tab-dmi"><span class="std std-numref">Table 11.4</span></a>)</p></td>
+<td><p>R</p></td>
+<td><p>7</p></td>
+</tr>
+<tr class="row-odd"><td><p>version</p></td>
+<td><p>3:0</p></td>
+<td><p>Conforming to RISC-V Debug specification Version 0.13.2</p></td>
+<td><p>R</p></td>
+<td><p>1</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="debug-module-interface-access-register-dmi"><span class="section-number">11.1.1.3. </span>Debug Module Interface Access Register (dmi)<a class="headerlink" href="#debug-module-interface-access-register-dmi" title="Link to this heading">¶</a></h4>
+<p>The dmi register allows access to the Debug Module Interface (DMI).
+In the JTAG TAP controller’s Update-DR state, the DTM starts the operation specified in the <em>op</em> field.
+In the JTAG TAP controller’s Capture-DR state, the DTM updates the <em>data</em> field with the result from that operation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>No status is reported in the op field. Therefore, debuggers should refrain from batching together multiple scans.</p>
+</div>
+<p>This register is mapped to the 5-bit JTAG address space.</p>
+<table class="docutils data align-default" id="tab-dmi">
+<caption><span class="caption-number">Table 11.4 </span><span class="caption-text">Debug Module Interface Access Register (dmi, at JTAG 0x11)</span><a class="headerlink" href="#tab-dmi" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>address</p></td>
+<td><p>40:34</p></td>
+<td><p>Address used for DMI access. In Update-DR, value used to access DM over DMI.</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>data</p></td>
+<td><p>33:2</p></td>
+<td><p>Data to send to DM over DMI during Update-DR, and data returned from DM as result of previous operation.</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>op</p></td>
+<td><p>1:0</p></td>
+<td><p>For write:</p>
+<ul class="simple">
+<li><p>0: Ignore data and address (nop)</p></li>
+<li><p>1: Read from address (read)</p></li>
+<li><p>2: Write data to address (write)</p></li>
+<li><p>3: Not implemented (do not use)</p></li>
+</ul>
+<p>For read:</p>
+<ul class="simple">
+<li><p>0: Previous operation completed successfully</p></li>
+<li><p>1..3: Not implemented (DMI accesses always succeed)</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="bypass-register-bypass"><span class="section-number">11.1.1.4. </span>BYPASS Register (BYPASS)<a class="headerlink" href="#bypass-register-bypass" title="Link to this heading">¶</a></h4>
+<p>The BYPASS register is a standard JTAG register.
+It is implemented as a 1-bit register which has no functional effect, except adding a 1-bit delay.
+It allows a debugger to not communicate with this TAP (i.e., bypass it).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All unused addresses in the 5-bit JTAG address space (i.e., all addresses except 0x01 (<code class="docutils literal notranslate"><span class="pre">IDCODE</span></code>), 0x10 (<code class="docutils literal notranslate"><span class="pre">dtmcs</span></code>), and 0x11 (<code class="docutils literal notranslate"><span class="pre">dmi</span></code>)) select the BYPASS register as well.</p>
+</div>
+<p>This register is mapped to the 5-bit JTAG address space.</p>
+<table class="docutils data align-default" id="tab-bypass">
+<caption><span class="caption-number">Table 11.5 </span><span class="caption-text">BYPASS Register (BYPASS, at JTAG 0x1F)</span><a class="headerlink" href="#tab-bypass" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bypass</p></td>
+<td><p>0</p></td>
+<td><p>Bypass</p></td>
+<td><p>-</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="control-status-registers-in-debug-module-interface-address-space"><span class="section-number">11.1.2. </span>Control/Status Registers in Debug Module Interface Address Space<a class="headerlink" href="#control-status-registers-in-debug-module-interface-address-space" title="Link to this heading">¶</a></h3>
+<p><a class="reference internal" href="#tab-registers-dmi"><span class="std std-numref">Table 11.6</span></a> Summarizes The Control/Status Registers In The Debug Module Interface Address Space.</p>
+<p>Registers in the Debug Module Interface address space are accessed through the <code class="docutils literal notranslate"><span class="pre">dmi</span></code> register in the JTAG address space (see <a class="reference internal" href="#debug-module-interface-access-register-dmi"><span class="std std-ref">Debug Module Interface Access Register (dmi)</span></a>).
+The <em>address</em> field of the <code class="docutils literal notranslate"><span class="pre">dmi</span></code> register selects the Debug Module Interface register to be accessed, the <em>data</em> field either provides the value to be written to the selected register or captures that register’s value, and the <em>op</em> field selects the operation to be performed.</p>
+<p>Addresses shown below are offsets relative to the Debug Module base address. VeeR EL2 supports a single Debug Module with a base address of 0x00.</p>
+<table class="docutils data align-default" id="tab-registers-dmi">
+<caption><span class="caption-number">Table 11.6 </span><span class="caption-text">Registers in Debug Module Interface Address Space</span><a class="headerlink" href="#tab-registers-dmi" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>DMI Address</strong></p></th>
+<th class="head"><p><strong>Name</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Section</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0x04</p></td>
+<td><p>data0</p></td>
+<td><p>Abstract data 0</p></td>
+<td><p><a class="reference internal" href="#abstract-data-0-1-registers-data01"><span class="std std-ref">Abstract Data 0 / 1 Registers (data0/1)</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x05</p></td>
+<td><p>data1</p></td>
+<td><p>Abstract data 1</p></td>
+<td><p><a class="reference internal" href="#abstract-data-0-1-registers-data01"><span class="std std-ref">Abstract Data 0 / 1 Registers (data0/1)</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>0x10</p></td>
+<td><p>dmcontrol</p></td>
+<td><p>Debug module control</p></td>
+<td><p><a class="reference internal" href="#debug-module-control-register-dmcontrol"><span class="std std-ref">System Bus Address 31:0 Register (sbaddress0)</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x11</p></td>
+<td><p>dmstatus</p></td>
+<td><p>Debug module status</p></td>
+<td><p><a class="reference internal" href="#debug-module-status-register-dmstatus"><span class="std std-ref">Debug Module Status Register (dmstatus)</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>0x16</p></td>
+<td><p>abstractcs</p></td>
+<td><p>Abstract control and status</p></td>
+<td><p><a class="reference internal" href="#abstract-control-and-status-register-abstractcs"><span class="std std-ref">Abstract Control and Status Register (abstractcs)</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x17</p></td>
+<td><p>command</p></td>
+<td><p>Abstract command</p></td>
+<td><p><a class="reference internal" href="#abstract-command-register-command"><span class="std std-ref">Abstract Command Register (command)</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>0x18</p></td>
+<td><p>abstractauto</p></td>
+<td><p>Abstract command autoexec</p></td>
+<td><p><a class="reference internal" href="#abstract-command-autoexec-register-abstractauto"><span class="std std-ref">Abstract Command Autoexec Register (abstractauto)</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x38</p></td>
+<td><p>sbcs</p></td>
+<td><p>System bus access control and status</p></td>
+<td><p><a class="reference internal" href="#system-bus-access-control-and-status-register-sbcs"><span class="std std-ref">System Bus Access Control and Status Register (sbcs)</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>0x39</p></td>
+<td><p>sbaddress0</p></td>
+<td><p>System bus address 31:0</p></td>
+<td><p><a class="reference internal" href="#system-bus-address-31-0-register-sbaddress0"><span class="std std-ref">System Bus Address 31:0 Register (sbaddress0)</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x3C</p></td>
+<td><p>sbdata0</p></td>
+<td><p>System bus data 31:0</p></td>
+<td><p><a class="reference internal" href="#system-bus-data-31-0-register-sbdata0"><span class="std std-ref">System Bus Data 31:0 Register (sbdata0)</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>0x3D</p></td>
+<td><p>sbdata1</p></td>
+<td><p>System bus data 63:32</p></td>
+<td><p><a class="reference internal" href="#system-bus-data-63-32-register-sbdata1"><span class="std std-ref">System Bus Data 63:32 Register (sbdata1)</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x40</p></td>
+<td><p>haltsum0</p></td>
+<td><p>Halt summary 0</p></td>
+<td><p><a class="reference internal" href="#halt-summary-0-register-haltsum0"><span class="std std-ref">Halt Summary 0 Register (haltsum0)</span></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>ICCM, DCCM, and PIC memory ranges are only accessible using the access memory abstract command.</p>
+</div>
+<h3 id="debug-module-control-register-dmcontrol"><span class="section-number">11.1.3. </span>Debug Module Control Register (dmcontrol)<a class="headerlink" href="#debug-module-control-register-dmcontrol" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">dmcontrol</span></code> register controls the overall Debug Module as well as the hart.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>On any given write, a debugger may only write ‘1’ to either the <em>resumereq</em> or <em>ackhavereset</em> bit. The other bit must be written to ‘0’.</p>
+</div>
+<p>This register is mapped to the Debug Module Interface address space.</p>
+<table class="docutils data align-default" id="tab-dmcontrol">
+<caption><span class="caption-number">Table 11.7 </span><span class="caption-text">Debug Module Control Register (dmcontrol, at Debug Module Offset 0x10)</span><a class="headerlink" href="#tab-dmcontrol" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>haltreq</p></td>
+<td><p>31</p></td>
+<td><p>Halt request:</p>
+<ul>
+<li><p>0: Clears halt request bit.</p>
+<p><strong>Note</strong>: May cancel outstanding halt request.</p>
+</li>
+<li><p>1: Sets halt request bit.</p>
+<p><strong>Note</strong>: Running hart halts whenever halt request bit is set.</p>
+</li>
+</ul>
+</td>
+<td><p>R0/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>resumereq</p></td>
+<td><p>30</p></td>
+<td><p>Resume request:</p>
+<ul class="simple">
+<li><p>0: No effect</p></li>
+<li><p>1: Causes hart to resume, if halted</p></li>
+</ul>
+<p><strong>Note</strong>: Also clears resume ack bit for hart.</p>
+<p><strong>Note</strong>: Setting <em>resumereq</em> bit is ignored if <em>haltreq</em> bit is set.</p>
+</td>
+<td><p>R0/W1</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>hartreset</p></td>
+<td><p>29</p></td>
+<td><p>Not implemented (i.e., 0: Deasserted)</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>ackhavereset</p></td>
+<td><p>28</p></td>
+<td><p>Reset core-internal, sticky <code class="docutils literal notranslate"><span class="pre">havereset</span></code> state:</p>
+<ul class="simple">
+<li><p>0: No effect</p></li>
+<li><p>1: Clear <code class="docutils literal notranslate"><span class="pre">havereset</span></code> state</p></li>
+</ul>
+</td>
+<td><p>R0/W1</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>27</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>hasel</p></td>
+<td><p>26</p></td>
+<td><p>Selects definition of currently selected harts:</p>
+<ul class="simple">
+<li><p>0: Single currently selected hart (VeeR EL2 is single-thread)</p></li>
+</ul>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>hartsello</p></td>
+<td><p>25:16</p></td>
+<td><p>Not implemented (VeeR EL2 is single-thread)</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>hartselhi</p></td>
+<td><p>15:6</p></td>
+<td><p>Not implemented (VeeR EL2 is single-thread)</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>5:4</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>setresethaltreq</p></td>
+<td><p>3</p></td>
+<td><p>Not implemented</p>
+<p><strong>Note</strong>: <em>hasresethaltreq</em> bit in <code class="docutils literal notranslate"><span class="pre">dmstatus</span></code> register (<a class="reference internal" href="#tab-dmstatus"><span class="std std-numref">Table 11.8</span></a>) is ‘0’.</p>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>clrresethaltreq</p></td>
+<td><p>2</p></td>
+<td><p>Not implemented</p>
+<p><strong>Note</strong>: <em>hasresethaltreq</em> bit in <code class="docutils literal notranslate"><span class="pre">dmstatus</span></code> register (<a class="reference internal" href="#tab-dmstatus"><span class="std std-numref">Table 11.8</span></a>) is ‘0’.</p>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>ndmreset</p></td>
+<td><p>1</p></td>
+<td><p>Controls reset signal from DM to VeeR EL2 core. Signal resets hart, but not DM. To perform a reset, debugger writes ‘1’, and then writes ‘0’ to deassert reset.</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>dmactive</p></td>
+<td><p>0</p></td>
+<td><p>Reset signal for Debug Module (DM):</p>
+<ul>
+<li><p>0: Module’s state takes its reset values</p>
+<p><strong>Note</strong>: Only <em>dmactive</em> bit may be written to value other than its reset value. Writes to all other bits of this register are ignored.</p>
+</li>
+<li><p>1: Module functions normally</p>
+<p>Debugger may pulse this bit low to get Debug Module into known state.</p>
+<p><strong>Note</strong>: The core complex’s <code class="docutils literal notranslate"><span class="pre">dbg_rst_l</span></code> signal (see <a class="reference internal" href="complex-ports.html"><span class="std std-doc">Complex Port List</span></a>) resets the Debug Module. It should only be used to reset the Debug Module at power up or possibly with a global reset signal which resets the entire platform.</p>
+</li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="debug-module-status-register-dmstatus"><span class="section-number">11.1.3.1. </span>Debug Module Status Register (dmstatus)<a class="headerlink" href="#debug-module-status-register-dmstatus" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">dmstatus</span></code> register reports status for the overall Debug Module as well as the hart.</p>
+<p>This register is read-only.</p>
+<p>This register is mapped to the Debug Module Interface address space.</p>
+<table class="docutils data align-default" id="tab-dmstatus">
+<caption><span class="caption-number">Table 11.8 </span><span class="caption-text">Debug Module Status Register (dmstatus, at Debug Module Offset 0x11)</span><a class="headerlink" href="#tab-dmstatus" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>31:23</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>impebreak</p></td>
+<td><p>22</p></td>
+<td><p>Not implemented</p>
+<p><strong>Note</strong>: VeeR EL2 does not implement a Program Buffer.</p>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>21:20</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>allhavereset</p></td>
+<td><p>19</p></td>
+<td><p>‘1’ when hart has been reset and reset has not been acknowledged</p></td>
+<td><p>R</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-even"><td><p>anyhavereset</p></td>
+<td><p>18</p></td>
+<td><p>‘1’ when hart has been reset and reset has not been acknowledged</p></td>
+<td><p>R</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-odd"><td><p>allresumeack</p></td>
+<td><p>17</p></td>
+<td><p>‘1’ when hart has acknowledged last resume request</p></td>
+<td><p>R</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-even"><td><p>anyresumeack</p></td>
+<td><p>16</p></td>
+<td><p>‘1’ when hart has acknowledged last resume request</p></td>
+<td><p>R</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-odd"><td><p>allnonexistent</p></td>
+<td><p>15</p></td>
+<td><p>Not implemented (VeeR EL2 is single-thread)</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>anynonexistent</p></td>
+<td><p>14</p></td>
+<td><p>Not implemented (VeeR EL2 is single-thread)</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>allunavail</p></td>
+<td><p>13</p></td>
+<td><p>‘1’ when hart is unavailable <a class="footnote-reference brackets" href="#fn-debugging-1" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>R</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-even"><td><p>anyunavail</p></td>
+<td><p>12</p></td>
+<td><p>‘1’ when hart is unavailable <a class="footnote-reference brackets" href="#fn-debugging-1" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>R</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-odd"><td><p>allrunning</p></td>
+<td><p>11</p></td>
+<td><p>‘1’ when hart is running</p></td>
+<td><p>R</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-even"><td><p>anyrunning</p></td>
+<td><p>10</p></td>
+<td><p>‘1’ when hart is running</p></td>
+<td><p>R</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-odd"><td><p>allhalted</p></td>
+<td><p>9</p></td>
+<td><p>‘1’ when hart is halted</p></td>
+<td><p>R</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-even"><td><p>anyhalted</p></td>
+<td><p>8</p></td>
+<td><p>‘1’ when hart is halted</p></td>
+<td><p>R</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-odd"><td><p>authenticated</p></td>
+<td><p>7</p></td>
+<td><p>Not implemented (i.e., 1: Always authenticated)</p></td>
+<td><p>R</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>authbusy</p></td>
+<td><p>6</p></td>
+<td><p>Not implemented (i.e., 0: Authentication module never busy)</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>hasresethaltreq</p></td>
+<td><p>5</p></td>
+<td><p>Not implemented</p>
+<p><strong>Note</strong>: VeeR EL2 implements halt-on-reset with <em>haltreq</em> set out of reset method.</p>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>confstrptrvalid</p></td>
+<td><p>4</p></td>
+<td><p>Not implemented</p>
+<p><strong>Note</strong>: VeeR EL2 does not provide information relevant to configuration string.</p>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>version</p></td>
+<td><p>3:0</p></td>
+<td><p>Debug Module present, conforming to RISC-V Debug specification Version 0.13.2</p></td>
+<td><p>R</p></td>
+<td><p>2</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="halt-summary-0-register-haltsum0"><span class="section-number">11.1.3.2. </span>Halt Summary 0 Register (haltsum0)<a class="headerlink" href="#halt-summary-0-register-haltsum0" title="Link to this heading">¶</a></h4>
+<p>Each bit in the <code class="docutils literal notranslate"><span class="pre">haltsum0</span></code> register indicates whether a specific hart is halted or not.
+Since VeeR EL2 is singlethreaded, only one bit is implemented.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Unavailable/nonexistent harts are not considered to be halted.</p>
+</div>
+<p>This register is read-only.</p>
+<p>This register is mapped to the Debug Module Interface address space.</p>
+<table class="docutils data align-default" id="tab-haltsum0">
+<caption><span class="caption-number">Table 11.9 </span><span class="caption-text">Halt Summary 0 Register (haltsum0, at Debug Module Offset 0x40)</span><a class="headerlink" href="#tab-haltsum0" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>31:1</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>halted</p></td>
+<td><p>0</p></td>
+<td><p>‘1’ when hart halted</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="abstract-control-and-status-register-abstractcs"><span class="section-number">11.1.3.3. </span>Abstract Control and Status Register (abstractcs)<a class="headerlink" href="#abstract-control-and-status-register-abstractcs" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">abstractcs</span></code> register provides status information of the abstract command interface and enables clearing of detected command errors.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Writing this register while an abstract command is executing causes its <em>cmderr</em> field to be set to ‘1’ (i.e., ‘busy’), if it is ‘0’.</p>
+</div>
+<p>This register is mapped to the Debug Module Interface address space.</p>
+<table class="docutils data align-default" id="tab-abstractcs">
+<caption><span class="caption-number">Table 11.10 </span><span class="caption-text">Abstract Control and Status Register (abstractcs, at Debug Module Offset 0x16)</span><a class="headerlink" href="#tab-abstractcs" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>31:29</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>progbufsize</p></td>
+<td><p>28:24</p></td>
+<td><p>Not implemented</p>
+<p><strong>Note</strong>: VeeR EL2 does not implement a Program Buffer.</p>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>23:13</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>busy</p></td>
+<td><p>12</p></td>
+<td><p>Abstract command interface activity:</p>
+<ul class="simple">
+<li><p>0: Abstract command interface idle</p></li>
+<li><p>1: Abstract command currently being executed</p></li>
+</ul>
+<p><strong>Note</strong>: ‘Busy’ indication set when command register (see <a class="reference internal" href="#abstract-command-register-command"><span class="std std-ref">Abstract Command Register (command)</span></a>) is written, cleared after command has completed.</p>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>11</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>cmderr</p></td>
+<td><p>10:8</p></td>
+<td><p>Set if abstract command fails.</p>
+<p>Reason for failure:</p>
+<ul class="simple">
+<li><p>0 (none): No error</p></li>
+<li><p>1 (busy): Abstract command was executing when <code class="docutils literal notranslate"><span class="pre">command</span></code>, <code class="docutils literal notranslate"><span class="pre">abstractcs</span></code>, or <code class="docutils literal notranslate"><span class="pre">abstractauto</span></code> register was written, or when <code class="docutils literal notranslate"><span class="pre">data0</span></code> or <code class="docutils literal notranslate"><span class="pre">data1</span></code> register was read or written</p></li>
+<li><p>2 (not supported): Requested command or option not supported, regardless of whether hart is running or not (i.e., illegal command, access register command not word-sized or postexec bit set, or access memory command size larger than word)</p></li>
+<li><p>3 (exception): Exception occurred while executing abstract command (i.e., illegal register address, address outside of ICCM/DCCM/PIC memory range but in internal memory region, ICCM/DCCM uncorrectable ECC error, or ICCM/PIC access not word-sized)</p></li>
+<li><p>4 (halt/resume): Abstract command couldn’t execute because hart wasn’t in required state (running/halted), or unavailable</p></li>
+<li><p>5 (bus): Abstract command failed for SoC memory access due to bus error (e.g., unmapped address, uncorrectable error, incorrect alignment, or unsupported access size)</p></li>
+<li><p>6: Reserved</p></li>
+<li><p>7 (other): Register or memory access size not 32 bits wide or unaligned</p></li>
+</ul>
+<p><strong>Note</strong>: Bits in this field remain set until cleared by writing ‘111’.</p>
+<p><strong>Note</strong>: Next abstract command not started until value is reset to ‘0’.</p>
+<p><strong>Note</strong>: Only contains valid value if <em>busy</em> is ‘0’.</p>
+</td>
+<td><p>R/W1C</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>7:4</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>datacount</p></td>
+<td><p>3:0</p></td>
+<td><p>2 data registers implemented as part of abstract command interface</p></td>
+<td><p>R</p></td>
+<td><p>2</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="abstract-command-register-command"><span class="section-number">11.1.4. </span>Abstract Command Register (command)<a class="headerlink" href="#abstract-command-register-command" title="Link to this heading">¶</a></h3>
+<p>Writes to the command register <code class="docutils literal notranslate"><span class="pre">cause</span></code> the corresponding abstract command to be executed.</p>
+<p>Writing this register while an abstract command is executing causes the <em>cmderr</em> field in the abstractcs register (see <a class="reference internal" href="#abstract-control-and-status-register-abstractcs"><span class="std std-ref">Abstract Control and Status Register (abstractcs)</span></a>) to be set to ‘1’ (i.e., ‘busy’), if it is ‘0’.
+If the <em>cmderr</em> field is non-zero, writes to the command register are ignored.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A non-zero <em>cmderr</em> field inhibits starting a new abstract command to accommodate debuggers which, for performance reasons, may send several commands to be executed in a row without checking the <em>cmderr</em> field in between. Checking the <em>cmderr</em> field only at the end of a sequence of commands is safe because later commands which might depend on a previous, but failed command are not executed.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Access register and access memory abstract commands may only be executed when the core is in the debug halt (db-halt) state. If the debugger is requesting the execution of an abstract command while the core is not in the debug halt state, the command is aborted and the <em>cmderr</em> field is set to ‘4’ (i.e., ‘halt/resume’), if it is ‘0’.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The access memory abstract command method provides access to ICCM, DCCM, and PIC memory ranges as well as to SoC memories.</p>
+</div>
+<p>This register is mapped to the Debug Module Interface address space.</p>
+<table class="docutils data align-default" id="tab-command">
+<caption><span class="caption-number">Table 11.11 </span><span class="caption-text">Abstract Command Register (command, at Debug Module Offset 0x17)</span><a class="headerlink" href="#tab-command" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>cmdtype</p></td>
+<td><p>31:24</p></td>
+<td><p>Abstract command type:</p>
+<ul class="simple">
+<li><p>0: Access Register Command</p></li>
+<li><p>2: Access Memory Command</p></li>
+</ul>
+<p><strong>Note</strong>: Other values not implemented or reserved for future use. Writing this field to value different than ‘0’ or ‘2’ causes abstract command to fail and <em>cmderr</em> field of <code class="docutils literal notranslate"><span class="pre">abstractcs</span></code> register to be set to ‘2’.</p>
+</td>
+<td><p>R0/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Access Register Command</strong></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>23</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>aarsize</p></td>
+<td><p>22:20</p></td>
+<td><p>Register access size:</p>
+<ul class="simple">
+<li><p>2: 32-bit access</p></li>
+</ul>
+<p><strong>Note</strong>: Other size values not implemented. Writing this field to value different than ‘2’ causes abstract command to fail and <em>cmderr</em> field of <code class="docutils literal notranslate"><span class="pre">abstractcs</span></code> register to be set to ‘2’, except if transfer is ‘0’.</p>
+</td>
+<td><p>R/W</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-even"><td><p>aarpostincrement</p></td>
+<td><p>19</p></td>
+<td><p>Access register post-increment control:</p>
+<ul class="simple">
+<li><p>0: No post-increment</p></li>
+<li><p>1: After every successful access register command completion, increment <em>regno</em> field (wrapping around to 0)</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>postexec</p></td>
+<td><p>18</p></td>
+<td><p>Not implemented (i.e., 0: No effect)</p>
+<p><strong>Note</strong>: Writing to ‘1’ causes abstract command to fail and <em>cmderr</em> field of <code class="docutils literal notranslate"><span class="pre">abstractcs</span></code> register to be set to ‘2’.</p>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>transfer</p></td>
+<td><p>17</p></td>
+<td><p>Transfer:</p>
+<ul>
+<li><p>0: Do not perform operation specified by write</p>
+<p><strong>Note</strong>: Selection of unimplemented options (except for <em>aarsize</em> and <em>regno</em> fields) causes cmderr field of <code class="docutils literal notranslate"><span class="pre">abstractcs</span></code> register to be set to ‘2’.</p>
+</li>
+<li><p>1: Perform operation specified by write</p>
+<p><strong>Note</strong>: Selection of unimplemented options causes abstract command to fail and <em>cmderr</em> field of <code class="docutils literal notranslate"><span class="pre">abstractcs</span></code> register to be set to ‘2’.</p>
+</li>
+</ul>
+</td>
+<td><p>R</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>write</p></td>
+<td><p>16</p></td>
+<td><p>Read or write register:</p>
+<ul class="simple">
+<li><p>0 (read): Copy data from register specified in <em>regno</em> field into <code class="docutils literal notranslate"><span class="pre">data0</span></code> register (<a class="reference internal" href="#abstract-data-0-1-registers-data0-1"><span class="std std-ref">Abstract Data 0 / 1 Registers (data0/1)</span></a>)</p></li>
+<li><p>1 (write): Copy data from <code class="docutils literal notranslate"><span class="pre">data0</span></code> register (<a class="reference internal" href="#abstract-data-0-1-registers-data0-1"><span class="std std-ref">Abstract Data 0 / 1 Registers (data0/1)</span></a>) into register specified in <em>regno</em> field</p></li>
+</ul>
+</td>
+<td><p>R0/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>regno</p></td>
+<td><p>15:0</p></td>
+<td><p>Register access:</p>
+<ul class="simple">
+<li><p>0x0000 - 0x0FFF: CSRs</p></li>
+<li><p>0x1000 - 0x101F: GPRs</p></li>
+<li><p>0x1020 - 0xFFFF: Not implemented or reserved</p></li>
+</ul>
+<p><strong>Note</strong>: Selecting illegal register address causes abstract command to fail and <em>cmderr</em> field of <code class="docutils literal notranslate"><span class="pre">abstractcs</span></code> register to be set to ‘3’, except if transfer is ‘0’.</p>
+</td>
+<td><p>R0/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Access Memory Command (ICCM, DCCM, PIC, and SoC Memories)</strong></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>aamvirtual</p></td>
+<td><p>23</p></td>
+<td><p>Not implemented (i.e., 0: Addresses are physical)</p>
+<p><strong>Note</strong>: VeeR EL2 supports physical addresses only. Since physical and virtual address are identical, no error is flagged <a class="footnote-reference brackets" href="#fn-debugging-2" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> even if written to ‘1’.</p>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>aamsize</p></td>
+<td><p>22:20</p></td>
+<td><p>Memory access size:</p>
+<ul class="simple">
+<li><p>0: 8-bit access (for DCCM and SoC memories)</p></li>
+<li><p>1: 16-bit access (for DCCM and SoC memories)</p></li>
+<li><p>2: 32-bit access (for ICCM, DCCM, PIC, and SoC memories)</p></li>
+</ul>
+<p><strong>Note</strong>: Writing this field to value ‘0’ or ‘1’ for ICCM or PIC memory access causes abstract command to fail and <em>cmderr</em> field of <code class="docutils literal notranslate"><span class="pre">abstractcs</span></code> register to be set to ‘3’.</p>
+<p><strong>Note</strong>: Other size values not implemented. Writing this field to value higher than ‘2’ causes abstract command to fail and <em>cmderr</em> field of <code class="docutils literal notranslate"><span class="pre">abstractcs</span></code> register to be set to ‘2’.</p>
+</td>
+<td><p>R/W</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-even"><td><p>aampostincrement</p></td>
+<td><p>19</p></td>
+<td><p>Access memory post-increment control:</p>
+<ul class="simple">
+<li><p>0: No post-increment</p></li>
+<li><p>1: After every successful access memory command completion, increment <code class="docutils literal notranslate"><span class="pre">data1</span></code> register (which contains memory address, see <a class="reference internal" href="#abstract-data-0-1-registers-data0-1"><span class="std std-ref">Abstract Data 0 / 1 Registers (data0/1)</span></a>) by number of bytes encoded in <em>aamsize</em> field</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Reserved</p></td>
+<td><p>18:17</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>write</p></td>
+<td><p>16</p></td>
+<td><p>Read or write memory location:</p>
+<ul class="simple">
+<li><p>0 (read): Copy data from memory location specified in data1 register (i.e., address) into data0 register (i.e., data) (<a class="reference internal" href="#abstract-data-0-1-registers-data0-1"><span class="std std-ref">Abstract Data 0 / 1 Registers (data0/1)</span></a>)</p></li>
+<li><p>1 (write): Copy data from data0 register (i.e., data) into memory location specified in data1 register (i.e., address) (<a class="reference internal" href="#abstract-data-0-1-registers-data0-1"><span class="std std-ref">Abstract Data 0 / 1 Registers (data0/1)</span></a>)</p></li>
+</ul>
+</td>
+<td><p>R0/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>target-specific</p></td>
+<td><p>15:14</p></td>
+<td><p>Not implemented</p>
+<p><strong>Note</strong>: VeeR EL2 does not use target-specific bits.</p>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>13:0</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="abstract-command-autoexec-register-abstractauto"><span class="section-number">11.1.4.1. </span>Abstract Command Autoexec Register (abstractauto)<a class="headerlink" href="#abstract-command-autoexec-register-abstractauto" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">abstractauto</span></code> register controls if reading or writing the <code class="docutils literal notranslate"><span class="pre">data0/1</span></code> registers (see <a class="reference internal" href="#abstract-data-0-1-registers-data0-1"><span class="std std-ref">Abstract Data 0 / 1 Registers (data0/1)</span></a>) automatically triggers the next execution of the abstract command in the <code class="docutils literal notranslate"><span class="pre">command</span></code> register (see <a class="reference internal" href="#abstract-command-register-command"><span class="std std-ref">Abstract Command Register (command)</span></a>).
+This feature allows more efficient burst accesses.</p>
+<p>Writing this register while an abstract command is executing causes the <em>cmderr</em> field in the abstractcs register (see <a class="reference internal" href="#abstract-control-and-status-register-abstractcs"><span class="std std-ref">Abstract Control and Status Register (abstractcs)</span></a>) to be set to ‘1’ (i.e., ‘busy’), if it is ‘0’.</p>
+<p>This register is mapped to the Debug Module Interface address space.</p>
+<table class="docutils data align-default" id="tab-abstractauto">
+<caption><span class="caption-number">Table 11.12 </span><span class="caption-text">Abstract Command Autoexec Register (abstractauto, at Debug Module Offset 0x18)</span><a class="headerlink" href="#tab-abstractauto" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>31:2</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>autoexecdata1</p></td>
+<td><p>1</p></td>
+<td><p>Auto-execution control for <code class="docutils literal notranslate"><span class="pre">data1</span></code> register:</p>
+<ul class="simple">
+<li><p>0: No automatic triggering of abstract command execution</p></li>
+<li><p>1: Reading or writing <code class="docutils literal notranslate"><span class="pre">data1</span></code> causes abstract command to be executed again</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>autoexecdata0</p></td>
+<td><p>0</p></td>
+<td><p>Auto-execution control for <code class="docutils literal notranslate"><span class="pre">data0</span></code> register:</p>
+<ul class="simple">
+<li><p>0: No automatic triggering of abstract command execution</p></li>
+<li><p>1: Reading or writing <code class="docutils literal notranslate"><span class="pre">data0</span></code> causes abstract command to be executed again</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="abstract-data-0-1-registers-data0-1"><span class="section-number">11.1.5. </span>Abstract Data 0 / 1 Registers (data0/1)<a class="headerlink" href="#abstract-data-0-1-registers-data0-1" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">data0/1</span></code> registers are basic read/write registers which may be read or changed by abstract commands.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <em>datacount</em> field of the <code class="docutils literal notranslate"><span class="pre">abstractcs</span></code> register (see <a class="reference internal" href="#tab-abstractcs"><span class="std std-numref">Table 11.10</span></a>) indicates that 2 (out of possible 12) registers are implemented in VeeR EL2.</p>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">data0</span></code> register sources the value for and provides the return value of an abstract command.
+The <code class="docutils literal notranslate"><span class="pre">data1</span></code> register provides the address for an access memory abstract command.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Selecting an address outside of the ICCM, DCCM, or PIC memory range but in one of the core-internal memory regions causes the abstract command to fail and the <em>cmderr</em> field of the <code class="docutils literal notranslate"><span class="pre">abstractcs</span></code> register to be set to ‘3’. Similarly, selecting an unmapped SoC memory address causes the abstract command to fail, provided the SoC responds with a bus error, and the <em>cmderr</em> field of the <code class="docutils literal notranslate"><span class="pre">abstractcs</span></code> register to be set to ‘5’.</p>
+</div>
+<p>Accessing these registers while an abstract command is executing causes the <em>cmderr</em> field of the <code class="docutils literal notranslate"><span class="pre">abstractcs</span></code> register (see <a class="reference internal" href="#tab-abstractcs"><span class="std std-numref">Table 11.10</span></a>) to be set to ‘1’ (i.e., ‘busy’), if it was ‘0’.</p>
+<p>Attempts to write the <code class="docutils literal notranslate"><span class="pre">data0/1</span></code> registers while the <em>busy</em> bit of the abstractcs register (see <a class="reference internal" href="#tab-abstractcs"><span class="std std-numref">Table 11.10</span></a>) is set does not change their value.</p>
+<p>The values in these registers may not be preserved after an abstract command has been executed.
+The only guarantees on their contents are the ones offered by the executed abstract command.
+If the abstract command fails, no assumptions should be made about the contents of these registers.</p>
+<p>These registers are mapped to the Debug Module Interface address space.</p>
+<table class="docutils data align-default" id="tab-data-0-1">
+<caption><span class="caption-number">Table 11.13 </span><span class="caption-text">Abstract Data 0 / 1 Register (data0/1, at Debug Module Offset 0x04 / 0x05)</span><a class="headerlink" href="#tab-data-0-1" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>data</p></td>
+<td><p>31:0</p></td>
+<td><p>Abstract command data:</p>
+<ul class="simple">
+<li><p>data0: data value (access register and access memory command)</p></li>
+<li><p>data1: address (access memory command)</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="system-bus-access-control-and-status-register-sbcs"><span class="section-number">11.1.5.1. </span>System Bus Access Control and Status Register (sbcs)<a class="headerlink" href="#system-bus-access-control-and-status-register-sbcs" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">sbcs</span></code> register provides controls and status information of the system bus access interface.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The system bus access method provides access to SoC memories only. Access to ICCM, DCCM, and PIC memory ranges is only available using the access memory abstract command method.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The operation of the system bus access method does not depend on the core’s state. SoC memory locations may be accessed using this method even when the core is running.</p>
+</div>
+<p>This register is mapped to the Debug Module Interface address space.</p>
+<table class="docutils data align-default" id="tab-sbcs">
+<caption><span class="caption-number">Table 11.14 </span><span class="caption-text">System Bus Access Control and Status Register (sbcs, at Debug Module Offset 0x38)</span><a class="headerlink" href="#tab-sbcs" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>sbversion</p></td>
+<td><p>31:29</p></td>
+<td><p>System Bus interface conforms to RISC-V Debug specification, Version 0.13.2</p></td>
+<td><p>R</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>Reserved</p></td>
+<td><p>28:23</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>sbbusyerror</p></td>
+<td><p>22</p></td>
+<td><p>Set when debugger attempts to read data while a read is in progress, or when debugger initiates a new access while one is still in progress (i.e., while <em>sbbusy</em> bit is set). Remains set until explicitly cleared by debugger.</p>
+<p><strong>Note</strong>: When set, Debug Module cannot initiate more system bus accesses.</p>
+</td>
+<td><p>R/W1C</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>sbbusy</p></td>
+<td><p>21</p></td>
+<td><p>System bus master interface status:</p>
+<ul class="simple">
+<li><p>0: System bus master idle</p></li>
+<li><p>1: System bus master busy (Set when read or write access requested, remains set until access fully completed)</p></li>
+</ul>
+<p><strong>Note</strong>: Writes to this register while <em>sbbusy</em> bit is set result in undefined behavior. Debugger must not write this register until it reads <em>sbbusy</em> bit as ‘0’.</p>
+<p><strong>Note</strong>: Bit reflects if system bus master interface is busy, not status of system bus itself.</p>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>sbreadonaddr</p></td>
+<td><p>20</p></td>
+<td><p>Auto-read on address write:</p>
+<ul class="simple">
+<li><p>0: No auto-read on address write</p></li>
+<li><p>1: Every write to <code class="docutils literal notranslate"><span class="pre">sbaddress0</span></code> (see <a class="reference internal" href="#system-bus-address-31-0-register-sbaddress0"><span class="std std-ref">System Bus Address 31:0 Register (sbaddress0)</span></a>) automatically triggers system bus read at new address</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>sbaccess</p></td>
+<td><p>19:17</p></td>
+<td><p>Access size for system bus access:</p>
+<ul class="simple">
+<li><p>0: 8-bit access</p></li>
+<li><p>1: 16-bit access</p></li>
+<li><p>2: 32-bit access</p></li>
+<li><p>3: 64-bit access</p></li>
+</ul>
+<p><strong>Note</strong>: Other values not supported. No access performed, <em>sberror</em> field set to ‘4’.</p>
+</td>
+<td><p>R/W</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-even"><td><p>sbautoincrement</p></td>
+<td><p>16</p></td>
+<td><p>Auto-address increment:</p>
+<ul class="simple">
+<li><p>0: No auto-address increment</p></li>
+<li><p>1: <code class="docutils literal notranslate"><span class="pre">sbaddress0</span></code> register (see <a class="reference internal" href="#system-bus-address-31-0-register-sbaddress0"><span class="std std-ref">System Bus Address 31:0 Register (sbaddress0)</span></a>) incremented by access size (in bytes) selected in sbaccess field after every successful system bus access</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>sbreadondata</p></td>
+<td><p>15</p></td>
+<td><p>Auto-read on data read:</p>
+<ul class="simple">
+<li><p>0: No auto-read on data read</p></li>
+<li><p>1: Every read from <code class="docutils literal notranslate"><span class="pre">sbdata0</span></code> register (see <a class="reference internal" href="#system-bus-data-31-0-register-sbdata0"><span class="std std-ref">System Bus Data 31:0 Register (sbdata0)</span></a>) automatically triggers new system bus read at (possibly auto- incremented) address</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>sberror</p></td>
+<td><p>14:12</p></td>
+<td><p>Set when Debug Module’s system bus master encounters an error: While this field is non-zero, no more system bus accesses can be initiated by the Debug Module.</p>
+<ul class="simple">
+<li><p>0: No bus error</p></li>
+<li><p>1: Not implemented (no timeout)</p></li>
+<li><p>2: Bad address accessed</p></li>
+<li><p>3: Alignment error</p></li>
+<li><p>4: Access of unsupported size requested</p></li>
+<li><p>5..7: Not implemented (no other error conditions)</p></li>
+</ul>
+<p><strong>Note</strong>: Bits in this field remain set until cleared by writing ‘111’.</p>
+<p><strong>Note</strong>: Debug Module may not initiate next system bus access until value is reset to ‘0’.</p>
+</td>
+<td><p>R/W1C</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>sbasize</p></td>
+<td><p>11:5</p></td>
+<td><p>Width of system bus addresses (in bits)</p></td>
+<td><p>R</p></td>
+<td><p>32</p></td>
+</tr>
+<tr class="row-even"><td><p>sbaccess128</p></td>
+<td><p>4</p></td>
+<td><p>128-bit system bus accesses not supported</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>sbaccess64</p></td>
+<td><p>3</p></td>
+<td><p>64-bit system bus accesses supported</p></td>
+<td><p>R</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>sbaccess32</p></td>
+<td><p>2</p></td>
+<td><p>32-bit system bus accesses supported</p></td>
+<td><p>R</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>sbaccess16</p></td>
+<td><p>1</p></td>
+<td><p>16-bit system bus accesses supported</p></td>
+<td><p>R</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>sbaccess8</p></td>
+<td><p>0</p></td>
+<td><p>8-bit system bus accesses supported</p></td>
+<td><p>R</p></td>
+<td><p>1</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="system-bus-address-31-0-register-sbaddress0"><span class="section-number">11.1.5.2. </span>System Bus Address 31:0 Register (sbaddress0)<a class="headerlink" href="#system-bus-address-31-0-register-sbaddress0" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">sbaddress0</span></code> register provides the address of the system bus access.</p>
+<p>If the <em>sbreadonaddr</em> bit of the <code class="docutils literal notranslate"><span class="pre">sbcs</span></code> register is ‘1’, writing the <code class="docutils literal notranslate"><span class="pre">sbaddress0</span></code> register triggers a system bus read access from the new address.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <em>sberror</em> and <em>sbbusyerror</em> fields of the <code class="docutils literal notranslate"><span class="pre">sbcs</span></code> register must both be ‘0’ for a system bus read operation to be performed.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the system bus master interface is busy (i.e., <em>sbbusy</em> bit of the <code class="docutils literal notranslate"><span class="pre">sbcs</span></code> register is ‘1’) when a write access to this register is performed, the <em>sbbusyerror</em> bit in the <code class="docutils literal notranslate"><span class="pre">sbcs</span></code> register is set and the access is aborted.</p>
+</div>
+<p>This register is mapped to the Debug Module Interface address space.</p>
+<table class="docutils data align-default" id="tab-sbaddress0">
+<caption><span class="caption-number">Table 11.15 </span><span class="caption-text">System Bus Address 31:0 Register (sbaddress0, at Debug Module Offset 0x39)</span><a class="headerlink" href="#tab-sbaddress0" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>address</p></td>
+<td><p>31:0</p></td>
+<td><p>System bus address</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="system-bus-data-31-0-register-sbdata0"><span class="section-number">11.1.5.3. </span>System Bus Data 31:0 Register (sbdata0)<a class="headerlink" href="#system-bus-data-31-0-register-sbdata0" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">sbdata0</span></code> register holds the right-justified lower bits for system bus read and write accesses.</p>
+<p>A successful system bus read updates the <code class="docutils literal notranslate"><span class="pre">sbdata0/1</span></code> registers with the value read from the system bus at the memory location addressed by the sbaddress0 register.
+If the width of the read access is less than 64 bits, the remaining high bits may take on any value.</p>
+<p>Reading the <code class="docutils literal notranslate"><span class="pre">sbdata0</span></code> register provides the current value of this register.
+If the <em>sbreadondata</em> bit of the sbcs register is ‘1’, reading this register also triggers a system bus read access which updates the <code class="docutils literal notranslate"><span class="pre">sbdata0/1</span></code> registers with the value read from the memory location addressed by the <code class="docutils literal notranslate"><span class="pre">sbaddress0</span></code> register.</p>
+<p>Writing the <code class="docutils literal notranslate"><span class="pre">sbdata0</span></code> register triggers a system bus write access which updates the memory location addressed by the <code class="docutils literal notranslate"><span class="pre">sbaddress0</span></code> register with the new values in the <code class="docutils literal notranslate"><span class="pre">sbdata0/1</span></code> registers.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only the <code class="docutils literal notranslate"><span class="pre">sbdata0</span></code> register has this behavior. Accessing the <code class="docutils literal notranslate"><span class="pre">sbdata1</span></code> register has no side effects.
+A debugger must access the <code class="docutils literal notranslate"><span class="pre">sbdata1</span></code> register first, before accessing the sbdata0 register.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <em>sberror</em> and <em>sbbusyerror</em> fields of the <code class="docutils literal notranslate"><span class="pre">sbcs</span></code> register must both be ‘0’ for a system bus read or write operation to be performed.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the system bus master interface is busy (i.e., <em>sbbusy</em> bit of the sbcs register is ‘1’) when a read or write access to this register is performed, the <em>sbbusyerror</em> bit in the <code class="docutils literal notranslate"><span class="pre">sbcs</span></code> register is set and the access is aborted.</p>
+</div>
+<p>This register is mapped to the Debug Module Interface address space.</p>
+<table class="docutils data align-default" id="tab-sbdata0">
+<caption><span class="caption-number">Table 11.16 </span><span class="caption-text">System Bus Data 31:0 Register (sbdata0, at Debug Module Offset 0x3C)</span><a class="headerlink" href="#tab-sbdata0" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>data</p></td>
+<td><p>31:0</p></td>
+<td><p>System bus data[31:0] for system bus read and write accesses</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="system-bus-data-63-32-register-sbdata1"><span class="section-number">11.1.5.4. </span>System Bus Data 63:32 Register (sbdata1)<a class="headerlink" href="#system-bus-data-63-32-register-sbdata1" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">sbdata1</span></code> register holds the upper 32 bits of the 64-bit wide system bus for read and write accesses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the system bus master interface is busy (i.e., <em>sbbusy</em> bit of the sbcs register is ‘1’) when a read or write access to this register is performed, the <em>sbbusyerror</em> bit in the <code class="docutils literal notranslate"><span class="pre">sbcs</span></code> register is set and the access is aborted.</p>
+</div>
+<p>This register is mapped to the Debug Module Interface address space.</p>
+<table class="docutils data align-default" id="tab-sbdata1">
+<caption><span class="caption-number">Table 11.17 </span><span class="caption-text">System Bus Data 63:32 Register (sbdata1, at Debug Module Offset 0x3D)</span><a class="headerlink" href="#tab-sbdata1" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>data</p></td>
+<td><p>31:0</p></td>
+<td><p>System bus data[63:32] for system bus read and write accesses</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="control-status-registers-in-risc-v-csr-address-space"><span class="section-number">11.1.6. </span>Control/Status Registers in RISC-V CSR Address Space<a class="headerlink" href="#control-status-registers-in-risc-v-csr-address-space" title="Link to this heading">¶</a></h3>
+<p>A summary of standard RISC-V control/status registers with platform-specific adaptations in CSR space:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#trigger-select-register-tselect"><span class="std std-ref">Trigger Select Register (tselect)</span></a></p></li>
+<li><p><a class="reference internal" href="#trigger-data-1-register-tdata1"><span class="std std-ref">Trigger Data 1 Register (tdata1)</span></a></p></li>
+<li><p><a class="reference internal" href="#match-control-register-mcontrol"><span class="std std-ref">Match Control Register (mcontrol)</span></a></p></li>
+<li><p><a class="reference internal" href="#trigger-data-2-register-tdata2"><span class="std std-ref">Trigger Data 2 Register (tdata2)</span></a></p></li>
+<li><p><a class="reference internal" href="#debug-control-and-status-register-dcsr"><span class="std std-ref">Debug Control and Status Register (dcsr)</span></a></p></li>
+<li><p><a class="reference internal" href="#debug-pc-register-dpc"><span class="std std-ref">Debug PC Register (dpc)</span></a></p></li>
+</ul>
+<p>All reserved and unused bits in these control/status registers must be hardwired to ‘0’.
+Unless otherwise noted, all read/write control/status registers must have WARL (Write Any value, Read Legal value) behavior.</p>
+<h4 id="trigger-select-register-tselect"><span class="section-number">11.1.6.1. </span>Trigger Select Register (tselect)<a class="headerlink" href="#trigger-select-register-tselect" title="Link to this heading">¶</a></h4>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Since triggers can be used both by Debug Mode and M-mode, the debugger must restore this register if it modified it.</p>
+</div>
+<p>This register is mapped to the standard read/write CSR address space.</p>
+<table class="docutils data align-default" id="tab-tselect">
+<caption><span class="caption-number">Table 11.18 </span><span class="caption-text">Trigger Select Register (tselect, at CSR 0x7A0)</span><a class="headerlink" href="#tab-tselect" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>31:2</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>index</p></td>
+<td><p>1:0</p></td>
+<td><p>Index of trigger 0..3</p>
+<p><strong>Note</strong>: Triggers 0 and 2 may be chained, triggers 1 and 3 not.</p>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="trigger-data-1-register-tdata1"><span class="section-number">11.1.6.2. </span>Trigger Data 1 Register (tdata1)<a class="headerlink" href="#trigger-data-1-register-tdata1" title="Link to this heading">¶</a></h4>
+<p>This register is mapped to the standard read/write CSR address space.</p>
+<table class="docutils data align-default" id="tab-tdata1">
+<caption><span class="caption-number">Table 11.19 </span><span class="caption-text">Trigger Data 1 Register (tdata1, at CSR 0x7A1)</span><a class="headerlink" href="#tab-tdata1" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>type</p></td>
+<td><p>31:28</p></td>
+<td><p>See <a class="reference internal" href="#tab-mcontrol"><span class="std std-numref">Table 11.20</span></a> below.</p></td>
+<td><p>R</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-odd"><td><p>dmode</p></td>
+<td><p>27</p></td>
+<td><p>See <a class="reference internal" href="#tab-mcontrol"><span class="std std-numref">Table 11.20</span></a> below.</p></td>
+<td><p>See <a class="reference internal" href="#tab-mcontrol"><span class="std std-numref">Table 11.20</span></a> below.</p></td>
+<td><p>See <a class="reference internal" href="#tab-mcontrol"><span class="std std-numref">Table 11.20</span></a> below.</p></td>
+</tr>
+<tr class="row-even"><td><p>data</p></td>
+<td><p>26:0</p></td>
+<td><p>See <a class="reference internal" href="#tab-mcontrol"><span class="std std-numref">Table 11.20</span></a> below.</p></td>
+<td><p>See <a class="reference internal" href="#tab-mcontrol"><span class="std std-numref">Table 11.20</span></a> below.</p></td>
+<td><p>See <a class="reference internal" href="#tab-mcontrol"><span class="std std-numref">Table 11.20</span></a> below.</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="match-control-register-mcontrol"><span class="section-number">11.1.6.3. </span>Match Control Register (mcontrol)<a class="headerlink" href="#match-control-register-mcontrol" title="Link to this heading">¶</a></h4>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>VeeR EL2 does not support triggering on the data of a load or on the opcode of an executed instruction.</p>
+</div>
+<p>This register is mapped to the standard read/write CSR address space.</p>
+<table class="docutils data align-default" id="tab-mcontrol">
+<caption><span class="caption-number">Table 11.20 </span><span class="caption-text">Match Control Register (mcontrol, at CSR 0x7A1)</span><a class="headerlink" href="#tab-mcontrol" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>type</p></td>
+<td><p>31:28</p></td>
+<td><p>Address/data match trigger (= mcontrol)</p></td>
+<td><p>R</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-odd"><td><p>dmode</p></td>
+<td><p>27</p></td>
+<td><p>Mode write privileges to <code class="docutils literal notranslate"><span class="pre">tdata1/2</span></code> registers (<a class="reference internal" href="#trigger-data-1-register-tdata1"><span class="std std-ref">Trigger Data 1 Register (tdata1)</span></a> and <a class="reference internal" href="#trigger-data-2-register-tdata2"><span class="std std-ref">Trigger Data 2 Register (tdata2)</span></a>) selected by <code class="docutils literal notranslate"><span class="pre">tselect</span></code> register (<a class="reference internal" href="#trigger-select-register-tselect"><span class="std std-ref">Trigger Select Register (tselect)</span></a>):</p>
+<ul class="simple">
+<li><p>0: Both Debug Mode and M-mode may write <code class="docutils literal notranslate"><span class="pre">tdata1/2</span></code> registers selected by <code class="docutils literal notranslate"><span class="pre">tselect</span></code> register</p></li>
+<li><p>1: Only Debug Mode may write <code class="docutils literal notranslate"><span class="pre">tdata1/2</span></code> registers selected by <code class="docutils literal notranslate"><span class="pre">tselect</span></code> register. Writes from M-mode are ignored.</p></li>
+</ul>
+<p><strong>Note</strong>: Only writable from Debug Mode.</p>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>maskmax</p></td>
+<td><p>26:21</p></td>
+<td><p><span class="math notranslate nohighlight">\(2^{31}\)</span> bytes is largest naturally aligned powers-of-two (NAPOT) range supported by hardware when match field is ‘1’.</p></td>
+<td><p>R</p></td>
+<td><p>31</p></td>
+</tr>
+<tr class="row-odd"><td><p>hit</p></td>
+<td><p>20</p></td>
+<td><p>Set by hardware when this trigger matches. Allows to determine which trigger(s) matched. May be set or cleared by trigger’s user at any time.</p>
+<p><strong>Note</strong>: For chained triggers, <em>hit</em> bit of a matching second trigger is not set unless first trigger matches as well.</p>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>select</p></td>
+<td><p>19</p></td>
+<td><p>Match selection:</p>
+<p>0: Perform match on address</p>
+<p>1: Perform match on store data value</p>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>timing</p></td>
+<td><p>18</p></td>
+<td><p>Action for this trigger is taken just before instruction that triggered it is committed, but after all preceding instructions are committed.</p>
+<p><strong>Note</strong>: No bus transaction is issued for an execute address trigger hit on a load to a side-effect address.</p>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>sizelo</p></td>
+<td><p>17:16</p></td>
+<td><p>Match size:</p>
+<ul>
+<li><p>0: Trigger attempts to match against access of any size.</p>
+<ul class="simple">
+<li><p>Match against address (if select bit is ‘0’)</p></li>
+<li><p>Match against store data (if select bit is ‘1’)</p></li>
+</ul>
+<p><strong>Note</strong>: Data is zero extended for byte or halfword stores.</p>
+<p><strong>Note</strong>: If <em>match</em> bit is ‘1’, the mask in the <code class="docutils literal notranslate"><span class="pre">tdata2</span></code> register is applied independent of the <em>select</em> bit value (i.e., in address or data matches).</p>
+<p><strong>Note</strong>: Other match size values not implemented.</p>
+</li>
+</ul>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>action</p></td>
+<td><p>15:12</p></td>
+<td><p>Action to take when trigger fires:</p>
+<ul class="simple">
+<li><p>0: Raise breakpoint exception (used when software wants to use trigger module without external debugger attached)</p></li>
+<li><p>1: Enter Debug Mode (only supported when trigger’s <em>dmode</em> bit is ‘1’)</p></li>
+</ul>
+<p><strong>Note</strong>: Other values reserved for future use.</p>
+<p><strong>Note</strong>: Triggers do not fire if this field is ‘0’ and interrupts are disabled <a class="footnote-reference brackets" href="#fn-debugging-3" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a> (i.e., <em>mie</em> bit of <code class="docutils literal notranslate"><span class="pre">mstatus</span></code> standard RISC-V register is ‘0’).</p>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>chain</p></td>
+<td><p>11</p></td>
+<td><p>Trigger chaining:</p>
+<ul class="simple">
+<li><p>0: When this trigger matches, the configured action is taken.</p></li>
+<li><p>1: While this trigger does not match, it prevents the trigger with the next index from matching.</p></li>
+</ul>
+<p><strong>Note</strong>: Supported for triggers 0 and 2 only, attempts to set this bit for triggers 1 and 3 are ignored.</p>
+<p><strong>Note</strong>: In VeeR EL2, only pairs of triggers (i.e., triggers 0/1 and triggers 2/3) are chainable.</p>
+<p><strong>Note</strong>: If <em>chain</em> bit of trigger 0/2 is ‘1’, it is chained to trigger 1/3. Only <em>action</em> field of trigger 1/3 is used (i.e., <em>action</em> field of trigger 0/2 is ignored). The action on second trigger is taken if and only if both triggers in chain match at the same time.</p>
+<p><strong>Note</strong>: Because the <em>chain</em> bit affects the next trigger, hardware resets it to ‘0’ for <code class="docutils literal notranslate"><span class="pre">mcontrol</span></code> register writes with <em>dmode</em> bit of ‘0’ if the next trigger has a dmode bit of ‘1’. In addition, hardware ignores writes to the mcontrol register which would set the <em>dmode</em> bit to ‘1’ if the previous trigger has both a <em>dmode</em> bit of ‘0’ and a <em>chain</em> bit of ‘1’. Debuggers must avoid the latter case by checking the <em>chain</em> bit of the previous trigger when writing the <code class="docutils literal notranslate"><span class="pre">mcontrol</span></code> register.</p>
+</td>
+<td><p>R/W (for triggers 0 and 2) R (for triggers 1 and 3)</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>match</p></td>
+<td><p>10:7</p></td>
+<td><p>Match control:</p>
+<ul class="simple">
+<li><p>0: Matches when value equals <code class="docutils literal notranslate"><span class="pre">tdata2</span></code> register’s (<a class="reference internal" href="#trigger-data-2-register-tdata2"><span class="std std-ref">Trigger Data 2 Register (tdata2)</span></a>) value <a class="footnote-reference brackets" href="#fn-debugging-4" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></li>
+<li><p>1: Matches when top <em>M</em> bits of value match top <em>M</em> bits of <code class="docutils literal notranslate"><span class="pre">tdata2</span></code> register’s (<a class="reference internal" href="#trigger-data-2-register-tdata2"><span class="std std-ref">Trigger Data 2 Register (tdata2)</span></a>) value (<em>M</em> is 31 minus the index of least-significant bit containing 0 in <code class="docutils literal notranslate"><span class="pre">tdata2</span></code> register)</p></li>
+</ul>
+<p><strong>Note</strong>: Other values not implemented or reserved for future use.</p>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>m</p></td>
+<td><p>6</p></td>
+<td><p>When set, enable this trigger in M-mode</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Reserved</p></td>
+<td><p>5</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>s</p></td>
+<td><p>4</p></td>
+<td><p>Not implemented</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>u</p></td>
+<td><p>3</p></td>
+<td><p>Not implemented</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>execute</p></td>
+<td><p>2</p></td>
+<td><p>When set, trigger fires on address of executed instruction</p>
+<p><strong>Note</strong>: For writes, written to ‘0’ if <em>select</em> bit is written to ‘1’.</p>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>store</p></td>
+<td><p>1</p></td>
+<td><p>When set, trigger fires on address or data of store</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>load</p></td>
+<td><p>0</p></td>
+<td><p>When set, trigger fires on address of load</p>
+<p><strong>Note</strong>: For writes, written to ‘0’ if <em>select</em> bit is written to ‘1’.</p>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="trigger-data-2-register-tdata2"><span class="section-number">11.1.6.4. </span>Trigger Data 2 Register (tdata2)<a class="headerlink" href="#trigger-data-2-register-tdata2" title="Link to this heading">¶</a></h4>
+<p>This register is mapped to the standard read/write CSR address space.</p>
+<table class="docutils data align-default" id="tab-tdata2">
+<caption><span class="caption-number">Table 11.21 </span><span class="caption-text">Trigger Data 2 Register (tdata2, at CSR 0x7A2)</span><a class="headerlink" href="#tab-tdata2" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>value</p></td>
+<td><p>31:0</p></td>
+<td><p>Match value:</p>
+<ul class="simple">
+<li><p>Address or data value for match:</p></li>
+<li><p>Address of load, store, or executed instruction <a class="footnote-reference brackets" href="#fn-debugging-4" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></li>
+<li><p>Data value of store</p></li>
+<li><p>Match mask (see <em>match</em> field of <code class="docutils literal notranslate"><span class="pre">mcontrol</span></code> register (<a class="reference internal" href="#tab-mcontrol"><span class="std std-numref">Table 11.20</span></a>) set to ‘1’)</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="debug-control-and-status-register-dcsr"><span class="section-number">11.1.6.5. </span>Debug Control and Status Register (dcsr)<a class="headerlink" href="#debug-control-and-status-register-dcsr" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">dcsr</span></code> register controls the behavior and provides status of the hart in Debug Mode.</p>
+<p>The RISC-V Debug specification <a class="reference internal" href="intro.html#ref-3"><span class="std std-ref">[3]</span></a>, Section 4.8.1 documents some required and several optional features.
+<a class="reference internal" href="#tab-dcsr"><span class="std std-numref">Table 11.22</span></a> describes the required features, the partial support of optional features in VeeR EL2, and indicates features not supported with “Not implemented”.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This register is accessible in <strong>Debug Mode only</strong>.
+Attempting to access this register in machine mode raises an illegal instruction exception.</p>
+</div>
+<p>This register is mapped to the standard read/write CSR address space.</p>
+<table class="docutils data align-default" id="tab-dcsr">
+<caption><span class="caption-number">Table 11.22 </span><span class="caption-text">Debug Control and Status Register (dcsr, at CSR 0x7B0)</span><a class="headerlink" href="#tab-dcsr" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>xdebugver</p></td>
+<td><p>31:28</p></td>
+<td><p>External debug support exists as described in this chapter and <a class="reference internal" href="intro.html#ref-3"><span class="std std-ref">[3]</span></a></p></td>
+<td><p>R</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-odd"><td><p>Reserved</p></td>
+<td><p>27:16</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>ebreakm</p></td>
+<td><p>15</p></td>
+<td><ul class="simple">
+<li><p>0: <code class="docutils literal notranslate"><span class="pre">ebreak</span></code> in M-mode behaves as described in RISC-V Privileged specification <a class="reference internal" href="intro.html#ref-2"><span class="std std-ref">[2]</span></a></p></li>
+<li><p>1: <code class="docutils literal notranslate"><span class="pre">ebreak</span></code> in M-mode enters Debug Mode</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Reserved</p></td>
+<td><p>14</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>ebreaks</p></td>
+<td><p>13</p></td>
+<td><p>Not implemented</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>ebreaku</p></td>
+<td><p>12</p></td>
+<td><p>Not implemented</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>stepie</p></td>
+<td><p>11</p></td>
+<td><ul class="simple">
+<li><p>0: Interrupts disabled during single stepping</p></li>
+<li><p>1: Interrupts enabled during single stepping</p></li>
+<li><p><strong>Note</strong>: Debugger must not change value while hart is running.</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>stopcount</p></td>
+<td><p>10</p></td>
+<td><ul class="simple">
+<li><p>0: Increment counters as usual</p></li>
+<li><p>1: Don’t increment any counters (incl. <code class="docutils literal notranslate"><span class="pre">cycle</span></code> and <code class="docutils literal notranslate"><span class="pre">instret</span></code>) while in Debug Mode or on <code class="docutils literal notranslate"><span class="pre">ebreak</span></code> entering Debug Mode (referred value for most debugging scenarios)</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>stoptime</p></td>
+<td><p>9</p></td>
+<td><p>Increment timers same as in non-debug mode</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>cause</p></td>
+<td><p>8:6</p></td>
+<td><p>Reason for Debug Mode entry (if multiple reasons in single cycle, set cause to highest priority):</p>
+<ul class="simple">
+<li><p>1: <code class="docutils literal notranslate"><span class="pre">ebreak</span></code> instruction was executed (<em>priority 3</em>)</p></li>
+<li><p>2: Trigger Module caused a breakpoint exception (<em>priority 4, highest</em>)</p></li>
+<li><p>3: Debugger or MPC interface (see <a class="reference internal" href="power.html#tab-veer-el2-multi-core-debug-ctrl-status-signals"><span class="std std-numref">Table 7.4</span></a>) requested entry to ebug Mode using haltreq (<em>priority 1</em>)</p></li>
+<li><p>4: Hart single-stepped because <em>step</em> was set (<em>priority 0, lowest</em>)</p></li>
+<li><p>5: Hart halted directly out of reset due to resethaltreq (also acceptable to report ‘3’) (<em>priority 2</em>) Other values reserved for future use.</p></li>
+</ul>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>5</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>mprven</p></td>
+<td><p>4</p></td>
+<td><p>Not implemented (i.e., 0: <em>mprv</em> field in <code class="docutils literal notranslate"><span class="pre">mstatus</span></code> register ignored in Debug Mode)</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>nmip</p></td>
+<td><p>3</p></td>
+<td><p>Non-Maskable Interrupt (NMI) pending for hart when set</p>
+<p><strong>Note</strong>: NMI may indicate a hardware error condition, reliable debugging  may no longer be possible once bit is set.</p>
+</td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>step</p></td>
+<td><p>2</p></td>
+<td><p>When set and not in Debug Mode, hart only executes single instruction  and enters Debug Mode. If instruction does not complete due to  exception, hart immediately enters Debug Mode before executing trap  handler, with appropriate exception registers set.</p>
+<p><strong>Note</strong>: Debugger must not change value while hart is running.</p>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>prv</p></td>
+<td><p>1:0</p></td>
+<td><p>Indicates privilege level hart was operating in when Debug Mode was entered (3 = M-mode)</p></td>
+<td><p>R</p></td>
+<td><p>3</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="debug-pc-register-dpc"><span class="section-number">11.1.6.6. </span>Debug PC Register (dpc)<a class="headerlink" href="#debug-pc-register-dpc" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">dpc</span></code> register provides the debugger information about the program counter (PC) when entering Debug Mode and control where to resume (RISC-V Debug specification <a class="reference internal" href="intro.html#ref-3"><span class="std std-ref">[3]</span></a>, Section 4.8.2).</p>
+<p>Upon entry to Debug Mode, the <code class="docutils literal notranslate"><span class="pre">dpc</span></code> register is updated with the address of the next instruction to be executed.
+The behavior is described in more detail in <a class="reference internal" href="#tab-dpc"><span class="std std-numref">Table 11.23</span></a> below.</p>
+<p>When resuming, the hart’s PC is updated to the address stored in the dpc register. A debugger may write the <code class="docutils literal notranslate"><span class="pre">dpc</span></code> register to change where the hart resumes.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This register is accessible in <strong>Debug Mode only</strong>. Attempting to access this register in machine mode raises an illegal instruction exception.</p>
+</div>
+<p>This register is mapped to the standard read/write CSR address space.</p>
+<table class="docutils data align-default" id="tab-dpc">
+<caption><span class="caption-number">Table 11.23 </span><span class="caption-text">Debug PC Register (dpc, at CSR 0x7B1)</span><a class="headerlink" href="#tab-dpc" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Field</strong></p></th>
+<th class="head"><p><strong>Bits</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Access</strong></p></th>
+<th class="head"><p><strong>Reset</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>dpc</p></td>
+<td><p>31:0</p></td>
+<td><p>Address captured for:</p>
+<p><code class="docutils literal notranslate"><span class="pre">ebreak</span></code>:</p>
+<ul class="simple">
+<li><p>Address of <code class="docutils literal notranslate"><span class="pre">ebreak</span></code> instruction</p></li>
+</ul>
+<p>Single step:</p>
+<ul class="simple">
+<li><p>Address of instruction which would be executed next if not in Debug Mode (i.e., PC + 4 for 32-bit instructions which don’t change program flow, destination PC on taken jumps/branches, etc.)</p></li>
+</ul>
+<p>Trigger module:</p>
+<p>If timing (see <em>timing</em> bit in <code class="docutils literal notranslate"><span class="pre">mcontrol</span></code> register in <a class="reference internal" href="#tab-mcontrol"><span class="std std-numref">Table 11.20</span></a>) is:</p>
+<ul class="simple">
+<li><p>0: Address of instruction which caused trigger to fire</p></li>
+<li><p>1: Address of next instruction to be executed when Debug Mode was entered</p></li>
+</ul>
+<p>Halt request:</p>
+<ul class="simple">
+<li><p>Address of next instruction to be executed when Debug Mode was entered</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="fn-debugging-1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>)</span>
+<p>Hart is in reset or ndmreset bit of dmstatus register is ‘1’.</p>
+</aside>
+<aside class="footnote brackets" id="fn-debugging-2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">2</a><span class="fn-bracket">]</span></span>
+<p>The RISC-V Debug specification <a class="reference internal" href="intro.html#ref-3"><span class="std std-ref">[3]</span></a> states that an implementation must fail accesses that it does not support.
+However, the Debug Task Group community agreed in an email exchange on the group’s reflector as well as in a group meeting that not reporting an error is acceptable for implementations without address translation (i.e., the physical address equals the virtual address).</p>
+</aside>
+<aside class="footnote brackets" id="fn-debugging-3" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">3</a><span class="fn-bracket">]</span></span>
+<p>To enable native debugging of M-mode code, VeeR EL2 implements the simpler but more restrictive solution of preventing triggers with the <em>action</em> field set to ‘0’ (i.e., breakpoint exception) while interrupts are disabled, as described in Section 5.1, ‘Native M-Mode Triggers’ of the RISC-V Debug specification <a class="reference internal" href="intro.html#ref-3"><span class="std std-ref">[3]</span></a>.</p>
+</aside>
+<aside class="footnote brackets" id="fn-debugging-4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id5">1</a>,<a role="doc-backlink" href="#id6">2</a>)</span>
+<p>Bit 0 of tdata2 register is ignored for instruction address matches.</p>
+</aside>
+</aside>
+
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      2025-12-22
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="cache.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 10. Cache Control" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              10. Cache Control
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="core-control.html" class="md-footer__link md-footer__link--next" aria-label="Next: 12. Low-Level Core Control" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              12. Low-Level Core Control
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        Copyright &#169; 2025 CHIPS Alliance The Linux Foundation®.
+        
+    </div>
+  
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+      
+      
+    
+    <a href="https://github.com/antmicro" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/antmicro" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["toc.integrate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+      
+        <script src="_static/sphinx_immaterial_theme.f9d9eeeb247ace16c.min.js?v=8ec58cb5"></script>
+        <script id="MathJax-script" src="_static/mathjax/tex-mml-chtml.js?v=cadf963e"></script>
+    
+  </body>
+</html>

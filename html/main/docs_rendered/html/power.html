@@ -1,0 +1,1750 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>7. Power Management and Multi-Core Debug Control - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
+      
+    
+    
+      
+        
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="_static/sphinx_immaterial_theme.c5589c0bd87d933a4.min.css?v=eeeb54bc" />
+        <link rel="stylesheet" type="text/css" href="_static/main.css" />
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="white">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="RISC-V VeeR EL2 Programmer&#39;s Reference Manual  documentation" class="md-header__button md-logo" aria-label="RISC-V VeeR EL2 Programmer's Reference Manual  documentation" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            RISC-V VeeR EL2 Programmer's Reference Manual  documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              7. Power Management and Multi-Core Debug Control
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="white"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="RISC-V VeeR EL2 Programmer&#39;s Reference Manual  documentation" class="md-nav__button md-logo" aria-label="RISC-V VeeR EL2 Programmer's Reference Manual  documentation" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    RISC-V VeeR EL2 Programmer's Reference Manual  documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="intro.html" class="md-nav__link">
+        <span class="md-ellipsis">RISC-<wbr>V Vee<wbr>R EL2 Programmer’s Reference Manual</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="overview.html" class="md-nav__link">
+        <span class="md-ellipsis">Core Overview</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="memory-map.html" class="md-nav__link">
+        <span class="md-ellipsis">Memory Map</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="error-protection.html" class="md-nav__link">
+        <span class="md-ellipsis">Memory Error Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dual-core-lock-step.html" class="md-nav__link">
+        <span class="md-ellipsis">Dual-<wbr>Core Lockstep <wbr>(DCLS)</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="timers.html" class="md-nav__link">
+        <span class="md-ellipsis">Internal Timers</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          <span class="md-ellipsis">Power Management and Multi-<wbr>Core Debug Control</span>
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        <span class="md-ellipsis">Power Management and Multi-<wbr>Core Debug Control</span>
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">Features</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-control-interfaces" class="md-nav__link">
+    <span class="md-ellipsis">Core Control Interfaces</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Control Interfaces">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#power-management" class="md-nav__link">
+    <span class="md-ellipsis">Power Management</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-core-debug-control" class="md-nav__link">
+    <span class="md-ellipsis">Multi-<wbr>Core Debug Control</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#power-states" class="md-nav__link">
+    <span class="md-ellipsis">Power States</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#power-control" class="md-nav__link">
+    <span class="md-ellipsis">Power Control</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Power Control">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#debug-mode" class="md-nav__link">
+    <span class="md-ellipsis">Debug Mode</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Debug Mode">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-stepping" class="md-nav__link">
+    <span class="md-ellipsis">Single Stepping</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forced-debug-halt" class="md-nav__link">
+    <span class="md-ellipsis">Forced Debug Halt</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#core-power-and-multi-core-debug-control-and-status-signals" class="md-nav__link">
+    <span class="md-ellipsis">Core Power and Multi-<wbr>Core Debug Control and Status Signals</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Power and Multi-Core Debug Control and Status Signals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#power-control-and-status-signals" class="md-nav__link">
+    <span class="md-ellipsis">Power Control and Status Signals</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-core-debug-control-and-status-signals" class="md-nav__link">
+    <span class="md-ellipsis">Multi-<wbr>Core Debug Control and Status Signals</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">Debug Scenarios</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Debug Scenarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scenario-1-core-halt-mpc-halt-mpc-run-core-resume" class="md-nav__link">
+    <span class="md-ellipsis">Scenario 1:<wbr> Core Halt → MPC Halt → MPC Run → Core Resume</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-2-core-halt-mpc-halt-core-resume-mpc-run" class="md-nav__link">
+    <span class="md-ellipsis">Scenario 2:<wbr> Core Halt → MPC Halt → Core Resume → MPC Run</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-3-mpc-halt-core-halt-core-resume-mpc-run" class="md-nav__link">
+    <span class="md-ellipsis">Scenario 3:<wbr> Mpc Halt → Core Halt → Core Resume → Mpc Run</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-4-mpc-halt-core-halt-mpc-run-core-resume" class="md-nav__link">
+    <span class="md-ellipsis">Scenario 4:<wbr> MPC Halt → Core Halt → MPC Run → Core Resume</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">Summary</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#core-wake-up-events" class="md-nav__link">
+    <span class="md-ellipsis">Core Wake-<wbr>Up Events</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#core-firmware-initiated-halt" class="md-nav__link">
+    <span class="md-ellipsis">Core Firmware-<wbr>Initiated Halt</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dma-operations-while-halted" class="md-nav__link">
+    <span class="md-ellipsis">DMA Operations While Halted</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#external-interrupts-while-halted" class="md-nav__link">
+    <span class="md-ellipsis">External Interrupts While Halted</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#control-status-registers" class="md-nav__link">
+    <span class="md-ellipsis">Control/Status Registers</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Control/Status Registers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#power-management-control-register-mpmc" class="md-nav__link">
+    <span class="md-ellipsis">Power Management Control Register <wbr>(mpmc)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#core-pause-control-register-mcpc" class="md-nav__link">
+    <span class="md-ellipsis">Core Pause Control Register <wbr>(mcpc)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forced-debug-halt-threshold-register-mfdht" class="md-nav__link">
+    <span class="md-ellipsis">Forced Debug Halt Threshold Register <wbr>(mfdht)</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forced-debug-halt-status-register-mfdhs" class="md-nav__link">
+    <span class="md-ellipsis">Forced Debug Halt Status Register <wbr>(mfdhs)</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="interrupts.html" class="md-nav__link">
+        <span class="md-ellipsis">External Interrupts</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="performance.html" class="md-nav__link">
+        <span class="md-ellipsis">Performance Monitoring</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cache.html" class="md-nav__link">
+        <span class="md-ellipsis">Cache Control</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="debugging.html" class="md-nav__link">
+        <span class="md-ellipsis">Debug Support</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="core-control.html" class="md-nav__link">
+        <span class="md-ellipsis">Low-<wbr>Level Core Control</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="adaptations.html" class="md-nav__link">
+        <span class="md-ellipsis">Standard RISC-<wbr>V CSRs with Core-<wbr>Specific Adaptations</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="csrs.html" class="md-nav__link">
+        <span class="md-ellipsis">CSR Address Map</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="interrupt-priority.html" class="md-nav__link">
+        <span class="md-ellipsis">Interrupt Priorities</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="clocks.html" class="md-nav__link">
+        <span class="md-ellipsis">Clock And Reset</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="complex-ports.html" class="md-nav__link">
+        <span class="md-ellipsis">Complex Port List</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="build-args.html" class="md-nav__link">
+        <span class="md-ellipsis">Build Arguments</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tests.html" class="md-nav__link">
+        <span class="md-ellipsis">Compliance Test Suite Failures</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="errata.html" class="md-nav__link">
+        <span class="md-ellipsis">Errata</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="physical-memory-protection.html" class="md-nav__link">
+        <span class="md-ellipsis">Physical Memory Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="user-mode.html" class="md-nav__link">
+        <span class="md-ellipsis">User Mode</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="verification.html" class="md-nav__link">
+        <span class="md-ellipsis">Verification</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="simulation-debugging.html" class="md-nav__link">
+        <span class="md-ellipsis">Interactive Debugging in Simulation</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tock.html" class="md-nav__link">
+        <span class="md-ellipsis">Running Tock OS</span>
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                  
+
+
+<h1 id="power-management-and-multi-core-debug-control"><span class="section-number">7. </span>Power Management and Multi-Core Debug Control<a class="headerlink" href="#power-management-and-multi-core-debug-control" title="Link to this heading">¶</a></h1>
+<p>This chapter specifies the power management and multi-core debug control functionality provided or supported by the VeeR EL2 core. Also documented in this chapter is how debug may interfere with core power management.</p>
+<h2 id="features"><span class="section-number">7.1. </span>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
+<p>VeeR EL2 supports and provides the following power management and multi-core debug control features:</p>
+<ul class="simple">
+<li><p>Support for three system-level power states: Active (C0), Sleep (C3), Power Off (C6)</p></li>
+<li><p>Firmware-initiated halt to enter sleep state</p></li>
+<li><p>Fine-grain clock gating in active state</p></li>
+<li><p>Enhanced clock gating in sleep state</p></li>
+<li><p>Halt/run control interface to/from SoC Power Management Unit (PMU)</p></li>
+<li><p>Signal indicating that core is halted</p></li>
+<li><p>Halt/run control interface to/from SoC debug Multi-Processor Controller (MPC) to enable cross-triggering in multi-core chips</p></li>
+<li><p>Timeout-based mechanism to force Debug Halt state by terminating hung bus transactions</p></li>
+<li><p>Signals indicating that core is in Debug Mode and core hit a breakpoint</p></li>
+<li><p>PAUSE feature to help avoid firmware spinning</p></li>
+</ul>
+<h2 id="core-control-interfaces"><span class="section-number">7.2. </span>Core Control Interfaces<a class="headerlink" href="#core-control-interfaces" title="Link to this heading">¶</a></h2>
+<p>VeeR EL2 provides two control interfaces, one for power management and one for multi-core debug control, which enable the core to be controlled by other SoC blocks.</p>
+<h3 id="power-management"><span class="section-number">7.2.1. </span>Power Management<a class="headerlink" href="#power-management" title="Link to this heading">¶</a></h3>
+<p>The power management interface enables an SoC-based Power Management Unit (PMU) to:</p>
+<ul class="simple">
+<li><p>Halt (i.e., enter low-power sleep state) or restart (i.e., resume execution) the core, and</p></li>
+<li><p>get an indication when the core has gracefully entered the sleep state.</p></li>
+</ul>
+<p>The power management interface signals are described in <a class="reference internal" href="#tab-veer-el2-power-ctrl-status-signals"><span class="std std-numref">Table 7.3</span></a>.</p>
+<h3 id="multi-core-debug-control"><span class="section-number">7.2.2. </span>Multi-Core Debug Control<a class="headerlink" href="#multi-core-debug-control" title="Link to this heading">¶</a></h3>
+<p>The multi-core debug control interface enables an SoC-based Multi-Processor Controller (MPC) to:</p>
+<ul class="simple">
+<li><p>Control the reset state of the core (i.e., either start executing or enter Debug Mode),</p></li>
+<li><p>halt (i.e., enter Debug Mode) or restart (i.e., resume execution) the core,</p></li>
+<li><p>get an indication when the core is in Debug Mode, and</p></li>
+<li><p>cross-trigger other cores when this core has entered Debug Mode due to a software or a hardware breakpoint.</p></li>
+</ul>
+<p>The multi-core debug control interface signals are described in <a class="reference internal" href="#tab-veer-el2-multi-core-debug-ctrl-status-signals"><span class="std std-numref">Table 7.4</span></a>.</p>
+<h2 id="power-states"><span class="section-number">7.3. </span>Power States<a class="headerlink" href="#power-states" title="Link to this heading">¶</a></h2>
+<p>From a system’s perspective, the core may be placed in one of three power states: Active (C0), Sleep (C3), and Power Off (C6).
+Active and Sleep states require hardware support from the core, but in the Power Off state the core is power-gated so no special hardware support is needed.</p>
+<p><a class="reference internal" href="#fig-activity-states"><span class="std std-numref">Fig. 7.1</span></a> depicts and <a class="reference internal" href="#tab-core-activity-states"><span class="std std-numref">Table 7.2</span></a> describes the core activity states as well as the events to transition between them.</p>
+<figure class="align-default" id="fig-activity-states">
+<img alt="Activity states" src="_images/activity_states.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 7.1 </span><span class="caption-text"><span class="caption-text">
+VeeR EL2 Core Activity States</span><a class="headerlink" href="#fig-activity-states" title="Permalink to this image">¶</a></figcaption>
+</figure>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>‘Core Quiesced’ implies that no new instructions are executed and all outstanding core-initiated bus transactions are completed (i.e., the unified buffer is empty, and all outstanding I-cache misses are finished).
+Note that the store queue and the DMA FIFO might not be empty due to on-going DMA transactions.</p>
+</div>
+<table class="docutils data align-default" id="tab-debug-resume-requests">
+<caption><span class="caption-number">Table 7.1 </span><span class="caption-text">Debug Resume Requests</span><a class="headerlink" href="#tab-debug-resume-requests" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Core-Internal State</p></th>
+<th class="head"></th>
+<th class="head"></th>
+<th class="head"></th>
+<th class="head"></th>
+<th class="head"></th>
+<th class="head"><p><strong>Comments</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Debug Resume</strong></p></td>
+<td><p><strong>Debug Halt</strong></p></td>
+<td><p><strong>MPC Halt</strong></p></td>
+<td><p><strong>MPC Run</strong></p></td>
+<td><p><strong>Halted (This Cycle)</strong></p></td>
+<td><p><strong>Halted (Next Cycle)</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>No request for Debug Mode entry</p></td>
+</tr>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td></td>
+<td></td>
+<td><p>No action required from core (requires coordination outside of core)</p></td>
+</tr>
+<tr class="row-odd"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>Waiting for MPC Run (core remains in ‘db-halt’ state)</p></td>
+</tr>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>MPC Run Ack</p></td>
+</tr>
+<tr class="row-odd"><td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>Waiting for Debug Resume (core remains in ‘db-halt’ state)</p></td>
+</tr>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td></td>
+<td></td>
+<td><p>No action required from core (requires coordination outside of core)</p></td>
+</tr>
+<tr class="row-odd"><td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>Waiting for both MPC Run and Debug Resume (core remains in ‘db-halt’ state)</p></td>
+</tr>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>Waiting for Debug Resume (core remains in ‘db-halt’ state)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td></td>
+<td></td>
+<td><p>No action required from core (requires coordination outside of core)</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td></td>
+<td></td>
+<td><p>No action required from core (requires coordination outside of core)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td></td>
+<td></td>
+<td><p>No action required from core (requires coordination outside of core)</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td></td>
+<td></td>
+<td><p>No action required from core (requires coordination outside of core)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>Debug Resume Ack</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td></td>
+<td></td>
+<td><p>No action required from core (requires coordination outside of core)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>Waiting for MPC Run (core remains in ‘db-halt’ state)</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>Debug Resume Ack and MPC Run Ack</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While in ‘db-halt’ state, hardware ignores Debug Resume requests if the corresponding ‘Debug Halt’ state is not ‘1’.
+Likewise, hardware ignores MPC Debug Run requests if the corresponding ‘MPC Halt’ state is not ‘1’.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The core-internal state bits are cleared upon exiting Debug Mode.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In the time period between an MPC Debug Halt request and an MPC Debug Run request, a core debug singlestep action is stalled but stays pending.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Even if the core is already in Debug Mode due to a previous MPC Debug Halt request, a core debugger must initiate a debug halt (i.e., Core Debug Halt request) before it may start issuing other debug commands. However, if Debug Mode was entered due to a core debug breakpoint, a Core Debug Halt request is not required.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>An MPC Debug Halt request may only be signaled when the core is either not in Debug Mode or is already in Debug Mode due to a previous Core Debug Halt request or a debug breakpoint or trigger. Also, an MPC Debug Run request may only be signaled when the core is in Debug Mode due to either a previous MPC Debug Halt request, a previous Core Debug Halt request, or a debug breakpoint or trigger. Issuing more than one MPC Debug Halt requests in succession or more than one MPC Debug Run requests in succession is a protocol violation.</p>
+</div>
+<table class="docutils data align-default" id="tab-core-activity-states">
+<caption><span class="caption-number">Table 7.2 </span><span class="caption-text">Core Activity States</span><a class="headerlink" href="#tab-core-activity-states" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p><strong>Active (C0)</strong></p></th>
+<th class="head"><p><strong>Active (C0)</strong></p></th>
+<th class="head"><p><strong>Sleep (C3)</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td></td>
+<td><p><strong>Running</strong></p></td>
+<td><p><strong>Halted</strong></p></td>
+<td><p><strong>Halted</strong></p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td></td>
+<td><p><strong>db-halt</strong></p></td>
+<td><p><strong>pmu/fw-halt</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>State Description</strong></p></td>
+<td><p>Core operating normally</p></td>
+<td><p>Core halted in Debug Mode</p></td>
+<td><p>Core halted by PMU halt request or by core firmware-initiated halt</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Power Savings</strong></p></td>
+<td><p>Fine-grain clock gating integrated in core minimizes power consumption during regular operation</p></td>
+<td><p>Fine-grain clock gating</p></td>
+<td><p>Enhanced clock gating in addition to fine-grain clock gating</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>DMA Access</strong></p></td>
+<td><p>DMA accesses allowed</p></td>
+<td><p>DMA accesses allowed</p></td>
+<td><p>DMA accesses allowed</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>State Indication</strong></p></td>
+<td><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cpu_halt_status</span></code> is low</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> is low (except for Core Debug Resume request with Single Step action)</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cpu_halt_status</span></code> is low</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> is high</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cpu_halt_status</span></code> is high</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> is low</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p><strong>Internal Timer Counters</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mitcnt0/1</span></code> incremented every core clock cycle (also during execution of instructions while single-stepping in Debug Mode)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mitcnt0/1</span></code> not incremented</p></td>
+<td><p>Depends on <em>halt_en</em> bit in <code class="docutils literal notranslate"><span class="pre">mitctl0/1</span></code> registers:</p>
+<ul class="simple">
+<li><p>0: <code class="docutils literal notranslate"><span class="pre">mitcnt0/1</span></code> not incremented</p></li>
+<li><p>1: <code class="docutils literal notranslate"><span class="pre">mitcnt0/1</span></code> incremented every core clock cycle</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p><strong>Machine Cycle Performance- Monitoring Counter</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mcycle</span></code> incremented every core clock cycle</p></td>
+<td><p>Depends on <em>stopcount</em> bit of <code class="docutils literal notranslate"><span class="pre">dcsr</span></code> register (see <a class="reference internal" href="debugging.html#debug-control-and-status-register-dcsr"><span class="std std-ref">Debug Control and Status Register (dcsr)</span></a>):</p>
+<ul class="simple">
+<li><p>0: <code class="docutils literal notranslate"><span class="pre">mcycle</span></code> incremented every core clock cycle</p></li>
+<li><p>1: <code class="docutils literal notranslate"><span class="pre">mcycle</span></code> not incremented</p></li>
+</ul>
+</td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mcycle</span></code> not incremented</p></td>
+</tr>
+</tbody>
+</table>
+<h2 id="power-control"><span class="section-number">7.4. </span>Power Control<a class="headerlink" href="#power-control" title="Link to this heading">¶</a></h2>
+<p>The priority order of simultaneous halt requests is as follows:</p>
+<ol class="arabic simple">
+<li><p>Any core debug halt action:</p>
+<ul class="simple">
+<li><p>Core debug halt request</p></li>
+<li><p>Core debug single step</p></li>
+<li><p>Core debug breakpoint</p></li>
+<li><p>Core debug trigger</p></li>
+</ul>
+</li>
+</ol>
+<ul class="simple">
+<li><p>or MPC debug halt request</p></li>
+</ul>
+<ol class="arabic simple" start="2">
+<li><p>PMU halt request or core firmware-initiated halt</p></li>
+</ol>
+<p>If the PMU sends a halt request while the core is in Debug Mode, the core disregards the halt request.
+If the PMU’s halt request is still pending when the core exits Debug Mode, the request is honored at that time.
+Similarly, core firmware can’t initiate a halt while in Debug Mode.
+However, it is not possible for a core firmware-initiated halt request to be pending when the core exits Debug Mode.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>There are two separate sources of debug operations: the core itself which conforms to the standard RISC-V Debug specification <a class="reference internal" href="intro.html#ref-3"><span class="std std-ref">[3]</span></a>, and the Multi-Processor Controller (MPC) IP block which provides multi-core debug capabilities.
+These two sources may interfere with each other and need to be carefully coordinated on a higher level outside the core.
+Unintended behavior might occur if simultaneous debug operations from these two sources are not synchronized (e.g., MPC requesting a resume during the execution of an abstract command initiated by the debugger attached to the JTAG port).</p>
+</div>
+<h3 id="debug-mode"><span class="section-number">7.4.1. </span>Debug Mode<a class="headerlink" href="#debug-mode" title="Link to this heading">¶</a></h3>
+<p>Debug Mode must be able to seize control of the core.
+Therefore, debug has higher priority than power control.</p>
+<p>Debug Mode is entered under any of the following conditions:</p>
+<ul class="simple">
+<li><p>Core debug halt request</p></li>
+<li><p>Core debug single step</p></li>
+<li><p>Core debug breakpoint with halt action</p></li>
+<li><p>Core debug trigger with halt action</p></li>
+<li><p>Multi-core debug halt request (from MPC)</p></li>
+</ul>
+<p>Debug Mode is exited with:</p>
+<ul class="simple">
+<li><p>Core debug resume request with no single step action</p></li>
+<li><p>Multi-core debug run request (from MPC)</p></li>
+</ul>
+<p>The state ‘db-halt’ is the only halt state allowed while in Debug Mode.</p>
+<h4 id="single-stepping"><span class="section-number">7.4.1.1. </span>Single Stepping<a class="headerlink" href="#single-stepping" title="Link to this heading">¶</a></h4>
+<p>A few notes about executing single-stepped instructions:</p>
+<ul class="simple">
+<li><p>Executing instructions which attempt to exit Debug Mode are ignored (e.g., writing to the <code class="docutils literal notranslate"><span class="pre">mpmc</span></code> register requesting to halt the core does not transition the core to the pmu/fw-halt state).</p></li>
+<li><p>Accesses to D-mode registers are illegal, even though the core is in Debug Mode.</p></li>
+<li><p>A core debug single-step action initiated in the time period between an MPC Debug Halt request and an MPC Debug Run request is stalled but stays pending until an MPC Debug Run request is issued.</p></li>
+</ul>
+<h4 id="forced-debug-halt"><span class="section-number">7.4.1.2. </span>Forced Debug Halt<a class="headerlink" href="#forced-debug-halt" title="Link to this heading">¶</a></h4>
+<p>Upon receiving a debug halt request (i.e., either a Core Debug or MPC Debug Halt request, or a breakpoint or trigger to Debug Mode), the core is typically quiesced before the Debug Halt (db-halt) state is entered.
+However, LSU or IFU bus transactions may not complete due to SoC or other issues outside the core which may stop the core from executing.
+This may prevent the core from entering the Debug Halt state after a debug halt request has been received.
+To enable a debugger taking control of the core, ongoing LSU and IFU bus transactions may be terminated after a programmable timeout period (see <a class="reference internal" href="#forced-debug-halt-threshold-register-mfdht"><span class="std std-ref">Forced Debug Halt Threshold Register (mfdht)</span></a>) has passed, forcing the core into the Debug Halt state.
+Once the debugger has control of the core, it may read a status register (see <a class="reference internal" href="#forced-debug-halt-status-register-mfdhs"><span class="std std-ref">Forced Debug Halt Status Register (mfdhs)</span></a>) to inquire if LSU or IFU bus transactions have been terminated and data might have been lost.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This feature is targeted at allowing a debugger to take control of a hung core. Therefore, the timeout period should be set high enough to cover any reasonable delay incurred by any access to SoC memory locations and devices. This should include potential additional delays due to congestion in the interconnect and other possible temporary conditions. If the timeout period is long enough for all outstanding transactions to gracefully finish, program execution may be resumed after debugging has been performed. However, if any outstanding transactions are prematurely forced to terminate, successfully resuming program execution after debug should not be expected because the data of terminated transactions may have been lost and possibly even a reset of the SoC might be necessary to bring the system back into a consistent state.</p>
+</div>
+<h3 id="core-power-and-multi-core-debug-control-and-status-signals"><span class="section-number">7.4.2. </span>Core Power and Multi-Core Debug Control and Status Signals<a class="headerlink" href="#core-power-and-multi-core-debug-control-and-status-signals" title="Link to this heading">¶</a></h3>
+<p><a class="reference internal" href="#fig-debug-csrs"><span class="std std-numref">Fig. 7.2</span></a> depicts the power and multi-core debug control and status signals which connect the VeeR EL2 core to the PMU and MPC IPs.
+Signals from the PMU and MPC to the core are asynchronous and must be synchronized to the core clock domain.
+Similarly, signals from the core are asynchronous to the PMU and MPC clock domains and must be synchronized to the PMU’s or MPC’s clock, respectively.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The synchronizer of the <code class="docutils literal notranslate"><span class="pre">cpu_run_req</span></code> signal may not be clock-gated. Otherwise, the core may not be woken up again via the PMU interface.</p>
+</div>
+<figure class="align-default" id="fig-debug-csrs">
+<img alt="Debug CSRS" src="_images/debug_csrs.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 7.2 </span><span class="caption-text"><span class="caption-text">
+VeeR EL2 Power and Multi-Core Debug Control and Status Signals</span><a class="headerlink" href="#fig-debug-csrs" title="Permalink to this image">¶</a></figcaption>
+</figure>
+<h4 id="power-control-and-status-signals"><span class="section-number">7.4.2.1. </span>Power Control and Status Signals<a class="headerlink" href="#power-control-and-status-signals" title="Link to this heading">¶</a></h4>
+<p>There are three types of signals between the Power Management Unit and the VeeR EL2 core, as described in <a class="reference internal" href="#tab-veer-el2-power-ctrl-status-signals"><span class="std std-numref">Table 7.3</span></a>. All signals are active-high.</p>
+<table class="docutils data align-default" id="tab-veer-el2-power-ctrl-status-signals">
+<caption><span class="caption-number">Table 7.3 </span><span class="caption-text">VeeR EL2 Power Control and Status Signals</span><a class="headerlink" href="#tab-veer-el2-power-ctrl-status-signals" title="Link to this table">¶</a></caption>
+<tbody>
+<tr class="row-odd"><td><p><strong>Signal(s)</strong></p></td>
+<td><p><strong>Description</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cpu_halt_req</span></code> and <code class="docutils literal notranslate"><span class="pre">cpu_halt_ack</span></code></p></td>
+<td><p>Full handshake to request the core to halt.</p>
+<p>The PMU requests the core to halt (i.e., enter pmu/fw-halt) by asserting the <code class="docutils literal notranslate"><span class="pre">cpu_halt_req</span></code> signal. The core is quiesced before halting. The core then asserts the <code class="docutils literal notranslate"><span class="pre">cpu_halt_ack</span></code> signal. When the PMU detects the asserted <code class="docutils literal notranslate"><span class="pre">cpu_halt_ack</span></code> signal, it deasserts the <code class="docutils literal notranslate"><span class="pre">cpu_halt_req</span></code> signal. Finally, when the core detects the deasserted <code class="docutils literal notranslate"><span class="pre">cpu_halt_req</span></code> signal, it deasserts the <code class="docutils literal notranslate"><span class="pre">cpu_halt_ack</span></code> signal.</p>
+<p><strong>Note:</strong> <code class="docutils literal notranslate"><span class="pre">cpu_halt_req</span></code> must be tied to ‘0’ if PMU interface is not used.</p>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cpu_run_req</span></code> and <code class="docutils literal notranslate"><span class="pre">cpu_run_ack</span></code></p></td>
+<td><p>Full handshake to request the core to run.</p>
+<p>The PMU requests the core to run by asserting the <code class="docutils literal notranslate"><span class="pre">cpu_run_req</span></code> signal. The core exits the halt state and starts execution again. The core then asserts the <code class="docutils literal notranslate"><span class="pre">cpu_run_ack</span></code> signal. When the PMU detects the asserted <code class="docutils literal notranslate"><span class="pre">cpu_run_ack</span></code> signal, it deasserts the <code class="docutils literal notranslate"><span class="pre">cpu_run_req</span></code> signal. Finally, when the core detects the deasserted <code class="docutils literal notranslate"><span class="pre">cpu_run_req</span></code> signal, it deasserts the <code class="docutils literal notranslate"><span class="pre">cpu_run_ack</span></code> signal.</p>
+<p><strong>Note:</strong> <code class="docutils literal notranslate"><span class="pre">cpu_run_req</span></code> must be tied to ‘0’ if PMU interface is not used.</p>
+</td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cpu_halt_status</span></code></p></td>
+<td><p>Indication from the core to the PMU that the core has been gracefully halted.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Power control protocol violations (e.g., simultaneously sending a run and a halt request) may lead to unexpected behavior.</p>
+</div>
+<p><a class="reference internal" href="#fig-csr-timing"><span class="std std-numref">Fig. 7.3</span></a> depicts conceptual timing diagrams of a halt and a run request. Note that entering Debug Mode is an asynchronous event relative to power control commands sent by the PMU. Debug Mode has higher priority and can interrupt and override PMU requests.</p>
+<figure class="align-default" id="fig-csr-timing">
+<img alt="CSR Timing" src="_images/csr_timing.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 7.3 </span><span class="caption-text"><span class="caption-text">
+VeeR EL2 Power Control and Status Interface Timing Diagrams</span><a class="headerlink" href="#fig-csr-timing" title="Permalink to this image">¶</a></figcaption>
+</figure>
+<h4 id="multi-core-debug-control-and-status-signals"><span class="section-number">7.4.2.2. </span>Multi-Core Debug Control and Status Signals<a class="headerlink" href="#multi-core-debug-control-and-status-signals" title="Link to this heading">¶</a></h4>
+<p>There are five types of signals between the Multi-Processor Controller and the VeeR EL2 core, as described in <a class="reference internal" href="#tab-veer-el2-multi-core-debug-ctrl-status-signals"><span class="std std-numref">Table 7.4</span></a>. All signals are active-high.</p>
+<table class="docutils data align-default" id="tab-veer-el2-multi-core-debug-ctrl-status-signals">
+<caption><span class="caption-number">Table 7.4 </span><span class="caption-text">VeeR EL2 Multi-Core Debug Control and Status Signals</span><a class="headerlink" href="#tab-veer-el2-multi-core-debug-ctrl-status-signals" title="Link to this table">¶</a></caption>
+<tbody>
+<tr class="row-odd"><td><p><strong>Signal(s)</strong></p></td>
+<td><p><strong>Description</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mpc_debug_halt_req</span></code> and <code class="docutils literal notranslate"><span class="pre">mpc_debug_halt_ack</span></code></p></td>
+<td><p>Full handshake to request the core to debug halt.</p>
+<p>The MPC requests the core to halt (i.e., enter ‘db-halt’) by asserting the <code class="docutils literal notranslate"><span class="pre">mpc_debug_halt_req</span></code> signal. The core is quiesced before halting. The core then asserts the <code class="docutils literal notranslate"><span class="pre">mpc_debug_halt_ack</span></code> signal. When the MPC detects the asserted <code class="docutils literal notranslate"><span class="pre">mpc_debug_halt_ack</span></code> signal, it deasserts the <code class="docutils literal notranslate"><span class="pre">mpc_debug_halt_req</span></code> signal. Finally, when the core detects the deasserted <code class="docutils literal notranslate"><span class="pre">mpc_debug_halt_req</span></code> signal, it deasserts the <code class="docutils literal notranslate"><span class="pre">mpc_debug_halt_ack</span></code> signal.</p>
+<p>For as long as the <code class="docutils literal notranslate"><span class="pre">mpc_debug_halt_req</span></code> signal is asserted, the core must assert and hold the <code class="docutils literal notranslate"><span class="pre">mpc_debug_halt_ack</span></code> signal whether it was already in ‘db-halt’ or just transitioned into ‘db-halt’ state.</p>
+<p><strong>Note:</strong> The <em>cause</em> field of the core’s <code class="docutils literal notranslate"><span class="pre">dcsr</span></code> register (see <a class="reference internal" href="debugging.html#debug-control-and-status-register-dcsr"><span class="std std-ref">Debug Control and Status Register (dcsr)</span></a>) is set to 3 (i.e., the same value as a debugger-requested entry to Debug Mode due to a Core Debug Halt request). Similarly, the <code class="docutils literal notranslate"><span class="pre">dpc</span></code> register (see <a class="reference internal" href="debugging.html#debug-pc-register-dpc"><span class="std std-ref">Debug PC Register (dpc)</span></a>) is updated with the address of the next instruction to be executed at the time that Debug Mode was entered.</p>
+<p><strong>Note:</strong> Signaling more than one MPC Debug Halt request in succession is a protocol violation.</p>
+<p><strong>Note:</strong> <code class="docutils literal notranslate"><span class="pre">mpc_debug_halt_req</span></code> must be tied to ‘0’ if MPC interface is not used.</p>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mpc_debug_run_req</span></code> and <code class="docutils literal notranslate"><span class="pre">mpc_debug_run_ack</span></code></p></td>
+<td><p>Full handshake to request the core to run.</p>
+<p>The MPC requests the core to run by asserting the <code class="docutils literal notranslate"><span class="pre">mpc_debug_run_req</span></code> signal. The core exits the halt state and starts execution again. The core then asserts the <code class="docutils literal notranslate"><span class="pre">mpc_debug_run_ack</span></code> signal. When the MPC detects the asserted <code class="docutils literal notranslate"><span class="pre">mpc_debug_run_ack</span></code> signal, it deasserts the <code class="docutils literal notranslate"><span class="pre">mpc_debug_run_req</span></code> signal. Finally, when the core detects the deasserted <code class="docutils literal notranslate"><span class="pre">mpc_debug_run_req</span></code> signal, it deasserts the <code class="docutils literal notranslate"><span class="pre">mpc_debug_run_ack</span></code> signal.</p>
+<p>For as long as the <code class="docutils literal notranslate"><span class="pre">mpc_debug_run_req</span></code> signal is asserted, the core must assert and hold the <code class="docutils literal notranslate"><span class="pre">mpc_debug_run_ack</span></code> signal whether it was already in ‘Running’ or after transitioning into ‘Running’ state.</p>
+<p><strong>Note:</strong> The core remains in the ‘db-halt’ state if a core debug request is also still active.</p>
+<p><strong>Note:</strong> Signaling more than one MPC Debug Run request in succession is a protocol violation.</p>
+<p><strong>Note:</strong> <code class="docutils literal notranslate"><span class="pre">mpc_debug_run_req</span></code> must be tied to ‘0’ if MPC interface is not used.</p>
+</td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mpc_reset_run_req</span></code></p></td>
+<td><p>Core start state control out of reset:</p>
+<ul class="simple">
+<li><p>1: Normal Mode (‘Running’ or ‘pmu/fw-halt’ state)</p></li>
+<li><p>0: Debug Mode halted (‘db-halt’ state)</p></li>
+</ul>
+<p><strong>Note:</strong> The core complex does not implement a synchronizer for this signal because the timing of the first clock is critical. It must be synchronized to the core clock domain outside the core in the SoC.</p>
+<p><strong>Note:</strong> <code class="docutils literal notranslate"><span class="pre">mpc_reset_run_req</span></code> must be tied to ‘1’ if MPC interface is not used.</p>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code></p></td>
+<td><p>Indication from the core to the MPC that it is currently transitioning to or already in Debug Mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">debug_brkpt_status</span></code></p></td>
+<td><p>Indication from the core to the MPC that a software (i.e., ebreak instruction) or hardware (i.e., trigger hit) breakpoint has been triggered in the core. The breakpoint signal is only asserted for breakpoints and triggers with debug halt action. The signal is deasserted on exiting Debug Mode.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Multi-core debug control protocol violations (e.g., simultaneously sending a run and a halt request) may lead to unexpected behavior.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the core is either not in the db-halt state (i.e., <code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> indication is not asserted) or is already in the db-halt state due to a previous Core Debug Halt request or a debug breakpoint or trigger (i.e., <code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> indication is already asserted), asserting the <code class="docutils literal notranslate"><span class="pre">mpc_debug_halt_req</span></code> signal is allowed and acknowledged with the assertion of the <code class="docutils literal notranslate"><span class="pre">mpc_debug_halt_ack</span></code> signal. Also, asserting the <code class="docutils literal notranslate"><span class="pre">mpc_debug_run_req</span></code> signal is only allowed if the core is in the db-halt state (i.e., <code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> indication is asserted), but the core asserts the <code class="docutils literal notranslate"><span class="pre">mpc_debug_run_ack</span></code> signal only after the <code class="docutils literal notranslate"><span class="pre">cpu_run_req</span></code> signal on the PMU interface has been asserted as well, if a PMU Halt request was still pending.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the MPC is requesting the core to enter Debug Mode out of reset by activating the <code class="docutils literal notranslate"><span class="pre">mpc_reset_run_req</span></code> signal, the <code class="docutils literal notranslate"><span class="pre">mpc_debug_run_req</span></code> signal may not be asserted until the core is out of reset and has entered Debug Mode. Violating this rule may lead to unexpected core behavior.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If Debug Mode is entered at reset by setting the <code class="docutils literal notranslate"><span class="pre">mpc_reset_run_req</span></code> signal to ‘0’, only a run request issued on the <code class="docutils literal notranslate"><span class="pre">mpc_debug_run_req/ack</span></code> interface allows the core to exit Debug Mode. A core debug resume request issued by the debugger does not transition the core out of Debug Mode.</p>
+</div>
+<p><a class="reference internal" href="#fig-multicore-csr-timing"><span class="std std-numref">Fig. 7.4</span></a> depicts conceptual timing diagrams of a halt and a run request.</p>
+<figure class="align-default" id="fig-multicore-csr-timing">
+<img alt="Multi-Core CSR Timing" src="_images/multicore_csr_timing.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 7.4 </span><span class="caption-text"><span class="caption-text">
+VeeR EL2 Multi-Core Debug Control and Status Interface Timing Diagrams</span><a class="headerlink" href="#fig-multicore-csr-timing" title="Permalink to this image">¶</a></figcaption>
+</figure>
+<p><a class="reference internal" href="#fig-breakpoint-timing"><span class="std std-numref">Fig. 7.5</span></a> depicts conceptual timing diagrams of the breakpoint indication.</p>
+<figure class="align-default" id="fig-breakpoint-timing">
+<img alt="Breakpoint Indication Timing" src="_images/breakpoint_timing.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 7.5 </span><span class="caption-text"><span class="caption-text">
+VeeR EL2 Breakpoint Indication Timing Diagrams</span><a class="headerlink" href="#fig-breakpoint-timing" title="Permalink to this image">¶</a></figcaption>
+</figure>
+<h3 id="debug-scenarios"><span class="section-number">7.4.3. </span>Debug Scenarios<a class="headerlink" href="#debug-scenarios" title="Link to this heading">¶</a></h3>
+<p>The following mixed core debug and MPC debug scenarios are supported by the core:</p>
+<h4 id="scenario-1-core-halt-mpc-halt-mpc-run-core-resume"><span class="section-number">7.4.3.1. </span>Scenario 1: Core Halt → MPC Halt → MPC Run → Core Resume<a class="headerlink" href="#scenario-1-core-halt-mpc-halt-mpc-run-core-resume" title="Link to this heading">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Core debugger asserts a Debug Halt request which results in the core transitioning into Debug Halt state (db-halt).</p></li>
+<li><p>In the system, another processor hits a breakpoint. The MPC signals a Debug Halt request to all processors to halt.</p></li>
+<li><p>Core acknowledges this Debug Halt request as it is already in Debug Halt state (db-halt).</p></li>
+<li><p>MPC signals a Debug Run request, but core is in the middle of a core debugger operation (e.g., an Abstract Command-based access) which requires it to remain in Debug Halt state.</p></li>
+<li><p>Core completes debugger operation and waits for Core Debug Resume request from the core debugger.</p></li>
+<li><p>When core debugger sends a Debug Resume request, the core then transitions to the Running state and deasserts the <code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> signal.</p></li>
+<li><p>Finally, core acknowledges MPC Debug Run request.</p></li>
+</ol>
+<h4 id="scenario-2-core-halt-mpc-halt-core-resume-mpc-run"><span class="section-number">7.4.3.2. </span>Scenario 2: Core Halt → MPC Halt → Core Resume → MPC Run<a class="headerlink" href="#scenario-2-core-halt-mpc-halt-core-resume-mpc-run" title="Link to this heading">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Core debugger asserts a Debug Halt request which results in the core transitioning into Debug Halt state (db-halt).</p></li>
+<li><p>In the system, another processor hits a breakpoint. The MPC signals Debug Halt request to all processors to halt.</p></li>
+<li><p>Core acknowledges this Debug Halt request as it is already in Debug Halt state (db-halt).</p></li>
+<li><p>Core debugger completes its operations and sends a Debug Resume request to the core.</p></li>
+<li><p>Core remains in Halted state as MPC has not yet asserted its Debug Run request.
+The <code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> signal remains asserted.</p></li>
+<li><p>When MPC signals a Debug Run request, the core then transitions to the Running state and deasserts the <code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> signal.</p></li>
+<li><p>Finally, core acknowledges MPC Debug Run request.</p></li>
+</ol>
+<h4 id="scenario-3-mpc-halt-core-halt-core-resume-mpc-run"><span class="section-number">7.4.3.3. </span>Scenario 3: Mpc Halt → Core Halt → Core Resume → Mpc Run<a class="headerlink" href="#scenario-3-mpc-halt-core-halt-core-resume-mpc-run" title="Link to this heading">¶</a></h4>
+<ol class="arabic simple">
+<li><p>MPC asserts a Debug Halt request which results in the core transitioning into Debug Halt state (db-halt).</p></li>
+<li><p>Core acknowledges this Debug Halt request.</p></li>
+<li><p>Core debugger signals a Debug Halt request to the core. Core is already in Debug Halt state (db-halt).</p></li>
+<li><p>Core debugger completes its operations and sends a Debug Resume request to the core.</p></li>
+<li><p>Core remains in Halted state as MPC has not yet asserted its Debug Run request. The <code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> signal remains asserted.</p></li>
+<li><p>When MPC signals a Debug Run request, the core then transitions to the Running state and deasserts the <code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> signal.</p></li>
+<li><p>Finally, core acknowledges MPC Debug Run request.</p></li>
+</ol>
+<h4 id="scenario-4-mpc-halt-core-halt-mpc-run-core-resume"><span class="section-number">7.4.3.4. </span>Scenario 4: MPC Halt → Core Halt → MPC Run → Core Resume<a class="headerlink" href="#scenario-4-mpc-halt-core-halt-mpc-run-core-resume" title="Link to this heading">¶</a></h4>
+<ol class="arabic simple">
+<li><p>MPC asserts a Debug Halt request which results in the core transitioning into Debug Halt state (db-halt).</p></li>
+<li><p>Core acknowledges this Debug Halt request.</p></li>
+<li><p>Core debugger signals a Debug Halt request to the core. Core is already in Debug Halt state (db-halt).</p></li>
+<li><p>MPC signals a Debug Run request, but core debugger operations are still in progress. Core remains in Halted state. The <code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> signal remains asserted.</p></li>
+<li><p>Core debugger completes operations and signals a Debug Resume request to the core.</p></li>
+<li><p>The core then transitions to the Running state and deasserts the <code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> signal.</p></li>
+<li><p>Finally, core acknowledges MPC Debug Run request.</p></li>
+</ol>
+<h4 id="summary"><span class="section-number">7.4.3.5. </span>Summary<a class="headerlink" href="#summary" title="Link to this heading">¶</a></h4>
+<p>For the core to exit out of Debug Halt state (db-halt) in cases where it has received debug halt requests from both core debugger and MPC, it must receive debug run requests from both the core debugger as well as the MPC, irrespective of the order in which debug halt requests came from both sources.
+Until then, the core remains halted and the <code class="docutils literal notranslate"><span class="pre">debug_mode_status</span></code> signal remains asserted.</p>
+<h3 id="core-wake-up-events"><span class="section-number">7.4.4. </span>Core Wake-Up Events<a class="headerlink" href="#core-wake-up-events" title="Link to this heading">¶</a></h3>
+<p>When not in Debug Mode (i.e., the core is in pmu/fw-halt state), the core is woken up on several events:</p>
+<ul class="simple">
+<li><p>PMU run request</p></li>
+<li><p>Highest-priority external interrupt (<code class="docutils literal notranslate"><span class="pre">mhwakeup</span></code> signal from PIC) and core interrupts are enabled</p></li>
+<li><p>Software interrupt</p></li>
+<li><p>Timer interrupt</p></li>
+<li><p>Internal timer interrupt</p></li>
+<li><p>Non-maskable interrupt (NMI) (<code class="docutils literal notranslate"><span class="pre">nmi_int</span></code> signal)</p></li>
+</ul>
+<p>The PIC is part of the core logic and the <code class="docutils literal notranslate"><span class="pre">mhwakeup</span></code> signal is connected directly inside the core.
+The internal timers are part of the core and internally connected as well.
+The standard RISC-V software and timer interrupt as well as NMI signals are external to the core and originate in the SoC.
+If desired, these signals can be routed through the PMU and further qualified there.</p>
+<h3 id="core-firmware-initiated-halt"><span class="section-number">7.4.5. </span>Core Firmware-Initiated Halt<a class="headerlink" href="#core-firmware-initiated-halt" title="Link to this heading">¶</a></h3>
+<p>The firmware running on the core may also initiate a halt by writing a ‘1’ to the <em>halt</em> field of the <code class="docutils literal notranslate"><span class="pre">mpmc</span></code> register (see <a class="reference internal" href="#power-management-control-register-mpmc"><span class="std std-ref">Power Management Control Register (mpmc)</span></a>).
+The core is quiesced before indicating that it has gracefully halted.</p>
+<h3 id="dma-operations-while-halted"><span class="section-number">7.4.6. </span>DMA Operations While Halted<a class="headerlink" href="#dma-operations-while-halted" title="Link to this heading">¶</a></h3>
+<p>When the core is halted in the ‘pmu/fw-halt’ or the ‘db-halt’ state, DMA operations are supported.</p>
+<h3 id="external-interrupts-while-halted"><span class="section-number">7.4.7. </span>External Interrupts While Halted<a class="headerlink" href="#external-interrupts-while-halted" title="Link to this heading">¶</a></h3>
+<p>All non-highest-priority external interrupts are temporarily ignored while halted.
+Only external interrupts which activate the <code class="docutils literal notranslate"><span class="pre">mhwakeup</span></code> signal (see <a class="reference internal" href="interrupts.html#regular-operation"><span class="std std-ref">Regular Operation</span></a>, Steps 13 and 14) are honored, if the core is enabled to service external interrupts (i.e., the <em>mie</em> bit of the <code class="docutils literal notranslate"><span class="pre">mstatus</span></code> and the <em>meie</em> bit of the <code class="docutils literal notranslate"><span class="pre">mie</span></code> standard RISC-V registers are both set, otherwise the core remains in the ‘pmu/fw-halt’ state).
+External interrupts which are still pending and have a sufficiently high priority to be signaled to the core are serviced once the core is back in the Running state.</p>
+<h2 id="control-status-registers"><span class="section-number">7.5. </span>Control/Status Registers<a class="headerlink" href="#control-status-registers" title="Link to this heading">¶</a></h2>
+<p>A summary of platform-specific control/status registers in CSR space:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#power-management-control-register-mpmc"><span class="std std-ref">Power Management Control Register (mpmc)</span></a></p></li>
+<li><p><a class="reference internal" href="#core-pause-control-register-mcpc"><span class="std std-ref">Core Pause Control Register (mcpc)</span></a></p></li>
+<li><p><a class="reference internal" href="#forced-debug-halt-threshold-register-mfdht"><span class="std std-ref">Forced Debug Halt Threshold Register (mfdht)</span></a></p></li>
+<li><p><a class="reference internal" href="#forced-debug-halt-status-register-mfdhs"><span class="std std-ref">Forced Debug Halt Status Register (mfdhs)</span></a></p></li>
+</ul>
+<p>All reserved and unused bits in these control/status registers must be hardwired to ‘0’.
+Unless otherwise noted, all read/write control/status registers must have WARL (Write Any value, Read Legal value) behavior.</p>
+<h3 id="power-management-control-register-mpmc"><span class="section-number">7.5.1. </span>Power Management Control Register (mpmc)<a class="headerlink" href="#power-management-control-register-mpmc" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">mpmc</span></code> register provides core power management control functionality.
+It allows the firmware running on the core to initiate a transition to the Halted (pmu/fw-halt) state.
+While entering the Halted state, interrupts may optionally be enabled atomically.</p>
+<p>The <em>halt</em> field of the <code class="docutils literal notranslate"><span class="pre">mpmc</span></code> register has W1R0 (Write 1, Read 0) behavior, as also indicated in the ‘Access’ column.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Writing a ‘1’ to the <em>haltie</em> field of the <code class="docutils literal notranslate"><span class="pre">mpmc</span></code> register without also setting the <em>halt</em> field has no immediate effect on the <em>mie</em> bit of the <code class="docutils literal notranslate"><span class="pre">mstatus</span></code> register.
+However, the <em>haltie</em> field of the <code class="docutils literal notranslate"><span class="pre">mpmc</span></code> register is updated accordingly.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Once the <em>mie</em> bit of the <code class="docutils literal notranslate"><span class="pre">mstatus</span></code> register is set via the <em>haltie</em> field of the <code class="docutils literal notranslate"><span class="pre">mpmc</span></code> register, it remains set until other operations clear it.
+Exiting the Halted (pmu/fw-halt) state does not clear the <em>mie</em> bit of the <code class="docutils literal notranslate"><span class="pre">mstatus</span></code> register set by entering the Halted state.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In Debug Mode, writing (i.e., setting or clearing) <em>haltie</em> has no effect on the <code class="docutils literal notranslate"><span class="pre">mstatus</span></code> register’s <em>mie</em> bit since the core does not transition to the Halted (pmu/fw-halt) state.</p>
+</div>
+<p>This register is mapped to the non-standard read/write CSR address space.</p>
+<table class="docutils data align-default" id="tab-power-mgmt-ctrl-register">
+<caption><span class="caption-number">Table 7.5 </span><span class="caption-text">Power Management Control Register (mpmc, at CSR 0x7C6)</span><a class="headerlink" href="#tab-power-mgmt-ctrl-register" title="Link to this table">¶</a></caption>
+<tbody>
+<tr class="row-odd"><td><p><strong>Field</strong></p></td>
+<td><p><strong>Bits</strong></p></td>
+<td><p><strong>Description</strong></p></td>
+<td><p><strong>Access</strong></p></td>
+<td><p><strong>Reset</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>31:2</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>haltie</p></td>
+<td><p>1</p></td>
+<td><p>Control interrupt enable (i.e., <em>mie</em> bit of <code class="docutils literal notranslate"><span class="pre">mstatus</span></code> register) when transitioning to Halted (pmu/fw-halt) state by setting halt bit below:</p>
+<ul class="simple">
+<li><p>0: Don’t change <em>mie</em> bit of <code class="docutils literal notranslate"><span class="pre">mstatus</span></code> register</p></li>
+<li><p>1: Set <em>mie</em> bit of <code class="docutils literal notranslate"><span class="pre">mstatus</span></code> register (i.e., atomically enable interrupts)</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>halt</p></td>
+<td><p>0</p></td>
+<td><p>Initiate core halt (i.e., transition to Halted (pmu/fw-halt) state)</p>
+<p><strong>Note:</strong> Write ignored if in Debug Mode</p>
+</td>
+<td><p>R0/W1</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="core-pause-control-register-mcpc"><span class="section-number">7.5.2. </span>Core Pause Control Register (mcpc)<a class="headerlink" href="#core-pause-control-register-mcpc" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">mcpc</span></code> register supports functions to temporarily stop the core from executing instructions.
+This helps to save core power since busy-waiting loops can be avoided in the firmware.</p>
+<p>PAUSE stops the core from executing instructions for a specified number <a class="footnote-reference brackets" href="#fn-power-1" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> of clock ticks or until an interrupt is received.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>PAUSE is a long-latency, interruptible instruction and does not change the core’s activity state (i.e., the core remains in the Running state).
+Therefore, even though this function may reduce core power, it is not part of core power management.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>PAUSE has a skid of several cycles.
+Therefore, instruction execution might not be stopped for precisely the number of cycles specified in the <em>pause</em> field of the mcpc register.
+However, this is acceptable for the intended use case of this function.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Depending on the <em>pause_en</em> bit of the <code class="docutils literal notranslate"><span class="pre">mitctl0/1</span></code> registers, the internal timers might be incremented while executing PAUSE.
+If an internal timer interrupt is signaled, PAUSE is terminated and normal execution resumes.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the PMU sends a halt request while PAUSE is still executing, the core enters the Halted (pmu/fw-halt) state and the <em>pause</em> clock counter stops until the core is back in the Running state.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>WFI is another candidate for a function that stops the core temporarily.
+Currently, the WFI instruction is implemented as NOP, which is a fully RISC-V-compliant option.</p>
+</div>
+<p>The <em>pause</em> field of the <code class="docutils literal notranslate"><span class="pre">mcpc</span></code> register has WAR0 (Write Any value, Read 0) behavior, as also indicated in the ‘Access’ column.</p>
+<p>This register is mapped to the non-standard read/write CSR address space.</p>
+<table class="docutils data align-default" id="tab-core-pause-ctrl-register">
+<caption><span class="caption-number">Table 7.6 </span><span class="caption-text">Core Pause Control Register (mcpc, at CSR 0x7C2)</span><a class="headerlink" href="#tab-core-pause-ctrl-register" title="Link to this table">¶</a></caption>
+<tbody>
+<tr class="row-odd"><td><p><strong>Field</strong></p></td>
+<td><p><strong>Bits</strong></p></td>
+<td><p><strong>Description</strong></p></td>
+<td><p><strong>Access</strong></p></td>
+<td><p><strong>Reset</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>pause</p></td>
+<td><p>31:0</p></td>
+<td><p>Pause execution for number of core clock cycles specified</p>
+<p><strong>Note:</strong> <em>pause</em> is decremented by 1 for each core clock cycle. Execution continues either when <em>pause</em> is 0 or any interrupt is received.</p>
+</td>
+<td><p>R0/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="forced-debug-halt-threshold-register-mfdht"><span class="section-number">7.5.3. </span>Forced Debug Halt Threshold Register (mfdht)<a class="headerlink" href="#forced-debug-halt-threshold-register-mfdht" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">mfdht</span></code> register hosts the enable bit of the forced debug halt mechanism as well as the power-of-two exponent of the timeout threshold.
+When enabled, if a debug halt request is received and LSU and/or IFU bus transactions are pending, an internal timeout counter starts incrementing with each core clock and keeps incrementing until the Debug Halt <em>(db-halt)</em> state is entered.
+If all ongoing bus transactions complete within the timeout period and the core is quiesced, the Debug Halt state is entered as usual.
+However, if the timeout counter <em>value</em> is equal to or greater than the threshold value (= <span class="math notranslate nohighlight">\(2^{thresh}\)</span> core clocks), all in-progress LSU and IFU bus transactions are terminated and the Debug Halt state is entered (i.e. the core may be forced to the Debug Halt state before it is fully quiesced).
+In addition, when entering the Debug Halt state in either case, the <code class="docutils literal notranslate"><span class="pre">mfdhs</span></code> register (see <a class="reference internal" href="#forced-debug-halt-status-register-mfdhs"><span class="std std-ref">Forced Debug Halt Status Register (mfdhs)</span></a> below) latches the status if any LSU or IFU bus transactions have been prematurely terminated.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The internal timeout counter is cleared at reset as well as when the Debug Halt (db-halt) state is exited.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The 5-bit threshold (<em>thresh</em> field) allows a timeout period of up to <span class="math notranslate nohighlight">\(2^{31}\)</span> core clock cycles (i.e., about 2.1 seconds at a 1GHz core clock frequency).</p>
+</div>
+<p>This register is mapped to the non-standard read/write CSR address space.</p>
+<table class="docutils data align-default" id="tab-forced-debug-halt-thld-register">
+<caption><span class="caption-number">Table 7.7 </span><span class="caption-text">Forced Debug Halt Threshold Register (mfdht, at CSR 0x7CE)</span><a class="headerlink" href="#tab-forced-debug-halt-thld-register" title="Link to this table">¶</a></caption>
+<tbody>
+<tr class="row-odd"><td><p><strong>Field</strong></p></td>
+<td><p><strong>Bits</strong></p></td>
+<td><p><strong>Description</strong></p></td>
+<td><p><strong>Access</strong></p></td>
+<td><p><strong>Reset</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>31:6</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>thresh</p></td>
+<td><p>5:1</p></td>
+<td><p>Power-of-two exponent of timeout threshold (= <span class="math notranslate nohighlight">\(2^{thresh}\)</span> core clock cycles)</p></td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>enable</p></td>
+<td><p>0</p></td>
+<td><p>Enable/disable forced debug halt timeout:</p>
+<ul class="simple">
+<li><p>0: Timeout mechanism disabled (default)</p></li>
+<li><p>1: Timeout mechanism enabled</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="forced-debug-halt-status-register-mfdhs"><span class="section-number">7.5.4. </span>Forced Debug Halt Status Register (mfdhs)<a class="headerlink" href="#forced-debug-halt-status-register-mfdhs" title="Link to this heading">¶</a></h3>
+<p>The mfdhs register provides status information if any LSU and/or IFU bus transactions have been prematurely terminated when the Debug Halt (db-halt) state has been entered.
+A debugger may read this register to inquire if any bus transactions have been terminated and data may have been lost while entering the Debug Halt state.
+If both status bits are ‘0’ indicates that the core was properly quiesced.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A debugger may also clear the status bits if desired, but clearing is not required for proper operation.</p>
+</div>
+<p>This register is mapped to the non-standard read/write CSR address space.</p>
+<table class="docutils data align-default" id="tab-forced-debug-halt-status-register">
+<caption><span class="caption-number">Table 7.8 </span><span class="caption-text">Forced Debug Halt Status Register (mfdhs, at CSR 0x7CF)</span><a class="headerlink" href="#tab-forced-debug-halt-status-register" title="Link to this table">¶</a></caption>
+<tbody>
+<tr class="row-odd"><td><p><strong>Field</strong></p></td>
+<td><p><strong>Bits</strong></p></td>
+<td><p><strong>Description</strong></p></td>
+<td><p><strong>Access</strong></p></td>
+<td><p><strong>Reset</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Reserved</p></td>
+<td><p>31:2</p></td>
+<td><p>Reserved</p></td>
+<td><p>R</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu</p></td>
+<td><p>1</p></td>
+<td><p>LSU bus transaction termination status:</p>
+<ul class="simple">
+<li><p>0: No transactions have been prematurely terminated</p></li>
+<li><p>1: One or more transactions have been prematurely terminated</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu</p></td>
+<td><p>0</p></td>
+<td><p>IFU bus transaction termination status:</p>
+<ul class="simple">
+<li><p>0: No transactions have been prematurely terminated</p></li>
+<li><p>1: One or more transactions have been prematurely terminated</p></li>
+</ul>
+</td>
+<td><p>R/W</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="fn-power-1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>The field width provided by the mcpc register allows to pause execution for about 4 seconds at a 1 GHz core clock.</p>
+</aside>
+</aside>
+
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      2025-12-22
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="timers.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 6. Internal Timers" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              6. Internal Timers
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="interrupts.html" class="md-footer__link md-footer__link--next" aria-label="Next: 8. External Interrupts" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              8. External Interrupts
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        Copyright &#169; 2025 CHIPS Alliance The Linux Foundation®.
+        
+    </div>
+  
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+      
+      
+    
+    <a href="https://github.com/antmicro" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/antmicro" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["toc.integrate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+      
+        <script src="_static/sphinx_immaterial_theme.f9d9eeeb247ace16c.min.js?v=8ec58cb5"></script>
+        <script id="MathJax-script" src="_static/mathjax/tex-mml-chtml.js?v=cadf963e"></script>
+    
+  </body>
+</html>

@@ -1,0 +1,2483 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>5. Dual-Core Lockstep (DCLS) - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
+      
+    
+    
+      
+        
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="_static/sphinx_immaterial_theme.c5589c0bd87d933a4.min.css?v=eeeb54bc" />
+        <link rel="stylesheet" type="text/css" href="_static/main.css" />
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="white">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="RISC-V VeeR EL2 Programmer&#39;s Reference Manual  documentation" class="md-header__button md-logo" aria-label="RISC-V VeeR EL2 Programmer's Reference Manual  documentation" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            RISC-V VeeR EL2 Programmer's Reference Manual  documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              5. Dual-Core Lockstep (DCLS)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="white"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="RISC-V VeeR EL2 Programmer&#39;s Reference Manual  documentation" class="md-nav__button md-logo" aria-label="RISC-V VeeR EL2 Programmer's Reference Manual  documentation" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    RISC-V VeeR EL2 Programmer's Reference Manual  documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="intro.html" class="md-nav__link">
+        <span class="md-ellipsis">RISC-<wbr>V Vee<wbr>R EL2 Programmer’s Reference Manual</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="overview.html" class="md-nav__link">
+        <span class="md-ellipsis">Core Overview</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="memory-map.html" class="md-nav__link">
+        <span class="md-ellipsis">Memory Map</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="error-protection.html" class="md-nav__link">
+        <span class="md-ellipsis">Memory Error Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          <span class="md-ellipsis">Dual-<wbr>Core Lockstep <wbr>(DCLS)</span>
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        <span class="md-ellipsis">Dual-<wbr>Core Lockstep <wbr>(DCLS)</span>
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#veer-el2-dcls-overview" class="md-nav__link">
+    <span class="md-ellipsis">Vee<wbr>R EL2 DCLS Overview</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="VeeR EL2 DCLS Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#error-policy" class="md-nav__link">
+    <span class="md-ellipsis">Error Policy</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitored-registers" class="md-nav__link">
+    <span class="md-ellipsis">Monitored Registers</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitored-ios" class="md-nav__link">
+    <span class="md-ellipsis">Monitored IOs</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shadow-core-control" class="md-nav__link">
+    <span class="md-ellipsis">Shadow Core Control</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">Configuration</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation-plan" class="md-nav__link">
+    <span class="md-ellipsis">Validation Plan</span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="timers.html" class="md-nav__link">
+        <span class="md-ellipsis">Internal Timers</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="power.html" class="md-nav__link">
+        <span class="md-ellipsis">Power Management and Multi-<wbr>Core Debug Control</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="interrupts.html" class="md-nav__link">
+        <span class="md-ellipsis">External Interrupts</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="performance.html" class="md-nav__link">
+        <span class="md-ellipsis">Performance Monitoring</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cache.html" class="md-nav__link">
+        <span class="md-ellipsis">Cache Control</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="debugging.html" class="md-nav__link">
+        <span class="md-ellipsis">Debug Support</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="core-control.html" class="md-nav__link">
+        <span class="md-ellipsis">Low-<wbr>Level Core Control</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="adaptations.html" class="md-nav__link">
+        <span class="md-ellipsis">Standard RISC-<wbr>V CSRs with Core-<wbr>Specific Adaptations</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="csrs.html" class="md-nav__link">
+        <span class="md-ellipsis">CSR Address Map</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="interrupt-priority.html" class="md-nav__link">
+        <span class="md-ellipsis">Interrupt Priorities</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="clocks.html" class="md-nav__link">
+        <span class="md-ellipsis">Clock And Reset</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="complex-ports.html" class="md-nav__link">
+        <span class="md-ellipsis">Complex Port List</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="build-args.html" class="md-nav__link">
+        <span class="md-ellipsis">Build Arguments</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tests.html" class="md-nav__link">
+        <span class="md-ellipsis">Compliance Test Suite Failures</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="errata.html" class="md-nav__link">
+        <span class="md-ellipsis">Errata</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="physical-memory-protection.html" class="md-nav__link">
+        <span class="md-ellipsis">Physical Memory Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="user-mode.html" class="md-nav__link">
+        <span class="md-ellipsis">User Mode</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="verification.html" class="md-nav__link">
+        <span class="md-ellipsis">Verification</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="simulation-debugging.html" class="md-nav__link">
+        <span class="md-ellipsis">Interactive Debugging in Simulation</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tock.html" class="md-nav__link">
+        <span class="md-ellipsis">Running Tock OS</span>
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                  
+
+
+<h1 id="dual-core-lockstep-dcls"><span class="section-number">5. </span>Dual-Core Lockstep (DCLS)<a class="headerlink" href="#dual-core-lockstep-dcls" title="Link to this heading">¶</a></h1>
+<p>This chapter describes the proposed Dual-Core Lockstep functionality and its future implementation in the VeeR EL2 Core, as required by Caliptra 2.0 for side-channel mitigation scenarios, although it may be useful for other applications like rad-hardening or other safety related-scenarios which DCLS is often also used for.</p>
+<h2 id="veer-el2-dcls-overview"><span class="section-number">5.1. </span>VeeR EL2 DCLS Overview<a class="headerlink" href="#veer-el2-dcls-overview" title="Link to this heading">¶</a></h2>
+<p>The lockstep feature will be added as an optional feature of VeeR EL2, disabled by default.
+If enabled, another copy of the VeeR EL2 CPU core will be additionally instantiated in the design.
+This second core will be referred to as a Shadow Core in this chapter.</p>
+<p>The Shadow Core is delayed by a constant, configurable <code class="docutils literal notranslate"><span class="pre">DELAY</span></code> number of clock cycles with regards to the main core.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">DCCM</span></code> and <code class="docutils literal notranslate"><span class="pre">ICCM</span></code> memories are not duplicated, and only the main VeeR EL2 CPU core has access to them.
+The Shadow Core is only supplied with the delayed inputs of the main core, including the relevant <code class="docutils literal notranslate"><span class="pre">DCCM</span></code> and <code class="docutils literal notranslate"><span class="pre">ICCM</span></code> data, without any ability to read from or write to those memories by itself.</p>
+<p>Similarly, <code class="docutils literal notranslate"><span class="pre">Icache</span></code> is not duplicated with only the main VeeR EL2 CPU core having direct access.
+The Shadow Core will receive a delayed copy of main core’s <code class="docutils literal notranslate"><span class="pre">Icache</span></code> inputs.
+The copy of main core’s <code class="docutils literal notranslate"><span class="pre">Icache</span></code> outputs will be passed into the <code class="docutils literal notranslate"><span class="pre">Equivalency</span> <span class="pre">Checker</span></code> to be validated against the Shadow Core’s <code class="docutils literal notranslate"><span class="pre">Icache</span></code> outputs.</p>
+<p>The diagram below outlines the architecture of the proposed solution.</p>
+<p><img alt="VeeR DCLS Overview" src="_images/dcls_block_diagram.png" /></p>
+<p>Outputs and the register file from the main core are delayed by <code class="docutils literal notranslate"><span class="pre">DELAY</span></code> cycles and passed to the <code class="docutils literal notranslate"><span class="pre">Equivalency</span> <span class="pre">Checker</span></code> for verification against the outputs and the register file of the Shadow Core.</p>
+<h3 id="error-policy"><span class="section-number">5.1.1. </span>Error Policy<a class="headerlink" href="#error-policy" title="Link to this heading">¶</a></h3>
+<p>The Dual Core Lockstep module will report an error when detected by asserting a single bit output signal.
+It is up to the integrator to provide a logic to handle the detected error.
+The error can be artifficially injected by using <a class="reference internal" href="#shadow-core-control">Shadow Core Control</a> capabilities.
+The corruption error will be reported always when all of the following requirements are met:</p>
+<ul class="simple">
+<li><p>Input and Output signals of both Main Core and Shadow Core differ OR an error injection feature is enabled,</p></li>
+<li><p>The Shadow Core is out of reset,</p></li>
+<li><p>The Shadow Core is not disabled.</p></li>
+</ul>
+<h3 id="monitored-registers"><span class="section-number">5.1.2. </span>Monitored Registers<a class="headerlink" href="#monitored-registers" title="Link to this heading">¶</a></h3>
+<p>The Shadow Core can have its internal copy of the register file by setting a proper VeeR EL2 configuration flag.
+Even though every discrepancy between register files of the Main Core and Shadow Core will eventually lead to difference between IOs of these modules, it might take some time for the mismatch to manifest.
+To determine whether a discrepancy has occurred immediately, the register files from both cores will be compared taking into account a reasonable subset of the VeeR EL2 registers, as defined in the table below:</p>
+<table class="docutils data align-center" id="tab-dcls-monitored-veer-el2-registers">
+<caption><span class="caption-number">Table 5.1 </span><span class="caption-text">Monitored VeeR EL2 Registers</span><a class="headerlink" href="#tab-dcls-monitored-veer-el2-registers" title="Link to this table">¶</a></caption>
+<tbody>
+<tr class="row-odd"><td><p><strong>Name</strong></p></td>
+<td><p><strong>Description</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>x1 (ra)</p></td>
+<td><p>Return address</p></td>
+</tr>
+<tr class="row-odd"><td><p>x2 (sp)</p></td>
+<td><p>Stack pointer</p></td>
+</tr>
+<tr class="row-even"><td><p>x8 (s0/fp)</p></td>
+<td><p>Saved register / frame pointer</p></td>
+</tr>
+<tr class="row-odd"><td><p>x10-x11 (a0-a1)</p></td>
+<td><p>Function arguments / return values</p></td>
+</tr>
+<tr class="row-even"><td><p>x12-17 (a2-7)</p></td>
+<td><p>Function arguments</p></td>
+</tr>
+<tr class="row-odd"><td><p>pc</p></td>
+<td><p>Program Counter</p></td>
+</tr>
+<tr class="row-even"><td><p>npc</p></td>
+<td><p>Next Program Counter</p></td>
+</tr>
+<tr class="row-odd"><td><p>mstatus</p></td>
+<td><p>Machine status</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="adaptations.html#machine-interrupt-enable-mie-and-machine-interrupt-pending-mip-registers"><span class="std std-ref">mie</span></a></p></td>
+<td><p>Machine interrupt enable</p></td>
+</tr>
+<tr class="row-odd"><td><p>mtvec</p></td>
+<td><p>Machine trap-handler base address</p></td>
+</tr>
+<tr class="row-even"><td><p>mscratch</p></td>
+<td><p>Scratch register for machine trap handlers</p></td>
+</tr>
+<tr class="row-odd"><td><p>mepc</p></td>
+<td><p>Machine exception program counter</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="adaptations.html#machine-cause-register-mcause"><span class="std std-ref">mcause</span></a></p></td>
+<td><p>Machine trap cause</p></td>
+</tr>
+<tr class="row-odd"><td><p>mtval</p></td>
+<td><p>Machine bad address or instruction</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="adaptations.html#machine-interrupt-enable-mie-and-machine-interrupt-pending-mip-registers"><span class="std std-ref">mip</span></a></p></td>
+<td><p>Machine interrupt pending</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="performance.html#standard-risc-v-registers"><span class="std std-ref">mcycle</span></a></p></td>
+<td><p>Machine cycle counter</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="performance.html#standard-risc-v-registers"><span class="std std-ref">minstret</span></a></p></td>
+<td><p>Machine instructions-retired counter</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="memory-map.html#region-access-control-register-mrac"><span class="std std-ref">mrac</span></a></p></td>
+<td><p>Region access control</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Should the monitored registers be dependent on the VeeR configuration?</p>
+</div>
+<h3 id="monitored-ios"><span class="section-number">5.1.3. </span>Monitored IOs<a class="headerlink" href="#monitored-ios" title="Link to this heading">¶</a></h3>
+<p>Since the Shadow Core module must replicate the behavior of the Main Core without any differences, it contains the same input and output ports.
+Input ports are delayed and routed to the copy of the VeeR EL2 CPU, output ports are compared with the delayed output ports of the Main Core.
+Refer to <a class="reference internal" href="#tab-shadow-core-tracked-signals"><span class="std std-ref">Core Complex signals tracked by the Shadow Core</span></a> for list of ports routed to the Shadow Core.</p>
+<table class="docutils data align-default" id="tab-shadow-core-tracked-signals">
+<caption><span class="caption-number">Table 5.2 </span><span class="caption-text">Core Complex signals tracked by the Shadow Core</span><a class="headerlink" href="#tab-shadow-core-tracked-signals" title="Link to this table">¶</a></caption>
+<tbody>
+<tr class="row-odd"><td><p><strong>Signal</strong></p></td>
+<td><p><strong>Dir</strong></p></td>
+<td><p><strong>Description</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Clock Enables</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_bus_clk_en</p></td>
+<td><p>in</p></td>
+<td><p>IFU master system bus clock enable</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_bus_clk_en</p></td>
+<td><p>in</p></td>
+<td><p>LSU master system bus clock enable</p></td>
+</tr>
+<tr class="row-odd"><td><p>dbg_bus_clk_en</p></td>
+<td><p>in</p></td>
+<td><p>Debug master system bus clock enable</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_bus_clk_en</p></td>
+<td><p>in</p></td>
+<td><p>DMA slave system bus clock enable</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Reset</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>rst_vec[31:1]</p></td>
+<td><p>in</p></td>
+<td><p>Core reset vector</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Interrupts</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>nmi_int</p></td>
+<td><p>in</p></td>
+<td><p>Non-Maskable Interrupt (async)</p></td>
+</tr>
+<tr class="row-odd"><td><p>nmi_vec[31:1]</p></td>
+<td><p>in</p></td>
+<td><p>Non-Maskable Interrupt vector</p></td>
+</tr>
+<tr class="row-even"><td><p>soft_int</p></td>
+<td><p>in</p></td>
+<td><p>Standard RISC-V software interrupt (async)</p></td>
+</tr>
+<tr class="row-odd"><td><p>timer_int</p></td>
+<td><p>in</p></td>
+<td><p>Standard RISC-V timer interrupt (async)</p></td>
+</tr>
+<tr class="row-even"><td><p>extintsrc_req[pt.PIC_TOTAL_INT:1]</p></td>
+<td><p>in</p></td>
+<td><p>External interrupts (async)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Core ID</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>core_id[31:4]</p></td>
+<td><p>in</p></td>
+<td><p>Core ID (mapped to <code class="docutils literal notranslate"><span class="pre">mhartid[31:4]</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>System Bus Interfaces</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><em><strong>AXI4</strong></em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><em><strong>Instruction Fetch Unit Master AXI4</strong></em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><em>Write address channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_awvalid</p></td>
+<td><p>out</p></td>
+<td><p>Write address valid (hardwired to 0)</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_awready</p></td>
+<td><p>in</p></td>
+<td><p>Write address ready</p></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_awid[pt.IFU_BUS_TAG-1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Write address ID</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_awaddr[31:0]</p></td>
+<td><p>out</p></td>
+<td><p>Write address</p></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_awlen[7:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst length</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_awsize[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst size</p></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_awburst[1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst type</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_awlock</p></td>
+<td><p>out</p></td>
+<td><p>Lock type</p></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_awcache[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Memory type</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_awprot[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Protection type</p></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_awqos[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Quality of Service (QoS)</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_awregion[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Region identifier</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Write data channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_wvalid</p></td>
+<td><p>out</p></td>
+<td><p>Write valid (hardwired to 0)</p></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_wready</p></td>
+<td><p>in</p></td>
+<td><p>Write ready</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_wdata[63:0]</p></td>
+<td><p>out</p></td>
+<td><p>Write data</p></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_wstrb[7:0]</p></td>
+<td><p>out</p></td>
+<td><p>Write strobes</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_wlast</p></td>
+<td><p>out</p></td>
+<td><p>Write last</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Write response channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_bvalid</p></td>
+<td><p>in</p></td>
+<td><p>Write response valid</p></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_bready</p></td>
+<td><p>out</p></td>
+<td><p>Write response ready (hardwired to 0)</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_bid[pt.IFU_BUS_TAG-1:0]</p></td>
+<td><p>in</p></td>
+<td><p>Response ID tag</p></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_bresp[1:0]</p></td>
+<td><p>in</p></td>
+<td><p>Write response</p></td>
+</tr>
+<tr class="row-even"><td><p><em>Read address channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_arvalid</p></td>
+<td><p>out</p></td>
+<td><p>Read address valid</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_arready</p></td>
+<td><p>in</p></td>
+<td><p>Read address ready</p></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_arid[pt.IFU_BUS_TAG-1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Read address ID</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_araddr[31:0]</p></td>
+<td><p>out</p></td>
+<td><p>Read address</p></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_arlen[7:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst length (hardwired to 0b0000_0000)</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_arsize[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst size (hardwired to 0b011)</p></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_arburst[1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst type (hardwired to 0b01)</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_arlock</p></td>
+<td><p>out</p></td>
+<td><p>Lock type (hardwired to 0)</p></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_arcache[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Memory type (hardwired to 0b1111)</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_arprot[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Protection type (hardwired to 0b100)</p></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_arqos[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Quality of Service (QoS) (hardwired to 0b0000)</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_arregion[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Region identifier</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Read data channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_rvalid</p></td>
+<td><p>in</p></td>
+<td><p>Read valid</p></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_rready</p></td>
+<td><p>out</p></td>
+<td><p>Read ready</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_rid[pt.IFU_BUS_TAG-1:0]</p></td>
+<td><p>in</p></td>
+<td><p>Read ID tag</p></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_rdata[63:0]</p></td>
+<td><p>in</p></td>
+<td><p>Read data</p></td>
+</tr>
+<tr class="row-even"><td><p>ifu_axi_rresp[1:0]</p></td>
+<td><p>in</p></td>
+<td><p>Read response</p></td>
+</tr>
+<tr class="row-odd"><td><p>ifu_axi_rlast</p></td>
+<td><p>in</p></td>
+<td><p>Read last</p></td>
+</tr>
+<tr class="row-even"><td><p><em><strong>Load/Store Unit Master AXI4</strong></em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><em>Write address channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_awvalid</p></td>
+<td><p>out</p></td>
+<td><p>Write address valid</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_awready</p></td>
+<td><p>in</p></td>
+<td><p>Write address ready</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_awid[pt.LSU_BUS_TAG-1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Write address ID</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_awaddr[31:0]</p></td>
+<td><p>out</p></td>
+<td><p>Write address</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_awlen[7:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst length (hardwired to 0b0000_0000)</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_awsize[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst size</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_awburst[1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst type (hardwired to 0b01)</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_awlock</p></td>
+<td><p>out</p></td>
+<td><p>Lock type (hardwired to 0)</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_awcache[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Memory type</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_awprot[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Protection type (hardwired to 0b000)</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_awqos[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Quality of Service (QoS) (hardwired to 0b0000)</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_awregion[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Region identifier</p></td>
+</tr>
+<tr class="row-even"><td><p><em>Write data channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_wvalid</p></td>
+<td><p>out</p></td>
+<td><p>Write valid</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_wready</p></td>
+<td><p>in</p></td>
+<td><p>Write ready</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_wdata[63:0]</p></td>
+<td><p>out</p></td>
+<td><p>Write data</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_wstrb[7:0]</p></td>
+<td><p>out</p></td>
+<td><p>Write strobes</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_wlast</p></td>
+<td><p>out</p></td>
+<td><p>Write last</p></td>
+</tr>
+<tr class="row-even"><td><p><em>Write response channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_bvalid</p></td>
+<td><p>in</p></td>
+<td><p>Write response valid</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_bready</p></td>
+<td><p>out</p></td>
+<td><p>Write response ready</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_bid[pt.LSU_BUS_TAG-1:0]</p></td>
+<td><p>in</p></td>
+<td><p>Response ID tag</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_bresp[1:0]</p></td>
+<td><p>in</p></td>
+<td><p>Write response</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Read address channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_arvalid</p></td>
+<td><p>out</p></td>
+<td><p>Read address valid</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_arready</p></td>
+<td><p>in</p></td>
+<td><p>Read address ready</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_arid[pt.LSU_BUS_TAG-1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Read address ID</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_araddr[31:0]</p></td>
+<td><p>out</p></td>
+<td><p>Read address</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_arlen[7:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst length (hardwired to 0b0000_0000)</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_arsize[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst size</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_arburst[1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst type (hardwired to 0b01)</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_arlock</p></td>
+<td><p>out</p></td>
+<td><p>Lock type (hardwired to 0)</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_arcache[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Memory type</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_arprot[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Protection type (hardwired to 0b000)</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_arqos[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Quality of Service (QoS) (hardwired to 0b0000)</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_arregion[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Region identifier</p></td>
+</tr>
+<tr class="row-even"><td><p><em>Read data channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_rvalid</p></td>
+<td><p>in</p></td>
+<td><p>Read valid</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_rready</p></td>
+<td><p>out</p></td>
+<td><p>Read ready</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_rid[pt.LSU_BUS_TAG-1:0]</p></td>
+<td><p>in</p></td>
+<td><p>Read ID tag</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_rdata[63:0]</p></td>
+<td><p>in</p></td>
+<td><p>Read data</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_axi_rresp[1:0]</p></td>
+<td><p>in</p></td>
+<td><p>Read response</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_axi_rlast</p></td>
+<td><p>in</p></td>
+<td><p>Read last</p></td>
+</tr>
+<tr class="row-odd"><td><p><em><strong>System Bus (Debug) Master AXI4</strong></em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><em>Write address channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_awvalid</p></td>
+<td><p>out</p></td>
+<td><p>Write address valid</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_awready</p></td>
+<td><p>in</p></td>
+<td><p>Write address ready</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_awid[pt.SB_BUS_TAG-1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Write address ID (hardwired to 0)</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_awaddr[31:0]</p></td>
+<td><p>out</p></td>
+<td><p>Write address</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_awlen[7:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst length (hardwired to 0b0000_0000)</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_awsize[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst size</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_awburst[1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst type (hardwired to 0b01)</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_awlock</p></td>
+<td><p>out</p></td>
+<td><p>Lock type (hardwired to 0)</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_awcache[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Memory type (hardwired to 0b1111)</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_awprot[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Protection type (hardwired to 0b000)</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_awqos[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Quality of Service (QoS) (hardwired to 0b0000)</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_awregion[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Region identifier</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Write data channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_wvalid</p></td>
+<td><p>out</p></td>
+<td><p>Write valid</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_wready</p></td>
+<td><p>in</p></td>
+<td><p>Write ready</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_wdata[63:0]</p></td>
+<td><p>out</p></td>
+<td><p>Write data</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_wstrb[7:0]</p></td>
+<td><p>out</p></td>
+<td><p>Write strobes</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_wlast</p></td>
+<td><p>out</p></td>
+<td><p>Write last</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Write response channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_bvalid</p></td>
+<td><p>in</p></td>
+<td><p>Write response valid</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_bready</p></td>
+<td><p>out</p></td>
+<td><p>Write response ready</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_bid[pt.SB_BUS_TAG-1:0]</p></td>
+<td><p>in</p></td>
+<td><p>Response ID tag</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_bresp[1:0]</p></td>
+<td><p>in</p></td>
+<td><p>Write response</p></td>
+</tr>
+<tr class="row-even"><td><p><em>Read address channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_arvalid</p></td>
+<td><p>out</p></td>
+<td><p>Read address valid</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_arready</p></td>
+<td><p>in</p></td>
+<td><p>Read address ready</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_arid[pt.SB_BUS_TAG-1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Read address ID (hardwired to 0)</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_araddr[31:0]</p></td>
+<td><p>out</p></td>
+<td><p>Read address</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_arlen[7:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst length (hardwired to 0b0000_0000)</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_arsize[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst size</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_arburst[1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst type (hardwired to 0b01)</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_arlock</p></td>
+<td><p>out</p></td>
+<td><p>Lock type (hardwired to 0)</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_arcache[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Memory type (hardwired to 0b0000)</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_arprot[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Protection type (hardwired to 0b000)</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_arqos[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Quality of Service (QoS) (hardwired to 0b0000)</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_arregion[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Region identifier</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Read data channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_rvalid</p></td>
+<td><p>in</p></td>
+<td><p>Read valid</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_rready</p></td>
+<td><p>out</p></td>
+<td><p>Read ready</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_rid[pt.SB_BUS_TAG-1:0]</p></td>
+<td><p>in</p></td>
+<td><p>Read ID tag</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_rdata[63:0]</p></td>
+<td><p>in</p></td>
+<td><p>Read data</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_axi_rresp[1:0]</p></td>
+<td><p>in</p></td>
+<td><p>Read response</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_axi_rlast</p></td>
+<td><p>in</p></td>
+<td><p>Read last</p></td>
+</tr>
+<tr class="row-even"><td><p><em><strong>DMA Slave AXI4</strong></em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><em>Write address channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>dma_axi_awvalid</p></td>
+<td><p>in</p></td>
+<td><p>Write address valid</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_axi_awready</p></td>
+<td><p>out</p></td>
+<td><p>Write address ready</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_axi_awid[pt.DMA_BUS_TAG-1:0]</p></td>
+<td><p>in</p></td>
+<td><p>Write address ID</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_axi_awaddr[31:0]</p></td>
+<td><p>in</p></td>
+<td><p>Write address</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_axi_awlen[7:0]</p></td>
+<td><p>in</p></td>
+<td><p>Burst length</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_axi_awsize[2:0]</p></td>
+<td><p>in</p></td>
+<td><p>Burst size</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_axi_awburst[1:0]</p></td>
+<td><p>in</p></td>
+<td><p>Burst type</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_axi_awprot[2:0]</p></td>
+<td><p>in</p></td>
+<td><p>Protection type</p></td>
+</tr>
+<tr class="row-even"><td><p><em>Write data channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>dma_axi_wvalid</p></td>
+<td><p>in</p></td>
+<td><p>Write valid</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_axi_wready</p></td>
+<td><p>out</p></td>
+<td><p>Write ready</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_axi_wdata[63:0]</p></td>
+<td><p>in</p></td>
+<td><p>Write data</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_axi_wstrb[7:0]</p></td>
+<td><p>in</p></td>
+<td><p>Write strobes</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_axi_wlast</p></td>
+<td><p>in</p></td>
+<td><p>Write last</p></td>
+</tr>
+<tr class="row-even"><td><p><em>Write response channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>dma_axi_bvalid</p></td>
+<td><p>out</p></td>
+<td><p>Write response valid</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_axi_bready</p></td>
+<td><p>in</p></td>
+<td><p>Write response ready</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_axi_bid[pt.DMA_BUS_TAG-1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Response ID tag</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_axi_bresp[1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Write response</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Read address channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>dma_axi_arvalid</p></td>
+<td><p>in</p></td>
+<td><p>Read address valid</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_axi_arready</p></td>
+<td><p>out</p></td>
+<td><p>Read address ready</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_axi_arid[pt.DMA_BUS_TAG-1:0]</p></td>
+<td><p>in</p></td>
+<td><p>Read address ID</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_axi_araddr[31:0]</p></td>
+<td><p>in</p></td>
+<td><p>Read address</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_axi_arlen[7:0]</p></td>
+<td><p>in</p></td>
+<td><p>Burst length</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_axi_arsize[2:0]</p></td>
+<td><p>in</p></td>
+<td><p>Burst size</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_axi_arburst[1:0]</p></td>
+<td><p>in</p></td>
+<td><p>Burst type</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_axi_arprot[2:0]</p></td>
+<td><p>in</p></td>
+<td><p>Protection type</p></td>
+</tr>
+<tr class="row-even"><td><p><em>Read data channel signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>dma_axi_rvalid</p></td>
+<td><p>out</p></td>
+<td><p>Read valid</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_axi_rready</p></td>
+<td><p>in</p></td>
+<td><p>Read ready</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_axi_rid[pt.DMA_BUS_TAG-1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Read ID tag</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_axi_rdata[63:0]</p></td>
+<td><p>out</p></td>
+<td><p>Read data</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_axi_rresp[1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Read response</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_axi_rlast</p></td>
+<td><p>out</p></td>
+<td><p>Read last</p></td>
+</tr>
+<tr class="row-odd"><td><p><em><strong>AHB-Lite</strong></em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><em><strong>Instruction Fetch Unit Master AHB-Lite</strong></em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><em>Master signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>haddr[31:0]</p></td>
+<td><p>out</p></td>
+<td><p>System address</p></td>
+</tr>
+<tr class="row-odd"><td><p>hburst[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst type (hardwired to 0b000)</p></td>
+</tr>
+<tr class="row-even"><td><p>hmastlock</p></td>
+<td><p>out</p></td>
+<td><p>Locked transfer (hardwired to 0)</p></td>
+</tr>
+<tr class="row-odd"><td><p>hprot[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Protection control</p></td>
+</tr>
+<tr class="row-even"><td><p>hsize[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Transfer size</p></td>
+</tr>
+<tr class="row-odd"><td><p>htrans[1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Transfer type</p></td>
+</tr>
+<tr class="row-even"><td><p>hwrite</p></td>
+<td><p>out</p></td>
+<td><p>Write transfer</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Slave signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>hrdata[63:0]</p></td>
+<td><p>in</p></td>
+<td><p>Read data</p></td>
+</tr>
+<tr class="row-odd"><td><p>hready</p></td>
+<td><p>in</p></td>
+<td><p>Transfer finished</p></td>
+</tr>
+<tr class="row-even"><td><p>hresp</p></td>
+<td><p>in</p></td>
+<td><p>Slave transfer response</p></td>
+</tr>
+<tr class="row-odd"><td><p><em><strong>Load/Store Unit Master AHB-Lite</strong></em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><em>Master signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_haddr[31:0]</p></td>
+<td><p>out</p></td>
+<td><p>System address</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_hburst[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst type (hardwired to 0b000)</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_hmastlock</p></td>
+<td><p>out</p></td>
+<td><p>Locked transfer (hardwired to 0)</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_hprot[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Protection control</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_hsize[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Transfer size</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_htrans[1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Transfer type</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_hwdata[63:0]</p></td>
+<td><p>out</p></td>
+<td><p>Write data</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_hwrite</p></td>
+<td><p>out</p></td>
+<td><p>Write transfer</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Slave signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>lsu_hrdata[63:0]</p></td>
+<td><p>in</p></td>
+<td><p>Read data</p></td>
+</tr>
+<tr class="row-odd"><td><p>lsu_hready</p></td>
+<td><p>in</p></td>
+<td><p>Transfer finished</p></td>
+</tr>
+<tr class="row-even"><td><p>lsu_hresp</p></td>
+<td><p>in</p></td>
+<td><p>Slave transfer response</p></td>
+</tr>
+<tr class="row-odd"><td><p><em><strong>System Bus (Debug) Master AHB-Lite</strong></em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><em>Master signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>sb_haddr[31:0]</p></td>
+<td><p>out</p></td>
+<td><p>System address</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_hburst[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Burst type (hardwired to 0b000)</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_hmastlock</p></td>
+<td><p>out</p></td>
+<td><p>Locked transfer (hardwired to 0)</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_hprot[3:0]</p></td>
+<td><p>out</p></td>
+<td><p>Protection control</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_hsize[2:0]</p></td>
+<td><p>out</p></td>
+<td><p>Transfer size</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_htrans[1:0]</p></td>
+<td><p>out</p></td>
+<td><p>Transfer type</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_hwdata[63:0]</p></td>
+<td><p>out</p></td>
+<td><p>Write data</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_hwrite</p></td>
+<td><p>out</p></td>
+<td><p>Write transfer</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Slave signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>sb_hrdata[63:0]</p></td>
+<td><p>in</p></td>
+<td><p>Read data</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb_hready</p></td>
+<td><p>in</p></td>
+<td><p>Transfer finished</p></td>
+</tr>
+<tr class="row-even"><td><p>sb_hresp</p></td>
+<td><p>in</p></td>
+<td><p>Slave transfer response</p></td>
+</tr>
+<tr class="row-odd"><td><p><em><strong>DMA Slave AHB-Lite</strong></em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><em>Slave signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>dma_haddr[31:0]</p></td>
+<td><p>in</p></td>
+<td><p>System address</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_hburst[2:0]</p></td>
+<td><p>in</p></td>
+<td><p>Burst type</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_hmastlock</p></td>
+<td><p>in</p></td>
+<td><p>Locked transfer</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_hprot[3:0]</p></td>
+<td><p>in</p></td>
+<td><p>Protection control</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_hsize[2:0]</p></td>
+<td><p>in</p></td>
+<td><p>Transfer size</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_htrans[1:0]</p></td>
+<td><p>in</p></td>
+<td><p>Transfer type</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_hwdata[63:0]</p></td>
+<td><p>in</p></td>
+<td><p>Write data</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_hwrite</p></td>
+<td><p>in</p></td>
+<td><p>Write transfer</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_hsel</p></td>
+<td><p>in</p></td>
+<td><p>Slave select</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_hreadyin</p></td>
+<td><p>in</p></td>
+<td><p>Transfer finished in</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Master signals</em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>dma_hrdata[63:0]</p></td>
+<td><p>out</p></td>
+<td><p>Read data</p></td>
+</tr>
+<tr class="row-odd"><td><p>dma_hreadyout</p></td>
+<td><p>out</p></td>
+<td><p>Transfer finished</p></td>
+</tr>
+<tr class="row-even"><td><p>dma_hresp</p></td>
+<td><p>out</p></td>
+<td><p>Slave transfer response</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Memory interfaces</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><em><strong>Data Close-Coupled Memory</strong></em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>dccm_clk_override</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>dccm_ecc_double_error</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>dccm_ecc_single_error</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>dccm_rd_addr_hi</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>dccm_rd_addr_lo</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>dccm_rd_data_hi</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>dccm_rd_data_lo</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>dccm_rden</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>dccm_wr_addr_hi</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>dccm_wr_addr_lo</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>dccm_wr_data_hi</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>dccm_wr_data_lo</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>dccm_wren</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>dec_tlu_core_ecc_disable</p></td>
+<td><p>out</p></td>
+<td><p>Disable core ECC</p></td>
+</tr>
+<tr class="row-odd"><td><p><em><strong>Inctruction Close-Coupled Memory</strong></em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>iccm_buf_correct_ecc</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>iccm_correction_state</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>iccm_ecc_double_error</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>iccm_ecc_single_error</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>iccm_rd_data</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>iccm_rd_data_ecc</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>iccm_rden</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>iccm_rw_addr</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>iccm_wr_data</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>iccm_wr_size</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>iccm_wren</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>icm_clk_override</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><em><strong>Instruction Cache Memory</strong></em></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ic_debug_addr</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ic_debug_rd_data</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ic_debug_rd_en</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ic_debug_tag_array</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ic_debug_way</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ic_debug_wr_data</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ic_debug_wr_en</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ic_eccerr</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ic_parerr</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ic_premux_data</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ic_rd_data</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ic_rd_en</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ic_rd_hit</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ic_rw_addr</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ic_sel_premux_data</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ic_tag_perr</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ic_tag_valid</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ic_wr_data</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ic_wr_en</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ictag_debug_rd_data</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Power Management Unit (PMU) Interface</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>i_cpu_halt_req</p></td>
+<td><p>in</p></td>
+<td><p>PMU halt request to core (async)</p></td>
+</tr>
+<tr class="row-odd"><td><p>o_cpu_halt_ack</p></td>
+<td><p>out</p></td>
+<td><p>Core acknowledgement for PMU halt request</p></td>
+</tr>
+<tr class="row-even"><td><p>o_cpu_halt_status</p></td>
+<td><p>out</p></td>
+<td><p>Core halted indication</p></td>
+</tr>
+<tr class="row-odd"><td><p>i_cpu_run_req</p></td>
+<td><p>in</p></td>
+<td><p>PMU run request to core (async)</p></td>
+</tr>
+<tr class="row-even"><td><p>o_cpu_run_ack</p></td>
+<td><p>out</p></td>
+<td><p>Core acknowledgement for PMU run request</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Multi-Processor Controller (MPC) Debug Interface</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>mpc_debug_halt_req</p></td>
+<td><p>in</p></td>
+<td><p>MPC debug halt request to core (async)</p></td>
+</tr>
+<tr class="row-odd"><td><p>mpc_debug_halt_ack</p></td>
+<td><p>out</p></td>
+<td><p>Core acknowledgement for MPC debug halt request</p></td>
+</tr>
+<tr class="row-even"><td><p>mpc_debug_run_req</p></td>
+<td><p>in</p></td>
+<td><p>MPC debug run request to core (async)</p></td>
+</tr>
+<tr class="row-odd"><td><p>mpc_debug_run_ack</p></td>
+<td><p>out</p></td>
+<td><p>Core acknowledgement for MPC debug run request</p></td>
+</tr>
+<tr class="row-even"><td><p>mpc_reset_run_req</p></td>
+<td><p>in</p></td>
+<td><p>Core start state control out of reset</p></td>
+</tr>
+<tr class="row-odd"><td><p>o_debug_mode_status</p></td>
+<td><p>out</p></td>
+<td><p>Core in Debug Mode indication</p></td>
+</tr>
+<tr class="row-even"><td><p>debug_brkpt_status</p></td>
+<td><p>out</p></td>
+<td><p>Hardware/software breakpoint indication</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Performance Counter Activity</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>dec_tlu_perfcnt0</p></td>
+<td><p>out</p></td>
+<td><p>Performance counter 0 incrementing</p></td>
+</tr>
+<tr class="row-odd"><td><p>dec_tlu_perfcnt1</p></td>
+<td><p>out</p></td>
+<td><p>Performance counter 1 incrementing</p></td>
+</tr>
+<tr class="row-even"><td><p>dec_tlu_perfcnt2</p></td>
+<td><p>out</p></td>
+<td><p>Performance counter 2 incrementing</p></td>
+</tr>
+<tr class="row-odd"><td><p>dec_tlu_perfcnt3</p></td>
+<td><p>out</p></td>
+<td><p>Performance counter 3 incrementing</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Trace Port</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>trace_rv_i_insn_ip[31:0]</p></td>
+<td><p>out</p></td>
+<td><p>Instruction opcode</p></td>
+</tr>
+<tr class="row-even"><td><p>trace_rv_i_address_ip[31:0]</p></td>
+<td><p>out</p></td>
+<td><p>Instruction address</p></td>
+</tr>
+<tr class="row-odd"><td><p>trace_rv_i_valid_ip</p></td>
+<td><p>out</p></td>
+<td><p>Instruction trace valid</p></td>
+</tr>
+<tr class="row-even"><td><p>trace_rv_i_exception_ip</p></td>
+<td><p>out</p></td>
+<td><p>Exception</p></td>
+</tr>
+<tr class="row-odd"><td><p>trace_rv_i_ecause_ip[4:0]</p></td>
+<td><p>out</p></td>
+<td><p>Exception cause</p></td>
+</tr>
+<tr class="row-even"><td><p>trace_rv_i_interrupt_ip</p></td>
+<td><p>out</p></td>
+<td><p>Interrupt exception</p></td>
+</tr>
+<tr class="row-odd"><td><p>trace_rv_i_tval_ip[31:0]</p></td>
+<td><p>out</p></td>
+<td><p>Exception trap value</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Debug Module Interface</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>dmi_reg_addr</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>dmi_reg_en</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>dmi_reg_rdata</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>dmi_reg_wdata</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>dmi_reg_wr_en</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>Debug JTAG Port</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>jtag_tck</p></td>
+<td><p>in</p></td>
+<td><p>JTAG Test Clock (async)</p></td>
+</tr>
+<tr class="row-even"><td><p>jtag_tms</p></td>
+<td><p>in</p></td>
+<td><p>JTAG Test Mode Select (async, sync to jtag_tck)</p></td>
+</tr>
+<tr class="row-odd"><td><p>jtag_tdi</p></td>
+<td><p>in</p></td>
+<td><p>JTAG Test Data In (async, sync to jtag_tck)</p></td>
+</tr>
+<tr class="row-even"><td><p>jtag_trst_n</p></td>
+<td><p>in</p></td>
+<td><p>JTAG Test Reset (async)</p></td>
+</tr>
+<tr class="row-odd"><td><p>jtag_tdo</p></td>
+<td><p>out</p></td>
+<td><p>JTAG Test Data Out (async, sync to jtag_tck)</p></td>
+</tr>
+<tr class="row-even"><td><p>jtag_id[31:1]</p></td>
+<td><p>in</p></td>
+<td><p>JTAG IDCODE register value (bit 0 tied internally to 1)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Testing</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>scan_mode</p></td>
+<td><p>in</p></td>
+<td><p>May be used to enable logic scan test, if implemented (must be ‘0’ for normal core operation)</p></td>
+</tr>
+<tr class="row-odd"><td><p>mbist_mode</p></td>
+<td><p>in</p></td>
+<td><p>May be used to enable MBIST for core-internal memories, if implemented (should be tied to ‘0’ if not used)</p></td>
+</tr>
+</tbody>
+</table>
+<p>Signals not compared due to their special meaning:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">clk</span></code> - <a class="reference internal" href="clocks.html#clocking"><span class="std std-ref">core complex clock</span></a>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">free_l2clk</span></code> - core complex clock always enabled, routed through one clock header,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">active_l2clk</span></code> - core complex clock enabled when the core is active, routed through one clock header,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rst_l</span></code> - <a class="reference internal" href="clocks.html#core-complex-reset-rst-l"><span class="std std-ref">core complex reset</span></a>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dbg_rst_l</span></code> - <a class="reference internal" href="clocks.html#debug-module-reset-dbg-rst-l"><span class="std std-ref">debug module reset</span></a>.</p></li>
+</ul>
+<h2 id="shadow-core-control"><span class="section-number">5.2. </span>Shadow Core Control<a class="headerlink" href="#shadow-core-control" title="Link to this heading">¶</a></h2>
+<p>The DCLS module exposes control logic that can be potentially connected to the external CSR.
+Specific signals available as the module ports are described in the <a class="reference internal" href="#tab-shadow-core-control-signals"><span class="std std-ref">Shadow Core Control Signals</span></a>.
+The error injection logic is a part of the Shadow Core and its purpose is to test whether the lockstep module operates correctly and to disable it if needed.
+Error is injected by asserting the <code class="docutils literal notranslate"><span class="pre">corruption_detected_o</span></code> output signal even if there is no corruption error detected between the Shadow Core and the Main Core.</p>
+<table class="docutils data align-default" id="tab-shadow-core-control-signals">
+<caption><span class="caption-number">Table 5.3 </span><span class="caption-text">Shadow Core Control Signals</span><a class="headerlink" href="#tab-shadow-core-control-signals" title="Link to this table">¶</a></caption>
+<tbody>
+<tr class="row-odd"><td><p><strong>Signal</strong></p></td>
+<td><p><strong>Direction</strong></p></td>
+<td><p><strong>Width</strong></p></td>
+<td><p><strong>Description</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>disable_corruption_detection_i</p></td>
+<td><p>input</p></td>
+<td><p>1</p></td>
+<td><p>Disable all error injection features</p></td>
+</tr>
+<tr class="row-odd"><td><p>lockstep_err_injection_en_i</p></td>
+<td><p>input</p></td>
+<td><p>1</p></td>
+<td><p>Activate an error injection to the Shadow Core</p></td>
+</tr>
+<tr class="row-even"><td><p>corruption_detected_o</p></td>
+<td><p>output</p></td>
+<td><p>1</p></td>
+<td><p>Indicate that a Shadow Core detected an error (corruption in comparison to the Main Core)</p></td>
+</tr>
+</tbody>
+</table>
+<h2 id="configuration"><span class="section-number">5.3. </span>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The DCLS feature is not supported in Debug Mode.
+Entering Debug Mode with DCLS enabled will disable DCLS until the next reset.</p>
+</div>
+<p>The DCLS feature can be enabled via <code class="docutils literal notranslate"><span class="pre">-set</span> <span class="pre">lockstep_enable=1</span></code> option.
+There are two configuration options:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-set</span> <span class="pre">lockstep_delay={2,</span> <span class="pre">3,</span> <span class="pre">4}</span></code> - the delay applied on the Shadow Core between 2 and 4 cycles,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-set</span> <span class="pre">lockstep_regfile_enable=1</span></code> - enable exposing the VeeR Register File so the Shadow Core will have an internal copy to compare with the Main Core Register File.</p></li>
+</ul>
+<p>The configuration options are ignored and their macros are not generated if the Dual Core Lockstep feature is disabled.</p>
+<h2 id="validation-plan"><span class="section-number">5.4. </span>Validation Plan<a class="headerlink" href="#validation-plan" title="Link to this heading">¶</a></h2>
+<p>The DCLS feature will be tested within:</p>
+<ul class="simple">
+<li><p>Software DCLS <a class="reference external" href="https://github.com/chipsalliance/Cores-VeeR-EL2/tree/main/testbench/tests/dcls/dcls.c">smoke test</a> - covers VeeR CPU core with the Shadow Core execution flow.</p></li>
+<li><p>RTL <code class="docutils literal notranslate"><span class="pre">el2_veer_lockstep</span></code> <a class="reference external" href="https://github.com/chipsalliance/Cores-VeeR-EL2/tree/main/verification/block/dcls">module tests</a> - covers the Shadow Core by itself.</p></li>
+</ul>
+<table class="docutils data align-center" id="vp-block-name-list-table">
+<caption><span class="caption-number">Table 5.4 </span><span class="caption-text">Validation Plan</span><a class="headerlink" href="#vp-block-name-list-table" title="Link to this table">¶</a></caption>
+<tbody>
+<tr class="row-odd"><td><p><strong>Function</strong></p></td>
+<td><p><strong>VeeR EL2 CPU core input corruption detection</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Reference Document</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Check description</p></td>
+<td><p>Verify the panic signal is raised only upon core states’ mismatch. Introduce corruption via VeeR EL2 CPU core inputs directed to the Shadow Core.</p></td>
+</tr>
+<tr class="row-even"><td><p>Coverage groups</p></td>
+<td><p>Each output of the VeeR EL2 CPU Core is reached when detecting the mismatch by <code class="docutils literal notranslate"><span class="pre">Equivalence</span> <span class="pre">Checker</span></code>. All bounds of configurable delay are reached.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Assertions</p></td>
+<td><p>Detection bit is asserted upon encountered corruption. Error behavior follows the error handling policy. No action is taken if no corruption was introduced.</p></td>
+</tr>
+<tr class="row-even"><td><p>Comments</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Test Name</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Function</strong></p></td>
+<td><p><strong>VeeR EL2 CPU core output corruption detection</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Reference Document</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Check description</p></td>
+<td><p>Verify the panic signal is raised only upon core states’ mismatch. Introduce corruption via the outputs of the main VeeR CPU core directed to <code class="docutils literal notranslate"><span class="pre">Equivalence</span> <span class="pre">Checker</span></code> in the Shadow Core.</p></td>
+</tr>
+<tr class="row-even"><td><p>Coverage groups</p></td>
+<td><p>Each output of the VeeR EL2 CPU Core is reached when detecting the mismatch by <code class="docutils literal notranslate"><span class="pre">Equivalence</span> <span class="pre">Checker</span></code>. All bounds of configurable delay are reached.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Assertions</p></td>
+<td><p>Detection bit is asserted upon encountered corruption. Error behavior follows the relevant error handling policy. No action is taken if no corruption was introduced.</p></td>
+</tr>
+<tr class="row-even"><td><p>Comments</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Test Name</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Function</strong></p></td>
+<td><p><strong>Internal state corruption detection</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Reference Document</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Check description</p></td>
+<td><p>Verify the panic signal is raised only upon core states’ mismatch. Introduce corruption via exposed registers of the Shadow Core.</p></td>
+</tr>
+<tr class="row-even"><td><p>Coverage groups</p></td>
+<td><p>Each <a class="reference internal" href="#monitored-registers">monitored register</a> is detected by the <code class="docutils literal notranslate"><span class="pre">Equivalence</span> <span class="pre">Checker</span></code>. All bounds of configurable delay are reached.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Assertions</p></td>
+<td><p>Detection bit is asserted upon encountered corruption. Error behavior follows the relevant error handling policy. No action is taken if no corruption was introduced.</p></td>
+</tr>
+<tr class="row-even"><td><p>Comments</p></td>
+<td><p>The default path will likely be more easily testable with the help of the software testbench. It should be possible to simulate a fault injection via mailbox see: <a class="reference external" href="https://github.com/chipsalliance/Cores-VeeR-EL2/blob/795eb588e34b6815033b769d54fcf7cfac4aae3a/testbench/tb_top.sv#L727">top_tb.sv</a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Test Name</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Function</strong></p></td>
+<td><p><strong>DCLS default execution</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Reference Document</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Check description</p></td>
+<td><p>Verify the DCLS feature behavior during non-obstructed execution.</p></td>
+</tr>
+<tr class="row-even"><td><p>Coverage groups</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Assertions</p></td>
+<td><p>Detection bit is not raised. Detection interrupt is not asserted. The test provides the same results as the VeeR EL2 CPU core without the DCLS feature enabled.</p></td>
+</tr>
+<tr class="row-even"><td><p>Comments</p></td>
+<td><p>It might be beneficial to use a software test with a program that will produce a result that can by easily compared to an alternative flow and also engage the VeeR EL2 core. Consider matrix multiplication.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Test Name</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Function</strong></p></td>
+<td><p><strong>Error reporting</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Reference Document</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Check description</p></td>
+<td><p>Verify error reporting policy upon detected corruption.</p></td>
+</tr>
+<tr class="row-even"><td><p>Coverage groups</p></td>
+<td><p>Each error policy is covered.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Assertions</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Comments</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Test Name</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Function</strong></p></td>
+<td><p><strong>Reset</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Reference Document</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Check description</p></td>
+<td><p>Verify the behavior in reset. Ensure normal execution upon leaving reset.</p></td>
+</tr>
+<tr class="row-even"><td><p>Coverage groups</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Assertions</p></td>
+<td><p>Shadow Core enters reset at the same time the main VeeR core does. Shadow Core exits reset after a predefined delay following the main core. Detected corruption and interrupts are deasserted upon entering the reset.</p></td>
+</tr>
+<tr class="row-even"><td><p>Comments</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Test Name</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      2025-12-29
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="error-protection.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 4. Memory Error Protection" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              4. Memory Error Protection
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="timers.html" class="md-footer__link md-footer__link--next" aria-label="Next: 6. Internal Timers" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              6. Internal Timers
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        Copyright &#169; 2025 CHIPS Alliance The Linux Foundation®.
+        
+    </div>
+  
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+      
+      
+    
+    <a href="https://github.com/antmicro" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/antmicro" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["toc.integrate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+      
+        <script src="_static/sphinx_immaterial_theme.f9d9eeeb247ace16c.min.js?v=8ec58cb5"></script>
+    
+  </body>
+</html>

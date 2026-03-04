@@ -211,7 +211,27 @@ import el2_pkg::*;
    output logic dec_tlu_postsync_d,           // CSR needs to be presync'd
 
 
-   output logic [31:0] dec_tlu_mrac_ff,        // CSR for memory region control
+   output logic [31:0] dec_tlu_mrac_ff,          // CSR for memory region control [Fixme]
+
+   output logic [31:0] dec_tlu_mracfg0_ff,       // CSR for memory region access configuration register
+   output logic [31:0] dec_tlu_mracfg1_ff,       // CSR for memory region access configuration register
+   
+   output logic [31:0] dec_tlu_mra0a_ff,         // CSR for memory region access configuration address register
+   output logic [31:0] dec_tlu_mra1a_ff,         // CSR for memory region access configuration register
+   output logic [31:0] dec_tlu_mra2a_ff,         // CSR for memory region access configuration address register
+   output logic [31:0] dec_tlu_mra3a_ff,         // CSR for memory region access configuration register
+   output logic [31:0] dec_tlu_mra4a_ff,         // CSR for memory region access configuration address register
+   output logic [31:0] dec_tlu_mra5a_ff,         // CSR for memory region access configuration register
+   output logic [31:0] dec_tlu_mra6a_ff,         // CSR for memory region access configuration address register
+   output logic [31:0] dec_tlu_mra7a_ff,         // CSR for memory region access configuration register
+   output logic [31:0] dec_tlu_mra8a_ff,         // CSR for memory region access configuration address register
+   output logic [31:0] dec_tlu_mra9a_ff,         // CSR for memory region access configuration register
+   output logic [31:0] dec_tlu_mra10a_ff,        // CSR for memory region access configuration address register
+   output logic [31:0] dec_tlu_mra11a_ff,        // CSR for memory region access configuration register
+   output logic [31:0] dec_tlu_mra12a_ff,        // CSR for memory region access configuration address register
+   output logic [31:0] dec_tlu_mra13a_ff,        // CSR for memory region access configuration register
+   output logic [31:0] dec_tlu_mra14a_ff,        // CSR for memory region access configuration address register
+   output logic [31:0] dec_tlu_mra15a_ff,        // CSR for memory region access configuration register
 
    output logic dec_tlu_force_halt, // halt has been forced
 
@@ -279,8 +299,13 @@ import el2_pkg::*;
    logic reset_delayed, reset_detect, reset_detected;
    logic wr_mstatus_r, wr_mtvec_r, wr_mcyclel_r, wr_mcycleh_r,
          wr_minstretl_r, wr_minstreth_r, wr_mscratch_r, wr_mepc_r, wr_mcause_r, wr_mscause_r, wr_mtval_r,
-         wr_mrac_r, wr_meihap_r, wr_meicurpl_r, wr_meipt_r, wr_dcsr_r,
-         wr_dpc_r, wr_meicidpl_r, wr_meivt_r, wr_meicpct_r, wr_micect_r, wr_miccmect_r, wr_mfdht_r, wr_mfdhs_r,
+         wr_mrac_r, 													// [Fixme]
+	 wr_mracfg0_r, wr_marcfg1_r, wr_mra0a_r, wr_mra1a_r, wr_mra2a_r,
+	 wr_mra3a_r, wr_mra4a_r, wr_mra5a_r, wr_mra6a_r, wr_mra7a_r,
+	 wr_mra8a_r, wr_mra9a_r, wr_mra10a_r, wr_mra11a_r, wr_mra12a_r,
+	 wr_mra13a_r, wr_mra14a_r, wr_mra15a_r,
+	 wr_meihap_r, wr_meicurpl_r, wr_meipt_r, wr_dcsr_r,							
+	 wr_dpc_r, wr_meicidpl_r, wr_meivt_r, wr_meicpct_r, wr_micect_r, wr_miccmect_r, wr_mfdht_r, wr_mfdhs_r,
          wr_mdccmect_r,wr_mhpme3_r, wr_mhpme4_r, wr_mhpme5_r, wr_mhpme6_r;
    logic wr_mpmc_r;
    logic [1:1] mpmc_b_ns, mpmc, mpmc_b;
@@ -323,7 +348,27 @@ import el2_pkg::*;
    logic [31:0] mhpmc3, mhpmc3_ns, mhpmc4, mhpmc4_ns, mhpmc5, mhpmc5_ns, mhpmc6, mhpmc6_ns;
    logic [31:0] mhpmc3h, mhpmc3h_ns, mhpmc4h, mhpmc4h_ns, mhpmc5h, mhpmc5h_ns, mhpmc6h, mhpmc6h_ns;
    logic [9:0]  mhpme3, mhpme4, mhpme5, mhpme6;
-   logic [31:0] mrac;
+   logic [31:0] mrac;											// [Fixme]
+
+   logic [31:0] mracfg0;
+   logic [31:0] mracfg1;
+   logic [31:0] mra0a;
+   logic [31:0] mra1a;
+   logic [31:0] mra2a;
+   logic [31:0] mra3a;
+   logic [31:0] mra4a;
+   logic [31:0] mra5a;
+   logic [31:0] mra6a;
+   logic [31:0] mra7a;
+   logic [31:0] mra8a;
+   logic [31:0] mra9a;
+   logic [31:0] mra10a;
+   logic [31:0] mra11a;
+   logic [31:0] mra12a;
+   logic [31:0] mra13a;
+   logic [31:0] mra14a;
+   logic [31:0] mra15a;
+
    logic [9:2] meihap;
    logic [31:10] meivt;
    logic [3:0] meicurpl_ns, meicurpl;
@@ -429,7 +474,26 @@ import el2_pkg::*;
    logic sel_exu_npc_r, sel_flush_npc_r, sel_hold_npc_r;
    logic pc0_valid_r;
    logic [15:0] mfdc_int, mfdc_ns;
-   logic [31:0] mrac_in;
+   logic [31:0] mrac_in;						// [Fixme]
+   logic [31:0] mracfg_in;
+   logic [31:0] mracfg0_in;						// [Fixme] not needed
+   logic [31:0] mracfg1_in;						// [Fixme] not needed
+   logic [31:0] mrac0a_in;						// [Fixme] not needed
+   logic [31:0] mrac1a_in;						// [Fixme] not needed
+   logic [31:0] mrac2a_in;
+   logic [31:0] mrac3a_in;						// [Fixme] not needed
+   logic [31:0] mrac4a_in;						// [Fixme] not needed
+   logic [31:0] mrac5a_in;						// [Fixme] not needed
+   logic [31:0] mrac6a_in;
+   logic [31:0] mrac7a_in;
+   logic [31:0] mrac8a_in;
+   logic [31:0] mrac9a_in;
+   logic [31:0] mrac10a_in;
+   logic [31:0] mrac11a_in;
+   logic [31:0] mrac12a_in;
+   logic [31:0] mrac13a_in;
+   logic [31:0] mrac14a_in;
+   logic [31:0] mrac15a_in;
    logic [31:27] csr_sat;
    logic [8:6] dcsr_cause;
    logic enter_debug_halt_req_le, dcsr_cause_upgradeable;
@@ -744,7 +808,33 @@ localparam MSECCFG_MML   = 0;
    // ----------------------------------------------------------------------
    // MRAC (RW)
    // [31:0] : Region Access Control Register, 16 regions, {side_effect, cachable} pairs
-   localparam MRAC          = 12'h7c0;
+   localparam MRAC          = 12'h7c0;						//	[Fixme]
+
+   // ----------------------------------------------------------------------
+   // MRACFG0 (RW)
+   // MRACFG1 (RW)
+   // [31:0] : Region Access Control Register, lower 8 regions, {mode[1:0], side_effect, cachable} pairs
+   // [31:0] : Region Access Control Register, upper 8 regions, {mode[1:0], side_effect, cachable} pairs
+   // 	                                                         mode[0]	TOR Enabled, disabled
+   // 	                                                         mode[1]        Reserved
+   localparam MRACFG0       = 12'h790;
+   localparam MRACFG1       = 12'h791;
+   localparam MRA0A         = 12'h792;
+   localparam MRA1A         = 12'h793;
+   localparam MRA2A         = 12'h794;
+   localparam MRA3A         = 12'h795;
+   localparam MRA4A         = 12'h796;
+   localparam MRA5A         = 12'h797;
+   localparam MRA6A         = 12'h798;
+   localparam MRA7A         = 12'h799;
+   localparam MRA8A         = 12'h79A;
+   localparam MRA9A         = 12'h79B;
+   localparam MRA10A        = 12'h79C;
+   localparam MRA11A        = 12'h79D;
+   localparam MRA12A        = 12'h79E;
+   localparam MRA13A        = 12'h79F;
+   localparam MRA14A        = 12'h7A0;
+   localparam MRA15A        = 12'h7A1;
 
    // ----------------------------------------------------------------------
    // MDEAU (WAR0)
@@ -2025,10 +2115,48 @@ end
    // MRAC (RW)
    // [31:0] : Region Access Control Register, 16 regions, {side_effect, cachable} pairs
 
-   assign wr_mrac_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRAC);
+   localparam MRACFG0       = 12'h790;
+   localparam MRACFG1       = 12'h791;
+   localparam MRA0A         = 12'h792;
+   localparam MRA1A         = 12'h793;
+   localparam MRA2A         = 12'h794;
+   localparam MRA3A         = 12'h795;
+   localparam MRA4A         = 12'h796;
+   localparam MRA5A         = 12'h797;
+   localparam MRA6A         = 12'h798;
+   localparam MRA7A         = 12'h799;
+   localparam MRA8A         = 12'h79A;
+   localparam MRA9A         = 12'h79B;
+   localparam MRA10A        = 12'h79C;
+   localparam MRA11A        = 12'h79D;
+   localparam MRA12A        = 12'h79E;
+   localparam MRA13A        = 12'h79F;
+   localparam MRA14A        = 12'h7A0;
+   localparam MRA15A        = 12'h7A1;
+   
+   assign wr_mrac_r    = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRAC);
+
+   assign wr_mracfg0_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRACFG0);
+   assign wr_mracfg1_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRACFG1);
+   assign wr_mra0a_r   = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRA0A  );
+   assign wr_mra1a_r   = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRA1A  );
+   assign wr_mra2a_r   = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRA2A  );
+   assign wr_mra3a_r   = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRA3A  );
+   assign wr_mra4a_r   = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRA4A  );
+   assign wr_mra5a_r   = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRA5A  );
+   assign wr_mra6a_r   = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRA6A  );
+   assign wr_mra7a_r   = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRA7A  );
+   assign wr_mra8a_r   = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRA8A  );
+   assign wr_mra9a_r   = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRA9A  );
+   assign wr_mra10a_r  = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRA10A );
+   assign wr_mra11a_r  = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRA11A );
+   assign wr_mra12a_r  = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRA12A );
+   assign wr_mra13a_r  = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRA13A );
+   assign wr_mra14a_r  = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRA14A );
+   assign wr_mra15a_r  = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MRA15A );
 
    // prevent pairs of 0x11, side_effect and cacheable
-   assign mrac_in[31:0] = {dec_csr_wrdata_r[31], dec_csr_wrdata_r[30] & ~dec_csr_wrdata_r[31],
+   assign mrac_in[31:0] = {dec_csr_wrdata_r[31], dec_csr_wrdata_r[30] & ~dec_csr_wrdata_r[31],		      // [Fixme]
                            dec_csr_wrdata_r[29], dec_csr_wrdata_r[28] & ~dec_csr_wrdata_r[29],
                            dec_csr_wrdata_r[27], dec_csr_wrdata_r[26] & ~dec_csr_wrdata_r[27],
                            dec_csr_wrdata_r[25], dec_csr_wrdata_r[24] & ~dec_csr_wrdata_r[25],
@@ -2039,16 +2167,56 @@ end
                            dec_csr_wrdata_r[15], dec_csr_wrdata_r[14] & ~dec_csr_wrdata_r[15],
                            dec_csr_wrdata_r[13], dec_csr_wrdata_r[12] & ~dec_csr_wrdata_r[13],
                            dec_csr_wrdata_r[11], dec_csr_wrdata_r[10] & ~dec_csr_wrdata_r[11],
-                           dec_csr_wrdata_r[9], dec_csr_wrdata_r[8] & ~dec_csr_wrdata_r[9],
-                           dec_csr_wrdata_r[7], dec_csr_wrdata_r[6] & ~dec_csr_wrdata_r[7],
-                           dec_csr_wrdata_r[5], dec_csr_wrdata_r[4] & ~dec_csr_wrdata_r[5],
-                           dec_csr_wrdata_r[3], dec_csr_wrdata_r[2] & ~dec_csr_wrdata_r[3],
-                           dec_csr_wrdata_r[1], dec_csr_wrdata_r[0] & ~dec_csr_wrdata_r[1]};
+                           dec_csr_wrdata_r[9],  dec_csr_wrdata_r[8]  & ~dec_csr_wrdata_r[9],
+                           dec_csr_wrdata_r[7],  dec_csr_wrdata_r[6]  & ~dec_csr_wrdata_r[7],
+                           dec_csr_wrdata_r[5],  dec_csr_wrdata_r[4]  & ~dec_csr_wrdata_r[5],
+                           dec_csr_wrdata_r[3],  dec_csr_wrdata_r[2]  & ~dec_csr_wrdata_r[3],
+                           dec_csr_wrdata_r[1],  dec_csr_wrdata_r[0]  & ~dec_csr_wrdata_r[1]};
+   // assign mracfg[31:0] = ();   // [Fixme]
 
-   rvdffe #(32)  mrac_ff (.*, .en(wr_mrac_r), .din(mrac_in[31:0]), .dout(mrac[31:0]));
+   rvdffe #(32)  mrac_ff    (.*, .en(wr_mrac_r),    .din(mrac_in[31:0]),          .dout(mrac[31:0]));         // [Fixme]
+
+   rvdffe #(32)  mracfg0_ff (.*, .en(wr_mracfg0_r), .din(mracfg_in[31:0]),        .dout(mracfg0[31:0]));      // [Fixme]
+   rvdffe #(32)  mracfg1_ff (.*, .en(wr_mracfg1_r), .din(mracfg_in[31:0]),        .dout(mracfg1[31:0]));      // [Fixme]
+   rvdffe #(32)  mra0a_ff   (.*, .en(wr_mra0a_r  ), .din(dec_csr_wrdata_r[31:0]), .dout(mrac0a [31:0]));
+   rvdffe #(32)  mra1a_ff   (.*, .en(wr_mra1a_r  ), .din(dec_csr_wrdata_r[31:0]), .dout(mrac1a [31:0]));
+   rvdffe #(32)  mra2a_ff   (.*, .en(wr_mra2a_r  ), .din(dec_csr_wrdata_r[31:0]), .dout(mrac2a [31:0]));
+   rvdffe #(32)  mra3a_ff   (.*, .en(wr_mra3a_r  ), .din(dec_csr_wrdata_r[31:0]), .dout(mrac3a [31:0]));
+   rvdffe #(32)  mra4a_ff   (.*, .en(wr_mra4a_r  ), .din(dec_csr_wrdata_r[31:0]), .dout(mrac4a [31:0]));
+   rvdffe #(32)  mra5a_ff   (.*, .en(wr_mra5a_r  ), .din(dec_csr_wrdata_r[31:0]), .dout(mrac5a [31:0]));
+   rvdffe #(32)  mra6a_ff   (.*, .en(wr_mra6a_r  ), .din(dec_csr_wrdata_r[31:0]), .dout(mrac6a [31:0]));
+   rvdffe #(32)  mra7a_ff   (.*, .en(wr_mra7a_r  ), .din(dec_csr_wrdata_r[31:0]), .dout(mrac7a [31:0]));
+   rvdffe #(32)  mra8a_ff   (.*, .en(wr_mra8a_r  ), .din(dec_csr_wrdata_r[31:0]), .dout(mrac8a [31:0]));
+   rvdffe #(32)  mra9a_ff   (.*, .en(wr_mra9a_r  ), .din(dec_csr_wrdata_r[31:0]), .dout(mrac9a [31:0]));
+   rvdffe #(32)  mra10a_ff  (.*, .en(wr_mra10a_r ), .din(dec_csr_wrdata_r[31:0]), .dout(mrac10a[31:0]));
+   rvdffe #(32)  mra11a_ff  (.*, .en(wr_mra11a_r ), .din(dec_csr_wrdata_r[31:0]), .dout(mrac11a[31:0]));
+   rvdffe #(32)  mra12a_ff  (.*, .en(wr_mra12a_r ), .din(dec_csr_wrdata_r[31:0]), .dout(mrac12a[31:0]));
+   rvdffe #(32)  mra13a_ff  (.*, .en(wr_mra13a_r ), .din(dec_csr_wrdata_r[31:0]), .dout(mrac13a[31:0]));
+   rvdffe #(32)  mra14a_ff  (.*, .en(wr_mra14a_r ), .din(dec_csr_wrdata_r[31:0]), .dout(mrac14a[31:0]));
+   rvdffe #(32)  mra15a_ff  (.*, .en(wr_mra15a_r ), .din(dec_csr_wrdata_r[31:0]), .dout(mrac15a[31:0]));
 
    // drive to LSU/IFU
-   assign dec_tlu_mrac_ff[31:0] = mrac[31:0];
+   assign dec_tlu_mrac_ff[31:0]    = mrac[31:0];
+   assign dec_tlu_mracfg0_ff[31:0] = mracfg0[31:0];     // CSR for memory region access configuration register
+   assign dec_tlu_mracfg1_ff       = mracfg1[31:0];	// CSR for memory region access configuration register
+   
+   assign dec_tlu_mra0a_ff         = mrac0a [31:0];     // CSR for memory region access configuration address register
+   assign dec_tlu_mra1a_ff         = mrac1a [31:0];     // CSR for memory region access configuration address register
+   assign dec_tlu_mra2a_ff         = mrac2a [31:0];     // CSR for memory region access configuration address register
+   assign dec_tlu_mra3a_ff         = mrac3a [31:0];     // CSR for memory region access configuration address register
+   assign dec_tlu_mra4a_ff         = mrac4a [31:0];     // CSR for memory region access configuration address register
+   assign dec_tlu_mra5a_ff         = mrac5a [31:0];     // CSR for memory region access configuration address register
+   assign dec_tlu_mra6a_ff         = mrac6a [31:0];     // CSR for memory region access configuration address register
+   assign dec_tlu_mra7a_ff         = mrac7a [31:0];     // CSR for memory region access configuration address register
+   assign dec_tlu_mra8a_ff         = mrac8a [31:0];     // CSR for memory region access configuration address register
+   assign dec_tlu_mra9a_ff         = mrac9a [31:0];     // CSR for memory region access configuration address register
+   assign dec_tlu_mra10a_ff        = mrac10a[31:0];     // CSR for memory region access configuration address register
+   assign dec_tlu_mra11a_ff        = mrac11a[31:0];     // CSR for memory region access configuration address register
+   assign dec_tlu_mra12a_ff        = mrac12a[31:0];     // CSR for memory region access configuration address register
+   assign dec_tlu_mra13a_ff        = mrac13a[31:0];     // CSR for memory region access configuration address register
+   assign dec_tlu_mra14a_ff        = mrac14a[31:0];     // CSR for memory region access configuration address register
+   assign dec_tlu_mra15a_ff        = mrac15a[31:0];     // CSR for memory region access configuration address register
+
 
    // ----------------------------------------------------------------------
    // MDEAU (WAR0)
@@ -2923,7 +3091,10 @@ assign dec_csr_legal_d = ( dec_csr_any_unq_d &
                            ~(dec_csr_wen_unq_d & (csr_mvendorid | csr_marchid | csr_mimpid | csr_mhartid | csr_mdseac | csr_meihap)) // that's not a write to a RO CSR
                            );
    // CSR read mux
-logic [31:0] mstatus_rf, mie_rf, mtvec_rf, mscratch_rf, mepc_rf, mcause_rf, mtval_rf, mip_rf, mcyclel_rf, mcycleh_rf, minstretl_rf, minstreth_rf, mrac_rf;
+logic [31:0] mstatus_rf, mie_rf, mtvec_rf, mscratch_rf, mepc_rf, mcause_rf, mtval_rf, mip_rf, mcyclel_rf, mcycleh_rf, minstretl_rf, minstreth_rf, mrac_rf; // [Fixme]
+logic [31:0] mracfg0_rf, mrac0a_rf, mrac1a_rf, mrac2a_rf,  mrac3a_rf,  mrac4a_rf,  mrac5a_rf,  mrac6a_rf,  mrac7a_rf; 
+logic [31:0] mracfg1_rf, mrac8a_rf, mrac9a_rf, mrac10a_rf, mrac11a_rf, mrac12a_rf, mrac13a_rf, mrac14a_rf, mrac15a_rf;
+
 `ifdef RV_USER_MODE
 assign mstatus_rf = {14'b0, mstatus[MSTATUS_MPRV], 4'b0, ~mstatus[MSTATUS_MPP], ~mstatus[MSTATUS_MPP], 3'b0, mstatus[MSTATUS_MPIE], 3'b0, mstatus[MSTATUS_MIE], 3'b0};
 `else
@@ -2940,7 +3111,29 @@ assign mcyclel_rf = mcyclel[31:0];
 assign mcycleh_rf = mcycleh_inc[31:0];
 assign minstretl_rf = minstretl_read[31:0];
 assign minstreth_rf = minstreth_read[31:0];
-assign mrac_rf = mrac[31:0];
+
+assign mrac_rf = mrac[31:0];			// [Fixme]
+
+assign mracfg0_rf  = mracfg0[31:0];
+assign mracfg1_rf  = mracfg1[31:0];              
+assign mrac0a_rf   = mrac0a [31:0];
+assign mrac1a_rf   = mrac1a [31:0];
+assign mrac2a_rf   = mrac2a [31:0];
+assign mrac3a_rf   = mrac3a [31:0];
+assign mrac4a_rf   = mrac4a [31:0];
+assign mrac5a_rf   = mrac5a [31:0];
+assign mrac6a_rf   = mrac6a [31:0];
+assign mrac7a_rf   = mrac7a [31:0];
+assign mrac8a_rf   = mrac8a [31:0];
+assign mrac9a_rf   = mrac9a [31:0];
+assign mrac10a_rf  = mrac10a[31:0];
+assign mrac11a_rf  = mrac11a[31:0];
+assign mrac12a_rf  = mrac12a[31:0];
+assign mrac13a_rf  = mrac13a[31:0];
+assign mrac14a_rf  = mrac14a[31:0];
+assign mrac15a_rf  = mrac15a[31:0];
+
+
 
 assign dec_csr_rddata_d[31:0] = (
 `ifdef RV_USER_MODE
@@ -2965,7 +3158,26 @@ assign dec_csr_rddata_d[31:0] = (
                                   ({32{csr_mcause}}    & mcause_rf) |
                                   ({32{csr_mscause}}   & {28'b0, mscause[3:0]}) |
                                   ({32{csr_mtval}}     & mtval_rf) |
-                                  ({32{csr_mrac}}      & mrac_rf) |
+                                  ({32{csr_mrac}}      & mrac_rf) |					// [Fixme]
+                                  ({32{csr_mracfg0}}   & mracfg0_rf) | 
+                                  ({32{csr_mracfg1}}   & mracfg1_rf) |
+                                  ({32{csr_mra0a}}     & mrac0a_rf)  |
+                                  ({32{csr_mra1a}}     & mrac1a_rf)  |
+                                  ({32{csr_mra2a}}     & mrac2a_rf)  |
+                                  ({32{csr_mra3a}}     & mrac3a_rf)  |
+                                  ({32{csr_mra4a}}     & mrac4a_rf)  |
+                                  ({32{csr_mra5a}}     & mrac5a_rf)  |
+                                  ({32{csr_mra6a}}     & mrac6a_rf)  |
+                                  ({32{csr_mra7a}}     & mrac7a_rf)  |
+                                  ({32{csr_mra8a}}     & mrac8a_rf)  |
+                                  ({32{csr_mra9a}}     & mrac9a_rf)  |
+                                  ({32{csr_mra10a}}    & mrac10a_rf) |
+                                  ({32{csr_mra11a}}    & mrac11a_rf) |
+                                  ({32{csr_mra12a}}    & mrac12a_rf) |
+                                  ({32{csr_mra13a}}    & mrac13a_rf) |
+                                  ({32{csr_mra14a}}    & mrac14a_rf) |
+                                  ({32{csr_mra15a}}    & mrac15a_rf) |
+                                                       
                                   ({32{csr_mdseac}}    & mdseac[31:0]) |
                                   ({32{csr_meivt}}     & {meivt[31:10], 10'b0}) |
                                   ({32{csr_meihap}}    & {meivt[31:10], meihap[9:2], 2'b0}) |
@@ -3041,7 +3253,25 @@ assign dec_csr_rddata_d[31:0] = (
    assign regfile.tlu.mcycleh = mcycleh_rf;
    assign regfile.tlu.minstretl = minstretl_rf;
    assign regfile.tlu.minstreth = minstreth_rf;
-   assign regfile.tlu.mrac = mrac_rf;
+   assign regfile.tlu.mrac     = mrac_rf;			// [Fixme]
+   assign regfile.tlu.mracfg0  = mracfg0_rf; 
+   assign regfile.tlu.mracfg1  = mracfg1_rf; 
+   assign regfile.tlu.mrac0a   = mrac0a_rf ; 
+   assign regfile.tlu.mrac1a   = mrac1a_rf ; 
+   assign regfile.tlu.mrac2a   = mrac2a_rf ; 
+   assign regfile.tlu.mrac3a   = mrac3a_rf ; 
+   assign regfile.tlu.mrac4a   = mrac4a_rf ; 
+   assign regfile.tlu.mrac5a   = mrac5a_rf ; 
+   assign regfile.tlu.mrac6a   = mrac6a_rf ; 
+   assign regfile.tlu.mrac7a   = mrac7a_rf ; 
+   assign regfile.tlu.mrac8a   = mrac8a_rf ; 
+   assign regfile.tlu.mrac9a   = mrac9a_rf ; 
+   assign regfile.tlu.mrac10a  = mrac10a_rf; 
+   assign regfile.tlu.mrac11a  = mrac11a_rf; 
+   assign regfile.tlu.mrac12a  = mrac12a_rf; 
+   assign regfile.tlu.mrac13a  = mrac13a_rf; 
+   assign regfile.tlu.mrac14a  = mrac14a_rf; 
+   assign regfile.tlu.mrac15a  = mrac15a_rf; 
 `endif
 
 endmodule // el2_dec_tlu_ctl

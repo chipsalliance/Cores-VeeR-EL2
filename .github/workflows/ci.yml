@@ -72,3 +72,18 @@ jobs:
     name: Build-Docs
     uses: ./.github/workflows/build-docs.yml
 
+  Report-Coverage:
+    name: Report-Coverage
+    needs: [
+      Test-Regression-Cache-Waypack-0-num-ways-2,
+      Test-Regression-Cache-Waypack-0-num-ways-4,
+      Test-Regression-Cache-Waypack-1-num-ways-2,
+      Test-Regression-Cache-Waypack-1-num-ways-4,
+      Test-Exceptions-Regression,
+      Test-Verification,
+      Test-Microarchitectural,
+      Test-RISCV-DV,
+      Test-RISCOF,
+      Test-OpenOCD
+    ]
+    uses: ./.github/workflows/report-coverage.yml

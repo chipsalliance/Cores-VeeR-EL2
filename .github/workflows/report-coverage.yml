@@ -1,0 +1,86 @@
+name: Coverage report
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  custom-coverage-reports:
+    name: Custom coverage reports
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set secrets version
+        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
+
+      - name: Prepare Environment
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_prepare_env
+
+      - name: Generate custom reports
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_custom_report
+
+      - name: Pack artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: info_files_v_mapped
+          path: info_files_v/*
+
+  pack-coverage-reports:
+    name: Coverage reports merger
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: debian:trixie
+    needs: [custom-coverage-reports]
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set secrets version
+        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
+
+      - name: Extract custom coverage
+        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        env:
+          SECRET_NAME: _secret_extract_custom_coverage
+
+      - name: Setup info-process
+        run: .github/scripts/info_process_setup.sh
+
+      - name: Prepare custom coverage
+        run: |
+          export SIM=v
+          .github/scripts/prepare_coverage_data.sh
+          # info_files_v_mapped uses the same dir.
+          rm -rf info_files_v
+
+      - name: Pack artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: v_coverage_single_data
+          path: v_coverage_single_data.tar.xz
+
+      - name: Pack artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: data_v
+          path: data_v/*

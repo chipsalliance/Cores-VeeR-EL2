@@ -22,7 +22,7 @@ cocotb-test==0.2.4
 pyuvm==2.9.1
 
 # Verification - Testing & Reporting
-pytest==7.4.1
+pytest==9.0.3
 pytest-html==3.2.0
 pytest-timeout==2.1.0
 pytest-md==0.2.0

@@ -66,7 +66,7 @@ class AHBLiteBFM(metaclass=utility_classes.Singleton):
                         self.rsp_driver_q.put_nowait(AHB_LITE_NOTIFICATION.AHB_LITE_READ)
 
             try:
-                (ahb_hrdata, ahb_hready, ahb_hresp) = self.req_driver_q.get_nowait()
+                ahb_hrdata, ahb_hready, ahb_hresp = self.req_driver_q.get_nowait()
                 self.dut.ahb_hrdata.value = ahb_hrdata
                 self.dut.ahb_hready.value = ahb_hready
                 self.dut.ahb_hresp.value = ahb_hresp

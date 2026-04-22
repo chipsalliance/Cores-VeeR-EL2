@@ -78,7 +78,7 @@ class JTAGBfm(metaclass=utility_classes.Singleton):
         while True:
             await FallingEdge(self.tck)
             try:
-                (tms, tdi) = self.req_driver_q.get_nowait()
+                tms, tdi = self.req_driver_q.get_nowait()
                 self.tms.value = tms
                 self.tdi.value = tdi
             except QueueEmpty:

@@ -255,7 +255,7 @@ Should Implement Insn
 
     Wait For Line On Uart           Hello VeeR
     Wait For Line On Uart           testing EBREAK
-    Wait For Line On Uart           trap! mstatus=0x1800, mcause=0x3, mepc=0x800002fa, insn=0x19002
+    Wait For Line On Uart           trap! mstatus=0x1800, mcause=0x3, mepc=0x800002f6, insn=0x19002
     Wait For Line On Uart           pass
     Wait For Line On Uart           testing ECALL
     Wait For Line On Uart           trap! mstatus=0x1800, mcause=0xb, mepc=0x80000332, insn=0x73

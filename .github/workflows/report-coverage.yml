@@ -15,7 +15,7 @@ jobs:
     env:
       DEBIAN_FRONTEND: "noninteractive"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -59,7 +59,7 @@ jobs:
       GHA_SA: gh-sa-veer-uploader
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -93,7 +93,7 @@ jobs:
       GHA_SA: gh-sa-veer-uploader
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 

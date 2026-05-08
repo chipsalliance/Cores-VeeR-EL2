@@ -15,7 +15,7 @@ jobs:
       contents: write
     steps:
       - name: Setup repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Print metadata
         run: |
@@ -55,7 +55,7 @@ jobs:
           path: ./riscof_dashboard
 
       - name: Checkout gh-pages
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: ./public.checkout

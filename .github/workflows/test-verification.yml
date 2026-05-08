@@ -23,7 +23,7 @@ jobs:
       FULL_NAME: "${{ matrix.bus }}-verification-${{ matrix.test }}"
     steps:
       - name: Setup repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -35,6 +35,7 @@ jobs:
 
       - name: Install prerequisities
         run: |
+          echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
             autoconf automake autotools-dev \
             bc bison build-essential \
@@ -124,7 +125,7 @@ jobs:
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 

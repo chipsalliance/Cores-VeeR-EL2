@@ -30,13 +30,14 @@ jobs:
     steps:
       - name: Install utils
         run: |
+          echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
           sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
             git python3 python3-pip build-essential ninja-build ccache \
             gcc-riscv64-unknown-elf
           pip3 install meson
 
       - name: Setup repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -86,7 +87,7 @@ jobs:
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 

@@ -413,10 +413,19 @@ import el2_pkg::*;
    el2_mem_if.veer_sram_src                el2_mem_export,
 
 `ifdef RV_LOCKSTEP_ENABLE
+   // Shadow Core trace
+   output logic [31:0] shadow_core_trace_rv_i_insn_ip,
+   output logic [31:0] shadow_core_trace_rv_i_address_ip,
+   output logic shadow_core_trace_rv_i_valid_ip,
+   output logic shadow_core_trace_rv_i_exception_ip,
+   output logic [4:0] shadow_core_trace_rv_i_ecause_ip,
+   output logic shadow_core_trace_rv_i_interrupt_ip,
+   output logic [31:0] shadow_core_trace_rv_i_tval_ip,
+
    // Shadow Core control
-   input logic  disable_corruption_detection_i,
-   input logic  lockstep_err_injection_en_i,
-   output logic corruption_detected_o,
+   input el2_mubi_pkg::el2_mubi_t disable_corruption_detection_i,
+   input el2_mubi_pkg::el2_mubi_t lockstep_err_injection_en_i,
+   output el2_mubi_pkg::el2_mubi_t corruption_detected_o,
 `endif
 
    // external MPC halt/run interface
@@ -480,7 +489,7 @@ import el2_pkg::*;
    logic [pt.ICACHE_NUM_WAYS-1:0]   ic_rd_hit;      // ic_rd_hit[3:0]
    logic         ic_tag_perr;                       // Ic tag parity error
 
-   logic [pt.ICACHE_INDEX_HI:3]  ic_debug_addr;     // Read/Write addresss to the Icache.
+   logic [pt.ICACHE_INDEX_HI:3]  ic_debug_addr;     // Read/Write address to the Icache.
    logic         ic_debug_rd_en;                    // Icache debug rd
    logic         ic_debug_wr_en;                    // Icache debug wr
    logic         ic_debug_tag_array;                // Debug tag array

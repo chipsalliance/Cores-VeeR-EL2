@@ -59,7 +59,7 @@ else ifeq ($(SIM), vcs)
     ifneq ($(CM_FILE),)
         EXTRA_ARGS += -cm_hier $(TEST_DIR)/$(CM_FILE)
     endif
-    EXTRA_ARGS += +incdir+$(CFGDIR) +incdir+$(SRCDIR)/include -assert svaext -cm line+cond+fsm+tgl+branch +vcs+lic+wait
+    EXTRA_ARGS += +define+FCOV +incdir+$(CFGDIR) +incdir+$(SRCDIR)/include -assert svaext -cm line+cond+fsm+tgl+branch -cg_coverage_control=1 +vcs+lic+wait
 endif
 
 # Produces verilog.dump VCD file

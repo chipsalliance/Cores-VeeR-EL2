@@ -12,6 +12,7 @@ lint_off -rule VARHIDDEN -file "*/el2_ifu_bp_ctl.sv"
 lint_off -rule VARHIDDEN -file "*/el2_ifu_mem_ctl.sv"
 lint_off -rule VARHIDDEN -file "*/el2_exu_alu_ctl.sv"
 lint_off -rule VARHIDDEN -file "*/el2_pic_ctrl.sv"
+lint_off -rule VARHIDDEN -file "*/el2_veer_lockstep.sv"
 
 // Width related warning require explicit type casting
 lint_off -rule WIDTHTRUNC -file "*/ahb_to_axi4.sv"
@@ -57,7 +58,7 @@ lint_off -rule WIDTHEXPAND -file "*/el2_exu_mul_ctl.sv"
 lint_off -rule WIDTHEXPAND -file "*/el2_dec_tlu_ctl.sv"
 lint_off -rule WIDTHEXPAND -file "*/el2_dma_ctrl.sv"
 lint_off -rule WIDTHEXPAND -file "*/el2_dbg.sv"
-lint_off -rule WIDTHEXPAND -file "*/el2_veer_lockstep.sv" -lines 383
+lint_off -rule WIDTHEXPAND -file "*/el2_veer_lockstep.sv" -lines 391
 
 // Unused parameters are probably safe to remove from RTL
 lint_off -rule UNUSEDPARAM -file "*/axi4_to_ahb.sv"
@@ -81,7 +82,7 @@ lint_off -rule BLKSEQ -file "*/beh_lib.sv" -lines 783
 lint_off -rule SYNCASYNCNET -file "*/el2_veer.sv" -lines 41
 
 // Unused clocks from shadow core
-lint_off -rule PINCONNECTEMPTY -file "*/el2_veer_lockstep.sv" -lines 1057-1058
+lint_off -rule PINCONNECTEMPTY -file "*/el2_veer_lockstep.sv" -lines 778-780
 
 // Logic that might be not optimal for event based model used by Verilator
 lint_off -rule UNOPTFLAT -file "*/axi4_to_ahb.sv"
@@ -92,6 +93,7 @@ lint_off -rule UNOPTFLAT -file "*/el2_exu_div_ctl.sv"
 lint_off -rule UNOPTFLAT -file "*/el2_lsu.sv"
 lint_off -rule UNOPTFLAT -file "*/el2_lsu_lsc_ctl.sv"
 lint_off -rule UNOPTFLAT -file "*/el2_pic_ctrl.sv"
+lint_off -rule UNOPTFLAT -file "*/el2_lsu_bus_buffer.sv"
 
 // Warnings related to the generated `el2_param.vh`
 lint_off -rule UNUSEDPARAM -file "*/el2_ifu_compress_ctl.sv"

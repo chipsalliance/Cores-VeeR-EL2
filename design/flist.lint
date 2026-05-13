@@ -6,6 +6,7 @@
 +incdir+$RV_ROOT/snapshots/default
 $RV_ROOT/snapshots/default/common_defines.vh
 $RV_ROOT/design/include/el2_def.sv
+$RV_ROOT/design/el2_mubi_pkg.sv
 $RV_ROOT/design/el2_veer_wrapper.sv
 $RV_ROOT/design/lib/el2_mem_if.sv
 $RV_ROOT/design/el2_mem.sv

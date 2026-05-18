@@ -96,6 +96,12 @@ TEST = hello_world
 TEST_DIR = ${TBDIR}/asm
 HEX_DIR = ${TBDIR}/hex
 
+# Define BUILD_TEST_DIR if TEST is set
+ifdef TEST
+#BUILD_TEST_DIR := build_$(TEST)
+BUILD_TEST_DIR := build_$(TEST)_$(shell date +'%Y%m%d-%H%M%S')
+endif
+
 # Coverage reporting
 # TODO: Set flags for other tools here as well
 ifeq ("$(COVERAGE)", "all")

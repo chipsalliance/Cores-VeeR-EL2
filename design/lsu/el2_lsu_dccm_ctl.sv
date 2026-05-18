@@ -70,10 +70,10 @@ import el2_pkg::*;
 
    input logic [pt.DCCM_DATA_WIDTH-1:0]    stbuf_data_any,          // the read out from stbuf
    input logic [pt.DCCM_ECC_WIDTH-1:0]     stbuf_ecc_any,           // the encoded data with ECC bits
-   input logic [pt.DCCM_DATA_WIDTH-1:0]    stbuf_fwddata_hi_m,      // stbuf fowarding to load
-   input logic [pt.DCCM_DATA_WIDTH-1:0]    stbuf_fwddata_lo_m,      // stbuf fowarding to load
-   input logic [pt.DCCM_BYTE_WIDTH-1:0]    stbuf_fwdbyteen_hi_m,    // stbuf fowarding to load
-   input logic [pt.DCCM_BYTE_WIDTH-1:0]    stbuf_fwdbyteen_lo_m,    // stbuf fowarding to load
+   input logic [pt.DCCM_DATA_WIDTH-1:0]    stbuf_fwddata_hi_m,      // stbuf forwarding to load
+   input logic [pt.DCCM_DATA_WIDTH-1:0]    stbuf_fwddata_lo_m,      // stbuf forwarding to load
+   input logic [pt.DCCM_BYTE_WIDTH-1:0]    stbuf_fwdbyteen_hi_m,    // stbuf forwarding to load
+   input logic [pt.DCCM_BYTE_WIDTH-1:0]    stbuf_fwdbyteen_lo_m,    // stbuf forwarding to load
 
    output logic [pt.DCCM_DATA_WIDTH-1:0]   dccm_rdata_hi_r,         // data from the dccm
    output logic [pt.DCCM_DATA_WIDTH-1:0]   dccm_rdata_lo_r,         // data from the dccm
@@ -126,7 +126,7 @@ import el2_pkg::*;
    output logic                            lsu_dccm_rden_m,         // dccm read
    output logic                            lsu_dccm_rden_r,         // dccm read
 
-   output logic                            dccm_dma_rvalid,         // dccm serviving the dma load
+   output logic                            dccm_dma_rvalid,         // dccm servicing the dma load
    output logic                            dccm_dma_ecc_error,      // DMA load had ecc error
    output logic [2:0]                      dccm_dma_rtag,           // DMA return tag
    output logic [63:0]                     dccm_dma_rdata,          // dccm data to dma request

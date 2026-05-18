@@ -22,7 +22,18 @@ USER_MODE_OPTS =
 endif
 
 CONF_PARAMS ?= -set build_axi4 $(USER_MODE_OPTS)
-
+ifdef lockstep_enable
+ CONF_PARAMS += -set lockstep_enable=1
+ ifdef lockstep_regfile_enable
+  CONF_PARAMS += -set lockstep_regfile_enable=1
+ endif
+ ifndef lockstep_delay
+  lockstep_delay := $(shell bash -c 'echo $$RANDOM')
+ endif
+$(info -----inside lockstep_delay_ifdef--------)
+ CONF_PARAMS += -set lockstep_delay=$(lockstep_delay)
+endif
+$(info ------------------ CONF_PARAMS is: $(CONF_PARAMS))
 TEST_CFLAGS = -g -gdwarf -O3 -funroll-all-loops
 ABI = -mabi=ilp32
 LD_ABI = $(ABI) -march=rv32imac
@@ -85,6 +96,12 @@ TEST = hello_world
 TEST_DIR = ${TBDIR}/asm
 HEX_DIR = ${TBDIR}/hex
 
+# Define BUILD_TEST_DIR if TEST is set
+ifdef TEST
+#BUILD_TEST_DIR := build_$(TEST)
+BUILD_TEST_DIR := build_$(TEST)_$(shell date +'%Y%m%d-%H%M%S')
+endif
+
 # Coverage reporting
 # TODO: Set flags for other tools here as well
 ifeq ("$(COVERAGE)", "all")
@@ -110,7 +127,7 @@ ifdef debug
  DEBUG_PLUS = +dumpon
  IRUN_DEBUG = -access +rc
  IRUN_DEBUG_RUN = -input ${RV_ROOT}/testbench/input.tcl
- VCS_DEBUG = -debug_access
+ VCS_DEBUG = -debug_access+r+w-memcbk -kdb
  VERILATOR_DEBUG = --trace
  RIVIERA_DEBUG = +access +r
 endif
@@ -205,11 +222,11 @@ verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	touch verilator-build
 
 vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
-	$(VCS) -full64 -assert svaext -sverilog +define+RV_OPENSOURCE $(ASSERT_DEFINES) \
+    $(VCS) $(VCS_DEBUG) -full64 -assert svaext -sverilog +define+RV_OPENSOURCE $(ASSERT_DEFINES) \
 	  +error+500 +incdir+${RV_ROOT}/design/lib \
 	  +incdir+${RV_ROOT}/design/include ${BUILD_DIR}/common_defines.vh \
 	  +incdir+$(BUILD_DIR)  +libext+.v $(defines) -CFLAGS "${CFLAGS}" \
-	  -cm_hier $(CM_HIER_FILE) \
+	  -cm_hier $(CM_HIER_FILE) -timescale=1ns/1ps \
 	  -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -l vcs.log
 	touch vcs-build
 
@@ -254,7 +271,7 @@ irun: program.hex irun-build
 	  -snapshot ${snapshot} -r $(snapshot) $(IRUN_DEBUG_RUN) $(profile)
 
 vcs: program.hex vcs-build
-	./simv $(DEBUG_PLUS) +vcs+lic+wait  -l vcs.log
+	./simv $(DEBUG_PLUS) +vcs+lic+wait  -a vcs.log
 
 vlog: program.hex ${TBFILES} ${BUILD_DIR}/defines.h
 	$(VLOG) -l vlog.log -sv -mfcu +incdir+${BUILD_DIR}+${RV_ROOT}/design/include+${RV_ROOT}/design/lib -ccflags "${CFLAGS}"\

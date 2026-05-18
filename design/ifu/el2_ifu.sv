@@ -118,7 +118,7 @@ import el2_pkg::*;
    output logic       ifu_ic_error_start,     // has all of the I$ ecc/parity for data/tag
 
 //   I$ & ITAG Ports
-   output logic [31:1]               ic_rw_addr,         // Read/Write addresss to the Icache.
+   output logic [31:1]               ic_rw_addr,         // Read/Write address to the Icache.
    output logic [pt.ICACHE_NUM_WAYS-1:0]                ic_wr_en,           // Icache write enable, when filling the Icache.
    output logic                      ic_rd_en,           // Icache read  enable.
 
@@ -135,7 +135,7 @@ import el2_pkg::*;
    output logic [63:0]               ic_premux_data,     // Premux data to be muxed with each way of the Icache.
    output logic                      ic_sel_premux_data, // Select the premux data.
 
-   output logic [pt.ICACHE_INDEX_HI:3]               ic_debug_addr,      // Read/Write addresss to the Icache.
+   output logic [pt.ICACHE_INDEX_HI:3]               ic_debug_addr,      // Read/Write address to the Icache.
    output logic                      ic_debug_rd_en,     // Icache debug rd
    output logic                      ic_debug_wr_en,     // Icache debug wr
    output logic                      ic_debug_tag_array, // Debug tag array
@@ -188,7 +188,7 @@ import el2_pkg::*;
    output logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] ifu_i0_bp_index, // BP index
    output logic [pt.BHT_GHR_SIZE-1:0] ifu_i0_bp_fghr, // BP FGHR
    output logic [pt.BTB_BTAG_SIZE-1:0] ifu_i0_bp_btag, // BP tag
-   output logic [$clog2(pt.BTB_SIZE)-1:0]         ifu_i0_fa_index,          // Fully associt btb index
+   output logic [$clog2(pt.BTB_SIZE)-1:0]         ifu_i0_fa_index,          // Fully associative btb index
 
    input el2_predict_pkt_t  exu_mp_pkt, // mispredict packet
    input logic [pt.BHT_GHR_SIZE-1:0] exu_mp_eghr, // execute ghr
@@ -199,7 +199,7 @@ import el2_pkg::*;
    input el2_br_tlu_pkt_t dec_tlu_br0_r_pkt, // slot0 update/error pkt
    input logic [pt.BHT_GHR_SIZE-1:0] exu_i0_br_fghr_r, // fghr to bp
    input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] exu_i0_br_index_r, // bp index
-   input logic [$clog2(pt.BTB_SIZE)-1:0] dec_fa_error_index, // Fully associt btb error index
+   input logic [$clog2(pt.BTB_SIZE)-1:0] dec_fa_error_index, // Fully associative btb error index
 
    input dec_tlu_flush_lower_wb,
 
@@ -326,7 +326,7 @@ import el2_pkg::*;
    logic              exu_mp_valid; // conditional branch mispredict
    logic exu_mp_way; // conditional branch mispredict
    logic exu_mp_ataken; // direction is actual taken
-   logic exu_mp_boffset; // branch offsett
+   logic exu_mp_boffset; // branch offset
    logic exu_mp_pc4; // branch is a 4B inst
    logic exu_mp_call; // branch is a call inst
    logic exu_mp_ret; // branch is a ret inst

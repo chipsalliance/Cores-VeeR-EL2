@@ -111,10 +111,11 @@ module ahb_sif #(
     end
   end
 
+  logic hresp;
 
   assign HRDATA = HREADY ? rdata : ~rdata;
   assign HREADYOUT = wscnt == 0;
-  assign HRESP = 0;
+  assign HRESP = hresp;
 
   always @(posedge HCLK or negedge HRESETn) begin
     if (~HRESETn) begin
@@ -122,6 +123,7 @@ module ahb_sif #(
       write <= 1'b0;
       rdata <= '0;
       wscnt <= 0;
+      hresp <= '0;
     end else begin
       if (HREADY & HSEL) begin
         laddr <= HADDR;

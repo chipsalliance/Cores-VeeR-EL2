@@ -127,7 +127,7 @@ ifdef debug
  DEBUG_PLUS = +dumpon
  IRUN_DEBUG = -access +rc
  IRUN_DEBUG_RUN = -input ${RV_ROOT}/testbench/input.tcl
- VCS_DEBUG = -debug_access
+ VCS_DEBUG = -debug_access+r+w-memcbk -kdb
  VERILATOR_DEBUG = --trace
  RIVIERA_DEBUG = +access +r
 endif
@@ -222,11 +222,11 @@ verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	touch verilator-build
 
 vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
-	$(VCS) -full64 -assert svaext -sverilog +define+RV_OPENSOURCE $(ASSERT_DEFINES) \
+    $(VCS) $(VCS_DEBUG) -full64 -assert svaext -sverilog +define+RV_OPENSOURCE $(ASSERT_DEFINES) \
 	  +error+500 +incdir+${RV_ROOT}/design/lib \
 	  +incdir+${RV_ROOT}/design/include ${BUILD_DIR}/common_defines.vh \
 	  +incdir+$(BUILD_DIR)  +libext+.v $(defines) -CFLAGS "${CFLAGS}" \
-	  -cm_hier $(CM_HIER_FILE) \
+	  -cm_hier $(CM_HIER_FILE) -timescale=1ns/1ps \
 	  -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -l vcs.log
 	touch vcs-build
 

@@ -22,7 +22,18 @@ USER_MODE_OPTS =
 endif
 
 CONF_PARAMS ?= -set build_axi4 $(USER_MODE_OPTS)
-
+ifdef lockstep_enable
+ CONF_PARAMS += -set lockstep_enable=1
+ ifdef lockstep_regfile_enable
+  CONF_PARAMS += -set lockstep_regfile_enable=1
+ endif
+ ifndef lockstep_delay
+  lockstep_delay := $(shell bash -c 'echo $$RANDOM')
+ endif
+$(info -----inside lockstep_delay_ifdef--------)
+ CONF_PARAMS += -set lockstep_delay=$(lockstep_delay)
+endif
+$(info ------------------ CONF_PARAMS is: $(CONF_PARAMS))
 TEST_CFLAGS = -g -gdwarf -O3 -funroll-all-loops
 ABI = -mabi=ilp32
 LD_ABI = $(ABI) -march=rv32imac

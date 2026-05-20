@@ -1540,13 +1540,14 @@ module tb_top
         preload_iccm();
 
 `ifndef VERILATOR
-    `ifdef VCS
-        $fsdbDumpfile("dump.fsdb");
-        $fsdbDumpvars(0, tb_top);
-    `else
-        $dumpfile("dump.vcd");
-        $dumpvars(0, tb_top);
-    `endif
+   `ifdef VCS_DEBUG
+       $fsdbDumpfile("dump.fsdb");
+       $fsdbDumpvars(0, tb_top);
+       $fsdbDumpMDA();
+   `else
+       $dumpfile("dump.vcd");
+       $dumpvars(0, tb_top);
+   `endif
         rst_l = 1'b1;
         rst_l = #5 1'b0;
         rst_l = #25 1'b1;

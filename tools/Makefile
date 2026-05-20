@@ -28,7 +28,9 @@ ifdef lockstep_enable
   CONF_PARAMS += -set lockstep_regfile_enable=1
  endif
  ifndef lockstep_delay
-  lockstep_delay := $(shell bash -c 'echo $$RANDOM')
+	MIN:= 2
+	MAX:= 4
+  lockstep_delay := $(shell bash -c 'echo $$(( ( $$RANDOM % ($(MAX) - $(MIN) + 1) ) + $(MIN) ))')
  endif
 $(info -----inside lockstep_delay_ifdef--------)
  CONF_PARAMS += -set lockstep_delay=$(lockstep_delay)
@@ -127,7 +129,7 @@ ifdef debug
  DEBUG_PLUS = +dumpon
  IRUN_DEBUG = -access +rc
  IRUN_DEBUG_RUN = -input ${RV_ROOT}/testbench/input.tcl
- VCS_DEBUG = -debug_access+r+w-memcbk -kdb
+ VCS_DEBUG = -debug_access+r+w -debug_access+all -kdb +define+VCS_DEBUG
  VERILATOR_DEBUG = --trace
  RIVIERA_DEBUG = +access +r
 endif
@@ -222,11 +224,11 @@ verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	touch verilator-build
 
 vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
-    $(VCS) $(VCS_DEBUG) -full64 -assert svaext -sverilog +define+RV_OPENSOURCE $(ASSERT_DEFINES) \
+	$(VCS) $(VCS_DEBUG) -full64 -assert svaext -sverilog +define+RV_OPENSOURCE $(ASSERT_DEFINES) \
 	  +error+500 +incdir+${RV_ROOT}/design/lib \
 	  +incdir+${RV_ROOT}/design/include ${BUILD_DIR}/common_defines.vh \
 	  +incdir+$(BUILD_DIR)  +libext+.v $(defines) -CFLAGS "${CFLAGS}" \
-	  -cm_hier $(CM_HIER_FILE) -timescale=1ns/1ps \
+	  -cm_hier $(CM_HIER_FILE) -timescale=1ns/10ps \
 	  -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -l vcs.log
 	touch vcs-build
 

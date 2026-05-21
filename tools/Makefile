@@ -22,6 +22,12 @@ USER_MODE_OPTS =
 endif
 
 CONF_PARAMS ?= -set build_axi4 $(USER_MODE_OPTS)
+
+ifneq ($(findstring dcls,$(TEST)),)
+lockstep_enable ?= 1
+lockstep_regfile_enable ?= 1
+endif
+
 ifdef lockstep_enable
  CONF_PARAMS += -set lockstep_enable=1
  ifdef lockstep_regfile_enable

@@ -4,7 +4,7 @@ COLOR_WHITE="\033[1;37m"
 COLOR_RED="\033[0;31m"
 COLOR_GREEN="\033[1;32m"
 
-RESULTS_DIR="results"
+RESULTS_DIR="regression_results"
 
 mkdir -p ${RESULTS_DIR}
 
@@ -22,15 +22,18 @@ TESTS=($TESTS)
 for NAME in ${TESTS[@]}; do
     echo -e "${COLOR_WHITE}==================== running test '${NAME}' ====================${COLOR_CLEAR}"
 
-    for COVERAGE in branch toggle functional; do
+#    for COVERAGE in branch toggle functional; do
+    for COVERAGE in all; do
 
         echo -e "${COLOR_WHITE}========== ${COVERAGE} coverage ==========${COLOR_CLEAR}"
         LOG="${RESULTS_DIR}/test_${NAME}_${COVERAGE}.log"
-        DIR="run_${NAME}_${COVERAGE}"
+#SMODI        DIR="run_${NAME}_${COVERAGE}"
+        DIR="${RESULTS_DIR}/run_${NAME}_${COVERAGE}"
 
         # Run the test
         mkdir -p ${DIR}
-        make -j`nproc` -C ${DIR} -f $RV_ROOT/tools/Makefile verilator TEST=${NAME} COVERAGE=${COVERAGE} 2>&1 | tee ${LOG}
+#        make -j`nproc` -C ${DIR} -f $RV_ROOT/tools/Makefile verilator TEST=${NAME} COVERAGE=${COVERAGE} 2>&1 | tee ${LOG}
+        make -j`nproc` -C ${DIR} -f $RV_ROOT/tools/Makefile vcs TEST=${NAME} COVERAGE=${COVERAGE} 2>&1 | tee ${LOG}
         RES=${PIPESTATUS[0]}
         if [ ${RES} -ne 0 ] || ! [ -f "${DIR}/coverage.dat" ]; then
             EXITCODE=-1
@@ -45,5 +48,11 @@ for NAME in ${TESTS[@]}; do
         fi
     done
 done
+# Generate URG report for VCS coverage if any .vdb directories were created
+VDB_DIRS=$(find ${RESULTS_DIR} -type d -name "*.vdb")
+if [ -n "$VDB_DIRS" ]; then
+    echo -e "${COLOR_WHITE}==================== Generating URG Report ====================${COLOR_CLEAR}"
+    urg -dir $VDB_DIRS -report ${RESULTS_DIR}/urgReport
+fi
 
 exit ${EXITCODE}

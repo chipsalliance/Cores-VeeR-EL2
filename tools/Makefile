@@ -32,13 +32,13 @@ ifdef lockstep_enable
 	MAX:= 4
   lockstep_delay := $(shell bash -c 'echo $$(( ( $$RANDOM % ($(MAX) - $(MIN) + 1) ) + $(MIN) ))')
  endif
-$(info -----inside lockstep_delay_ifdef--------)
  CONF_PARAMS += -set lockstep_delay=$(lockstep_delay)
 endif
 $(info ------------------ CONF_PARAMS is: $(CONF_PARAMS))
 TEST_CFLAGS = -g -gdwarf -O3 -funroll-all-loops
 ABI = -mabi=ilp32
-LD_ABI = $(ABI) -march=rv32imac
+#SMODI LD_ABI = $(ABI) -march=rv32imac
+LD_ABI = $(ABI) -march=rv32imc
 
 TB_EXTRA_ARGS ?= --test-halt
 
@@ -58,7 +58,8 @@ VCS = vcs
 VLOG = qverilog
 VERILATOR = verilator
 RIVIERA = riviera
-GCC_PREFIX = riscv64-unknown-elf
+#SMODI GCC_PREFIX = riscv64-unknown-elf
+GCC_PREFIX = riscv-none-elf
 BUILD_DIR = snapshots/${snapshot}
 TBDIR = ${RV_ROOT}/testbench
 PICOLIBC_DIR = ${RV_ROOT}/third_party/picolibc/install
@@ -108,12 +109,17 @@ endif
 # TODO: Set flags for other tools here as well
 ifeq ("$(COVERAGE)", "all")
     VERILATOR_COVERAGE = --coverage
+#    VCS_COVERAGE = -cm line+cond+fsm+tgl+branch+assert+fcov
+    VCS_COVERAGE = -cm line+cond+fsm+tgl+branch+assert
 else ifeq ("$(COVERAGE)", "branch")
     VERILATOR_COVERAGE = --coverage-line
+    VCS_COVERAGE = -cm branch
 else ifeq ("$(COVERAGE)", "toggle")
     VERILATOR_COVERAGE = --coverage-toggle
+    VCS_COVERAGE = -cm tgl
 else ifeq ("$(COVERAGE)", "functional")
     VERILATOR_COVERAGE = --coverage-user
+#not a valid option    VCS_COVERAGE = -cm fcov
 else ifneq ("$(COVERAGE)", "")
     $(error Unknown COVERAGE value '$(COVERAGE)')
 endif
@@ -126,7 +132,7 @@ endif
 OFILES = $(TEST).o
 
 ifdef debug
- DEBUG_PLUS = +dumpon
+ DEBUG_PLUS = +dumpon +fsdbfile+dump.fsdb +fsdb+all=on +fsdb+mda=on
  IRUN_DEBUG = -access +rc
  IRUN_DEBUG_RUN = -input ${RV_ROOT}/testbench/input.tcl
  VCS_DEBUG = -debug_access+r+w -debug_access+all -kdb +define+VCS_DEBUG
@@ -224,11 +230,11 @@ verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	touch verilator-build
 
 vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
-	$(VCS) $(VCS_DEBUG) -full64 -assert svaext -sverilog +define+RV_OPENSOURCE $(ASSERT_DEFINES) \
+	$(VCS) $(VCS_DEBUG) -full64 -assert svaext -sverilog +define+RV_OPENSOURCE $(LOCKSTEP_ENABLE) $(LOCKSTEP_REGFILE_ENABLE) $(ASSERT_DEFINES) \
 	  +error+500 +incdir+${RV_ROOT}/design/lib \
 	  +incdir+${RV_ROOT}/design/include ${BUILD_DIR}/common_defines.vh \
 	  +incdir+$(BUILD_DIR)  +libext+.v $(defines) -CFLAGS "${CFLAGS}" \
-	  -cm_hier $(CM_HIER_FILE) -timescale=1ns/10ps \
+	  -cm_hier $(CM_HIER_FILE) $(VCS_COVERAGE) -timescale=1ns/10ps \
 	  -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -l vcs.log
 	touch vcs-build
 
@@ -255,6 +261,10 @@ riviera-build: ${TBFILES} ${BUILD_DIR}/defines.h
 
 ############ TEST Simulation ###############################
 
+ifneq ($(TEST),)
+# TEST is set
+ifeq ($(notdir $(CURDIR)),$(BUILD_TEST_DIR))
+# In build directory, use normal targets
 verilator: program.hex verilator-build
 	# FIXME: Assuming here that either begin_signature or end_signature implies
 	# that both symbols are present.
@@ -273,7 +283,7 @@ irun: program.hex irun-build
 	  -snapshot ${snapshot} -r $(snapshot) $(IRUN_DEBUG_RUN) $(profile)
 
 vcs: program.hex vcs-build
-	./simv $(DEBUG_PLUS) +vcs+lic+wait  -a vcs.log
+	./simv $(DEBUG_PLUS) +vcs+lic+wait $(VCS_COVERAGE) -a vcs.log
 
 vlog: program.hex ${TBFILES} ${BUILD_DIR}/defines.h
 	$(VLOG) -l vlog.log -sv -mfcu +incdir+${BUILD_DIR}+${RV_ROOT}/design/include+${RV_ROOT}/design/lib -ccflags "${CFLAGS}"\
@@ -281,6 +291,38 @@ vlog: program.hex ${TBFILES} ${BUILD_DIR}/defines.h
 
 riviera: program.hex riviera-build
 	vsim -c -lib work ${DEBUG_PLUS} ${RIVIERA_DEBUG} tb_top -do "run -all; exit" -l riviera.log
+
+endif
+else
+# TEST not set, use normal targets
+verilator: program.hex verilator-build
+	# FIXME: Assuming here that either begin_signature or end_signature implies
+	# that both symbols are present.
+	grep -E "(begin|end)_signature" $(TEST).sym >/dev/null 2>&1; \
+	if [ $$? -eq 0 ]; then \
+		BEG=`grep "begin_signature" $(TEST).sym | cut -d\  -f 1`;\
+		END=`grep "end_signature"   $(TEST).sym | cut -d\  -f 1`;\
+		./obj_dir/Vtb_top ${TB_EXTRA_ARGS} --mem-signature $${BEG} $${END}; \
+	else \
+		./obj_dir/Vtb_top ${TB_EXTRA_ARGS}; \
+	fi
+
+irun: program.hex irun-build
+	$(IRUN) -64bit -abvglobalfailurelimit 1 +lic_queue -licqueue \
+	  -status -xmlibdirpath . -xmlibdirname veer.build \
+	  -snapshot ${snapshot} -r $(snapshot) $(IRUN_DEBUG_RUN) $(profile)
+
+vcs: program.hex vcs-build
+	./simv $(DEBUG_PLUS) +vcs+lic+wait $(VCS_COVERAGE) -l vcs.log
+
+vlog: program.hex ${TBFILES} ${BUILD_DIR}/defines.h
+	$(VLOG) -l vlog.log -sv -mfcu +incdir+${BUILD_DIR}+${RV_ROOT}/design/include+${RV_ROOT}/design/lib -ccflags "${CFLAGS}"\
+        $(ASSERT_DEFINES) $(defines) -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -R +nowarn3829 +nowarn2583 ${DEBUG_PLUS} -suppress 14408 -suppress 16154
+
+riviera: program.hex riviera-build
+	vsim -c -lib work ${DEBUG_PLUS} ${RIVIERA_DEBUG} tb_top -do "run -all; exit" -l riviera.log
+
+endif
 
 
 
@@ -333,3 +375,29 @@ help:
 
 .PHONY: help clean picolibc verilator vcs irun vlog riviera
 
+# Automatic build directory creation based on TEST
+ifdef TEST
+#BUILD_TEST_DIR := build_$(TEST)
+ifneq ($(notdir $(CURDIR)),$(BUILD_TEST_DIR))
+verilator: 
+	mkdir -p $(BUILD_TEST_DIR)
+	cd $(BUILD_TEST_DIR) && exec $(MAKE) -f "${RV_ROOT}/tools/Makefile" snapshot=$(snapshot) TEST=$(TEST) verilator
+
+irun: 
+	mkdir -p $(BUILD_TEST_DIR)
+	cd $(BUILD_TEST_DIR) && exec $(MAKE) -f "${RV_ROOT}/tools/Makefile" snapshot=$(snapshot) TEST=$(TEST) irun
+
+vcs: 
+	mkdir -p $(BUILD_TEST_DIR)
+	cd $(BUILD_TEST_DIR) && exec $(MAKE) -f "${RV_ROOT}/tools/Makefile" snapshot=$(snapshot) TEST=$(TEST) vcs
+
+vlog: 
+	mkdir -p $(BUILD_TEST_DIR)
+	cd $(BUILD_TEST_DIR) && exec $(MAKE) -f "${RV_ROOT}/tools/Makefile" snapshot=$(snapshot) TEST=$(TEST) vlog
+
+riviera: 
+	mkdir -p $(BUILD_TEST_DIR)
+	cd $(BUILD_TEST_DIR) && exec $(MAKE) -f "${RV_ROOT}/tools/Makefile" snapshot=$(snapshot) TEST=$(TEST) riviera
+
+endif
+endif

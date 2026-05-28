@@ -986,9 +986,14 @@ import el2_pkg::*;
   `define RV_ASSERT_OR_VERILATOR
 `endif
 `ifdef RV_ASSERT_OR_VERILATOR
+   logic disable_const_delay_assertion;
+   initial begin
+     disable_const_delay_assertion = 0;
+   end
+
    property p_const_delay;
    @(posedge clk)
-   disable iff (!core_rst_l)
+   disable iff (!core_rst_l || disable_const_delay_assertion)
     shadow_core_trace_rv_i_valid_ip |-> (
       $past(trace_rv_i_valid_ip, `RV_LOCKSTEP_DELAY) &&
       shadow_core_trace_rv_i_insn_ip      == $past(trace_rv_i_insn_ip,      `RV_LOCKSTEP_DELAY) &&

@@ -999,11 +999,13 @@ module tb_top
 `ifdef RV_LOCKSTEP_ENABLE
 `define VEER rvtop_wrapper.rvtop.veer
 `define LOCKSTEP rvtop_wrapper.rvtop.lockstep
+`define LOCKSTEP_CONST_DELAY_ASSERT_DISABLE rvtop_wrapper.rvtop.disable_const_delay_assertion
 // Injected values should be randomized & it should be ensured that they're different
 // to what's their current value
     always@(inject_lockstep_in_dist,    inject_veer_in_dist, clear_inject_in_dist,
             inject_lockstep_in_dist_no, inject_veer_in_dist_no) begin: inject_corruption
         if (inject_lockstep_in_dist) begin: inject_lockstep_corruption
+            force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
             case (inject_lockstep_in_dist_no)
                 0: force `LOCKSTEP.rst_vec = '1;
                 1: force `LOCKSTEP.nmi_int = '1;
@@ -1115,6 +1117,7 @@ module tb_top
                 default: force `LOCKSTEP.lockstep_err_injection_en_i = '1;
             endcase
         end else if (inject_veer_in_dist) begin: inject_veer_corruption
+          force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
           case (inject_veer_in_dist_no)
                 0: force `VEER.rst_vec = '1;
                 1: force `VEER.nmi_int = '1;
@@ -1227,6 +1230,7 @@ module tb_top
             endcase
         end
         if (clear_inject_in_dist) begin : clear_err_injection
+            release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
             force `LOCKSTEP.rst_vec = reset_vector[31:1];
             release `LOCKSTEP.nmi_int;
             force `LOCKSTEP.nmi_vec = nmi_vector[31:1];

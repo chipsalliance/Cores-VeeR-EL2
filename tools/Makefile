@@ -29,16 +29,16 @@ lockstep_regfile_enable ?= 1
 endif
 
 ifdef lockstep_enable
- CONF_PARAMS += -set lockstep_enable=1
+ override CONF_PARAMS += -set lockstep_enable=1
  ifdef lockstep_regfile_enable
-  CONF_PARAMS += -set lockstep_regfile_enable=1
+  override CONF_PARAMS += -set lockstep_regfile_enable=1
  endif
  ifndef lockstep_delay
 	MIN:= 2
 	MAX:= 4
   lockstep_delay := $(shell bash -c 'echo $$(( ( $$RANDOM % ($(MAX) - $(MIN) + 1) ) + $(MIN) ))')
  endif
- CONF_PARAMS += -set lockstep_delay=$(lockstep_delay)
+ override CONF_PARAMS += -set lockstep_delay=$(lockstep_delay)
 endif
 $(info ------------------ CONF_PARAMS is: $(CONF_PARAMS))
 TEST_CFLAGS = -g -gdwarf -O3 -funroll-all-loops
@@ -113,6 +113,9 @@ endif
 
 # Coverage reporting
 # TODO: Set flags for other tools here as well
+ifneq ("$(COVERAGE)", "")
+    FCOV_DEFINES = +define+FCOV
+endif
 ifeq ("$(COVERAGE)", "all")
     VERILATOR_COVERAGE = --coverage
 #    VCS_COVERAGE = -cm line+cond+fsm+tgl+branch+assert+fcov
@@ -193,7 +196,9 @@ TBFILES = $(TBDIR)/tb_top_pkg.sv \
           $(TBDIR)/axi4_mux/axi_crossbar_wr.v \
           $(TBDIR)/axi4_mux/axi_register_rd.v \
           $(TBDIR)/axi4_mux/axi_register_wr.v \
-          $(TBDIR)/axi4_mux/priority_encoder.v
+          $(TBDIR)/axi4_mux/priority_encoder.v \
+	  $(TBDIR)/coverage/fcov/dcls_fcov.sv \
+	  $(TBDIR)/coverage/fcov/dcls_fcov_bind.sv 
 
 defines  = $(BUILD_DIR)/common_defines.vh
 defines += ${RV_ROOT}/design/include/el2_def.sv
@@ -236,7 +241,7 @@ verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	touch verilator-build
 
 vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
-	$(VCS) $(VCS_DEBUG) -full64 -assert svaext -sverilog +define+RV_OPENSOURCE $(LOCKSTEP_ENABLE) $(LOCKSTEP_REGFILE_ENABLE) $(ASSERT_DEFINES) \
+	$(VCS) $(VCS_DEBUG) -full64 -assert svaext -sverilog $(FCOV_DEFINES) +define+RV_OPENSOURCE $(LOCKSTEP_ENABLE) $(LOCKSTEP_REGFILE_ENABLE) $(ASSERT_DEFINES) \
 	  +error+500 +incdir+${RV_ROOT}/design/lib \
 	  +incdir+${RV_ROOT}/design/include ${BUILD_DIR}/common_defines.vh \
 	  +incdir+$(BUILD_DIR)  +libext+.v $(defines) -CFLAGS "${CFLAGS}" \

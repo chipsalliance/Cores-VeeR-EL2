@@ -6,6 +6,8 @@ COLOR_GREEN="\033[1;32m"
 
 RESULTS_DIR="regression_results"
 
+SIMULATOR=${1:-verilator}
+
 mkdir -p ${RESULTS_DIR}
 
 # Configure VeeR
@@ -15,6 +17,8 @@ if [ $? -ne 0 ]; then
     echo "Failed to configure VeeR-EL2 core"
     exit -1
 fi
+
+echo -e "${COLOR_WHITE}==================== Using simulator: ${SIMULATOR} ====================${COLOR_CLEAR}"
 
 # Run regression tests with coverage collection enabled
 EXITCODE=0
@@ -32,27 +36,46 @@ for NAME in ${TESTS[@]}; do
 
         # Run the test
         mkdir -p ${DIR}
-#        make -j`nproc` -C ${DIR} -f $RV_ROOT/tools/Makefile verilator TEST=${NAME} COVERAGE=${COVERAGE} 2>&1 | tee ${LOG}
-        make -j`nproc` -C ${DIR} -f $RV_ROOT/tools/Makefile vcs TEST=${NAME} COVERAGE=${COVERAGE} 2>&1 | tee ${LOG}
+        make -j`nproc` -C ${DIR} -f $RV_ROOT/tools/Makefile ${SIMULATOR} TEST=${NAME} COVERAGE=${COVERAGE} 2>&1 | tee ${LOG}
         RES=${PIPESTATUS[0]}
-        if [ ${RES} -ne 0 ] || ! [ -f "${DIR}/coverage.dat" ]; then
+
+        FAILED=0
+        if [ ${RES} -ne 0 ]; then
+            FAILED=1
+        elif [ "${SIMULATOR}" == "verilator" ] && ! [ -f "${DIR}/coverage.dat" ]; then
+            FAILED=1
+        fi
+
+        if [ ${FAILED} -ne 0 ]; then
             EXITCODE=-1
             echo -e "${COLOR_WHITE}Test '${NAME}' ${COLOR_RED}FAILED${COLOR_CLEAR}"
         else
-
-            # Copy and convert coverage data
-            cp ${DIR}/coverage.dat ${RESULTS_DIR}/coverage_${NAME}_${COVERAGE}.dat
-            verilator_coverage --write-info ${RESULTS_DIR}/coverage_${NAME}_${COVERAGE}.info ${RESULTS_DIR}/coverage_${NAME}_${COVERAGE}.dat
-
+            if [ "${SIMULATOR}" == "verilator" ]; then
+                # Copy and convert coverage data
+                cp ${DIR}/coverage.dat ${RESULTS_DIR}/coverage_${NAME}_${COVERAGE}.dat
+                verilator_coverage --write-info ${RESULTS_DIR}/coverage_${NAME}_${COVERAGE}.info ${RESULTS_DIR}/coverage_${NAME}_${COVERAGE}.dat
+            fi
             echo -e "${COLOR_WHITE}Test '${NAME}' ${COLOR_GREEN}SUCCEEDED${COLOR_CLEAR}"
         fi
     done
 done
+
 # Generate URG report for VCS coverage if any .vdb directories were created
-VDB_DIRS=$(find ${RESULTS_DIR} -type d -name "*.vdb")
-if [ -n "$VDB_DIRS" ]; then
-    echo -e "${COLOR_WHITE}==================== Generating URG Report ====================${COLOR_CLEAR}"
-    urg -dir $VDB_DIRS -report ${RESULTS_DIR}/urgReport
+if [ "${SIMULATOR}" == "vcs" ]; then
+    VDB_DIRS=$(find ${RESULTS_DIR} -type d -name "*.vdb")
+    if [ -n "$VDB_DIRS" ]; then
+        echo -e "${COLOR_WHITE}==================== Generating URG Report ====================${COLOR_CLEAR}"
+        urg -dir $VDB_DIRS -report ${RESULTS_DIR}/urgReport
+    fi
+fi
+
+# Generate merged coverage report for Verilator if any .dat files were created
+if [ "${SIMULATOR}" == "verilator" ]; then
+    DAT_FILES=$(find ${RESULTS_DIR} -maxdepth 1 -name "coverage_*.dat")
+    if [ -n "$DAT_FILES" ]; then
+        echo -e "${COLOR_WHITE}==================== Merging Verilator Coverage ====================${COLOR_CLEAR}"
+        verilator_coverage --write-info ${RESULTS_DIR}/merged_coverage.info $DAT_FILES
+    fi
 fi
 
 exit ${EXITCODE}

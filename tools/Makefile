@@ -64,8 +64,9 @@ VCS = vcs
 VLOG = qverilog
 VERILATOR = verilator
 RIVIERA = riviera
-#SMODI GCC_PREFIX = riscv64-unknown-elf
-GCC_PREFIX = riscv-none-elf
+GCC_PREFIX = riscv64-unknown-elf
+#SMODI
+#GCC_PREFIX = riscv-none-elf
 BUILD_DIR = snapshots/${snapshot}
 TBDIR = ${RV_ROOT}/testbench
 PICOLIBC_DIR = ${RV_ROOT}/third_party/picolibc/install
@@ -98,7 +99,7 @@ endif
 
 VERILATOR_SKIP_WARNINGS = $(VERILATOR_NOIMPLICIT) -Wno-TIMESCALEMOD -Wno-ASCRANGE \
 	-Wno-CASEINCOMPLETE -Wno-INITIALDLY -Wno-WIDTH -Wno-UNOPTFLAT -Wno-SIDEEFFECT \
-	-Wno-LATCH
+	-Wno-LATCH -Wno-COVERIGN
 
 # Define test name
 TEST = hello_world
@@ -129,6 +130,9 @@ else ifeq ("$(COVERAGE)", "toggle")
 else ifeq ("$(COVERAGE)", "functional")
     VERILATOR_COVERAGE = --coverage-user
 #not a valid option    VCS_COVERAGE = -cm fcov
+else ifeq ("$(COVERAGE)", "0")
+    VERILATOR_COVERAGE = 
+    VCS_COVERAGE = 
 else ifneq ("$(COVERAGE)", "")
     $(error Unknown COVERAGE value '$(COVERAGE)')
 endif
@@ -208,7 +212,7 @@ includes = -I${BUILD_DIR} -I$(TBDIR)/axi4_mux
 CM_HIER_FILE = $(RV_ROOT)/cm.cfg
 
 # Verilator supports only C++14 and newer
-CFLAGS += -std=c++14
+CFLAGS += -std=c++2a
 
 # Optimization for better performance; alternative is nothing for
 # slower runtime (faster compiles) -O2 for faster runtime (slower
@@ -272,10 +276,6 @@ riviera-build: ${TBFILES} ${BUILD_DIR}/defines.h
 
 ############ TEST Simulation ###############################
 
-ifneq ($(TEST),)
-# TEST is set
-ifeq ($(notdir $(CURDIR)),$(BUILD_TEST_DIR))
-# In build directory, use normal targets
 verilator: program.hex verilator-build
 	# FIXME: Assuming here that either begin_signature or end_signature implies
 	# that both symbols are present.
@@ -302,38 +302,6 @@ vlog: program.hex ${TBFILES} ${BUILD_DIR}/defines.h
 
 riviera: program.hex riviera-build
 	vsim -c -lib work ${DEBUG_PLUS} ${RIVIERA_DEBUG} tb_top -do "run -all; exit" -l riviera.log
-
-endif
-else
-# TEST not set, use normal targets
-verilator: program.hex verilator-build
-	# FIXME: Assuming here that either begin_signature or end_signature implies
-	# that both symbols are present.
-	grep -E "(begin|end)_signature" $(TEST).sym >/dev/null 2>&1; \
-	if [ $$? -eq 0 ]; then \
-		BEG=`grep "begin_signature" $(TEST).sym | cut -d\  -f 1`;\
-		END=`grep "end_signature"   $(TEST).sym | cut -d\  -f 1`;\
-		./obj_dir/Vtb_top ${TB_EXTRA_ARGS} --mem-signature $${BEG} $${END}; \
-	else \
-		./obj_dir/Vtb_top ${TB_EXTRA_ARGS}; \
-	fi
-
-irun: program.hex irun-build
-	$(IRUN) -64bit -abvglobalfailurelimit 1 +lic_queue -licqueue \
-	  -status -xmlibdirpath . -xmlibdirname veer.build \
-	  -snapshot ${snapshot} -r $(snapshot) $(IRUN_DEBUG_RUN) $(profile)
-
-vcs: program.hex vcs-build
-	./simv $(DEBUG_PLUS) +vcs+lic+wait $(VCS_COVERAGE) -l vcs.log
-
-vlog: program.hex ${TBFILES} ${BUILD_DIR}/defines.h
-	$(VLOG) -l vlog.log -sv -mfcu +incdir+${BUILD_DIR}+${RV_ROOT}/design/include+${RV_ROOT}/design/lib -ccflags "${CFLAGS}"\
-        $(ASSERT_DEFINES) $(defines) -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -R +nowarn3829 +nowarn2583 ${DEBUG_PLUS} -suppress 14408 -suppress 16154
-
-riviera: program.hex riviera-build
-	vsim -c -lib work ${DEBUG_PLUS} ${RIVIERA_DEBUG} tb_top -do "run -all; exit" -l riviera.log
-
-endif
 
 
 
@@ -386,29 +354,3 @@ help:
 
 .PHONY: help clean picolibc verilator vcs irun vlog riviera
 
-# Automatic build directory creation based on TEST
-ifdef TEST
-#BUILD_TEST_DIR := build_$(TEST)
-ifneq ($(notdir $(CURDIR)),$(BUILD_TEST_DIR))
-verilator: 
-	mkdir -p $(BUILD_TEST_DIR)
-	cd $(BUILD_TEST_DIR) && exec $(MAKE) -f "${RV_ROOT}/tools/Makefile" snapshot=$(snapshot) TEST=$(TEST) verilator
-
-irun: 
-	mkdir -p $(BUILD_TEST_DIR)
-	cd $(BUILD_TEST_DIR) && exec $(MAKE) -f "${RV_ROOT}/tools/Makefile" snapshot=$(snapshot) TEST=$(TEST) irun
-
-vcs: 
-	mkdir -p $(BUILD_TEST_DIR)
-	cd $(BUILD_TEST_DIR) && exec $(MAKE) -f "${RV_ROOT}/tools/Makefile" snapshot=$(snapshot) TEST=$(TEST) vcs
-
-vlog: 
-	mkdir -p $(BUILD_TEST_DIR)
-	cd $(BUILD_TEST_DIR) && exec $(MAKE) -f "${RV_ROOT}/tools/Makefile" snapshot=$(snapshot) TEST=$(TEST) vlog
-
-riviera: 
-	mkdir -p $(BUILD_TEST_DIR)
-	cd $(BUILD_TEST_DIR) && exec $(MAKE) -f "${RV_ROOT}/tools/Makefile" snapshot=$(snapshot) TEST=$(TEST) riviera
-
-endif
-endif

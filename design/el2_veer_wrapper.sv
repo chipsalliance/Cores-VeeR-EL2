@@ -981,8 +981,7 @@ import el2_pkg::*;
 `ifdef RV_LOCKSTEP_ENABLE
 `ifdef RV_ASSERT_ON
   `define RV_ASSERT_OR_VERILATOR
-`endif
-`ifdef VERILATOR
+`elsif VERILATOR
   `define RV_ASSERT_OR_VERILATOR
 `endif
 `ifdef RV_ASSERT_OR_VERILATOR
@@ -1006,6 +1005,6 @@ import el2_pkg::*;
    endproperty
 
   assert property (p_const_delay) else $fatal("Lockstep constant delay violation");
-`endif // `ifdef RV_LOCKSTEP_ENABLE
 `endif // `ifdef RV_ASSERT_OR_VERILATOR
+`endif // `ifdef RV_LOCKSTEP_ENABLE
 endmodule

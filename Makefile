@@ -53,7 +53,7 @@ ifneq ($(notdir $(CURDIR)),$(BUILD_TEST_DIR))
 verilator vcs xrun qverilog riviera irun vlog: 
 	echo $(BUILD_TEST_DIR)
 	mkdir -p $(BUILD_TEST_DIR)
-	cd $(BUILD_TEST_DIR) && exec $(MAKE) -f "${RV_ROOT}/tools/Makefile" snapshot=$(snapshot) TEST=$(TEST) USER_MODE=$(USER_MODE) debug=$(debug) COVERAGE=$(COVERAGE) $@
+	cd $(BUILD_TEST_DIR) && exec $(MAKE) -f "${RV_ROOT}/tools/Makefile" snapshot=$(snapshot) TEST=$(TEST) USER_MODE=$(USER_MODE) debug=$(DEBUG) COVERAGE=$(COVERAGE) $@
 
 endif
 endif

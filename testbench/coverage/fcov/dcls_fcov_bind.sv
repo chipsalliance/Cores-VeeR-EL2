@@ -1,6 +1,8 @@
 // Copyright 2024 Antmicro <www.antmicro.com>
 //
 // SPDX-License-Identifier: Apache-2.0
+`ifndef VERILATOR
+
 `ifdef FCOV
 `ifdef RV_LOCKSTEP_ENABLE
 bind el2_veer_lockstep dcls_fcov dcls_fcov_bind (
@@ -22,3 +24,4 @@ bind el2_veer_lockstep dcls_fcov dcls_fcov_bind (
 );
 `endif //ifdef FCOV
 `endif //ifdef FCOV
+`endif //ifndef VERILATOR 

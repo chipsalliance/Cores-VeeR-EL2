@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+`ifndef VERILATOR
 module dcls_fcov (
     input logic clk,
     input logic rst_l,
@@ -92,3 +93,4 @@ endgroup
 lockstep_fcov lockstep_fcov_inst = new();
 
 endmodule
+`endif

@@ -28,7 +28,7 @@ jobs:
         bus: ["axi", "ahb"]
         test: ["hello_world", "hello_world_dccm", "hello_world_iccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
                "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters",
-               "pmp", "pmp_random", "write_unaligned", "icache", "bitmanip", "read_after_read"]
+               "pmp", "pmp_random", "pmp_overlap", "write_unaligned", "icache", "bitmanip", "read_after_read"]
         coverage: ["all"]
         priv: ["0", "1"]
         tb_extra_args: ["--test-halt"]  # hello_world_iccm will also have --test-lsu-clk-ratio

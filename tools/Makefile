@@ -23,23 +23,24 @@ endif
 
 CONF_PARAMS ?= -set build_axi4 $(USER_MODE_OPTS)
 
-ifneq ($(findstring dcls,$(TEST)),)
-lockstep_enable ?= 1
-lockstep_regfile_enable ?= 1
-endif
-
-ifdef lockstep_enable
- override CONF_PARAMS += -set lockstep_enable=1
- ifdef lockstep_regfile_enable
-  override CONF_PARAMS += -set lockstep_regfile_enable=1
- endif
- ifndef lockstep_delay
-	MIN:= 2
-	MAX:= 4
-  lockstep_delay := $(shell bash -c 'echo $$(( ( $$RANDOM % ($(MAX) - $(MIN) + 1) ) + $(MIN) ))')
- endif
- override CONF_PARAMS += -set lockstep_delay=$(lockstep_delay)
-endif
+#don't override here.  TODO: a better place to randomize DELAY/MUBI params
+#ifneq ($(findstring dcls,$(TEST)),)
+#lockstep_enable ?= 1
+#lockstep_regfile_enable ?= 1
+#endif
+#
+#ifdef lockstep_enable
+# override CONF_PARAMS += -set lockstep_enable=1
+# ifdef lockstep_regfile_enable
+#  override CONF_PARAMS += -set lockstep_regfile_enable=1
+# endif
+# ifndef lockstep_delay
+#	MIN:= 2
+#	MAX:= 4
+#  lockstep_delay := $(shell bash -c 'echo $$(( ( $$RANDOM % ($(MAX) - $(MIN) + 1) ) + $(MIN) ))')
+# endif
+# override CONF_PARAMS += -set lockstep_delay=$(lockstep_delay)
+#endif
 $(info ------------------ CONF_PARAMS is: $(CONF_PARAMS))
 TEST_CFLAGS = -g -gdwarf -O3 -funroll-all-loops
 ABI = -mabi=ilp32

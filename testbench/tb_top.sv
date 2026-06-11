@@ -778,6 +778,21 @@ module tb_top
     logic [8:0] inject_veer_in_dist_no, inject_lockstep_in_dist_no;
     bit   at_newline = 1'b1;
 
+    logic mpc_debug_halt_req_force;
+    logic mpc_debug_run_req_force;
+    logic mpc_debug_halt_req_internal;
+    logic mpc_debug_run_req_internal;
+
+    assign mpc_debug_halt_req_internal = mpc_debug_halt_req | mpc_debug_halt_req_force;
+    assign mpc_debug_run_req_internal = mpc_debug_run_req | mpc_debug_run_req_force;
+
+    logic [2:0] dbg_seq_state;
+    localparam DBG_SEQ_IDLE = 3'd0;
+    localparam DBG_SEQ_HALT_REQ = 3'd1;
+    localparam DBG_SEQ_WAIT_HALT = 3'd2;
+    localparam DBG_SEQ_RUN_REQ = 3'd3;
+    localparam DBG_SEQ_WAIT_RUN = 3'd4;
+
     always @(negedge core_clk or negedge rst_l) begin
         if (rst_l == 0) begin
             error_injection_mode <= '0;
@@ -788,6 +803,9 @@ module tb_top
             clear_inject_in_dist <= '0;
             rst_l_cmd <= '1;
             at_newline <= 1'b1;
+            dbg_seq_state <= DBG_SEQ_IDLE;
+            mpc_debug_halt_req_force <= 1'b0;
+            mpc_debug_run_req_force <= 1'b0;
         `ifdef RV_LOCKSTEP_ENABLE
             disable_corruption_detection_i <= el2_mubi_pkg::El2MuBiFalse;
             lockstep_err_injection_en_i <= el2_mubi_pkg::El2MuBiFalse;
@@ -896,6 +914,51 @@ module tb_top
                 $display("[%0t ns] Reset all",$time);
                 rst_l_cmd <= 8'b1;
             end
+            if(mailbox_write && (mailbox_data[7:0] == 8'h99)) begin
+                $display("[%0t ns] TEST_FAILED (requested by software)",$time);
+                `ifdef TB_SILENT_FAIL
+                    $finish;
+                `else
+                    $fatal;
+                `endif // TB_SILENT_FAIL
+            end
+
+            // Debug sequence state machine
+            case (dbg_seq_state)
+                DBG_SEQ_IDLE: begin
+                    if (mailbox_write && (mailbox_data[7:0] == 8'h97)) begin
+                        $display("[%0t ns] Debug sequence triggered",$time);
+                        dbg_seq_state <= DBG_SEQ_HALT_REQ;
+                    end
+                end
+                DBG_SEQ_HALT_REQ: begin
+                    $display("[%0t ns] Asserting mpc_debug_halt_req_force",$time);
+                    mpc_debug_halt_req_force <= 1'b1;
+                    dbg_seq_state <= DBG_SEQ_WAIT_HALT;
+                end
+                DBG_SEQ_WAIT_HALT: begin
+                    if (mpc_debug_halt_ack == 1'b1) begin
+                        $display("[%0t ns] Halt ack received, deasserting halt req force",$time);
+                        mpc_debug_halt_req_force <= 1'b0;
+                        dbg_seq_state <= DBG_SEQ_RUN_REQ;
+                    end
+                end
+                DBG_SEQ_RUN_REQ: begin
+                    if (o_debug_mode_status == 1'b1) begin
+                        $display("[%0t ns] Core is in debug mode, asserting mpc_debug_run_req_force",$time);
+                        mpc_debug_run_req_force <= 1'b1;
+                        dbg_seq_state <= DBG_SEQ_WAIT_RUN;
+                    end
+                end
+                DBG_SEQ_WAIT_RUN: begin
+                    if (mpc_debug_run_ack == 1'b1) begin
+                        $display("[%0t ns] Run ack received, deasserting run req force",$time);
+                        mpc_debug_run_req_force <= 1'b0;
+                        dbg_seq_state <= DBG_SEQ_IDLE;
+                    end
+                end
+                default: dbg_seq_state <= DBG_SEQ_IDLE;
+            endcase
             // ECC error injection
             if(mailbox_write && (mailbox_data[7:0] == 8'he0)) begin
                 $display("[%0t ns] Injecting single bit ICCM error",$time);
@@ -2197,6 +2260,7 @@ module tb_top
         mpc_debug_run_req = 1'b0;
         wait(o_debug_mode_status == 1'b0);
         $display("[%0t ns] done",$time);
+
 `endif
     end
 `ifndef VERILATOR
@@ -2491,9 +2555,9 @@ veer_wrapper rvtop_wrapper (
     .jtag_tdoEn             (),
 
     .mpc_debug_halt_ack     ( mpc_debug_halt_ack),
-    .mpc_debug_halt_req     ( mpc_debug_halt_req),
+    .mpc_debug_halt_req     ( mpc_debug_halt_req_internal),
     .mpc_debug_run_ack      ( mpc_debug_run_ack),
-    .mpc_debug_run_req      ( mpc_debug_run_req),
+    .mpc_debug_run_req      ( mpc_debug_run_req_internal),
     .mpc_reset_run_req      ( 1'b1),             // Start running after reset
     .debug_brkpt_status     (debug_brkpt_status),
 

@@ -1,0 +1,1 @@
+OFILES = crt0.o dcls_debug.o printf.o

@@ -37,7 +37,7 @@ class TestReset(BaseTest):
             "corruption_detected_o": self.mubi_false,
         }
         # The shadow core should go into the reset regardless of the delay
-        for _ in range(lockstep_delay):
+        for _ in range(lockstep_delay - 1):
             await ReadOnly()
             self.assert_signals(signals)
             await RisingEdge(self.clk)

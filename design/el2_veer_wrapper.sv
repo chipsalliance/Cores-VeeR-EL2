@@ -866,7 +866,7 @@ import el2_pkg::*;
    assign ifu_axi_bvalid = '0;
    assign ifu_axi_bresp[1:0] = '0;
    assign ifu_axi_bid[pt.IFU_BUS_TAG-1:0] = '0;
- 
+
    /*pragma coverage on*/
 
 `endif //  `ifdef RV_BUILD_AHB_LITE
@@ -978,4 +978,33 @@ import el2_pkg::*;
   end
 `endif
 
+`ifdef RV_LOCKSTEP_ENABLE
+`ifdef RV_ASSERT_ON
+  `define RV_ASSERT_OR_VERILATOR
+`elsif VERILATOR
+  `define RV_ASSERT_OR_VERILATOR
+`endif
+`ifdef RV_ASSERT_OR_VERILATOR
+   logic disable_const_delay_assertion;
+   initial begin
+     disable_const_delay_assertion = 0;
+   end
+
+   property p_const_delay;
+   @(posedge clk)
+   disable iff (!core_rst_l || disable_const_delay_assertion)
+    shadow_core_trace_rv_i_valid_ip |-> (
+      $past(trace_rv_i_valid_ip, `RV_LOCKSTEP_DELAY) &&
+      shadow_core_trace_rv_i_insn_ip      == $past(trace_rv_i_insn_ip,      `RV_LOCKSTEP_DELAY) &&
+      shadow_core_trace_rv_i_address_ip   == $past(trace_rv_i_address_ip,   `RV_LOCKSTEP_DELAY) &&
+      shadow_core_trace_rv_i_exception_ip == $past(trace_rv_i_exception_ip, `RV_LOCKSTEP_DELAY) &&
+      shadow_core_trace_rv_i_ecause_ip    == $past(trace_rv_i_ecause_ip,    `RV_LOCKSTEP_DELAY) &&
+      shadow_core_trace_rv_i_interrupt_ip == $past(trace_rv_i_interrupt_ip, `RV_LOCKSTEP_DELAY) &&
+      shadow_core_trace_rv_i_tval_ip      == $past(trace_rv_i_tval_ip,      `RV_LOCKSTEP_DELAY)
+    );
+   endproperty
+
+  assert property (p_const_delay) else $fatal("Lockstep constant delay violation");
+`endif // `ifdef RV_ASSERT_OR_VERILATOR
+`endif // `ifdef RV_LOCKSTEP_ENABLE
 endmodule

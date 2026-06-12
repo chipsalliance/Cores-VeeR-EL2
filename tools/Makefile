@@ -44,8 +44,7 @@ CONF_PARAMS ?= -set build_axi4 $(USER_MODE_OPTS)
 $(info ------------------ CONF_PARAMS is: $(CONF_PARAMS))
 TEST_CFLAGS = -g -gdwarf -O3 -funroll-all-loops
 ABI = -mabi=ilp32
-#SMODI LD_ABI = $(ABI) -march=rv32imac
-LD_ABI = $(ABI) -march=rv32imc
+LD_ABI = $(ABI) -march=rv32imac
 
 TB_EXTRA_ARGS ?= --test-halt
 

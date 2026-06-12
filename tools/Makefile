@@ -66,7 +66,6 @@ VLOG = qverilog
 VERILATOR = verilator
 RIVIERA = riviera
 GCC_PREFIX = riscv64-unknown-elf
-#SMODI
 #GCC_PREFIX = riscv-none-elf
 BUILD_DIR = snapshots/${snapshot}
 TBDIR = ${RV_ROOT}/testbench

@@ -32,7 +32,7 @@ for NAME in ${TESTS[@]}; do
 
         echo -e "${COLOR_WHITE}========== ${COVERAGE} coverage ==========${COLOR_CLEAR}"
         LOG="${RESULTS_DIR}/test_${NAME}_${COVERAGE}.log"
-#SMODI        DIR="run_${NAME}_${COVERAGE}"
+#        DIR="run_${NAME}_${COVERAGE}"
         DIR="${RESULTS_DIR}/run_${NAME}_${COVERAGE}"
 
         # Run the test

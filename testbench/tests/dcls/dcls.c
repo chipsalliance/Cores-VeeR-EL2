@@ -101,7 +101,8 @@ int main () {
       
 #else
             old_boot_count == (32*2) || old_boot_count == (34*2) || old_boot_count == (50*2) ||
-	    (old_boot_count >= (51*2) && old_boot_count <= (73*2) && (old_boot_count % 2 == 0)) //skip VEER side axi channels to prevent breakage in code exectuion
+	    (old_boot_count >= (51*2) && old_boot_count <= (73*2) && (old_boot_count % 2 == 0)) || //skip VEER side axi channels to prevent breakage in code exectuion
+	    (old_boot_count >= (78*2) && old_boot_count <= (78*2) && (old_boot_count % 2 == 0)) //skip VEER side ahb channels to prevent breakage in code exectuion
 	
 #endif
             )

@@ -2220,9 +2220,6 @@ module tb_top
        $fsdbDumpfile("dump.fsdb");
        $fsdbDumpvars(0, tb_top);
        $fsdbDumpMDA();
-   `else
-       $dumpfile("dump.vcd");
-       $dumpvars(0, tb_top);
    `endif
         rst_l = 1'b1;
         rst_l = #5 1'b0;

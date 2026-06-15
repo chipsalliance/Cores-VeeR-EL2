@@ -733,6 +733,24 @@ module el2_veer_lockstep
     end
   end
 
+  // Latch the debug state
+  logic debug_mode_status_latch;
+  el2_mubi_t dbg_detected;
+
+  always_ff @(posedge clk or negedge rst_l) begin
+    if (~rst_l) begin
+      debug_mode_status_latch <= 1'b0;
+    end else begin
+      if (o_debug_mode_status) begin
+        debug_mode_status_latch <= 1'b1;
+      end else begin
+        debug_mode_status_latch <= debug_mode_status_latch;
+      end
+    end
+  end
+
+  assign dbg_detected = mubi_from_bool(debug_mode_status_latch);
+
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
   el2_regfile_if shadow_core_regfile ();
 
@@ -1115,6 +1133,7 @@ module el2_veer_lockstep
   // Scenario I:
   // - Shadow Core is out of reset
   // - Shadow Core is enabled
+  // - Main Core was never in debug state
   // - One of:
   //    * IOs (or regfiles if enabled) of Main Core and Shadow Core differ
   //    * error injection (`lockstep_err_injection_en_i`) is enabled
@@ -1125,7 +1144,7 @@ module el2_veer_lockstep
   el2_mubi_t any_corruption, case0, case1;
 
   assign any_corruption = mubi_or(mubi_or(corruption_detected, lockstep_err_injection_en_i), err_injection_invalid);
-  assign case0 = mubi_and(any_corruption, ~disable_corruption_detection_i);
+  assign case0 = mubi_and(mubi_and(any_corruption, ~disable_corruption_detection_i), ~dbg_detected);
   assign case1 = disable_detection_invalid;
   assign corruption_detected_o = mubi_and(mubi_or(case0, case1), mubi_from_bool(rst_n));
 endmodule : el2_veer_lockstep

@@ -1350,7 +1350,8 @@ end
          assign iccm_dma_rdata[63:0] = '0 ;
          assign iccm_single_ecc_error = '0 ;
          assign iccm_dma_rtag         = '0 ;
-
+         assign iccm_dma_rd_ecc_single_err = '0 ;
+         assign iccm_dma_rd_ecc_double_err = '0 ;
 
 
 

@@ -98,7 +98,7 @@ endif
 
 VERILATOR_SKIP_WARNINGS = $(VERILATOR_NOIMPLICIT) -Wno-TIMESCALEMOD -Wno-ASCRANGE \
 	-Wno-CASEINCOMPLETE -Wno-INITIALDLY -Wno-WIDTH -Wno-UNOPTFLAT -Wno-SIDEEFFECT \
-	-Wno-LATCH 
+	-Wno-LATCH
 
 # Define test name
 TEST = hello_world
@@ -211,7 +211,7 @@ includes = -I${BUILD_DIR} -I$(TBDIR)/axi4_mux
 CM_HIER_FILE = $(RV_ROOT)/cm.cfg
 
 # Verilator supports only C++14 and newer
-CFLAGS += -std=c++2a
+CFLAGS += -std=c++14
 
 # Optimization for better performance; alternative is nothing for
 # slower runtime (faster compiles) -O2 for faster runtime (slower

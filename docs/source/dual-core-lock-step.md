@@ -1157,6 +1157,18 @@ Error is injected by asserting the `corruption_detected_o` output signal even if
   - Indicate that a Shadow Core detected an error (corruption in comparison to the Main Core)
 :::
 
+## Multibit boolean logic
+
+The Shadow Core control ports and equivalency checker ports operate on multibit boolean logic.
+Instead of using single bit signals for bit arithmetic and boolean IOs, there are predefined values corresponding to True and False values.
+There are three configuration options:
+
+* `-set mubi_width = {2, 3, 4, ..., 32}` - number of bits to represent a single boolean value.
+* `-set mubi_true = {0x0, 0x1, ..., 0xffffffff}` - value corresponding to True which must be complementary to the value assigned to `mubi_false`.
+* `-set mubi_false = {0x0, 0x1, ..., 0xffffffff}` - value corresponding to False which must be complementary to the value assigned to `mubi_true`.
+
+If the aforementioned configuration options are not specified explicitly, the DCLS feature will use 2-bit boolean logic where `0x2` and `0x1` are values corresponding to `True` and `False` respectively.
+
 ## Configuration
 
 ```{warning}

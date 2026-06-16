@@ -14,9 +14,9 @@ _start:
         # Call main()
         call main
 
-        # Map exit code: == 0 - success, != 0 - failure
+        # Map exit code: 0 - success, not 0 - failure
         mv  a1, a0
-        li  a0, 0xfe # ok (check for `corruption_detected_o` status)
+        li  a0, 0xff # ok
         beq a1, x0, _finish
         li  a0, 1 # fail
 

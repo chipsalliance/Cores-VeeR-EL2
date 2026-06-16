@@ -112,7 +112,7 @@ int main () {
         tohost = CMD_INJ_CLEAR;
     }
 
-    // Inject error that is known to cuase error
+    // Inject error that is known to cause error
     tohost = 1 << 8 | CMD_INJ_LOCKSTEP;
     return 0;
 }

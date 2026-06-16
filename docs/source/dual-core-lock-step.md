@@ -1187,7 +1187,7 @@ The configuration options are ignored and their macros are not generated if the 
 
 The DCLS feature will be tested within:
 
-* Software DCLS [smoke test](https://github.com/chipsalliance/Cores-VeeR-EL2/tree/main/testbench/tests/dcls/dcls.c) - covers VeeR CPU core with the Shadow Core execution flow.
+* Software DCLS [smoke tests](https://github.com/chipsalliance/Cores-VeeR-EL2/tree/main/testbench/tests/dcls) - cover VeeR CPU core with the Shadow Core execution flow.
 * RTL `el2_veer_lockstep` [module tests](https://github.com/chipsalliance/Cores-VeeR-EL2/tree/main/verification/block/dcls) - covers the Shadow Core by itself.
 
 :::{list-table} Validation Plan
@@ -1289,6 +1289,22 @@ The DCLS feature will be tested within:
   -
 * - Test Name
   -
+* -
+  -
+* - **Function**
+  - **Disable error detection after entering debug state**
+* - Reference Document
+  -
+* - Check description
+  - Verify the DCLS feature behavior after entering debug state.
+* - Coverage groups
+  -
+* - Assertions
+  - Corruption detection is disabled when Main Core enters debug mode. It is not disabled until core resets.
+* - Comments
+  -
+* - Test Name
+  - `dcls_debug`
 * -
   -
 :::

@@ -3,6 +3,7 @@
 +define+RV_OPENSOURCE
 +incdir+$RV_ROOT/testbench
 +incdir+$RV_ROOT/design/include
+$RV_ROOT/design/lib/el2_assert.sv
 $RV_ROOT/design/el2_mubi_pkg.sv
 $RV_ROOT/testbench/veer_wrapper.sv
 $RV_ROOT/design/el2_lockstep_pkg.sv

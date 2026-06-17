@@ -20,6 +20,9 @@ package el2_mubi_pkg;
   parameter el2_mubi_t El2MuBiFalse = 1'b0;
 `endif
 
+  // This is a prerequisite for the multibit functions below to work
+  `ASSERT_STATIC_IN_PACKAGE(CheckMuBiValsComplementary, El2MuBiTrue == ~El2MuBiFalse)
+
   function automatic el2_mubi_t mubi_check_invalid(el2_mubi_t val);
     return (val inside {El2MuBiTrue, El2MuBiFalse}) ? El2MuBiFalse : El2MuBiTrue;
   endfunction : mubi_check_invalid

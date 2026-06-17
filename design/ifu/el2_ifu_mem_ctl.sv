@@ -164,7 +164,6 @@ import el2_pkg::*;
    output logic [77:0]               iccm_wr_data,       // ICCM write data.
    output logic [2:0]                iccm_wr_size,       // ICCM write location within DW.
 
-   input  logic [63:0]               iccm_rd_data,       // Data read from ICCM.
    input  logic [77:0]               iccm_rd_data_ecc,   // Data + ECC read from ICCM.
    input  logic [1:0]                ifu_fetch_val,
    // IFU control signals
@@ -447,6 +446,10 @@ import el2_pkg::*;
    logic   ifu_bus_rvalid_unq;
    logic   bus_cmd_beat_en;
 
+   // iccm_rd_data is equivalent to iccm_rd_data_ecc except:
+   // - the ECC bits are stripped
+   // - half-word shifted to match the instruction request alignment
+   logic [63:0] iccm_rd_data;
 
 // ---- Clock gating section -----
 // c1 clock enables
@@ -1305,6 +1308,8 @@ ifc_dma_access_ok_prev,dma_iccm_req_f})
   assign ic_fetch_val_shift_right[3:0] = {ic_fetch_val_int_f << ifu_fetch_addr_int_f[1] } ;
 
    assign iccm_rdmux_data[77:0] = iccm_rd_data_ecc[77:0];
+   // Remove the ECC and align by the fetch halfword.
+   assign iccm_rd_data[63:0] =  64'({iccm_rdmux_data[70:39], iccm_rdmux_data[31:0]} >> (16*ifu_fetch_addr_int_f[1]));
    for (genvar i=0; i < 2 ; i++) begin : ICCM_ECC_CHECK
       assign iccm_ecc_word_enable[i] = ((|ic_fetch_val_shift_right[(2*i+1):(2*i)] & ~exu_flush_final & sel_iccm_data) | iccm_dma_rvalid_in) & ~dec_tlu_core_ecc_disable;
    rvecc_decode  ecc_decode (

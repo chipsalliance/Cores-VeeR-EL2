@@ -103,7 +103,6 @@ import el2_pkg::*;
    output logic                  iccm_buf_correct_ecc,
    output logic                  iccm_correction_state,
 
-   input  logic [63:0]          iccm_rd_data,
    input  logic [77:0]           iccm_rd_data_ecc,
 
    // ICache , ITAG  ports

@@ -888,6 +888,23 @@ module tb_top
                 $display("Reset all");
                 rst_l_cmd <= 8'b1;
             end
+            // CPU debug enter/exit sequence
+            if(mailbox_write && (mailbox_data[7:0] == 8'hA0)) begin
+                $display("Request to halt CPU");
+                force mpc_debug_halt_req = 1'b1;
+
+                $display("Wait for CPU to ACK halt request");
+                @(posedge mpc_debug_halt_ack);
+                release mpc_debug_halt_req;
+
+                $display("CPU ACKed halt request, request to run CPU");
+                force mpc_debug_run_req = 1'b1;
+
+                $display("Wait for CPU to ACK run request");
+                @(posedge mpc_debug_run_ack);
+                release mpc_debug_run_req;
+                $display("CPU ACKed run request");
+            end
             // ECC error injection
             if(mailbox_write && (mailbox_data[7:0] == 8'he0)) begin
                 $display("Injecting single bit ICCM error");

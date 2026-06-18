@@ -11,7 +11,7 @@ jobs:
   tests:
     name: Verification tests
     runs-on: ubuntu-24.04
-    container: ghcr.io/antmicro/cores-veer-el2:20250411084921
+    container: ghcr.io/antmicro/cores-veer-el2:20260618
     strategy:
       matrix:
         bus: ["ahb", "axi"]
@@ -45,7 +45,7 @@ jobs:
             texinfo \
             zlib1g zlib1g-dev \
             libbit-vector-perl
- 
+
       - name: Install coverage dependencies
         run: |
           python3 -m venv .venv

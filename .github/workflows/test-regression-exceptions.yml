@@ -15,7 +15,7 @@ jobs:
   regression-tests:
     name: Regression exceptions tests
     runs-on: ubuntu-24.04
-    container: ghcr.io/antmicro/cores-veer-el2:20250411084921
+    container: ghcr.io/antmicro/cores-veer-el2:20260618
     strategy:
       matrix:
         bus: ["axi"]
@@ -32,30 +32,21 @@ jobs:
       CCACHE_DIR: "/opt/regression/.cache/"
 
     steps:
-      - name: Install utils
-        run: |
-          echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
-          echo "debconf debconf/frontend select Noninteractive" | sudo debconf-set-selections
-          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            git python3 python3-pip build-essential ninja-build ccache \
-            gcc-riscv64-unknown-elf
-          pip3 install meson --break-system-packages
-
       - name: Setup repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Install coverage dependencies
+      - name: Install dependencies
         run: |
           python3 -m venv .venv
           source .venv/bin/activate
+          pip install -r requirements.txt
           pip install -r .github/scripts/requirements-coverage.txt
           echo "PATH=$PATH" >> $GITHUB_ENV
 
       - name: Setup environment
         run: |
-          echo "/opt/verilator/bin" >> $GITHUB_PATH
           RV_ROOT=`pwd`
           echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
           PYTHONUNBUFFERED=1
@@ -66,7 +57,6 @@ jobs:
 
       - name: Run tests
         run: |
-          export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} ${{ matrix.cache_waypack }}
 
@@ -88,7 +78,7 @@ jobs:
     name: Custom regression exceptions tests
     if: inputs.run_custom
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: centos:8
+    container: antmicro/centos-dev-tools
     env:
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader
@@ -97,10 +87,5 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set secrets version
-        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
-
       - name: Run tests
-        run: _secret_combined_${{ env.SECRETS_VERSION }}
-        env:
-          SECRET_NAME: _secret_custom_regression_exceptions_tests
+        run: _secret_custom_regression_exceptions_tests:19

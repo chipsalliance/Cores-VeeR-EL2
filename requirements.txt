@@ -13,19 +13,17 @@ Sphinx>=8.0.2,<9
 https://github.com/antmicro/antmicro-sphinx-utils/archive/main.zip
 
 # Verification - Core
-# Note: Custom cocotb might be required for some flows
-# ./third_party/cocotb
-cocotb==1.8.0
-cocotb-bus==0.2.1
+cocotb==1.9.0
+cocotb-bus==0.3.0
 cocotb-coverage==1.1.0
-cocotb-test==0.2.4
-pyuvm==2.9.1
+cocotb-test==0.2.6
+pyuvm==4.0.1
 
 # Verification - Testing & Reporting
 pytest==9.0.3
-pytest-html==3.2.0
+pytest-html==4.2.0
 pytest-timeout==2.1.0
 pytest-md==0.2.0
 
 # Scientific/Math (used in some block tests)
-scipy==1.13.1
+scipy==1.17.1

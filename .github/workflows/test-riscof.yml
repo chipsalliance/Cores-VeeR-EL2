@@ -12,7 +12,7 @@ jobs:
   tests:
     name: Run RISCOF tests
     runs-on: ubuntu-24.04
-    container: ghcr.io/antmicro/cores-veer-el2:20250411084921
+    container: ghcr.io/antmicro/cores-veer-el2:20260618
     strategy:
       fail-fast: false
       matrix:
@@ -22,36 +22,22 @@ jobs:
       CCACHE_DIR: "/opt/riscof/.cache/"
 
     steps:
-      - name: Install utils
-        run: |
-          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            git ccache python3-minimal python3-pip device-tree-compiler \
-            build-essential ninja-build
-
-      # ghcr.io/antmicro/cores-veer-el2:20250411084921 is ubuntu-22.04.5 which has a riscv toolchain
-      # without the support for the Zicsr extension
-      - name: Install cross-compiler
-        run: |
-          echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
-          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            gcc-riscv64-unknown-elf
-          riscv64-unknown-elf-gcc --version
-
       - name: Setup repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Install coverage dependencies
+      - name: Install dependencies
         run: |
           python3 -m venv .venv
           source .venv/bin/activate
+          pip install -r requirements.txt
           pip install -r .github/scripts/requirements-coverage.txt
           echo "PATH=$PATH" >> $GITHUB_ENV
 
       - name: Install RISCOF
         run: |
-          pip3 install git+https://github.com/riscv/riscof@a25e315
+          pip3 install git+https://github.com/riscv/riscof@a02a5b17472e29139a1ef8d1826ac54145fd61d7
 
       - name: Clone tests
         run: |
@@ -83,7 +69,6 @@ jobs:
 
       - name: Build VeeR model
         run: |
-          export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
           pushd riscof
             VEER_OPTS="-set=user_mode=1 -set=smepmp=1"
@@ -92,7 +77,6 @@ jobs:
 
       - name: Run tests, collect coverage
         run: |
-          export PATH=/opt/verilator/bin:/opt/spike/bin:$PATH
           pushd riscof
             riscof run --no-browser --config=config.ini --suite=riscv-arch-test/riscv-test-suite/ --env=riscv-arch-test/riscv-test-suite/env
             mkdir -p coverage
@@ -101,7 +85,6 @@ jobs:
 
       - name: Prepare coverage data
         run: |
-          export PATH=/opt/verilator/bin:$PATH
           .github/scripts/convert_dat.sh riscof/coverage/coverage.dat \
              riscof/coverage/coverage_riscof-m
 

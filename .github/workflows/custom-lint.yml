@@ -13,7 +13,7 @@ jobs:
       github.event_name != 'pull_request' ||
       github.event.pull_request.head.repo.owner.login == 'chipsalliance'
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: centos:8
+    container: antmicro/centos-dev-tools
     env:
       GHA_EXTERNAL_DISK: additional-tools-all
       GHA_SA: gh-sa-veer-uploader
@@ -22,10 +22,5 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set secrets version
-        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
-
       - name: Run lint
-        run: _secret_combined_${{ env.SECRETS_VERSION }}
-        env:
-          SECRET_NAME: _secret_lint
+        run: _secret_lint:12

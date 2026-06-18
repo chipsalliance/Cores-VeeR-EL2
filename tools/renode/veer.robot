@@ -258,27 +258,27 @@ Should Implement Insn
     Wait For Line On Uart           trap! mstatus=0x1800, mcause=0x3, mepc=0x800002f6, insn=0x19002
     Wait For Line On Uart           pass
     Wait For Line On Uart           testing ECALL
-    Wait For Line On Uart           trap! mstatus=0x1800, mcause=0xb, mepc=0x80000332, insn=0x73
+    Wait For Line On Uart           trap! mstatus=0x1800, mcause=0xb, mepc=0x80000342, insn=0x73
     Wait For Line On Uart           pass
     Wait For Line On Uart           testing WFI
     Wait For Line On Uart           pass
     Wait For Line On Uart           testing SRET
-    Wait For Line On Uart           trap! mstatus=0x1800, mcause=0x2, mepc=0x80000378, insn=0x10200073
+    Wait For Line On Uart           trap! mstatus=0x1800, mcause=0x2, mepc=0x800003a8, insn=0x10200073
     Wait For Line On Uart           pass
     Wait For Line On Uart           Hello from user_main()
     Wait For Line On Uart           testing EBREAK
-    Wait For Line On Uart           trap! mstatus=0x80, mcause=0x3, mepc=0x8000010c, insn=0x19002
+    Wait For Line On Uart           trap! mstatus=0x80, mcause=0x3, mepc=0x800000f0, insn=0x19002
     Wait For Line On Uart           pass
     Wait For Line On Uart           testing ECALL
-    Wait For Line On Uart           trap! mstatus=0x80, mcause=0x8, mepc=0x8000014c, insn=0x73
+    Wait For Line On Uart           trap! mstatus=0x80, mcause=0x8, mepc=0x80000140, insn=0x73
     Wait For Line On Uart           pass
     Wait For Line On Uart           testing WFI
     Wait For Line On Uart           pass
     Wait For Line On Uart           testing SRET
-    Wait For Line On Uart           trap! mstatus=0x80, mcause=0x2, mepc=0x80000196, insn=0x10200073
+    Wait For Line On Uart           trap! mstatus=0x80, mcause=0x2, mepc=0x80000192, insn=0x10200073
     Wait For Line On Uart           pass
     Wait For Line On Uart           testing MRET
-    Wait For Line On Uart           trap! mstatus=0x80, mcause=0x2, mepc=0x800001c4, insn=0x30200073
+    Wait For Line On Uart           trap! mstatus=0x80, mcause=0x2, mepc=0x800001c8, insn=0x30200073
     Wait For Line On Uart           pass
 
     Wait For Line On Uart           Finished: PASSED  matchNextLine=false
@@ -355,7 +355,7 @@ Should Implement PMP
     Wait For Line On Uart           pass
     Wait For Line On Uart           testing R...
     Wait For Line On Uart           reading from .area...
-    Wait For Line On Uart           Trap! mcause=0x00000005, mepc=0x800004DC, sp=0x80007DD4
+    Wait For Line On Uart           Trap! mcause=0x00000005, mepc=0x800004D6, sp=0x80007DE4
     Wait For Line On Uart           pass
     Wait For Line On Uart           testing X...
     Wait For Line On Uart           Trap! mcause=0x00000001, mepc=0x80004040, sp=0x80007E34
@@ -398,7 +398,7 @@ Should Implement PMP
     Wait For Line On Uart           pass
     Wait For Line On Uart           testing R...
     Wait For Line On Uart           reading from .area...
-    Wait For Line On Uart           Trap! mcause=0x00000005, mepc=0x800004DC, sp=0x80007DD4
+    Wait For Line On Uart           Trap! mcause=0x00000005, mepc=0x800004D6, sp=0x80007DE4
     Wait For Line On Uart           pass
     Wait For Line On Uart           testing X...
     Wait For Line On Uart           hello from .area
@@ -523,7 +523,7 @@ Should Implement PMP
     Wait For Line On Uart           pass
     Wait For Line On Uart           testing R...
     Wait For Line On Uart           reading from .area...
-    Wait For Line On Uart           Trap! mcause=0x00000005, mepc=0x800004DC, sp=0x80007DE4
+    Wait For Line On Uart           Trap! mcause=0x00000005, mepc=0x800004D6, sp=0x80007DF4
     Wait For Line On Uart           pass
     Wait For Line On Uart           testing X...
     Wait For Line On Uart           hello from .area
@@ -566,7 +566,7 @@ Should Implement PMP
     Wait For Line On Uart           pass
     Wait For Line On Uart           testing R...
     Wait For Line On Uart           reading from .area...
-    Wait For Line On Uart           Trap! mcause=0x00000005, mepc=0x800004DC, sp=0x80007DE4
+    Wait For Line On Uart           Trap! mcause=0x00000005, mepc=0x800004D6, sp=0x80007DF4
     Wait For Line On Uart           pass
     Wait For Line On Uart           testing X...
     Wait For Line On Uart           hello from .area

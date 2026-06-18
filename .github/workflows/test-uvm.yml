@@ -7,7 +7,7 @@ jobs:
   tests:
     name: UVM tests
     runs-on: ubuntu-24.04
-    container: ghcr.io/antmicro/cores-veer-el2:20250411084921
+    container: ghcr.io/antmicro/cores-veer-el2:20260618
     env:
       CCACHE_DIR: "/opt/uvm/.cache/"
       DEBIAN_FRONTEND: "noninteractive"
@@ -17,14 +17,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install prerequisities
-        run: |
-          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            git build-essential ccache
-
       - name: Setup environment
         run: |
-          echo "/opt/verilator/bin" >> $GITHUB_PATH
           RV_ROOT=`pwd`
           echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
           PYTHONUNBUFFERED=1

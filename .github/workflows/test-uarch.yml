@@ -15,7 +15,7 @@ jobs:
   lint:
     name: Lint microarchitectural tests
     runs-on: ubuntu-24.04
-    container: ghcr.io/antmicro/cores-veer-el2:20250411084921
+    container: ghcr.io/antmicro/cores-veer-el2:20260618
     steps:
       - name: Setup repository
         uses: actions/checkout@v4
@@ -44,7 +44,7 @@ jobs:
   tests:
     name: Microarchitectural tests
     runs-on: ubuntu-24.04
-    container: ghcr.io/antmicro/cores-veer-el2:20250411084921
+    container: ghcr.io/antmicro/cores-veer-el2:20260618
     strategy:
       matrix:
         include:
@@ -101,35 +101,16 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install prerequisites
+      - name: Install dependencies
         run: |
-          echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
-          echo "debconf debconf/frontend select Noninteractive" | sudo debconf-set-selections
-          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            autoconf automake autotools-dev \
-            bc bison build-essential \
-            ccache curl \
-            flex \
-            gawk gcc-riscv64-unknown-elf git gperf \
-            help2man \
-            libexpat-dev libfl-dev libfl2 libgmp-dev \
-            libmpc-dev libmpfr-dev libpython3-all-dev libtool \
-            ninja-build \
-            patchutils python3 python3-dev python3-pip \
-            texinfo \
-            zip zlib1g zlib1g-dev \
-            libbit-vector-perl
-
-      - name: Install coverage dependencies
-        run: |
+          sudo apt -qqy install zip
           python3 -m venv .venv
           source .venv/bin/activate
+          pip install -r requirements.txt
           pip install -r .github/scripts/requirements-coverage.txt
-          python3 -m pip install meson nox
 
       - name: Setup environment
         run: |
-          echo "/opt/verilator/bin" >> $GITHUB_PATH
           RV_ROOT=`pwd`
           echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
           PYTHONUNBUFFERED=1
@@ -157,7 +138,6 @@ jobs:
       - name: Prepare coverage data
         run: |
           shopt -s extglob
-          export PATH=/opt/verilator/bin:$PATH
           source .venv/bin/activate
 
           mkdir -p results
@@ -196,7 +176,7 @@ jobs:
     name: Run custom Microarchitectural tests
     if: inputs.run_custom
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: centos:8
+    container: antmicro/centos-dev-tools
     strategy:
       matrix:
         test:
@@ -230,12 +210,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set secrets version
-        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
-
       - name: Perform custom tests
-        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        run: _secret_custom_uarch:22
         env:
-          SECRET_NAME: _secret_custom_uarch
           TEST: ${{ matrix.test }}
-

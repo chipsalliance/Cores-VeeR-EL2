@@ -404,7 +404,7 @@ module el2_veer_lockstep_wrapper
     core_id = '0;
     mpc_debug_halt_req = '0;
     mpc_debug_run_req = '0;
-    mpc_reset_run_req = '0;
+    mpc_reset_run_req = '1; // Run the core instead of entering debug mode after reset
     dccm_rd_data_lo = '0;
     dccm_rd_data_hi = '0;
     iccm_rd_data = '0;

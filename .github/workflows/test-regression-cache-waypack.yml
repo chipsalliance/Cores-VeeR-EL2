@@ -9,6 +9,9 @@ on:
       num_ways:
         required: true
         type: number
+      run_custom:
+        type: boolean
+        default: true
 
 defaults:
   run:
@@ -110,6 +113,7 @@ jobs:
 
   custom-regression-tests:
     name: Custom regression tests
+    if: inputs.run_custom
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: centos:8
     strategy:

@@ -2,6 +2,10 @@ name: RISCV-DV tests
 
 on:
   workflow_call:
+    inputs:
+      run_custom:
+        type: boolean
+        default: true
 
 defaults:
   run:
@@ -50,6 +54,7 @@ jobs:
 
   generate-code:
     name: Generate code for tests
+    if: inputs.run_custom
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: centos:8
     needs: generate-config
@@ -217,6 +222,7 @@ jobs:
 
   run-custom-tests:
     name: Run custom RISC-V DV tests
+    if: inputs.run_custom
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: centos:8
     needs: [ generate-config, run-tests ]

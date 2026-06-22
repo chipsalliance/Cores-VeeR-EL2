@@ -2,6 +2,10 @@ name: VeeR-EL2 verification
 
 on:
   workflow_call:
+    inputs:
+      run_custom:
+        type: boolean
+        default: true
 
 defaults:
   run:
@@ -117,6 +121,7 @@ jobs:
 
   custom-verification-tests:
     name: Custom verification tests
+    if: inputs.run_custom
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: centos:8
     strategy:

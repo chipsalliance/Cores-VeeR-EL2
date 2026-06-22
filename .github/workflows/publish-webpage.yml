@@ -2,6 +2,10 @@ name: GH-Pages Build and Main Deploy
 
 on:
   workflow_call:
+    inputs:
+      run_custom:
+        type: boolean
+        default: true
 
 jobs:
   build:
@@ -29,6 +33,7 @@ jobs:
           path: data_verilator/
 
       - name: Download coverage reports merged
+        if: inputs.run_custom
         uses: actions/download-artifact@v4
         with:
           name: data_both
@@ -93,16 +98,23 @@ jobs:
           # data
           cd data_verilator
           zip $TARGET_DIR/data.zip *
-          cd ../data_both
-          zip $TARGET_DIR/data_both.zip *
           cd ..
+          if [ -d data_both ]; then
+            cd data_both
+            zip $TARGET_DIR/data_both.zip *
+            cd ..
+          fi
 
           # get coverview
           git clone https://github.com/antmicro/coverview
           cd coverview
           npm install
           npm run build
-          python3 embed.py --inject-data $TARGET_DIR/data_both.zip
+          if [ -f $TARGET_DIR/data_both.zip ]; then
+            python3 embed.py --inject-data $TARGET_DIR/data_both.zip
+          else
+            python3 embed.py --inject-data $TARGET_DIR/data.zip
+          fi
           cd ..
 
           # dashboard

@@ -2,6 +2,10 @@ name: Coverage report
 
 on:
   workflow_call:
+    inputs:
+      run_custom:
+        type: boolean
+        default: true
 
 defaults:
   run:
@@ -52,6 +56,7 @@ jobs:
 
   custom-coverage-reports:
     name: Custom coverage reports
+    if: inputs.run_custom
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: centos:8
     env:

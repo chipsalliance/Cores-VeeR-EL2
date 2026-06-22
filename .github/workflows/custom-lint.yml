@@ -9,6 +9,9 @@ on:
 jobs:
   run-lint:
     name: Run lint
+    if: >
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.owner.login == 'chipsalliance'
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: centos:8
     env:

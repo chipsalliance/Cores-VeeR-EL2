@@ -53,7 +53,7 @@ jobs:
   custom-coverage-reports:
     name: Custom coverage reports
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: centos:8
+    container: antmicro/centos-dev-tools
     env:
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader

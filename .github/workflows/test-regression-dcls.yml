@@ -91,7 +91,7 @@ jobs:
   custom-regression-tests:
     name: Custom regression tests
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: centos:8
+    container: antmicro/centos-dev-tools
     strategy:
       matrix:
         bus: ["axi", "ahb"]

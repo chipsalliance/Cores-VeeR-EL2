@@ -191,7 +191,7 @@ jobs:
   custom_tests:
     name: Run custom Microarchitectural tests
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: centos:8
+    container: antmicro/centos-dev-tools
     strategy:
       matrix:
         test:

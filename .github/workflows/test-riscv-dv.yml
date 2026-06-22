@@ -51,7 +51,7 @@ jobs:
   generate-code:
     name: Generate code for tests
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: centos:8
+    container: antmicro/centos-dev-tools
     needs: generate-config
     strategy:
       fail-fast: false
@@ -218,7 +218,7 @@ jobs:
   run-custom-tests:
     name: Run custom RISC-V DV tests
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: centos:8
+    container: antmicro/centos-dev-tools
     needs: [ generate-config, run-tests ]
     strategy:
       fail-fast: false

@@ -110,7 +110,7 @@ jobs:
   custom-openocd-tests:
     name: Run Custom OpenOCD tests
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: centos:8
+    container: antmicro/centos-dev-tools
     strategy:
       fail-fast: false
       matrix:

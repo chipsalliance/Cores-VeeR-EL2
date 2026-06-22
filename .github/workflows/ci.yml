@@ -155,5 +155,7 @@ jobs:
       actions: write
       contents: write
     name: Publish-to-GH-Pages
-    needs: [Report-Coverage, Build-Docs]
+    needs: [Check-PR-Origin, Report-Coverage, Build-Docs]
     uses: ./.github/workflows/publish-webpage.yml
+    with:
+      run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}

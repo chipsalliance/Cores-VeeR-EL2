@@ -10,6 +10,8 @@ $RV_ROOT/design/lib/el2_assert.sv
 $RV_ROOT/design/el2_mubi_pkg.sv
 $RV_ROOT/design/el2_veer_wrapper.sv
 $RV_ROOT/design/lib/el2_mem_if.sv
+$RV_ROOT/design/lib/el2_prim_generic_buf.sv
+$RV_ROOT/design/lib/el2_prim_buf.sv
 $RV_ROOT/design/el2_mem.sv
 $RV_ROOT/design/el2_pic_ctrl.sv
 $RV_ROOT/design/el2_veer.sv

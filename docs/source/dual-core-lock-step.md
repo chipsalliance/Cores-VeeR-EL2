@@ -1183,6 +1183,33 @@ There are two configuration options:
 
 The configuration options are ignored and their macros are not generated if the Dual Core Lockstep feature is disabled.
 
+## Synthesis: optimization barriers (`el2_prim_buf`)
+
+For the DCLS to be effective, the Shadow Core and the Main/Shadow comparison logic must *not* be merged or removed by synthesis.
+Logic-equivalence-aware tools can otherwise recognize the Shadow Core as redundant duplicate logic and optimize it away.
+
+To prevent this, `el2_veer_lockstep` inserts optimization barriers (`el2_prim_buf`) on the IOs of the Shadow Core:
+
+* the Shadow Core input bus (`shadow_core_inputs`),
+* the delayed Main Core outputs used in the comparison (`delayed_main_core_outputs`).
+
+The register-file comparison (when `lockstep_regfile_enable=1`) is covered by the `shadow_core_inputs` barrier: the Shadow Core's internal register file is driven from the buffered inputs, so the comparison cannot be proven constant and optimized away.
+
+`el2_prim_buf` is an abstract wrapper that selects its implementation through the `RV_PRIM_BUF_IMPL` macro.
+By default, it resolves to `el2_prim_generic_buf`, which is a plain buffer provided such that the core builds and simulates standalone.
+
+**Warning**
+The default `el2_prim_generic_buf` shipped in this repository is **functionally** a buffer but is **not constrained for synthesis**, i.e., it carries no `keep` / `size_only` / `dont_touch` attribute.
+With the generic buffer alone, a synthesis tool is free to optimize the barrier - and therefore the redundant Shadow Core and comparison logic it protects - away.
+
+An integrator targeting silicon (or fault-injection / safety hardening) **must** do one of the following:
+
+* Apply the appropriate synthesis constraints to `el2_prim_generic_buf` in their flow (e.g. `size_only` or `KEEP` / `DONT_TOUCH` in) so the buffer survives optimization; **or**
+* Override `RV_PRIM_BUF_IMPL` to point at a primitive that already carries those constraints. For example, Caliptra builds pass `+define+RV_PRIM_BUF_IMPL=caliptra_prim_buf`, whose generic/Xilinx implementations are constrained `size_only` / `keep` by the Caliptra synthesis flow.
+
+Failing to do either leaves the DCLS protection unverified against logic-optimization removal.
+```
+
 ## Validation Plan
 
 The DCLS feature will be tested within:

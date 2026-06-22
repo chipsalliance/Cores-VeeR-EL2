@@ -67,6 +67,8 @@ VERILOG_SOURCES  = \
 	${SRCDIR}/lib/el2_lib.sv \
 	${SRCDIR}/lib/axi4_to_ahb.sv \
 	${SRCDIR}/lib/ahb_to_axi4.sv \
+	${SRCDIR}/lib/el2_prim_generic_buf.sv \
+	${SRCDIR}/lib/el2_prim_buf.sv \
 	$(SRCDIR)/el2_lockstep_pkg.sv \
 	$(SRCDIR)/el2_veer_lockstep.sv \
 	$(TEST_DIR)/el2_veer_lockstep_cov_if.sv \

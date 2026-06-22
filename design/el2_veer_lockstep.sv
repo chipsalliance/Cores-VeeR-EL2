@@ -401,8 +401,26 @@ module el2_veer_lockstep
   veer_outputs_t delayed_main_core_outputs;
   veer_outputs_t shadow_core_outputs;
 
-  assign shadow_core_inputs = delay_input_d[LockstepDelayPipeStages];
-  assign delayed_main_core_outputs = delay_output_d[LockstepDelayPipeStages];
+  // Insert optimization barriers (el2_prim_buf) at the shadow-core IOs so that
+  // synthesis tools cannot prove the shadow core / comparison redundant and
+  // optimize them away.
+  veer_inputs_t  shadow_core_inputs_pre;
+  veer_outputs_t delayed_main_core_outputs_pre;
+  assign shadow_core_inputs_pre        = delay_input_d[LockstepDelayPipeStages];
+  assign delayed_main_core_outputs_pre = delay_output_d[LockstepDelayPipeStages];
+
+  el2_prim_buf #(
+    .Width($bits(veer_inputs_t))
+  ) u_shadow_inputs_buf (
+      .in_i (shadow_core_inputs_pre),
+      .out_o(shadow_core_inputs)
+  );
+  el2_prim_buf #(
+    .Width($bits(veer_outputs_t))
+  ) u_main_outputs_buf (
+      .in_i (delayed_main_core_outputs_pre),
+      .out_o(delayed_main_core_outputs)
+  );
 
   // Capture input
   assign main_core_inputs.rst_vec = rst_vec;

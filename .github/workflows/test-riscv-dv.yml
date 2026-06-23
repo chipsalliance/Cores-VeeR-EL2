@@ -120,30 +120,16 @@ jobs:
       CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
 
     steps:
-      - name: Install utils
-        run: |
-          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            git ccache device-tree-compiler python3-minimal python3-pip \
-            libboost-all-dev
-
-      # As of July 9th, 2024 `ubuntu:latest` comes with riscv64-unknown-elf-gcc
-      # 10.0.2. We need a newer version for bitmanip extension support.
-      - name: Install cross-compiler
-        run: |
-          echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
-          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            gcc-riscv64-unknown-elf
-          riscv64-unknown-elf-gcc --version
-
       - name: Setup repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Install coverage dependencies
+      - name: Install dependencies
         run: |
           python3 -m venv .venv
           source .venv/bin/activate
+          pip install -r requirements.txt
           pip install -r .github/scripts/requirements-coverage.txt
           echo "PATH=$PATH" >> $GITHUB_ENV
 
@@ -161,7 +147,6 @@ jobs:
         run: |
           ls tools/riscv-dv/work
           export FULL_NAME=riscv_dv-${{ matrix.test }}-${{ matrix.priv }}-${{ matrix.iss }}-${{ matrix.version }}
-          export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`realpath .`
           export RISCV_GCC=riscv64-unknown-elf-gcc
           export RISCV_OBJCOPY=riscv64-unknown-elf-objcopy

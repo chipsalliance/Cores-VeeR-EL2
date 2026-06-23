@@ -17,14 +17,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install prerequisities
-        run: |
-          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            git build-essential ccache
-
       - name: Setup environment
         run: |
-          echo "/opt/verilator/bin" >> $GITHUB_PATH
           RV_ROOT=`pwd`
           echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
           PYTHONUNBUFFERED=1

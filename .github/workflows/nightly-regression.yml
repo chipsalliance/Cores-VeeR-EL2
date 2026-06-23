@@ -1,0 +1,41 @@
+name: Nightly Regression VeeR-EL2
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 7 * * *'  # run daily at 07:00 am (UTC)
+
+jobs:
+
+  Check-PR-Origin:
+    name: Check PR origin
+    runs-on: ubuntu-24.04
+    outputs:
+      is_internal: ${{ steps.check.outputs.is_internal }}
+    steps:
+      - name: Determine if PR is from chipsalliance organization
+        id: check
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REPO_OWNER: ${{ github.event.pull_request.head.repo.owner.login }}
+        run: |
+          if [ "$EVENT_NAME" != "pull_request" ]; then
+            echo "is_internal=true" >> $GITHUB_OUTPUT
+            echo "Not a pull request event. Custom CI checks will run."
+          elif [ "$HEAD_REPO_OWNER" = "chipsalliance" ]; then
+            echo "is_internal=true" >> $GITHUB_OUTPUT
+            echo "PR from chipsalliance organization. Custom CI checks will run."
+          else
+            echo "is_internal=false" >> $GITHUB_OUTPUT
+            echo "PR from external fork ($HEAD_REPO_OWNER). Custom CI checks will be skipped."
+          fi
+
+
+  ## SAMPLE JOB:
+  ## Test-DCLS:
+  ##   name: Test-DCLS-Regression
+  ##   needs: [Check-PR-Origin]
+  ##   uses: ./.github/workflows/test-regression-dcls.yml
+  ##   with:
+  ##     run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
+

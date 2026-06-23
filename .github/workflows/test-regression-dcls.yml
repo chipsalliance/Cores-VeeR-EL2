@@ -123,13 +123,9 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set secrets version
-        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
-
       - name: Run tests
-        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        run: _secret_dcls_regression:8
         env:
-          SECRET_NAME: _secret_dcls_regression
           DCLS_ENABLE: "1"
           TEST: ${{ matrix.test }}
           BUS: ${{ matrix.bus }}

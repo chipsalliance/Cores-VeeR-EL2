@@ -131,12 +131,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set secrets version
-        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
-
       - name: Run tests
-        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        run: _secret_custom_verification_tests:9
         env:
-          SECRET_NAME: _secret_custom_verification_tests
           TEST: ${{ matrix.test }}
           BUS: ${{ matrix.bus }}

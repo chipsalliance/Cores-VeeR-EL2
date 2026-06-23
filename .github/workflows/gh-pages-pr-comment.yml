@@ -32,7 +32,7 @@ jobs:
           cat pr_number.txt | tee "$GITHUB_OUTPUT"
 
       - name: Post comment (internal PR)
-        if: steps.PR.outputs.is_internal == 'true'
+        if: github.event.workflow_run.head_repository.owner.login == 'chipsalliance'
         uses: actions/github-script@v6
         with:
           script: |
@@ -44,7 +44,7 @@ jobs:
             })
 
       - name: Post comment (external PR)
-        if: steps.PR.outputs.is_internal != 'true'
+        if: github.event.workflow_run.head_repository.owner.login != 'chipsalliance'
         uses: actions/github-script@v6
         with:
           script: |

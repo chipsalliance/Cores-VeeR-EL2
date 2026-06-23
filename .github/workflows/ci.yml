@@ -143,6 +143,22 @@ jobs:
     with:
       run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
+  Upload-PR-Info:
+    name: Upload PR info
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    needs: [Check-PR-Origin]
+    steps:
+      - name: Write PR info
+        run: |
+          echo "number=${{ github.event.number }}" >> pr_number.txt
+          echo "is_internal=${{ needs.Check-PR-Origin.outputs.is_internal }}" >> pr_number.txt
+      - name: Upload PR info
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr_number
+          path: pr_number.txt
+
   Build-Docs:
     name: Build-Docs
     uses: ./.github/workflows/build-docs.yml

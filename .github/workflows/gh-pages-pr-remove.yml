@@ -12,6 +12,7 @@ env:
 jobs:
   remove:
     name: PR Remove Deploy
+    if: github.event.workflow_run.head_repository.owner.login == 'chipsalliance'
     concurrency:
       group: gh-pages
     runs-on: ubuntu-24.04

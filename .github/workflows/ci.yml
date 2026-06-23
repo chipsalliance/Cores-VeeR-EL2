@@ -152,7 +152,6 @@ jobs:
       - name: Write PR info
         run: |
           echo "number=${{ github.event.number }}" >> pr_number.txt
-          echo "is_internal=${{ needs.Check-PR-Origin.outputs.is_internal }}" >> pr_number.txt
       - name: Upload PR info
         uses: actions/upload-artifact@v4
         with:

@@ -10,6 +10,7 @@ on:
 jobs:
   build:
     name: Build and Main Deploy
+    if: inputs.run_custom
     concurrency:
       group: gh-pages
     runs-on: ubuntu-24.04
@@ -141,18 +142,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public.new
           force_orphan: true
-
-      - name: Save PR number
-        if: github.event_name == 'pull_request'
-        run: |
-          echo "number=${{ github.event.number }}" >> pr_number.txt
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        if: github.event_name == 'pull_request'
-        with:
-          name: pr_number
-          path: ./pr_number.txt
 
       - name: Pack webpage as an artifact
         if: always()

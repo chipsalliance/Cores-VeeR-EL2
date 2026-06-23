@@ -37,7 +37,7 @@ jobs:
 
       - name: Install RISCOF
         run: |
-          pip3 install git+https://github.com/riscv/riscof@a25e315
+          pip3 install git+https://github.com/riscv/riscof@a02a5b17472e29139a1ef8d1826ac54145fd61d7
 
       - name: Clone tests
         run: |

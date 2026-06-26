@@ -40,7 +40,6 @@ import el2_pkg::*;
 
    el2_mem_if.veer_iccm                               iccm_mem_export,                     // RAM repositioned in testbench and connected by this interface
 
-   output logic [63:0]                                iccm_rd_data,                        // ICCM read data
    output logic [77:0]                                iccm_rd_data_ecc,                    // ICCM read ecc
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
    /*pragma coverage off*/
@@ -60,8 +59,6 @@ import el2_pkg::*;
    logic [pt.ICCM_BITS-1:1]              addr_bank_inc;
    logic [pt.ICCM_BANK_HI : 2]           iccm_rd_addr_hi_q;
    logic [pt.ICCM_BANK_HI : 1]           iccm_rd_addr_lo_q;
-   logic             [63:0]              iccm_rd_data_pre;
-   logic             [63:0]              iccm_data;
    logic [1:0]                           addr_incr;
    logic [pt.ICCM_NUM_BANKS-1:0] [38:0]  iccm_bank_wr_data_vec;
 
@@ -217,9 +214,6 @@ import el2_pkg::*;
    rvdffs  #(pt.ICCM_BANK_HI)   rd_addr_lo_ff (.*, .clk(active_clk), .din(iccm_rw_addr [pt.ICCM_BANK_HI:1]), .dout(iccm_rd_addr_lo_q[pt.ICCM_BANK_HI:1]), .en(1'b1));   // bit 0 of address is always 0
    rvdffs  #(pt.ICCM_BANK_BITS) rd_addr_hi_ff (.*, .clk(active_clk), .din(addr_bank_inc[pt.ICCM_BANK_HI:2]), .dout(iccm_rd_addr_hi_q[pt.ICCM_BANK_HI:2]), .en(1'b1));
 
-   assign iccm_rd_data_pre[63:0] = {iccm_bank_dout_fn[iccm_rd_addr_hi_q][31:0], iccm_bank_dout_fn[iccm_rd_addr_lo_q[pt.ICCM_BANK_HI:2]][31:0]};
-   assign iccm_data[63:0]        = 64'({16'b0, (iccm_rd_data_pre[63:0] >> (16*iccm_rd_addr_lo_q[1]))});
-   assign iccm_rd_data[63:0]     = {iccm_data[63:0]};
    assign iccm_rd_data_ecc[77:0] = {iccm_bank_dout_fn[iccm_rd_addr_hi_q][38:0], iccm_bank_dout_fn[iccm_rd_addr_lo_q[pt.ICCM_BANK_HI:2]][38:0]};
 
 endmodule // el2_ifu_iccm_mem

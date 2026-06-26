@@ -195,7 +195,6 @@ package el2_lockstep_pkg;
     logic                           mpc_reset_run_req;
     logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_rd_data_lo;
     logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_rd_data_hi;
-    logic [63:0]                    iccm_rd_data;
     logic [77:0]                    iccm_rd_data_ecc;
     logic [141:0]                   ic_rd_data;
     logic [1:0]                     ic_rd_addr_lo;

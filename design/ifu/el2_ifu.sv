@@ -155,7 +155,6 @@ import el2_pkg::*;
    output logic [77:0]               iccm_wr_data,       // ICCM write data.
    output logic [2:0]                iccm_wr_size,       // ICCM write location within DW.
 
-   input  logic [63:0]               iccm_rd_data,       // Data read from ICCM.
    input  logic [77:0]               iccm_rd_data_ecc,   // Data + ECC read from ICCM.
 
    // ICCM ECC status

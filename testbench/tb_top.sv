@@ -1301,6 +1301,11 @@ module tb_top
                 93: force `LOCKSTEP.dec_tlu_perfcnt3 = '1;
                 // --- END ADDED UNCONDITIONAL FORCES (AHB) ---
             `endif
+                // --- Internal State & Safety Tamper Forces (Common for AHB & AXI) ---
+                200: force `LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout[15] = ~`LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout[15]; // Flip register a5 bit 15
+                201: force `LOCKSTEP.xshadow_core.ifu.aln.q0pcff.genblock.genblock.dff.dout[14] = ~`LOCKSTEP.xshadow_core.ifu.aln.q0pcff.genblock.genblock.dff.dout[14]; // Flip PC bit 15 (mapped to internal dout[14])
+                202: force `LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.genblock.genblock.dff.dout[4] = ~`LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.genblock.genblock.dff.dout[4]; // Flip mtvec bit 5 (mapped to internal dout[4])
+                203: force `LOCKSTEP.xshadow_core.dec.tlu.mdccmect = 32'h10000004; // Force subordinate ECC threshold alert (Threshold=2, Counter=4)
                 default: force `LOCKSTEP.lockstep_err_injection_en_i = '1;
             endcase
         end else if (inject_veer_in_dist) begin: inject_veer_corruption
@@ -1635,6 +1640,10 @@ module tb_top
             release `LOCKSTEP.dec_tlu_perfcnt1;
             release `LOCKSTEP.dec_tlu_perfcnt2;
             release `LOCKSTEP.dec_tlu_perfcnt3;
+            release `LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout[15]; // Flip register a5 bit 15
+            release `LOCKSTEP.xshadow_core.ifu.aln.q0pcff.genblock.genblock.dff.dout[14] ; // Flip PC bit 15 (mapped to internal dout[14])
+            release `LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.genblock.genblock.dff.dout[4]; // 
+            release `LOCKSTEP.xshadow_core.dec.tlu.mdccmect;
             // --- END ADDED UNCONDITIONAL RELEASES ---
         `ifdef RV_BUILD_AXI4
             release `LOCKSTEP.lsu_axi_awready;
@@ -2175,7 +2184,7 @@ module tb_top
         i_cpu_run_req = 1'b0;
         mpc_debug_halt_req = 1'b0;
         mpc_debug_run_req = 1'b0;
-
+  `ifndef RV_LOCKSTEP_ENABLE  //https://github.com/chipsalliance/Cores-VeeR-EL2/issues/475
         $display("[%0t ns] halting CPU and waiting for ack",$time);
         i_cpu_halt_req = #5 1'b1;
         wait(o_cpu_halt_ack == 1);
@@ -2203,7 +2212,7 @@ module tb_top
         mpc_debug_run_req = 1'b0;
         wait(o_debug_mode_status == 1'b0);
         $display("[%0t ns] done",$time);
-
+  `endif
 `endif
     end
 `ifndef VERILATOR

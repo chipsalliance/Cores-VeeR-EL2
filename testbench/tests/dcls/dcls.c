@@ -97,12 +97,16 @@ int main () {
             old_boot_count == (50*2) || old_boot_count == (51*2) || 
 	    (old_boot_count >= (100*2) && old_boot_count <= (111*2)) ||  //skip Read signal channel for lsu_axi
 	    (old_boot_count >= (84*2) && old_boot_count <= (178*2) && (old_boot_count % 2 == 0)) || //skip VEER side axi channels to prevent breakage in code exectuion
-	    (old_boot_count >= (180*2) && old_boot_count <= (180*2) && (old_boot_count % 2 == 0)) //skip VEER side Unconditional forces to prevent breakage in code exectuion
+	    (old_boot_count >= (180*2) && old_boot_count <= (180*2) && (old_boot_count % 2 == 0)) ||  //skip VEER side Unconditional forces to prevent breakage in code exectuion
+	    (old_boot_count >= (182*2) && old_boot_count < (183*2)) //skip VEER and LOCKSTEP side Unconditional forces to prevent breakage in code exectuion (debug_mode_status)
+      
       
 #else
             old_boot_count == (32*2) || old_boot_count == (34*2) || old_boot_count == (50*2) ||
 	    (old_boot_count >= (51*2) && old_boot_count <= (73*2) && (old_boot_count % 2 == 0)) || //skip VEER side axi channels to prevent breakage in code exectuion
-	    (old_boot_count >= (78*2) && old_boot_count <= (78*2) && (old_boot_count % 2 == 0)) //skip VEER side ahb channels to prevent breakage in code exectuion
+	    (old_boot_count >= (78*2) && old_boot_count <= (78*2) && (old_boot_count % 2 == 0)) ||  //skip VEER side ahb channels to prevent breakage in code exectuion
+	    (old_boot_count >= (80*2) && old_boot_count < (81*2)) //skip VEER & LOCKSTEP side ahb channels to prevent breakage in code exectuion (debug mode status)
+      
 	
 #endif
             )

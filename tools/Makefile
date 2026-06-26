@@ -87,6 +87,9 @@ VERILATOR_VERSION    := $(subst .,,$(word 2,$(shell $(VERILATOR) --version)))
 
 ifneq ($(TB_MAX_CYCLES),)
 	VERILATOR_EXTRA_ARGS := -GMAX_CYCLES=$(TB_MAX_CYCLES)
+	VCS_EXTRA_ARGS := -pvalue+tb_top.MAX_CYCLES=$(TB_MAX_CYCLES)
+	IRUN_EXTRA_ARGS := -defparam tb_top.MAX_CYCLES=$(TB_MAX_CYCLES)
+	RIVIERA_EXTRA_ARGS := -gMAX_CYCLES=$(TB_MAX_CYCLES)
 endif
 
 ifeq ("$(.SHELLSTATUS)", "0")
@@ -249,7 +252,7 @@ vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	  +incdir+${RV_ROOT}/design/include ${BUILD_DIR}/common_defines.vh \
 	  +incdir+$(BUILD_DIR)  +libext+.v $(defines) -CFLAGS "${CFLAGS}" \
 	  -cm_hier $(CM_HIER_FILE) $(VCS_COVERAGE) -timescale=1ns/10ps \
-	  -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -l vcs.log
+	  -f ${RV_ROOT}/testbench/flist $(VCS_EXTRA_ARGS) ${TBFILES} ${TB_DPI_SRCS} -l vcs.log
 	touch vcs-build
 
 irun-build: ${TBFILES} ${BUILD_DIR}/defines.h
@@ -257,7 +260,7 @@ irun-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	  -xmlibdirpath . -xmlibdirname veer.build \
 	  -incdir ${RV_ROOT}/design/lib -incdir ${RV_ROOT}/design/include \
 	  -vlog_ext +.vh+.h $(defines) -incdir $(BUILD_DIR) \
-	  -f ${RV_ROOT}/testbench/flist -top tb_top  ${TBFILES} \
+	  -f ${RV_ROOT}/testbench/flist $(IRUN_EXTRA_ARGS) -top tb_top  ${TBFILES} \
 	  -I${RV_ROOT}/testbench -elaborate  -snapshot ${snapshot} $(profile)
 	touch irun-build
 
@@ -300,7 +303,7 @@ vlog: program.hex ${TBFILES} ${BUILD_DIR}/defines.h
         $(ASSERT_DEFINES) $(defines) -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -R +nowarn3829 +nowarn2583 ${DEBUG_PLUS} -suppress 14408 -suppress 16154
 
 riviera: program.hex riviera-build
-	vsim -c -lib work ${DEBUG_PLUS} ${RIVIERA_DEBUG} tb_top -do "run -all; exit" -l riviera.log
+	vsim -c -lib work ${DEBUG_PLUS} ${RIVIERA_DEBUG} $(RIVIERA_EXTRA_ARGS) tb_top -do "run -all; exit" -l riviera.log
 
 
 

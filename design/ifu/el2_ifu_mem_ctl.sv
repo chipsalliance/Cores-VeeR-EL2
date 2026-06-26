@@ -446,6 +446,10 @@ import el2_pkg::*;
    logic   ifu_bus_rvalid_unq;
    logic   bus_cmd_beat_en;
 
+   // ICCM address-XOR data masks used for the XOR infection feature.
+   logic [31:0] iccm_wr_xor_mask_w0, iccm_wr_xor_mask_w1;
+   logic [31:0] iccm_rd_xor_mask_w0, iccm_rd_xor_mask_w1;
+
    // iccm_rd_data is equivalent to iccm_rd_data_ecc except:
    // - the ECC bits are stripped
    // - half-word shifted to match the instruction request alignment
@@ -1269,8 +1273,18 @@ ifc_dma_access_ok_prev,dma_iccm_req_f})
                            .din(dma_mem_wdata[63:32]),
                            .ecc_out(dma_mem_ecc[13:7]));
 
-        assign iccm_wr_data[77:0]   =  (iccm_correct_ecc & ~(ifc_dma_access_q_ok & dma_iccm_req)) ?  {iccm_ecc_corr_data_ff[38:0], iccm_ecc_corr_data_ff[38:0]} :
-                                       {dma_mem_ecc[13:7],dma_mem_wdata[63:32], dma_mem_ecc[6:0],dma_mem_wdata[31:0]};
+         // ICCM address-XOR infection. The (replicated) word address is XORed
+         // into the stored DATA bits; the ECC stays the plain encode(original data). On
+         // read the address is removed before ECC decode and before the instruction is
+         // formed. On a read/write address mismatch, the address is not correctly removed,
+         // i.e., an ECC error is triggered as well as garbles the instruction itself.
+         logic [77:0] iccm_wr_data_pre;
+         assign iccm_wr_data_pre[77:0] =  (iccm_correct_ecc & ~(ifc_dma_access_q_ok & dma_iccm_req)) ?  {iccm_ecc_corr_data_ff[38:0], iccm_ecc_corr_data_ff[38:0]} :
+                                                                                                        {dma_mem_ecc[13:7],dma_mem_wdata[63:32], dma_mem_ecc[6:0],dma_mem_wdata[31:0]};
+         assign iccm_wr_data[31:0]   = iccm_wr_data_pre[31:0]  ^ iccm_wr_xor_mask_w0[31:0]; // word0 data ^ addr mask
+         assign iccm_wr_data[38:32]  = iccm_wr_data_pre[38:32];                             // word0 ecc (plain)
+         assign iccm_wr_data[70:39]  = iccm_wr_data_pre[70:39] ^ iccm_wr_xor_mask_w1[31:0]; // word1 data ^ addr mask
+         assign iccm_wr_data[77:71]  = iccm_wr_data_pre[77:71];                             // word1 ecc (plain)
 
          assign iccm_dma_rdata_1_muxed[31:0] = dma_mem_addr_ff[2] ?  iccm_corrected_data[0][31:0] : iccm_corrected_data[1][31:0] ;
          assign iccm_dma_rdata_in[63:0]      = iccm_dma_ecc_error_in ? {2{dma_mem_addr[31:0]}} : {iccm_dma_rdata_1_muxed[31:0], iccm_corrected_data[0]};
@@ -1297,6 +1311,27 @@ ifc_dma_access_ok_prev,dma_iccm_req_f})
     assign iccm_dma_rd_ecc_single_err = iccm_dma_sb_error;
     assign iccm_dma_rd_ecc_double_err = iccm_dma_rvalid && iccm_dma_ecc_error;
 
+   // ICCM address-XOR mask generation.
+`ifdef RV_ICCM_ADDR_XOR
+   logic [pt.ICCM_BITS-1:2] iccm_wr_wa_w0, iccm_wr_wa_w1, iccm_rd_wa_w0, iccm_rd_wa_w1;
+   // Write addresses.
+   assign iccm_wr_wa_w0 = {iccm_rw_addr[pt.ICCM_BITS-1:3], 1'b0};
+   assign iccm_wr_wa_w1 = {iccm_rw_addr[pt.ICCM_BITS-1:3], 1'b1};
+   // Read addresses.
+   assign iccm_rd_wa_w0 = iccm_rw_addr_f[pt.ICCM_BITS-1:2];
+   assign iccm_rd_wa_w1 = iccm_rw_addr_f[pt.ICCM_BITS-1:2] + 1'b1;
+   // Mask assembly.
+   assign iccm_wr_xor_mask_w0 = 32'({iccm_wr_wa_w0, iccm_wr_wa_w0});
+   assign iccm_wr_xor_mask_w1 = 32'({iccm_wr_wa_w1, iccm_wr_wa_w1});
+   assign iccm_rd_xor_mask_w0 = 32'({iccm_rd_wa_w0, iccm_rd_wa_w0});
+   assign iccm_rd_xor_mask_w1 = 32'({iccm_rd_wa_w1, iccm_rd_wa_w1});
+`else
+   assign iccm_wr_xor_mask_w0 = '0;
+   assign iccm_wr_xor_mask_w1 = '0;
+   assign iccm_rd_xor_mask_w0 = '0;
+   assign iccm_rd_xor_mask_w1 = '0;
+`endif
+
 
 /////////////////////////////////////////////////////////////////////////////////////
 // ECC checking logic for ICCM data.                                               //
@@ -1307,7 +1342,12 @@ ifc_dma_access_ok_prev,dma_iccm_req_f})
   assign ic_fetch_val_int_f[3:0] = {2'b00 , ic_fetch_val_f[1:0] } ;
   assign ic_fetch_val_shift_right[3:0] = {ic_fetch_val_int_f << ifu_fetch_addr_int_f[1] } ;
 
-   assign iccm_rdmux_data[77:0] = iccm_rd_data_ecc[77:0];
+   // ICCM address-XOR: remove the address from the DATA bits before ECC decode, using the
+   // registered read address.
+   assign iccm_rdmux_data[31:0]   = iccm_rd_data_ecc[31:0]   ^ iccm_rd_xor_mask_w0[31:0]; // word0 data de-XOR
+   assign iccm_rdmux_data[38:32]  = iccm_rd_data_ecc[38:32];                              // word0 ecc (plain)
+   assign iccm_rdmux_data[70:39]  = iccm_rd_data_ecc[70:39]  ^ iccm_rd_xor_mask_w1[31:0]; // word1 data de-XOR
+   assign iccm_rdmux_data[77:71]  = iccm_rd_data_ecc[77:71];                              // word1 ecc (plain)
    // Remove the ECC and align by the fetch halfword.
    assign iccm_rd_data[63:0] =  64'({iccm_rdmux_data[70:39], iccm_rdmux_data[31:0]} >> (16*ifu_fetch_addr_int_f[1]));
    for (genvar i=0; i < 2 ; i++) begin : ICCM_ECC_CHECK

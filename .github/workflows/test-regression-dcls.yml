@@ -84,6 +84,66 @@ jobs:
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
 
+  regression-tests-iccm-addr-xor:
+    name: Regression tests (DCLS + ICCM address-XOR)
+    runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:20250411084921
+    strategy:
+      matrix:
+        bus: ["axi", "ahb"]
+        # ICCM-exercising subset, built with DCLS + RV_ICCM_ADDR_XOR enabled. The XOR feature
+        # only affects the ICCM data path and is privilege-independent, so a single priv level
+        # of these ICCM/ECC tests is enough to exercise it without re-running the full matrix.
+        test: ["hello_world_iccm", "hello_world", "ecc"]
+        coverage: ["all"]
+        priv: ["0"]
+        tb_extra_args: [""]
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/regression/.cache/"
+      DCLS_ENABLE: "1"
+      DCLS_DELAY: "0"
+      ICCM_ADDR_XOR: "1"
+
+    steps:
+      - name: Install utils
+        run: |
+          echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
+          echo "debconf debconf/frontend select Noninteractive" | sudo debconf-set-selections
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+            git python3 python3-pip build-essential ninja-build ccache \
+            gcc-riscv64-unknown-elf
+          pip3 install meson --break-system-packages
+
+      - name: Setup repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install coverage dependencies
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -r .github/scripts/requirements-coverage.txt
+          echo "PATH=$PATH" >> $GITHUB_ENV
+
+      - name: Setup environment
+        run: |
+          echo "/opt/verilator/bin" >> $GITHUB_PATH
+          RV_ROOT=`pwd`
+          echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
+          PYTHONUNBUFFERED=1
+          echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
+          TEST_PATH=$RV_ROOT/test_results
+          echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+
+      - name: Run tests
+        run: |
+          export PATH=/opt/verilator/bin:$PATH
+          export RV_ROOT=`pwd`
+          export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+
   custom-regression-tests:
     name: Custom regression tests
     if: inputs.run_custom

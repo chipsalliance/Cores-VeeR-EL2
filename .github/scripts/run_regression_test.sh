@@ -57,6 +57,17 @@ run_regression_test(){
         COMMON_PARAMS="-set lockstep_enable=1 -set lockstep_regfile_enable=1 -set lockstep_delay=${DCLS_DELAY} ${COMMON_PARAMS}"
     fi
 
+    # ICCM_ADDR_XOR may not be set
+    set +u
+    if [[ -z "${ICCM_ADDR_XOR}" ]]; then
+        ICCM_ADDR_XOR="0"
+    fi
+    set -u
+
+    if [[ "${ICCM_ADDR_XOR}" == "1" ]]; then
+        COMMON_PARAMS="-set iccm_addr_xor=1 ${COMMON_PARAMS}"
+    fi
+
     COMMON_PARAMS="-set=icache_waypack=${ICACHE_WAYPACK} ${COMMON_PARAMS}"
 
     if [[ "${BUS}" == "axi" ]]; then

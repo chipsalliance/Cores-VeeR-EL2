@@ -926,9 +926,6 @@ Refer to {ref}`tab-shadow-core-tracked-signals` for list of ports routed to the 
 * - iccm_ecc_single_error
   -
   -
-* - iccm_rd_data
-  -
-  -
 * - iccm_rd_data_ecc
   -
   -

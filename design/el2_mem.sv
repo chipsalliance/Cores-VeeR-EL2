@@ -51,7 +51,6 @@ import el2_pkg::*;
    input logic [2:0]   iccm_wr_size,
    input logic [77:0]  iccm_wr_data,
 
-   output logic [63:0] iccm_rd_data,
    output logic [77:0] iccm_rd_data_ecc,
 
    // Icache and Itag Ports
@@ -170,12 +169,10 @@ if (pt.ICCM_ENABLE) begin : iccm
    el2_ifu_iccm_mem  #(.pt(pt)) iccm (.*,
                   .clk_override(icm_clk_override),
                   .iccm_rw_addr(iccm_rw_addr[pt.ICCM_BITS-1:1]),
-                  .iccm_rd_data(iccm_rd_data[63:0]),
                   .iccm_mem_export(mem_export_local.veer_iccm)
                    );
 end
 else  begin
-   assign iccm_rd_data     = '0 ;
    assign iccm_rd_data_ecc = '0 ;
    assign mem_export_local.iccm_addr_bank = '0;
    assign mem_export_local.iccm_bank_wr_data = '0;

@@ -516,7 +516,6 @@ import el2_pkg::*;
    logic           iccm_buf_correct_ecc;
    logic           iccm_correction_state;
 
-   logic [63:0]    iccm_rd_data;
    logic [77:0]    iccm_rd_data_ecc;
 
    logic        core_rst_l;                         // Core reset including rst_l and dbg_rst_l

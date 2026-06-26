@@ -63,8 +63,7 @@ async def test_err_fetch2(dut):
     dut.ifc_dma_access_ok.value = 1
     dut.ifc_iccm_access_bf.value = 1
     dut.ic_rd_data.value = 2**63 - 1
-    dut.iccm_rd_data.value = 2**63 - 1
-    dut.iccm_rd_data_ecc.value = 44
+    dut.iccm_rd_data_ecc.value = 2**63 - 1
     dut.ifu_fetch_val.value = 1
     await fetch_miss(dut, rand_ifu_addr())
 
@@ -96,8 +95,7 @@ async def test_err_stop_fetch(dut):
     dut.ifc_dma_access_ok.value = 1
     dut.ifc_iccm_access_bf.value = 1
     dut.ic_rd_data.value = 2**63 - 1
-    dut.iccm_rd_data.value = 2**63 - 1
-    dut.iccm_rd_data_ecc.value = 44
+    dut.iccm_rd_data_ecc.value = 2**63 - 1
     dut.ifu_fetch_val.value = 1
     await fetch_miss(dut, rand_ifu_addr())
 

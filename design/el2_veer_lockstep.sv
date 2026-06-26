@@ -81,7 +81,6 @@ module el2_veer_lockstep
     input logic                    iccm_buf_correct_ecc,
     input logic                    iccm_correction_state,
 
-    input logic [63:0] iccm_rd_data,
     input logic [77:0] iccm_rd_data_ecc,
 
     // ICache , ITAG  ports
@@ -487,7 +486,6 @@ module el2_veer_lockstep
   assign main_core_inputs.mpc_reset_run_req = mpc_reset_run_req;
   assign main_core_inputs.dccm_rd_data_lo = dccm_rd_data_lo;
   assign main_core_inputs.dccm_rd_data_hi = dccm_rd_data_hi;
-  assign main_core_inputs.iccm_rd_data = iccm_rd_data;
   assign main_core_inputs.iccm_rd_data_ecc = iccm_rd_data_ecc;
   assign main_core_inputs.ic_rd_data = ic_rd_data;
   assign main_core_inputs.ic_rd_addr_lo = ic_rd_addr_lo;
@@ -884,7 +882,6 @@ module el2_veer_lockstep
       .iccm_wr_data(shadow_core_outputs.iccm_wr_data),
       .iccm_buf_correct_ecc(shadow_core_outputs.iccm_buf_correct_ecc),
       .iccm_correction_state(shadow_core_outputs.iccm_correction_state),
-      .iccm_rd_data(shadow_core_inputs.iccm_rd_data),
       .iccm_rd_data_ecc(shadow_core_inputs.iccm_rd_data_ecc),
 
       .ic_rw_addr(shadow_core_outputs.ic_rw_addr),

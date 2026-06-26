@@ -279,6 +279,19 @@ The debug/diagnostic cache-write path (`dec_tlu_ic_diag_pkt`) does not apply the
 Hence, a debugger that writes to the iCache needs to apply the XOR itself.
 Debug reads return XOR-scrambled data and must be un-XORed with the same line address.
 
+## ICCM Address Infection
+
+Optionally (build argument `iccm_addr_xor`), the ICCM write word address is XORed into the data that gets stored into the ICCM.
+On a read, the ICCM read word address is XORed on the fetched data from ICCM.
+If both addresses match, the plain data is retrieved.
+
+If the read address does not match the write address, the address does not cancel.
+As after the read XOR the ECC check happens, the mismatch is detected by an ECC error.
+In addition, as the data is garbled, the instruction is corrupted as well.
+
+Note that the XOR happens within the [Dual-Core Lock-Step](dual-core-lock-step.md) domain.
+Firmware or backdoor loaders that write the ICCM directly must apply the same address XOR.
+
 ## Core Error Counter/Threshold Registers
 
 A summary of platform-specific core error counter/threshold control/status registers in CSR space:

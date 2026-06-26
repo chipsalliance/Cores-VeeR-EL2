@@ -1045,7 +1045,6 @@ module tb_top
                 8: force `LOCKSTEP_CORE.mpc_reset_run_req = '1;
                 9: force `LOCKSTEP_CORE.dccm_rd_data_lo = '1;
                 10: force `LOCKSTEP_CORE.dccm_rd_data_hi = '1;
-                11: force `LOCKSTEP_CORE.iccm_rd_data = '1;
                 12: force `LOCKSTEP_CORE.iccm_rd_data_ecc = '1;
                 13: force `LOCKSTEP_CORE.ic_rd_data = '1;
                 14: force `LOCKSTEP_CORE.ic_debug_rd_data = '1;
@@ -1300,7 +1299,6 @@ module tb_top
                 8: force `VEER.mpc_reset_run_req = '1;
                 9: force `VEER.dccm_rd_data_lo = '1;
                 10: force `VEER.dccm_rd_data_hi = '1;
-                11: force `VEER.iccm_rd_data = '1;
                 12: force `VEER.iccm_rd_data_ecc = '1;
                 13: force `VEER.ic_rd_data = '1;
                 14: force `VEER.ic_debug_rd_data = '1;
@@ -1555,7 +1553,6 @@ module tb_top
             release `LOCKSTEP_CORE.mpc_reset_run_req;
             release `LOCKSTEP_CORE.dccm_rd_data_lo;
             release `LOCKSTEP_CORE.dccm_rd_data_hi;
-            release `LOCKSTEP_CORE.iccm_rd_data;
             release `LOCKSTEP_CORE.iccm_rd_data_ecc;
             release `LOCKSTEP_CORE.ic_rd_data;
             release `LOCKSTEP_CORE.ic_debug_rd_data;
@@ -1791,7 +1788,6 @@ module tb_top
             release `VEER.mpc_reset_run_req;
             release `VEER.dccm_rd_data_lo;
             release `VEER.dccm_rd_data_hi;
-            release `VEER.iccm_rd_data;
             release `VEER.iccm_rd_data_ecc;
             release `VEER.ic_rd_data;
             release `VEER.ic_debug_rd_data;
@@ -2809,7 +2805,11 @@ $display("ICCM pre-load from %h to %h", saddr, eaddr);
 
 for(addr= saddr; addr <= eaddr; addr+=4) begin
     data = {imem.mem[addr+3],imem.mem[addr+2],imem.mem[addr+1],imem.mem[addr]};
+`ifdef RV_ICCM_ADDR_XOR
+    slam_iccm_ram(addr, {riscv_ecc32(data), data ^ {addr[`RV_ICCM_BITS-1:2], addr[`RV_ICCM_BITS-1:2]}});
+`else
     slam_iccm_ram(addr, data == 0 ? 0 : {riscv_ecc32(data),data});
+`endif
 end
 
 endtask

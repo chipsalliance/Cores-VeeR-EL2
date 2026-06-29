@@ -22,25 +22,6 @@ USER_MODE_OPTS =
 endif
 
 CONF_PARAMS ?= -set build_axi4 $(USER_MODE_OPTS)
-
-#don't override here.  TODO: a better place to randomize DELAY/MUBI params
-#ifneq ($(findstring dcls,$(TEST)),)
-#lockstep_enable ?= 1
-#lockstep_regfile_enable ?= 1
-#endif
-#
-#ifdef lockstep_enable
-# override CONF_PARAMS += -set lockstep_enable=1
-# ifdef lockstep_regfile_enable
-#  override CONF_PARAMS += -set lockstep_regfile_enable=1
-# endif
-# ifndef lockstep_delay
-#	MIN:= 2
-#	MAX:= 4
-#  lockstep_delay := $(shell bash -c 'echo $$(( ( $$RANDOM % ($(MAX) - $(MIN) + 1) ) + $(MIN) ))')
-# endif
-# override CONF_PARAMS += -set lockstep_delay=$(lockstep_delay)
-#endif
 $(info ------------------ CONF_PARAMS is: $(CONF_PARAMS))
 TEST_CFLAGS = -g -gdwarf -O3 -funroll-all-loops
 ABI = -mabi=ilp32
@@ -65,7 +46,6 @@ VLOG = qverilog
 VERILATOR = verilator
 RIVIERA = riviera
 GCC_PREFIX = riscv64-unknown-elf
-#GCC_PREFIX = riscv-none-elf
 BUILD_DIR = snapshots/${snapshot}
 TBDIR = ${RV_ROOT}/testbench
 PICOLIBC_DIR = ${RV_ROOT}/third_party/picolibc/install
@@ -199,9 +179,7 @@ TBFILES = $(TBDIR)/tb_top_pkg.sv \
           $(TBDIR)/axi4_mux/axi_crossbar_wr.v \
           $(TBDIR)/axi4_mux/axi_register_rd.v \
           $(TBDIR)/axi4_mux/axi_register_wr.v \
-          $(TBDIR)/axi4_mux/priority_encoder.v \
-	  $(TBDIR)/coverage/fcov/dcls_fcov.sv \
-	  $(TBDIR)/coverage/fcov/dcls_fcov_bind.sv 
+          $(TBDIR)/axi4_mux/priority_encoder.v 
 
 defines  = $(BUILD_DIR)/common_defines.vh
 defines += ${RV_ROOT}/design/include/el2_def.sv

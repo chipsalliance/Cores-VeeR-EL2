@@ -1,6 +1,7 @@
 name: RISCV-DV tests
 
 on:
+  push:
   workflow_call:
 
 defaults:

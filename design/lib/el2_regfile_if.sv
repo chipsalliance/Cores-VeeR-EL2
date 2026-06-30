@@ -19,6 +19,15 @@
 interface el2_regfile_if
 import el2_pkg::*;
 ();
+`ifdef RV_LOCKSTEP_REGFILE_READ_ENABLE
+  // Compare the read output ports of the register file.
+  // When a fault corrupts a register, this is detected by DCLS once
+  // the register file content is read.
+  typedef struct packed {
+    logic [31:0] rd0; // GPR read port 0 data (raddr0 / rs1)
+    logic [31:0] rd1; // GPR read port 1 data (raddr1 / rs2)
+  } el2_regfile_gpr_pkt_t;
+`else
   typedef struct packed {
     // General Purpose Registers
     logic [31:0] ra; // Return address
@@ -27,6 +36,7 @@ import el2_pkg::*;
     logic [31:0] a0, a1; // Function arguments 0-1 / Return values 0-1
     logic [31:0] a2, a3, a4, a5, a6, a7; // Function arguments 2-7
   } el2_regfile_gpr_pkt_t;
+`endif
 
   typedef struct packed {
     // Important registers chosen for exposure

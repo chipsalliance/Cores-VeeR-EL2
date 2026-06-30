@@ -39,9 +39,11 @@ The corruption error will be reported always when all of the following requireme
 
 ### Monitored Registers
 
-The Shadow Core can have its internal copy of the register file by setting a proper VeeR EL2 configuration flag.
+#### Register File
+
+Enabling the `lockstep_regfile_enable` VeeR EL2 configuration flag exposes the register file of both cores to the `Equivalency Checker`.
 Even though every discrepancy between register files of the Main Core and Shadow Core will eventually lead to difference between IOs of these modules, it might take some time for the mismatch to manifest.
-To determine whether a discrepancy has occurred immediately, the register files from both cores will be compared taking into account a reasonable subset of the VeeR EL2 registers, as defined in the table below:
+To detect the discrepancy earlier, the register files from both cores are compared taking into account a reasonable subset of the VeeR EL2 registers, as defined in the table below:
 
 :::{list-table} Monitored VeeR EL2 Registers
 :header-rows: 0
@@ -60,6 +62,22 @@ To determine whether a discrepancy has occurred immediately, the register files 
   - Function arguments / return values
 * - x12-17 (a2-7)
   - Function arguments
+:::
+
+Additionally enabling the `lockstep_regfile_read_enable` flag switches this comparison from the fixed subset above to the register file read output ports (`rd0`/`rd1`) of both cores.
+This covers all registers rather than a subset (a fault is detected once the corrupted register is read) and reduces area.
+
+#### Control and Status Registers
+
+The following CSRs from both cores will be compared:
+
+:::{list-table} Monitored VeeR EL2 CSRs
+:header-rows: 0
+:name: tab-dcls-monitored-veer-el2-csrs
+:align: center
+
+* - **Name**
+  - **Description**
 * - pc
   - Program Counter
 * - npc
@@ -1181,9 +1199,10 @@ Entering Debug Mode with DCLS enabled will disable DCLS until the next reset.
 ```
 
 The DCLS feature can be enabled via `-set lockstep_enable=1` option.
-There are two configuration options:
+There are three configuration options:
 * `-set lockstep_delay={2, 3, 4}` - the delay applied on the Shadow Core between 2 and 4 cycles,
-* `-set lockstep_regfile_enable=1` - enable exposing the VeeR Register File so the Shadow Core will have an internal copy to compare with the Main Core Register File.
+* `-set lockstep_regfile_enable=1` - enable exposing the VeeR register file so a fixed subset of registers is compared against the Shadow Core's,
+* `-set lockstep_regfile_read_enable=1` - compare the register file read output ports (covering all registers) instead of the fixed subset. Requires `lockstep_regfile_enable=1`.
 
 The configuration options are ignored and their macros are not generated if the Dual Core Lockstep feature is disabled.
 
@@ -1336,6 +1355,22 @@ The DCLS feature will be tested within:
   -
 * - Test Name
   - `dcls_debug`
+* -
+  -
+* - **Function**
+  - **Register file fault injection detection**
+* - Reference Document
+  -
+* - Check description
+  - Inject a fault into the register file or the register file output ports of the main or the shadow core.
+* - Coverage groups
+  -
+* - Assertions
+  - Detection bit is asserted upon encountered corruption. Error behavior follows the relevant error handling policy. No action is taken if no corruption was introduced.
+* - Comments
+  -
+* - Test Name
+  -
 * -
   -
 :::

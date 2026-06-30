@@ -20,7 +20,7 @@ jobs:
 
       - name: Download artifact
         id: download-artifact
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           name: pr_number
           path: ./
@@ -31,7 +31,9 @@ jobs:
         run: |
           cat pr_number.txt | tee "$GITHUB_OUTPUT"
 
-      - uses: actions/github-script@v6
+      - name: Post comment (internal PR)
+        if: github.event.workflow_run.head_repository.owner.login == 'chipsalliance'
+        uses: actions/github-script@v6
         with:
           script: |
             github.rest.issues.createComment({
@@ -39,4 +41,16 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: 'Coverage report for this PR is available at ${{ env.WEB_URL }}/html/dev/${{ steps.PR.outputs.number }}/coverage_dashboard/all, documentation is available at ${{ env.WEB_URL }}/html/dev/${{ steps.PR.outputs.number }}/docs_rendered/html'
+            })
+
+      - name: Post comment (external PR)
+        if: github.event.workflow_run.head_repository.owner.login != 'chipsalliance'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: ${{ steps.PR.outputs.number }},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Coverage dashboard artifact for this PR is available in the [CI run](${{ github.event.workflow_run.html_url }})'
             })

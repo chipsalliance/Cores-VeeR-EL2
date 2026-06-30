@@ -12,6 +12,7 @@ env:
 jobs:
   remove:
     name: PR Remove Deploy
+    if: github.event.workflow_run.head_repository.owner.login == 'chipsalliance'
     concurrency:
       group: gh-pages
     runs-on: ubuntu-24.04
@@ -19,7 +20,7 @@ jobs:
       contents: write
     steps:
       - name: Setup repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install coverage dependencies
         run: |
@@ -29,14 +30,14 @@ jobs:
           echo "PATH=$PATH" >> $GITHUB_ENV
 
       - name: Download deployment
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: ${{ env.ROOT_DIR }}
 
       - name: Download artifact
         id: download-artifact
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           name: delete_pr_number
           path: ./

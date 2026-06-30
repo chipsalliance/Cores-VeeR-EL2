@@ -2,6 +2,10 @@ name: Coverage report
 
 on:
   workflow_call:
+    inputs:
+      run_custom:
+        type: boolean
+        default: true
 
 defaults:
   run:
@@ -15,7 +19,7 @@ jobs:
     env:
       DEBIAN_FRONTEND: "noninteractive"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -52,6 +56,7 @@ jobs:
 
   custom-coverage-reports:
     name: Custom coverage reports
+    if: inputs.run_custom
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: centos:8
     env:
@@ -59,7 +64,7 @@ jobs:
       GHA_SA: gh-sa-veer-uploader
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -93,7 +98,7 @@ jobs:
       GHA_SA: gh-sa-veer-uploader
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 

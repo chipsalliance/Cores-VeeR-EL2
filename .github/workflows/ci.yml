@@ -10,53 +10,99 @@ on:
 
 jobs:
 
+  Check-PR-Origin:
+    name: Check PR origin
+    runs-on: ubuntu-24.04
+    outputs:
+      is_internal: ${{ steps.check.outputs.is_internal }}
+    steps:
+      - name: Determine if PR is from chipsalliance organization
+        id: check
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REPO_OWNER: ${{ github.event.pull_request.head.repo.owner.login }}
+        run: |
+          if [ "$EVENT_NAME" != "pull_request" ]; then
+            echo "is_internal=true" >> $GITHUB_OUTPUT
+            echo "Not a pull request event. Custom CI checks will run."
+          elif [ "$HEAD_REPO_OWNER" = "chipsalliance" ]; then
+            echo "is_internal=true" >> $GITHUB_OUTPUT
+            echo "PR from chipsalliance organization. Custom CI checks will run."
+          else
+            echo "is_internal=false" >> $GITHUB_OUTPUT
+            echo "PR from external fork ($HEAD_REPO_OWNER). Custom CI checks will be skipped."
+          fi
+
   Test-DCLS:
     name: Test-DCLS-Regression
+    needs: [Check-PR-Origin]
     uses: ./.github/workflows/test-regression-dcls.yml
+    with:
+      run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
   Test-Regression-Cache-Waypack-0-num-ways-2:
     name: Test-Regression Cache Waypack 0 Num Ways 2
+    needs: [Check-PR-Origin]
     uses: ./.github/workflows/test-regression-cache-waypack.yml
     with:
       waypack: 0
       num_ways: 2
+      run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
   Test-Regression-Cache-Waypack-0-num-ways-4:
     name: Test-Regression Cache Waypack 0 Num Ways 4
+    needs: [Check-PR-Origin]
     uses: ./.github/workflows/test-regression-cache-waypack.yml
     with:
       waypack: 0
       num_ways: 4
+      run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
   Test-Regression-Cache-Waypack-1-num-ways-2:
     name: Test-Regression Cache Waypack 1 Num Ways 2
+    needs: [Check-PR-Origin]
     uses: ./.github/workflows/test-regression-cache-waypack.yml
     with:
       waypack: 1
       num_ways: 2
+      run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
   Test-Regression-Cache-Waypack-1-num-ways-4:
     name: Test-Regression Cache Waypack 1 Num Ways 4
+    needs: [Check-PR-Origin]
     uses: ./.github/workflows/test-regression-cache-waypack.yml
     with:
       waypack: 1
       num_ways: 4
+      run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
   Test-Exceptions-Regression:
     name: Test-Exceptions-Regression
+    needs: [Check-PR-Origin]
     uses: ./.github/workflows/test-regression-exceptions.yml
+    with:
+      run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
   Test-Verification:
     name: Test-Verification
+    needs: [Check-PR-Origin]
     uses: ./.github/workflows/test-verification.yml
+    with:
+      run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
   Test-Microarchitectural:
     name: Test-Microarchitectural
+    needs: [Check-PR-Origin]
     uses: ./.github/workflows/test-uarch.yml
+    with:
+      run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
   Test-RISCV-DV:
     name: Test-RISCV-DV
+    needs: [Check-PR-Origin]
     uses: ./.github/workflows/test-riscv-dv.yml
+    with:
+      run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
   Test-RISCOF:
     name: Test-RISCOF
@@ -72,11 +118,15 @@ jobs:
 
   Test-OpenOCD:
     name: Test-OpenOCD
+    needs: [Check-PR-Origin]
     uses: ./.github/workflows/test-openocd.yml
+    with:
+      run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
   Report-Coverage:
     name: Report-Coverage
     needs: [
+      Check-PR-Origin,
       Test-DCLS,
       Test-Regression-Cache-Waypack-0-num-ways-2,
       Test-Regression-Cache-Waypack-0-num-ways-4,
@@ -90,6 +140,23 @@ jobs:
       Test-OpenOCD
     ]
     uses: ./.github/workflows/report-coverage.yml
+    with:
+      run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
+
+  Upload-PR-Info:
+    name: Upload PR info
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    needs: [Check-PR-Origin]
+    steps:
+      - name: Write PR info
+        run: |
+          echo "number=${{ github.event.number }}" >> pr_number.txt
+      - name: Upload PR info
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr_number
+          path: pr_number.txt
 
   Build-Docs:
     name: Build-Docs
@@ -103,5 +170,7 @@ jobs:
       actions: write
       contents: write
     name: Publish-to-GH-Pages
-    needs: [Report-Coverage, Build-Docs]
+    needs: [Check-PR-Origin, Report-Coverage, Build-Docs]
     uses: ./.github/workflows/publish-webpage.yml
+    with:
+      run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}

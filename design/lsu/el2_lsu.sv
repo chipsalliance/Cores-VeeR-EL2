@@ -72,7 +72,7 @@ import el2_pkg::*;
    output logic                               lsu_nonblock_load_valid_m,      // there is an external load -> put in the cam
    output logic [pt.LSU_NUM_NBLOAD_WIDTH-1:0] lsu_nonblock_load_tag_m,        // the tag of the external non block load
    output logic                               lsu_nonblock_load_inv_r,        // invalidate signal for the cam entry for non block loads
-   output logic [pt.LSU_NUM_NBLOAD_WIDTH-1:0] lsu_nonblock_load_inv_tag_r,    // tag of the enrty which needs to be invalidated
+   output logic [pt.LSU_NUM_NBLOAD_WIDTH-1:0] lsu_nonblock_load_inv_tag_r,    // tag of the entry which needs to be invalidated
    output logic                               lsu_nonblock_load_data_valid,   // the non block is valid - sending information back to the cam
    output logic                               lsu_nonblock_load_data_error,   // non block load has an error
    output logic [pt.LSU_NUM_NBLOAD_WIDTH-1:0] lsu_nonblock_load_data_tag,     // the tag of the non block load sending the data/error

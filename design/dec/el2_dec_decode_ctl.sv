@@ -50,7 +50,7 @@ import el2_pkg::*;
 
    input logic [3:0]  lsu_trigger_match_m,            // lsu trigger matches
 
-   input logic lsu_pmu_misaligned_m,                  // perf mon: load/store misalign
+   input logic lsu_pmu_misaligned_m,                  // perf mon: load/store misalignment
    input logic dec_tlu_debug_stall,                   // debug stall decode
    input logic dec_tlu_flush_leak_one_r,              // leak1 instruction
 
@@ -68,7 +68,7 @@ import el2_pkg::*;
    input logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] dec_i0_bp_index,   // i0 branch index
    input logic [pt.BHT_GHR_SIZE-1:0] dec_i0_bp_fghr,  // BP FGHR
    input logic [pt.BTB_BTAG_SIZE-1:0] dec_i0_bp_btag, // BP tag
-   input logic [$clog2(pt.BTB_SIZE)-1:0] dec_i0_bp_fa_index,          // Fully associt btb index
+   input logic [$clog2(pt.BTB_SIZE)-1:0] dec_i0_bp_fa_index,          // Fully associative btb index
 
    input logic lsu_idle_any,                          // lsu idle: if fence instr & ~lsu_idle then stall decode
 
@@ -179,7 +179,7 @@ import el2_pkg::*;
    output logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] i0_predict_index_d, // i0 predict index
    output logic [pt.BTB_BTAG_SIZE-1:0] i0_predict_btag_d, // i0_predict branch tag
 
-   output logic [$clog2(pt.BTB_SIZE)-1:0] dec_fa_error_index, // Fully associt btb error index
+   output logic [$clog2(pt.BTB_SIZE)-1:0] dec_fa_error_index, // Fully associative btb error index
 
    output logic [1:0] dec_data_en,                    // clock-gating logic
    output logic [1:0] dec_ctl_en,

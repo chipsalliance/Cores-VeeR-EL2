@@ -27,7 +27,7 @@ Outputs and the register file from the main core are delayed by `DELAY` cycles a
 
 The Dual Core Lockstep module will report an error when detected by asserting a single bit output signal.
 It is up to the integrator to provide a logic to handle the detected error.
-The error can be artifficially injected by using [Shadow Core Control](#shadow-core-control) capabilities.
+The error can be artificially injected by using [Shadow Core Control](#shadow-core-control) capabilities.
 The corruption error will be reported always when all of the following requirements are met:
 * Input and Output signals of both Main Core and Shadow Core differ OR an error injection feature is enabled,
 * The Shadow Core is out of reset,
@@ -1157,6 +1157,18 @@ Error is injected by asserting the `corruption_detected_o` output signal even if
   - Indicate that a Shadow Core detected an error (corruption in comparison to the Main Core)
 :::
 
+## Multibit boolean logic
+
+The Shadow Core control ports and equivalency checker ports operate on multibit boolean logic.
+Instead of using single bit signals for bit arithmetic and boolean IOs, there are predefined values corresponding to True and False values.
+There are three configuration options:
+
+* `-set mubi_width = {2, 3, 4, ..., 32}` - number of bits to represent a single boolean value.
+* `-set mubi_true = {0x0, 0x1, ..., 0xffffffff}` - value corresponding to True which must be complementary to the value assigned to `mubi_false`.
+* `-set mubi_false = {0x0, 0x1, ..., 0xffffffff}` - value corresponding to False which must be complementary to the value assigned to `mubi_true`.
+
+If the aforementioned configuration options are not specified explicitly, the DCLS feature will use 2-bit boolean logic where `0x2` and `0x1` are values corresponding to `True` and `False` respectively.
+
 ## Configuration
 
 ```{warning}
@@ -1175,7 +1187,7 @@ The configuration options are ignored and their macros are not generated if the 
 
 The DCLS feature will be tested within:
 
-* Software DCLS [smoke test](https://github.com/chipsalliance/Cores-VeeR-EL2/tree/main/testbench/tests/dcls/dcls.c) - covers VeeR CPU core with the Shadow Core execution flow.
+* Software DCLS [smoke tests](https://github.com/chipsalliance/Cores-VeeR-EL2/tree/main/testbench/tests/dcls) - cover VeeR CPU core with the Shadow Core execution flow.
 * RTL `el2_veer_lockstep` [module tests](https://github.com/chipsalliance/Cores-VeeR-EL2/tree/main/verification/block/dcls) - covers the Shadow Core by itself.
 
 :::{list-table} Validation Plan
@@ -1277,6 +1289,22 @@ The DCLS feature will be tested within:
   -
 * - Test Name
   -
+* -
+  -
+* - **Function**
+  - **Disable error detection after entering debug state**
+* - Reference Document
+  -
+* - Check description
+  - Verify the DCLS feature behavior after entering debug state.
+* - Coverage groups
+  -
+* - Assertions
+  - Corruption detection is disabled when Main Core enters debug mode. It is not disabled until core resets.
+* - Comments
+  -
+* - Test Name
+  - `dcls_debug`
 * -
   -
 :::

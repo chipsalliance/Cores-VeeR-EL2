@@ -66,7 +66,7 @@ import el2_pkg::*;
    input  logic [pt.ICACHE_BANKS_WAY-1:0][70:0]               ic_wr_data,         // Data to fill to the Icache. With ECC
    input  logic [70:0]               ic_debug_wr_data,   // Debug wr cache.
    output logic [70:0]               ic_debug_rd_data ,  // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
-   input  logic [pt.ICACHE_INDEX_HI:3]               ic_debug_addr,      // Read/Write addresss to the Icache.
+   input  logic [pt.ICACHE_INDEX_HI:3]               ic_debug_addr,      // Read/Write address to the Icache.
    input  logic                      ic_debug_rd_en,     // Icache debug rd
    input  logic                      ic_debug_wr_en,     // Icache debug wr
    input  logic                      ic_debug_tag_array, // Debug tag array

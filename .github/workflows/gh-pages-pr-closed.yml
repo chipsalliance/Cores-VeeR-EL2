@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     name: PR Remove
+    if: github.event.pull_request.head.repo.owner.login == 'chipsalliance'
     concurrency:
       group: gh-pages
     runs-on: ubuntu-24.04

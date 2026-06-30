@@ -158,6 +158,9 @@ int main(int argc, char** argv) {
     main_time += 5;
     tb->core_clk = !tb->core_clk;
     tb->eval();
+#if VM_TRACE
+      tfp->dump (main_time);
+#endif
   }
   tb->rst_l = 1;
   // Simulate
@@ -170,6 +173,9 @@ int main(int argc, char** argv) {
       main_time += 5;
       tb->core_clk = !tb->core_clk;
       tb->eval();
+#if VM_TRACE
+      tfp->dump (main_time);
+#endif
     }
     tb->i_cpu_halt_req = 0;
     // wait for halt signal
@@ -177,6 +183,9 @@ int main(int argc, char** argv) {
       main_time += 5;
       tb->core_clk = !tb->core_clk;
       tb->eval();
+#if VM_TRACE
+      tfp->dump (main_time);
+#endif
     }
     // restart the CPU
     tb->i_cpu_run_req = 1;
@@ -185,6 +194,9 @@ int main(int argc, char** argv) {
       main_time += 5;
       tb->core_clk = !tb->core_clk;
       tb->eval();
+#if VM_TRACE
+      tfp->dump (main_time);
+#endif
     }
     tb->i_cpu_run_req = 0;
     // wait for run signal
@@ -193,6 +205,9 @@ int main(int argc, char** argv) {
       main_time += 5;
       tb->core_clk = !tb->core_clk;
       tb->eval();
+#if VM_TRACE
+      tfp->dump (main_time);
+#endif
     }
     // test mpc halt
     tb->mpc_debug_halt_req = 1;
@@ -202,6 +217,9 @@ int main(int argc, char** argv) {
       main_time += 5;
       tb->core_clk = !tb->core_clk;
       tb->eval();
+#if VM_TRACE
+      tfp->dump (main_time);
+#endif
     }
     tb->mpc_debug_halt_req = 0;
     // wait for halt signal
@@ -209,6 +227,9 @@ int main(int argc, char** argv) {
       main_time += 5;
       tb->core_clk = !tb->core_clk;
       tb->eval();
+#if VM_TRACE
+      tfp->dump (main_time);
+#endif
     }
     // restart the CPU
     tb->mpc_debug_run_req = 1;
@@ -217,6 +238,9 @@ int main(int argc, char** argv) {
       main_time += 5;
       tb->core_clk = !tb->core_clk;
       tb->eval();
+#if VM_TRACE
+      tfp->dump (main_time);
+#endif
     }
     tb->mpc_debug_run_req = 0;
     // wait for run signal
@@ -225,6 +249,9 @@ int main(int argc, char** argv) {
       main_time += 5;
       tb->core_clk = !tb->core_clk;
       tb->eval();
+#if VM_TRACE
+      tfp->dump (main_time);
+#endif
     }
   } else {
     tb->i_cpu_halt_req = 0;
@@ -241,6 +268,9 @@ int main(int argc, char** argv) {
         main_time += 5;
         tb->core_clk = !tb->core_clk;
         tb->eval();
+#if VM_TRACE
+      tfp->dump (main_time);
+#endif
       }
       tb->lsu_bus_clk_en = !tb->lsu_bus_clk_en;
     }
@@ -253,6 +283,9 @@ int main(int argc, char** argv) {
       main_time += 5;
       tb->core_clk = !tb->core_clk;
       tb->eval();
+#if VM_TRACE
+      tfp->dump (main_time);
+#endif
     }
     tb->rst_l = 1;
   }

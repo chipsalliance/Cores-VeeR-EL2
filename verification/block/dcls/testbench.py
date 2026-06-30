@@ -18,6 +18,9 @@ class BaseEnv(uvm_env):
         # Config
         ConfigDB().set(None, "*", "TEST_CLK_PERIOD", 1)
         ConfigDB().set(None, "*", "LOCKSTEP_DELAY", 3)
+        ConfigDB().set(None, "*", "MUBI_WIDTH", 4)
+        ConfigDB().set(None, "*", "MUBI_TRUE", 0x6)
+        ConfigDB().set(None, "*", "MUBI_FALSE", 0x9)
 
     def connect_phase(self):
         pass
@@ -59,8 +62,17 @@ class BaseTest(uvm_test):
         self.dut.rst_l.value = 1
         self.dut.dbg_rst_l.value = 1
 
+        # Initialize inputs
+        # Enable corruption detection by default
+        self.dut.disable_corruption_detection_i.value = self.mubi_false
+        self.dut.lockstep_err_injection_en_i.value = self.mubi_false
+
     async def run_phase(self):
         self.raise_objection()
+
+        self.mubi_false = ConfigDB().get(None, "", "MUBI_FALSE")
+        self.mubi_true = ConfigDB().get(None, "", "MUBI_TRUE")
+        self.mubi_max = (2 ** ConfigDB().get(None, "", "MUBI_WIDTH")) - 1
 
         # Start clocks
         self.start_clock("clk")

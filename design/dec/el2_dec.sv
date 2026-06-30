@@ -435,17 +435,8 @@ module el2_dec
 
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
       el2_regfile_if regfile_if ();
-      assign regfile.gpr.ra = regfile_if.gpr.ra;
-      assign regfile.gpr.sp = regfile_if.gpr.sp;
-      assign regfile.gpr.fp = regfile_if.gpr.fp;
-      assign regfile.gpr.a0 = regfile_if.gpr.a0;
-      assign regfile.gpr.a1 = regfile_if.gpr.a1;
-      assign regfile.gpr.a2 = regfile_if.gpr.a2;
-      assign regfile.gpr.a3 = regfile_if.gpr.a3;
-      assign regfile.gpr.a4 = regfile_if.gpr.a4;
-      assign regfile.gpr.a5 = regfile_if.gpr.a5;
-      assign regfile.gpr.a6 = regfile_if.gpr.a6;
-      assign regfile.gpr.a7 = regfile_if.gpr.a7;
+      assign regfile.gpr.rd0 = regfile_if.gpr.rd0;
+      assign regfile.gpr.rd1 = regfile_if.gpr.rd1;
 
       assign regfile.tlu.pc        = regfile_if.tlu.pc;
       assign regfile.tlu.npc       = regfile_if.tlu.npc;

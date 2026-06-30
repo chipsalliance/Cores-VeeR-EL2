@@ -72,7 +72,10 @@ import el2_pkg::*;
    input  logic                      ic_debug_tag_array, // Debug tag array
    input  logic [pt.ICACHE_NUM_WAYS-1:0]                ic_debug_way,       // Debug way. Rd or Wr.
 
-   output logic [63:0]              ic_rd_data ,        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
+   output logic [63:0]              ic_rd_data ,        // Data read from Icache (64b, ECC stripped). F2 stage.
+`ifdef RV_LOCKSTEP_ENABLE
+   output logic [6:0]               ic_rd_data_ecc,     // ECC over ic_rd_data
+`endif
    output logic [25:0]               ictag_debug_rd_data,// Debug icache tag.
 
 
@@ -157,6 +160,9 @@ else  begin
    assign   ic_rd_hit[pt.ICACHE_NUM_WAYS-1:0] = '0;
    assign   ic_tag_perr    = '0 ;
    assign   ic_rd_data  = '0 ;
+`ifdef RV_LOCKSTEP_ENABLE
+   assign   ic_rd_data_ecc = '0 ;
+`endif
    assign   ictag_debug_rd_data  = '0 ;
    assign   ic_debug_rd_data  = '0 ;
    assign   ic_eccerr      = '0;

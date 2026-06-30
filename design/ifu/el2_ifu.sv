@@ -123,7 +123,10 @@ import el2_pkg::*;
    output logic                      ic_rd_en,           // Icache read  enable.
 
    output logic [pt.ICACHE_BANKS_WAY-1:0][70:0]               ic_wr_data,         // Data to fill to the Icache. With ECC
-   input  logic [63:0]              ic_rd_data ,        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
+   input  logic [63:0]              ic_rd_data ,        // Data read from Icache (64b, ECC stripped). F2 stage.
+`ifdef RV_LOCKSTEP_ENABLE
+   input  logic [6:0]               ic_rd_data_ecc,     // ECC over ic_rd_data, re-checked here
+`endif
    input  logic [70:0]              ic_debug_rd_data ,        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
    input  logic [25:0]                     ictag_debug_rd_data,// Debug icache tag.
    output logic [70:0]               ic_debug_wr_data,   // Debug wr cache.
@@ -312,8 +315,23 @@ import el2_pkg::*;
 
 
    // icache
+`ifdef RV_LOCKSTEP_ENABLE
+   // Check the ECC over the ic_rd_data.
+   logic                            ic_rd_data_ecc_err;
+   logic [pt.ICACHE_BANKS_WAY-1:0]  ic_ecc_err_accumulated;
+   rvecc_decode_64 ic_rd_data_bus_chk (
+      .en       (1'b1),
+      .din      (ic_rd_data[63:0]),
+      .ecc_in   (ic_rd_data_ecc[6:0]),
+      .ecc_error(ic_rd_data_ecc_err)
+   );
+   assign ic_ecc_err_accumulated = ic_eccerr | {pt.ICACHE_BANKS_WAY{ic_rd_data_ecc_err}};
+`endif
    el2_ifu_mem_ctl #(.pt(pt)) mem_ctl
      (.*,
+`ifdef RV_LOCKSTEP_ENABLE
+      .ic_eccerr(ic_ecc_err_accumulated),
+`endif
       .ic_data_f(ic_data_f[31:0])
       );
 

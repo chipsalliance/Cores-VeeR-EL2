@@ -198,6 +198,7 @@ package el2_lockstep_pkg;
     logic [63:0]                    iccm_rd_data;
     logic [77:0]                    iccm_rd_data_ecc;
     logic [63:0]                    ic_rd_data;
+    logic [6:0]                     ic_rd_data_ecc;
     logic [70:0]                    ic_debug_rd_data;
     logic [25:0]                    ictag_debug_rd_data;
     logic [pt.ICACHE_BANKS_WAY-1:0] ic_eccerr;

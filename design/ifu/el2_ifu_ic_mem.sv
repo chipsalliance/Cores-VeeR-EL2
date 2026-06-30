@@ -41,7 +41,10 @@ import el2_pkg::*;
       input logic                                   ic_sel_premux_data, // Select the pre_muxed data
 
       input  logic [pt.ICACHE_BANKS_WAY-1:0][70:0]  ic_wr_data,         // Data to fill to the Icache. With ECC
-      output logic [63:0]                           ic_rd_data ,        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
+      output logic [63:0]                           ic_rd_data ,        // Data read from Icache (64b, ECC stripped). F2 stage.
+`ifdef RV_LOCKSTEP_ENABLE
+      output logic [6:0]                            ic_rd_data_ecc,     // ECC over ic_rd_data
+`endif
       output logic [70:0]                           ic_debug_rd_data ,  // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
       output logic [25:0]                           ictag_debug_rd_data,// Debug icache tag.
       input logic  [70:0]                           ic_debug_wr_data,   // Debug wr cache.
@@ -126,7 +129,10 @@ import el2_pkg::*;
       input logic                          ic_rd_en,           // Read enable
 
       input  logic [pt.ICACHE_BANKS_WAY-1:0][70:0]    ic_wr_data,         // Data to fill to the Icache. With ECC
-      output logic [63:0]                             ic_rd_data ,                                 // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
+      output logic [63:0]                             ic_rd_data ,                                 // Data read from Icache (64b, ECC stripped). F2 stage.
+`ifdef RV_LOCKSTEP_ENABLE
+      output logic [6:0]                              ic_rd_data_ecc,     // ECC over ic_rd_data
+`endif
       input  logic [70:0]                             ic_debug_wr_data,   // Debug wr cache.
       output logic [70:0]                             ic_debug_rd_data ,  // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
       output logic [pt.ICACHE_BANKS_WAY-1:0] ic_parerr,
@@ -711,6 +717,22 @@ else  begin : ECC0_MUX
 
 end // else: !if( pt.ICACHE_ECC )
 
+`ifdef RV_LOCKSTEP_ENABLE
+   // Generate the ECC for each way and output the muxed ECC portion together
+   // with the plain read data (ic_rd_data). Inside the dual-core lockstep
+   // domain, we check the ECC.
+   logic [pt.ICACHE_NUM_WAYS-1:0][6:0] ic_rd_data_ecc_way;
+   for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin : ic_rd_data_ecc_gen
+      rvecc_encode_64 ic_rd_data_ecc_enc (.din(wb_dout_way_with_premux[i][63:0]),
+                                          .ecc_out(ic_rd_data_ecc_way[i][6:0]));
+   end
+   always_comb begin : ic_rd_data_ecc_mux
+      ic_rd_data_ecc[6:0] = '0;
+      for (int i=0; i<pt.ICACHE_NUM_WAYS; i++) begin
+         ic_rd_data_ecc[6:0] |= {7{ic_rd_hit_q[i] | ic_sel_premux_data}} & ic_rd_data_ecc_way[i][6:0];
+      end
+   end
+`endif
 
 endmodule // EL2_IC_DATA
 

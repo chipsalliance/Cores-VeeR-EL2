@@ -113,7 +113,10 @@ import el2_pkg::*;
    output logic                  ic_rd_en,
 
    output logic [pt.ICACHE_BANKS_WAY-1:0][70:0]               ic_wr_data,         // Data to fill to the Icache. With ECC
-   input  logic [63:0]               ic_rd_data ,        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
+   input  logic [63:0]               ic_rd_data ,        // Data read from Icache (64b, ECC stripped). F2 stage.
+`ifdef RV_LOCKSTEP_ENABLE
+   input  logic [6:0]                ic_rd_data_ecc,     // ECC over ic_rd_data
+`endif
    input  logic [70:0]               ic_debug_rd_data ,        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
    input  logic [25:0]               ictag_debug_rd_data,// Debug icache tag.
    output logic [70:0]               ic_debug_wr_data,   // Debug wr cache.

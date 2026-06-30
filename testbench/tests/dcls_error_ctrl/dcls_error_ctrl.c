@@ -1,3 +1,41 @@
+/*
+ * Dual-Core Lockstep (DCLS) Error Control & Monitoring Test
+ *
+ * Description:
+ * This test verifies the functionality, fault tolerance, and tamper resistance of the
+ * Dual-Core Lockstep (DCLS) error monitoring and injection mechanisms using Multi-Bit
+ * Integrity (MUBI) control signals.
+ *
+ * Test Cases:
+ * 1. Error Suppression (External Injection):
+ *    Sets monitoring disable (CMD_INJ_CTRL) to valid RV_MUBI_TRUE. Sweeps all possible
+ *    external error injection values (CMD_INJ_EXT) and verifies no traps occur.
+ *
+ * 2. Error Suppression (Lockstep Mismatch):
+ *    With monitoring disabled (RV_MUBI_TRUE), injects a core lockstep mismatch
+ *    (CMD_INJ_LOCKSTEP) and verifies the trap is suppressed.
+ *
+ * 3. Normal Monitoring (External Injection):
+ *    Re-enables monitoring by setting CMD_INJ_CTRL to valid RV_MUBI_FALSE. Sweeps all
+ *    injection values (CMD_INJ_EXT) and verifies exactly 1 value (RV_MUBI_FALSE) does
+ *    not trap, while all (1 << RV_MUBI_WIDTH) - 1 non-false values trap.
+ *
+ * 4. Disable Control Signal Fault Detection:
+ *    Sweeps all possible multibit values written to CMD_INJ_CTRL. Verifies that valid
+ *    RV_MUBI_TRUE disables reporting, valid RV_MUBI_FALSE enables reporting, and all
+ *    invalid/corrupted multibit values trigger a trap.
+ *
+ * 5. Interrupt Disabled Execution:
+ *    Disables machine interrupts (MIE.MEIE = 0, MSTATUS.MIE = 0) and verifies lockstep
+ *    mismatch trapping still functions as expected.
+ *
+ * 6. Fail-Secure / Disable Tamper Resistance:
+ *    Writes an invalid/corrupted multibit value (dis_inv) to CMD_INJ_CTRL and injects
+ *    an external fault (CMD_INJ_EXT = RV_MUBI_TRUE). Verifies that unless CMD_INJ_CTRL
+ *    is strictly equal to valid RV_MUBI_TRUE, any tampered disable signal fails secure
+ *    and traps immediately upon fault injection.
+ */
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -149,6 +187,27 @@ int main () {
         trap_count = 0;
     }
     tests_done += (1 << RV_MUBI_WIDTH);
+
+    // ========================================================================
+    // NEW CASE 6: SW Error Injection + Monitoring Disable Tamper (Should trap)
+    // ========================================================================
+    if (test_count == tests_done) {
+        printf("Testing New Case 6: SW Inject + DIS Tamper...\n");
+        test_count++;
+        uint32_t dis_inv = (RV_MUBI_TRUE == 1) ? 2 : 1;
+        tohost = dis_inv << 8 | CMD_INJ_CTRL;
+        tohost = RV_MUBI_TRUE << 8 | CMD_INJ_EXT;
+        for (volatile int slp = 0; slp < 500; slp++) asm volatile("nop");
+    }
+    if (test_count == tests_done + 1 && trap_count != 1) {
+        printf("FAIL: New Case 6 did not trap!\n");
+        tohost = 1;
+    } else if (test_count == tests_done + 1) {
+        printf("PASS: New Case 6 trapped as expected!\n");
+        trap_count = 0;
+        tohost = CMD_INJ_CLEAR;
+    }
+    tests_done += 1;
 
     mie = read_csr(mie);
     mie &= ~(1 << 11);

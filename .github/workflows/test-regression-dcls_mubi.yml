@@ -1,0 +1,93 @@
+name: Regression tests DCLS MUBI
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  regression-tests-mubi:
+    name: DCLS MUBI Regression
+    runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:20250411084921
+    strategy:
+      fail-fast: false
+      matrix:
+        bus: ["axi", "ahb"]
+        mubi:
+          - { width: 2, true_val: "0x2", false_val: "0x1" }
+          - { width: 4, true_val: "0xE", false_val: "0x1" }
+          - { width: 4, true_val: "0xA", false_val: "0x5" }
+          - { width: 8, true_val: "0xFE", false_val: "0x1" }
+          - { width: 8, true_val: "0x55", false_val: "0xAA" }
+#fails (runs too long)          - { width: 16, true_val: "0xFFFE", false_val: "0x0001" }
+#fails (runs too long)          - { width: 16, true_val: "0x5555", false_val: "0xAAAA" }
+#fails (runs too long)          - { width: 32, true_val: "0xFFFFFFFE", false_val: "0x00000001" }
+#fails (runs too long)          - { width: 32, true_val: "0x55555555", false_val: "0xAAAAAAAA" }
+        test: ["dcls_error_ctrl"]
+        coverage: ["all"]
+        priv: ["1"]
+        tb_extra_args: ["--test-halt"]
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/regression/.cache/"
+      DCLS_ENABLE: "1"
+
+    steps:
+      - name: Install utils
+        run: |
+          echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
+          echo "debconf debconf/frontend select Noninteractive" | sudo debconf-set-selections
+          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
+            git python3 python3-pip build-essential ninja-build ccache \
+            gcc-riscv64-unknown-elf
+          pip3 install meson --break-system-packages
+
+      - name: Setup repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install coverage dependencies
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -r .github/scripts/requirements-coverage.txt
+          echo "PATH=$PATH" >> $GITHUB_ENV
+
+      - name: Setup environment
+        run: |
+          echo "/opt/verilator/bin" >> $GITHUB_PATH
+          RV_ROOT=`pwd`
+          echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
+          PYTHONUNBUFFERED=1
+          echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
+          TEST_PATH=$RV_ROOT/test_results
+          echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+          echo "FULL_NAME=${{ matrix.bus }}_w${{ matrix.mubi.width }}_${{ matrix.mubi.true_val }}_${{ matrix.mubi.false_val }}" >> $GITHUB_ENV
+
+      - name: Run DCLS MUBI regression test
+        run: |
+          export PATH=/opt/verilator/bin:$PATH
+          export RV_ROOT=`pwd`
+          export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
+          DELAY=$(( RANDOM % 3 + 2 ))
+          echo "Executing MUBI Regression: Bus=${{ matrix.bus }}, Width=${{ matrix.mubi.width }}bit, True=${{ matrix.mubi.true_val }}, False=${{ matrix.mubi.false_val }}, Delay=${DELAY}"
+          MUBI_FLAGS="0 -set mubi_width=${{ matrix.mubi.width }} -set mubi_true=${{ matrix.mubi.true_val }} -set mubi_false=${{ matrix.mubi.false_val }} -set lockstep_delay=${DELAY}"
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test }} ${{ matrix.coverage }} ${{ matrix.priv }} "$MUBI_FLAGS"
+
+      - name: Prepare coverage data
+        run: |
+          source .venv/bin/activate
+          mkdir -p results
+          .github/scripts/convert_dat.sh ${TEST_PATH}/coverage.dat results/coverage_${FULL_NAME}
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression_tests_coverage_dcls_mubi_${{ env.FULL_NAME }}
+          path: results/*.info

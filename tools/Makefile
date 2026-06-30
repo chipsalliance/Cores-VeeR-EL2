@@ -23,6 +23,25 @@ endif
 
 CONF_PARAMS ?= -set build_axi4 $(USER_MODE_OPTS)
 
+#don't override here.  TODO: a better place to randomize DELAY/MUBI params
+#ifneq ($(findstring dcls,$(TEST)),)
+#lockstep_enable ?= 1
+#lockstep_regfile_enable ?= 1
+#endif
+#
+#ifdef lockstep_enable
+# override CONF_PARAMS += -set lockstep_enable=1
+# ifdef lockstep_regfile_enable
+#  override CONF_PARAMS += -set lockstep_regfile_enable=1
+# endif
+# ifndef lockstep_delay
+#	MIN:= 2
+#	MAX:= 4
+#  lockstep_delay := $(shell bash -c 'echo $$(( ( $$RANDOM % ($(MAX) - $(MIN) + 1) ) + $(MIN) ))')
+# endif
+# override CONF_PARAMS += -set lockstep_delay=$(lockstep_delay)
+#endif
+$(info ------------------ CONF_PARAMS is: $(CONF_PARAMS))
 TEST_CFLAGS = -g -gdwarf -O3 -funroll-all-loops
 ABI = -mabi=ilp32
 LD_ABI = $(ABI) -march=rv32imac
@@ -46,6 +65,7 @@ VLOG = qverilog
 VERILATOR = verilator
 RIVIERA = riviera
 GCC_PREFIX = riscv64-unknown-elf
+#GCC_PREFIX = riscv-none-elf
 BUILD_DIR = snapshots/${snapshot}
 TBDIR = ${RV_ROOT}/testbench
 PICOLIBC_DIR = ${RV_ROOT}/third_party/picolibc/install
@@ -67,6 +87,9 @@ VERILATOR_VERSION    := $(subst .,,$(word 2,$(shell $(VERILATOR) --version)))
 
 ifneq ($(TB_MAX_CYCLES),)
 	VERILATOR_EXTRA_ARGS := -GMAX_CYCLES=$(TB_MAX_CYCLES)
+	VCS_EXTRA_ARGS := -pvalue+tb_top.MAX_CYCLES=$(TB_MAX_CYCLES)
+	IRUN_EXTRA_ARGS := -defparam tb_top.MAX_CYCLES=$(TB_MAX_CYCLES)
+	RIVIERA_EXTRA_ARGS := -gMAX_CYCLES=$(TB_MAX_CYCLES)
 endif
 
 ifeq ("$(.SHELLSTATUS)", "0")
@@ -85,16 +108,33 @@ TEST = hello_world
 TEST_DIR = ${TBDIR}/asm
 HEX_DIR = ${TBDIR}/hex
 
+# Define BUILD_TEST_DIR if TEST is set
+ifdef TEST
+#BUILD_TEST_DIR := build_$(TEST)
+BUILD_TEST_DIR := build_$(TEST)_$(shell date +'%Y%m%d-%H%M%S')
+endif
+
 # Coverage reporting
 # TODO: Set flags for other tools here as well
+ifneq ("$(COVERAGE)", "")
+    FCOV_DEFINES = +define+FCOV
+endif
 ifeq ("$(COVERAGE)", "all")
     VERILATOR_COVERAGE = --coverage
+#    VCS_COVERAGE = -cm line+cond+fsm+tgl+branch+assert+fcov
+    VCS_COVERAGE = -cm line+cond+fsm+tgl+branch+assert
 else ifeq ("$(COVERAGE)", "branch")
     VERILATOR_COVERAGE = --coverage-line
+    VCS_COVERAGE = -cm branch
 else ifeq ("$(COVERAGE)", "toggle")
     VERILATOR_COVERAGE = --coverage-toggle
+    VCS_COVERAGE = -cm tgl
 else ifeq ("$(COVERAGE)", "functional")
     VERILATOR_COVERAGE = --coverage-user
+#not a valid option    VCS_COVERAGE = -cm fcov
+else ifeq ("$(COVERAGE)", "0")
+    VERILATOR_COVERAGE = 
+    VCS_COVERAGE = 
 else ifneq ("$(COVERAGE)", "")
     $(error Unknown COVERAGE value '$(COVERAGE)')
 endif
@@ -107,10 +147,10 @@ endif
 OFILES = $(TEST).o
 
 ifdef debug
- DEBUG_PLUS = +dumpon
+ DEBUG_PLUS = +dumpon +fsdbfile+dump.fsdb +fsdb+all=on +fsdb+mda=on
  IRUN_DEBUG = -access +rc
  IRUN_DEBUG_RUN = -input ${RV_ROOT}/testbench/input.tcl
- VCS_DEBUG = -debug_access
+ VCS_DEBUG = -debug_access+r+w -debug_access+all -kdb +define+VCS_DEBUG
  VERILATOR_DEBUG = --trace
  RIVIERA_DEBUG = +access +r
 endif
@@ -162,7 +202,9 @@ TBFILES = $(TBDIR)/tb_top_pkg.sv \
           $(TBDIR)/axi4_mux/axi_crossbar_wr.v \
           $(TBDIR)/axi4_mux/axi_register_rd.v \
           $(TBDIR)/axi4_mux/axi_register_wr.v \
-          $(TBDIR)/axi4_mux/priority_encoder.v
+          $(TBDIR)/axi4_mux/priority_encoder.v \
+	  $(TBDIR)/coverage/fcov/dcls_fcov.sv \
+	  $(TBDIR)/coverage/fcov/dcls_fcov_bind.sv 
 
 defines  = $(BUILD_DIR)/common_defines.vh
 defines += ${RV_ROOT}/design/include/el2_def.sv
@@ -205,12 +247,12 @@ verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	touch verilator-build
 
 vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
-	$(VCS) -full64 -assert svaext -sverilog +define+RV_OPENSOURCE $(ASSERT_DEFINES) \
+	$(VCS) $(VCS_DEBUG) -full64 -assert svaext -sverilog $(FCOV_DEFINES) +define+RV_OPENSOURCE $(LOCKSTEP_ENABLE) $(LOCKSTEP_REGFILE_ENABLE) $(ASSERT_DEFINES) \
 	  +error+500 +incdir+${RV_ROOT}/design/lib \
 	  +incdir+${RV_ROOT}/design/include ${BUILD_DIR}/common_defines.vh \
 	  +incdir+$(BUILD_DIR)  +libext+.v $(defines) -CFLAGS "${CFLAGS}" \
-	  -cm_hier $(CM_HIER_FILE) \
-	  -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -l vcs.log
+	  -cm_hier $(CM_HIER_FILE) $(VCS_COVERAGE) -timescale=1ns/10ps \
+	  -f ${RV_ROOT}/testbench/flist $(VCS_EXTRA_ARGS) ${TBFILES} ${TB_DPI_SRCS} -l vcs.log
 	touch vcs-build
 
 irun-build: ${TBFILES} ${BUILD_DIR}/defines.h
@@ -218,7 +260,7 @@ irun-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	  -xmlibdirpath . -xmlibdirname veer.build \
 	  -incdir ${RV_ROOT}/design/lib -incdir ${RV_ROOT}/design/include \
 	  -vlog_ext +.vh+.h $(defines) -incdir $(BUILD_DIR) \
-	  -f ${RV_ROOT}/testbench/flist -top tb_top  ${TBFILES} \
+	  -f ${RV_ROOT}/testbench/flist $(IRUN_EXTRA_ARGS) -top tb_top  ${TBFILES} \
 	  -I${RV_ROOT}/testbench -elaborate  -snapshot ${snapshot} $(profile)
 	touch irun-build
 
@@ -254,14 +296,14 @@ irun: program.hex irun-build
 	  -snapshot ${snapshot} -r $(snapshot) $(IRUN_DEBUG_RUN) $(profile)
 
 vcs: program.hex vcs-build
-	./simv $(DEBUG_PLUS) +vcs+lic+wait  -l vcs.log
+	./simv $(DEBUG_PLUS) +vcs+lic+wait $(VCS_COVERAGE) -a vcs.log
 
 vlog: program.hex ${TBFILES} ${BUILD_DIR}/defines.h
 	$(VLOG) -l vlog.log -sv -mfcu +incdir+${BUILD_DIR}+${RV_ROOT}/design/include+${RV_ROOT}/design/lib -ccflags "${CFLAGS}"\
         $(ASSERT_DEFINES) $(defines) -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -R +nowarn3829 +nowarn2583 ${DEBUG_PLUS} -suppress 14408 -suppress 16154
 
 riviera: program.hex riviera-build
-	vsim -c -lib work ${DEBUG_PLUS} ${RIVIERA_DEBUG} tb_top -do "run -all; exit" -l riviera.log
+	vsim -c -lib work ${DEBUG_PLUS} ${RIVIERA_DEBUG} $(RIVIERA_EXTRA_ARGS) tb_top -do "run -all; exit" -l riviera.log
 
 
 

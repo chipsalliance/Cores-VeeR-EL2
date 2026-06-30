@@ -55,6 +55,10 @@ import el2_pkg::*;
    logic [31:1] gpr_wr_en;
 
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
+ `ifdef RV_LOCKSTEP_REGFILE_READ_ENABLE
+   assign regfile.gpr.rd0 = rd0[31:0];
+   assign regfile.gpr.rd1 = rd1[31:0];
+ `else
    assign regfile.gpr.ra = gpr_out[1][31:0]; // x1
    assign regfile.gpr.sp = gpr_out[2][31:0]; // x2
    assign regfile.gpr.fp = gpr_out[8][31:0]; // x8
@@ -66,6 +70,7 @@ import el2_pkg::*;
    assign regfile.gpr.a5 = gpr_out[15][31:0]; // x15
    assign regfile.gpr.a6 = gpr_out[16][31:0]; // x16
    assign regfile.gpr.a7 = gpr_out[17][31:0]; // x17
+ `endif
 `endif
 
    // GPR Write Enables

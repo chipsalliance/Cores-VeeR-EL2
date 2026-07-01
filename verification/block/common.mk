@@ -5,7 +5,7 @@ $(info $(shell cocotb-config --makefiles))
 
 TOPLEVEL_LANG    = verilog
 SIM             ?= verilator
-WAVES           ?= 1
+WAVES           ?= 0
 
 # Paths
 CURDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
@@ -60,6 +60,14 @@ else ifeq ($(SIM), vcs)
         EXTRA_ARGS += -cm_hier $(TEST_DIR)/$(CM_FILE)
     endif
     EXTRA_ARGS += +define+FCOV +incdir+$(CFGDIR) +incdir+$(SRCDIR)/include -assert svaext -cm line+cond+fsm+tgl+branch -cg_coverage_control=1 +vcs+lic+wait
+    COMPILE_ARGS += -kdb
+    COMPILE_ARGS += -debug_access+all +vcs+fsdbon +vcs+fsdbdumpvars
+    COMPILE_ARGS += -l vcs.log
+
+    ifeq ($(WAVES), 1)
+        SIM_ARGS += +vcs+fsdbon +vcs+fsdbdumpvars
+        SIM_ARGS += +fsdbfile+dump.fsdb +fsdb+all=on +fsdb+mda=on
+    endif
 endif
 
 # Produces verilog.dump VCD file

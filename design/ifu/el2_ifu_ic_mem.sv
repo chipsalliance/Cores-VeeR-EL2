@@ -41,13 +41,13 @@ import el2_pkg::*;
       input logic                                   ic_sel_premux_data, // Select the pre_muxed data
 
       input  logic [pt.ICACHE_BANKS_WAY-1:0][70:0]  ic_wr_data,         // Data to fill to the Icache. With ECC
-      output logic [63:0]                           ic_rd_data ,        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
+      output logic [141:0]                          ic_rd_data ,        // Raw way-muxed 142-bit ECC-protected word pair. F2 stage.
+      output logic [1:0]                            ic_rd_addr_lo,      // F2-aligned ic_rw_addr_ff[2:1] for core-side rotate
+      output logic [pt.ICACHE_BANKS_WAY-1:0]        ic_rd_bank_check_en,// Per-bank ECC check enable for core-side decode
       output logic [70:0]                           ic_debug_rd_data ,  // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
       output logic [25:0]                           ictag_debug_rd_data,// Debug icache tag.
       input logic  [70:0]                           ic_debug_wr_data,   // Debug wr cache.
 
-      output logic [pt.ICACHE_BANKS_WAY-1:0]        ic_eccerr,          // ecc error per bank
-      output logic [pt.ICACHE_BANKS_WAY-1:0]        ic_parerr,          // ecc error per bank
       input logic [pt.ICACHE_NUM_WAYS-1:0]          ic_tag_valid,       // Valid from the I$ tag valid outside (in flops).
 
       el2_mem_if.veer_icache_src icache_export,
@@ -126,11 +126,11 @@ import el2_pkg::*;
       input logic                          ic_rd_en,           // Read enable
 
       input  logic [pt.ICACHE_BANKS_WAY-1:0][70:0]    ic_wr_data,         // Data to fill to the Icache. With ECC
-      output logic [63:0]                             ic_rd_data ,                                 // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
+      output logic [141:0]                            ic_rd_data ,        // Raw way-muxed 142-bit ECC-protected word pair. F2 stage.
+      output logic [1:0]                              ic_rd_addr_lo,      // F2-aligned ic_rw_addr_ff[2:1] for core-side rotate
+      output logic [pt.ICACHE_BANKS_WAY-1:0]          ic_rd_bank_check_en,// Per-bank ECC check enable for core-side decode
       input  logic [70:0]                             ic_debug_wr_data,   // Debug wr cache.
       output logic [70:0]                             ic_debug_rd_data ,  // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
-      output logic [pt.ICACHE_BANKS_WAY-1:0] ic_parerr,
-      output logic [pt.ICACHE_BANKS_WAY-1:0] ic_eccerr,    // ecc error per bank
       input logic [pt.ICACHE_INDEX_HI:3]     ic_debug_addr,     // Read/Write address to the Icache.
       input logic                            ic_debug_rd_en,      // Icache debug rd
       input logic                            ic_debug_wr_en,      // Icache debug wr
@@ -158,9 +158,8 @@ import el2_pkg::*;
    logic [pt.ICACHE_BANKS_WAY-1:0]                                                ic_debug_sel_sb;
 
    logic [pt.ICACHE_NUM_WAYS-1:0][pt.ICACHE_BANKS_WAY-1:0][70:0]                  wb_dout ;       //  ways x bank
-   logic [pt.ICACHE_BANKS_WAY-1:0][70:0]                                          ic_sb_wr_data, ic_bank_wr_data, wb_dout_ecc_bank;
+   logic [pt.ICACHE_BANKS_WAY-1:0][70:0]                                          ic_sb_wr_data, ic_bank_wr_data;
    logic [pt.ICACHE_NUM_WAYS-1:0] [141:0]                                         wb_dout_way_pre;
-   logic [pt.ICACHE_NUM_WAYS-1:0] [63:0]                                          wb_dout_way, wb_dout_way_with_premux;
    logic [141:0]                                                                  wb_dout_ecc;
 
    logic [pt.ICACHE_BANKS_WAY-1:0]                                                bank_check_en;
@@ -616,39 +615,23 @@ import el2_pkg::*;
       end
     end
 
-    for ( genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin : num_ways_mux1
-      assign wb_dout_way[i][63:0] = (ic_rw_addr_ff[2:1] == 2'b00) ? wb_dout_way_pre[i][63:0]   :
-                                    (ic_rw_addr_ff[2:1] == 2'b01) ?{wb_dout_way_pre[i][86:71], wb_dout_way_pre[i][63:16]} :
-                                    (ic_rw_addr_ff[2:1] == 2'b10) ?{wb_dout_way_pre[i][102:71],wb_dout_way_pre[i][63:32]} :
-                                                                   {wb_dout_way_pre[i][118:71],wb_dout_way_pre[i][63:48]};
-
-      assign wb_dout_way_with_premux[i][63:0]  =  ic_sel_premux_data ? ic_premux_data[63:0] : wb_dout_way[i][63:0] ;
-   end
-
    always_comb begin : rd_out
       ic_debug_rd_data[70:0]     = '0;
-      ic_rd_data[63:0]           = '0;
       wb_dout_ecc[141:0]         = '0;
       for ( int i=0; i<pt.ICACHE_NUM_WAYS; i++) begin : num_ways_mux2
-         ic_rd_data[63:0]       |= ({64{ic_rd_hit_q[i] | ic_sel_premux_data}}) &  wb_dout_way_with_premux[i][63:0];
          ic_debug_rd_data[70:0] |= ({71{ic_rd_hit_q[i]}}) & wb_dout_way_pre[i][70:0];
          wb_dout_ecc[141:0]     |= {142{ic_rd_hit_q[i]}}  & wb_dout_way_pre[i];
       end
    end
 
+   // Expose the raw way-muxed 142-bit ECC-protected word pair to the core.
+   // Byte-rotate + ECC decode are performed core-side (in el2_ifu_mem_ctl).
+   assign ic_rd_data                = wb_dout_ecc;
+   assign ic_rd_addr_lo[1:0]        = ic_rw_addr_ff[2:1];
+   assign ic_rd_bank_check_en       = bank_check_en;
 
  for (genvar i=0; i < pt.ICACHE_BANKS_WAY ; i++) begin : ic_ecc_error
     assign bank_check_en[i]    = |ic_rd_hit[pt.ICACHE_NUM_WAYS-1:0] & ((i==0) | (~ic_cacheline_wrap_ff & (ic_b_rden_ff[pt.ICACHE_BANKS_WAY-1:0] == {pt.ICACHE_BANKS_WAY{1'b1}})));  // always check the lower address bank, and drop the upper address bank on a CL wrap
-    assign wb_dout_ecc_bank[i] = wb_dout_ecc[(71*i)+70:(71*i)];
-
-   rvecc_decode_64  ecc_decode_64 (
-                           .en               (bank_check_en[i]),
-                           .din              (wb_dout_ecc_bank[i][63 : 0]),                // [134:71],  [63:0]
-                           .ecc_in           (wb_dout_ecc_bank[i][70 : 64]),               // [141:135] [70:64]
-                           .ecc_error        (ic_eccerr[i]));
-
-   // or the sb and db error detects into 1 signal called aligndataperr[i] where i corresponds to 2B position
-  assign  ic_parerr[i]  = '0 ;
   end // block: ic_ecc_error
 
 end // if ( pt.ICACHE_ECC )
@@ -667,47 +650,25 @@ else  begin : ECC0_MUX
       end
      end
    end
-   // When we straddle the banks like this - the ECC we capture is not correct ??
-   for ( genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin : num_ways_mux1
-      assign wb_dout_way[i][63:0] = (ic_rw_addr_ff[2:1] == 2'b00) ? wb_dout_way_pre[i][63:0]   :
-                                    (ic_rw_addr_ff[2:1] == 2'b01) ?{wb_dout_way_pre[i][83:68],  wb_dout_way_pre[i][63:16]} :
-                                    (ic_rw_addr_ff[2:1] == 2'b10) ?{wb_dout_way_pre[i][99:68],  wb_dout_way_pre[i][63:32]} :
-                                                                   {wb_dout_way_pre[i][115:68], wb_dout_way_pre[i][63:48]};
-
-      assign wb_dout_way_with_premux[i][63:0]      =  ic_sel_premux_data ? ic_premux_data[63:0]  : wb_dout_way[i][63:0] ;
-   end
-
    always_comb begin : rd_out
-      ic_rd_data[63:0]   = '0;
       ic_debug_rd_data[70:0]   = '0;
-      wb_dout_ecc[135:0] = '0;
+      wb_dout_ecc[141:0] = '0;
 
       for ( int i=0; i<pt.ICACHE_NUM_WAYS; i++) begin : num_ways_mux2
-         ic_rd_data[63:0]   |= ({64{ic_rd_hit_q[i] | ic_sel_premux_data}} &  wb_dout_way_with_premux[i][63:0]);
          ic_debug_rd_data[70:0] |= ({71{ic_rd_hit_q[i]}}) & {3'b0,wb_dout_way_pre[i][67:0]};
          wb_dout_ecc[135:0] |= {136{ic_rd_hit_q[i]}}  & wb_dout_way_pre[i][135:0];
       end
    end
 
-   assign wb_dout_ecc_bank[0] =  wb_dout_ecc[67:0];
-   assign wb_dout_ecc_bank[1] =  wb_dout_ecc[135:68];
-
-   logic [pt.ICACHE_BANKS_WAY-1:0][3:0] ic_parerr_bank;
+   // Expose the raw way-muxed 136-bit parity-protected word pair to the core.
+   // Byte-rotate + parity-check are performed core-side (in el2_ifu_mem_ctl).
+   assign ic_rd_data          = wb_dout_ecc;
+   assign ic_rd_addr_lo       = ic_rw_addr_ff[2:1];
+   assign ic_rd_bank_check_en = bank_check_en;
 
   for (genvar i=0; i < pt.ICACHE_BANKS_WAY ; i++) begin : ic_par_error
     assign bank_check_en[i]    = |ic_rd_hit[pt.ICACHE_NUM_WAYS-1:0] & ((i==0) | (~ic_cacheline_wrap_ff & (ic_b_rden_ff[pt.ICACHE_BANKS_WAY-1:0] == {pt.ICACHE_BANKS_WAY{1'b1}})));  // always check the lower address bank, and drop the upper address bank on a CL wrap
-     for (genvar j=0; j<4; j++)  begin : parity
-      rveven_paritycheck pchk (
-                           .data_in   (wb_dout_ecc_bank[i][16*(j+1)-1: 16*j]),
-                           .parity_in (wb_dout_ecc_bank[i][64+j]),
-                           .parity_err(ic_parerr_bank[i][j] )
-                           );
-        end
-     assign ic_eccerr [i] = '0 ;
   end
-
-     assign ic_parerr[1] = (|ic_parerr_bank[1][3:0]) & bank_check_en[1];
-     assign ic_parerr[0] = (|ic_parerr_bank[0][3:0]) & bank_check_en[0];
 
 end // else: !if( pt.ICACHE_ECC )
 

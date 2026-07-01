@@ -111,15 +111,15 @@ module el2_ifu_mem_ctl_wrapper
     output logic ic_rd_en,  // Icache read  enable.
 
     output logic [pt.ICACHE_BANKS_WAY-1:0] [70:0]               ic_wr_data,           // Data to fill to the Icache. With ECC
-    input  logic [63:0]               ic_rd_data ,          // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
+    input  logic [141:0]                   ic_rd_data ,         // Raw way-muxed ECC/parity word pair (rotate+check done core-side). F2 stage.
+    input  logic [1:0]                     ic_rd_addr_lo,       // F2-aligned ic_rw_addr_ff[2:1] for core-side rotate
+    input  logic [pt.ICACHE_BANKS_WAY-1:0] ic_rd_bank_check_en, // Per-bank check enable for core-side decode
     input  logic [70:0]               ic_debug_rd_data ,          // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
     input logic [25:0] ictag_debug_rd_data,  // Debug icache tag.
     output logic [70:0] ic_debug_wr_data,  // Debug wr cache.
     output logic [70:0] ifu_ic_debug_rd_data,  // debug data read
 
 
-    input logic [pt.ICACHE_BANKS_WAY-1:0] ic_eccerr,  //
-    input logic [pt.ICACHE_BANKS_WAY-1:0] ic_parerr,
 
     output logic [  pt.ICACHE_INDEX_HI:3] ic_debug_addr,       // Read/Write addresss to the Icache.
     output logic                          ic_debug_rd_en,      // Icache debug rd

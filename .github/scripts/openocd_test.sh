@@ -63,8 +63,11 @@ if [ $? -ne 0 ]; then
 fi
 echo -e "Simulation running and ready (pid=${SIM_PID})"
 
-# Wait a bit
-sleep 2s
+timeout 5 bash -c 'until nc -z localhost 5000; do sleep 0.5; done'
+if [ $? -ne 0 ]; then
+    echo "Timed out waiting for port 5000"
+    exit 1
+fi
 
 # Run the test
 echo -e "${COLOR_WHITE}======== Running OpenOCD test '$@' ========${COLOR_OFF}"
@@ -84,4 +87,3 @@ wait $SIM_PID
 
 # Honor the exitcode
 exit ${EXITCODE}
-

@@ -23,4 +23,4 @@ jobs:
           submodules: recursive
 
       - name: Run lint
-        run: _secret_lint:12
+        run: _secret_lint:14

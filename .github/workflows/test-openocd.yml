@@ -45,6 +45,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo apt -qqy install iproute2
           python3 -m venv .venv
           source .venv/bin/activate
           pip install -r requirements.txt
@@ -115,6 +116,6 @@ jobs:
           submodules: recursive
 
       - name: Run tests
-        run: _secret_custom_openocd_tests:13
+        run: _secret_custom_openocd_tests:14
         env:
           BUS: ${{ matrix.bus }}

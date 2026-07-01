@@ -249,6 +249,19 @@ General comments:
 [^fn-error-protection-6]: For load/store accesses, the corrected data is written back to the DCCM and counted only if the load/store instruction retires (i.e., access is non-speculative and has no exception).
 [^fn-error-protection-7]: For non-speculative accesses only.
 
+## ICCM Address Infection
+
+Optionally (build argument `iccm_addr_xor`), the ICCM write word address is XORed into the data that gets stored into the ICCM.
+On a read, the ICCM read word address is XORed on the fetched data from ICCM.
+If both addresses match, the plain data is retrieved.
+
+If the read address does not match the write address, the address does not cancel.
+As after the read XOR the ECC check happens, the mismatch is detected by an ECC error.
+In addition, as the data is garbled, the instruction is corrupted as well.
+
+Note that the XOR happens within the [Dual-Core Lock-Step](dual-core-lock-step.md) domain.
+Firmware or backdoor loaders that write the ICCM directly must apply the same address XOR.
+
 ## Core Error Counter/Threshold Registers
 
 A summary of platform-specific core error counter/threshold control/status registers in CSR space:

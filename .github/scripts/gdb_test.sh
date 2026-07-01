@@ -73,7 +73,6 @@ SIM_PID=$!
 
 # Wait
 wait_for_phrase "${SIM_LOG}" "${SIM_START_STRING}"
-sleep 1s
 retcode=$?
 if [ $retcode -ne 0 ]; then
     echo -e "${COLOR_RED}Failed to start the simulation: $retcode ${COLOR_OFF}"
@@ -81,6 +80,15 @@ if [ $retcode -ne 0 ]; then
     terminate_all; exit -1
 fi
 echo -e "Simulation running and ready (pid=${SIM_PID})"
+
+# Wait until port 5000 is listed on the ports listening for connections
+timeout 10 bash -c 'until ss -ltn | grep -q ':5000'; do sleep 0.1; done'
+if [ $? -ne 0 ]; then
+    echo "Timed out waiting for port 5000"
+    exit 1
+else
+    echo "Port 5000 is listening for connections"
+fi
 
 # Launch OpenOCD
 echo -e "Launching OpenOCD..."
@@ -98,9 +106,6 @@ if [ $? -ne 0 ]; then
     terminate_all; exit -1
 fi
 echo -e "OpenOCD running and ready (pid=${OPENOCD_PID})"
-
-# Wait a bit
-sleep 1s
 
 # Run the test
 echo -e "${COLOR_WHITE}======== Running GDB script test.gdb ========${COLOR_OFF}"
@@ -136,7 +141,7 @@ if [ "$tb_passed" -ne 0 ]; then
 fi
 echo "Testbench passed."
 
-if [ "$gdb_output_match" -ne 0 ]; then 
+if [ "$gdb_output_match" -ne 0 ]; then
     echo "The output from GDB doesn't match the golden reference. See ${gdb_output_golden}"
     exit 1
 fi

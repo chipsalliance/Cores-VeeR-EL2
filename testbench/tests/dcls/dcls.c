@@ -54,9 +54,9 @@ int main () {
     unsigned long mstatus;
 
 #if (SDVT_AHB == 0)
-    if (old_boot_count < (83 * 2)) {
+    if (old_boot_count < (196 * 2)) {
 #else
-    if (old_boot_count < (50 * 2)) {
+    if (old_boot_count < (94 * 2)) {
 #endif
         mie = read_csr(mie);
         mie &= ~(1 << 11);
@@ -78,9 +78,9 @@ int main () {
     }
 
 #if (SDVT_AHB == 0)
-    while (old_boot_count < (83 * 2)) {
+    while (old_boot_count < (196 * 2)) {
 #else
-    while (old_boot_count < (50 * 2)) {
+    while (old_boot_count < (94 * 2)) {
 #endif
         old_boot_count = boot_count;
         boot_count++;
@@ -92,11 +92,16 @@ int main () {
         if (old_boot_count == (2*2) || old_boot_count == (3*2) || old_boot_count == (6*2) ||
             old_boot_count == (9*2) || old_boot_count == (10*2) || old_boot_count == (13*2) ||
             old_boot_count == (18*2) || old_boot_count == (19*2) || old_boot_count == (28*2) ||
+            (old_boot_count == (33*2) && (old_boot_count % 2 == 0)) ||  //skip VEER side Unconditional forces to prevent breakage in code exectuion
+            (old_boot_count >= (35*2) && old_boot_count < (36*2)) || //skip VEER and LOCKSTEP side Unconditional forces to prevent breakage in code exectuion (debug_mode_status)
 #if (SDVT_AHB == 0)
-            old_boot_count == (36*2) || old_boot_count == (47*2) || old_boot_count == (49*2) ||
-            old_boot_count == (50*2) || old_boot_count == (51*2)
+            old_boot_count == (53*2) || old_boot_count == (64*2) || old_boot_count == (66*2) ||
+            old_boot_count == (67*2) || old_boot_count == (68*2) || 
+	    (old_boot_count >= (117*2) && old_boot_count <= (128*2)) ||  //skip Read signal channel for lsu_axi
+	    (old_boot_count >= (101*2) && old_boot_count <= (195*2) && (old_boot_count % 2 == 0)) //skip VEER side axi channels to prevent breakage in code exectuion
 #else
-            old_boot_count == (32*2) || old_boot_count == (34*2) || old_boot_count == (50*2)
+            old_boot_count == (49*2) || old_boot_count == (51*2) || old_boot_count == (67*2) ||
+	    (old_boot_count >= (68*2) && old_boot_count <= (90*2) && (old_boot_count % 2 == 0)) //skip VEER side ahb channels to prevent breakage in code exectuion
 #endif
             )
             continue;

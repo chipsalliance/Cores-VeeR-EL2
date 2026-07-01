@@ -885,7 +885,7 @@ module tb_top
             end
         `endif // RV_LOCKSTEP_ENABLE
             if(mailbox_write && (mailbox_data[7:0] == 8'h96)) begin
-                $display("Reset all");
+                $display("[%0t ns] Reset all",$time);
                 rst_l_cmd <= 8'b1;
             end
             // CPU debug enter/exit sequence
@@ -907,23 +907,23 @@ module tb_top
             end
             // ECC error injection
             if(mailbox_write && (mailbox_data[7:0] == 8'he0)) begin
-                $display("Injecting single bit ICCM error");
+                $display("[%0t ns] Injecting single bit ICCM error",$time);
                 error_injection_mode.iccm_single_bit_error <= 1'b1;
             end
             else if(mailbox_write && (mailbox_data[7:0] == 8'he1)) begin
-                $display("Injecting double bit ICCM error");
+                $display("[%0t ns] Injecting double bit ICCM error",$time);
                 error_injection_mode.iccm_double_bit_error <= 1'b1;
             end
             else if(mailbox_write && (mailbox_data[7:0] == 8'he2)) begin
-                $display("Injecting single bit DCCM error");
+                $display("[%0t ns] Injecting single bit DCCM error",$time);
                 error_injection_mode.dccm_single_bit_error <= 1'b1;
             end
             else if(mailbox_write && (mailbox_data[7:0] == 8'he3)) begin
-                $display("Injecting double bit DCCM error");
+                $display("[%0t ns] Injecting double bit DCCM error",$time);
                 error_injection_mode.dccm_double_bit_error <= 1'b1;
             end
             else if(mailbox_write && (mailbox_data[7:0] == 8'he4)) begin
-                $display("Disable ECC error injection");
+                $display("[%0t ns] Disable ECC error injection",$time);
                 error_injection_mode <= '0;
             end
             // Memory signature dump
@@ -939,35 +939,35 @@ module tb_top
                 // The reason why it's determined here is that it's on the system integrating VeeR
                 // to determine exact behavior and status report of this indicator
                     if (corruption_detected_o != el2_mubi_pkg::El2MuBiTrue) begin
-                        $display("No core corruption detected..\n");
-                        $display("TEST_FAILED");
+                        $display("[%0t ns] No core corruption detected..\n",$time);
+                        $display("[%0t ns] TEST_FAILED",$time);
                         `ifdef TB_SILENT_FAIL
                             $finish;
                         `else
                             $fatal;
                         `endif // TB_SILENT_FAIL
                     end else begin
-                        $display("Core corruption has been detected..\n");
-                        $display("TEST_PASSED");
+                        $display("[%0t ns] Core corruption has been detected..\n",$time);
+                        $display("[%0t ns] TEST_PASSED",$time);
                         $finish;
                     end
                 `else
-                    $display("DCLS feature is disabled. No corruption will be detected.\n");
-                    $display("TEST_PASSED");
+                    $display("[%0t ns] DCLS feature is disabled. No corruption will be detected.\n",$time);
+                    $display("[%0t ns] TEST_PASSED",$time);
                     $finish;
                 `endif // RV_LOCKSTEP_ENABLE
             end
             if(mailbox_write && mailbox_data[7:0] == 8'hff) begin
-                $display("TEST_PASSED");
-                $display("\nFinished : minstret = %0d, mcycle = %0d", `DEC.tlu.minstretl[31:0],`DEC.tlu.mcyclel[31:0]);
-                $display("See \"exec.log\" for execution trace with register updates..\n");
+                $display("[%0t ns] TEST_PASSED",$time);
+                $display("[%0t ns] \nFinished : minstret = %0d, mcycle = %0d",$time, `DEC.tlu.minstretl[31:0],`DEC.tlu.mcyclel[31:0]);
+                $display("[%0t ns] See \"exec.log\" for execution trace with register updates..\n",$time);
                 // OpenOCD test breaks if simulation closes the TCP connection first.
                 // This delay allows OpenOCD to close the connection before the #finish.
                 #15000;
                 $finish;
             end
             else if(mailbox_write && mailbox_data[7:0] == 8'h1) begin
-                $display("TEST_FAILED");
+                $display("[%0t ns] TEST_FAILED",$time);
                 `ifdef TB_SILENT_FAIL
                     $finish;
                 `else
@@ -1063,80 +1063,224 @@ module tb_top
                 29: force `LOCKSTEP.timer_int = '1;
                 30: force `LOCKSTEP.soft_int = '1;
                 31: force `LOCKSTEP.scan_mode = '1;
+                // --- ADDED UNCONDITIONAL FORCES ---
+                32: force `LOCKSTEP.o_cpu_halt_ack = '1;
+                33: force `LOCKSTEP.o_cpu_halt_status = '1;
+                34: force `LOCKSTEP.o_cpu_run_ack = '1;
+                35: force `LOCKSTEP.o_debug_mode_status = '1;
+                36: force `LOCKSTEP.mpc_debug_halt_ack = '1;
+                37: force `LOCKSTEP.mpc_debug_run_ack = '1;
+                38: force `LOCKSTEP.trace_rv_i_insn_ip = '1;
+                39: force `LOCKSTEP.trace_rv_i_address_ip = '1;
+                40: force `LOCKSTEP.trace_rv_i_valid_ip = '1;
+                41: force `LOCKSTEP.trace_rv_i_exception_ip = '1;
+                42: force `LOCKSTEP.trace_rv_i_ecause_ip = '1;
+                43: force `LOCKSTEP.trace_rv_i_interrupt_ip = '1;
+                44: force `LOCKSTEP.trace_rv_i_tval_ip = '1;
+                45: force `LOCKSTEP.dec_tlu_perfcnt0 = '1;
+                46: force `LOCKSTEP.dec_tlu_perfcnt1 = '1;
+                47: force `LOCKSTEP.dec_tlu_perfcnt2 = '1;
+                48: force `LOCKSTEP.dec_tlu_perfcnt3 = '1;
+                // --- END ADDED UNCONDITIONAL FORCES ---
             `ifdef RV_BUILD_AXI4
-                32: force `LOCKSTEP.lsu_axi_awready = '1;
-                33: force `LOCKSTEP.lsu_axi_wready = '1;
-                34: force `LOCKSTEP.lsu_axi_bvalid = '1;
-                35: force `LOCKSTEP.lsu_axi_bresp = '1;
-                36: force `LOCKSTEP.lsu_axi_bid = '1;
-                37: force `LOCKSTEP.lsu_axi_arready = '1;
-                38: force `LOCKSTEP.lsu_axi_rvalid = '1;
-                39: force `LOCKSTEP.lsu_axi_rid = '1;
-                40: force `LOCKSTEP.lsu_axi_rdata = '1;
-                41: force `LOCKSTEP.lsu_axi_rresp = '1;
-                42: force `LOCKSTEP.lsu_axi_rlast = '1;
-                43: force `LOCKSTEP.ifu_axi_wready = '1;
-                44: force `LOCKSTEP.ifu_axi_bvalid = '1;
-                45: force `LOCKSTEP.ifu_axi_bresp = '1;
-                46: force `LOCKSTEP.ifu_axi_bid = '1;
-                47: force `LOCKSTEP.ifu_axi_arready = '1;
-                48: force `LOCKSTEP.ifu_axi_rvalid = '1;
-                49: force `LOCKSTEP.ifu_axi_rid = '1;
-                50: force `LOCKSTEP.ifu_axi_rdata = '1;
-                51: force `LOCKSTEP.ifu_axi_rresp = '1;
-                52: force `LOCKSTEP.ifu_axi_rlast = '1;
-                53: force `LOCKSTEP.sb_axi_awready = '1;
-                54: force `LOCKSTEP.sb_axi_wready = '1;
-                55: force `LOCKSTEP.sb_axi_bvalid = '1;
-                56: force `LOCKSTEP.sb_axi_bresp = '1;
-                57: force `LOCKSTEP.sb_axi_bid = '1;
-                58: force `LOCKSTEP.sb_axi_arready = '1;
-                59: force `LOCKSTEP.sb_axi_rvalid = '1;
-                60: force `LOCKSTEP.sb_axi_rid = '1;
-                61: force `LOCKSTEP.sb_axi_rdata = '1;
-                62: force `LOCKSTEP.sb_axi_rresp = '1;
-                63: force `LOCKSTEP.sb_axi_rlast = '1;
-                64: force `LOCKSTEP.dma_axi_awvalid = '1;
-                65: force `LOCKSTEP.dma_axi_awid = '1;
-                66: force `LOCKSTEP.dma_axi_awaddr = '1;
-                67: force `LOCKSTEP.dma_axi_awsize = '1;
-                68: force `LOCKSTEP.dma_axi_awprot = '1;
-                69: force `LOCKSTEP.dma_axi_awlen = '1;
-                70: force `LOCKSTEP.dma_axi_awburst = '1;
-                71: force `LOCKSTEP.dma_axi_wvalid = '1;
-                72: force `LOCKSTEP.dma_axi_wdata = '1;
-                73: force `LOCKSTEP.dma_axi_wstrb = '1;
-                74: force `LOCKSTEP.dma_axi_wlast = '1;
-                75: force `LOCKSTEP.dma_axi_bready = '1;
-                76: force `LOCKSTEP.dma_axi_arvalid = '1;
-                77: force `LOCKSTEP.dma_axi_arid = '1;
-                78: force `LOCKSTEP.dma_axi_araddr = '1;
-                79: force `LOCKSTEP.dma_axi_arsize = '1;
-                80: force `LOCKSTEP.dma_axi_arprot = '1;
-                81: force `LOCKSTEP.dma_axi_arlen = '1;
-                82: force `LOCKSTEP.dma_axi_arburst = '1;
-                83: force `LOCKSTEP.dma_axi_rready = '1;
+                49: force `LOCKSTEP.lsu_axi_awready = '1;
+                50: force `LOCKSTEP.lsu_axi_wready = '1;
+                51: force `LOCKSTEP.lsu_axi_bvalid = '1;
+                52: force `LOCKSTEP.lsu_axi_bresp = '1;
+                53: force `LOCKSTEP.lsu_axi_bid = '1;
+                54: force `LOCKSTEP.lsu_axi_arready = '1;
+                55: force `LOCKSTEP.lsu_axi_rvalid = '1;
+                56: force `LOCKSTEP.lsu_axi_rid = '1;
+                57: force `LOCKSTEP.lsu_axi_rdata = '1;
+                58: force `LOCKSTEP.lsu_axi_rresp = '1;
+                59: force `LOCKSTEP.lsu_axi_rlast = '1;
+                60: force `LOCKSTEP.ifu_axi_wready = '1;
+                61: force `LOCKSTEP.ifu_axi_bvalid = '1;
+                62: force `LOCKSTEP.ifu_axi_bresp = '1;
+                63: force `LOCKSTEP.ifu_axi_bid = '1;
+                64: force `LOCKSTEP.ifu_axi_arready = '1;
+                65: force `LOCKSTEP.ifu_axi_rvalid = '1;
+                66: force `LOCKSTEP.ifu_axi_rid = '1;
+                67: force `LOCKSTEP.ifu_axi_rdata = '1;
+                68: force `LOCKSTEP.ifu_axi_rresp = '1;
+                69: force `LOCKSTEP.ifu_axi_rlast = '1;
+                70: force `LOCKSTEP.sb_axi_awready = '1;
+                71: force `LOCKSTEP.sb_axi_wready = '1;
+                72: force `LOCKSTEP.sb_axi_bvalid = '1;
+                73: force `LOCKSTEP.sb_axi_bresp = '1;
+                74: force `LOCKSTEP.sb_axi_bid = '1;
+                75: force `LOCKSTEP.sb_axi_arready = '1;
+                76: force `LOCKSTEP.sb_axi_rvalid = '1;
+                77: force `LOCKSTEP.sb_axi_rid = '1;
+                78: force `LOCKSTEP.sb_axi_rdata = '1;
+                79: force `LOCKSTEP.sb_axi_rresp = '1;
+                80: force `LOCKSTEP.sb_axi_rlast = '1;
+                81: force `LOCKSTEP.dma_axi_awvalid = '1;
+                82: force `LOCKSTEP.dma_axi_awid = '1;
+                83: force `LOCKSTEP.dma_axi_awaddr = '1;
+                84: force `LOCKSTEP.dma_axi_awsize = '1;
+                85: force `LOCKSTEP.dma_axi_awprot = '1;
+                86: force `LOCKSTEP.dma_axi_awlen = '1;
+                87: force `LOCKSTEP.dma_axi_awburst = '1;
+                88: force `LOCKSTEP.dma_axi_wvalid = '1;
+                89: force `LOCKSTEP.dma_axi_wdata = '1;
+                90: force `LOCKSTEP.dma_axi_wstrb = '1;
+                91: force `LOCKSTEP.dma_axi_wlast = '1;
+                92: force `LOCKSTEP.dma_axi_bready = '1;
+                93: force `LOCKSTEP.dma_axi_arvalid = '1;
+                94: force `LOCKSTEP.dma_axi_arid = '1;
+                95: force `LOCKSTEP.dma_axi_araddr = '1;
+                96: force `LOCKSTEP.dma_axi_arsize = '1;
+                97: force `LOCKSTEP.dma_axi_arprot = '1;
+                98: force `LOCKSTEP.dma_axi_arlen = '1;
+                99: force `LOCKSTEP.dma_axi_arburst = '1;
+                100: force `LOCKSTEP.dma_axi_rready = '1;
+                // --- ADDED AXI FORCES ---
+		101: force `LOCKSTEP.lsu_axi_awvalid = '1;
+                102: force `LOCKSTEP.lsu_axi_awid = '1;
+                103: force `LOCKSTEP.lsu_axi_awaddr = '1;
+                104: force `LOCKSTEP.lsu_axi_awregion = '1;
+                105: force `LOCKSTEP.lsu_axi_awlen = '1;
+                106: force `LOCKSTEP.lsu_axi_awsize = '1;
+                107: force `LOCKSTEP.lsu_axi_awburst = '1;
+                108: force `LOCKSTEP.lsu_axi_awlock = '1;
+                109: force `LOCKSTEP.lsu_axi_awcache = '1;
+                110: force `LOCKSTEP.lsu_axi_awprot = '1;
+                111: force `LOCKSTEP.lsu_axi_awqos = '1;
+                112: force `LOCKSTEP.lsu_axi_wvalid = '1;
+                113: force `LOCKSTEP.lsu_axi_wdata = '1;
+                114: force `LOCKSTEP.lsu_axi_wstrb = '1;
+                115: force `LOCKSTEP.lsu_axi_wlast = '1;
+                116: force `LOCKSTEP.lsu_axi_bready = '1;
+                117: force `LOCKSTEP.lsu_axi_arvalid = '1;
+                118: force `LOCKSTEP.lsu_axi_arid = '1;
+                119: force `LOCKSTEP.lsu_axi_araddr = '1;
+                120: force `LOCKSTEP.lsu_axi_arregion = '1;
+                121: force `LOCKSTEP.lsu_axi_arlen = '1;
+                122: force `LOCKSTEP.lsu_axi_arsize = '1;
+                123: force `LOCKSTEP.lsu_axi_arburst = '1;
+                124: force `LOCKSTEP.lsu_axi_arlock = '1;
+                125: force `LOCKSTEP.lsu_axi_arcache = '1;
+                126: force `LOCKSTEP.lsu_axi_arprot = '1;
+                127: force `LOCKSTEP.lsu_axi_arqos = '1;
+                128: force `LOCKSTEP.lsu_axi_rready = '1;
+                129: force `LOCKSTEP.ifu_axi_awvalid = '1;
+                130: force `LOCKSTEP.ifu_axi_awid = '1;
+                131: force `LOCKSTEP.ifu_axi_awaddr = '1;
+                132: force `LOCKSTEP.ifu_axi_awregion = '1;
+                133: force `LOCKSTEP.ifu_axi_awlen = '1;
+                134: force `LOCKSTEP.ifu_axi_awsize = '1;
+                135: force `LOCKSTEP.ifu_axi_awburst = '1;
+                136: force `LOCKSTEP.ifu_axi_awlock = '1;
+                137: force `LOCKSTEP.ifu_axi_awcache = '1;
+                138: force `LOCKSTEP.ifu_axi_awprot = '1;
+                139: force `LOCKSTEP.ifu_axi_awqos = '1;
+                140: force `LOCKSTEP.ifu_axi_wvalid = '1;
+                141: force `LOCKSTEP.ifu_axi_wdata = '1;
+                142: force `LOCKSTEP.ifu_axi_wstrb = '1;
+                143: force `LOCKSTEP.ifu_axi_wlast = '1;
+                144: force `LOCKSTEP.ifu_axi_bready = '1;
+                145: force `LOCKSTEP.ifu_axi_arvalid = '1;
+                146: force `LOCKSTEP.ifu_axi_arid = '1;
+                147: force `LOCKSTEP.ifu_axi_araddr = '1;
+                148: force `LOCKSTEP.ifu_axi_arregion = '1;
+                149: force `LOCKSTEP.ifu_axi_arlen = '1;
+                150: force `LOCKSTEP.ifu_axi_arsize = '1;
+                151: force `LOCKSTEP.ifu_axi_arburst = '1;
+                152: force `LOCKSTEP.ifu_axi_arlock = '1;
+                153: force `LOCKSTEP.ifu_axi_arcache = '1;
+                154: force `LOCKSTEP.ifu_axi_arprot = '1;
+                155: force `LOCKSTEP.ifu_axi_arqos = '1;
+                156: force `LOCKSTEP.ifu_axi_rready = '1;
+                157: force `LOCKSTEP.sb_axi_awvalid = '1;
+                158: force `LOCKSTEP.sb_axi_awid = '1;
+                159: force `LOCKSTEP.sb_axi_awaddr = '1;
+                160: force `LOCKSTEP.sb_axi_awregion = '1;
+                161: force `LOCKSTEP.sb_axi_awlen = '1;
+                162: force `LOCKSTEP.sb_axi_awsize = '1;
+                163: force `LOCKSTEP.sb_axi_awburst = '1;
+                164: force `LOCKSTEP.sb_axi_awlock = '1;
+                165: force `LOCKSTEP.sb_axi_awcache = '1;
+                166: force `LOCKSTEP.sb_axi_awprot = '1;
+                167: force `LOCKSTEP.sb_axi_awqos = '1;
+                168: force `LOCKSTEP.sb_axi_wvalid = '1;
+                169: force `LOCKSTEP.sb_axi_wdata = '1;
+                170: force `LOCKSTEP.sb_axi_wstrb = '1;
+                171: force `LOCKSTEP.sb_axi_wlast = '1;
+                172: force `LOCKSTEP.sb_axi_bready = '1;
+                173: force `LOCKSTEP.sb_axi_arvalid = '1;
+                174: force `LOCKSTEP.sb_axi_arid = '1;
+                175: force `LOCKSTEP.sb_axi_araddr = '1;
+                176: force `LOCKSTEP.sb_axi_arregion = '1;
+                177: force `LOCKSTEP.sb_axi_arlen = '1;
+                178: force `LOCKSTEP.sb_axi_arsize = '1;
+                179: force `LOCKSTEP.sb_axi_arburst = '1;
+                180: force `LOCKSTEP.sb_axi_arlock = '1;
+                181: force `LOCKSTEP.sb_axi_arcache = '1;
+                182: force `LOCKSTEP.sb_axi_arprot = '1;
+                183: force `LOCKSTEP.sb_axi_arqos = '1;
+                184: force `LOCKSTEP.sb_axi_rready = '1;
+                185: force `LOCKSTEP.dma_axi_awready = '1;
+                186: force `LOCKSTEP.dma_axi_wready = '1;
+                187: force `LOCKSTEP.dma_axi_bvalid = '1;
+                188: force `LOCKSTEP.dma_axi_bresp = '1;
+                189: force `LOCKSTEP.dma_axi_bid = '1;
+                190: force `LOCKSTEP.dma_axi_arready = '1;
+                191: force `LOCKSTEP.dma_axi_rvalid = '1;
+                192: force `LOCKSTEP.dma_axi_rid = '1;
+                193: force `LOCKSTEP.dma_axi_rdata = '1;
+                194: force `LOCKSTEP.dma_axi_rresp = '1;
+                195: force `LOCKSTEP.dma_axi_rlast = '1;
+                // --- END ADDED AXI FORCES ---
             `endif
             `ifdef RV_BUILD_AHB_LITE
-                32: force `LOCKSTEP.hrdata = '1;
-                33: force `LOCKSTEP.hready = '1;
-                34: force `LOCKSTEP.hresp = '1;
-                35: force `LOCKSTEP.lsu_hrdata = '1;
-                36: force `LOCKSTEP.lsu_hready = '1;
-                37: force `LOCKSTEP.lsu_hresp = '1;
-                38: force `LOCKSTEP.sb_hrdata = '1;
-                39: force `LOCKSTEP.sb_hready = '1;
-                40: force `LOCKSTEP.sb_hresp = '1;
-                41: force `LOCKSTEP.dma_hsel = '1;
-                42: force `LOCKSTEP.dma_haddr = '1;
-                43: force `LOCKSTEP.dma_hburst = '1;
-                44: force `LOCKSTEP.dma_hmastlock = '1;
-                45: force `LOCKSTEP.dma_hprot = '1;
-                46: force `LOCKSTEP.dma_hsize = '1;
-                47: force `LOCKSTEP.dma_htrans = '1;
-                48: force `LOCKSTEP.dma_hwrite = '1;
-                49: force `LOCKSTEP.dma_hwdata = '1;
-                50: force `LOCKSTEP.dma_hreadyin = '1;
+                49: force `LOCKSTEP.hrdata = '1;
+                50: force `LOCKSTEP.hready = '1;
+                51: force `LOCKSTEP.hresp = '1;
+                52: force `LOCKSTEP.lsu_hrdata = '1;
+                53: force `LOCKSTEP.lsu_hready = '1;
+                54: force `LOCKSTEP.lsu_hresp = '1;
+                55: force `LOCKSTEP.sb_hrdata = '1;
+                56: force `LOCKSTEP.sb_hready = '1;
+                57: force `LOCKSTEP.sb_hresp = '1;
+                58: force `LOCKSTEP.dma_hsel = '1;
+                59: force `LOCKSTEP.dma_haddr = '1;
+                60: force `LOCKSTEP.dma_hburst = '1;
+                61: force `LOCKSTEP.dma_hmastlock = '1;
+                62: force `LOCKSTEP.dma_hprot = '1;
+                63: force `LOCKSTEP.dma_hsize = '1;
+                64: force `LOCKSTEP.dma_htrans = '1;
+                65: force `LOCKSTEP.dma_hwrite = '1;
+                66: force `LOCKSTEP.dma_hwdata = '1;
+                67: force `LOCKSTEP.dma_hreadyin = '1;
+                // --- ADDED AHB FORCES ---
+                68: force `LOCKSTEP.haddr = '1;
+                69: force `LOCKSTEP.hburst = '1;
+                70: force `LOCKSTEP.hmastlock = '1;
+                71: force `LOCKSTEP.hprot = '1;
+                72: force `LOCKSTEP.hsize = '1;
+                73: force `LOCKSTEP.htrans = '1;
+                74: force `LOCKSTEP.hwrite = '1;
+                75: force `LOCKSTEP.sb_haddr = '1;
+                76: force `LOCKSTEP.sb_hburst = '1;
+                77: force `LOCKSTEP.sb_hmastlock = '1;
+                78: force `LOCKSTEP.sb_hprot = '1;
+                79: force `LOCKSTEP.sb_hsize = '1;
+                80: force `LOCKSTEP.sb_htrans = '1;
+                81: force `LOCKSTEP.sb_hwrite = '1;
+                82: force `LOCKSTEP.sb_hwdata = '1;
+                83: force `LOCKSTEP.lsu_haddr = '1;
+                84: force `LOCKSTEP.lsu_hburst = '1;
+                85: force `LOCKSTEP.lsu_hmastlock = '1;
+                86: force `LOCKSTEP.lsu_hprot = '1;
+                87: force `LOCKSTEP.lsu_hsize = '1;
+                88: force `LOCKSTEP.lsu_htrans = '1;
+                89: force `LOCKSTEP.lsu_hwrite = '1;
+                90: force `LOCKSTEP.lsu_hwdata = '1;
+                91: force `LOCKSTEP.dma_hrdata = '1;
+                92: force `LOCKSTEP.dma_hreadyout = '1;
+                93: force `LOCKSTEP.dma_hresp = '1;
+                // --- END ADDED AHB FORCES ---
             `endif
                 default: force `LOCKSTEP.lockstep_err_injection_en_i = '1;
             endcase
@@ -1177,80 +1321,224 @@ module tb_top
                 29: force `VEER.timer_int = '1;
                 30: force `VEER.soft_int = '1;
                 31: force `VEER.scan_mode = '1;
+                // --- ADDED UNCONDITIONAL FORCES ---
+                32: force `VEER.o_cpu_halt_ack = '1;
+                33: force `VEER.o_cpu_halt_status = '1;
+                34: force `VEER.o_cpu_run_ack = '1;
+                35: force `VEER.o_debug_mode_status = '1;
+                36: force `VEER.mpc_debug_halt_ack = '1;
+                37: force `VEER.mpc_debug_run_ack = '1;
+                38: force `VEER.trace_rv_i_insn_ip = '1;
+                39: force `VEER.trace_rv_i_address_ip = '1;
+                40: force `VEER.trace_rv_i_valid_ip = '1;
+                41: force `VEER.trace_rv_i_exception_ip = '1;
+                42: force `VEER.trace_rv_i_ecause_ip = '1;
+                43: force `VEER.trace_rv_i_interrupt_ip = '1;
+                44: force `VEER.trace_rv_i_tval_ip = '1;
+                45: force `VEER.dec_tlu_perfcnt0 = '1;
+                46: force `VEER.dec_tlu_perfcnt1 = '1;
+                47: force `VEER.dec_tlu_perfcnt2 = '1;
+                48: force `VEER.dec_tlu_perfcnt3 = '1;
+                // --- END ADDED UNCONDITIONAL FORCES ---
             `ifdef RV_BUILD_AXI4
-                32: force `VEER.lsu_axi_awready = '1;
-                33: force `VEER.lsu_axi_wready = '1;
-                34: force `VEER.lsu_axi_bvalid = '1;
-                35: force `VEER.lsu_axi_bresp = '1;
-                36: force `VEER.lsu_axi_bid = '1;
-                37: force `VEER.lsu_axi_arready = '1;
-                38: force `VEER.lsu_axi_rvalid = '1;
-                39: force `VEER.lsu_axi_rid = '1;
-                40: force `VEER.lsu_axi_rdata = '1;
-                41: force `VEER.lsu_axi_rresp = '1;
-                42: force `VEER.lsu_axi_rlast = '1;
-                43: force `VEER.ifu_axi_wready = '1;
-                44: force `VEER.ifu_axi_bvalid = '1;
-                45: force `VEER.ifu_axi_bresp = '1;
-                46: force `VEER.ifu_axi_bid = '1;
-                47: force `VEER.ifu_axi_arready = '1;
-                48: force `VEER.ifu_axi_rvalid = '1;
-                49: force `VEER.ifu_axi_rid = '1;
-                50: force `VEER.ifu_axi_rdata = '1;
-                51: force `VEER.ifu_axi_rresp = '1;
-                52: force `VEER.ifu_axi_rlast = '1;
-                53: force `VEER.sb_axi_awready = '1;
-                54: force `VEER.sb_axi_wready = '1;
-                55: force `VEER.sb_axi_bvalid = '1;
-                56: force `VEER.sb_axi_bresp = '1;
-                57: force `VEER.sb_axi_bid = '1;
-                58: force `VEER.sb_axi_arready = '1;
-                59: force `VEER.sb_axi_rvalid = '1;
-                60: force `VEER.sb_axi_rid = '1;
-                61: force `VEER.sb_axi_rdata = '1;
-                62: force `VEER.sb_axi_rresp = '1;
-                63: force `VEER.sb_axi_rlast = '1;
-                64: force `VEER.dma_axi_awvalid = '1;
-                65: force `VEER.dma_axi_awid = '1;
-                66: force `VEER.dma_axi_awaddr = '1;
-                67: force `VEER.dma_axi_awsize = '1;
-                68: force `VEER.dma_axi_awprot = '1;
-                69: force `VEER.dma_axi_awlen = '1;
-                70: force `VEER.dma_axi_awburst = '1;
-                71: force `VEER.dma_axi_wvalid = '1;
-                72: force `VEER.dma_axi_wdata = '1;
-                73: force `VEER.dma_axi_wstrb = '1;
-                74: force `VEER.dma_axi_wlast = '1;
-                75: force `VEER.dma_axi_bready = '1;
-                76: force `VEER.dma_axi_arvalid = '1;
-                77: force `VEER.dma_axi_arid = '1;
-                78: force `VEER.dma_axi_araddr = '1;
-                79: force `VEER.dma_axi_arsize = '1;
-                80: force `VEER.dma_axi_arprot = '1;
-                81: force `VEER.dma_axi_arlen = '1;
-                82: force `VEER.dma_axi_arburst = '1;
-                83: force `VEER.dma_axi_rready = '1;
+                49: force `VEER.lsu_axi_awready = '1;
+                50: force `VEER.lsu_axi_wready = '1;
+                51: force `VEER.lsu_axi_bvalid = '1;
+                52: force `VEER.lsu_axi_bresp = '1;
+                53: force `VEER.lsu_axi_bid = '1;
+                54: force `VEER.lsu_axi_arready = '1;
+                55: force `VEER.lsu_axi_rvalid = '1;
+                56: force `VEER.lsu_axi_rid = '1;
+                57: force `VEER.lsu_axi_rdata = '1;
+                58: force `VEER.lsu_axi_rresp = '1;
+                59: force `VEER.lsu_axi_rlast = '1;
+                60: force `VEER.ifu_axi_wready = '1;
+                61: force `VEER.ifu_axi_bvalid = '1;
+                62: force `VEER.ifu_axi_bresp = '1;
+                63: force `VEER.ifu_axi_bid = '1;
+                64: force `VEER.ifu_axi_arready = '1;
+                65: force `VEER.ifu_axi_rvalid = '1;
+                66: force `VEER.ifu_axi_rid = '1;
+                67: force `VEER.ifu_axi_rdata = '1;
+                68: force `VEER.ifu_axi_rresp = '1;
+                69: force `VEER.ifu_axi_rlast = '1;
+                70: force `VEER.sb_axi_awready = '1;
+                71: force `VEER.sb_axi_wready = '1;
+                72: force `VEER.sb_axi_bvalid = '1;
+                73: force `VEER.sb_axi_bresp = '1;
+                74: force `VEER.sb_axi_bid = '1;
+                75: force `VEER.sb_axi_arready = '1;
+                76: force `VEER.sb_axi_rvalid = '1;
+                77: force `VEER.sb_axi_rid = '1;
+                78: force `VEER.sb_axi_rdata = '1;
+                79: force `VEER.sb_axi_rresp = '1;
+                80: force `VEER.sb_axi_rlast = '1;
+                81: force `VEER.dma_axi_awvalid = '1;
+                82: force `VEER.dma_axi_awid = '1;
+                83: force `VEER.dma_axi_awaddr = '1;
+                84: force `VEER.dma_axi_awsize = '1;
+                85: force `VEER.dma_axi_awprot = '1;
+                86: force `VEER.dma_axi_awlen = '1;
+                87: force `VEER.dma_axi_awburst = '1;
+                88: force `VEER.dma_axi_wvalid = '1;
+                89: force `VEER.dma_axi_wdata = '1;
+                90: force `VEER.dma_axi_wstrb = '1;
+                91: force `VEER.dma_axi_wlast = '1;
+                92: force `VEER.dma_axi_bready = '1;
+                93: force `VEER.dma_axi_arvalid = '1;
+                94: force `VEER.dma_axi_arid = '1;
+                95: force `VEER.dma_axi_araddr = '1;
+                96: force `VEER.dma_axi_arsize = '1;
+                97: force `VEER.dma_axi_arprot = '1;
+                98: force `VEER.dma_axi_arlen = '1;
+                99: force `VEER.dma_axi_arburst = '1;
+                100: force `VEER.dma_axi_rready = '1;
+                // --- ADDED AXI FORCES ---
+		101: force `VEER.lsu_axi_awvalid = '1;
+                102: force `VEER.lsu_axi_awid = '1;
+                103: force `VEER.lsu_axi_awaddr = '1;
+                104: force `VEER.lsu_axi_awregion = '1;
+                105: force `VEER.lsu_axi_awlen = '1;
+                106: force `VEER.lsu_axi_awsize = '1;
+                107: force `VEER.lsu_axi_awburst = '1;
+                108: force `VEER.lsu_axi_awlock = '1;
+                109: force `VEER.lsu_axi_awcache = '1;
+                110: force `VEER.lsu_axi_awprot = '1;
+                111: force `VEER.lsu_axi_awqos = '1;
+                112: force `VEER.lsu_axi_wvalid = '1;
+                113: force `VEER.lsu_axi_wdata = '1;
+                114: force `VEER.lsu_axi_wstrb = '1;
+                115: force `VEER.lsu_axi_wlast = '1;
+                116: force `VEER.lsu_axi_bready = '1;
+                117: force `VEER.lsu_axi_arvalid = '1;
+                118: force `VEER.lsu_axi_arid = '1;
+                119: force `VEER.lsu_axi_araddr = '1;
+                120: force `VEER.lsu_axi_arregion = '1;
+                121: force `VEER.lsu_axi_arlen = '1;
+                122: force `VEER.lsu_axi_arsize = '1;
+                123: force `VEER.lsu_axi_arburst = '1;
+                124: force `VEER.lsu_axi_arlock = '1;
+                125: force `VEER.lsu_axi_arcache = '1;
+                126: force `VEER.lsu_axi_arprot = '1;
+                127: force `VEER.lsu_axi_arqos = '1;
+                128: force `VEER.lsu_axi_rready = '1;
+                129: force `VEER.ifu_axi_awvalid = '1;
+                130: force `VEER.ifu_axi_awid = '1;
+                131: force `VEER.ifu_axi_awaddr = '1;
+                132: force `VEER.ifu_axi_awregion = '1;
+                133: force `VEER.ifu_axi_awlen = '1;
+                134: force `VEER.ifu_axi_awsize = '1;
+                135: force `VEER.ifu_axi_awburst = '1;
+                136: force `VEER.ifu_axi_awlock = '1;
+                137: force `VEER.ifu_axi_awcache = '1;
+                138: force `VEER.ifu_axi_awprot = '1;
+                139: force `VEER.ifu_axi_awqos = '1;
+                140: force `VEER.ifu_axi_wvalid = '1;
+                141: force `VEER.ifu_axi_wdata = '1;
+                142: force `VEER.ifu_axi_wstrb = '1;
+                143: force `VEER.ifu_axi_wlast = '1;
+                144: force `VEER.ifu_axi_bready = '1;
+                145: force `VEER.ifu_axi_arvalid = '1;
+                146: force `VEER.ifu_axi_arid = '1;
+                147: force `VEER.ifu_axi_araddr = '1;
+                148: force `VEER.ifu_axi_arregion = '1;
+                149: force `VEER.ifu_axi_arlen = '1;
+                150: force `VEER.ifu_axi_arsize = '1;
+                151: force `VEER.ifu_axi_arburst = '1;
+                152: force `VEER.ifu_axi_arlock = '1;
+                153: force `VEER.ifu_axi_arcache = '1;
+                154: force `VEER.ifu_axi_arprot = '1;
+                155: force `VEER.ifu_axi_arqos = '1;
+                156: force `VEER.ifu_axi_rready = '1;
+                157: force `VEER.sb_axi_awvalid = '1;
+                158: force `VEER.sb_axi_awid = '1;
+                159: force `VEER.sb_axi_awaddr = '1;
+                160: force `VEER.sb_axi_awregion = '1;
+                161: force `VEER.sb_axi_awlen = '1;
+                162: force `VEER.sb_axi_awsize = '1;
+                163: force `VEER.sb_axi_awburst = '1;
+                164: force `VEER.sb_axi_awlock = '1;
+                165: force `VEER.sb_axi_awcache = '1;
+                166: force `VEER.sb_axi_awprot = '1;
+                167: force `VEER.sb_axi_awqos = '1;
+                168: force `VEER.sb_axi_wvalid = '1;
+                169: force `VEER.sb_axi_wdata = '1;
+                170: force `VEER.sb_axi_wstrb = '1;
+                171: force `VEER.sb_axi_wlast = '1;
+                172: force `VEER.sb_axi_bready = '1;
+                173: force `VEER.sb_axi_arvalid = '1;
+                174: force `VEER.sb_axi_arid = '1;
+                175: force `VEER.sb_axi_araddr = '1;
+                176: force `VEER.sb_axi_arregion = '1;
+                177: force `VEER.sb_axi_arlen = '1;
+                178: force `VEER.sb_axi_arsize = '1;
+                179: force `VEER.sb_axi_arburst = '1;
+                180: force `VEER.sb_axi_arlock = '1;
+                181: force `VEER.sb_axi_arcache = '1;
+                182: force `VEER.sb_axi_arprot = '1;
+                183: force `VEER.sb_axi_arqos = '1;
+                184: force `VEER.sb_axi_rready = '1;
+                185: force `VEER.dma_axi_awready = '1;
+                186: force `VEER.dma_axi_wready = '1;
+                187: force `VEER.dma_axi_bvalid = '1;
+                188: force `VEER.dma_axi_bresp = '1;
+                189: force `VEER.dma_axi_bid = '1;
+                190: force `VEER.dma_axi_arready = '1;
+                191: force `VEER.dma_axi_rvalid = '1;
+                192: force `VEER.dma_axi_rid = '1;
+                193: force `VEER.dma_axi_rdata = '1;
+                194: force `VEER.dma_axi_rresp = '1;
+                195: force `VEER.dma_axi_rlast = '1;
+                // --- END ADDED AXI FORCES ---
             `endif
             `ifdef RV_BUILD_AHB_LITE
-                32: force `VEER.hrdata = '1;
-                33: force `VEER.hready = '1;
-                34: force `VEER.hresp = '1;
-                35: force `VEER.lsu_hrdata = '1;
-                36: force `VEER.lsu_hready = '1;
-                37: force `VEER.lsu_hresp = '1;
-                38: force `VEER.sb_hrdata = '1;
-                39: force `VEER.sb_hready = '1;
-                40: force `VEER.sb_hresp = '1;
-                41: force `VEER.dma_hsel = '1;
-                42: force `VEER.dma_haddr = '1;
-                43: force `VEER.dma_hburst = '1;
-                44: force `VEER.dma_hmastlock = '1;
-                45: force `VEER.dma_hprot = '1;
-                46: force `VEER.dma_hsize = '1;
-                47: force `VEER.dma_htrans = '1;
-                48: force `VEER.dma_hwrite = '1;
-                49: force `VEER.dma_hwdata = '1;
-                50: force `VEER.dma_hreadyin = '1;
+                49: force `VEER.hrdata = '1;
+                50: force `VEER.hready = '1;
+                51: force `VEER.hresp = '1;
+                52: force `VEER.lsu_hrdata = '1;
+                53: force `VEER.lsu_hready = '1;
+                54: force `VEER.lsu_hresp = '1;
+                55: force `VEER.sb_hrdata = '1;
+                56: force `VEER.sb_hready = '1;
+                57: force `VEER.sb_hresp = '1;
+                58: force `VEER.dma_hsel = '1;
+                59: force `VEER.dma_haddr = '1;
+                60: force `VEER.dma_hburst = '1;
+                61: force `VEER.dma_hmastlock = '1;
+                62: force `VEER.dma_hprot = '1;
+                63: force `VEER.dma_hsize = '1;
+                64: force `VEER.dma_htrans = '1;
+                65: force `VEER.dma_hwrite = '1;
+                66: force `VEER.dma_hwdata = '1;
+                67: force `VEER.dma_hreadyin = '1;
+                // --- ADDED AHB FORCES ---
+                68: force `VEER.haddr = '1;
+                69: force `VEER.hburst = '1;
+                70: force `VEER.hmastlock = '1;
+                71: force `VEER.hprot = '1;
+                72: force `VEER.hsize = '1;
+                73: force `VEER.htrans = '1;
+                74: force `VEER.hwrite = '1;
+                75: force `VEER.sb_haddr = '1;
+                76: force `VEER.sb_hburst = '1;
+                77: force `VEER.sb_hmastlock = '1;
+                78: force `VEER.sb_hprot = '1;
+                79: force `VEER.sb_hsize = '1;
+                80: force `VEER.sb_htrans = '1;
+                81: force `VEER.sb_hwrite = '1;
+                82: force `VEER.sb_hwdata = '1;
+                83: force `VEER.lsu_haddr = '1;
+                84: force `VEER.lsu_hburst = '1;
+                85: force `VEER.lsu_hmastlock = '1;
+                86: force `VEER.lsu_hprot = '1;
+                87: force `VEER.lsu_hsize = '1;
+                88: force `VEER.lsu_htrans = '1;
+                89: force `VEER.lsu_hwrite = '1;
+                90: force `VEER.lsu_hwdata = '1;
+                91: force `VEER.dma_hrdata = '1;
+                92: force `VEER.dma_hreadyout = '1;
+                93: force `VEER.dma_hresp = '1;
+                // --- END ADDED AHB FORCES ---
             `endif
                 default: force `LOCKSTEP.lockstep_err_injection_en_i = '1;
             endcase
@@ -1291,6 +1579,25 @@ module tb_top
             release `LOCKSTEP.timer_int;
             release `LOCKSTEP.soft_int;
             release `LOCKSTEP.scan_mode;
+            // --- ADDED UNCONDITIONAL RELEASES ---
+            release `LOCKSTEP.o_cpu_halt_ack;
+            release `LOCKSTEP.o_cpu_halt_status;
+            release `LOCKSTEP.o_cpu_run_ack;
+            release `LOCKSTEP.o_debug_mode_status;
+            release `LOCKSTEP.mpc_debug_halt_ack;
+            release `LOCKSTEP.mpc_debug_run_ack;
+            release `LOCKSTEP.trace_rv_i_insn_ip;
+            release `LOCKSTEP.trace_rv_i_address_ip;
+            release `LOCKSTEP.trace_rv_i_valid_ip;
+            release `LOCKSTEP.trace_rv_i_exception_ip;
+            release `LOCKSTEP.trace_rv_i_ecause_ip;
+            release `LOCKSTEP.trace_rv_i_interrupt_ip;
+            release `LOCKSTEP.trace_rv_i_tval_ip;
+            release `LOCKSTEP.dec_tlu_perfcnt0;
+            release `LOCKSTEP.dec_tlu_perfcnt1;
+            release `LOCKSTEP.dec_tlu_perfcnt2;
+            release `LOCKSTEP.dec_tlu_perfcnt3;
+            // --- END ADDED UNCONDITIONAL RELEASES ---
         `ifdef RV_BUILD_AXI4
             release `LOCKSTEP.lsu_axi_awready;
             release `LOCKSTEP.lsu_axi_wready;
@@ -1344,6 +1651,91 @@ module tb_top
             release `LOCKSTEP.dma_axi_arlen;
             release `LOCKSTEP.dma_axi_arburst;
             release `LOCKSTEP.dma_axi_rready;
+            // --- ADDED AXI RELEASES ---
+	    release `LOCKSTEP.lsu_axi_awvalid;
+            release `LOCKSTEP.lsu_axi_awid;
+            release `LOCKSTEP.lsu_axi_awaddr;
+            release `LOCKSTEP.lsu_axi_awregion;
+            release `LOCKSTEP.lsu_axi_awlen;
+            release `LOCKSTEP.lsu_axi_awsize;
+            release `LOCKSTEP.lsu_axi_awburst;
+            release `LOCKSTEP.lsu_axi_awlock;
+            release `LOCKSTEP.lsu_axi_awcache;
+            release `LOCKSTEP.lsu_axi_awprot;
+            release `LOCKSTEP.lsu_axi_awqos;
+            release `LOCKSTEP.lsu_axi_wvalid;
+            release `LOCKSTEP.lsu_axi_wdata;
+            release `LOCKSTEP.lsu_axi_wstrb;
+            release `LOCKSTEP.lsu_axi_wlast;
+            release `LOCKSTEP.lsu_axi_bready;
+            release `LOCKSTEP.ifu_axi_awvalid;
+            release `LOCKSTEP.ifu_axi_awid;
+            release `LOCKSTEP.ifu_axi_awaddr;
+            release `LOCKSTEP.ifu_axi_awregion;
+            release `LOCKSTEP.ifu_axi_awlen;
+            release `LOCKSTEP.ifu_axi_awsize;
+            release `LOCKSTEP.ifu_axi_awburst;
+            release `LOCKSTEP.ifu_axi_awlock;
+            release `LOCKSTEP.ifu_axi_awcache;
+            release `LOCKSTEP.ifu_axi_awprot;
+            release `LOCKSTEP.ifu_axi_awqos;
+            release `LOCKSTEP.ifu_axi_wvalid;
+            release `LOCKSTEP.ifu_axi_wdata;
+            release `LOCKSTEP.ifu_axi_wstrb;
+            release `LOCKSTEP.ifu_axi_wlast;
+            release `LOCKSTEP.ifu_axi_bready;
+            release `LOCKSTEP.ifu_axi_arvalid;
+            release `LOCKSTEP.ifu_axi_arid;
+            release `LOCKSTEP.ifu_axi_araddr;
+            release `LOCKSTEP.ifu_axi_arregion;
+            release `LOCKSTEP.ifu_axi_arlen;
+            release `LOCKSTEP.ifu_axi_arsize;
+            release `LOCKSTEP.ifu_axi_arburst;
+            release `LOCKSTEP.ifu_axi_arlock;
+            release `LOCKSTEP.ifu_axi_arcache;
+            release `LOCKSTEP.ifu_axi_arprot;
+            release `LOCKSTEP.ifu_axi_arqos;
+            release `LOCKSTEP.ifu_axi_rready;
+            release `LOCKSTEP.sb_axi_awvalid;
+            release `LOCKSTEP.sb_axi_awid;
+            release `LOCKSTEP.sb_axi_awaddr;
+            release `LOCKSTEP.sb_axi_awregion;
+            release `LOCKSTEP.sb_axi_awlen;
+            release `LOCKSTEP.sb_axi_awsize;
+            release `LOCKSTEP.sb_axi_awburst;
+            release `LOCKSTEP.sb_axi_awlock;
+            release `LOCKSTEP.sb_axi_awcache;
+            release `LOCKSTEP.sb_axi_awprot;
+            release `LOCKSTEP.sb_axi_awqos;
+            release `LOCKSTEP.sb_axi_wvalid;
+            release `LOCKSTEP.sb_axi_wdata;
+            release `LOCKSTEP.sb_axi_wstrb;
+            release `LOCKSTEP.sb_axi_wlast;
+            release `LOCKSTEP.sb_axi_bready;
+            release `LOCKSTEP.sb_axi_arvalid;
+            release `LOCKSTEP.sb_axi_arid;
+            release `LOCKSTEP.sb_axi_araddr;
+            release `LOCKSTEP.sb_axi_arregion;
+            release `LOCKSTEP.sb_axi_arlen;
+            release `LOCKSTEP.sb_axi_arsize;
+            release `LOCKSTEP.sb_axi_arburst;
+            release `LOCKSTEP.sb_axi_arlock;
+            release `LOCKSTEP.sb_axi_arcache;
+            release `LOCKSTEP.sb_axi_arprot;
+            release `LOCKSTEP.sb_axi_arqos;
+            release `LOCKSTEP.sb_axi_rready;
+            release `LOCKSTEP.dma_axi_awready;
+            release `LOCKSTEP.dma_axi_wready;
+            release `LOCKSTEP.dma_axi_bvalid;
+            release `LOCKSTEP.dma_axi_bresp;
+            release `LOCKSTEP.dma_axi_bid;
+            release `LOCKSTEP.dma_axi_arready;
+            release `LOCKSTEP.dma_axi_rvalid;
+            release `LOCKSTEP.dma_axi_rid;
+            release `LOCKSTEP.dma_axi_rdata;
+            release `LOCKSTEP.dma_axi_rresp;
+            release `LOCKSTEP.dma_axi_rlast;
+            // --- END ADDED AXI RELEASES ---
         `endif
         `ifdef RV_BUILD_AHB_LITE
             release `LOCKSTEP.hrdata;
@@ -1365,6 +1757,34 @@ module tb_top
             release `LOCKSTEP.dma_hwrite;
             release `LOCKSTEP.dma_hwdata;
             release `LOCKSTEP.dma_hreadyin;
+            // --- ADDED AHB RELEASES ---
+            release `LOCKSTEP.haddr;
+            release `LOCKSTEP.hburst;
+            release `LOCKSTEP.hmastlock;
+            release `LOCKSTEP.hprot;
+            release `LOCKSTEP.hsize;
+            release `LOCKSTEP.htrans;
+            release `LOCKSTEP.hwrite;
+            release `LOCKSTEP.sb_haddr;
+            release `LOCKSTEP.sb_hburst;
+            release `LOCKSTEP.sb_hmastlock;
+            release `LOCKSTEP.sb_hprot;
+            release `LOCKSTEP.sb_hsize;
+            release `LOCKSTEP.sb_htrans;
+            release `LOCKSTEP.sb_hwrite;
+            release `LOCKSTEP.sb_hwdata;
+            release `LOCKSTEP.lsu_haddr;
+            release `LOCKSTEP.lsu_hburst;
+            release `LOCKSTEP.lsu_hmastlock;
+            release `LOCKSTEP.lsu_hprot;
+            release `LOCKSTEP.lsu_hsize;
+            release `LOCKSTEP.lsu_htrans;
+            release `LOCKSTEP.lsu_hwrite;
+            release `LOCKSTEP.lsu_hwdata;
+            release `LOCKSTEP.dma_hrdata;
+            release `LOCKSTEP.dma_hreadyout;
+            release `LOCKSTEP.dma_hresp;
+            // --- END ADDED AHB RELEASES ---
         `endif
             force `VEER.rst_vec = reset_vector[31:1];
             release `VEER.nmi_int;
@@ -1398,6 +1818,25 @@ module tb_top
             release `VEER.timer_int;
             release `VEER.soft_int;
             release `VEER.scan_mode;
+            // --- ADDED UNCONDITIONAL RELEASES ---
+            release `VEER.o_cpu_halt_ack;
+            release `VEER.o_cpu_halt_status;
+            release `VEER.o_cpu_run_ack;
+            release `VEER.o_debug_mode_status;
+            release `VEER.mpc_debug_halt_ack;
+            release `VEER.mpc_debug_run_ack;
+            release `VEER.trace_rv_i_insn_ip;
+            release `VEER.trace_rv_i_address_ip;
+            release `VEER.trace_rv_i_valid_ip;
+            release `VEER.trace_rv_i_exception_ip;
+            release `VEER.trace_rv_i_ecause_ip;
+            release `VEER.trace_rv_i_interrupt_ip;
+            release `VEER.trace_rv_i_tval_ip;
+            release `VEER.dec_tlu_perfcnt0;
+            release `VEER.dec_tlu_perfcnt1;
+            release `VEER.dec_tlu_perfcnt2;
+            release `VEER.dec_tlu_perfcnt3;
+            // --- END ADDED UNCONDITIONAL RELEASES ---
         `ifdef RV_BUILD_AXI4
             release `VEER.lsu_axi_awready;
             release `VEER.lsu_axi_wready;
@@ -1451,6 +1890,91 @@ module tb_top
             release `VEER.dma_axi_arlen;
             release `VEER.dma_axi_arburst;
             release `VEER.dma_axi_rready;
+            // --- ADDED AXI RELEASES ---
+	    release `VEER.lsu_axi_awvalid;
+            release `VEER.lsu_axi_awid;
+            release `VEER.lsu_axi_awaddr;
+            release `VEER.lsu_axi_awregion;
+            release `VEER.lsu_axi_awlen;
+            release `VEER.lsu_axi_awsize;
+            release `VEER.lsu_axi_awburst;
+            release `VEER.lsu_axi_awlock;
+            release `VEER.lsu_axi_awcache;
+            release `VEER.lsu_axi_awprot;
+            release `VEER.lsu_axi_awqos;
+            release `VEER.lsu_axi_wvalid;
+            release `VEER.lsu_axi_wdata;
+            release `VEER.lsu_axi_wstrb;
+            release `VEER.lsu_axi_wlast;
+            release `VEER.lsu_axi_bready;
+            release `VEER.ifu_axi_awvalid;
+            release `VEER.ifu_axi_awid;
+            release `VEER.ifu_axi_awaddr;
+            release `VEER.ifu_axi_awregion;
+            release `VEER.ifu_axi_awlen;
+            release `VEER.ifu_axi_awsize;
+            release `VEER.ifu_axi_awburst;
+            release `VEER.ifu_axi_awlock;
+            release `VEER.ifu_axi_awcache;
+            release `VEER.ifu_axi_awprot;
+            release `VEER.ifu_axi_awqos;
+            release `VEER.ifu_axi_wvalid;
+            release `VEER.ifu_axi_wdata;
+            release `VEER.ifu_axi_wstrb;
+            release `VEER.ifu_axi_wlast;
+            release `VEER.ifu_axi_bready;
+            release `VEER.ifu_axi_arvalid;
+            release `VEER.ifu_axi_arid;
+            release `VEER.ifu_axi_araddr;
+            release `VEER.ifu_axi_arregion;
+            release `VEER.ifu_axi_arlen;
+            release `VEER.ifu_axi_arsize;
+            release `VEER.ifu_axi_arburst;
+            release `VEER.ifu_axi_arlock;
+            release `VEER.ifu_axi_arcache;
+            release `VEER.ifu_axi_arprot;
+            release `VEER.ifu_axi_arqos;
+            release `VEER.ifu_axi_rready;
+            release `VEER.sb_axi_awvalid;
+            release `VEER.sb_axi_awid;
+            release `VEER.sb_axi_awaddr;
+            release `VEER.sb_axi_awregion;
+            release `VEER.sb_axi_awlen;
+            release `VEER.sb_axi_awsize;
+            release `VEER.sb_axi_awburst;
+            release `VEER.sb_axi_awlock;
+            release `VEER.sb_axi_awcache;
+            release `VEER.sb_axi_awprot;
+            release `VEER.sb_axi_awqos;
+            release `VEER.sb_axi_wvalid;
+            release `VEER.sb_axi_wdata;
+            release `VEER.sb_axi_wstrb;
+            release `VEER.sb_axi_wlast;
+            release `VEER.sb_axi_bready;
+            release `VEER.sb_axi_arvalid;
+            release `VEER.sb_axi_arid;
+            release `VEER.sb_axi_araddr;
+            release `VEER.sb_axi_arregion;
+            release `VEER.sb_axi_arlen;
+            release `VEER.sb_axi_arsize;
+            release `VEER.sb_axi_arburst;
+            release `VEER.sb_axi_arlock;
+            release `VEER.sb_axi_arcache;
+            release `VEER.sb_axi_arprot;
+            release `VEER.sb_axi_arqos;
+            release `VEER.sb_axi_rready;
+            release `VEER.dma_axi_awready;
+            release `VEER.dma_axi_wready;
+            release `VEER.dma_axi_bvalid;
+            release `VEER.dma_axi_bresp;
+            release `VEER.dma_axi_bid;
+            release `VEER.dma_axi_arready;
+            release `VEER.dma_axi_rvalid;
+            release `VEER.dma_axi_rid;
+            release `VEER.dma_axi_rdata;
+            release `VEER.dma_axi_rresp;
+            release `VEER.dma_axi_rlast;
+            // --- END ADDED AXI RELEASES ---
         `endif
         `ifdef RV_BUILD_AHB_LITE
             release `VEER.hrdata;
@@ -1472,6 +1996,34 @@ module tb_top
             release `VEER.dma_hwrite;
             release `VEER.dma_hwdata;
             release `VEER.dma_hreadyin;
+            // --- ADDED AHB RELEASES ---
+            release `VEER.haddr;
+            release `VEER.hburst;
+            release `VEER.hmastlock;
+            release `VEER.hprot;
+            release `VEER.hsize;
+            release `VEER.htrans;
+            release `VEER.hwrite;
+            release `VEER.sb_haddr;
+            release `VEER.sb_hburst;
+            release `VEER.sb_hmastlock;
+            release `VEER.sb_hprot;
+            release `VEER.sb_hsize;
+            release `VEER.sb_htrans;
+            release `VEER.sb_hwrite;
+            release `VEER.sb_hwdata;
+            release `VEER.lsu_haddr;
+            release `VEER.lsu_hburst;
+            release `VEER.lsu_hmastlock;
+            release `VEER.lsu_hprot;
+            release `VEER.lsu_hsize;
+            release `VEER.lsu_htrans;
+            release `VEER.lsu_hwrite;
+            release `VEER.lsu_hwdata;
+            release `VEER.dma_hrdata;
+            release `VEER.dma_hreadyout;
+            release `VEER.dma_hresp;
+            // --- END ADDED AHB RELEASES ---
         `endif
             release `LOCKSTEP.lockstep_err_injection_en_i;
         end
@@ -1572,8 +2124,11 @@ module tb_top
         preload_iccm();
 
 `ifndef VERILATOR
-        $dumpfile("dump.vcd");
-        $dumpvars(0, tb_top);
+   `ifdef VCS_DEBUG
+       $fsdbDumpfile("dump.fsdb");
+       $fsdbDumpvars(0, tb_top);
+       $fsdbDumpMDA();
+   `endif
         rst_l = 1'b1;
         rst_l = #5 1'b0;
         rst_l = #25 1'b1;
@@ -1583,33 +2138,34 @@ module tb_top
         mpc_debug_halt_req = 1'b0;
         mpc_debug_run_req = 1'b0;
 
-        $display("halting CPU and waiting for ack");
+        $display("[%0t ns] halting CPU and waiting for ack",$time);
         i_cpu_halt_req = #5 1'b1;
         wait(o_cpu_halt_ack == 1);
-        $display("waiting for halt");
+        $display("[%0t ns] waiting for halt",$time);
         i_cpu_halt_req = 1'b0;
         wait(o_cpu_halt_status == 1'b1);
-        $display("requesting start and waiting for ack");
+        $display("[%0t ns] requesting start and waiting for ack",$time);
         i_cpu_run_req = 1'b1;
         wait(o_cpu_run_ack == 1'b1);
-        $display("waiting for run");
+        $display("[%0t ns] waiting for run",$time);
         i_cpu_run_req = 1'b0;
         wait(o_cpu_halt_status == 1'b0);
-        $display("done");
+        $display("[%0t ns] done",$time);
 
-        $display("requesting mpc halt and wating for ack");
+        $display("[%0t ns] requesting mpc halt and wating for ack",$time);
         mpc_debug_halt_req = 1'b1;
         wait(mpc_debug_halt_ack == 1'b1);
-        $display("waiting for debug halt");
+        $display("[%0t ns] waiting for debug halt",$time);
         mpc_debug_halt_req = 1'b0;
         wait(o_debug_mode_status == 1'b1);
-        $display("requesting start and waiting for ack");
+        $display("[%0t ns] requesting start and waiting for ack",$time);
         mpc_debug_run_req = 1'b1;
         wait(mpc_debug_run_ack == 1'b1);
-        $display("waiting for cpu to start");
+        $display("[%0t ns] waiting for cpu to start",$time);
         mpc_debug_run_req = 1'b0;
         wait(o_debug_mode_status == 1'b0);
-        $display("done");
+        $display("[%0t ns] done",$time);
+
 `endif
     end
 `ifndef VERILATOR
@@ -2255,14 +2811,14 @@ addr = 'hffff_fff0;
 saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 if ( (saddr < `RV_ICCM_SADR) || (saddr > `RV_ICCM_EADR)) return;
 `ifndef RV_ICCM_ENABLE
-    $display("********************************************************");
-    $display("ICCM preload: there is no ICCM in VeeR, terminating !!!");
-    $display("********************************************************");
+    $display("[%0t ns] ********************************************************",$time);
+    $display("[%0t ns] ICCM preload: there is no ICCM in VeeR, terminating !!!",$time);
+    $display("[%0t ns] ********************************************************",$time);
     $finish;
 `endif
 addr += 4;
 eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
-$display("ICCM pre-load from %h to %h", saddr, eaddr);
+$display("[%0t ns] ICCM pre-load from %h to %h",$time, saddr, eaddr);
 
 for(addr= saddr; addr <= eaddr; addr+=4) begin
     data = {imem.mem[addr+3],imem.mem[addr+2],imem.mem[addr+1],imem.mem[addr]};
@@ -2286,14 +2842,14 @@ addr = 'hffff_fff8;
 saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 if (saddr < `RV_DCCM_SADR || saddr > `RV_DCCM_EADR) return;
 `ifndef RV_DCCM_ENABLE
-    $display("********************************************************");
-    $display("DCCM preload: there is no DCCM in VeeR, terminating !!!");
-    $display("********************************************************");
+    $display("[%0t ns] ********************************************************",$time);
+    $display("[%0t ns] DCCM preload: there is no DCCM in VeeR, terminating !!!",$time);
+    $display("[%0t ns] ********************************************************",$time);
     $finish;
 `endif
 addr += 4;
 eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
-$display("DCCM pre-load from %h to %h", saddr, eaddr);
+$display("[%0t ns] DCCM pre-load from %h to %h",$time, saddr, eaddr);
 
 for(addr=saddr; addr <= eaddr; addr+=4) begin
     data = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
@@ -2329,7 +2885,7 @@ case(bank)
 `endif
 endcase
 `endif
-//$display("Writing bank %0d indx=%0d A=%h, D=%h",bank, indx, addr, data);
+//$display("[%0t ns] Writing bank %0d indx=%0d A=%h, D=%h",bank, indx, addr, data);
 endtask
 
 
@@ -2451,7 +3007,7 @@ endfunction
 task dump_signature ();
     integer fp, i;
 
-    $display("Dumping memory signature (0x%08X - 0x%08X)...",
+    $display("[%0t ns] Dumping memory signature (0x%08X - 0x%08X)...",$time,
         mem_signature_begin,
         mem_signature_end
     );

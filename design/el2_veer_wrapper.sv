@@ -497,12 +497,12 @@ import el2_pkg::*;
 
    logic [25:0]  ictag_debug_rd_data;               // Debug icache tag.
    logic [pt.ICACHE_BANKS_WAY-1:0][70:0]  ic_wr_data;
-   logic [63:0]  ic_rd_data;
+   logic [141:0] ic_rd_data;
+   logic [1:0]   ic_rd_addr_lo;
+   logic [pt.ICACHE_BANKS_WAY-1:0] ic_rd_bank_check_en;
    logic [70:0]  ic_debug_rd_data;                  // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
    logic [70:0]  ic_debug_wr_data;                  // Debug wr cache.
 
-   logic [pt.ICACHE_BANKS_WAY-1:0] ic_eccerr;       // ecc error per bank
-   logic [pt.ICACHE_BANKS_WAY-1:0] ic_parerr;       // parity error per bank
 
    logic [63:0]  ic_premux_data;
    logic         ic_sel_premux_data;

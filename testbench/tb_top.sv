@@ -1046,8 +1046,6 @@ module tb_top
                 12: force `LOCKSTEP.ic_rd_data = '1;
                 13: force `LOCKSTEP.ic_debug_rd_data = '1;
                 14: force `LOCKSTEP.ictag_debug_rd_data = '1;
-                15: force `LOCKSTEP.ic_eccerr = '1;
-                16: force `LOCKSTEP.ic_parerr = '1;
                 17: force `LOCKSTEP.ic_rd_hit = '1;
                 18: force `LOCKSTEP.ic_tag_perr = '1;
                 19: force `LOCKSTEP.lsu_bus_clk_en = '1;
@@ -1159,8 +1157,6 @@ module tb_top
                 12: force `VEER.ic_rd_data = '1;
                 13: force `VEER.ic_debug_rd_data = '1;
                 14: force `VEER.ictag_debug_rd_data = '1;
-                15: force `VEER.ic_eccerr = '1;
-                16: force `VEER.ic_parerr = '1;
                 17: force `VEER.ic_rd_hit = '1;
                 18: force `VEER.ic_tag_perr = '1;
                 19: force `VEER.lsu_bus_clk_en = '1;
@@ -1272,8 +1268,6 @@ module tb_top
             release `LOCKSTEP.ic_rd_data;
             release `LOCKSTEP.ic_debug_rd_data;
             release `LOCKSTEP.ictag_debug_rd_data;
-            release `LOCKSTEP.ic_eccerr;
-            release `LOCKSTEP.ic_parerr;
             release `LOCKSTEP.ic_rd_hit;
             release `LOCKSTEP.ic_tag_perr;
             release `LOCKSTEP.lsu_bus_clk_en;
@@ -1378,8 +1372,6 @@ module tb_top
             release `VEER.ic_rd_data;
             release `VEER.ic_debug_rd_data;
             release `VEER.ictag_debug_rd_data;
-            release `VEER.ic_eccerr;
-            release `VEER.ic_parerr;
             release `VEER.ic_rd_hit;
             release `VEER.ic_tag_perr;
             release `VEER.lsu_bus_clk_en;

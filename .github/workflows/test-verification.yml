@@ -117,7 +117,7 @@ jobs:
           submodules: recursive
 
       - name: Run tests
-        run: _secret_custom_verification_tests:10
+        run: _secret_custom_verification_tests:11
         env:
           TEST: ${{ matrix.test }}
           BUS: ${{ matrix.bus }}

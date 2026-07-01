@@ -71,7 +71,7 @@ jobs:
           submodules: recursive
 
       - name: Prepare Environment
-        run: _secret_prepare_env:6
+        run: _secret_prepare_env:7
 
       - name: Generate code
         if: matrix.version == 'uvm'
@@ -247,7 +247,7 @@ jobs:
           rm -rf verilator-artifacts
 
       - name: Prepare Environment
-        run: _secret_prepare_env:6
+        run: _secret_prepare_env:7
 
       - name: Perform custom tests
         run: _secret_custom_riscv_dv:12

@@ -211,6 +211,6 @@ jobs:
           submodules: recursive
 
       - name: Perform custom tests
-        run: _secret_custom_uarch:22
+        run: _secret_custom_uarch:23
         env:
           TEST: ${{ matrix.test }}

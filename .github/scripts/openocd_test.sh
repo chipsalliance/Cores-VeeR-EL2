@@ -63,8 +63,14 @@ if [ $? -ne 0 ]; then
 fi
 echo -e "Simulation running and ready (pid=${SIM_PID})"
 
-# Wait a bit
-sleep 2s
+# Wait until port 5000 is listed on the ports listening for connections
+timeout 10 bash -c 'until ss -ltn | grep -q ':5000'; do sleep 0.1; done'
+if [ $? -ne 0 ]; then
+    echo "Timed out waiting for port 5000"
+    exit 1
+else
+    echo "Port 5000 is listening for connections"
+fi
 
 # Run the test
 echo -e "${COLOR_WHITE}======== Running OpenOCD test '$@' ========${COLOR_OFF}"
@@ -84,4 +90,3 @@ wait $SIM_PID
 
 # Honor the exitcode
 exit ${EXITCODE}
-

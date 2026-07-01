@@ -1350,11 +1350,13 @@ end
          assign iccm_dma_rdata[63:0] = '0 ;
          assign iccm_single_ecc_error = '0 ;
          assign iccm_dma_rtag         = '0 ;
-
-
-
-
-
+         assign iccm_dma_rd_ecc_single_err = '0 ;
+         assign iccm_dma_rd_ecc_double_err = '0 ;
+         assign iccm_rw_addr  = '0 ;
+         assign iccm_wren     = 1'b0 ;
+         assign iccm_rden     = 1'b0 ;
+         assign iccm_wr_data  = '0 ;
+         assign iccm_wr_size  = '0 ;
 
          assign iccm_rd_ecc_single_err                 = 1'b0 ;
          assign iccm_rd_ecc_double_err                 = '0 ;
@@ -1363,12 +1365,6 @@ end
          assign iccm_ecc_corr_index_ff[pt.ICCM_BITS-1:2]  =  '0;
          assign iccm_ecc_corr_data_ff[38:0]            =  '0;
          assign iccm_ecc_write_status                  =  '0;
-
-
-
-
-
-
     end
 
 

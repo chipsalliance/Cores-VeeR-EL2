@@ -174,8 +174,13 @@ if (pt.ICCM_ENABLE) begin : iccm
                    );
 end
 else  begin
-   assign  iccm_rd_data    = '0 ;
+   assign iccm_rd_data     = '0 ;
    assign iccm_rd_data_ecc = '0 ;
+   assign mem_export_local.iccm_addr_bank = '0;
+   assign mem_export_local.iccm_bank_wr_data = '0;
+   assign mem_export_local.iccm_bank_wr_ecc = '0;
+   assign mem_export_local.iccm_clken = '0;
+   assign mem_export_local.iccm_wren_bank = '0;
 end
 
 

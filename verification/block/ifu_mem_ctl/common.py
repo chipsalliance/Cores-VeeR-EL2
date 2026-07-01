@@ -86,10 +86,10 @@ async def initialize(dut):
     dut.dma_mem_wdata.value = 0
     dut.dma_mem_tag.value = 0
     dut.ic_rd_data.value = 0
+    dut.ic_rd_addr_lo.value = 0
+    dut.ic_rd_bank_check_en.value = 0
     dut.ic_debug_rd_data.value = 0
     dut.ictag_debug_rd_data.value = 0
-    dut.ic_eccerr.value = 0
-    dut.ic_parerr.value = 0
     dut.ic_rd_hit.value = 0
     dut.ic_tag_perr.value = 0
     dut.iccm_rd_data.value = 0

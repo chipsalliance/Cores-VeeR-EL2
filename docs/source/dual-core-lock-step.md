@@ -952,13 +952,13 @@ Refer to {ref}`tab-shadow-core-tracked-signals` for list of ports routed to the 
 * - ic_debug_wr_en
   -
   -
-* - ic_eccerr
-  -
-  -
-* - ic_parerr
-  -
-  -
 * - ic_premux_data
+  -
+  -
+* - ic_rd_addr_lo
+  -
+  -
+* - ic_rd_bank_check_en
   -
   -
 * - ic_rd_data

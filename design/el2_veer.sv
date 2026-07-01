@@ -113,13 +113,13 @@ import el2_pkg::*;
    output logic                  ic_rd_en,
 
    output logic [pt.ICACHE_BANKS_WAY-1:0][70:0]               ic_wr_data,         // Data to fill to the Icache. With ECC
-   input  logic [63:0]               ic_rd_data ,        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
+   input  logic [141:0]              ic_rd_data ,              // Raw way-muxed 142-bit ECC-protected word pair. F2 stage.
+   input  logic [1:0]                ic_rd_addr_lo,            // F2-aligned ic_rw_addr_ff[2:1] for core-side rotate
+   input  logic [pt.ICACHE_BANKS_WAY-1:0] ic_rd_bank_check_en, // Per-bank ECC check enable for core-side decode
    input  logic [70:0]               ic_debug_rd_data ,        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
    input  logic [25:0]               ictag_debug_rd_data,// Debug icache tag.
    output logic [70:0]               ic_debug_wr_data,   // Debug wr cache.
 
-   input  logic [pt.ICACHE_BANKS_WAY-1:0] ic_eccerr,
-   input  logic [pt.ICACHE_BANKS_WAY-1:0] ic_parerr,
    output logic [63:0]               ic_premux_data,     // Premux data to be muxed with each way of the Icache.
    output logic                      ic_sel_premux_data, // Select premux data
 

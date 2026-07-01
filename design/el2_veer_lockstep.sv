@@ -91,13 +91,13 @@ module el2_veer_lockstep
     input logic                          ic_rd_en,
 
     input logic [pt.ICACHE_BANKS_WAY-1:0][70:0] ic_wr_data,  // Data to fill to the Icache. With ECC
-    input  logic [63:0]               ic_rd_data ,        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
+    input  logic [141:0]                   ic_rd_data ,         // Raw way-muxed 142-bit ECC-protected word pair. F2 stage.
+    input  logic [1:0]                     ic_rd_addr_lo,       // F2-aligned ic_rw_addr_ff[2:1] for core-side rotate
+    input  logic [pt.ICACHE_BANKS_WAY-1:0] ic_rd_bank_check_en, // Per-bank ECC check enable for core-side decode
     input  logic [70:0]               ic_debug_rd_data ,        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
     input logic [25:0] ictag_debug_rd_data,  // Debug icache tag.
     input logic [70:0] ic_debug_wr_data,  // Debug wr cache.
 
-    input logic [pt.ICACHE_BANKS_WAY-1:0] ic_eccerr,
-    input logic [pt.ICACHE_BANKS_WAY-1:0] ic_parerr,
     input logic [63:0] ic_premux_data,  // Premux data to be muxed with each way of the Icache.
     input logic ic_sel_premux_data,  // Select premux data
 
@@ -437,10 +437,10 @@ module el2_veer_lockstep
   assign main_core_inputs.iccm_rd_data = iccm_rd_data;
   assign main_core_inputs.iccm_rd_data_ecc = iccm_rd_data_ecc;
   assign main_core_inputs.ic_rd_data = ic_rd_data;
+  assign main_core_inputs.ic_rd_addr_lo = ic_rd_addr_lo;
+  assign main_core_inputs.ic_rd_bank_check_en = ic_rd_bank_check_en;
   assign main_core_inputs.ic_debug_rd_data = ic_debug_rd_data;
   assign main_core_inputs.ictag_debug_rd_data = ictag_debug_rd_data;
-  assign main_core_inputs.ic_eccerr = ic_eccerr;
-  assign main_core_inputs.ic_parerr = ic_parerr;
   assign main_core_inputs.ic_rd_hit = ic_rd_hit;
   assign main_core_inputs.ic_tag_perr = ic_tag_perr;
   assign main_core_inputs.lsu_axi_awready = lsu_axi_awready;
@@ -876,12 +876,12 @@ module el2_veer_lockstep
 
       .ic_wr_data(shadow_core_outputs.ic_wr_data),
       .ic_rd_data(shadow_core_inputs.ic_rd_data),
+      .ic_rd_addr_lo(shadow_core_inputs.ic_rd_addr_lo),
+      .ic_rd_bank_check_en(shadow_core_inputs.ic_rd_bank_check_en),
       .ic_debug_rd_data(shadow_core_inputs.ic_debug_rd_data),
       .ictag_debug_rd_data(shadow_core_inputs.ictag_debug_rd_data),
       .ic_debug_wr_data(shadow_core_outputs.ic_debug_wr_data),
 
-      .ic_eccerr(shadow_core_inputs.ic_eccerr),
-      .ic_parerr(shadow_core_inputs.ic_parerr),
       .ic_premux_data(shadow_core_outputs.ic_premux_data),
       .ic_sel_premux_data(shadow_core_outputs.ic_sel_premux_data),
 

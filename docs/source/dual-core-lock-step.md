@@ -17,6 +17,10 @@ Similarly, `Icache` is not duplicated with only the main VeeR EL2 CPU core havin
 The Shadow Core will receive a delayed copy of main core's `Icache` inputs.
 The copy of main core's `Icache` outputs will be passed into the `Equivalency Checker` to be validated against the Shadow Core's `Icache` outputs.
 
+Because these memories sit outside the lockstep domain, a fault injected into their address path would fetch wrong, but valid, data that is transported to both cores, so the equivalency check cannot detect it.
+To mitigate this, the access address is linked with the data by XORing the address on top of the data.
+When reading the data, an address mismatch yields an ECC/parity error.
+
 The diagram below outlines the architecture of the proposed solution.
 
 ![VeeR DCLS Overview](img/dcls_block_diagram.png)

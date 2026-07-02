@@ -260,6 +260,25 @@ As after the read XOR the ECC check happens, the mismatch is detected as an ECC 
 
 Firmware or backdoor loaders that write the DCCM directly must apply the same address XOR.
 
+## ICache Address Infection
+
+When the ICache address-XOR infection feature is enabled (`RV_ICACHE_ADDR_XOR`, which requires [Dual-Core Lock-Step](dual-core-lock-step.md) / `RV_LOCKSTEP_ENABLE`), the ICache cache line address is XORed into the data that gets stored into the ICache.
+On a read, the ICache fetch cache line address is XORed on the data read from the ICache.
+If both addresses match, the plain data is retrieved.
+
+If the read address does not match the write address (e.g., caused by a fault injection attack), the address does not cancel.
+As after the read XOR the ECC (or parity, depending on configuration) check happens, the mismatch is detected as an ECC/parity error.
+The cache line is then invalidated and the instruction is refetched from SoC memory.
+Moreover, the ICache error counter ([micect](#i-cache-error-counterthreshold-register-micect)) is incremented.
+
+For the address used by the XOR, only the cache line address is used.
+With this, the XOR mask is constant across a cache line.
+Hence, address mismatches within a cache line cannot be detected, because the entire line is fetched at once.
+
+The debug/diagnostic cache-write path (`dec_tlu_ic_diag_pkt`) does not apply the XOR.
+Hence, a debugger that writes to the iCache needs to apply the XOR itself.
+Debug reads return XOR-scrambled data and must be un-XORed with the same line address.
+
 ## Core Error Counter/Threshold Registers
 
 A summary of platform-specific core error counter/threshold control/status registers in CSR space:

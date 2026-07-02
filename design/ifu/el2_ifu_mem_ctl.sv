@@ -669,6 +669,36 @@ import el2_pkg::*;
   assign ic_rw_addr[31:1]      = ifu_ic_rw_int_addr[31:1] ;
 
 
+  // Instruction Cache XOR Infection
+  //
+  // In this fault injection countermeasure, on a write into the iCache, the
+  // write address is XORed into the data that is stored in the iCache. Once
+  // the data is read, the read address is XORed on this data to revert the
+  // write XOR.
+  //
+  // If a fault inside the instruction cache (which is outside the DCLS domain)
+  // would have manipulated an address, the reverted XOR produces garbled data,
+  // which the ECC check detects. Then, the cache line is invalidated and the
+  // instruction is refetched.
+  //
+  // For the XOR we use the cache line address, so the mask is constant across
+  // the whole line (all rows and both banks). This is required because on a read
+  // the fetched word is byte-rotated and, on a cacheline-wrap access, assembled
+  // from two banks that may map to different rows within the line; a finer,
+  // per-word mask would not cancel cleanly there. The consequence is that faults
+  // on the intra-line address bits (wrong row or bank within the correct line)
+  // are not detected.
+  logic [63:0] ic_wr_addr_infect;
+  logic [63:0] ic_rd_addr_infect;
+`ifdef RV_ICACHE_ADDR_XOR
+  assign ic_wr_addr_infect = 64'(imb_ff[31:pt.ICACHE_TAG_INDEX_LO]);
+  assign ic_rd_addr_infect = 64'(ifu_fetch_addr_int_f[31:pt.ICACHE_TAG_INDEX_LO]);
+`else
+  assign ic_wr_addr_infect = 64'b0;
+  assign ic_rd_addr_infect = 64'b0;
+`endif
+
+
 if (pt.ICACHE_ECC == 1) begin: icache_ecc_1
    logic [6:0]       ic_wr_ecc;
    logic [6:0]       ic_miss_buff_ecc;
@@ -705,8 +735,11 @@ if (pt.ICACHE_ECC == 1) begin: icache_ecc_1
                                          })
                                   );
 
-  assign ic_wr_16bytes_data[141:0] =  ifu_bus_rid_ff[0] ? {ic_wr_ecc[6:0] , ifu_bus_rdata_ff[63:0] ,  ic_miss_buff_ecc[6:0] , ic_miss_buff_half[63:0] } :
-                                                        {ic_miss_buff_ecc[6:0] ,  ic_miss_buff_half[63:0] , ic_wr_ecc[6:0] , ifu_bus_rdata_ff[63:0] } ;
+  assign ic_wr_16bytes_data[141:0] =  ifu_bus_rid_ff[0] ? {ic_wr_ecc[6:0], ifu_bus_rdata_ff[63:0] ^ ic_wr_addr_infect,
+                                                           ic_miss_buff_ecc[6:0], ic_miss_buff_half[63:0] ^ ic_wr_addr_infect}
+                                                        :
+                                                          {ic_miss_buff_ecc[6:0],  ic_miss_buff_half[63:0] ^ ic_wr_addr_infect,
+                                                           ic_wr_ecc[6:0] , ifu_bus_rdata_ff[63:0] ^ ic_wr_addr_infect};
 
 
 end
@@ -747,8 +780,11 @@ else begin : icache_parity_1
                                           })
                                    );
 
-   assign ic_wr_16bytes_data[135:0] =  ifu_bus_rid_ff[0] ? {ic_wr_parity[3:0] , ifu_bus_rdata_ff[63:0] ,  ic_miss_buff_parity[3:0] , ic_miss_buff_half[63:0] } :
-                                                        {ic_miss_buff_parity[3:0] ,  ic_miss_buff_half[63:0] , ic_wr_parity[3:0] , ifu_bus_rdata_ff[63:0] } ;
+   assign ic_wr_16bytes_data[135:0] =  ifu_bus_rid_ff[0] ? {ic_wr_parity[3:0], ifu_bus_rdata_ff[63:0] ^ ic_wr_addr_infect,
+                                                            ic_miss_buff_parity[3:0], ic_miss_buff_half[63:0] ^ ic_wr_addr_infect}
+                                                         :
+                                                           {ic_miss_buff_parity[3:0],  ic_miss_buff_half[63:0] ^ ic_wr_addr_infect,
+                                                            ic_wr_parity[3:0], ifu_bus_rdata_ff[63:0] ^ ic_wr_addr_infect};
 
 end
 
@@ -761,32 +797,38 @@ end
   // Core-side alignment (byte-rotate) and ECC / parity check of the raw 142-bit
   // ic_rd_data input (ic_rd_data_aligned / ic_eccerr_int / ic_parerr_int declared above).
   if (pt.ICACHE_ECC) begin : g_ic_rd_ecc_core
-     logic [63:0] ic_rd_rot;
-     assign ic_rd_rot = (ic_rd_addr_lo == 2'b00) ? ic_rd_data[63:0]                        :
-                        (ic_rd_addr_lo == 2'b01) ? {ic_rd_data[86:71],  ic_rd_data[63:16]} :
-                        (ic_rd_addr_lo == 2'b10) ? {ic_rd_data[102:71], ic_rd_data[63:32]} :
-                                                 {ic_rd_data[118:71], ic_rd_data[63:48]};
+     logic [63:0]  ic_rd_rot;
+     logic [141:0] ic_rd_data_fixed;
+     assign ic_rd_data_fixed = {ic_rd_data[141:135], ic_rd_data[134:71] ^ ic_rd_addr_infect,
+                                ic_rd_data[70:64],   ic_rd_data[63:0]   ^ ic_rd_addr_infect};
+     assign ic_rd_rot = (ic_rd_addr_lo == 2'b00) ? ic_rd_data_fixed[63:0]                              :
+                        (ic_rd_addr_lo == 2'b01) ? {ic_rd_data_fixed[86:71],  ic_rd_data_fixed[63:16]} :
+                        (ic_rd_addr_lo == 2'b10) ? {ic_rd_data_fixed[102:71], ic_rd_data_fixed[63:32]} :
+                                                 {ic_rd_data_fixed[118:71], ic_rd_data_fixed[63:48]};
      assign ic_rd_data_aligned = ic_sel_premux_data ? ic_premux_data[63:0] : ic_rd_rot;
      for (genvar i=0; i<pt.ICACHE_BANKS_WAY; i++) begin : g_dec
         rvecc_decode_64 ecc_decode_64 (
            .en       (ic_rd_bank_check_en[i]),
-           .din      (ic_rd_data[71*i +: 64]),
-           .ecc_in   (ic_rd_data[71*i+64 +: 7]),
+           .din      (ic_rd_data_fixed[71*i +: 64]),
+           .ecc_in   (ic_rd_data_fixed[71*i+64 +: 7]),
            .ecc_error(ic_eccerr_int[i]));
      end
      assign ic_parerr_int = '0;
   end else begin : g_ic_rd_par_core
      logic [63:0] ic_rd_rot_par;
+     logic [135:0] ic_rd_data_fixed;
      logic [pt.ICACHE_BANKS_WAY-1:0][67:0] wb_par_bank;
      logic [pt.ICACHE_BANKS_WAY-1:0][3:0]  ic_parerr_bank;
-     assign ic_rd_rot_par = (ic_rd_addr_lo == 2'b00) ? ic_rd_data[63:0]                        :
-                            (ic_rd_addr_lo == 2'b01) ? {ic_rd_data[83:68],  ic_rd_data[63:16]} :
-                            (ic_rd_addr_lo == 2'b10) ? {ic_rd_data[99:68],  ic_rd_data[63:32]} :
-                                                     {ic_rd_data[115:68], ic_rd_data[63:48]};
+     assign ic_rd_data_fixed = {ic_rd_data[135:132], ic_rd_data[131:68] ^ ic_rd_addr_infect,
+                                ic_rd_data[67:64],   ic_rd_data[63:0]   ^ ic_rd_addr_infect};
+     assign ic_rd_rot_par = (ic_rd_addr_lo == 2'b00) ? ic_rd_data_fixed[63:0]                              :
+                            (ic_rd_addr_lo == 2'b01) ? {ic_rd_data_fixed[83:68],  ic_rd_data_fixed[63:16]} :
+                            (ic_rd_addr_lo == 2'b10) ? {ic_rd_data_fixed[99:68],  ic_rd_data_fixed[63:32]} :
+                                                     {ic_rd_data_fixed[115:68], ic_rd_data_fixed[63:48]};
      assign ic_rd_data_aligned = ic_sel_premux_data ? ic_premux_data[63:0] : ic_rd_rot_par;
      assign ic_eccerr_int = '0;
-     assign wb_par_bank[0] = ic_rd_data[67:0];
-     assign wb_par_bank[1] = ic_rd_data[135:68];
+     assign wb_par_bank[0] = ic_rd_data_fixed[67:0];
+     assign wb_par_bank[1] = ic_rd_data_fixed[135:68];
      for (genvar i=0; i<pt.ICACHE_BANKS_WAY; i++) begin : g_par
         for (genvar j=0; j<4; j++) begin : g_par_chk
            rveven_paritycheck pchk (

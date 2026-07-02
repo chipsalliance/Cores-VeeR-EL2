@@ -46,6 +46,7 @@ ifeq ($(SIM), verilator)
     EXTRA_ARGS   += --trace --trace-structs
     EXTRA_ARGS   += $(VERILATOR_COVERAGE)
     EXTRA_ARGS   += -I$(CFGDIR) -Wno-DECLFILENAME
+    PLUSARGS     += --trace
 
     # Include test specific Verilator config if it exists
     ifneq ("$(wildcard $(TEST_DIR)/config.vlt)","")

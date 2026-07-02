@@ -41,8 +41,6 @@ jobs:
           echo "include-run=$(python3 .github/scripts/riscv_dv_matrix_include.py run-tests)" | tee -a $GITHUB_OUTPUT
           echo "include-run-custom=$(python3 .github/scripts/riscv_dv_matrix_include.py run-custom-tests)" | tee -a $GITHUB_OUTPUT
           echo "exclude-run=[ \
-            {'iss': 'renode', 'test': 'riscv_bitmanip_full_test_veer'}, \
-            {'iss': 'renode', 'test': 'riscv_bitmanip_balanced_test_veer'}, \
             {'iss': 'renode', 'test': 'riscv_illegal_instr_test'}, \
             {'iss': 'renode', 'test': 'riscv_hint_instr_test'}, \
             {'iss': 'renode', 'test': 'riscv_ebreak_test', 'priv': 'mu'}, \
@@ -56,7 +54,7 @@ jobs:
     name: Generate code for tests
     if: inputs.run_custom
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: centos:8
+    container: antmicro/centos-dev-tools
     needs: generate-config
     strategy:
       fail-fast: false
@@ -72,19 +70,13 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set secrets version
-        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
-
       - name: Prepare Environment
-        run: _secret_combined_${{ env.SECRETS_VERSION }}
-        env:
-          SECRET_NAME: _secret_prepare_env
+        run: _secret_prepare_env:6
 
       - name: Generate code
         if: matrix.version == 'uvm'
-        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        run: _secret_generate_code:4
         env:
-          SECRET_NAME: _secret_generate_code
           RISCV_DV_TEST: ${{ matrix.test }}
           RISCV_DV_ITER: ${{ env.ITERATIONS }}
           RISCV_DV_SEED: ${{ env.SEED }}
@@ -111,7 +103,7 @@ jobs:
   run-tests:
     name: Run RISC-V DV tests
     runs-on: ubuntu-24.04
-    container: ghcr.io/antmicro/cores-veer-el2:20250411084921
+    container: ghcr.io/antmicro/cores-veer-el2:20260618
     needs: [ generate-config, generate-code ]
     strategy:
       fail-fast: false
@@ -131,30 +123,16 @@ jobs:
       CACHE_HASH: ${{ needs.generate-config.outputs.hash }}
 
     steps:
-      - name: Install utils
-        run: |
-          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            git ccache device-tree-compiler python3-minimal python3-pip \
-            libboost-all-dev
-
-      # As of July 9th, 2024 `ubuntu:latest` comes with riscv64-unknown-elf-gcc
-      # 10.0.2. We need a newer version for bitmanip extension support.
-      - name: Install cross-compiler
-        run: |
-          echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
-          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            gcc-riscv64-unknown-elf
-          riscv64-unknown-elf-gcc --version
-
       - name: Setup repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Install coverage dependencies
+      - name: Install dependencies
         run: |
           python3 -m venv .venv
           source .venv/bin/activate
+          pip install -r requirements.txt
           pip install -r .github/scripts/requirements-coverage.txt
           echo "PATH=$PATH" >> $GITHUB_ENV
 
@@ -172,7 +150,6 @@ jobs:
         run: |
           ls tools/riscv-dv/work
           export FULL_NAME=riscv_dv-${{ matrix.test }}-${{ matrix.priv }}-${{ matrix.iss }}-${{ matrix.version }}
-          export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`realpath .`
           export RISCV_GCC=riscv64-unknown-elf-gcc
           export RISCV_OBJCOPY=riscv64-unknown-elf-objcopy
@@ -224,7 +201,7 @@ jobs:
     name: Run custom RISC-V DV tests
     if: inputs.run_custom
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: centos:8
+    container: antmicro/centos-dev-tools
     needs: [ generate-config, run-tests ]
     strategy:
       fail-fast: false
@@ -269,18 +246,12 @@ jobs:
           cp -r $SRC_DIR/${{ matrix.iss }}_sim $TEST_DIR/
           rm -rf verilator-artifacts
 
-      - name: Set secrets version
-        run: echo "SECRETS_VERSION=`cat .github/scripts/secrets_version`" >> $GITHUB_ENV
-
       - name: Prepare Environment
-        run: _secret_combined_${{ env.SECRETS_VERSION }}
-        env:
-          SECRET_NAME: _secret_prepare_env
+        run: _secret_prepare_env:6
 
       - name: Perform custom tests
-        run: _secret_combined_${{ env.SECRETS_VERSION }}
+        run: _secret_custom_riscv_dv:12
         env:
-          SECRET_NAME: _secret_custom_riscv_dv
           RISCV_DV_ITER: ${{ env.ITERATIONS }}
           RISCV_DV_TEST: ${{ matrix.test }}
           RISCV_DV_PRIV: ${{ matrix.priv }}

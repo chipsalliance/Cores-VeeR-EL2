@@ -990,21 +990,38 @@ import el2_pkg::*;
      disable_const_delay_assertion = 0;
    end
 
-   property p_const_delay;
-   @(posedge clk)
-   disable iff (!core_rst_l || disable_const_delay_assertion)
-    shadow_core_trace_rv_i_valid_ip |-> (
-      $past(trace_rv_i_valid_ip, `RV_LOCKSTEP_DELAY) &&
-      shadow_core_trace_rv_i_insn_ip      == $past(trace_rv_i_insn_ip,      `RV_LOCKSTEP_DELAY) &&
-      shadow_core_trace_rv_i_address_ip   == $past(trace_rv_i_address_ip,   `RV_LOCKSTEP_DELAY) &&
-      shadow_core_trace_rv_i_exception_ip == $past(trace_rv_i_exception_ip, `RV_LOCKSTEP_DELAY) &&
-      shadow_core_trace_rv_i_ecause_ip    == $past(trace_rv_i_ecause_ip,    `RV_LOCKSTEP_DELAY) &&
-      shadow_core_trace_rv_i_interrupt_ip == $past(trace_rv_i_interrupt_ip, `RV_LOCKSTEP_DELAY) &&
-      shadow_core_trace_rv_i_tval_ip      == $past(trace_rv_i_tval_ip,      `RV_LOCKSTEP_DELAY)
-    );
-   endproperty
+   if (`RV_LOCKSTEP_DELAY > 0) begin
+      property p_const_delay;
+      @(posedge clk)
+      disable iff (!core_rst_l || disable_const_delay_assertion)
+       shadow_core_trace_rv_i_valid_ip |-> (
+         $past(trace_rv_i_valid_ip, `RV_LOCKSTEP_DELAY) &&
+         shadow_core_trace_rv_i_insn_ip      == $past(trace_rv_i_insn_ip,      `RV_LOCKSTEP_DELAY) &&
+         shadow_core_trace_rv_i_address_ip   == $past(trace_rv_i_address_ip,   `RV_LOCKSTEP_DELAY) &&
+         shadow_core_trace_rv_i_exception_ip == $past(trace_rv_i_exception_ip, `RV_LOCKSTEP_DELAY) &&
+         shadow_core_trace_rv_i_ecause_ip    == $past(trace_rv_i_ecause_ip,    `RV_LOCKSTEP_DELAY) &&
+         shadow_core_trace_rv_i_interrupt_ip == $past(trace_rv_i_interrupt_ip, `RV_LOCKSTEP_DELAY) &&
+         shadow_core_trace_rv_i_tval_ip      == $past(trace_rv_i_tval_ip,      `RV_LOCKSTEP_DELAY)
+       );
+      endproperty
+      assert property (p_const_delay) else $fatal("Lockstep constant delay violation");
+    end else begin
+      property p_const_delay;
+      @(posedge clk)
+      disable iff (!core_rst_l || disable_const_delay_assertion)
+       shadow_core_trace_rv_i_valid_ip |-> (
+         trace_rv_i_valid_ip &&
+         shadow_core_trace_rv_i_insn_ip      == trace_rv_i_insn_ip      &&
+         shadow_core_trace_rv_i_address_ip   == trace_rv_i_address_ip   &&
+         shadow_core_trace_rv_i_exception_ip == trace_rv_i_exception_ip &&
+         shadow_core_trace_rv_i_ecause_ip    == trace_rv_i_ecause_ip    &&
+         shadow_core_trace_rv_i_interrupt_ip == trace_rv_i_interrupt_ip &&
+         shadow_core_trace_rv_i_tval_ip      == trace_rv_i_tval_ip
+       );
+      endproperty
+      assert property (p_const_delay) else $fatal("Lockstep constant delay violation");
+    end
 
-  assert property (p_const_delay) else $fatal("Lockstep constant delay violation");
 `endif // `ifdef RV_ASSERT_OR_VERILATOR
 `endif // `ifdef RV_LOCKSTEP_ENABLE
 endmodule

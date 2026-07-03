@@ -390,14 +390,12 @@ module el2_veer_lockstep
     output el2_mubi_t corruption_detected_o
 );
   localparam int unsigned LockstepDelay = 32'(pt.LOCKSTEP_DELAY);  // Delay I/O; in clock cycles
-  localparam int LockstepDelayPipeStages = (LockstepDelay > 0) ? int'(LockstepDelay - 1) : 0;
+  localparam int LockstepDelayPipeStages = int'(LockstepDelay - 1);
 
   veer_inputs_t main_core_inputs;
-  veer_inputs_t [LockstepDelayPipeStages:0] delay_input_d;
   veer_inputs_t shadow_core_inputs;
 
   veer_outputs_t main_core_outputs;
-  veer_outputs_t [LockstepDelayPipeStages:0] delay_output_d;
   veer_outputs_t delayed_main_core_outputs;
   veer_outputs_t shadow_core_outputs;
 
@@ -406,8 +404,63 @@ module el2_veer_lockstep
   // optimize them away.
   veer_inputs_t  shadow_core_inputs_pre;
   veer_outputs_t delayed_main_core_outputs_pre;
-  assign shadow_core_inputs_pre        = delay_input_d[LockstepDelayPipeStages];
-  assign delayed_main_core_outputs_pre = delay_output_d[LockstepDelayPipeStages];
+
+  logic rst_shadow, rst_dbg_shadow;
+
+  if (LockstepDelay > 0) begin : delayed_input
+    veer_inputs_t [LockstepDelayPipeStages:0] delay_input_d;
+    veer_outputs_t [LockstepDelayPipeStages:0] delay_output_d;
+    assign shadow_core_inputs_pre        = delay_input_d[LockstepDelayPipeStages];
+    assign delayed_main_core_outputs_pre = delay_output_d[LockstepDelayPipeStages];
+
+    // Shadow core enters reset immediately with main core but gets out of reset
+    // after the delay
+    logic [LockstepDelayPipeStages:0] rst_shadow_sr, rst_dbg_shadow_sr;
+    assign rst_shadow = &rst_shadow_sr;
+    assign rst_dbg_shadow = &rst_dbg_shadow_sr;
+
+    always_ff @(posedge clk or negedge rst_l) begin
+      if (!rst_l) begin
+        rst_shadow_sr <= '0;
+      end else begin
+        rst_shadow_sr <= (rst_shadow_sr << 1) + 1;
+      end
+    end
+
+    always_ff @(posedge clk or negedge dbg_rst_l) begin
+      if (!dbg_rst_l) begin
+        rst_dbg_shadow_sr <= '0;
+      end else begin
+        rst_dbg_shadow_sr <= (rst_dbg_shadow_sr << 1) + 1;
+      end
+    end
+    // Delay the inputs and outputs
+    always_ff @(posedge clk or negedge rst_l) begin
+      if (~rst_l) begin
+        delay_input_d[0]  <= veer_inputs_t'(0);
+        delay_output_d[0] <= veer_outputs_t'(0);
+      end else begin
+        delay_input_d[0]  <= main_core_inputs;
+        delay_output_d[0] <= main_core_outputs;
+      end
+    end
+    for (genvar i = 0; i < LockstepDelayPipeStages; i++) begin
+      always_ff @(posedge clk or negedge rst_l) begin
+        if (!rst_l) begin
+          delay_input_d[i+1]  <= veer_inputs_t'(0);
+          delay_output_d[i+1] <= veer_outputs_t'(0);
+        end else begin
+          delay_input_d[i+1]  <= delay_input_d[i];
+          delay_output_d[i+1] <= delay_output_d[i];
+        end
+      end
+    end
+  end else begin : raw_input
+    assign shadow_core_inputs_pre        = main_core_inputs;
+    assign delayed_main_core_outputs_pre = main_core_outputs;
+    assign rst_shadow = rst_l;
+    assign rst_dbg_shadow = dbg_rst_l;
+  end
 
   el2_prim_buf #(
     .Width($bits(veer_inputs_t))
@@ -706,51 +759,6 @@ module el2_veer_lockstep
   assign main_core_outputs.dccm_ecc_single_error = dccm_ecc_single_error;
   assign main_core_outputs.dccm_ecc_double_error = dccm_ecc_double_error;
 
-  // Shadow core enters reset immediately with main core but gets out of reset
-  // after the delay
-  logic [LockstepDelayPipeStages:0] rst_shadow_sr, rst_dbg_shadow_sr;
-  logic rst_shadow, rst_dbg_shadow;
-  assign rst_shadow = &rst_shadow_sr;
-  assign rst_dbg_shadow = &rst_dbg_shadow_sr;
-
-  always_ff @(posedge clk or negedge rst_l) begin
-    if (!rst_l) begin
-      rst_shadow_sr <= '0;
-    end else begin
-      rst_shadow_sr <= (rst_shadow_sr << 1) + 1;
-    end
-  end
-
-  always_ff @(posedge clk or negedge dbg_rst_l) begin
-    if (!dbg_rst_l) begin
-      rst_dbg_shadow_sr <= '0;
-    end else begin
-      rst_dbg_shadow_sr <= (rst_dbg_shadow_sr << 1) + 1;
-    end
-  end
-
-  // Delay the inputs and outputs
-  always_ff @(posedge clk or negedge rst_l) begin
-    if (~rst_l) begin
-      delay_input_d[0]  <= veer_inputs_t'(0);
-      delay_output_d[0] <= veer_outputs_t'(0);
-    end else begin
-      delay_input_d[0]  <= main_core_inputs;
-      delay_output_d[0] <= main_core_outputs;
-    end
-  end
-  for (genvar i = 0; i < LockstepDelayPipeStages; i++) begin
-    always_ff @(posedge clk or negedge rst_l) begin
-      if (!rst_l) begin
-        delay_input_d[i+1]  <= veer_inputs_t'(0);
-        delay_output_d[i+1] <= veer_outputs_t'(0);
-      end else begin
-        delay_input_d[i+1]  <= delay_input_d[i];
-        delay_output_d[i+1] <= delay_output_d[i];
-      end
-    end
-  end
-
   // Latch the debug state
   logic debug_mode_status_latch;
   el2_mubi_t dbg_detected;
@@ -770,29 +778,39 @@ module el2_veer_lockstep
   assign dbg_detected = mubi_from_bool(debug_mode_status_latch);
 
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
+`endif
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+  logic regfile_corrupted;
   el2_regfile_if shadow_core_regfile ();
 
-  el2_regfile_if delayed_main_core_regfile[LockstepDelayPipeStages:0] ();
+  if (LockstepDelay > 0) begin : delayed_regfile
+      el2_regfile_if delayed_main_core_regfile[LockstepDelayPipeStages:0] ();
 
-  always_ff @(posedge clk or negedge rst_l) begin
-    if (!rst_l) begin
-      delayed_main_core_regfile[0].gpr <= '0;
-      delayed_main_core_regfile[0].tlu <= '0;
-    end else begin
-      delayed_main_core_regfile[0].gpr <= main_core_regfile.gpr;
-      delayed_main_core_regfile[0].tlu <= main_core_regfile.tlu;
-    end
-  end
-  for (genvar i = 0; i < LockstepDelayPipeStages; i++) begin
-    always_ff @(posedge clk or negedge rst_l) begin
-      if (!rst_l) begin
-        delayed_main_core_regfile[i+1].gpr <= '0;
-        delayed_main_core_regfile[i+1].tlu <= '0;
-      end else begin
-        delayed_main_core_regfile[i+1].gpr <= delayed_main_core_regfile[i].gpr;
-        delayed_main_core_regfile[i+1].tlu <= delayed_main_core_regfile[i].tlu;
+      always_ff @(posedge clk or negedge rst_l) begin
+        if (!rst_l) begin
+          delayed_main_core_regfile[0].gpr <= '0;
+          delayed_main_core_regfile[0].tlu <= '0;
+        end else begin
+          delayed_main_core_regfile[0].gpr <= main_core_regfile.gpr;
+          delayed_main_core_regfile[0].tlu <= main_core_regfile.tlu;
+        end
       end
-    end
+      for (genvar i = 0; i < LockstepDelayPipeStages; i++) begin
+        always_ff @(posedge clk or negedge rst_l) begin
+          if (!rst_l) begin
+            delayed_main_core_regfile[i+1].gpr <= '0;
+            delayed_main_core_regfile[i+1].tlu <= '0;
+          end else begin
+            delayed_main_core_regfile[i+1].gpr <= delayed_main_core_regfile[i].gpr;
+            delayed_main_core_regfile[i+1].tlu <= delayed_main_core_regfile[i].tlu;
+          end
+        end
+      end
+      assign regfile_corrupted   = (delayed_main_core_regfile[LockstepDelayPipeStages].gpr != shadow_core_regfile.gpr)
+                                 | (delayed_main_core_regfile[LockstepDelayPipeStages].tlu != shadow_core_regfile.tlu);
+  end else begin : raw_regfile
+      assign regfile_corrupted   = (main_core_regfile.gpr != shadow_core_regfile.gpr)
+                                 | (main_core_regfile.tlu != shadow_core_regfile.tlu);
   end
 `endif
 
@@ -1135,9 +1153,6 @@ module el2_veer_lockstep
   assign outputs_corrupted = delayed_main_core_outputs != shadow_core_outputs;
 
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
-  logic regfile_corrupted;
-  assign regfile_corrupted   = (delayed_main_core_regfile[LockstepDelayPipeStages].gpr != shadow_core_regfile.gpr)
-                             | (delayed_main_core_regfile[LockstepDelayPipeStages].tlu != shadow_core_regfile.tlu);
   assign corruption_detected = mubi_from_bool(outputs_corrupted | regfile_corrupted);
 `else
   assign corruption_detected = mubi_from_bool(outputs_corrupted);

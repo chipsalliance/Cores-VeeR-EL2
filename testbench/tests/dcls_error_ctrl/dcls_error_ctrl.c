@@ -160,5 +160,8 @@ int main () {
 
     // Inject error that is known to cuase error
     tohost = 1 << 8 | CMD_INJ_LOCKSTEP;
+    for (uint32_t slp = 0; slp < 100; slp++) {
+        __asm__ volatile ("nop");
+    }
     return 0;
 }

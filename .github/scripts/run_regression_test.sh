@@ -54,7 +54,7 @@ run_regression_test(){
     set -u
 
     if [[ "${DCLS_ENABLE}" ==  "1" ]]; then
-        COMMON_PARAMS="-set lockstep_enable=1 -set lockstep_regfile_enable=1 ${COMMON_PARAMS}"
+        COMMON_PARAMS="-set lockstep_enable=1 -set lockstep_regfile_enable=1 -set lockstep_delay=${DCLS_DELAY} ${COMMON_PARAMS}"
     fi
 
     COMMON_PARAMS="-set=icache_waypack=${ICACHE_WAYPACK} ${COMMON_PARAMS}"

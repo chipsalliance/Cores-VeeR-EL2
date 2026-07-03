@@ -294,14 +294,35 @@ import el2_pkg::*;
                                                                              lsu_dccm_wren_d ? end_addr_d[pt.DCCM_BITS-1:0] : stbuf_addr_any[pt.DCCM_BITS-1:0];
    assign dccm_rd_addr_lo[pt.DCCM_BITS-1:0]     = lsu_addr_d[pt.DCCM_BITS-1:0];
    assign dccm_rd_addr_hi[pt.DCCM_BITS-1:0]     = end_addr_d[pt.DCCM_BITS-1:0];
-   assign dccm_wr_data_lo[pt.DCCM_FDATA_WIDTH-1:0] = ld_single_ecc_error_r_ff ? (ld_single_ecc_error_lo_r_ff ? {sec_data_ecc_lo_r_ff[pt.DCCM_ECC_WIDTH-1:0],sec_data_lo_r_ff[pt.DCCM_DATA_WIDTH-1:0]} :
+
+   // DCCM address-XOR mask generation for the DCCM address-XOR infection feature.
+   logic [pt.DCCM_DATA_WIDTH-1:0] dccm_wr_infect_lo, dccm_wr_infect_hi;
+   logic [pt.DCCM_DATA_WIDTH-1:0] dccm_rd_infect_lo, dccm_rd_infect_hi;
+`ifdef RV_DCCM_ADDR_XOR
+   localparam int DCCM_XOR_PAD = int'(pt.DCCM_DATA_WIDTH) - 2*(int'(pt.DCCM_BITS) - 2);
+   assign dccm_wr_infect_lo = {{DCCM_XOR_PAD{1'b0}}, dccm_wr_addr_lo[pt.DCCM_BITS-1:2], dccm_wr_addr_lo[pt.DCCM_BITS-1:2]};
+   assign dccm_wr_infect_hi = {{DCCM_XOR_PAD{1'b0}}, dccm_wr_addr_hi[pt.DCCM_BITS-1:2], dccm_wr_addr_hi[pt.DCCM_BITS-1:2]};
+   assign dccm_rd_infect_lo = {{DCCM_XOR_PAD{1'b0}}, lsu_addr_m[pt.DCCM_BITS-1:2],      lsu_addr_m[pt.DCCM_BITS-1:2]};
+   assign dccm_rd_infect_hi = {{DCCM_XOR_PAD{1'b0}}, end_addr_m[pt.DCCM_BITS-1:2],      end_addr_m[pt.DCCM_BITS-1:2]};
+`else
+   assign dccm_wr_infect_lo = '0;
+   assign dccm_wr_infect_hi = '0;
+   assign dccm_rd_infect_lo = '0;
+   assign dccm_rd_infect_hi = '0;
+`endif
+
+   // DCCM address-XOR infection feature.
+   // XOR the write address on top of the data.
+   assign dccm_wr_data_lo[pt.DCCM_FDATA_WIDTH-1:0] = ({{pt.DCCM_ECC_WIDTH{1'b0}}, dccm_wr_infect_lo}) ^
+                                                     (ld_single_ecc_error_r_ff ? (ld_single_ecc_error_lo_r_ff ? {sec_data_ecc_lo_r_ff[pt.DCCM_ECC_WIDTH-1:0],sec_data_lo_r_ff[pt.DCCM_DATA_WIDTH-1:0]} :
                                                                                                                {sec_data_ecc_hi_r_ff[pt.DCCM_ECC_WIDTH-1:0],sec_data_hi_r_ff[pt.DCCM_DATA_WIDTH-1:0]}) :
                                                                                 (dma_dccm_wen ? {dma_dccm_wdata_ecc_lo[pt.DCCM_ECC_WIDTH-1:0],dma_dccm_wdata_lo[pt.DCCM_DATA_WIDTH-1:0]} :
-                                                                                                {stbuf_ecc_any[pt.DCCM_ECC_WIDTH-1:0],stbuf_data_any[pt.DCCM_DATA_WIDTH-1:0]});
-   assign dccm_wr_data_hi[pt.DCCM_FDATA_WIDTH-1:0] = ld_single_ecc_error_r_ff ? (ld_single_ecc_error_hi_r_ff ? {sec_data_ecc_hi_r_ff[pt.DCCM_ECC_WIDTH-1:0],sec_data_hi_r_ff[pt.DCCM_DATA_WIDTH-1:0]} :
+                                                                                                {stbuf_ecc_any[pt.DCCM_ECC_WIDTH-1:0],stbuf_data_any[pt.DCCM_DATA_WIDTH-1:0]}));
+   assign dccm_wr_data_hi[pt.DCCM_FDATA_WIDTH-1:0] = ({{pt.DCCM_ECC_WIDTH{1'b0}}, dccm_wr_infect_hi}) ^
+                                                     (ld_single_ecc_error_r_ff ? (ld_single_ecc_error_hi_r_ff ? {sec_data_ecc_hi_r_ff[pt.DCCM_ECC_WIDTH-1:0],sec_data_hi_r_ff[pt.DCCM_DATA_WIDTH-1:0]} :
                                                                                                                {sec_data_ecc_lo_r_ff[pt.DCCM_ECC_WIDTH-1:0],sec_data_lo_r_ff[pt.DCCM_DATA_WIDTH-1:0]}) :
                                                                                 (dma_dccm_wen ? {dma_dccm_wdata_ecc_hi[pt.DCCM_ECC_WIDTH-1:0],dma_dccm_wdata_hi[pt.DCCM_DATA_WIDTH-1:0]} :
-                                                                                                {stbuf_ecc_any[pt.DCCM_ECC_WIDTH-1:0],stbuf_data_any[pt.DCCM_DATA_WIDTH-1:0]});
+                                                                                                {stbuf_ecc_any[pt.DCCM_ECC_WIDTH-1:0],stbuf_data_any[pt.DCCM_DATA_WIDTH-1:0]}));
 
    // DCCM outputs
    assign store_byteen_m[3:0] = {4{lsu_pkt_m.store}} &
@@ -376,8 +397,12 @@ import el2_pkg::*;
 
    end
 
-   assign dccm_rdata_lo_m[pt.DCCM_DATA_WIDTH-1:0]   = dccm_rd_data_lo[pt.DCCM_DATA_WIDTH-1:0]; // for ld choose dccm_out
-   assign dccm_rdata_hi_m[pt.DCCM_DATA_WIDTH-1:0]   = dccm_rd_data_hi[pt.DCCM_DATA_WIDTH-1:0]; // for ld this is used for ecc
+   // DCCM address-XOR infection feature.
+   // XOR the read address on top of the data. If the write and read address
+   // match, the plain data is retrieved. On an address mismatch, garbled
+   // data is retrieved that ECC detects.
+   assign dccm_rdata_lo_m[pt.DCCM_DATA_WIDTH-1:0]   = dccm_rd_data_lo[pt.DCCM_DATA_WIDTH-1:0] ^ dccm_rd_infect_lo; // for ld choose dccm_out
+   assign dccm_rdata_hi_m[pt.DCCM_DATA_WIDTH-1:0]   = dccm_rd_data_hi[pt.DCCM_DATA_WIDTH-1:0] ^ dccm_rd_infect_hi; // for ld this is used for ecc
 
    assign dccm_data_ecc_lo_m[pt.DCCM_ECC_WIDTH-1:0] = dccm_rd_data_lo[pt.DCCM_FDATA_WIDTH-1:pt.DCCM_DATA_WIDTH];
    assign dccm_data_ecc_hi_m[pt.DCCM_ECC_WIDTH-1:0] = dccm_rd_data_hi[pt.DCCM_FDATA_WIDTH-1:pt.DCCM_DATA_WIDTH];

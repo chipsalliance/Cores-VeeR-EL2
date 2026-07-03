@@ -249,6 +249,17 @@ General comments:
 [^fn-error-protection-6]: For load/store accesses, the corrected data is written back to the DCCM and counted only if the load/store instruction retires (i.e., access is non-speculative and has no exception).
 [^fn-error-protection-7]: For non-speculative accesses only.
 
+## DCCM Address Infection
+
+When the DCCM address-XOR infection feature is enabled (`RV_DCCM_ADDR_XOR`, which requires [Dual-Core Lock-Step](dual-core-lock-step.md) / `RV_LOCKSTEP_ENABLE`), the DCCM write address is XORed into the data that gets stored into the DCCM.
+On a read, the DCCM read address is XORed on the data read from the DCCM.
+If both addresses match, the plain data is retrieved.
+
+If the read address does not match the write address (e.g., caused by a fault injection attack), the address does not cancel.
+As after the read XOR the ECC check happens, the mismatch is detected as an ECC error.
+
+Firmware or backdoor loaders that write the DCCM directly must apply the same address XOR.
+
 ## Core Error Counter/Threshold Registers
 
 A summary of platform-specific core error counter/threshold control/status registers in CSR space:

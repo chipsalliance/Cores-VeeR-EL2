@@ -2297,7 +2297,14 @@ $display("DCCM pre-load from %h to %h", saddr, eaddr);
 
 for(addr=saddr; addr <= eaddr; addr+=4) begin
     data = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
+`ifdef RV_DCCM_ADDR_XOR
+    // DCCM address infection (see el2_lsu_dccm_ctl.sv): the core stores
+    // (data ^ mask(word_addr)) and undoes it on read, so this backdoor loader
+    // must apply the same XOR. The ECC is computed over the true data.
+    slam_dccm_ram(addr, {riscv_ecc32(data), data ^ {{(pt.DCCM_DATA_WIDTH-2*(pt.DCCM_BITS-2)){1'b0}}, addr[pt.DCCM_BITS-1:2], addr[pt.DCCM_BITS-1:2]}});
+`else
     slam_dccm_ram(addr, data == 0 ? 0 : {riscv_ecc32(data),data});
+`endif
 end
 
 endtask
@@ -2483,6 +2490,13 @@ task dump_signature ();
             `endif
             endcase
 
+`ifdef RV_DCCM_ADDR_XOR
+            // DCCM address infection (see el2_lsu_dccm_ctl.sv): the RAM stores
+            // (data ^ mask(word_addr)) and the core undoes it on read. This
+            // backdoor read bypasses the core datapath, so un-XOR the same
+            // mask here to recover the plain data for the signature.
+            data[pt.DCCM_DATA_WIDTH-1:0] = data[pt.DCCM_DATA_WIDTH-1:0] ^ {{(pt.DCCM_DATA_WIDTH-2*(pt.DCCM_BITS-2)){1'b0}}, i[pt.DCCM_BITS-1:2], i[pt.DCCM_BITS-1:2]};
+`endif
             $fwrite(fp, "%08X\n", data[31:0]);
         end else
 `endif

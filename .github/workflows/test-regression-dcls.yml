@@ -25,6 +25,7 @@ jobs:
                "icache", "bitmanip"]
         coverage: ["all"]
         priv: ["0", "1"]
+        delay: ["0", "1", "2", "3", "4"]
         tb_extra_args: [""]
         exclude:
           # These tests require user mode
@@ -52,6 +53,7 @@ jobs:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/regression/.cache/"
       DCLS_ENABLE: "1"
+      DCLS_DELAY: $${{ matrix.delay }}
 
     steps:
       - name: Setup repository

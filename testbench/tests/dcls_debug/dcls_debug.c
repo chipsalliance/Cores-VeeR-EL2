@@ -87,7 +87,7 @@ int main () {
 
     if (boot_count == 1) {
         printf("Inject error (should trigger a trap)\n");
-        tohost = RV_MUBI_TRUE | CMD_INJ_EXT;
+        tohost = (RV_MUBI_TRUE << 8) | CMD_INJ_EXT;
     } else if (boot_count == 2) {
         if (trap_count != 1) {
             printf("ERROR: Corruption was not reported\n");
@@ -98,7 +98,7 @@ int main () {
         tohost = 1 << 8 | CMD_ENT_DBG;
 
         printf("Inject error (should be ignored)\n");
-        tohost = RV_MUBI_TRUE | CMD_INJ_EXT;
+        tohost = (RV_MUBI_TRUE << 8) | CMD_INJ_EXT;
 
         if (trap_count != 1) {
             printf("ERROR: Corruption was reported after entering debug mode\n");
@@ -108,6 +108,8 @@ int main () {
         printf("ERROR: This should have never been reached, reset was done too many times\n");
         tohost = CMD_FAIL;
     }
-
+    for (uint32_t slp = 0; slp < 100; slp++) {
+        __asm__ volatile ("nop");
+    }
     return 0;
 }

@@ -776,6 +776,7 @@ module tb_top
     logic inject_veer_in_dist, inject_lockstep_in_dist;
     logic clear_inject_in_dist;
     logic [8:0] inject_veer_in_dist_no, inject_lockstep_in_dist_no;
+    bit   at_newline = 1'b1;
 
     always @(negedge core_clk or negedge rst_l) begin
         if (rst_l == 0) begin
@@ -786,6 +787,7 @@ module tb_top
             inject_lockstep_in_dist <= '0;
             clear_inject_in_dist <= '0;
             rst_l_cmd <= '1;
+            at_newline <= 1'b1;
             inject_veer_in_dist_no <= '0;
             inject_lockstep_in_dist_no <= '0;
         `ifdef RV_LOCKSTEP_ENABLE
@@ -812,8 +814,14 @@ module tb_top
             end
             // console Monitor
             if( mailbox_data_val & mailbox_write) begin
-                $fwrite(fd,"%c", mailbox_data[7:0]);
-                $write("%c", mailbox_data[7:0]);
+                if (at_newline) begin
+                    $fwrite(fd,"[%0t ns] %c", $time, mailbox_data[7:0]);
+                    $write("[%0t ns] %c", $time, mailbox_data[7:0]);
+                end else begin
+                    $fwrite(fd,"%c", mailbox_data[7:0]);
+                    $write("%c", mailbox_data[7:0]);
+                end
+                at_newline <= (mailbox_data[7:0] == 8'ha);
             end
             // Interrupt signals control
             // data[7:0] == 0x80 - clear ext irq line index given by data[15:8]
@@ -887,7 +895,7 @@ module tb_top
             end
         `endif // RV_LOCKSTEP_ENABLE
             if(mailbox_write && (mailbox_data[7:0] == 8'h96)) begin
-                $display("Reset all");
+                $display("[%0t ns] Reset all",$time);
                 rst_l_cmd <= 8'b1;
             end
             // CPU debug enter/exit sequence
@@ -909,23 +917,23 @@ module tb_top
             end
             // ECC error injection
             if(mailbox_write && (mailbox_data[7:0] == 8'he0)) begin
-                $display("Injecting single bit ICCM error");
+                $display("[%0t ns] Injecting single bit ICCM error",$time);
                 error_injection_mode.iccm_single_bit_error <= 1'b1;
             end
             else if(mailbox_write && (mailbox_data[7:0] == 8'he1)) begin
-                $display("Injecting double bit ICCM error");
+                $display("[%0t ns] Injecting double bit ICCM error",$time);
                 error_injection_mode.iccm_double_bit_error <= 1'b1;
             end
             else if(mailbox_write && (mailbox_data[7:0] == 8'he2)) begin
-                $display("Injecting single bit DCCM error");
+                $display("[%0t ns] Injecting single bit DCCM error",$time);
                 error_injection_mode.dccm_single_bit_error <= 1'b1;
             end
             else if(mailbox_write && (mailbox_data[7:0] == 8'he3)) begin
-                $display("Injecting double bit DCCM error");
+                $display("[%0t ns] Injecting double bit DCCM error",$time);
                 error_injection_mode.dccm_double_bit_error <= 1'b1;
             end
             else if(mailbox_write && (mailbox_data[7:0] == 8'he4)) begin
-                $display("Disable ECC error injection");
+                $display("[%0t ns] Disable ECC error injection",$time);
                 error_injection_mode <= '0;
             end
             // Memory signature dump
@@ -941,35 +949,35 @@ module tb_top
                 // The reason why it's determined here is that it's on the system integrating VeeR
                 // to determine exact behavior and status report of this indicator
                     if (corruption_detected_o != el2_mubi_pkg::El2MuBiTrue) begin
-                        $display("No core corruption detected..\n");
-                        $display("TEST_FAILED");
+                        $display("[%0t ns] No core corruption detected..\n",$time);
+                        $display("[%0t ns] TEST_FAILED",$time);
                         `ifdef TB_SILENT_FAIL
                             $finish;
                         `else
                             $fatal;
                         `endif // TB_SILENT_FAIL
                     end else begin
-                        $display("Core corruption has been detected..\n");
-                        $display("TEST_PASSED");
+                        $display("[%0t ns] Core corruption has been detected..\n",$time);
+                        $display("[%0t ns] TEST_PASSED",$time);
                         $finish;
                     end
                 `else
-                    $display("DCLS feature is disabled. No corruption will be detected.\n");
-                    $display("TEST_PASSED");
+                    $display("[%0t ns] DCLS feature is disabled. No corruption will be detected.\n",$time);
+                    $display("[%0t ns] TEST_PASSED",$time);
                     $finish;
                 `endif // RV_LOCKSTEP_ENABLE
             end
             if(mailbox_write && mailbox_data[7:0] == 8'hff) begin
-                $display("TEST_PASSED");
-                $display("\nFinished : minstret = %0d, mcycle = %0d", `DEC.tlu.minstretl[31:0],`DEC.tlu.mcyclel[31:0]);
-                $display("See \"exec.log\" for execution trace with register updates..\n");
+                $display("[%0t ns] TEST_PASSED",$time);
+                $display("[%0t ns] \nFinished : minstret = %0d, mcycle = %0d",$time, `DEC.tlu.minstretl[31:0],`DEC.tlu.mcyclel[31:0]);
+                $display("[%0t ns] See \"exec.log\" for execution trace with register updates..\n",$time);
                 // OpenOCD test breaks if simulation closes the TCP connection first.
                 // This delay allows OpenOCD to close the connection before the #finish.
                 #15000;
                 $finish;
             end
             else if(mailbox_write && mailbox_data[7:0] == 8'h1) begin
-                $display("TEST_FAILED");
+                $display("[%0t ns] TEST_FAILED",$time);
                 `ifdef TB_SILENT_FAIL
                     $finish;
                 `else
@@ -2111,8 +2119,11 @@ module tb_top
         preload_iccm();
 
 `ifndef VERILATOR
-        $dumpfile("dump.vcd");
-        $dumpvars(0, tb_top);
+   `ifdef VCS_DEBUG
+       $fsdbDumpfile("dump.fsdb");
+       $fsdbDumpvars(0, tb_top);
+       $fsdbDumpMDA();
+   `endif
         rst_l = 1'b1;
         rst_l = #5 1'b0;
         rst_l = #25 1'b1;
@@ -2122,33 +2133,33 @@ module tb_top
         mpc_debug_halt_req = 1'b0;
         mpc_debug_run_req = 1'b0;
 
-        $display("halting CPU and waiting for ack");
+        $display("[%0t ns] halting CPU and waiting for ack",$time);
         i_cpu_halt_req = #5 1'b1;
         wait(o_cpu_halt_ack == 1);
-        $display("waiting for halt");
+        $display("[%0t ns] waiting for halt",$time);
         i_cpu_halt_req = 1'b0;
         wait(o_cpu_halt_status == 1'b1);
-        $display("requesting start and waiting for ack");
+        $display("[%0t ns] requesting start and waiting for ack",$time);
         i_cpu_run_req = 1'b1;
         wait(o_cpu_run_ack == 1'b1);
-        $display("waiting for run");
+        $display("[%0t ns] waiting for run",$time);
         i_cpu_run_req = 1'b0;
         wait(o_cpu_halt_status == 1'b0);
-        $display("done");
+        $display("[%0t ns] done",$time);
 
-        $display("requesting mpc halt and wating for ack");
+        $display("[%0t ns] requesting mpc halt and wating for ack",$time);
         mpc_debug_halt_req = 1'b1;
         wait(mpc_debug_halt_ack == 1'b1);
-        $display("waiting for debug halt");
+        $display("[%0t ns] waiting for debug halt",$time);
         mpc_debug_halt_req = 1'b0;
         wait(o_debug_mode_status == 1'b1);
-        $display("requesting start and waiting for ack");
+        $display("[%0t ns] requesting start and waiting for ack",$time);
         mpc_debug_run_req = 1'b1;
         wait(mpc_debug_run_ack == 1'b1);
-        $display("waiting for cpu to start");
+        $display("[%0t ns] waiting for cpu to start",$time);
         mpc_debug_run_req = 1'b0;
         wait(o_debug_mode_status == 1'b0);
-        $display("done");
+        $display("[%0t ns] done",$time);
 `endif
     end
 `ifndef VERILATOR
@@ -2794,14 +2805,14 @@ addr = 'hffff_fff0;
 saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 if ( (saddr < `RV_ICCM_SADR) || (saddr > `RV_ICCM_EADR)) return;
 `ifndef RV_ICCM_ENABLE
-    $display("********************************************************");
-    $display("ICCM preload: there is no ICCM in VeeR, terminating !!!");
-    $display("********************************************************");
+    $display("[%0t ns] ********************************************************",$time);
+    $display("[%0t ns] ICCM preload: there is no ICCM in VeeR, terminating !!!",$time);
+    $display("[%0t ns] ********************************************************",$time);
     $finish;
 `endif
 addr += 4;
 eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
-$display("ICCM pre-load from %h to %h", saddr, eaddr);
+$display("[%0t ns] ICCM pre-load from %h to %h",$time, saddr, eaddr);
 
 for(addr= saddr; addr <= eaddr; addr+=4) begin
     data = {imem.mem[addr+3],imem.mem[addr+2],imem.mem[addr+1],imem.mem[addr]};
@@ -2829,14 +2840,14 @@ addr = 'hffff_fff8;
 saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 if (saddr < `RV_DCCM_SADR || saddr > `RV_DCCM_EADR) return;
 `ifndef RV_DCCM_ENABLE
-    $display("********************************************************");
-    $display("DCCM preload: there is no DCCM in VeeR, terminating !!!");
-    $display("********************************************************");
+    $display("[%0t ns] ********************************************************",$time);
+    $display("[%0t ns] DCCM preload: there is no DCCM in VeeR, terminating !!!",$time);
+    $display("[%0t ns] ********************************************************",$time);
     $finish;
 `endif
 addr += 4;
 eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
-$display("DCCM pre-load from %h to %h", saddr, eaddr);
+$display("[%0t ns] DCCM pre-load from %h to %h",$time, saddr, eaddr);
 
 for(addr=saddr; addr <= eaddr; addr+=4) begin
     data = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
@@ -3001,7 +3012,7 @@ endfunction
 task dump_signature ();
     integer fp, i;
 
-    $display("Dumping memory signature (0x%08X - 0x%08X)...",
+    $display("[%0t ns] Dumping memory signature (0x%08X - 0x%08X)...",$time,
         mem_signature_begin,
         mem_signature_end
     );

@@ -25,13 +25,14 @@ run_regression_test(){
     # COVERAGE -
     # USER_MODE - '1' for user mode, '0' for without user mode
     # CACHE WAYPACK -
-    check_args_count $# 6
+    # SIMULATOR - (Optional) 'verilator' (default) or 'vcs'
     RESULTS_DIR=$1
     BUS=$2
     NAME=$3
     COVERAGE=$4
     USER_MODE=$5
     ICACHE_WAYPACK=$6
+    SIMULATOR=${7:-verilator}
     echo -e "${COLOR_WHITE}========== running test '${NAME}' =========${COLOR_CLEAR}"
     echo -e "${COLOR_WHITE} RESULTS_DIR    = ${RESULTS_DIR}${COLOR_CLEAR}"
     echo -e "${COLOR_WHITE} SYSTEM BUS     = ${BUS}${COLOR_CLEAR}"
@@ -39,6 +40,7 @@ run_regression_test(){
     echo -e "${COLOR_WHITE} COVERAGE       = ${COVERAGE}${COLOR_CLEAR}"
     echo -e "${COLOR_WHITE} USER_MODE      = ${USER_MODE}${COLOR_CLEAR}"
     echo -e "${COLOR_WHITE} ICACHE_WAYPACK = ${ICACHE_WAYPACK}${COLOR_CLEAR}"
+    echo -e "${COLOR_WHITE} SIMULATOR      = ${SIMULATOR}${COLOR_CLEAR}"
 
     COMMON_PARAMS="-set bitmanip_zba -set bitmanip_zbb -set bitmanip_zbc -set bitmanip_zbe -set bitmanip_zbf -set bitmanip_zbp -set bitmanip_zbr -set bitmanip_zbs -set=fpga_optimize=0"
 
@@ -94,7 +96,7 @@ run_regression_test(){
 
     # Run the test
     mkdir -p ${DIR}
-    make -j`nproc` -C ${DIR} -f $RV_ROOT/tools/Makefile verilator $EXTRA_ARGS CONF_PARAMS="${PARAMS}" TEST=${NAME} COVERAGE=${COVERAGE} 2>&1 | tee ${LOG}
+    make -j`nproc` -C ${DIR} -f $RV_ROOT/tools/Makefile ${SIMULATOR} $EXTRA_ARGS CONF_PARAMS="${PARAMS}" TEST=${NAME} COVERAGE=${COVERAGE} 2>&1 | tee ${LOG}
 }
 
 # Example usage
@@ -105,5 +107,8 @@ run_regression_test(){
 # USER_MODE=1
 # run_regression_test.sh $RESULTS_DIR $BUS $NAME $COVERAGE $USER_MODE
 
-check_args_count $# 6
+if [ "$#" -lt 6 ] || [ "$#" -gt 7 ]; then
+    echo -e "${COLOR_WHITE}Expected 6 or 7 arguments, but received $# ${COLOR_RED}FAIL${COLOR_CLEAR}"
+    exit 1
+fi
 run_regression_test "$@"

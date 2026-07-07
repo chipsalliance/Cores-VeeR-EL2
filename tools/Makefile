@@ -86,15 +86,21 @@ TEST_DIR = ${TBDIR}/asm
 HEX_DIR = ${TBDIR}/hex
 
 # Coverage reporting
-# TODO: Set flags for other tools here as well
+ifneq ("$(COVERAGE)", "")
+    FCOV_DEFINES = +define+FCOV
+endif
 ifeq ("$(COVERAGE)", "all")
     VERILATOR_COVERAGE = --coverage
+    VCS_COVERAGE = -cm line+cond+fsm+tgl+branch+assert
 else ifeq ("$(COVERAGE)", "branch")
     VERILATOR_COVERAGE = --coverage-line
+    VCS_COVERAGE = -cm branch
 else ifeq ("$(COVERAGE)", "toggle")
     VERILATOR_COVERAGE = --coverage-toggle
+    VCS_COVERAGE = -cm tgl
 else ifeq ("$(COVERAGE)", "functional")
     VERILATOR_COVERAGE = --coverage-user
+    VCS_COVERAGE = -cm assert
 else ifneq ("$(COVERAGE)", "")
     $(error Unknown COVERAGE value '$(COVERAGE)')
 endif
@@ -110,7 +116,7 @@ ifdef debug
  DEBUG_PLUS = +dumpon
  IRUN_DEBUG = -access +rc
  IRUN_DEBUG_RUN = -input ${RV_ROOT}/testbench/input.tcl
- VCS_DEBUG = -debug_access
+ VCS_DEBUG = -debug_access+r+w -debug_access+all -kdb +define+VCS_DEBUG
  VERILATOR_DEBUG = --trace
  RIVIERA_DEBUG = +access +r
 endif
@@ -205,11 +211,11 @@ verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	touch verilator-build
 
 vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
-	$(VCS) -full64 -assert svaext -sverilog +define+RV_OPENSOURCE $(ASSERT_DEFINES) \
+	$(VCS) $(VCS_DEBUG) -full64 -assert svaext -sverilog $(FCOV_DEFINES) +define+RV_OPENSOURCE $(ASSERT_DEFINES) \
 	  +error+500 +incdir+${RV_ROOT}/design/lib \
 	  +incdir+${RV_ROOT}/design/include ${BUILD_DIR}/common_defines.vh \
 	  +incdir+$(BUILD_DIR)  +libext+.v $(defines) -CFLAGS "${CFLAGS}" \
-	  -cm_hier $(CM_HIER_FILE) \
+	  -cm_hier $(CM_HIER_FILE) $(VCS_COVERAGE) -timescale=1ns/10ps \
 	  -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -l vcs.log
 	touch vcs-build
 
@@ -254,7 +260,7 @@ irun: program.hex irun-build
 	  -snapshot ${snapshot} -r $(snapshot) $(IRUN_DEBUG_RUN) $(profile)
 
 vcs: program.hex vcs-build
-	./simv $(DEBUG_PLUS) +vcs+lic+wait  -l vcs.log
+	./simv $(DEBUG_PLUS) +vcs+lic+wait  -a vcs.log
 
 vlog: program.hex ${TBFILES} ${BUILD_DIR}/defines.h
 	$(VLOG) -l vlog.log -sv -mfcu +incdir+${BUILD_DIR}+${RV_ROOT}/design/include+${RV_ROOT}/design/lib -ccflags "${CFLAGS}"\

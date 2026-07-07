@@ -51,9 +51,9 @@ for NAME in ${TESTS[@]}; do
         SUMMARY_ROWS+=("$(printf "%-30s | %-10s | ${COLOR_RED}%-8s${COLOR_CLEAR} | %s" "${NAME}" "${COVERAGE}" "FAILED" "${DIR}")")
     else
         if [ "${SIMULATOR}" == "verilator" ]; then
-            # Copy and convert coverage data
-            cp ${DIR}/coverage.dat ${RESULTS_DIR}/coverage_${NAME}_${COVERAGE}.dat
-            verilator_coverage --write-info ${RESULTS_DIR}/coverage_${NAME}_${COVERAGE}.info ${RESULTS_DIR}/coverage_${NAME}_${COVERAGE}.dat
+                # Copy and convert coverage data
+                cp ${DIR}/coverage.dat ${RESULTS_DIR}/coverage_${NAME}_${COVERAGE}.dat
+                verilator_coverage --write-info ${RESULTS_DIR}/coverage_${NAME}_${COVERAGE}.info ${RESULTS_DIR}/coverage_${NAME}_${COVERAGE}.dat
         fi
         echo -e "${COLOR_WHITE}Test '${NAME}' ${COLOR_GREEN}SUCCEEDED${COLOR_CLEAR}"
         SUMMARY_ROWS+=("$(printf "%-30s | %-10s | ${COLOR_GREEN}%-8s${COLOR_CLEAR} | %s" "${NAME}" "${COVERAGE}" "PASSED" "${DIR}")")

@@ -7,8 +7,6 @@ obj_dir
 *.exe
 *.swp
 *.sym
-*.fsdb
-ucli.key
 verilator-build
 program.hex
 snapshots

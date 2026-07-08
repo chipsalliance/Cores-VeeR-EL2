@@ -115,8 +115,10 @@ EXTRA_VEER_CONFIG="-set=dccm_size=32" MODULE=test_readwrite make
 
 ## Directory Structure
 
-Each subdirectory in this directory represents a block under test (e.g., `dccm`, `dec`, `exu_alu`). They typically contain:
-*   `Makefile`: The block-specific Makefile.
-*   `testbench.py`: The PyUVM testbench environment (drivers, monitors, scoreboards).
-*   `test_*.py`: The test cases.
-*   `config.vlt`: Verilator configuration file (if needed).
+*   `common/`: provides shared, reusable Python verification utilities and components that can be imported across all block-level testbenches.
+*   Block subdirectories (e.g., `dccm`, `dec`, `exu_alu`): Each subdirectory represents a block under test. They typically contain:
+    *   `Makefile`: The block-specific Makefile.
+    *   `testbench.py`: The PyUVM testbench environment (drivers, monitors, scoreboards).
+    *   `test_*.py`: The test cases.
+    *   `config.vlt`: Verilator configuration file (if needed).
+

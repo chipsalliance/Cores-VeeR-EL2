@@ -466,6 +466,13 @@ import el2_pkg::*;
    input  logic [31:0]             recovery_gpr_wrdata, // GPR recovery backdoor write data
    input  logic [ 4:0]             recovery_gpr_rdaddr, // GPR recovery backdoor read address
    output logic [31:0]             recovery_gpr_rddata, // GPR recovery backdoor read data
+
+   input  el2_mubi_pkg::el2_mubi_t recovery_csr_en,     // Enable the CSR state recovery backdoor
+   input  logic                    recovery_csr_wen,    // CSR recovery backdoor write enable
+   input  logic [11:0]             recovery_csr_wraddr, // CSR recovery backdoor write address
+   input  logic [31:0]             recovery_csr_wrdata, // CSR recovery backdoor write data
+   input  logic [11:0]             recovery_csr_rdaddr, // CSR recovery backdoor read address
+   output logic [31:0]             recovery_csr_rddata, // CSR recovery backdoor read data
 `endif
 
    input logic [pt.PIC_TOTAL_INT:1]           extintsrc_req,

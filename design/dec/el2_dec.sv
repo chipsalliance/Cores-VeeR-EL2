@@ -337,6 +337,13 @@ module el2_dec
     input  logic [31:0]             recovery_gpr_wrdata, // GPR recovery backdoor write data
     input  logic [ 4:0]             recovery_gpr_rdaddr, // GPR recovery backdoor read address
     output logic [31:0]             recovery_gpr_rddata, // GPR recovery backdoor read data
+
+    input  el2_mubi_pkg::el2_mubi_t recovery_csr_en,     // Enable the CSR state recovery backdoor
+    input  logic                    recovery_csr_wen,    // CSR recovery backdoor write enable
+    input  logic [11:0]             recovery_csr_wraddr, // CSR recovery backdoor write address
+    input  logic [31:0]             recovery_csr_wrdata, // CSR recovery backdoor write data
+    input  logic [11:0]             recovery_csr_rdaddr, // CSR recovery backdoor read address
+    output logic [31:0]             recovery_csr_rddata, // CSR recovery backdoor read data
 `endif
 
     output logic dec_tlu_i0_commit_cmt,  // committed i0 instruction
@@ -477,13 +484,38 @@ module el2_dec
       assign regfile.tlu.mrac      = regfile_if.tlu.mrac;
 `endif
 
+  // CSR access backdoor for state retrieval and restoration. Requires the core
+  // to be halted to operate!
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+  logic        dec_csr_wen_muxed;
+  logic [11:0] dec_csr_wraddr_muxed;
+  logic [31:0] dec_csr_wrdata_muxed;
+  logic [11:0] dec_csr_rdaddr_muxed;
+  logic [31:0] dec_csr_rddata_muxed;
+
+  assign dec_csr_wen_muxed    = el2_mubi_pkg::mubi_check_true(recovery_csr_en) ? recovery_csr_wen    : dec_csr_wen_r;
+  assign dec_csr_wrdata_muxed = el2_mubi_pkg::mubi_check_true(recovery_csr_en) ? recovery_csr_wrdata : dec_csr_wrdata_r;
+  assign dec_csr_wraddr_muxed = el2_mubi_pkg::mubi_check_true(recovery_csr_en) ? recovery_csr_wraddr : dec_csr_wraddr_r;
+
+  assign dec_csr_rdaddr_muxed = el2_mubi_pkg::mubi_check_true(recovery_csr_en) ? recovery_csr_rdaddr : dec_csr_rdaddr_d;
+  assign dec_csr_rddata_d     = dec_csr_rddata_muxed; // No need to mux data
+  assign recovery_csr_rddata  = dec_csr_rddata_muxed;
+`endif
+
   el2_dec_tlu_ctl #(.pt(pt)
   ) tlu (
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
-      .regfile(regfile_if.veer_tlu_rf),
+    .regfile(regfile_if.veer_tlu_rf),
 `endif
-      .*);
-
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    .dec_csr_wen_r    (dec_csr_wen_muxed),
+    .dec_csr_wraddr_r (dec_csr_wraddr_muxed),
+    .dec_csr_wrdata_r (dec_csr_wrdata_muxed),
+    .dec_csr_rdaddr_d (dec_csr_rdaddr_muxed),
+    .dec_csr_rddata_d (dec_csr_rddata_muxed),
+`endif
+    .*
+  );
 
   el2_dec_gpr_ctl #(
       .pt(pt)

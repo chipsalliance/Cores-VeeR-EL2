@@ -895,6 +895,14 @@ import el2_pkg::*;
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
                                 .regfile(regfile.veer_rf_src),
 `endif
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+                                .recovery_csr_en     (el2_mubi_pkg::El2MuBiTrue), // TODO: connect to TMR logic
+                                .recovery_csr_wen    ('0),
+                                .recovery_csr_wraddr ('0),
+                                .recovery_csr_wrdata ('0),
+                                .recovery_csr_rdaddr ('0),
+                                .recovery_csr_rddata (),
+`endif
                                 .*
                                 );
 

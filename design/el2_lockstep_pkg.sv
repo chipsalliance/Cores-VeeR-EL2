@@ -47,8 +47,6 @@ package el2_lockstep_pkg;
     logic                                 ic_rd_en;
     logic [pt.ICACHE_BANKS_WAY-1:0][70:0] ic_wr_data;
     logic [70:0]                          ic_debug_wr_data;
-    logic [63:0]                          ic_premux_data;
-    logic                                 ic_sel_premux_data;
     logic [pt.ICACHE_INDEX_HI:3]          ic_debug_addr;
     logic                                 ic_debug_rd_en;
     logic                                 ic_debug_wr_en;

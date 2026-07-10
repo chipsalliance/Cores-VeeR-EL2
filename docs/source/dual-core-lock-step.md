@@ -1158,15 +1158,15 @@ Error is injected by asserting the `corruption_detected_o` output signal even if
   - **Description**
 * - disable_corruption_detection_i
   - input
-  - 1
+  - `el2_mubi_t`
   - Disable all error injection features
 * - lockstep_err_injection_en_i
   - input
-  - 1
+  - `el2_mubi_t`
   - Activate an error injection to the Shadow Core
 * - corruption_detected_o
   - output
-  - 1
+  - `el2_mubi_t`
   - Indicate that a Shadow Core detected an error (corruption in comparison to the Main Core)
 :::
 

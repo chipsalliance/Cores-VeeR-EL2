@@ -179,8 +179,6 @@ import el2_pkg::*;
    output logic                      iccm_dma_sb_error,      // Single Bit ECC error from a DMA access
    output logic [1:0]                ic_fetch_val_f,         // valid bytes for fetch. To the Aligner.
    output logic [31:0]               ic_data_f,              // Data read from Icache or ICCM. To the Aligner.
-   output logic [63:0]               ic_premux_data,         // Premuxed data to be muxed with Icache data
-   output logic                      ic_sel_premux_data,     // Select premux data.
 
 /////  Debug
    input  el2_cache_debug_pkt_t     dec_tlu_ic_diag_pkt ,       // Icache/tag debug read/write packet
@@ -293,6 +291,8 @@ import el2_pkg::*;
    logic           sel_mb_status_addr ;
    logic [63:0]    ic_final_data;
    logic [63:0]                    ic_rd_data_aligned;
+   logic [63:0]                    ic_premux_data;         // Premuxed data to be muxed with Icache data (DCLS-internal)
+   logic                           ic_sel_premux_data;     // Select premux data (DCLS-internal)
    logic [pt.ICACHE_BANKS_WAY-1:0] ic_eccerr_int;
    logic [pt.ICACHE_BANKS_WAY-1:0] ic_parerr_int;
 

@@ -971,9 +971,6 @@ Refer to {ref}`tab-shadow-core-tracked-signals` for list of ports routed to the 
 * - ic_debug_wr_en
   -
   -
-* - ic_premux_data
-  -
-  -
 * - ic_rd_addr_lo
   -
   -
@@ -990,9 +987,6 @@ Refer to {ref}`tab-shadow-core-tracked-signals` for list of ports routed to the 
   -
   -
 * - ic_rw_addr
-  -
-  -
-* - ic_sel_premux_data
   -
   -
 * - ic_tag_perr

@@ -37,8 +37,6 @@ import el2_pkg::*;
       input logic                                   ic_debug_wr_en,     // Icache debug wr
       input logic                                   ic_debug_tag_array, // Debug tag array
       input logic [pt.ICACHE_NUM_WAYS-1:0]          ic_debug_way,       // Debug way. Rd or Wr.
-      input logic [63:0]                            ic_premux_data,     // Premux data to be muxed with each way of the Icache.
-      input logic                                   ic_sel_premux_data, // Select the pre_muxed data
 
       input  logic [pt.ICACHE_BANKS_WAY-1:0][70:0]  ic_wr_data,         // Data to fill to the Icache. With ECC
       output logic [141:0]                          ic_rd_data ,        // Raw way-muxed 142-bit ECC-protected word pair. F2 stage.
@@ -136,8 +134,6 @@ import el2_pkg::*;
       input logic                            ic_debug_wr_en,      // Icache debug wr
       input logic                            ic_debug_tag_array,  // Debug tag array
       input logic [pt.ICACHE_NUM_WAYS-1:0]   ic_debug_way,        // Debug way. Rd or Wr.
-      input logic [63:0]                     ic_premux_data,      // Premux data to be muxed with each way of the Icache.
-      input logic                            ic_sel_premux_data,  // Select the pre_muxed data
 
       input logic [pt.ICACHE_NUM_WAYS-1:0]ic_rd_hit,
       el2_mem_if.veer_icache_data         icache_export,

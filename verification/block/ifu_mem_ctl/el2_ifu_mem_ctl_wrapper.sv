@@ -157,8 +157,6 @@ module el2_ifu_mem_ctl_wrapper
     output logic iccm_dma_sb_error,  // Single Bit ECC error from a DMA access
     output logic [1:0] ic_fetch_val_f,  // valid bytes for fetch. To the Aligner.
     output logic [31:0] ic_data_f,  // Data read from Icache or ICCM. To the Aligner.
-    output logic [63:0] ic_premux_data,  // Premuxed data to be muxed with Icache data
-    output logic ic_sel_premux_data,  // Select premux data.
 
     /////  Debug
     // Icache/tag debug read/write packet

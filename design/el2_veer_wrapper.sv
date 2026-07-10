@@ -504,9 +504,6 @@ import el2_pkg::*;
    logic [70:0]  ic_debug_wr_data;                  // Debug wr cache.
 
 
-   logic [63:0]  ic_premux_data;
-   logic         ic_sel_premux_data;
-
    // ICCM ports
    logic [pt.ICCM_BITS-1:1]    iccm_rw_addr;
    logic           iccm_wren;

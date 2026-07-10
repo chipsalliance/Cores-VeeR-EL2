@@ -287,8 +287,6 @@ interface el2_veer_lockstep_cov_if
         `SINGLE_BIN_FOR(ic_rd_en)
         `SINGLE_BIN_FOR(ic_wr_data)
         `SINGLE_BIN_FOR(ic_debug_wr_data)
-        `SINGLE_BIN_FOR(ic_premux_data)
-        `SINGLE_BIN_FOR(ic_sel_premux_data)
         `SINGLE_BIN_FOR(ic_debug_addr)
         `SINGLE_BIN_FOR(ic_debug_rd_en)
         `SINGLE_BIN_FOR(ic_debug_wr_en)

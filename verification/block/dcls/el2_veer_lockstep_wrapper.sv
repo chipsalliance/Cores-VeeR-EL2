@@ -117,8 +117,6 @@ module el2_veer_lockstep_wrapper
   logic [                         70:0] ic_debug_rd_data ;        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
   logic [25:0] ictag_debug_rd_data;  // Debug icache tag.
   logic [70:0] ic_debug_wr_data;  // Debug wr cache.
-  logic [63:0] ic_premux_data;  // Premux data to be muxed with each way of the Icache.
-  logic ic_sel_premux_data;  // Select premux data
 
 
   logic [pt.ICACHE_INDEX_HI:3] ic_debug_addr;  // Read/Write addresss to the Icache.

@@ -753,22 +753,22 @@ module el2_veer_lockstep
   assign main_core_outputs.dccm_ecc_double_error = dccm_ecc_double_error;
 
   // Latch the debug state
-  logic debug_mode_status_latch;
+  el2_mubi_t debug_mode_status_latch;
   el2_mubi_t dbg_detected;
 
   always_ff @(posedge clk or negedge rst_l) begin
     if (~rst_l) begin
-      debug_mode_status_latch <= 1'b0;
+      debug_mode_status_latch <= El2MuBiFalse;
     end else begin
       if (o_debug_mode_status) begin
-        debug_mode_status_latch <= 1'b1;
+        debug_mode_status_latch <= El2MuBiTrue;
       end else begin
         debug_mode_status_latch <= debug_mode_status_latch;
       end
     end
   end
 
-  assign dbg_detected = mubi_from_bool(debug_mode_status_latch);
+  assign dbg_detected = debug_mode_status_latch;
 
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
 `endif

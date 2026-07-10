@@ -311,6 +311,13 @@ module el2_dec_wrapper
     input  logic [ 4:0] recovery_gpr_rdaddr, // GPR recovery backdoor read address
     output logic [31:0] recovery_gpr_rddata, // GPR recovery backdoor read data
 
+    input  logic        recovery_csr_en,     // Enable the CSR state recovery backdoor
+    input  logic        recovery_csr_wen,    // CSR recovery backdoor write enable
+    input  logic [11:0] recovery_csr_wraddr, // CSR recovery backdoor write address
+    input  logic [31:0] recovery_csr_wrdata, // CSR recovery backdoor write data
+    input  logic [11:0] recovery_csr_rdaddr, // CSR recovery backdoor read address
+    output logic [31:0] recovery_csr_rddata, // CSR recovery backdoor read data
+
     output logic dec_tlu_i0_commit_cmt,  // committed i0 instruction
     // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
     /*pragma coverage off*/
@@ -343,6 +350,7 @@ module el2_dec_wrapper
   el2_dec dut (
 `ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
     .recovery_gpr_en(el2_mubi_pkg::mubi_from_bool(recovery_gpr_en)),
+    .recovery_csr_en(el2_mubi_pkg::mubi_from_bool(recovery_csr_en)),
 `endif
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
     .regfile(regfile.veer_rf_src),

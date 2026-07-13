@@ -236,7 +236,9 @@ The rules for instruction fetch and load/store accesses to core-local memories a
 1. An instruction fetch access to a region
     1. containing one or more ICCM sub-region(s)causes an exception if
         1. the access is not completely within the ICCM sub-region, or
-        1. the boundary of an ICCM to a non-ICCM sub-region and vice versa is crossed, even if the region contains a DCCM/PIC memory-mapped control register sub-region.
+        1. the boundary of an ICCM to a non-ICCM sub-region and vice versa is crossed,
+
+        even if the region contains a DCCM/PIC memory-mapped control register sub-region.
     1. not containing an ICCM sub-region goes out to the system bus, even if the region contains a DCCM/PIC memory-mapped control register sub-region.
 
 1. A load/store access to a region
@@ -244,7 +246,11 @@ The rules for instruction fetch and load/store accesses to core-local memories a
         1. the access is not completely within the DCCM/PIC memory-mapped control register subregion, or
         1. the boundary of
             1. a DCCM to a non-DCCM sub-region and vice versa, or
-            1. a PIC memory-mapped control register sub-region is crossed, even if the region contains an ICCM sub-region.
+            1. a PIC memory-mapped control register sub-region
+
+            is crossed,
+
+          even if the region contains an ICCM sub-region.
     1. not containing a DCCM/PIC memory-mapped control register sub-region goes out to the system bus, even if the region contains an ICCM sub-region.
 
 ### Core-Local / D-Bus Access Prediction

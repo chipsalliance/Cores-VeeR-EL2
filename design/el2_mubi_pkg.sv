@@ -6,6 +6,8 @@ package el2_mubi_pkg;
   // doesn't apply any encoding to the logic
 `ifdef RV_LOCKSTEP_ENABLE
   parameter int El2MuBiWidth = `RV_MUBI_WIDTH;
+`elsif RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+  parameter int El2MuBiWidth = `RV_MUBI_WIDTH;
 `else
   parameter int El2MuBiWidth = 1;
 `endif
@@ -13,6 +15,9 @@ package el2_mubi_pkg;
   typedef logic [El2MuBiWidth-1:0] el2_mubi_t;
 
 `ifdef RV_LOCKSTEP_ENABLE
+  parameter el2_mubi_t El2MuBiTrue = `RV_MUBI_TRUE;
+  parameter el2_mubi_t El2MuBiFalse = `RV_MUBI_FALSE;
+`elsif RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
   parameter el2_mubi_t El2MuBiTrue = `RV_MUBI_TRUE;
   parameter el2_mubi_t El2MuBiFalse = `RV_MUBI_FALSE;
 `else

@@ -15,6 +15,9 @@ CM_FILE      = cm.cfg
 EXTRA_ARGS = -I$(SRCDIR)/include/
 
 VERILOG_SOURCES  = \
+    $(SRCDIR)/lib/el2_assert.sv \
+    $(SRCDIR)/lib/el2_regfile_if.sv \
+    $(SRCDIR)/el2_mubi_pkg.sv \
     $(TEST_DIR)/el2_dec_wrapper.sv \
     $(SRCDIR)/dec/el2_dec.sv \
     $(SRCDIR)/dec/el2_dec_decode_ctl.sv \

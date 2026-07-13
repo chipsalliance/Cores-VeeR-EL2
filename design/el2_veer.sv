@@ -459,6 +459,14 @@ import el2_pkg::*;
    // Register file
    el2_regfile_if.veer_rf_src regfile,
 `endif
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+   input  el2_mubi_pkg::el2_mubi_t recovery_gpr_en,     // Enable the GPR state recovery
+   input  logic                    recovery_gpr_wen,    // GPR recovery backdoor write enable
+   input  logic [ 4:0]             recovery_gpr_wraddr, // GPR recovery backdoor write address
+   input  logic [31:0]             recovery_gpr_wrdata, // GPR recovery backdoor write data
+   input  logic [ 4:0]             recovery_gpr_rdaddr, // GPR recovery backdoor read address
+   output logic [31:0]             recovery_gpr_rddata, // GPR recovery backdoor read data
+`endif
 
    input logic [pt.PIC_TOTAL_INT:1]           extintsrc_req,
    input logic                   timer_int,

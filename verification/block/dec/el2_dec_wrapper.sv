@@ -304,6 +304,13 @@ module el2_dec_wrapper
     output logic dec_tlu_dccm_clk_override,   // override DCCM clock domain gating
     output logic dec_tlu_icm_clk_override,    // override ICCM clock domain gating
 
+    input  logic        recovery_gpr_en,     // Enable the GPR state recovery
+    input  logic        recovery_gpr_wen,    // GPR recovery backdoor write enable
+    input  logic [ 4:0] recovery_gpr_wraddr, // GPR recovery backdoor write address
+    input  logic [31:0] recovery_gpr_wrdata,  // GPR recovery backdoor write data
+    input  logic [ 4:0] recovery_gpr_rdaddr, // GPR recovery backdoor read address
+    output logic [31:0] recovery_gpr_rddata, // GPR recovery backdoor read data
+
     output logic dec_tlu_i0_commit_cmt,  // committed i0 instruction
     // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
     /*pragma coverage off*/
@@ -329,5 +336,17 @@ module el2_dec_wrapper
   assign i0_brp = '0;
   assign lsu_error_pkt_r = '0;
 
-  el2_dec dut (.*);
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+    el2_regfile_if regfile ();
+`endif
+
+  el2_dec dut (
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    .recovery_gpr_en(el2_mubi_pkg::mubi_from_bool(recovery_gpr_en)),
+`endif
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+    .regfile(regfile.veer_rf_src),
+`endif
+    .*
+  );
 endmodule

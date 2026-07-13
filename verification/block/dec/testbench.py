@@ -64,7 +64,8 @@ def log_mismatch_error(logger, name, expected, got):
 
 
 csr_list = [getattr(csrs, mod) for mod in dir(csrs) if isinstance(getattr(csrs, mod), csrs.CSR)]
-CSR_OPCODE = 0b1110011
+CSR_OPCODE  = 0b1110011
+ADDI_OPCODE = 0b0010011
 
 
 class Funct3(IntEnum):
@@ -74,9 +75,10 @@ class Funct3(IntEnum):
     CSRRWI = 0b101
     CSRRSI = 0b110
     CSRRCI = 0b111
+    ZERO   = 0b000
 
 
-def csr_access_inst(csr, rs1, funct3, rd, opcode):
+def i_type_inst(csr, rs1, funct3, rd, opcode):
     csr_mask = (1 << 13) - 1
     rs1_mask = (1 << 6) - 1
     funct3_mask = (1 << 4) - 1
@@ -97,7 +99,7 @@ class ReadCSRInst:
     funct3: Funct3 = Funct3.CSRRS
 
     def encode(self):
-        return csr_access_inst(self.csr, 0, self.funct3, 0, CSR_OPCODE)
+        return i_type_inst(self.csr, 0, self.funct3, 0, CSR_OPCODE)
 
 
 @dataclass
@@ -106,7 +108,25 @@ class WriteCSRInst:
     funct3: Funct3 = Funct3.CSRRW
 
     def encode(self):
-        return csr_access_inst(self.csr, 0, self.funct3, 0, CSR_OPCODE)
+        return i_type_inst(self.csr, 0, self.funct3, 0, CSR_OPCODE)
+
+
+@dataclass
+class ReadGPRInst:
+    gpr: int = 0
+    funct3: Funct3 = Funct3.ZERO
+
+    def encode(self):
+        return i_type_inst(0, self.gpr, self.funct3, 0, ADDI_OPCODE)
+
+
+@dataclass
+class WriteGPRInst:
+    gpr: int = 0
+    funct3: Funct3 = Funct3.ZERO
+
+    def encode(self):
+        return i_type_inst(0, 0, self.funct3, self.gpr, ADDI_OPCODE)
 
 
 def randint(width=32):
@@ -124,6 +144,9 @@ class DecInputItem(uvm_sequence_item):
         pic_claimid=0,
         exu_i0_result_x=0,
         ifu_ic_debug_rd_data=0,
+        gpr_addr=0,
+        gpr_data=0,
+        gpr_oper=None,
         csrw_instr=0,
         csrr_instr=0,
         csr_addr=0,
@@ -136,6 +159,9 @@ class DecInputItem(uvm_sequence_item):
         self.csr_addr = csr_addr
         self.csrw_instr = csrw_instr
         self.csrr_instr = csrr_instr
+        self.gpr_addr = gpr_addr
+        self.gpr_data = gpr_data
+        self.gpr_oper = gpr_oper
         self.pic_pl = pic_pl
         self.pic_claimid = pic_claimid
         self.ifu_ic_debug_rd_data = ifu_ic_debug_rd_data
@@ -209,6 +235,10 @@ class DecInputItem(uvm_sequence_item):
             self.csr_addr = csrs.MEICIDPL
             self.csrw_instr = WriteCSRInst(self.csr_addr).encode()
             self.csrr_instr = ReadCSRInst(self.csr_addr).encode()
+        elif test == "recovery_gpr_access":
+            self.gpr_addr = random.randint(0, 31)
+            self.gpr_data = random.range(1 << 32) if self.gpr_addr != 0 else 0
+            self.gpr_oper = random.choice(["wr_front", "wr_back", "rd_front", "rd_back"])
 
 
 class DecOutputItem(uvm_sequence_item):
@@ -224,6 +254,9 @@ class DecOutputItem(uvm_sequence_item):
         dec_tlu_meihap=0,
         trigger_pkt_any=TriggerAnyPktT(),
         ifu_ic_debug_rd_data=0,
+        gpr_addr=0,
+        gpr_data=0,
+        gpr_oper=None,
     ):
         super().__init__("DecOutputItem")
         self.csrr_instr = csrr_instr
@@ -232,6 +265,9 @@ class DecOutputItem(uvm_sequence_item):
         self.dec_tlu_meihap = dec_tlu_meihap
         self.trigger_pkt_any = trigger_pkt_any
         self.ifu_ic_debug_rd_data = ifu_ic_debug_rd_data
+        self.gpr_addr = gpr_addr
+        self.gpr_data = gpr_data
+        self.gpr_oper = gpr_oper
 
 
 # ==============================================================================
@@ -267,6 +303,47 @@ class DecDriver(uvm_driver):
         self.dut.ifu_i0_valid.value = 0
         await RisingEdge(self.dut.clk)
         self.dut.exu_i0_result_x.value = 0
+
+    async def read_gpr(self, instr):
+        self.dut.ifu_i0_valid.value = 0
+        await RisingEdge(self.dut.clk)
+        self.dut.ifu_i0_valid.value = 1
+        self.dut.ifu_i0_instr.value = instr
+        await RisingEdge(self.dut.clk)
+        self.dut.ifu_i0_valid.value = 0
+        self.dut.ifu_i0_instr.value = 0
+
+    async def write_gpr(self, instr, data):
+        self.dut.ifu_i0_valid.value = 0
+        await RisingEdge(self.dut.clk)
+        self.dut.ifu_i0_valid.value = 1
+        self.dut.ifu_i0_instr.value = instr
+        await RisingEdge(self.dut.clk)
+        self.dut.ifu_i0_instr.value = 0
+        self.dut.exu_i0_result_x.value = data
+        self.dut.ifu_i0_valid.value = 0
+        await RisingEdge(self.dut.clk)
+        self.dut.exu_i0_result_x.value = 0
+
+    async def read_gpr_recovery(self, addr):
+        await RisingEdge(self.dut.clk)
+        self.dut.recovery_gpr_en.value = 1
+        self.dut.recovery_gpr_rdaddr.value = addr
+        await RisingEdge(self.dut.clk)
+        data = self.dut.recovery_gpr_rddata.value
+        self.dut.recovery_gpr_en.value = 0
+
+    async def write_gpr_recovery(self, addr, data):
+        await RisingEdge(self.dut.clk)
+        self.dut.recovery_gpr_en.value = 1
+        self.dut.recovery_gpr_wen.value = 1
+        self.dut.recovery_gpr_wraddr.value = addr
+        self.dut.recovery_gpr_wrdata.value = data
+        await RisingEdge(self.dut.clk)
+        # Disable wren and drive random data to check if its honored
+        self.dut.recovery_gpr_en.value = 0
+        self.dut.recovery_gpr_wen.value = 0
+        self.dut.recovery_gpr_wrdata.value = random.randrange(1 << 32)
 
     async def run_phase(self):
         while True:
@@ -314,6 +391,20 @@ class DecDriver(uvm_driver):
                     await ClockCycles(self.dut.clk, 2)
                     await self.read_csr(it.csrr_instr)
                     await RisingEdge(self.dut.clk)
+                elif test == "recovery_gpr_access":
+                    match it.gpr_oper:
+                        case "wr_front":
+                            await self.write_gpr(WriteGPRInst(it.gpr_addr).encode(), it.gpr_data)
+                        case "rd_front":
+                            await self.read_gpr(ReadGPRInst(it.gpr_addr).encode())
+                        case "wr_back":
+                            await self.write_gpr_recovery(it.gpr_addr, it.gpr_data)
+                        case "rd_back":
+                            await self.read_gpr_recovery(it.gpr_addr)
+                        case _:
+                            raise RuntimeError("Unknown GPR oper '{}'".format(it.gpr_oper))
+                else:
+                    raise RuntimeError("Unknown test '{}'".format(test))
             else:
                 raise RuntimeError("Unknown item '{}'".format(type(it)))
 
@@ -399,6 +490,21 @@ class DecInputMonitor(uvm_component):
                 exu_i0_result_x = int(self.dut.exu_i0_result_x.value)
                 await RisingEdge(self.dut.ifu_i0_valid)
                 self.ap.write(DecInputItem(csr_addr=csr_addr, exu_i0_result_x=exu_i0_result_x))
+            elif test == "recovery_gpr_access":
+                await RisingEdge(self.dut.clk)
+                # Backdoor access
+                if self.dut.recovery_gpr_en.value and self.dut.recovery_gpr_wen.value:
+                    addr = int(self.dut.recovery_gpr_wraddr.value)
+                    data = int(self.dut.recovery_gpr_wrdata.value)
+                    self.ap.write(DecInputItem(gpr_addr=addr, gpr_data=data, gpr_oper="wr_back"))
+                # Frontdoor access
+                elif self.dut.ifu_i0_valid.value:
+                    func = (int(self.dut.ifu_i0_instr.value) >> 12) & 0x7
+                    dst_addr =  (int(self.dut.ifu_i0_instr.value) >> 7) & 0x1f
+                    if func == 0 and dst_addr != 0: # ZERO
+                        await RisingEdge(self.dut.clk)
+                        data = int(self.dut.exu_i0_result_x.value)
+                        self.ap.write(DecInputItem(gpr_addr=dst_addr, gpr_oper="wr_front"))
 
 
 class DecOutputMonitor(uvm_component):
@@ -474,6 +580,19 @@ class DecOutputMonitor(uvm_component):
                         dec_csr_rddata_d=dec_csr_rddata_d,
                     )
                 )
+            elif test == "recovery_gpr_access":
+                await RisingEdge(self.dut.clk)
+                if not self.dut.recovery_gpr_en.value and self.dut.dec_i0_rs1_en_d.value:
+                    src_addr =  (int(self.dut.ifu_i0_instr.value) >> 15) & 0x1f
+                    func = (int(self.dut.ifu_i0_instr.value) >> 12) & 0x7
+                    if func == 0 and src_addr != 0: # ZERO
+                        data = int(self.dut.gpr_i0_rs1_d.value)
+                        self.ap.write(DecOutputItem(gpr_addr=src_addr, gpr_data=data, gpr_oper="rd_front"))
+                elif self.dut.recovery_gpr_en.value and self.dut.recovery_gpr_wen.value == 0:
+                    addr = int(self.dut.recovery_gpr_rdaddr.value)
+                    data = int(self.dut.recovery_gpr_rddata.value)
+                    self.ap.write(DecOutputItem(gpr_addr=addr, gpr_data=data, gpr_oper="rd_back"))
+
 
 
 # ==============================================================================
@@ -516,6 +635,10 @@ class DecScoreboard(uvm_component):
                 break
 
             if not got_inp and not got_out:
+                if getattr(self, "unmatched_read", None) is not None:
+                    self.passed = len(self.unmatched_read) == 0 if self.passed else False
+                if getattr(self, "unmatched_write", None) is not None:
+                    self.passed = len(self.unmatched_write) == 0 if self.passed else False
                 break
 
             if self.passed is None:
@@ -639,6 +762,44 @@ class DecScoreboard(uvm_component):
                     log_mismatch_error(self.logger, f"reg_val[{hex(csr)}]", reg_val_i, reg_val_o)
                     self.passed = False
 
+            elif test == "recovery_gpr_access":
+                if getattr(self, "unmatched_read", None) is None:
+                    self.unmatched_read = {}
+                if getattr(self, "unmatched_write", None) is None:
+                    self.unmatched_write = {}
+                if item_inp.gpr_addr not in self.unmatched_read:
+                    if item_inp.gpr_addr not in self.unmatched_write:
+                        self.unmatched_write[item_inp.gpr_addr] = []
+                    self.unmatched_write[item_inp.gpr_addr].append(item_inp.gpr_data)
+                else:
+                    if item_inp.gpr_data != self.unmatched_read[item_inp.gpr_addr][0]:
+                        log_mismatch_error(
+                            self.logger,
+                            f"gp_reg_val[{hex(item_inp.gpr_addr)}]",
+                            item_inp.gpr_data,
+                            self.unmatched_read[item_inp.gpr_addr]
+                        )
+                        self.passed = False
+                    self.unmatched_read[item_inp.gpr_addr] = self.unmatched_read[item_inp.gpr_addr][1:]
+                    if len(self.unmatched_read[item_inp.gpr_addr]) == 0:
+                        del self.unmatched_read[item_inp.gpr_addr]
+                if item_out.gpr_addr not in self.unmatched_write:
+                    if item_out.gpr_addr not in self.unmatched_read:
+                        self.unmatched_read[item_out.gpr_addr] = []
+                    self.unmatched_read[item_out.gpr_addr].append(item_out.gpr_data)
+                else:
+                    if item_out.gpr_data != self.unmatched_write[item_out.gpr_addr][0]:
+                        log_mismatch_error(
+                            self.logger,
+                            f"gp_reg_val[{hex(item_out.gpr_addr)}]",
+                            item_out.gpr_data,
+                            self.unmatched_write[item_out.gpr_addr]
+                        )
+                        self.passed = False
+                    self.unmatched_write[item_out.gpr_addr] = self.unmatched_write[item_out.gpr_addr][1:]
+                    if len(self.unmatched_write[item_out.gpr_addr]) == 0:
+                        del self.unmatched_write[item_out.gpr_addr]
+
     def final_phase(self):
         if not self.passed:
             self.logger.critical("{} reports a failure".format(type(self)))
@@ -663,6 +824,41 @@ class DecSequence(uvm_sequence):
 
             await self.start_item(item)
             await self.finish_item(item)
+
+
+class DecTmrRecoverySequence(uvm_sequence):
+    def __init__(self, name, mode):
+        super().__init__(name)
+        assert mode in ["retrieve", "restore"], mode
+        self.mode = mode
+
+    async def body(self):
+        count = 2 # 2 iterations
+        for _ in range(count):
+            gpr_wr = list(range(1, 32))
+            random.shuffle(gpr_wr)
+
+            gpr_data = {addr: random.randrange(1 << 32) for addr in gpr_wr}
+            for addr in gpr_wr:
+                item = DecInputItem(
+                    gpr_addr = addr,
+                    gpr_data = gpr_data[addr],
+                    gpr_oper = "wr_front" if self.mode == "retrieve" else "wr_back",
+                )
+                await self.start_item(item)
+                await self.finish_item(item)
+
+            # Read CSRs back but in different order
+            gpr_rd = list(range(1, 32))
+            random.shuffle(gpr_rd)
+
+            for addr in gpr_rd:
+                item = DecInputItem(
+                    gpr_addr = addr,
+                    gpr_oper = "rd_back" if self.mode == "retrieve" else "rd_front",
+                )
+                await self.start_item(item)
+                await self.finish_item(item)
 
 
 # ==============================================================================
@@ -849,6 +1045,12 @@ class BaseTest(uvm_test):
         cocotb.top.exu_i0_br_middle_r.value = 0
         cocotb.top.exu_i0_br_way_r.value = 0
         cocotb.top.ifu_i0_cinst.value = 0
+        cocotb.top.recovery_gpr_en.value = 0
+        cocotb.top.recovery_gpr_wen.value = 0
+        cocotb.top.recovery_gpr_wraddr.value = 0
+        cocotb.top.recovery_gpr_wrdata.value = 0
+        cocotb.top.recovery_gpr_rdaddr.value = 0
+        cocotb.top.recovery_gpr_rddata.value = 0
         # Issue reset
         await self.do_reset()
 

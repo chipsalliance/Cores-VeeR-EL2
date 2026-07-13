@@ -1,0 +1,44 @@
+name: Regression tests cache waypack PMP Random (custom)
+
+on:
+  workflow_call:
+    inputs:
+      run_custom:
+        type: boolean
+        default: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  custom-pmp-random-waypack:
+    name: Custom cache waypack pmp_random tests
+    if: inputs.run_custom
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: centos:8
+    strategy:
+      matrix:
+        waypack: [0, 1]
+        num_ways: [2, 4]
+        bus: ["axi", "ahb"]
+        priv: ["0", "1"]
+        ecc: ["0", "1"]
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
+      WAYPACK: ${{ matrix.waypack }}
+      NUM_WAYS: ${{ matrix.num_ways }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run tests
+        run: _secret_custom_regression_tests_waypack:8
+        env:
+          TEST: pmp_random
+          BUS: ${{ matrix.bus }}
+          PRIV: ${{ matrix.priv }}
+          ECC: ${{ matrix.ecc }}
+          TB_TIMEOUT: "8000000"

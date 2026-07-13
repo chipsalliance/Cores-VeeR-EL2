@@ -67,6 +67,7 @@ VERILATOR_VERSION    := $(subst .,,$(word 2,$(shell $(VERILATOR) --version)))
 
 ifneq ($(TB_MAX_CYCLES),)
 	VERILATOR_EXTRA_ARGS := -GMAX_CYCLES=$(TB_MAX_CYCLES)
+	VCS_EXTRA_ARGS := -pvalue+tb_top.MAX_CYCLES=$(TB_MAX_CYCLES)
 endif
 
 ifeq ("$(.SHELLSTATUS)", "0")
@@ -209,6 +210,7 @@ vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	  +error+500 +incdir+${RV_ROOT}/design/lib \
 	  +incdir+${RV_ROOT}/design/include ${BUILD_DIR}/common_defines.vh \
 	  +incdir+$(BUILD_DIR)  +libext+.v $(defines) -CFLAGS "${CFLAGS}" \
+	  $(VCS_EXTRA_ARGS) \
 	  -cm_hier $(CM_HIER_FILE) \
 	  -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -l vcs.log
 	touch vcs-build

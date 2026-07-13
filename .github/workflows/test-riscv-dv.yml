@@ -3,6 +3,9 @@ name: RISCV-DV tests
 on:
   workflow_call:
     inputs:
+      run_public:
+        type: boolean
+        default: true
       run_custom:
         type: boolean
         default: true
@@ -102,6 +105,7 @@ jobs:
 
   run-tests:
     name: Run RISC-V DV tests
+    if: inputs.run_public
     runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20260618
     needs: [ generate-config, generate-code ]

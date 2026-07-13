@@ -9,6 +9,9 @@ on:
       num_ways:
         required: true
         type: number
+      run_public:
+        type: boolean
+        default: true
       run_custom:
         type: boolean
         default: true
@@ -24,6 +27,7 @@ env:
 jobs:
   regression-tests:
     name: Regression tests
+    if: inputs.run_public
     runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20260618
     strategy:

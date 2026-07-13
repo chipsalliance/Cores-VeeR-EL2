@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import pyuvm
 from pyuvm import ConfigDB
-from testbench import BaseEnv, BaseTest, DecSequence
+from testbench import BaseEnv, BaseTest, DecSequence, DecTmrRecoverySequence
 
 # =============================================================================
 
@@ -55,3 +55,32 @@ class TestDebugCSRs(DecTluCtlTest):
 class TestMeicidpl(DecTluCtlTest):
     def __init__(self, name, parent, env_class=BaseEnv):
         super().__init__("meicidpl", name, parent, env_class)
+
+@pyuvm.test()
+class TestTmrRetrieve(BaseTest):
+    def __init__(self, name, parent, env_class=BaseEnv):
+        super().__init__(name, parent, env_class)
+        self.test_name = "recovery_gpr_access"
+
+    def end_of_elaboration_phase(self):
+        super().end_of_elaboration_phase()
+        ConfigDB().set(None, "*", "TEST", self.test_name)
+        self.seq = DecTmrRecoverySequence("stimulus", "retrieve")
+
+    async def run(self):
+        await self.seq.start(self.env.dec_seqr)
+
+@pyuvm.test()
+class TestTmrRestore(BaseTest):
+    def __init__(self, name, parent, env_class=BaseEnv):
+        super().__init__(name, parent, env_class)
+        self.test_name = "recovery_gpr_access"
+
+    def end_of_elaboration_phase(self):
+        super().end_of_elaboration_phase()
+        ConfigDB().set(None, "*", "TEST", self.test_name)
+        self.seq = DecTmrRecoverySequence("stimulus", "restore")
+
+    async def run(self):
+        await self.seq.start(self.env.dec_seqr)
+

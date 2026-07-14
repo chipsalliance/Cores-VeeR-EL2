@@ -103,7 +103,7 @@ jobs:
   run-tests:
     name: Run RISC-V DV tests
     runs-on: ubuntu-24.04
-    container: ghcr.io/antmicro/cores-veer-el2:20260618
+    container: ghcr.io/antmicro/cores-veer-el2:20260714
     needs: [ generate-config, generate-code ]
     strategy:
       fail-fast: false

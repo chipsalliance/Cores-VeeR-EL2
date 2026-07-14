@@ -773,6 +773,10 @@ module tb_top
     integer fd, tp, el;
     logic next_dbus_error;
     logic next_ibus_error;
+    logic next_ic_error;
+    logic next_dcls_mismatch;
+    logic dcls_mismatch_active;
+    logic force_veer_corrupt;
     logic inject_veer_in_dist, inject_lockstep_in_dist;
     logic clear_inject_in_dist;
     logic [8:0] inject_veer_in_dist_no, inject_lockstep_in_dist_no;
@@ -784,6 +788,7 @@ module tb_top
             next_dbus_error <= '0;
             next_ibus_error <= '0;
             inject_veer_in_dist <= '0;
+
             inject_lockstep_in_dist <= '0;
             clear_inject_in_dist <= '0;
             rst_l_cmd <= '1;
@@ -1022,6 +1027,26 @@ module tb_top
         end
     end
     `endif
+
+    always @(posedge core_clk or negedge rst_l) begin
+        if (~rst_l) begin
+            next_ic_error <= 0;
+        end else begin
+            if (mailbox_write && mailbox_data[7:0] == 8'h89) begin
+                next_ic_error <= 1;
+            end else if (next_ic_error && (|rvtop_wrapper.rvtop.ic_rd_bank_check_en)) begin
+                next_ic_error <= 0;
+            end
+        end
+    end
+
+    always @(*) begin
+        if (next_ic_error && (|rvtop_wrapper.rvtop.ic_rd_bank_check_en)) begin
+            force rvtop_wrapper.rvtop.ic_rd_data = 142'h1;
+        end else begin
+            release rvtop_wrapper.rvtop.ic_rd_data;
+        end
+    end
 
 `ifdef RV_LOCKSTEP_ENABLE
 `define VEER rvtop_wrapper.rvtop.veer
@@ -2132,7 +2157,7 @@ module tb_top
         i_cpu_run_req = 1'b0;
         mpc_debug_halt_req = 1'b0;
         mpc_debug_run_req = 1'b0;
-
+   `ifndef RV_LOCKSTEP_ENABLE  //https://github.com/chipsalliance/Cores-VeeR-EL2/issues/475
         $display("[%0t ns] halting CPU and waiting for ack",$time);
         i_cpu_halt_req = #5 1'b1;
         wait(o_cpu_halt_ack == 1);
@@ -2160,6 +2185,7 @@ module tb_top
         mpc_debug_run_req = 1'b0;
         wait(o_debug_mode_status == 1'b0);
         $display("[%0t ns] done",$time);
+   `endif        
 `endif
     end
 `ifndef VERILATOR

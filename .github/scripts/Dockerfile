@@ -122,7 +122,7 @@ RUN git clone https://github.com/riscv-software-src/riscv-isa-sim spike && \
 
 ENV PATH="$PATH:/opt/riscv/bin:/opt/renode:/opt/verilator/bin:/opt/openocd/bin:/opt/spike/bin"
 
-RUN riscv32-unknown-elf-gcc --version
+RUN riscv64-unknown-elf-gcc --version
 RUN verilator --version
 RUN openocd --version
 RUN renode --version

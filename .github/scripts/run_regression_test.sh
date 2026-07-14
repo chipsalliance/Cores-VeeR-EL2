@@ -78,6 +78,9 @@ run_regression_test(){
     if [[ -z "${DCCM_WR_READBACK}" ]]; then
         DCCM_WR_READBACK="0"
     fi
+    if [[ "${ECC}" == "0" ]]; then
+        COMMON_PARAMS="-set icache_ecc=0 ${COMMON_PARAMS}"
+    fi
     set -u
 
     if [[ "${DCCM_WR_READBACK}" == "1" ]]; then
@@ -98,9 +101,13 @@ run_regression_test(){
     echo -e "${COLOR_WHITE} CONF PARAMS = ${PARAMS}${COLOR_CLEAR}"
 
     mkdir -p ${RESULTS_DIR}
-    LOG="${RESULTS_DIR}/test_${NAME}_${COVERAGE}_${USER_MODE}.log"
+    set +u
+    ECC_VAL="${ECC:-1}"
+    set -u
+    LOG="${RESULTS_DIR}/test_${NAME}_${BUS}_${COVERAGE}_${USER_MODE}_ecc_${ECC_VAL}.log"
     touch ${LOG}
-    DIR="run_${NAME}_${COVERAGE}_${USER_MODE}"
+    DIR_TAG=$(basename "${RESULTS_DIR}")
+    DIR="run_${DIR_TAG}_${NAME}_${BUS}_${COVERAGE}_${USER_MODE}_ecc_${ECC_VAL}"
 
     if [ "$NAME" = "pmp_random" ]; then
         EXTRA_ARGS='TB_MAX_CYCLES=8000000'

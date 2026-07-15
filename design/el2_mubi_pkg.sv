@@ -44,6 +44,17 @@ package el2_mubi_pkg;
     return val == 0 ? El2MuBiFalse : El2MuBiTrue;
   endfunction : mubi_from_bool
 
+  // Performs a logical NOT of a single multibit value.
+  function automatic el2_mubi_t mubi_not(el2_mubi_t a);
+    if (mubi_check_true(a)) begin
+      return El2MuBiFalse;
+    end else if (mubi_check_false(a)) begin
+      return El2MuBiTrue;
+    end else begin
+      return a; // Invalid so can't perform the operation. Pass it through
+    end
+  endfunction : mubi_not
+
   // Performs a logical OR operation between two multibit values.
   function automatic el2_mubi_t mubi_or(el2_mubi_t a, el2_mubi_t b);
     logic [El2MuBiWidth-1:0] a_in, b_in, out;
@@ -55,9 +66,21 @@ package el2_mubi_pkg;
     return el2_mubi_t'(out);
   endfunction : mubi_or
 
+  // Performs a logical OR operation between three multibit values.
+  function automatic el2_mubi_t mubi_or3(el2_mubi_t a, el2_mubi_t b, el2_mubi_t c);
+    logic [El2MuBiWidth-1:0] a_in, b_in, c_in,out;
+    a_in = a;
+    b_in = b;
+    c_in = c;
+    for (int k = 0; k < El2MuBiWidth; k++) begin
+      out[k] = El2MuBiTrue[k] ? a_in[k] || b_in[k] || c_in[k] : a_in[k] && b_in[k] && c_in[k];
+    end
+    return el2_mubi_t'(out);
+  endfunction : mubi_or3
+
   // Performs a logical AND operation between two multibit values.
   function automatic el2_mubi_t mubi_and(el2_mubi_t a, el2_mubi_t b);
-    logic [El2MuBiWidth-1:0] a_in, b_in, act_in, out;
+    logic [El2MuBiWidth-1:0] a_in, b_in, out;
     a_in = a;
     b_in = b;
     for (int k = 0; k < El2MuBiWidth; k++) begin
@@ -65,5 +88,17 @@ package el2_mubi_pkg;
     end
     return el2_mubi_t'(out);
   endfunction : mubi_and
+
+  // Performs a logical AND operation between three multibit values.
+  function automatic el2_mubi_t mubi_and3(el2_mubi_t a, el2_mubi_t b, el2_mubi_t c);
+    logic [El2MuBiWidth-1:0] a_in, b_in, c_in, out;
+    a_in = a;
+    b_in = b;
+    c_in = c;
+    for (int k = 0; k < El2MuBiWidth; k++) begin
+      out[k] = El2MuBiTrue[k] ? a_in[k] && b_in[k] && c_in[k] : a_in[k] || b_in[k] || c_in[k];
+    end
+    return el2_mubi_t'(out);
+  endfunction : mubi_and3
 
 endpackage

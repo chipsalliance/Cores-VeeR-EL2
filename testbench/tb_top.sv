@@ -756,7 +756,12 @@ module tb_top
     tb_top_pkg::veer_sram_error_injection_mode_t error_injection_mode;
     logic x_sanitizer_en;
 
-`define DEC rvtop_wrapper.rvtop.veer.dec
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+`define VEER rvtop_wrapper.rvtop.veer
+`else
+`define VEER rvtop_wrapper.rvtop.tmr_complex.cores[0].veer
+`endif
+`define DEC `VEER.dec
 
 `ifdef RV_BUILD_AHB_LITE
     always_ff @(posedge core_clk)
@@ -1116,7 +1121,6 @@ module tb_top
     logic ic_perr_r_d1;
 
 `ifdef RV_LOCKSTEP_ENABLE
-`define VEER rvtop_wrapper.rvtop.veer
 `define LOCKSTEP rvtop_wrapper.rvtop.lockstep
 `define LOCKSTEP_CORE rvtop_wrapper.rvtop.lockstep.xshadow_core
 `define LOCKSTEP_CONST_DELAY_ASSERT_DISABLE rvtop_wrapper.rvtop.disable_const_delay_assertion

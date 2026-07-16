@@ -886,6 +886,7 @@ import el2_pkg::*;
    logic [31:0]            dmi_reg_wdata;
    logic [31:0]            dmi_reg_rdata;
 
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
    el2_regfile_if regfile ();
 `endif
@@ -906,7 +907,6 @@ import el2_pkg::*;
 `endif
                                 .*
                                 );
-
 `ifdef RV_LOCKSTEP_ENABLE
    el2_veer_lockstep #(.pt(pt)) lockstep (
                                 .clk(clk),
@@ -916,6 +916,13 @@ import el2_pkg::*;
                                 .*
                                 );
 `endif // `ifdef RV_LOCKSTEP_ENABLE
+
+`else // RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    el2_tmr_complex #(.pt(pt)) tmr_complex(
+        .clk(clk),
+        .*
+    );
+`endif
 
    // Instantiate the mem
    el2_mem  #(.pt(pt)) mem (

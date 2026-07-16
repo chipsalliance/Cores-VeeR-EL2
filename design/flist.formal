@@ -21,6 +21,7 @@ $RV_ROOT/design/include/el2_def.sv
 $RV_ROOT/design/lib/el2_assert.sv
 $RV_ROOT/design/el2_mubi_pkg.sv
 $RV_ROOT/design/el2_veer_wrapper.sv
+$RV_ROOT/design/el2_tmr_complex.sv
 $RV_ROOT/design/el2_veer_lockstep.sv
 $RV_ROOT/design/el2_mem.sv
 $RV_ROOT/design/el2_pic_ctrl.sv

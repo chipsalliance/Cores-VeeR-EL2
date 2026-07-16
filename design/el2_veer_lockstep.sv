@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
 module el2_veer_lockstep
   import el2_pkg::*;
   import el2_mubi_pkg::*;
@@ -1181,3 +1182,4 @@ module el2_veer_lockstep
   assign case1 = disable_detection_invalid;
   assign corruption_detected_o = mubi_and(mubi_or(case0, case1), mubi_from_bool(rst_n));
 endmodule : el2_veer_lockstep
+`endif

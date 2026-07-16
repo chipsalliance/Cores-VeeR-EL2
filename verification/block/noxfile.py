@@ -403,6 +403,19 @@ def lsu_tl_verify(session, blockName, testName, coverage):
 def dec_pmp_ctl_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_voter"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_voting",
+        "test_detection",
+        "test_enable",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_voter_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
 
 @nox.session(reuse_venv=True)
 def lint(session: nox.Session) -> None:

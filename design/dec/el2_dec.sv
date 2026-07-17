@@ -313,6 +313,7 @@ module el2_dec
     output logic dec_tlu_external_ldfwd_disable,  // disable external load forwarding
     output logic dec_tlu_sideeffect_posted_disable,  // disable posted stores to side-effect address
     output logic dec_tlu_core_ecc_disable,  // disable core ECC
+    output logic dec_tlu_dccm_wr_readback_disable,  // disable DCCM write-readback check
     output logic dec_tlu_bpred_disable,  // disable branch prediction
     output logic dec_tlu_wb_coalescing_disable,  // disable writebuffer coalescing
     output logic [2:0] dec_tlu_dma_qos_prty,  // DMA QoS priority coming from MFDC [18:16]

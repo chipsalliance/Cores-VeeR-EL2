@@ -35,6 +35,7 @@ module el2_veer_lockstep
     input logic dccm_clk_override,
     input logic icm_clk_override,
     input logic dec_tlu_core_ecc_disable,
+    input logic dec_tlu_dccm_wr_readback_disable,
 
     // external halt/run interface
     input logic i_cpu_halt_req,  // Asynchronous Halt request to CPU
@@ -363,6 +364,7 @@ module el2_veer_lockstep
     input logic iccm_ecc_double_error,
     input logic dccm_ecc_single_error,
     input logic dccm_ecc_double_error,
+    input logic dccm_write_readback_error,
 
     input logic [pt.PIC_TOTAL_INT:1] extintsrc_req,
     input logic                      timer_int,
@@ -588,6 +590,7 @@ module el2_veer_lockstep
   assign main_core_outputs.dccm_clk_override = dccm_clk_override;
   assign main_core_outputs.icm_clk_override = icm_clk_override;
   assign main_core_outputs.dec_tlu_core_ecc_disable = dec_tlu_core_ecc_disable;
+  assign main_core_outputs.dec_tlu_dccm_wr_readback_disable = dec_tlu_dccm_wr_readback_disable;
   assign main_core_outputs.o_cpu_halt_ack = o_cpu_halt_ack;
   assign main_core_outputs.o_cpu_halt_status = o_cpu_halt_status;
   assign main_core_outputs.o_cpu_run_ack = o_cpu_run_ack;
@@ -751,6 +754,7 @@ module el2_veer_lockstep
   assign main_core_outputs.iccm_ecc_double_error = iccm_ecc_double_error;
   assign main_core_outputs.dccm_ecc_single_error = dccm_ecc_single_error;
   assign main_core_outputs.dccm_ecc_double_error = dccm_ecc_double_error;
+  assign main_core_outputs.dccm_write_readback_error = dccm_write_readback_error;
 
   // Latch the debug state
   el2_mubi_t debug_mode_status_latch;
@@ -837,6 +841,7 @@ module el2_veer_lockstep
       .dccm_clk_override(shadow_core_outputs.dccm_clk_override),
       .icm_clk_override(shadow_core_outputs.icm_clk_override),
       .dec_tlu_core_ecc_disable(shadow_core_outputs.dec_tlu_core_ecc_disable),
+      .dec_tlu_dccm_wr_readback_disable(shadow_core_outputs.dec_tlu_dccm_wr_readback_disable),
 
       .i_cpu_halt_req(shadow_core_inputs.i_cpu_halt_req),
       .i_cpu_run_req(shadow_core_inputs.i_cpu_run_req),
@@ -1117,6 +1122,7 @@ module el2_veer_lockstep
       .iccm_ecc_double_error(shadow_core_outputs.iccm_ecc_double_error),
       .dccm_ecc_single_error(shadow_core_outputs.dccm_ecc_single_error),
       .dccm_ecc_double_error(shadow_core_outputs.dccm_ecc_double_error),
+      .dccm_write_readback_error(shadow_core_outputs.dccm_write_readback_error),
 
       .extintsrc_req(shadow_core_inputs.extintsrc_req),
       .timer_int(shadow_core_inputs.timer_int),

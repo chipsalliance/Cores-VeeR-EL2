@@ -227,14 +227,15 @@ import el2_pkg::*;
    output logic [31:0] dec_tlu_mtval_wb1, // MTVAL value
 
    // feature disable from mfdc
-   output logic  dec_tlu_external_ldfwd_disable, // disable external load forwarding
-   output logic  dec_tlu_sideeffect_posted_disable,  // disable posted stores to side-effect address
-   output logic  dec_tlu_core_ecc_disable, // disable core ECC
-   output logic  dec_tlu_bpred_disable,           // disable branch prediction
-   output logic  dec_tlu_wb_coalescing_disable,   // disable writebuffer coalescing
-   output logic  dec_tlu_pipelining_disable,      // disable pipelining
-   output logic  dec_tlu_trace_disable,           // disable trace
-   output logic [2:0]  dec_tlu_dma_qos_prty,    // DMA QoS priority coming from MFDC [18:16]
+   output logic  dec_tlu_external_ldfwd_disable,    // disable external load forwarding
+   output logic  dec_tlu_sideeffect_posted_disable, // disable posted stores to side-effect address
+   output logic  dec_tlu_core_ecc_disable,          // disable core ECC
+   output logic  dec_tlu_dccm_wr_readback_disable,  // disable DCCM write-readback check
+   output logic  dec_tlu_bpred_disable,             // disable branch prediction
+   output logic  dec_tlu_wb_coalescing_disable,     // disable writebuffer coalescing
+   output logic  dec_tlu_pipelining_disable,        // disable pipelining
+   output logic  dec_tlu_trace_disable,             // disable trace
+   output logic [2:0]  dec_tlu_dma_qos_prty,        // DMA QoS priority coming from MFDC [18:16]
 
    // clock gating overrides from mcgc
    output logic  dec_tlu_misc_clk_override, // override misc clock domain gating
@@ -727,16 +728,14 @@ localparam MSECCFG_MML   = 0;
    // [15:13] : Reserved, reads 0x0
    // [12]   : Disable trace
    // [11]   : Disable external load forwarding
-   // [10]   : Disable dual issue
-   // [9]    : Disable pic multiple ints
+   // [10:9] : Reserved, reads 0x0
    // [8]    : Disable core ecc
-   // [7]    : Disable secondary alu?s
-   // [6]    : Unused, 0x0
-   // [5]    : Disable non-blocking loads/divides
-   // [4]    : Disable fast divide
+   // [7]    : Disable DCCM write-readback check (only present when built with RV_DCCM_WR_READBACK)
+   // [6]    : Disable side-effect (posted store) pipelining
+   // [5:4]  : Reserved, reads 0x0
    // [3]    : Disable branch prediction and return stack
    // [2]    : Disable write buffer coalescing
-   // [1]    : Disable load misses that bypass the write buffer
+   // [1]    : Reserved, reads 0x0
    // [0]    : Disable pipelining - Enable single instruction execution
    //
    localparam MFDC          = 12'h7f9;
@@ -1976,16 +1975,14 @@ end
    // [15:13] : Reserved, reads 0x0
    // [12]   : Disable trace
    // [11]   : Disable external load forwarding
-   // [10]   : Disable dual issue
-   // [9]    : Disable pic multiple ints
+   // [10:9] : Reserved, reads 0x0
    // [8]    : Disable core ecc
-   // [7]    : Disable secondary alu?s
-   // [6]    : Unused, 0x0
-   // [5]    : Disable non-blocking loads/divides
-   // [4]    : Disable fast divide
+   // [7]    : Disable DCCM write-readback check (only present when built with RV_DCCM_WR_READBACK)
+   // [6]    : Disable side-effect (posted store) pipelining
+   // [5:4]  : Reserved, reads 0x0
    // [3]    : Disable branch prediction and return stack
    // [2]    : Disable write buffer coalescing
-   // [1]    : Disable load misses that bypass the write buffer
+   // [1]    : Reserved, reads 0x0
    // [0]    : Disable pipelining - Enable single instruction execution
    //
 
@@ -2010,6 +2007,7 @@ end
    assign dec_tlu_trace_disable = mfdc[12];
    assign dec_tlu_external_ldfwd_disable = mfdc[11];
    assign dec_tlu_core_ecc_disable = mfdc[8];
+   assign dec_tlu_dccm_wr_readback_disable = mfdc[7];
    assign dec_tlu_sideeffect_posted_disable = mfdc[6];
    assign dec_tlu_bpred_disable = mfdc[3];
    assign dec_tlu_wb_coalescing_disable = mfdc[2];

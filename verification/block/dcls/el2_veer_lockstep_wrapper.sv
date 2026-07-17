@@ -55,6 +55,7 @@ module el2_veer_lockstep_wrapper
   logic dccm_clk_override;
   logic icm_clk_override;
   logic dec_tlu_core_ecc_disable;
+  logic dec_tlu_dccm_wr_readback_disable;
 
   // external halt/run interface
   logic i_cpu_halt_req;  // Asynchronous Halt request to CPU
@@ -385,6 +386,7 @@ module el2_veer_lockstep_wrapper
   logic iccm_ecc_double_error;
   logic dccm_ecc_single_error;
   logic dccm_ecc_double_error;
+  logic dccm_write_readback_error;
 
   logic scan_mode;
 

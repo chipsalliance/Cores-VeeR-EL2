@@ -43,12 +43,17 @@ class TestSequence(uvm_sequence):
             it.signals["in_b"] = value
             it.signals["in_c"] = value
 
-            # Make a single random fault
+            # Make a random fault
             if random.random() < 0.25:
-                upset = random.randrange(0, 1 << width)
-                which = random.choice(["in_a", "in_b", "in_c"])
 
-                it.signals[which] = upset
+                # Fault count
+                n = 2 if random.random() < 0.25 else 1
+
+                # Inject
+                which = random.sample(["in_a", "in_b", "in_c"], k=n)
+                for sig in which:
+                    upset = random.randrange(0, 1 << width)
+                    it.signals[sig] = upset
 
             # Send the item
             await self.seqr.start_item(it)
@@ -87,6 +92,7 @@ class Scoreboard(BaseScoreboard):
             pred_fault_a = MuBiFalse
             pred_fault_b = MuBiFalse
             pred_fault_c = MuBiFalse
+            pred_crit    = MuBiFalse
 
             if   in_a != in_b and in_b != in_c and in_c == in_a:
                 pred_fault_b = MuBiTrue
@@ -97,21 +103,30 @@ class Scoreboard(BaseScoreboard):
             elif in_a != in_b and in_b == in_c and in_c != in_a:
                 pred_fault_a = MuBiTrue
                 pred_out     = in_c
+            elif in_a != in_b and in_b != in_c and in_c != in_a:
+                pred_out     = None
+                pred_fault_a = MuBiTrue
+                pred_fault_b = MuBiTrue
+                pred_fault_c = MuBiTrue
+                pred_crit    = MuBiTrue
             else:
-                # Assume that only 1 fault is possible in the test
-                # so in the remaining cases there are no faults.
+                # Assume that in the remaining cases there are no faults.
                 pred_out = in_a
 
             # Check MuBi
             assert it.signals["fault_a"] in [MuBiTrue, MuBiFalse]
             assert it.signals["fault_b"] in [MuBiTrue, MuBiFalse]
             assert it.signals["fault_c"] in [MuBiTrue, MuBiFalse]
+            assert it.signals["critical"] in [MuBiTrue, MuBiFalse]
 
             # Check
-            assert pred_out     == it.signals["out"]
+            if pred_out is not None:
+                assert pred_out == it.signals["out"]
+
             assert pred_fault_a == it.signals["fault_a"]
             assert pred_fault_b == it.signals["fault_b"]
             assert pred_fault_c == it.signals["fault_c"]
+            assert pred_crit    == it.signals["critical"]
 
 # ==============================================================================
 

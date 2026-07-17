@@ -2506,10 +2506,11 @@ veer_wrapper rvtop_wrapper (
     .ic_bank_way_clken_final_up (el2_mem_export.ic_bank_way_clken_final_up),
     .wb_dout_pre_up             (el2_mem_export.wb_dout_pre_up),
 
-    .iccm_ecc_single_error  (),
-    .iccm_ecc_double_error  (),
-    .dccm_ecc_single_error  (),
-    .dccm_ecc_double_error  (),
+    .iccm_ecc_single_error     (),
+    .iccm_ecc_double_error     (),
+    .dccm_ecc_single_error     (),
+    .dccm_ecc_double_error     (),
+    .dccm_write_readback_error (),
 
 `ifdef RV_LOCKSTEP_ENABLE
     .shadow_core_trace_rv_i_insn_ip      (shadow_core_trace_rv_i_insn_ip),

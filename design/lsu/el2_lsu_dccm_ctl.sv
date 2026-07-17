@@ -144,6 +144,10 @@ import el2_pkg::*;
    input logic [pt.DCCM_FDATA_WIDTH-1:0]   dccm_rd_data_lo,         // dccm read data back from the dccm
    input logic [pt.DCCM_FDATA_WIDTH-1:0]   dccm_rd_data_hi,         // dccm read data back from the dccm
 
+   output logic                            dccm_wr_rdbk_pend_ff,             // write-readback window open -- stall decode/dma
+   output logic                            dccm_wr_readback_error,           // write-readback mismatch fault pin
+   input logic                             dec_tlu_dccm_wr_readback_disable, // runtime disable (MFDC), default enabled
+
    // PIC ports
    output logic                            picm_wren,               // write to pic
    output logic                            picm_rden,               // read to pick
@@ -174,6 +178,19 @@ import el2_pkg::*;
    logic                           dccm_wr_bypass_d_m_hi, dccm_wr_bypass_d_r_hi;
    logic                           dccm_wr_bypass_d_m_lo, dccm_wr_bypass_d_r_lo;
    logic                           kill_ecc_corr_lo_r, kill_ecc_corr_hi_r;
+
+`ifdef RV_DCCM_WR_READBACK
+   logic                           dccm_wr_rdbk_arm;        // arm a new read-back window this cycle
+   logic                           dccm_wr_rdbk_issue;      // steal read port this cycle (no real read wants it)
+   logic                           dccm_wr_rdbk_snoop_lo;   // a real read this cycle already covers our addr (lo)
+   logic                           dccm_wr_rdbk_snoop_hi;   // a real read this cycle already covers our addr (hi)
+   logic                           dccm_wr_rdbk_resolve;    // window resolves this cycle (steal or snoop)
+   logic [pt.DCCM_BITS-1:0]        dccm_wr_rdbk_addr_ff;    // captured word addr (lo==hi, single bank)
+   logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_wr_rdbk_data_ff;    // captured written data+ecc
+   logic                           dccm_wr_rdbk_active;     // dccm_rd_data_lo/hi valid this cycle for compare
+   logic                           dccm_wr_rdbk_active_hi;  // compare should use dccm_rd_data_hi, not _lo
+   logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_wr_rdbk_expect;     // expected value, aligned with dccm_rd_data_lo/hi
+`endif
 
     // byte_en flowing down
    logic [3:0]                     store_byteen_m ,store_byteen_r;
@@ -274,10 +291,17 @@ import el2_pkg::*;
    assign ld_single_ecc_error_hi_r_ns = ld_single_ecc_error_hi_r & (lsu_commit_r | lsu_pkt_r.dma) & ~kill_ecc_corr_hi_r;
    assign ld_single_ecc_error_r_ff = (ld_single_ecc_error_lo_r_ff | ld_single_ecc_error_hi_r_ff) & ~lsu_double_ecc_error_r_ff;
 
+`ifdef RV_DCCM_WR_READBACK
+   assign lsu_stbuf_commit_any = stbuf_reqvld_any & ~dccm_wr_rdbk_pend_ff &
+                                 (~(lsu_dccm_rden_d | lsu_dccm_wren_d | ld_single_ecc_error_r_ff) |
+                                  (lsu_dccm_rden_d & ~((stbuf_addr_any[pt.DCCM_WIDTH_BITS+:pt.DCCM_BANK_BITS] == lsu_addr_d[pt.DCCM_WIDTH_BITS+:pt.DCCM_BANK_BITS]) |
+                                                       (stbuf_addr_any[pt.DCCM_WIDTH_BITS+:pt.DCCM_BANK_BITS] == end_addr_d[pt.DCCM_WIDTH_BITS+:pt.DCCM_BANK_BITS]))));
+`else
    assign lsu_stbuf_commit_any = stbuf_reqvld_any &
                                  (~(lsu_dccm_rden_d | lsu_dccm_wren_d | ld_single_ecc_error_r_ff) |
                                   (lsu_dccm_rden_d & ~((stbuf_addr_any[pt.DCCM_WIDTH_BITS+:pt.DCCM_BANK_BITS] == lsu_addr_d[pt.DCCM_WIDTH_BITS+:pt.DCCM_BANK_BITS]) |
                                                        (stbuf_addr_any[pt.DCCM_WIDTH_BITS+:pt.DCCM_BANK_BITS] == end_addr_d[pt.DCCM_WIDTH_BITS+:pt.DCCM_BANK_BITS]))));
+`endif
 
    // No need to read for aligned word/dword stores since ECC will come by new data completely
    assign lsu_dccm_rden_d = lsu_pkt_d.valid & (lsu_pkt_d.load | (lsu_pkt_d.store & (~(lsu_pkt_d.word | lsu_pkt_d.dword) | (lsu_addr_d[1:0] != 2'b0)))) & addr_in_dccm_d;
@@ -287,13 +311,19 @@ import el2_pkg::*;
 
    // DCCM inputs
    assign dccm_wren                             = lsu_dccm_wren_d | lsu_stbuf_commit_any | ld_single_ecc_error_r_ff;
-   assign dccm_rden                             = lsu_dccm_rden_d & addr_in_dccm_d;
    assign dccm_wr_addr_lo[pt.DCCM_BITS-1:0]     = ld_single_ecc_error_r_ff ? (ld_single_ecc_error_lo_r_ff ? ld_sec_addr_lo_r_ff[pt.DCCM_BITS-1:0] : ld_sec_addr_hi_r_ff[pt.DCCM_BITS-1:0]) :
                                                                              lsu_dccm_wren_d ? lsu_addr_d[pt.DCCM_BITS-1:0] : stbuf_addr_any[pt.DCCM_BITS-1:0];
    assign dccm_wr_addr_hi[pt.DCCM_BITS-1:0]     = ld_single_ecc_error_r_ff ? (ld_single_ecc_error_hi_r_ff ? ld_sec_addr_hi_r_ff[pt.DCCM_BITS-1:0] : ld_sec_addr_lo_r_ff[pt.DCCM_BITS-1:0]) :
                                                                              lsu_dccm_wren_d ? end_addr_d[pt.DCCM_BITS-1:0] : stbuf_addr_any[pt.DCCM_BITS-1:0];
+`ifdef RV_DCCM_WR_READBACK
+   assign dccm_rden                             = (lsu_dccm_rden_d & addr_in_dccm_d) | dccm_wr_rdbk_issue;
+   assign dccm_rd_addr_lo[pt.DCCM_BITS-1:0]     = dccm_wr_rdbk_issue ? dccm_wr_rdbk_addr_ff[pt.DCCM_BITS-1:0] : lsu_addr_d[pt.DCCM_BITS-1:0];
+   assign dccm_rd_addr_hi[pt.DCCM_BITS-1:0]     = dccm_wr_rdbk_issue ? dccm_wr_rdbk_addr_ff[pt.DCCM_BITS-1:0] : end_addr_d[pt.DCCM_BITS-1:0];
+`else
+   assign dccm_rden                             = lsu_dccm_rden_d & addr_in_dccm_d;
    assign dccm_rd_addr_lo[pt.DCCM_BITS-1:0]     = lsu_addr_d[pt.DCCM_BITS-1:0];
    assign dccm_rd_addr_hi[pt.DCCM_BITS-1:0]     = end_addr_d[pt.DCCM_BITS-1:0];
+`endif
 
    // DCCM address-XOR mask generation for the DCCM address-XOR infection feature.
    logic [pt.DCCM_DATA_WIDTH-1:0] dccm_wr_infect_lo, dccm_wr_infect_hi;
@@ -433,6 +463,59 @@ import el2_pkg::*;
       rvdffe #(pt.DCCM_BITS) ld_sec_addr_hi_rff (.*, .din(end_addr_r[pt.DCCM_BITS-1:0]), .dout(ld_sec_addr_hi_r_ff[pt.DCCM_BITS-1:0]), .en(ld_single_ecc_error_r | clk_override), .clk(clk));
       rvdffe #(pt.DCCM_BITS) ld_sec_addr_lo_rff (.*, .din(lsu_addr_r[pt.DCCM_BITS-1:0]), .dout(ld_sec_addr_lo_r_ff[pt.DCCM_BITS-1:0]), .en(ld_single_ecc_error_r | clk_override), .clk(clk));
 
+`ifdef RV_DCCM_WR_READBACK
+      // Arm a readback window on a store-buffer commit.
+      // Gated by the MFDC DCCM write read-back disable bit.
+      assign dccm_wr_rdbk_arm = lsu_stbuf_commit_any & ~dec_tlu_dccm_wr_readback_disable;
+
+      // A real read this cycle that already targets our pending address completes
+      // the check for free. Its own result is tapped next cycle instead of us
+      // stealing the port. Reads are never delayed for this feature.
+      assign dccm_wr_rdbk_snoop_lo = dccm_wr_rdbk_pend_ff & lsu_dccm_rden_d & (lsu_addr_d[pt.DCCM_BITS-1:0] == dccm_wr_rdbk_addr_ff[pt.DCCM_BITS-1:0]);
+      assign dccm_wr_rdbk_snoop_hi = dccm_wr_rdbk_pend_ff & lsu_dccm_rden_d & (end_addr_d[pt.DCCM_BITS-1:0] == dccm_wr_rdbk_addr_ff[pt.DCCM_BITS-1:0]);
+
+      // Steal the port only when nothing else wants to read this cycle.
+      // Reads always win. Only writes defer to a pending window.
+      assign dccm_wr_rdbk_issue = dccm_wr_rdbk_pend_ff & ~lsu_dccm_rden_d & ~ld_single_ecc_error_r_ff;
+
+      assign dccm_wr_rdbk_resolve = dccm_wr_rdbk_issue | dccm_wr_rdbk_snoop_lo | dccm_wr_rdbk_snoop_hi;
+
+      // Error if the read-back data doesn't match the expected data.
+      assign dccm_wr_readback_error = dccm_wr_rdbk_active &
+                     ((dccm_wr_rdbk_active_hi ? dccm_rd_data_hi[pt.DCCM_FDATA_WIDTH-1:0] : dccm_rd_data_lo[pt.DCCM_FDATA_WIDTH-1:0]) != dccm_wr_rdbk_expect[pt.DCCM_FDATA_WIDTH-1:0]);
+
+      // Set on commit, cleared exactly when the window resolves (steal or snoop).
+      rvdffsc #(.WIDTH(1)) dccm_wr_rdbk_pend_ffi
+         (.din(1'b1), .dout(dccm_wr_rdbk_pend_ff),
+          .en(dccm_wr_rdbk_arm), .clear(dccm_wr_rdbk_resolve), .clk(clk), .*);
+
+      // Register the store address in the cycle where dccm_wr_rdbk_arm goes high.
+      rvdffe #(pt.DCCM_BITS) dccm_wr_rdbk_addr_ffi
+         (.din(stbuf_addr_any[pt.DCCM_BITS-1:0]), .dout(dccm_wr_rdbk_addr_ff[pt.DCCM_BITS-1:0]),
+          .en(dccm_wr_rdbk_arm | clk_override), .clk(clk), .*);
+
+      // Register the store data in the cycle where dccm_wr_rdbk_arm goes high.
+      rvdffe #(pt.DCCM_FDATA_WIDTH) dccm_wr_rdbk_data_ffi
+         (.din(dccm_wr_data_lo[pt.DCCM_FDATA_WIDTH-1:0]), .dout(dccm_wr_rdbk_data_ff[pt.DCCM_FDATA_WIDTH-1:0]),
+          .en(dccm_wr_rdbk_arm | clk_override), .clk(clk), .*);
+
+      // The read-back is active exactly one cycle after it resolved (steal or snoop).
+      rvdff #(1) dccm_wr_rdbk_active_ffi
+         (.din(dccm_wr_rdbk_resolve), .dout(dccm_wr_rdbk_active), .clk(clk), .*);
+
+      // Only a snoop on the hi half (with no lo match) needs the hi bank for compare.
+      rvdff #(1) dccm_wr_rdbk_active_hi_ffi
+         (.din(dccm_wr_rdbk_snoop_hi & ~dccm_wr_rdbk_snoop_lo), .dout(dccm_wr_rdbk_active_hi), .clk(clk), .*);
+
+      // Register the expected value for the read-back.
+      rvdffe #(pt.DCCM_FDATA_WIDTH) dccm_wr_rdbk_expect_ffi
+         (.din(dccm_wr_rdbk_data_ff[pt.DCCM_FDATA_WIDTH-1:0]), .dout(dccm_wr_rdbk_expect[pt.DCCM_FDATA_WIDTH-1:0]),
+          .en(dccm_wr_rdbk_resolve | clk_override), .clk(clk), .*);
+`else
+      assign dccm_wr_rdbk_pend_ff   = 1'b0;
+      assign dccm_wr_readback_error = 1'b0;
+`endif
+
    end else begin: Gen_dccm_disable
       assign lsu_dccm_rden_m = '0;
       assign lsu_dccm_rden_r = '0;
@@ -442,6 +525,9 @@ import el2_pkg::*;
       assign ld_single_ecc_error_lo_r_ff = 1'b0;
       assign ld_sec_addr_hi_r_ff[pt.DCCM_BITS-1:0] = '0;
       assign ld_sec_addr_lo_r_ff[pt.DCCM_BITS-1:0] = '0;
+
+      assign dccm_wr_rdbk_pend_ff   = 1'b0;
+      assign dccm_wr_readback_error = 1'b0;
    end
 
 `ifdef RV_ASSERT_ON
@@ -453,6 +539,15 @@ import el2_pkg::*;
    assert_ld_single_ecc_error_commit: assert property (ld_single_ecc_error_commit) else
      $display("No commit or DMA but ECC correction happened");
 
+`ifdef RV_DCCM_WR_READBACK
+   // A real D-stage read can never be present while the steal issues, the
+   // steal only fires when nothing else wants to read this cycle.
+   property dccm_wr_rdbk_no_conflict;
+      @(posedge clk) disable iff(~rst_l) dccm_wr_rdbk_issue |-> ~lsu_dccm_rden_d;
+   endproperty
+   assert_dccm_wr_rdbk_no_conflict: assert property (dccm_wr_rdbk_no_conflict) else
+     $display("Real D-stage read present during readback steal");
+`endif
 
 `endif
 

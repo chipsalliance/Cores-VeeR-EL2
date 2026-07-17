@@ -384,6 +384,7 @@ import el2_pkg::*;
    output logic                            iccm_ecc_double_error,
    output logic                            dccm_ecc_single_error,
    output logic                            dccm_ecc_double_error,
+   output logic                            dccm_write_readback_error,
 
    // ICache export interface
    el2_mem_if.veer_icache_src              el2_icache_export,
@@ -520,6 +521,7 @@ import el2_pkg::*;
    logic        dccm_clk_override;
    logic        icm_clk_override;
    logic        dec_tlu_core_ecc_disable;
+   logic        dec_tlu_dccm_wr_readback_disable;
 
 
    // zero out the signals not presented at the wrapper instantiation level

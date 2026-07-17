@@ -15,6 +15,7 @@ package el2_lockstep_pkg;
     logic                                 dccm_clk_override;
     logic                                 icm_clk_override;
     logic                                 dec_tlu_core_ecc_disable;
+    logic                                 dec_tlu_dccm_wr_readback_disable;
     logic                                 o_cpu_halt_ack;
     logic                                 o_cpu_halt_status;
     logic                                 o_cpu_run_ack;
@@ -178,6 +179,7 @@ package el2_lockstep_pkg;
     logic                                 iccm_ecc_double_error;
     logic                                 dccm_ecc_single_error;
     logic                                 dccm_ecc_double_error;
+    logic                                 dccm_write_readback_error;
   } veer_outputs_t;
 
   // Inputs

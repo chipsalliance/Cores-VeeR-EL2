@@ -346,6 +346,7 @@ module veer_wrapper
     output logic iccm_ecc_double_error,
     output logic dccm_ecc_single_error,
     output logic dccm_ecc_double_error,
+    output logic dccm_write_readback_error,
 
 `ifdef RV_LOCKSTEP_ENABLE
     output logic [31:0] shadow_core_trace_rv_i_insn_ip,

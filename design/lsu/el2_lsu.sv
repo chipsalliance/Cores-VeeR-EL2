@@ -38,10 +38,11 @@ import el2_pkg::*;
    input logic                             dec_tlu_force_halt,       // This will be high till TLU goes to debug halt
 
    // chicken signals
-   input logic                             dec_tlu_external_ldfwd_disable,     // disable load to load forwarding for externals
+   input logic                             dec_tlu_external_ldfwd_disable,    // disable load to load forwarding for externals
    input logic                             dec_tlu_wb_coalescing_disable,     // disable the write buffer coalesce
    input logic                             dec_tlu_sideeffect_posted_disable, // disable the posted sideeffect load store to the bus
    input logic                             dec_tlu_core_ecc_disable,          // disable the generation of the ecc
+   input logic                             dec_tlu_dccm_wr_readback_disable,  // disable the DCCM write-readback check
 
    input logic [31:0]                      exu_lsu_rs1_d,        // address rs operand
    input logic [31:0]                      exu_lsu_rs2_d,        // store data
@@ -202,6 +203,9 @@ import el2_pkg::*;
    output logic                            lsu_dccm_rd_ecc_single_err,
    output logic                            lsu_dccm_rd_ecc_double_err,
 
+   // DCCM write-readback status
+   output logic                            dccm_wr_readback_error,
+
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
    /*pragma coverage off*/
    input logic                             scan_mode,           // scan mode
@@ -244,6 +248,8 @@ import el2_pkg::*;
    logic        ld_single_ecc_error_r, ld_single_ecc_error_r_ff;
    assign lsu_dccm_rd_ecc_single_err = lsu_single_ecc_error_r;
    assign lsu_dccm_rd_ecc_double_err = lsu_double_ecc_error_r;
+
+   logic        dccm_wr_rdbk_pend_ff;
 
    logic [31:0] picm_mask_data_m;
 
@@ -333,7 +339,7 @@ import el2_pkg::*;
    assign dma_mem_tag_d[2:0]   = dma_mem_tag[2:0];
    assign ldst_nodma_mtor = (lsu_pkt_m.valid & ~lsu_pkt_m.dma & (addr_in_dccm_m | addr_in_pic_m) & lsu_pkt_m.store);
 
-   assign dccm_ready = ~(dec_lsu_valid_raw_d | ldst_nodma_mtor | ld_single_ecc_error_r_ff);
+   assign dccm_ready = ~(dec_lsu_valid_raw_d | ldst_nodma_mtor | ld_single_ecc_error_r_ff | (dccm_wr_rdbk_pend_ff & dma_mem_write));
 
    assign dma_dccm_wen = dma_dccm_req & dma_mem_write & addr_in_dccm_d & dma_mem_sz[1];   // Perform DMA writes only for word/dword
    assign dma_pic_wen  = dma_dccm_req & dma_mem_write & addr_in_pic_d;
@@ -353,7 +359,7 @@ import el2_pkg::*;
                                                       (lsu_pkt_r.valid & ~lsu_pkt_r.dma)) &
                                                       lsu_bus_buffer_empty_any;
 
-   assign lsu_active = (lsu_pkt_m.valid | lsu_pkt_r.valid | ld_single_ecc_error_r_ff) | ~lsu_bus_buffer_empty_any;  // This includes DMA. Used for gating top clock
+   assign lsu_active = (lsu_pkt_m.valid | lsu_pkt_r.valid | ld_single_ecc_error_r_ff | dccm_wr_rdbk_pend_ff) | ~lsu_bus_buffer_empty_any;  // This includes DMA. Used for gating top clock
 
    // Instantiate the store buffer
    assign store_stbuf_reqvld_r = lsu_pkt_r.valid & lsu_pkt_r.store & addr_in_dccm_r & ~flush_r & (~lsu_pkt_r.dma | ((lsu_pkt_r.by | lsu_pkt_r.half) & ~lsu_double_ecc_error_r));

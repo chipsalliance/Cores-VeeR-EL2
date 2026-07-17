@@ -77,10 +77,12 @@ This register is mapped to the non-standard read/write CSR address space.
     - 1: ICCM/DCCM ECC checking disabled
   - R/W
   - 0
-* - Reserved
+* - dwrd
   - 7
-  - Reserved
-  - R
+  - DCCM write-readback check disable (only meaningful when built with `RV_DCCM_WR_READBACK`; reads 0 otherwise, see [](error-protection.md#dccm-write-readback-check)):
+    - 0: DCCM write-readback check enabled
+    - 1: DCCM write-readback check disabled
+  - R/W
   - 0
 * - sepd
   - 6

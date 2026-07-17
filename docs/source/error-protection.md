@@ -260,6 +260,25 @@ As after the read XOR the ECC check happens, the mismatch is detected as an ECC 
 
 Firmware or backdoor loaders that write the DCCM directly must apply the same address XOR.
 
+## DCCM Write Readback Check
+
+When the DCCM write-readback check is built in (`RV_DCCM_WR_READBACK`, independent of [Dual-Core Lock-Step](dual-core-lock-step.md) / `RV_LOCKSTEP_ENABLE`) and not disabled at runtime (`dwrd` bit in [mfdc](core-control.md#feature-disable-control-register-mfdc), enabled by default like every other `mfdc` feature), every core-store write that commits to the DCCM is checked against the data that was written.
+
+Only core-store writes (drained from the store buffer) are covered. DMA writes and ECC single-bit-correction write-backs are not checked by this mechanism.
+
+Reads are never stalled or delayed by this check, under any circumstance. If a real read that would use the DCCM port anyway happens to target the pending check's address, its own result is reused to complete the check for free.
+Otherwise, the check opportunistically steals the DCCM port on any cycle where nothing else wants to read.
+This is possible only because new DCCM writes are held off for as long as one check remains outstanding, and only one check is ever outstanding at a time.
+ECC single-bit-correction write-backs are not held off, but they are always preceded by a matching read that the check would already have snooped.
+
+Because reads are never delayed to force a check to complete, a check's completion time is not bounded: under a sustained stream of reads that never touches the pending address and never leaves a fully read-idle cycle, a check can in principle remain outstanding indefinitely.
+Deferred writes simply accumulate in the existing 4-entry store buffer.
+Once it fills, new stores stall via its own pre-existing `lsu_stbuf_full_any` capacity backpressure rather than through any new mechanism specific to this feature.
+Store throughput degrades gracefully under sustained store pressure instead of being cut on every store.
+
+A mismatch is reported on the `dccm_write_readback_error` output pin.
+Unlike the ECC error pins, this is not tied into a CSR or interrupt, it is left to the SoC integrator to decide how to handle it.
+
 ## ICache Address Infection
 
 When the ICache address-XOR infection feature is enabled (`RV_ICACHE_ADDR_XOR`, which requires [Dual-Core Lock-Step](dual-core-lock-step.md) / `RV_LOCKSTEP_ENABLE`), the ICache cache line address is XORed into the data that gets stored into the ICache.

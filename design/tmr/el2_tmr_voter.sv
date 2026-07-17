@@ -5,9 +5,6 @@
 module el2_tmr_voter # (
   parameter unsigned Width = 1  // Signal width
 ) (
-  input  logic clk_i,
-  input  logic rst_ni,
-
   // Inputs to the voter
   input  logic [Width-1:0] in_a,
   input  logic [Width-1:0] in_b,
@@ -24,7 +21,11 @@ module el2_tmr_voter # (
   // Fault indicators
   output el2_mubi_pkg::el2_mubi_t fault_a,
   output el2_mubi_pkg::el2_mubi_t fault_b,
-  output el2_mubi_pkg::el2_mubi_t fault_c
+  output el2_mubi_pkg::el2_mubi_t fault_c,
+
+  // Critical (unrecoverable) fault inidicator
+  output el2_mubi_pkg::el2_mubi_t critical
+
 );
   import el2_mubi_pkg::*;
 
@@ -60,6 +61,8 @@ module el2_tmr_voter # (
         sel_b   = El2MuBiTrue;
         sel_c   = El2MuBiFalse;
 
+        critical = El2MuBiFalse;
+
       // B is faulty
       end else if (mubi_check_true(mubi_and3(mubi_not(cmp_ab), mubi_not(cmp_bc), cmp_ca))) begin
         fault_a = El2MuBiFalse;
@@ -69,6 +72,8 @@ module el2_tmr_voter # (
         sel_a   = El2MuBiFalse;
         sel_b   = El2MuBiFalse;
         sel_c   = El2MuBiTrue;
+
+        critical = El2MuBiFalse;
 
       // C is faulty
       end else if (mubi_check_true(mubi_and3(cmp_ab, mubi_not(cmp_bc), mubi_not(cmp_ca)))) begin
@@ -80,6 +85,8 @@ module el2_tmr_voter # (
         sel_b   = El2MuBiFalse;
         sel_c   = El2MuBiFalse;
 
+        critical = El2MuBiFalse;
+
       // Complete disagreement
       end else if (mubi_check_true(mubi_and3(mubi_not(cmp_ab), mubi_not(cmp_bc), mubi_not(cmp_ca)))) begin
         fault_a = El2MuBiTrue;
@@ -89,6 +96,8 @@ module el2_tmr_voter # (
         sel_a   = El2MuBiFalse;
         sel_b   = El2MuBiFalse;
         sel_c   = El2MuBiFalse;
+
+        critical = El2MuBiTrue;
 
       // Complete agreement
       end else begin
@@ -100,6 +109,7 @@ module el2_tmr_voter # (
         sel_b   = El2MuBiFalse;
         sel_c   = El2MuBiFalse;
 
+        critical = El2MuBiFalse;
       end
 
     // A is disabled
@@ -115,6 +125,8 @@ module el2_tmr_voter # (
         sel_b   = El2MuBiFalse;
         sel_c   = El2MuBiFalse;
 
+        critical = El2MuBiTrue;
+
       // Agreement
       end else begin
         fault_a = El2MuBiFalse;
@@ -124,6 +136,8 @@ module el2_tmr_voter # (
         sel_a   = El2MuBiFalse;
         sel_b   = El2MuBiTrue;
         sel_c   = El2MuBiFalse;
+
+        critical = El2MuBiFalse;
       end
 
     // B is disabled
@@ -139,6 +153,8 @@ module el2_tmr_voter # (
         sel_b   = El2MuBiFalse;
         sel_c   = El2MuBiFalse;
 
+        critical = El2MuBiTrue;
+
       // Agreement
       end else begin
         fault_a = El2MuBiFalse;
@@ -148,6 +164,8 @@ module el2_tmr_voter # (
         sel_a   = El2MuBiFalse;
         sel_b   = El2MuBiFalse;
         sel_c   = El2MuBiTrue;
+
+        critical = El2MuBiFalse;
       end
 
     // C is disabled
@@ -163,6 +181,8 @@ module el2_tmr_voter # (
         sel_b   = El2MuBiFalse;
         sel_c   = El2MuBiFalse;
 
+        critical = El2MuBiTrue;
+
       // Agreement
       end else begin
         fault_a = El2MuBiFalse;
@@ -172,6 +192,8 @@ module el2_tmr_voter # (
         sel_a   = El2MuBiTrue;
         sel_b   = El2MuBiFalse;
         sel_c   = El2MuBiFalse;
+
+        critical = El2MuBiFalse;
       end
 
     // Two or more inputs are disabled
@@ -184,6 +206,7 @@ module el2_tmr_voter # (
       sel_b   = El2MuBiFalse;
       sel_c   = El2MuBiFalse;
 
+      critical = El2MuBiTrue;
     end
 
   end

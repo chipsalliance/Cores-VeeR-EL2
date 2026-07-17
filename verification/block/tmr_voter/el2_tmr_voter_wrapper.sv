@@ -29,9 +29,12 @@ module el2_tmr_voter_wrapper # (
   // Fault indicators
   output el2_mubi_pkg::el2_mubi_t fault_a,
   output el2_mubi_pkg::el2_mubi_t fault_b,
-  output el2_mubi_pkg::el2_mubi_t fault_c
+  output el2_mubi_pkg::el2_mubi_t fault_c,
+
+  // Critical (unrecoverable) fault inidicator
+  output el2_mubi_pkg::el2_mubi_t critical
 );
 
-  el2_rmt_voter #(.Width(Width)) dut (.*);
+  el2_tmr_voter #(.Width(Width)) dut (.*);
 
 endmodule

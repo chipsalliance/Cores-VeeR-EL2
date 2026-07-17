@@ -1231,7 +1231,6 @@ An integrator targeting silicon (or fault-injection / safety hardening) **must**
 * Override `RV_PRIM_BUF_IMPL` to point at a primitive that already carries those constraints. For example, Caliptra builds pass `+define+RV_PRIM_BUF_IMPL=caliptra_prim_buf`, whose generic/Xilinx implementations are constrained `size_only` / `keep` by the Caliptra synthesis flow.
 
 Failing to do either leaves the DCLS protection unverified against logic-optimization removal.
-```
 
 ## Validation Plan
 

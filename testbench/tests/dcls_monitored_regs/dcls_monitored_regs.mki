@@ -1,0 +1,1 @@
+OFILES = dcls_monitored_regs.o crt0.o printf.o

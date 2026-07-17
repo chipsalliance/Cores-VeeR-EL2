@@ -43,7 +43,6 @@ class TestSequence(uvm_sequence):
             it.signals["in_b"] = value
             it.signals["in_c"] = value
 
-            # Make a single random fault
             if random.random() < 0.25:
                 upset = random.randrange(0, 1 << width)
                 which = random.choice(enabled).replace("en_", "in_")
@@ -61,6 +60,7 @@ class TestSequence(uvm_sequence):
 class Scoreboard(BaseScoreboard):
     """
     Check if mismatches are correctly detected between any two enabled inputs
+    and if critical faults are detected.
     """
 
     def check_phase(self):
@@ -89,6 +89,7 @@ class Scoreboard(BaseScoreboard):
             pred_fault_a = MuBiFalse
             pred_fault_b = MuBiFalse
             pred_fault_c = MuBiFalse
+            pred_crit    = MuBiFalse
 
             # C is disabled
             if en_a and en_b and not en_c:
@@ -96,6 +97,7 @@ class Scoreboard(BaseScoreboard):
                 pred_fault_a = MuBiTrue if (in_a != in_b) else MuBiFalse
                 pred_fault_b = MuBiTrue if (in_a != in_b) else MuBiFalse
                 pred_fault_c = MuBiFalse
+                pred_crit    = MuBiTrue if (in_a != in_b) else MuBiFalse
 
             # A is disabled
             elif not en_a and en_b and en_c:
@@ -103,6 +105,7 @@ class Scoreboard(BaseScoreboard):
                 pred_fault_a = MuBiFalse
                 pred_fault_b = MuBiTrue if (in_b != in_c) else MuBiFalse
                 pred_fault_c = MuBiTrue if (in_b != in_c) else MuBiFalse
+                pred_crit    = MuBiTrue if (in_b != in_c) else MuBiFalse
 
             # B is disabled
             elif en_a and not en_b and en_c:
@@ -110,6 +113,7 @@ class Scoreboard(BaseScoreboard):
                 pred_fault_a = MuBiTrue if (in_c != in_a) else MuBiFalse
                 pred_fault_b = MuBiFalse
                 pred_fault_c = MuBiTrue if (in_c != in_a) else MuBiFalse
+                pred_crit    = MuBiTrue if (in_c != in_a) else MuBiFalse
 
             # Should not happen in this test
             else:
@@ -119,6 +123,7 @@ class Scoreboard(BaseScoreboard):
             assert it.signals["fault_a"] in [MuBiTrue, MuBiFalse]
             assert it.signals["fault_b"] in [MuBiTrue, MuBiFalse]
             assert it.signals["fault_c"] in [MuBiTrue, MuBiFalse]
+            assert it.signals["critical"] in [MuBiTrue, MuBiFalse]
 
             # Check
             if pred_out is not None:
@@ -127,6 +132,7 @@ class Scoreboard(BaseScoreboard):
             assert pred_fault_a == it.signals["fault_a"]
             assert pred_fault_b == it.signals["fault_b"]
             assert pred_fault_c == it.signals["fault_c"]
+            assert pred_crit    == it.signals["critical"]
 
 # ==============================================================================
 

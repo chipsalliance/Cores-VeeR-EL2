@@ -62,6 +62,13 @@ run_regression_test(){
         COMMON_PARAMS="-set lockstep_enable=1 -set lockstep_regfile_enable=1 -set lockstep_delay=${DCLS_DELAY} ${COMMON_PARAMS}"
     fi
 
+    # REGFILE_READ_ENABLE may not be set
+    set +u
+    if [[ -n "${REGFILE_READ_ENABLE:-}" ]]; then
+        COMMON_PARAMS="-set lockstep_regfile_read_enable=${REGFILE_READ_ENABLE} ${COMMON_PARAMS}"
+    fi
+    set -u
+
     # ICCM_ADDR_XOR may not be set
     set +u
     if [[ -z "${ICCM_ADDR_XOR}" ]]; then

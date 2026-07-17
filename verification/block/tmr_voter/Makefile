@@ -12,7 +12,7 @@ SRCDIR   := $(abspath $(TEST_DIR)../../../../design)
 TEST_FILES = $(sort $(wildcard test_*.py))
 
 MODULE    ?= $(subst $(space),$(comma),$(subst .py,,$(TEST_FILES)))
-TOPLEVEL   = el2_tmr_voter
+TOPLEVEL   = el2_tmr_voter_wrapper
 
 COMPILE_ARGS = \
  -DRV_MUBI_WIDTH=2 \

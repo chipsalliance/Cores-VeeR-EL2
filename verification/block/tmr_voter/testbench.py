@@ -133,7 +133,7 @@ class BaseEnv(uvm_env):
             "in_a", "in_b", "in_c",
             "en_a", "en_b", "en_c",
             "out",
-            "fault_a", "fault_b", "fault_c",
+            "fault_a", "fault_b", "fault_c", "critical",
         ])
 
         # Scoreboard(s)

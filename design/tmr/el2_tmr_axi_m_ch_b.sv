@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Antmicro
 // SPDX-License-Identifier: Apache-2.0
 
-module el2_tmr_axi_ch_b # (
+module el2_tmr_axi_m_ch_b # (
   parameter unsigned IdWidth = 1
 ) (
 

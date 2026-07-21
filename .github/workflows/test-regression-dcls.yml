@@ -144,6 +144,57 @@ jobs:
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
 
+  regression-tests-dccm-wr-readback:
+    name: Regression tests (DCLS + DCCM write readback)
+    runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:20260714
+    strategy:
+      matrix:
+        bus: ["axi", "ahb"]
+        # DCCM-exercising subset, built with DCLS + RV_DCCM_WR_READBACK enabled. The readback
+        # feature only affects the DCCM write path and is privilege-independent, so a single
+        # priv level of these DCCM/ECC tests is enough to exercise it without re-running the
+        # full matrix.
+        test: ["dccm_wr_readback", "hello_world_dccm", "ecc"]
+        coverage: ["all"]
+        priv: ["0"]
+        tb_extra_args: [""]
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/regression/.cache/"
+      DCLS_ENABLE: "1"
+      DCLS_DELAY: "0"
+      DCCM_WR_READBACK: "1"
+
+    steps:
+      - name: Setup repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+          pip install -r .github/scripts/requirements-coverage.txt
+          echo "PATH=$PATH" >> $GITHUB_ENV
+
+      - name: Setup environment
+        run: |
+          RV_ROOT=`pwd`
+          echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
+          PYTHONUNBUFFERED=1
+          echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
+          TEST_PATH=$RV_ROOT/test_results
+          echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+
+      - name: Run tests
+        run: |
+          export RV_ROOT=`pwd`
+          export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+
   custom-regression-tests:
     name: Custom regression tests
     if: inputs.run_custom

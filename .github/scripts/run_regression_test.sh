@@ -70,6 +70,17 @@ run_regression_test(){
         COMMON_PARAMS="-set iccm_addr_xor=1 ${COMMON_PARAMS}"
     fi
 
+    # DCCM_WR_READBACK may not be set
+    set +u
+    if [[ -z "${DCCM_WR_READBACK}" ]]; then
+        DCCM_WR_READBACK="0"
+    fi
+    set -u
+
+    if [[ "${DCCM_WR_READBACK}" == "1" ]]; then
+        COMMON_PARAMS="-set dccm_wr_readback=1 ${COMMON_PARAMS}"
+    fi
+
     COMMON_PARAMS="-set=icache_waypack=${ICACHE_WAYPACK} ${COMMON_PARAMS}"
 
     if [[ "${BUS}" == "axi" ]]; then

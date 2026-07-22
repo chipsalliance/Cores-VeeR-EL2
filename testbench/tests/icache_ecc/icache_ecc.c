@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: Apache-2.0
- * Copyright 2024 Google LLC
+ * Copyright 2026 Google LLC
  *
  * ICache Core-Side ECC & Parity Fault Recovery Test
  *

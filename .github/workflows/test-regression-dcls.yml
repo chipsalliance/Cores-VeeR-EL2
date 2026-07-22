@@ -18,6 +18,8 @@ jobs:
     outputs:
       tests: ${{ steps.select.outputs.tests }}
       custom_tests: ${{ steps.select-custom.outputs.tests }}
+      mubi_configs: ${{ steps.select-mubi.outputs.configs }}
+      icache_ecc_tests: ${{ steps.select-icache-ecc.outputs.tests }}
     steps:
       - uses: actions/checkout@v4
       - name: Select tests
@@ -32,8 +34,40 @@ jobs:
         run: |
           echo "tests=$(python3 .github/scripts/select_pr_tests.py \
             '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}-custom' 4 \
-            'hello_world,hello_world_dccm,dcls,dcls_debug,dcls_error_ctrl,dhry,ecc,csr_misa,csr_access,csr_mstatus,csr_mseccfg,perf_counters,icache,bitmanip' \
+            'hello_world,hello_world_dccm,dcls,dcls_debug,dcls_error_ctrl,dcls_ecc_asymmetric,dcls_internal_state,ecc_threshold,dhry,ecc,csr_misa,csr_access,csr_mstatus,csr_mseccfg,perf_counters,icache,bitmanip' \
             'csr_access')" | tee -a $GITHUB_OUTPUT
+      - name: Select ICache ECC tests
+        id: select-icache-ecc
+        run: |
+          echo "tests=$(python3 .github/scripts/select_pr_tests.py \
+            '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}-icache-ecc' 4 \
+            'icache_ecc,dcls_ecc_asymmetric,dcls_internal_state,ecc_threshold')" | tee -a $GITHUB_OUTPUT
+      - name: Select MUBI configs
+        id: select-mubi
+        run: |
+          python3 -c "
+          import json, random
+          all_configs = [
+              {'width': 2, 'true_val': '0x2', 'false_val': '0x1'},
+              {'width': 4, 'true_val': '0xE', 'false_val': '0x1'},
+              {'width': 4, 'true_val': '0xA', 'false_val': '0x5'},
+              {'width': 8, 'true_val': '0xFE', 'false_val': '0x1'},
+              {'width': 8, 'true_val': '0x55', 'false_val': '0xAA'},
+              {'width': 16, 'true_val': '0xFFFE', 'false_val': '0x0001'},
+              {'width': 16, 'true_val': '0x5555', 'false_val': '0xAAAA'},
+              {'width': 32, 'true_val': '0xFFFFFFFE', 'false_val': '0x00000001'},
+              {'width': 32, 'true_val': '0x55555555', 'false_val': '0xAAAAAAAA'},
+          ]
+          event_name = '${{ github.event_name }}'
+          seed = '${{ github.event.pull_request.head.sha || github.sha }}-mubi'
+          if event_name == 'pull_request':
+              pool = [c for c in all_configs if c['width'] != 8]
+              selected = random.Random(seed).sample(pool, min(2, len(pool)))
+              selected.sort(key=lambda c: (c['width'], c['true_val'], c['false_val']))
+          else:
+              selected = all_configs
+          print('configs=' + json.dumps(selected))
+          " | tee -a $GITHUB_OUTPUT
 
   regression-tests:
     name: Regression tests
@@ -108,7 +142,7 @@ jobs:
   regression-tests-iccm-addr-xor:
     name: Regression tests (DCLS + ICCM address-XOR)
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20250411084921
+    container: ghcr.io/antmicro/cores-veer-el2:20260714
     strategy:
       matrix:
         bus: ["axi", "ahb"]
@@ -127,30 +161,21 @@ jobs:
       ICCM_ADDR_XOR: "1"
 
     steps:
-      - name: Install utils
-        run: |
-          echo "deb http://archive.ubuntu.com/ubuntu/ noble main universe" | sudo tee -a /etc/apt/sources.list > /dev/null
-          echo "debconf debconf/frontend select Noninteractive" | sudo debconf-set-selections
-          sudo apt -qqy update && sudo apt -qqy --no-install-recommends install \
-            git python3 python3-pip build-essential ninja-build ccache \
-            gcc-riscv64-unknown-elf
-          pip3 install meson --break-system-packages
-
       - name: Setup repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Install coverage dependencies
+      - name: Install dependencies
         run: |
           python3 -m venv .venv
           source .venv/bin/activate
+          pip install -r requirements.txt
           pip install -r .github/scripts/requirements-coverage.txt
           echo "PATH=$PATH" >> $GITHUB_ENV
 
       - name: Setup environment
         run: |
-          echo "/opt/verilator/bin" >> $GITHUB_PATH
           RV_ROOT=`pwd`
           echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
           PYTHONUNBUFFERED=1
@@ -160,7 +185,6 @@ jobs:
 
       - name: Run tests
         run: |
-          export PATH=/opt/verilator/bin:$PATH
           export RV_ROOT=`pwd`
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
@@ -218,16 +242,79 @@ jobs:
 
   regression-tests-icache-ecc:
     name: Regression tests (DCLS + ICache ECC/Parity)
+    needs: [generate-matrix]
     runs-on: ubuntu-latest
     container: ghcr.io/antmicro/cores-veer-el2:20260714
     strategy:
       matrix:
         bus: ["axi", "ahb"]
-        test: ["icache_ecc"]
+        test: ${{ fromJSON(needs.generate-matrix.outputs.icache_ecc_tests) }}
         coverage: ["all"]
         priv: ["1"]
         delay: ["0", "1", "2", "3", "4"]
         ecc: ["0", "1"]
+        rf_read: ["0", "1"]
+        tb_extra_args: [""]
+        exclude:
+          # Only dcls_internal_state runs with rf_read = 1
+          - test: "icache_ecc"
+            rf_read: "1"
+          - test: "dcls_ecc_asymmetric"
+            rf_read: "1"
+          - test: "ecc_threshold"
+            rf_read: "1"
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/regression/.cache/"
+      DCLS_ENABLE: "1"
+      DCLS_DELAY: ${{ matrix.delay }}
+      DCLS_REGFILE_READ_ENABLE: ${{ matrix.rf_read }}
+
+    steps:
+      - name: Setup repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+          pip install -r .github/scripts/requirements-coverage.txt
+          echo "PATH=$PATH" >> $GITHUB_ENV
+
+      - name: Setup environment
+        run: |
+          RV_ROOT=`pwd`
+          echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
+          PYTHONUNBUFFERED=1
+          echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
+          TEST_PATH=$RV_ROOT/test_results
+          echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+
+      - name: Run tests
+        run: |
+          export RV_ROOT=`pwd`
+          export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
+          export ECC="${{ matrix.ecc }}"
+          export DCLS_REGFILE_READ_ENABLE="${{ matrix.rf_read }}"
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+
+  regression-tests-mubi:
+    name: DCLS MUBI Regression
+    needs: [generate-matrix]
+    runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:20260714
+    strategy:
+      fail-fast: false
+      matrix:
+        bus: ["axi", "ahb"]
+        mubi: ${{ fromJSON(needs.generate-matrix.outputs.mubi_configs) }}
+        test: ["dcls_mubi_sweep"]
+        coverage: ["all"]
+        priv: ["1"]
+        delay: ["0", "1", "2", "3", "4"]
         tb_extra_args: [""]
     env:
       DEBIAN_FRONTEND: "noninteractive"
@@ -258,12 +345,15 @@ jobs:
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
 
-      - name: Run tests
+      - name: Run DCLS MUBI regression test
         run: |
           export RV_ROOT=`pwd`
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
-          export ECC="${{ matrix.ecc }}"
-          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+          export MUBI_WIDTH="${{ matrix.mubi.width }}"
+          export MUBI_TRUE="${{ matrix.mubi.true_val }}"
+          export MUBI_FALSE="${{ matrix.mubi.false_val }}"
+          echo "Executing MUBI Regression: Bus=${{ matrix.bus }}, Width=${MUBI_WIDTH}bit, True=${MUBI_TRUE}, False=${MUBI_FALSE}, Delay=${DCLS_DELAY}"
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test }} ${{ matrix.coverage }} ${{ matrix.priv }} 0
 
   custom-regression-tests:
     name: Custom regression tests
@@ -290,6 +380,12 @@ jobs:
             test: "insns"
           - priv: "0"
             test: "perf_counters"
+          - priv: "0"
+            test: "dcls_ecc_asymmetric"
+          - priv: "0"
+            test: "dcls_internal_state"
+          - priv: "0"
+            test: "ecc_threshold"
           # end tests which require user mode
     env:
       GHA_EXTERNAL_DISK: additional-tools

@@ -773,9 +773,14 @@ module tb_top
     integer fd, tp, el;
     logic next_dbus_error;
     logic next_ibus_error;
+    logic next_ic_error;
+    logic next_dcls_mismatch;
+    logic dcls_mismatch_active;
+    logic force_veer_corrupt;
     logic inject_veer_in_dist, inject_lockstep_in_dist;
     logic clear_inject_in_dist;
     logic [8:0] inject_veer_in_dist_no, inject_lockstep_in_dist_no;
+    bit   at_newline = 1'b1;
 
     always @(negedge core_clk or negedge rst_l) begin
         if (rst_l == 0) begin
@@ -783,9 +788,11 @@ module tb_top
             next_dbus_error <= '0;
             next_ibus_error <= '0;
             inject_veer_in_dist <= '0;
+
             inject_lockstep_in_dist <= '0;
             clear_inject_in_dist <= '0;
             rst_l_cmd <= '1;
+            at_newline <= 1'b1;
             inject_veer_in_dist_no <= '0;
             inject_lockstep_in_dist_no <= '0;
         `ifdef RV_LOCKSTEP_ENABLE
@@ -812,8 +819,14 @@ module tb_top
             end
             // console Monitor
             if( mailbox_data_val & mailbox_write) begin
-                $fwrite(fd,"%c", mailbox_data[7:0]);
-                $write("%c", mailbox_data[7:0]);
+                if (at_newline) begin
+                    $fwrite(fd,"[%0t ns] %c", $time, mailbox_data[7:0]);
+                    $write("[%0t ns] %c", $time, mailbox_data[7:0]);
+                end else begin
+                    $fwrite(fd,"%c", mailbox_data[7:0]);
+                    $write("%c", mailbox_data[7:0]);
+                end
+                at_newline <= (mailbox_data[7:0] == 8'ha);
             end
             // Interrupt signals control
             // data[7:0] == 0x80 - clear ext irq line index given by data[15:8]
@@ -875,10 +888,28 @@ module tb_top
                 inject_lockstep_in_dist_no <= mailbox_data[15:8];
             end
             if (mailbox_write && (mailbox_data[7:0] == 8'h93)) begin
-                lockstep_err_injection_en_i <= mailbox_data[15:8];
+                if (el2_mubi_pkg::El2MuBiWidth == 32) begin
+                    if (mailbox_data[31:8] == el2_mubi_pkg::El2MuBiTrue[23:0])
+                        lockstep_err_injection_en_i <= el2_mubi_pkg::El2MuBiTrue;
+                    else if (mailbox_data[31:8] == el2_mubi_pkg::El2MuBiFalse[23:0])
+                        lockstep_err_injection_en_i <= el2_mubi_pkg::El2MuBiFalse;
+                    else
+                        lockstep_err_injection_en_i <= el2_mubi_pkg::el2_mubi_t'(mailbox_data[31:8]);
+                end else begin
+                    lockstep_err_injection_en_i <= el2_mubi_pkg::el2_mubi_t'(mailbox_data[63:8]);
+                end
             end
             if (mailbox_write && (mailbox_data[7:0] == 8'h94)) begin
-                disable_corruption_detection_i <= mailbox_data[15:8];
+                if (el2_mubi_pkg::El2MuBiWidth == 32) begin
+                    if (mailbox_data[31:8] == el2_mubi_pkg::El2MuBiTrue[23:0])
+                        disable_corruption_detection_i <= el2_mubi_pkg::El2MuBiTrue;
+                    else if (mailbox_data[31:8] == el2_mubi_pkg::El2MuBiFalse[23:0])
+                        disable_corruption_detection_i <= el2_mubi_pkg::El2MuBiFalse;
+                    else
+                        disable_corruption_detection_i <= el2_mubi_pkg::el2_mubi_t'(mailbox_data[31:8]);
+                end else begin
+                    disable_corruption_detection_i <= el2_mubi_pkg::el2_mubi_t'(mailbox_data[63:8]);
+                end
             end
             if (mailbox_write && (mailbox_data[7:0] == 8'h95)) begin
                 clear_inject_in_dist <= 1'b1;
@@ -887,7 +918,7 @@ module tb_top
             end
         `endif // RV_LOCKSTEP_ENABLE
             if(mailbox_write && (mailbox_data[7:0] == 8'h96)) begin
-                $display("Reset all");
+                $display("[%0t ns] Reset all",$time);
                 rst_l_cmd <= 8'b1;
             end
             // CPU debug enter/exit sequence
@@ -909,23 +940,23 @@ module tb_top
             end
             // ECC error injection
             if(mailbox_write && (mailbox_data[7:0] == 8'he0)) begin
-                $display("Injecting single bit ICCM error");
+                $display("[%0t ns] Injecting single bit ICCM error",$time);
                 error_injection_mode.iccm_single_bit_error <= 1'b1;
             end
             else if(mailbox_write && (mailbox_data[7:0] == 8'he1)) begin
-                $display("Injecting double bit ICCM error");
+                $display("[%0t ns] Injecting double bit ICCM error",$time);
                 error_injection_mode.iccm_double_bit_error <= 1'b1;
             end
             else if(mailbox_write && (mailbox_data[7:0] == 8'he2)) begin
-                $display("Injecting single bit DCCM error");
+                $display("[%0t ns] Injecting single bit DCCM error",$time);
                 error_injection_mode.dccm_single_bit_error <= 1'b1;
             end
             else if(mailbox_write && (mailbox_data[7:0] == 8'he3)) begin
-                $display("Injecting double bit DCCM error");
+                $display("[%0t ns] Injecting double bit DCCM error",$time);
                 error_injection_mode.dccm_double_bit_error <= 1'b1;
             end
             else if(mailbox_write && (mailbox_data[7:0] == 8'he4)) begin
-                $display("Disable ECC error injection");
+                $display("[%0t ns] Disable ECC error injection",$time);
                 error_injection_mode <= '0;
             end
             // Memory signature dump
@@ -941,35 +972,35 @@ module tb_top
                 // The reason why it's determined here is that it's on the system integrating VeeR
                 // to determine exact behavior and status report of this indicator
                     if (corruption_detected_o != el2_mubi_pkg::El2MuBiTrue) begin
-                        $display("No core corruption detected..\n");
-                        $display("TEST_FAILED");
+                        $display("[%0t ns] No core corruption detected..\n",$time);
+                        $display("[%0t ns] TEST_FAILED",$time);
                         `ifdef TB_SILENT_FAIL
                             $finish;
                         `else
                             $fatal;
                         `endif // TB_SILENT_FAIL
                     end else begin
-                        $display("Core corruption has been detected..\n");
-                        $display("TEST_PASSED");
+                        $display("[%0t ns] Core corruption has been detected..\n",$time);
+                        $display("[%0t ns] TEST_PASSED",$time);
                         $finish;
                     end
                 `else
-                    $display("DCLS feature is disabled. No corruption will be detected.\n");
-                    $display("TEST_PASSED");
+                    $display("[%0t ns] DCLS feature is disabled. No corruption will be detected.\n",$time);
+                    $display("[%0t ns] TEST_PASSED",$time);
                     $finish;
                 `endif // RV_LOCKSTEP_ENABLE
             end
             if(mailbox_write && mailbox_data[7:0] == 8'hff) begin
-                $display("TEST_PASSED");
-                $display("\nFinished : minstret = %0d, mcycle = %0d", `DEC.tlu.minstretl[31:0],`DEC.tlu.mcyclel[31:0]);
-                $display("See \"exec.log\" for execution trace with register updates..\n");
+                $display("[%0t ns] TEST_PASSED",$time);
+                $display("[%0t ns] \nFinished : minstret = %0d, mcycle = %0d",$time, `DEC.tlu.minstretl[31:0],`DEC.tlu.mcyclel[31:0]);
+                $display("[%0t ns] See \"exec.log\" for execution trace with register updates..\n",$time);
                 // OpenOCD test breaks if simulation closes the TCP connection first.
                 // This delay allows OpenOCD to close the connection before the #finish.
                 #15000;
                 $finish;
             end
             else if(mailbox_write && mailbox_data[7:0] == 8'h1) begin
-                $display("TEST_FAILED");
+                $display("[%0t ns] TEST_FAILED",$time);
                 `ifdef TB_SILENT_FAIL
                     $finish;
                 `else
@@ -1014,6 +1045,26 @@ module tb_top
         end
     end
     `endif
+
+    always @(posedge core_clk or negedge rst_l) begin
+        if (~rst_l) begin
+            next_ic_error <= 0;
+        end else begin
+            if (mailbox_write && mailbox_data[7:0] == 8'h89) begin
+                next_ic_error <= 1;
+            end else if (next_ic_error && (|rvtop_wrapper.rvtop.ic_rd_bank_check_en)) begin
+                next_ic_error <= 0;
+            end
+        end
+    end
+
+    always @(*) begin
+        if (next_ic_error && (|rvtop_wrapper.rvtop.ic_rd_bank_check_en)) begin
+            force rvtop_wrapper.rvtop.ic_rd_data = 142'h1;
+        end else begin
+            release rvtop_wrapper.rvtop.ic_rd_data;
+        end
+    end
 
 `ifdef RV_LOCKSTEP_ENABLE
 `define VEER rvtop_wrapper.rvtop.veer
@@ -1281,6 +1332,32 @@ module tb_top
                 92: force `LOCKSTEP_CORE.dma_hresp = '1;
                 // --- END ADDED AHB FORCES ---
             `endif
+            // --- Internal State & Safety Tamper Forces (Common for AHB & AXI) ---
+            `ifndef VERILATOR
+                200: begin
+                    logic [31:0] cur_gpr;
+                    cur_gpr = `LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout;
+                    force `LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout[15] = ~cur_gpr[15]; // Flip register a5 bit 15
+                    $display("forcing cur_gpr");
+                end
+                201: begin
+                    logic [30:0] cur_pc;
+                    cur_pc = `LOCKSTEP.xshadow_core.ifu.aln.q0pcff.genblock.genblock.dff.dout;
+                    force `LOCKSTEP.xshadow_core.ifu.aln.q0pcff.genblock.genblock.dff.dout[14] = ~cur_pc[14]; // Flip PC bit 15 (mapped to internal dout[14])
+                    $display("forcing cur_pc");
+                end
+                202: begin
+                    logic [30:0] cur_mtvec;
+                    cur_mtvec = `LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.genblock.genblock.dff.dout;
+                    force `LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.genblock.genblock.dff.dout[4] = ~cur_mtvec[4]; // Flip mtvec bit 5 (mapped to internal dout[4])
+                    $display("forcing cur_mtvec");
+                end
+            `else
+                200: force `LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout[15] = ~`LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout[15]; // Flip register a5 bit 15
+                201: force `LOCKSTEP.xshadow_core.ifu.aln.q0pcff.genblock.genblock.dff.dout[14] = ~`LOCKSTEP.xshadow_core.ifu.aln.q0pcff.genblock.genblock.dff.dout[14]; // Flip PC bit 15 (mapped to internal dout[14])
+                202: force `LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.genblock.genblock.dff.dout[4] = ~`LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.genblock.genblock.dff.dout[4]; // Flip mtvec bit 5 (mapped to internal dout[4])
+            `endif
+                203: force `LOCKSTEP.xshadow_core.dec.tlu.mdccmect = 32'h10000004; // Force subordinate ECC threshold alert (Threshold=2, Counter=4)
                 default: force `LOCKSTEP.lockstep_err_injection_en_i = '1;
             endcase
         end else if (inject_veer_in_dist) begin: inject_veer_corruption
@@ -1588,6 +1665,10 @@ module tb_top
             release `LOCKSTEP_CORE.dec_tlu_perfcnt1;
             release `LOCKSTEP_CORE.dec_tlu_perfcnt2;
             release `LOCKSTEP_CORE.dec_tlu_perfcnt3;
+            release `LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout[15]; // Flip register a5 bit 15
+            release `LOCKSTEP.xshadow_core.ifu.aln.q0pcff.genblock.genblock.dff.dout[14] ; // Flip PC bit 15 (mapped to internal dout[14])
+            release `LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.genblock.genblock.dff.dout[4]; // 
+            release `LOCKSTEP.xshadow_core.dec.tlu.mdccmect;
             // --- END ADDED UNCONDITIONAL RELEASES ---
         `ifdef RV_BUILD_AXI4
             release `LOCKSTEP_CORE.lsu_axi_awready;
@@ -2111,8 +2192,11 @@ module tb_top
         preload_iccm();
 
 `ifndef VERILATOR
-        $dumpfile("dump.vcd");
-        $dumpvars(0, tb_top);
+   `ifdef VCS_DEBUG
+       $fsdbDumpfile("dump.fsdb");
+       $fsdbDumpvars(0, tb_top);
+       $fsdbDumpMDA();
+   `endif
         rst_l = 1'b1;
         rst_l = #5 1'b0;
         rst_l = #25 1'b1;
@@ -2121,34 +2205,35 @@ module tb_top
         i_cpu_run_req = 1'b0;
         mpc_debug_halt_req = 1'b0;
         mpc_debug_run_req = 1'b0;
-
-        $display("halting CPU and waiting for ack");
+   `ifndef RV_LOCKSTEP_ENABLE  //https://github.com/chipsalliance/Cores-VeeR-EL2/issues/475
+        $display("[%0t ns] halting CPU and waiting for ack",$time);
         i_cpu_halt_req = #5 1'b1;
         wait(o_cpu_halt_ack == 1);
-        $display("waiting for halt");
+        $display("[%0t ns] waiting for halt",$time);
         i_cpu_halt_req = 1'b0;
         wait(o_cpu_halt_status == 1'b1);
-        $display("requesting start and waiting for ack");
+        $display("[%0t ns] requesting start and waiting for ack",$time);
         i_cpu_run_req = 1'b1;
         wait(o_cpu_run_ack == 1'b1);
-        $display("waiting for run");
+        $display("[%0t ns] waiting for run",$time);
         i_cpu_run_req = 1'b0;
         wait(o_cpu_halt_status == 1'b0);
-        $display("done");
+        $display("[%0t ns] done",$time);
 
-        $display("requesting mpc halt and wating for ack");
+        $display("[%0t ns] requesting mpc halt and wating for ack",$time);
         mpc_debug_halt_req = 1'b1;
         wait(mpc_debug_halt_ack == 1'b1);
-        $display("waiting for debug halt");
+        $display("[%0t ns] waiting for debug halt",$time);
         mpc_debug_halt_req = 1'b0;
         wait(o_debug_mode_status == 1'b1);
-        $display("requesting start and waiting for ack");
+        $display("[%0t ns] requesting start and waiting for ack",$time);
         mpc_debug_run_req = 1'b1;
         wait(mpc_debug_run_ack == 1'b1);
-        $display("waiting for cpu to start");
+        $display("[%0t ns] waiting for cpu to start",$time);
         mpc_debug_run_req = 1'b0;
         wait(o_debug_mode_status == 1'b0);
-        $display("done");
+        $display("[%0t ns] done",$time);
+   `endif        
 `endif
     end
 `ifndef VERILATOR
@@ -2794,14 +2879,14 @@ addr = 'hffff_fff0;
 saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 if ( (saddr < `RV_ICCM_SADR) || (saddr > `RV_ICCM_EADR)) return;
 `ifndef RV_ICCM_ENABLE
-    $display("********************************************************");
-    $display("ICCM preload: there is no ICCM in VeeR, terminating !!!");
-    $display("********************************************************");
+    $display("[%0t ns] ********************************************************",$time);
+    $display("[%0t ns] ICCM preload: there is no ICCM in VeeR, terminating !!!",$time);
+    $display("[%0t ns] ********************************************************",$time);
     $finish;
 `endif
 addr += 4;
 eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
-$display("ICCM pre-load from %h to %h", saddr, eaddr);
+$display("[%0t ns] ICCM pre-load from %h to %h",$time, saddr, eaddr);
 
 for(addr= saddr; addr <= eaddr; addr+=4) begin
     data = {imem.mem[addr+3],imem.mem[addr+2],imem.mem[addr+1],imem.mem[addr]};
@@ -2829,14 +2914,14 @@ addr = 'hffff_fff8;
 saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 if (saddr < `RV_DCCM_SADR || saddr > `RV_DCCM_EADR) return;
 `ifndef RV_DCCM_ENABLE
-    $display("********************************************************");
-    $display("DCCM preload: there is no DCCM in VeeR, terminating !!!");
-    $display("********************************************************");
+    $display("[%0t ns] ********************************************************",$time);
+    $display("[%0t ns] DCCM preload: there is no DCCM in VeeR, terminating !!!",$time);
+    $display("[%0t ns] ********************************************************",$time);
     $finish;
 `endif
 addr += 4;
 eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
-$display("DCCM pre-load from %h to %h", saddr, eaddr);
+$display("[%0t ns] DCCM pre-load from %h to %h",$time, saddr, eaddr);
 
 for(addr=saddr; addr <= eaddr; addr+=4) begin
     data = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
@@ -3001,7 +3086,7 @@ endfunction
 task dump_signature ();
     integer fp, i;
 
-    $display("Dumping memory signature (0x%08X - 0x%08X)...",
+    $display("[%0t ns] Dumping memory signature (0x%08X - 0x%08X)...",$time,
         mem_signature_begin,
         mem_signature_end
     );

@@ -87,6 +87,20 @@ run_regression_test(){
         COMMON_PARAMS="-set dccm_wr_readback=1 ${COMMON_PARAMS}"
     fi
 
+    MUBI_WIDTH="${MUBI_WIDTH:-}"
+    MUBI_TRUE="${MUBI_TRUE:-}"
+    MUBI_FALSE="${MUBI_FALSE:-}"
+
+    if [[ -n "${MUBI_WIDTH}" ]]; then
+        COMMON_PARAMS="-set mubi_width=${MUBI_WIDTH} ${COMMON_PARAMS}"
+        if [[ -n "${MUBI_TRUE}" ]]; then
+            COMMON_PARAMS="-set mubi_true=${MUBI_TRUE} ${COMMON_PARAMS}"
+        fi
+        if [[ -n "${MUBI_FALSE}" ]]; then
+            COMMON_PARAMS="-set mubi_false=${MUBI_FALSE} ${COMMON_PARAMS}"
+        fi
+    fi
+
     COMMON_PARAMS="-set=icache_waypack=${ICACHE_WAYPACK} -set=icache_num_ways=${ICACHE_NUM_WAYS} ${COMMON_PARAMS}"
 
     if [[ "${BUS}" == "axi" ]]; then
@@ -101,15 +115,12 @@ run_regression_test(){
     echo -e "${COLOR_WHITE} CONF PARAMS = ${PARAMS}${COLOR_CLEAR}"
 
     mkdir -p ${RESULTS_DIR}
-    set +u
     ECC_VAL="${ECC:-1}"
-    set -u
     LOG="${RESULTS_DIR}/test_${NAME}_${BUS}_${COVERAGE}_${USER_MODE}_ecc_${ECC_VAL}.log"
     touch ${LOG}
-    DIR_TAG=$(basename "${RESULTS_DIR}")
-    DIR="run_${DIR_TAG}_${NAME}_${BUS}_${COVERAGE}_${USER_MODE}_ecc_${ECC_VAL}"
+    DIR="run_${NAME}_${BUS}_${COVERAGE}_${USER_MODE}_ecc_${ECC_VAL}"
 
-    if [ "$NAME" = "pmp_random" ]; then
+    if [ "$NAME" = "pmp_random" ] || [ "$NAME" = "dcls_mubi_sweep" ]; then
         EXTRA_ARGS='TB_MAX_CYCLES=8000000'
     else
         EXTRA_ARGS=

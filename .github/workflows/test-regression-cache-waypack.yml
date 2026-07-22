@@ -35,14 +35,14 @@ jobs:
         run: |
           echo "tests=$(python3 .github/scripts/select_pr_tests.py \
             '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}' 4 \
-            'hello_world,hello_world_dccm,hello_world_iccm,cmark,cmark_dccm,cmark_iccm,dhry,ecc,csr_misa,csr_access,csr_mstatus,csr_mseccfg,modesw,insns,irq,perf_counters,pmp,pmp_random,write_unaligned,icache,icache_ecc,bitmanip,read_after_read' \
+            'hello_world,hello_world_dccm,hello_world_iccm,cmark,cmark_dccm,cmark_iccm,dhry,ecc,ecc_threshold,csr_misa,csr_access,csr_mstatus,csr_mseccfg,modesw,insns,irq,perf_counters,pmp,pmp_random,write_unaligned,icache,icache_ecc,bitmanip,read_after_read' \
             'pmp_random')" | tee -a $GITHUB_OUTPUT
       - name: Select custom tests
         id: select-custom
         run: |
           echo "tests=$(python3 .github/scripts/select_pr_tests.py \
             '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}-custom' 4 \
-            'hello_world,hello_world_dccm,hello_world_iccm,cmark,cmark_dccm,cmark_iccm,dhry,ecc,csr_misa,csr_access,csr_mstatus,csr_mseccfg,modesw,insns,irq,perf_counters,pmp,write_unaligned,icache,icache_ecc,bitmanip,read_after_read')" | tee -a $GITHUB_OUTPUT
+            'hello_world,hello_world_dccm,hello_world_iccm,cmark,cmark_dccm,cmark_iccm,dhry,ecc,ecc_threshold,csr_misa,csr_access,csr_mstatus,csr_mseccfg,modesw,insns,irq,perf_counters,pmp,write_unaligned,icache,icache_ecc,bitmanip,read_after_read')" | tee -a $GITHUB_OUTPUT
 
   regression-tests:
     name: Regression tests
@@ -70,6 +70,8 @@ jobs:
             test: "insns"
           - priv: "0"
             test: "perf_counters"
+          - priv: "0"
+            test: "ecc_threshold"
           # end tests which require user mode
     env:
       DEBIAN_FRONTEND: "noninteractive"
@@ -148,6 +150,8 @@ jobs:
             test: "insns"
           - priv: "0"
             test: "perf_counters"
+          - priv: "0"
+            test: "ecc_threshold"
           # end tests which require user mode
           # These tests require AHB bus
           - bus: "axi"

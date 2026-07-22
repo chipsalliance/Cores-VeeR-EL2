@@ -1,0 +1,2 @@
+OFILES = crt0.o dcls_mubi_sweep.o printf.o
+TEST_NAME = dcls_mubi_sweep

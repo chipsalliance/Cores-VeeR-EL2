@@ -279,6 +279,8 @@ Store throughput degrades gracefully under sustained store pressure instead of b
 A mismatch is reported on the `dccm_write_readback_error` output pin.
 Unlike the ECC error pins, this is not tied into a CSR or interrupt, it is left to the SoC integrator to decide how to handle it.
 
+The address and the actual (corrupted) data of the first such mismatch since the last clear are latched and made available for inspection over [DMI](debugging.md#dccm-write-readback-fault-status-register-dccm_wr_rdbk_status).
+
 ## ICache Address Infection
 
 When the ICache address-XOR infection feature is enabled (`RV_ICACHE_ADDR_XOR`, which requires [Dual-Core Lock-Step](dual-core-lock-step.md) / `RV_LOCKSTEP_ENABLE`), the ICache cache line address is XORed into the data that gets stored into the ICache.

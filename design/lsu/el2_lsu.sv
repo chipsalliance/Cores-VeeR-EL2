@@ -206,6 +206,12 @@ import el2_pkg::*;
    // DCCM write-readback status
    output logic                            dccm_wr_readback_error,
 
+   // DCCM write-readback sticky first-fault capture, exposed to el2_dbg over DMI
+   output logic                            dccm_wr_rdbk_fault_valid,
+   output logic [pt.DCCM_BITS-1:0]         dccm_wr_rdbk_fault_addr,
+   output logic [pt.DCCM_FDATA_WIDTH-1:0]  dccm_wr_rdbk_fault_data,
+   input logic                             dccm_wr_rdbk_fault_clear,
+
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
    /*pragma coverage off*/
    input logic                             scan_mode,           // scan mode

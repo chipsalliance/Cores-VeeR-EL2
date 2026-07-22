@@ -148,6 +148,12 @@ import el2_pkg::*;
    output logic                            dccm_wr_readback_error,           // write-readback mismatch fault pin
    input logic                             dec_tlu_dccm_wr_readback_disable, // runtime disable (MFDC), default enabled
 
+   // Sticky first-fault DCCM wr readback capture for DMI (debug) visibility.
+   output logic                            dccm_wr_rdbk_fault_valid,         // a fault is latched, pending DMI clear
+   output logic [pt.DCCM_BITS-1:0]         dccm_wr_rdbk_fault_addr,          // address of the latched fault
+   output logic [pt.DCCM_FDATA_WIDTH-1:0]  dccm_wr_rdbk_fault_data,          // actual (corrupted) data+ecc read back
+   input logic                             dccm_wr_rdbk_fault_clear,         // DMI write-to-clear: re-arm capture
+
    // PIC ports
    output logic                            picm_wren,               // write to pic
    output logic                            picm_rden,               // read to pick
@@ -180,16 +186,17 @@ import el2_pkg::*;
    logic                           kill_ecc_corr_lo_r, kill_ecc_corr_hi_r;
 
 `ifdef RV_DCCM_WR_READBACK
-   logic                           dccm_wr_rdbk_arm;        // arm a new read-back window this cycle
-   logic                           dccm_wr_rdbk_issue;      // steal read port this cycle (no real read wants it)
-   logic                           dccm_wr_rdbk_snoop_lo;   // a real read this cycle already covers our addr (lo)
-   logic                           dccm_wr_rdbk_snoop_hi;   // a real read this cycle already covers our addr (hi)
-   logic                           dccm_wr_rdbk_resolve;    // window resolves this cycle (steal or snoop)
-   logic [pt.DCCM_BITS-1:0]        dccm_wr_rdbk_addr_ff;    // captured word addr (lo==hi, single bank)
-   logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_wr_rdbk_data_ff;    // captured written data+ecc
-   logic                           dccm_wr_rdbk_active;     // dccm_rd_data_lo/hi valid this cycle for compare
-   logic                           dccm_wr_rdbk_active_hi;  // compare should use dccm_rd_data_hi, not _lo
-   logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_wr_rdbk_expect;     // expected value, aligned with dccm_rd_data_lo/hi
+   logic                           dccm_wr_rdbk_arm;              // arm a new read-back window this cycle
+   logic                           dccm_wr_rdbk_issue;            // steal read port this cycle (no real read wants it)
+   logic                           dccm_wr_rdbk_snoop_lo;         // a real read this cycle already covers our addr (lo)
+   logic                           dccm_wr_rdbk_snoop_hi;         // a real read this cycle already covers our addr (hi)
+   logic                           dccm_wr_rdbk_resolve;          // window resolves this cycle (steal or snoop)
+   logic [pt.DCCM_BITS-1:0]        dccm_wr_rdbk_addr_ff;          // captured word addr (lo==hi, single bank)
+   logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_wr_rdbk_data_ff;          // captured written data+ecc
+   logic                           dccm_wr_rdbk_active;           // dccm_rd_data_lo/hi valid this cycle for compare
+   logic                           dccm_wr_rdbk_active_hi;        // compare should use dccm_rd_data_hi, not _lo
+   logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_wr_rdbk_expect;           // expected value, aligned with dccm_rd_data_lo/hi
+   logic                           dccm_wr_rdbk_fault_capture_en; // latch this fault (first-fault-wins)
 `endif
 
     // byte_en flowing down
@@ -484,6 +491,9 @@ import el2_pkg::*;
       assign dccm_wr_readback_error = dccm_wr_rdbk_active &
                      ((dccm_wr_rdbk_active_hi ? dccm_rd_data_hi[pt.DCCM_FDATA_WIDTH-1:0] : dccm_rd_data_lo[pt.DCCM_FDATA_WIDTH-1:0]) != dccm_wr_rdbk_expect[pt.DCCM_FDATA_WIDTH-1:0]);
 
+      // First-fault-wins: only latch while no previously-captured fault is still pending a DMI clear.
+      assign dccm_wr_rdbk_fault_capture_en = dccm_wr_readback_error & ~dccm_wr_rdbk_fault_valid;
+
       // Set on commit, cleared exactly when the window resolves (steal or snoop).
       rvdffsc #(.WIDTH(1)) dccm_wr_rdbk_pend_ffi
          (.din(1'b1), .dout(dccm_wr_rdbk_pend_ff),
@@ -511,9 +521,27 @@ import el2_pkg::*;
       rvdffe #(pt.DCCM_FDATA_WIDTH) dccm_wr_rdbk_expect_ffi
          (.din(dccm_wr_rdbk_data_ff[pt.DCCM_FDATA_WIDTH-1:0]), .dout(dccm_wr_rdbk_expect[pt.DCCM_FDATA_WIDTH-1:0]),
           .en(dccm_wr_rdbk_resolve | clk_override), .clk(clk), .*);
+
+      // Sticky fault capture for DMI visibility. Set on first fault, held until an explicit
+      // DMI write clears it (dccm_wr_rdbk_fault_clear).
+      rvdffsc #(.WIDTH(1)) dccm_wr_rdbk_fault_valid_ffi
+         (.din(1'b1), .dout(dccm_wr_rdbk_fault_valid),
+          .en(dccm_wr_rdbk_fault_capture_en), .clear(dccm_wr_rdbk_fault_clear), .clk(clk), .*);
+
+      rvdffs #(pt.DCCM_BITS) dccm_wr_rdbk_fault_addr_ffi
+         (.din(dccm_wr_rdbk_addr_ff[pt.DCCM_BITS-1:0]), .dout(dccm_wr_rdbk_fault_addr[pt.DCCM_BITS-1:0]),
+          .en(dccm_wr_rdbk_fault_capture_en), .clk(clk), .*);
+
+      rvdffs #(pt.DCCM_FDATA_WIDTH) dccm_wr_rdbk_fault_data_ffi
+         (.din(dccm_wr_rdbk_active_hi ? dccm_rd_data_hi[pt.DCCM_FDATA_WIDTH-1:0] : dccm_rd_data_lo[pt.DCCM_FDATA_WIDTH-1:0]),
+          .dout(dccm_wr_rdbk_fault_data[pt.DCCM_FDATA_WIDTH-1:0]),
+          .en(dccm_wr_rdbk_fault_capture_en), .clk(clk), .*);
 `else
-      assign dccm_wr_rdbk_pend_ff   = 1'b0;
-      assign dccm_wr_readback_error = 1'b0;
+      assign dccm_wr_rdbk_pend_ff     = 1'b0;
+      assign dccm_wr_readback_error   = 1'b0;
+      assign dccm_wr_rdbk_fault_valid = 1'b0;
+      assign dccm_wr_rdbk_fault_addr  = '0;
+      assign dccm_wr_rdbk_fault_data  = '0;
 `endif
 
    end else begin: Gen_dccm_disable
@@ -526,8 +554,11 @@ import el2_pkg::*;
       assign ld_sec_addr_hi_r_ff[pt.DCCM_BITS-1:0] = '0;
       assign ld_sec_addr_lo_r_ff[pt.DCCM_BITS-1:0] = '0;
 
-      assign dccm_wr_rdbk_pend_ff   = 1'b0;
-      assign dccm_wr_readback_error = 1'b0;
+      assign dccm_wr_rdbk_pend_ff     = 1'b0;
+      assign dccm_wr_readback_error   = 1'b0;
+      assign dccm_wr_rdbk_fault_valid = 1'b0;
+      assign dccm_wr_rdbk_fault_addr  = '0;
+      assign dccm_wr_rdbk_fault_data  = '0;
    end
 
 `ifdef RV_ASSERT_ON

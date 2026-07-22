@@ -86,10 +86,12 @@ run_regression_test(){
     mkdir -p ${RESULTS_DIR}
     LOG="${RESULTS_DIR}/test_${NAME}_${COVERAGE}_${USER_MODE}.log"
     touch ${LOG}
-    DIR="run_${NAME}_${COVERAGE}_${USER_MODE}"
+    DIR_TAG=$(basename "${RESULTS_DIR}")
+    DIR="run_${DIR_TAG}_${NAME}_${COVERAGE}_${USER_MODE}"
 
-    if [ "$NAME" = "pmp_random" ]; then
-        EXTRA_ARGS='TB_MAX_CYCLES=8000000'
+    if [ "$NAME" = "pmp_random" ] || [ "$NAME" = "dcls_error_ctrl" ]; then
+        EXTRA_ARGS='TB_MAX_CYCLES=10000000'
+        echo -e "${COLOR_YELLOW}Overriding TB_MAX_CYCLES to 10000000${COLOR_CLEAR}"
     else
         EXTRA_ARGS=
     fi

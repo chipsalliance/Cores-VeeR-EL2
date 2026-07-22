@@ -888,10 +888,28 @@ module tb_top
                 inject_lockstep_in_dist_no <= mailbox_data[15:8];
             end
             if (mailbox_write && (mailbox_data[7:0] == 8'h93)) begin
-                lockstep_err_injection_en_i <= mailbox_data[15:8];
+                if (el2_mubi_pkg::El2MuBiWidth == 32) begin
+                    if (mailbox_data[31:8] == el2_mubi_pkg::El2MuBiTrue[23:0])
+                        lockstep_err_injection_en_i <= el2_mubi_pkg::El2MuBiTrue;
+                    else if (mailbox_data[31:8] == el2_mubi_pkg::El2MuBiFalse[23:0])
+                        lockstep_err_injection_en_i <= el2_mubi_pkg::El2MuBiFalse;
+                    else
+                        lockstep_err_injection_en_i <= el2_mubi_pkg::el2_mubi_t'(mailbox_data[31:8]);
+                end else begin
+                    lockstep_err_injection_en_i <= el2_mubi_pkg::el2_mubi_t'(mailbox_data[63:8]);
+                end
             end
             if (mailbox_write && (mailbox_data[7:0] == 8'h94)) begin
-                disable_corruption_detection_i <= mailbox_data[15:8];
+                if (el2_mubi_pkg::El2MuBiWidth == 32) begin
+                    if (mailbox_data[31:8] == el2_mubi_pkg::El2MuBiTrue[23:0])
+                        disable_corruption_detection_i <= el2_mubi_pkg::El2MuBiTrue;
+                    else if (mailbox_data[31:8] == el2_mubi_pkg::El2MuBiFalse[23:0])
+                        disable_corruption_detection_i <= el2_mubi_pkg::El2MuBiFalse;
+                    else
+                        disable_corruption_detection_i <= el2_mubi_pkg::el2_mubi_t'(mailbox_data[31:8]);
+                end else begin
+                    disable_corruption_detection_i <= el2_mubi_pkg::el2_mubi_t'(mailbox_data[63:8]);
+                end
             end
             if (mailbox_write && (mailbox_data[7:0] == 8'h95)) begin
                 clear_inject_in_dist <= 1'b1;
@@ -1314,6 +1332,32 @@ module tb_top
                 92: force `LOCKSTEP_CORE.dma_hresp = '1;
                 // --- END ADDED AHB FORCES ---
             `endif
+            // --- Internal State & Safety Tamper Forces (Common for AHB & AXI) ---
+            `ifndef VERILATOR
+                200: begin
+                    logic [31:0] cur_gpr;
+                    cur_gpr = `LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout;
+                    force `LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout[15] = ~cur_gpr[15]; // Flip register a5 bit 15
+                    $display("forcing cur_gpr");
+                end
+                201: begin
+                    logic [30:0] cur_pc;
+                    cur_pc = `LOCKSTEP.xshadow_core.ifu.aln.q0pcff.genblock.genblock.dff.dout;
+                    force `LOCKSTEP.xshadow_core.ifu.aln.q0pcff.genblock.genblock.dff.dout[14] = ~cur_pc[14]; // Flip PC bit 15 (mapped to internal dout[14])
+                    $display("forcing cur_pc");
+                end
+                202: begin
+                    logic [30:0] cur_mtvec;
+                    cur_mtvec = `LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.genblock.genblock.dff.dout;
+                    force `LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.genblock.genblock.dff.dout[4] = ~cur_mtvec[4]; // Flip mtvec bit 5 (mapped to internal dout[4])
+                    $display("forcing cur_mtvec");
+                end
+            `else
+                200: force `LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout[15] = ~`LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout[15]; // Flip register a5 bit 15
+                201: force `LOCKSTEP.xshadow_core.ifu.aln.q0pcff.genblock.genblock.dff.dout[14] = ~`LOCKSTEP.xshadow_core.ifu.aln.q0pcff.genblock.genblock.dff.dout[14]; // Flip PC bit 15 (mapped to internal dout[14])
+                202: force `LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.genblock.genblock.dff.dout[4] = ~`LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.genblock.genblock.dff.dout[4]; // Flip mtvec bit 5 (mapped to internal dout[4])
+            `endif
+                203: force `LOCKSTEP.xshadow_core.dec.tlu.mdccmect = 32'h10000004; // Force subordinate ECC threshold alert (Threshold=2, Counter=4)
                 default: force `LOCKSTEP.lockstep_err_injection_en_i = '1;
             endcase
         end else if (inject_veer_in_dist) begin: inject_veer_corruption
@@ -1621,6 +1665,10 @@ module tb_top
             release `LOCKSTEP_CORE.dec_tlu_perfcnt1;
             release `LOCKSTEP_CORE.dec_tlu_perfcnt2;
             release `LOCKSTEP_CORE.dec_tlu_perfcnt3;
+            release `LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout[15]; // Flip register a5 bit 15
+            release `LOCKSTEP.xshadow_core.ifu.aln.q0pcff.genblock.genblock.dff.dout[14] ; // Flip PC bit 15 (mapped to internal dout[14])
+            release `LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.genblock.genblock.dff.dout[4]; // 
+            release `LOCKSTEP.xshadow_core.dec.tlu.mdccmect;
             // --- END ADDED UNCONDITIONAL RELEASES ---
         `ifdef RV_BUILD_AXI4
             release `LOCKSTEP_CORE.lsu_axi_awready;

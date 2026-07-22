@@ -302,6 +302,18 @@ Addresses shown below are offsets relative to the Debug Module base address. Vee
   - haltsum0
   - Halt summary 0
   - [](debugging.md#halt-summary-0-register-haltsum0)
+* - 0x70
+  - dccm_wr_rdbk_status
+  - DCCM write-readback fault status/address (custom, vendor-specific)
+  - [](debugging.md#dccm-write-readback-fault-status-register-dccm_wr_rdbk_status)
+* - 0x71
+  - dccm_wr_rdbk_data
+  - DCCM write-readback fault data (custom, vendor-specific)
+  - [](debugging.md#dccm-write-readback-fault-data-register-dccm_wr_rdbk_data)
+* - 0x72
+  - dccm_wr_rdbk_ecc
+  - DCCM write-readback fault ecc (custom, vendor-specific)
+  - [](debugging.md#dccm-write-readback-fault-ecc-register-dccm_wr_rdbk_ecc)
 :::
 
 :::{note}
@@ -1136,6 +1148,90 @@ This register is mapped to the Debug Module Interface address space.
   - 31:0
   - System bus data[63:32] for system bus read and write accesses
   - R/W
+  - 0
+:::
+
+#### DCCM Write-Readback Fault Status Register (dccm_wr_rdbk_status)
+
+The `dccm_wr_rdbk_status` register exposes the first-fault-wins sticky capture from the [DCCM write-readback check](error-protection.md#dccm-write-readback-check) (only meaningful when built with `RV_DCCM_WR_READBACK`, otherwise this register always reads 0).
+Together with `dccm_wr_rdbk_data` and `dccm_wr_rdbk_ecc`, it is intended for pentest and reliability debugging.
+
+The *valid* field is set the first time a write-readback fault occurs after being cleared.
+Subsequent faults are not captured while *valid* is still set, so a debugger always sees the earliest fault since the last clear.
+
+Writing '1' to the *valid* field clears it, re-arming capture for the next fault.
+
+:::{list-table} DCCM Write-Readback Fault Status Register (dccm_wr_rdbk_status, at Debug Module Offset 0x70)
+:name: tab-dccm-wr-rdbk-status
+:header-rows: 1
+
+* - **Field**
+  - **Bits**
+  - **Description**
+  - **Access**
+  - **Reset**
+* - address
+  - DCCM_BITS-1:0
+  - Address of the captured fault (valid iff *valid* is set)
+  - R
+  - 0
+* - reserved
+  - 30:DCCM_BITS
+  - Reserved, reads 0x0
+  - R
+  - 0
+* - valid
+  - 31
+  - A fault is latched, write '1' to clear
+  - R/W1C
+  - 0
+:::
+
+#### DCCM Write-Readback Fault Data Register (dccm_wr_rdbk_data)
+
+The `dccm_wr_rdbk_data` register holds the actual data that was read back during the latched fault captured in `dccm_wr_rdbk_status`, i.e. the value that failed to match what was written.
+It is valid iff the *valid* field of `dccm_wr_rdbk_status` is set, and is cleared the same way (by writing '1' to that field).
+
+:::{list-table} DCCM Write-Readback Fault Data Register (dccm_wr_rdbk_data, at Debug Module Offset 0x71)
+:name: tab-dccm-wr-rdbk-data
+:header-rows: 1
+
+* - **Field**
+  - **Bits**
+  - **Description**
+  - **Access**
+  - **Reset**
+* - data
+  - 31:0
+  - Actual data read back during the latched fault
+  - R
+  - 0
+:::
+
+#### DCCM Write-Readback Fault ECC Register (dccm_wr_rdbk_ecc)
+
+The `dccm_wr_rdbk_ecc` register holds the ECC bits associated with the data in `dccm_wr_rdbk_data`, i.e. the ECC bits that were read back alongside the actual data during the latched fault.
+Together, `dccm_wr_rdbk_data` and `dccm_wr_rdbk_ecc` form the complete, ECC-protected DCCM word at adjacent Debug Module offsets.
+It is valid iff the *valid* field of `dccm_wr_rdbk_status` is set, and is cleared the same way (by writing '1' to that field).
+
+:::{list-table} DCCM Write-Readback Fault ECC Register (dccm_wr_rdbk_ecc, at Debug Module Offset 0x72)
+:name: tab-dccm-wr-rdbk-ecc
+:header-rows: 1
+
+* - **Field**
+  - **Bits**
+  - **Description**
+  - **Access**
+  - **Reset**
+* - ecc
+  - DCCM_ECC_WIDTH-1:0
+  - ECC bits read back alongside the faulty data
+  - R
+  - 0
+* - reserved
+  - 31:DCCM_ECC_WIDTH
+  - Reserved, reads 0x0
+  - R
   - 0
 :::
 

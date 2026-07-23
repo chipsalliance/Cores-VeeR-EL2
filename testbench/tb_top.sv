@@ -764,7 +764,7 @@ module tb_top
 `endif
 
 `ifdef RV_BUILD_AXI4
-    assign mailbox_write = lmem.awvalid && lmem.awaddr == mem_mailbox && rst_l_combined;
+    assign mailbox_write = lmem.awvalid && lmem.awready && lmem.awaddr == mem_mailbox && rst_l_combined;
     assign mailbox_data  = lmem.wdata;
 `endif
 
@@ -984,6 +984,17 @@ module tb_top
                     $fatal;
                 `endif // TB_SILENT_FAIL
             end
+
+            // Auto-recovery on trap handler entry during DCLS testing
+            if (trace_rv_i_valid_ip && (trace_rv_i_address_ip == (`DEC.tlu.mtvec_rf & 32'hfffffffc))) begin
+                if (inject_veer_in_dist || inject_lockstep_in_dist) begin
+                    //$display("[DEBUG_AUTO_RECOVER] t=%0t, CPU entered trap handler at %h. Auto-clearing fault and resetting CPU.", $time, trace_rv_i_address_ip);
+                    clear_inject_in_dist <= 1'b1;
+                    inject_veer_in_dist <= 1'b0;
+                    inject_lockstep_in_dist <= 1'b0;
+                    rst_l_cmd <= 8'b1;
+                end
+            end
         end
     end
 
@@ -1151,14 +1162,14 @@ module tb_top
                 105: force `LOCKSTEP_CORE.lsu_axi_awsize = '1;
                 106: force `LOCKSTEP_CORE.lsu_axi_awburst = '1;
                 107: force `LOCKSTEP_CORE.lsu_axi_awlock = '1;
-                108: force `LOCKSTEP_CORE.lsu_axi_awcache = '1;
+                108: force `LOCKSTEP_CORE.lsu_axi_awcache = 4'h0;
                 109: force `LOCKSTEP_CORE.lsu_axi_awprot = '1;
                 110: force `LOCKSTEP_CORE.lsu_axi_awqos = '1;
                 111: force `LOCKSTEP_CORE.lsu_axi_wvalid = '1;
                 112: force `LOCKSTEP_CORE.lsu_axi_wdata = '1;
                 113: force `LOCKSTEP_CORE.lsu_axi_wstrb = '1;
                 114: force `LOCKSTEP_CORE.lsu_axi_wlast = '1;
-                115: force `LOCKSTEP_CORE.lsu_axi_bready = '1;
+                115: force `LOCKSTEP_CORE.lsu_axi_bready = 1'b0;
                 116: force `LOCKSTEP_CORE.lsu_axi_arvalid = '1;
                 117: force `LOCKSTEP_CORE.lsu_axi_arid = '1;
                 118: force `LOCKSTEP_CORE.lsu_axi_araddr = '1;
@@ -1167,10 +1178,10 @@ module tb_top
                 121: force `LOCKSTEP_CORE.lsu_axi_arsize = '1;
                 122: force `LOCKSTEP_CORE.lsu_axi_arburst = '1;
                 123: force `LOCKSTEP_CORE.lsu_axi_arlock = '1;
-                124: force `LOCKSTEP_CORE.lsu_axi_arcache = '1;
+                124: force `LOCKSTEP_CORE.lsu_axi_arcache = 4'h0;
                 125: force `LOCKSTEP_CORE.lsu_axi_arprot = '1;
                 126: force `LOCKSTEP_CORE.lsu_axi_arqos = '1;
-                127: force `LOCKSTEP_CORE.lsu_axi_rready = '1;
+                127: force `LOCKSTEP_CORE.lsu_axi_rready = 1'b0;
                 128: force `LOCKSTEP_CORE.ifu_axi_awvalid = '1;
                 129: force `LOCKSTEP_CORE.ifu_axi_awid = '1;
                 130: force `LOCKSTEP_CORE.ifu_axi_awaddr = '1;
@@ -1195,10 +1206,10 @@ module tb_top
                 149: force `LOCKSTEP_CORE.ifu_axi_arsize = '1;
                 150: force `LOCKSTEP_CORE.ifu_axi_arburst = '1;
                 151: force `LOCKSTEP_CORE.ifu_axi_arlock = '1;
-                152: force `LOCKSTEP_CORE.ifu_axi_arcache = '1;
+                152: force `LOCKSTEP_CORE.ifu_axi_arcache = 4'h0;
                 153: force `LOCKSTEP_CORE.ifu_axi_arprot = '1;
                 154: force `LOCKSTEP_CORE.ifu_axi_arqos = '1;
-                155: force `LOCKSTEP_CORE.ifu_axi_rready = '1;
+                155: force `LOCKSTEP_CORE.ifu_axi_rready = 1'b0;
                 156: force `LOCKSTEP_CORE.sb_axi_awvalid = '1;
                 157: force `LOCKSTEP_CORE.sb_axi_awid = '1;
                 158: force `LOCKSTEP_CORE.sb_axi_awaddr = '1;
@@ -1207,14 +1218,14 @@ module tb_top
                 161: force `LOCKSTEP_CORE.sb_axi_awsize = '1;
                 162: force `LOCKSTEP_CORE.sb_axi_awburst = '1;
                 163: force `LOCKSTEP_CORE.sb_axi_awlock = '1;
-                164: force `LOCKSTEP_CORE.sb_axi_awcache = '1;
+                164: force `LOCKSTEP_CORE.sb_axi_awcache = 4'h0;
                 165: force `LOCKSTEP_CORE.sb_axi_awprot = '1;
                 166: force `LOCKSTEP_CORE.sb_axi_awqos = '1;
                 167: force `LOCKSTEP_CORE.sb_axi_wvalid = '1;
                 168: force `LOCKSTEP_CORE.sb_axi_wdata = '1;
                 169: force `LOCKSTEP_CORE.sb_axi_wstrb = '1;
                 170: force `LOCKSTEP_CORE.sb_axi_wlast = '1;
-                171: force `LOCKSTEP_CORE.sb_axi_bready = '1;
+                171: force `LOCKSTEP_CORE.sb_axi_bready = 1'b0;
                 172: force `LOCKSTEP_CORE.sb_axi_arvalid = '1;
                 173: force `LOCKSTEP_CORE.sb_axi_arid = '1;
                 174: force `LOCKSTEP_CORE.sb_axi_araddr = '1;
@@ -1226,7 +1237,7 @@ module tb_top
                 180: force `LOCKSTEP_CORE.sb_axi_arcache = '1;
                 181: force `LOCKSTEP_CORE.sb_axi_arprot = '1;
                 182: force `LOCKSTEP_CORE.sb_axi_arqos = '1;
-                183: force `LOCKSTEP_CORE.sb_axi_rready = '1;
+                183: force `LOCKSTEP_CORE.sb_axi_rready = 1'b0;
                 184: force `LOCKSTEP_CORE.dma_axi_awready = '1;
                 185: force `LOCKSTEP_CORE.dma_axi_wready = '1;
                 186: force `LOCKSTEP_CORE.dma_axi_bvalid = '1;
@@ -1289,6 +1300,15 @@ module tb_top
                 92: force `LOCKSTEP_CORE.dma_hresp = '1;
                 // --- END ADDED AHB FORCES ---
             `endif
+                105: force `LOCKSTEP.xshadow_core.dec.arf.gpr[11].gprff.dout[0] = ~`LOCKSTEP.xshadow_core.dec.arf.gpr[11].gprff.dout[0];
+                106: force `LOCKSTEP.xshadow_core.dec.arf.gpr[13].gprff.dout[0] = ~`LOCKSTEP.xshadow_core.dec.arf.gpr[13].gprff.dout[0];
+                107: force `LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.dout[0] = ~`LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.dout[0];
+                108: force `LOCKSTEP.xshadow_core.dec.arf.gpr[17].gprff.dout[0] = ~`LOCKSTEP.xshadow_core.dec.arf.gpr[17].gprff.dout[0];
+                115: force `LOCKSTEP.xshadow_core.dec.tlu.mepc_ff.dout[1] = ~`LOCKSTEP.xshadow_core.dec.tlu.mepc_ff.dout[1];
+                116: force `LOCKSTEP.xshadow_core.dec.tlu.mie_ff.dout[0] = ~`LOCKSTEP.xshadow_core.dec.tlu.mie_ff.dout[0];
+                117: force `LOCKSTEP.xshadow_core.dec.tlu.mcause_ff.dout[0] = ~`LOCKSTEP.xshadow_core.dec.tlu.mcause_ff.dout[0];
+                118: force `LOCKSTEP.xshadow_core.dec.tlu.mip[0] = ~`LOCKSTEP.xshadow_core.dec.tlu.mip[0];
+                119: force `LOCKSTEP.xshadow_core.dec.tlu.minstretl_bff.dout[8] = ~`LOCKSTEP.xshadow_core.dec.tlu.minstretl_bff.dout[8];
                 default: force `LOCKSTEP.lockstep_err_injection_en_i = '1;
             endcase
         end else if (inject_veer_in_dist) begin: inject_veer_corruption
@@ -1411,8 +1431,8 @@ module tb_top
                 111: force `VEER.lsu_axi_wvalid = '1;
                 112: force `VEER.lsu_axi_wdata = '1;
                 113: force `VEER.lsu_axi_wstrb = '1;
-                114: force `VEER.lsu_axi_wlast = '1;
-                115: force `VEER.lsu_axi_bready = '1;
+                114: force `VEER.lsu_axi_wlast = 1'b0;
+                115: force `VEER.lsu_axi_bready = 1'b0;
                 116: force `VEER.lsu_axi_arvalid = '1;
                 117: force `VEER.lsu_axi_arid = '1;
                 118: force `VEER.lsu_axi_araddr = '1;
@@ -1424,7 +1444,7 @@ module tb_top
                 124: force `VEER.lsu_axi_arcache = '1;
                 125: force `VEER.lsu_axi_arprot = '1;
                 126: force `VEER.lsu_axi_arqos = '1;
-                127: force `VEER.lsu_axi_rready = '1;
+                127: force `VEER.lsu_axi_rready = 1'b0;
                 128: force `VEER.ifu_axi_awvalid = '1;
                 129: force `VEER.ifu_axi_awid = '1;
                 130: force `VEER.ifu_axi_awaddr = '1;
@@ -1452,7 +1472,7 @@ module tb_top
                 152: force `VEER.ifu_axi_arcache = '1;
                 153: force `VEER.ifu_axi_arprot = '1;
                 154: force `VEER.ifu_axi_arqos = '1;
-                155: force `VEER.ifu_axi_rready = '1;
+                155: force `VEER.ifu_axi_rready = 1'b0;
                 156: force `VEER.sb_axi_awvalid = '1;
                 157: force `VEER.sb_axi_awid = '1;
                 158: force `VEER.sb_axi_awaddr = '1;
@@ -1467,8 +1487,8 @@ module tb_top
                 167: force `VEER.sb_axi_wvalid = '1;
                 168: force `VEER.sb_axi_wdata = '1;
                 169: force `VEER.sb_axi_wstrb = '1;
-                170: force `VEER.sb_axi_wlast = '1;
-                171: force `VEER.sb_axi_bready = '1;
+                170: force `VEER.sb_axi_wlast = 1'b0;
+                171: force `VEER.sb_axi_bready = 1'b0;
                 172: force `VEER.sb_axi_arvalid = '1;
                 173: force `VEER.sb_axi_arid = '1;
                 174: force `VEER.sb_axi_araddr = '1;
@@ -1480,7 +1500,7 @@ module tb_top
                 180: force `VEER.sb_axi_arcache = '1;
                 181: force `VEER.sb_axi_arprot = '1;
                 182: force `VEER.sb_axi_arqos = '1;
-                183: force `VEER.sb_axi_rready = '1;
+                183: force `VEER.sb_axi_rready = 1'b0;
                 184: force `VEER.dma_axi_awready = '1;
                 185: force `VEER.dma_axi_wready = '1;
                 186: force `VEER.dma_axi_bvalid = '1;
@@ -1543,6 +1563,17 @@ module tb_top
                 92: force `VEER.dma_hresp = '1;
                 // --- END ADDED AHB FORCES ---
             `endif
+                100: force `VEER.dec.arf.gpr[10].gprff.dout[0] = ~`VEER.dec.arf.gpr[10].gprff.dout[0];
+                101: force `VEER.dec.arf.gpr[1].gprff.dout[0] = ~`VEER.dec.arf.gpr[1].gprff.dout[0];
+                102: force `VEER.dec.arf.gpr[12].gprff.dout[0] = ~`VEER.dec.arf.gpr[12].gprff.dout[0];
+                103: force `VEER.dec.arf.gpr[14].gprff.dout[0] = ~`VEER.dec.arf.gpr[14].gprff.dout[0];
+                104: force `VEER.dec.arf.gpr[16].gprff.dout[0] = ~`VEER.dec.arf.gpr[16].gprff.dout[0];
+                109: force `VEER.dec.tlu.mscratch_ff.dout[0] = ~`VEER.dec.tlu.mscratch_ff.dout[0];
+                110: force `VEER.dec.tlu.mstatus[0] = ~`VEER.dec.tlu.mstatus[0];
+                111: force `VEER.dec.tlu.mtvec_ff.dout[0] = ~`VEER.dec.tlu.mtvec_ff.dout[0];
+                112: force `VEER.dec.tlu.mtval_ff.dout[0] = ~`VEER.dec.tlu.mtval_ff.dout[0];
+                113: force `VEER.dec.tlu.mcyclel_bff.dout[8] = ~`VEER.dec.tlu.mcyclel_bff.dout[8];
+                114: force `VEER.dec.tlu.mrac_ff.dout[0] = ~`VEER.dec.tlu.mrac_ff.dout[0];
                 default: force `LOCKSTEP.lockstep_err_injection_en_i = '1;
             endcase
         end
@@ -1667,6 +1698,18 @@ module tb_top
             release `LOCKSTEP_CORE.lsu_axi_wstrb;
             release `LOCKSTEP_CORE.lsu_axi_wlast;
             release `LOCKSTEP_CORE.lsu_axi_bready;
+            release `LOCKSTEP_CORE.lsu_axi_arvalid;
+            release `LOCKSTEP_CORE.lsu_axi_arid;
+            release `LOCKSTEP_CORE.lsu_axi_araddr;
+            release `LOCKSTEP_CORE.lsu_axi_arregion;
+            release `LOCKSTEP_CORE.lsu_axi_arlen;
+            release `LOCKSTEP_CORE.lsu_axi_arsize;
+            release `LOCKSTEP_CORE.lsu_axi_arburst;
+            release `LOCKSTEP_CORE.lsu_axi_arlock;
+            release `LOCKSTEP_CORE.lsu_axi_arcache;
+            release `LOCKSTEP_CORE.lsu_axi_arprot;
+            release `LOCKSTEP_CORE.lsu_axi_arqos;
+            release `LOCKSTEP_CORE.lsu_axi_rready;
             release `LOCKSTEP_CORE.ifu_axi_awvalid;
             release `LOCKSTEP_CORE.ifu_axi_awid;
             release `LOCKSTEP_CORE.ifu_axi_awaddr;
@@ -1902,6 +1945,18 @@ module tb_top
             release `VEER.lsu_axi_wstrb;
             release `VEER.lsu_axi_wlast;
             release `VEER.lsu_axi_bready;
+            release `VEER.lsu_axi_arvalid;
+            release `VEER.lsu_axi_arid;
+            release `VEER.lsu_axi_araddr;
+            release `VEER.lsu_axi_arregion;
+            release `VEER.lsu_axi_arlen;
+            release `VEER.lsu_axi_arsize;
+            release `VEER.lsu_axi_arburst;
+            release `VEER.lsu_axi_arlock;
+            release `VEER.lsu_axi_arcache;
+            release `VEER.lsu_axi_arprot;
+            release `VEER.lsu_axi_arqos;
+            release `VEER.lsu_axi_rready;
             release `VEER.ifu_axi_awvalid;
             release `VEER.ifu_axi_awid;
             release `VEER.ifu_axi_awaddr;
@@ -2020,6 +2075,26 @@ module tb_top
             release `VEER.dma_hresp;
             // --- END ADDED AHB RELEASES ---
         `endif
+            release `VEER.dec.arf.gpr[10].gprff.dout[0];
+            release `VEER.dec.arf.gpr[1].gprff.dout[0];
+            release `VEER.dec.arf.gpr[12].gprff.dout[0];
+            release `VEER.dec.arf.gpr[14].gprff.dout[0];
+            release `VEER.dec.arf.gpr[16].gprff.dout[0];
+            release `VEER.dec.tlu.mscratch_ff.dout[0];
+            release `VEER.dec.tlu.mstatus[0];
+            release `VEER.dec.tlu.mtvec_ff.dout[0];
+            release `VEER.dec.tlu.mtval_ff.dout[0];
+            release `VEER.dec.tlu.mcyclel_bff.dout[8];
+            release `VEER.dec.tlu.mrac_ff.dout[0];
+            release `LOCKSTEP.xshadow_core.dec.arf.gpr[11].gprff.dout[0];
+            release `LOCKSTEP.xshadow_core.dec.arf.gpr[13].gprff.dout[0];
+            release `LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.dout[0];
+            release `LOCKSTEP.xshadow_core.dec.arf.gpr[17].gprff.dout[0];
+            release `LOCKSTEP.xshadow_core.dec.tlu.mepc_ff.dout[1];
+            release `LOCKSTEP.xshadow_core.dec.tlu.mie_ff.dout[0];
+            release `LOCKSTEP.xshadow_core.dec.tlu.mcause_ff.dout[0];
+            release `LOCKSTEP.xshadow_core.dec.tlu.mip[0];
+            release `LOCKSTEP.xshadow_core.dec.tlu.minstretl_bff.dout[8];
             release `LOCKSTEP.lockstep_err_injection_en_i;
         end
     end

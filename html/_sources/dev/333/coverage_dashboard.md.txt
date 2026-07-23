@@ -1,0 +1,8 @@
+(333_coverage_dashboard)=
+# Coverage dashboard
+
+## Summary reports (all tests)
+ * [all coverage](external:coverage_dashboard/all/index.html)
+
+## Individual test reports
+no data

@@ -39,6 +39,9 @@ import el2_pkg::*;
    /*pragma coverage off*/
    input logic [31:1]                      nmi_vec,
    input logic [31:1]                      jtag_id,
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+   input logic [31:1]                      broken_core_jtag_id,
+`endif
    /*pragma coverage on*/
 
 
@@ -404,6 +407,10 @@ import el2_pkg::*;
    input logic                             jtag_trst_n, // JTAG Reset
    output logic                            jtag_tdo,    // JTAG TDO
    output logic                            jtag_tdoEn,  // JTAG Test Data Output enable
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+   output logic                            broken_core_jtag_tdoEn,
+`endif
+
 
    /*pragma coverage off*/
    input logic [31:4] core_id,
@@ -884,6 +891,19 @@ import el2_pkg::*;
    logic                   dmi_reg_wr_en;
    logic [31:0]            dmi_reg_wdata;
    logic [31:0]            dmi_reg_rdata;
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+   logic                   broken_core_dmi_en;
+   logic [6:0]             broken_core_dmi_addr;
+   logic                   broken_core_dmi_wr_en;
+   logic [31:0]            broken_core_dmi_wdata;
+   logic [31:0]            broken_core_dmi_rdata;
+
+   logic                   broken_core_dmi_reg_en;
+   logic [6:0]             broken_core_dmi_reg_addr;
+   logic                   broken_core_dmi_reg_wr_en;
+   logic [31:0]            broken_core_dmi_reg_wdata;
+   logic [31:0]            broken_core_dmi_reg_rdata;
+`endif
 
 `ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
@@ -936,6 +956,9 @@ import el2_pkg::*;
                              .*
                              );
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    logic jtag_cascade;
+`endif
 
    logic unused_dmi_hard_reset;
    //  JTAG/DMI instance
@@ -945,7 +968,11 @@ import el2_pkg::*;
     .tck         (jtag_tck),        // JTAG clock
     .tms         (jtag_tms),        // Test mode select
     .tdi         (jtag_tdi),        // Test Data Input
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    .tdo         (jtag_cascade),    // Test Data Cascade to the next JTAG tap
+`else
     .tdo         (jtag_tdo),        // Test Data Output
+`endif
     .tdoEnable   (jtag_tdoEn),      // Test Data Output enable
     // Processor Signals
     .core_rst_n  (dbg_rst_l),       // Debug reset, active low
@@ -984,6 +1011,54 @@ import el2_pkg::*;
    );
 
    always_comb dmi_active = dmi_en;
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+
+   logic unused_broken_core_dmi_hard_reset;
+   //  JTAG/DMI instance
+   dmi_wrapper  broken_core_dmi_wrapper (
+    // JTAG signals
+    .trst_n      (jtag_trst_n),     // JTAG reset
+    .tck         (jtag_tck),        // JTAG clock
+    .tms         (jtag_tms),        // Test mode select
+    .tdi         (jtag_cascade),    // Test Data Input
+    .tdo         (jtag_tdo),        // Test Data Output
+    .tdoEnable   (broken_core_jtag_tdoEn),      // Test Data Output enable
+    // Processor Signals
+    .core_rst_n  (dbg_rst_l),       // Debug reset, active low
+    .core_clk    (clk),             // Core clock
+    .jtag_id     (broken_core_jtag_id),         // JTAG ID
+    .rd_data     (broken_core_dmi_rdata),       // Read data from  Processor
+    .reg_wr_data (broken_core_dmi_wdata),       // Write data to Processor
+    .reg_wr_addr (broken_core_dmi_addr),        // Write address to Processor
+    .reg_en      (broken_core_dmi_en),          // Write interface bit to Processor
+    .reg_wr_en   (broken_core_dmi_wr_en),       // Write enable to Processor
+    .dmi_hard_reset   (unused_broken_core_dmi_hard_reset)
+   );
+
+   // DMI core/uncore mux
+   dmi_mux broken_core_dmi_mux (
+    .core_enable        (dmi_core_enable),
+    .uncore_enable      ('0),
+
+    .dmi_en             (broken_core_dmi_en),
+    .dmi_wr_en          (broken_core_dmi_wr_en),
+    .dmi_addr           (broken_core_dmi_addr),
+    .dmi_wdata          (broken_core_dmi_wdata),
+    .dmi_rdata          (broken_core_dmi_rdata),
+
+    .dmi_core_en        (broken_core_dmi_reg_en),
+    .dmi_core_wr_en     (broken_core_dmi_reg_addr),
+    .dmi_core_addr      (broken_core_dmi_reg_wr_en),
+    .dmi_core_wdata     (broken_core_dmi_reg_wdata),
+    .dmi_core_rdata     (broken_core_dmi_reg_rdata),
+
+    .dmi_uncore_en      (),
+    .dmi_uncore_wr_en   (),
+    .dmi_uncore_addr    (),
+    .dmi_uncore_wdata   (),
+    .dmi_uncore_rdata   ('0)
+   );
+`endif
 
 `ifdef RV_ASSERT_ON
   // to avoid internal assertions failure at time 0

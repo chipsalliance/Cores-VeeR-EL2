@@ -110,6 +110,10 @@ module tb_top
     logic        [31:0]         nmi_vector;
     logic        [31:1]         jtag_id;
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    logic        [31:0]         broken_core_jtag_id;
+`endif
+
     logic        [31:0]         ic_haddr        ;
     logic        [2:0]          ic_hburst       ;
     logic                       ic_hmastlock    ;
@@ -758,7 +762,7 @@ module tb_top
 `ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
 `define VEER rvtop_wrapper.rvtop.veer
 `else
-`define VEER rvtop_wrapper.rvtop.tmr_complex.cores[0].veer
+`define VEER rvtop_wrapper.rvtop.tmr_complex.cores[0]
 `endif
 `define DEC `VEER.dec
 
@@ -859,6 +863,17 @@ module tb_top
                 if (mailbox_data[7:0] == 8'h86) begin
                     extintsrc_req[1] <= 1;
                 end
+            end
+            if(mailbox_write && (mailbox_data[7:0] == 8'h8a)) begin
+                force i_cpu_halt_req = 1'b1;
+                wait (o_cpu_halt_ack == 1'b1);
+                @(posedge core_clk);
+                release i_cpu_halt_req;
+                repeat (100) @(posedge core_clk);
+                force i_cpu_run_req = 1'b1;
+                wait (o_cpu_run_ack == 1'b1);
+                @(posedge core_clk);
+                release i_cpu_run_req;
             end
             if(mailbox_write && (mailbox_data[7:0] == 8'h90)) begin
                 extintsrc_req  <= {pt.PIC_TOTAL_INT-1{1'b0}};
@@ -2104,6 +2119,11 @@ module tb_top
         jtag_id[31:28] = 4'b1;
         jtag_id[27:12] = '0;
         jtag_id[11:1]  = 11'h45;
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+        broken_core_jtag_id[31:28] = 4'b1;
+        jtag_id[27:12] = 16'h1;
+        jtag_id[11:1]  = 11'h45;
+`endif
         reset_vector   = `RV_RESET_VEC;
         nmi_assert_int = 0;
         nmi_vector     = 32'hee000000;
@@ -2182,6 +2202,9 @@ veer_wrapper rvtop_wrapper (
     .nmi_int                ( nmi_int       ),
     .nmi_vec                ( nmi_vector[31:1]),
     .jtag_id                ( jtag_id[31:1]),
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    .broken_core_jtag_id    ( broken_core_jtag_id[31:1]),
+`endif
 
 `ifdef RV_BUILD_AHB_LITE
     .haddr                  ( ic_haddr      ),
@@ -2449,6 +2472,9 @@ veer_wrapper rvtop_wrapper (
     .jtag_trst_n            (jtag_trst_n),
     .jtag_tdo               (jtag_tdo),
     .jtag_tdoEn             (),
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    .broken_core_jtag_tdoEn (),
+`endif
 
     .mpc_debug_halt_ack     ( mpc_debug_halt_ack),
     .mpc_debug_halt_req     ( mpc_debug_halt_req),

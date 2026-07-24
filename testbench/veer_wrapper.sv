@@ -27,6 +27,9 @@ module veer_wrapper
     input logic        nmi_int,
     input logic [31:1] nmi_vec,
     input logic [31:1] jtag_id,
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    input logic [31:1] broken_core_jtag_id,
+`endif
 
 
     output logic [31:0] trace_rv_i_insn_ip,
@@ -300,6 +303,9 @@ module veer_wrapper
     input  logic jtag_trst_n,  // JTAG Reset
     output logic jtag_tdo,     // JTAG TDO
     output logic jtag_tdoEn,   // JTAG Test Data Output enable
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    output logic broken_core_jtag_tdoEn,   // Broken Core JTAG Test Data Output enable
+`endif
 
     input logic [31:4] core_id,
 
@@ -434,6 +440,9 @@ module veer_wrapper
       .el2_icache_export(mem_export.veer_icache_src),
       .dmi_core_enable(dmi_core_enable),
       .dmi_active(dmi_active),
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+     .broken_core_jtag_id    ( broken_core_jtag_id[31:1]),
+`endif
       .*
   );
 

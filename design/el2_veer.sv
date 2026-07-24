@@ -40,8 +40,16 @@ import el2_pkg::*;
    /*pragma coverage on*/
    output logic                 core_rst_l,   // This is "rst_l | dbg_rst_l"
 
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
    output logic                 active_l2clk,
    output logic                 free_l2clk,
+`else
+   output logic        active_state,
+   input  logic        free_l2clk,
+   input  logic        active_l2clk,
+   input  logic        free_clk,
+   input  logic        active_clk,
+`endif
 
    output logic [31:0] trace_rv_i_insn_ip,
    output logic [31:0] trace_rv_i_address_ip,
@@ -369,6 +377,7 @@ import el2_pkg::*;
    output logic                         dma_axi_rlast,
 
 
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
  //// AHB LITE BUS
    output logic [31:0]           haddr,
    /* exclude signals that are tied to constant value in axi4_to_ahb.sv */
@@ -434,6 +443,7 @@ import el2_pkg::*;
    output  logic [63:0]          dma_hrdata,
    output  logic                 dma_hreadyout,
    output  logic                 dma_hresp,
+`endif
 
    input   logic                 lsu_bus_clk_en,
    input   logic                 ifu_bus_clk_en,
@@ -471,9 +481,31 @@ import el2_pkg::*;
    input  logic [31:0]             recovery_csr_wrdata, // CSR recovery backdoor write data
    input  logic [11:0]             recovery_csr_rdaddr, // CSR recovery backdoor read address
    output logic [31:0]             recovery_csr_rddata, // CSR recovery backdoor read data
+
+   output logic        dec_tlu_force_halt,
+   output logic        dec_tlu_bus_clk_override,
+
+   output logic        pic_clk_override,
+   output logic        pic_io_clk_override,
+   output logic [31:0] picm_rdaddr,
+   output logic [31:0] picm_wraddr,
+   output logic [31:0] picm_wr_data,
+   output logic        picm_wren,
+   output logic        picm_rden,
+   output logic        picm_mken,
+   output logic [3:0]  dec_tlu_meicurpl,
+   output logic [3:0]  dec_tlu_meipt,
+
+   input  logic        mexintpend,
+   input  logic [3:0]  pic_pl,
+   input  logic [7:0]  pic_claimid,
+   input  logic [31:0] picm_rd_data,
+   input  logic        mhwakeup,
+
+`else
+   input logic [pt.PIC_TOTAL_INT:1]           extintsrc_req,
 `endif
 
-   input logic [pt.PIC_TOTAL_INT:1]           extintsrc_req,
    input logic                   timer_int,
    input logic                   soft_int,
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
@@ -816,6 +848,7 @@ import el2_pkg::*;
    logic [pt.BTB_ADDR_HI:pt.BTB_ADDR_LO] i0_predict_index_d;     // DEC predict index
    logic [pt.BTB_BTAG_SIZE-1:0] i0_predict_btag_d;               // DEC predict branch tag
 
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
    // PIC ports
    logic                  picm_wren;
    logic                  picm_rden;
@@ -824,6 +857,7 @@ import el2_pkg::*;
    logic [31:0]           picm_wraddr;
    logic [31:0]           picm_wr_data;
    logic [31:0]           picm_rd_data;
+`endif
 
    // feature disable from mfdc
    logic  dec_tlu_external_ldfwd_disable; // disable external load forwarding
@@ -836,7 +870,9 @@ import el2_pkg::*;
    logic  dec_tlu_misc_clk_override;
    logic  dec_tlu_ifu_clk_override;
    logic  dec_tlu_lsu_clk_override;
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
    logic  dec_tlu_bus_clk_override;
+`endif
    logic  dec_tlu_pic_clk_override;
    logic  dec_tlu_dccm_clk_override;
    logic  dec_tlu_icm_clk_override;
@@ -893,7 +929,9 @@ import el2_pkg::*;
    logic                   dec_tlu_resume_ack;
    logic                   dec_tlu_debug_mode;        // Core is in debug mode
    logic                   dec_debug_wdata_rs1_d;
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
    logic                   dec_tlu_force_halt;        // halt has been forced
+`endif
 
    logic [1:0]             dec_data_en;
    logic [1:0]             dec_ctl_en;
@@ -918,9 +956,11 @@ import el2_pkg::*;
    logic                   ifu_pmu_bus_busy;
    logic                   ifu_pmu_bus_trxn;
 
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
    logic                   active_state;
    logic                   free_clk;
    logic                   active_clk;
+`endif
    logic                   dec_pause_state_cg;
 
    logic                   lsu_nonblock_load_data_error;
@@ -936,10 +976,12 @@ import el2_pkg::*;
 
    logic                   lsu_fastint_stall_any;
 
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
    logic [7:0]  pic_claimid;
    logic [3:0]  pic_pl, dec_tlu_meicurpl, dec_tlu_meipt;
    logic        mexintpend;
    logic        mhwakeup;
+`endif
 
    logic        dma_active;
 
@@ -956,12 +998,14 @@ import el2_pkg::*;
 
    assign active_state = (~(halt_state | pause_state) | dec_tlu_flush_lower_r | dec_tlu_flush_lower_wb)  | dec_tlu_misc_clk_override;
 
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
    rvoclkhdr free_cg2   ( .clk(clk), .en(1'b1),         .l1clk(free_l2clk), .* );
    rvoclkhdr active_cg2 ( .clk(clk), .en(active_state), .l1clk(active_l2clk), .* );
 
 // all other clock headers are 1st level
    rvoclkhdr free_cg1   ( .clk(free_l2clk),     .en(1'b1), .l1clk(free_clk), .* );
    rvoclkhdr active_cg1 ( .clk(active_l2clk),   .en(1'b1), .l1clk(active_clk), .* );
+`endif
 
 
    assign core_dbg_cmd_done = dma_dbg_cmd_done | dec_dbg_cmd_done;
@@ -1072,6 +1116,7 @@ import el2_pkg::*;
    assign dccm_ecc_double_error = lsu_dccm_rd_ecc_double_err;
    assign dccm_write_readback_error = dccm_wr_readback_error;
 
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
    el2_pic_ctrl  #(.pt(pt)) pic_ctrl_inst (
                                             .clk(free_l2clk),
                                             .clk_override(dec_tlu_pic_clk_override),
@@ -1084,6 +1129,10 @@ import el2_pkg::*;
                                             .meipt(dec_tlu_meipt[3:0]),
                                             .rst_l(core_rst_l),
                                             .*);
+`else
+  assign pic_clk_override = dec_tlu_pic_clk_override;
+  assign pic_io_clk_override = dec_tlu_picio_clk_override;
+`endif
 
    el2_dma_ctrl #(.pt(pt)) dma_ctrl (
                                       .clk(free_l2clk),
@@ -1128,6 +1177,7 @@ import el2_pkg::*;
       .*
   );
 
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
    if (pt.BUILD_AHB_LITE == 1) begin: Gen_AXI_To_AHB
 
       // AXI4 -> AHB Gasket for LSU
@@ -1488,7 +1538,66 @@ if  (pt.BUILD_AHB_LITE == 1) begin
 
 `endif
    end // if (pt.BUILD_AHB_LITE == 1)
+`else
 
+   // Drive the final AXI inputs
+   assign lsu_axi_awready_int                 = lsu_axi_awready;
+   assign lsu_axi_wready_int                  = lsu_axi_wready;
+   assign lsu_axi_bvalid_int                  = lsu_axi_bvalid;
+   assign lsu_axi_bresp_int[1:0]              = lsu_axi_bresp[1:0];
+   assign lsu_axi_bid_int[pt.LSU_BUS_TAG-1:0] = lsu_axi_bid[pt.LSU_BUS_TAG-1:0];
+   assign lsu_axi_arready_int                 = lsu_axi_arready;
+   assign lsu_axi_rvalid_int                  = lsu_axi_rvalid;
+   assign lsu_axi_rid_int[pt.LSU_BUS_TAG-1:0] = lsu_axi_rid[pt.LSU_BUS_TAG-1:0];
+   assign lsu_axi_rdata_int[63:0]             = lsu_axi_rdata[63:0];
+   assign lsu_axi_rresp_int[1:0]              = lsu_axi_rresp[1:0];
+   assign lsu_axi_rlast_int                   = lsu_axi_rlast;
+
+   assign ifu_axi_awready_int                 = ifu_axi_awready;
+   assign ifu_axi_wready_int                  = ifu_axi_wready;
+   assign ifu_axi_bvalid_int                  = ifu_axi_bvalid;
+   assign ifu_axi_bresp_int[1:0]              = ifu_axi_bresp[1:0];
+   assign ifu_axi_bid_int[pt.IFU_BUS_TAG-1:0] = ifu_axi_bid[pt.IFU_BUS_TAG-1:0];
+   assign ifu_axi_arready_int                 = ifu_axi_arready;
+   assign ifu_axi_rvalid_int                  = ifu_axi_rvalid;
+   assign ifu_axi_rid_int[pt.IFU_BUS_TAG-1:0] = ifu_axi_rid[pt.IFU_BUS_TAG-1:0];
+   assign ifu_axi_rdata_int[63:0]             = ifu_axi_rdata[63:0];
+   assign ifu_axi_rresp_int[1:0]              = ifu_axi_rresp[1:0];
+   assign ifu_axi_rlast_int                   = ifu_axi_rlast;
+
+   assign sb_axi_awready_int                  = sb_axi_awready;
+   assign sb_axi_wready_int                   = sb_axi_wready;
+   assign sb_axi_bvalid_int                   = sb_axi_bvalid;
+   assign sb_axi_bresp_int[1:0]               = sb_axi_bresp[1:0];
+   assign sb_axi_bid_int[pt.SB_BUS_TAG-1:0]   = sb_axi_bid[pt.SB_BUS_TAG-1:0];
+   assign sb_axi_arready_int                  = sb_axi_arready;
+   assign sb_axi_rvalid_int                   = sb_axi_rvalid;
+   assign sb_axi_rid_int[pt.SB_BUS_TAG-1:0]   = sb_axi_rid[pt.SB_BUS_TAG-1:0];
+   assign sb_axi_rdata_int[63:0]              = sb_axi_rdata[63:0];
+   assign sb_axi_rresp_int[1:0]               = sb_axi_rresp[1:0];
+   assign sb_axi_rlast_int                    = sb_axi_rlast;
+
+   assign dma_axi_awvalid_int                  = dma_axi_awvalid;
+   assign dma_axi_awid_int[pt.DMA_BUS_TAG-1:0] = dma_axi_awid[pt.DMA_BUS_TAG-1:0];
+   assign dma_axi_awaddr_int[31:0]             = dma_axi_awaddr[31:0];
+   assign dma_axi_awsize_int[2:0]              = dma_axi_awsize[2:0];
+   assign dma_axi_awprot_int[2:0]              = dma_axi_awprot[2:0];
+   assign dma_axi_awlen_int[7:0]               = dma_axi_awlen[7:0];
+   assign dma_axi_awburst_int[1:0]             = dma_axi_awburst[1:0];
+   assign dma_axi_wvalid_int                   = dma_axi_wvalid;
+   assign dma_axi_wdata_int[63:0]              = dma_axi_wdata;
+   assign dma_axi_wstrb_int[7:0]               = dma_axi_wstrb[7:0];
+   assign dma_axi_wlast_int                    = dma_axi_wlast;
+   assign dma_axi_bready_int                   = dma_axi_bready;
+   assign dma_axi_arvalid_int                  = dma_axi_arvalid;
+   assign dma_axi_arid_int[pt.DMA_BUS_TAG-1:0] = dma_axi_arid[pt.DMA_BUS_TAG-1:0];
+   assign dma_axi_araddr_int[31:0]             = dma_axi_araddr[31:0];
+   assign dma_axi_arsize_int[2:0]              = dma_axi_arsize[2:0];
+   assign dma_axi_arprot_int[2:0]              = dma_axi_arprot[2:0];
+   assign dma_axi_arlen_int[7:0]               = dma_axi_arlen[7:0];
+   assign dma_axi_arburst_int[1:0]             = dma_axi_arburst[1:0];
+   assign dma_axi_rready_int                   = dma_axi_rready;
+`endif
 
       // unpack packet
       // also need retires_p==3

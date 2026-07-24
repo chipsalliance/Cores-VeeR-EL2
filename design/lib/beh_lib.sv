@@ -766,6 +766,34 @@ module rvecc_decode_64  (
 
  endmodule // rvecc_decode_64
 
+`ifndef TECH_SPECIFIC_EC_RV_TMR
+module `TEC_RV_TMR
+  (
+    input  logic I0, I1, I2,
+    output logic O
+    );
+
+  assign O = (I0 & I1) | (I1 & I2) | (I2 & I0);
+
+endmodule
+`endif
+
+module rvtmr
+#( parameter WIDTH=1 )(
+    input  logic[WIDTH-1:0] I [3],
+    output logic[WIDTH-1:0] O
+);
+
+    for(genvar i=0; i< WIDTH; i++) begin
+`ifdef TECH_SPECIFIC_EC_RV_ICG
+        `USER_EC_RV_TMR voter(.I0(I[0][i]), .I1(I[1][i]), .I2(I[2][i]), .O(O[i]));
+`else
+        `TEC_RV_TMR voter(.I0(I[0][i]), .I1(I[1][i]), .I2(I[2][i]), .O(O[i]));
+`endif
+    end
+
+endmodule
+
 `ifndef TECH_SPECIFIC_EC_RV_ICG
 module `TEC_RV_ICG
   (

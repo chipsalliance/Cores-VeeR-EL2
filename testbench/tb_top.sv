@@ -868,6 +868,17 @@ module tb_top
                     extintsrc_req[1] <= 1;
                 end
             end
+            if(mailbox_write && (mailbox_data[7:0] == 8'h8a)) begin
+                force i_cpu_halt_req = 1'b1;
+                wait (o_cpu_halt_ack == 1'b1);
+                @(posedge core_clk);
+                release i_cpu_halt_req;
+                repeat (100) @(posedge core_clk);
+                force i_cpu_run_req = 1'b1;
+                wait (o_cpu_run_ack == 1'b1);
+                @(posedge core_clk);
+                release i_cpu_run_req;
+            end
             if(mailbox_write && (mailbox_data[7:0] == 8'h90)) begin
                 extintsrc_req  <= {pt.PIC_TOTAL_INT-1{1'b0}};
                 nmi_assert_int <= 4'b0000;

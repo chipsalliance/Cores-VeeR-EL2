@@ -74,6 +74,94 @@ Depending on the number of enabled inputs, the module implements the following f
 
    Constant critical failure, unable to detect / correct a fault due to missing information.
 
+### Majority voting for AXI bus interfaces
+
+The TMR AXI interface is used to interface the triple core complex to the system bus.
+In the design, there's one TMR AXI interface per VeeR AXI interface.
+This includes:
+
+ - IFU
+ - LSU
+ - DMA (external access to ICCM/DCCM)
+ - SB (debugging side bus)
+
+There are two types of the interface: for AXI manager and subordinate.
+
+#### Bus channel voter
+
+The block diagram below shows a generalized structure for a bus channel voter.
+The same structure is used for all AXI manager and subordinate channels.
+
+:::{figure-md}
+![bus_channel_voter.png](img/bus_channel_voter.png)
+
+Block diagram of TMR bus channel voter
+:::
+
+The module consists of separate majority voting modules for each multi-bit bus signal (and including `valid` or `ready`)
+
+Critical (unrecoverable) faults detected by the voters are logically OR-ed together and used to gate the handshake signal.
+This forms a fast combinational-only path that prevents spurious / faulty transactions from being issued / acknowledged by the TMR core complex.
+
+Detected individual core faults are also OR-ed together and with an external fault input but instead of used for gating, they drive flip-flops that store their state.
+Outputs of the flip-flops drive enable inputs of the voters.
+Its the responsibility of each voter to indicate a critical failure if input state cannot be derived from all of its enabled inputs.
+The outputs are also exposed to the outside of the module.
+
+#### TMR AXI manager interface
+
+The high-level block diagram of the interface is shown in the block diagram:
+:::{figure-md}
+![axi_m_tmr_interface](img/axi_m_tmr_interface.png)
+
+Block diagram of TMR AXI manager interface
+:::
+
+The module consists of 5 AXI manager channel modules.
+The structure of a channel module is specific to each channel but in general conforms to a bus channel voter.
+
+In this module all fault outpus from all channel modules are OR-ed together and then connected to them back through external fault inputs.
+This closes a loop around flip-fliops in bus voters making them immediately latch any fault, regardless of where it is reported.
+
+There is no need to combinationaly gate each `valid`/`ready` handshake signal with aggregated critical fault detections from all channel modules.
+This is beacause channel handshake is confined only to the channel.
+
+#### TMR AXI subordinate interface
+
+The high-level block diagram of the interface is shown in the block diagram:
+:::{figure-md}
+![axi_s_tmr_interface](img/axi_s_tmr_interface.png)
+
+Block diagram of TMR AXI subordinate interface
+:::
+
+The module operates in the same way as the AXI manager interface.
+All bus signals have reversed direction, voters differ as well as they operate only on signals driven by CPU cores.
+
+#### AXI transaction completion
+
+In case of a recoverable fault, an AXI transaction must be completed before the TMR complex can perform the recovery procedure.
+For this purpose there are write and read AXI bus monitor modules.
+Each of them is responsible for blocking recovery during pending transactions and blocking new transactions during pending recovery.
+This prevents violating AXI bus protocol and allows the system to continue operation once recovery is done.
+
+For unrecoverable (critical) faults, the AXI monitor module provides information whether the fault happened between or during a transaction.
+In the former case, reset of only the TMR complex is required. In the latter, the whole system requires a reset.
+
+### Majority voting for CCM and PIC interfaces
+
+VeeR core uses three kinds of CCM (closely coupled memory):
+ * ICCM
+ * DCCM
+ * I-Cache
+
+There's also the PIC which is memory mapped and connected through a dedicated interface resembing one of a CCM block.
+
+All of them are connected to the core via interfaces, where VeeR is the manager.
+
+TMR adapters for these interfaces follows the same design pattern as single AXI channel interface.
+Flow control signals are gated by critical fault detection combinational logic.
+
 ## Boot configuration
 
 VeeR in the TMR configuration allows for 3 modes of operation:

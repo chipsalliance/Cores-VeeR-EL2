@@ -2,7 +2,7 @@
 // //
 // // SPDX-License-Identifier: Apache-2.0
 //
-//
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
 module el2_tmr_complex_clk
   import el2_pkg::*;
   import el2_mubi_pkg::*;
@@ -96,3 +96,4 @@ module el2_tmr_complex_clk
     assign dma_bus_clk_en_veer[i] = dma_bus_clk_en;
   end
 endmodule
+`endif

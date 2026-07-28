@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+`ifdef RV_LOCKSTEP_ENABLE
 module el2_veer_lockstep
   import el2_pkg::*;
   import el2_mubi_pkg::*;

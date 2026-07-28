@@ -6,75 +6,13 @@ import os
 
 from axi_agent import *
 from axi_bus import *
-from cocotb.clock import Clock
-from cocotb.handle import ModifiableObject
 from cocotb.triggers import ClockCycles, FallingEdge, RisingEdge
 from cocotb.utils import get_sim_time
 from cocotbext.axi.axi_ram import AxiRam
 from pyuvm import *
 
-# ==============================================================================
-
-# FIXME: Sync with makefile somehow
-MuBiFalse = 0b01
-MuBiTrue = 0b10
-
-# ==============================================================================
-
-
-class FaultItem(uvm_sequence_item):
-
-    def __init__(self, name="FaultItem"):
-        super().__init__(name)
-        self.timestamp = 0
-        self.fault = [False, False, False]
-
-    def __str__(self):
-        return (
-            f"FaultItem(timestamp={self.timestamp}, "
-            + ",".join([str(int(f)) for f in self.fault])
-            + ")"
-        )
-
-
-# ==============================================================================
-
-
-class FaultMonitor(uvm_monitor):
-    """
-    Monitors the module's fault indicator outputs
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def build_phase(self):
-        self.ap = uvm_analysis_port("ap", self)
-
-    async def run_phase(self):
-        prev_fault = None
-
-        while True:
-            await RisingEdge(cocotb.top.clk_i)
-
-            curr_fault = [
-                cocotb.top.s_axi_a_fault_o.value == MuBiTrue,
-                cocotb.top.s_axi_b_fault_o.value == MuBiTrue,
-                cocotb.top.s_axi_c_fault_o.value == MuBiTrue,
-            ]
-
-            if prev_fault is None:
-                prev_fault = curr_fault
-
-            if curr_fault != prev_fault:
-                item = FaultItem()
-                item.timestamp = get_sim_time(units="ps")
-                item.fault = curr_fault
-                self.logger.debug(f"Fault state: {str(item)}")
-
-                self.ap.write(item)
-                prev_fault = curr_fault
-
+import common
+from common import FaultItem, FaultMonitor, MuBiFalse, MuBiTrue
 
 # ==============================================================================
 
@@ -203,7 +141,15 @@ class BaseEnv(uvm_env):
         )
 
         # Fault status output monitor
-        self.fault_monitor = FaultMonitor("fault_monitor", self)
+        self.fault_monitor = FaultMonitor(
+            "fault_monitor",
+            self,
+            signals=[
+                cocotb.top.s_axi_a_fault_o,
+                cocotb.top.s_axi_b_fault_o,
+                cocotb.top.s_axi_c_fault_o,
+            ],
+        )
 
         # Scoreboard(s)
         self.scoreboard = None
@@ -228,77 +174,10 @@ class BaseEnv(uvm_env):
 # ==============================================================================
 
 
-class BaseTest(uvm_test):
+class BaseTest(common.BaseTest):
     """
     Base PyUVM test for the module
     """
 
     def __init__(self, name, parent, scb_class=None):
-        super().__init__(name, parent)
-        self.scb_class = scb_class
-
-        # Synchronize pyuvm logging level with cocotb logging level. Unclear
-        # why it does not happen automatically.
-        level = logging.getLevelName(os.environ.get("COCOTB_LOG_LEVEL", "INFO"))
-        uvm_report_object.set_default_logging_level(level)
-
-    def build_phase(self):
-        self.env = BaseEnv("env", self, self.scb_class)
-
-    def start_clock(self, name):
-        period = ConfigDB().get(None, "", "TEST_CLK_PERIOD")
-        sig = getattr(cocotb.top, name)
-        clock = Clock(sig, period, units="ns")
-        cocotb.start_soon(clock.start(start_high=False))
-
-    async def reset(self):
-
-        # Wait, assert reset
-        await ClockCycles(cocotb.top.clk_i, 3)
-        cocotb.top.rst_ni.value = 0
-
-        # It seems that cocotbext-axi does not drive AXI signals to a known
-        # state on reset. This is important here as TMR continuiusly compares
-        # their state. Clear them manually
-        for name in dir(cocotb.top):
-            obj = getattr(cocotb.top, name)
-            if not isinstance(obj, ModifiableObject):
-                continue
-
-            if name.startswith("s_axi_") and name.endswith("_i"):
-                obj.value = 0
-            if name.startswith("m_axi_") and name.endswith("_i"):
-                obj.value = 0
-
-        cocotb.top.s_axi_a_fault_i.value = MuBiFalse
-        cocotb.top.s_axi_b_fault_i.value = MuBiFalse
-        cocotb.top.s_axi_c_fault_i.value = MuBiFalse
-
-        cocotb.top.s_axi_a_fault_clr_i.value = MuBiFalse
-        cocotb.top.s_axi_b_fault_clr_i.value = MuBiFalse
-        cocotb.top.s_axi_c_fault_clr_i.value = MuBiFalse
-
-        await ClockCycles(cocotb.top.clk_i, 2)
-        cocotb.top.rst_ni.value = 1
-        await ClockCycles(cocotb.top.clk_i, 3)
-
-    async def run_phase(self):
-        self.raise_objection()
-
-        # Initialize signals
-        cocotb.top.rst_ni.value = 1
-
-        # Start clock
-        self.start_clock("clk_i")
-        await ClockCycles(cocotb.top.clk_i, 2)
-
-        # Reset
-        await self.reset()
-
-        # Run the test
-        await self.run()
-        await ClockCycles(cocotb.top.clk_i, 2)
-        self.drop_objection()
-
-    async def run(self):
-        raise NotImplementedError()
+        super().__init__(name, parent, scb_class=scb_class, env_class=BaseEnv)

@@ -16,9 +16,42 @@ from cocotbext.axi.stream import StreamBus
 
 # ==============================================================================
 
+
+class StreamBusWithUpsets(StreamBus):
+    """
+    A proxy class that allows injecting upsets to the bus
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.upsets = dict()
+
+    def drive(self, obj, strict=False):
+
+        # Call the base method
+        super().drive(obj, strict)
+
+        # Drive upsets with no delay effectively overwriting what's given in
+        # obj
+        self.upset()
+
+    def upset(self):
+        """
+        Drives upsets to the bus
+        """
+        for key, value in self.upsets.items():
+            sig = self._signals.get(key, None)
+            if sig is not None:
+                sig.value = value
+                sig._log.debug(f"upsetting to {value}")
+
+
+# ==============================================================================
+
+
 SAxiAWBus = type(
     "SAxiAWBus",
-    (StreamBus,),
+    (StreamBusWithUpsets,),
     {
         "_signals": {s: s + ("_o" if "ready" in s else "_i") for s in AxiAWBus._signals},
         "_optional_signals": {
@@ -29,7 +62,7 @@ SAxiAWBus = type(
 
 SAxiWBus = type(
     "SAxiWBus",
-    (StreamBus,),
+    (StreamBusWithUpsets,),
     {
         "_signals": {s: s + ("_o" if "ready" in s else "_i") for s in AxiWBus._signals},
         "_optional_signals": {
@@ -40,7 +73,7 @@ SAxiWBus = type(
 
 SAxiBBus = type(
     "SAxiBBus",
-    (StreamBus,),
+    (StreamBusWithUpsets,),
     {
         "_signals": {s: s + ("_i" if "ready" in s else "_o") for s in AxiBBus._signals},
         "_optional_signals": {
@@ -61,7 +94,7 @@ class SAxiWriteBus(AxiWriteBus):
 
 SAxiARBus = type(
     "SAxiARBus",
-    (StreamBus,),
+    (StreamBusWithUpsets,),
     {
         "_signals": {s: s + ("_o" if "ready" in s else "_i") for s in AxiARBus._signals},
         "_optional_signals": {
@@ -72,7 +105,7 @@ SAxiARBus = type(
 
 SAxiRBus = type(
     "SAxiRBus",
-    (StreamBus,),
+    (StreamBusWithUpsets,),
     {
         "_signals": {s: s + ("_i" if "ready" in s else "_o") for s in AxiRBus._signals},
         "_optional_signals": {
@@ -103,7 +136,7 @@ class SAxiBus(AxiBus):
 
 MAxiAWBus = type(
     "MAxiAWBus",
-    (StreamBus,),
+    (StreamBusWithUpsets,),
     {
         "_signals": {s: s + ("_i" if "ready" in s else "_o") for s in AxiAWBus._signals},
         "_optional_signals": {
@@ -114,7 +147,7 @@ MAxiAWBus = type(
 
 MAxiWBus = type(
     "MAxiWBus",
-    (StreamBus,),
+    (StreamBusWithUpsets,),
     {
         "_signals": {s: s + ("_i" if "ready" in s else "_o") for s in AxiWBus._signals},
         "_optional_signals": {
@@ -125,7 +158,7 @@ MAxiWBus = type(
 
 MAxiBBus = type(
     "MAxiBBus",
-    (StreamBus,),
+    (StreamBusWithUpsets,),
     {
         "_signals": {s: s + ("_o" if "ready" in s else "_i") for s in AxiBBus._signals},
         "_optional_signals": {
@@ -146,7 +179,7 @@ class MAxiWriteBus(AxiWriteBus):
 
 MAxiARBus = type(
     "MAxiARBus",
-    (StreamBus,),
+    (StreamBusWithUpsets,),
     {
         "_signals": {s: s + ("_i" if "ready" in s else "_o") for s in AxiARBus._signals},
         "_optional_signals": {
@@ -157,7 +190,7 @@ MAxiARBus = type(
 
 MAxiRBus = type(
     "MAxiRBus",
-    (StreamBus,),
+    (StreamBusWithUpsets,),
     {
         "_signals": {s: s + ("_o" if "ready" in s else "_i") for s in AxiRBus._signals},
         "_optional_signals": {

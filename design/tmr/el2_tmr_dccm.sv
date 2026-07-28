@@ -2,7 +2,7 @@
 // //
 // // SPDX-License-Identifier: Apache-2.0
 //
-//
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
 module el2_tmr_dccm
   import el2_pkg::*;
   import el2_mubi_pkg::*;
@@ -67,3 +67,4 @@ module el2_tmr_dccm
 
 
 endmodule
+`endif

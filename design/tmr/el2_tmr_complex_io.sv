@@ -2,6 +2,7 @@
 // //
 // // SPDX-License-Identifier: Apache-2.0
 //
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
 module el2_tmr_complex_io
   import el2_pkg::*;
   import el2_mubi_pkg::*;
@@ -1048,3 +1049,4 @@ module el2_tmr_complex_io
   end // if (pt.BUILD_AHB_LITE == 1)
 
 endmodule
+`endif

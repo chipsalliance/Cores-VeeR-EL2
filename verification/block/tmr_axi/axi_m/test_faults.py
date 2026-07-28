@@ -16,6 +16,9 @@ from pyuvm import ConfigDB, test, uvm_sequence
 from testbench import (
     BaseScoreboard,
     BaseTest,
+)
+
+from common import (
     MuBiFalse,
     MuBiTrue,
 )
@@ -186,9 +189,6 @@ class TestFaults(BaseTest):
                     elif what == "data":
                         j = random.randrange(len(core_items[which].data))
                         core_items[which].data[j] ^= 1 << random.randrange(8)
-
-                    # elif what == "id":
-                    #    core_items[which].id ^= 1 << random.randrange(4)
 
                     elif what == "burst":
                         core_items[which].burst = random.choice(list(AxiBurstType))

@@ -7,7 +7,7 @@ space := $(null) #
 comma := ,
 
 TEST_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-SRCDIR   := $(abspath $(TEST_DIR)../../../../design)
+SRCDIR   := $(abspath $(TEST_DIR)../../../../../design)
 
 TEST_FILES = $(sort $(wildcard test_*.py))
 
@@ -23,7 +23,9 @@ COMPILE_ARGS = \
  -GDataWidth=64 \
  -GIdWidth=4 \
 
-include $(TEST_DIR)/../common.mk
+include $(TEST_DIR)/../../common.mk
+
+export PYTHONPATH := $(PYTHONPATH):$(TEST_DIR)/..
 
 # Deliberately declare source list here not to include most of the common
 # VeeR files. This test is a unit test.

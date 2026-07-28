@@ -4,8 +4,8 @@ import random
 
 from pyuvm import ConfigDB, test, uvm_sequence
 from testbench import (
-    BaseTest,
     BaseScoreboard,
+    BaseTest,
     DriverItem,
     MuBiFalse,
     MuBiTrue,
@@ -19,14 +19,15 @@ class TestSequence(uvm_sequence):
     Enable exactly 2 random inputs. Drive the same value to them. Occassionaly
     do an upsed by driving one of the enable inputs with a different value.
     """
+
     def __init__(self, name):
         super().__init__(name)
 
         self.seqr = ConfigDB().get(None, "", "SEQR")
 
     async def body(self):
-        iter  = ConfigDB().get(None, "", "TEST_ITERATIONS")
-        width = 8 # FIXME: Sync with makefile
+        iter = ConfigDB().get(None, "", "TEST_ITERATIONS")
+        width = 8  # FIXME: Sync with makefile
 
         for i in range(iter):
             it = DriverItem()
@@ -71,10 +72,12 @@ class Scoreboard(BaseScoreboard):
             self.logger.debug(str(it))
 
             # Everything disabled, skip
-            if it.signals["en_a"] != MuBiTrue and \
-               it.signals["en_b"] != MuBiTrue and \
-               it.signals["en_c"] != MuBiTrue:
-               continue
+            if (
+                it.signals["en_a"] != MuBiTrue
+                and it.signals["en_b"] != MuBiTrue
+                and it.signals["en_c"] != MuBiTrue
+            ):
+                continue
 
             in_a = it.signals["in_a"]
             in_b = it.signals["in_b"]
@@ -85,35 +88,35 @@ class Scoreboard(BaseScoreboard):
             en_c = it.signals["en_c"] == MuBiTrue
 
             # Predict
-            pred_out     = None
+            pred_out = None
             pred_fault_a = MuBiFalse
             pred_fault_b = MuBiFalse
             pred_fault_c = MuBiFalse
-            pred_crit    = MuBiFalse
+            pred_crit = MuBiFalse
 
             # C is disabled
             if en_a and en_b and not en_c:
-                pred_out     = in_a     if (in_a == in_b) else None
+                pred_out = in_a if (in_a == in_b) else None
                 pred_fault_a = MuBiTrue if (in_a != in_b) else MuBiFalse
                 pred_fault_b = MuBiTrue if (in_a != in_b) else MuBiFalse
                 pred_fault_c = MuBiFalse
-                pred_crit    = MuBiTrue if (in_a != in_b) else MuBiFalse
+                pred_crit = MuBiTrue if (in_a != in_b) else MuBiFalse
 
             # A is disabled
             elif not en_a and en_b and en_c:
-                pred_out     = in_b     if (in_b == in_c) else None
+                pred_out = in_b if (in_b == in_c) else None
                 pred_fault_a = MuBiFalse
                 pred_fault_b = MuBiTrue if (in_b != in_c) else MuBiFalse
                 pred_fault_c = MuBiTrue if (in_b != in_c) else MuBiFalse
-                pred_crit    = MuBiTrue if (in_b != in_c) else MuBiFalse
+                pred_crit = MuBiTrue if (in_b != in_c) else MuBiFalse
 
             # B is disabled
             elif en_a and not en_b and en_c:
-                pred_out     = in_c     if (in_c == in_a) else None
+                pred_out = in_c if (in_c == in_a) else None
                 pred_fault_a = MuBiTrue if (in_c != in_a) else MuBiFalse
                 pred_fault_b = MuBiFalse
                 pred_fault_c = MuBiTrue if (in_c != in_a) else MuBiFalse
-                pred_crit    = MuBiTrue if (in_c != in_a) else MuBiFalse
+                pred_crit = MuBiTrue if (in_c != in_a) else MuBiFalse
 
             # Should not happen in this test
             else:
@@ -132,7 +135,8 @@ class Scoreboard(BaseScoreboard):
             assert pred_fault_a == it.signals["fault_a"]
             assert pred_fault_b == it.signals["fault_b"]
             assert pred_fault_c == it.signals["fault_c"]
-            assert pred_crit    == it.signals["critical"]
+            assert pred_crit == it.signals["critical"]
+
 
 # ==============================================================================
 

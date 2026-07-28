@@ -4,21 +4,24 @@ import random
 from copy import deepcopy
 
 import cocotb
-from cocotb.triggers import Timer, Combine, ClockCycles
-from pyuvm import ConfigDB, test, uvm_sequence
-
+from axi_agent import (
+    AxiReadTransaction,
+    AxiTransaction,
+    AxiTransactionType,
+    AxiWriteTransaction,
+)
+from cocotb.triggers import ClockCycles, Combine, Timer
 from cocotbext.axi import AxiBurstType
-from axi_agent import AxiWriteTransaction, AxiReadTransaction
-from axi_agent import AxiTransaction, AxiTransactionType
-
+from pyuvm import ConfigDB, test, uvm_sequence
 from testbench import (
-    BaseTest,
     BaseScoreboard,
+    BaseTest,
     MuBiFalse,
     MuBiTrue,
 )
 
 # =============================================================================
+
 
 class FaultScoreboard(BaseScoreboard):
 
@@ -101,12 +104,14 @@ class FaultScoreboard(BaseScoreboard):
 
                 for ev in ["a", "b", "c", "m"]:
                     self.logger.error(f" AXI {ev.upper()}:")
-                    for l in str(event[ev]).splitlines():
-                        self.logger.error("  " + l)
+                    for line in str(event[ev]).splitlines():
+                        self.logger.error("  " + line)
 
                 self.passed = False
 
+
 # =============================================================================
+
 
 class TransactionSequence(uvm_sequence):
     """
@@ -115,7 +120,7 @@ class TransactionSequence(uvm_sequence):
 
     def __init__(self, name, items, seqr):
         self.items = items
-        self.seqr  = seqr
+        self.seqr = seqr
         super().__init__(name)
 
     async def body(self):
@@ -123,7 +128,9 @@ class TransactionSequence(uvm_sequence):
             await self.seqr.start_item(item)
             await self.seqr.finish_item(item)
 
+
 # =============================================================================
+
 
 @test()
 class TestFaults(BaseTest):
@@ -131,7 +138,7 @@ class TestFaults(BaseTest):
         super().__init__(name, parent, FaultScoreboard)
 
     async def run(self):
-        period     = ConfigDB().get(None, "", "TEST_CLK_PERIOD")
+        period = ConfigDB().get(None, "", "TEST_CLK_PERIOD")
         iterations = ConfigDB().get(None, "", "TEST_ITERATIONS")
 
         for it in range(iterations):
@@ -140,9 +147,9 @@ class TestFaults(BaseTest):
             base_items = []
             for i in range(20):
                 item = AxiTransaction()
-                item.type    = random.choice(list(AxiTransactionType))
+                item.type = random.choice(list(AxiTransactionType))
                 item.address = random.randrange(1 << 32)
-                item.id      = random.randrange(1 << 4)
+                item.id = random.randrange(1 << 4)
 
                 if item.type == AxiTransactionType.WRITE:
                     item.data = bytearray([random.randrange(256) for j in range(8)])
@@ -180,7 +187,7 @@ class TestFaults(BaseTest):
                         j = random.randrange(len(core_items[which].data))
                         core_items[which].data[j] ^= 1 << random.randrange(8)
 
-                    #elif what == "id":
+                    # elif what == "id":
                     #    core_items[which].id ^= 1 << random.randrange(4)
 
                     elif what == "burst":
@@ -190,12 +197,15 @@ class TestFaults(BaseTest):
                         assert False, what
 
             # Get sequencers
-            sequencers = [ConfigDB().get(None, "", "AXI_AGENT_" + i).sequencer \
-                          for i in ["A", "B", "C"]]
+            sequencers = [
+                ConfigDB().get(None, "", "AXI_AGENT_" + i).sequencer for i in ["A", "B", "C"]
+            ]
 
             # Create sequences
-            sequences = [TransactionSequence("seq_" + i, it, s) \
-                         for i, it, s in zip(["a", "b", "c"], items, sequencers)]
+            sequences = [
+                TransactionSequence("seq_" + i, it, s)
+                for i, it, s in zip(["a", "b", "c"], items, sequencers)
+            ]
 
             # Start tasks
             tasks = [cocotb.start_soon(s.start()) for s in sequences]

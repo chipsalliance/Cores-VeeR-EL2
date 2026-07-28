@@ -2,11 +2,16 @@
 # Copyright (c) 2026 Antmicro
 # SPDX-License-Identifier: Apache-2.0
 
-from cocotb.triggers import First
 from cocotb.queue import QueueEmpty
+from cocotb.triggers import First
 from cocotb.utils import get_sim_time
-from cocotbext.axi.axi_channels import AxiAWMonitor, AxiWMonitor, AxiBMonitor
-from cocotbext.axi.axi_channels import AxiARMonitor, AxiRMonitor
+from cocotbext.axi.axi_channels import (
+    AxiARMonitor,
+    AxiAWMonitor,
+    AxiBMonitor,
+    AxiRMonitor,
+    AxiWMonitor,
+)
 from pyuvm import *
 
 from .axi_item import *
@@ -27,7 +32,7 @@ class AxiWriteMonitor(uvm_monitor):
         super().__init__(*args, **kwargs)
 
     def build_phase(self):
-        bus  = self.bfm_args["bus"]
+        bus = self.bfm_args["bus"]
         args = self.bfm_args.copy()
 
         # Create monitors, connect them to relevant buses
@@ -35,15 +40,15 @@ class AxiWriteMonitor(uvm_monitor):
         self.aw_mon = AxiAWMonitor(**args)
 
         args["bus"] = bus.write.w
-        self.w_mon  = AxiWMonitor(**args)
+        self.w_mon = AxiWMonitor(**args)
 
         args["bus"] = bus.write.b
-        self.b_mon  = AxiBMonitor(**args)
+        self.b_mon = AxiBMonitor(**args)
 
-        self.aw_ap  = uvm_analysis_port("aw_ap", self) # AW
-        self.w_ap   = uvm_analysis_port("w_ap",  self) # W
-        self.b_ap   = uvm_analysis_port("b_ap",  self) # B
-        self.tr_ap  = uvm_analysis_port("tr_ap", self) # Transactions
+        self.aw_ap = uvm_analysis_port("aw_ap", self)  # AW
+        self.w_ap = uvm_analysis_port("w_ap", self)  # W
+        self.b_ap = uvm_analysis_port("b_ap", self)  # B
+        self.tr_ap = uvm_analysis_port("tr_ap", self)  # Transactions
 
     async def run_phase(self):
         pending = dict()
@@ -53,9 +58,11 @@ class AxiWriteMonitor(uvm_monitor):
         while True:
 
             # Wait for any monitor to receive something
-            await First(self.aw_mon.active_event.wait(),
-                        self.w_mon.active_event.wait(),
-                        self.b_mon.active_event.wait())
+            await First(
+                self.aw_mon.active_event.wait(),
+                self.w_mon.active_event.wait(),
+                self.b_mon.active_event.wait(),
+            )
 
             # Get timestamp. FIXME: This may be off from the actual item
             # reported by a cocotbext-axi monitor
@@ -132,6 +139,7 @@ class AxiWriteMonitor(uvm_monitor):
             except QueueEmpty:
                 pass
 
+
 # ==============================================================================
 
 
@@ -146,7 +154,7 @@ class AxiReadMonitor(uvm_monitor):
         super().__init__(*args, **kwargs)
 
     def build_phase(self):
-        bus  = self.bfm_args["bus"]
+        bus = self.bfm_args["bus"]
         args = self.bfm_args.copy()
 
         # Create monitors, connect them to relevant buses
@@ -154,11 +162,11 @@ class AxiReadMonitor(uvm_monitor):
         self.ar_mon = AxiARMonitor(**args)
 
         args["bus"] = bus.read.r
-        self.r_mon  = AxiRMonitor(**args)
+        self.r_mon = AxiRMonitor(**args)
 
-        self.ar_ap  = uvm_analysis_port("ar_ap", self) # AR
-        self.r_ap   = uvm_analysis_port("r_ap",  self) # R
-        self.tr_ap  = uvm_analysis_port("tr_ap", self) # Transactions
+        self.ar_ap = uvm_analysis_port("ar_ap", self)  # AR
+        self.r_ap = uvm_analysis_port("r_ap", self)  # R
+        self.tr_ap = uvm_analysis_port("tr_ap", self)  # Transactions
 
     async def run_phase(self):
         pending = dict()
@@ -166,8 +174,7 @@ class AxiReadMonitor(uvm_monitor):
         while True:
 
             # Wait for any monitor to receive something
-            await First(self.ar_mon.active_event.wait(),
-                        self.r_mon.active_event.wait())
+            await First(self.ar_mon.active_event.wait(), self.r_mon.active_event.wait())
 
             # Get timestamp. FIXME: This may be off from the actual item
             # reported by a cocotbext-axi monitor
@@ -230,6 +237,7 @@ class AxiReadMonitor(uvm_monitor):
             except QueueEmpty:
                 pass
 
+
 # ==============================================================================
 
 
@@ -247,15 +255,15 @@ class AxiMonitor(uvm_monitor, uvm_export_base):
 
         # Create monitors
         self.wr_mon = AxiWriteMonitor("WriteMonitor", self, bfm_args=self.bfm_args)
-        self.rd_mon = AxiReadMonitor ("ReadMonitor",  self, bfm_args=self.bfm_args)
+        self.rd_mon = AxiReadMonitor("ReadMonitor", self, bfm_args=self.bfm_args)
 
         # Create ports
-        self.aw_ap  = uvm_analysis_port("aw_ap", self) # AW
-        self.w_ap   = uvm_analysis_port("w_ap",  self) # W
-        self.b_ap   = uvm_analysis_port("b_ap",  self) # B
-        self.ar_ap  = uvm_analysis_port("ar_ap", self) # AR
-        self.r_ap   = uvm_analysis_port("r_ap",  self) # R
-        self.tr_ap  = uvm_analysis_port("tr_ap", self) # Transactions
+        self.aw_ap = uvm_analysis_port("aw_ap", self)  # AW
+        self.w_ap = uvm_analysis_port("w_ap", self)  # W
+        self.b_ap = uvm_analysis_port("b_ap", self)  # B
+        self.ar_ap = uvm_analysis_port("ar_ap", self)  # AR
+        self.r_ap = uvm_analysis_port("r_ap", self)  # R
+        self.tr_ap = uvm_analysis_port("tr_ap", self)  # Transactions
 
     def connect_phase(self):
 

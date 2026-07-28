@@ -3,6 +3,7 @@
 // // SPDX-License-Identifier: Apache-2.0
 //
 //
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
 module el2_tmr_ic
   import el2_pkg::*;
   import el2_mubi_pkg::*;
@@ -93,3 +94,4 @@ module el2_tmr_ic
   end
 
 endmodule
+`endif

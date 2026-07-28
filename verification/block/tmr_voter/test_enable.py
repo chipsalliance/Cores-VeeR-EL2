@@ -4,8 +4,8 @@ import random
 
 from pyuvm import ConfigDB, test, uvm_sequence
 from testbench import (
-    BaseTest,
     BaseScoreboard,
+    BaseTest,
     DriverItem,
     MuBiFalse,
     MuBiTrue,
@@ -19,14 +19,15 @@ class TestSequence(uvm_sequence):
     Randomly enabled inputs while driving the same data to all of them.
     Occassionaly drives different data to the disabled one(s).
     """
+
     def __init__(self, name):
         super().__init__(name)
 
         self.seqr = ConfigDB().get(None, "", "SEQR")
 
     async def body(self):
-        iter  = ConfigDB().get(None, "", "TEST_ITERATIONS")
-        width = 8 # FIXME: Sync with makefile
+        iter = ConfigDB().get(None, "", "TEST_ITERATIONS")
+        width = 8  # FIXME: Sync with makefile
 
         # Drive all inputs, occasionally disable some
         for i in range(iter):

@@ -11,6 +11,7 @@ __all__ = ["AxiDriver"]
 
 # ==============================================================================
 
+
 class AxiDriver(uvm_driver):
     """
     AXI master driver.
@@ -32,21 +33,21 @@ class AxiDriver(uvm_driver):
 
             if item.type == AxiTransactionType.WRITE:
                 item.resp = await self.axi_master.write(
-                    address = item.address,
-                    data    = item.data,
-                    awid    = item.id,
-                    burst   = item.burst,
-                    size    = item.size,
+                    address=item.address,
+                    data=item.data,
+                    awid=item.id,
+                    burst=item.burst,
+                    size=item.size,
                     # TODO: Other fields
                 )
 
             elif item.type == AxiTransactionType.READ:
                 item.resp = await self.axi_master.read(
-                    address = item.address,
-                    length  = item.length,
-                    arid    = item.id,
-                    burst   = item.burst,
-                    size    = item.size,
+                    address=item.address,
+                    length=item.length,
+                    arid=item.id,
+                    burst=item.burst,
+                    size=item.size,
                     # TODO: Other fields
                 )
 
@@ -54,4 +55,3 @@ class AxiDriver(uvm_driver):
                 assert False, item.type
 
             self.seq_item_port.item_done()
-            

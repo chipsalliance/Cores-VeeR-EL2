@@ -88,6 +88,7 @@ endif
 
 ifneq ($(DEC_TEST),)
     EXTRA_CONFIG_OPTS += "-set=fast_interrupt_redirect=0"
+    EXTRA_CONFIG_OPTS += "-set=triple_modular_redundancy_enable=1"
 endif
 
 # Rules for generating VeeR config

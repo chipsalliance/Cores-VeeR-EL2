@@ -13,7 +13,7 @@ from pyuvm import *
 
 # FIXME: Sync with makefile somehow
 MuBiFalse = 0b01
-MuBiTrue  = 0b10
+MuBiTrue = 0b10
 
 # ==============================================================================
 
@@ -48,6 +48,7 @@ class BusDriver(uvm_driver):
 
             self.seq_item_port.item_done()
 
+
 # ==============================================================================
 
 
@@ -63,14 +64,14 @@ class MonitorItem(uvm_sequence_item):
 class BusMonitor(uvm_component):
 
     def __init__(self, *args, **kwargs):
-        self.uut     = kwargs["uut"]
+        self.uut = kwargs["uut"]
         self.signals = kwargs["signals"]
 
         del kwargs["uut"]
         del kwargs["signals"]
 
         super().__init__(*args, **kwargs)
-    
+
     def build_phase(self):
         self.ap = uvm_analysis_port("ap", self)
 
@@ -85,10 +86,12 @@ class BusMonitor(uvm_component):
                 assert hasattr(self.uut, k), k
                 s = getattr(self.uut, k)
                 signals[k] = s.value
-            
+
             self.ap.write(MonitorItem(signals))
 
+
 # ==============================================================================
+
 
 class BaseScoreboard(uvm_component):
 
@@ -108,7 +111,9 @@ class BaseScoreboard(uvm_component):
             self.logger.critical("{} reports a failure".format(type(self)))
             assert False
 
+
 # ==============================================================================
+
 
 class BaseEnv(uvm_env):
     """
@@ -127,14 +132,26 @@ class BaseEnv(uvm_env):
         # Sequencers
         self.bus_seqr = uvm_sequencer("bus_seqr", self)
         # Driver
-        self.bus_drv = BusDriver("bus_drv", self, uut = cocotb.top)
+        self.bus_drv = BusDriver("bus_drv", self, uut=cocotb.top)
         # Monitors
-        self.bus_mon = BusMonitor("bus_mon", self, uut = cocotb.top, signals = [
-            "in_a", "in_b", "in_c",
-            "en_a", "en_b", "en_c",
-            "out",
-            "fault_a", "fault_b", "fault_c", "critical",
-        ])
+        self.bus_mon = BusMonitor(
+            "bus_mon",
+            self,
+            uut=cocotb.top,
+            signals=[
+                "in_a",
+                "in_b",
+                "in_c",
+                "en_a",
+                "en_b",
+                "en_c",
+                "out",
+                "fault_a",
+                "fault_b",
+                "fault_c",
+                "critical",
+            ],
+        )
 
         # Scoreboard(s)
         self.scoreboard = None
@@ -147,6 +164,7 @@ class BaseEnv(uvm_env):
         self.bus_drv.seq_item_port.connect(self.bus_seqr.seq_item_export)
         if self.scoreboard:
             self.bus_mon.ap.connect(self.scoreboard.fifo.analysis_export)
+
 
 # ==============================================================================
 

@@ -4,36 +4,41 @@
 
 import os
 
-from cocotb.handle import ModifiableObject
+from axi_agent import *
+from axi_bus import *
 from cocotb.clock import Clock
+from cocotb.handle import ModifiableObject
 from cocotb.triggers import ClockCycles, FallingEdge, RisingEdge
 from cocotb.utils import get_sim_time
 from cocotbext.axi.axi_ram import AxiRam
-
-from axi_agent import *
 from pyuvm import *
-
-from axi_bus import *
 
 # ==============================================================================
 
 # FIXME: Sync with makefile somehow
 MuBiFalse = 0b01
-MuBiTrue  = 0b10
+MuBiTrue = 0b10
 
 # ==============================================================================
+
 
 class FaultItem(uvm_sequence_item):
 
     def __init__(self, name="FaultItem"):
         super().__init__(name)
         self.timestamp = 0
-        self.fault     = [False, False, False]
+        self.fault = [False, False, False]
 
     def __str__(self):
-        return f"FaultItem(timestamp={self.timestamp}, " + ",".join([str(int(f)) for f in self.fault]) + ")"
+        return (
+            f"FaultItem(timestamp={self.timestamp}, "
+            + ",".join([str(int(f)) for f in self.fault])
+            + ")"
+        )
+
 
 # ==============================================================================
+
 
 class FaultMonitor(uvm_monitor):
     """
@@ -63,14 +68,16 @@ class FaultMonitor(uvm_monitor):
 
             if curr_fault != prev_fault:
                 item = FaultItem()
-                item.timestamp = get_sim_time(units='ps')
-                item.fault     = curr_fault
+                item.timestamp = get_sim_time(units="ps")
+                item.fault = curr_fault
                 self.logger.debug(f"Fault state: {str(item)}")
 
                 self.ap.write(item)
                 prev_fault = curr_fault
 
+
 # ==============================================================================
+
 
 class BaseScoreboard(uvm_component):
 
@@ -107,7 +114,9 @@ class BaseScoreboard(uvm_component):
             self.logger.critical("{} reports a failure".format(type(self)))
             assert False
 
+
 # ==============================================================================
+
 
 class BaseEnv(uvm_env):
     """
@@ -132,44 +141,66 @@ class BaseEnv(uvm_env):
         m_axi = MAxiBus.from_prefix(cocotb.top, "m_axi")
 
         # AXI master agents
-        self.s_axi_a_agent = AxiAgent("AXI_A", self, type=AxiAgentType.MASTER,
+        self.s_axi_a_agent = AxiAgent(
+            "AXI_A",
+            self,
+            type=AxiAgentType.MASTER,
             bfm_args={
-                "bus":   s_axi_a,
+                "bus": s_axi_a,
                 "clock": cocotb.top.clk_i,
                 "reset": cocotb.top.rst_ni,
-                "reset_active_level": 0
-            })
+                "reset_active_level": 0,
+            },
+        )
 
-        self.s_axi_b_agent = AxiAgent("AXI_B", self, type=AxiAgentType.MASTER,
+        self.s_axi_b_agent = AxiAgent(
+            "AXI_B",
+            self,
+            type=AxiAgentType.MASTER,
             bfm_args={
-                "bus":   s_axi_b,
+                "bus": s_axi_b,
                 "clock": cocotb.top.clk_i,
                 "reset": cocotb.top.rst_ni,
-                "reset_active_level": 0
-            })
+                "reset_active_level": 0,
+            },
+        )
 
-        self.s_axi_c_agent = AxiAgent("AXI_C", self, type=AxiAgentType.MASTER,
+        self.s_axi_c_agent = AxiAgent(
+            "AXI_C",
+            self,
+            type=AxiAgentType.MASTER,
             bfm_args={
-                "bus":   s_axi_c,
+                "bus": s_axi_c,
                 "clock": cocotb.top.clk_i,
                 "reset": cocotb.top.rst_ni,
-                "reset_active_level": 0
-            })
+                "reset_active_level": 0,
+            },
+        )
 
         ConfigDB().set(None, "*", "AXI_AGENT_A", self.s_axi_a_agent)
         ConfigDB().set(None, "*", "AXI_AGENT_B", self.s_axi_b_agent)
         ConfigDB().set(None, "*", "AXI_AGENT_C", self.s_axi_c_agent)
 
         # AXI slave "agent"
-        self.m_axi_agent = AxiRam(bus=m_axi, clock=cocotb.top.clk_i, reset=cocotb.top.rst_ni, reset_active_level=0, size=2**32)
+        self.m_axi_agent = AxiRam(
+            bus=m_axi,
+            clock=cocotb.top.clk_i,
+            reset=cocotb.top.rst_ni,
+            reset_active_level=0,
+            size=2**32,
+        )
 
         # AXI slave monitor
-        self.m_axi_monitor = AxiMonitor("M_AXI", self, bfm_args={
-            "bus":   m_axi,
-            "clock": cocotb.top.clk_i,
-            "reset": cocotb.top.rst_ni,
-            "reset_active_level": 0
-        })
+        self.m_axi_monitor = AxiMonitor(
+            "M_AXI",
+            self,
+            bfm_args={
+                "bus": m_axi,
+                "clock": cocotb.top.clk_i,
+                "reset": cocotb.top.rst_ni,
+                "reset_active_level": 0,
+            },
+        )
 
         # Fault status output monitor
         self.fault_monitor = FaultMonitor("fault_monitor", self)
@@ -181,11 +212,18 @@ class BaseEnv(uvm_env):
 
     def connect_phase(self):
         if self.scoreboard:
-            self.s_axi_a_agent.monitor.tr_ap.connect(self.scoreboard.s_axi_a_tr_fifo.analysis_export)
-            self.s_axi_b_agent.monitor.tr_ap.connect(self.scoreboard.s_axi_b_tr_fifo.analysis_export)
-            self.s_axi_c_agent.monitor.tr_ap.connect(self.scoreboard.s_axi_c_tr_fifo.analysis_export)
+            self.s_axi_a_agent.monitor.tr_ap.connect(
+                self.scoreboard.s_axi_a_tr_fifo.analysis_export
+            )
+            self.s_axi_b_agent.monitor.tr_ap.connect(
+                self.scoreboard.s_axi_b_tr_fifo.analysis_export
+            )
+            self.s_axi_c_agent.monitor.tr_ap.connect(
+                self.scoreboard.s_axi_c_tr_fifo.analysis_export
+            )
             self.m_axi_monitor.tr_ap.connect(self.scoreboard.m_axi_tr_fifo.analysis_export)
             self.fault_monitor.ap.connect(self.scoreboard.fault_fifo.analysis_export)
+
 
 # ==============================================================================
 

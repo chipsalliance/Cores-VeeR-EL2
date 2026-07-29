@@ -1,6 +1,17 @@
 $RV_ROOT/design/lib/el2_assert.sv
 $RV_ROOT/design/el2_mubi_pkg.sv
 $RV_ROOT/design/el2_veer_wrapper.sv
+$RV_ROOT/design/tmr/el2_tmr_axi.sv
+$RV_ROOT/design/tmr/el2_tmr_ic.sv
+$RV_ROOT/design/tmr/el2_tmr_iccm.sv
+$RV_ROOT/design/tmr/el2_tmr_dccm.sv
+$RV_ROOT/design/tmr/el2_tmr_dmi.sv
+$RV_ROOT/design/tmr/el2_tmr_complex_clk.sv
+$RV_ROOT/design/tmr/el2_tmr_complex_io.sv
+$RV_ROOT/design/tmr/el2_tmr_exec_ctrl.sv
+$RV_ROOT/design/tmr/el2_tmr_misc.sv
+$RV_ROOT/design/tmr/el2_tmr_pic.sv
+$RV_ROOT/design/el2_tmr_complex.sv
 $RV_ROOT/design/el2_veer_lockstep.sv
 $RV_ROOT/design/el2_mem.sv
 $RV_ROOT/design/el2_pic_ctrl.sv

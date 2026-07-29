@@ -214,7 +214,7 @@ class AxiReadMonitor(uvm_monitor):
                 rid = int(r_item.rid)
                 trs = pending.get(rid, None)
                 if not trs:
-                    self.logger.error(f"No pending transaction for RID {b_item.rid}")
+                    self.logger.error(f"No pending transaction for RID {r_item.rid}")
 
                 else:
 

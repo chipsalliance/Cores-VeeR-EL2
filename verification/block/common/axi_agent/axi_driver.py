@@ -5,7 +5,7 @@
 from cocotbext.axi import AxiMaster
 from pyuvm import *
 
-from . import AxiTransaction, AxiTransactionType
+from .axi_item import AxiTransaction, AxiTransactionType
 
 __all__ = ["AxiDriver"]
 

@@ -6,7 +6,8 @@ import enum
 
 from pyuvm import *
 
-from . import AxiDriver, AxiMonitor
+from .axi_driver import AxiDriver
+from .axi_monitor import AxiMonitor
 
 __all__ = ["AxiAgentType", "AxiAgent"]
 

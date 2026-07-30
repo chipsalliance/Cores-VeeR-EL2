@@ -32,6 +32,7 @@ $RV_ROOT/design/tmr/el2_tmr_complex_io.sv
 $RV_ROOT/design/tmr/el2_tmr_exec_ctrl.sv
 $RV_ROOT/design/tmr/el2_tmr_misc.sv
 $RV_ROOT/design/tmr/el2_tmr_pic.sv
+$RV_ROOT/design/tmr/el2_tmr_recovery_fsm.sv
 $RV_ROOT/design/el2_tmr_complex.sv
 $RV_ROOT/design/el2_veer_lockstep.sv
 $RV_ROOT/design/el2_mem.sv

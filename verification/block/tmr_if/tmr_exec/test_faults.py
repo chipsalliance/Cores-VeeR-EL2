@@ -115,7 +115,10 @@ class FaultScoreboard(BaseScoreboard):
                 # test
                 assert False, fault_state
 
-            pred_bus_state = {k.replace("_veer", ""): v[index] for k, v in veer_bus_state.items()}
+            pred_bus_state = {
+                k.replace("_veer", "").replace("ext_", ""): v[index]
+                for k, v in veer_bus_state.items()
+            }
 
             # Compare
             if pred_bus_state != out_bus_state:
@@ -153,9 +156,9 @@ class TestFaults(BaseTest):
         iterations = ConfigDB().get(None, "", "TEST_ITERATIONS")
 
         signals = {
-            "o_cpu_halt_ack_veer": None,
-            "o_cpu_run_ack_veer": None,
-            "o_cpu_halt_status_veer": None,
+            "ext_o_cpu_halt_ack_veer": None,
+            "ext_o_cpu_run_ack_veer": None,
+            "ext_o_cpu_halt_status_veer": None,
             "o_debug_mode_status_veer": None,
             "mpc_debug_halt_ack_veer": None,
             "mpc_debug_run_ack_veer": None,

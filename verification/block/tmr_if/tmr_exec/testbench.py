@@ -78,12 +78,18 @@ class BaseEnv(uvm_env):
         # VeeR-side bus sequencer
         self.veer_bus_seqr = uvm_sequencer("veer_bus_seqr", self)
 
+        veer_sigs = []
+        for s in bus_signals:
+            if s.startswith("o_cpu"):
+                veer_sigs.append("ext_" + s + "_veer")
+            else:
+                veer_sigs.append(s + "_veer")
         # VeeR-side bus monitor
         self.veer_bus_monitor = BusMonitor(
             "veer_bus_monitor",
             self,
             clock_domain=self.clock_domain,
-            signals=[s + "_veer" for s in bus_signals],
+            signals=veer_sigs,
         )
 
         # TMR complex output side bus monitor
@@ -148,9 +154,9 @@ class BaseTest(common.BaseTest):
         cocotb.top.exec_fault_clr[1].value = MuBiFalse
         cocotb.top.exec_fault_clr[2].value = MuBiFalse
 
-        cocotb.top.o_cpu_halt_ack_veer.value = [0] * 3
-        cocotb.top.o_cpu_run_ack_veer.value = [0] * 3
-        cocotb.top.o_cpu_halt_status_veer.value = [0] * 3
+        cocotb.top.ext_o_cpu_halt_ack_veer.value = [0] * 3
+        cocotb.top.ext_o_cpu_run_ack_veer.value = [0] * 3
+        cocotb.top.ext_o_cpu_halt_status_veer.value = [0] * 3
         cocotb.top.o_debug_mode_status_veer.value = [0] * 3
         cocotb.top.mpc_debug_halt_ack_veer.value = [0] * 3
         cocotb.top.mpc_debug_run_ack_veer.value = [0] * 3

@@ -421,19 +421,29 @@ module el2_tmr_complex
   logic dec_tlu_force_halt_veer[3];
   logic dec_tlu_core_ecc_disable_veer[3];
 
+  // Core ctrl signals between CPU and Recovery
   logic i_cpu_halt_req_veer[3];
   logic i_cpu_run_req_veer[3];
   logic o_cpu_halt_ack_veer[3];
   logic o_cpu_halt_status_veer[3];
   logic o_cpu_run_ack_veer[3];
-  logic o_debug_mode_status_veer[3];
+  logic mpc_reset_run_req_veer[3];
+  // Core ctrl signals betwen Recovery and external
+  logic ext_i_cpu_halt_req_veer[3];
+  logic ext_i_cpu_run_req_veer[3];
+  logic ext_o_cpu_halt_ack_veer[3];
+  logic ext_o_cpu_halt_status_veer[3];
+  logic ext_o_cpu_run_ack_veer[3];
+  logic ext_mpc_reset_run_req_veer[3];
   // external MPC halt/run interface
+  logic o_debug_mode_status_veer[3];
   logic mpc_debug_halt_req_veer[3];
   logic mpc_debug_halt_ack_veer[3];
   logic mpc_debug_run_req_veer[3];
   logic mpc_debug_run_ack_veer[3];
-  logic mpc_reset_run_req_veer[3];
   logic debug_brkpt_status_veer[3];
+
+
 
   // PIC registers
   logic        pic_clk_override_veer[3];
@@ -1033,21 +1043,13 @@ module el2_tmr_complex
   el2_tmr_exec_ctrl el2_tmr_exec_ctrl_u (.*);
   el2_tmr_misc el2_tmr_misc_u (.*);
 
-  // TODO: Implemente recovery logic
-  always_comb begin
-    for (int i=0;i < 3; i+=1) begin
-      recovery_gpr_en_veer[i] = el2_mubi_pkg::El2MuBiFalse;
-      recovery_gpr_wen_veer[i] = '0;
-      recovery_gpr_wraddr_veer[i] = '0;
-      recovery_gpr_wrdata_veer[i] = '0;
-      recovery_gpr_rdaddr_veer[i] = '0;
-      recovery_csr_en_veer[i] = el2_mubi_pkg::El2MuBiFalse;
-      recovery_csr_wen_veer[i] = '0;
-      recovery_csr_wraddr_veer[i] = '0;
-      recovery_csr_wrdata_veer[i] = '0;
-      recovery_csr_rdaddr_veer[i] = '0;
-    end
-  end
+  el2_tmr_recovery_fsm #(.pt(pt)) el2_tmr_recovery_fsm_u (
+      .*,
+      .external_flag(el2_mubi_pkg::El2MuBiFalse),
+      .clear_external_flag(),
+      .sync_rst_l(),
+      .fatal_err()
+  );
 
   for (genvar i=0;i < 3; i+=1) begin: cores
     logic dec_tlu_dccm_wr_readback_disable; // TODO: Is it needed?

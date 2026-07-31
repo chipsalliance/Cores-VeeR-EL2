@@ -22,14 +22,14 @@ class BaseScoreboard(uvm_component):
     def build_phase(self):
         self.passed = False
 
-        self.s_axi_a_tr_fifo = uvm_tlm_analysis_fifo("s_axi_a_tr_fifo", self)
-        self.s_axi_a_tr_port = uvm_get_port("s_axi_a_tr_port", self)
+        self.a_s_axi_tr_fifo = uvm_tlm_analysis_fifo("a_s_axi_tr_fifo", self)
+        self.a_s_axi_tr_port = uvm_get_port("a_s_axi_tr_port", self)
 
-        self.s_axi_b_tr_fifo = uvm_tlm_analysis_fifo("s_axi_b_tr_fifo", self)
-        self.s_axi_b_tr_port = uvm_get_port("s_axi_b_tr_port", self)
+        self.b_s_axi_tr_fifo = uvm_tlm_analysis_fifo("b_s_axi_tr_fifo", self)
+        self.b_s_axi_tr_port = uvm_get_port("b_s_axi_tr_port", self)
 
-        self.s_axi_c_tr_fifo = uvm_tlm_analysis_fifo("s_axi_c_tr_fifo", self)
-        self.s_axi_c_tr_port = uvm_get_port("s_axi_c_tr_port", self)
+        self.c_s_axi_tr_fifo = uvm_tlm_analysis_fifo("c_s_axi_tr_fifo", self)
+        self.c_s_axi_tr_port = uvm_get_port("c_s_axi_tr_port", self)
 
         self.m_axi_tr_fifo = uvm_tlm_analysis_fifo("m_axi_tr_fifo", self)
         self.m_axi_tr_port = uvm_get_port("m_axi_tr_port", self)
@@ -38,9 +38,9 @@ class BaseScoreboard(uvm_component):
         self.fault_port = uvm_get_port("fault_port", self)
 
     def connect_phase(self):
-        self.s_axi_a_tr_port.connect(self.s_axi_a_tr_fifo.get_export)
-        self.s_axi_b_tr_port.connect(self.s_axi_b_tr_fifo.get_export)
-        self.s_axi_c_tr_port.connect(self.s_axi_c_tr_fifo.get_export)
+        self.a_s_axi_tr_port.connect(self.a_s_axi_tr_fifo.get_export)
+        self.b_s_axi_tr_port.connect(self.b_s_axi_tr_fifo.get_export)
+        self.c_s_axi_tr_port.connect(self.c_s_axi_tr_fifo.get_export)
         self.m_axi_tr_port.connect(self.m_axi_tr_fifo.get_export)
         self.fault_port.connect(self.fault_fifo.get_export)
 
@@ -71,15 +71,15 @@ class BaseEnv(uvm_env):
         ConfigDB().set(None, "*", "TEST_ITERATIONS", 100)
 
         # AXI slave buses
-        s_axi_a = SAxiBus.from_prefix(cocotb.top, "s_axi_a")
-        s_axi_b = SAxiBus.from_prefix(cocotb.top, "s_axi_b")
-        s_axi_c = SAxiBus.from_prefix(cocotb.top, "s_axi_c")
+        s_axi_a = SAxiBus.from_prefix(cocotb.top, "a_s_axi")
+        s_axi_b = SAxiBus.from_prefix(cocotb.top, "b_s_axi")
+        s_axi_c = SAxiBus.from_prefix(cocotb.top, "c_s_axi")
 
         # AXI master bus
         m_axi = MAxiBus.from_prefix(cocotb.top, "m_axi")
 
         # AXI master agents
-        self.s_axi_a_agent = AxiAgent(
+        self.a_s_axi_agent = AxiAgent(
             "AXI_A",
             self,
             type=AxiAgentType.MASTER,
@@ -91,7 +91,7 @@ class BaseEnv(uvm_env):
             },
         )
 
-        self.s_axi_b_agent = AxiAgent(
+        self.b_s_axi_agent = AxiAgent(
             "AXI_B",
             self,
             type=AxiAgentType.MASTER,
@@ -103,7 +103,7 @@ class BaseEnv(uvm_env):
             },
         )
 
-        self.s_axi_c_agent = AxiAgent(
+        self.c_s_axi_agent = AxiAgent(
             "AXI_C",
             self,
             type=AxiAgentType.MASTER,
@@ -115,9 +115,9 @@ class BaseEnv(uvm_env):
             },
         )
 
-        ConfigDB().set(None, "*", "AXI_AGENT_A", self.s_axi_a_agent)
-        ConfigDB().set(None, "*", "AXI_AGENT_B", self.s_axi_b_agent)
-        ConfigDB().set(None, "*", "AXI_AGENT_C", self.s_axi_c_agent)
+        ConfigDB().set(None, "*", "AXI_AGENT_A", self.a_s_axi_agent)
+        ConfigDB().set(None, "*", "AXI_AGENT_B", self.b_s_axi_agent)
+        ConfigDB().set(None, "*", "AXI_AGENT_C", self.c_s_axi_agent)
 
         # AXI slave "agent"
         self.m_axi_agent = AxiRam(
@@ -145,9 +145,9 @@ class BaseEnv(uvm_env):
             "fault_monitor",
             self,
             signals=[
-                cocotb.top.s_axi_a_fault_o,
-                cocotb.top.s_axi_b_fault_o,
-                cocotb.top.s_axi_c_fault_o,
+                cocotb.top.a_s_axi_fault_o,
+                cocotb.top.b_s_axi_fault_o,
+                cocotb.top.c_s_axi_fault_o,
             ],
         )
 
@@ -158,14 +158,14 @@ class BaseEnv(uvm_env):
 
     def connect_phase(self):
         if self.scoreboard:
-            self.s_axi_a_agent.monitor.tr_ap.connect(
-                self.scoreboard.s_axi_a_tr_fifo.analysis_export
+            self.a_s_axi_agent.monitor.tr_ap.connect(
+                self.scoreboard.a_s_axi_tr_fifo.analysis_export
             )
-            self.s_axi_b_agent.monitor.tr_ap.connect(
-                self.scoreboard.s_axi_b_tr_fifo.analysis_export
+            self.b_s_axi_agent.monitor.tr_ap.connect(
+                self.scoreboard.b_s_axi_tr_fifo.analysis_export
             )
-            self.s_axi_c_agent.monitor.tr_ap.connect(
-                self.scoreboard.s_axi_c_tr_fifo.analysis_export
+            self.c_s_axi_agent.monitor.tr_ap.connect(
+                self.scoreboard.c_s_axi_tr_fifo.analysis_export
             )
             self.m_axi_monitor.tr_ap.connect(self.scoreboard.m_axi_tr_fifo.analysis_export)
             self.fault_monitor.ap.connect(self.scoreboard.fault_fifo.analysis_export)

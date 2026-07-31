@@ -114,9 +114,9 @@ class BaseTest(uvm_test):
             if not isinstance(obj, ModifiableObject):
                 continue
 
-            if name.startswith("s_axi_") and name.endswith("_i"):
+            if "s_axi_" in name and name.endswith("_i"):
                 obj.value = 0
-            if name.startswith("m_axi_") and name.endswith("_i"):
+            if "m_axi_" in name and name.endswith("_i"):
                 obj.value = 0
 
             if name.endswith("fault_i"):

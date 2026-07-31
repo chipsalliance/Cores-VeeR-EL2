@@ -12,154 +12,154 @@ module el2_tmr_axi_s # (
   input  logic  rst_ni,
 
   // AXI port for core A
-  output logic                     m_axi_a_awvalid_o,
-  input  logic                     m_axi_a_awready_i,
-  output logic [IdWidth-1:0]       m_axi_a_awid_o,
-  output logic [AddrWidth-1:0]     m_axi_a_awaddr_o,
-  output logic [3:0]               m_axi_a_awregion_o,
-  output logic [7:0]               m_axi_a_awlen_o,
-  output logic [2:0]               m_axi_a_awsize_o,
-  output logic [1:0]               m_axi_a_awburst_o,
-  output logic                     m_axi_a_awlock_o,
-  output logic [3:0]               m_axi_a_awcache_o,
-  output logic [2:0]               m_axi_a_awprot_o,
-  output logic [3:0]               m_axi_a_awqos_o,
+  output logic                     a_m_axi_awvalid_o,
+  input  logic                     a_m_axi_awready_i,
+  output logic [IdWidth-1:0]       a_m_axi_awid_o,
+  output logic [AddrWidth-1:0]     a_m_axi_awaddr_o,
+  output logic [3:0]               a_m_axi_awregion_o,
+  output logic [7:0]               a_m_axi_awlen_o,
+  output logic [2:0]               a_m_axi_awsize_o,
+  output logic [1:0]               a_m_axi_awburst_o,
+  output logic                     a_m_axi_awlock_o,
+  output logic [3:0]               a_m_axi_awcache_o,
+  output logic [2:0]               a_m_axi_awprot_o,
+  output logic [3:0]               a_m_axi_awqos_o,
 
-  output logic                     m_axi_a_wvalid_o,
-  input  logic                     m_axi_a_wready_i,
-  output logic [DataWidth-1:0]     m_axi_a_wdata_o,
-  output logic [DataWidth/8-1:0]   m_axi_a_wstrb_o,
-  output logic                     m_axi_a_wlast_o,
+  output logic                     a_m_axi_wvalid_o,
+  input  logic                     a_m_axi_wready_i,
+  output logic [DataWidth-1:0]     a_m_axi_wdata_o,
+  output logic [DataWidth/8-1:0]   a_m_axi_wstrb_o,
+  output logic                     a_m_axi_wlast_o,
 
-  input  logic                     m_axi_a_bvalid_i,
-  output logic                     m_axi_a_bready_o,
-  input  logic [1:0]               m_axi_a_bresp_i,
-  input  logic [IdWidth-1:0]       m_axi_a_bid_i,
+  input  logic                     a_m_axi_bvalid_i,
+  output logic                     a_m_axi_bready_o,
+  input  logic [1:0]               a_m_axi_bresp_i,
+  input  logic [IdWidth-1:0]       a_m_axi_bid_i,
 
-  output logic                     m_axi_a_arvalid_o,
-  input  logic                     m_axi_a_arready_i,
-  output logic [IdWidth-1:0]       m_axi_a_arid_o,
-  output logic [AddrWidth-1:0]     m_axi_a_araddr_o,
-  output logic [3:0]               m_axi_a_arregion_o,
-  output logic [7:0]               m_axi_a_arlen_o,
-  output logic [2:0]               m_axi_a_arsize_o,
-  output logic [1:0]               m_axi_a_arburst_o,
-  output logic                     m_axi_a_arlock_o,
-  output logic [3:0]               m_axi_a_arcache_o,
-  output logic [2:0]               m_axi_a_arprot_o,
-  output logic [3:0]               m_axi_a_arqos_o,
+  output logic                     a_m_axi_arvalid_o,
+  input  logic                     a_m_axi_arready_i,
+  output logic [IdWidth-1:0]       a_m_axi_arid_o,
+  output logic [AddrWidth-1:0]     a_m_axi_araddr_o,
+  output logic [3:0]               a_m_axi_arregion_o,
+  output logic [7:0]               a_m_axi_arlen_o,
+  output logic [2:0]               a_m_axi_arsize_o,
+  output logic [1:0]               a_m_axi_arburst_o,
+  output logic                     a_m_axi_arlock_o,
+  output logic [3:0]               a_m_axi_arcache_o,
+  output logic [2:0]               a_m_axi_arprot_o,
+  output logic [3:0]               a_m_axi_arqos_o,
 
-  input  logic                     m_axi_a_rvalid_i,
-  output logic                     m_axi_a_rready_o,
-  input  logic [IdWidth-1:0]       m_axi_a_rid_i,
-  input  logic [DataWidth-1:0]     m_axi_a_rdata_i,
-  input  logic [1:0]               m_axi_a_rresp_i,
-  input  logic                     m_axi_a_rlast_i,
+  input  logic                     a_m_axi_rvalid_i,
+  output logic                     a_m_axi_rready_o,
+  input  logic [IdWidth-1:0]       a_m_axi_rid_i,
+  input  logic [DataWidth-1:0]     a_m_axi_rdata_i,
+  input  logic [1:0]               a_m_axi_rresp_i,
+  input  logic                     a_m_axi_rlast_i,
 
   // AXI port for core A
-  output logic                     m_axi_b_awvalid_o,
-  input  logic                     m_axi_b_awready_i,
-  output logic [IdWidth-1:0]       m_axi_b_awid_o,
-  output logic [AddrWidth-1:0]     m_axi_b_awaddr_o,
-  output logic [3:0]               m_axi_b_awregion_o,
-  output logic [7:0]               m_axi_b_awlen_o,
-  output logic [2:0]               m_axi_b_awsize_o,
-  output logic [1:0]               m_axi_b_awburst_o,
-  output logic                     m_axi_b_awlock_o,
-  output logic [3:0]               m_axi_b_awcache_o,
-  output logic [2:0]               m_axi_b_awprot_o,
-  output logic [3:0]               m_axi_b_awqos_o,
+  output logic                     b_m_axi_awvalid_o,
+  input  logic                     b_m_axi_awready_i,
+  output logic [IdWidth-1:0]       b_m_axi_awid_o,
+  output logic [AddrWidth-1:0]     b_m_axi_awaddr_o,
+  output logic [3:0]               b_m_axi_awregion_o,
+  output logic [7:0]               b_m_axi_awlen_o,
+  output logic [2:0]               b_m_axi_awsize_o,
+  output logic [1:0]               b_m_axi_awburst_o,
+  output logic                     b_m_axi_awlock_o,
+  output logic [3:0]               b_m_axi_awcache_o,
+  output logic [2:0]               b_m_axi_awprot_o,
+  output logic [3:0]               b_m_axi_awqos_o,
 
-  output logic                     m_axi_b_wvalid_o,
-  input  logic                     m_axi_b_wready_i,
-  output logic [DataWidth-1:0]     m_axi_b_wdata_o,
-  output logic [DataWidth/8-1:0]   m_axi_b_wstrb_o,
-  output logic                     m_axi_b_wlast_o,
+  output logic                     b_m_axi_wvalid_o,
+  input  logic                     b_m_axi_wready_i,
+  output logic [DataWidth-1:0]     b_m_axi_wdata_o,
+  output logic [DataWidth/8-1:0]   b_m_axi_wstrb_o,
+  output logic                     b_m_axi_wlast_o,
 
-  input  logic                     m_axi_b_bvalid_i,
-  output logic                     m_axi_b_bready_o,
-  input  logic [1:0]               m_axi_b_bresp_i,
-  input  logic [IdWidth-1:0]       m_axi_b_bid_i,
+  input  logic                     b_m_axi_bvalid_i,
+  output logic                     b_m_axi_bready_o,
+  input  logic [1:0]               b_m_axi_bresp_i,
+  input  logic [IdWidth-1:0]       b_m_axi_bid_i,
 
-  output logic                     m_axi_b_arvalid_o,
-  input  logic                     m_axi_b_arready_i,
-  output logic [IdWidth-1:0]       m_axi_b_arid_o,
-  output logic [AddrWidth-1:0]     m_axi_b_araddr_o,
-  output logic [3:0]               m_axi_b_arregion_o,
-  output logic [7:0]               m_axi_b_arlen_o,
-  output logic [2:0]               m_axi_b_arsize_o,
-  output logic [1:0]               m_axi_b_arburst_o,
-  output logic                     m_axi_b_arlock_o,
-  output logic [3:0]               m_axi_b_arcache_o,
-  output logic [2:0]               m_axi_b_arprot_o,
-  output logic [3:0]               m_axi_b_arqos_o,
+  output logic                     b_m_axi_arvalid_o,
+  input  logic                     b_m_axi_arready_i,
+  output logic [IdWidth-1:0]       b_m_axi_arid_o,
+  output logic [AddrWidth-1:0]     b_m_axi_araddr_o,
+  output logic [3:0]               b_m_axi_arregion_o,
+  output logic [7:0]               b_m_axi_arlen_o,
+  output logic [2:0]               b_m_axi_arsize_o,
+  output logic [1:0]               b_m_axi_arburst_o,
+  output logic                     b_m_axi_arlock_o,
+  output logic [3:0]               b_m_axi_arcache_o,
+  output logic [2:0]               b_m_axi_arprot_o,
+  output logic [3:0]               b_m_axi_arqos_o,
 
-  input  logic                     m_axi_b_rvalid_i,
-  output logic                     m_axi_b_rready_o,
-  input  logic [IdWidth-1:0]       m_axi_b_rid_i,
-  input  logic [DataWidth-1:0]     m_axi_b_rdata_i,
-  input  logic [1:0]               m_axi_b_rresp_i,
-  input  logic                     m_axi_b_rlast_i,
+  input  logic                     b_m_axi_rvalid_i,
+  output logic                     b_m_axi_rready_o,
+  input  logic [IdWidth-1:0]       b_m_axi_rid_i,
+  input  logic [DataWidth-1:0]     b_m_axi_rdata_i,
+  input  logic [1:0]               b_m_axi_rresp_i,
+  input  logic                     b_m_axi_rlast_i,
 
   // AXI port for core C
-  output logic                     m_axi_c_awvalid_o,
-  input  logic                     m_axi_c_awready_i,
-  output logic [IdWidth-1:0]       m_axi_c_awid_o,
-  output logic [AddrWidth-1:0]     m_axi_c_awaddr_o,
-  output logic [3:0]               m_axi_c_awregion_o,
-  output logic [7:0]               m_axi_c_awlen_o,
-  output logic [2:0]               m_axi_c_awsize_o,
-  output logic [1:0]               m_axi_c_awburst_o,
-  output logic                     m_axi_c_awlock_o,
-  output logic [3:0]               m_axi_c_awcache_o,
-  output logic [2:0]               m_axi_c_awprot_o,
-  output logic [3:0]               m_axi_c_awqos_o,
+  output logic                     c_m_axi_awvalid_o,
+  input  logic                     c_m_axi_awready_i,
+  output logic [IdWidth-1:0]       c_m_axi_awid_o,
+  output logic [AddrWidth-1:0]     c_m_axi_awaddr_o,
+  output logic [3:0]               c_m_axi_awregion_o,
+  output logic [7:0]               c_m_axi_awlen_o,
+  output logic [2:0]               c_m_axi_awsize_o,
+  output logic [1:0]               c_m_axi_awburst_o,
+  output logic                     c_m_axi_awlock_o,
+  output logic [3:0]               c_m_axi_awcache_o,
+  output logic [2:0]               c_m_axi_awprot_o,
+  output logic [3:0]               c_m_axi_awqos_o,
 
-  output logic                     m_axi_c_wvalid_o,
-  input  logic                     m_axi_c_wready_i,
-  output logic [DataWidth-1:0]     m_axi_c_wdata_o,
-  output logic [DataWidth/8-1:0]   m_axi_c_wstrb_o,
-  output logic                     m_axi_c_wlast_o,
+  output logic                     c_m_axi_wvalid_o,
+  input  logic                     c_m_axi_wready_i,
+  output logic [DataWidth-1:0]     c_m_axi_wdata_o,
+  output logic [DataWidth/8-1:0]   c_m_axi_wstrb_o,
+  output logic                     c_m_axi_wlast_o,
 
-  input  logic                     m_axi_c_bvalid_i,
-  output logic                     m_axi_c_bready_o,
-  input  logic [1:0]               m_axi_c_bresp_i,
-  input  logic [IdWidth-1:0]       m_axi_c_bid_i,
+  input  logic                     c_m_axi_bvalid_i,
+  output logic                     c_m_axi_bready_o,
+  input  logic [1:0]               c_m_axi_bresp_i,
+  input  logic [IdWidth-1:0]       c_m_axi_bid_i,
 
-  output logic                     m_axi_c_arvalid_o,
-  input  logic                     m_axi_c_arready_i,
-  output logic [IdWidth-1:0]       m_axi_c_arid_o,
-  output logic [AddrWidth-1:0]     m_axi_c_araddr_o,
-  output logic [3:0]               m_axi_c_arregion_o,
-  output logic [7:0]               m_axi_c_arlen_o,
-  output logic [2:0]               m_axi_c_arsize_o,
-  output logic [1:0]               m_axi_c_arburst_o,
-  output logic                     m_axi_c_arlock_o,
-  output logic [3:0]               m_axi_c_arcache_o,
-  output logic [2:0]               m_axi_c_arprot_o,
-  output logic [3:0]               m_axi_c_arqos_o,
+  output logic                     c_m_axi_arvalid_o,
+  input  logic                     c_m_axi_arready_i,
+  output logic [IdWidth-1:0]       c_m_axi_arid_o,
+  output logic [AddrWidth-1:0]     c_m_axi_araddr_o,
+  output logic [3:0]               c_m_axi_arregion_o,
+  output logic [7:0]               c_m_axi_arlen_o,
+  output logic [2:0]               c_m_axi_arsize_o,
+  output logic [1:0]               c_m_axi_arburst_o,
+  output logic                     c_m_axi_arlock_o,
+  output logic [3:0]               c_m_axi_arcache_o,
+  output logic [2:0]               c_m_axi_arprot_o,
+  output logic [3:0]               c_m_axi_arqos_o,
 
-  input  logic                     m_axi_c_rvalid_i,
-  output logic                     m_axi_c_rready_o,
-  input  logic [IdWidth-1:0]       m_axi_c_rid_i,
-  input  logic [DataWidth-1:0]     m_axi_c_rdata_i,
-  input  logic [1:0]               m_axi_c_rresp_i,
-  input  logic                     m_axi_c_rlast_i,
+  input  logic                     c_m_axi_rvalid_i,
+  output logic                     c_m_axi_rready_o,
+  input  logic [IdWidth-1:0]       c_m_axi_rid_i,
+  input  logic [DataWidth-1:0]     c_m_axi_rdata_i,
+  input  logic [1:0]               c_m_axi_rresp_i,
+  input  logic                     c_m_axi_rlast_i,
 
   // Channel fault output
-  output el2_mubi_pkg::el2_mubi_t  m_axi_a_fault_o,
-  output el2_mubi_pkg::el2_mubi_t  m_axi_b_fault_o,
-  output el2_mubi_pkg::el2_mubi_t  m_axi_c_fault_o,
+  output el2_mubi_pkg::el2_mubi_t  a_m_axi_fault_o,
+  output el2_mubi_pkg::el2_mubi_t  b_m_axi_fault_o,
+  output el2_mubi_pkg::el2_mubi_t  c_m_axi_fault_o,
 
   // External fault input
-  input  el2_mubi_pkg::el2_mubi_t  m_axi_a_fault_i,
-  input  el2_mubi_pkg::el2_mubi_t  m_axi_b_fault_i,
-  input  el2_mubi_pkg::el2_mubi_t  m_axi_c_fault_i,
+  input  el2_mubi_pkg::el2_mubi_t  a_m_axi_fault_i,
+  input  el2_mubi_pkg::el2_mubi_t  b_m_axi_fault_i,
+  input  el2_mubi_pkg::el2_mubi_t  c_m_axi_fault_i,
 
   // Fault clear
-  input  el2_mubi_pkg::el2_mubi_t  m_axi_a_fault_clr_i,
-  input  el2_mubi_pkg::el2_mubi_t  m_axi_b_fault_clr_i,
-  input  el2_mubi_pkg::el2_mubi_t  m_axi_c_fault_clr_i,
+  input  el2_mubi_pkg::el2_mubi_t  a_m_axi_fault_clr_i,
+  input  el2_mubi_pkg::el2_mubi_t  b_m_axi_fault_clr_i,
+  input  el2_mubi_pkg::el2_mubi_t  c_m_axi_fault_clr_i,
 
   // Outgoing AXI subordinate port
   input  logic                     s_axi_awvalid_i,
@@ -209,9 +209,9 @@ module el2_tmr_axi_s # (
 
   import el2_mubi_pkg::*;
 
-  el2_mubi_t m_axi_a_fault;
-  el2_mubi_t m_axi_b_fault;
-  el2_mubi_t m_axi_c_fault;
+  el2_mubi_t a_m_axi_fault;
+  el2_mubi_t b_m_axi_fault;
+  el2_mubi_t c_m_axi_fault;
 
   // ......................................................
   // AXI AW channel
@@ -228,56 +228,56 @@ module el2_tmr_axi_s # (
     .clk_i               (clk_i),
     .rst_ni              (rst_ni),
 
-    .m_axi_a_axvalid_o   (m_axi_a_awvalid_o),
-    .m_axi_a_axready_i   (m_axi_a_awready_i),
-    .m_axi_a_axid_o      (m_axi_a_awid_o),
-    .m_axi_a_axaddr_o    (m_axi_a_awaddr_o),
-    .m_axi_a_axregion_o  (m_axi_a_awregion_o),
-    .m_axi_a_axlen_o     (m_axi_a_awlen_o),
-    .m_axi_a_axsize_o    (m_axi_a_awsize_o),
-    .m_axi_a_axburst_o   (m_axi_a_awburst_o),
-    .m_axi_a_axlock_o    (m_axi_a_awlock_o),
-    .m_axi_a_axcache_o   (m_axi_a_awcache_o),
-    .m_axi_a_axprot_o    (m_axi_a_awprot_o),
-    .m_axi_a_axqos_o     (m_axi_a_awqos_o),
+    .a_m_axi_axvalid_o   (a_m_axi_awvalid_o),
+    .a_m_axi_axready_i   (a_m_axi_awready_i),
+    .a_m_axi_axid_o      (a_m_axi_awid_o),
+    .a_m_axi_axaddr_o    (a_m_axi_awaddr_o),
+    .a_m_axi_axregion_o  (a_m_axi_awregion_o),
+    .a_m_axi_axlen_o     (a_m_axi_awlen_o),
+    .a_m_axi_axsize_o    (a_m_axi_awsize_o),
+    .a_m_axi_axburst_o   (a_m_axi_awburst_o),
+    .a_m_axi_axlock_o    (a_m_axi_awlock_o),
+    .a_m_axi_axcache_o   (a_m_axi_awcache_o),
+    .a_m_axi_axprot_o    (a_m_axi_awprot_o),
+    .a_m_axi_axqos_o     (a_m_axi_awqos_o),
 
-    .m_axi_b_axvalid_o   (m_axi_b_awvalid_o),
-    .m_axi_b_axready_i   (m_axi_b_awready_i),
-    .m_axi_b_axid_o      (m_axi_b_awid_o),
-    .m_axi_b_axaddr_o    (m_axi_b_awaddr_o),
-    .m_axi_b_axregion_o  (m_axi_b_awregion_o),
-    .m_axi_b_axlen_o     (m_axi_b_awlen_o),
-    .m_axi_b_axsize_o    (m_axi_b_awsize_o),
-    .m_axi_b_axburst_o   (m_axi_b_awburst_o),
-    .m_axi_b_axlock_o    (m_axi_b_awlock_o),
-    .m_axi_b_axcache_o   (m_axi_b_awcache_o),
-    .m_axi_b_axprot_o    (m_axi_b_awprot_o),
-    .m_axi_b_axqos_o     (m_axi_b_awqos_o),
+    .b_m_axi_axvalid_o   (b_m_axi_awvalid_o),
+    .b_m_axi_axready_i   (b_m_axi_awready_i),
+    .b_m_axi_axid_o      (b_m_axi_awid_o),
+    .b_m_axi_axaddr_o    (b_m_axi_awaddr_o),
+    .b_m_axi_axregion_o  (b_m_axi_awregion_o),
+    .b_m_axi_axlen_o     (b_m_axi_awlen_o),
+    .b_m_axi_axsize_o    (b_m_axi_awsize_o),
+    .b_m_axi_axburst_o   (b_m_axi_awburst_o),
+    .b_m_axi_axlock_o    (b_m_axi_awlock_o),
+    .b_m_axi_axcache_o   (b_m_axi_awcache_o),
+    .b_m_axi_axprot_o    (b_m_axi_awprot_o),
+    .b_m_axi_axqos_o     (b_m_axi_awqos_o),
 
-    .m_axi_c_axvalid_o   (m_axi_c_awvalid_o),
-    .m_axi_c_axready_i   (m_axi_c_awready_i),
-    .m_axi_c_axid_o      (m_axi_c_awid_o),
-    .m_axi_c_axaddr_o    (m_axi_c_awaddr_o),
-    .m_axi_c_axregion_o  (m_axi_c_awregion_o),
-    .m_axi_c_axlen_o     (m_axi_c_awlen_o),
-    .m_axi_c_axsize_o    (m_axi_c_awsize_o),
-    .m_axi_c_axburst_o   (m_axi_c_awburst_o),
-    .m_axi_c_axlock_o    (m_axi_c_awlock_o),
-    .m_axi_c_axcache_o   (m_axi_c_awcache_o),
-    .m_axi_c_axprot_o    (m_axi_c_awprot_o),
-    .m_axi_c_axqos_o     (m_axi_c_awqos_o),
+    .c_m_axi_axvalid_o   (c_m_axi_awvalid_o),
+    .c_m_axi_axready_i   (c_m_axi_awready_i),
+    .c_m_axi_axid_o      (c_m_axi_awid_o),
+    .c_m_axi_axaddr_o    (c_m_axi_awaddr_o),
+    .c_m_axi_axregion_o  (c_m_axi_awregion_o),
+    .c_m_axi_axlen_o     (c_m_axi_awlen_o),
+    .c_m_axi_axsize_o    (c_m_axi_awsize_o),
+    .c_m_axi_axburst_o   (c_m_axi_awburst_o),
+    .c_m_axi_axlock_o    (c_m_axi_awlock_o),
+    .c_m_axi_axcache_o   (c_m_axi_awcache_o),
+    .c_m_axi_axprot_o    (c_m_axi_awprot_o),
+    .c_m_axi_axqos_o     (c_m_axi_awqos_o),
 
-    .m_axi_a_fault_o     (m_axi_aw_a_fault),
-    .m_axi_b_fault_o     (m_axi_aw_b_fault),
-    .m_axi_c_fault_o     (m_axi_aw_c_fault),
+    .a_m_axi_fault_o     (m_axi_aw_a_fault),
+    .b_m_axi_fault_o     (m_axi_aw_b_fault),
+    .c_m_axi_fault_o     (m_axi_aw_c_fault),
 
-    .m_axi_a_fault_i     (m_axi_a_fault),
-    .m_axi_b_fault_i     (m_axi_b_fault),
-    .m_axi_c_fault_i     (m_axi_c_fault),
+    .a_m_axi_fault_i     (a_m_axi_fault),
+    .b_m_axi_fault_i     (b_m_axi_fault),
+    .c_m_axi_fault_i     (c_m_axi_fault),
 
-    .m_axi_a_fault_clr_i (m_axi_a_fault_clr_i),
-    .m_axi_b_fault_clr_i (m_axi_b_fault_clr_i),
-    .m_axi_c_fault_clr_i (m_axi_c_fault_clr_i),
+    .a_m_axi_fault_clr_i (a_m_axi_fault_clr_i),
+    .b_m_axi_fault_clr_i (b_m_axi_fault_clr_i),
+    .c_m_axi_fault_clr_i (c_m_axi_fault_clr_i),
 
     .s_axi_axvalid_i     (s_axi_awvalid_i),
     .s_axi_axready_o     (s_axi_awready_o),
@@ -307,35 +307,35 @@ module el2_tmr_axi_s # (
     .clk_i               (clk_i),
     .rst_ni              (rst_ni),
 
-    .m_axi_a_wvalid_o    (m_axi_a_wvalid_o),
-    .m_axi_a_wready_i    (m_axi_a_wready_i),
-    .m_axi_a_wdata_o     (m_axi_a_wdata_o),
-    .m_axi_a_wstrb_o     (m_axi_a_wstrb_o),
-    .m_axi_a_wlast_o     (m_axi_a_wlast_o),
+    .a_m_axi_wvalid_o    (a_m_axi_wvalid_o),
+    .a_m_axi_wready_i    (a_m_axi_wready_i),
+    .a_m_axi_wdata_o     (a_m_axi_wdata_o),
+    .a_m_axi_wstrb_o     (a_m_axi_wstrb_o),
+    .a_m_axi_wlast_o     (a_m_axi_wlast_o),
 
-    .m_axi_b_wvalid_o    (m_axi_b_wvalid_o),
-    .m_axi_b_wready_i    (m_axi_b_wready_i),
-    .m_axi_b_wdata_o     (m_axi_b_wdata_o),
-    .m_axi_b_wstrb_o     (m_axi_b_wstrb_o),
-    .m_axi_b_wlast_o     (m_axi_b_wlast_o),
+    .b_m_axi_wvalid_o    (b_m_axi_wvalid_o),
+    .b_m_axi_wready_i    (b_m_axi_wready_i),
+    .b_m_axi_wdata_o     (b_m_axi_wdata_o),
+    .b_m_axi_wstrb_o     (b_m_axi_wstrb_o),
+    .b_m_axi_wlast_o     (b_m_axi_wlast_o),
 
-    .m_axi_c_wvalid_o    (m_axi_c_wvalid_o),
-    .m_axi_c_wready_i    (m_axi_c_wready_i),
-    .m_axi_c_wdata_o     (m_axi_c_wdata_o),
-    .m_axi_c_wstrb_o     (m_axi_c_wstrb_o),
-    .m_axi_c_wlast_o     (m_axi_c_wlast_o),
+    .c_m_axi_wvalid_o    (c_m_axi_wvalid_o),
+    .c_m_axi_wready_i    (c_m_axi_wready_i),
+    .c_m_axi_wdata_o     (c_m_axi_wdata_o),
+    .c_m_axi_wstrb_o     (c_m_axi_wstrb_o),
+    .c_m_axi_wlast_o     (c_m_axi_wlast_o),
 
-    .m_axi_a_fault_o     (m_axi_w_a_fault),
-    .m_axi_b_fault_o     (m_axi_w_b_fault),
-    .m_axi_c_fault_o     (m_axi_w_c_fault),
+    .a_m_axi_fault_o     (m_axi_w_a_fault),
+    .b_m_axi_fault_o     (m_axi_w_b_fault),
+    .c_m_axi_fault_o     (m_axi_w_c_fault),
 
-    .m_axi_a_fault_i     (m_axi_a_fault),
-    .m_axi_b_fault_i     (m_axi_b_fault),
-    .m_axi_c_fault_i     (m_axi_c_fault),
+    .a_m_axi_fault_i     (a_m_axi_fault),
+    .b_m_axi_fault_i     (b_m_axi_fault),
+    .c_m_axi_fault_i     (c_m_axi_fault),
 
-    .m_axi_a_fault_clr_i (m_axi_a_fault_clr_i),
-    .m_axi_b_fault_clr_i (m_axi_b_fault_clr_i),
-    .m_axi_c_fault_clr_i (m_axi_c_fault_clr_i),
+    .a_m_axi_fault_clr_i (a_m_axi_fault_clr_i),
+    .b_m_axi_fault_clr_i (b_m_axi_fault_clr_i),
+    .c_m_axi_fault_clr_i (c_m_axi_fault_clr_i),
 
     .s_axi_wvalid_i      (s_axi_wvalid_i),
     .s_axi_wready_o      (s_axi_wready_o),
@@ -346,9 +346,9 @@ module el2_tmr_axi_s # (
 
   // ......................................................
   // AXI B channel
-  el2_mubi_t m_axi_b_a_fault;
-  el2_mubi_t m_axi_b_b_fault;
-  el2_mubi_t m_axi_b_c_fault;
+  el2_mubi_t b_a_m_axi_fault;
+  el2_mubi_t b_m_axi_b_fault;
+  el2_mubi_t b_m_axi_c_fault;
 
   el2_tmr_axi_s_ch_b # (
     .IdWidth (IdWidth)
@@ -358,32 +358,32 @@ module el2_tmr_axi_s # (
     .clk_i               (clk_i),
     .rst_ni              (rst_ni),
 
-    .m_axi_a_bvalid_i    (m_axi_a_bvalid_i),
-    .m_axi_a_bready_o    (m_axi_a_bready_o),
-    .m_axi_a_bresp_i     (m_axi_a_bresp_i),
-    .m_axi_a_bid_i       (m_axi_a_bid_i),
+    .a_m_axi_bvalid_i    (a_m_axi_bvalid_i),
+    .a_m_axi_bready_o    (a_m_axi_bready_o),
+    .a_m_axi_bresp_i     (a_m_axi_bresp_i),
+    .a_m_axi_bid_i       (a_m_axi_bid_i),
 
-    .m_axi_b_bvalid_i    (m_axi_b_bvalid_i),
-    .m_axi_b_bready_o    (m_axi_b_bready_o),
-    .m_axi_b_bresp_i     (m_axi_b_bresp_i),
-    .m_axi_b_bid_i       (m_axi_b_bid_i),
+    .b_m_axi_bvalid_i    (b_m_axi_bvalid_i),
+    .b_m_axi_bready_o    (b_m_axi_bready_o),
+    .b_m_axi_bresp_i     (b_m_axi_bresp_i),
+    .b_m_axi_bid_i       (b_m_axi_bid_i),
 
-    .m_axi_c_bvalid_i    (m_axi_c_bvalid_i),
-    .m_axi_c_bready_o    (m_axi_c_bready_o),
-    .m_axi_c_bresp_i     (m_axi_c_bresp_i),
-    .m_axi_c_bid_i       (m_axi_c_bid_i),
+    .c_m_axi_bvalid_i    (c_m_axi_bvalid_i),
+    .c_m_axi_bready_o    (c_m_axi_bready_o),
+    .c_m_axi_bresp_i     (c_m_axi_bresp_i),
+    .c_m_axi_bid_i       (c_m_axi_bid_i),
 
-    .m_axi_a_fault_o     (m_axi_b_a_fault),
-    .m_axi_b_fault_o     (m_axi_b_b_fault),
-    .m_axi_c_fault_o     (m_axi_b_c_fault),
+    .a_m_axi_fault_o     (b_a_m_axi_fault),
+    .b_m_axi_fault_o     (b_m_axi_b_fault),
+    .c_m_axi_fault_o     (b_m_axi_c_fault),
 
-    .m_axi_a_fault_i     (m_axi_a_fault),
-    .m_axi_b_fault_i     (m_axi_b_fault),
-    .m_axi_c_fault_i     (m_axi_c_fault),
+    .a_m_axi_fault_i     (a_m_axi_fault),
+    .b_m_axi_fault_i     (b_m_axi_fault),
+    .c_m_axi_fault_i     (c_m_axi_fault),
 
-    .m_axi_a_fault_clr_i (m_axi_a_fault_clr_i),
-    .m_axi_b_fault_clr_i (m_axi_b_fault_clr_i),
-    .m_axi_c_fault_clr_i (m_axi_c_fault_clr_i),
+    .a_m_axi_fault_clr_i (a_m_axi_fault_clr_i),
+    .b_m_axi_fault_clr_i (b_m_axi_fault_clr_i),
+    .c_m_axi_fault_clr_i (c_m_axi_fault_clr_i),
 
     .s_axi_bvalid_o      (s_axi_bvalid_o),
     .s_axi_bready_i      (s_axi_bready_i),
@@ -406,56 +406,56 @@ module el2_tmr_axi_s # (
     .clk_i               (clk_i),
     .rst_ni              (rst_ni),
 
-    .m_axi_a_axvalid_o   (m_axi_a_arvalid_o),
-    .m_axi_a_axready_i   (m_axi_a_arready_i),
-    .m_axi_a_axid_o      (m_axi_a_arid_o),
-    .m_axi_a_axaddr_o    (m_axi_a_araddr_o),
-    .m_axi_a_axregion_o  (m_axi_a_arregion_o),
-    .m_axi_a_axlen_o     (m_axi_a_arlen_o),
-    .m_axi_a_axsize_o    (m_axi_a_arsize_o),
-    .m_axi_a_axburst_o   (m_axi_a_arburst_o),
-    .m_axi_a_axlock_o    (m_axi_a_arlock_o),
-    .m_axi_a_axcache_o   (m_axi_a_arcache_o),
-    .m_axi_a_axprot_o    (m_axi_a_arprot_o),
-    .m_axi_a_axqos_o     (m_axi_a_arqos_o),
+    .a_m_axi_axvalid_o   (a_m_axi_arvalid_o),
+    .a_m_axi_axready_i   (a_m_axi_arready_i),
+    .a_m_axi_axid_o      (a_m_axi_arid_o),
+    .a_m_axi_axaddr_o    (a_m_axi_araddr_o),
+    .a_m_axi_axregion_o  (a_m_axi_arregion_o),
+    .a_m_axi_axlen_o     (a_m_axi_arlen_o),
+    .a_m_axi_axsize_o    (a_m_axi_arsize_o),
+    .a_m_axi_axburst_o   (a_m_axi_arburst_o),
+    .a_m_axi_axlock_o    (a_m_axi_arlock_o),
+    .a_m_axi_axcache_o   (a_m_axi_arcache_o),
+    .a_m_axi_axprot_o    (a_m_axi_arprot_o),
+    .a_m_axi_axqos_o     (a_m_axi_arqos_o),
 
-    .m_axi_b_axvalid_o   (m_axi_b_arvalid_o),
-    .m_axi_b_axready_i   (m_axi_b_arready_i),
-    .m_axi_b_axid_o      (m_axi_b_arid_o),
-    .m_axi_b_axaddr_o    (m_axi_b_araddr_o),
-    .m_axi_b_axregion_o  (m_axi_b_arregion_o),
-    .m_axi_b_axlen_o     (m_axi_b_arlen_o),
-    .m_axi_b_axsize_o    (m_axi_b_arsize_o),
-    .m_axi_b_axburst_o   (m_axi_b_arburst_o),
-    .m_axi_b_axlock_o    (m_axi_b_arlock_o),
-    .m_axi_b_axcache_o   (m_axi_b_arcache_o),
-    .m_axi_b_axprot_o    (m_axi_b_arprot_o),
-    .m_axi_b_axqos_o     (m_axi_b_arqos_o),
+    .b_m_axi_axvalid_o   (b_m_axi_arvalid_o),
+    .b_m_axi_axready_i   (b_m_axi_arready_i),
+    .b_m_axi_axid_o      (b_m_axi_arid_o),
+    .b_m_axi_axaddr_o    (b_m_axi_araddr_o),
+    .b_m_axi_axregion_o  (b_m_axi_arregion_o),
+    .b_m_axi_axlen_o     (b_m_axi_arlen_o),
+    .b_m_axi_axsize_o    (b_m_axi_arsize_o),
+    .b_m_axi_axburst_o   (b_m_axi_arburst_o),
+    .b_m_axi_axlock_o    (b_m_axi_arlock_o),
+    .b_m_axi_axcache_o   (b_m_axi_arcache_o),
+    .b_m_axi_axprot_o    (b_m_axi_arprot_o),
+    .b_m_axi_axqos_o     (b_m_axi_arqos_o),
 
-    .m_axi_c_axvalid_o   (m_axi_c_arvalid_o),
-    .m_axi_c_axready_i   (m_axi_c_arready_i),
-    .m_axi_c_axid_o      (m_axi_c_arid_o),
-    .m_axi_c_axaddr_o    (m_axi_c_araddr_o),
-    .m_axi_c_axregion_o  (m_axi_c_arregion_o),
-    .m_axi_c_axlen_o     (m_axi_c_arlen_o),
-    .m_axi_c_axsize_o    (m_axi_c_arsize_o),
-    .m_axi_c_axburst_o   (m_axi_c_arburst_o),
-    .m_axi_c_axlock_o    (m_axi_c_arlock_o),
-    .m_axi_c_axcache_o   (m_axi_c_arcache_o),
-    .m_axi_c_axprot_o    (m_axi_c_arprot_o),
-    .m_axi_c_axqos_o     (m_axi_c_arqos_o),
+    .c_m_axi_axvalid_o   (c_m_axi_arvalid_o),
+    .c_m_axi_axready_i   (c_m_axi_arready_i),
+    .c_m_axi_axid_o      (c_m_axi_arid_o),
+    .c_m_axi_axaddr_o    (c_m_axi_araddr_o),
+    .c_m_axi_axregion_o  (c_m_axi_arregion_o),
+    .c_m_axi_axlen_o     (c_m_axi_arlen_o),
+    .c_m_axi_axsize_o    (c_m_axi_arsize_o),
+    .c_m_axi_axburst_o   (c_m_axi_arburst_o),
+    .c_m_axi_axlock_o    (c_m_axi_arlock_o),
+    .c_m_axi_axcache_o   (c_m_axi_arcache_o),
+    .c_m_axi_axprot_o    (c_m_axi_arprot_o),
+    .c_m_axi_axqos_o     (c_m_axi_arqos_o),
 
-    .m_axi_a_fault_o     (m_axi_ar_a_fault),
-    .m_axi_b_fault_o     (m_axi_ar_b_fault),
-    .m_axi_c_fault_o     (m_axi_ar_c_fault),
+    .a_m_axi_fault_o     (m_axi_ar_a_fault),
+    .b_m_axi_fault_o     (m_axi_ar_b_fault),
+    .c_m_axi_fault_o     (m_axi_ar_c_fault),
 
-    .m_axi_a_fault_i     (m_axi_a_fault),
-    .m_axi_b_fault_i     (m_axi_b_fault),
-    .m_axi_c_fault_i     (m_axi_c_fault),
+    .a_m_axi_fault_i     (a_m_axi_fault),
+    .b_m_axi_fault_i     (b_m_axi_fault),
+    .c_m_axi_fault_i     (c_m_axi_fault),
 
-    .m_axi_a_fault_clr_i (m_axi_a_fault_clr_i),
-    .m_axi_b_fault_clr_i (m_axi_b_fault_clr_i),
-    .m_axi_c_fault_clr_i (m_axi_c_fault_clr_i),
+    .a_m_axi_fault_clr_i (a_m_axi_fault_clr_i),
+    .b_m_axi_fault_clr_i (b_m_axi_fault_clr_i),
+    .c_m_axi_fault_clr_i (c_m_axi_fault_clr_i),
 
     .s_axi_axvalid_i     (s_axi_arvalid_i),
     .s_axi_axready_o     (s_axi_arready_o),
@@ -486,38 +486,38 @@ module el2_tmr_axi_s # (
     .clk_i               (clk_i),
     .rst_ni              (rst_ni),
 
-    .m_axi_a_rvalid_i    (m_axi_a_rvalid_i),
-    .m_axi_a_rready_o    (m_axi_a_rready_o),
-    .m_axi_a_rid_i       (m_axi_a_rid_i),
-    .m_axi_a_rdata_i     (m_axi_a_rdata_i),
-    .m_axi_a_rresp_i     (m_axi_a_rresp_i),
-    .m_axi_a_rlast_i     (m_axi_a_rlast_i),
+    .a_m_axi_rvalid_i    (a_m_axi_rvalid_i),
+    .a_m_axi_rready_o    (a_m_axi_rready_o),
+    .a_m_axi_rid_i       (a_m_axi_rid_i),
+    .a_m_axi_rdata_i     (a_m_axi_rdata_i),
+    .a_m_axi_rresp_i     (a_m_axi_rresp_i),
+    .a_m_axi_rlast_i     (a_m_axi_rlast_i),
 
-    .m_axi_b_rvalid_i    (m_axi_b_rvalid_i),
-    .m_axi_b_rready_o    (m_axi_b_rready_o),
-    .m_axi_b_rid_i       (m_axi_b_rid_i),
-    .m_axi_b_rdata_i     (m_axi_b_rdata_i),
-    .m_axi_b_rresp_i     (m_axi_b_rresp_i),
-    .m_axi_b_rlast_i     (m_axi_b_rlast_i),
+    .b_m_axi_rvalid_i    (b_m_axi_rvalid_i),
+    .b_m_axi_rready_o    (b_m_axi_rready_o),
+    .b_m_axi_rid_i       (b_m_axi_rid_i),
+    .b_m_axi_rdata_i     (b_m_axi_rdata_i),
+    .b_m_axi_rresp_i     (b_m_axi_rresp_i),
+    .b_m_axi_rlast_i     (b_m_axi_rlast_i),
 
-    .m_axi_c_rvalid_i    (m_axi_c_rvalid_i),
-    .m_axi_c_rready_o    (m_axi_c_rready_o),
-    .m_axi_c_rid_i       (m_axi_c_rid_i),
-    .m_axi_c_rdata_i     (m_axi_c_rdata_i),
-    .m_axi_c_rresp_i     (m_axi_c_rresp_i),
-    .m_axi_c_rlast_i     (m_axi_c_rlast_i),
+    .c_m_axi_rvalid_i    (c_m_axi_rvalid_i),
+    .c_m_axi_rready_o    (c_m_axi_rready_o),
+    .c_m_axi_rid_i       (c_m_axi_rid_i),
+    .c_m_axi_rdata_i     (c_m_axi_rdata_i),
+    .c_m_axi_rresp_i     (c_m_axi_rresp_i),
+    .c_m_axi_rlast_i     (c_m_axi_rlast_i),
 
-    .m_axi_a_fault_o     (m_axi_r_a_fault),
-    .m_axi_b_fault_o     (m_axi_r_b_fault),
-    .m_axi_c_fault_o     (m_axi_r_c_fault),
+    .a_m_axi_fault_o     (m_axi_r_a_fault),
+    .b_m_axi_fault_o     (m_axi_r_b_fault),
+    .c_m_axi_fault_o     (m_axi_r_c_fault),
 
-    .m_axi_a_fault_i     (m_axi_a_fault),
-    .m_axi_b_fault_i     (m_axi_b_fault),
-    .m_axi_c_fault_i     (m_axi_c_fault),
+    .a_m_axi_fault_i     (a_m_axi_fault),
+    .b_m_axi_fault_i     (b_m_axi_fault),
+    .c_m_axi_fault_i     (c_m_axi_fault),
 
-    .m_axi_a_fault_clr_i (m_axi_a_fault_clr_i),
-    .m_axi_b_fault_clr_i (m_axi_b_fault_clr_i),
-    .m_axi_c_fault_clr_i (m_axi_c_fault_clr_i),
+    .a_m_axi_fault_clr_i (a_m_axi_fault_clr_i),
+    .b_m_axi_fault_clr_i (b_m_axi_fault_clr_i),
+    .c_m_axi_fault_clr_i (c_m_axi_fault_clr_i),
 
     .s_axi_rvalid_o      (s_axi_rvalid_o),
     .s_axi_rready_i      (s_axi_rready_i),
@@ -530,49 +530,49 @@ module el2_tmr_axi_s # (
   // ......................................................
   // Fault aggregation and loopback
 
-  el2_mubi_t m_axi_a_fault_l0;
-  el2_mubi_t m_axi_a_fault_l1;
-  el2_mubi_t m_axi_a_fault_l2;
+  el2_mubi_t a_m_axi_fault_l0;
+  el2_mubi_t a_m_axi_fault_l1;
+  el2_mubi_t a_m_axi_fault_l2;
 
-  el2_mubi_t m_axi_b_fault_l0;
-  el2_mubi_t m_axi_b_fault_l1;
-  el2_mubi_t m_axi_b_fault_l2;
+  el2_mubi_t b_m_axi_fault_l0;
+  el2_mubi_t b_m_axi_fault_l1;
+  el2_mubi_t b_m_axi_fault_l2;
 
-  el2_mubi_t m_axi_c_fault_l0;
-  el2_mubi_t m_axi_c_fault_l1;
-  el2_mubi_t m_axi_c_fault_l2;
+  el2_mubi_t c_m_axi_fault_l0;
+  el2_mubi_t c_m_axi_fault_l1;
+  el2_mubi_t c_m_axi_fault_l2;
 
   always_comb begin
-    m_axi_a_fault_l0 = mubi_or(m_axi_aw_a_fault, m_axi_w_a_fault);
-    m_axi_a_fault_l1 = mubi_or(m_axi_b_a_fault,  m_axi_ar_a_fault);
-    m_axi_a_fault_l2 = mubi_or(m_axi_r_a_fault,  m_axi_a_fault_i);
+    a_m_axi_fault_l0 = mubi_or(m_axi_aw_a_fault, m_axi_w_a_fault);
+    a_m_axi_fault_l1 = mubi_or(b_a_m_axi_fault,  m_axi_ar_a_fault);
+    a_m_axi_fault_l2 = mubi_or(m_axi_r_a_fault,  a_m_axi_fault_i);
 
-    m_axi_a_fault    = mubi_or3(m_axi_a_fault_l0, m_axi_a_fault_l1, m_axi_a_fault_l2);
+    a_m_axi_fault    = mubi_or3(a_m_axi_fault_l0, a_m_axi_fault_l1, a_m_axi_fault_l2);
   end
 
   always_comb begin
-    m_axi_b_fault_l0 = mubi_or(m_axi_aw_b_fault, m_axi_w_b_fault);
-    m_axi_b_fault_l1 = mubi_or(m_axi_b_b_fault,  m_axi_ar_b_fault);
-    m_axi_b_fault_l2 = mubi_or(m_axi_r_b_fault,  m_axi_b_fault_i);
+    b_m_axi_fault_l0 = mubi_or(m_axi_aw_b_fault, m_axi_w_b_fault);
+    b_m_axi_fault_l1 = mubi_or(b_m_axi_b_fault,  m_axi_ar_b_fault);
+    b_m_axi_fault_l2 = mubi_or(m_axi_r_b_fault,  b_m_axi_fault_i);
 
-    m_axi_b_fault    = mubi_or3(m_axi_b_fault_l0, m_axi_b_fault_l1, m_axi_b_fault_l2);
+    b_m_axi_fault    = mubi_or3(b_m_axi_fault_l0, b_m_axi_fault_l1, b_m_axi_fault_l2);
   end
 
   always_comb begin
-    m_axi_c_fault_l0 = mubi_or(m_axi_aw_c_fault, m_axi_w_c_fault);
-    m_axi_c_fault_l1 = mubi_or(m_axi_b_c_fault,  m_axi_ar_c_fault);
-    m_axi_c_fault_l2 = mubi_or(m_axi_r_c_fault,  m_axi_c_fault_i);
+    c_m_axi_fault_l0 = mubi_or(m_axi_aw_c_fault, m_axi_w_c_fault);
+    c_m_axi_fault_l1 = mubi_or(b_m_axi_c_fault,  m_axi_ar_c_fault);
+    c_m_axi_fault_l2 = mubi_or(m_axi_r_c_fault,  c_m_axi_fault_i);
 
-    m_axi_c_fault    = mubi_or3(m_axi_c_fault_l0, m_axi_c_fault_l1, m_axi_c_fault_l2);
+    c_m_axi_fault    = mubi_or3(c_m_axi_fault_l0, c_m_axi_fault_l1, c_m_axi_fault_l2);
   end
 
   // ......................................................
   // Fault output
 
   always_comb begin
-    m_axi_a_fault_o = m_axi_a_fault;
-    m_axi_b_fault_o = m_axi_b_fault;
-    m_axi_c_fault_o = m_axi_c_fault;
+    a_m_axi_fault_o = a_m_axi_fault;
+    b_m_axi_fault_o = b_m_axi_fault;
+    c_m_axi_fault_o = c_m_axi_fault;
   end
 
 endmodule

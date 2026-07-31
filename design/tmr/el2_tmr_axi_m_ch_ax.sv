@@ -11,61 +11,61 @@ module el2_tmr_axi_m_ch_ax # (
   input  logic  rst_ni,
 
   // AR/AW channel input A
-  input  logic                     s_axi_a_axvalid_i,
-  output logic                     s_axi_a_axready_o,
-  input  logic [IdWidth-1:0]       s_axi_a_axid_i,
-  input  logic [AddrWidth-1:0]     s_axi_a_axaddr_i,
-  input  logic [3:0]               s_axi_a_axregion_i,
-  input  logic [7:0]               s_axi_a_axlen_i,
-  input  logic [2:0]               s_axi_a_axsize_i,
-  input  logic [1:0]               s_axi_a_axburst_i,
-  input  logic                     s_axi_a_axlock_i,
-  input  logic [3:0]               s_axi_a_axcache_i,
-  input  logic [2:0]               s_axi_a_axprot_i,
-  input  logic [3:0]               s_axi_a_axqos_i,
+  input  logic                     a_s_axi_axvalid_i,
+  output logic                     a_s_axi_axready_o,
+  input  logic [IdWidth-1:0]       a_s_axi_axid_i,
+  input  logic [AddrWidth-1:0]     a_s_axi_axaddr_i,
+  input  logic [3:0]               a_s_axi_axregion_i,
+  input  logic [7:0]               a_s_axi_axlen_i,
+  input  logic [2:0]               a_s_axi_axsize_i,
+  input  logic [1:0]               a_s_axi_axburst_i,
+  input  logic                     a_s_axi_axlock_i,
+  input  logic [3:0]               a_s_axi_axcache_i,
+  input  logic [2:0]               a_s_axi_axprot_i,
+  input  logic [3:0]               a_s_axi_axqos_i,
 
   // AR/AW channel input B
-  input  logic                     s_axi_b_axvalid_i,
-  output logic                     s_axi_b_axready_o,
-  input  logic [IdWidth-1:0]       s_axi_b_axid_i,
-  input  logic [AddrWidth-1:0]     s_axi_b_axaddr_i,
-  input  logic [3:0]               s_axi_b_axregion_i,
-  input  logic [7:0]               s_axi_b_axlen_i,
-  input  logic [2:0]               s_axi_b_axsize_i,
-  input  logic [1:0]               s_axi_b_axburst_i,
-  input  logic                     s_axi_b_axlock_i,
-  input  logic [3:0]               s_axi_b_axcache_i,
-  input  logic [2:0]               s_axi_b_axprot_i,
-  input  logic [3:0]               s_axi_b_axqos_i,
+  input  logic                     b_s_axi_axvalid_i,
+  output logic                     b_s_axi_axready_o,
+  input  logic [IdWidth-1:0]       b_s_axi_axid_i,
+  input  logic [AddrWidth-1:0]     b_s_axi_axaddr_i,
+  input  logic [3:0]               b_s_axi_axregion_i,
+  input  logic [7:0]               b_s_axi_axlen_i,
+  input  logic [2:0]               b_s_axi_axsize_i,
+  input  logic [1:0]               b_s_axi_axburst_i,
+  input  logic                     b_s_axi_axlock_i,
+  input  logic [3:0]               b_s_axi_axcache_i,
+  input  logic [2:0]               b_s_axi_axprot_i,
+  input  logic [3:0]               b_s_axi_axqos_i,
 
   // AR/AW channel input C
-  input  logic                     s_axi_c_axvalid_i,
-  output logic                     s_axi_c_axready_o,
-  input  logic [IdWidth-1:0]       s_axi_c_axid_i,
-  input  logic [AddrWidth-1:0]     s_axi_c_axaddr_i,
-  input  logic [3:0]               s_axi_c_axregion_i,
-  input  logic [7:0]               s_axi_c_axlen_i,
-  input  logic [2:0]               s_axi_c_axsize_i,
-  input  logic [1:0]               s_axi_c_axburst_i,
-  input  logic                     s_axi_c_axlock_i,
-  input  logic [3:0]               s_axi_c_axcache_i,
-  input  logic [2:0]               s_axi_c_axprot_i,
-  input  logic [3:0]               s_axi_c_axqos_i,
+  input  logic                     c_s_axi_axvalid_i,
+  output logic                     c_s_axi_axready_o,
+  input  logic [IdWidth-1:0]       c_s_axi_axid_i,
+  input  logic [AddrWidth-1:0]     c_s_axi_axaddr_i,
+  input  logic [3:0]               c_s_axi_axregion_i,
+  input  logic [7:0]               c_s_axi_axlen_i,
+  input  logic [2:0]               c_s_axi_axsize_i,
+  input  logic [1:0]               c_s_axi_axburst_i,
+  input  logic                     c_s_axi_axlock_i,
+  input  logic [3:0]               c_s_axi_axcache_i,
+  input  logic [2:0]               c_s_axi_axprot_i,
+  input  logic [3:0]               c_s_axi_axqos_i,
 
   // Channel fault output
-  output el2_mubi_pkg::el2_mubi_t  s_axi_a_fault_o,
-  output el2_mubi_pkg::el2_mubi_t  s_axi_b_fault_o,
-  output el2_mubi_pkg::el2_mubi_t  s_axi_c_fault_o,
+  output el2_mubi_pkg::el2_mubi_t  a_s_axi_fault_o,
+  output el2_mubi_pkg::el2_mubi_t  b_s_axi_fault_o,
+  output el2_mubi_pkg::el2_mubi_t  c_s_axi_fault_o,
 
   // External fault input
-  input  el2_mubi_pkg::el2_mubi_t  s_axi_a_fault_i,
-  input  el2_mubi_pkg::el2_mubi_t  s_axi_b_fault_i,
-  input  el2_mubi_pkg::el2_mubi_t  s_axi_c_fault_i,
+  input  el2_mubi_pkg::el2_mubi_t  a_s_axi_fault_i,
+  input  el2_mubi_pkg::el2_mubi_t  b_s_axi_fault_i,
+  input  el2_mubi_pkg::el2_mubi_t  c_s_axi_fault_i,
 
   // Fault clear
-  input  el2_mubi_pkg::el2_mubi_t  s_axi_a_fault_clr_i,
-  input  el2_mubi_pkg::el2_mubi_t  s_axi_b_fault_clr_i,
-  input  el2_mubi_pkg::el2_mubi_t  s_axi_c_fault_clr_i,
+  input  el2_mubi_pkg::el2_mubi_t  a_s_axi_fault_clr_i,
+  input  el2_mubi_pkg::el2_mubi_t  b_s_axi_fault_clr_i,
+  input  el2_mubi_pkg::el2_mubi_t  c_s_axi_fault_clr_i,
 
   // AR/AW channel output
   output logic                     m_axi_axvalid_o,
@@ -83,9 +83,9 @@ module el2_tmr_axi_m_ch_ax # (
 );
   import el2_mubi_pkg::*;
 
-  el2_mubi_t s_axi_a_enable;
-  el2_mubi_t s_axi_b_enable;
-  el2_mubi_t s_axi_c_enable;
+  el2_mubi_t a_s_axi_enable;
+  el2_mubi_t b_s_axi_enable;
+  el2_mubi_t c_s_axi_enable;
 
   el2_mubi_t fault_axvalid  [3];
   el2_mubi_t fault_axid     [3];
@@ -123,13 +123,13 @@ module el2_tmr_axi_m_ch_ax # (
   // Voters
 
   el2_tmr_voter #(.Width(1)) x_voter_axvalid (
-    .in_a     (s_axi_a_axvalid_i),
-    .in_b     (s_axi_b_axvalid_i),
-    .in_c     (s_axi_c_axvalid_i),
+    .in_a     (a_s_axi_axvalid_i),
+    .in_b     (b_s_axi_axvalid_i),
+    .in_c     (c_s_axi_axvalid_i),
 
-    .en_a     (s_axi_a_enable),
-    .en_b     (s_axi_b_enable),
-    .en_c     (s_axi_c_enable),
+    .en_a     (a_s_axi_enable),
+    .en_b     (b_s_axi_enable),
+    .en_c     (c_s_axi_enable),
 
     .out      (m_axi_axvalid),
 
@@ -141,13 +141,13 @@ module el2_tmr_axi_m_ch_ax # (
   );
 
   el2_tmr_voter #(.Width($bits(m_axi_axid_o))) x_voter_axid (
-    .in_a     (s_axi_a_axid_i),
-    .in_b     (s_axi_b_axid_i),
-    .in_c     (s_axi_c_axid_i),
+    .in_a     (a_s_axi_axid_i),
+    .in_b     (b_s_axi_axid_i),
+    .in_c     (c_s_axi_axid_i),
 
-    .en_a     (s_axi_a_enable),
-    .en_b     (s_axi_b_enable),
-    .en_c     (s_axi_c_enable),
+    .en_a     (a_s_axi_enable),
+    .en_b     (b_s_axi_enable),
+    .en_c     (c_s_axi_enable),
 
     .out      (m_axi_axid_o),
 
@@ -159,13 +159,13 @@ module el2_tmr_axi_m_ch_ax # (
   );
 
   el2_tmr_voter #(.Width($bits(m_axi_axaddr_o))) x_voter_axaddr (
-    .in_a     (s_axi_a_axaddr_i),
-    .in_b     (s_axi_b_axaddr_i),
-    .in_c     (s_axi_c_axaddr_i),
+    .in_a     (a_s_axi_axaddr_i),
+    .in_b     (b_s_axi_axaddr_i),
+    .in_c     (c_s_axi_axaddr_i),
 
-    .en_a     (s_axi_a_enable),
-    .en_b     (s_axi_b_enable),
-    .en_c     (s_axi_c_enable),
+    .en_a     (a_s_axi_enable),
+    .en_b     (b_s_axi_enable),
+    .en_c     (c_s_axi_enable),
 
     .out      (m_axi_axaddr_o),
 
@@ -177,13 +177,13 @@ module el2_tmr_axi_m_ch_ax # (
   );
 
   el2_tmr_voter #(.Width($bits(m_axi_axregion_o))) x_voter_axregion (
-    .in_a     (s_axi_a_axregion_i),
-    .in_b     (s_axi_b_axregion_i),
-    .in_c     (s_axi_c_axregion_i),
+    .in_a     (a_s_axi_axregion_i),
+    .in_b     (b_s_axi_axregion_i),
+    .in_c     (c_s_axi_axregion_i),
 
-    .en_a     (s_axi_a_enable),
-    .en_b     (s_axi_b_enable),
-    .en_c     (s_axi_c_enable),
+    .en_a     (a_s_axi_enable),
+    .en_b     (b_s_axi_enable),
+    .en_c     (c_s_axi_enable),
 
     .out      (m_axi_axregion_o),
 
@@ -195,13 +195,13 @@ module el2_tmr_axi_m_ch_ax # (
   );
 
   el2_tmr_voter #(.Width($bits(m_axi_axlen_o))) x_voter_axlen (
-    .in_a     (s_axi_a_axlen_i),
-    .in_b     (s_axi_b_axlen_i),
-    .in_c     (s_axi_c_axlen_i),
+    .in_a     (a_s_axi_axlen_i),
+    .in_b     (b_s_axi_axlen_i),
+    .in_c     (c_s_axi_axlen_i),
 
-    .en_a     (s_axi_a_enable),
-    .en_b     (s_axi_b_enable),
-    .en_c     (s_axi_c_enable),
+    .en_a     (a_s_axi_enable),
+    .en_b     (b_s_axi_enable),
+    .en_c     (c_s_axi_enable),
 
     .out      (m_axi_axlen_o),
 
@@ -213,13 +213,13 @@ module el2_tmr_axi_m_ch_ax # (
   );
 
   el2_tmr_voter #(.Width($bits(m_axi_axsize_o))) x_voter_axsize (
-    .in_a     (s_axi_a_axsize_i),
-    .in_b     (s_axi_b_axsize_i),
-    .in_c     (s_axi_c_axsize_i),
+    .in_a     (a_s_axi_axsize_i),
+    .in_b     (b_s_axi_axsize_i),
+    .in_c     (c_s_axi_axsize_i),
 
-    .en_a     (s_axi_a_enable),
-    .en_b     (s_axi_b_enable),
-    .en_c     (s_axi_c_enable),
+    .en_a     (a_s_axi_enable),
+    .en_b     (b_s_axi_enable),
+    .en_c     (c_s_axi_enable),
 
     .out      (m_axi_axsize_o),
 
@@ -231,13 +231,13 @@ module el2_tmr_axi_m_ch_ax # (
   );
 
   el2_tmr_voter #(.Width($bits(m_axi_axburst_o))) x_voter_axburst (
-    .in_a     (s_axi_a_axburst_i),
-    .in_b     (s_axi_b_axburst_i),
-    .in_c     (s_axi_c_axburst_i),
+    .in_a     (a_s_axi_axburst_i),
+    .in_b     (b_s_axi_axburst_i),
+    .in_c     (c_s_axi_axburst_i),
 
-    .en_a     (s_axi_a_enable),
-    .en_b     (s_axi_b_enable),
-    .en_c     (s_axi_c_enable),
+    .en_a     (a_s_axi_enable),
+    .en_b     (b_s_axi_enable),
+    .en_c     (c_s_axi_enable),
 
     .out      (m_axi_axburst_o),
 
@@ -249,13 +249,13 @@ module el2_tmr_axi_m_ch_ax # (
   );
 
   el2_tmr_voter #(.Width($bits(m_axi_axlock_o))) x_voter_axlock (
-    .in_a     (s_axi_a_axlock_i),
-    .in_b     (s_axi_b_axlock_i),
-    .in_c     (s_axi_c_axlock_i),
+    .in_a     (a_s_axi_axlock_i),
+    .in_b     (b_s_axi_axlock_i),
+    .in_c     (c_s_axi_axlock_i),
 
-    .en_a     (s_axi_a_enable),
-    .en_b     (s_axi_b_enable),
-    .en_c     (s_axi_c_enable),
+    .en_a     (a_s_axi_enable),
+    .en_b     (b_s_axi_enable),
+    .en_c     (c_s_axi_enable),
 
     .out      (m_axi_axlock_o),
 
@@ -267,13 +267,13 @@ module el2_tmr_axi_m_ch_ax # (
   );
 
   el2_tmr_voter #(.Width($bits(m_axi_axprot_o))) x_voter_axprot (
-    .in_a     (s_axi_a_axprot_i),
-    .in_b     (s_axi_b_axprot_i),
-    .in_c     (s_axi_c_axprot_i),
+    .in_a     (a_s_axi_axprot_i),
+    .in_b     (b_s_axi_axprot_i),
+    .in_c     (c_s_axi_axprot_i),
 
-    .en_a     (s_axi_a_enable),
-    .en_b     (s_axi_b_enable),
-    .en_c     (s_axi_c_enable),
+    .en_a     (a_s_axi_enable),
+    .en_b     (b_s_axi_enable),
+    .en_c     (c_s_axi_enable),
 
     .out      (m_axi_axprot_o),
 
@@ -285,13 +285,13 @@ module el2_tmr_axi_m_ch_ax # (
   );
 
   el2_tmr_voter #(.Width($bits(m_axi_axcache_o))) x_voter_axcache (
-    .in_a     (s_axi_a_axcache_i),
-    .in_b     (s_axi_b_axcache_i),
-    .in_c     (s_axi_c_axcache_i),
+    .in_a     (a_s_axi_axcache_i),
+    .in_b     (b_s_axi_axcache_i),
+    .in_c     (c_s_axi_axcache_i),
 
-    .en_a     (s_axi_a_enable),
-    .en_b     (s_axi_b_enable),
-    .en_c     (s_axi_c_enable),
+    .en_a     (a_s_axi_enable),
+    .en_b     (b_s_axi_enable),
+    .en_c     (c_s_axi_enable),
 
     .out      (m_axi_axcache_o),
 
@@ -303,13 +303,13 @@ module el2_tmr_axi_m_ch_ax # (
   );
 
   el2_tmr_voter #(.Width($bits(m_axi_axqos_o))) x_voter_axqos (
-    .in_a     (s_axi_a_axqos_i),
-    .in_b     (s_axi_b_axqos_i),
-    .in_c     (s_axi_c_axqos_i),
+    .in_a     (a_s_axi_axqos_i),
+    .in_b     (b_s_axi_axqos_i),
+    .in_c     (c_s_axi_axqos_i),
 
-    .en_a     (s_axi_a_enable),
-    .en_b     (s_axi_b_enable),
-    .en_c     (s_axi_c_enable),
+    .en_a     (a_s_axi_enable),
+    .en_b     (b_s_axi_enable),
+    .en_c     (c_s_axi_enable),
 
     .out      (m_axi_axqos_o),
 
@@ -355,9 +355,9 @@ module el2_tmr_axi_m_ch_ax # (
   // ready passthrough
 
   // TODO: Is it worth gating ready with fault ?
-  assign s_axi_a_axready_o = m_axi_axready_i;
-  assign s_axi_b_axready_o = m_axi_axready_i;
-  assign s_axi_c_axready_o = m_axi_axready_i;
+  assign a_s_axi_axready_o = m_axi_axready_i;
+  assign b_s_axi_axready_o = m_axi_axready_i;
+  assign c_s_axi_axready_o = m_axi_axready_i;
 
   // ......................................................
   // Local and external fault OR gates
@@ -393,16 +393,16 @@ module el2_tmr_axi_m_ch_ax # (
   end endgenerate
 
   // Final fault state
-  assign fault_d[0] = mubi_or(s_axi_a_fault_i, fault_local_d[0]);
-  assign fault_d[1] = mubi_or(s_axi_b_fault_i, fault_local_d[1]);
-  assign fault_d[2] = mubi_or(s_axi_c_fault_i, fault_local_d[2]);
+  assign fault_d[0] = mubi_or(a_s_axi_fault_i, fault_local_d[0]);
+  assign fault_d[1] = mubi_or(b_s_axi_fault_i, fault_local_d[1]);
+  assign fault_d[2] = mubi_or(c_s_axi_fault_i, fault_local_d[2]);
 
   // ......................................................
   // Fault state register
 
-  assign fault_clr[0] = s_axi_a_fault_clr_i;
-  assign fault_clr[1] = s_axi_b_fault_clr_i;
-  assign fault_clr[2] = s_axi_c_fault_clr_i;
+  assign fault_clr[0] = a_s_axi_fault_clr_i;
+  assign fault_clr[1] = b_s_axi_fault_clr_i;
+  assign fault_clr[2] = c_s_axi_fault_clr_i;
 
   generate for (genvar i=0; i<3; i=i+1) begin : fault_ff
     always_ff @(posedge clk_i or negedge rst_ni) begin
@@ -419,13 +419,13 @@ module el2_tmr_axi_m_ch_ax # (
   end endgenerate
 
   // Fault outputs (registered)
-  assign s_axi_a_fault_o = fault_q[0];
-  assign s_axi_b_fault_o = fault_q[1];
-  assign s_axi_c_fault_o = fault_q[2];
+  assign a_s_axi_fault_o = fault_q[0];
+  assign b_s_axi_fault_o = fault_q[1];
+  assign c_s_axi_fault_o = fault_q[2];
 
   // Voter input enable
-  assign s_axi_a_enable = mubi_not(fault_q[0]);
-  assign s_axi_b_enable = mubi_not(fault_q[1]);
-  assign s_axi_c_enable = mubi_not(fault_q[2]);
+  assign a_s_axi_enable = mubi_not(fault_q[0]);
+  assign b_s_axi_enable = mubi_not(fault_q[1]);
+  assign c_s_axi_enable = mubi_not(fault_q[2]);
 
 endmodule

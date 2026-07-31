@@ -36,25 +36,25 @@ class FaultScoreboard(BaseScoreboard):
         self.passed = True
         while self.m_axi_tr_port.can_get():
 
-            if not self.s_axi_a_tr_port.can_get():
+            if not self.a_s_axi_tr_port.can_get():
                 self.logger.error("No more transactions observed on AXI A port")
                 self.passed = False
                 break
 
-            if not self.s_axi_b_tr_port.can_get():
+            if not self.b_s_axi_tr_port.can_get():
                 self.logger.error("No more transactions observed on AXI B port")
                 self.passed = False
                 break
 
-            if not self.s_axi_c_tr_port.can_get():
+            if not self.c_s_axi_tr_port.can_get():
                 self.logger.error("No more transactions observed on AXI C port")
                 self.passed = False
                 break
 
             _, tr_m = self.m_axi_tr_port.try_get()
-            _, tr_a = self.s_axi_a_tr_port.try_get()
-            _, tr_b = self.s_axi_b_tr_port.try_get()
-            _, tr_c = self.s_axi_c_tr_port.try_get()
+            _, tr_a = self.a_s_axi_tr_port.try_get()
+            _, tr_b = self.b_s_axi_tr_port.try_get()
+            _, tr_c = self.c_s_axi_tr_port.try_get()
 
             if isinstance(tr_m, AxiWriteTransaction):
                 timestamp = tr_m.b.timestamp

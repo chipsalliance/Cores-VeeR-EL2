@@ -51,7 +51,9 @@ html_show_sphinx = False
     html_logo,
     html_theme_options,
     html_context
-) = antmicro_html()
+) = antmicro_html(
+    gh_slug="chipsalliance/Cores-VeeR-EL2"
+)
 
 html_theme_options["palette"][0].update({
     "scheme": "slate",

@@ -108,11 +108,14 @@ module el2_dec_pmp_ctl
       logic [7:0] csr_wdata;
 
       // PMPCFG fields are WARL. Mask out bits 6:5 during write.
-      // When Smepmp is disabled R=0 and W=1 combination is illegal mask out W
-      // when R is cleared.
+      // When Smepmp is disabled or MML is unset, R=0 and W=1 combination
+      // is illegal - mask out W (bit 1) when R (bit 0) is cleared.
       assign raw_wdata = dec_csr_wrdata_r[(entry_idx[1:0]*8)+7:(entry_idx[1:0]*8)+0];
 `ifdef RV_SMEPMP
-      assign csr_wdata = raw_wdata & 8'b10011111;
+      // The combination (R=0, W=1) remains reserved, until MML is set
+      assign csr_wdata = mseccfg.MML ?
+         (raw_wdata & 8'b10011111) :
+         (raw_wdata[0] ? (raw_wdata & 8'b10011111) : (raw_wdata & 8'b10011101));
 `else
       assign csr_wdata = raw_wdata[0] ? (raw_wdata & 8'b10011111) : (raw_wdata & 8'b10011101);
 `endif

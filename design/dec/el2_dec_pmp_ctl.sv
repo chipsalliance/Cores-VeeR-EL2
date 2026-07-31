@@ -112,7 +112,10 @@ module el2_dec_pmp_ctl
       // when R is cleared.
       assign raw_wdata = dec_csr_wrdata_r[(entry_idx[1:0]*8)+7:(entry_idx[1:0]*8)+0];
 `ifdef RV_SMEPMP
-      assign csr_wdata = raw_wdata & 8'b10011111;
+      // The combination remains reserved, until MML is set
+      assign csr_wdata = mseccfg.MML ?
+         (raw_wdata & 8'b10011111) :
+         (raw_wdata[0] ? (raw_wdata & 8'b10011111) : (raw_wdata & 8'b10011101));
 `else
       assign csr_wdata = raw_wdata[0] ? (raw_wdata & 8'b10011111) : (raw_wdata & 8'b10011101);
 `endif

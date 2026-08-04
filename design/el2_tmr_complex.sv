@@ -88,7 +88,6 @@ module el2_tmr_complex
     output logic                        iccm_buf_correct_ecc,
     output logic                        iccm_correction_state,
 
-    input  logic [63:0]                 iccm_rd_data,
     input  logic [77:0]                 iccm_rd_data_ecc,
 
     // ICACHE
@@ -528,7 +527,6 @@ module el2_tmr_complex
   logic [77:0]             iccm_wr_data_veer[3];
   logic                    iccm_buf_correct_ecc_veer[3];
   logic                    iccm_correction_state_veer[3];
-  logic [63:0]             iccm_rd_data_veer[3];
   logic [77:0]             iccm_rd_data_ecc_veer[3];
 
   // ICACHE
@@ -940,6 +938,48 @@ module el2_tmr_complex
 
   logic        free_clk_int;
 
+  //-------------------------------------------------------------------
+
+  // TMR AXI fault signals
+  el2_mubi_pkg::el2_mubi_t axi_fault_d[3];
+  el2_mubi_pkg::el2_mubi_t axi_fault_q[3];
+  el2_mubi_pkg::el2_mubi_t axi_fault_clr[3];
+
+  // TMR ICCM fault signals
+  el2_mubi_pkg::el2_mubi_t iccm_fault_d[3];
+  el2_mubi_pkg::el2_mubi_t iccm_fault_q[3];
+  el2_mubi_pkg::el2_mubi_t iccm_fault_clr[3];
+
+  // TMR DCCM fault signals
+  el2_mubi_pkg::el2_mubi_t dccm_fault_d[3];
+  el2_mubi_pkg::el2_mubi_t dccm_fault_q[3];
+  el2_mubi_pkg::el2_mubi_t dccm_fault_clr[3];
+
+  // TODO: Other fault signals
+
+  //-------------------------------------------------------------------
+  // Global TMR fault state and control
+
+  el2_mubi_pkg::el2_mubi_t tmr_fault_d[3];
+  el2_mubi_pkg::el2_mubi_t tmr_fault_q[3];
+  el2_mubi_pkg::el2_mubi_t tmr_fault_clr[3];
+
+  // TODO: Potentially move the following to a new "el2_tmr_fault" module
+  generate for(genvar i=0; i<3; i=i+1) begin
+    assign axi_fault_d[i]    = tmr_fault_d[i];
+    assign axi_fault_clr[i]  = tmr_fault_clr[i];
+
+    assign iccm_fault_d[i]   = tmr_fault_d[i];
+    assign iccm_fault_clr[i] = tmr_fault_clr[i];
+
+    assign dccm_fault_d[i]   = tmr_fault_d[i];
+    assign dccm_fault_clr[i] = tmr_fault_clr[i];
+
+    assign tmr_fault_q[i]  = mubi_or3(axi_fault_q[i], iccm_fault_q[i], dccm_fault_q[i]); // TODO: Aggregate ALL TMR fault state signals
+  end endgenerate
+
+  //-------------------------------------------------------------------
+
   el2_tmr_axi #(.pt(pt)) el2_tmr_axi_u (.*);
   el2_tmr_iccm #(.pt(pt)) el2_tmr_iccm_u (.*);
   el2_tmr_dccm #(.pt(pt)) el2_tmr_dccm_u (.*);
@@ -1028,7 +1068,6 @@ module el2_tmr_complex
         .iccm_wr_data(iccm_wr_data_veer[i]),
         .iccm_buf_correct_ecc(iccm_buf_correct_ecc_veer[i]),
         .iccm_correction_state(iccm_correction_state_veer[i]),
-        .iccm_rd_data(iccm_rd_data_veer[i]),
         .iccm_rd_data_ecc(iccm_rd_data_ecc_veer[i]),
         .ic_rw_addr(ic_rw_addr_veer[i]),
         .ic_tag_valid(ic_tag_valid_veer[i]),

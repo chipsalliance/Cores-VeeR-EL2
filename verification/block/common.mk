@@ -9,7 +9,7 @@ WAVES           ?= 1
 
 # Paths
 CURDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-CFGDIR := $(abspath $(CURDIR)/snapshots/default)
+CFGDIR ?= $(abspath $(CURDIR)/snapshots/default)
 CONFIG := $(abspath $(CURDIR)/../../configs)
 
 # Set pythonpath so that tests can access common modules
@@ -80,17 +80,21 @@ endif
 
 include $(shell cocotb-config --makefiles)/Makefile.sim
 
-ifeq ($(PMP_TEST),)
-    EXTRA_CONFIG_OPTS = ""
-else
-    EXTRA_CONFIG_OPTS = "-set=pmp_entries=64"
+EXTRA_CONFIG_OPTS ?= ""
+
+ifneq ($(PMP_TEST),)
+    EXTRA_CONFIG_OPTS += "-set=pmp_entries=64"
 endif
 
 ifneq ($(DEC_TEST),)
     EXTRA_CONFIG_OPTS += "-set=fast_interrupt_redirect=0"
+endif
+
+ifneq ($(TMR_ENABLE),)
     EXTRA_CONFIG_OPTS += "-set=triple_modular_redundancy_enable=1"
 endif
 
 # Rules for generating VeeR config
 $(CFGDIR)/common_defines.vh:
-	cd $(CURDIR) && $(CONFIG)/veer.config -fpga_optimize=0 $(EXTRA_CONFIG_OPTS) $(EXTRA_VEER_CONFIG)
+	mkdir -p $(CFGDIR)/../..
+	cd $(CFGDIR)/../.. && $(CONFIG)/veer.config -fpga_optimize=0 $(EXTRA_CONFIG_OPTS) $(EXTRA_VEER_CONFIG)

@@ -423,8 +423,20 @@ module el2_tmr_axi
     input  logic [pt.DMA_BUS_TAG-1:0] dma_axi_rid_veer[3],
     input  logic [63:0]               dma_axi_rdata_veer[3],
     input  logic [1:0]                dma_axi_rresp_veer[3],
-    input  logic                      dma_axi_rlast_veer[3]
+    input  logic                      dma_axi_rlast_veer[3],
+
+    // Fault inputs
+    input  el2_mubi_pkg::el2_mubi_t axi_fault_d[3],
+    // Fault outputs
+    output el2_mubi_pkg::el2_mubi_t axi_fault_q[3],
+    // Fault clear inputs
+    input  el2_mubi_pkg::el2_mubi_t axi_fault_clr[3]
 );
+
+  // TODO: Connect to fault control/status
+  generate for (genvar i=0; i<3; i=i+1) begin
+    assign axi_fault_q[i] = El2MuBiFalse;
+  end endgenerate
 
 //TODO: Change it to use voters
   always_comb begin

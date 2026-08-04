@@ -10,6 +10,7 @@ TEST_FILES   = $(sort $(wildcard test_*.py))
 MODULE      ?= $(subst $(space),$(comma),$(subst .py,,$(TEST_FILES)))
 TOPLEVEL     = el2_dec_wrapper
 DEC_TEST    := 1
+TMR_ENABLE  := 1
 CM_FILE      = cm.cfg
 
 EXTRA_ARGS = -I$(SRCDIR)/include/

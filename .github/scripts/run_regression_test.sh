@@ -26,6 +26,7 @@ run_regression_test(){
     # USER_MODE - '1' for user mode, '0' for without user mode
     # CACHE WAYPACK -
     # SIMULATOR - (Optional) 'verilator' (default) or 'vcs'
+    # ICACHE_NUM_WAYS - (Optional) '2' (default) or '4'
     RESULTS_DIR=$1
     BUS=$2
     NAME=$3
@@ -33,14 +34,16 @@ run_regression_test(){
     USER_MODE=$5
     ICACHE_WAYPACK=$6
     SIMULATOR=${7:-verilator}
+    ICACHE_NUM_WAYS=${8:-2}
     echo -e "${COLOR_WHITE}========== running test '${NAME}' =========${COLOR_CLEAR}"
-    echo -e "${COLOR_WHITE} RESULTS_DIR    = ${RESULTS_DIR}${COLOR_CLEAR}"
-    echo -e "${COLOR_WHITE} SYSTEM BUS     = ${BUS}${COLOR_CLEAR}"
-    echo -e "${COLOR_WHITE} NAME           = ${NAME}${COLOR_CLEAR}"
-    echo -e "${COLOR_WHITE} COVERAGE       = ${COVERAGE}${COLOR_CLEAR}"
-    echo -e "${COLOR_WHITE} USER_MODE      = ${USER_MODE}${COLOR_CLEAR}"
-    echo -e "${COLOR_WHITE} ICACHE_WAYPACK = ${ICACHE_WAYPACK}${COLOR_CLEAR}"
-    echo -e "${COLOR_WHITE} SIMULATOR      = ${SIMULATOR}${COLOR_CLEAR}"
+    echo -e "${COLOR_WHITE} RESULTS_DIR     = ${RESULTS_DIR}${COLOR_CLEAR}"
+    echo -e "${COLOR_WHITE} SYSTEM BUS      = ${BUS}${COLOR_CLEAR}"
+    echo -e "${COLOR_WHITE} NAME            = ${NAME}${COLOR_CLEAR}"
+    echo -e "${COLOR_WHITE} COVERAGE        = ${COVERAGE}${COLOR_CLEAR}"
+    echo -e "${COLOR_WHITE} USER_MODE       = ${USER_MODE}${COLOR_CLEAR}"
+    echo -e "${COLOR_WHITE} ICACHE_WAYPACK  = ${ICACHE_WAYPACK}${COLOR_CLEAR}"
+    echo -e "${COLOR_WHITE} ICACHE_NUM_WAYS = ${ICACHE_NUM_WAYS}${COLOR_CLEAR}"
+    echo -e "${COLOR_WHITE} SIMULATOR       = ${SIMULATOR}${COLOR_CLEAR}"
 
     COMMON_PARAMS="-set bitmanip_zba -set bitmanip_zbb -set bitmanip_zbc -set bitmanip_zbe -set bitmanip_zbf -set bitmanip_zbp -set bitmanip_zbr -set bitmanip_zbs -set=fpga_optimize=0"
 
@@ -81,7 +84,7 @@ run_regression_test(){
         COMMON_PARAMS="-set dccm_wr_readback=1 ${COMMON_PARAMS}"
     fi
 
-    COMMON_PARAMS="-set=icache_waypack=${ICACHE_WAYPACK} ${COMMON_PARAMS}"
+    COMMON_PARAMS="-set=icache_waypack=${ICACHE_WAYPACK} -set=icache_num_ways=${ICACHE_NUM_WAYS} ${COMMON_PARAMS}"
 
     if [[ "${BUS}" == "axi" ]]; then
         PARAMS="-set build_axi4 ${COMMON_PARAMS}"
@@ -116,10 +119,10 @@ run_regression_test(){
 # NAME=hello_world
 # COVERAGE=branch
 # USER_MODE=1
-# run_regression_test.sh $RESULTS_DIR $BUS $NAME $COVERAGE $USER_MODE
+# run_regression_test.sh $RESULTS_DIR $BUS $NAME $COVERAGE $USER_MODE $ICACHE_WAYPACK $SIMULATOR $ICACHE_NUM_WAYS
 
-if [ "$#" -lt 6 ] || [ "$#" -gt 7 ]; then
-    echo -e "${COLOR_WHITE}Expected 6 or 7 arguments, but received $# ${COLOR_RED}FAIL${COLOR_CLEAR}"
+if [ "$#" -lt 6 ] || [ "$#" -gt 8 ]; then
+    echo -e "${COLOR_WHITE}Expected 6, 7 or 8 arguments, but received $# ${COLOR_RED}FAIL${COLOR_CLEAR}"
     exit 1
 fi
 run_regression_test "$@"

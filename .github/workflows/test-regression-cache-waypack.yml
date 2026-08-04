@@ -86,7 +86,7 @@ jobs:
           if [ ${{ matrix.test }} = hello_world_iccm ]; then
               export TB_EXTRA_ARGS="$TB_EXTRA_ARGS --test-lsu-clk-ratio"
           fi
-          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} $WAYPACK
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} $WAYPACK verilator $NUM_WAYS
 
       - name: Prepare coverage data
         run: |

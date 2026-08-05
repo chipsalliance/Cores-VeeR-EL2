@@ -116,6 +116,6 @@ jobs:
           submodules: recursive
 
       - name: Run tests
-        run: _secret_custom_openocd_tests:14
+        run: _secret_custom_openocd_tests:16
         env:
           BUS: ${{ matrix.bus }}

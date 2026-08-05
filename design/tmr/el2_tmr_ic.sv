@@ -25,9 +25,6 @@ module el2_tmr_ic
     input  logic [25:0]                          ictag_debug_rd_data,// Debug icache tag.
     output logic [70:0]                          ic_debug_wr_data,   // Debug wr cache.
 
-    output logic [63:0]                          ic_premux_data,     // Premux data to be muxed with each way of the Icache.
-    output logic                                 ic_sel_premux_data, // Select premux data
-
     output logic [pt.ICACHE_INDEX_HI:3]          ic_debug_addr,      // Read/Write address to the Icache.
     output logic                                 ic_debug_rd_en,     // Icache debug rd
     output logic                                 ic_debug_wr_en,     // Icache debug wr
@@ -50,9 +47,6 @@ module el2_tmr_ic
     output logic [70:0]                          ic_debug_rd_data_veer[3],
     output logic [25:0]                          ictag_debug_rd_data_veer[3],
     input  logic [70:0]                          ic_debug_wr_data_veer[3],
-
-    input  logic [63:0]                          ic_premux_data_veer[3],
-    input  logic                                 ic_sel_premux_data_veer[3],
 
     input  logic [pt.ICACHE_INDEX_HI:3]          ic_debug_addr_veer[3],
     input  logic                                 ic_debug_rd_en_veer[3],
@@ -84,8 +78,6 @@ module el2_tmr_ic
     ic_rd_en = ic_rd_en_veer[0];
     ic_wr_data = ic_wr_data_veer[0];
     ic_debug_wr_data = ic_debug_wr_data_veer[0];
-    ic_premux_data = ic_premux_data_veer[0];
-    ic_sel_premux_data = ic_sel_premux_data_veer[0];
     ic_debug_addr = ic_debug_addr_veer[0];
     ic_debug_rd_en = ic_debug_rd_en_veer[0];
     ic_debug_wr_en = ic_debug_wr_en_veer[0];

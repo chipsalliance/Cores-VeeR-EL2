@@ -698,10 +698,10 @@ module rvecc_decode  (
    assign ecc_check[5] = ecc_in[5]^din[26]^din[27]^din[28]^din[29]^din[30]^din[31];
 
    // This is the parity bit
-   assign ecc_check[6] = ((^din[31:0])^(^ecc_in[6:0])) & ~sed_ded;
+   assign ecc_check[6] = ((^din[31:0])^(^ecc_in[6:0]));
 
-   assign single_ecc_error = en & (ecc_check[6:0] != 0) & ecc_check[6];   // this will never be on for sed_ded
-   assign double_ecc_error = en & (ecc_check[6:0] != 0) & ~ecc_check[6];  // all errors in the sed_ded case will be recorded as DE
+   assign single_ecc_error = en & (ecc_check[6:0] != 0) & ~sed_ded;   // this will never be on for sed_ded
+   assign double_ecc_error = en & (ecc_check[6:0] != 0);  // all errors in the sed_ded case will be recorded as DE
 
    // Generate the mask for error correctiong
    for (genvar i=1; i<40; i++) begin

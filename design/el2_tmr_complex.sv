@@ -104,9 +104,6 @@ module el2_tmr_complex
     input  logic [25:0]                          ictag_debug_rd_data,// Debug icache tag.
     output logic [70:0]                          ic_debug_wr_data,   // Debug wr cache.
 
-    output logic [63:0]                          ic_premux_data,     // Premux data to be muxed with each way of the Icache.
-    output logic                                 ic_sel_premux_data, // Select premux data
-
     output logic [pt.ICACHE_INDEX_HI:3]          ic_debug_addr,      // Read/Write address to the Icache.
     output logic                                 ic_debug_rd_en,     // Icache debug rd
     output logic                                 ic_debug_wr_en,     // Icache debug wr
@@ -543,9 +540,6 @@ module el2_tmr_complex
   logic [25:0]                          ictag_debug_rd_data_veer[3];
   logic [70:0]                          ic_debug_wr_data_veer[3];
 
-  logic [63:0]                          ic_premux_data_veer[3];
-  logic                                 ic_sel_premux_data_veer[3];
-
   logic [pt.ICACHE_INDEX_HI:3]          ic_debug_addr_veer[3];
   logic                                 ic_debug_rd_en_veer[3];
   logic                                 ic_debug_wr_en_veer[3];
@@ -978,6 +972,12 @@ module el2_tmr_complex
     assign tmr_fault_q[i]  = mubi_or3(axi_fault_q[i], iccm_fault_q[i], dccm_fault_q[i]); // TODO: Aggregate ALL TMR fault state signals
   end endgenerate
 
+  // FIXME: Remove fault stubs
+  generate for(genvar i=0; i<3; i=i+1) begin
+    assign tmr_fault_d[i] = El2MuBiFalse;
+    assign tmr_fault_clr[i] = El2MuBiFalse;
+  end endgenerate
+
   //-------------------------------------------------------------------
 
   el2_tmr_axi #(.pt(pt)) el2_tmr_axi_u (.*);
@@ -1011,6 +1011,9 @@ module el2_tmr_complex
   end
 
   for (genvar i=0;i < 3; i+=1) begin: cores
+    logic dec_tlu_dccm_wr_readback_disable; // TODO: Is it needed?
+    logic dccm_write_readback_error; // TODO: Is it needed?
+
     el2_veer #(.pt(pt)) veer (
         .clk(clk),
         .rst_l(rst_l),
@@ -1080,8 +1083,6 @@ module el2_tmr_complex
         .ic_debug_rd_data (ic_debug_rd_data_veer[i]),
         .ictag_debug_rd_data(ictag_debug_rd_data_veer[i]),
         .ic_debug_wr_data(ic_debug_wr_data_veer[i]),
-        .ic_premux_data(ic_premux_data_veer[i]),
-        .ic_sel_premux_data(ic_sel_premux_data_veer[i]),
         .ic_debug_addr(ic_debug_addr_veer[i]),
         .ic_debug_rd_en(ic_debug_rd_en_veer[i]),
         .ic_debug_wr_en(ic_debug_wr_en_veer[i]),
@@ -1250,6 +1251,7 @@ module el2_tmr_complex
         .iccm_ecc_double_error(iccm_ecc_double_error_veer[i]),
         .dccm_ecc_single_error(dccm_ecc_single_error_veer[i]),
         .dccm_ecc_double_error(dccm_ecc_double_error_veer[i]),
+        .dccm_write_readback_error(dccm_write_readback_error),
         .recovery_gpr_en(recovery_gpr_en_veer[i]),
         .recovery_gpr_wen(recovery_gpr_wen_veer[i]),
         .recovery_gpr_wraddr(recovery_gpr_wraddr_veer[i]),
@@ -1264,6 +1266,7 @@ module el2_tmr_complex
         .recovery_csr_rddata(recovery_csr_rddata_veer[i]),
         .dec_tlu_force_halt(dec_tlu_force_halt_veer[i]),
         .dec_tlu_bus_clk_override(dec_tlu_bus_clk_override_veer[i]),
+        .dec_tlu_dccm_wr_readback_disable(dec_tlu_dccm_wr_readback_disable),
         .pic_clk_override(pic_clk_override_veer[i]),
         .pic_io_clk_override(pic_io_clk_override_veer[i]),
         .picm_rdaddr(picm_rdaddr_veer[i]),

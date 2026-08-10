@@ -75,7 +75,7 @@ int main () {
 
     reg = read_csr(CSR_MSECCFG);
     if (!(reg & MSECCFG_RLB)) {
-        printf("ERROR: mseccfg.MML cannot be set\n");
+        printf("ERROR: mseccfg.RLB cannot be set\n");
         return -1;
     }
 
@@ -86,6 +86,24 @@ int main () {
     if (reg & MSECCFG_RLB) {
         printf("ERROR: mseccfg.RLB cannot be cleared\n");
         return -1;
+    }
+    printf("ok.\n");
+
+    // check that reserved region configurations (W=1, R=0)
+    // cannot be set while mseccfg.MML == 0
+    // since the register is WARL, we expect PMPCFG_W to be cleared on readback
+    printf("Checking that reserved regions cannot be set...\n");
+    write_csr(CSR_PMPCFG0, PMPCFG_W | PMPCFG_X);
+    reg = read_csr(CSR_PMPCFG0);
+    if (reg & PMPCFG_W) {
+        printf("ERROR: reserved region (X=1, W=1, R=0) can be set when mseccfg.MML is not set\n");
+        return -1;   
+    }
+    write_csr(CSR_PMPCFG0, PMPCFG_W);
+    reg = read_csr(CSR_PMPCFG0);
+    if (reg & PMPCFG_W) {
+        printf("ERROR: reserved region (X=0, W=1, R=0) can be set when mseccfg.MML is not set\n");
+        return -1;   
     }
     printf("ok.\n");
 

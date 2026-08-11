@@ -73,10 +73,24 @@ run_regression_test(){
         COMMON_PARAMS="-set iccm_addr_xor=1 ${COMMON_PARAMS}"
     fi
 
+    # ICACHE_ADDR_XOR may not be set
+    set +u
+    if [[ -z "${ICACHE_ADDR_XOR}" ]]; then
+        ICACHE_ADDR_XOR="0"
+    fi
+    set -u
+
+    if [[ "${ICACHE_ADDR_XOR}" == "1" ]]; then
+        COMMON_PARAMS="-set icache_addr_xor=1 -set icache_enable=1 ${COMMON_PARAMS}"
+    fi
+
     # DCCM_WR_READBACK may not be set
     set +u
     if [[ -z "${DCCM_WR_READBACK}" ]]; then
         DCCM_WR_READBACK="0"
+    fi
+    if [[ "${ECC}" == "0" ]]; then
+        COMMON_PARAMS="-set icache_ecc=0 ${COMMON_PARAMS}"
     fi
     set -u
 

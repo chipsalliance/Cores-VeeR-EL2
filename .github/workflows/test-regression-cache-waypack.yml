@@ -22,16 +22,37 @@ env:
   NUM_WAYS: ${{ inputs.num_ways }}
 
 jobs:
+  generate-matrix:
+    name: Generate test matrix
+    runs-on: ubuntu-24.04
+    outputs:
+      tests: ${{ steps.select.outputs.tests }}
+      custom_tests: ${{ steps.select-custom.outputs.tests }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select tests
+        id: select
+        run: |
+          echo "tests=$(python3 .github/scripts/select_pr_tests.py \
+            '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}' 4 \
+            'hello_world,hello_world_dccm,hello_world_iccm,cmark,cmark_dccm,cmark_iccm,dhry,ecc,csr_misa,csr_access,csr_mstatus,csr_mseccfg,modesw,insns,irq,perf_counters,pmp,pmp_random,write_unaligned,icache,icache_ecc,bitmanip,read_after_read' \
+            'pmp_random')" | tee -a $GITHUB_OUTPUT
+      - name: Select custom tests
+        id: select-custom
+        run: |
+          echo "tests=$(python3 .github/scripts/select_pr_tests.py \
+            '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}-custom' 4 \
+            'hello_world,hello_world_dccm,hello_world_iccm,cmark,cmark_dccm,cmark_iccm,dhry,ecc,csr_misa,csr_access,csr_mstatus,csr_mseccfg,modesw,insns,irq,perf_counters,pmp,write_unaligned,icache,icache_ecc,bitmanip,read_after_read')" | tee -a $GITHUB_OUTPUT
+
   regression-tests:
     name: Regression tests
+    needs: [generate-matrix]
     runs-on: ubuntu-24.04
     container: ghcr.io/antmicro/cores-veer-el2:20260714
     strategy:
       matrix:
         bus: ["axi", "ahb"]
-        test: ["hello_world", "hello_world_dccm", "hello_world_iccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
-               "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters",
-               "pmp", "pmp_random", "write_unaligned", "icache", "icache_ecc", "bitmanip", "read_after_read"]
+        test: ${{ fromJSON(needs.generate-matrix.outputs.tests) }}
         coverage: ["all"]
         priv: ["0", "1"]
         tb_extra_args: ["--test-halt"]  # hello_world_iccm will also have --test-lsu-clk-ratio
@@ -104,14 +125,13 @@ jobs:
   custom-regression-tests:
     name: Custom regression tests
     if: inputs.run_custom
+    needs: [generate-matrix]
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: antmicro/centos-dev-tools
     strategy:
       matrix:
         bus: ["axi", "ahb"]
-        test: ["hello_world", "hello_world_dccm", "hello_world_iccm", "cmark", "cmark_dccm", "cmark_iccm", "dhry", "ecc",
-               "csr_misa", "csr_access", "csr_mstatus", "csr_mseccfg", "modesw", "insns", "irq", "perf_counters", "pmp", "write_unaligned",
-               "icache", "icache_ecc", "bitmanip", "read_after_read"]
+        test: ${{ fromJSON(needs.generate-matrix.outputs.custom_tests) }}
         priv: ["0", "1"]
         ecc: ["0", "1"]
         exclude:

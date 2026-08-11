@@ -199,7 +199,7 @@ jobs:
 
   run-custom-tests:
     name: Run custom RISC-V DV tests
-    if: inputs.run_custom
+    if: inputs.run_custom && github.event_name != 'pull_request'
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: antmicro/centos-dev-tools
     needs: [ generate-config, run-tests ]

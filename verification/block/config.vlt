@@ -95,6 +95,10 @@ lint_off -rule UNOPTFLAT -file "*/el2_lsu_lsc_ctl.sv"
 lint_off -rule UNOPTFLAT -file "*/el2_pic_ctrl.sv"
 lint_off -rule UNOPTFLAT -file "*/el2_lsu_bus_buffer.sv"
 
+// Combinatorial paths between different PMP channels are falsely reported by verilator and
+// /* verilator split_var */ cannot be used due to `--public-flat-rw` in cocotb tests.
+lint_off -rule UNOPTFLAT -file "*/el2_pmp.sv"
+
 // Warnings related to the generated `el2_param.vh`
 lint_off -rule UNUSEDPARAM -file "*/el2_ifu_compress_ctl.sv"
 lint_off -rule UNUSEDPARAM -file "*/el2_dec_gpr_ctl.sv"

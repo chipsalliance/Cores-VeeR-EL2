@@ -125,6 +125,7 @@ jobs:
 
   Report-Coverage:
     name: Report-Coverage
+    if: github.event_name != 'pull_request'
     needs: [
       Check-PR-Origin,
       Test-DCLS,
@@ -160,6 +161,7 @@ jobs:
 
   Build-Docs:
     name: Build-Docs
+    if: github.event_name != 'pull_request'
     uses: ./.github/workflows/build-docs.yml
 
   Publish-to-GH-Pages:

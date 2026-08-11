@@ -35,11 +35,6 @@ module el2_tmr_complex
     output logic        trace_rv_i_interrupt_ip,
     output logic [31:0] trace_rv_i_tval_ip,
 
-
-    output logic                 dccm_clk_override,
-    output logic                 icm_clk_override,
-    output logic                 dec_tlu_core_ecc_disable,
-
     // external halt/run interface
     input logic  i_cpu_halt_req,    // Asynchronous Halt request to CPU
     input logic  i_cpu_run_req,     // Asynchronous Restart request to CPU
@@ -51,6 +46,9 @@ module el2_tmr_complex
     /*pragma coverage off*/
     input logic [31:4] core_id, // CORE ID
     /*pragma coverage on*/
+
+    // Memory Export Interface
+    el2_mem_if.veer_sram_src   mem_export,
 
     // external MPC halt/run interface
     input logic mpc_debug_halt_req, // Async halt request
@@ -64,54 +62,6 @@ module el2_tmr_complex
     output logic dec_tlu_perfcnt1,
     output logic dec_tlu_perfcnt2,
     output logic dec_tlu_perfcnt3,
-
-    // External Buses
-    // DCCM
-    output logic                            dccm_wren,
-    output logic                            dccm_rden,
-    output logic [pt.DCCM_BITS-1:0]         dccm_wr_addr_lo,
-    output logic [pt.DCCM_BITS-1:0]         dccm_wr_addr_hi,
-    output logic [pt.DCCM_BITS-1:0]         dccm_rd_addr_lo,
-    output logic [pt.DCCM_BITS-1:0]         dccm_rd_addr_hi,
-    output logic [pt.DCCM_FDATA_WIDTH-1:0]  dccm_wr_data_lo,
-    output logic [pt.DCCM_FDATA_WIDTH-1:0]  dccm_wr_data_hi,
-
-    input logic [pt.DCCM_FDATA_WIDTH-1:0]   dccm_rd_data_lo,
-    input logic [pt.DCCM_FDATA_WIDTH-1:0]   dccm_rd_data_hi,
-
-    // ICCM
-    output logic [pt.ICCM_BITS-1:1]     iccm_rw_addr,
-    output logic                        iccm_wren,
-    output logic                        iccm_rden,
-    output logic [2:0]                  iccm_wr_size,
-    output logic [77:0]                 iccm_wr_data,
-    output logic                        iccm_buf_correct_ecc,
-    output logic                        iccm_correction_state,
-
-    input  logic [77:0]                 iccm_rd_data_ecc,
-
-    // ICACHE
-    output logic [31:1]                          ic_rw_addr,
-    output logic [pt.ICACHE_NUM_WAYS-1:0]        ic_tag_valid,
-    output logic [pt.ICACHE_NUM_WAYS-1:0]        ic_wr_en,
-    output logic                                 ic_rd_en,
-
-    output logic [pt.ICACHE_BANKS_WAY-1:0][70:0] ic_wr_data,         // Data to fill to the Icache. With ECC
-    input  logic [141:0]                         ic_rd_data,              // Raw way-muxed 142-bit ECC-protected word pair. F2 stage.
-    input  logic [1:0]                           ic_rd_addr_lo,            // F2-aligned ic_rw_addr_ff[2:1] for core-side rotate
-    input  logic [pt.ICACHE_BANKS_WAY-1:0]       ic_rd_bank_check_en, // Per-bank ECC check enable for core-side decode
-    input  logic [70:0]                          ic_debug_rd_data,        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
-    input  logic [25:0]                          ictag_debug_rd_data,// Debug icache tag.
-    output logic [70:0]                          ic_debug_wr_data,   // Debug wr cache.
-
-    output logic [pt.ICACHE_INDEX_HI:3]          ic_debug_addr,      // Read/Write address to the Icache.
-    output logic                                 ic_debug_rd_en,     // Icache debug rd
-    output logic                                 ic_debug_wr_en,     // Icache debug wr
-    output logic                                 ic_debug_tag_array, // Debug tag array
-    output logic [pt.ICACHE_NUM_WAYS-1:0]        ic_debug_way,       // Debug way. Rd or Wr.
-
-    input  logic [pt.ICACHE_NUM_WAYS-1:0]        ic_rd_hit,
-    input  logic                                 ic_tag_perr,        // Icache Tag parity error
 
     //-------------------------- LSU AXI signals--------------------------
     // AXI Write Channels
@@ -750,6 +700,10 @@ module el2_tmr_complex
   logic [11:0]             recovery_csr_rdaddr_veer[3];
   logic [31:0]             recovery_csr_rddata_veer[3];
 
+  // VeeR <-> Memories interfaces
+  el2_mem_if local_ccm_export();
+  el2_mem_if mem_export_veer[3]();
+
   // POST TMR AXI
   //-------------------------- LSU AXI signals--------------------------
   // AXI Write Channels
@@ -980,9 +934,39 @@ module el2_tmr_complex
 
   //-------------------------------------------------------------------
 
+  // Connect local memory export interface to allow using DCCM and ICCM modports
+  assign local_ccm_export.clk = clk;
+
+  assign mem_export      .clk                = clk;
+  assign mem_export      .iccm_clken         = local_ccm_export.iccm_clken;
+  assign mem_export      .iccm_wren_bank     = local_ccm_export.iccm_wren_bank;
+  assign mem_export      .iccm_addr_bank     = local_ccm_export.iccm_addr_bank;
+  assign mem_export      .iccm_bank_wr_data  = local_ccm_export.iccm_bank_wr_data;
+  assign mem_export      .iccm_bank_wr_ecc   = local_ccm_export.iccm_bank_wr_ecc;
+  assign local_ccm_export.iccm_bank_dout     = mem_export.      iccm_bank_dout;
+  assign local_ccm_export.iccm_bank_ecc      = mem_export.      iccm_bank_ecc;
+
+  assign mem_export      .dccm_clken         = local_ccm_export.dccm_clken;
+  assign mem_export      .dccm_wren_bank     = local_ccm_export.dccm_wren_bank;
+  assign mem_export      .dccm_addr_bank     = local_ccm_export.dccm_addr_bank;
+  assign mem_export      .dccm_wr_data_bank  = local_ccm_export.dccm_wr_data_bank;
+  assign mem_export      .dccm_wr_ecc_bank   = local_ccm_export.dccm_wr_ecc_bank;
+  assign local_ccm_export.dccm_bank_dout     = mem_export      .dccm_bank_dout;
+  assign local_ccm_export.dccm_bank_ecc      = mem_export      .dccm_bank_ecc;
+
+  //-------------------------------------------------------------------
+
   el2_tmr_axi #(.pt(pt)) el2_tmr_axi_u (.*);
-  el2_tmr_iccm #(.pt(pt)) el2_tmr_iccm_u (.*);
-  el2_tmr_dccm #(.pt(pt)) el2_tmr_dccm_u (.*);
+  el2_tmr_iccm #(.pt(pt)) el2_tmr_iccm_u (
+    .iccm_export(local_ccm_export.veer_iccm),
+    .iccm_export_veer(mem_export_veer.veer_iccm_sink),
+    .*
+  );
+  el2_tmr_dccm #(.pt(pt)) el2_tmr_dccm_u (
+    .dccm_export(local_ccm_export.veer_dccm),
+    .dccm_export_veer(mem_export_veer.veer_dccm_sink),
+    .*
+  );
   el2_tmr_dmi #(.pt(pt)) el2_tmr_dmi_u (.*);
   el2_tmr_ic #(.pt(pt)) el2_tmr_ic_u (.*);
   el2_tmr_pic #(.pt(pt)) el2_tmr_pic_u (.*);
@@ -1284,6 +1268,54 @@ module el2_tmr_complex
         .mhwakeup(mhwakeup_veer[i]),
         .timer_int(timer_int_veer[i]),
         .soft_int(soft_int_veer[i]),
+        .scan_mode(scan_mode)
+      );
+
+    // Instantiate the mem
+    el2_mem  #(.pt(pt)) mem (
+        .clk(active_l2clk_veer[i]),
+        .rst_l(core_rst_l_veer[i]),
+        .dccm_clk_override(dccm_clk_override_veer[i]),
+        .icm_clk_override(icm_clk_override_veer[i]),
+        .dec_tlu_core_ecc_disable(dec_tlu_core_ecc_disable_veer[i]),
+        .dccm_wren(dccm_wren_veer[i]),
+        .dccm_rden(dccm_rden_veer[i]),
+        .dccm_wr_addr_lo(dccm_wr_addr_lo_veer[i]),
+        .dccm_wr_addr_hi(dccm_wr_addr_hi_veer[i]),
+        .dccm_rd_addr_lo(dccm_rd_addr_lo_veer[i]),
+        .dccm_rd_addr_hi(dccm_rd_addr_hi_veer[i]),
+        .dccm_wr_data_lo(dccm_wr_data_lo_veer[i]),
+        .dccm_wr_data_hi(dccm_wr_data_hi_veer[i]),
+        .dccm_rd_data_lo(dccm_rd_data_lo_veer[i]),
+        .dccm_rd_data_hi(dccm_rd_data_hi_veer[i]),
+        .iccm_rw_addr(iccm_rw_addr_veer[i]),
+        .iccm_buf_correct_ecc(iccm_buf_correct_ecc_veer[i]),
+        .iccm_correction_state(iccm_correction_state_veer[i]),
+        .iccm_wren(iccm_wren_veer[i]),
+        .iccm_rden(iccm_rden_veer[i]),
+        .iccm_wr_size(iccm_wr_size_veer[i]),
+        .iccm_wr_data(iccm_wr_data_veer[i]),
+        .iccm_rd_data_ecc(iccm_rd_data_ecc_veer[i]),
+        .ic_rw_addr(ic_rw_addr_veer[i]),
+        .ic_tag_valid(ic_tag_valid_veer[i]),
+        .ic_wr_en(ic_wr_en_veer[i]),
+        .ic_rd_en(ic_rd_en_veer[i]),
+        .ic_wr_data(ic_wr_data_veer[i]),
+        .ic_debug_wr_data(ic_debug_wr_data_veer[i]),
+        .ic_debug_rd_data(ic_debug_rd_data_veer[i]),
+        .ic_debug_addr(ic_debug_addr_veer[i]),
+        .ic_debug_rd_en(ic_debug_rd_en_veer[i]),
+        .ic_debug_wr_en(ic_debug_wr_en_veer[i]),
+        .ic_debug_tag_array(ic_debug_tag_array_veer[i]),
+        .ic_debug_way(ic_debug_way_veer[i]),
+        .ic_rd_data(ic_rd_data_veer[i]),
+        .ic_rd_addr_lo(ic_rd_addr_lo_veer[i]),
+        .ic_rd_bank_check_en(ic_rd_bank_check_en_veer[i]),
+        .ictag_debug_rd_data(ictag_debug_rd_data_veer[i]),
+        .ic_rd_hit(ic_rd_hit_veer[i]),
+        .ic_tag_perr(ic_tag_perr_veer[i]),
+        .mem_export(mem_export_veer[i].veer_sram_src),
+        .icache_export(mem_export_veer[i].veer_icache_src),
         .scan_mode(scan_mode)
       );
   end

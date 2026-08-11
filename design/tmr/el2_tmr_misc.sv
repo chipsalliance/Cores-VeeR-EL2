@@ -34,7 +34,6 @@ module el2_tmr_misc
 
     output logic core_rst_l,
     output logic dec_tlu_force_halt_int,
-    output logic dec_tlu_core_ecc_disable,
 
     // TMR
     // Reset and interrupts
@@ -59,8 +58,7 @@ module el2_tmr_misc
     input  logic dec_tlu_perfcnt3_veer[3],
 
     input  logic core_rst_l_veer[3],
-    input  logic dec_tlu_force_halt_veer[3],
-    input  logic dec_tlu_core_ecc_disable_veer[3]
+    input  logic dec_tlu_force_halt_veer[3]
 );
 
 //TODO: Change it to use voters
@@ -88,7 +86,6 @@ module el2_tmr_misc
     dec_tlu_perfcnt2 = dec_tlu_perfcnt2_veer[0];
     dec_tlu_perfcnt3 = dec_tlu_perfcnt3_veer[0];
     dec_tlu_force_halt_int = dec_tlu_force_halt_veer[0];
-    dec_tlu_core_ecc_disable = dec_tlu_core_ecc_disable_veer[0];
   end
 endmodule
 `endif

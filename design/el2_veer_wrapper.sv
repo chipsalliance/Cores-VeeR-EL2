@@ -910,13 +910,6 @@ import el2_pkg::*;
                                 );
 `endif // `ifdef RV_LOCKSTEP_ENABLE
 
-`else // RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
-    el2_tmr_complex #(.pt(pt)) tmr_complex(
-        .clk(clk),
-        .*
-    );
-`endif
-
    // Instantiate the mem
    el2_mem  #(.pt(pt)) mem (
                              .clk(active_l2clk),
@@ -925,6 +918,15 @@ import el2_pkg::*;
                              .icache_export(el2_icache_export),
                              .*
                              );
+
+`else // RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    el2_tmr_complex #(.pt(pt)) tmr_complex(
+        .clk(clk),
+        .mem_export(el2_mem_export),
+        .icache_export(el2_icache_export),
+        .*
+    );
+`endif // RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
 
 
    logic unused_dmi_hard_reset;

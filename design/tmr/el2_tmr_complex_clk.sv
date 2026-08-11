@@ -29,13 +29,9 @@ module el2_tmr_complex_clk
     output logic dbg_bus_clk_en_veer[3],
     output logic dma_bus_clk_en_veer[3],
 
-    input  logic dccm_clk_override_veer[3],
-    input  logic icm_clk_override_veer[3],
     input  logic dec_tlu_bus_clk_override_veer[3],
     input  logic pic_clk_override_veer[3],
     input  logic pic_io_clk_override_veer[3],
-    output logic dccm_clk_override,
-    output logic icm_clk_override,
     output logic dec_tlu_bus_clk_override_int,
     output logic pic_clk_override_int,
     output logic pic_io_clk_override_int,
@@ -52,16 +48,6 @@ module el2_tmr_complex_clk
   );
 
   // Active clock will only cost extra power
-  // TODO: Add logic to correctly handle different configurations
-  rvtmr  #(.WIDTH(1)) dccm_clk_override_voter (
-    .I(dccm_clk_override_veer),
-    .O(dccm_clk_override)
-  );
-  // TODO: Add logic to correctly handle different configurations
-  rvtmr  #(.WIDTH(1)) icm_clk_override_voter (
-    .I(icm_clk_override_veer),
-    .O(icm_clk_override)
-  );
   // TODO: Add logic to correctly handle different configurations
   rvtmr  #(.WIDTH(1)) dec_tlu_bus_clk_override_voter (
     .I(dec_tlu_bus_clk_override_veer),

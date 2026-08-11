@@ -9,42 +9,14 @@ module el2_tmr_dccm
 #(
     `include "el2_param.vh"
 ) (
-    input  logic free_l2clk,
+    input logic clk,
     input  logic rst_l,
 
-    // DCCM
-    output logic                            dccm_wren,
-    output logic                            dccm_rden,
-    output logic [pt.DCCM_BITS-1:0]         dccm_wr_addr_lo,
-    output logic [pt.DCCM_BITS-1:0]         dccm_wr_addr_hi,
-    output logic [pt.DCCM_BITS-1:0]         dccm_rd_addr_lo,
-    output logic [pt.DCCM_BITS-1:0]         dccm_rd_addr_hi,
-    output logic [pt.DCCM_FDATA_WIDTH-1:0]  dccm_wr_data_lo,
-    output logic [pt.DCCM_FDATA_WIDTH-1:0]  dccm_wr_data_hi,
-
-    input logic [pt.DCCM_FDATA_WIDTH-1:0]   dccm_rd_data_lo,
-    input logic [pt.DCCM_FDATA_WIDTH-1:0]   dccm_rd_data_hi,
-
-    // DCCM ECC status
-    output logic                 dccm_ecc_single_error,
-    output logic                 dccm_ecc_double_error,
+    // DCCM Memory
+    el2_mem_if.veer_dccm dccm_export,
 
     // DCCM TMR
-    input  logic                           dccm_wren_veer[3],
-    input  logic                           dccm_rden_veer[3],
-    input  logic [pt.DCCM_BITS-1:0]        dccm_wr_addr_lo_veer[3],
-    input  logic [pt.DCCM_BITS-1:0]        dccm_wr_addr_hi_veer[3],
-    input  logic [pt.DCCM_BITS-1:0]        dccm_rd_addr_lo_veer[3],
-    input  logic [pt.DCCM_BITS-1:0]        dccm_rd_addr_hi_veer[3],
-    input  logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_wr_data_lo_veer[3],
-    input  logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_wr_data_hi_veer[3],
-
-    output logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_rd_data_lo_veer[3],
-    output logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_rd_data_hi_veer[3],
-
-    // DCCM ECC status
-    output logic dccm_ecc_single_error_veer[3],
-    output logic dccm_ecc_double_error_veer[3],
+    el2_mem_if.veer_dccm_sink dccm_export_veer[3],
 
     // Fault inputs
     input  el2_mubi_pkg::el2_mubi_t dccm_fault_d[3],
@@ -54,200 +26,180 @@ module el2_tmr_dccm
     input  el2_mubi_pkg::el2_mubi_t dccm_fault_clr[3]
 );
 
+  // Create constant with casting to avoid width expansion warnings
+  localparam ADDR_BANK_WIDTH = int'(pt.DCCM_BITS) - int'(pt.DCCM_BANK_BITS) - 2;
+
   // ......................................................
 
   el2_mubi_t enable[3];
 
-  el2_mubi_t fault_dccm_wr_addr_lo[3];
-  el2_mubi_t fault_dccm_wr_addr_hi[3];
-  el2_mubi_t fault_dccm_rd_addr_lo[3];
-  el2_mubi_t fault_dccm_rd_addr_hi[3];
-  el2_mubi_t fault_dccm_wr_data_lo[3];
-  el2_mubi_t fault_dccm_wr_data_hi[3];
-  el2_mubi_t fault_dccm_ctl_bundle[3];
+  el2_mubi_t                         fault_dccm_clken[3];
+  el2_mubi_t                         fault_dccm_wren_bank[3];
+  el2_mubi_t [pt.DCCM_NUM_BANKS-1:0] fault_dccm_addr_bank[3];
+  el2_mubi_t [pt.DCCM_NUM_BANKS-1:0] fault_dccm_wr_data_bank[3];
+  el2_mubi_t [pt.DCCM_NUM_BANKS-1:0] fault_dccm_wr_ecc_bank[3];
 
-  el2_mubi_t crit_dccm_wr_addr_lo;
-  el2_mubi_t crit_dccm_wr_addr_hi;
-  el2_mubi_t crit_dccm_rd_addr_lo;
-  el2_mubi_t crit_dccm_rd_addr_hi;
-  el2_mubi_t crit_dccm_wr_data_lo;
-  el2_mubi_t crit_dccm_wr_data_hi;
-  el2_mubi_t crit_dccm_ctl_bundle;
+  el2_mubi_t                         crit_dccm_clken;
+  el2_mubi_t                         crit_dccm_wren_bank;
+  el2_mubi_t [pt.DCCM_NUM_BANKS-1:0] crit_dccm_addr_bank;
+  el2_mubi_t [pt.DCCM_NUM_BANKS-1:0] crit_dccm_wr_data_bank;
+  el2_mubi_t [pt.DCCM_NUM_BANKS-1:0] crit_dccm_wr_ecc_bank;
 
   el2_mubi_t crit_any;
 
   // ......................................................
 
-  el2_tmr_voter #(.Width(pt.DCCM_BITS)) x_voter_wr_addr_lo (
-    .in_a     (dccm_wr_addr_lo_veer[0]),
-    .in_b     (dccm_wr_addr_lo_veer[1]),
-    .in_c     (dccm_wr_addr_lo_veer[2]),
+  logic [pt.DCCM_NUM_BANKS-1:0] dccm_clken;
+  logic [pt.DCCM_NUM_BANKS-1:0] dccm_wren_bank;
+
+  el2_tmr_voter #(.Width(pt.DCCM_NUM_BANKS)) u_voter_dccm_clken (
+    .in_a     (dccm_export_veer[0].dccm_clken),
+    .in_b     (dccm_export_veer[1].dccm_clken),
+    .in_c     (dccm_export_veer[2].dccm_clken),
 
     .en_a     (enable[0]),
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (dccm_wr_addr_lo),
+    .out      (dccm_clken),
 
-    .fault_a  (fault_dccm_wr_addr_lo[0]),
-    .fault_b  (fault_dccm_wr_addr_lo[1]),
-    .fault_c  (fault_dccm_wr_addr_lo[2]),
+    .fault_a  (fault_dccm_clken[0]),
+    .fault_b  (fault_dccm_clken[1]),
+    .fault_c  (fault_dccm_clken[2]),
 
-    .critical (crit_dccm_wr_addr_lo)
+    .critical (crit_dccm_clken)
   );
 
-  el2_tmr_voter #(.Width(pt.DCCM_BITS)) x_voter_wr_addr_hi (
-    .in_a     (dccm_wr_addr_hi_veer[0]),
-    .in_b     (dccm_wr_addr_hi_veer[1]),
-    .in_c     (dccm_wr_addr_hi_veer[2]),
+  el2_tmr_voter #(.Width(pt.DCCM_NUM_BANKS)) u_voter_dccm_wren_bank (
+    .in_a     (dccm_export_veer[0].dccm_wren_bank),
+    .in_b     (dccm_export_veer[1].dccm_wren_bank),
+    .in_c     (dccm_export_veer[2].dccm_wren_bank),
 
     .en_a     (enable[0]),
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (dccm_wr_addr_hi),
+    .out      (dccm_wren_bank),
 
-    .fault_a  (fault_dccm_wr_addr_hi[0]),
-    .fault_b  (fault_dccm_wr_addr_hi[1]),
-    .fault_c  (fault_dccm_wr_addr_hi[2]),
+    .fault_a  (fault_dccm_wren_bank[0]),
+    .fault_b  (fault_dccm_wren_bank[1]),
+    .fault_c  (fault_dccm_wren_bank[2]),
 
-    .critical (crit_dccm_wr_addr_hi)
+    .critical (crit_dccm_wren_bank)
   );
 
-  el2_tmr_voter #(.Width(pt.DCCM_BITS)) x_voter_rd_addr_lo (
-    .in_a     (dccm_rd_addr_lo_veer[0]),
-    .in_b     (dccm_rd_addr_lo_veer[1]),
-    .in_c     (dccm_rd_addr_lo_veer[2]),
+  for (genvar i = 0; i < pt.DCCM_NUM_BANKS; i++) begin : gen_dccm_voters
+    el2_tmr_voter #(.Width(ADDR_BANK_WIDTH)) u_voter_dccm_addr_bank (
+      .in_a     (dccm_export_veer[0].dccm_addr_bank[i]),
+      .in_b     (dccm_export_veer[1].dccm_addr_bank[i]),
+      .in_c     (dccm_export_veer[2].dccm_addr_bank[i]),
 
-    .en_a     (enable[0]),
-    .en_b     (enable[1]),
-    .en_c     (enable[2]),
+      .en_a     (enable[0]),
+      .en_b     (enable[1]),
+      .en_c     (enable[2]),
 
-    .out      (dccm_rd_addr_lo),
+      .out      (dccm_export.dccm_addr_bank[i]),
 
-    .fault_a  (fault_dccm_rd_addr_lo[0]),
-    .fault_b  (fault_dccm_rd_addr_lo[1]),
-    .fault_c  (fault_dccm_rd_addr_lo[2]),
+      .fault_a  (fault_dccm_addr_bank[0][i]),
+      .fault_b  (fault_dccm_addr_bank[1][i]),
+      .fault_c  (fault_dccm_addr_bank[2][i]),
 
-    .critical (crit_dccm_rd_addr_lo)
-  );
+      .critical (crit_dccm_addr_bank[i])
+    );
 
-  el2_tmr_voter #(.Width(pt.DCCM_BITS)) x_voter_rd_addr_hi (
-    .in_a     (dccm_rd_addr_hi_veer[0]),
-    .in_b     (dccm_rd_addr_hi_veer[1]),
-    .in_c     (dccm_rd_addr_hi_veer[2]),
+    el2_tmr_voter #(.Width(pt.DCCM_DATA_WIDTH)) u_voter_dccm_wr_data_bank (
+      .in_a     (dccm_export_veer[0].dccm_wr_data_bank[i]),
+      .in_b     (dccm_export_veer[1].dccm_wr_data_bank[i]),
+      .in_c     (dccm_export_veer[2].dccm_wr_data_bank[i]),
 
-    .en_a     (enable[0]),
-    .en_b     (enable[1]),
-    .en_c     (enable[2]),
+      .en_a     (enable[0]),
+      .en_b     (enable[1]),
+      .en_c     (enable[2]),
 
-    .out      (dccm_rd_addr_hi),
+      .out      (dccm_export.dccm_wr_data_bank[i]),
 
-    .fault_a  (fault_dccm_rd_addr_hi[0]),
-    .fault_b  (fault_dccm_rd_addr_hi[1]),
-    .fault_c  (fault_dccm_rd_addr_hi[2]),
+      .fault_a  (fault_dccm_wr_data_bank[0][i]),
+      .fault_b  (fault_dccm_wr_data_bank[1][i]),
+      .fault_c  (fault_dccm_wr_data_bank[2][i]),
 
-    .critical (crit_dccm_rd_addr_hi)
-  );
+      .critical (crit_dccm_wr_data_bank[i])
+    );
 
-  el2_tmr_voter #(.Width(pt.DCCM_FDATA_WIDTH)) x_voter_wr_data_lo (
-    .in_a     (dccm_wr_data_lo_veer[0]),
-    .in_b     (dccm_wr_data_lo_veer[1]),
-    .in_c     (dccm_wr_data_lo_veer[2]),
+    el2_tmr_voter #(.Width(pt.DCCM_ECC_WIDTH)) u_voter_dccm_wr_ecc_bank (
+      .in_a     (dccm_export_veer[0].dccm_wr_ecc_bank[i]),
+      .in_b     (dccm_export_veer[1].dccm_wr_ecc_bank[i]),
+      .in_c     (dccm_export_veer[2].dccm_wr_ecc_bank[i]),
 
-    .en_a     (enable[0]),
-    .en_b     (enable[1]),
-    .en_c     (enable[2]),
+      .en_a     (enable[0]),
+      .en_b     (enable[1]),
+      .en_c     (enable[2]),
 
-    .out      (dccm_wr_data_lo),
+      .out      (dccm_export.dccm_wr_ecc_bank[i]),
 
-    .fault_a  (fault_dccm_wr_data_lo[0]),
-    .fault_b  (fault_dccm_wr_data_lo[1]),
-    .fault_c  (fault_dccm_wr_data_lo[2]),
+      .fault_a  (fault_dccm_wr_ecc_bank[0][i]),
+      .fault_b  (fault_dccm_wr_ecc_bank[1][i]),
+      .fault_c  (fault_dccm_wr_ecc_bank[2][i]),
 
-    .critical (crit_dccm_wr_data_lo)
-  );
+      .critical (crit_dccm_wr_ecc_bank[i])
+    );
+  end
 
-  el2_tmr_voter #(.Width(pt.DCCM_FDATA_WIDTH)) x_voter_wr_data_hi (
-    .in_a     (dccm_wr_data_hi_veer[0]),
-    .in_b     (dccm_wr_data_hi_veer[1]),
-    .in_c     (dccm_wr_data_hi_veer[2]),
+  el2_mubi_t fault_dccm_addr_bank_aggr[3];
+  el2_mubi_t fault_dccm_wr_data_bank_aggr[3];
+  el2_mubi_t fault_dccm_wr_ecc_bank_aggr[3];
 
-    .en_a     (enable[0]),
-    .en_b     (enable[1]),
-    .en_c     (enable[2]),
+  el2_mubi_t crit_dccm_addr_bank_aggr;
+  el2_mubi_t crit_dccm_wr_data_bank_aggr;
+  el2_mubi_t crit_dccm_wr_ecc_bank_aggr;
 
-    .out      (dccm_wr_data_hi),
+  always_comb begin
+    for (int i = 0; i < 3; i++) begin : gen_veer_dccm_faults
+      fault_dccm_addr_bank_aggr[i]    = fault_dccm_addr_bank[i][0];
+      fault_dccm_wr_data_bank_aggr[i] = fault_dccm_wr_data_bank[i][0];
+      fault_dccm_wr_ecc_bank_aggr[i]  = fault_dccm_wr_ecc_bank[i][0];
 
-    .fault_a  (fault_dccm_wr_data_hi[0]),
-    .fault_b  (fault_dccm_wr_data_hi[1]),
-    .fault_c  (fault_dccm_wr_data_hi[2]),
+      for (int j = 1; j < pt.DCCM_NUM_BANKS; j++) begin : gen_aggr_dccm_faults
+        fault_dccm_addr_bank_aggr[i]    = mubi_or(fault_dccm_addr_bank_aggr[i],    fault_dccm_addr_bank[i][j]);
+        fault_dccm_wr_data_bank_aggr[i] = mubi_or(fault_dccm_wr_data_bank_aggr[i], fault_dccm_wr_data_bank[i][j]);
+        fault_dccm_wr_ecc_bank_aggr[i]  = mubi_or(fault_dccm_wr_ecc_bank_aggr[i],  fault_dccm_wr_ecc_bank[i][j]);
+      end
+    end
+  end
 
-    .critical (crit_dccm_wr_data_hi)
-  );
+  always_comb begin
+    crit_dccm_addr_bank_aggr    = crit_dccm_addr_bank[0];
+    crit_dccm_wr_data_bank_aggr = crit_dccm_wr_data_bank[0];
+    crit_dccm_wr_ecc_bank_aggr  = crit_dccm_wr_ecc_bank[0];
+
+    for (int i = 1; i < pt.DCCM_NUM_BANKS; i++) begin : gen_aggr_dccm_crits
+      crit_dccm_addr_bank_aggr    = mubi_or(crit_dccm_addr_bank_aggr,    crit_dccm_addr_bank[i]);
+      crit_dccm_wr_data_bank_aggr = mubi_or(crit_dccm_wr_data_bank_aggr, crit_dccm_wr_data_bank[i]);
+      crit_dccm_wr_ecc_bank_aggr  = mubi_or(crit_dccm_wr_ecc_bank_aggr,  crit_dccm_wr_ecc_bank[i]);
+    end
+  end
 
   // ......................................................
 
-  // Bundle single-bit control signals togeather
-  typedef struct packed {
-    logic wren;
-    logic rden;
-  } dccm_ctl_bundle_t;
-
-  dccm_ctl_bundle_t dccm_ctl_bundle;
-  dccm_ctl_bundle_t dccm_ctl_bundle_veer[3];
-
-  generate for (genvar i=0; i<3; i=i+1) begin : ctl_bundle
-    always_comb begin
-      dccm_ctl_bundle_veer[i].wren = dccm_wren_veer[i];
-      dccm_ctl_bundle_veer[i].rden = dccm_rden_veer[i];
-    end
-  end endgenerate
-
+  // Gate control signals with critical errors
   always_comb begin
-    dccm_wren = dccm_ctl_bundle.wren & mubi_check_false(crit_any);
-    dccm_rden = dccm_ctl_bundle.rden & mubi_check_false(crit_any);
+    dccm_export.dccm_clken     = dccm_clken     & {pt.DCCM_NUM_BANKS{mubi_check_false(crit_any)}};
+    dccm_export.dccm_wren_bank = dccm_wren_bank & {pt.DCCM_NUM_BANKS{mubi_check_false(crit_any)}};
   end
-
-  el2_tmr_voter #(.Width($bits(dccm_ctl_bundle_t))) x_voter_ctl_bundle (
-    .in_a     (dccm_ctl_bundle_veer[0]),
-    .in_b     (dccm_ctl_bundle_veer[1]),
-    .in_c     (dccm_ctl_bundle_veer[2]),
-
-    .en_a     (enable[0]),
-    .en_b     (enable[1]),
-    .en_c     (enable[2]),
-
-    .out      (dccm_ctl_bundle),
-
-    .fault_a  (fault_dccm_ctl_bundle[0]),
-    .fault_b  (fault_dccm_ctl_bundle[1]),
-    .fault_c  (fault_dccm_ctl_bundle[2]),
-
-    .critical (crit_dccm_ctl_bundle)
-  );
 
   // ......................................................
 
   // Fault aggregation and registers
-  generate for (genvar i=0; i<3; i=i+1) begin : fault
-    el2_mubi_t  fault_l00;
-    el2_mubi_t  fault_l01;
-    el2_mubi_t  fault_l02;
+  for (genvar i = 0; i < 3; i++) begin : gen_dccm_faults
     el2_mubi_t  fault_l0;
     el2_mubi_t  fault_l1;
     el2_mubi_t  fault_any;
 
-    assign fault_l00 = mubi_or(fault_dccm_wr_addr_lo[i], fault_dccm_wr_addr_hi[i]);
-    assign fault_l01 = mubi_or(fault_dccm_rd_addr_lo[i], fault_dccm_rd_addr_hi[i]);
-    assign fault_l02 = mubi_or(fault_dccm_wr_data_lo[i], fault_dccm_wr_data_hi[i]);
+    assign fault_l0 = mubi_or(fault_dccm_clken[i], fault_dccm_wren_bank[i]);
+    assign fault_l1 = mubi_or3(fault_dccm_addr_bank_aggr[i], fault_dccm_wr_data_bank_aggr[i], fault_dccm_wr_ecc_bank_aggr[i]);
 
-    assign fault_l0  = mubi_or3(fault_l00,  fault_l01, fault_l02);
-    assign fault_l1  = mubi_or(dccm_fault_d[i], fault_dccm_ctl_bundle[i]);
+    assign fault_any  = mubi_or3(fault_l0,  fault_l1, dccm_fault_d[i]);
 
-    assign fault_any = mubi_or(fault_l0, fault_l1);
-
-    always_ff @(posedge free_l2clk or negedge rst_l) begin
+    always_ff @(posedge clk or negedge rst_l) begin
       if (!rst_l) begin
         dccm_fault_q[i] <= El2MuBiFalse;
       end else begin
@@ -260,35 +212,28 @@ module el2_tmr_dccm
     end
 
     assign enable[i] = mubi_not(dccm_fault_q[i]);
-
-  end endgenerate
+  end
 
   // ......................................................
 
   // Critical fault aggregation
-  el2_mubi_t  crit_l00;
-  el2_mubi_t  crit_l01;
-  el2_mubi_t  crit_l02;
-  el2_mubi_t  crit_l03;
   el2_mubi_t  crit_l0;
+  el2_mubi_t  crit_l1;
 
-  assign crit_l00 = mubi_or(crit_dccm_wr_addr_lo, crit_dccm_wr_addr_hi);
-  assign crit_l01 = mubi_or(crit_dccm_rd_addr_lo, crit_dccm_rd_addr_hi);
-  assign crit_l02 = mubi_or(crit_dccm_wr_data_lo, crit_dccm_wr_data_hi);
+  assign crit_l0 = mubi_or(crit_dccm_clken, crit_dccm_wren_bank);
+  assign crit_l1 = mubi_or3(crit_dccm_addr_bank_aggr, crit_dccm_wr_data_bank_aggr, crit_dccm_wr_ecc_bank_aggr);
 
-  assign crit_l0  = mubi_or3(crit_l00,  crit_l01, crit_l02);
-
-  assign crit_any = mubi_or(crit_l0, crit_dccm_ctl_bundle);
+  assign crit_any  = mubi_or(crit_l0,  crit_l1);
 
   // ......................................................
 
   // Propagate response to cores
-  generate for (genvar i=0; i<3; i=i+1) begin
+  for (genvar i=0; i<3; i=i+1) begin
     always_comb begin
-      dccm_rd_data_lo_veer[i] = dccm_rd_data_lo;
-      dccm_rd_data_hi_veer[i] = dccm_rd_data_hi;
+      dccm_export_veer[i].dccm_bank_dout = dccm_export.dccm_bank_dout;
+      dccm_export_veer[i].dccm_bank_ecc = dccm_export.dccm_bank_ecc;
     end
-  end endgenerate
+  end
 
 endmodule
 `endif

@@ -2,7 +2,6 @@
 // //
 // // SPDX-License-Identifier: Apache-2.0
 //
-//
 `ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
 module el2_tmr_iccm
   import el2_pkg::*;
@@ -10,38 +9,14 @@ module el2_tmr_iccm
 #(
     `include "el2_param.vh"
 ) (
-    input  logic free_l2clk,
+    input logic clk,
     input  logic rst_l,
 
-    // ICCM
-    output logic [pt.ICCM_BITS-1:1]     iccm_rw_addr,
-    output logic                        iccm_wren,
-    output logic                        iccm_rden,
-    output logic [2:0]                  iccm_wr_size,
-    output logic [77:0]                 iccm_wr_data,
-    output logic                        iccm_buf_correct_ecc,
-    output logic                        iccm_correction_state,
-
-    input  logic [77:0]                 iccm_rd_data_ecc,
-
-    // ICCM ECC status
-    output logic                 iccm_ecc_single_error,
-    output logic                 iccm_ecc_double_error,
+    // ICCM Memory
+    el2_mem_if.veer_iccm iccm_export,
 
     // ICCM TMR
-    input  logic [pt.ICCM_BITS-1:1] iccm_rw_addr_veer[3],
-    input  logic                    iccm_wren_veer[3],
-    input  logic                    iccm_rden_veer[3],
-    input  logic [2:0]              iccm_wr_size_veer[3],
-    input  logic [77:0]             iccm_wr_data_veer[3],
-    input  logic                    iccm_buf_correct_ecc_veer[3],
-    input  logic                    iccm_correction_state_veer[3],
-
-    output logic [77:0]             iccm_rd_data_ecc_veer[3],
-
-    // ICCM ECC status
-    input  logic                 iccm_ecc_single_error_veer[3],
-    input  logic                 iccm_ecc_double_error_veer[3],
+    el2_mem_if.veer_iccm_sink iccm_export_veer[3],
 
     // Fault inputs
     input  el2_mubi_pkg::el2_mubi_t iccm_fault_d[3],
@@ -51,144 +26,180 @@ module el2_tmr_iccm
     input  el2_mubi_pkg::el2_mubi_t iccm_fault_clr[3]
 );
 
+  // Create constant with casting to avoid width expansion warnings
+  localparam ADDR_BANK_WIDTH = int'(pt.ICCM_BITS) - int'(pt.ICCM_BANK_INDEX_LO);
+
   // ......................................................
 
   el2_mubi_t enable[3];
 
-  el2_mubi_t fault_iccm_rw_addr[3];
-  el2_mubi_t fault_iccm_wr_data[3];
-  el2_mubi_t fault_iccm_wr_size[3];
-  el2_mubi_t fault_iccm_ctl_bundle[3];
+  el2_mubi_t                         fault_iccm_clken[3];
+  el2_mubi_t                         fault_iccm_wren_bank[3];
+  el2_mubi_t [pt.ICCM_NUM_BANKS-1:0] fault_iccm_addr_bank[3];
+  el2_mubi_t [pt.ICCM_NUM_BANKS-1:0] fault_iccm_bank_wr_data[3];
+  el2_mubi_t [pt.ICCM_NUM_BANKS-1:0] fault_iccm_bank_wr_ecc[3];
 
-  el2_mubi_t crit_iccm_rw_addr;
-  el2_mubi_t crit_iccm_wr_data;
-  el2_mubi_t crit_iccm_wr_size;
-  el2_mubi_t crit_iccm_ctl_bundle;
+  el2_mubi_t                         crit_iccm_clken;
+  el2_mubi_t                         crit_iccm_wren_bank;
+  el2_mubi_t [pt.ICCM_NUM_BANKS-1:0] crit_iccm_addr_bank;
+  el2_mubi_t [pt.ICCM_NUM_BANKS-1:0] crit_iccm_bank_wr_data;
+  el2_mubi_t [pt.ICCM_NUM_BANKS-1:0] crit_iccm_bank_wr_ecc;
 
   el2_mubi_t crit_any;
 
   // ......................................................
 
-  el2_tmr_voter #(.Width(pt.ICCM_BITS-1)) x_voter_rw_addr (
-    .in_a     (iccm_rw_addr_veer[0]),
-    .in_b     (iccm_rw_addr_veer[1]),
-    .in_c     (iccm_rw_addr_veer[2]),
+  logic [pt.ICCM_NUM_BANKS-1:0] iccm_clken;
+  logic [pt.ICCM_NUM_BANKS-1:0] iccm_wren_bank;
+
+  el2_tmr_voter #(.Width(pt.ICCM_NUM_BANKS)) u_voter_iccm_clken (
+    .in_a     (iccm_export_veer[0].iccm_clken),
+    .in_b     (iccm_export_veer[1].iccm_clken),
+    .in_c     (iccm_export_veer[2].iccm_clken),
 
     .en_a     (enable[0]),
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (iccm_rw_addr),
+    .out      (iccm_clken),
 
-    .fault_a  (fault_iccm_rw_addr[0]),
-    .fault_b  (fault_iccm_rw_addr[1]),
-    .fault_c  (fault_iccm_rw_addr[2]),
+    .fault_a  (fault_iccm_clken[0]),
+    .fault_b  (fault_iccm_clken[1]),
+    .fault_c  (fault_iccm_clken[2]),
 
-    .critical (crit_iccm_rw_addr)
+    .critical (crit_iccm_clken)
   );
 
-  el2_tmr_voter #(.Width($bits(iccm_wr_data))) x_voter_wr_data (
-    .in_a     (iccm_wr_data_veer[0]),
-    .in_b     (iccm_wr_data_veer[1]),
-    .in_c     (iccm_wr_data_veer[2]),
+  el2_tmr_voter #(.Width(pt.ICCM_NUM_BANKS)) u_voter_iccm_wren_bank (
+    .in_a     (iccm_export_veer[0].iccm_wren_bank),
+    .in_b     (iccm_export_veer[1].iccm_wren_bank),
+    .in_c     (iccm_export_veer[2].iccm_wren_bank),
 
     .en_a     (enable[0]),
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (iccm_wr_data),
+    .out      (iccm_wren_bank),
 
-    .fault_a  (fault_iccm_wr_data[0]),
-    .fault_b  (fault_iccm_wr_data[1]),
-    .fault_c  (fault_iccm_wr_data[2]),
+    .fault_a  (fault_iccm_wren_bank[0]),
+    .fault_b  (fault_iccm_wren_bank[1]),
+    .fault_c  (fault_iccm_wren_bank[2]),
 
-    .critical (crit_iccm_wr_data)
+    .critical (crit_iccm_wren_bank)
   );
 
-  el2_tmr_voter #(.Width($bits(iccm_wr_size))) x_voter_wr_size (
-    .in_a     (iccm_wr_size_veer[0]),
-    .in_b     (iccm_wr_size_veer[1]),
-    .in_c     (iccm_wr_size_veer[2]),
+  for (genvar i = 0; i < pt.ICCM_NUM_BANKS; i++) begin : gen_iccm_voters
+    el2_tmr_voter #(.Width(ADDR_BANK_WIDTH)) u_voter_iccm_addr_bank (
+      .in_a     (iccm_export_veer[0].iccm_addr_bank[i]),
+      .in_b     (iccm_export_veer[1].iccm_addr_bank[i]),
+      .in_c     (iccm_export_veer[2].iccm_addr_bank[i]),
 
-    .en_a     (enable[0]),
-    .en_b     (enable[1]),
-    .en_c     (enable[2]),
+      .en_a     (enable[0]),
+      .en_b     (enable[1]),
+      .en_c     (enable[2]),
 
-    .out      (iccm_wr_size),
+      .out      (iccm_export.iccm_addr_bank[i]),
 
-    .fault_a  (fault_iccm_wr_size[0]),
-    .fault_b  (fault_iccm_wr_size[1]),
-    .fault_c  (fault_iccm_wr_size[2]),
+      .fault_a  (fault_iccm_addr_bank[0][i]),
+      .fault_b  (fault_iccm_addr_bank[1][i]),
+      .fault_c  (fault_iccm_addr_bank[2][i]),
 
-    .critical (crit_iccm_wr_size)
-  );
+      .critical (crit_iccm_addr_bank[i])
+    );
+
+    el2_tmr_voter #(.Width(32)) u_voter_iccm_bank_wr_data (
+      .in_a     (iccm_export_veer[0].iccm_bank_wr_data[i]),
+      .in_b     (iccm_export_veer[1].iccm_bank_wr_data[i]),
+      .in_c     (iccm_export_veer[2].iccm_bank_wr_data[i]),
+
+      .en_a     (enable[0]),
+      .en_b     (enable[1]),
+      .en_c     (enable[2]),
+
+      .out      (iccm_export.iccm_bank_wr_data[i]),
+
+      .fault_a  (fault_iccm_bank_wr_data[0][i]),
+      .fault_b  (fault_iccm_bank_wr_data[1][i]),
+      .fault_c  (fault_iccm_bank_wr_data[2][i]),
+
+      .critical (crit_iccm_bank_wr_data[i])
+    );
+
+    el2_tmr_voter #(.Width(pt.ICCM_ECC_WIDTH)) u_voter_iccm_bank_wr_ecc (
+      .in_a     (iccm_export_veer[0].iccm_bank_wr_ecc[i]),
+      .in_b     (iccm_export_veer[1].iccm_bank_wr_ecc[i]),
+      .in_c     (iccm_export_veer[2].iccm_bank_wr_ecc[i]),
+
+      .en_a     (enable[0]),
+      .en_b     (enable[1]),
+      .en_c     (enable[2]),
+
+      .out      (iccm_export.iccm_bank_wr_ecc[i]),
+
+      .fault_a  (fault_iccm_bank_wr_ecc[0][i]),
+      .fault_b  (fault_iccm_bank_wr_ecc[1][i]),
+      .fault_c  (fault_iccm_bank_wr_ecc[2][i]),
+
+      .critical (crit_iccm_bank_wr_ecc[i])
+    );
+  end
+
+  el2_mubi_t fault_iccm_addr_bank_aggr[3];
+  el2_mubi_t fault_iccm_bank_wr_data_aggr[3];
+  el2_mubi_t fault_iccm_bank_wr_ecc_aggr[3];
+
+  el2_mubi_t crit_iccm_addr_bank_aggr;
+  el2_mubi_t crit_iccm_bank_wr_data_aggr;
+  el2_mubi_t crit_iccm_bank_wr_ecc_aggr;
+
+  always_comb begin
+    for (int i = 0; i < 3; i++) begin : gen_veer_iccm_faults
+      fault_iccm_addr_bank_aggr[i]    = fault_iccm_addr_bank[i][0];
+      fault_iccm_bank_wr_data_aggr[i] = fault_iccm_bank_wr_data[i][0];
+      fault_iccm_bank_wr_ecc_aggr[i]  = fault_iccm_bank_wr_ecc[i][0];
+
+      for (int j = 1; j < pt.ICCM_NUM_BANKS; j++) begin : gen_aggr_iccm_faults
+        fault_iccm_addr_bank_aggr[i]    = mubi_or(fault_iccm_addr_bank_aggr[i],    fault_iccm_addr_bank[i][j]);
+        fault_iccm_bank_wr_data_aggr[i] = mubi_or(fault_iccm_bank_wr_data_aggr[i], fault_iccm_bank_wr_data[i][j]);
+        fault_iccm_bank_wr_ecc_aggr[i]  = mubi_or(fault_iccm_bank_wr_ecc_aggr[i],  fault_iccm_bank_wr_ecc[i][j]);
+      end
+    end
+  end
+
+  always_comb begin
+    crit_iccm_addr_bank_aggr    = crit_iccm_addr_bank[0];
+    crit_iccm_bank_wr_data_aggr = crit_iccm_bank_wr_data[0];
+    crit_iccm_bank_wr_ecc_aggr  = crit_iccm_bank_wr_ecc[0];
+
+    for (int i = 1; i < pt.ICCM_NUM_BANKS; i++) begin : gen_aggr_iccm_crits
+      crit_iccm_addr_bank_aggr    = mubi_or(crit_iccm_addr_bank_aggr,    crit_iccm_addr_bank[i]);
+      crit_iccm_bank_wr_data_aggr = mubi_or(crit_iccm_bank_wr_data_aggr, crit_iccm_bank_wr_data[i]);
+      crit_iccm_bank_wr_ecc_aggr  = mubi_or(crit_iccm_bank_wr_ecc_aggr,  crit_iccm_bank_wr_ecc[i]);
+    end
+  end
 
   // ......................................................
 
-  // Bundle single-bit control signals togeather
-  typedef struct packed {
-    logic wren;
-    logic rden;
-    logic buf_correct_ecc;
-    logic correction_state;
-    logic ecc_single_error;
-    logic ecc_double_error;
-  } iccm_ctl_bundle_t;
-
-  iccm_ctl_bundle_t iccm_ctl_bundle;
-  iccm_ctl_bundle_t iccm_ctl_bundle_veer[3];
-
-  generate for (genvar i=0; i<3; i=i+1) begin : ctl_bundle
-    always_comb begin
-      iccm_ctl_bundle_veer[i].wren             = iccm_wren_veer[i];
-      iccm_ctl_bundle_veer[i].rden             = iccm_rden_veer[i];
-      iccm_ctl_bundle_veer[i].buf_correct_ecc  = iccm_buf_correct_ecc_veer[i];
-      iccm_ctl_bundle_veer[i].correction_state = iccm_correction_state_veer[i];
-      iccm_ctl_bundle_veer[i].ecc_single_error = iccm_ecc_single_error_veer[i];
-      iccm_ctl_bundle_veer[i].ecc_double_error = iccm_ecc_double_error_veer[i];
-    end
-  end endgenerate
-
+  // Gate control signals with critical errors
   always_comb begin
-    iccm_wren             = iccm_ctl_bundle.wren & mubi_check_false(crit_any);
-    iccm_rden             = iccm_ctl_bundle.rden & mubi_check_false(crit_any);
-    iccm_buf_correct_ecc  = iccm_ctl_bundle.buf_correct_ecc;
-    iccm_correction_state = iccm_ctl_bundle.correction_state;
-    iccm_ecc_single_error = iccm_ctl_bundle.ecc_single_error;
-    iccm_ecc_double_error = iccm_ctl_bundle.ecc_double_error;
+    iccm_export.iccm_clken     = iccm_clken     & {pt.ICCM_NUM_BANKS{mubi_check_false(crit_any)}};
+    iccm_export.iccm_wren_bank = iccm_wren_bank & {pt.ICCM_NUM_BANKS{mubi_check_false(crit_any)}};
   end
-
-  el2_tmr_voter #(.Width($bits(iccm_ctl_bundle_t))) x_voter_ctl_bundle (
-    .in_a     (iccm_ctl_bundle_veer[0]),
-    .in_b     (iccm_ctl_bundle_veer[1]),
-    .in_c     (iccm_ctl_bundle_veer[2]),
-
-    .en_a     (enable[0]),
-    .en_b     (enable[1]),
-    .en_c     (enable[2]),
-
-    .out      (iccm_ctl_bundle),
-
-    .fault_a  (fault_iccm_ctl_bundle[0]),
-    .fault_b  (fault_iccm_ctl_bundle[1]),
-    .fault_c  (fault_iccm_ctl_bundle[2]),
-
-    .critical (crit_iccm_ctl_bundle)
-  );
 
   // ......................................................
 
   // Fault aggregation and registers
-  generate for (genvar i=0; i<3; i=i+1) begin : fault
+  for (genvar i=0; i<3; i=i+1) begin : gen_iccm_faults
     el2_mubi_t  fault_l0;
     el2_mubi_t  fault_l1;
     el2_mubi_t  fault_any;
 
-    assign fault_l0  = mubi_or(fault_iccm_rw_addr[i], fault_iccm_wr_data[i]);
-    assign fault_l1  = mubi_or(fault_iccm_wr_size[i], fault_iccm_ctl_bundle[i]);
-    assign fault_any = mubi_or3(iccm_fault_d[i], fault_l0, fault_l1);
+    assign fault_l0 = mubi_or(fault_iccm_clken[i], fault_iccm_wren_bank[i]);
+    assign fault_l1 = mubi_or3(fault_iccm_addr_bank_aggr[i], fault_iccm_bank_wr_data_aggr[i], fault_iccm_bank_wr_ecc_aggr[i]);
 
-    always_ff @(posedge free_l2clk or negedge rst_l) begin
+    assign fault_any  = mubi_or3(fault_l0,  fault_l1, iccm_fault_d[i]);
+
+    always_ff @(posedge clk or negedge rst_l) begin
       if (!rst_l) begin
         iccm_fault_q[i] <= El2MuBiFalse;
       end else begin
@@ -201,23 +212,28 @@ module el2_tmr_iccm
     end
 
     assign enable[i] = mubi_not(iccm_fault_q[i]);
+  end
 
-  end endgenerate
+  // ......................................................
 
   // Critical fault aggregation
-  el2_mubi_t crit_l0;
-  el2_mubi_t crit_l1;
+  el2_mubi_t  crit_l0;
+  el2_mubi_t  crit_l1;
 
-  assign crit_l0  = mubi_or(crit_iccm_rw_addr, crit_iccm_wr_data);
-  assign crit_l1  = mubi_or(crit_iccm_wr_size, crit_iccm_ctl_bundle);
-  assign crit_any = mubi_or(crit_l0, crit_l1);
+  assign crit_l0 = mubi_or(crit_iccm_clken, crit_iccm_wren_bank);
+  assign crit_l1 = mubi_or3(crit_iccm_addr_bank_aggr, crit_iccm_bank_wr_data_aggr, crit_iccm_bank_wr_ecc_aggr);
+
+  assign crit_any  = mubi_or(crit_l0,  crit_l1);
 
   // ......................................................
 
   // Propagate response to cores
-  generate for (genvar i=0; i<3; i=i+1) begin : resp
-    assign iccm_rd_data_ecc_veer[i] = iccm_rd_data_ecc;
-  end endgenerate
+  for (genvar i=0; i<3; i=i+1) begin
+    always_comb begin
+      iccm_export_veer[i].iccm_bank_dout = iccm_export.iccm_bank_dout;
+      iccm_export_veer[i].iccm_bank_ecc = iccm_export.iccm_bank_ecc;
+    end
+  end
 
 endmodule
 `endif

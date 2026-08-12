@@ -87,9 +87,15 @@ jobs:
 
   custom-regression-exceptions-tests:
     name: Custom regression exceptions tests
-    if: inputs.run_custom && github.event_name != 'pull_request'
+    needs: [generate-matrix]
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: antmicro/centos-dev-tools
+    strategy:
+      matrix:
+        bus: ["axi"]
+        test: ${{ fromJSON(needs.generate-matrix.outputs.tests) }}
+        priv: ["0"]
+        waypack: ["0", "1"]
     env:
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader
@@ -99,4 +105,9 @@ jobs:
           submodules: recursive
 
       - name: Run tests
-        run: _secret_custom_regression_exceptions_tests:20
+        run: _secret_custom_regression_exceptions_tests:21
+        env:
+          TEST: ${{ matrix.test }}
+          BUS: ${{ matrix.bus }}
+          PRIV: ${{ matrix.priv }}
+          WAYPACK: ${{ matrix.waypack }}

@@ -33,16 +33,36 @@ jobs:
             echo "PR from external fork ($HEAD_REPO_OWNER). Custom CI checks will be skipped."
           fi
 
+  Detect-Changes:
+    name: Detect changed paths
+    runs-on: ubuntu-24.04
+    outputs:
+      docs_changed: ${{ github.event_name != 'pull_request' || steps.filter.outputs.docs == 'true' }}
+      code_changed: ${{ github.event_name != 'pull_request' || steps.filter.outputs.code == 'true' }}
+    steps:
+      - name: Filter changed paths
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            docs:
+              - 'docs/**'
+            code:
+              - '!docs/**'
+
   Test-DCLS:
     name: Test-DCLS-Regression
-    needs: [Check-PR-Origin]
+    needs: [Check-PR-Origin, Detect-Changes]
+    if: needs.Detect-Changes.outputs.code_changed == 'true'
     uses: ./.github/workflows/test-regression-dcls.yml
     with:
       run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
   Test-Regression-Cache-Waypack-0-num-ways-2:
     name: Test-Regression Cache Waypack 0 Num Ways 2
-    needs: [Check-PR-Origin]
+    needs: [Check-PR-Origin, Detect-Changes]
+    if: needs.Detect-Changes.outputs.code_changed == 'true'
     uses: ./.github/workflows/test-regression-cache-waypack.yml
     with:
       waypack: 0
@@ -51,7 +71,8 @@ jobs:
 
   Test-Regression-Cache-Waypack-0-num-ways-4:
     name: Test-Regression Cache Waypack 0 Num Ways 4
-    needs: [Check-PR-Origin]
+    needs: [Check-PR-Origin, Detect-Changes]
+    if: needs.Detect-Changes.outputs.code_changed == 'true'
     uses: ./.github/workflows/test-regression-cache-waypack.yml
     with:
       waypack: 0
@@ -60,7 +81,8 @@ jobs:
 
   Test-Regression-Cache-Waypack-1-num-ways-2:
     name: Test-Regression Cache Waypack 1 Num Ways 2
-    needs: [Check-PR-Origin]
+    needs: [Check-PR-Origin, Detect-Changes]
+    if: needs.Detect-Changes.outputs.code_changed == 'true'
     uses: ./.github/workflows/test-regression-cache-waypack.yml
     with:
       waypack: 1
@@ -69,7 +91,8 @@ jobs:
 
   Test-Regression-Cache-Waypack-1-num-ways-4:
     name: Test-Regression Cache Waypack 1 Num Ways 4
-    needs: [Check-PR-Origin]
+    needs: [Check-PR-Origin, Detect-Changes]
+    if: needs.Detect-Changes.outputs.code_changed == 'true'
     uses: ./.github/workflows/test-regression-cache-waypack.yml
     with:
       waypack: 1
@@ -78,47 +101,58 @@ jobs:
 
   Test-Exceptions-Regression:
     name: Test-Exceptions-Regression
-    needs: [Check-PR-Origin]
+    needs: [Check-PR-Origin, Detect-Changes]
+    if: needs.Detect-Changes.outputs.code_changed == 'true'
     uses: ./.github/workflows/test-regression-exceptions.yml
     with:
       run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
   Test-Verification:
     name: Test-Verification
-    needs: [Check-PR-Origin]
+    needs: [Check-PR-Origin, Detect-Changes]
+    if: needs.Detect-Changes.outputs.code_changed == 'true'
     uses: ./.github/workflows/test-verification.yml
     with:
       run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
   Test-Microarchitectural:
     name: Test-Microarchitectural
-    needs: [Check-PR-Origin]
+    needs: [Check-PR-Origin, Detect-Changes]
+    if: needs.Detect-Changes.outputs.code_changed == 'true'
     uses: ./.github/workflows/test-uarch.yml
     with:
       run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
   Test-RISCV-DV:
     name: Test-RISCV-DV
-    needs: [Check-PR-Origin]
+    needs: [Check-PR-Origin, Detect-Changes]
+    if: needs.Detect-Changes.outputs.code_changed == 'true'
     uses: ./.github/workflows/test-riscv-dv.yml
     with:
       run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
   Test-RISCOF:
     name: Test-RISCOF
+    needs: [Detect-Changes]
+    if: needs.Detect-Changes.outputs.code_changed == 'true'
     uses: ./.github/workflows/test-riscof.yml
 
   Test-UVM:
     name: Test-UVM
+    needs: [Detect-Changes]
+    if: needs.Detect-Changes.outputs.code_changed == 'true'
     uses: ./.github/workflows/test-uvm.yml
 
   Test-Renode:
     name: Test-Renode
+    needs: [Detect-Changes]
+    if: needs.Detect-Changes.outputs.code_changed == 'true'
     uses: ./.github/workflows/test-renode.yml
 
   Test-OpenOCD:
     name: Test-OpenOCD
-    needs: [Check-PR-Origin]
+    needs: [Check-PR-Origin, Detect-Changes]
+    if: needs.Detect-Changes.outputs.code_changed == 'true'
     uses: ./.github/workflows/test-openocd.yml
     with:
       run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
@@ -161,7 +195,8 @@ jobs:
 
   Build-Docs:
     name: Build-Docs
-    if: github.event_name != 'pull_request'
+    needs: [Detect-Changes]
+    if: needs.Detect-Changes.outputs.docs_changed == 'true'
     uses: ./.github/workflows/build-docs.yml
 
   Publish-to-GH-Pages:

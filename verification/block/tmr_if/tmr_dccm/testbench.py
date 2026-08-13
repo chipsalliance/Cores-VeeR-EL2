@@ -60,14 +60,13 @@ class BaseEnv(uvm_env):
     def build_phase(self):
 
         bus_signals = [
-            "dccm_wren",
-            "dccm_rden",
-            "dccm_wr_addr_lo",
-            "dccm_wr_addr_hi",
-            "dccm_rd_addr_lo",
-            "dccm_rd_addr_hi",
-            "dccm_wr_data_lo",
-            "dccm_wr_data_hi",
+            "dccm_clken",
+            "dccm_wren_bank",
+            "dccm_addr_bank",
+            "dccm_wr_data_bank",
+            "dccm_wr_ecc_bank",
+            "dccm_bank_dout",
+            "dccm_bank_ecc",
         ]
 
         ConfigDB().set(None, "*", "TEST_CLK_PERIOD", 1)
@@ -132,7 +131,7 @@ class BaseTest(common.BaseTest):
         super().__init__(
             name,
             parent,
-            clk_name="free_l2clk",
+            clk_name="clk",
             rst_name="rst_l",
             scb_class=scb_class,
             env_class=BaseEnv,
@@ -141,15 +140,13 @@ class BaseTest(common.BaseTest):
     async def initial(self):
 
         # Initialize
-        cocotb.top.dccm_fault_d[0] = MuBiFalse
-        cocotb.top.dccm_fault_d[1] = MuBiFalse
-        cocotb.top.dccm_fault_d[2] = MuBiFalse
-
-        cocotb.top.dccm_wren_veer.value = [0] * 3
-        cocotb.top.dccm_rden_veer.value = [0] * 3
-        cocotb.top.dccm_wr_addr_lo_veer.value = [0] * 3
-        cocotb.top.dccm_wr_addr_hi_veer.value = [0] * 3
-        cocotb.top.dccm_rd_addr_lo_veer.value = [0] * 3
-        cocotb.top.dccm_rd_addr_hi_veer.value = [0] * 3
-        cocotb.top.dccm_wr_data_lo_veer.value = [0] * 3
-        cocotb.top.dccm_wr_data_hi_veer.value = [0] * 3
+        cocotb.top.dccm_fault_d[0].value = MuBiFalse
+        cocotb.top.dccm_fault_d[1].value = MuBiFalse
+        cocotb.top.dccm_fault_d[2].value = MuBiFalse
+        cocotb.top.dccm_clken_veer.value = [0] * 3
+        cocotb.top.dccm_wren_bank_veer.value = [0] * 3
+        cocotb.top.dccm_addr_bank_veer.value = [0] * 3
+        cocotb.top.dccm_wr_data_bank_veer.value = [0] * 3
+        cocotb.top.dccm_wr_ecc_bank_veer.value = [0] * 3
+        cocotb.top.dccm_bank_dout.value = 0
+        cocotb.top.dccm_bank_ecc.value = 0

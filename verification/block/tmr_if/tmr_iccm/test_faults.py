@@ -153,15 +153,13 @@ class TestFaults(BaseTest):
         iterations = ConfigDB().get(None, "", "TEST_ITERATIONS")
 
         signals = {
-            "iccm_rw_addr_veer": None,
-            "iccm_wren_veer": None,
-            "iccm_rden_veer": None,
-            "iccm_wr_size_veer": None,
-            "iccm_wr_data_veer": None,
-            "iccm_buf_correct_ecc_veer": None,
-            "iccm_correction_state_veer": None,
-            "iccm_ecc_single_error_veer": None,
-            "iccm_ecc_double_error_veer": None,
+            "iccm_clken_veer": None,
+            "iccm_wren_bank_veer": None,
+            "iccm_addr_bank_veer": None,
+            "iccm_bank_wr_data_veer": None,
+            "iccm_bank_wr_ecc_veer": None,
+            "iccm_bank_dout_veer": None,
+            "iccm_bank_ecc_veer": None,
         }
 
         # Get signal lengths

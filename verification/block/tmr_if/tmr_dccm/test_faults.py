@@ -153,16 +153,13 @@ class TestFaults(BaseTest):
         iterations = ConfigDB().get(None, "", "TEST_ITERATIONS")
 
         signals = {
-            "dccm_wren_veer": None,
-            "dccm_rden_veer": None,
-            "dccm_wr_addr_lo_veer": None,
-            "dccm_wr_addr_hi_veer": None,
-            "dccm_rd_addr_lo_veer": None,
-            "dccm_rd_addr_hi_veer": None,
-            "dccm_wr_data_lo_veer": None,
-            "dccm_wr_data_hi_veer": None,
-            "dccm_rd_data_lo_veer": None,
-            "dccm_rd_data_hi_veer": None,
+            "dccm_clken_veer": None,
+            "dccm_wren_bank_veer": None,
+            "dccm_addr_bank_veer": None,
+            "dccm_wr_data_bank_veer": None,
+            "dccm_wr_ecc_bank_veer": None,
+            "dccm_bank_dout_veer": None,
+            "dccm_bank_ecc_veer": None,
         }
 
         # Get signal lengths

@@ -60,15 +60,13 @@ class BaseEnv(uvm_env):
     def build_phase(self):
 
         bus_signals = [
-            "iccm_rw_addr",
-            "iccm_wren",
-            "iccm_rden",
-            "iccm_wr_size",
-            "iccm_wr_data",
-            "iccm_buf_correct_ecc",
-            "iccm_correction_state",
-            "iccm_ecc_single_error",
-            "iccm_ecc_double_error",
+            "iccm_clken",
+            "iccm_wren_bank",
+            "iccm_addr_bank",
+            "iccm_bank_wr_data",
+            "iccm_bank_wr_ecc",
+            "iccm_bank_dout",
+            "iccm_bank_ecc",
         ]
 
         ConfigDB().set(None, "*", "TEST_CLK_PERIOD", 1)
@@ -133,7 +131,7 @@ class BaseTest(common.BaseTest):
         super().__init__(
             name,
             parent,
-            clk_name="free_l2clk",
+            clk_name="clk",
             rst_name="rst_l",
             scb_class=scb_class,
             env_class=BaseEnv,
@@ -142,16 +140,14 @@ class BaseTest(common.BaseTest):
     async def initial(self):
 
         # Initialize
-        cocotb.top.iccm_fault_d[0] = MuBiFalse
-        cocotb.top.iccm_fault_d[1] = MuBiFalse
-        cocotb.top.iccm_fault_d[2] = MuBiFalse
+        cocotb.top.iccm_fault_d[0].value = MuBiFalse
+        cocotb.top.iccm_fault_d[1].value = MuBiFalse
+        cocotb.top.iccm_fault_d[2].value = MuBiFalse
 
-        cocotb.top.iccm_rw_addr_veer.value = [0] * 3
-        cocotb.top.iccm_wren_veer.value = [0] * 3
-        cocotb.top.iccm_rden_veer.value = [0] * 3
-        cocotb.top.iccm_wr_size_veer.value = [0] * 3
-        cocotb.top.iccm_wr_data_veer.value = [0] * 3
-        cocotb.top.iccm_buf_correct_ecc_veer.value = [0] * 3
-        cocotb.top.iccm_correction_state_veer.value = [0] * 3
-        cocotb.top.iccm_ecc_single_error_veer.value = [0] * 3
-        cocotb.top.iccm_ecc_double_error_veer.value = [0] * 3
+        cocotb.top.iccm_clken_veer.value = [0] * 3
+        cocotb.top.iccm_wren_bank_veer.value = [0] * 3
+        cocotb.top.iccm_addr_bank_veer.value = [0] * 3
+        cocotb.top.iccm_bank_wr_data_veer.value = [0] * 3
+        cocotb.top.iccm_bank_wr_ecc_veer.value = [0] * 3
+        cocotb.top.iccm_bank_dout.value = 0
+        cocotb.top.iccm_bank_ecc.value = 0

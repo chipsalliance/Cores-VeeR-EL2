@@ -7,7 +7,6 @@
 module el2_tmr_ic
   import el2_pkg::*;
   import el2_mubi_pkg::*;
-  import el2_lockstep_pkg::*;
 #(
     `include "el2_param.vh"
 ) (
@@ -47,7 +46,6 @@ module el2_tmr_ic
   el2_mubi_t                           fault_ic_tag_wren_biten_vec[3];
   el2_mubi_t                           fault_ic_tag_wr_data[3];
   el2_mubi_t                           fault_ic_rw_addr_q[3];
-  el2_mubi_t                           fault_ic_ctl_bundle[3];
 
   el2_mubi_t [pt.ICACHE_BANKS_WAY-1:0] crit_ic_b_sb_wren;
   el2_mubi_t [pt.ICACHE_BANKS_WAY-1:0] crit_ic_b_sb_bit_en_vec;
@@ -60,7 +58,6 @@ module el2_tmr_ic
   el2_mubi_t                           crit_ic_tag_wren_biten_vec;
   el2_mubi_t                           crit_ic_tag_wr_data;
   el2_mubi_t                           crit_ic_rw_addr_q;
-  el2_mubi_t                           crit_ic_ctl_bundle;
 
   el2_mubi_t crit_any;
 
@@ -276,7 +273,7 @@ module el2_tmr_ic
     .critical (crit_ic_tag_wren_biten_vec)
   );
 
-  el2_tmr_voter #(.Width(25)) u_voter_ic_tag_wr_data (
+  el2_tmr_voter #(.Width(26)) u_voter_ic_tag_wr_data (
     .in_a     (icache_export_veer[0].ic_tag_wr_data),
     .in_b     (icache_export_veer[1].ic_tag_wr_data),
     .in_c     (icache_export_veer[2].ic_tag_wr_data),
@@ -337,10 +334,14 @@ module el2_tmr_ic
   // ......................................................
 
   // Gate control signals with critical errors
+  for (genvar i = 0; i < pt.ICACHE_BANKS_WAY; i++) begin : gen_ic_control
+    always_comb begin
+      icache_export.ic_b_sb_wren[i]       = mem_if_int.ic_b_sb_wren[i]       & {pt.ICACHE_NUM_WAYS{mubi_check_false(crit_any)}};
+      icache_export.ic_b_sb_bit_en_vec[i] = mem_if_int.ic_b_sb_bit_en_vec[i] & {71*pt.ICACHE_NUM_WAYS{mubi_check_false(crit_any)}};
+    end
+  end
   always_comb begin
-    icache_export.ic_b_sb_wren          = mem_if_int.ic_b_sb_wren          & {pt.ICACHE_NUM_WAYS{mubi_check_false(crit_any)}};
-    icache_export.ic_b_sb_bit_en_vec    = mem_if_int.ic_b_sb_bit_en_vec    & {71*pt.ICACHE_NUM_WAYS{mubi_check_false(crit_any)}};
-    icache_export.ic_tag_wren_q         = mem_if_int.ic_tag_wren_q         & {71{mubi_check_false(crit_any)}};
+    icache_export.ic_tag_wren_q         = mem_if_int.ic_tag_wren_q         & {pt.ICACHE_NUM_WAYS{mubi_check_false(crit_any)}};
     icache_export.ic_tag_wren_biten_vec = mem_if_int.ic_tag_wren_biten_vec & {26*pt.ICACHE_NUM_WAYS{mubi_check_false(crit_any)}};
   end
 
@@ -348,7 +349,7 @@ module el2_tmr_ic
 
   // Fault aggregation and registers
   for (genvar i = 0; i < 3; i++) begin : gen_ic_fault
-    el2_mubi_t  fault_l00, fault_l01, fault_l02, fault_l03, fault_l04, fault_l05;
+    el2_mubi_t  fault_l00, fault_l01, fault_l02, fault_l03, fault_l04;
     el2_mubi_t  fault_l0, fault_l1;
     el2_mubi_t  fault_any;
 
@@ -357,10 +358,9 @@ module el2_tmr_ic
     assign fault_l02 = mubi_or(fault_ic_bank_way_clken_final[i], fault_ic_bank_way_clken_final_up_aggr[i]);
     assign fault_l03 = mubi_or(fault_ic_tag_clken_final[i], fault_ic_tag_wren_q[i]);
     assign fault_l04 = mubi_or(fault_ic_tag_wren_biten_vec[i], fault_ic_tag_wr_data[i]);
-    assign fault_l05 = mubi_or(fault_ic_rw_addr_q[i], fault_ic_ctl_bundle[i]);
 
     assign fault_l0  = mubi_or3(fault_l00,  fault_l01, fault_l02);
-    assign fault_l1  = mubi_or3(fault_l03,  fault_l04, fault_l05);
+    assign fault_l1  = mubi_or3(fault_l03,  fault_l04, fault_ic_rw_addr_q[i]);
 
     assign fault_any = mubi_or3(fault_l0, fault_l1, ic_fault_d[i]);
 
@@ -382,7 +382,7 @@ module el2_tmr_ic
   // ......................................................
 
   // Critical fault aggregation
-  el2_mubi_t  crit_l00, crit_l01, crit_l02, crit_l03, crit_l04, crit_l05;
+  el2_mubi_t  crit_l00, crit_l01, crit_l02, crit_l03, crit_l04;
   el2_mubi_t  crit_l0, crit_l1;
 
   assign crit_l00 = mubi_or(crit_ic_b_sb_wren_aggr, crit_ic_b_sb_bit_en_vec_aggr);
@@ -390,10 +390,9 @@ module el2_tmr_ic
   assign crit_l02 = mubi_or(crit_ic_bank_way_clken_final, crit_ic_bank_way_clken_final_up_aggr);
   assign crit_l03 = mubi_or(crit_ic_tag_clken_final, crit_ic_tag_wren_q);
   assign crit_l04 = mubi_or(crit_ic_tag_wren_biten_vec, crit_ic_tag_wr_data);
-  assign crit_l05 = mubi_or(crit_ic_rw_addr_q, crit_ic_ctl_bundle);
 
   assign crit_l0  = mubi_or3(crit_l00, crit_l01, crit_l02);
-  assign crit_l1  = mubi_or3(crit_l03, crit_l04, crit_l05);
+  assign crit_l1  = mubi_or3(crit_l03, crit_l04, crit_ic_rw_addr_q);
 
   assign crit_any = mubi_or(crit_l0, crit_l1);
 

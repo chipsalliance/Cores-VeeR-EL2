@@ -932,7 +932,7 @@ module el2_tmr_complex
     assign ic_fault_d[i]     = tmr_fault_d[i];
     assign ic_fault_clr[i]   = tmr_fault_clr[i];
 
-    assign tmr_fault_q[i]  = mubi_or(ic_fault_q, mubi_or3(axi_fault_q[i], iccm_fault_q[i], dccm_fault_q[i])); // TODO: Aggregate ALL TMR fault state signals
+    assign tmr_fault_q[i]  = mubi_or(ic_fault_q[i], mubi_or3(axi_fault_q[i], iccm_fault_q[i], dccm_fault_q[i])); // TODO: Aggregate ALL TMR fault state signals
   end endgenerate
 
   // FIXME: Remove fault stubs

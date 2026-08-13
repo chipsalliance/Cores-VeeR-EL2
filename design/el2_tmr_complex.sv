@@ -49,6 +49,7 @@ module el2_tmr_complex
 
     // Memory Export Interface
     el2_mem_if.veer_sram_src   mem_export,
+    el2_mem_if.veer_icache_src icache_export,
 
     // external MPC halt/run interface
     input logic mpc_debug_halt_req, // Async halt request
@@ -968,7 +969,7 @@ module el2_tmr_complex
     .*
   );
   el2_tmr_dmi #(.pt(pt)) el2_tmr_dmi_u (.*);
-  el2_tmr_ic #(.pt(pt)) el2_tmr_ic_u (.*);
+  // el2_tmr_ic #(.pt(pt)) el2_tmr_ic_u (.*);
   el2_tmr_pic #(.pt(pt)) el2_tmr_pic_u (.*);
   el2_tmr_complex_io el2_tmr_complex_io_u(
       .free_clk(free_clk_int),

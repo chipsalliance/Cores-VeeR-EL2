@@ -909,6 +909,11 @@ module el2_tmr_complex
   el2_mubi_pkg::el2_mubi_t ic_fault_q[3];
   el2_mubi_pkg::el2_mubi_t ic_fault_clr[3];
 
+  // TMR PIC fault signals
+  el2_mubi_pkg::el2_mubi_t pic_fault_d[3];
+  el2_mubi_pkg::el2_mubi_t pic_fault_q[3];
+  el2_mubi_pkg::el2_mubi_t pic_fault_clr[3];
+
   // TODO: Other fault signals
 
   //-------------------------------------------------------------------
@@ -932,7 +937,10 @@ module el2_tmr_complex
     assign ic_fault_d[i]     = tmr_fault_d[i];
     assign ic_fault_clr[i]   = tmr_fault_clr[i];
 
-    assign tmr_fault_q[i]  = mubi_or(ic_fault_q[i], mubi_or3(axi_fault_q[i], iccm_fault_q[i], dccm_fault_q[i])); // TODO: Aggregate ALL TMR fault state signals
+    assign pic_fault_d[i]    = tmr_fault_d[i];
+    assign pic_fault_clr[i]  = tmr_fault_clr[i];
+
+    assign tmr_fault_q[i]  = mubi_or3(ic_fault_q[i], mubi_or(axi_fault_q[i], iccm_fault_q[i]), mubi_or(dccm_fault_q[i], pic_fault_q[i])); // TODO: Aggregate ALL TMR fault state signals
   end endgenerate
 
   // FIXME: Remove fault stubs
@@ -982,7 +990,7 @@ module el2_tmr_complex
     .icache_export_veer(mem_export_veer.veer_icache_sink),
     .*
   );
-  el2_tmr_pic #(.pt(pt)) el2_tmr_pic_u (.*);
+  el2_tmr_pic el2_tmr_pic_u (.*);
   el2_tmr_complex_io el2_tmr_complex_io_u(
       .free_clk(free_clk_int),
       .*

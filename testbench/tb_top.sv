@@ -1150,7 +1150,7 @@ module tb_top
                 release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
             `endif
         end else begin
-            ic_perr_r_d1 <= rvtop_wrapper.rvtop.veer.dec.tlu.ic_perr_r;
+            ic_perr_r_d1 <= `VEER.dec.tlu.ic_perr_r;
             if (mailbox_write && mailbox_data[7:0] == 8'h89) begin
                 `ifdef RV_ASSERT_OR_VERILATOR
                     force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;

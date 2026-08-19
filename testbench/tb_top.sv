@@ -1064,7 +1064,7 @@ module tb_top
             next_ic_error <= 0;
             ic_perr_r_d1  <= 0;
         end else begin
-            ic_perr_r_d1 <= rvtop_wrapper.rvtop.veer.dec.tlu.ic_perr_r;
+            ic_perr_r_d1 <= `VEER.dec.tlu.ic_perr_r;
             if (mailbox_write && mailbox_data[7:0] == 8'h89) begin
                 next_ic_error <= 1;
                 force rvtop_wrapper.rvtop.ic_rd_data = 142'h1;

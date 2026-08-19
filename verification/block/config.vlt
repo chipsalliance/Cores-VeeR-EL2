@@ -72,7 +72,7 @@ lint_off -rule UNUSEDPARAM -file "*/el2_lsu_dccm_ctl.sv"
 lint_off -rule UNUSEDPARAM -file "*/el2_lsu_dccm_mem.sv"
 
 // Gated clock, expected latch
-lint_off -rule LATCH -file "*/beh_lib.sv" -lines 781
+lint_off -rule LATCH -file "*/beh_lib.sv" -lines 809
 
 lint_off -rule BLKSEQ -file "*/beh_lib.sv" -lines 783
 
@@ -82,7 +82,7 @@ lint_off -rule BLKSEQ -file "*/beh_lib.sv" -lines 783
 lint_off -rule SYNCASYNCNET -file "*/el2_veer.sv" -lines 41
 
 // Unused clocks from shadow core
-lint_off -rule PINCONNECTEMPTY -file "*/el2_veer_lockstep.sv" -lines 841-842
+lint_off -rule PINCONNECTEMPTY -file "*/el2_veer_lockstep.sv" -lines 842-843
 
 // Logic that might be not optimal for event based model used by Verilator
 lint_off -rule UNOPTFLAT -file "*/axi4_to_ahb.sv"

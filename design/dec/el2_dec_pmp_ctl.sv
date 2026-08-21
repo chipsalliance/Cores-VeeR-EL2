@@ -80,6 +80,7 @@ module el2_dec_pmp_ctl
 
    // ----------------------------------------------------------------------
 
+   logic [pt.PMP_ENTRIES-1:0] pmp_locked_wr_en; // Check if certain types of regions are writable in SMEPMP without RLB set
    logic [pt.PMP_ENTRIES-1:0] entry_lock_eff;  // Effective entry lock
    for (genvar r = 0; r < pt.PMP_ENTRIES; r++) begin : g_pmpcfg_lock
 `ifdef RV_SMEPMP
@@ -108,17 +109,30 @@ module el2_dec_pmp_ctl
       logic [7:0] csr_wdata;
 
       // PMPCFG fields are WARL. Mask out bits 6:5 during write.
-      // When Smepmp is disabled R=0 and W=1 combination is illegal mask out W
-      // when R is cleared.
+      // When Smepmp is disabled or MML is unset, R=0 and W=1 combination
+      // is illegal - mask out W (bit 1) when R (bit 0) is cleared.
       assign raw_wdata = dec_csr_wrdata_r[(entry_idx[1:0]*8)+7:(entry_idx[1:0]*8)+0];
 `ifdef RV_SMEPMP
-      assign csr_wdata = raw_wdata & 8'b10011111;
+      // The combination (R=0, W=1) remains reserved, until MML is set
+      assign csr_wdata = mseccfg.MML ?
+         (raw_wdata & 8'b10011111) :
+         (raw_wdata[0] ? (raw_wdata & 8'b10011111) : (raw_wdata & 8'b10011101));
+      // Check against regions that cannot be set without RLB, unless MML is disabled
+      // "Adding a rule with executable privileges that either is M-mode-only or a locked Shared-Region is not
+      // possible and such pmpcfg writes are ignored, leaving pmpcfg unchanged. This restriction can be
+      // temporarily lifted e.g. during the boot process, by setting mseccfg.RLB"
+      // simplified boolean formula for *allowed* writes is: L'+RW+W'X'
+      assign pmp_locked_wr_en[entry_idx] = mseccfg.RLB | ~mseccfg.MML
+         | ~raw_wdata[7] /* locked */ | (raw_wdata[0] & raw_wdata[1] /* read & write */)
+         | (~raw_wdata[2] & ~raw_wdata[1] /* ~exec & ~write */);
 `else
       assign csr_wdata = raw_wdata[0] ? (raw_wdata & 8'b10011111) : (raw_wdata & 8'b10011101);
+      assign pmp_locked_wr_en[entry_idx] = 1'b1;
 `endif
 
       rvdffe #(8) pmpcfg_ff (.*, .clk(free_l2clk),
-                          .en(wr_pmpcfg_r & (wr_pmpcfg_group == entry_idx[5:2]) & (~entry_lock_eff[entry_idx])),
+                          .en(wr_pmpcfg_r & (wr_pmpcfg_group == entry_idx[5:2]) & (~entry_lock_eff[entry_idx])
+                              & pmp_locked_wr_en[entry_idx]),
                           .din(csr_wdata),
                           .dout(pmp_pmpcfg[entry_idx]));
    end

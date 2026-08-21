@@ -24,6 +24,7 @@
 #define CSR_MSECCFG     0x747
 
 #define CSR_PMPCFG0     0x3A0
+#define CSR_PMPCFG1     0x3A1
 #define CSR_PMPADDR0    0x3B0
 #define CSR_PMPADDR1    0x3B1
 #define CSR_PMPADDR2    0x3B2
@@ -75,7 +76,7 @@ int main () {
 
     reg = read_csr(CSR_MSECCFG);
     if (!(reg & MSECCFG_RLB)) {
-        printf("ERROR: mseccfg.MML cannot be set\n");
+        printf("ERROR: mseccfg.RLB cannot be set\n");
         return -1;
     }
 
@@ -86,6 +87,24 @@ int main () {
     if (reg & MSECCFG_RLB) {
         printf("ERROR: mseccfg.RLB cannot be cleared\n");
         return -1;
+    }
+    printf("ok.\n");
+
+    // check that reserved region configurations (W=1, R=0)
+    // cannot be set while mseccfg.MML == 0
+    // since the register is WARL, we expect PMPCFG_W to be cleared on readback
+    printf("Checking that reserved regions cannot be set...\n");
+    write_csr(CSR_PMPCFG0, PMPCFG_W | PMPCFG_X);
+    reg = read_csr(CSR_PMPCFG0);
+    if (reg & PMPCFG_W) {
+        printf("ERROR: reserved region (X=1, W=1, R=0) can be set when mseccfg.MML is not set\n");
+        return -1;   
+    }
+    write_csr(CSR_PMPCFG0, PMPCFG_W);
+    reg = read_csr(CSR_PMPCFG0);
+    if (reg & PMPCFG_W) {
+        printf("ERROR: reserved region (X=0, W=1, R=0) can be set when mseccfg.MML is not set\n");
+        return -1;   
     }
     printf("ok.\n");
 
@@ -127,16 +146,97 @@ int main () {
     }
     printf("ok.\n");
 
+    // Verify that mseccfg.MML cannot be cleared once set
+    // The tests following this one, expect SMEPMP-specific behavior
+    // And as such they expect this bit to be set
+    // (except sticky RLB test which doesn't care about it)
+    printf("Checking if mseccfg.MML cannot be cleared...\n");
+
+    // Lock region 1
+    pmpcfg |= PMPREGION(PMPCFG_L, 1);
+    write_csr(CSR_PMPCFG0, pmpcfg);
+
+    // Lock region 3. Region 1 is already locked. This is necessary for the
+    // test as when MML=1 non-locked regions always deny access in M mode
+    pmpcfg |= PMPREGION(PMPCFG_L, 3);
+    write_csr(CSR_PMPCFG0, pmpcfg);
+
+    reg = read_csr(CSR_MSECCFG);
+    write_csr(CSR_MSECCFG, reg |  MSECCFG_MML);
+
+    reg = read_csr(CSR_MSECCFG);
+    write_csr(CSR_MSECCFG, reg & ~MSECCFG_MML);
+
+    reg = read_csr(CSR_MSECCFG);
+    if (!(reg & MSECCFG_MML)) {
+        printf("ERROR: mseccfg.MML can be cleared\n");
+        return -1;
+    }
+    printf("ok.\n");
+
+    // Verify that certain shared rules can be set once RLB is set
+    // need to be done before we clear RLB for the final time
+    // since once we lock at least one rule and clear RLB we won't be able to
+    // set RLB again (also verified in this test suite).
+    printf("Checking shared region rules requiring mseccfg.RLB (when RLB is set)...\n");
+
+    reg = read_csr(CSR_MSECCFG);
+    if (!(reg & MSECCFG_RLB)) {
+        printf("ERROR: mseccfg.RLB is not set\n");
+        return -1;
+    }
+
+    reg = PMPREGION(PMPCFG_L | PMPCFG_X, 1);
+    write_csr(CSR_PMPCFG1, reg);
+    if (read_csr(CSR_PMPCFG1) != reg)
+    {
+        printf("Rule LX not set, even if RLB is set!\n");
+        return -1;
+    }
+    reg = PMPREGION(PMPCFG_L | PMPCFG_W, 1);
+    write_csr(CSR_PMPCFG1, reg);
+    if (read_csr(CSR_PMPCFG1) != reg)
+    {
+        printf("Rule LW not set, even if RLB is set!\n");
+        return -1;
+    }
+    reg = PMPREGION(PMPCFG_L | PMPCFG_W | PMPCFG_X, 1);
+    write_csr(CSR_PMPCFG1, reg);
+    if (read_csr(CSR_PMPCFG1) != reg)
+    {
+        printf("Rule LWX not set, even if RLB is set!\n");
+        return -1;
+    }
+    reg = PMPREGION(PMPCFG_L | PMPCFG_R | PMPCFG_X, 1);
+    write_csr(CSR_PMPCFG1, reg);
+    if (read_csr(CSR_PMPCFG1) != reg)
+    {
+        printf("Rule LRX not set, even if RLB is set!\n");
+        return -1;
+    }
+    // Clear the CSR, so it doesn't stay locked and leave side effects
+    write_csr(CSR_PMPCFG1, 0);
+    if (read_csr(CSR_PMPCFG1) != 0)
+    {
+        printf("Cannot clear region after test!\n");
+        return -1;
+    }
+    printf("ok.\n");
+
     // Verify that when at least one PMP region is locked mseccfg.RLB cannot be
-    // set.
+    // set (sticky RLB behavior).
     printf("Checking if mseccfg.RLB cannot be set if any PMP region is locked...\n");
 
     // Clear RLB
     reg = read_csr(CSR_MSECCFG);
     write_csr(CSR_MSECCFG, reg & ~MSECCFG_RLB);
 
-    // Lock region 1
-    write_csr(CSR_PMPCFG0, pmpcfg | PMPREGION(PMPCFG_L, 1));
+    // Verify that region 1 is locked
+    if (!(read_csr(CSR_PMPCFG0) & PMPREGION(PMPCFG_L, 1)))
+    {
+        printf("Region 1 is not locked!\n");
+        return -1;
+    }
 
     // Try setting RLB and check
     reg = read_csr(CSR_MSECCFG);
@@ -149,21 +249,65 @@ int main () {
     }
     printf("ok.\n");
 
-    // Verify that mseccfg.MML cannot be cleared once set
-    printf("Checking if mseccfg.MML cannot be cleared...\n");
+    // Verify that certain shared rules cannot be set when MML is set
+    printf("Checking shared region rules requiring mseccfg.RLB (when RLB is unset)...\n");
 
-    // Lock region 3. Region 1 is already locked. This is necessary for the
-    // test as when MML=1 non-locked regions always deny access in M mode
-    write_csr(CSR_PMPCFG0, pmpcfg | PMPREGION(PMPCFG_L, 3));
+    write_csr(CSR_PMPCFG1, PMPREGION(PMPCFG_L | PMPCFG_X, 1));
+    if (read_csr(CSR_PMPCFG1) != 0)
+    {
+        printf("Rule LX set, even if RLB is not set!\n");
+        return -1;
+    }
+    write_csr(CSR_PMPCFG1, PMPREGION(PMPCFG_L | PMPCFG_W, 1));
+    if (read_csr(CSR_PMPCFG1) != 0)
+    {
+        printf("Rule LW set, even if RLB is not set!\n");
+        return -1;
+    }
+    write_csr(CSR_PMPCFG1, PMPREGION(PMPCFG_L | PMPCFG_W | PMPCFG_X, 1));
+    if (read_csr(CSR_PMPCFG1) != 0)
+    {
+        printf("Rule LWX set, even if RLB is not set!\n");
+        return -1;
+    }
+    write_csr(CSR_PMPCFG1, PMPREGION(PMPCFG_L | PMPCFG_R | PMPCFG_X, 1));
+    if (read_csr(CSR_PMPCFG1) != 0)
+    {
+        printf("Rule LRX set, even if RLB is not set!\n");
+        return -1;
+    }
+    printf("ok.\n");
 
-    reg = read_csr(CSR_MSECCFG);
-    write_csr(CSR_MSECCFG, reg |  MSECCFG_MML);
-    reg = read_csr(CSR_MSECCFG);
-    write_csr(CSR_MSECCFG, reg & ~MSECCFG_MML);
+    // Settable shared (and locked) regions. These can be set without RLB
+    // each case tests different pmpXcfg, since these are locked, so modification is not possible
+    printf("Checking shared region rules NOT requiring mseccfg.RLB (when RLB is unset)...\n");
 
-    reg = read_csr(CSR_MSECCFG);
-    if (!(reg & MSECCFG_MML)) {
-        printf("ERROR: mseccfg.MML can be cleared\n");
+    reg = PMPREGION(PMPCFG_L | PMPCFG_R | PMPCFG_X | PMPCFG_W, 0);
+    write_csr(CSR_PMPCFG1, reg);
+    if (read_csr(CSR_PMPCFG1) != reg)
+    {
+        printf("Rule LRXW not set\n");
+        return -1;
+    }
+    reg |= PMPREGION(PMPCFG_L | PMPCFG_R | PMPCFG_W, 1);
+    write_csr(CSR_PMPCFG1, reg);
+    if (read_csr(CSR_PMPCFG1) != reg)
+    {
+        printf("Rule LRW not set!\n");
+        return -1;
+    }
+    reg |= PMPREGION(PMPCFG_L | PMPCFG_R, 2);
+    write_csr(CSR_PMPCFG1, reg);
+    if (read_csr(CSR_PMPCFG1) != reg)
+    {
+        printf("Rule LR not set!\n");
+        return -1;
+    }
+    reg |= PMPREGION(PMPCFG_L, 3);
+    write_csr(CSR_PMPCFG1, reg);
+    if (read_csr(CSR_PMPCFG1) != reg)
+    {
+        printf("Rule L not set!\n");
         return -1;
     }
     printf("ok.\n");

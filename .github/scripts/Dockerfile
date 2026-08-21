@@ -1,20 +1,4 @@
-FROM debian:trixie
-
-ARG VERILATOR_VERSION
-ARG OPENOCD_VERSION
-ARG RENODE_VERSION
-ARG SPIKE_VERSION
-
-ENV VERILATOR_VERSION=$VERILATOR_VERSION
-ENV OPENOCD_VERSION=$OPENOCD_VERSION
-ENV RENODE_VERSION=$RENODE_VERSION
-ENV SPIKE_VERSION=$SPIKE_VERSION
-
-# All versions shall be stated explicitly
-RUN : "${VERILATOR_VERSION:?Environment variable VERILATOR_VERSION is not set or empty}" && \
-    : "${OPENOCD_VERSION:?Environment variable OPENOCD_VERSION is not set or empty}" && \
-    : "${RENODE_VERSION:?Environment variable RENODE_VERSION is not set or empty}" && \
-    : "${SPIKE_VERSION:?Environment variable SPIKE_VERSION is not set or empty}"
+FROM debian:trixie AS base
 
 # Install prerequisites
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -60,16 +44,28 @@ RUN cpanm File::Slurp
 RUN cpanm --notest Module::Pluggable
 RUN cpanm Bit::Vector Capture::Tiny DateTime DateTime::Format::W3CDTF Devel::Cover Digest::MD5 File::Spec JSON::XS Memory::Process Time::HiRes
 
-# Clone and build Risc-V toolchain
-RUN git clone https://github.com/riscv-collab/riscv-gnu-toolchain.git riscv && \
-  cd riscv && \
-  ./configure --prefix=/opt/riscv --enable-multilib && \
+FROM base AS riscv-toolchain-build
+# Clone and build RISC-V toolchain
+RUN git clone https://github.com/riscv-collab/riscv-gnu-toolchain.git riscv
+# This is a workaround for unstable upstream dependency servers
+RUN cd riscv && sed -i \
+  -e 's#url = https://sourceware.org/git/binutils-gdb.git#url = git://sourceware.org/git/binutils-gdb.git#' \
+  -e 's#url = https://sourceware.org/git/glibc.git#url = git://sourceware.org/git/glibc.git#' \
+  -e 's#url = https://gcc.gnu.org/git/gcc.git#url = git://gcc.gnu.org/git/gcc.git#' \
+  -e 's#url = https://sourceware.org/git/newlib-cygwin.git#url = git://sourceware.org/git/newlib-cygwin.git#' \
+  .gitmodules
+RUN cd riscv && ./configure --prefix=/opt/riscv --enable-multilib && \
   make -j$(nproc) && \
   cd .. && \
   rm -rf riscv
 
+FROM base AS verilator-build
+ARG VERILATOR_VERSION
+ENV VERILATOR_VERSION=$VERILATOR_VERSION
+RUN : "${VERILATOR_VERSION:?Environment variable VERILATOR_VERSION is not set or empty}"
+
 # Clone and build Verilator
-RUN git clone https://github.com/antmicro/verilator verilator && \
+RUN git clone https://github.com/verilator/verilator verilator && \
   cd verilator && \
   git checkout ${VERILATOR_VERSION} && \
   autoconf && \
@@ -78,6 +74,11 @@ RUN git clone https://github.com/antmicro/verilator verilator && \
   make install && \
   cd .. && \
   rm -rf verilator
+
+FROM base AS openocd-build
+ARG OPENOCD_VERSION
+ENV OPENOCD_VERSION=$OPENOCD_VERSION
+RUN : "${OPENOCD_VERSION:?Environment variable OPENOCD_VERSION is not set or empty}"
 
 # Clone and build OpenOCD
 RUN git clone https://github.com/antmicro/openocd openocd && \
@@ -90,12 +91,22 @@ RUN git clone https://github.com/antmicro/openocd openocd && \
   cd .. && \
   rm -rf openocd
 
+FROM base AS renode-build
+ARG RENODE_VERSION
+ENV RENODE_VERSION=$RENODE_VERSION
+RUN : "${RENODE_VERSION:?Environment variable RENODE_VERSION is not set or empty}"
+
 # Download and unpack Renode
 RUN wget https://builds.renode.io/renode-${RENODE_VERSION}.linux-portable.tar.gz && \
   mv renode-*.tar.gz /opt/renode.tar.gz && \
   mkdir -p /opt/renode && \
   tar -zxvf /opt/renode.tar.gz --strip-components=1 -C /opt/renode && \
   rm /opt/renode.tar.gz
+
+FROM base AS spike-build
+ARG SPIKE_VERSION
+ENV SPIKE_VERSION=$SPIKE_VERSION
+RUN : "${SPIKE_VERSION:?Environment variable SPIKE_VERSION is not set or empty}"
 
 # Clone and build Spike
 # FIXME: sed replacements in this part should be done in a VeeR-specific Spike fork
@@ -120,8 +131,20 @@ RUN git clone https://github.com/riscv-software-src/riscv-isa-sim spike && \
   cd ../.. && \
   rm -rf /opt/spike/include /opt/spike/lib spike
 
-ENV PATH="$PATH:/opt/riscv/bin:/opt/renode:/opt/verilator/bin:/opt/openocd/bin:/opt/spike/bin"
 
+FROM base AS aggregate
+ARG VERILATOR_VERSION
+ARG OPENOCD_VERSION
+ARG RENODE_VERSION
+ARG SPIKE_VERSION
+
+COPY --from=riscv-toolchain-build /opt/riscv /opt/riscv
+COPY --from=renode-build /opt/renode /opt/renode
+COPY --from=verilator-build /opt/verilator /opt/verilator
+COPY --from=openocd-build /opt/openocd /opt/openocd
+COPY --from=spike-build /opt/spike /opt/spike
+
+ENV PATH="$PATH:/opt/riscv/bin:/opt/renode:/opt/verilator/bin:/opt/openocd/bin:/opt/spike/bin"
 RUN riscv64-unknown-elf-gcc --version
 RUN verilator --version
 RUN openocd --version

@@ -73,7 +73,7 @@ jobs:
     name: Regression tests
     needs: [generate-matrix]
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20260714
+    container: ghcr.io/antmicro/cores-veer-el2:20260819
     strategy:
       matrix:
         bus: ["axi", "ahb"]
@@ -192,7 +192,7 @@ jobs:
   regression-tests-dccm-wr-readback:
     name: Regression tests (DCLS + DCCM write readback)
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20260714
+    container: ghcr.io/antmicro/cores-veer-el2:20260819
     strategy:
       matrix:
         bus: ["axi", "ahb"]
@@ -244,7 +244,7 @@ jobs:
     name: Regression tests (DCLS + ICache ECC/Parity)
     needs: [generate-matrix]
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20260714
+    container: ghcr.io/antmicro/cores-veer-el2:20260819
     strategy:
       matrix:
         bus: ["axi", "ahb"]

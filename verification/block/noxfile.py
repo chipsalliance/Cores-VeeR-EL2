@@ -495,6 +495,17 @@ def tmr_ic_verify(session, blockName, testName, coverage):
 def tmr_pic_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_if/tmr_misc"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_faults",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_misc_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
 
 @nox.session(reuse_venv=True)
 def lint(session: nox.Session) -> None:

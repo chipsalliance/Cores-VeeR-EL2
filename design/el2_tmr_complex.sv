@@ -924,6 +924,11 @@ module el2_tmr_complex
   el2_mubi_pkg::el2_mubi_t misc_fault_q[3];
   el2_mubi_pkg::el2_mubi_t misc_fault_clr[3];
 
+  // TMR exec ctrl fault signals
+  el2_mubi_pkg::el2_mubi_t exec_fault_d[3];
+  el2_mubi_pkg::el2_mubi_t exec_fault_q[3];
+  el2_mubi_pkg::el2_mubi_t exec_fault_clr[3];
+
   // TODO: Other fault signals
 
   //-------------------------------------------------------------------
@@ -956,11 +961,16 @@ module el2_tmr_complex
     assign misc_fault_d[i]   = tmr_fault_d[i];
     assign misc_fault_clr[i] = tmr_fault_clr[i];
 
+    assign exec_fault_d[i]   = tmr_fault_d[i];
+    assign exec_fault_clr[i] = tmr_fault_clr[i];
+
     assign tmr_fault_q[i]  = mubi_or3(
-      mubi_or(ic_fault_q[i],   dmi_fault_q[i]),
-      mubi_or(axi_fault_q[i],  iccm_fault_q[i]),
+      mubi_or3(ic_fault_q[i],   dmi_fault_q[i], misc_fault_q[i]),
+      mubi_or3(axi_fault_q[i],  iccm_fault_q[i], exec_fault_q[i]),
       mubi_or(dccm_fault_q[i], pic_fault_q[i])
-    ); // TODO: Aggregate ALL TMR fault state signals
+    );
+
+     // TODO: Aggregate ALL TMR fault state signals
 
   end endgenerate
 
@@ -1017,7 +1027,7 @@ module el2_tmr_complex
       .*
   );
   el2_tmr_complex_clk #(.pt(pt)) el2_tmr_complex_clk_u(.*);
-  el2_tmr_exec_ctrl #(.pt(pt)) el2_tmr_exec_ctrl_u (.*);
+  el2_tmr_exec_ctrl el2_tmr_exec_ctrl_u (.*);
   el2_tmr_misc el2_tmr_misc_u (.*);
 
   // TODO: Implemente recovery logic

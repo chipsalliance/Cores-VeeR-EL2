@@ -432,7 +432,10 @@ module el2_tmr_axi
     // Fault outputs
     output el2_mubi_pkg::el2_mubi_t axi_fault_q[3],
     // Fault clear inputs
-    input  el2_mubi_pkg::el2_mubi_t axi_fault_clr[3]
+    input  el2_mubi_pkg::el2_mubi_t axi_fault_clr[3],
+
+    output el2_mubi_t axi_pending,    // When true, there are pending in-flight transactions
+    output el2_mubi_t axi_count_fatal // When true, a fatal ECC error happened on one of the counters
 );
 
   // ......................................................
@@ -1288,6 +1291,137 @@ module el2_tmr_axi
     .b_m_axi_fault_clr_i (dma_axi_fault_clr[1]),
     .c_m_axi_fault_clr_i (dma_axi_fault_clr[2])
   );
+
+  // ......................................................
+  // AXI transaction counters
+  el2_mubi_t lsu_axi_pending;
+  el2_mubi_t lsu_axi_count_fatal;
+  el2_mubi_t ifu_axi_pending;
+  el2_mubi_t ifu_axi_count_fatal;
+  el2_mubi_t sb_axi_pending;
+  el2_mubi_t sb_axi_count_fatal;
+  el2_mubi_t dma_axi_pending;
+  el2_mubi_t dma_axi_count_fatal;
+
+  el2_tmr_axi_counter u_lsu_counter (
+    .clk_i          (free_l2clk),
+    .rst_ni         (rst_l),
+
+    .axi_awvalid_i  (lsu_axi_awvalid_int),
+    .axi_awready_i  (lsu_axi_awready_int),
+
+    .axi_wvalid_i   (lsu_axi_wvalid_int),
+    .axi_wready_i   (lsu_axi_wready_int),
+    .axi_wlast_i    (lsu_axi_wlast_int),
+
+    .axi_bvalid_i   (lsu_axi_bvalid_int),
+    .axi_bready_i   (lsu_axi_bready_int),
+
+    .axi_arvalid_i  (lsu_axi_arvalid_int),
+    .axi_arready_i  (lsu_axi_arready_int),
+
+    .axi_rvalid_i   (lsu_axi_rvalid_int),
+    .axi_rready_i   (lsu_axi_rready_int),
+    .axi_rlast_i    (lsu_axi_rlast_int),
+
+    .clear_i        (el2_mubi_pkg::El2MuBiFalse),
+    .pending_o      (lsu_axi_pending),
+
+    .ecc_error_o    (),
+    .ecc_fatal_o    (lsu_axi_count_fatal)
+  );
+
+  el2_tmr_axi_counter u_ifu_counter (
+    .clk_i          (free_l2clk),
+    .rst_ni         (rst_l),
+
+    .axi_awvalid_i  (ifu_axi_awvalid_int),
+    .axi_awready_i  (ifu_axi_awready_int),
+
+    .axi_wvalid_i   (ifu_axi_wvalid_int),
+    .axi_wready_i   (ifu_axi_wready_int),
+    .axi_wlast_i    (ifu_axi_wlast_int),
+
+    .axi_bvalid_i   (ifu_axi_bvalid_int),
+    .axi_bready_i   (ifu_axi_bready_int),
+
+    .axi_arvalid_i  (ifu_axi_arvalid_int),
+    .axi_arready_i  (ifu_axi_arready_int),
+
+    .axi_rvalid_i   (ifu_axi_rvalid_int),
+    .axi_rready_i   (ifu_axi_rready_int),
+    .axi_rlast_i    (ifu_axi_rlast_int),
+
+    .clear_i        (el2_mubi_pkg::El2MuBiFalse),
+    .pending_o      (ifu_axi_pending),
+
+    .ecc_error_o    (),
+    .ecc_fatal_o    (ifu_axi_count_fatal)
+  );
+
+  el2_tmr_axi_counter u_sb_counter (
+    .clk_i          (free_l2clk),
+    .rst_ni         (rst_l),
+
+    .axi_awvalid_i  (sb_axi_awvalid_int),
+    .axi_awready_i  (sb_axi_awready_int),
+
+    .axi_wvalid_i   (sb_axi_wvalid_int),
+    .axi_wready_i   (sb_axi_wready_int),
+    .axi_wlast_i    (sb_axi_wlast_int),
+
+    .axi_bvalid_i   (sb_axi_bvalid_int),
+    .axi_bready_i   (sb_axi_bready_int),
+
+    .axi_arvalid_i  (sb_axi_arvalid_int),
+    .axi_arready_i  (sb_axi_arready_int),
+
+    .axi_rvalid_i   (sb_axi_rvalid_int),
+    .axi_rready_i   (sb_axi_rready_int),
+    .axi_rlast_i    (sb_axi_rlast_int),
+
+    .clear_i        (el2_mubi_pkg::El2MuBiFalse),
+    .pending_o      (sb_axi_pending),
+
+    .ecc_error_o    (),
+    .ecc_fatal_o    (sb_axi_count_fatal)
+  );
+
+  el2_tmr_axi_counter u_dma_counter (
+    .clk_i          (free_l2clk),
+    .rst_ni         (rst_l),
+
+    .axi_awvalid_i  (dma_axi_awvalid_int),
+    .axi_awready_i  (dma_axi_awready_int),
+
+    .axi_wvalid_i   (dma_axi_wvalid_int),
+    .axi_wready_i   (dma_axi_wready_int),
+    .axi_wlast_i    (dma_axi_wlast_int),
+
+    .axi_bvalid_i   (dma_axi_bvalid_int),
+    .axi_bready_i   (dma_axi_bready_int),
+
+    .axi_arvalid_i  (dma_axi_arvalid_int),
+    .axi_arready_i  (dma_axi_arready_int),
+
+    .axi_rvalid_i   (dma_axi_rvalid_int),
+    .axi_rready_i   (dma_axi_rready_int),
+    .axi_rlast_i    (dma_axi_rlast_int),
+
+    .clear_i        (el2_mubi_pkg::El2MuBiFalse),
+    .pending_o      (dma_axi_pending),
+
+    .ecc_error_o    (),
+    .ecc_fatal_o    (dma_axi_count_fatal)
+  );
+
+  // Aggregate pending
+  assign axi_pending = mubi_or(mubi_or(ifu_axi_pending, lsu_axi_pending),
+                               mubi_or(sb_axi_pending,  dma_axi_pending));
+
+  // Aggregate fatal
+  assign axi_count_fatal = mubi_or(mubi_or(ifu_axi_count_fatal, lsu_axi_count_fatal),
+                                   mubi_or(sb_axi_count_fatal,  dma_axi_count_fatal));
 
 endmodule
 `endif

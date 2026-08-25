@@ -889,10 +889,13 @@ module el2_tmr_complex
 
   //-------------------------------------------------------------------
 
+  el2_mubi_pkg::el2_mubi_t axi_pending;
+
   // TMR AXI fault signals
   el2_mubi_pkg::el2_mubi_t axi_fault_d[3];
   el2_mubi_pkg::el2_mubi_t axi_fault_q[3];
   el2_mubi_pkg::el2_mubi_t axi_fault_clr[3];
+  el2_mubi_pkg::el2_mubi_t axi_count_fatal;
 
   // TMR ICCM fault signals
   el2_mubi_pkg::el2_mubi_t iccm_fault_d[3];
@@ -965,9 +968,9 @@ module el2_tmr_complex
     assign exec_fault_clr[i] = tmr_fault_clr[i];
 
     assign tmr_fault_q[i]  = mubi_or3(
-      mubi_or3(ic_fault_q[i],   dmi_fault_q[i], misc_fault_q[i]),
+      mubi_or3(ic_fault_q[i],   dmi_fault_q[i],  misc_fault_q[i]),
       mubi_or3(axi_fault_q[i],  iccm_fault_q[i], exec_fault_q[i]),
-      mubi_or(dccm_fault_q[i], pic_fault_q[i])
+      mubi_or3(dccm_fault_q[i], pic_fault_q[i],  axi_count_fatal)
     );
 
      // TODO: Aggregate ALL TMR fault state signals

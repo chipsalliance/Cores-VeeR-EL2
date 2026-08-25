@@ -536,6 +536,21 @@ def tmr_exec_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
 
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["ecc_counter"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_counting",
+        "test_ecc_error",
+        "test_ecc_fatal",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def ecc_counter_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
 @nox.session(reuse_venv=True)
 def lint(session: nox.Session) -> None:
     """Options are defined in pyproject.toml and .flake8 files"""

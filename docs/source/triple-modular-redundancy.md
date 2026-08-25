@@ -30,8 +30,8 @@ Block diagram of the TMR complex
 :::
 
 The TMR complex contains:
-* 3 VeeR EL2 cores without integrated PIC
-* PIC common for all the cores in the complex
+* 3 VeeR EL2 cores with memory translation and without integrated PIC
+* common PIC for all the cores in the complex
 * PIC TMR - interface voter that handles PIC and external interrupt buses
 * IC TMR - interface voter that handles Instruction Cache bus
 * Clock distribution module - gates and distributes clocks to the TMR complex logic and to the VeeR EL2 cores
@@ -155,7 +155,7 @@ VeeR core uses three kinds of CCM (closely coupled memory):
  * DCCM
  * I-Cache
 
-There's also the PIC which is memory mapped and connected through a dedicated interface resembing one of a CCM block.
+There's also the PIC which is memory mapped and connected through a dedicated interface resembling one of a CCM block.
 
 All of them are connected to the core via interfaces, where VeeR is the manager.
 

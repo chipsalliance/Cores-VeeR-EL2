@@ -158,19 +158,19 @@ class TestFaults(BaseTest):
         iterations = ConfigDB().get(None, "", "TEST_ITERATIONS")
 
         signals = {
-            "trace_rv_i_insn_ip_veer" : None,
-            "trace_rv_i_address_ip_veer" : None,
-            "trace_rv_i_valid_ip_veer" : None,
-            "trace_rv_i_exception_ip_veer" : None,
-            "trace_rv_i_ecause_ip_veer" : None,
-            "trace_rv_i_interrupt_ip_veer" : None,
-            "trace_rv_i_tval_ip_veer" : None,
-            "dec_tlu_perfcnt0_veer" : None,
-            "dec_tlu_perfcnt1_veer" : None,
-            "dec_tlu_perfcnt2_veer" : None,
-            "dec_tlu_perfcnt3_veer" : None,
-            "dec_tlu_force_halt_veer" : None,
-#            "core_rst_l_veer" : None,
+            "trace_rv_i_insn_ip_veer": None,
+            "trace_rv_i_address_ip_veer": None,
+            "trace_rv_i_valid_ip_veer": None,
+            "trace_rv_i_exception_ip_veer": None,
+            "trace_rv_i_ecause_ip_veer": None,
+            "trace_rv_i_interrupt_ip_veer": None,
+            "trace_rv_i_tval_ip_veer": None,
+            "dec_tlu_perfcnt0_veer": None,
+            "dec_tlu_perfcnt1_veer": None,
+            "dec_tlu_perfcnt2_veer": None,
+            "dec_tlu_perfcnt3_veer": None,
+            "dec_tlu_force_halt_veer": None,
+            #            "core_rst_l_veer" : None,
         }
 
         # Get signal lengths

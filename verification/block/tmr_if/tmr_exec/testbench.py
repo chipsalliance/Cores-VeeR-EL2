@@ -148,16 +148,16 @@ class BaseTest(common.BaseTest):
         cocotb.top.exec_fault_clr[1].value = MuBiFalse
         cocotb.top.exec_fault_clr[2].value = MuBiFalse
 
-        cocotb.top.o_cpu_halt_ack_veer.value      = [0] * 3
-        cocotb.top.o_cpu_run_ack_veer.value       = [0] * 3
-        cocotb.top.o_cpu_halt_status_veer.value   = [0] * 3
+        cocotb.top.o_cpu_halt_ack_veer.value = [0] * 3
+        cocotb.top.o_cpu_run_ack_veer.value = [0] * 3
+        cocotb.top.o_cpu_halt_status_veer.value = [0] * 3
         cocotb.top.o_debug_mode_status_veer.value = [0] * 3
-        cocotb.top.mpc_debug_halt_ack_veer.value  = [0] * 3
-        cocotb.top.mpc_debug_run_ack_veer.value   = [0] * 3
-        cocotb.top.debug_brkpt_status_veer.value  = [0] * 3
+        cocotb.top.mpc_debug_halt_ack_veer.value = [0] * 3
+        cocotb.top.mpc_debug_run_ack_veer.value = [0] * 3
+        cocotb.top.debug_brkpt_status_veer.value = [0] * 3
 
-        cocotb.top.i_cpu_halt_req.value     = 0
-        cocotb.top.i_cpu_run_req.value      = 0
+        cocotb.top.i_cpu_halt_req.value = 0
+        cocotb.top.i_cpu_run_req.value = 0
         cocotb.top.mpc_debug_halt_req.value = 0
-        cocotb.top.mpc_debug_run_req.value  = 0
-        cocotb.top.mpc_reset_run_req.value  = 0
+        cocotb.top.mpc_debug_run_req.value = 0
+        cocotb.top.mpc_reset_run_req.value = 0

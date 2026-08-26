@@ -144,7 +144,7 @@ class BaseTest(common.BaseTest):
 
         cocotb.top.dmi_reg_rdata_veer.value = [0] * 3
 
-        cocotb.top.dmi_reg_en.value    = 0
+        cocotb.top.dmi_reg_en.value = 0
         cocotb.top.dmi_reg_wr_en.value = 0
-        cocotb.top.dmi_reg_addr.value  = 0
+        cocotb.top.dmi_reg_addr.value = 0
         cocotb.top.dmi_reg_wdata.value = 0

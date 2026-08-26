@@ -116,6 +116,7 @@ class AxiTransactionType(enum.IntEnum):
 class AxiTransaction(uvm_sequence_item):
     def __init__(self, name="AxiTransaction"):
         super().__init__(name)
+        self.is_blocking = True
 
         self.type = None
         self.address = None

@@ -72,7 +72,7 @@ class BaseEnv(uvm_env):
             "dec_tlu_perfcnt2",
             "dec_tlu_perfcnt3",
             "dec_tlu_force_halt",
-#            "core_rst_l",
+            #            "core_rst_l",
         ]
 
         ConfigDB().set(None, "*", "TEST_CLK_PERIOD", 1)
@@ -154,22 +154,22 @@ class BaseTest(common.BaseTest):
         cocotb.top.misc_fault_clr[1].value = MuBiFalse
         cocotb.top.misc_fault_clr[2].value = MuBiFalse
 
-        cocotb.top.trace_rv_i_insn_ip_veer      = [0] * 3
-        cocotb.top.trace_rv_i_address_ip_veer   = [0] * 3
-        cocotb.top.trace_rv_i_valid_ip_veer     = [0] * 3
+        cocotb.top.trace_rv_i_insn_ip_veer = [0] * 3
+        cocotb.top.trace_rv_i_address_ip_veer = [0] * 3
+        cocotb.top.trace_rv_i_valid_ip_veer = [0] * 3
         cocotb.top.trace_rv_i_exception_ip_veer = [0] * 3
-        cocotb.top.trace_rv_i_ecause_ip_veer    = [0] * 3
+        cocotb.top.trace_rv_i_ecause_ip_veer = [0] * 3
         cocotb.top.trace_rv_i_interrupt_ip_veer = [0] * 3
-        cocotb.top.trace_rv_i_tval_ip_veer      = [0] * 3
-        cocotb.top.dec_tlu_perfcnt0_veer        = [0] * 3
-        cocotb.top.dec_tlu_perfcnt1_veer        = [0] * 3
-        cocotb.top.dec_tlu_perfcnt2_veer        = [0] * 3
-        cocotb.top.dec_tlu_perfcnt3_veer        = [0] * 3
-        cocotb.top.dec_tlu_force_halt_veer      = [0] * 3
-        cocotb.top.core_rst_l_veer              = [0] * 3
+        cocotb.top.trace_rv_i_tval_ip_veer = [0] * 3
+        cocotb.top.dec_tlu_perfcnt0_veer = [0] * 3
+        cocotb.top.dec_tlu_perfcnt1_veer = [0] * 3
+        cocotb.top.dec_tlu_perfcnt2_veer = [0] * 3
+        cocotb.top.dec_tlu_perfcnt3_veer = [0] * 3
+        cocotb.top.dec_tlu_force_halt_veer = [0] * 3
+        cocotb.top.core_rst_l_veer = [0] * 3
 
-        cocotb.top.rst_vec.value   = 0
-        cocotb.top.nmi_int.value   = 0
-        cocotb.top.nmi_vec.value   = 0
+        cocotb.top.rst_vec.value = 0
+        cocotb.top.nmi_int.value = 0
+        cocotb.top.nmi_vec.value = 0
         cocotb.top.timer_int.value = 0
-        cocotb.top.soft_int.value  = 0
+        cocotb.top.soft_int.value = 0

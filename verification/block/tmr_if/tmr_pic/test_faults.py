@@ -115,7 +115,9 @@ class FaultScoreboard(BaseScoreboard):
                 # test
                 assert False, fault_state
 
-            pred_bus_state = {k.replace("_veer", "_int"): v[index] for k, v in veer_bus_state.items()}
+            pred_bus_state = {
+                k.replace("_veer", "_int"): v[index] for k, v in veer_bus_state.items()
+            }
 
             # Compare
             if pred_bus_state != out_bus_state:

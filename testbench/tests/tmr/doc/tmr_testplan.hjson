@@ -18,9 +18,9 @@
       '''
       "stage": "DV0.1",
       "tests": [
-        "test_baseline_workload_1",
-        "test_baseline_workload_2",
-        "test_baseline_workload_N",
+        "baseline_workload_1",
+        "baseline_workload_2",
+        "baseline_workload_N",
       ]
       "tags": ["baseline"]
     },
@@ -29,32 +29,23 @@
       "desc": '''
         Intent:
         * Prove that TMR logic is capable of detecting injected faults in the design
-        * This should be treated as a smoke test for fault detection capabilities
-        * Record `Time To Fault Event Detection`
 
         Stimulus:
         * Configure VeeR EL2 with TMR feature enabled
-        * Generate multiple fault injection scenarios (FIS) with `faultergeist-gen` using one of available fault generation models
-        * Use known seed values for generating fault injection strategies
-        * Generate the minimal number of faults required to trigger Fault Event Detection
-        * Enable fault injection for VeeR EL2 based on generated FIS
-        * Execute test software from STS on VeeR EL2 for each generated FIS
-        // Perhaps it would be sufficient to prepare only few places in the design
-        // that are known to cause fault detection in TMR logic and use these for
-        // fault injection.
-        * Store `Time To Fault Event Detection` records as one of the test results
-          * Record time between start of the fault injection process and first Fault Event Detection
-          * Record time between every successful Fault Event Recovery and subsequent Fault Event Detection
+        * Use SV test scenario with bit flip injection using force-release mechanism
+        * Inject bit flip into a signal covered by TMR logic
+        * Constrain the bit flip injection time with the state of the core rather than hardcoded time delay
+        * Execute basic test software on VeeR EL2
 
         Check:
-        * Verify if TMR logic detects injected failures
+        * Verify if TMR logic detects injected faults
           * Check TMR output port responsible for Fault Event Detection Notification
       '''
       "stage": "DV0.2",
       "tests": [
-        "test_fault_detection_workload_1",
-        "test_fault_detection_workload_2",
-        "test_fault_detection_workload_N",
+        "fault_detection_scenario_1",
+        "fault_detection_scenario_2",
+        "fault_detection_scenario_N",
       ]
       "tags": ["fault_detection"]
     },
@@ -63,21 +54,16 @@
       "desc": '''
         Intent:
         * Prove that TMR logic is capable of recovering from detected Fault Event
-        * Record `Time To Fault Event Detection`
 
         Stimulus:
         * Configure VeeR EL2 with TMR feature enabled
-        * Generate multiple fault injection scenarios (FIS) with `faultergeist-gen` using one of available fault generation models
-        * Use known seed values for generating fault injection strategies
-        * Generate the minimal number of faults required to trigger Fault Event Detection
-        * Enable fault injection for VeeR EL2 based on generated FIS
-        * Execute test software from STS on VeeR EL2 for each generated FIS
-        * Store `Time To Fault Event Detection` records as one of the test results
-          * Record time between start of the fault injection process and first Fault Event Detection
-          * Record time between every successful Fault Event Recovery and subsequent Fault Event Detection
+        * Use SV test scenario with bit flip injection using force-release mechanism
+        * Inject bit flip into a signal covered by TMR logic that triggers Fault Event Detection in the design that should be recoverable
+        * Constrain the bit flip injection time with the state of the core rather than hardcoded time delay
+        * Execute basic test software on VeeR EL2
 
         Check:
-        * Verify if TMR logic detects injected failures
+        * Verify if TMR logic detects injected faults
           * Check TMR output port responsible for Fault Event Detection Notification
         * Verify if TMR logic performs succesfull recovery from Fault Event
           * Check TMR output port responsible for Fault Event Recovery Success Notification
@@ -85,76 +71,27 @@
       '''
       "stage": "DV0.3",
       "tests": [
-        "test_recovery_success_workload_1",
-        "test_recovery_success_workload_2",
-        "test_recovery_success_workload_N",
+        "recovery_success_scenario_1",
+        "recovery_success_scenario_2",
+        "recovery_success_scenario_N",
       ]
       "tags": ["recovery_success"]
-    },
-    {
-      "name": "recovery_success_directed",
-      "desc": '''
-        Intent:
-        * Prove that TMR logic is capable of recovering from detected Fault Event
-        * Prove the capabilities by testing on specified areas of the design
-        * Record `Time To Fault Event Detection`
-
-        Stimulus:
-        * Configure VeeR EL2 with TMR feature enabled
-        * Constrain the list of 'upsetable' signals only to considered design area
-        * Generate multiple fault injection scenarios (FIS) with `faultergeist-gen` for each considered area and using one of available fault generation models
-        * Use known seed values for generating fault injection strategies
-        * Generate the minimal number of faults required to trigger Fault Event Detection
-        * Enable fault injection for VeeR EL2 based on generated FIS
-        * Execute test software from STS on VeeR EL2 for each generated FIS
-        * Store `Time To Fault Event Detection` records as one of the test results
-          * Record time between start of the fault injection process and first Fault Event Detection
-          * Record time between every successful Fault Event Recovery and subsequent Fault Event Detection
-
-        Check:
-        * Verify if TMR logic detects injected failures
-          * Check TMR output port responsible for Fault Event Detection Notification
-        * Verify if TMR logic performs succesfull recovery from Fault Event
-          * Check TMR output port responsible for Fault Event Recovery Success Notification
-          * Compare simulation results against golden results from `baseline` tests
-      '''
-      "stage": "DV0.3",
-      "tests": [
-        "test_recovery_success_directed_area_1_workload_1",
-        "test_recovery_success_directed_area_2_workload_1",
-        "test_recovery_success_directed_area_M_workload_1",
-        "test_recovery_success_directed_area_1_workload_2",
-        "test_recovery_success_directed_area_2_workload_2",
-        "test_recovery_success_directed_area_M_workload_2",
-        "test_recovery_success_directed_area_1_workload_N",
-        "test_recovery_success_directed_area_2_workload_N",
-        "test_recovery_success_directed_area_M_workload_N",
-      ]
-      "tags": ["recovery_success_directed"]
     },
     {
       "name": "recovery_failure",
       "desc": '''
         Intent:
         * Verify TMR logic behaviour upon detecting Fault Event that puts the design into unrecoverable state
-        * Record `Time To Fault Event Detection`
-        * Record `Time To Recovery Failure`
 
         Stimulus:
         * Configure VeeR EL2 with TMR feature enabled
-        * Generate multiple fault injection scenarios (FIS) with `faultergeist-gen` using one of available fault generation models
-        * Use known seed values for generating fault injection strategies
-        * Generate the minimal number of faults required to trigger Fault Event Detection that leads to unrecoverable state
-        * Enable fault injection for VeeR EL2 based on generated FIS
-        * Execute test software from STS on VeeR EL2 for each generated FIS
-        * Store `Time To Fault Event Detection` records as one of the test results
-          * Record time between start of the fault injection process and first Fault Event Detection
-          * Record time between every successful Fault Event Recovery and subsequent Fault Event Detection
-        * Store `Time To Recovery Failure` as one of the test results
-          * Record time between start of the fault injection process and Fault Event Detection that triggers Recovery Failure
+        * Use SV test scenario with bit flip injection using force-release mechanism
+        * Inject bit flip into a signal covered by TMR logic that triggers Fault Event Detection in the design that should be unrecoverable
+        * Constrain the bit flip injection time with the state of the core rather than hardcoded time delay
+        * Execute basic test software on VeeR EL2
 
         Check:
-        * Verify if TMR logic detects injected failures
+        * Verify if TMR logic detects injected faults
           * Check TMR output port responsible for Fault Event Detection Notification
         * Verify if TMR logic detects unrecoverable failure
           * Check TMR output port responsible for Fault Event Recovery Failed Notification
@@ -162,134 +99,158 @@
       '''
       "stage": "DV0.3",
       "tests": [
-        "test_recovery_failure_workload_1",
-        "test_recovery_failure_workload_2",
-        "test_recovery_failure_workload_N",
+        "recovery_failure_scenario_1",
+        "recovery_failure_scenario_2",
+        "recovery_failure_scenario_N",
       ]
       "tags": ["recovery_failure"]
-    },
-    {
-      "name": "recovery_failure_directed",
-      "desc": '''
-        Intent:
-        * Verify TMR logic behaviour upon detecting Fault Event that puts the design into unrecoverable state
-        * Verify the capabilities by testing on specified areas of the design
-        * Record `Time To Fault Event Detection`
-        * Record `Time To Recovery Failure`
-
-        Stimulus:
-        * Configure VeeR EL2 with TMR feature enabled
-        * Constrain the list of 'upsetable' signals only to considered design area
-        * Generate multiple fault injection scenarios (FIS) with `faultergeist-gen` for each considered area and using one of available fault generation models
-        * Use known seed values for generating fault injection strategies
-        * Generate the minimal number of faults required to trigger Fault Event Detection that leads to unrecoverable state
-        * Enable fault injection for VeeR EL2 based on generated FIS
-        * Execute test software from STS on VeeR EL2 for each generated FIS
-        * Store `Time To Fault Event Detection` records as one of the test results
-          * Record time between start of the fault injection process and first Fault Event Detection
-          * Record time between every successful Fault Event Recovery and subsequent Fault Event Detection
-        * Store `Time To Recovery Failure` as one of the test results
-          * Record time between start of the fault injection process and Fault Event Detection that triggers Recovery Failure
-
-        Check:
-        * Verify if TMR logic detects injected failures
-          * Check TMR output port responsible for Fault Event Detection Notification
-        * Verify if TMR logic detects unrecoverable failure
-          * Check TMR output port responsible for Fault Event Recovery Failed Notification
-          * Compare simulation results against golden results from `baseline` tests
-      '''
-      "stage": "DV0.3",
-      "tests": [
-        "test_recovery_failure_directed_area_1_workload_1",
-        "test_recovery_failure_directed_area_2_workload_1",
-        "test_recovery_failure_directed_area_M_workload_1",
-        "test_recovery_failure_directed_area_1_workload_2",
-        "test_recovery_failure_directed_area_2_workload_2",
-        "test_recovery_failure_directed_area_M_workload_2",
-        "test_recovery_failure_directed_area_1_workload_N",
-        "test_recovery_failure_directed_area_2_workload_N",
-        "test_recovery_failure_directed_area_M_workload_N",
-      ]
-      "tags": ["recovery_failure_directed"]
     },
     {
       "name": "critical_failure",
       "desc": '''
         Intent:
-        * Verify design behaviour upon Fault Event that is not detected by TMR logic
-        * Record `Time to Critical Failure`
-        * Record fault vectors that triggered Critical Failure
+        * Verify design behaviour upon Fault Event that is not detected by TMR logic and cause critical failure of the design
 
         Stimulus:
         * Configure VeeR EL2 with TMR feature enabled
-        * Generate multiple fault injection scenarios (FIS) with `faultergeist-gen` using one of available fault generation models
-        * Use known seed values for generating fault injection strategies
-        * Generate the minimal number of faults required to trigger Fault Event that is not detected by TMR logic and causes critical failure of the design
-        * Enable fault injection for VeeR EL2 based on generated FIS
-        * Execute test software from STS on VeeR EL2 for each generated FIS
-        * Store `Time To Critical Failure` as one of the test results
-          * Record time between start of the fault injection process and Critical Failure
-        * Store fault vectors that triggered Critical Failure as one of the test results
+        * Use SV test scenario with bit flip injection using force-release mechanism
+        * Inject bit flip into a signal that is not detected by TMR logic and that triggers a critical failure of the design
+        * Constrain the bit flip injection time with the state of the core rather than hardcoded time delay
+        * Execute basic test software on VeeR EL2
 
         Check:
-        * Verify if TMR logic does not detect injected failures
+        * Verify if TMR logic does not detect injected faults
           * Check TMR output port responsible for Fault Event Detection Notification
         * Verify if design reached a critical failure
           * Compare simulation results against golden results from `baseline` tests
       '''
       "stage": "DV0.3",
       "tests": [
-        "test_critical_failure_workload_1",
-        "test_critical_failure_workload_2",
-        "test_critical_failure_workload_N",
+        "critical_failure_scenario_1",
+        "critical_failure_scenario_2",
+        "critical_failure_scenario_N",
       ]
       "tags": ["critical_failure"]
     },
     {
-      "name": "critical_failure_directed",
+      "name": "fuzz",
       "desc": '''
         Intent:
-        * Verify design behaviour upon Fault Event that is not detected by TMR logic
-        * Verify the behaviour on specified areas of the design
+        * Prove that TMR logic is capable of detecting injected faults in the design
+        * Prove that TMR logic is capable of recovering from detected Fault Event
+        * Find and record fault injection strategies that lead to TMR failures:
+          * Fault Events that are detected by TMR logic and that put the design into unrecoverable state
+          * Fault Events that are not detected by TMR logic and cause critical failure
+        * Record `Time To Fault Event Detection`
+        * Record `Time To Recovery Failure`
+        * Record `Time to Critical Failure`
+
+        Stimulus:
+        * Configure VeeR EL2 with TMR feature enabled
+        * Generate fault injection scenario (FIS) with `faultergeist-gen` using one of available fault generation models
+        * Randomize seed value for generating fault injection strategy
+        * Enable fault injection for VeeR EL2 based on generated FIS
+        * Execute test software from STS on VeeR EL2
+        * Store `Time To Fault Event Detection` records as one of the test results
+          * Record time between start of the fault injection process and first Fault Event Detection
+          * Record time between every successful Fault Event Recovery and subsequent Fault Event Detection
+        * Store `Time To Recovery Failure` as one of the test results
+          * Record time between start of the fault injection process and Fault Event Detection that triggers Recovery Failure
+        * Store `Time To Critical Failure` as one of the test results
+          * Record time between start of the fault injection process and Critical Failure
+        * Store FIS if the simulation ended with one of the following:
+          * Detected Fault Event and Design Recovery Failure
+          * Undetected Fault Event and Desgin Critical Failure
+        * Repeat test procedure for multiple generated FIS and for all workloads from STS
+
+        Check:
+        * Verify if TMR logic detects injected faults
+          * Check TMR output port responsible for Fault Event Detection Notification
+        * Verify if TMR logic performs succesfull recovery from Fault Event
+          * Check TMR output port responsible for Fault Event Recovery Success Notification
+          * Compare simulation results against golden results from `baseline` tests
+        * Verify if TMR logic performs recovery from Fault Event but fails
+          * Check TMR output port responsible for Fault Event Recovery Failed Notification
+          * Compare simulation results against golden results from `baseline` tests
+        * Verify if design reached a critical failure
+          * Check TMR output port responsible for Fault Event Detection Notification
+            * Must not be detected
+          * Compare simulation results against golden results from `baseline` tests
+      '''
+      "stage": "DV0.3",
+      "tests": [
+        "fuzz_workload_1",
+        "fuzz_workload_2",
+        "fuzz_workload_N",
+      ]
+      "tags": ["fuzz"]
+    },
+    {
+      "name": "fuzz_directed",
+      "desc": '''
+        Intent:
+        * Prove that TMR logic is capable of detecting injected faults in the design
+        * Prove that TMR logic is capable of recovering from detected Fault Event
+        * Find and record fault injection strategies that lead to TMR failures:
+          * Fault Events that are detected by TMR logic and that put the design into unrecoverable state
+          * Fault Events that are not detected by TMR logic and cause critical failure
+        * Verify the behaviour on specified area of the design
+        * Record `Time To Fault Event Detection`
+        * Record `Time To Recovery Failure`
         * Record `Time to Critical Failure`
 
         Stimulus:
         * Configure VeeR EL2 with TMR feature enabled
         * Constrain the list of 'upsetable' signals only to considered design area
-        * Generate multiple fault injection scenarios (FIS) with `faultergeist-gen` for each considered area and using one of available fault generation models
-        * Use known seed values for generating fault injection strategies
-        * Generate the minimal number of faults required to trigger Fault Event that is not detected by TMR logic and causes critical failure of the design
+        * Generate fault injection scenario (FIS) with `faultergeist-gen` for each considered area and using one of available fault generation models
+        * Randomize seed value for generating fault injection strategy
         * Enable fault injection for VeeR EL2 based on generated FIS
-        * Execute test software from STS on VeeR EL2 for each generated FIS
+        * Execute test software from STS on VeeR EL2
+        * Store `Time To Fault Event Detection` records as one of the test results
+          * Record time between start of the fault injection process and first Fault Event Detection
+          * Record time between every successful Fault Event Recovery and subsequent Fault Event Detection
+        * Store `Time To Recovery Failure` as one of the test results
+          * Record time between start of the fault injection process and Fault Event Detection that triggers Recovery Failure
         * Store `Time To Critical Failure` as one of the test results
           * Record time between start of the fault injection process and Critical Failure
-        * Store fault vectors that triggered Critical Failure as one of the test results
+        * Store FIS if the simulation ended with one of the following:
+          * Detected Fault Event and Design Recovery Failure
+          * Undetected Fault Event and Desgin Critical Failure
+        * Repeat test procedure for multiple generated FIS, for all workloads from STS and for all considered design areas
 
         Check:
-        * Verify if TMR logic does not detect injected failures
+        * Verify if TMR logic detects injected faults
           * Check TMR output port responsible for Fault Event Detection Notification
+        * Verify if TMR logic performs succesfull recovery from Fault Event
+          * Check TMR output port responsible for Fault Event Recovery Success Notification
+          * Compare simulation results against golden results from `baseline` tests
+        * Verify if TMR logic performs recovery from Fault Event but fails
+          * Check TMR output port responsible for Fault Event Recovery Failed Notification
+          * Compare simulation results against golden results from `baseline` tests
         * Verify if design reached a critical failure
+          * Check TMR output port responsible for Fault Event Detection Notification
+            * Must not be detected
           * Compare simulation results against golden results from `baseline` tests
       '''
       "stage": "DV0.3",
       "tests": [
-        "test_critical_failure_directed_area_1_workload_1",
-        "test_critical_failure_directed_area_2_workload_1",
-        "test_critical_failure_directed_area_M_workload_1",
-        "test_critical_failure_directed_area_1_workload_2",
-        "test_critical_failure_directed_area_2_workload_2",
-        "test_critical_failure_directed_area_M_workload_2",
-        "test_critical_failure_directed_area_1_workload_N",
-        "test_critical_failure_directed_area_2_workload_N",
-        "test_critical_failure_directed_area_M_workload_N",
+        "fuzz_directed_area_1_workload_1",
+        "fuzz_directed_area_2_workload_1",
+        "fuzz_directed_area_M_workload_1",
+        "fuzz_directed_area_1_workload_2",
+        "fuzz_directed_area_2_workload_2",
+        "fuzz_directed_area_M_workload_2",
+        "fuzz_directed_area_1_workload_N",
+        "fuzz_directed_area_2_workload_N",
+        "fuzz_directed_area_M_workload_N",
       ]
-      "tags": ["critical_failure_directed"]
+      "tags": ["fuzz_directed"]
     },
     {
       "name": "mtbf_measurement",
       "desc": '''
         Intent:
-        * Gather from other tests:
+        * Gather from fuzz tests:
           * `Time To Fault Event Detection`
           * `Time To Recovery Failure`
           * `Time To Critical Failure`
@@ -299,12 +260,47 @@
             * Recovery Failure
             * Critical Failure
           * Area of fault injection
+        * Gather:
+          * Total Number of injected faults
+          * Total Number of detected fault events
+          * Total Number of successfull recoveries
+          * Total Number of failed recoveries
+          * Total Number of critical failures
       '''
       "stage": "DV0.4",
       "tests": [
         "gather_mtbf_measurements"
       ]
       "tags": ["mtbf_measurement"]
+    },
+    {
+      "name": "regression",
+      "desc": '''
+        Intent:
+        * Prove that TMR logic works as expected and no bugs are introduced
+        * Prove that TMR logic will no longer enter incorrect state after injecting faults that were previously known to cause a failure after the underlying bug was fixed
+
+        Stimulus:
+        * Configure VeeR EL2 with TMR feature enabled
+        * Use SV test scenario with bit flip injection using force-release mechanism
+        * Inject bit flips into signals from general group that was known to trigger unwanted Recovery Failure or Critical Failure
+        * Constrain the bit flip injection time with the state of the core rather than hardcoded time delay
+        * Execute on VeeR EL2 the same test software that was running in the simulation when the bug was discovered
+
+        Check:
+        * Verify if TMR logic detects injected faults
+          * Check TMR output port responsible for Fault Event Detection Notification
+        * Verify if TMR logic performs succesfull recovery from Fault Event
+          * Check TMR output port responsible for Fault Event Recovery Success Notification
+          * Compare simulation results against golden results from `baseline` tests
+      '''
+      "stage": "DV0.2",
+      "tests": [
+        "regression_scenario_1",
+        "regression_scenario_2",
+        "regression_scenario_N",
+      ]
+      "tags": ["regression"]
     }
   ]
 }

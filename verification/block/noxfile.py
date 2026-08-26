@@ -446,6 +446,19 @@ def tmr_axi_s_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_axi/axi_counter"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_counting",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_axi_counter_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["tmr_if/tmr_iccm"])
 @nox.parametrize(
     "testName",

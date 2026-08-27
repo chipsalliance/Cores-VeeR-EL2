@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Google LLC
+#
+# Author: Samip Modi (samipmodi@google.com)
+
+OFILES = crt0.o dccm_addr_xor.o printf.o
+TEST_CFLAGS = -g -O3 -falign-functions=16

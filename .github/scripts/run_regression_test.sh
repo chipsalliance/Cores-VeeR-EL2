@@ -73,6 +73,17 @@ run_regression_test(){
         COMMON_PARAMS="-set iccm_addr_xor=1 ${COMMON_PARAMS}"
     fi
 
+    # DCCM_ADDR_XOR may not be set
+    set +u
+    if [[ -z "${DCCM_ADDR_XOR}" ]]; then
+        DCCM_ADDR_XOR="0"
+    fi
+    set -u
+
+    if [[ "${DCCM_ADDR_XOR}" == "1" ]]; then
+        COMMON_PARAMS="-set dccm_addr_xor=1 ${COMMON_PARAMS}"
+    fi
+
     # DCCM_WR_READBACK may not be set
     set +u
     if [[ -z "${DCCM_WR_READBACK}" ]]; then

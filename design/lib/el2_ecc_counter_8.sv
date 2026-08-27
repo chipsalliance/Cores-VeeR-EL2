@@ -48,13 +48,12 @@ module el2_ecc_counter_8 (
   );
 
   // Storage
-  always @(posedge clk_i or negedge rst_ni) begin
-    if (~rst_ni) begin
-      storage <= '0;
-    end else begin
-      storage <= storage_next;
-    end
-  end
+  rvdff #(.WIDTH($bits(storage))) dff_storage (
+    .clk   (clk_i),
+    .rst_l (rst_ni),
+    .din   (storage_next),
+    .dout  (storage)
+  );
 
   // ECC decoder
   logic [4:0] ecc_syndrome_nc;
@@ -73,18 +72,23 @@ module el2_ecc_counter_8 (
 
   // Uncorrectable error is latched
   logic ecc_fatal;
+  logic ecc_fatal_next;
 
-  always_ff @(posedge clk_i or negedge rst_ni) begin
-    if (!rst_ni) begin
-      ecc_fatal <= '0;
-    end else begin
-      if (clr_i) begin
-        ecc_fatal <= '0;
-      end else if (ecc_error[1]) begin
-        ecc_fatal <= '1;
-      end
+  always_comb begin
+    ecc_fatal_next = ecc_fatal;
+    if (clr_i) begin
+      ecc_fatal_next = '0;
+    end else if (ecc_error[1]) begin
+      ecc_fatal_next = '1;
     end
   end
+
+  rvdff #(.WIDTH(1)) dff_ecc_fatal (
+    .clk   (clk_i),
+    .rst_l (rst_ni),
+    .din   (ecc_fatal_next),
+    .dout  (ecc_fatal)
+  );
 
   assign ecc_fatal_o = ecc_fatal | ecc_error[1];
 

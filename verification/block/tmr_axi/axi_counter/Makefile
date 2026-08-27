@@ -20,12 +20,6 @@ COMPILE_ARGS = \
  -DRV_MUBI_FALSE=1 \
  -DRV_TRIPLE_MODULAR_REDUNDANCY_ENABLE=1 \
 
-include $(TEST_DIR)/../../common.mk
-
-export PYTHONPATH := $(PYTHONPATH):$(TEST_DIR)/..
-
-# Deliberately declare source list here not to include most of the common
-# VeeR files. This test is a unit test.
 VERILOG_SOURCES = \
     $(SRCDIR)/lib/el2_assert.sv \
     $(SRCDIR)/el2_mubi_pkg.sv \
@@ -35,3 +29,6 @@ VERILOG_SOURCES = \
     $(SRCDIR)/tmr/el2_tmr_axi_counter.sv \
     $(TEST_DIR)/el2_tmr_axi_counter_wrapper.sv
 
+include $(TEST_DIR)/../../common.mk
+
+export PYTHONPATH := $(PYTHONPATH):$(TEST_DIR)/..

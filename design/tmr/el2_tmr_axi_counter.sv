@@ -40,17 +40,22 @@ module el2_tmr_axi_counter
   // ......................................................
 
   // Detect first W beat
-  logic axi_wfirst;
+  logic axi_wfirst_n;
+  logic axi_wfirst_n_next;
 
-  always_ff @(posedge clk_i or negedge rst_ni) begin
-    if (!rst_ni) begin
-      axi_wfirst <= '1;
-    end else begin
-      if (axi_wvalid_i & axi_wready_i) begin
-        axi_wfirst <= axi_wlast_i;
-      end
+  always_comb begin
+    axi_wfirst_n_next = axi_wfirst_n;
+    if (axi_wvalid_i & axi_wready_i) begin
+      axi_wfirst_n_next = ~axi_wlast_i;
     end
   end
+
+  rvdff #(.WIDTH(1)) dff_wfirst (
+    .clk   (clk_i),
+    .rst_l (rst_ni),
+    .din   (axi_wfirst_n_next),
+    .dout  (axi_wfirst_n)
+  );
 
   // ......................................................
 
@@ -85,7 +90,7 @@ module el2_tmr_axi_counter
     .clk_i   (clk_i),
     .rst_ni  (rst_ni),
 
-    .inc_i   (axi_wvalid_i  & axi_wready_i & axi_wfirst),
+    .inc_i   (axi_wvalid_i  & axi_wready_i & ~axi_wfirst_n),
     .dec_i   (axi_bvalid_i  & axi_bready_i),
     .clr_i   (mubi_check_true(clear_i)),
 

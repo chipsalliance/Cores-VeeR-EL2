@@ -399,7 +399,7 @@ module el2_veer_lockstep
     output el2_mubi_t corruption_detected_o
 );
   localparam int unsigned LockstepDelay = 32'(pt.LOCKSTEP_DELAY);  // Delay I/O; in clock cycles
-  localparam int LockstepDelayPipeStages = int'(LockstepDelay - 1);
+  localparam int LockstepDelayPipeStages = (LockstepDelay > 0) ? int'(LockstepDelay - 1) : 0;
 
   veer_inputs_t main_core_inputs;
   veer_inputs_t shadow_core_inputs;

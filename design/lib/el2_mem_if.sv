@@ -97,11 +97,25 @@ import el2_pkg::*;
       input iccm_bank_dout, iccm_bank_ecc
   );
 
+  modport veer_iccm_sink(
+      output clk,
+      // ICCM
+      input iccm_clken, iccm_wren_bank, iccm_addr_bank, iccm_bank_wr_data, iccm_bank_wr_ecc,
+      output iccm_bank_dout, iccm_bank_ecc
+  );
+
   modport veer_dccm(
       input clk,
       // DCCM
       output dccm_clken, dccm_wren_bank, dccm_addr_bank, dccm_wr_data_bank, dccm_wr_ecc_bank,
       input dccm_bank_dout, dccm_bank_ecc
+  );
+
+  modport veer_dccm_sink(
+      output clk,
+      // DCCM
+      input dccm_clken, dccm_wren_bank, dccm_addr_bank, dccm_wr_data_bank, dccm_wr_ecc_bank,
+      output dccm_bank_dout, dccm_bank_ecc
   );
 
   modport veer_sram_src(
@@ -145,6 +159,17 @@ import el2_pkg::*;
       // tag
       output ic_tag_clken_final, ic_tag_wren_q, ic_tag_wren_biten_vec, ic_tag_wr_data, ic_rw_addr_q,
       input ic_tag_data_raw_packed_pre,ic_tag_data_raw_pre
+  );
+
+  modport veer_icache_sink(
+      // cache uses the same clk as sram, we do not define clk port in this modport,
+      // assuming the clk will be connected in sram_src
+      // data
+      input ic_b_sb_wren, ic_b_sb_bit_en_vec, ic_sb_wr_data, ic_rw_addr_bank_q, ic_bank_way_clken_final, ic_bank_way_clken_final_up,
+      output wb_packeddout_pre, wb_dout_pre_up,
+      // tag
+      input ic_tag_clken_final, ic_tag_wren_q, ic_tag_wren_biten_vec, ic_tag_wr_data, ic_rw_addr_q,
+      output ic_tag_data_raw_packed_pre,ic_tag_data_raw_pre
   );
 
 endinterface

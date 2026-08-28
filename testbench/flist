@@ -7,6 +7,33 @@ $RV_ROOT/design/lib/el2_assert.sv
 $RV_ROOT/design/el2_mubi_pkg.sv
 $RV_ROOT/testbench/veer_wrapper.sv
 $RV_ROOT/design/el2_lockstep_pkg.sv
+$RV_ROOT/design/lib/el2_secded_13_8_enc.sv
+$RV_ROOT/design/lib/el2_secded_13_8_dec.sv
+$RV_ROOT/design/lib/el2_ecc_counter_8.sv
+$RV_ROOT/design/tmr/el2_tmr_voter.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_rdy.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_m_ch_ax.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_m_ch_b.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_m_ch_r.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_m_ch_w.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_m.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_s_ch_ax.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_s_ch_b.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_s_ch_r.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_s_ch_w.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_s.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_counter.sv
+$RV_ROOT/design/tmr/el2_tmr_axi.sv
+$RV_ROOT/design/tmr/el2_tmr_ic.sv
+$RV_ROOT/design/tmr/el2_tmr_iccm.sv
+$RV_ROOT/design/tmr/el2_tmr_dccm.sv
+$RV_ROOT/design/tmr/el2_tmr_dmi.sv
+$RV_ROOT/design/tmr/el2_tmr_complex_clk.sv
+$RV_ROOT/design/tmr/el2_tmr_complex_io.sv
+$RV_ROOT/design/tmr/el2_tmr_exec_ctrl.sv
+$RV_ROOT/design/tmr/el2_tmr_misc.sv
+$RV_ROOT/design/tmr/el2_tmr_pic.sv
+$RV_ROOT/design/el2_tmr_complex.sv
 $RV_ROOT/design/el2_veer_lockstep.sv
 $RV_ROOT/verification/block/dcls/el2_veer_lockstep_cov_if.sv
 $RV_ROOT/verification/block/dcls/el2_veer_lockstep_cov_bind.sv
@@ -53,8 +80,12 @@ $RV_ROOT/design/dmi/dmi_jtag_to_core_sync.v
 $RV_ROOT/design/dmi/rvjtag_tap.v
 $RV_ROOT/design/lib/el2_lib.sv
 $RV_ROOT/design/lib/el2_mem_if.sv
+$RV_ROOT/design/lib/el2_prim_generic_buf.sv
+$RV_ROOT/design/lib/el2_prim_buf.sv
+-y $RV_ROOT/design/lib
 -v $RV_ROOT/design/lib/beh_lib.sv
 -v $RV_ROOT/design/lib/mem_lib.sv
--y $RV_ROOT/design/lib
+-v $RV_ROOT/design/lib/ahb_to_axi4.sv
+-v $RV_ROOT/design/lib/axi4_to_ahb.sv
 -v $RV_ROOT/testbench/axi_lsu_dma_bridge.sv
 -v $RV_ROOT/testbench/user_cells.sv

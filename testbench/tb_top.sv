@@ -755,7 +755,12 @@ module tb_top
 
     tb_top_pkg::veer_sram_error_injection_mode_t error_injection_mode;
 
-`define DEC rvtop_wrapper.rvtop.veer.dec
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+`define VEER rvtop_wrapper.rvtop.veer
+`else
+`define VEER rvtop_wrapper.rvtop.tmr_complex.cores[0].veer
+`endif
+`define DEC `VEER.dec
 
 `ifdef RV_BUILD_AHB_LITE
     always_ff @(posedge core_clk)
@@ -864,6 +869,17 @@ module tb_top
                 if (mailbox_data[7:0] == 8'h86) begin
                     extintsrc_req[1] <= 1;
                 end
+            end
+            if(mailbox_write && (mailbox_data[7:0] == 8'h8a)) begin
+                force i_cpu_halt_req = 1'b1;
+                wait (o_cpu_halt_ack == 1'b1);
+                @(posedge core_clk);
+                release i_cpu_halt_req;
+                repeat (100) @(posedge core_clk);
+                force i_cpu_run_req = 1'b1;
+                wait (o_cpu_run_ack == 1'b1);
+                @(posedge core_clk);
+                release i_cpu_run_req;
             end
             if(mailbox_write && (mailbox_data[7:0] == 8'h90)) begin
                 extintsrc_req  <= {pt.PIC_TOTAL_INT-1{1'b0}};
@@ -1048,7 +1064,7 @@ module tb_top
             next_ic_error <= 0;
             ic_perr_r_d1  <= 0;
         end else begin
-            ic_perr_r_d1 <= rvtop_wrapper.rvtop.veer.dec.tlu.ic_perr_r;
+            ic_perr_r_d1 <= `VEER.dec.tlu.ic_perr_r;
             if (mailbox_write && mailbox_data[7:0] == 8'h89) begin
                 next_ic_error <= 1;
                 force rvtop_wrapper.rvtop.ic_rd_data = 142'h1;
@@ -1060,7 +1076,6 @@ module tb_top
     end
 
 `ifdef RV_LOCKSTEP_ENABLE
-`define VEER rvtop_wrapper.rvtop.veer
 `define LOCKSTEP rvtop_wrapper.rvtop.lockstep
 `define LOCKSTEP_CORE rvtop_wrapper.rvtop.lockstep.xshadow_core
 `define LOCKSTEP_CONST_DELAY_ASSERT_DISABLE rvtop_wrapper.rvtop.disable_const_delay_assertion

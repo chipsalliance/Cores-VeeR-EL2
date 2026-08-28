@@ -404,6 +404,166 @@ def dec_pmp_ctl_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
 
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_voter"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_voting",
+        "test_detection",
+        "test_enable",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_voter_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_axi/axi_m"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_faults",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_axi_m_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_axi/axi_s"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_faults",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_axi_s_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_axi/axi_counter"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_counting",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_axi_counter_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_if/tmr_iccm"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_faults",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_iccm_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_if/tmr_dccm"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_faults",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_dccm_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_if/tmr_ic"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_faults",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_ic_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_if/tmr_pic"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_faults",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_pic_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_if/tmr_misc"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_faults",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_misc_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_if/tmr_dmi"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_faults",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_dmi_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_if/tmr_exec"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_faults",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_exec_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["ecc_counter"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_counting",
+        "test_ecc_error",
+        "test_ecc_fatal",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def ecc_counter_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
 @nox.session(reuse_venv=True)
 def lint(session: nox.Session) -> None:
     """Options are defined in pyproject.toml and .flake8 files"""

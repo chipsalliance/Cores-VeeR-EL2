@@ -1,0 +1,2 @@
+`verilator_config
+forceable -module "el2_ecc_counter_8" -var "storage"

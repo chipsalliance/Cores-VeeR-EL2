@@ -39,7 +39,7 @@ DEFINES="$(sed -nr "$DEFINES_REGEX" $COMMON_DEFINES $PD_DEFINES $EL2_IFU_IC_MEM 
 
 # Skip files that should not be processed
 SKIP_DESIGN_FILES="el2_param.vh\|el2_pdef.vh\|common_defines.vh\|pd_defines.vh"
-DESIGN_FILES="$(find $DESIGN_DIR -name "*.sv" -o -name "*.vh" -o -name "*.v" | grep -v $SKIP_DESIGN_FILES)"
+DESIGN_FILES="$(find $DESIGN_DIR \( -name "*.sv" -o -name "*.vh" -o -name "*.svh" -o -name "*.h" -o -name "*.v" \) | grep -v $SKIP_DESIGN_FILES)"
 DESIGN_FILES+=" $EXTRA_DESIGN_FILES"
 MODULES="$(sed -nr "$MODULES_REGEX" $DESIGN_FILES | sort -ur)"
 
@@ -82,11 +82,19 @@ for DEFINE in $DEFINES; do
 	sed -i -E "s/((\`ifdef)|(\`ifndef)) $DEFINE/\1 "$PREFIX"$DEFINE/g" $DESIGN_FILES
 done
 
+# Explicitly prefix RV_BUILD_AHB_LITE to avoid collisions
+echo "Prefixing RV_BUILD_AHB_LITE macro"
+sed -i -E "s/((\`ifdef)|(\`ifndef)) RV_BUILD_AHB_LITE/\1 ${PREFIX}RV_BUILD_AHB_LITE/g" $DESIGN_FILES
+sed -i -E "s/\`RV_BUILD_AHB_LITE\b/\`${PREFIX}RV_BUILD_AHB_LITE/g" $DESIGN_FILES
+
 # Replace include names in RTL sources
 echo "Replacing include names in RTL sources"
 sed -i "s/include \"el2_param.vh\"/include \""$PREFIX"el2_param.vh\"/g" $DESIGN_FILES
 sed -i "s/include \"el2_pdef.vh\"/include \""$PREFIX"el2_pdef.vh\"/g" $DESIGN_FILES
 sed -i "s/include \"common_defines.vh\"/include \""$PREFIX"common_defines.vh\"/g" $OUTPUT_PD_DEFINES
+
+# Ensure .svh includes are also updated with prefix
+sed -i -E "s/include \"(el2_[a-zA-Z0-9_]+)\.svh\"/include \"${PREFIX}\1.svh\"/g" $DESIGN_FILES
 
 # Replace package name and its imports in RTL sources
 echo "Replacing package name and its imports in RTL sources"
@@ -120,6 +128,20 @@ perl -pi -e "s/(?<!${PREFIX})EL2_IC_TAG_PACKED_SRAM/${PREFIX}EL2_IC_TAG_PACKED_S
 perl -pi -e "s/(?<!${PREFIX})EL2_IC_TAG_SRAM/${PREFIX}EL2_IC_TAG_SRAM/g" $EL2_IFU_IC_MEM
 perl -pi -e "s/(?<!${PREFIX})EL2_PACKED_IC_DATA_SRAM/${PREFIX}EL2_PACKED_IC_DATA_SRAM/g" $EL2_IFU_IC_MEM
 perl -pi -e "s/(?<!${PREFIX})EL2_IC_DATA_SRAM/${PREFIX}EL2_IC_DATA_SRAM/g" $EL2_IFU_IC_MEM
+
+# Special handling for pic_map_auto.h (convert to .svh, let later step add prefix)
+PIC_MAP_FILE=$(find $DESIGN_DIR -name "pic_map_auto.h")
+
+if [ -n "$PIC_MAP_FILE" ]; then
+    PIC_DIR="$(dirname "$PIC_MAP_FILE")"
+    TEMP_PIC_FILE="$PIC_DIR/pic_map_auto.svh"
+
+    echo "Converting $PIC_MAP_FILE -> $TEMP_PIC_FILE"
+    mv "$PIC_MAP_FILE" "$TEMP_PIC_FILE"
+
+    # Update all references BEFORE prefixing
+    grep -rl "pic_map_auto.h" $DESIGN_DIR | xargs -r sed -i "s|pic_map_auto.h|pic_map_auto.svh|g"
+fi
 
 # Add prefix to design file names
 echo "Adding prefix to VeeR design file names"

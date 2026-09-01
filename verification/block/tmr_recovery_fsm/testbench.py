@@ -32,18 +32,19 @@ class RegBusItem(uvm_sequence_item):
         self.write = 0
         self.wraddr = 0
         self.wrdata = 0
+        self.en = 0
         self.wait_enable = False
-        self.sample = False
+        self.sample_bus = False
         self.drive_rddata = False
         self.noop = False
 
     def __str__(self):
         return (
-            f"RegBusItem(timestamp={self.timestamp}, "
+            f"RegBusItem(timestamp={self.timestamp}, en={self.en}, "
             + f"rdaddr={self.rdaddr}, rddata={self.rddata}, "
             + f"wraddr={self.wraddr}, wrdata={self.wrdata}, "
             + f"write={self.write}, wait_enable={self.wait_enable}, "
-            + f"sampe={self.sample}, drive_rddata={self.drive_rddata}, noop={self.noop}"
+            + f"sample_bus={self.sample_bus}, drive_rddata={self.drive_rddata}, noop={self.noop}"
             + ")"
         )
 
@@ -52,8 +53,8 @@ class ExtFlagsItem(uvm_sequence_item):
 
     def __init__(self, name="ExtFlagsItem"):
         super().__init__(name)
-        self.ext = 0
-        self.clr = 0
+        self.ext = MuBiFalse
+        self.clr = MuBiFalse
         self.drive_ext = False
         self.wait_for_clr = False
         self.timestamp = 0
@@ -161,7 +162,7 @@ class RegBusMonitor(uvm_monitor):
                 item.write = self.signals["wen"].value
                 item.wraddr = self.signals["wraddr"].value
                 item.wrdata = self.signals["wrdata"].value
-                self.logger.debug(f"RegBus: {str(read_item)}")
+                self.logger.debug(f"RegBus: {str(item)}")
                 self.ap.write(item)
 
 
@@ -192,6 +193,7 @@ class RegBusDriver(uvm_driver):
                 self.seq_item_port.item_done()
             elif it.sample_bus:
                 ans = RegBusItem()
+                ans.en = self.signals["en"].value
                 ans.rdaddr = self.signals["rdaddr"].value
                 ans.write = self.signals["wen"].value
                 ans.wraddr = self.signals["wraddr"].value
@@ -200,6 +202,7 @@ class RegBusDriver(uvm_driver):
             elif it.drive_rddata:
                 self.signals["rddata"].value = it.rddata
                 await RisingEdge(self.clock_domain.clk)
+                await ReadWrite()
                 self.seq_item_port.item_done()
             elif it.noop:
                 await RisingEdge(self.clock_domain.clk)
@@ -271,6 +274,7 @@ class ExternalFlagDriver(uvm_driver):
                 while self.signals["clr"].value != MuBiTrue:
                     await RisingEdge(self.clock_domain.clk)
                     await ReadWrite()
+                ans.clr = self.signals["clr"].value
             self.seq_item_port.item_done(rsp=ans)
 
 
@@ -363,12 +367,15 @@ class CPUCtrlStatusDriver(uvm_driver):
                 ):
                     await RisingEdge(self.clock_domain.clk)
                     await ReadWrite()
+                self.seq_item_port.item_done()
             elif it.sample:
-                ans = ExtFlagsItem()
+                ans = CPUCtrlStatusItem()
                 ans.i_cpu_halt_req = self.signals["i_cpu_halt_req"].value
                 ans.i_cpu_run_req = self.signals["i_cpu_run_req"].value
                 ans.mpc_reset_run_req = self.signals["mpc_reset_run_req"].value
                 self.seq_item_port.item_done(rsp=ans)
+            else:
+                assert False, f"{it}"
 
     async def run_soc_side(self):
         while True:
@@ -389,12 +396,15 @@ class CPUCtrlStatusDriver(uvm_driver):
                 ):
                     await RisingEdge(self.clock_domain.clk)
                     await ReadWrite()
+                self.seq_item_port.item_done()
             elif it.sample:
-                ans = ExtFlagsItem()
+                ans = CPUCtrlStatusItem()
                 ans.o_cpu_halt_ack = self.signals["o_cpu_halt_ack"].value
                 ans.o_cpu_halt_status = self.signals["o_cpu_halt_status"].value
                 ans.o_cpu_run_ack = self.signals["o_cpu_run_ack"].value
                 self.seq_item_port.item_done(rsp=ans)
+            else:
+                assert False, f"{it}"
 
     async def run_phase(self):
         if self.cpu_side:
@@ -437,6 +447,33 @@ class ResetSignalMonitor(uvm_monitor):
 
                 self.ap.write(item)
                 prev_sync_rst = curr_sync_rst
+
+
+class ResetSignalDriver(uvm_driver):
+    """
+    Drives the reset interface
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.signals = kwargs["signals"]
+        self.clock_domain = kwargs["clock_domain"]
+
+        del kwargs["signals"]
+        del kwargs["clock_domain"]
+        super().__init__(*args, **kwargs)
+
+    async def run_phase(self):
+        while True:
+            it = await self.seq_item_port.get_next_item()
+            assert isinstance(it, ResetStatusItem)
+            await ReadWrite()
+            if it.wait_reset_low:
+                while self.signals["sync_rst_l"].value == 1:
+                    await RisingEdge(self.clock_domain.clk)
+                    await ReadWrite()
+                self.seq_item_port.item_done()
+            else:
+                assert False, f"{it}"
 
 
 class FatalSignalMonitor(uvm_monitor):

@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+# Perl script to generate input for the espresso tool
+# The input contains mapping from linear space to CSR addresses
+
 use Getopt::Long;
 
 use integer;

@@ -18,6 +18,7 @@ EXTRA_ARGS = -I$(SRCDIR)/include/
 VERILOG_SOURCES = \
     $(SRCDIR)/lib/el2_assert.sv \
     $(SRCDIR)/el2_mubi_pkg.sv \
+    $(SRCDIR)/tmr/el2_tmr_3way_fatal_check_mubi.sv \
     $(SRCDIR)/tmr/el2_tmr_recovery_fsm.sv
 
 include $(TEST_DIR)/../common.mk

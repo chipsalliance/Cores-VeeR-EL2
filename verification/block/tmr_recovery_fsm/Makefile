@@ -15,6 +15,13 @@ MODULE    ?= $(subst $(space),$(comma),$(subst .py,,$(TEST_FILES)))
 TOPLEVEL   = el2_tmr_recovery_fsm
 EXTRA_ARGS = -I$(SRCDIR)/include/
 
+COMPILE_ARGS = \
+ -DRV_MUBI_WIDTH=2 \
+ -DRV_MUBI_TRUE=2 \
+ -DRV_MUBI_FALSE=1 \
+ -DRV_TRIPLE_MODULAR_REDUNDANCY_ENABLE=1 \
+ -DRV_USER_MODE=1
+
 VERILOG_SOURCES = \
     $(SRCDIR)/lib/el2_assert.sv \
     $(SRCDIR)/el2_mubi_pkg.sv \

@@ -948,52 +948,63 @@ module el2_tmr_complex
 
   //-------------------------------------------------------------------
   // Global TMR fault state and control
+  el2_mubi_pkg::el2_mubi_t tmr_fault;
+  el2_mubi_pkg::el2_mubi_t recovery_fault;
 
-  el2_mubi_pkg::el2_mubi_t tmr_fault_d[3];
   el2_mubi_pkg::el2_mubi_t tmr_fault_q[3];
-  el2_mubi_pkg::el2_mubi_t tmr_fault_clr[3];
+  el2_mubi_pkg::el2_mubi_t tmr_fault_clr;
 
   // TODO: Potentially move the following to a new "el2_tmr_fault" module
-  generate for(genvar i=0; i<3; i=i+1) begin
-    assign axi_fault_d[i]    = tmr_fault_d[i];
-    assign axi_fault_clr[i]  = tmr_fault_clr[i];
+  generate for(genvar i=0; i<3; i=i+1) begin : fault
+    el2_mubi_pkg::el2_mubi_t tmr_fault_d;
+    el2_mubi_pkg::el2_mubi_t tmr_fault_r;
+    el2_mubi_pkg::el2_mubi_t tmr_fault_r_next;
 
-    assign iccm_fault_d[i]   = tmr_fault_d[i];
-    assign iccm_fault_clr[i] = tmr_fault_clr[i];
+    assign axi_fault_d[i]    = tmr_fault_d;
+    assign axi_fault_clr[i]  = tmr_fault_clr;
 
-    assign dccm_fault_d[i]   = tmr_fault_d[i];
-    assign dccm_fault_clr[i] = tmr_fault_clr[i];
+    assign iccm_fault_d[i]   = tmr_fault_d;
+    assign iccm_fault_clr[i] = tmr_fault_clr;
 
-    assign ic_fault_d[i]     = tmr_fault_d[i];
-    assign ic_fault_clr[i]   = tmr_fault_clr[i];
+    assign dccm_fault_d[i]   = tmr_fault_d;
+    assign dccm_fault_clr[i] = tmr_fault_clr;
 
-    assign pic_fault_d[i]    = tmr_fault_d[i];
-    assign pic_fault_clr[i]  = tmr_fault_clr[i];
+    assign ic_fault_d[i]     = tmr_fault_d;
+    assign ic_fault_clr[i]   = tmr_fault_clr;
 
-    assign dmi_fault_d[i]    = tmr_fault_d[i];
-    assign dmi_fault_clr[i]  = tmr_fault_clr[i];
+    assign pic_fault_d[i]    = tmr_fault_d;
+    assign pic_fault_clr[i]  = tmr_fault_clr;
 
-    assign misc_fault_d[i]   = tmr_fault_d[i];
-    assign misc_fault_clr[i] = tmr_fault_clr[i];
+    assign dmi_fault_d[i]    = tmr_fault_d;
+    assign dmi_fault_clr[i]  = tmr_fault_clr;
 
-    assign exec_fault_d[i]   = tmr_fault_d[i];
-    assign exec_fault_clr[i] = tmr_fault_clr[i];
+    assign misc_fault_d[i]   = tmr_fault_d;
+    assign misc_fault_clr[i] = tmr_fault_clr;
 
+    assign exec_fault_d[i]   = tmr_fault_d;
+    assign exec_fault_clr[i] = tmr_fault_clr;
+
+    // Aggregate ALL TMR fault state signals
     assign tmr_fault_q[i]  = mubi_or3(
       mubi_or3(ic_fault_q[i],   dmi_fault_q[i],  misc_fault_q[i]),
       mubi_or3(axi_fault_q[i],  iccm_fault_q[i], exec_fault_q[i]),
       mubi_or3(dccm_fault_q[i], pic_fault_q[i],  axi_count_fatal)
     );
 
-     // TODO: Aggregate ALL TMR fault state signals
+    // Store TMR fault
+    assign tmr_fault_r_next =
+      (tmr_fault_clr) ? El2MuBiFalse : mubi_or3(tmr_fault_r, tmr_fault_q[i], recovery_fault);
+
+    rvmubidff dff (.*, .din(tmr_fault_r_next), .dout(tmr_fault_r));
+
+    // Connect the registered fault state output to fault state input. This way
+    // all independent fault detection blocks can inform each other.
+    assign tmr_fault_d = tmr_fault_r;
 
   end endgenerate
 
-  // FIXME: Remove fault stubs
-  generate for(genvar i=0; i<3; i=i+1) begin
-    assign tmr_fault_d[i] = El2MuBiFalse;
-    assign tmr_fault_clr[i] = El2MuBiFalse;
-  end endgenerate
+  // Aggregate fault status of each core to one fault signal
+  assign tmr_fault = mubi_or3(tmr_fault_q[0], tmr_fault_q[1], tmr_fault_q[2]);
 
   //-------------------------------------------------------------------
 
@@ -1070,13 +1081,15 @@ module el2_tmr_complex
   el2_tmr_exec_ctrl el2_tmr_exec_ctrl_u (.*);
   el2_tmr_misc el2_tmr_misc_u (.*);
 
+  logic sync_rst_l;
+
   el2_tmr_recovery_fsm el2_tmr_recovery_fsm_u (
       .*,
       .faulty_core(tmr_fault_q),
-      .external_flag(el2_mubi_pkg::El2MuBiFalse),
-      .clear_external_flag(),
-      .sync_rst_l(),
-      .fatal_err()
+      .external_flag(tmr_fault),
+      .clear_external_flag(tmr_fault_clr),
+      .sync_rst_l(sync_rst_l),
+      .fatal_err(recovery_fault)
   );
 
   for (genvar i=0;i < 3; i+=1) begin: cores
@@ -1117,7 +1130,7 @@ module el2_tmr_complex
     // VeeR core
     el2_veer #(.pt(pt)) veer (
         .clk(clk),
-        .rst_l(rst_l),
+        .rst_l(rst_l & sync_rst_l),
         .dbg_rst_l(dbg_rst_l),
         .rst_vec(rst_vec_veer[i]),
         .nmi_int(nmi_int_veer[i]),

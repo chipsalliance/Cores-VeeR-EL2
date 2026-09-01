@@ -118,4 +118,15 @@ package el2_mubi_pkg;
     return el2_mubi_t'(out);
   endfunction : mubi_and3
 
+  function automatic el2_mubi_t el2_mubi_mux_el2_mubi_true (
+      el2_mubi_t sel, el2_mubi_t match, el2_mubi_t mismatch
+    );
+    el2_mubi_t steps [El2MuBiWidth];
+    steps[0] = El2MuBiTrue[0] == sel[0] ? match : mismatch;
+    for (int i=1; i < El2MuBiWidth; ++i) begin
+      steps[i] = El2MuBiTrue[i] == sel[i] ? steps[i-1] : mismatch;
+    end
+    return steps[El2MuBiWidth-1];
+  endfunction : el2_mubi_mux_el2_mubi_true
+
 endpackage

@@ -72,9 +72,9 @@ module el2_tmr_recovery_fsm
 );
 
 `ifdef RV_USER_MODE
-  localparam int csr_cnt = 146;
-`else
   localparam int csr_cnt = 163;
+`else
+  localparam int csr_cnt = 146;
 `endif
 
   logic recovery_state_en;
@@ -98,7 +98,9 @@ module el2_tmr_recovery_fsm
     assign ext_o_cpu_halt_status_veer[i] = o_cpu_halt_status_veer[i];
     assign ext_o_cpu_run_ack_veer[i] = o_cpu_run_ack_veer[i];
   end
-  assign sync_rst_l = recovery_state == RESTART_CPU;
+  assign sync_rst_l = recovery_state == RESET_CPU;
+  assign int_i_cpu_halt_req_veer = recovery_state == HALT_CORES;
+  assign int_i_cpu_run_req_veer = recovery_state == RESTART_CPU;
   rvtmr #(1) halt_ack_tmr_m (.I(o_cpu_halt_ack_veer), .O(int_o_cpu_halt_ack_veer));
   rvtmr #(1) run_ack_tmr_m (.I(o_cpu_run_ack_veer), .O(int_o_cpu_run_ack_veer));
   rvtmr #(1) halt_status_tmr_m (.I(o_cpu_halt_status_veer), .O(int_o_cpu_halt_status_veer));
@@ -259,69 +261,101 @@ module el2_tmr_recovery_fsm
     el2_mubi_t read_reg_flag_int;
     el2_mubi_t nxread_reg_flag;
     logic read_reg_flag_clr;
-    rvdffsc #(El2MuBiWidth) read_reg_flag_ff (.*,
-          .din(nxread_reg_flag),
-          .dout(read_reg_flag_r[i]),
-          .clear(read_reg_flag_clr),
-          .en(1'b1)
+    rvdff #(El2MuBiWidth) read_reg_flag_ff (.*,
+      .din(nxread_reg_flag),
+      .dout(read_reg_flag_r[i])
     );
     rvtmr #(El2MuBiWidth) read_reg_flag_tmr (.I(read_reg_flag_r), .O(read_reg_flag_int));
     assign nxread_reg_flag = el2_mubi_mux_el2_mubi_true(
-      .sel(el2_mubi_recovery_state_comp(recovery_state, SET_FLAG_RD)),
+      .sel(el2_mubi_reg_comp(32'(recovery_state), 32'(SET_FLAG_RD))),
       .match(El2MuBiTrue),
-      .mismatch(read_reg_flag_int));
-    assign read_reg_flag_clr = mubi_check_true(el2_mubi_recovery_state_comp(recovery_state, CLEAR_FLAG_RD));
+      .mismatch(el2_mubi_mux_el2_mubi_true(
+          .sel(el2_mubi_reg_comp(32'(recovery_state), 32'(CLEAR_FLAG_RD))),
+          .match(El2MuBiFalse),
+          .mismatch(el2_mubi_mux_el2_mubi_true(
+              .sel(el2_mubi_reg_comp(32'(read_reg_flag_int), 32'h0)),
+              .match(El2MuBiFalse),
+              .mismatch(read_reg_flag_int)
+            )
+          )
+        )
+      )
+    );
 
     // CPU clear flag
     el2_mubi_t cpu_clear_flag_int;
     el2_mubi_t nxcpu_clear_flag;
     logic cpu_clear_flag_clr;
-    rvdffsc #(El2MuBiWidth) cpu_clear_flag_ff (.*,
-          .din(nxcpu_clear_flag),
-          .dout(cpu_clear_flag_r[i]),
-          .clear(cpu_clear_flag_clr),
-          .en(1'b1)
+    rvdff #(El2MuBiWidth) cpu_clear_flag_ff (.*,
+      .din(nxcpu_clear_flag),
+      .dout(cpu_clear_flag_r[i])
     );
     rvtmr #(El2MuBiWidth) cpu_clear_flag_tmr (.I(cpu_clear_flag_r), .O(cpu_clear_flag_int));
     assign nxcpu_clear_flag = el2_mubi_mux_el2_mubi_true(
-      .sel(el2_mubi_recovery_state_comp(recovery_state, SET_FLAG_CC)),
+      .sel(el2_mubi_reg_comp(32'(recovery_state), 32'(SET_FLAG_CC))),
       .match(El2MuBiTrue),
-      .mismatch(cpu_clear_flag_int));
-    assign cpu_clear_flag_clr = mubi_check_true(el2_mubi_recovery_state_comp(recovery_state, CLEAR_FLAG_CC));
+      .mismatch(el2_mubi_mux_el2_mubi_true(
+          .sel(el2_mubi_reg_comp(32'(recovery_state), 32'(CLEAR_FLAG_CC))),
+          .match(El2MuBiFalse),
+          .mismatch(el2_mubi_mux_el2_mubi_true(
+              .sel(el2_mubi_reg_comp(32'(cpu_clear_flag_int), 32'h0)),
+              .match(El2MuBiFalse),
+              .mismatch(cpu_clear_flag_int)
+            )
+          )
+        )
+      )
+    );
 
     // State recoverd flag
     el2_mubi_t state_recovered_flag_int;
     el2_mubi_t nxstate_recovered_flag;
     logic state_recovered_flag_clr;
-    rvdffsc #(El2MuBiWidth) state_recovered_flag_ff (.*,
+    rvdff #(El2MuBiWidth) state_recovered_flag_ff (.*,
           .din(nxstate_recovered_flag),
-          .dout(state_recovered_flag_r[i]),
-          .clear(state_recovered_flag_clr),
-          .en(1'b1)
+          .dout(state_recovered_flag_r[i])
     );
     rvtmr #(El2MuBiWidth) state_recovered_flag_tmr (.I(state_recovered_flag_r), .O(state_recovered_flag_int));
     assign nxstate_recovered_flag = el2_mubi_mux_el2_mubi_true(
-      .sel(el2_mubi_recovery_state_comp(recovery_state, SET_FLAG_SR)),
+      .sel(el2_mubi_reg_comp(32'(recovery_state), 32'(SET_FLAG_SR))),
       .match(El2MuBiTrue),
-      .mismatch(state_recovered_flag_int));
-    assign state_recovered_flag_clr = mubi_check_true(el2_mubi_recovery_state_comp(recovery_state, CLEAR_FLAG_SR));
+      .mismatch(el2_mubi_mux_el2_mubi_true(
+          .sel(el2_mubi_reg_comp(32'(recovery_state), 32'(CLEAR_FLAG_SR))),
+          .match(El2MuBiFalse),
+          .mismatch(el2_mubi_mux_el2_mubi_true(
+              .sel(el2_mubi_reg_comp(32'(state_recovered_flag_int), 32'h0)),
+              .match(El2MuBiFalse),
+              .mismatch(state_recovered_flag_int)
+            )
+          )
+        )
+      )
+    );
 
     // CPU running flag
     el2_mubi_t cpu_running_flag_int;
     el2_mubi_t nxcpu_running_flag;
     logic cpu_running_flag_clr;
-    rvdffsc #(El2MuBiWidth) cpu_running_flag_ff (.*,
+    rvdff #(El2MuBiWidth) cpu_running_flag_ff (.*,
           .din(nxcpu_running_flag),
-          .dout(cpu_running_flag_r[i]),
-          .clear(cpu_running_flag_clr),
-          .en(1'b1)
+          .dout(cpu_running_flag_r[i])
     );
     rvtmr #(El2MuBiWidth) cpu_running_flag_tmr (.I(cpu_running_flag_r), .O(cpu_running_flag_int));
     assign nxcpu_running_flag = el2_mubi_mux_el2_mubi_true(
-      .sel(el2_mubi_recovery_state_comp(recovery_state, SET_FLAG_CR)),
+      .sel(el2_mubi_reg_comp(32'(recovery_state), 32'(SET_FLAG_CR))),
       .match(El2MuBiTrue),
-      .mismatch(cpu_running_flag_int));
-    assign cpu_running_flag_clr = mubi_check_true(el2_mubi_recovery_state_comp(recovery_state, CLEAR_FLAG_CR));
+      .mismatch(el2_mubi_mux_el2_mubi_true(
+          .sel(el2_mubi_reg_comp(32'(recovery_state), 32'(CLEAR_FLAG_CR))),
+          .match(El2MuBiFalse),
+          .mismatch(el2_mubi_mux_el2_mubi_true(
+              .sel(el2_mubi_reg_comp(32'(cpu_running_flag_int), 32'h0)),
+              .match(El2MuBiFalse),
+              .mismatch(cpu_running_flag_int)
+            )
+          )
+        )
+      )
+    );
   end
 
   el2_mubi_t read_reg_flag;
@@ -333,7 +367,7 @@ module el2_tmr_recovery_fsm
   el2_mubi_t cpu_running_flag;
   rvtmr #(El2MuBiWidth) cpu_running_flag_final_tmr (.I(cpu_running_flag_r), .O(cpu_running_flag));
 
-  assign clear_external_flag = el2_mubi_recovery_state_comp(recovery_state, CLEAR_FLAG_ERR);
+  assign clear_external_flag = el2_mubi_reg_comp(32'(recovery_state), 32'(CLEAR_FLAG_ERR));
 
   // Recovery state Machine
   always_comb begin : RECOVERY_SM
@@ -465,31 +499,6 @@ module el2_tmr_recovery_fsm
 
 endmodule
 
-module el2_tmr_3way_fatal_check_mubi
-#(
-  parameter unsigned Width=1
-)
-(
-  input  logic [Width-1:0] in[3],
-  output el2_mubi_pkg::el2_mubi_t fatal
-);
-
-  logic cmp_t[3], cmp_c[3];
-  assign cmp_t[0] = in[0] == in[1];
-  assign cmp_t[1] = in[1] == in[2];
-  assign cmp_t[2] = in[0] == in[2];
-  assign cmp_c[0] = in[0] != in[1];
-  assign cmp_c[1] = in[1] != in[2];
-  assign cmp_c[2] = in[0] != in[2];
-
-  for (genvar i=0; i < el2_mubi_pkg::El2MuBiWidth; ++i) begin : per_bit_voter
-    if (el2_mubi_pkg::El2MuBiTrue[i])
-      rvtmr fatal_t_tmr(.I(cmp_t), .O(fatal[i]));
-    else
-      rvtmr fatal_c_tmr(.I(cmp_c), .O(fatal[i]));
-  end
-endmodule
-
 module el2_tmr_csr_addr_decode
 (
     input  logic [ 7:0] counter,
@@ -531,17 +540,6 @@ function automatic recovery_state_t el2_mubi_mux_recovery_state_false (
   return steps[el2_mubi_pkg::El2MuBiWidth-1];
 endfunction : el2_mubi_mux_recovery_state_false
 
-function automatic el2_mubi_pkg::el2_mubi_t el2_mubi_mux_el2_mubi_true (
-    el2_mubi_pkg::el2_mubi_t sel, el2_mubi_pkg::el2_mubi_t match, el2_mubi_pkg::el2_mubi_t mismatch
-  );
-  el2_mubi_pkg::el2_mubi_t steps [el2_mubi_pkg::El2MuBiWidth];
-  steps[0] = el2_mubi_pkg::El2MuBiTrue[0] == sel[0] ? match : mismatch;
-  for (int i=1; i < el2_mubi_pkg::El2MuBiWidth; ++i) begin
-    steps[i] = el2_mubi_pkg::El2MuBiTrue[i] == sel[i] ? steps[i-1] : mismatch;
-  end
-  return steps[el2_mubi_pkg::El2MuBiWidth-1];
-endfunction : el2_mubi_mux_el2_mubi_true
-
 function automatic el2_mubi_pkg::el2_mubi_t el2_mubi_reg_comp (
     logic [31:0] a, logic [31:0] b
   );
@@ -549,22 +547,10 @@ function automatic el2_mubi_pkg::el2_mubi_t el2_mubi_reg_comp (
   logic t, c;
   t = a == b;
   c = a != b;
-  for (int i=1; i < el2_mubi_pkg::El2MuBiWidth; ++i) begin
+  for (int i=0; i < el2_mubi_pkg::El2MuBiWidth; ++i) begin
     out[i] = el2_mubi_pkg::El2MuBiTrue[i] ? t : c;
   end
   return el2_mubi_pkg::el2_mubi_t'(out);
 endfunction : el2_mubi_reg_comp
 
-function automatic el2_mubi_pkg::el2_mubi_t el2_mubi_recovery_state_comp (
-    recovery_state_t a, recovery_state_t b
-  );
-  logic [el2_mubi_pkg::El2MuBiWidth-1:0] out;
-  logic t, c;
-  t = a == b;
-  c = a != b;
-  for (int i=1; i < el2_mubi_pkg::El2MuBiWidth; ++i) begin
-    out[i] = el2_mubi_pkg::El2MuBiTrue[i] ? t : c;
-  end
-  return el2_mubi_pkg::el2_mubi_t'(out);
-endfunction : el2_mubi_recovery_state_comp
 `endif

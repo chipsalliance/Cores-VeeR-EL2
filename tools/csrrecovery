@@ -96,9 +96,13 @@ printf(".type fr\n");
 $cnt=0;
 foreach $csr (sort keys %csrs) {
     foreach $csr_addr (@{$csrs{$csr}}) {
+        if (!(defined $first_csr)) {
+            $first_csr=$csr_addr
+        }
         printf("%s %s\n", d2bl($cnt++, $len), $csr_addr);
     }
 }
+printf("%s %s\n", d2bl($cnt, $len), $first_csr);
 
 exit;
 

@@ -109,7 +109,7 @@ module el2_tmr_recovery_fsm
     assign ext_o_cpu_halt_status_veer[i] = o_cpu_halt_status_veer[i];
     assign ext_o_cpu_run_ack_veer[i] = o_cpu_run_ack_veer[i];
   end
-  assign sync_rst_l = recovery_state == RESET_CPU;
+  assign sync_rst_l = recovery_state != RESET_CPU;
   assign int_i_cpu_halt_req_veer = recovery_state == HALT_CORES;
   assign int_i_cpu_run_req_veer = recovery_state == RESTART_CPU;
   rvtmr #(1) halt_ack_tmr_m (.I(o_cpu_halt_ack_veer), .O(int_o_cpu_halt_ack_veer));
@@ -130,7 +130,7 @@ module el2_tmr_recovery_fsm
     logic [7:0] cnt_csr_int;
     rvdffsc #(8) cnt_csr_ff (.*, .din(cnt_nxtcsr[i]), .dout(cnt_csr[i]), .clear(cnt_csr_clr[i]), .en(1'b1));
     rvtmr #(8) cnt_csr_tmr (.I(cnt_csr), .O(cnt_csr_int));
-    assign cnt_nxtcsr[i] = cnt_csr_inc[i] ? 8'(cnt_csr_int + 8'h1) : cnt_csr_int;
+    assign cnt_nxtcsr[i] = cnt_csr_inc[i] & !(cnt_csr[i] == 8'(csr_cnt)) ? 8'(cnt_csr_int + 8'h1) : cnt_csr_int;
     assign cnt_csr_clr[i] = (recovery_nxstate != recovery_state) & recovery_state_en;
   end
 
@@ -138,7 +138,7 @@ module el2_tmr_recovery_fsm
     logic [5:0] cnt_gpr_int;
     rvdffsc #(6) cnt_gpr_ff (.*, .din(cnt_nxtgpr[i]), .dout(cnt_gpr[i]), .clear(cnt_gpr_clr[i]), .en(1'b1));
     rvtmr #(6) cnt_gpr_tmr (.I(cnt_gpr), .O(cnt_gpr_int));
-    assign cnt_nxtgpr[i] = 6'(cnt_gpr_int + 6'h1);
+    assign cnt_nxtgpr[i] = cnt_gpr_inc[i] & !cnt_gpr[i][5] ? 6'(cnt_gpr_int + 6'h1) : cnt_gpr_int;
     assign cnt_gpr_clr[i] = (recovery_nxstate != recovery_state) & recovery_state_en;
   end
 
@@ -202,7 +202,7 @@ module el2_tmr_recovery_fsm
 
   logic [csr_cnt-1:0] csr_we;
   logic [csr_cnt-1:0] csr_src;
-  logic [csr_cnt-1:0] csr_re;
+  logic [csr_cnt:0] csr_re;
   rvtmr #(32) csr_tmr (.I(recovery_csr_rddata_veer_d), .O(csr_with_ecc_wr[0+:32]));
   rvecc_encode csr_ecc_enc (.din(csr_with_ecc_wr[0+:32]), .ecc_out(csr_with_ecc_wr[32+:7]));
   rvecc_decode csr_ecc_dec (
@@ -211,18 +211,24 @@ module el2_tmr_recovery_fsm
   );
 
   for(genvar i=0; i < csr_cnt; ++i) begin : csr_reg_storage
-    assign csr_we[i]  = (cnt_csr[0] == 8'(i)) & mubi_check_true(all_csr_ready);
-    assign csr_src[i] = (cnt_csr[1] == 8'(i)) & mubi_check_true(all_csr_ready);
+    assign csr_we[i]  = (cnt_csr[0] == 8'(i)) & mubi_check_true(all_csr_ready) & (recovery_state == READ_REG);
+    assign csr_src[i] = (cnt_csr[1] == 8'(i)) & mubi_check_true(all_csr_ready) & (recovery_state == READ_REG);
     assign csr_re[i]  = (cnt_csr[2] == 8'(i));
     logic [38:0] csr_recovery_storage_int;
     assign csr_recovery_storage_int = csr_src[i] ? csr_with_ecc_wr : csr_recovery_storage[i];
     rvdffs #(39) csr_recovery_storage_ff (.*, .din(csr_recovery_storage_int), .dout(csr_recovery_storage[i]), .en(csr_we[i]));
   end
+  assign csr_recovery_storage[csr_cnt] = csr_recovery_storage[0];
+  assign csr_re[csr_cnt] = (cnt_csr[2] == 8'(csr_cnt));
+  // Wrap i = csr_cnt to CSR 0
+  logic  csr_wrap;
+  assign csr_wrap = (cnt_csr[2] == csr_cnt);
   always_comb begin
     csr_with_ecc_rd = '0;
     for (int i=0; i < csr_cnt; ++i) begin
       csr_with_ecc_rd |= ({39{csr_re[i]}} & csr_recovery_storage[i]);
     end
+    csr_with_ecc_rd |= ({39{csr_wrap}} & csr_recovery_storage[0]);
   end
 
   logic [38:0] gpr_recovery_storage [32];
@@ -240,9 +246,9 @@ module el2_tmr_recovery_fsm
   );
 
   for(genvar i=0; i < 32; ++i) begin : gpr_reg_storage
-    assign gpr_we[i]  = (cnt_gpr[0] == 6'(i)) & mubi_check_true(all_gpr_ready);
-    assign gpr_src[i] = (cnt_gpr[1] == 6'(i)) & mubi_check_true(all_gpr_ready);
-    assign gpr_re[i]  = (cnt_gpr[2] == 6'(i));
+    assign gpr_we[i]  = (cnt_gpr[0][4:0] == 5'(i)) & mubi_check_true(all_gpr_ready) & (recovery_state == READ_REG);
+    assign gpr_src[i] = (cnt_gpr[1][4:0] == 5'(i)) & mubi_check_true(all_gpr_ready) & (recovery_state == READ_REG);
+    assign gpr_re[i]  = (cnt_gpr[2][4:0] == 5'(i));
     logic [38:0] gpr_recovery_storage_int;
     assign gpr_recovery_storage_int = gpr_src[i] ? gpr_with_ecc_wr : gpr_recovery_storage[i];
     rvdffs #(39) gpr_recovery_storage_ff (.*, .din(gpr_recovery_storage_int), .dout(gpr_recovery_storage[i]), .en(gpr_we[i]));
@@ -255,10 +261,10 @@ module el2_tmr_recovery_fsm
   end
 
   for(genvar i=0; i < 3; ++i) begin : cnt_inc_logic
-    assign cnt_csr_inc[i] = recovery_state == READ_REG ? csr_with_ecc_wr == csr_with_ecc_rd :
-      recovery_state == WRITE_REG ? csr_wrdata == recovery_csr_rddata_veer[i]: 1'b1;
-    assign cnt_gpr_inc[i] = recovery_state == READ_REG ? gpr_with_ecc_wr == gpr_with_ecc_rd :
-      recovery_state == WRITE_REG ? gpr_wrdata == recovery_gpr_rddata_veer[i]: 1'b1;
+    assign cnt_csr_inc[i] = recovery_state == READ_REG ? csr_with_ecc_wr == csr_with_ecc_rd & mubi_check_true(all_csr_ready) :
+      recovery_state == WRITE_REG ? csr_wrdata == recovery_csr_rddata_veer[i] & mubi_check_true(all_csr_ready) : 1'b1;
+    assign cnt_gpr_inc[i] = recovery_state == READ_REG ? gpr_with_ecc_wr == gpr_with_ecc_rd & mubi_check_true(all_gpr_ready) :
+      recovery_state == WRITE_REG ? gpr_wrdata == recovery_gpr_rddata_veer[i] & mubi_check_true(all_csr_ready) : 1'b1;
   end
 
   // Flags
@@ -518,10 +524,10 @@ module el2_tmr_csr_addr_decode
 
   // To generate MU mode CSR decode logic
   // 1.  csrrecovery -in csrdecode_mu > csrrecovery_mu.e
-  // 2.  espresso -Dso -oeqntott csrdecode_mu.e | ./addassign > csrrecovery_mu.svh
+  // 2.  espresso -Dso -oeqntott csrrecovery_mu.e | ./addassign > csrrecovery_mu.svh
   // To generate M-only mode CSR decode logic
   // 1.  csrrecovery -in csrdecode_m > csrrecovery_m.e
-  // 2.  espresso -Dso -oeqntott csrdecode_m.e | ./addassign > csrrecovery_m.svh
+  // 2.  espresso -Dso -oeqntott csrrecovery_m.e | ./addassign > csrrecovery_m.svh
 `ifdef RV_USER_MODE
   `include "csrrecovery_mu.svh"
 `else

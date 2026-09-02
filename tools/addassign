@@ -33,7 +33,7 @@ foreach $line (@in) {
     }
 
     if ($line=~/([^=]+)=\s*\(\s*\);/) {
-        printf("assign ${prefix}$1 = 1'b0;\n");
+        printf("assign ${prefix}$1 = 1'b1;\n");
         next;
     }
 

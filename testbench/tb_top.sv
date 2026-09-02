@@ -4210,4 +4210,145 @@ jtagdpi #(
   assign jtag_trst_n = 1'b0;
 `endif
 
+// Quick and dirty TMR test ///////////////////////////////////////////////////
+//
+// Randomly injects upsets to core GPRs. To enable run simulation with
+// "+upsets" plusarg. Upset intervals are counted in clock cycles.
+
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+
+`define VEER0 rvtop_wrapper.rvtop.tmr_complex.cores[0].veer
+`define VEER1 rvtop_wrapper.rvtop.tmr_complex.cores[1].veer
+`define VEER2 rvtop_wrapper.rvtop.tmr_complex.cores[2].veer
+
+task tmr_upsetter();
+
+  integer delay = 150; // Fixed delay to the first upset
+  integer which_cpu;
+  integer which_reg;
+
+  $display("Upsetter running...");
+  forever begin
+
+    repeat (delay) @(posedge core_clk);
+    delay = 100000 + $urandom() % 100000;
+
+    which_cpu = $urandom() % 3;
+    which_reg = 1 + $urandom() % 31;
+    $display("[%0t] Upset! core:%0d, gpr:x%0d", $time, which_cpu, which_reg);
+    if (which_cpu == 0) begin
+      if (which_reg ==  1) `VEER0.dec.arf.gpr[ 1].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  2) `VEER0.dec.arf.gpr[ 2].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  3) `VEER0.dec.arf.gpr[ 3].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  4) `VEER0.dec.arf.gpr[ 4].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  5) `VEER0.dec.arf.gpr[ 5].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  6) `VEER0.dec.arf.gpr[ 6].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  7) `VEER0.dec.arf.gpr[ 7].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  8) `VEER0.dec.arf.gpr[ 8].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  9) `VEER0.dec.arf.gpr[ 9].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 10) `VEER0.dec.arf.gpr[10].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 11) `VEER0.dec.arf.gpr[11].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 12) `VEER0.dec.arf.gpr[12].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 13) `VEER0.dec.arf.gpr[13].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 14) `VEER0.dec.arf.gpr[14].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 15) `VEER0.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 16) `VEER0.dec.arf.gpr[16].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 17) `VEER0.dec.arf.gpr[17].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 18) `VEER0.dec.arf.gpr[18].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 19) `VEER0.dec.arf.gpr[19].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 20) `VEER0.dec.arf.gpr[20].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 21) `VEER0.dec.arf.gpr[21].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 22) `VEER0.dec.arf.gpr[22].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 23) `VEER0.dec.arf.gpr[23].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 24) `VEER0.dec.arf.gpr[24].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 25) `VEER0.dec.arf.gpr[25].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 26) `VEER0.dec.arf.gpr[26].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 27) `VEER0.dec.arf.gpr[27].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 28) `VEER0.dec.arf.gpr[28].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 29) `VEER0.dec.arf.gpr[29].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 30) `VEER0.dec.arf.gpr[30].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 31) `VEER0.dec.arf.gpr[31].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+    end
+
+    if (which_cpu == 1) begin
+      if (which_reg ==  1) `VEER1.dec.arf.gpr[ 1].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  2) `VEER1.dec.arf.gpr[ 2].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  3) `VEER1.dec.arf.gpr[ 3].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  4) `VEER1.dec.arf.gpr[ 4].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  5) `VEER1.dec.arf.gpr[ 5].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  6) `VEER1.dec.arf.gpr[ 6].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  7) `VEER1.dec.arf.gpr[ 7].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  8) `VEER1.dec.arf.gpr[ 8].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  9) `VEER1.dec.arf.gpr[ 9].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 10) `VEER1.dec.arf.gpr[10].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 11) `VEER1.dec.arf.gpr[11].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 12) `VEER1.dec.arf.gpr[12].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 13) `VEER1.dec.arf.gpr[13].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 14) `VEER1.dec.arf.gpr[14].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 15) `VEER1.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 16) `VEER1.dec.arf.gpr[16].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 17) `VEER1.dec.arf.gpr[17].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 18) `VEER1.dec.arf.gpr[18].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 19) `VEER1.dec.arf.gpr[19].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 20) `VEER1.dec.arf.gpr[20].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 21) `VEER1.dec.arf.gpr[21].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 22) `VEER1.dec.arf.gpr[22].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 23) `VEER1.dec.arf.gpr[23].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 24) `VEER1.dec.arf.gpr[24].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 25) `VEER1.dec.arf.gpr[25].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 26) `VEER1.dec.arf.gpr[26].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 27) `VEER1.dec.arf.gpr[27].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 28) `VEER1.dec.arf.gpr[28].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 29) `VEER1.dec.arf.gpr[29].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 30) `VEER1.dec.arf.gpr[30].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 31) `VEER1.dec.arf.gpr[31].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+    end
+
+    if (which_cpu == 2) begin
+      if (which_reg ==  1) `VEER2.dec.arf.gpr[ 1].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  2) `VEER2.dec.arf.gpr[ 2].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  3) `VEER2.dec.arf.gpr[ 3].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  4) `VEER2.dec.arf.gpr[ 4].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  5) `VEER2.dec.arf.gpr[ 5].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  6) `VEER2.dec.arf.gpr[ 6].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  7) `VEER2.dec.arf.gpr[ 7].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  8) `VEER2.dec.arf.gpr[ 8].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  9) `VEER2.dec.arf.gpr[ 9].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 10) `VEER2.dec.arf.gpr[10].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 11) `VEER2.dec.arf.gpr[11].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 12) `VEER2.dec.arf.gpr[12].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 13) `VEER2.dec.arf.gpr[13].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 14) `VEER2.dec.arf.gpr[14].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 15) `VEER2.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 16) `VEER2.dec.arf.gpr[16].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 17) `VEER2.dec.arf.gpr[17].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 18) `VEER2.dec.arf.gpr[18].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 19) `VEER2.dec.arf.gpr[19].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 20) `VEER2.dec.arf.gpr[20].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 21) `VEER2.dec.arf.gpr[21].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 22) `VEER2.dec.arf.gpr[22].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 23) `VEER2.dec.arf.gpr[23].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 24) `VEER2.dec.arf.gpr[24].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 25) `VEER2.dec.arf.gpr[25].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 26) `VEER2.dec.arf.gpr[26].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 27) `VEER2.dec.arf.gpr[27].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 28) `VEER2.dec.arf.gpr[28].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 29) `VEER2.dec.arf.gpr[29].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 30) `VEER2.dec.arf.gpr[30].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 31) `VEER2.dec.arf.gpr[31].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+    end
+
+  end
+endtask
+
+initial begin
+  if ($test$plusargs("upsets")) begin
+    fork
+      tmr_upsetter();
+    join_none
+  end
+end
+
+`endif
+
 endmodule

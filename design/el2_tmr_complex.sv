@@ -443,7 +443,7 @@ module el2_tmr_complex
   logic mpc_debug_run_ack_veer[3];
   logic debug_brkpt_status_veer[3];
 
-
+  logic [31:1] dec_tlu_pc_veer[3];
 
   // PIC registers
   logic        pic_clk_override_veer[3];
@@ -1308,6 +1308,7 @@ module el2_tmr_complex
         .dec_tlu_force_halt(dec_tlu_force_halt_veer[i]),
         .dec_tlu_bus_clk_override(dec_tlu_bus_clk_override_veer[i]),
         .dec_tlu_dccm_wr_readback_disable(dec_tlu_dccm_wr_readback_disable),
+        .dec_tlu_pc(dec_tlu_pc_veer[i]),
         .pic_clk_override(pic_clk_override_veer[i]),
         .pic_io_clk_override(pic_io_clk_override_veer[i]),
         .picm_rdaddr(picm_rdaddr_veer[i]),

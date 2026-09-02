@@ -47,7 +47,13 @@ module el2_tmr_recovery_fsm
     output logic [11:0]             recovery_csr_rdaddr_veer[3],
     input  logic [31:0]             recovery_csr_rddata_veer[3],
 
+    // VeeR reset control
     output logic sync_rst_l,
+
+    // VeeR reset vector and PC
+    input  logic [31:1] rst_vec,
+    output logic [31:1] rst_vec_veer[3],
+    input  logic [31:1] dec_tlu_pc_veer[3],
 
     // VeeR exec ctrl
     output logic i_cpu_halt_req_veer[3],
@@ -70,6 +76,11 @@ module el2_tmr_recovery_fsm
 
     input  logic scan_mode
 );
+
+  // TODO: Make the FSM inject reset vector after core reset
+  assign rst_vec_veer[0] = rst_vec;
+  assign rst_vec_veer[1] = rst_vec;
+  assign rst_vec_veer[2] = rst_vec;
 
 `ifdef RV_USER_MODE
   localparam int csr_cnt = 163;

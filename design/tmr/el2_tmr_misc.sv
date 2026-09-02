@@ -12,7 +12,6 @@ module el2_tmr_misc
     input  logic rst_l,
 
     // Reset and interrupts
-    input  logic [31:1] rst_vec,
     input  logic        nmi_int,
     input  logic [31:1] nmi_vec,
     input  logic        timer_int,
@@ -37,7 +36,6 @@ module el2_tmr_misc
 
     // TMR
     // Reset and interrupts
-    output logic [31:1] rst_vec_veer[3],
     output logic        nmi_int_veer[3],
     output logic [31:1] nmi_vec_veer[3],
     output logic        timer_int_veer[3],
@@ -335,7 +333,6 @@ module el2_tmr_misc
 
   // Propagate response to Cores
   for (genvar i=0; i < 3; i+=1) begin
-    assign rst_vec_veer[i]   = rst_vec;
     assign nmi_int_veer[i]   = nmi_int;
     assign nmi_vec_veer[i]   = nmi_vec;
 

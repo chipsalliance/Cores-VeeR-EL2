@@ -265,6 +265,10 @@ import el2_pkg::*;
 
 `endif
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+   output logic [31:1] dec_tlu_pc,   // Current state of the PC register
+`endif
+
    // pmp
    output el2_pmp_cfg_pkt_t pmp_pmpcfg  [pt.PMP_ENTRIES],
    output logic [31:0]      pmp_pmpaddr [pt.PMP_ENTRIES]
@@ -1825,6 +1829,14 @@ end
                           ({31{~pc0_valid_r}} & pc_r_d1[31:1]));
 
    rvdffpcie #(31)  pwbc_ff (.*, .en(pc0_valid_r), .din(pc_r[31:1]), .dout(pc_r_d1[31:1]));
+
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+   // Expose the PC state. Use the output of the pwbc_ff register directly.
+   // The state of PC may be delayed w.r.t. pc_r but since the core its halted
+   // it does not matter. Taking output directly from the register helps with
+   // timing closure.
+   assign dec_tlu_pc = pc_r_d1;
+`endif
 
    assign wr_mepc_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MEPC);
 

@@ -1,17 +1,14 @@
 # Copyright (c) 2026 Antmicro <www.antmicro.com>
 # SPDX-License-Identifier: Apache-2.0
 import random
-from copy import deepcopy
 
 import cocotb
-from cocotb.triggers import ClockCycles, Combine, Timer
+from cocotb.triggers import Combine, Timer
 from pyuvm import ConfigDB, test, uvm_sequence
 from testbench import (
     BaseScoreboard,
     BaseTest,
     CPUCtrlStatusItem,
-    MuBiFalse,
-    MuBiTrue,
 )
 
 # =============================================================================

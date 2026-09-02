@@ -263,11 +263,13 @@ class ExternalFlagDriver(uvm_driver):
     async def run_phase(self):
         while True:
             it = await self.seq_item_port.get_next_item()
+            self.logger.debug(f"Received item {it}")
             assert isinstance(it, ExtFlagsItem)
             await ReadWrite()
             ans = ExtFlagsItem()
             ans.clr = self.signals["clr"].value
             if it.drive_ext:
+                self.logger.debug(f"Driving ext with {it.ext}")
                 self.signals["ext"].value = it.ext
                 await RisingEdge(self.clock_domain.clk)
             elif it.wait_for_clr:

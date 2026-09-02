@@ -222,7 +222,7 @@ module el2_tmr_recovery_fsm
   assign csr_re[csr_cnt] = (cnt_csr[2] == 8'(csr_cnt));
   // Wrap i = csr_cnt to CSR 0
   logic  csr_wrap;
-  assign csr_wrap = (cnt_csr[2] == csr_cnt);
+  assign csr_wrap = (cnt_csr[2] == 8'(csr_cnt));
   always_comb begin
     csr_with_ecc_rd = '0;
     for (int i=0; i < csr_cnt; ++i) begin

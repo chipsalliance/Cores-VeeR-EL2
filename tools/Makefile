@@ -113,12 +113,22 @@ endif
 
 OFILES = $(TEST).o
 
+# Verilator tracing format
+VERILATOR_TRACE ?= vcd
+
+# Debugging
 ifdef debug
  DEBUG_PLUS = +dumpon
  IRUN_DEBUG = -access +rc
  IRUN_DEBUG_RUN = -input ${RV_ROOT}/testbench/input.tcl
  VCS_DEBUG = -debug_access+r+w -debug_access+all -kdb +define+VCS_DEBUG
- VERILATOR_DEBUG = --trace
+ ifeq ($(VERILATOR_TRACE),vcd)
+   VERILATOR_DEBUG = --trace --trace-vcd --trace-underscore
+ else ifeq ($(VERILATOR_TRACE),fst)
+   VERILATOR_DEBUG = --trace --trace-fst --trace-underscore --trace-structs
+ else
+   $(error Invalid VERILATOR_TRACE, legal options are "vcd" and "fst")
+ endif
  RIVIERA_DEBUG = +access +r
 endif
 

@@ -348,10 +348,15 @@ module el2_dec_wrapper
     el2_regfile_if regfile ();
 `endif
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    logic [31:1] dec_tlu_pc;
+`endif
+
   el2_dec dut (
 `ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
     .recovery_gpr_en(el2_mubi_pkg::mubi_from_bool(recovery_gpr_en)),
     .recovery_csr_en(el2_mubi_pkg::mubi_from_bool(recovery_csr_en)),
+    .dec_tlu_pc(dec_tlu_pc),
 `endif
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
     .regfile(regfile.veer_rf_src),

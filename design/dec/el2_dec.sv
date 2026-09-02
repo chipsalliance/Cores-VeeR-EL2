@@ -309,6 +309,10 @@ module el2_dec
 
 `endif
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    output logic [31:1] dec_tlu_pc,   // Current state of the PC register
+`endif
+
     // feature disable from mfdc
     output logic dec_tlu_external_ldfwd_disable,  // disable external load forwarding
     output logic dec_tlu_sideeffect_posted_disable,  // disable posted stores to side-effect address

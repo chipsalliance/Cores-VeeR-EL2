@@ -168,7 +168,6 @@ class BaseTest(common.BaseTest):
         cocotb.top.dec_tlu_force_halt_veer = [0] * 3
         cocotb.top.core_rst_l_veer = [0] * 3
 
-        cocotb.top.rst_vec.value = 0
         cocotb.top.nmi_int.value = 0
         cocotb.top.nmi_vec.value = 0
         cocotb.top.timer_int.value = 0

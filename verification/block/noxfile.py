@@ -550,6 +550,21 @@ def tmr_exec_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_recovery_fsm"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_passthrough",
+        "test_no_err",
+        "test_error",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_recovery_fsm_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["ecc_counter"])
 @nox.parametrize(
     "testName",

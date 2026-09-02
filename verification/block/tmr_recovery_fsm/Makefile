@@ -8,6 +8,7 @@ comma := ,
 
 TEST_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 SRCDIR   := $(abspath $(TEST_DIR)../../../../design)
+CFGDIR   := $(TEST_DIR)/snapshots/default
 
 TEST_FILES = $(sort $(wildcard test_*.py))
 
@@ -15,12 +16,8 @@ MODULE    ?= $(subst $(space),$(comma),$(subst .py,,$(TEST_FILES)))
 TOPLEVEL   = el2_tmr_recovery_fsm
 EXTRA_ARGS = -I$(SRCDIR)/include/
 
-COMPILE_ARGS = \
- -DRV_MUBI_WIDTH=2 \
- -DRV_MUBI_TRUE=2 \
- -DRV_MUBI_FALSE=1 \
- -DRV_TRIPLE_MODULAR_REDUNDANCY_ENABLE=1 \
- -DRV_USER_MODE=1
+EXTRA_CONFIG_ARGS += -set=mubi_width=2 -set=mubi_false=0x1 -set=mubi_true=0x2 -set=user_mode=1
+TMR_ENABLE := 1
 
 VERILOG_SOURCES = \
     $(SRCDIR)/lib/el2_assert.sv \

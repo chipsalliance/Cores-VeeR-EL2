@@ -110,7 +110,7 @@ module el2_tmr_recovery_fsm
   assign sync_rst_l = recovery_state != RESET_CPU;
   assign int_i_cpu_halt_req_veer = recovery_state == HALT_CORES;
   assign int_i_cpu_run_req_veer = recovery_state == RESTART_CPU;
-  rvtmr #(1) halt_ack_tmr_m (.I(o_cpu_halt_ack_veer), .O(int_o_cpu_halt_ack_veer));
+  assign int_o_cpu_halt_ack_veer = o_cpu_halt_ack_veer[0] & o_cpu_halt_ack_veer[1] & o_cpu_halt_ack_veer[2];
   rvtmr #(1) run_ack_tmr_m (.I(o_cpu_run_ack_veer), .O(int_o_cpu_run_ack_veer));
   rvtmr #(1) halt_status_tmr_m (.I(o_cpu_halt_status_veer), .O(int_o_cpu_halt_status_veer));
   rvdff #(.WIDTH(3)) cpu_exec_status_d (.*,

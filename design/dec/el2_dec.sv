@@ -312,7 +312,7 @@ module el2_dec
 `endif
 
 `ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
-    output logic [31:1] dec_tlu_pc,   // Current state of the PC register
+    output logic [31:1] dec_tlu_npc,   // Next state of the PC register
 `endif
 
     // feature disable from mfdc

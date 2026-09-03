@@ -51,7 +51,7 @@ module el2_tmr_recovery_fsm
     // VeeR reset vector and PC
     input  logic [31:1] rst_vec,
     output logic [31:1] rst_vec_veer[3],
-    input  logic [31:1] dec_tlu_pc_veer[3],
+    input  logic [31:1] dec_tlu_npc_veer[3],
 
     // VeeR exec ctrl
     output logic mpc_debug_halt_req_veer[3],
@@ -269,7 +269,7 @@ module el2_tmr_recovery_fsm
   logic [31:0] pc_rdata_raw;
   logic [31:1] pc_rdata;
 
-  rvtmr #(31) pc_tmr (.I(dec_tlu_pc_veer), .O(pc_with_ecc_wr[1+:31])); // TODO: Detect fatal disagreement
+  rvtmr #(31) pc_tmr (.I(dec_tlu_npc_veer), .O(pc_with_ecc_wr[1+:31])); // TODO: Detect fatal disagreement
   assign pc_with_ecc_wr[0] = 0;
   rvecc_encode pc_ecc_enc (.din(pc_with_ecc_wr[0+:32]), .ecc_out(pc_with_ecc_wr[32+:7]));
   rvecc_decode pc_ecc_dec (

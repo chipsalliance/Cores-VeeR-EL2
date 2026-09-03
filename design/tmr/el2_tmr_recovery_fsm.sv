@@ -75,11 +75,6 @@ module el2_tmr_recovery_fsm
     input  logic scan_mode
 );
 
-  // TODO: Make the FSM inject reset vector after core reset
-  assign rst_vec_veer[0] = rst_vec;
-  assign rst_vec_veer[1] = rst_vec;
-  assign rst_vec_veer[2] = rst_vec;
-
 `ifdef RV_USER_MODE
   localparam int csr_cnt = 163;
 `else
@@ -263,6 +258,30 @@ module el2_tmr_recovery_fsm
       recovery_state == WRITE_REG ? csr_wrdata == recovery_csr_rddata_veer[i] & mubi_check_true(all_csr_ready) : 1'b1;
     assign cnt_gpr_inc[i] = recovery_state == READ_REG ? gpr_with_ecc_wr == gpr_with_ecc_rd & mubi_check_true(all_gpr_ready) :
       recovery_state == WRITE_REG ? gpr_wrdata == recovery_gpr_rddata_veer[i] & mubi_check_true(all_csr_ready) : 1'b1;
+  end
+
+  // PC storage
+  logic        pc_we;
+  logic [38:0] pc_with_ecc_wr;
+  logic [38:0] pc_with_ecc_rd;
+  logic [31:0] pc_rdata_raw;
+  logic [31:1] pc_rdata;
+
+  rvtmr #(31) pc_tmr (.I(dec_tlu_pc_veer), .O(pc_with_ecc_wr[1+:31])); // TODO: Detect fatal disagreement
+  assign pc_with_ecc_wr[0] = 0;
+  rvecc_encode pc_ecc_enc (.din(pc_with_ecc_wr[0+:32]), .ecc_out(pc_with_ecc_wr[32+:7]));
+  rvecc_decode pc_ecc_dec (
+    .en(1'b1), .din(pc_with_ecc_rd[0+:32]), .ecc_in(pc_with_ecc_rd[32+:7]),
+    .sed_ded(1'b0), .dout(pc_rdata_raw), .ecc_out(), .single_ecc_error(), .double_ecc_error() // TODO: Add ECC error to fatal error
+  );
+  assign pc_rdata = pc_rdata_raw[31:1];
+
+  assign pc_we = (recovery_state == READ_REG);
+  rvdffs #(39) pc_recovery_storage_ff (.*, .din(pc_with_ecc_wr), .dout(pc_with_ecc_rd), .en(pc_we));
+
+  // PC restoration via the reset vector
+  for(genvar i=0; i<3; ++i) begin : reset_vector
+    assign rst_vec_veer[i] = (recovery_state != IDLE & recovery_state != 0) ? pc_rdata : rst_vec;
   end
 
   // Flags

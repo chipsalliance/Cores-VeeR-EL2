@@ -422,26 +422,29 @@ module el2_tmr_complex
 
   // Core ctrl signals between CPU and Recovery
   logic i_cpu_halt_req_veer[3];
-  logic i_cpu_run_req_veer[3];
   logic o_cpu_halt_ack_veer[3];
-  logic o_cpu_halt_status_veer[3];
+  logic i_cpu_run_req_veer[3];
   logic o_cpu_run_ack_veer[3];
-  logic mpc_reset_run_req_veer[3];
-  // Core ctrl signals betwen Recovery and external
-  logic ext_i_cpu_halt_req_veer[3];
-  logic ext_i_cpu_run_req_veer[3];
-  logic ext_o_cpu_halt_ack_veer[3];
-  logic ext_o_cpu_halt_status_veer[3];
-  logic ext_o_cpu_run_ack_veer[3];
-  logic ext_mpc_reset_run_req_veer[3];
-  // external MPC halt/run interface
+  logic o_cpu_halt_status_veer[3];
   logic o_debug_mode_status_veer[3];
+
+  // Core ctrl signals betwen Recovery and external
+  logic ext_mpc_debug_halt_req_veer[3];
+  logic ext_mpc_debug_halt_ack_veer[3];
+  logic ext_mpc_debug_run_req_veer[3];
+  logic ext_mpc_debug_run_ack_veer[3];
+  logic ext_mpc_reset_run_req_veer[3];
+
+  // external MPC halt/run interface
   logic mpc_debug_halt_req_veer[3];
   logic mpc_debug_halt_ack_veer[3];
   logic mpc_debug_run_req_veer[3];
   logic mpc_debug_run_ack_veer[3];
+  logic mpc_reset_run_req_veer[3];
+
   logic debug_brkpt_status_veer[3];
 
+  // Program counter
   logic [31:1] dec_tlu_pc_veer[3];
 
   // PIC registers

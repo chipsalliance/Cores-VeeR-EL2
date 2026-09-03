@@ -445,7 +445,7 @@ module el2_tmr_complex
   logic debug_brkpt_status_veer[3];
 
   // Program counter
-  logic [31:1] dec_tlu_pc_veer[3];
+  logic [31:1] dec_tlu_npc_veer[3];
 
   // PIC registers
   logic        pic_clk_override_veer[3];
@@ -1110,8 +1110,8 @@ module el2_tmr_complex
     );
 
     // PC state gating
-    logic [31:1] dec_tlu_pc_veer_g;
-    rvogate #(.WIDTH($bits(dec_tlu_pc_veer_g))) u_dec_tlu_pc_gate (.*, .din(dec_tlu_pc_veer_g),  .dout(dec_tlu_pc_veer[i]));
+    logic [31:1] dec_tlu_npc_veer_g;
+    rvogate #(.WIDTH($bits(dec_tlu_npc_veer_g))) u_dec_tlu_npc_gate (.*, .din(dec_tlu_npc_veer_g),  .dout(dec_tlu_npc_veer[i]));
 
     // VeeR core
     el2_veer #(.pt(pt)) veer (
@@ -1367,7 +1367,7 @@ module el2_tmr_complex
         .dec_tlu_force_halt(dec_tlu_force_halt_veer[i]),
         .dec_tlu_bus_clk_override(dec_tlu_bus_clk_override_veer[i]),
         .dec_tlu_dccm_wr_readback_disable(dec_tlu_dccm_wr_readback_disable),
-        .dec_tlu_pc(dec_tlu_pc_veer_g),
+        .dec_tlu_npc(dec_tlu_npc_veer_g),
         .pic_clk_override(pic_clk_override_veer[i]),
         .pic_io_clk_override(pic_io_clk_override_veer[i]),
         .picm_rdaddr(picm_rdaddr_veer[i]),

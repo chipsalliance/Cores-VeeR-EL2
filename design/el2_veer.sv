@@ -484,7 +484,7 @@ import el2_pkg::*;
 
    output logic        dec_tlu_force_halt,
    output logic        dec_tlu_bus_clk_override,
-   output logic [31:1] dec_tlu_pc,
+   output logic [31:1] dec_tlu_npc,
 
    output logic        pic_clk_override,
    output logic        pic_io_clk_override,

@@ -156,12 +156,12 @@ class TestFaults(BaseTest):
         iterations = ConfigDB().get(None, "", "TEST_ITERATIONS")
 
         signals = {
-            "ext_o_cpu_halt_ack_veer": None,
-            "ext_o_cpu_run_ack_veer": None,
-            "ext_o_cpu_halt_status_veer": None,
+            "o_cpu_halt_ack_veer": None,
+            "o_cpu_run_ack_veer": None,
+            "o_cpu_halt_status_veer": None,
             "o_debug_mode_status_veer": None,
-            "mpc_debug_halt_ack_veer": None,
-            "mpc_debug_run_ack_veer": None,
+            "ext_mpc_debug_halt_ack_veer": None,
+            "ext_mpc_debug_run_ack_veer": None,
             "debug_brkpt_status_veer": None,
         }
 

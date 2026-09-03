@@ -54,19 +54,17 @@ module el2_tmr_recovery_fsm
     input  logic [31:1] dec_tlu_pc_veer[3],
 
     // VeeR exec ctrl
-    output logic i_cpu_halt_req_veer[3],
-    output logic i_cpu_run_req_veer[3],
-    input  logic o_cpu_halt_ack_veer[3],
-    input  logic o_cpu_halt_status_veer[3],
-    input  logic o_cpu_run_ack_veer[3],
+    output logic mpc_debug_halt_req_veer[3],
+    input  logic mpc_debug_halt_ack_veer[3],
+    output logic mpc_debug_run_req_veer[3],
+    input  logic mpc_debug_run_ack_veer[3],
     output logic mpc_reset_run_req_veer[3],
 
     // External exec ctrl
-    input  logic ext_i_cpu_halt_req_veer[3],
-    input  logic ext_i_cpu_run_req_veer[3],
-    output logic ext_o_cpu_halt_ack_veer[3],
-    output logic ext_o_cpu_halt_status_veer[3],
-    output logic ext_o_cpu_run_ack_veer[3],
+    input  logic ext_mpc_debug_halt_req_veer[3],
+    output logic ext_mpc_debug_halt_ack_veer[3],
+    input  logic ext_mpc_debug_run_req_veer[3],
+    output logic ext_mpc_debug_run_ack_veer[3],
     input  logic ext_mpc_reset_run_req_veer[3],
 
     // Error flags
@@ -87,31 +85,35 @@ module el2_tmr_recovery_fsm
   rvdffiee #(9) fsm_state_ff (.*, .din(recovery_nxstate), .dout(recovery_state), .en(recovery_state_en));
 
   // Exec control
-
-  logic int_i_cpu_halt_req_veer;
-  logic int_i_cpu_run_req_veer;
-  logic int_o_cpu_halt_ack_veer, int_o_cpu_halt_ack_veer_d;
-  logic int_o_cpu_halt_status_veer, int_o_cpu_halt_status_veer_d;
-  logic int_o_cpu_run_ack_veer, int_o_cpu_run_ack_veer_d;
+  logic int_mpc_debug_halt_req_veer;
+  logic int_mpc_debug_halt_ack_veer, int_mpc_debug_halt_ack_veer_d;
+  logic int_mpc_debug_run_req_veer;
+  logic int_mpc_debug_run_ack_veer,  int_mpc_debug_run_ack_veer_d;
+  logic int_mpc_reset_run_req_veer;
 
   for (genvar i=0; i < 3; ++i) begin : mux_exec_ctrl_signals
-    assign i_cpu_halt_req_veer[i] = recovery_state == IDLE | recovery_state == '0 ? ext_i_cpu_halt_req_veer[i] : int_i_cpu_halt_req_veer;
-    assign i_cpu_run_req_veer[i] = recovery_state == IDLE | recovery_state == '0 ? ext_i_cpu_run_req_veer[i] : int_i_cpu_run_req_veer;
-    assign mpc_reset_run_req_veer[i] = recovery_state == IDLE | recovery_state == '0 ? ext_mpc_reset_run_req_veer[i] : 'b0;
-    assign ext_o_cpu_halt_ack_veer[i] = o_cpu_halt_ack_veer[i];
-    assign ext_o_cpu_halt_status_veer[i] = o_cpu_halt_status_veer[i];
-    assign ext_o_cpu_run_ack_veer[i] = o_cpu_run_ack_veer[i];
+    assign mpc_debug_halt_req_veer[i] = recovery_state == IDLE | recovery_state == '0 ? ext_mpc_debug_halt_req_veer[i] : int_mpc_debug_halt_req_veer;
+    assign mpc_debug_run_req_veer[i] = recovery_state == IDLE | recovery_state == '0 ? ext_mpc_debug_run_req_veer[i] : int_mpc_debug_run_req_veer;
+    assign mpc_reset_run_req_veer[i] = recovery_state == IDLE | recovery_state == '0 ? ext_mpc_reset_run_req_veer[i] : int_mpc_reset_run_req_veer;
+    assign ext_mpc_debug_halt_ack_veer[i] = mpc_debug_halt_ack_veer[i];
+    assign ext_mpc_debug_run_ack_veer[i] = mpc_debug_run_ack_veer[i];
   end
   assign sync_rst_l = recovery_state != RESET_CPU;
-  assign int_i_cpu_halt_req_veer = recovery_state == HALT_CORES;
-  assign int_i_cpu_run_req_veer = recovery_state == RESTART_CPU;
-  assign int_o_cpu_halt_ack_veer = o_cpu_halt_ack_veer[0] & o_cpu_halt_ack_veer[1] & o_cpu_halt_ack_veer[2];
-  rvtmr #(1) run_ack_tmr_m (.I(o_cpu_run_ack_veer), .O(int_o_cpu_run_ack_veer));
-  rvtmr #(1) halt_status_tmr_m (.I(o_cpu_halt_status_veer), .O(int_o_cpu_halt_status_veer));
-  rvdff #(.WIDTH(3)) cpu_exec_status_d (.*,
-    .din({int_o_cpu_halt_ack_veer, int_o_cpu_run_ack_veer, int_o_cpu_halt_status_veer}),
-    .dout({int_o_cpu_halt_ack_veer_d, int_o_cpu_run_ack_veer_d, int_o_cpu_halt_status_veer_d})
+
+  rvdff #(.WIDTH(2)) cpu_exec_status_d (.*,
+    .din ({int_mpc_debug_halt_ack_veer,   int_mpc_debug_run_ack_veer  }),
+    .dout({int_mpc_debug_halt_ack_veer_d, int_mpc_debug_run_ack_veer_d})
   );
+
+  assign int_mpc_debug_halt_req_veer = recovery_state == HALT_CORES;
+  assign int_mpc_debug_run_req_veer = recovery_state == RESTART_CPU;
+  assign int_mpc_debug_halt_ack_veer = mpc_debug_halt_ack_veer[0] & mpc_debug_halt_ack_veer[1] & mpc_debug_halt_ack_veer[2];
+
+  assign int_mpc_reset_run_req_veer = ~(recovery_state == RESET_CPU   |
+                                        recovery_state == SET_FLAG_CC |
+                                        recovery_state == WRITE_REG);
+
+  rvtmr #(1) run_ack_tmr_m (.I(mpc_debug_run_ack_veer), .O(int_mpc_debug_run_ack_veer));
 
   // GPR and CSR counters
   logic [7:0] cnt_csr [3], cnt_nxtcsr [3];
@@ -414,8 +416,7 @@ module el2_tmr_recovery_fsm
       end
       HALT_CORES: begin : halt_cores
         recovery_nxstate = READ_REG;
-        recovery_state_en = (int_o_cpu_halt_ack_veer & int_o_cpu_halt_ack_veer_d) &
-          (int_o_cpu_halt_status_veer & int_o_cpu_halt_status_veer_d);
+        recovery_state_en = (int_mpc_debug_halt_ack_veer & int_mpc_debug_halt_ack_veer_d);
       end
       READ_REG: begin : read_reg
         recovery_nxstate = SET_FLAG_RD;
@@ -445,8 +446,7 @@ module el2_tmr_recovery_fsm
       end
       RESTART_CPU: begin : restart_cpu
         recovery_nxstate = SET_FLAG_CR;
-        recovery_state_en = (int_o_cpu_run_ack_veer & int_o_cpu_run_ack_veer_d) &
-          (~int_o_cpu_halt_status_veer & ~int_o_cpu_halt_status_veer_d);
+        recovery_state_en = (int_mpc_debug_run_ack_veer & int_mpc_debug_run_ack_veer_d);
       end
       SET_FLAG_CR: begin : set_flag_cr
         recovery_nxstate = el2_mubi_mux_recovery_state_true(.sel(cpu_running_flag), .match(CLEAR_FLAG_ERR), .mismatch(SET_FLAG_CR));

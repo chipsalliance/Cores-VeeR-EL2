@@ -80,7 +80,7 @@ class BaseEnv(uvm_env):
 
         veer_sigs = []
         for s in bus_signals:
-            if s.startswith("o_cpu"):
+            if s.startswith("mpc_"):
                 veer_sigs.append("ext_" + s + "_veer")
             else:
                 veer_sigs.append(s + "_veer")
@@ -156,12 +156,12 @@ class BaseTest(common.BaseTest):
         cocotb.top.exec_fault_clr[1].value = MuBiFalse
         cocotb.top.exec_fault_clr[2].value = MuBiFalse
 
-        cocotb.top.ext_o_cpu_halt_ack_veer.value = [0] * 3
-        cocotb.top.ext_o_cpu_run_ack_veer.value = [0] * 3
-        cocotb.top.ext_o_cpu_halt_status_veer.value = [0] * 3
+        cocotb.top.o_cpu_halt_ack_veer.value = [0] * 3
+        cocotb.top.o_cpu_run_ack_veer.value = [0] * 3
+        cocotb.top.o_cpu_halt_status_veer.value = [0] * 3
         cocotb.top.o_debug_mode_status_veer.value = [0] * 3
-        cocotb.top.mpc_debug_halt_ack_veer.value = [0] * 3
-        cocotb.top.mpc_debug_run_ack_veer.value = [0] * 3
+        cocotb.top.ext_mpc_debug_halt_ack_veer.value = [0] * 3
+        cocotb.top.ext_mpc_debug_run_ack_veer.value = [0] * 3
         cocotb.top.debug_brkpt_status_veer.value = [0] * 3
 
         cocotb.top.i_cpu_halt_req.value = 0

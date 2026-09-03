@@ -25,18 +25,19 @@ module el2_tmr_exec_ctrl
     input  logic mpc_reset_run_req,
     output logic debug_brkpt_status,
     // EXEC CTRL TMR
-    output logic ext_i_cpu_halt_req_veer[3],
-    input  logic ext_o_cpu_halt_ack_veer[3],
-    output logic ext_i_cpu_run_req_veer[3],
-    input  logic ext_o_cpu_run_ack_veer[3],
-    input  logic ext_o_cpu_halt_status_veer[3],
+    output logic i_cpu_halt_req_veer[3],
+    input  logic o_cpu_halt_ack_veer[3],
+    output logic i_cpu_run_req_veer[3],
+    input  logic o_cpu_run_ack_veer[3],
+    input  logic o_cpu_halt_status_veer[3],
     input  logic o_debug_mode_status_veer[3],
 
-    output logic mpc_debug_halt_req_veer[3],
-    input  logic mpc_debug_halt_ack_veer[3],
-    output logic mpc_debug_run_req_veer[3],
-    input  logic mpc_debug_run_ack_veer[3],
+    output logic ext_mpc_debug_halt_req_veer[3],
+    input  logic ext_mpc_debug_halt_ack_veer[3],
+    output logic ext_mpc_debug_run_req_veer[3],
+    input  logic ext_mpc_debug_run_ack_veer[3],
     output logic ext_mpc_reset_run_req_veer[3],
+
     input  logic debug_brkpt_status_veer[3],
 
     // Fault inputs
@@ -68,12 +69,12 @@ module el2_tmr_exec_ctrl
 
   for (genvar i=0; i<3; i=i+1) begin
     assign exec_ctrl_veer[i] = {
-      ext_o_cpu_halt_ack_veer[i],
-      ext_o_cpu_run_ack_veer[i],
-      ext_o_cpu_halt_status_veer[i],
+      o_cpu_halt_ack_veer[i],
+      o_cpu_run_ack_veer[i],
+      o_cpu_halt_status_veer[i],
       o_debug_mode_status_veer[i],
-      mpc_debug_halt_ack_veer[i],
-      mpc_debug_run_ack_veer[i],
+      ext_mpc_debug_halt_ack_veer[i],
+      ext_mpc_debug_run_ack_veer[i],
       debug_brkpt_status_veer[i]
     };
   end
@@ -138,12 +139,12 @@ module el2_tmr_exec_ctrl
 
   // Propagate response to Cores
   for (genvar i=0; i < 3; i+=1) begin : resp
-    assign ext_i_cpu_halt_req_veer[i]    = i_cpu_halt_req;
-    assign ext_i_cpu_run_req_veer[i]     = i_cpu_run_req;
+    assign i_cpu_halt_req_veer[i]         = i_cpu_halt_req;
+    assign i_cpu_run_req_veer[i]          = i_cpu_run_req;
 
-    assign mpc_debug_halt_req_veer[i]    = mpc_debug_halt_req;
-    assign mpc_debug_run_req_veer[i]     = mpc_debug_run_req;
-    assign ext_mpc_reset_run_req_veer[i] = mpc_reset_run_req; // Not gated, sampled upon reset
+    assign ext_mpc_debug_halt_req_veer[i] = mpc_debug_halt_req;
+    assign ext_mpc_debug_run_req_veer[i]  = mpc_debug_run_req;
+    assign ext_mpc_reset_run_req_veer[i]  = mpc_reset_run_req; // Not gated, sampled upon reset
    end
 
 endmodule

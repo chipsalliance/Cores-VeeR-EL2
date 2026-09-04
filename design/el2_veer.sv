@@ -515,8 +515,7 @@ import el2_pkg::*;
    /*pragma coverage on*/
 );
 
-
-
+   logic reset_delayed;
 
    logic [63:0]                  hwdata_nc;
    //----------------------------------------------------------------------

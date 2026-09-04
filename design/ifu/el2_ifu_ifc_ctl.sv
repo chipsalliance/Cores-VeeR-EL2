@@ -35,6 +35,11 @@ import el2_pkg::*;
    input logic scan_mode, // scan
    /*pragma coverage on*/
 
+   input logic reset_delayed,     // Reset detection
+
+   input logic mpc_reset_run_req, // Run/halt after reset
+   input logic mpc_debug_run_ack, // Run ack
+
    input logic ic_hit_f,      // Icache hit
    input logic ifu_ic_mb_empty, // Miss buffer empty
 
@@ -72,6 +77,9 @@ import el2_pkg::*;
 
    );
 
+   logic     fetch_enable;
+   logic     fetch_enable_ns;
+
    logic [31:1]  fetch_addr_bf;
    logic [31:1]  fetch_addr_next;
    logic [3:0]   fb_write_f, fb_write_ns;
@@ -97,7 +105,12 @@ import el2_pkg::*;
    logic     dma_stall;
    assign dma_stall = ic_dma_active | dma_iccm_stall_any_f;
 
-
+   // Fetch enable control
+   // On reset, start with disabled. Enable on mpc_reset_run_req sampled after
+   // rst_l rising edge or on MPC debug run ack. Do not stop IFU on entering
+   // MPC halt to retain original core behavior.
+   rvdff #(1) runff (.*, .din(fetch_enable_ns), .dout(fetch_enable));
+   assign fetch_enable_ns = fetch_enable | (reset_delayed & mpc_reset_run_req) | mpc_debug_run_ack;
 
    // Fetch address mux
    // - flush
@@ -134,7 +147,7 @@ end
 
    assign fetch_addr_next_1 = line_wrap ? 1'b0 : ifc_fetch_addr_f[1];
 
-   assign ifc_fetch_req_bf_raw = ~idle;
+   assign ifc_fetch_req_bf_raw = ~idle & fetch_enable;
    assign ifc_fetch_req_bf =  ifc_fetch_req_bf_raw &
 
                  ~(fb_full_f_ns & ~(ifu_fb_consume2 | ifu_fb_consume1)) &

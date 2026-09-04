@@ -774,6 +774,8 @@ module tb_top
     logic next_dbus_error;
     logic next_ibus_error;
     logic next_ic_error;
+    logic next_ic_addr_error;
+    logic next_ic_hit_error;
     logic inject_veer_in_dist, inject_lockstep_in_dist;
     logic clear_inject_in_dist;
     logic [8:0] inject_veer_in_dist_no, inject_lockstep_in_dist_no;
@@ -1081,15 +1083,43 @@ module tb_top
 `endif
 `endif
 
+    // =========================================================================
+    // ICache Fault Injection & micect CSR (0x7F0) Hardware Counter Timing:
+    // 1. Mailbox writes (0x89: data fault, 0x8A: address infection, 0x8B: hit fault)
+    //    force corruption on the ICache read path and temporarily disable lockstep
+    //    constant delay assertions (`LOCKSTEP_CONST_DELAY_ASSERT_DISABLE).
+    //    - Signal Hierarchies:
+    //      - Mailboxes 0x89 & 0x8B force `rvtop_wrapper.rvtop.ic_rd_data`: This is the
+    //        142-bit top-level read data bus in el2_veer_wrapper connecting el2_mem to
+    //        both main core (el2_veer) and lockstep (el2_veer_lockstep). Forcing this
+    //        shared bus feeds both cores naturally (with lockstep delay), so no separate
+    //        LOCKSTEP_CORE force is needed.
+    //      - Mailbox 0x8A forces `rvtop.veer.ifu.mem_ctl.ic_rd_addr_infect`: This is an
+    //        internal address XOR signal inside each core's IFU (not present at wrapper
+    //        level). Hence, both primary core and `LOCKSTEP_CORE must be forced explicitly.
+    // 2. On the subsequent ICache access, the core detects an ECC/parity error and
+    //    pulses `rvtop.veer.dec.tlu.ic_perr_r` for 1 cycle.
+    // 3. In el2_dec_tlu_ctl.sv, `ic_perr_r` synchronously increments the `micect` CSR:
+    //      assign micect_inc[26:0] = micect[26:0] + {26'b0, ic_perr_r};
+    // 4. Hardware invalidates the line, flushes the pipeline, and restarts the fetch
+    //    from the SoC bus (AXI4/AHB).
+    // 5. tb_top samples `ic_perr_r` as `ic_perr_r_d1` (1-cycle delay) to release the
+    //    forced signals and re-enable assertions, allowing the core's bus refetch to
+    //    complete cleanly. By the time software resumes and reads `micect`, the
+    //    hardware counter increment has already taken place.
+    // =========================================================================
     always @(posedge core_clk or negedge rst_l_combined) begin
         if (~rst_l_combined) begin
-            next_ic_error <= 0;
-            ic_perr_r_d1  <= 0;
+            next_ic_error      <= 0;
+            next_ic_addr_error <= 0;
+            next_ic_hit_error  <= 0;
+            ic_perr_r_d1       <= 0;
             `ifdef RV_ASSERT_OR_VERILATOR
                 release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
             `endif
         end else begin
             ic_perr_r_d1 <= rvtop_wrapper.rvtop.veer.dec.tlu.ic_perr_r;
+            // Mailbox 0x89: Force ICache read data corruption (bit 0 flip)
             if (mailbox_write && mailbox_data[7:0] == 8'h89) begin
                 `ifdef RV_ASSERT_OR_VERILATOR
                     force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
@@ -1098,6 +1128,52 @@ module tb_top
                 force rvtop_wrapper.rvtop.ic_rd_data = 142'h1;
             end else if (next_ic_error && ic_perr_r_d1) begin
                 next_ic_error <= 0;
+                release rvtop_wrapper.rvtop.ic_rd_data;
+                `ifdef RV_ASSERT_OR_VERILATOR
+                    release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
+                `endif
+            end
+
+            // Mailbox 0x8A: Force address XOR mismatch (address infection fault)
+            // Guarded by RV_ICACHE_ADDR_XOR so no fault is forced when the feature is compiled out.
+            if (mailbox_write && mailbox_data[7:0] == 8'h8A) begin
+            `ifdef RV_ICACHE_ADDR_XOR
+                `ifdef RV_ASSERT_OR_VERILATOR
+                    force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
+                `endif
+                next_ic_addr_error <= 1;
+                // Corrupt address XOR vector to simulate misdirected access / XOR mismatch fault
+                force rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_rd_addr_infect = 64'h1234_5678;
+`ifdef RV_LOCKSTEP_ENABLE
+                force `LOCKSTEP_CORE.ifu.mem_ctl.ic_rd_addr_infect = 64'h1234_5678;
+`endif
+            `endif
+            end else if (next_ic_addr_error && ic_perr_r_d1) begin
+                next_ic_addr_error <= 0;
+            `ifdef RV_ICACHE_ADDR_XOR
+                release rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_rd_addr_infect;
+`ifdef RV_LOCKSTEP_ENABLE
+                release `LOCKSTEP_CORE.ifu.mem_ctl.ic_rd_addr_infect;
+`endif
+            `endif
+                `ifdef RV_ASSERT_OR_VERILATOR
+                    release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
+                `endif
+            end
+
+            // Mailbox 0x8B: Force multi-bit read data corruption (hit logic / way selection fault).
+            // Targets shared wrapper bus rvtop_wrapper.rvtop.ic_rd_data (same as 0x89) to corrupt
+            // way-muxed data arriving at both primary and lockstep cores.
+            if (mailbox_write && mailbox_data[7:0] == 8'h8B) begin
+                `ifdef RV_ASSERT_OR_VERILATOR
+                    force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
+                `endif
+                next_ic_hit_error <= 1;
+                // Corrupt read data to simulate incorrect way selection / hit logic fault.
+                // Uses 16'h5557 pattern (odd parity per 16-bit chunk) so both Parity and ECC detectors trigger.
+                force rvtop_wrapper.rvtop.ic_rd_data = 142'h5557_5557_5557_5557;
+            end else if (next_ic_hit_error && ic_perr_r_d1) begin
+                next_ic_hit_error <= 0;
                 release rvtop_wrapper.rvtop.ic_rd_data;
                 `ifdef RV_ASSERT_OR_VERILATOR
                     release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;

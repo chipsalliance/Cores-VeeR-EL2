@@ -38,6 +38,8 @@ import el2_pkg::*;
    input logic scan_mode,
    /*pragma coverage on*/
 
+   output logic reset_delayed, // Reset detection
+
    //rst_vec is supposed to be connected to constant in the top level
    /*pragma coverage off*/
    input logic [31:1] rst_vec, // reset vector, from core pins
@@ -281,7 +283,7 @@ import el2_pkg::*;
                  tdata_kill_write;
 
 
-   logic reset_delayed, reset_detect, reset_detected;
+   logic reset_detect, reset_detected;
    logic wr_mstatus_r, wr_mtvec_r, wr_mcyclel_r, wr_mcycleh_r,
          wr_minstretl_r, wr_minstreth_r, wr_mscratch_r, wr_mepc_r, wr_mcause_r, wr_mscause_r, wr_mtval_r,
          wr_mrac_r, wr_meihap_r, wr_meicurpl_r, wr_meipt_r, wr_dcsr_r,

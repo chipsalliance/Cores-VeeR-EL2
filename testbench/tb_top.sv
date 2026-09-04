@@ -197,7 +197,6 @@ module tb_top
 
     wire                        lmem_hready_out;
     wire                        dma_hready_out;
-    int                         commit_count;
 
     logic [3:0]                 nmi_assert_int;
 
@@ -745,7 +744,6 @@ module tb_top
 `endif
 
 `endif
-    string                      abi_reg[32]; // ABI register names
     el2_mem_if el2_mem_export ();
 
     logic [pt.ICCM_NUM_BANKS-1:0][                   38:0] iccm_bank_wr_fdata;
@@ -760,6 +758,9 @@ module tb_top
 `define VEER rvtop_wrapper.rvtop.veer
 `else
 `define VEER rvtop_wrapper.rvtop.tmr_complex.cores[0].veer
+`define VEER0 rvtop_wrapper.rvtop.tmr_complex.cores[0].veer
+`define VEER1 rvtop_wrapper.rvtop.tmr_complex.cores[1].veer
+`define VEER2 rvtop_wrapper.rvtop.tmr_complex.cores[2].veer
 `endif
 `define DEC `VEER.dec
 
@@ -776,7 +777,7 @@ module tb_top
 
     assign mailbox_data_val = mailbox_data[7:0] > 8'h5 && mailbox_data[7:0] < 8'h7f;
 
-    integer fd, tp, el;
+    integer fd;
     logic next_dbus_error;
     logic next_ibus_error;
     logic next_ic_error;
@@ -2190,73 +2191,148 @@ module tb_top
     // at least two clock cycles - see RISC-V VeeR EL2 Programmer's Reference Manual section 2.16
     assign nmi_int = |{nmi_assert_int[3:2]};
 
-    // trace monitor
-    always @(posedge core_clk) begin
-        wb_valid      <= `DEC.dec_i0_wen_r;
-        wb_dest       <= `DEC.dec_i0_waddr_r;
-        wb_data       <= `DEC.dec_i0_wdata_r;
-        wb_csr_valid  <= `DEC.dec_csr_wen_r;
-        wb_csr_dest   <= `DEC.dec_csr_wraddr_r;
-        wb_csr_data   <= `DEC.dec_csr_wrdata_r;
-        if (trace_rv_i_valid_ip) begin
-           $fwrite(tp,"%b,%h,%h,%0h,%0h,3,%b,%h,%h,%b\n", trace_rv_i_valid_ip, 0, trace_rv_i_address_ip,
-                  0, trace_rv_i_insn_ip,trace_rv_i_exception_ip,trace_rv_i_ecause_ip,
-                  trace_rv_i_tval_ip,trace_rv_i_interrupt_ip);
-           // Basic trace - no exception register updates
-           // #1 0 ee000000 b0201073 c 0b02       00000000
-           commit_count++;
-           $fwrite (el, "%10d : %8s 0 %h %h%13s %14s ; %s\n", cycleCnt, $sformatf("#%0d",commit_count),
-                        trace_rv_i_address_ip, trace_rv_i_insn_ip,
-                        (wb_dest !=0 && wb_valid)?  $sformatf("%s=%h", abi_reg[wb_dest], wb_data) : "            ",
-                        (wb_csr_valid)? $sformatf("c%h=%h", wb_csr_dest, wb_csr_data) : "             ",
-                        dasm(trace_rv_i_insn_ip, trace_rv_i_address_ip, wb_dest & {5{wb_valid}}, wb_data)
-                   );
-        end
-        if(`DEC.dec_nonblock_load_wen) begin
-            $fwrite (el, "%10d : %32s=%h                ; nbL\n", cycleCnt, abi_reg[`DEC.dec_nonblock_load_waddr], `DEC.lsu_nonblock_load_data);
-            tb_top.gpr[0][`DEC.dec_nonblock_load_waddr] = `DEC.lsu_nonblock_load_data;
-        end
-        if(`DEC.exu_div_wren) begin
-            $fwrite (el, "%10d : %32s=%h                ; nbD\n", cycleCnt, abi_reg[`DEC.div_waddr_wb], `DEC.exu_div_result);
-            tb_top.gpr[0][`DEC.div_waddr_wb] = `DEC.exu_div_result;
-        end
+    // Trace interface(s)
+    trace_monitor_if  trace();
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    trace_monitor_if  trace_core[3]();
+`endif
+
+    // Connect trace signals
+    assign trace.clk    = core_clk;
+    assign trace.rst_n  = rst_l;
+
+    assign trace.trace_insn      = trace_rv_i_insn_ip;
+    assign trace.trace_address   = trace_rv_i_address_ip;
+    assign trace.trace_valid     = trace_rv_i_valid_ip; 
+    assign trace.trace_exception = trace_rv_i_exception_ip;
+    assign trace.trace_ecause    = trace_rv_i_ecause_ip;
+    assign trace.trace_interrupt = trace_rv_i_interrupt_ip;
+    assign trace.trace_tval      = trace_rv_i_tval_ip;
+
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    for (genvar i=0; i<3; i++) begin
+        assign trace_core[i].clk    = core_clk;
+        assign trace_core[i].rst_n  = rst_l;
     end
 
+    assign trace_core[0].trace_insn      = `VEER0.trace_rv_i_insn_ip;
+    assign trace_core[0].trace_address   = `VEER0.trace_rv_i_address_ip;
+    assign trace_core[0].trace_valid     = `VEER0.trace_rv_i_valid_ip;
+    assign trace_core[0].trace_exception = `VEER0.trace_rv_i_exception_ip;
+    assign trace_core[0].trace_ecause    = `VEER0.trace_rv_i_ecause_ip;
+    assign trace_core[0].trace_interrupt = `VEER0.trace_rv_i_interrupt_ip;
+    assign trace_core[0].trace_tval      = `VEER0.trace_rv_i_tval_ip;
+
+    assign trace_core[0].gpr_wvalid = `VEER0.dec.dec_i0_wen_r;
+    assign trace_core[0].gpr_waddr  = `VEER0.dec.dec_i0_waddr_r;
+    assign trace_core[0].gpr_wdata  = `VEER0.dec.dec_i0_wdata_r;
+
+    assign trace_core[0].csr_wvalid = `VEER0.dec.dec_csr_wen_r;
+    assign trace_core[0].csr_waddr  = `VEER0.dec.dec_csr_wraddr_r;
+    assign trace_core[0].csr_wdata  = `VEER0.dec.dec_csr_wrdata_r;
+
+    assign trace_core[0].nonblock_load_wvalid = `VEER0.dec.dec_nonblock_load_wen;
+    assign trace_core[0].nonblock_load_waddr  = `VEER0.dec.dec_nonblock_load_waddr;
+    assign trace_core[0].nonblock_load_wdata  = `VEER0.dec.lsu_nonblock_load_data;
+
+    assign trace_core[0].div_wvalid = `VEER0.dec.exu_div_wren;
+    assign trace_core[0].div_waddr  = `VEER0.dec.div_waddr_wb;
+    assign trace_core[0].div_wdata  = `VEER0.dec.exu_div_result;
+
+    assign trace_core[1].trace_insn      = `VEER1.trace_rv_i_insn_ip;
+    assign trace_core[1].trace_address   = `VEER1.trace_rv_i_address_ip;
+    assign trace_core[1].trace_valid     = `VEER1.trace_rv_i_valid_ip;
+    assign trace_core[1].trace_exception = `VEER1.trace_rv_i_exception_ip;
+    assign trace_core[1].trace_ecause    = `VEER1.trace_rv_i_ecause_ip;
+    assign trace_core[1].trace_interrupt = `VEER1.trace_rv_i_interrupt_ip;
+    assign trace_core[1].trace_tval      = `VEER1.trace_rv_i_tval_ip;
+
+    assign trace_core[1].gpr_wvalid = `VEER1.dec.dec_i0_wen_r;
+    assign trace_core[1].gpr_waddr  = `VEER1.dec.dec_i0_waddr_r;
+    assign trace_core[1].gpr_wdata  = `VEER1.dec.dec_i0_wdata_r;
+
+    assign trace_core[1].csr_wvalid = `VEER1.dec.dec_csr_wen_r;
+    assign trace_core[1].csr_waddr  = `VEER1.dec.dec_csr_wraddr_r;
+    assign trace_core[1].csr_wdata  = `VEER1.dec.dec_csr_wrdata_r;
+
+    assign trace_core[1].nonblock_load_wvalid = `VEER1.dec.dec_nonblock_load_wen;
+    assign trace_core[1].nonblock_load_waddr  = `VEER1.dec.dec_nonblock_load_waddr;
+    assign trace_core[1].nonblock_load_wdata  = `VEER1.dec.lsu_nonblock_load_data;
+
+    assign trace_core[1].div_wvalid = `VEER1.dec.exu_div_wren;
+    assign trace_core[1].div_waddr  = `VEER1.dec.div_waddr_wb;
+    assign trace_core[1].div_wdata  = `VEER1.dec.exu_div_result;
+
+    assign trace_core[2].trace_insn      = `VEER2.trace_rv_i_insn_ip;
+    assign trace_core[2].trace_address   = `VEER2.trace_rv_i_address_ip;
+    assign trace_core[2].trace_valid     = `VEER2.trace_rv_i_valid_ip;
+    assign trace_core[2].trace_exception = `VEER2.trace_rv_i_exception_ip;
+    assign trace_core[2].trace_ecause    = `VEER2.trace_rv_i_ecause_ip;
+    assign trace_core[2].trace_interrupt = `VEER2.trace_rv_i_interrupt_ip;
+    assign trace_core[2].trace_tval      = `VEER2.trace_rv_i_tval_ip;
+
+    assign trace_core[2].gpr_wvalid = `VEER2.dec.dec_i0_wen_r;
+    assign trace_core[2].gpr_waddr  = `VEER2.dec.dec_i0_waddr_r;
+    assign trace_core[2].gpr_wdata  = `VEER2.dec.dec_i0_wdata_r;
+
+    assign trace_core[2].csr_wvalid = `VEER2.dec.dec_csr_wen_r;
+    assign trace_core[2].csr_waddr  = `VEER2.dec.dec_csr_wraddr_r;
+    assign trace_core[2].csr_wdata  = `VEER2.dec.dec_csr_wrdata_r;
+
+    assign trace_core[2].nonblock_load_wvalid = `VEER2.dec.dec_nonblock_load_wen;
+    assign trace_core[2].nonblock_load_waddr  = `VEER2.dec.dec_nonblock_load_waddr;
+    assign trace_core[2].nonblock_load_wdata  = `VEER2.dec.lsu_nonblock_load_data;
+
+    assign trace_core[2].div_wvalid = `VEER2.dec.exu_div_wren;
+    assign trace_core[2].div_waddr  = `VEER2.dec.div_waddr_wb;
+    assign trace_core[2].div_wdata  = `VEER2.dec.exu_div_result;
+`endif
+
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    // For TMR enabled do majority voting. Regular RISC-V trace is already
+    // majority voted as a part of the TMR complex
+    begin : trace_tmr
+        rvtmr #($bits(trace.gpr_wvalid)) tmr_gpr_wvalid ('{`VEER0.dec.dec_i0_wen_r,     `VEER1.dec.dec_i0_wen_r,     `VEER2.dec.dec_i0_wen_r},     trace.gpr_wvalid);
+        rvtmr #($bits(trace.gpr_waddr))  tmr_gpr_waddr  ('{`VEER0.dec.dec_i0_waddr_r,   `VEER1.dec.dec_i0_waddr_r,   `VEER2.dec.dec_i0_waddr_r},   trace.gpr_waddr);
+        rvtmr #($bits(trace.gpr_wdata))  tmr_gpr_wdata  ('{`VEER0.dec.dec_i0_wdata_r,   `VEER1.dec.dec_i0_wdata_r,   `VEER2.dec.dec_i0_wdata_r},   trace.gpr_wdata);
+
+        rvtmr #($bits(trace.csr_wvalid)) tmr_csr_wvalid ('{`VEER0.dec.dec_csr_wen_r,    `VEER1.dec.dec_csr_wen_r,    `VEER2.dec.dec_csr_wen_r},    trace.csr_wvalid);
+        rvtmr #($bits(trace.csr_waddr))  tmr_csr_waddr  ('{`VEER0.dec.dec_csr_wraddr_r, `VEER1.dec.dec_csr_wraddr_r, `VEER2.dec.dec_csr_wraddr_r}, trace.csr_waddr);
+        rvtmr #($bits(trace.csr_wdata))  tmr_csr_wdata  ('{`VEER0.dec.dec_csr_wrdata_r, `VEER1.dec.dec_csr_wrdata_r, `VEER2.dec.dec_csr_wrdata_r}, trace.csr_wdata);
+
+        rvtmr #($bits(trace.nonblock_load_wvalid)) tmr_nonblock_load_wvalid ('{`VEER0.dec.dec_nonblock_load_wen,   `VEER1.dec.dec_nonblock_load_wen,   `VEER2.dec.dec_nonblock_load_wen},   trace.nonblock_load_wvalid);
+        rvtmr #($bits(trace.nonblock_load_waddr))  tmr_nonblock_load_waddr  ('{`VEER0.dec.dec_nonblock_load_waddr, `VEER1.dec.dec_nonblock_load_waddr, `VEER2.dec.dec_nonblock_load_waddr}, trace.nonblock_load_waddr);
+        rvtmr #($bits(trace.nonblock_load_wdata))  tmr_nonblock_load_wdata  ('{`VEER0.dec.lsu_nonblock_load_data,  `VEER1.dec.lsu_nonblock_load_data,  `VEER2.dec.lsu_nonblock_load_data},  trace.nonblock_load_wdata);
+
+        rvtmr #($bits(trace.div_wvalid)) tmr_div_wvalid ('{`VEER0.dec.exu_div_wren,   `VEER1.dec.exu_div_wren,   `VEER2.dec.exu_div_wren},   trace.div_wvalid);
+        rvtmr #($bits(trace.div_waddr))  tmr_div_waddr  ('{`VEER0.dec.div_waddr_wb,   `VEER1.dec.div_waddr_wb,   `VEER2.dec.div_waddr_wb},   trace.div_waddr);
+        rvtmr #($bits(trace.div_wdata))  tmr_div_wdata  ('{`VEER0.dec.exu_div_result, `VEER1.dec.exu_div_result, `VEER2.dec.exu_div_result}, trace.div_wdata);
+    end
+
+`else
+    assign trace.gpr_wvalid = `DEC.dec_i0_wen_r;
+    assign trace.gpr_waddr  = `DEC.dec_i0_waddr_r;
+    assign trace.gpr_wdata  = `DEC.dec_i0_wdata_r;
+
+    assign trace.csr_wvalid = `DEC.dec_csr_wen_r;
+    assign trace.csr_waddr  = `DEC.dec_csr_wraddr_r;
+    assign trace.csr_wdata  = `DEC.dec_csr_wrdata_r;
+
+    assign trace.nonblock_load_wvalid = `DEC.dec_nonblock_load_wen;
+    assign trace.nonblock_load_waddr  = `DEC.dec_nonblock_load_waddr;
+    assign trace.nonblock_load_wdata  = `DEC.lsu_nonblock_load_data;
+
+    assign trace.div_wvalid = `DEC.exu_div_wren;
+    assign trace.div_waddr  = `DEC.div_waddr_wb;
+    assign trace.div_wdata  = `DEC.exu_div_result;
+`endif
+
+    TraceMonitor trace_monitor;
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    TraceMonitor trace_monitor_core[3];
+`endif
 
     initial begin
-        abi_reg[0] = "zero";
-        abi_reg[1] = "ra";
-        abi_reg[2] = "sp";
-        abi_reg[3] = "gp";
-        abi_reg[4] = "tp";
-        abi_reg[5] = "t0";
-        abi_reg[6] = "t1";
-        abi_reg[7] = "t2";
-        abi_reg[8] = "s0";
-        abi_reg[9] = "s1";
-        abi_reg[10] = "a0";
-        abi_reg[11] = "a1";
-        abi_reg[12] = "a2";
-        abi_reg[13] = "a3";
-        abi_reg[14] = "a4";
-        abi_reg[15] = "a5";
-        abi_reg[16] = "a6";
-        abi_reg[17] = "a7";
-        abi_reg[18] = "s2";
-        abi_reg[19] = "s3";
-        abi_reg[20] = "s4";
-        abi_reg[21] = "s5";
-        abi_reg[22] = "s6";
-        abi_reg[23] = "s7";
-        abi_reg[24] = "s8";
-        abi_reg[25] = "s9";
-        abi_reg[26] = "s10";
-        abi_reg[27] = "s11";
-        abi_reg[28] = "t3";
-        abi_reg[29] = "t4";
-        abi_reg[30] = "t5";
-        abi_reg[31] = "t6";
-
         extintsrc_req = {pt.PIC_TOTAL_INT-1{1'b0}};
         timer_int     = 0;
         soft_int      = 0;
@@ -2271,13 +2347,16 @@ module tb_top
 
         $readmemh("program.hex",  lmem.mem);
         $readmemh("program.hex",  imem.mem);
-        tp = $fopen("trace_port.csv","w");
-        el = $fopen("exec.log","w");
-        $fwrite (el, "//   Cycle : #inst    0    pc    opcode    reg=value    csr=value     ; mnemonic\n");
         fd = $fopen("console.log","w");
-        commit_count = 0;
         preload_dccm();
         preload_iccm();
+
+        trace_monitor = new(trace, "exec.log", "trace_port.csv");
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+        trace_monitor_core[0] = new(trace_core[0], "exec0.log", "trace_port0.csv");
+        trace_monitor_core[1] = new(trace_core[1], "exec1.log", "trace_port1.csv");
+        trace_monitor_core[2] = new(trace_core[2], "exec2.log", "trace_port2.csv");
+`endif
 
 `ifndef VERILATOR
    `ifdef VCS_DEBUG
@@ -4130,9 +4209,5 @@ jtagdpi #(
   assign jtag_tdi = 1'b0;
   assign jtag_trst_n = 1'b0;
 `endif
-
-/* verilator lint_off CASEINCOMPLETE */
-`include "dasm.svi"
-/* verilator lint_on CASEINCOMPLETE */
 
 endmodule

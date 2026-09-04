@@ -165,7 +165,8 @@ TB_DPI_SRCS := $(addprefix $(TBDIR)/,$(TB_DPI_SRCS))
 # Testbench sources
 TB_VERILATOR_SRCS = $(TBDIR)/test_tb_top.cpp $(TB_DPI_SRCS)
 
-TBFILES = $(TBDIR)/tb_top_pkg.sv \
+TBFILES = $(TBDIR)/tb_top_if.sv \
+          $(TBDIR)/tb_top_pkg.sv \
           $(TBDIR)/tb_top.sv \
           $(TBDIR)/ahb_sif.sv \
           $(TBDIR)/jtagdpi/jtagdpi.sv \

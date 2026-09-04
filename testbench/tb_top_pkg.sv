@@ -13,6 +13,10 @@
 // limitations under the License.
 //
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+`define TMR_RECOVERY_FSM tb_top.rvtop_wrapper.rvtop.tmr_complex.el2_tmr_recovery_fsm_u
+`endif
+
 package tb_top_pkg;
 
 `ifndef VERILATOR
@@ -81,5 +85,104 @@ package tb_top_pkg;
     logic iccm_double_bit_error;
     logic iccm_single_bit_error;
   } veer_sram_error_injection_mode_t;
+
+  /* verilator lint_off CASEINCOMPLETE */
+  `include "dasm.svi"
+  /* verilator lint_on CASEINCOMPLETE */
+
+  /*
+    This class is responsible for monitoring the trace port as well as VeeR
+    internals to provide execution trace dump. The trace is simultaneously
+    written in CSV and text format.
+  */
+  class TraceMonitor;
+
+      local virtual trace_monitor_if trace;
+      local gpr_t   gpr;
+      local integer tp = 0;
+      local integer el = 0;
+
+      function new (virtual trace_monitor_if vif, string exec_log, input string trace_csv);
+          this.trace = vif;
+
+          if (exec_log != "") begin
+              el = $fopen(exec_log, "w");
+              $fwrite (el, "//   Cycle : #inst    0    pc    opcode    reg=value    csr=value     ; mnemonic\n");
+          end
+          if (trace_csv != "") begin
+              tp = $fopen(trace_csv, "w");
+          end
+
+          fork
+              run();
+          join_none
+      endfunction
+
+      // Trace monitoring task
+      local task automatic run();
+          integer commit_count = 0;
+          integer cycle_count  = 0;
+
+          logic        wb_valid;
+          logic [ 4:0] wb_dest;
+          logic [31:0] wb_data;
+
+          logic        wb_csr_valid;
+          logic [11:0] wb_csr_dest;
+          logic [31:0] wb_csr_data;
+
+          forever begin
+              @(posedge trace.clk);
+              cycle_count++;
+
+              if (!trace.rst_n) continue;
+
+              if (trace.trace_valid) begin
+
+                  // Trace CSV
+                  if (tp) begin
+                      $fwrite(tp,"%b,%h,%h,%0h,%0h,3,%b,%h,%h,%b\n", trace.trace_valid, 0, trace.trace_address,
+                             0, trace.trace_insn, trace.trace_exception, trace.trace_ecause,
+                             trace.trace_tval, trace.trace_interrupt);
+                  end
+
+                  // Basic trace - no exception register updates
+                  // #1 0 ee000000 b0201073 c 0b02       00000000
+                  commit_count++;
+                  $fwrite(el, "%10d : %8s 0 %h %h%13s %14s ; %s\n", cycle_count, $sformatf("#%0d", commit_count),
+                              trace.trace_address, trace.trace_insn,
+                              (wb_dest !=0 && wb_valid) ? $sformatf("%s=%h", abi_reg[wb_dest], wb_data) : "            ",
+                              (wb_csr_valid)? $sformatf("c%h=%h", wb_csr_dest, wb_csr_data) : "             ",
+                              dasm(trace.trace_insn, trace.trace_address, wb_dest & {5{wb_valid}}, wb_data, gpr)
+                          );
+              end
+              if(trace.nonblock_load_wvalid) begin
+                  $fwrite(el, "%10d : %32s=%h                ; nbL\n", cycle_count, abi_reg[trace.nonblock_load_waddr], trace.nonblock_load_wdata);
+                  gpr[trace.nonblock_load_waddr] = trace.nonblock_load_wdata;
+              end
+              if(trace.div_wvalid) begin
+                  $fwrite(el, "%10d : %32s=%h                ; nbD\n", cycle_count, abi_reg[trace.div_waddr], trace.div_wdata);
+                  gpr[trace.div_waddr] = trace.div_wdata;
+              end
+  `ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+              if (`TMR_RECOVERY_FSM.recovery_state_en && `TMR_RECOVERY_FSM.recovery_state != '0) begin
+                  if (`TMR_RECOVERY_FSM.recovery_nxstate == HALT_CORES) begin
+                      $fwrite(el, "%10d : TMR recovery procedure began\n", cycle_count);
+                  end
+                  if (`TMR_RECOVERY_FSM.recovery_nxstate == IDLE) begin
+                      $fwrite(el, "%10d : TMR recovery procedure finished\n", cycle_count);
+                  end
+              end
+  `endif
+              // Delay DEC internals by 1 cycle
+              wb_valid      = trace.gpr_wvalid;
+              wb_dest       = trace.gpr_waddr;
+              wb_data       = trace.gpr_wdata;
+              wb_csr_valid  = trace.csr_wvalid;
+              wb_csr_dest   = trace.csr_waddr;
+              wb_csr_data   = trace.csr_wdata;
+          end
+      endtask
+  endclass : TraceMonitor
 
 endpackage

@@ -775,6 +775,8 @@ module tb_top
     logic next_dbus_error;
     logic next_ibus_error;
     logic next_ic_error;
+    logic next_ic_addr_error;
+    logic next_ic_hit_error;
     logic inject_veer_in_dist, inject_lockstep_in_dist;
     logic clear_inject_in_dist;
     logic [8:0] inject_veer_in_dist_no, inject_lockstep_in_dist_no;
@@ -1113,7 +1115,9 @@ module tb_top
     end
     `endif
 
-    logic ic_perr_r_d1;
+    logic       ic_perr_r_d1;
+    logic [3:0] ic_addr_err_cnt;
+    logic       next_ic_addr_error_d1;
 
 `ifdef RV_LOCKSTEP_ENABLE
 `define VEER rvtop_wrapper.rvtop.veer
@@ -1125,17 +1129,69 @@ module tb_top
 `elsif VERILATOR
   `define RV_ASSERT_OR_VERILATOR
 `endif
-`endif
+    // Delay pipeline to synchronize shadow core (LOCKSTEP_CORE) internal IFU fault
+    // injection and release with the configured lockstep delay (pt.LOCKSTEP_DELAY).
+    localparam int unsigned LockstepDelay = 32'(pt.LOCKSTEP_DELAY);
+    logic [4:0] shadow_ic_addr_error_q;
+    logic       shadow_ic_addr_error;
+    logic       shadow_ic_addr_error_d1;
 
     always @(posedge core_clk or negedge rst_l_combined) begin
         if (~rst_l_combined) begin
-            next_ic_error <= 0;
-            ic_perr_r_d1  <= 0;
+            shadow_ic_addr_error_q  <= '0;
+            shadow_ic_addr_error_d1 <= 1'b0;
+        end else begin
+            shadow_ic_addr_error_q  <= {shadow_ic_addr_error_q[3:0], next_ic_addr_error};
+            shadow_ic_addr_error_d1 <= shadow_ic_addr_error;
+        end
+    end
+
+    assign shadow_ic_addr_error = (LockstepDelay == 0) ? next_ic_addr_error :
+                                                         shadow_ic_addr_error_q[LockstepDelay - 1];
+`endif
+
+    // =========================================================================
+    // ICache Fault Injection & micect CSR (0x7F0) Hardware Counter Timing:
+    // 1. Mailbox writes (0x89: data fault, 0x8A: address infection, 0x8B: hit fault)
+    //    force corruption on the ICache read path and temporarily disable lockstep
+    //    constant delay assertions (`LOCKSTEP_CONST_DELAY_ASSERT_DISABLE).
+    //    - Signal Hierarchies:
+    //      - Mailboxes 0x89 & 0x8B force `rvtop_wrapper.rvtop.ic_rd_data`: This is the
+    //        142-bit top-level read data bus in el2_veer_wrapper connecting el2_mem to
+    //        both main core (el2_veer) and lockstep (el2_veer_lockstep). Forcing this
+    //        shared bus feeds both cores naturally (with lockstep delay), so no separate
+    //        LOCKSTEP_CORE force is needed.
+    //      - Mailbox 0x8A forces `ifu.mem_ctl.ifu_fetch_addr_int_f` (bit ICACHE_TAG_INDEX_LO
+    //        flipped via XOR): This is an internal signal inside each core's IFU (not present
+    //        at wrapper level). Hence, both primary core and `LOCKSTEP_CORE are forced
+    //        explicitly, with `LOCKSTEP_CORE delayed by `pt.LOCKSTEP_DELAY` cycles.
+    // 2. On the subsequent ICache access, the core detects an ECC/parity error and
+    //    pulses `rvtop.veer.dec.tlu.ic_perr_r` for 1 cycle.
+    // 3. In el2_dec_tlu_ctl.sv, `ic_perr_r` synchronously increments the `micect` CSR:
+    //      assign micect_inc[26:0] = micect[26:0] + {26'b0, ic_perr_r};
+    // 4. Hardware invalidates the line, flushes the pipeline, and restarts the fetch
+    //    from the SoC bus (AXI4/AHB).
+    // 5. tb_top samples `ic_perr_r` as `ic_perr_r_d1` (1-cycle delay) to release the
+    //    forced signals and re-enable assertions, allowing the core's bus refetch to
+    //    complete cleanly. By the time software resumes and reads `micect`, the
+    //    hardware counter increment has already taken place.
+    // =========================================================================
+    always @(posedge core_clk or negedge rst_l_combined) begin
+        if (~rst_l_combined) begin
+            next_ic_error         <= 0;
+            next_ic_addr_error    <= 0;
+            next_ic_addr_error_d1 <= 0;
+            next_ic_hit_error     <= 0;
+            ic_perr_r_d1          <= 0;
+            ic_addr_err_cnt       <= '0;
             `ifdef RV_ASSERT_OR_VERILATOR
                 release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
             `endif
         end else begin
-            ic_perr_r_d1 <= rvtop_wrapper.rvtop.veer.dec.tlu.ic_perr_r;
+            ic_perr_r_d1          <= rvtop_wrapper.rvtop.veer.dec.tlu.ic_perr_r;
+            next_ic_addr_error_d1 <= next_ic_addr_error;
+
+            // Mailbox 0x89: Force ICache read data corruption (forces 142-bit ic_rd_data to 142'h1)
             if (mailbox_write && mailbox_data[7:0] == 8'h89) begin
                 `ifdef RV_ASSERT_OR_VERILATOR
                     force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
@@ -1149,7 +1205,83 @@ module tb_top
                     release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
                 `endif
             end
+
+            // Mailbox 0x8A: Force address XOR mismatch (1-bit flip on ifu_fetch_addr_int_f).
+            // Injected unconditionally: triggers ECC/parity error when RV_ICACHE_ADDR_XOR=1,
+            // and slips undetected (released after 8 ICache hits) when RV_ICACHE_ADDR_XOR=0.
+            if (mailbox_write && mailbox_data[7:0] == 8'h8A) begin
+                `ifdef RV_ASSERT_OR_VERILATOR
+                    force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
+                `endif
+                next_ic_addr_error <= 1;
+                ic_addr_err_cnt    <= '0;
+            end else if (next_ic_addr_error) begin
+                if (ic_perr_r_d1 || (ic_addr_err_cnt == 4'd8)) begin
+                    next_ic_addr_error <= 0;
+                    ic_addr_err_cnt    <= '0;
+                end else if (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_act_hit_f) begin
+                    ic_addr_err_cnt <= ic_addr_err_cnt + 4'd1;
+                end
+            end
+
+            // Re-enable lockstep constant-delay assertion once the shadow core (which trails
+            // the main core by LockstepDelay cycles, including LockstepDelay=0) releases its force.
+            `ifdef RV_ASSERT_OR_VERILATOR
+            if (!shadow_ic_addr_error && shadow_ic_addr_error_d1) begin
+                release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
+            end
+            `endif
+
+            // Mailbox 0x8B: Force multi-bit read data corruption (hit logic / way selection fault).
+            // Targets shared wrapper bus rvtop_wrapper.rvtop.ic_rd_data (same as 0x89) to corrupt
+            // way-muxed data arriving at both primary and lockstep cores.
+            if (mailbox_write && mailbox_data[7:0] == 8'h8B) begin
+                `ifdef RV_ASSERT_OR_VERILATOR
+                    force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
+                `endif
+                next_ic_hit_error <= 1;
+                // Corrupt read data to simulate incorrect way selection / hit logic fault.
+                // Uses 16'h5557 pattern (odd parity per 16-bit chunk) so both Parity and ECC detectors trigger.
+                force rvtop_wrapper.rvtop.ic_rd_data = 142'h5557_5557_5557_5557;
+            end else if (next_ic_hit_error && ic_perr_r_d1) begin
+                next_ic_hit_error <= 0;
+                release rvtop_wrapper.rvtop.ic_rd_data;
+                `ifdef RV_ASSERT_OR_VERILATOR
+                    release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
+                `endif
+            end
         end
+    end
+
+    // =========================================================================
+    // Mailbox 0x8A Dynamic Address Bit-Flip Force & Release:
+    // Because `ifu_fetch_addr_int_f` updates on every fetch cycle from the F-stage
+    // register (`ifu_fetch_addr_f_ff`), a combinational block is used so the forced
+    // value tracks the current cycle's fetch address with bit `ICACHE_TAG_INDEX_LO`
+    // inverted (`^ 1`).
+    // - When `next_ic_addr_error` / `shadow_ic_addr_error` are 0 (all normal cycles),
+    //   all branches evaluate to false and no force or release is executed.
+    // - When the error flag transitions from 1 -> 0 (`_d1` pulse), a single-shot
+    //   `release` restores normal operation.
+    // =========================================================================
+    always @(*) begin
+        if (next_ic_addr_error) begin
+            force rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f =
+                rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_f_ff.dout ^
+                31'(1 << (pt.ICACHE_TAG_INDEX_LO - 1));
+        end else if (next_ic_addr_error_d1) begin
+            release rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f;
+        end
+
+`ifdef RV_LOCKSTEP_ENABLE
+        if (shadow_ic_addr_error) begin
+            force `LOCKSTEP_CORE.ifu.mem_ctl.ifu_fetch_addr_int_f =
+                `LOCKSTEP_CORE.ifu.mem_ctl.ifu_fetch_addr_f_ff.dout ^
+                31'(1 << (pt.ICACHE_TAG_INDEX_LO - 1));
+        end else if (shadow_ic_addr_error_d1) begin
+            release `LOCKSTEP_CORE.ifu.mem_ctl.ifu_fetch_addr_int_f;
+        end
+`endif
     end
 
 `ifdef RV_LOCKSTEP_ENABLE

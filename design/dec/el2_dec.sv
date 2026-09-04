@@ -37,6 +37,8 @@ module el2_dec
     input logic free_clk,                     // Clock always.                  Through two clock headers. For flops without second clock header built in.
     input logic free_l2clk,                   // Clock always.                  Through one clock header.  For flops with    second header built in.
 
+    output logic reset_delayed, // Reset detection
+
     input logic lsu_fastint_stall_any,        // needed by lsu for 2nd pass of dma with ecc correction, stall next cycle
 
     output logic dec_extint_stall,  // Stall on external interrupt

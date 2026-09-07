@@ -99,15 +99,19 @@ class Scoreboard(uvm_component):
             awaddr = item[2]
             wvalid = item[5]
             wdata = item[6]
+            awready = item[10]
+            wready = item[11]
 
-            if awvalid:
+            if awvalid and awready:
                 axi_w_req_dict["ADDRESS"] = awaddr
-            elif wvalid:
-                axi_w_req_dict["DATA"] = wdata
-            else:
-                raise ValueError("Unexpected item in monitor queue.")
+                axi_w_req_list.append(axi_w_req_dict)
 
-            axi_w_req_list.append(axi_w_req_dict)
+            if wvalid and wready:
+                axi_w_req_dict = {"DATA": wdata}
+                axi_w_req_list.append(axi_w_req_dict)
+
+            if not awvalid and not wvalid:
+                raise ValueError("Unexpected item in monitor queue.")
 
         # For each request there should be one data item
         transaction_requests = axi_w_req_list[0::2]

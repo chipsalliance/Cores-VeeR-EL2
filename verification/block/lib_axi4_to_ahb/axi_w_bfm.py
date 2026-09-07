@@ -123,6 +123,8 @@ class AXIWriteChannelBFM(metaclass=utility_classes.Singleton):
                     get_int(self.dut.axi_wstrb),
                     get_int(self.dut.axi_wlast),
                     get_int(self.dut.axi_bready),
+                    get_int(self.dut.axi_awready),
+                    get_int(self.dut.axi_wready),
                 )
                 await self.req_monitor_q.put(item)
 

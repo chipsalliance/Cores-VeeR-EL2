@@ -4,8 +4,10 @@
 import cocotb
 from axi_w_bfm import AXIWriteChannelBFM
 from axi_w_seq import (
+    AXIWriteFastSeqItem,
     AXIWriteInactiveSeqItem,
     AXIWriteLastDataSeqItem,
+    AXIWriteReadySeqItem,
     AXIWriteResponseWriteSeqItem,
     AXIWriteTransactionRequestSeqItem,
 )
@@ -57,6 +59,13 @@ class AXIWriteChannelDriver(uvm_driver):
                 self.logger.debug(f"Driven: {item}")
                 self.seq_item_port.item_done()
 
+            if isinstance(item, AXIWriteFastSeqItem):
+                await self.drive(item)
+                self.logger.debug(f"Driven: {item}")
+                if item.wait_for_handshake:
+                    await self.wait_handshakes("axi_awready", "axi_wready")
+                self.seq_item_port.item_done()
+
             if isinstance(item, AXIWriteTransactionRequestSeqItem):
                 await self.drive(item)
                 self.logger.debug(f"Driven: {item}")
@@ -75,6 +84,11 @@ class AXIWriteChannelDriver(uvm_driver):
                 self.logger.debug(f"Driven: {item}")
                 self.seq_item_port.item_done()
 
+            if isinstance(item, AXIWriteReadySeqItem):
+                await self.drive(item)
+                self.logger.debug(f"Driven: {item}")
+                self.seq_item_port.item_done()
+
     async def wait_handshake(self, sig_name=None, TIMEOUT_THRESHOLD=30):
         timeout = 0
         while True:
@@ -86,6 +100,23 @@ class AXIWriteChannelDriver(uvm_driver):
 
             if timeout > TIMEOUT_THRESHOLD:
                 raise TimeoutError(f"Transaction Request Handshake Timeout: AXI Write: {sig_name}")
+
+    async def wait_handshakes(self, *sig_names, TIMEOUT_THRESHOLD=30):
+        handshakes_done = set()
+
+        for _ in range(TIMEOUT_THRESHOLD + 1):
+            await RisingEdge(self.bfm.clk)
+            for sig_name in sig_names:
+                if getattr(self.bfm.dut, sig_name).value:
+                    handshakes_done.add(sig_name)
+
+            if len(handshakes_done) == len(sig_names):
+                return
+
+        raise TimeoutError(
+            "Transaction Request Handshake Timeout: AXI Write: "
+            f"missing {set(sig_names) - handshakes_done}"
+        )
 
     async def drive(self, item):
         await self.bfm.req_driver_q_put(

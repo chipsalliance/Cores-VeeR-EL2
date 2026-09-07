@@ -373,7 +373,7 @@ import el2_pkg::*;
                                  ((buf_cmd_byte_ptrQ == 3'b111) | (buf_byteen[get_nxtbyte_ptr(buf_cmd_byte_ptrQ[2:0],buf_byteen[7:0],1'b1)] == 1'b0))));
                   bypass_en       = buf_state_en & buf_write_in & (buf_nxtstate == CMD_WR);   // Only bypass for writes for the time being
                   ahb_htrans[1:0] = {2{(~(cmd_done | cmd_doneQ) | bypass_en)}} & 2'b10;
-                  slave_valid_pre  = buf_state_en & (buf_nxtstate != DONE_WR);
+                  slave_valid_pre  = buf_state_en & ~(ahb_hresp_q);
 
                   trxn_done = ahb_hready_q & ahb_hwrite_q & (ahb_htrans_q[1:0] != 2'b0);
                   buf_cmd_byte_ptr_en = trxn_done | bypass_en;

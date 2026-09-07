@@ -287,35 +287,60 @@ class CPUReactiveCtrlSequence(uvm_sequence):
             await self.seqr.finish_item(item)
 
             state = await self.seqr.get_response()
-            if state.i_cpu_halt_req:
+            if state.mpc_debug_halt_req:
                 if not self.halted:
                     for _ in range(self.halt_delay):
                         item = CPUCtrlStatusItem()
                         item.drive_ext = True
                         await self.seqr.start_item(item)
                         await self.seqr.finish_item(item)
+                        item = CPUCtrlStatusItem()
+                        item.sample = True
+                        await self.seqr.start_item(item)
+                        await self.seqr.finish_item(item)
+                        state = await self.seqr.get_response()
                     self.halted = True
+                while state.mpc_debug_halt_req:
+                    item = CPUCtrlStatusItem()
+                    item.drive_ext = True
+                    item.mpc_debug_halt_ack = 1
+                    await self.seqr.start_item(item)
+                    await self.seqr.finish_item(item)
+                    item = CPUCtrlStatusItem()
+                    item.sample = True
+                    await self.seqr.start_item(item)
+                    await self.seqr.finish_item(item)
+                    state = await self.seqr.get_response()
                 item = CPUCtrlStatusItem()
                 item.drive_ext = True
-                item.o_cpu_halt_ack = 1
-                item.o_cpu_halt_status = 1
+                item.mpc_debug_halt_ack = 0
                 await self.seqr.start_item(item)
                 await self.seqr.finish_item(item)
-            elif state.i_cpu_run_req:
+            elif state.mpc_debug_run_req:
                 if self.halted:
-                    item.o_cpu_halt_status = 1
                     for _ in range(self.run_delay):
                         item = CPUCtrlStatusItem()
                         item.drive_ext = True
                         await self.seqr.start_item(item)
                         await self.seqr.finish_item(item)
                     self.halted = False
+                while state.mpc_debug_run_req:
+                    item = CPUCtrlStatusItem()
+                    item.drive_ext = True
+                    item.mpc_debug_run_ack = 1
+                    await self.seqr.start_item(item)
+                    await self.seqr.finish_item(item)
+                    item = CPUCtrlStatusItem()
+                    item.sample = True
+                    await self.seqr.start_item(item)
+                    await self.seqr.finish_item(item)
+                    state = await self.seqr.get_response()
                 item = CPUCtrlStatusItem()
                 item.drive_ext = True
-                item.o_cpu_halt_status = 0
-                item.o_cpu_run_ack = 1
+                item.mpc_debug_run_ack = 0
                 await self.seqr.start_item(item)
                 await self.seqr.finish_item(item)
+                break
 
 
 class ExternalFlagSequence(uvm_sequence):

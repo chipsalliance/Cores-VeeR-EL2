@@ -1379,6 +1379,9 @@ module el2_tmr_complex
   end
 
   // Common PIC for all the VeeRs instances
+  logic  pic_rst_l;
+  assign pic_rst_l = rst_l | dbg_rst_l;
+
   el2_pic_ctrl  #(.pt(pt)) pic_ctrl_inst (
     .clk(free_l2clk),
     .free_clk(free_clk_int),
@@ -1398,7 +1401,7 @@ module el2_tmr_complex
     .claimid(pic_claimid_int[7:0]),
     .meicurpl(meicurpl_int[3:0]),
     .meipt(meipt_int[3:0]),
-    .rst_l(core_rst_l),
+    .rst_l(pic_rst_l),
     .*
   );
 endmodule

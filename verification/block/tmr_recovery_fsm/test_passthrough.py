@@ -91,16 +91,15 @@ class TestPassthrough(BaseTest):
                 for i in range(20):
                     soc_item = CPUCtrlStatusItem()
                     soc_item.drive_ext = True
-                    soc_item.i_cpu_halt_req = random.randint(0, 1)
-                    soc_item.i_cpu_run_req = random.randint(0, 1)
+                    soc_item.mpc_debug_halt_req = random.randint(0, 1)
+                    soc_item.mpc_debug_run_req = random.randint(0, 1)
                     soc_item.mpc_reset_run_req = random.randint(0, 1)
                     soc_sub_array.append(soc_item)
 
                     cpu_item = CPUCtrlStatusItem()
                     cpu_item.drive_ext = True
-                    cpu_item.o_cpu_halt_ack = random.randint(0, 1)
-                    cpu_item.o_cpu_halt_status = random.randint(0, 1)
-                    cpu_item.o_cpu_run_ack = random.randint(0, 1)
+                    cpu_item.mpc_debug_halt_ack = random.randint(0, 1)
+                    cpu_item.mpc_debug_run_ack = random.randint(0, 1)
                     cpu_sub_array.append(cpu_item)
 
                 soc_items.append(soc_sub_array)

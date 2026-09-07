@@ -72,11 +72,10 @@ class CPUCtrlStatusItem(uvm_sequence_item):
 
     def __init__(self, name="CPUCtrlStatusItem"):
         super().__init__(name)
-        self.i_cpu_halt_req = 0
-        self.o_cpu_halt_ack = 0
-        self.o_cpu_halt_status = 0
-        self.i_cpu_run_req = 0
-        self.o_cpu_run_ack = 0
+        self.mpc_debug_halt_req = 0
+        self.mpc_debug_halt_ack = 0
+        self.mpc_debug_run_req = 0
+        self.mpc_debug_run_ack = 0
         self.mpc_reset_run_req = 0
         self.drive_ext = False
         self.wait_req = False
@@ -88,20 +87,19 @@ class CPUCtrlStatusItem(uvm_sequence_item):
         if not isinstance(other, CPUCtrlStatusItem):
             return False
         return (
-            self.i_cpu_halt_req == other.i_cpu_halt_req
-            and self.o_cpu_halt_ack == other.o_cpu_halt_ack
-            and self.o_cpu_halt_status == other.o_cpu_halt_status
-            and self.i_cpu_run_req == other.i_cpu_run_req
-            and self.o_cpu_run_ack == other.o_cpu_run_ack
+            self.mpc_debug_halt_req == other.mpc_debug_halt_req
+            and self.mpc_debug_halt_ack == other.mpc_debug_halt_ack
+            and self.mpc_debug_run_req == other.mpc_debug_run_req
+            and self.mpc_debug_run_ack == other.mpc_debug_run_ack
             and self.mpc_reset_run_req == other.mpc_reset_run_req
         )
 
     def __str__(self):
         return (
             f"CPUCtrlStatusItem(timestamp={self.timestamp}, "
-            + f"i_cpu_halt_req={self.i_cpu_halt_req}, o_cpu_halt_ack={self.o_cpu_halt_ack}, "
-            + f"i_cpu_run_req={self.i_cpu_run_req}, o_cpu_run_ack={self.o_cpu_run_ack}, "
-            + f"o_cpu_halt_status={self.o_cpu_halt_status}, mpc_reset_run_req={self.mpc_reset_run_req}, "
+            + f"mpc_debug_halt_req={self.mpc_debug_halt_req}, mpc_debug_halt_ack={self.mpc_debug_halt_ack}, "
+            + f"mpc_debug_run_req={self.mpc_debug_run_req}, mpc_debug_run_ack={self.mpc_debug_run_ack}, "
+            + f"mpc_reset_run_req={self.mpc_reset_run_req}, "
             + f"drive_ext={self.drive_ext}, wait_req={self.wait_req}, wait_ack={self.wait_ack}, sample={self.sample}"
             + ")"
         )
@@ -296,21 +294,31 @@ class CPUCtrlStatusMonitor(uvm_monitor):
     Monitors the CPU control interface
     """
 
-    sig_names = [
-        "i_cpu_halt_req",
-        "o_cpu_halt_ack",
-        "o_cpu_halt_status",
-        "i_cpu_run_req",
-        "o_cpu_run_ack",
-        "mpc_reset_run_req",
-    ]
+    sig_names = {
+        False: [
+            "mpc_debug_halt_req",
+            "mpc_debug_halt_ack",
+            "mpc_debug_run_req",
+            "mpc_debug_run_ack",
+            "mpc_reset_run_req",
+        ],
+        True: [
+            "mpc_debug_halt_req",
+            "mpc_debug_halt_ack",
+            "mpc_debug_run_req",
+            "mpc_debug_run_ack",
+            "mpc_reset_run_req",
+        ],
+    }
 
     def __init__(self, *args, **kwargs):
         self.signals = kwargs["signals"]
         self.clock_domain = kwargs["clock_domain"]
+        self.cpu_side = kwargs["cpu_side"]
 
         del kwargs["signals"]
         del kwargs["clock_domain"]
+        del kwargs["cpu_side"]
         super().__init__(*args, **kwargs)
 
     def build_phase(self):
@@ -322,7 +330,7 @@ class CPUCtrlStatusMonitor(uvm_monitor):
             await RisingEdge(self.clock_domain.clk)
             await ReadOnly()
 
-            curr_cpu_state = {i: self.signals[i].value for i in self.sig_names}
+            curr_cpu_state = {i: self.signals[i].value for i in self.sig_names[self.cpu_side]}
 
             if prev_cpu_state is None:
                 prev_cpu_state = curr_cpu_state
@@ -343,14 +351,22 @@ class CPUCtrlStatusDriver(uvm_driver):
     Drives the CPU control interface
     """
 
-    sig_names = [
-        "i_cpu_halt_req",
-        "o_cpu_halt_ack",
-        "o_cpu_halt_status",
-        "i_cpu_run_req",
-        "o_cpu_run_ack",
-        "mpc_reset_run_req",
-    ]
+    sig_names = {
+        False: [
+            "mpc_debug_halt_req",
+            "mpc_debug_halt_ack",
+            "mpc_debug_run_req",
+            "mpc_debug_run_ack",
+            "mpc_reset_run_req",
+        ],
+        True: [
+            "mpc_debug_halt_req",
+            "mpc_debug_halt_ack",
+            "mpc_debug_run_req",
+            "mpc_debug_run_ack",
+            "mpc_reset_run_req",
+        ],
+    }
 
     def __init__(self, *args, **kwargs):
         self.signals = kwargs["signals"]
@@ -368,23 +384,22 @@ class CPUCtrlStatusDriver(uvm_driver):
             assert isinstance(it, CPUCtrlStatusItem)
             await ReadWrite()
             if it.drive_ext:
-                self.signals["o_cpu_halt_ack"].value = it.o_cpu_halt_ack
-                self.signals["o_cpu_halt_status"].value = it.o_cpu_halt_status
-                self.signals["o_cpu_run_ack"].value = it.o_cpu_run_ack
+                self.signals["mpc_debug_halt_ack"].value = it.mpc_debug_halt_ack
+                self.signals["mpc_debug_run_ack"].value = it.mpc_debug_run_ack
                 await RisingEdge(self.clock_domain.clk)
                 self.seq_item_port.item_done()
             elif it.wait_req:
                 while (
-                    self.signals["i_cpu_halt_req"].value == 0
-                    and self.signals["i_cpu_run_req"].value == 0
+                    self.signals["mpc_debug_halt_req"].value == 0
+                    and self.signals["mpc_debug_run_req"].value == 0
                 ):
                     await RisingEdge(self.clock_domain.clk)
                     await ReadWrite()
                 self.seq_item_port.item_done()
             elif it.sample:
                 ans = CPUCtrlStatusItem()
-                ans.i_cpu_halt_req = self.signals["i_cpu_halt_req"].value
-                ans.i_cpu_run_req = self.signals["i_cpu_run_req"].value
+                ans.mpc_debug_halt_req = self.signals["mpc_debug_halt_req"].value
+                ans.mpc_debug_run_req = self.signals["mpc_debug_run_req"].value
                 ans.mpc_reset_run_req = self.signals["mpc_reset_run_req"].value
                 self.seq_item_port.item_done(rsp=ans)
             else:
@@ -397,24 +412,23 @@ class CPUCtrlStatusDriver(uvm_driver):
             self.logger.debug(f"SoC Drive: {str(it)}")
             await ReadWrite()
             if it.drive_ext:
-                self.signals["i_cpu_halt_req"].value = it.i_cpu_halt_req
-                self.signals["i_cpu_run_req"].value = it.i_cpu_run_req
+                self.signals["mpc_debug_halt_req"].value = it.mpc_debug_halt_req
+                self.signals["mpc_debug_run_req"].value = it.mpc_debug_run_req
                 self.signals["mpc_reset_run_req"].value = it.mpc_reset_run_req
                 await RisingEdge(self.clock_domain.clk)
                 self.seq_item_port.item_done()
             elif it.wait_ack:
                 while (
-                    self.signals["i_cpu_halt_ack"].value == 0
-                    and self.signals["i_cpu_run_ack"].value == 0
+                    self.signals["mpc_debug_halt_ack"].value == 0
+                    and self.signals["mpc_debug_run_ack"].value == 0
                 ):
                     await RisingEdge(self.clock_domain.clk)
                     await ReadWrite()
                 self.seq_item_port.item_done()
             elif it.sample:
                 ans = CPUCtrlStatusItem()
-                ans.o_cpu_halt_ack = self.signals["o_cpu_halt_ack"].value
-                ans.o_cpu_halt_status = self.signals["o_cpu_halt_status"].value
-                ans.o_cpu_run_ack = self.signals["o_cpu_run_ack"].value
+                ans.mpc_debug_halt_ack = self.signals["mpc_debug_halt_ack"].value
+                ans.mpc_debug_run_ack = self.signals["mpc_debug_run_ack"].value
                 self.seq_item_port.item_done(rsp=ans)
             else:
                 assert False, f"{it}"
@@ -693,7 +707,7 @@ class BaseEnv(uvm_env):
                     cpu_side=True,
                     signals={
                         sig: getattr(cocotb.top, f"{sig}_veer")[i]
-                        for sig in CPUCtrlStatusDriver.sig_names
+                        for sig in CPUCtrlStatusDriver.sig_names[True]
                     },
                 )
             )
@@ -707,7 +721,7 @@ class BaseEnv(uvm_env):
                     cpu_side=False,
                     signals={
                         sig: getattr(cocotb.top, f"ext_{sig}_veer")[i]
-                        for sig in CPUCtrlStatusDriver.sig_names
+                        for sig in CPUCtrlStatusDriver.sig_names[False]
                     },
                 )
             )
@@ -772,9 +786,10 @@ class BaseEnv(uvm_env):
                     f"cpu_ctrl[{i}]_cpu_mon",
                     self,
                     clock_domain=self.clock_domain,
+                    cpu_side=True,
                     signals={
                         sig: getattr(cocotb.top, f"{sig}_veer")[i]
-                        for sig in CPUCtrlStatusMonitor.sig_names
+                        for sig in CPUCtrlStatusMonitor.sig_names[True]
                     },
                 )
             )
@@ -785,9 +800,10 @@ class BaseEnv(uvm_env):
                     f"cpu_ctrl[{i}]_soc_mon",
                     self,
                     clock_domain=self.clock_domain,
+                    cpu_side=False,
                     signals={
                         sig: getattr(cocotb.top, f"ext_{sig}_veer")[i]
-                        for sig in CPUCtrlStatusMonitor.sig_names
+                        for sig in CPUCtrlStatusMonitor.sig_names[False]
                     },
                 )
             )
@@ -897,19 +913,17 @@ class BaseTest(uvm_test):
         for sig in cocotb.top.recovery_csr_rddata_veer:
             sig.value = 0
 
-        for sig in cocotb.top.o_cpu_halt_ack_veer:
+        for sig in cocotb.top.mpc_debug_halt_ack_veer:
             sig.value = 0
-        for sig in cocotb.top.o_cpu_halt_status_veer:
-            sig.value = 0
-        for sig in cocotb.top.o_cpu_run_ack_veer:
+        for sig in cocotb.top.mpc_debug_run_ack_veer:
             sig.value = 0
 
-        for sig in cocotb.top.ext_i_cpu_halt_req_veer:
+        for sig in cocotb.top.ext_mpc_debug_halt_req_veer:
             sig.value = 0
-        for sig in cocotb.top.ext_i_cpu_run_req_veer:
+        for sig in cocotb.top.ext_mpc_debug_run_req_veer:
             sig.value = 0
         for sig in cocotb.top.ext_mpc_reset_run_req_veer:
-            sig.value = 0
+            sig.value = 1
 
         await ClockCycles(cocotb.top.clk, 2)
         cocotb.top.rst_l.value = 1

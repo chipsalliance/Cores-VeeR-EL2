@@ -3,7 +3,107 @@
 import copy
 
 from pyuvm import uvm_sequence
-from testbench import CPUCtrlStatusItem, ExtFlagsItem, MuBiFalse, MuBiTrue, RegBusItem
+from testbench import (
+    BaseScoreboard,
+    CPUCtrlStatusItem,
+    ExtFlagsItem,
+    MuBiFalse,
+    MuBiTrue,
+    RegBusItem,
+)
+
+
+class RegBusScoreboard(BaseScoreboard):
+
+    def check_phase(self):
+        self.passed = True
+
+        def majority_vote(val1, val2, val3):
+            """
+            Vote for the correct value based on 3 inputs. If not possible to pick the winner, return None.
+            """
+            if val1 == val2:
+                return val1
+            elif val2 == val3:
+                return val2
+            elif val1 == val3:
+                return val3
+            else:
+                return None
+
+        def check_if_transfers(if_name):
+            assert if_name in ["gpr", "csr"]
+
+            recovery_ports = getattr(self, f"recovery_{if_name}_ports")
+            reg_reads = [{}, {}, {}]
+            while (
+                recovery_ports[0].can_get()
+                and recovery_ports[1].can_get()
+                and recovery_ports[2].can_get()
+            ):
+                tr = [None for _ in range(3)]
+
+                # Collect simultaneous transactions
+                for i in range(3):
+                    _, tr[i] = recovery_ports[i].try_get()
+                    if not isinstance(tr[i], RegBusItem):
+                        self.passed = False
+                        continue
+
+                    read_reg_value = reg_reads[i].get(int(tr[i].rdaddr))
+                    if tr[i].write and (read_reg_value is None):
+                        self.passed = False
+                        self.logger.error(
+                            f"[{tr[i].timestamp}] {if_name.upper()} written without prior read at this address"
+                        )
+                        continue
+
+                    if not tr[i].write:
+                        # Save read value for later comparison
+                        reg_reads[i][int(tr[i].rdaddr)] = int(tr[i].rddata)
+                        self.logger.debug(
+                            f"[{tr[i].timestamp}] {if_name.upper()} read value {hex(tr[i].rddata)} at {hex(tr[i].rdaddr)}"
+                        )
+
+                if not (tr[0].timestamp == tr[1].timestamp == tr[2].timestamp):
+                    self.passed = False
+                    self.logger.error(
+                        f"Received {if_name.upper()} transactions do not match in time"
+                    )
+                    break
+
+                rddata = majority_vote(
+                    reg_reads[0][int(tr[0].rdaddr)],
+                    reg_reads[1][int(tr[1].rdaddr)],
+                    reg_reads[2][int(tr[2].rdaddr)],
+                )
+                if rddata is None:
+                    self.logger.error("Voter failed")
+                    continue
+
+                for i in range(3):
+                    if tr[i].write:
+                        if rddata != int(tr[i].wrdata):
+                            self.passed = False
+                            self.logger.error(
+                                f"[{tr[i].timestamp}] {if_name.upper()} written different value than earlier read at address {hex(tr[i].wraddr)}, expected: {hex(rddata)}, got: {hex(tr[i].wrdata)}"
+                            )
+                            continue
+                        if int(tr[i].rddata) not in [0, int(tr[i].wrdata)]:
+                            self.passed = False
+                            self.logger.error(
+                                f"[{tr[i].timestamp}] During write, read data should be either 0 or equal to write data"
+                            )
+                            continue
+                        if int(tr[i].wraddr) != int(tr[i].rdaddr):
+                            self.passed = False
+                            self.logger.error(
+                                f"[{tr[i].timestamp}] Simultaneous read and write on {if_name.upper()} interface is only allowed at the same address"
+                            )
+                            continue
+
+        check_if_transfers("gpr")
+        check_if_transfers("csr")
 
 
 class CPUReactiveCtrlSequence(uvm_sequence):
@@ -24,10 +124,12 @@ class CPUReactiveCtrlSequence(uvm_sequence):
             item.wait_req = True
             await self.seqr.start_item(item)
             await self.seqr.finish_item(item)
+
             item = CPUCtrlStatusItem()
             item.sample = True
             await self.seqr.start_item(item)
             await self.seqr.finish_item(item)
+
             state = await self.seqr.get_response()
             if state.i_cpu_halt_req:
                 if not self.halted:
@@ -114,10 +216,12 @@ class RecoveryInterfaceSequence(uvm_sequence):
             item.wait_enable = True
             await self.seqr.start_item(item)
             await self.seqr.finish_item(item)
+
             sitem = RegBusItem()
             sitem.sample_bus = True
             await self.seqr.start_item(sitem)
             await self.seqr.finish_item(sitem)
+
             sample = await self.seqr.get_response()
             while sample.en == MuBiTrue:
                 ritem = RegBusItem()
@@ -127,11 +231,13 @@ class RecoveryInterfaceSequence(uvm_sequence):
                 await self.seqr.finish_item(ritem)
                 if int(sample.write) == 1:
                     self.reg_map[int(sample.wraddr)] = int(sample.wrdata)
+
                 sitem = RegBusItem()
                 sitem.sample_bus = True
                 await self.seqr.start_item(sitem)
                 await self.seqr.finish_item(sitem)
                 sample = await self.seqr.get_response()
+
             if sample.en == MuBiFalse:
                 ritem = RegBusItem()
                 ritem.rddata = 0

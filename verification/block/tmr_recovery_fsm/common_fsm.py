@@ -348,14 +348,18 @@ class ExternalFlagSequence(uvm_sequence):
     A sequence which drives external flag and responds to clear request
     """
 
-    def __init__(self, name, seqr, clear_delay=0):
+    def __init__(self, name, seqr, clear_delay=0, faulty_core=None):
         self.seqr = seqr
         self.clear_delay = clear_delay
+        self.faulty_core = faulty_core
         super().__init__(name)
 
     async def body(self):
         item = ExtFlagsItem()
         item.ext = MuBiTrue
+        item.faulty_core = [MuBiFalse for _ in range(3)]
+        if self.faulty_core is not None:
+            item.faulty_core[self.faulty_core] = MuBiTrue
         item.drive_ext = True
         await self.seqr.start_item(item)
         await self.seqr.finish_item(item)
@@ -370,6 +374,9 @@ class ExternalFlagSequence(uvm_sequence):
         for _ in range(self.clear_delay):
             item = ExtFlagsItem()
             item.ext = MuBiTrue
+            item.faulty_core = [MuBiFalse for _ in range(3)]
+            if self.faulty_core is not None:
+                item.faulty_core[self.faulty_core] = MuBiTrue
             item.drive_ext = True
             await self.seqr.start_item(item)
             await self.seqr.finish_item(item)
@@ -377,6 +384,7 @@ class ExternalFlagSequence(uvm_sequence):
 
         item = ExtFlagsItem()
         item.ext = MuBiFalse
+        item.faulty_core = [MuBiFalse for _ in range(3)]
         item.drive_ext = True
         await self.seqr.start_item(item)
         await self.seqr.finish_item(item)

@@ -72,6 +72,7 @@ VERILOG_SOURCES  = \
 	$(SRCDIR)/el2_lockstep_pkg.sv \
 	$(SRCDIR)/el2_veer_lockstep.sv \
 	$(TEST_DIR)/el2_veer_lockstep_cov_if.sv \
+	$(TEST_DIR)/el2_veer_lockstep_delay_cov_if.sv \
 	$(TEST_DIR)/el2_veer_lockstep_cov_bind.sv \
 	$(TEST_DIR)/el2_veer_lockstep_wrapper.sv
 

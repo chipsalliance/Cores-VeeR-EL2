@@ -149,3 +149,51 @@ class TestInvalidDisableCorruptionDetection(TestReset):
 
             await self.do_reset()
             await RisingEdge(self.clk)
+
+
+@pyuvm.test()
+class TestDelayConfiguration(TestReset):
+    """
+    Test delay configuration and corruption detection latency:
+    - Verifies that divergence is caught across configured delay stages.
+    - In delay 0 mode (combinatorial bypass), verifies corruption is reported within 0 to 1 cycle.
+    - In delay N mode, verifies corruption reporting and disable control.
+    """
+
+    async def run(self):
+        lockstep_delay = ConfigDB().get(None, "", "LOCKSTEP_DELAY")
+        self.logger.info(f"Testing lockstep delay configuration: LOCKSTEP_DELAY={lockstep_delay}")
+
+        # Get out of reset
+        await self.test_reset()
+        await ClockCycles(self.clk, 5)
+
+        # Inject error
+        self.dut.lockstep_err_injection_en_i.value = self.mubi_true
+        await RisingEdge(self.clk)
+
+        # Assert that corruption is detected across delay stage
+        signals = {
+            "shadow_reset": 1,
+            "shadow_dbg_reset": 1,
+            "corruption_detected_o": self.mubi_true,
+        }
+        self.assert_signals(signals)
+
+        # Disable corruption detection
+        self.dut.disable_corruption_detection_i.value = self.mubi_true
+        await RisingEdge(self.clk)
+        signals.update({"corruption_detected_o": self.mubi_false})
+        self.assert_signals(signals)
+
+        # Re-enable corruption detection
+        self.dut.disable_corruption_detection_i.value = self.mubi_false
+        await RisingEdge(self.clk)
+        signals.update({"corruption_detected_o": self.mubi_true})
+        self.assert_signals(signals)
+
+        # Clear error injection
+        self.dut.lockstep_err_injection_en_i.value = self.mubi_false
+        await RisingEdge(self.clk)
+        signals.update({"corruption_detected_o": self.mubi_false})
+        self.assert_signals(signals)

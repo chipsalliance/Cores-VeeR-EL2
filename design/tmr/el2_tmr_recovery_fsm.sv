@@ -31,6 +31,8 @@ module el2_tmr_recovery_fsm
     input  el2_mubi_pkg::el2_mubi_t external_flag,
     output el2_mubi_pkg::el2_mubi_t clear_external_flag,
 
+    input  el2_mubi_pkg::el2_mubi_t faulty_core[3],
+
     output el2_mubi_pkg::el2_mubi_t recovery_gpr_en_veer[3],
     output logic                    recovery_gpr_wen_veer[3],
     output logic [ 4:0]             recovery_gpr_wraddr_veer[3],
@@ -107,7 +109,9 @@ module el2_tmr_recovery_fsm
 
   assign int_mpc_debug_halt_req_veer = recovery_state == HALT_CORES;
   assign int_mpc_debug_run_req_veer = recovery_state == RESTART_CPU;
-  assign int_mpc_debug_halt_ack_veer = mpc_debug_halt_ack_veer[0] & mpc_debug_halt_ack_veer[1] & mpc_debug_halt_ack_veer[2];
+  assign int_mpc_debug_halt_ack_veer = (mpc_debug_halt_ack_veer[0] | mubi_check_true(faulty_core[0])) &
+                                       (mpc_debug_halt_ack_veer[1] | mubi_check_true(faulty_core[1])) &
+                                       (mpc_debug_halt_ack_veer[2] | mubi_check_true(faulty_core[2]));
 
   assign int_mpc_reset_run_req_veer = ~(recovery_state == RESET_CPU   |
                                         recovery_state == SET_FLAG_CC |
@@ -174,12 +178,20 @@ module el2_tmr_recovery_fsm
     rvdff #(.WIDTH(32)) gpr_value_d_m (.*, .din(recovery_gpr_rddata_veer[i]), .dout(recovery_gpr_rddata_veer_d[i]));
     assign gpr_ready[i] = el2_mubi_reg_comp(recovery_gpr_rddata_veer[i], recovery_gpr_rddata_veer_d[i]);
   end
-  assign all_csr_ready = mubi_and3(csr_ready[0], csr_ready[1], csr_ready[2]);
-  assign all_gpr_ready = mubi_and3(gpr_ready[0], gpr_ready[1], gpr_ready[2]);
+  assign all_csr_ready = mubi_and3(mubi_or(csr_ready[0], faulty_core[0]),
+                                   mubi_or(csr_ready[1], faulty_core[1]),
+                                   mubi_or(csr_ready[2], faulty_core[2]));
+  assign all_gpr_ready = mubi_and3(mubi_or(gpr_ready[0], faulty_core[0]),
+                                   mubi_or(gpr_ready[1], faulty_core[1]),
+                                   mubi_or(gpr_ready[2], faulty_core[2]));
 
   el2_mubi_t csr_fatal, gpr_fatal;
-  el2_tmr_3way_fatal_check_mubi #(.Width(32)) verify_csr(.in(recovery_csr_rddata_veer_d), .fatal(csr_fatal));
-  el2_tmr_3way_fatal_check_mubi #(.Width(32)) verify_gpr(.in(recovery_gpr_rddata_veer_d), .fatal(gpr_fatal));
+  el2_tmr_3way_fatal_check_mubi #(.Width(32)) verify_csr(.in(recovery_csr_rddata_veer_d),
+                                                         .faulty_core(faulty_core),
+                                                         .fatal(csr_fatal));
+  el2_tmr_3way_fatal_check_mubi #(.Width(32)) verify_gpr(.in(recovery_gpr_rddata_veer_d),
+                                                         .faulty_core(faulty_core),
+                                                         .fatal(gpr_fatal));
 
   el2_mubi_t csr_ready_and_fatal, gpr_ready_and_fatal;
   assign csr_ready_and_fatal = el2_mubi_mux_el2_mubi_true(
@@ -206,8 +218,10 @@ module el2_tmr_recovery_fsm
   );
 
   for(genvar i=0; i < csr_cnt; ++i) begin : csr_reg_storage
-    assign csr_we[i]  = (cnt_csr[0] == 8'(i)) & mubi_check_true(all_csr_ready) & (recovery_state == READ_REG);
-    assign csr_src[i] = (cnt_csr[1] == 8'(i)) & mubi_check_true(all_csr_ready) & (recovery_state == READ_REG);
+    assign csr_we[i]  = (cnt_csr[0] == 8'(i)) & mubi_check_true(all_csr_ready) &
+                        (recovery_state == READ_REG) & mubi_check_false(fatal_err);
+    assign csr_src[i] = (cnt_csr[1] == 8'(i)) & mubi_check_true(all_csr_ready) &
+                        (recovery_state == READ_REG) & mubi_check_false(fatal_err);
     assign csr_re[i]  = (cnt_csr[2] == 8'(i));
     logic [38:0] csr_recovery_storage_int;
     assign csr_recovery_storage_int = csr_src[i] ? csr_with_ecc_wr : csr_recovery_storage[i];
@@ -241,8 +255,10 @@ module el2_tmr_recovery_fsm
   );
 
   for(genvar i=0; i < 32; ++i) begin : gpr_reg_storage
-    assign gpr_we[i]  = (cnt_gpr[0][4:0] == 5'(i)) & mubi_check_true(all_gpr_ready) & (recovery_state == READ_REG);
-    assign gpr_src[i] = (cnt_gpr[1][4:0] == 5'(i)) & mubi_check_true(all_gpr_ready) & (recovery_state == READ_REG);
+    assign gpr_we[i]  = (cnt_gpr[0][4:0] == 5'(i)) & mubi_check_true(all_gpr_ready) &
+                        (recovery_state == READ_REG) & mubi_check_false(fatal_err);
+    assign gpr_src[i] = (cnt_gpr[1][4:0] == 5'(i)) & mubi_check_true(all_gpr_ready) &
+                        (recovery_state == READ_REG) & mubi_check_false(fatal_err);
     assign gpr_re[i]  = (cnt_gpr[2][4:0] == 5'(i));
     logic [38:0] gpr_recovery_storage_int;
     assign gpr_recovery_storage_int = gpr_src[i] ? gpr_with_ecc_wr : gpr_recovery_storage[i];

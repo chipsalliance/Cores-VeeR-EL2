@@ -95,7 +95,7 @@ class TestRecoverableError(BaseTest):
             cpu_seqs = [
                 CPUReactiveCtrlSequence(f"cpu_seq{i}", s) for i, s in zip(range(3), cpu_seqrs)
             ]
-            flag_seq = ExternalFlagSequence("ext_flag_seq", flag_seqr)
+            flag_seq = ExternalFlagSequence("ext_flag_seq", flag_seqr, faulty_core=faulty_core)
 
             gpr_seqs = [
                 RecoveryInterfaceSequence(f"gpr_seq{i}", s, gpr_vals)

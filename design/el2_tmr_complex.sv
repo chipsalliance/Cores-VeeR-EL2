@@ -1072,6 +1072,7 @@ module el2_tmr_complex
 
   el2_tmr_recovery_fsm el2_tmr_recovery_fsm_u (
       .*,
+      .faulty_core(tmr_fault_q),
       .external_flag(el2_mubi_pkg::El2MuBiFalse),
       .clear_external_flag(),
       .sync_rst_l(),

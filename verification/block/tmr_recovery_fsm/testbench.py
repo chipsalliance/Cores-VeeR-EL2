@@ -54,6 +54,7 @@ class ExtFlagsItem(uvm_sequence_item):
     def __init__(self, name="ExtFlagsItem"):
         super().__init__(name)
         self.ext = MuBiFalse
+        self.faulty_core = [MuBiFalse for _ in range(3)]
         self.clr = MuBiFalse
         self.drive_ext = False
         self.wait_for_clr = False
@@ -62,7 +63,7 @@ class ExtFlagsItem(uvm_sequence_item):
     def __str__(self):
         return (
             f"ExtFlagsItem(timestamp={self.timestamp}, "
-            + f"ext={self.ext}, clr={self.clr}, "
+            + f"ext={self.ext}, faulty_core={self.faulty_core}, clr={self.clr}, "
             + f"drive_ext={self.drive_ext}, wait_for_clr={self.wait_for_clr}"
             + ")"
         )
@@ -241,6 +242,7 @@ class ExternalFlagMonitor(uvm_monitor):
             await ReadOnly()
 
             curr_flags = {i: self.signals[i].value for i in ["ext", "clr"]}
+            curr_flags["faulty_core"] = [sig.value for sig in self.signals["faulty_core"]]
 
             if prev_flags is None:
                 prev_flags = curr_flags
@@ -250,6 +252,7 @@ class ExternalFlagMonitor(uvm_monitor):
                 item.timestamp = get_sim_time(units="ps")
                 item.ext = curr_flags["ext"]
                 item.clr = curr_flags["clr"]
+                item.faulty_core = curr_flags["faulty_core"]
                 self.logger.debug(f"External flags: {str(item)}")
 
                 self.ap.write(item)
@@ -280,6 +283,8 @@ class ExternalFlagDriver(uvm_driver):
             if it.drive_ext:
                 self.logger.debug(f"Driving ext with {it.ext}")
                 self.signals["ext"].value = it.ext
+                for sig, value in zip(self.signals["faulty_core"], it.faulty_core):
+                    sig.value = value
                 await RisingEdge(self.clock_domain.clk)
             elif it.wait_for_clr:
                 while self.signals["clr"].value != MuBiTrue:
@@ -734,6 +739,7 @@ class BaseEnv(uvm_env):
             signals={
                 "ext": getattr(cocotb.top, "external_flag"),
                 "clr": getattr(cocotb.top, "clear_external_flag"),
+                "faulty_core": getattr(cocotb.top, "faulty_core"),
             },
         )
 
@@ -816,6 +822,7 @@ class BaseEnv(uvm_env):
             signals={
                 "ext": getattr(cocotb.top, "external_flag"),
                 "clr": getattr(cocotb.top, "clear_external_flag"),
+                "faulty_core": getattr(cocotb.top, "faulty_core"),
             },
         )
 
@@ -924,6 +931,9 @@ class BaseTest(uvm_test):
             sig.value = 0
         for sig in cocotb.top.ext_mpc_reset_run_req_veer:
             sig.value = 1
+
+        for sig in cocotb.top.faulty_core:
+            sig.value = MuBiFalse
 
         await ClockCycles(cocotb.top.clk, 2)
         cocotb.top.rst_l.value = 1

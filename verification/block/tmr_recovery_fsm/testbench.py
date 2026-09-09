@@ -21,6 +21,323 @@ MuBiTrue = 0b10
 
 # ==============================================================================
 
+# CSRs available in M-mode only
+MCSR = [
+    0x300,
+    0x301,
+    0x304,
+    0x305,
+    0x320,
+    0x323,
+    0x324,
+    0x325,
+    0x326,
+    0x340,
+    0x341,
+    0x342,
+    0x343,
+    0x344,
+    0x3A0,
+    0x3A1,
+    0x3A2,
+    0x3A3,
+    0x3A4,
+    0x3A5,
+    0x3A6,
+    0x3A7,
+    0x3A8,
+    0x3A9,
+    0x3AA,
+    0x3AB,
+    0x3AC,
+    0x3AD,
+    0x3AE,
+    0x3AF,
+    0x3B0,
+    0x3B1,
+    0x3B2,
+    0x3B3,
+    0x3B4,
+    0x3B5,
+    0x3B6,
+    0x3B7,
+    0x3B8,
+    0x3B9,
+    0x3BA,
+    0x3BB,
+    0x3BC,
+    0x3BD,
+    0x3BE,
+    0x3BF,
+    0x3C0,
+    0x3C1,
+    0x3C2,
+    0x3C3,
+    0x3C4,
+    0x3C5,
+    0x3C6,
+    0x3C7,
+    0x3C8,
+    0x3C9,
+    0x3CA,
+    0x3CB,
+    0x3CC,
+    0x3CD,
+    0x3CE,
+    0x3CF,
+    0x3D0,
+    0x3D1,
+    0x3D2,
+    0x3D3,
+    0x3D4,
+    0x3D5,
+    0x3D6,
+    0x3D7,
+    0x3D8,
+    0x3D9,
+    0x3DA,
+    0x3DB,
+    0x3DC,
+    0x3DD,
+    0x3DE,
+    0x3DF,
+    0x3E0,
+    0x3E1,
+    0x3E2,
+    0x3E3,
+    0x3E4,
+    0x3E5,
+    0x3E6,
+    0x3E7,
+    0x3E8,
+    0x3E9,
+    0x3EA,
+    0x3EB,
+    0x3EC,
+    0x3ED,
+    0x3EE,
+    0x3EF,
+    0x7A0,
+    0x7A1,
+    0x7A2,
+    0x7B0,
+    0x7B1,
+    0x7C0,
+    0x7C2,
+    0x7C4,
+    0x7C6,
+    0x7C8,
+    0x7C9,
+    0x7CA,
+    0x7CB,
+    0x7CC,
+    0x7CE,
+    0x7CF,
+    0x7D2,
+    0x7D3,
+    0x7D4,
+    0x7D5,
+    0x7D6,
+    0x7D7,
+    0x7F0,
+    0x7F1,
+    0x7F2,
+    0x7F8,
+    0x7F9,
+    0x7FF,
+    0xB00,
+    0xB02,
+    0xB03,
+    0xB04,
+    0xB05,
+    0xB06,
+    0xB80,
+    0xB82,
+    0xB83,
+    0xB84,
+    0xB85,
+    0xB86,
+    0xBC0,
+    0xBC8,
+    0xBC9,
+    0xBCA,
+    0xBCB,
+    0xBCC,
+    0xF11,
+    0xF12,
+    0xF13,
+    0xF14,
+    0xFC0,
+    0xFC8,
+]
+
+# CSRs available in both U and M modes
+UCSR = [
+    0x300,
+    0x301,
+    0x304,
+    0x305,
+    0x306,
+    0x30A,
+    0x31A,
+    0x320,
+    0x323,
+    0x324,
+    0x325,
+    0x326,
+    0x340,
+    0x341,
+    0x342,
+    0x343,
+    0x344,
+    0x3A0,
+    0x3A1,
+    0x3A2,
+    0x3A3,
+    0x3A4,
+    0x3A5,
+    0x3A6,
+    0x3A7,
+    0x3A8,
+    0x3A9,
+    0x3AA,
+    0x3AB,
+    0x3AC,
+    0x3AD,
+    0x3AE,
+    0x3AF,
+    0x3B0,
+    0x3B1,
+    0x3B2,
+    0x3B3,
+    0x3B4,
+    0x3B5,
+    0x3B6,
+    0x3B7,
+    0x3B8,
+    0x3B9,
+    0x3BA,
+    0x3BB,
+    0x3BC,
+    0x3BD,
+    0x3BE,
+    0x3BF,
+    0x3C0,
+    0x3C1,
+    0x3C2,
+    0x3C3,
+    0x3C4,
+    0x3C5,
+    0x3C6,
+    0x3C7,
+    0x3C8,
+    0x3C9,
+    0x3CA,
+    0x3CB,
+    0x3CC,
+    0x3CD,
+    0x3CE,
+    0x3CF,
+    0x3D0,
+    0x3D1,
+    0x3D2,
+    0x3D3,
+    0x3D4,
+    0x3D5,
+    0x3D6,
+    0x3D7,
+    0x3D8,
+    0x3D9,
+    0x3DA,
+    0x3DB,
+    0x3DC,
+    0x3DD,
+    0x3DE,
+    0x3DF,
+    0x3E0,
+    0x3E1,
+    0x3E2,
+    0x3E3,
+    0x3E4,
+    0x3E5,
+    0x3E6,
+    0x3E7,
+    0x3E8,
+    0x3E9,
+    0x3EA,
+    0x3EB,
+    0x3EC,
+    0x3ED,
+    0x3EE,
+    0x3EF,
+    0x747,
+    0x757,
+    0x7A0,
+    0x7A1,
+    0x7A2,
+    0x7B0,
+    0x7B1,
+    0x7C0,
+    0x7C2,
+    0x7C4,
+    0x7C6,
+    0x7C8,
+    0x7C9,
+    0x7CA,
+    0x7CB,
+    0x7CC,
+    0x7CE,
+    0x7CF,
+    0x7D2,
+    0x7D3,
+    0x7D4,
+    0x7D5,
+    0x7D6,
+    0x7D7,
+    0x7F0,
+    0x7F1,
+    0x7F2,
+    0x7F8,
+    0x7F9,
+    0x7FF,
+    0xB00,
+    0xB02,
+    0xB03,
+    0xB04,
+    0xB05,
+    0xB06,
+    0xB80,
+    0xB82,
+    0xB83,
+    0xB84,
+    0xB85,
+    0xB86,
+    0xBC0,
+    0xBC8,
+    0xBC9,
+    0xBCA,
+    0xBCB,
+    0xBCC,
+    0xC00,
+    0xC02,
+    0xC03,
+    0xC04,
+    0xC05,
+    0xC06,
+    0xC80,
+    0xC82,
+    0xC83,
+    0xC84,
+    0xC85,
+    0xC86,
+    0xF11,
+    0xF12,
+    0xF13,
+    0xF14,
+    0xFC0,
+    0xFC8,
+]
+
 
 class RegBusItem(uvm_sequence_item):
 
@@ -33,6 +350,7 @@ class RegBusItem(uvm_sequence_item):
         self.wraddr = 0
         self.wrdata = 0
         self.en = 0
+        self.reset = 0
         self.wait_enable = False
         self.sample_bus = False
         self.drive_rddata = False
@@ -40,7 +358,7 @@ class RegBusItem(uvm_sequence_item):
 
     def __str__(self):
         return (
-            f"RegBusItem(timestamp={self.timestamp}, en={self.en}, "
+            f"RegBusItem(timestamp={self.timestamp}, en={self.en}, reset={self.reset}, "
             + f"rdaddr={self.rdaddr}, rddata={self.rddata}, "
             + f"wraddr={self.wraddr}, wrdata={self.wrdata}, "
             + f"write={self.write}, wait_enable={self.wait_enable}, "
@@ -78,10 +396,13 @@ class CPUCtrlStatusItem(uvm_sequence_item):
         self.mpc_debug_run_req = 0
         self.mpc_debug_run_ack = 0
         self.mpc_reset_run_req = 0
+        self.reset = 0
+        self.hard_reset = 0
         self.drive_ext = False
         self.wait_req = False
         self.wait_ack = False
         self.sample = False
+        self.noop = False
         self.timestamp = 0
 
     def __eq__(self, other):
@@ -93,6 +414,8 @@ class CPUCtrlStatusItem(uvm_sequence_item):
             and self.mpc_debug_run_req == other.mpc_debug_run_req
             and self.mpc_debug_run_ack == other.mpc_debug_run_ack
             and self.mpc_reset_run_req == other.mpc_reset_run_req
+            and self.reset == other.reset
+            and self.hard_reset == other.hard_reset
         )
 
     def __str__(self):
@@ -100,21 +423,11 @@ class CPUCtrlStatusItem(uvm_sequence_item):
             f"CPUCtrlStatusItem(timestamp={self.timestamp}, "
             + f"mpc_debug_halt_req={self.mpc_debug_halt_req}, mpc_debug_halt_ack={self.mpc_debug_halt_ack}, "
             + f"mpc_debug_run_req={self.mpc_debug_run_req}, mpc_debug_run_ack={self.mpc_debug_run_ack}, "
-            + f"mpc_reset_run_req={self.mpc_reset_run_req}, "
-            + f"drive_ext={self.drive_ext}, wait_req={self.wait_req}, wait_ack={self.wait_ack}, sample={self.sample}"
+            + f"mpc_reset_run_req={self.mpc_reset_run_req}, reset={self.reset}, hard_reset={self.hard_reset}, "
+            + f"drive_ext={self.drive_ext}, wait_req={self.wait_req}, "
+            + f"wait_ack={self.wait_ack}, sample={self.sample}, noop={self.noop}"
             + ")"
         )
-
-
-class ResetStatusItem(uvm_sequence_item):
-
-    def __init__(self, name="ResetStatusItem"):
-        super().__init__(name)
-        self.reset = 0
-        self.timestamp = 0
-
-    def __str__(self):
-        return f"ResetStatusItem(timestamp={self.timestamp}, " + "sync_rst_l={self.reset}" + ")"
 
 
 class FatalStatusItem(uvm_sequence_item):
@@ -172,6 +485,7 @@ class RegBusMonitor(uvm_monitor):
                 item.write = self.signals["wen"].value
                 item.wraddr = self.signals["wraddr"].value
                 item.wrdata = self.signals["wrdata"].value
+                item.reset = self.signals["reset"].value == 0
                 self.logger.debug(f"RegBus: {str(item)}")
                 self.ap.write(item)
 
@@ -197,7 +511,7 @@ class RegBusDriver(uvm_driver):
             assert isinstance(it, RegBusItem)
             await ReadWrite()
             if it.wait_enable:
-                while self.signals["en"].value != MuBiTrue:
+                while self.signals["en"].value != MuBiTrue and self.signals["reset"].value != 0:
                     await RisingEdge(self.clock_domain.clk)
                     await ReadWrite()
                 self.seq_item_port.item_done()
@@ -208,6 +522,7 @@ class RegBusDriver(uvm_driver):
                 ans.write = self.signals["wen"].value
                 ans.wraddr = self.signals["wraddr"].value
                 ans.wrdata = self.signals["wrdata"].value
+                ans.reset = self.signals["reset"].value == 0
                 self.seq_item_port.item_done(rsp=ans)
             elif it.drive_rddata:
                 self.signals["rddata"].value = it.rddata
@@ -299,22 +614,13 @@ class CPUCtrlStatusMonitor(uvm_monitor):
     Monitors the CPU control interface
     """
 
-    sig_names = {
-        False: [
-            "mpc_debug_halt_req",
-            "mpc_debug_halt_ack",
-            "mpc_debug_run_req",
-            "mpc_debug_run_ack",
-            "mpc_reset_run_req",
-        ],
-        True: [
-            "mpc_debug_halt_req",
-            "mpc_debug_halt_ack",
-            "mpc_debug_run_req",
-            "mpc_debug_run_ack",
-            "mpc_reset_run_req",
-        ],
-    }
+    sig_names = [
+        "mpc_debug_halt_req",
+        "mpc_debug_halt_ack",
+        "mpc_debug_run_req",
+        "mpc_debug_run_ack",
+        "mpc_reset_run_req",
+    ]
 
     def __init__(self, *args, **kwargs):
         self.signals = kwargs["signals"]
@@ -335,7 +641,7 @@ class CPUCtrlStatusMonitor(uvm_monitor):
             await RisingEdge(self.clock_domain.clk)
             await ReadOnly()
 
-            curr_cpu_state = {i: self.signals[i].value for i in self.sig_names[self.cpu_side]}
+            curr_cpu_state = {i: self.signals[i].value for i in self.sig_names}
 
             if prev_cpu_state is None:
                 prev_cpu_state = curr_cpu_state
@@ -356,22 +662,13 @@ class CPUCtrlStatusDriver(uvm_driver):
     Drives the CPU control interface
     """
 
-    sig_names = {
-        False: [
-            "mpc_debug_halt_req",
-            "mpc_debug_halt_ack",
-            "mpc_debug_run_req",
-            "mpc_debug_run_ack",
-            "mpc_reset_run_req",
-        ],
-        True: [
-            "mpc_debug_halt_req",
-            "mpc_debug_halt_ack",
-            "mpc_debug_run_req",
-            "mpc_debug_run_ack",
-            "mpc_reset_run_req",
-        ],
-    }
+    sig_names = [
+        "mpc_debug_halt_req",
+        "mpc_debug_halt_ack",
+        "mpc_debug_run_req",
+        "mpc_debug_run_ack",
+        "mpc_reset_run_req",
+    ]
 
     def __init__(self, *args, **kwargs):
         self.signals = kwargs["signals"]
@@ -397,6 +694,8 @@ class CPUCtrlStatusDriver(uvm_driver):
                 while (
                     self.signals["mpc_debug_halt_req"].value == 0
                     and self.signals["mpc_debug_run_req"].value == 0
+                    and self.signals["reset"] == 1
+                    and self.signals["hard_reset"] == 1
                 ):
                     await RisingEdge(self.clock_domain.clk)
                     await ReadWrite()
@@ -406,7 +705,13 @@ class CPUCtrlStatusDriver(uvm_driver):
                 ans.mpc_debug_halt_req = self.signals["mpc_debug_halt_req"].value
                 ans.mpc_debug_run_req = self.signals["mpc_debug_run_req"].value
                 ans.mpc_reset_run_req = self.signals["mpc_reset_run_req"].value
+                ans.reset = self.signals["reset"].value == 0
+                ans.hard_reset = self.signals["hard_reset"].value == 0
                 self.seq_item_port.item_done(rsp=ans)
+            elif it.noop:
+                await RisingEdge(self.clock_domain.clk)
+                await ReadWrite()
+                self.seq_item_port.item_done()
             else:
                 assert False, f"{it}"
 
@@ -435,6 +740,10 @@ class CPUCtrlStatusDriver(uvm_driver):
                 ans.mpc_debug_halt_ack = self.signals["mpc_debug_halt_ack"].value
                 ans.mpc_debug_run_ack = self.signals["mpc_debug_run_ack"].value
                 self.seq_item_port.item_done(rsp=ans)
+            elif it.noop:
+                await RisingEdge(self.clock_domain.clk)
+                await ReadWrite()
+                self.seq_item_port.item_done()
             else:
                 assert False, f"{it}"
 
@@ -442,70 +751,6 @@ class CPUCtrlStatusDriver(uvm_driver):
         if self.cpu_side:
             await self.run_cpu_side()
         await self.run_soc_side()
-
-
-class ResetSignalMonitor(uvm_monitor):
-    """
-    Monitors the CPU sync reset
-    """
-
-    def __init__(self, *args, **kwargs):
-        self.signal = kwargs["signal"]
-        self.clock_domain = kwargs["clock_domain"]
-
-        del kwargs["signal"]
-        del kwargs["clock_domain"]
-        super().__init__(*args, **kwargs)
-
-    def build_phase(self):
-        self.ap = uvm_analysis_port("ap", self)
-
-    async def run_phase(self):
-        prev_sync_rst = None
-        while True:
-            await RisingEdge(self.clock_domain.clk)
-            await ReadOnly()
-
-            curr_sync_rst = self.signal.value
-
-            if prev_sync_rst is None:
-                prev_sync_rst = curr_sync_rst
-
-            if prev_sync_rst != curr_sync_rst:
-                item = ResetStatusItem()
-                item.timestamp = get_sim_time(units="ps")
-                item.reset = curr_sync_rst
-                self.logger.debug(f"Reset State: {str(item)}")
-
-                self.ap.write(item)
-                prev_sync_rst = curr_sync_rst
-
-
-class ResetSignalDriver(uvm_driver):
-    """
-    Drives the reset interface
-    """
-
-    def __init__(self, *args, **kwargs):
-        self.signals = kwargs["signals"]
-        self.clock_domain = kwargs["clock_domain"]
-
-        del kwargs["signals"]
-        del kwargs["clock_domain"]
-        super().__init__(*args, **kwargs)
-
-    async def run_phase(self):
-        while True:
-            it = await self.seq_item_port.get_next_item()
-            assert isinstance(it, ResetStatusItem)
-            await ReadWrite()
-            if it.wait_reset_low:
-                while self.signals["sync_rst_l"].value == 1:
-                    await RisingEdge(self.clock_domain.clk)
-                    await ReadWrite()
-                self.seq_item_port.item_done()
-            else:
-                assert False, f"{it}"
 
 
 class FatalSignalMonitor(uvm_monitor):
@@ -619,10 +864,6 @@ class BaseScoreboard(uvm_component):
         self.external_flag_fifo = uvm_tlm_analysis_fifo("external_flag_fifo", self)
         self.external_flag_port = uvm_get_port("external_flag_port", self)
 
-        # Sync reset
-        self.sync_rst_fifo = uvm_tlm_analysis_fifo("sync_rst_fifo", self)
-        self.sync_rst_port = uvm_get_port("sync_rst_port", self)
-
         # Fatal err
         self.fatal_err_fifo = uvm_tlm_analysis_fifo("fatal_err_fifo", self)
         self.fatal_err_port = uvm_get_peek_port("fatal_err_port", self)
@@ -647,9 +888,6 @@ class BaseScoreboard(uvm_component):
 
         # External flag
         self.external_flag_port.connect(self.external_flag_fifo.get_export)
-
-        # Sync reset
-        self.sync_rst_port.connect(self.sync_rst_fifo.get_export)
 
         # Fatal err
         self.fatal_err_port.connect(self.fatal_err_fifo.get_peek_export)
@@ -698,7 +936,8 @@ class BaseEnv(uvm_env):
                         signals={
                             sig: getattr(cocotb.top, f"recovery_{bus}_{sig}_veer")[i]
                             for sig in RegBusDriver.sig_names
-                        },
+                        }
+                        | {"reset": cocotb.top.sync_rst_l},
                     )
                 )
         # CPU control bus
@@ -712,8 +951,9 @@ class BaseEnv(uvm_env):
                     cpu_side=True,
                     signals={
                         sig: getattr(cocotb.top, f"{sig}_veer")[i]
-                        for sig in CPUCtrlStatusDriver.sig_names[True]
-                    },
+                        for sig in CPUCtrlStatusDriver.sig_names
+                    }
+                    | {"reset": cocotb.top.sync_rst_l, "hard_reset": cocotb.top.rst_l},
                 )
             )
         self.soc_driver = []
@@ -726,8 +966,9 @@ class BaseEnv(uvm_env):
                     cpu_side=False,
                     signals={
                         sig: getattr(cocotb.top, f"ext_{sig}_veer")[i]
-                        for sig in CPUCtrlStatusDriver.sig_names[False]
-                    },
+                        for sig in CPUCtrlStatusDriver.sig_names
+                    }
+                    | {"reset": cocotb.top.sync_rst_l},
                 )
             )
 
@@ -780,7 +1021,8 @@ class BaseEnv(uvm_env):
                         signals={
                             sig: getattr(cocotb.top, f"recovery_{bus}_{sig}_veer")[i]
                             for sig in RegBusMonitor.sig_names
-                        },
+                        }
+                        | {"reset": cocotb.top.sync_rst_l},
                     )
                 )
 
@@ -795,8 +1037,9 @@ class BaseEnv(uvm_env):
                     cpu_side=True,
                     signals={
                         sig: getattr(cocotb.top, f"{sig}_veer")[i]
-                        for sig in CPUCtrlStatusMonitor.sig_names[True]
-                    },
+                        for sig in CPUCtrlStatusMonitor.sig_names
+                    }
+                    | {"reset": cocotb.top.sync_rst_l},
                 )
             )
         self.soc_mon = []
@@ -809,8 +1052,9 @@ class BaseEnv(uvm_env):
                     cpu_side=False,
                     signals={
                         sig: getattr(cocotb.top, f"ext_{sig}_veer")[i]
-                        for sig in CPUCtrlStatusMonitor.sig_names[False]
-                    },
+                        for sig in CPUCtrlStatusMonitor.sig_names
+                    }
+                    | {"reset": cocotb.top.sync_rst_l},
                 )
             )
 
@@ -827,13 +1071,6 @@ class BaseEnv(uvm_env):
         )
 
         # Misc signals
-        self.sync_rst_mon = ResetSignalMonitor(
-            "sync_rst_mon",
-            self,
-            clock_domain=self.clock_domain,
-            signal=getattr(cocotb.top, "sync_rst_l"),
-        )
-
         self.fatal_err_mon = FatalSignalMonitor(
             "fatal_err_mon",
             self,
@@ -875,7 +1112,6 @@ class BaseEnv(uvm_env):
                 mon.ap.connect(self.scoreboard.external_cpu_ctrl_fifos[i].analysis_export)
 
             self.external_flag_mon.ap.connect(self.scoreboard.external_flag_fifo.analysis_export)
-            self.sync_rst_mon.ap.connect(self.scoreboard.sync_rst_fifo.analysis_export)
             self.hard_rst_mon.ap.connect(self.scoreboard.hard_rst_fifo.analysis_export)
             self.fatal_err_mon.ap.connect(self.scoreboard.fatal_err_fifo.analysis_export)
 

@@ -557,6 +557,7 @@ def tmr_exec_verify(session, blockName, testName, coverage):
         "test_passthrough",
         "test_no_err",
         "test_error",
+        "test_no_halt",
     ],
 )
 @nox.parametrize("coverage", coverageTypes)

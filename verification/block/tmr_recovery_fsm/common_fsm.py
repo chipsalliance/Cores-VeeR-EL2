@@ -230,6 +230,13 @@ class RegBusScoreboard(BaseScoreboard):
             if self.hard_rst_port.can_get():
                 _, rst_event = self.hard_rst_port.try_get()
                 self.logger.debug(f"[{rst_event.timestamp}] Skipping initial reset event")
+                if self.fatal_err_port.can_peek():
+                    _, fatal_err_event = self.fatal_err_port.try_peek()
+                    if fatal_err_event.timestamp <= rst_event.timestamp:
+                        self.fatal_err_port.try_get()
+                        self.logger.debug(
+                            f"[{fatal_err_event.timestamp}] Skipping initial fatal error event"
+                        )
 
         gpr_port_empty = False
         csr_port_empty = False
@@ -253,10 +260,11 @@ class RegBusScoreboard(BaseScoreboard):
 
         if self.fatal_err_port.can_get():
             _, fatl_err_event = self.fatal_err_port.try_get()
-            self.passed = False
-            self.logger.error(
-                f"Unexpected fatal error detected, first at {fatl_err_event.timestamp}"
-            )
+            if fatl_err_event == MuBiTrue:
+                self.passed = False
+                self.logger.error(
+                    f"Unexpected fatal error detected, first at {fatl_err_event.timestamp}"
+                )
 
         if self.passed:
             self.logger.info("All scoreboard checks passed")
@@ -265,13 +273,19 @@ class RegBusScoreboard(BaseScoreboard):
 class CPUReactiveCtrlSequence(uvm_sequence):
     """
     A sequence which responds to control requests
+    CPU can be either in halted or running state, so only requests that change state are processed.
     """
 
-    def __init__(self, name, seqr, halt_delay=3, run_delay=1):
+    def __init__(self, name, seqr, halt_delay=3, run_delay=1, stop_on_hard_reset=False):
         self.seqr = seqr
         self.halted = False
+        self.reset = False
         self.halt_delay = halt_delay
+        self.curr_halt_delay = self.halt_delay
         self.run_delay = run_delay
+        self.curr_run_delay = self.run_delay
+        self.stop_on_hard_reset = stop_on_hard_reset
+
         super().__init__(name)
 
     async def body(self):
@@ -287,60 +301,78 @@ class CPUReactiveCtrlSequence(uvm_sequence):
             await self.seqr.finish_item(item)
 
             state = await self.seqr.get_response()
+            if state.hard_reset and self.stop_on_hard_reset:
+                break
+            if state.reset:
+                self.reset = True
+                item = CPUCtrlStatusItem()
+                item.noop = True
+                await self.seqr.start_item(item)
+                await self.seqr.finish_item(item)
+                continue
+
+            if self.reset:
+                self.reset = False
+                self.halted = False if state.mpc_reset_run_req else True
+                self.curr_halt_delay = self.halt_delay
+                self.curr_run_delay = self.run_delay
+                continue
+
+            if not state.mpc_debug_halt_req:
+                self.curr_halt_delay = self.halt_delay
+            if not state.mpc_debug_run_req:
+                self.curr_run_delay = self.run_delay
+
             if state.mpc_debug_halt_req:
                 if not self.halted:
-                    for _ in range(self.halt_delay):
-                        item = CPUCtrlStatusItem()
-                        item.drive_ext = True
-                        await self.seqr.start_item(item)
-                        await self.seqr.finish_item(item)
-                        item = CPUCtrlStatusItem()
-                        item.sample = True
-                        await self.seqr.start_item(item)
-                        await self.seqr.finish_item(item)
-                        state = await self.seqr.get_response()
-                    self.halted = True
-                while state.mpc_debug_halt_req:
+                    self.curr_halt_delay = self.curr_halt_delay - 1
                     item = CPUCtrlStatusItem()
                     item.drive_ext = True
-                    item.mpc_debug_halt_ack = 1
                     await self.seqr.start_item(item)
                     await self.seqr.finish_item(item)
-                    item = CPUCtrlStatusItem()
-                    item.sample = True
-                    await self.seqr.start_item(item)
-                    await self.seqr.finish_item(item)
-                    state = await self.seqr.get_response()
-                item = CPUCtrlStatusItem()
-                item.drive_ext = True
-                item.mpc_debug_halt_ack = 0
-                await self.seqr.start_item(item)
-                await self.seqr.finish_item(item)
-            elif state.mpc_debug_run_req:
+                    if self.curr_halt_delay == 0:
+                        self.halted = True
+                    continue
+            if state.mpc_debug_run_req:
                 if self.halted:
-                    for _ in range(self.run_delay):
-                        item = CPUCtrlStatusItem()
-                        item.drive_ext = True
-                        await self.seqr.start_item(item)
-                        await self.seqr.finish_item(item)
-                    self.halted = False
-                while state.mpc_debug_run_req:
+                    self.curr_run_delay = self.curr_run_delay - 1
                     item = CPUCtrlStatusItem()
                     item.drive_ext = True
-                    item.mpc_debug_run_ack = 1
                     await self.seqr.start_item(item)
                     await self.seqr.finish_item(item)
-                    item = CPUCtrlStatusItem()
-                    item.sample = True
-                    await self.seqr.start_item(item)
-                    await self.seqr.finish_item(item)
-                    state = await self.seqr.get_response()
+                    if self.curr_run_delay == 0:
+                        self.halted = False
+                    continue
+            item = CPUCtrlStatusItem()
+            item.drive_ext = True
+            item.mpc_debug_halt_ack = state.mpc_debug_halt_req
+            item.mpc_debug_run_ack = state.mpc_debug_run_req
+            await self.seqr.start_item(item)
+            await self.seqr.finish_item(item)
+            item = CPUCtrlStatusItem()
+            item.sample = True
+            await self.seqr.start_item(item)
+            await self.seqr.finish_item(item)
+            state = await self.seqr.get_response()
+            if state.mpc_debug_halt_req == 0 and state.mpc_debug_run_req == 0:
                 item = CPUCtrlStatusItem()
                 item.drive_ext = True
-                item.mpc_debug_run_ack = 0
+                item.mpc_debug_halt_ack = state.mpc_debug_halt_req
+                item.mpc_debug_run_ack = state.mpc_debug_run_req
                 await self.seqr.start_item(item)
                 await self.seqr.finish_item(item)
-                break
+
+
+class CPUNoHaltReactiveCtrlSequence(CPUReactiveCtrlSequence):
+    """
+    A sequence which responds to control requests
+    CPU can be either in halted or running state, so only requests that change state are processed.
+    """
+
+    def __init__(self, name, seqr, run_delay=1, stop_on_hard_reset=False):
+        super().__init__(
+            name, seqr, halt_delay=0, run_delay=run_delay, stop_on_hard_reset=stop_on_hard_reset
+        )
 
 
 class ExternalFlagSequence(uvm_sequence):
@@ -394,24 +426,23 @@ class ExternalFlagSequence(uvm_sequence):
 class RecoveryInterfaceSequence(uvm_sequence):
     """
     A sequence which drives recovery interface
-
-    There is a built-in error injection mechanism configurable with flags:
-    * err_idx - selects by index which bus transaction will be considered for error injection
-                or sequence termination
-    * err_inj_en - selects whether error will be injected on selected err_idx
     """
 
-    def __init__(self, name, seqr, reg_map, err_idx=None, err_inj_en=False):
-        self.reg_map = copy.deepcopy(reg_map)
+    def __init__(self, name, seqr, reg_map=None):
+        self.reg_map = {}
+        if reg_map is not None:
+            self.reg_map = copy.deepcopy(reg_map)
         self.seqr = seqr
-        self.finish_no_en = False
-        self.err_idx = err_idx
-        self.err_inj_en = err_inj_en
+        self.random_output = False
         super().__init__(name)
 
+    def update_reg_map(self, reg_map):
+        self.reg_map = copy.deepcopy(reg_map)
+
+    def arm_random_response(self):
+        self.random_output = True
+
     async def body(self):
-        tx_idx = 0
-        last_addr = 0
         while True:
             item = RegBusItem()
             item.wait_enable = True
@@ -424,50 +455,30 @@ class RecoveryInterfaceSequence(uvm_sequence):
             await self.seqr.finish_item(sitem)
 
             sample = await self.seqr.get_response()
-            while sample.en == MuBiTrue:
+            if sample.reset:
+                self.random_output = False
+                for reg in self.reg_map:
+                    self.reg_map[reg] = 0
+                item = RegBusItem()
+                item.noop = True
+                await self.seqr.start_item(item)
+                await self.seqr.finish_item(item)
+                continue
+            elif sample.en == MuBiTrue:
                 ritem = RegBusItem()
-                rddata = self.reg_map[int(sample.rdaddr)]
-
-                # If it's the first transaction, initialize last address
-                if tx_idx == 0:
-                    last_addr = int(sample.rdaddr)
-
-                # Inject an error if we're at the selected transaction index
-                if (tx_idx == self.err_idx) and self.err_inj_en:
-                    rddata = rddata ^ random.randint(0, 2**32)
-
-                ritem.rddata = rddata
+                ritem.rddata = (
+                    self.reg_map[int(sample.rdaddr)] ^ random.randrange(1, 2**32)
+                    if self.random_output
+                    else self.reg_map[int(sample.rdaddr)]
+                )
                 ritem.drive_rddata = True
                 await self.seqr.start_item(ritem)
                 await self.seqr.finish_item(ritem)
                 if int(sample.write) == 1:
                     self.reg_map[int(sample.wraddr)] = int(sample.wrdata)
-
-                # If exit index equals current transaction index, terminate the sequence
-                if self.err_idx == tx_idx:
-                    break
-
-                sitem = RegBusItem()
-                sitem.sample_bus = True
-                await self.seqr.start_item(sitem)
-                await self.seqr.finish_item(sitem)
-                sample = await self.seqr.get_response()
-
-                # Increment transaction index and update last address only if we've just moved
-                # to another address
-                if int(sample.rdaddr) != last_addr:
-                    last_addr = int(sample.rdaddr)
-                    tx_idx += 1
-
-            # If exit index equals current transaction index, terminate the sequence
-            if self.err_idx == tx_idx:
-                break
-
-            if sample.en == MuBiFalse:
+            elif sample.en == MuBiFalse:
                 ritem = RegBusItem()
                 ritem.rddata = 0
                 ritem.drive_rddata = True
                 await self.seqr.start_item(ritem)
                 await self.seqr.finish_item(ritem)
-                if self.finish_no_en:
-                    break

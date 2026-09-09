@@ -44,10 +44,20 @@ module el2_tmr_exec_ctrl
     // Fault outputs
     output el2_mubi_pkg::el2_mubi_t exec_fault_q[3],
     // Fault clear inputs
-    input  el2_mubi_pkg::el2_mubi_t exec_fault_clr[3]
+    input  el2_mubi_pkg::el2_mubi_t exec_fault_clr[3],
+
+    // Inhibit (cutoff) input
+    input  el2_mubi_pkg::el2_mubi_t exec_output_inhibit
 );
 
   // ......................................................
+  logic i_cpu_halt_req_int;
+  logic i_cpu_run_req_int;
+  logic mpc_debug_halt_req_int;
+  logic mpc_debug_run_req_int;
+
+  logic o_debug_mode_status_int;
+  logic debug_brkpt_status_int;
 
   el2_mubi_t enable[3];
   el2_mubi_t exec_fault[3];
@@ -68,13 +78,13 @@ module el2_tmr_exec_ctrl
     };
   end
 
-  assign o_cpu_halt_ack      = exec_ctrl_int[6];
-  assign o_cpu_run_ack       = exec_ctrl_int[5];
-  assign o_cpu_halt_status   = exec_ctrl_int[4];
-  assign o_debug_mode_status = exec_ctrl_int[3];
-  assign mpc_debug_halt_ack  = exec_ctrl_int[2];
-  assign mpc_debug_run_ack   = exec_ctrl_int[1];
-  assign debug_brkpt_status  = exec_ctrl_int[0];
+  assign o_cpu_halt_ack          = exec_ctrl_int[6];
+  assign o_cpu_run_ack           = exec_ctrl_int[5];
+  assign o_cpu_halt_status       = exec_ctrl_int[4];
+  assign o_debug_mode_status_int = exec_ctrl_int[3];
+  assign mpc_debug_halt_ack      = exec_ctrl_int[2];
+  assign mpc_debug_run_ack       = exec_ctrl_int[1];
+  assign debug_brkpt_status_int  = exec_ctrl_int[0];
 
   el2_tmr_voter #(.Width($bits(exec_ctrl_int))) u_voter_exec_ctl (
     .in_a     (exec_ctrl_veer[0]),
@@ -93,6 +103,16 @@ module el2_tmr_exec_ctrl
 
     .critical (crit_nc)
   );
+
+  // ......................................................
+
+  logic  inh;
+  assign inh = mubi_check_true(exec_output_inhibit);
+
+  // Don't gate signals over which the recovery FSM can take control. Gates for
+  // them are inside el2_tmr_complex
+  rvogate #(.WIDTH(1)) u_o_debug_mode_status_gate (.*, .din(o_debug_mode_status_int), .dout(o_debug_mode_status));
+  rvogate #(.WIDTH(1)) u_debug_brkpt_status_gate  (.*, .din(debug_brkpt_status_int),  .dout(debug_brkpt_status));
 
   // ......................................................
 
@@ -118,12 +138,12 @@ module el2_tmr_exec_ctrl
 
   // Propagate response to Cores
   for (genvar i=0; i < 3; i+=1) begin : resp
-    assign ext_i_cpu_halt_req_veer[i] = i_cpu_halt_req;
-    assign ext_i_cpu_run_req_veer[i] = i_cpu_run_req;
+    assign ext_i_cpu_halt_req_veer[i]    = i_cpu_halt_req;
+    assign ext_i_cpu_run_req_veer[i]     = i_cpu_run_req;
 
-    assign mpc_debug_halt_req_veer[i] = mpc_debug_halt_req;
-    assign mpc_debug_run_req_veer[i] = mpc_debug_run_req;
-    assign ext_mpc_reset_run_req_veer[i] = mpc_reset_run_req;
+    assign mpc_debug_halt_req_veer[i]    = mpc_debug_halt_req;
+    assign mpc_debug_run_req_veer[i]     = mpc_debug_run_req;
+    assign ext_mpc_reset_run_req_veer[i] = mpc_reset_run_req; // Not gated, sampled upon reset
    end
 
 endmodule

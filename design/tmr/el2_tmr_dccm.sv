@@ -23,7 +23,10 @@ module el2_tmr_dccm
     // Fault outputs
     output el2_mubi_pkg::el2_mubi_t dccm_fault_q[3],
     // Fault clear inputs
-    input  el2_mubi_pkg::el2_mubi_t dccm_fault_clr[3]
+    input  el2_mubi_pkg::el2_mubi_t dccm_fault_clr[3],
+
+    // Inhibit (cutoff) input
+    input  el2_mubi_pkg::el2_mubi_t dccm_output_inhibit
 );
 
   // Create constant with casting to avoid width expansion warnings
@@ -46,6 +49,8 @@ module el2_tmr_dccm
   el2_mubi_t [pt.DCCM_NUM_BANKS-1:0] crit_dccm_wr_ecc_bank;
 
   el2_mubi_t crit_any;
+
+  el2_mem_if dccm_export_int();
 
   // ......................................................
 
@@ -98,7 +103,7 @@ module el2_tmr_dccm
       .en_b     (enable[1]),
       .en_c     (enable[2]),
 
-      .out      (dccm_export.dccm_addr_bank[i]),
+      .out      (dccm_export_int.dccm_addr_bank[i]),
 
       .fault_a  (fault_dccm_addr_bank[0][i]),
       .fault_b  (fault_dccm_addr_bank[1][i]),
@@ -116,7 +121,7 @@ module el2_tmr_dccm
       .en_b     (enable[1]),
       .en_c     (enable[2]),
 
-      .out      (dccm_export.dccm_wr_data_bank[i]),
+      .out      (dccm_export_int.dccm_wr_data_bank[i]),
 
       .fault_a  (fault_dccm_wr_data_bank[0][i]),
       .fault_b  (fault_dccm_wr_data_bank[1][i]),
@@ -134,7 +139,7 @@ module el2_tmr_dccm
       .en_b     (enable[1]),
       .en_c     (enable[2]),
 
-      .out      (dccm_export.dccm_wr_ecc_bank[i]),
+      .out      (dccm_export_int.dccm_wr_ecc_bank[i]),
 
       .fault_a  (fault_dccm_wr_ecc_bank[0][i]),
       .fault_b  (fault_dccm_wr_ecc_bank[1][i]),
@@ -182,9 +187,26 @@ module el2_tmr_dccm
 
   // Gate control signals with critical errors
   always_comb begin
-    dccm_export.dccm_clken     = dccm_clken     & {pt.DCCM_NUM_BANKS{mubi_check_false(crit_any)}};
-    dccm_export.dccm_wren_bank = dccm_wren_bank & {pt.DCCM_NUM_BANKS{mubi_check_false(crit_any)}};
+    dccm_export_int.dccm_clken     = dccm_clken     & {pt.DCCM_NUM_BANKS{mubi_check_false(crit_any)}};
+    dccm_export_int.dccm_wren_bank = dccm_wren_bank & {pt.DCCM_NUM_BANKS{mubi_check_false(crit_any)}};
   end
+
+  // ......................................................
+
+  logic  inh;
+  assign inh = mubi_check_true(dccm_output_inhibit);
+
+  rvogate #(.WIDTH($bits(dccm_export_int.dccm_clken)))     u_dccm_clken_gate     (.*, .din(dccm_export_int.dccm_clken),     .dout(dccm_export.dccm_clken));
+  rvogate #(.WIDTH($bits(dccm_export_int.dccm_wren_bank))) u_dccm_wren_bank_gate (.*, .din(dccm_export_int.dccm_wren_bank), .dout(dccm_export.dccm_wren_bank));
+
+  for (genvar i = 0; i < pt.DCCM_NUM_BANKS; i++) begin : gen_dccm_gates
+    rvogate #(.WIDTH($bits(dccm_export_int.dccm_addr_bank[i])))    u_dccm_addr_bank_gate    (.*, .din(dccm_export_int.dccm_addr_bank[i]),    .dout(dccm_export.dccm_addr_bank[i]));
+    rvogate #(.WIDTH($bits(dccm_export_int.dccm_wr_data_bank[i]))) u_dccm_wr_data_bank_gate (.*, .din(dccm_export_int.dccm_wr_data_bank[i]), .dout(dccm_export.dccm_wr_data_bank[i]));
+    rvogate #(.WIDTH($bits(dccm_export_int.dccm_wr_ecc_bank[i])))  u_dccm_wr_ecc_bank_gate  (.*, .din(dccm_export_int.dccm_wr_ecc_bank[i]),  .dout(dccm_export.dccm_wr_ecc_bank[i]));
+  end
+
+  assign dccm_export_int.dccm_bank_dout = dccm_export.dccm_bank_dout;
+  assign dccm_export_int.dccm_bank_ecc  = dccm_export.dccm_bank_ecc;
 
   // ......................................................
 
@@ -230,8 +252,8 @@ module el2_tmr_dccm
   // Propagate response to cores
   for (genvar i=0; i<3; i=i+1) begin
     always_comb begin
-      dccm_export_veer[i].dccm_bank_dout = dccm_export.dccm_bank_dout;
-      dccm_export_veer[i].dccm_bank_ecc = dccm_export.dccm_bank_ecc;
+      dccm_export_veer[i].dccm_bank_dout = dccm_export_int.dccm_bank_dout;
+      dccm_export_veer[i].dccm_bank_ecc  = dccm_export_int.dccm_bank_ecc;
     end
   end
 

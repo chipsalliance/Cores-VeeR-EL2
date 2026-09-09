@@ -995,6 +995,31 @@ module el2_tmr_complex
 
   //-------------------------------------------------------------------
 
+  // I/O inhibit signals
+  el2_mubi_pkg::el2_mubi_t tmr_output_inhibit;
+  // FIXME: TODO: Drive from the recovery FSM
+  assign tmr_output_inhibit = El2MuBiFalse;
+
+  el2_mubi_pkg::el2_mubi_t axi_output_inhibit;
+  el2_mubi_pkg::el2_mubi_t dccm_output_inhibit;
+  el2_mubi_pkg::el2_mubi_t dmi_output_inhibit;
+  el2_mubi_pkg::el2_mubi_t exec_output_inhibit;
+  el2_mubi_pkg::el2_mubi_t iccm_output_inhibit;
+  el2_mubi_pkg::el2_mubi_t ic_output_inhibit;
+  el2_mubi_pkg::el2_mubi_t misc_output_inhibit;
+  el2_mubi_pkg::el2_mubi_t pic_output_inhibit;
+
+  assign axi_output_inhibit  = tmr_output_inhibit;
+  assign dccm_output_inhibit = tmr_output_inhibit;
+  assign dmi_output_inhibit  = tmr_output_inhibit;
+  assign exec_output_inhibit = tmr_output_inhibit;
+  assign iccm_output_inhibit = tmr_output_inhibit;
+  assign ic_output_inhibit   = tmr_output_inhibit;
+  assign misc_output_inhibit = tmr_output_inhibit;
+  assign pic_output_inhibit  = tmr_output_inhibit;
+
+  //-------------------------------------------------------------------
+
   // Connect local memory export interface to allow using DCCM and ICCM modports
   assign local_ccm_export.clk = clk;
 
@@ -1055,6 +1080,38 @@ module el2_tmr_complex
     logic dec_tlu_dccm_wr_readback_disable; // TODO: Is it needed?
     logic dccm_write_readback_error; // TODO: Is it needed?
 
+    // I/O inhibit
+    logic  inh;
+    assign inh = mubi_check_true(tmr_output_inhibit);
+
+    // GPR recovery signals gating
+    logic [31:0] recovery_gpr_rddata_veer_g;
+    rvogate #(.WIDTH($bits(recovery_gpr_rddata_veer_g))) u_recovery_gpr_rddata_gate (.*, .din(recovery_gpr_rddata_veer_g),  .dout(recovery_gpr_rddata_veer[i]));
+
+    // CSR recovery signals gating
+    logic [31:0] recovery_csr_rddata_veer_g;
+    rvogate #(.WIDTH($bits(recovery_csr_rddata_veer_g))) u_recovery_csr_rddata_gate (.*, .din(recovery_csr_rddata_veer_g),  .dout(recovery_csr_rddata_veer[i]));
+
+    // Halt/run control gating & debug
+    // Gates for debug_mode_status and debug_brkpt_status are inside el2_tmr_exec_ctl.sv
+    logic o_cpu_halt_ack_veer_g;
+    logic o_cpu_run_ack_veer_g;
+    logic o_cpu_halt_status_veer_g;
+    logic mpc_debug_halt_ack_veer_g;
+    logic mpc_debug_run_ack_veer_g;
+    rvogate #(.WIDTH(5)) u_run_halt_gate (
+      .*,
+      .din  ({o_cpu_halt_ack_veer_g, o_cpu_run_ack_veer_g, o_cpu_halt_status_veer_g,
+              mpc_debug_halt_ack_veer_g, mpc_debug_run_ack_veer_g}),
+      .dout ({o_cpu_halt_ack_veer[i], o_cpu_run_ack_veer[i], o_cpu_halt_status_veer[i],
+              mpc_debug_halt_ack_veer[i], mpc_debug_run_ack_veer[i]})
+    );
+
+    // PC state gating
+    logic [31:1] dec_tlu_pc_veer_g;
+    rvogate #(.WIDTH($bits(dec_tlu_pc_veer_g))) u_dec_tlu_pc_gate (.*, .din(dec_tlu_pc_veer_g),  .dout(dec_tlu_pc_veer[i]));
+
+    // VeeR core
     el2_veer #(.pt(pt)) veer (
         .clk(clk),
         .rst_l(rst_l),
@@ -1080,16 +1137,16 @@ module el2_tmr_complex
         .dec_tlu_core_ecc_disable(dec_tlu_core_ecc_disable_veer[i]),
         .i_cpu_halt_req(i_cpu_halt_req_veer[i]),
         .i_cpu_run_req(i_cpu_run_req_veer[i]),
-        .o_cpu_halt_ack(o_cpu_halt_ack_veer[i]),
-        .o_cpu_halt_status(o_cpu_halt_status_veer[i]),
-        .o_cpu_run_ack(o_cpu_run_ack_veer[i]),
+        .o_cpu_halt_ack(o_cpu_halt_ack_veer_g),
+        .o_cpu_halt_status(o_cpu_halt_status_veer_g),
+        .o_cpu_run_ack(o_cpu_run_ack_veer_g),
         .o_debug_mode_status(o_debug_mode_status_veer[i]),
         .core_id(core_id),
         .mpc_debug_halt_req(mpc_debug_halt_req_veer[i]),
         .mpc_debug_run_req(mpc_debug_run_req_veer[i]),
         .mpc_reset_run_req(mpc_reset_run_req_veer[i]),
-        .mpc_debug_halt_ack(mpc_debug_halt_ack_veer[i]),
-        .mpc_debug_run_ack(mpc_debug_run_ack_veer[i]),
+        .mpc_debug_halt_ack(mpc_debug_halt_ack_veer_g),
+        .mpc_debug_run_ack(mpc_debug_run_ack_veer_g),
         .debug_brkpt_status(debug_brkpt_status_veer[i]),
         .dec_tlu_perfcnt0(dec_tlu_perfcnt0_veer[i]),
         .dec_tlu_perfcnt1(dec_tlu_perfcnt1_veer[i]),
@@ -1298,17 +1355,17 @@ module el2_tmr_complex
         .recovery_gpr_wraddr(recovery_gpr_wraddr_veer[i]),
         .recovery_gpr_wrdata(recovery_gpr_wrdata_veer[i]),
         .recovery_gpr_rdaddr(recovery_gpr_rdaddr_veer[i]),
-        .recovery_gpr_rddata(recovery_gpr_rddata_veer[i]),
+        .recovery_gpr_rddata(recovery_gpr_rddata_veer_g),
         .recovery_csr_en(recovery_csr_en_veer[i]),
         .recovery_csr_wen(recovery_csr_wen_veer[i]),
         .recovery_csr_wraddr(recovery_csr_wraddr_veer[i]),
         .recovery_csr_wrdata(recovery_csr_wrdata_veer[i]),
         .recovery_csr_rdaddr(recovery_csr_rdaddr_veer[i]),
-        .recovery_csr_rddata(recovery_csr_rddata_veer[i]),
+        .recovery_csr_rddata(recovery_csr_rddata_veer_g),
         .dec_tlu_force_halt(dec_tlu_force_halt_veer[i]),
         .dec_tlu_bus_clk_override(dec_tlu_bus_clk_override_veer[i]),
         .dec_tlu_dccm_wr_readback_disable(dec_tlu_dccm_wr_readback_disable),
-        .dec_tlu_pc(dec_tlu_pc_veer[i]),
+        .dec_tlu_pc(dec_tlu_pc_veer_g),
         .pic_clk_override(pic_clk_override_veer[i]),
         .pic_io_clk_override(pic_io_clk_override_veer[i]),
         .picm_rdaddr(picm_rdaddr_veer[i]),

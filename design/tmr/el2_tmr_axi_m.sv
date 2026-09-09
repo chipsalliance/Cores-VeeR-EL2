@@ -161,6 +161,9 @@ module el2_tmr_axi_m # (
   input  el2_mubi_pkg::el2_mubi_t  b_s_axi_fault_clr_i,
   input  el2_mubi_pkg::el2_mubi_t  c_s_axi_fault_clr_i,
 
+  // Inhibit (cutoff) input
+  input  el2_mubi_pkg::el2_mubi_t  output_inhibit_i,
+
   // Outgoing AXI manager port
   output logic                     m_axi_awvalid_o,
   input  logic                     m_axi_awready_i,
@@ -214,7 +217,41 @@ module el2_tmr_axi_m # (
   el2_mubi_t c_s_axi_fault;
 
   // ......................................................
+
+  logic clk;
+  logic rst_l;
+  logic inh;
+
+  assign clk   = clk_i;
+  assign rst_l = rst_ni;
+  assign inh   = mubi_check_true(output_inhibit_i);
+
+  // ......................................................
   // AXI AW channel
+  logic                     m_axi_awvalid;
+  logic [IdWidth-1:0]       m_axi_awid;
+  logic [AddrWidth-1:0]     m_axi_awaddr;
+  logic [3:0]               m_axi_awregion;
+  logic [7:0]               m_axi_awlen;
+  logic [2:0]               m_axi_awsize;
+  logic [1:0]               m_axi_awburst;
+  logic                     m_axi_awlock;
+  logic [3:0]               m_axi_awcache;
+  logic [2:0]               m_axi_awprot;
+  logic [3:0]               m_axi_awqos;
+
+  rvogate #(.WIDTH($bits(m_axi_awvalid)))  u_m_axi_awvalid_gate  (.*, .din(m_axi_awvalid),  .dout(m_axi_awvalid_o));
+  rvogate #(.WIDTH($bits(m_axi_awid)))     u_m_axi_awid_gate     (.*, .din(m_axi_awid),     .dout(m_axi_awid_o));
+  rvogate #(.WIDTH($bits(m_axi_awaddr)))   u_m_axi_awaddr_gate   (.*, .din(m_axi_awaddr),   .dout(m_axi_awaddr_o));
+  rvogate #(.WIDTH($bits(m_axi_awregion))) u_m_axi_awregion_gate (.*, .din(m_axi_awregion), .dout(m_axi_awregion_o));
+  rvogate #(.WIDTH($bits(m_axi_awlen)))    u_m_axi_awlen_gate    (.*, .din(m_axi_awlen),    .dout(m_axi_awlen_o));
+  rvogate #(.WIDTH($bits(m_axi_awsize)))   u_m_axi_awsize_gate   (.*, .din(m_axi_awsize),   .dout(m_axi_awsize_o));
+  rvogate #(.WIDTH($bits(m_axi_awburst)))  u_m_axi_awburst_gate  (.*, .din(m_axi_awburst),  .dout(m_axi_awburst_o));
+  rvogate #(.WIDTH($bits(m_axi_awlock)))   u_m_axi_awlock_gate   (.*, .din(m_axi_awlock),   .dout(m_axi_awlock_o));
+  rvogate #(.WIDTH($bits(m_axi_awcache)))  u_m_axi_awcache_gate  (.*, .din(m_axi_awcache),  .dout(m_axi_awcache_o));
+  rvogate #(.WIDTH($bits(m_axi_awprot)))   u_m_axi_awprot_gate   (.*, .din(m_axi_awprot),   .dout(m_axi_awprot_o));
+  rvogate #(.WIDTH($bits(m_axi_awqos)))    u_m_axi_awqos_gate    (.*, .din(m_axi_awqos),    .dout(m_axi_awqos_o));
+
   el2_mubi_t s_axi_aw_a_fault;
   el2_mubi_t s_axi_aw_b_fault;
   el2_mubi_t s_axi_aw_c_fault;
@@ -279,22 +316,32 @@ module el2_tmr_axi_m # (
     .b_s_axi_fault_clr_i (b_s_axi_fault_clr_i),
     .c_s_axi_fault_clr_i (c_s_axi_fault_clr_i),
 
-    .m_axi_axvalid_o     (m_axi_awvalid_o),
+    .m_axi_axvalid_o     (m_axi_awvalid),
     .m_axi_axready_i     (m_axi_awready_i),
-    .m_axi_axid_o        (m_axi_awid_o),
-    .m_axi_axaddr_o      (m_axi_awaddr_o),
-    .m_axi_axregion_o    (m_axi_awregion_o),
-    .m_axi_axlen_o       (m_axi_awlen_o),
-    .m_axi_axsize_o      (m_axi_awsize_o),
-    .m_axi_axburst_o     (m_axi_awburst_o),
-    .m_axi_axlock_o      (m_axi_awlock_o),
-    .m_axi_axcache_o     (m_axi_awcache_o),
-    .m_axi_axprot_o      (m_axi_awprot_o),
-    .m_axi_axqos_o       (m_axi_awqos_o)
+    .m_axi_axid_o        (m_axi_awid),
+    .m_axi_axaddr_o      (m_axi_awaddr),
+    .m_axi_axregion_o    (m_axi_awregion),
+    .m_axi_axlen_o       (m_axi_awlen),
+    .m_axi_axsize_o      (m_axi_awsize),
+    .m_axi_axburst_o     (m_axi_awburst),
+    .m_axi_axlock_o      (m_axi_awlock),
+    .m_axi_axcache_o     (m_axi_awcache),
+    .m_axi_axprot_o      (m_axi_awprot),
+    .m_axi_axqos_o       (m_axi_awqos)
   );
 
-  // ........................................_i..............
+  // ......................................................
   // AXI W channel
+  logic                     m_axi_wvalid;
+  logic [DataWidth-1:0]     m_axi_wdata;
+  logic [DataWidth/8-1:0]   m_axi_wstrb;
+  logic                     m_axi_wlast;
+
+  rvogate #(.WIDTH($bits(m_axi_wvalid))) u_m_axi_wvalid_gate (.*, .din(m_axi_wvalid),   .dout(m_axi_wvalid_o));
+  rvogate #(.WIDTH($bits(m_axi_wdata)))  u_m_axi_wdata_gate  (.*, .din(m_axi_wdata),    .dout(m_axi_wdata_o));
+  rvogate #(.WIDTH($bits(m_axi_wstrb)))  u_m_axi_wstrb_gate  (.*, .din(m_axi_wstrb),    .dout(m_axi_wstrb_o));
+  rvogate #(.WIDTH($bits(m_axi_wlast)))  u_m_axi_wlast_gate  (.*, .din(m_axi_wlast),    .dout(m_axi_wlast_o));
+
   el2_mubi_t s_axi_w_a_fault;
   el2_mubi_t s_axi_w_b_fault;
   el2_mubi_t s_axi_w_c_fault;
@@ -337,15 +384,19 @@ module el2_tmr_axi_m # (
     .b_s_axi_fault_clr_i (b_s_axi_fault_clr_i),
     .c_s_axi_fault_clr_i (c_s_axi_fault_clr_i),
 
-    .m_axi_wvalid_o      (m_axi_wvalid_o),
+    .m_axi_wvalid_o      (m_axi_wvalid),
     .m_axi_wready_i      (m_axi_wready_i),
-    .m_axi_wdata_o       (m_axi_wdata_o),
-    .m_axi_wstrb_o       (m_axi_wstrb_o),
-    .m_axi_wlast_o       (m_axi_wlast_o)
+    .m_axi_wdata_o       (m_axi_wdata),
+    .m_axi_wstrb_o       (m_axi_wstrb),
+    .m_axi_wlast_o       (m_axi_wlast)
   );
 
   // ......................................................
   // AXI B channel
+  logic m_axi_bready;
+
+  rvogate #(.WIDTH($bits(m_axi_bready))) u_m_axi_bready_gate (.*, .din(m_axi_bready), .dout(m_axi_bready_o));
+
   el2_mubi_t b_s_axi_a_fault;
   el2_mubi_t b_s_axi_b_fault;
   el2_mubi_t b_c_s_axi_fault;
@@ -386,13 +437,37 @@ module el2_tmr_axi_m # (
     .c_s_axi_fault_clr_i (c_s_axi_fault_clr_i),
 
     .m_axi_bvalid_i      (m_axi_bvalid_i),
-    .m_axi_bready_o      (m_axi_bready_o),
+    .m_axi_bready_o      (m_axi_bready),
     .m_axi_bresp_i       (m_axi_bresp_i),
     .m_axi_bid_i         (m_axi_bid_i)
   );
 
   // ......................................................
   // AXI AR channel
+  logic                     m_axi_arvalid;
+  logic [IdWidth-1:0]       m_axi_arid;
+  logic [AddrWidth-1:0]     m_axi_araddr;
+  logic [3:0]               m_axi_arregion;
+  logic [7:0]               m_axi_arlen;
+  logic [2:0]               m_axi_arsize;
+  logic [1:0]               m_axi_arburst;
+  logic                     m_axi_arlock;
+  logic [3:0]               m_axi_arcache;
+  logic [2:0]               m_axi_arprot;
+  logic [3:0]               m_axi_arqos;
+
+  rvogate #(.WIDTH($bits(m_axi_arvalid)))  u_m_axi_arvalid_gate  (.*, .din(m_axi_arvalid),  .dout(m_axi_arvalid_o));
+  rvogate #(.WIDTH($bits(m_axi_arid)))     u_m_axi_arid_gate     (.*, .din(m_axi_arid),     .dout(m_axi_arid_o));
+  rvogate #(.WIDTH($bits(m_axi_araddr)))   u_m_axi_araddr_gate   (.*, .din(m_axi_araddr),   .dout(m_axi_araddr_o));
+  rvogate #(.WIDTH($bits(m_axi_arregion))) u_m_axi_arregion_gate (.*, .din(m_axi_arregion), .dout(m_axi_arregion_o));
+  rvogate #(.WIDTH($bits(m_axi_arlen)))    u_m_axi_arlen_gate    (.*, .din(m_axi_arlen),    .dout(m_axi_arlen_o));
+  rvogate #(.WIDTH($bits(m_axi_arsize)))   u_m_axi_arsize_gate   (.*, .din(m_axi_arsize),   .dout(m_axi_arsize_o));
+  rvogate #(.WIDTH($bits(m_axi_arburst)))  u_m_axi_arburst_gate  (.*, .din(m_axi_arburst),  .dout(m_axi_arburst_o));
+  rvogate #(.WIDTH($bits(m_axi_arlock)))   u_m_axi_arlock_gate   (.*, .din(m_axi_arlock),   .dout(m_axi_arlock_o));
+  rvogate #(.WIDTH($bits(m_axi_arcache)))  u_m_axi_arcache_gate  (.*, .din(m_axi_arcache),  .dout(m_axi_arcache_o));
+  rvogate #(.WIDTH($bits(m_axi_arprot)))   u_m_axi_arprot_gate   (.*, .din(m_axi_arprot),   .dout(m_axi_arprot_o));
+  rvogate #(.WIDTH($bits(m_axi_arqos)))    u_m_axi_arqos_gate    (.*, .din(m_axi_arqos),    .dout(m_axi_arqos_o));
+
   el2_mubi_t s_axi_ar_a_fault;
   el2_mubi_t s_axi_ar_b_fault;
   el2_mubi_t s_axi_ar_c_fault;
@@ -457,22 +532,26 @@ module el2_tmr_axi_m # (
     .b_s_axi_fault_clr_i (b_s_axi_fault_clr_i),
     .c_s_axi_fault_clr_i (c_s_axi_fault_clr_i),
 
-    .m_axi_axvalid_o     (m_axi_arvalid_o),
+    .m_axi_axvalid_o     (m_axi_arvalid),
     .m_axi_axready_i     (m_axi_arready_i),
-    .m_axi_axid_o        (m_axi_arid_o),
-    .m_axi_axaddr_o      (m_axi_araddr_o),
-    .m_axi_axregion_o    (m_axi_arregion_o),
-    .m_axi_axlen_o       (m_axi_arlen_o),
-    .m_axi_axsize_o      (m_axi_arsize_o),
-    .m_axi_axburst_o     (m_axi_arburst_o),
-    .m_axi_axlock_o      (m_axi_arlock_o),
-    .m_axi_axcache_o     (m_axi_arcache_o),
-    .m_axi_axprot_o      (m_axi_arprot_o),
-    .m_axi_axqos_o       (m_axi_arqos_o)
+    .m_axi_axid_o        (m_axi_arid),
+    .m_axi_axaddr_o      (m_axi_araddr),
+    .m_axi_axregion_o    (m_axi_arregion),
+    .m_axi_axlen_o       (m_axi_arlen),
+    .m_axi_axsize_o      (m_axi_arsize),
+    .m_axi_axburst_o     (m_axi_arburst),
+    .m_axi_axlock_o      (m_axi_arlock),
+    .m_axi_axcache_o     (m_axi_arcache),
+    .m_axi_axprot_o      (m_axi_arprot),
+    .m_axi_axqos_o       (m_axi_arqos)
   );
 
   // ......................................................
   // AXI R channel
+  logic m_axi_rready;
+
+  rvogate #(.WIDTH($bits(m_axi_rready))) u_m_axi_rready_gate (.*, .din(m_axi_rready), .dout(m_axi_rready_o));
+
   el2_mubi_t s_axi_r_a_fault;
   el2_mubi_t s_axi_r_b_fault;
   el2_mubi_t s_axi_r_c_fault;
@@ -520,7 +599,7 @@ module el2_tmr_axi_m # (
     .c_s_axi_fault_clr_i (c_s_axi_fault_clr_i),
 
     .m_axi_rvalid_i      (m_axi_rvalid_i),
-    .m_axi_rready_o      (m_axi_rready_o),
+    .m_axi_rready_o      (m_axi_rready),
     .m_axi_rid_i         (m_axi_rid_i),
     .m_axi_rdata_i       (m_axi_rdata_i),
     .m_axi_rresp_i       (m_axi_rresp_i),

@@ -434,6 +434,9 @@ module el2_tmr_axi
     // Fault clear inputs
     input  el2_mubi_pkg::el2_mubi_t axi_fault_clr[3],
 
+    // TMR complex output inhibit
+    input  el2_mubi_pkg::el2_mubi_t axi_output_inhibit,
+
     output el2_mubi_t axi_pending,    // When true, there are pending in-flight transactions
     output el2_mubi_t axi_count_fatal // When true, a fatal ECC error happened on one of the counters
 );
@@ -680,7 +683,9 @@ module el2_tmr_axi
 
     .a_s_axi_fault_clr_i (lsu_axi_fault_clr[0]),
     .b_s_axi_fault_clr_i (lsu_axi_fault_clr[1]),
-    .c_s_axi_fault_clr_i (lsu_axi_fault_clr[2])
+    .c_s_axi_fault_clr_i (lsu_axi_fault_clr[2]),
+
+    .output_inhibit_i    (axi_output_inhibit)
   );
 
   // IFU AXI
@@ -883,7 +888,9 @@ module el2_tmr_axi
 
     .a_s_axi_fault_clr_i (ifu_axi_fault_clr[0]),
     .b_s_axi_fault_clr_i (ifu_axi_fault_clr[1]),
-    .c_s_axi_fault_clr_i (ifu_axi_fault_clr[2])
+    .c_s_axi_fault_clr_i (ifu_axi_fault_clr[2]),
+
+    .output_inhibit_i    (axi_output_inhibit)
   );
 
   // SB AXI
@@ -1086,7 +1093,9 @@ module el2_tmr_axi
 
     .a_s_axi_fault_clr_i (sb_axi_fault_clr[0]),
     .b_s_axi_fault_clr_i (sb_axi_fault_clr[1]),
-    .c_s_axi_fault_clr_i (sb_axi_fault_clr[2])
+    .c_s_axi_fault_clr_i (sb_axi_fault_clr[2]),
+
+    .output_inhibit_i    (axi_output_inhibit)
   );
 
   // DMA AXI
@@ -1289,7 +1298,9 @@ module el2_tmr_axi
 
     .a_m_axi_fault_clr_i (dma_axi_fault_clr[0]),
     .b_m_axi_fault_clr_i (dma_axi_fault_clr[1]),
-    .c_m_axi_fault_clr_i (dma_axi_fault_clr[2])
+    .c_m_axi_fault_clr_i (dma_axi_fault_clr[2]),
+
+    .output_inhibit_i    (axi_output_inhibit)
   );
 
   // ......................................................

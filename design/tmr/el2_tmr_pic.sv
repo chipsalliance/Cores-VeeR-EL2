@@ -47,7 +47,10 @@ module el2_tmr_pic
     // Fault outputs
     output el2_mubi_pkg::el2_mubi_t pic_fault_q[3],
     // Fault clear inputs
-    input  el2_mubi_pkg::el2_mubi_t pic_fault_clr[3]
+    input  el2_mubi_pkg::el2_mubi_t pic_fault_clr[3],
+
+    // Inhibit (cutoff) input
+    input  el2_mubi_pkg::el2_mubi_t pic_output_inhibit
 );
 
   // ......................................................
@@ -69,6 +72,16 @@ module el2_tmr_pic
   el2_mubi_t crit_meipt;
 
   el2_mubi_t crit_any;
+
+  logic [ 2:0] picm_ctrl_int_g;
+  logic [31:0] picm_rdaddr_int_g;
+  logic [31:0] picm_wraddr_int_g;
+  logic [31:0] picm_wr_data_int_g;
+  logic [ 3:0] meicurpl_int_g;
+  logic [ 3:0] meipt_int_g;
+
+  logic [ 7:0] pic_claimid_int_g;
+  logic [ 3:0] pic_pl_int_g;
 
   // ......................................................
 
@@ -92,7 +105,7 @@ module el2_tmr_pic
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (picm_ctrl_int),
+    .out      (picm_ctrl_int_g),
 
     .fault_a  (fault_picm_ctrl[0]),
     .fault_b  (fault_picm_ctrl[1]),
@@ -110,7 +123,7 @@ module el2_tmr_pic
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (picm_rdaddr_int),
+    .out      (picm_rdaddr_int_g),
 
     .fault_a  (fault_picm_rdaddr[0]),
     .fault_b  (fault_picm_rdaddr[1]),
@@ -128,7 +141,7 @@ module el2_tmr_pic
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (picm_wraddr_int),
+    .out      (picm_wraddr_int_g),
 
     .fault_a  (fault_picm_wraddr[0]),
     .fault_b  (fault_picm_wraddr[1]),
@@ -146,7 +159,7 @@ module el2_tmr_pic
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (picm_wr_data_int),
+    .out      (picm_wr_data_int_g),
 
     .fault_a  (fault_picm_wr_data[0]),
     .fault_b  (fault_picm_wr_data[1]),
@@ -164,7 +177,7 @@ module el2_tmr_pic
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (meicurpl_int),
+    .out      (meicurpl_int_g),
 
     .fault_a  (fault_meicurpl[0]),
     .fault_b  (fault_meicurpl[1]),
@@ -182,7 +195,7 @@ module el2_tmr_pic
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (meipt_int),
+    .out      (meipt_int_g),
 
     .fault_a  (fault_meipt[0]),
     .fault_b  (fault_meipt[1]),
@@ -190,6 +203,20 @@ module el2_tmr_pic
 
     .critical (crit_meipt)
   );
+
+  // ......................................................
+
+  logic  inh;
+  assign inh = mubi_check_true(pic_output_inhibit);
+
+  rvogate  #(.WIDTH($bits(picm_ctrl_int_g)))    u_picm_ctrl_int_gate    (.*, .din(picm_ctrl_int_g),    .dout(picm_ctrl_int));
+  rvogate  #(.WIDTH($bits(picm_rdaddr_int_g)))  u_picm_rdaddr_int_gate  (.*, .din(picm_rdaddr_int_g),  .dout(picm_rdaddr_int));
+  rvogate  #(.WIDTH($bits(picm_wraddr_int_g)))  u_picm_wraddr_int_gate  (.*, .din(picm_wraddr_int_g),  .dout(picm_wraddr_int));
+  rvogate  #(.WIDTH($bits(picm_wr_data_int_g))) u_picm_wr_data_int_gate (.*, .din(picm_wr_data_int_g), .dout(picm_wr_data_int));
+
+  // Use latch for CSR state explicitly not to confuse PIC
+  rvolatch #(.WIDTH($bits(meicurpl_int_g)))     u_meicurpl_int_gate     (.*, .din(meicurpl_int_g),     .dout(meicurpl_int));
+  rvolatch #(.WIDTH($bits(meipt_int_g)))        u_meipt_int_gate        (.*, .din(meipt_int_g),        .dout(meipt_int));
 
   // ......................................................
 

@@ -23,7 +23,10 @@ module el2_tmr_iccm
     // Fault outputs
     output el2_mubi_pkg::el2_mubi_t iccm_fault_q[3],
     // Fault clear inputs
-    input  el2_mubi_pkg::el2_mubi_t iccm_fault_clr[3]
+    input  el2_mubi_pkg::el2_mubi_t iccm_fault_clr[3],
+
+    // Inhibit (cutoff) input
+    input  el2_mubi_pkg::el2_mubi_t iccm_output_inhibit
 );
 
   // Create constant with casting to avoid width expansion warnings
@@ -46,6 +49,8 @@ module el2_tmr_iccm
   el2_mubi_t [pt.ICCM_NUM_BANKS-1:0] crit_iccm_bank_wr_ecc;
 
   el2_mubi_t crit_any;
+
+  el2_mem_if iccm_export_int();
 
   // ......................................................
 
@@ -98,7 +103,7 @@ module el2_tmr_iccm
       .en_b     (enable[1]),
       .en_c     (enable[2]),
 
-      .out      (iccm_export.iccm_addr_bank[i]),
+      .out      (iccm_export_int.iccm_addr_bank[i]),
 
       .fault_a  (fault_iccm_addr_bank[0][i]),
       .fault_b  (fault_iccm_addr_bank[1][i]),
@@ -116,7 +121,7 @@ module el2_tmr_iccm
       .en_b     (enable[1]),
       .en_c     (enable[2]),
 
-      .out      (iccm_export.iccm_bank_wr_data[i]),
+      .out      (iccm_export_int.iccm_bank_wr_data[i]),
 
       .fault_a  (fault_iccm_bank_wr_data[0][i]),
       .fault_b  (fault_iccm_bank_wr_data[1][i]),
@@ -134,7 +139,7 @@ module el2_tmr_iccm
       .en_b     (enable[1]),
       .en_c     (enable[2]),
 
-      .out      (iccm_export.iccm_bank_wr_ecc[i]),
+      .out      (iccm_export_int.iccm_bank_wr_ecc[i]),
 
       .fault_a  (fault_iccm_bank_wr_ecc[0][i]),
       .fault_b  (fault_iccm_bank_wr_ecc[1][i]),
@@ -182,9 +187,26 @@ module el2_tmr_iccm
 
   // Gate control signals with critical errors
   always_comb begin
-    iccm_export.iccm_clken     = iccm_clken     & {pt.ICCM_NUM_BANKS{mubi_check_false(crit_any)}};
-    iccm_export.iccm_wren_bank = iccm_wren_bank & {pt.ICCM_NUM_BANKS{mubi_check_false(crit_any)}};
+    iccm_export_int.iccm_clken     = iccm_clken     & {pt.ICCM_NUM_BANKS{mubi_check_false(crit_any)}};
+    iccm_export_int.iccm_wren_bank = iccm_wren_bank & {pt.ICCM_NUM_BANKS{mubi_check_false(crit_any)}};
   end
+
+  // ......................................................
+
+  logic  inh;
+  assign inh = mubi_check_true(iccm_output_inhibit);
+
+  rvogate #(.WIDTH($bits(iccm_export_int.iccm_clken)))     u_iccm_clken_gate     (.*, .din(iccm_export_int.iccm_clken),     .dout(iccm_export.iccm_clken));
+  rvogate #(.WIDTH($bits(iccm_export_int.iccm_wren_bank))) u_iccm_wren_bank_gate (.*, .din(iccm_export_int.iccm_wren_bank), .dout(iccm_export.iccm_wren_bank));
+
+  for (genvar i = 0; i < pt.ICCM_NUM_BANKS; i++) begin : gen_iccm_gates
+    rvogate #(.WIDTH($bits(iccm_export_int.iccm_addr_bank[i])))    u_iccm_addr_bank_gate    (.*, .din(iccm_export_int.iccm_addr_bank[i]),    .dout(iccm_export.iccm_addr_bank[i]));
+    rvogate #(.WIDTH($bits(iccm_export_int.iccm_bank_wr_data[i]))) u_iccm_bank_wr_data_gate (.*, .din(iccm_export_int.iccm_bank_wr_data[i]), .dout(iccm_export.iccm_bank_wr_data[i]));
+    rvogate #(.WIDTH($bits(iccm_export_int.iccm_bank_wr_ecc[i])))  u_iccm_bank_wr_ecc_gate  (.*, .din(iccm_export_int.iccm_bank_wr_ecc[i]),  .dout(iccm_export.iccm_bank_wr_ecc[i]));
+  end
+
+  assign iccm_export_int.iccm_bank_dout = iccm_export.iccm_bank_dout;
+  assign iccm_export_int.iccm_bank_ecc  = iccm_export.iccm_bank_ecc;
 
   // ......................................................
 
@@ -230,8 +252,8 @@ module el2_tmr_iccm
   // Propagate response to cores
   for (genvar i=0; i<3; i=i+1) begin
     always_comb begin
-      iccm_export_veer[i].iccm_bank_dout = iccm_export.iccm_bank_dout;
-      iccm_export_veer[i].iccm_bank_ecc = iccm_export.iccm_bank_ecc;
+      iccm_export_veer[i].iccm_bank_dout = iccm_export_int.iccm_bank_dout;
+      iccm_export_veer[i].iccm_bank_ecc  = iccm_export_int.iccm_bank_ecc;
     end
   end
 

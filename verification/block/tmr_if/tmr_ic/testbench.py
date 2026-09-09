@@ -144,6 +144,8 @@ class BaseTest(common.BaseTest):
     async def initial(self):
 
         # Initialize
+        cocotb.top.ic_output_inhibit.value = MuBiFalse
+
         cocotb.top.ic_fault_d[0].value = MuBiFalse
         cocotb.top.ic_fault_d[1].value = MuBiFalse
         cocotb.top.ic_fault_d[2].value = MuBiFalse

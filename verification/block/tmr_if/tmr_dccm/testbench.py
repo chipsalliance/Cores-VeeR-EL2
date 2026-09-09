@@ -140,9 +140,12 @@ class BaseTest(common.BaseTest):
     async def initial(self):
 
         # Initialize
+        cocotb.top.dccm_output_inhibit.value = MuBiFalse
+
         cocotb.top.dccm_fault_d[0].value = MuBiFalse
         cocotb.top.dccm_fault_d[1].value = MuBiFalse
         cocotb.top.dccm_fault_d[2].value = MuBiFalse
+
         cocotb.top.dccm_clken_veer.value = [0] * 3
         cocotb.top.dccm_wren_bank_veer.value = [0] * 3
         cocotb.top.dccm_addr_bank_veer.value = [0] * 3

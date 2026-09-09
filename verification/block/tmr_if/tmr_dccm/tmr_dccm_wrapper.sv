@@ -36,7 +36,10 @@ module tmr_dccm_wrapper
     // Fault outputs
     output el2_mubi_pkg::el2_mubi_t dccm_fault_q[3],
     // Fault clear inputs
-    input  el2_mubi_pkg::el2_mubi_t dccm_fault_clr[3]
+    input  el2_mubi_pkg::el2_mubi_t dccm_fault_clr[3],
+
+    // Inhibit (cutoff) input
+    input  el2_mubi_pkg::el2_mubi_t dccm_output_inhibit
 );
 
   el2_mem_if local_mem_export();

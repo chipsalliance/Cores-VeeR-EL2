@@ -865,5 +865,58 @@ module rvoclkhdr
 
 endmodule
 
+/*
+   A mux that switches between its input and tieoff
+*/
+module rvotieoff #(
+   parameter unsigned             WIDTH  = 1,
+   parameter unsigned [WIDTH-1:0] TIEOFF = '0
+) (
+   input  logic [WIDTH-1:0] din,   // Data input
+   output logic [WIDTH-1:0] dout,  // Data output
+   input  logic             inh    // Output inhibit
+);
 
+   // Async. mux between input and TIEOFF
+   assign dout =  ({WIDTH{~inh}} & din) | ({WIDTH{inh}} & TIEOFF);
 
+endmodule // rvotieoff
+
+/*
+   A latch that stores its input state when the inhibit input is high
+*/
+module rvolatch #(
+   parameter unsigned             WIDTH  = 1
+) (
+   input  logic [WIDTH-1:0] din,   // Data input
+   output logic [WIDTH-1:0] dout,  // Data output
+   input  logic             inh    // Output inhibit
+);
+
+   // Latch
+   always_latch begin
+      if (!inh) dout = din;
+   end
+
+endmodule // rvolatch
+
+/*
+   An output gate module used to cut-off output from logic being asynchronously
+   reset.
+*/
+module rvogate #(
+   parameter unsigned             WIDTH  = 1,
+   parameter unsigned [WIDTH-1:0] TIEOFF = '0
+) (
+   input  logic [WIDTH-1:0] din,   // Data input
+   output logic [WIDTH-1:0] dout,  // Data output
+   input  logic             inh    // Output inhibit
+);
+
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ISOLATE_LATCH
+   rvolatch  #(.WIDTH(WIDTH)) latch (.*);
+`else
+   rvotieoff #(.WIDTH(WIDTH), .TIEOFF(TIEOFF)) mux (.*);
+`endif
+
+endmodule // rvogate

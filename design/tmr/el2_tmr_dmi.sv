@@ -28,10 +28,19 @@ module el2_tmr_dmi
     // Fault outputs
     output el2_mubi_pkg::el2_mubi_t dmi_fault_q[3],
     // Fault clear inputs
-    input  el2_mubi_pkg::el2_mubi_t dmi_fault_clr[3]
+    input  el2_mubi_pkg::el2_mubi_t dmi_fault_clr[3],
+
+    // Inhibit (cutoff) input
+    input  el2_mubi_pkg::el2_mubi_t dmi_output_inhibit
 );
 
   // ......................................................
+
+  logic        dmi_reg_en_int;
+  logic        dmi_reg_wr_en_int;
+  logic [6:0]  dmi_reg_addr_int;
+  logic [31:0] dmi_reg_wdata_int;
+  logic [31:0] dmi_reg_rdata_int;
 
   el2_mubi_t enable[3];
 
@@ -49,7 +58,7 @@ module el2_tmr_dmi
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (dmi_reg_rdata),
+    .out      (dmi_reg_rdata_int),
 
     .fault_a  (fault_dmi_reg_rdata[0]),
     .fault_b  (fault_dmi_reg_rdata[1]),
@@ -57,6 +66,17 @@ module el2_tmr_dmi
 
     .critical (crit_dmi_reg_rdata_nc)
   );
+
+  // ......................................................
+
+  logic  inh;
+  assign inh = mubi_check_true(dmi_output_inhibit);
+
+  rvogate #(.WIDTH($bits(dmi_reg_rdata_int))) u_dmi_reg_rdata_gate (.*, .din(dmi_reg_rdata_int), .dout(dmi_reg_rdata));
+  rvogate #(.WIDTH($bits(dmi_reg_en_int)))    u_dmi_reg_en_gate    (.*, .din(dmi_reg_en),        .dout(dmi_reg_en_int));
+  rvogate #(.WIDTH($bits(dmi_reg_addr_int)))  u_dmi_reg_addr_gate  (.*, .din(dmi_reg_addr),      .dout(dmi_reg_addr_int));
+  rvogate #(.WIDTH($bits(dmi_reg_wr_en_int))) u_dmi_reg_wr_en_gate (.*, .din(dmi_reg_wr_en),     .dout(dmi_reg_wr_en_int));
+  rvogate #(.WIDTH($bits(dmi_reg_wdata_int))) u_dmi_reg_wdata_gate (.*, .din(dmi_reg_wdata),     .dout(dmi_reg_wdata_int));
 
   // ......................................................
 
@@ -84,10 +104,10 @@ module el2_tmr_dmi
 
   // Propagate response to Cores
   for (genvar i=0; i < 3; i+=1) begin : resp
-    assign dmi_reg_en_veer[i]    = dmi_reg_en;
-    assign dmi_reg_addr_veer[i]  = dmi_reg_addr;
-    assign dmi_reg_wr_en_veer[i] = dmi_reg_wr_en;
-    assign dmi_reg_wdata_veer[i] = dmi_reg_wdata;
+    assign dmi_reg_en_veer[i]    = dmi_reg_en_int;
+    assign dmi_reg_addr_veer[i]  = dmi_reg_addr_int;
+    assign dmi_reg_wr_en_veer[i] = dmi_reg_wr_en_int;
+    assign dmi_reg_wdata_veer[i] = dmi_reg_wdata_int;
   end
 
 endmodule

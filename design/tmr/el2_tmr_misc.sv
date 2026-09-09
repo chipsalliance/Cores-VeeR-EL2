@@ -16,6 +16,7 @@ module el2_tmr_misc
     input  logic [31:1] nmi_vec,
     input  logic        timer_int,
     input  logic        soft_int,
+
     // Trace
     output logic [31:0] trace_rv_i_insn_ip,
     output logic [31:0] trace_rv_i_address_ip,
@@ -40,6 +41,7 @@ module el2_tmr_misc
     output logic [31:1] nmi_vec_veer[3],
     output logic        timer_int_veer[3],
     output logic        soft_int_veer[3],
+
     // Trace
     input  logic [31:0] trace_rv_i_insn_ip_veer[3],
     input  logic [31:0] trace_rv_i_address_ip_veer[3],
@@ -63,8 +65,23 @@ module el2_tmr_misc
     // Fault outputs
     output el2_mubi_pkg::el2_mubi_t misc_fault_q[3],
     // Fault clear inputs
-    input  el2_mubi_pkg::el2_mubi_t misc_fault_clr[3]
+    input  el2_mubi_pkg::el2_mubi_t misc_fault_clr[3],
+
+    // Inhibit (cutoff) input
+    input  el2_mubi_pkg::el2_mubi_t misc_output_inhibit
 );
+
+  // ......................................................
+
+  logic [31:0] trace_rv_i_insn_ip_g;
+  logic [31:0] trace_rv_i_address_ip_g;
+  logic        trace_rv_i_valid_ip_g;
+  logic        trace_rv_i_exception_ip_g;
+  logic [4:0]  trace_rv_i_ecause_ip_g;
+  logic        trace_rv_i_interrupt_ip_g;
+  logic [31:0] trace_rv_i_tval_ip_g;
+
+  logic dec_tlu_force_halt_g;
 
   // ......................................................
 
@@ -97,6 +114,7 @@ module el2_tmr_misc
   // ......................................................
 
   // Pass reset through only a single voter
+  // No input/output gating, it's not directly driven by any VeeR logic
   rvtmr #(.WIDTH(1)) u_core_rst_l (
     .I (core_rst_l_veer),
     .O (core_rst_l)
@@ -111,8 +129,8 @@ module el2_tmr_misc
     assign trace_rv_i_exc_int_ip_veer[i] = {trace_rv_i_exception_ip_veer[i], trace_rv_i_interrupt_ip_veer[i]};
   end
 
-  assign trace_rv_i_exception_ip = trace_rv_i_exc_int_ip[1] & mubi_check_false(crit_any);
-  assign trace_rv_i_interrupt_ip = trace_rv_i_exc_int_ip[0] & mubi_check_false(crit_any);
+  assign trace_rv_i_exception_ip_g = trace_rv_i_exc_int_ip[1] & mubi_check_false(crit_any);
+  assign trace_rv_i_interrupt_ip_g = trace_rv_i_exc_int_ip[0] & mubi_check_false(crit_any);
 
   el2_tmr_voter #(.Width(2)) u_voter_trace_rv_i_exc_int_ip (
     .in_a     (trace_rv_i_exc_int_ip_veer[0]),
@@ -133,7 +151,7 @@ module el2_tmr_misc
   );
 
   logic  trace_rv_i_valid_ip_int;
-  assign trace_rv_i_valid_ip = trace_rv_i_valid_ip_int & mubi_check_false(crit_any);
+  assign trace_rv_i_valid_ip_g = trace_rv_i_valid_ip_int & mubi_check_false(crit_any);
 
   el2_tmr_voter #(.Width(1)) u_voter_trace_rv_i_valid_ip (
     .in_a     (trace_rv_i_valid_ip_veer[0]),
@@ -162,7 +180,7 @@ module el2_tmr_misc
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (trace_rv_i_insn_ip),
+    .out      (trace_rv_i_insn_ip_g),
 
     .fault_a  (fault_trace_rv_i_insn_ip_veer[0]),
     .fault_b  (fault_trace_rv_i_insn_ip_veer[1]),
@@ -180,7 +198,7 @@ module el2_tmr_misc
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (trace_rv_i_address_ip),
+    .out      (trace_rv_i_address_ip_g),
 
     .fault_a  (fault_trace_rv_i_address_ip_veer[0]),
     .fault_b  (fault_trace_rv_i_address_ip_veer[1]),
@@ -198,7 +216,7 @@ module el2_tmr_misc
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (trace_rv_i_ecause_ip),
+    .out      (trace_rv_i_ecause_ip_g),
 
     .fault_a  (fault_trace_rv_i_ecause_ip_veer[0]),
     .fault_b  (fault_trace_rv_i_ecause_ip_veer[1]),
@@ -216,7 +234,7 @@ module el2_tmr_misc
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (trace_rv_i_tval_ip),
+    .out      (trace_rv_i_tval_ip_g),
 
     .fault_a  (fault_trace_rv_i_tval_ip_veer[0]),
     .fault_b  (fault_trace_rv_i_tval_ip_veer[1]),
@@ -239,6 +257,7 @@ module el2_tmr_misc
   // ......................................................
 
   logic [3:0] dec_tlu_perfcnt_veer[3];
+  logic [3:0] dec_tlu_perfcnt_g;
   logic [3:0] dec_tlu_perfcnt;
 
   for (genvar i=0; i<3; i=i+1) begin
@@ -264,7 +283,7 @@ module el2_tmr_misc
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (dec_tlu_perfcnt),
+    .out      (dec_tlu_perfcnt_g),
 
     .fault_a  (fault_dec_tlu_perfcnt_veer[0]),
     .fault_b  (fault_dec_tlu_perfcnt_veer[1]),
@@ -282,7 +301,7 @@ module el2_tmr_misc
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (dec_tlu_force_halt_int),
+    .out      (dec_tlu_force_halt_g),
 
     .fault_a  (fault_dec_tlu_force_halt_veer[0]),
     .fault_b  (fault_dec_tlu_force_halt_veer[1]),
@@ -290,6 +309,22 @@ module el2_tmr_misc
 
     .critical (crit_dec_tlu_force_halt_veer_nc)
   );
+
+  // ......................................................
+
+  logic  inh;
+  assign inh = mubi_check_true(misc_output_inhibit);
+
+  rvogate #(.WIDTH($bits(trace_rv_i_insn_ip)))      u_trace_rv_i_insn_ip_gate      (.*, .din(trace_rv_i_insn_ip_g),      .dout(trace_rv_i_insn_ip));
+  rvogate #(.WIDTH($bits(trace_rv_i_address_ip)))   u_trace_rv_i_address_ip_gate   (.*, .din(trace_rv_i_address_ip_g),   .dout(trace_rv_i_address_ip));
+  rvogate #(.WIDTH($bits(trace_rv_i_valid_ip)))     u_trace_rv_i_valid_ip_gate     (.*, .din(trace_rv_i_valid_ip_g),     .dout(trace_rv_i_valid_ip));
+  rvogate #(.WIDTH($bits(trace_rv_i_exception_ip))) u_trace_rv_i_exception_ip_gate (.*, .din(trace_rv_i_exception_ip_g), .dout(trace_rv_i_exception_ip));
+  rvogate #(.WIDTH($bits(trace_rv_i_ecause_ip)))    u_trace_rv_i_ecause_ip_gate    (.*, .din(trace_rv_i_ecause_ip_g),    .dout(trace_rv_i_ecause_ip));
+  rvogate #(.WIDTH($bits(trace_rv_i_interrupt_ip))) u_trace_rv_i_interrupt_ip_gate (.*, .din(trace_rv_i_interrupt_ip_g), .dout(trace_rv_i_interrupt_ip));
+  rvogate #(.WIDTH($bits(trace_rv_i_tval_ip)))      u_trace_rv_i_tval_ip_gate      (.*, .din(trace_rv_i_tval_ip_g),      .dout(trace_rv_i_tval_ip));
+
+  rvogate #(.WIDTH($bits(dec_tlu_perfcnt))) u_perfcnt_gate    (.*, .din(dec_tlu_perfcnt_g),    .dout(dec_tlu_perfcnt));
+  rvogate #(.WIDTH(1))                      u_force_halt_gate (.*, .din(dec_tlu_force_halt_g), .dout(dec_tlu_force_halt_int));
 
   // ......................................................
 

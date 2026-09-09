@@ -24,14 +24,22 @@ module el2_tmr_ic
     // Fault outputs
     output el2_mubi_pkg::el2_mubi_t ic_fault_q[3],
     // Fault clear inputs
-    input  el2_mubi_pkg::el2_mubi_t ic_fault_clr[3]
+    input  el2_mubi_pkg::el2_mubi_t ic_fault_clr[3],
+
+    // Inhibit (cutoff) input
+    input  el2_mubi_pkg::el2_mubi_t ic_output_inhibit
 );
 
   // Create constants with casting to avoid width expansion warnings
   localparam RW_ADDR_BANK_WIDTH = int'(pt.ICACHE_INDEX_HI) - int'(pt.ICACHE_DATA_INDEX_LO) + 1;
   localparam RW_ADDR_WIDTH = int'(pt.ICACHE_INDEX_HI) - int'(pt.ICACHE_TAG_INDEX_LO) + 1;
 
-  el2_mem_if mem_if_int();
+  logic [pt.ICACHE_BANKS_WAY-1:0][pt.ICACHE_NUM_WAYS-1:0]      ic_b_sb_wren_int;
+  logic [pt.ICACHE_BANKS_WAY-1:0][(71*pt.ICACHE_NUM_WAYS)-1:0] ic_b_sb_bit_en_vec_int;
+  logic [pt.ICACHE_NUM_WAYS-1:0]                               ic_tag_wren_q_int;
+  logic [(26*pt.ICACHE_NUM_WAYS)-1 :0]                         ic_tag_wren_biten_vec_int;
+
+  el2_mem_if icache_export_int();
 
   el2_mubi_t enable[3];
 
@@ -84,7 +92,7 @@ module el2_tmr_ic
       .en_b     (enable[1]),
       .en_c     (enable[2]),
 
-      .out      (mem_if_int.ic_b_sb_wren[i]),
+      .out      (ic_b_sb_wren_int[i]),
 
       .fault_a  (fault_ic_b_sb_wren[0][i]),
       .fault_b  (fault_ic_b_sb_wren[1][i]),
@@ -102,7 +110,7 @@ module el2_tmr_ic
       .en_b     (enable[1]),
       .en_c     (enable[2]),
 
-      .out      (mem_if_int.ic_b_sb_bit_en_vec[i]),
+      .out      (ic_b_sb_bit_en_vec_int[i]),
 
       .fault_a  (fault_ic_b_sb_bit_en_vec[0][i]),
       .fault_b  (fault_ic_b_sb_bit_en_vec[1][i]),
@@ -120,7 +128,7 @@ module el2_tmr_ic
       .en_b     (enable[1]),
       .en_c     (enable[2]),
 
-      .out      (icache_export.ic_sb_wr_data[i]),
+      .out      (icache_export_int.ic_sb_wr_data[i]),
 
       .fault_a  (fault_ic_sb_wr_data[0][i]),
       .fault_b  (fault_ic_sb_wr_data[1][i]),
@@ -138,7 +146,7 @@ module el2_tmr_ic
       .en_b     (enable[1]),
       .en_c     (enable[2]),
 
-      .out      (icache_export.ic_rw_addr_bank_q[i]),
+      .out      (icache_export_int.ic_rw_addr_bank_q[i]),
 
       .fault_a  (fault_ic_rw_addr_bank_q[0][i]),
       .fault_b  (fault_ic_rw_addr_bank_q[1][i]),
@@ -188,7 +196,7 @@ module el2_tmr_ic
       .en_b     (enable[1]),
       .en_c     (enable[2]),
 
-      .out      (icache_export.ic_bank_way_clken_final_up[i]),
+      .out      (icache_export_int.ic_bank_way_clken_final_up[i]),
 
       .fault_a  (fault_ic_bank_way_clken_final_up[0][i]),
       .fault_b  (fault_ic_bank_way_clken_final_up[1][i]),
@@ -207,7 +215,7 @@ module el2_tmr_ic
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (icache_export.ic_bank_way_clken_final),
+    .out      (icache_export_int.ic_bank_way_clken_final),
 
     .fault_a  (fault_ic_bank_way_clken_final[0]),
     .fault_b  (fault_ic_bank_way_clken_final[1]),
@@ -228,7 +236,7 @@ module el2_tmr_ic
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (icache_export.ic_tag_clken_final),
+    .out      (icache_export_int.ic_tag_clken_final),
 
     .fault_a  (fault_ic_tag_clken_final[0]),
     .fault_b  (fault_ic_tag_clken_final[1]),
@@ -246,7 +254,7 @@ module el2_tmr_ic
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (mem_if_int.ic_tag_wren_q),
+    .out      (ic_tag_wren_q_int),
 
     .fault_a  (fault_ic_tag_wren_q[0]),
     .fault_b  (fault_ic_tag_wren_q[1]),
@@ -264,7 +272,7 @@ module el2_tmr_ic
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (mem_if_int.ic_tag_wren_biten_vec),
+    .out      (ic_tag_wren_biten_vec_int),
 
     .fault_a  (fault_ic_tag_wren_biten_vec[0]),
     .fault_b  (fault_ic_tag_wren_biten_vec[1]),
@@ -282,7 +290,7 @@ module el2_tmr_ic
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (icache_export.ic_tag_wr_data),
+    .out      (icache_export_int.ic_tag_wr_data),
 
     .fault_a  (fault_ic_tag_wr_data[0]),
     .fault_b  (fault_ic_tag_wr_data[1]),
@@ -300,7 +308,7 @@ module el2_tmr_ic
     .en_b     (enable[1]),
     .en_c     (enable[2]),
 
-    .out      (icache_export.ic_rw_addr_q),
+    .out      (icache_export_int.ic_rw_addr_q),
 
     .fault_a  (fault_ic_rw_addr_q[0]),
     .fault_b  (fault_ic_rw_addr_q[1]),
@@ -336,14 +344,42 @@ module el2_tmr_ic
   // Gate control signals with critical errors
   for (genvar i = 0; i < pt.ICACHE_BANKS_WAY; i++) begin : gen_ic_control
     always_comb begin
-      icache_export.ic_b_sb_wren[i]       = mem_if_int.ic_b_sb_wren[i]       & {pt.ICACHE_NUM_WAYS{mubi_check_false(crit_any)}};
-      icache_export.ic_b_sb_bit_en_vec[i] = mem_if_int.ic_b_sb_bit_en_vec[i] & {71*pt.ICACHE_NUM_WAYS{mubi_check_false(crit_any)}};
+      icache_export_int.ic_b_sb_wren[i]       = ic_b_sb_wren_int[i]       & {pt.ICACHE_NUM_WAYS{mubi_check_false(crit_any)}};
+      icache_export_int.ic_b_sb_bit_en_vec[i] = ic_b_sb_bit_en_vec_int[i] & {71*pt.ICACHE_NUM_WAYS{mubi_check_false(crit_any)}};
     end
   end
   always_comb begin
-    icache_export.ic_tag_wren_q         = mem_if_int.ic_tag_wren_q         & {pt.ICACHE_NUM_WAYS{mubi_check_false(crit_any)}};
-    icache_export.ic_tag_wren_biten_vec = mem_if_int.ic_tag_wren_biten_vec & {26*pt.ICACHE_NUM_WAYS{mubi_check_false(crit_any)}};
+    icache_export_int.ic_tag_wren_q         = ic_tag_wren_q_int         & {pt.ICACHE_NUM_WAYS{mubi_check_false(crit_any)}};
+    icache_export_int.ic_tag_wren_biten_vec = ic_tag_wren_biten_vec_int & {26*pt.ICACHE_NUM_WAYS{mubi_check_false(crit_any)}};
   end
+
+  // ......................................................
+
+  logic  inh;
+  assign inh = mubi_check_true(ic_output_inhibit);
+
+  for (genvar i = 0; i < pt.ICACHE_BANKS_WAY; i++) begin : gen_ic_data_gates_0
+    rvogate #(.WIDTH($bits(icache_export_int.ic_b_sb_wren[i])))       u_ic_b_sb_wren_gate       (.*, .din(icache_export_int.ic_b_sb_wren[i]),       .dout(icache_export.ic_b_sb_wren[i]));
+    rvogate #(.WIDTH($bits(icache_export_int.ic_b_sb_bit_en_vec[i]))) u_ic_b_sb_bit_en_vec_gate (.*, .din(icache_export_int.ic_b_sb_bit_en_vec[i]), .dout(icache_export.ic_b_sb_bit_en_vec[i]));
+    rvogate #(.WIDTH($bits(icache_export_int.ic_sb_wr_data[i])))      u_ic_sb_wr_data_gate      (.*, .din(icache_export_int.ic_sb_wr_data[i]),      .dout(icache_export.ic_sb_wr_data[i]));
+    rvogate #(.WIDTH($bits(icache_export_int.ic_rw_addr_bank_q[i])))  u_ic_rw_addr_bank_q_gate  (.*, .din(icache_export_int.ic_rw_addr_bank_q[i]),  .dout(icache_export.ic_rw_addr_bank_q[i]));
+  end
+
+  for (genvar i = 0; i < pt.ICACHE_NUM_WAYS; i++) begin : gen_ic_data_gates_1
+    rvogate #(.WIDTH($bits(icache_export_int.ic_bank_way_clken_final_up[i]))) u_ic_bank_way_clken_final_up_gate (.*, .din(icache_export_int.ic_bank_way_clken_final_up[i]), .dout(icache_export.ic_bank_way_clken_final_up[i]));
+  end
+
+  rvogate #(.WIDTH($bits(icache_export_int.ic_bank_way_clken_final)))    u_ic_bank_way_clken_final_gate    (.*, .din(icache_export_int.ic_bank_way_clken_final), .dout(icache_export.ic_bank_way_clken_final));
+  rvogate #(.WIDTH($bits(icache_export_int.ic_tag_clken_final)))         u_ic_tag_clken_final_gate         (.*, .din(icache_export_int.ic_tag_clken_final),      .dout(icache_export.ic_tag_clken_final));
+  rvogate #(.WIDTH($bits(icache_export_int.ic_tag_wren_q)))              u_ic_tag_wren_q_gate              (.*, .din(icache_export_int.ic_tag_wren_q),           .dout(icache_export.ic_tag_wren_q));
+  rvogate #(.WIDTH($bits(icache_export_int.ic_tag_wren_biten_vec)))      u_ic_tag_wren_biten_vec_gate      (.*, .din(icache_export_int.ic_tag_wren_biten_vec),   .dout(icache_export.ic_tag_wren_biten_vec));
+  rvogate #(.WIDTH($bits(icache_export_int.ic_tag_wr_data)))             u_ic_tag_wr_data_gate             (.*, .din(icache_export_int.ic_tag_wr_data),          .dout(icache_export.ic_tag_wr_data));
+  rvogate #(.WIDTH($bits(icache_export_int.ic_rw_addr_q)))               u_ic_rw_addr_q_gate               (.*, .din(icache_export_int.ic_rw_addr_q),            .dout(icache_export.ic_rw_addr_q));
+
+  assign icache_export_int.wb_packeddout_pre          = icache_export.wb_packeddout_pre;
+  assign icache_export_int.wb_dout_pre_up             = icache_export.wb_dout_pre_up;
+  assign icache_export_int.ic_tag_data_raw_packed_pre = icache_export.ic_tag_data_raw_packed_pre;
+  assign icache_export_int.ic_tag_data_raw_pre        = icache_export.ic_tag_data_raw_pre;
 
   // ......................................................
 
@@ -402,11 +438,11 @@ module el2_tmr_ic
   for (genvar i = 0; i < 3; i++) begin
     always_comb begin
       // Data
-      icache_export_veer[i].wb_packeddout_pre = icache_export.wb_packeddout_pre;
-      icache_export_veer[i].wb_dout_pre_up = icache_export.wb_dout_pre_up;
+      icache_export_veer[i].wb_packeddout_pre          = icache_export_int.wb_packeddout_pre;
+      icache_export_veer[i].wb_dout_pre_up             = icache_export_int.wb_dout_pre_up;
       // Tag
-      icache_export_veer[i].ic_tag_data_raw_packed_pre = icache_export.ic_tag_data_raw_packed_pre;
-      icache_export_veer[i].ic_tag_data_raw_pre = icache_export.ic_tag_data_raw_pre;
+      icache_export_veer[i].ic_tag_data_raw_packed_pre = icache_export_int.ic_tag_data_raw_packed_pre;
+      icache_export_veer[i].ic_tag_data_raw_pre        = icache_export_int.ic_tag_data_raw_pre;
     end
   end
 

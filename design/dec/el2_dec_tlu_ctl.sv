@@ -1734,7 +1734,8 @@ end
 
    assign wr_mcyclel_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MCYCLEL);
 
-   assign mcyclel_cout_in = ~(kill_ebreak_count_r | (dec_tlu_dbg_halted & dcsr[DCSR_STOPC]) | dec_tlu_pmu_fw_halted | mcountinhibit[0]);
+   assign mcyclel_cout_in = ~(kill_ebreak_count_r | (dec_tlu_dbg_halted & dcsr[DCSR_STOPC]) | dec_tlu_pmu_fw_halted | mcountinhibit[0] |
+      (pt.MCYCLE_STOP_MPC_HALT & (mpc_halt_state_ns | ~reset_detect)));
 
    // split for power
    assign {mcyclela_cout, mcyclel_inc[7:0]}  = mcyclel[7:0] +  {7'b0, 1'b1};

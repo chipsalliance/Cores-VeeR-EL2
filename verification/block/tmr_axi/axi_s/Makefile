@@ -19,6 +19,8 @@ COMPILE_ARGS = \
  -DRV_MUBI_TRUE=2 \
  -DRV_MUBI_FALSE=1 \
  -DRV_TRIPLE_MODULAR_REDUNDANCY_ENABLE=1 \
+ -DTEC_RV_ICG=my_rvicg \
+ -DTEC_RV_TMR=my_rvtmr \
  -GAddrWidth=32 \
  -GDataWidth=64 \
  -GIdWidth=4 \
@@ -31,6 +33,7 @@ export PYTHONPATH := $(PYTHONPATH):$(TEST_DIR)/..
 # VeeR files. This test is a unit test.
 VERILOG_SOURCES = \
     $(SRCDIR)/lib/el2_assert.sv \
+    $(SRCDIR)/lib/beh_lib.sv \
     $(SRCDIR)/el2_mubi_pkg.sv \
     $(SRCDIR)/tmr/el2_tmr_voter.sv \
     $(SRCDIR)/tmr/el2_tmr_axi_rdy.sv \

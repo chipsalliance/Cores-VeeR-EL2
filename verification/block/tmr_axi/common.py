@@ -133,6 +133,7 @@ class BaseTest(uvm_test):
 
         # Initialize signals
         cocotb.top.rst_ni.value = 1
+        cocotb.top.output_inhibit_i.value = MuBiFalse
 
         # Start clock
         self.start_clock("clk_i")

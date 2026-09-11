@@ -25,9 +25,7 @@ typedef enum logic [8:0] {
 
 module el2_tmr_recovery_fsm
   import el2_mubi_pkg::*;
-#(
-    `include "el2_param.vh"
-) (
+(
     input  logic clk,
     input  logic rst_l,
     input  el2_mubi_pkg::el2_mubi_t external_flag,

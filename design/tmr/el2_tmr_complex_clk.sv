@@ -6,10 +6,7 @@
 module el2_tmr_complex_clk
   import el2_pkg::*;
   import el2_mubi_pkg::*;
-  import el2_lockstep_pkg::*;
-#(
-    `include "el2_param.vh"
-) (
+(
     input  logic clk,
     input  logic active_state_veer[3],
     output logic active_l2clk_veer[3],

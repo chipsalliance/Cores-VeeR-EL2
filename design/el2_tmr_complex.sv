@@ -6,7 +6,6 @@
 module el2_tmr_complex
   import el2_pkg::*;
   import el2_mubi_pkg::*;
-  import el2_lockstep_pkg::*;
 #(
     `include "el2_param.vh"
 ) (
@@ -1064,11 +1063,11 @@ module el2_tmr_complex
       .free_clk(free_clk_int),
       .*
   );
-  el2_tmr_complex_clk #(.pt(pt)) el2_tmr_complex_clk_u(.*);
+  el2_tmr_complex_clk el2_tmr_complex_clk_u(.*);
   el2_tmr_exec_ctrl el2_tmr_exec_ctrl_u (.*);
   el2_tmr_misc el2_tmr_misc_u (.*);
 
-  el2_tmr_recovery_fsm #(.pt(pt)) el2_tmr_recovery_fsm_u (
+  el2_tmr_recovery_fsm el2_tmr_recovery_fsm_u (
       .*,
       .external_flag(el2_mubi_pkg::El2MuBiFalse),
       .clear_external_flag(),

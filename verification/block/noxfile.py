@@ -579,6 +579,19 @@ def ecc_counter_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
 
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_cutoff"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_inhibit",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_cutoff_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
 @nox.session(reuse_venv=True)
 def lint(session: nox.Session) -> None:
     """Options are defined in pyproject.toml and .flake8 files"""

@@ -10,7 +10,7 @@ module el2_tmr_axi
     `include "el2_param.vh"
 ) (
     input  logic                            rst_l,
-    output logic                            free_l2clk,
+    input  logic                            free_l2clk,
 
     //-------------------------- LSU AXI signals--------------------------
     // AXI Write Channels

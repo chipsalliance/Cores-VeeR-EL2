@@ -6,7 +6,6 @@
 module el2_tmr_complex_io
   import el2_pkg::*;
   import el2_mubi_pkg::*;
-  import el2_lockstep_pkg::*;
 #(
     `include "el2_param.vh"
 ) (

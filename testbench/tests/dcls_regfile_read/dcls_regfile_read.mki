@@ -1,0 +1,1 @@
+OFILES = dcls_regfile_read.o crt0.o printf.o

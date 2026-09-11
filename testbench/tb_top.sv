@@ -1325,6 +1325,43 @@ module tb_top
                 92: force `LOCKSTEP_CORE.dma_hresp = '1;
                 // --- END ADDED AHB FORCES ---
             `endif
+                // --- MONITORED REGISTER FORCES (LOCKSTEP) ---
+                221: force `LOCKSTEP_CORE.dec.arf.gpr[1].gprff.dout[0] = 1'b1;
+                222: force `LOCKSTEP_CORE.dec.arf.gpr[2].gprff.dout[0] = 1'b1;
+                223: force `LOCKSTEP_CORE.dec.arf.gpr[3].gprff.dout[0] = 1'b1;
+                224: force `LOCKSTEP_CORE.dec.arf.gpr[4].gprff.dout[0] = 1'b1;
+                225: force `LOCKSTEP_CORE.dec.arf.gpr[5].gprff.dout[0] = 1'b1;
+                226: force `LOCKSTEP_CORE.dec.arf.gpr[6].gprff.dout[0] = 1'b1;
+                227: force `LOCKSTEP_CORE.dec.arf.gpr[7].gprff.dout[0] = 1'b1;
+                228: force `LOCKSTEP_CORE.dec.arf.gpr[8].gprff.dout[0] = 1'b1;
+                229: force `LOCKSTEP_CORE.dec.arf.gpr[9].gprff.dout[0] = 1'b1;
+                230: force `LOCKSTEP_CORE.dec.arf.gpr[10].gprff.dout[0] = 1'b1;
+                231: force `LOCKSTEP_CORE.dec.arf.gpr[11].gprff.dout[0] = 1'b1;
+                232: force `LOCKSTEP_CORE.dec.arf.gpr[12].gprff.dout[0] = 1'b1;
+                233: force `LOCKSTEP_CORE.dec.arf.gpr[13].gprff.dout[0] = 1'b1;
+                234: force `LOCKSTEP_CORE.dec.arf.gpr[14].gprff.dout[0] = 1'b1;
+                235: force `LOCKSTEP_CORE.dec.arf.gpr[15].gprff.dout[0] = 1'b1;
+                236: force `LOCKSTEP_CORE.dec.arf.gpr[16].gprff.dout[0] = 1'b1;
+                237: force `LOCKSTEP_CORE.dec.arf.gpr[17].gprff.dout[0] = 1'b1;
+                238: force `LOCKSTEP_CORE.dec.arf.gpr[18].gprff.dout[0] = 1'b1;
+                239: force `LOCKSTEP_CORE.dec.arf.gpr[19].gprff.dout[0] = 1'b1;
+                240: force `LOCKSTEP_CORE.dec.arf.gpr[20].gprff.dout[0] = 1'b1;
+                241: force `LOCKSTEP_CORE.dec.arf.gpr[21].gprff.dout[0] = 1'b1;
+                242: force `LOCKSTEP_CORE.dec.arf.gpr[22].gprff.dout[0] = 1'b1;
+                243: force `LOCKSTEP_CORE.dec.arf.gpr[23].gprff.dout[0] = 1'b1;
+                244: force `LOCKSTEP_CORE.dec.arf.gpr[24].gprff.dout[0] = 1'b1;
+                245: force `LOCKSTEP_CORE.dec.arf.gpr[25].gprff.dout[0] = 1'b1;
+                246: force `LOCKSTEP_CORE.dec.arf.gpr[26].gprff.dout[0] = 1'b1;
+                247: force `LOCKSTEP_CORE.dec.arf.gpr[27].gprff.dout[0] = 1'b1;
+                248: force `LOCKSTEP_CORE.dec.arf.gpr[28].gprff.dout[0] = 1'b1;
+                249: force `LOCKSTEP_CORE.dec.arf.gpr[29].gprff.dout[0] = 1'b1;
+                250: force `LOCKSTEP_CORE.dec.arf.gpr[30].gprff.dout[0] = 1'b1;
+                251: force `LOCKSTEP_CORE.dec.arf.gpr[31].gprff.dout[0] = 1'b1;
+                252: force `LOCKSTEP_CORE.dec.tlu.mepc_ff.dout[1] = 1'b1;
+                253: force `LOCKSTEP_CORE.dec.tlu.mie_rf[7] = 1'b1;
+                254: force `LOCKSTEP_CORE.dec.tlu.mcause_ff.dout[0] = 1'b1;
+                255: force `LOCKSTEP_CORE.dec.tlu.mip_rf[7] = 1'b1;
+                195: force `LOCKSTEP_CORE.dec.tlu.minstretl_bff.dout[8] = 1'b1;
                 default: force `LOCKSTEP.lockstep_err_injection_en_i = '1;
             endcase
         end else if (inject_veer_in_dist) begin: inject_veer_corruption
@@ -1579,6 +1616,44 @@ module tb_top
                 92: force `VEER.dma_hresp = '1;
                 // --- END ADDED AHB FORCES ---
             `endif
+                // --- MONITORED REGISTER FORCES (VEER) ---
+                221: force `VEER.dec.arf.gpr[1].gprff.dout[0] = 1'b1;
+                222: force `VEER.dec.arf.gpr[2].gprff.dout[0] = 1'b1;
+                223: force `VEER.dec.arf.gpr[3].gprff.dout[0] = 1'b1;
+                224: force `VEER.dec.arf.gpr[4].gprff.dout[0] = 1'b1;
+                225: force `VEER.dec.arf.gpr[5].gprff.dout[0] = 1'b1;
+                226: force `VEER.dec.arf.gpr[6].gprff.dout[0] = 1'b1;
+                227: force `VEER.dec.arf.gpr[7].gprff.dout[0] = 1'b1;
+                228: force `VEER.dec.arf.gpr[8].gprff.dout[0] = 1'b1;
+                229: force `VEER.dec.arf.gpr[9].gprff.dout[0] = 1'b1;
+                230: force `VEER.dec.arf.gpr[10].gprff.dout[0] = 1'b1;
+                231: force `VEER.dec.arf.gpr[11].gprff.dout[0] = 1'b1;
+                232: force `VEER.dec.arf.gpr[12].gprff.dout[0] = 1'b1;
+                233: force `VEER.dec.arf.gpr[13].gprff.dout[0] = 1'b1;
+                234: force `VEER.dec.arf.gpr[14].gprff.dout[0] = 1'b1;
+                235: force `VEER.dec.arf.gpr[15].gprff.dout[0] = 1'b1;
+                236: force `VEER.dec.arf.gpr[16].gprff.dout[0] = 1'b1;
+                237: force `VEER.dec.arf.gpr[17].gprff.dout[0] = 1'b1;
+                238: force `VEER.dec.arf.gpr[18].gprff.dout[0] = 1'b1;
+                239: force `VEER.dec.arf.gpr[19].gprff.dout[0] = 1'b1;
+                240: force `VEER.dec.arf.gpr[20].gprff.dout[0] = 1'b1;
+                241: force `VEER.dec.arf.gpr[21].gprff.dout[0] = 1'b1;
+                242: force `VEER.dec.arf.gpr[22].gprff.dout[0] = 1'b1;
+                243: force `VEER.dec.arf.gpr[23].gprff.dout[0] = 1'b1;
+                244: force `VEER.dec.arf.gpr[24].gprff.dout[0] = 1'b1;
+                245: force `VEER.dec.arf.gpr[25].gprff.dout[0] = 1'b1;
+                246: force `VEER.dec.arf.gpr[26].gprff.dout[0] = 1'b1;
+                247: force `VEER.dec.arf.gpr[27].gprff.dout[0] = 1'b1;
+                248: force `VEER.dec.arf.gpr[28].gprff.dout[0] = 1'b1;
+                249: force `VEER.dec.arf.gpr[29].gprff.dout[0] = 1'b1;
+                250: force `VEER.dec.arf.gpr[30].gprff.dout[0] = 1'b1;
+                251: force `VEER.dec.arf.gpr[31].gprff.dout[0] = 1'b1;
+                252: force `VEER.dec.tlu.mscratch_ff.dout[0] = 1'b1;
+                253: force `VEER.dec.tlu.mstatus_rf[3] = 1'b0;
+                254: force `VEER.dec.tlu.mtvec_ff.dout[0] = 1'b1;
+                255: force `VEER.dec.tlu.mtval_ff.dout[0] = 1'b1;
+                195: force `VEER.dec.tlu.mcyclel_bff.dout[8] = 1'b1;
+                196: force `VEER.dec.tlu.mrac_ff.dout[0] = 1'b1;
                 default: force `LOCKSTEP.lockstep_err_injection_en_i = '1;
             endcase
         end
@@ -2056,6 +2131,80 @@ module tb_top
             release `VEER.dma_hresp;
             // --- END ADDED AHB RELEASES ---
         `endif
+            // --- MONITORED REGISTER RELEASES ---
+            release `VEER.dec.arf.gpr[1].gprff.dout[0];
+            release `VEER.dec.arf.gpr[2].gprff.dout[0];
+            release `VEER.dec.arf.gpr[3].gprff.dout[0];
+            release `VEER.dec.arf.gpr[4].gprff.dout[0];
+            release `VEER.dec.arf.gpr[5].gprff.dout[0];
+            release `VEER.dec.arf.gpr[6].gprff.dout[0];
+            release `VEER.dec.arf.gpr[7].gprff.dout[0];
+            release `VEER.dec.arf.gpr[8].gprff.dout[0];
+            release `VEER.dec.arf.gpr[9].gprff.dout[0];
+            release `VEER.dec.arf.gpr[10].gprff.dout[0];
+            release `VEER.dec.arf.gpr[11].gprff.dout[0];
+            release `VEER.dec.arf.gpr[12].gprff.dout[0];
+            release `VEER.dec.arf.gpr[13].gprff.dout[0];
+            release `VEER.dec.arf.gpr[14].gprff.dout[0];
+            release `VEER.dec.arf.gpr[15].gprff.dout[0];
+            release `VEER.dec.arf.gpr[16].gprff.dout[0];
+            release `VEER.dec.arf.gpr[17].gprff.dout[0];
+            release `VEER.dec.arf.gpr[18].gprff.dout[0];
+            release `VEER.dec.arf.gpr[19].gprff.dout[0];
+            release `VEER.dec.arf.gpr[20].gprff.dout[0];
+            release `VEER.dec.arf.gpr[21].gprff.dout[0];
+            release `VEER.dec.arf.gpr[22].gprff.dout[0];
+            release `VEER.dec.arf.gpr[23].gprff.dout[0];
+            release `VEER.dec.arf.gpr[24].gprff.dout[0];
+            release `VEER.dec.arf.gpr[25].gprff.dout[0];
+            release `VEER.dec.arf.gpr[26].gprff.dout[0];
+            release `VEER.dec.arf.gpr[27].gprff.dout[0];
+            release `VEER.dec.arf.gpr[28].gprff.dout[0];
+            release `VEER.dec.arf.gpr[29].gprff.dout[0];
+            release `VEER.dec.arf.gpr[30].gprff.dout[0];
+            release `VEER.dec.arf.gpr[31].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[1].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[2].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[3].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[4].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[5].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[6].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[7].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[8].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[9].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[10].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[11].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[12].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[13].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[14].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[15].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[16].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[17].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[18].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[19].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[20].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[21].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[22].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[23].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[24].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[25].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[26].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[27].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[28].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[29].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[30].gprff.dout[0];
+            release `LOCKSTEP_CORE.dec.arf.gpr[31].gprff.dout[0];
+            release `VEER.dec.tlu.mscratch_ff.dout[0];
+            release `VEER.dec.tlu.mstatus_rf[3];
+            release `VEER.dec.tlu.mtvec_ff.dout[0];
+            release `VEER.dec.tlu.mtval_ff.dout[0];
+            release `VEER.dec.tlu.mcyclel_bff.dout[8];
+            release `VEER.dec.tlu.mrac_ff.dout[0];
+            release `LOCKSTEP_CORE.dec.tlu.mepc_ff.dout[1];
+            release `LOCKSTEP_CORE.dec.tlu.mie_rf[7];
+            release `LOCKSTEP_CORE.dec.tlu.mcause_ff.dout[0];
+            release `LOCKSTEP_CORE.dec.tlu.mip_rf[7];
+            release `LOCKSTEP_CORE.dec.tlu.minstretl_bff.dout[8];
             release `LOCKSTEP.lockstep_err_injection_en_i;
         end
     end

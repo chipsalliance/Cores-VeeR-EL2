@@ -117,7 +117,8 @@ ifdef debug
  DEBUG_PLUS = +dumpon
  IRUN_DEBUG = -access +rc
  IRUN_DEBUG_RUN = -input ${RV_ROOT}/testbench/input.tcl
- VCS_DEBUG = -debug_access+r+w -debug_access+all -kdb +define+VCS_DEBUG
+ VCS_DEBUG = -debug_access+r+w -debug_access+all +memcbk -kdb +define+VCS_DEBUG
+ FSDB_DUMP = +fsdb+mda +fsdb+mda_depth=0 +fsdb+struct
  VERILATOR_DEBUG = --trace
  RIVIERA_DEBUG = +access +r
 endif
@@ -261,7 +262,7 @@ irun: program.hex irun-build
 	  -snapshot ${snapshot} -r $(snapshot) $(IRUN_DEBUG_RUN) $(profile)
 
 vcs: program.hex vcs-build
-	./simv $(DEBUG_PLUS) +vcs+lic+wait  -a vcs.log
+	./simv $(DEBUG_PLUS) $(FSDB_DUMP) +vcs+lic+wait -a vcs.log
 
 vlog: program.hex ${TBFILES} ${BUILD_DIR}/defines.h
 	$(VLOG) -l vlog.log -sv -mfcu +incdir+${BUILD_DIR}+${RV_ROOT}/design/include+${RV_ROOT}/design/lib -ccflags "${CFLAGS}"\

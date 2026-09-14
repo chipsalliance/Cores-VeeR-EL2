@@ -135,6 +135,12 @@ import el2_pkg::*;
       assign lsu_single_ecc_error_r                      = single_ecc_error_hi_r | single_ecc_error_lo_r;
       assign lsu_double_ecc_error_r                      = double_ecc_error_hi_r | double_ecc_error_lo_r;
 
+      // Tie-off unused signals.
+      assign sec_data_hi_m[pt.DCCM_DATA_WIDTH-1:0]       = '0;
+      assign sec_data_lo_m[pt.DCCM_DATA_WIDTH-1:0]       = '0;
+      assign lsu_single_ecc_error_m                      = '0;
+      assign lsu_double_ecc_error_m                      = '0;
+
    end else begin: L2U_Plus1_0
 
       logic        ldst_dual_m;

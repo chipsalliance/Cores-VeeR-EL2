@@ -10,8 +10,12 @@ lint_off -rule PINCONNECTEMPTY -file "*/el2_ifu_ic_mem.sv"
 lint_off -rule VARHIDDEN -file "*/axi4_to_ahb.sv"
 lint_off -rule VARHIDDEN -file "*/el2_ifu_bp_ctl.sv"
 lint_off -rule VARHIDDEN -file "*/el2_ifu_mem_ctl.sv"
+lint_off -rule VARHIDDEN -file "*/el2_ifu_ifc_ctl.sv"
+lint_off -rule VARHIDDEN -file "*/el2_ifu_ic_mem.sv"
 lint_off -rule VARHIDDEN -file "*/el2_exu_alu_ctl.sv"
+lint_off -rule VARHIDDEN -file "*/el2_lsu_bus_buffer.sv"
 lint_off -rule VARHIDDEN -file "*/el2_pic_ctrl.sv"
+lint_off -rule VARHIDDEN -file "*/el2_dbg.sv"
 lint_off -rule VARHIDDEN -file "*/el2_veer_lockstep.sv"
 
 // Width related warning require explicit type casting
@@ -35,6 +39,7 @@ lint_off -rule WIDTHTRUNC -file "*/el2_lsu_dccm_mem.sv"
 lint_off -rule WIDTHTRUNC -file "*/el2_lsu_trigger.sv"
 lint_off -rule WIDTHTRUNC -file "*/el2_ifu_iccm_mem.sv"
 lint_off -rule WIDTHTRUNC -file "*/el2_ifu_mem_ctl.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_ifu_ic_mem.sv"
 lint_off -rule WIDTHTRUNC -file "*/el2_exu.sv"
 lint_off -rule WIDTHTRUNC -file "*/el2_exu_alu_ctl.sv"
 lint_off -rule WIDTHTRUNC -file "*/el2_exu_div_ctl.sv"
@@ -42,12 +47,14 @@ lint_off -rule WIDTHTRUNC -file "*/el2_exu_mul_ctl.sv"
 lint_off -rule WIDTHTRUNC -file "*/el2_dbg.sv"
 lint_off -rule WIDTHTRUNC -file "*/el2_pic_ctrl.sv"
 lint_off -rule WIDTHTRUNC -file "*/el2_pmp.sv"
+lint_off -rule WIDTHTRUNC -file "*/el2_mem.sv"
 lint_off -rule WIDTHTRUNC -file "*/el2_mem_if.sv"
 
 lint_off -rule WIDTHEXPAND -file "*/el2_exu.sv"
 lint_off -rule WIDTHEXPAND -file "*/el2_pic_ctrl.sv"
 lint_off -rule WIDTHEXPAND -file "*/el2_ifu_bp_ctl.sv"
 lint_off -rule WIDTHEXPAND -file "*/el2_ifu_mem_ctl.sv"
+lint_off -rule WIDTHEXPAND -file "*/el2_ifu_ic_mem.sv"
 lint_off -rule WIDTHEXPAND -file "*/el2_ifu_iccm_mem.sv"
 lint_off -rule WIDTHEXPAND -file "*/el2_lsu_addrcheck.sv"
 lint_off -rule WIDTHEXPAND -file "*/el2_lsu_bus_buffer.sv"
@@ -103,3 +110,10 @@ lint_off -rule UNUSEDPARAM -file "*/el2_lsu_trigger.sv"
 lint_off -rule UNUSEDPARAM -file "*/el2_lsu_clkdomain.sv"
 
 lint_off -rule WIDTHTRUNC -file "*/el2_ifu_compress_ctl.sv"
+
+// Unused pins in el2_tmr_axi
+lint_off -rule PINCONNECTEMPTY -file "*/tmr/el2_tmr_axi.sv" -lines 1100-1236
+lint_off -rule PINCONNECTEMPTY -file "*/tmr/el2_tmr_axi.sv" -lines 1341
+lint_off -rule PINCONNECTEMPTY -file "*/tmr/el2_tmr_axi.sv" -lines 1369
+lint_off -rule PINCONNECTEMPTY -file "*/tmr/el2_tmr_axi.sv" -lines 1397
+lint_off -rule PINCONNECTEMPTY -file "*/tmr/el2_tmr_axi.sv" -lines 1425

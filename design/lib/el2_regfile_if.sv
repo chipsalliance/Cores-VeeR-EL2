@@ -40,7 +40,7 @@ import el2_pkg::*;
 
   typedef struct packed {
     // Important registers chosen for exposure
-    logic [31:0] pc, npc; // (Next) Program Counter
+    logic [31:1] pc, npc; // (Next) Program Counter
     logic [31:0] mstatus; // Machine status
     logic [31:0] mie; // Machine interrupt enable
     logic [31:0] mtvec; // Machine trap-handler base address

@@ -15,6 +15,8 @@
 //
 // Implementation derived from https://github.com/lowRISC/opentitan/blob/891c6079b2f19650f2bb6d248c28ea4cfbd746d2/hw/ip/prim/rtl/prim_mubi_pkg.sv#L31
 
+`include "common_defines.vh"
+
 package el2_mubi_pkg;
 
   // Multibit feature without DCLS feature enabled

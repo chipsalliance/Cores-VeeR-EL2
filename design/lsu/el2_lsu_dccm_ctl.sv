@@ -246,6 +246,9 @@ import el2_pkg::*;
       rvdffe #(32)                 picm_rddata_rff       (.*, .din(picm_rd_data_m[31:0]),                                   .dout(picm_rd_data_r[31:0]),                                   .en(addr_in_pic_m | clk_override));
       rvdff #(3)                   dma_mem_tag_rff       (.*, .din(dma_mem_tag_m[2:0]),                                     .dout(dma_mem_tag_r[2:0]),                                     .clk(lsu_c1_r_clk));
 
+      // Tie-off unused signals.
+      assign lsu_ld_data_m        = '0;
+
    end else begin: L2U_Plus1_0
 
       logic [63:0]  lsu_rdata_m, lsu_rdata_corr_m;

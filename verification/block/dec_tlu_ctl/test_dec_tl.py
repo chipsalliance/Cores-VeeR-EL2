@@ -85,3 +85,14 @@ class TestDebugICCache(BaseTest):
 
     async def run(self):
         await self.seq.start(self.env.tl_seqr)
+
+
+@pyuvm.test()
+class TestMcycleHalt(BaseTest):
+    def end_of_elaboration_phase(self):
+        super().end_of_elaboration_phase()
+        ConfigDB().set(None, "*", "TEST", "mcycle_halt")
+        self.seq = TlSequence("stimulus")
+
+    async def run(self):
+        await self.seq.start(self.env.tl_seqr)

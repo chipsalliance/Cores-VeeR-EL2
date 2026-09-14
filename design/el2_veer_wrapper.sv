@@ -21,6 +21,9 @@
 // Comments:
 //
 //********************************************************************************
+
+`include "common_defines.vh"
+
 module el2_veer_wrapper
 import el2_pkg::*;
  #(

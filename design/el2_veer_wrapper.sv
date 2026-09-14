@@ -900,10 +900,6 @@ import el2_pkg::*;
                                 );
 
 `ifdef RV_LOCKSTEP_ENABLE
-   initial begin
-      $display("Dual Core Lockstep enabled!\n");
-   end
-
    el2_veer_lockstep #(.pt(pt)) lockstep (
                                 .clk(clk),
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE

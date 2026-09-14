@@ -2275,6 +2275,11 @@ module tb_top
 `else
         assign porst_l = cycleCnt > 2;
 `endif
+
+`ifdef RV_LOCKSTEP_ENABLE
+    initial $display("Dual Core Lockstep enabled!");
+`endif
+
    //=========================================================================-
    // RTL instance
    //=========================================================================-

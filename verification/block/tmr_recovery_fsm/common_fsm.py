@@ -179,11 +179,13 @@ class ExternalFlagSequence(uvm_sequence):
         await self.seqr.start_item(item)
         await self.seqr.finish_item(item)
         _ = await self.seqr.get_response()
+
         item = ExtFlagsItem()
         item.wait_for_clr = True
         await self.seqr.start_item(item)
         await self.seqr.finish_item(item)
         _ = await self.seqr.get_response()
+
         for _ in range(self.clear_delay):
             item = ExtFlagsItem()
             item.ext = MuBiTrue
@@ -191,6 +193,7 @@ class ExternalFlagSequence(uvm_sequence):
             await self.seqr.start_item(item)
             await self.seqr.finish_item(item)
             _ = await self.seqr.get_response()
+
         item = ExtFlagsItem()
         item.ext = MuBiFalse
         item.drive_ext = True
@@ -202,15 +205,24 @@ class ExternalFlagSequence(uvm_sequence):
 class RecoveryInterfaceSequence(uvm_sequence):
     """
     A sequence which drives recovery interface
+
+    There is a built-in error injection mechanism configurable with flags:
+    * err_idx - selects by index which bus transaction will be considered for error injection
+                or sequence termination
+    * err_inj_en - selects whether error will be injected on selected err_idx
     """
 
-    def __init__(self, name, seqr, reg_map):
+    def __init__(self, name, seqr, reg_map, err_idx=None, err_inj_en=False):
         self.reg_map = copy.deepcopy(reg_map)
         self.seqr = seqr
         self.finish_no_en = False
+        self.err_idx = err_idx
+        self.err_inj_en = err_inj_en
         super().__init__(name)
 
     async def body(self):
+        tx_idx = 0
+        last_addr = 0
         while True:
             item = RegBusItem()
             item.wait_enable = True
@@ -225,18 +237,42 @@ class RecoveryInterfaceSequence(uvm_sequence):
             sample = await self.seqr.get_response()
             while sample.en == MuBiTrue:
                 ritem = RegBusItem()
-                ritem.rddata = self.reg_map[int(sample.rdaddr)]
+                rddata = self.reg_map[int(sample.rdaddr)]
+
+                # If it's the first transaction, initialize last address
+                if tx_idx == 0:
+                    last_addr = int(sample.rdaddr)
+
+                # Inject an error if we're at the selected transaction index
+                if (tx_idx == self.err_idx) and self.err_inj_en:
+                    rddata = rddata ^ random.randint(0, 2**32)
+
+                ritem.rddata = rddata
                 ritem.drive_rddata = True
                 await self.seqr.start_item(ritem)
                 await self.seqr.finish_item(ritem)
                 if int(sample.write) == 1:
                     self.reg_map[int(sample.wraddr)] = int(sample.wrdata)
 
+                # If exit index equals current transaction index, terminate the sequence
+                if self.err_idx == tx_idx:
+                    break
+
                 sitem = RegBusItem()
                 sitem.sample_bus = True
                 await self.seqr.start_item(sitem)
                 await self.seqr.finish_item(sitem)
                 sample = await self.seqr.get_response()
+
+                # Increment transaction index and update last address only if we've just moved
+                # to another address
+                if int(sample.rdaddr) != last_addr:
+                    last_addr = int(sample.rdaddr)
+                    tx_idx += 1
+
+            # If exit index equals current transaction index, terminate the sequence
+            if self.err_idx == tx_idx:
+                break
 
             if sample.en == MuBiFalse:
                 ritem = RegBusItem()

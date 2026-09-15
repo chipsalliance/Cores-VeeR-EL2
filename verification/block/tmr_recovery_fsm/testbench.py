@@ -109,7 +109,7 @@ class CPUCtrlStatusItem(uvm_sequence_item):
 
 class ResetStatusItem(uvm_sequence_item):
 
-    def __init__(self, name="MiscStatusItem"):
+    def __init__(self, name="ResetStatusItem"):
         super().__init__(name)
         self.reset = 0
         self.timestamp = 0
@@ -120,13 +120,13 @@ class ResetStatusItem(uvm_sequence_item):
 
 class FatalStatusItem(uvm_sequence_item):
 
-    def __init__(self, name="MiscStatusItem"):
+    def __init__(self, name="FatalStatusItem"):
         super().__init__(name)
         self.fatal = 0
         self.timestamp = 0
 
     def __str__(self):
-        return f"ResetStatusItem(timestamp={self.timestamp}, " + "fatal_err={self.fatal}" + ")"
+        return f"FatalStatusItem(timestamp={self.timestamp}, " + "fatal_err={self.fatal}" + ")"
 
 
 # ==============================================================================

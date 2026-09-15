@@ -129,6 +129,17 @@ class FatalStatusItem(uvm_sequence_item):
         return f"FatalStatusItem(timestamp={self.timestamp}, " + "fatal_err={self.fatal}" + ")"
 
 
+class HardResetStatusItem(uvm_sequence_item):
+
+    def __init__(self, name="HardResetStatusItem"):
+        super().__init__(name)
+        self.reset = 0
+        self.timestamp = 0
+
+    def __str__(self):
+        return f"HardResetStatusItem(timestamp={self.timestamp}, " + "rst_l={self.reset}" + ")"
+
+
 # ==============================================================================
 
 
@@ -515,12 +526,49 @@ class FatalSignalMonitor(uvm_monitor):
                 prev_fatal_err = curr_fatal_err
 
 
+class HardResetSignalMonitor(uvm_monitor):
+    """
+    Monitors the FSM hard reset signal
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.signal = kwargs["signal"]
+        self.clock_domain = kwargs["clock_domain"]
+
+        del kwargs["signal"]
+        del kwargs["clock_domain"]
+        super().__init__(*args, **kwargs)
+
+    def build_phase(self):
+        self.ap = uvm_analysis_port("ap", self)
+
+    async def run_phase(self):
+        prev_rst = None
+        while True:
+            await RisingEdge(self.clock_domain.clk)
+            await ReadOnly()
+
+            curr_rst = self.signal.value
+
+            if prev_rst is None:
+                prev_rst = curr_rst
+
+            if prev_rst != curr_rst:
+                item = HardResetStatusItem()
+                item.timestamp = get_sim_time(units="ps")
+                item.reset = curr_rst
+
+                self.ap.write(item)
+                prev_rst = curr_rst
+
+
 # ==============================================================================
 
 
 class BaseScoreboard(uvm_component):
 
     def build_phase(self):
+        self.logger.setLevel(logging.INFO)
         self.passed = False
 
         # Register access
@@ -560,6 +608,10 @@ class BaseScoreboard(uvm_component):
         self.fatal_err_fifo = uvm_tlm_analysis_fifo("fatal_err_fifo", self)
         self.fatal_err_port = uvm_get_port("fatal_err_port", self)
 
+        # Hard FSM reset
+        self.hard_rst_fifo = uvm_tlm_analysis_fifo("hard_rst_fifo", self)
+        self.hard_rst_port = uvm_get_port("hard_rst_port", self)
+
     def connect_phase(self):
         # Register access
         for port, fifo in zip(self.recovery_gpr_ports, self.recovery_gpr_fifos):
@@ -582,6 +634,9 @@ class BaseScoreboard(uvm_component):
 
         # Fatal err
         self.fatal_err_port.connect(self.fatal_err_fifo.get_export)
+
+        # Hard FSM reset
+        self.hard_rst_port.connect(self.hard_rst_fifo.get_export)
 
     def check_phase(self):
         raise NotImplementedError()
@@ -762,6 +817,13 @@ class BaseEnv(uvm_env):
             signal=getattr(cocotb.top, "fatal_err"),
         )
 
+        self.hard_rst_mon = HardResetSignalMonitor(
+            "hard_rst_mon",
+            self,
+            clock_domain=self.clock_domain,
+            signal=getattr(cocotb.top, "rst_l"),
+        )
+
         # Scoreboard(s)
         self.scoreboard = None
         if self.scb_class is not None:
@@ -790,6 +852,7 @@ class BaseEnv(uvm_env):
 
             self.external_flag_mon.ap.connect(self.scoreboard.external_flag_fifo.analysis_export)
             self.sync_rst_mon.ap.connect(self.scoreboard.sync_rst_fifo.analysis_export)
+            self.hard_rst_mon.ap.connect(self.scoreboard.hard_rst_fifo.analysis_export)
             self.fatal_err_mon.ap.connect(self.scoreboard.fatal_err_fifo.analysis_export)
 
 

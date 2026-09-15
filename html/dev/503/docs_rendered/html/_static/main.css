@@ -1,0 +1,20 @@
+[data-md-color-scheme="slate"] {
+  --md-hue: 218;
+  --md-default-bg-color: hsla(var(--md-hue), 22%, 7%, 1);
+}
+
+[data-md-color-primary="teal"] {
+  --md-primary-fg-color: #25292e;
+}
+
+[data-md-color-scheme="slate"][data-md-color-primary="teal"] {
+  --md-typeset-a-color: #00d0c9;
+}
+
+.md-social {
+  display: none;
+}
+
+.md-header__option {
+  display: none;
+}

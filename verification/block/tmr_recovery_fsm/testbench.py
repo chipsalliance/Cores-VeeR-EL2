@@ -664,6 +664,7 @@ class BaseEnv(uvm_env):
 
         ConfigDB().set(None, "*", "TEST_CLK_PERIOD", 1)
         ConfigDB().set(None, "*", "TEST_ITERATIONS", 100)
+        ConfigDB().set(None, "*", "USER_MODE", 0)
 
         # Drivers
         # Recovery monitor

@@ -1,8 +1,9 @@
 # Copyright (c) 2026 Antmicro <www.antmicro.com>
 # SPDX-License-Identifier: Apache-2.0
 import copy
+import random
 
-from pyuvm import uvm_sequence
+from pyuvm import ConfigDB, uvm_sequence
 from testbench import (
     BaseScoreboard,
     CPUCtrlStatusItem,
@@ -15,95 +16,236 @@ from testbench import (
 
 class RegBusScoreboard(BaseScoreboard):
 
-    def check_phase(self):
+    def build_phase(self):
+        super().build_phase()
         self.passed = True
+        self.fatal_err_ts = None
+        self.hard_rst_ts = None
+        period_ps = ConfigDB().get(None, "", "TEST_CLK_PERIOD")
+        self.period_ns = period_ps * 1000
 
-        def majority_vote(val1, val2, val3):
-            """
-            Vote for the correct value based on 3 inputs. If not possible to pick the winner, return None.
-            """
-            if val1 == val2:
-                return val1
-            elif val2 == val3:
-                return val2
-            elif val1 == val3:
-                return val3
-            else:
-                return None
+        self.reg_reads = {
+            "gpr": [{}, {}, {}],
+            "csr": [{}, {}, {}],
+        }
+        self.tx_buf = {
+            "gpr": [None for _ in range(3)],
+            "csr": [None for _ in range(3)],
+        }
+        self.recovery_ports = {
+            "gpr": self.recovery_gpr_ports,
+            "csr": self.recovery_csr_ports,
+        }
 
-        def check_if_transfers(if_name):
-            assert if_name in ["gpr", "csr"]
+    def load_next_xfer_batch(self, if_name):
+        """
+        Loads next transaction batch (one for each core in TMR) from the registers bus queue to
+        the global variables for later use.
+        """
+        assert if_name in ["gpr", "csr"]
 
-            recovery_ports = getattr(self, f"recovery_{if_name}_ports")
-            reg_reads = [{}, {}, {}]
-            while (
-                recovery_ports[0].can_get()
-                and recovery_ports[1].can_get()
-                and recovery_ports[2].can_get()
-            ):
-                tr = [None for _ in range(3)]
+        if (
+            self.recovery_ports[if_name][0].can_get()
+            and self.recovery_ports[if_name][1].can_get()
+            and self.recovery_ports[if_name][2].can_get()
+        ):
+            for i in range(3):
+                _, self.tx_buf[if_name][i] = self.recovery_ports[if_name][i].try_get()
 
-                # Collect simultaneous transactions
-                for i in range(3):
-                    _, tr[i] = recovery_ports[i].try_get()
-                    if not isinstance(tr[i], RegBusItem):
-                        self.passed = False
-                        continue
+            setattr(self, f"{if_name}_ts", self.tx_buf[if_name][0].timestamp)
+            return True
+        # No data in ports
+        return False
 
-                    read_reg_value = reg_reads[i].get(int(tr[i].rdaddr))
-                    if tr[i].write and (read_reg_value is None):
-                        self.passed = False
-                        self.logger.error(
-                            f"[{tr[i].timestamp}] {if_name.upper()} written without prior read at this address"
-                        )
-                        continue
+    def majority_vote(self, val1, val2, val3):
+        """
+        Vote for the correct value based on 3 inputs. If not possible to pick the winner, return None.
+        """
+        if val1 == val2:
+            return val1
+        elif val2 == val3:
+            return val2
+        elif val1 == val3:
+            return val3
+        else:
+            return None
 
-                    if not tr[i].write:
-                        # Save read value for later comparison
-                        reg_reads[i][int(tr[i].rdaddr)] = int(tr[i].rddata)
-                        self.logger.debug(
-                            f"[{tr[i].timestamp}] {if_name.upper()} read value {hex(tr[i].rddata)} at {hex(tr[i].rdaddr)}"
-                        )
+    def get_rst_after_fatal_err(self):
+        """
+        Retrieve timestamp of the first hard reset after detected fatal error.
+        """
+        got_reset = False
+        while self.hard_rst_port.can_get():
+            got_reset = True
+            _, hard_rst_event = self.hard_rst_port.try_get()
 
-                if not (tr[0].timestamp == tr[1].timestamp == tr[2].timestamp):
+            if self.fatal_err_ts > hard_rst_event.timestamp:
+                self.logger.debug(
+                    f"Skipping hard reset at {hard_rst_event.timestamp}, fatal error was at {self.fatal_err_ts}"
+                )
+                continue
+
+            if hard_rst_event.reset != 0:
+                self.logger.error(
+                    f"[{hard_rst_event.timestamp}] Reset deasserted after fatal error! No assertion detected."
+                )
+                self.passed = False
+
+            # This is first reset after fatal error, leave the loop
+            self.hard_rst_ts = hard_rst_event.timestamp
+            self.logger.debug(f"[{self.hard_rst_ts}] Found reset after fatal error")
+
+            # Drop reset deassert from the queue
+            self.hard_rst_port.try_get()
+            break
+        if not got_reset:
+            self.logger.warning(
+                "FSM entered fatal error state but was never reset afterwards! This might suggest invalid test construction."
+            )
+
+        # Do not enter this function again unless new fatal err occurred
+        self.fatal_err_ts = None
+
+    def check_if_transfers(self, if_name):
+        assert if_name in ["gpr", "csr"]
+
+        tr = self.tx_buf[if_name]
+
+        # Collect simultaneous transactions
+        reject_xfers = False
+        for i in range(3):
+            if not isinstance(tr[i], RegBusItem):
+                self.passed = False
+                self.logger.error(f"Received invalid bus item on {if_name.upper()} port!")
+                continue
+
+        if not (tr[0].timestamp == tr[1].timestamp == tr[2].timestamp):
+            self.passed = False
+            self.logger.error(
+                f"Received {if_name.upper()} transactions do not match in time, {tr[0].timestamp} vs {tr[1].timestamp} vs {tr[2].timestamp}"
+            )
+            return
+
+        tr_ts = tr[0].timestamp
+        log_prefix = f"[{tr_ts}] ({if_name.upper()})"
+        # Perform initial data checks and save read data for later comparison
+        for i in range(3):
+            # Discard all operations between fatal error and hard reset
+            if self.hard_rst_ts is not None and self.hard_rst_ts > tr[i].timestamp:
+                reject_xfers = True
+                continue
+
+            read_reg_value = self.reg_reads[if_name][i].get(int(tr[i].rdaddr))
+            if tr[i].write and (read_reg_value is None):
+                self.passed = False
+                self.logger.error(f"{log_prefix} written without prior read at this address")
+                continue
+
+            if not tr[i].write:
+                # Save read value for later comparison
+                self.reg_reads[if_name][i][int(tr[i].rdaddr)] = int(tr[i].rddata)
+                self.logger.debug(
+                    f"{log_prefix} read value {hex(tr[i].rddata)} at {hex(tr[i].rdaddr)}"
+                )
+
+        if reject_xfers:
+            self.logger.debug(
+                f"{log_prefix} Ignoring transfer that happened between fatal error and hard reset."
+            )
+            return
+
+        self.logger.debug(
+            f"{log_prefix} Majority voting: {hex(tr[0].rddata)} vs {hex(tr[1].rddata)} vs {hex(tr[2].rddata)}"
+        )
+        rddata_act = self.majority_vote(
+            int(tr[0].rddata),
+            int(tr[1].rddata),
+            int(tr[2].rddata),
+        )
+        self.logger.debug(f"{log_prefix} Got rddata: {rddata_act}")
+        if rddata_act is None:
+            self.logger.debug(f"{log_prefix} Voter failed")
+            if not self.fatal_err_port.can_get():
+                self.passed = False
+                self.logger.error(f"{log_prefix} FSM did not report fatal error!")
+                return
+            _, fatal_event = self.fatal_err_port.try_get()
+            self.fatal_err_ts = fatal_event.timestamp
+
+            # Check if fatal_err was reported exactly one cycle after error
+            exp_fatal_ts = tr_ts + self.period_ns
+            if (fatal_event.fatal == MuBiTrue) and (self.fatal_err_ts != exp_fatal_ts):
+                self.passed = False
+                self.logger.error(
+                    f"{log_prefix} FSM reported fatal error at unexpected timestamp! Got {self.fatal_err_ts}, expected: {exp_fatal_ts}"
+                )
+                return
+            return
+
+        rddata_exp = self.majority_vote(
+            self.reg_reads[if_name][0][int(tr[0].rdaddr)],
+            self.reg_reads[if_name][1][int(tr[1].rdaddr)],
+            self.reg_reads[if_name][2][int(tr[2].rdaddr)],
+        )
+        self.logger.debug(f"{log_prefix} Expected rddata: {rddata_exp}")
+        for i in range(3):
+            if tr[i].write:
+                if rddata_exp != int(tr[i].wrdata):
                     self.passed = False
                     self.logger.error(
-                        f"Received {if_name.upper()} transactions do not match in time"
+                        f"{log_prefix} written different value than earlier read at address {hex(tr[i].wraddr)}, expected: {hex(rddata_exp)}, got: {hex(tr[i].wrdata)}"
                     )
-                    break
-
-                rddata = majority_vote(
-                    reg_reads[0][int(tr[0].rdaddr)],
-                    reg_reads[1][int(tr[1].rdaddr)],
-                    reg_reads[2][int(tr[2].rdaddr)],
-                )
-                if rddata is None:
-                    self.logger.error("Voter failed")
+                    continue
+                if int(tr[i].rddata) not in [0, int(tr[i].wrdata)]:
+                    self.passed = False
+                    self.logger.error(
+                        f"{log_prefix} During write, read data should be either 0 or equal to write data"
+                    )
+                    continue
+                if int(tr[i].wraddr) != int(tr[i].rdaddr):
+                    self.passed = False
+                    self.logger.error(
+                        f"{log_prefix} Simultaneous read and write is only allowed at the same address"
+                    )
                     continue
 
-                for i in range(3):
-                    if tr[i].write:
-                        if rddata != int(tr[i].wrdata):
-                            self.passed = False
-                            self.logger.error(
-                                f"[{tr[i].timestamp}] {if_name.upper()} written different value than earlier read at address {hex(tr[i].wraddr)}, expected: {hex(rddata)}, got: {hex(tr[i].wrdata)}"
-                            )
-                            continue
-                        if int(tr[i].rddata) not in [0, int(tr[i].wrdata)]:
-                            self.passed = False
-                            self.logger.error(
-                                f"[{tr[i].timestamp}] During write, read data should be either 0 or equal to write data"
-                            )
-                            continue
-                        if int(tr[i].wraddr) != int(tr[i].rdaddr):
-                            self.passed = False
-                            self.logger.error(
-                                f"[{tr[i].timestamp}] Simultaneous read and write on {if_name.upper()} interface is only allowed at the same address"
-                            )
-                            continue
+    def check_phase(self):
+        # Initiate data buffers
+        if not self.load_next_xfer_batch("csr") or not self.load_next_xfer_batch("gpr"):
+            self.passed = False
+            self.logger.error("At least one register bus transactions port is empty!")
 
-        check_if_transfers("gpr")
-        check_if_transfers("csr")
+        self.gpr_ts = self.tx_buf["gpr"][0].timestamp
+        self.csr_ts = self.tx_buf["csr"][0].timestamp
+
+        # Every test starts with a reset sequence which we don't care about, remove it from FIFO
+        for _ in range(2):
+            if self.hard_rst_port.can_get():
+                _, rst_event = self.hard_rst_port.try_get()
+                self.logger.debug(f"[{rst_event.timestamp}] Skipping initial reset event")
+
+        gpr_port_empty = False
+        csr_port_empty = False
+        while not gpr_port_empty or not csr_port_empty:
+            if self.fatal_err_ts is not None:
+                self.get_rst_after_fatal_err()
+            if self.gpr_ts < self.csr_ts:
+                if not gpr_port_empty:
+                    self.check_if_transfers("gpr")
+                    gpr_port_empty = not self.load_next_xfer_batch("gpr")
+                elif not csr_port_empty:
+                    self.check_if_transfers("csr")
+                    csr_port_empty = not self.load_next_xfer_batch("csr")
+            else:
+                if not csr_port_empty:
+                    self.check_if_transfers("csr")
+                    csr_port_empty = not self.load_next_xfer_batch("csr")
+                elif not gpr_port_empty:
+                    self.check_if_transfers("gpr")
+                    gpr_port_empty = not self.load_next_xfer_batch("gpr")
+
+        if self.passed:
+            self.logger.info("All scoreboard checks passed")
 
 
 class CPUReactiveCtrlSequence(uvm_sequence):

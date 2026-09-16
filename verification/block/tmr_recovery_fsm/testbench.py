@@ -606,7 +606,7 @@ class BaseScoreboard(uvm_component):
 
         # Fatal err
         self.fatal_err_fifo = uvm_tlm_analysis_fifo("fatal_err_fifo", self)
-        self.fatal_err_port = uvm_get_port("fatal_err_port", self)
+        self.fatal_err_port = uvm_get_peek_port("fatal_err_port", self)
 
         # Hard FSM reset
         self.hard_rst_fifo = uvm_tlm_analysis_fifo("hard_rst_fifo", self)
@@ -633,7 +633,7 @@ class BaseScoreboard(uvm_component):
         self.sync_rst_port.connect(self.sync_rst_fifo.get_export)
 
         # Fatal err
-        self.fatal_err_port.connect(self.fatal_err_fifo.get_export)
+        self.fatal_err_port.connect(self.fatal_err_fifo.get_peek_export)
 
         # Hard FSM reset
         self.hard_rst_port.connect(self.hard_rst_fifo.get_export)

@@ -95,6 +95,12 @@ class RegBusScoreboard(BaseScoreboard):
             self.hard_rst_ts = hard_rst_event.timestamp
             self.logger.debug(f"[{self.hard_rst_ts}] Found reset after fatal error")
 
+            # Drop fatal_err transition at hard reset from the queue
+            if self.fatal_err_port.can_peek():
+                _, fatal_err_event = self.fatal_err_port.try_peek()
+                if fatal_err_event.timestamp == self.hard_rst_ts:
+                    self.fatal_err_port.try_get()
+
             # Drop reset deassert from the queue
             self.hard_rst_port.try_get()
             break
@@ -171,6 +177,7 @@ class RegBusScoreboard(BaseScoreboard):
                 return
             _, fatal_event = self.fatal_err_port.try_get()
             self.fatal_err_ts = fatal_event.timestamp
+            self.logger.debug(f"{log_prefix} Detected fatal error at {self.fatal_err_ts}")
 
             # Check if fatal_err was reported exactly one cycle after error
             exp_fatal_ts = tr_ts + self.period_ns
@@ -247,7 +254,9 @@ class RegBusScoreboard(BaseScoreboard):
         if self.fatal_err_port.can_get():
             _, fatl_err_event = self.fatal_err_port.try_get()
             self.passed = False
-            self.log.error(f"Unexpected fatal error detected, first at {fatl_err_event.timestamp}")
+            self.logger.error(
+                f"Unexpected fatal error detected, first at {fatl_err_event.timestamp}"
+            )
 
         if self.passed:
             self.logger.info("All scoreboard checks passed")

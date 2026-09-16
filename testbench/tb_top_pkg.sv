@@ -48,11 +48,34 @@ package tb_top_pkg;
     return 2 << ($urandom % (37)) | 39'(do_double_bit);
   endfunction
 
+  // sanitize_x: Translates 4-state 'X'/'Z' uninitialized SRAM bits into deterministic '0'
+  // (modeling physical bus pull-down behavior).
+  // The 39-bit width [38:0] matches the widest internal memory data path across both ICCM
+  // and DCCM: pt.ICCM_FDATA_WIDTH = pt.DCCM_FDATA_WIDTH = 39 (32-bit data + 7-bit ECC,
+  // matching the ram_*x39 macro data port widths).
+  function static logic [38:0] sanitize_x(input logic [38:0] val);
+    for (int b = 0; b < 39; b++) begin
+      sanitize_x[b] = (val[b] === 1'b1) ? 1'b1 : 1'b0;
+    end
+  endfunction
+
   typedef struct packed {
+    //  [9] - DCCM Access (ME/clken) Fault Injection (disables both reads and writes)
+    //  [8] - DCCM Write Enable Fault Injection
+    //  [7] - DCCM Address Fault Injection
+    //  [6] - ICCM Access (ME/clken) Fault Injection (disables both reads and writes)
+    //  [5] - ICCM Write Enable Fault Injection
+    //  [4] - ICCM Address Fault Injection
     //  [3] - Double bit, DCCM Error Injection
     //  [2] - Single bit, DCCM Error Injection
     //  [1] - Double bit, ICCM Error Injection
     //  [0] - Single bit, ICCM Error Injection
+    logic dccm_access_fault;
+    logic dccm_wren_fault;
+    logic dccm_addr_fault;
+    logic iccm_access_fault;
+    logic iccm_wren_fault;
+    logic iccm_addr_fault;
     logic dccm_double_bit_error;
     logic dccm_single_bit_error;
     logic iccm_double_bit_error;

@@ -244,6 +244,11 @@ class RegBusScoreboard(BaseScoreboard):
                     self.check_if_transfers("gpr")
                     gpr_port_empty = not self.load_next_xfer_batch("gpr")
 
+        if self.fatal_err_port.can_get():
+            _, fatl_err_event = self.fatal_err_port.try_get()
+            self.passed = False
+            self.log.error(f"Unexpected fatal error detected, first at {fatl_err_event.timestamp}")
+
         if self.passed:
             self.logger.info("All scoreboard checks passed")
 

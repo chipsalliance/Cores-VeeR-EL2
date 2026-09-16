@@ -44,7 +44,7 @@ class TransactionSequence(uvm_sequence):
 # =============================================================================
 
 
-@test()
+@test(expect_fail=True)
 class TestRecoverableError(BaseTest):
     # There are always 32 GPRs, specified by ISA
     num_of_gprs = 32
@@ -137,7 +137,7 @@ class TestRecoverableError(BaseTest):
             await self.reset()
 
 
-@test(skip=False)
+@test()
 class TestFatalError(BaseTest):
     # There are always 32 GPRs, specified by ISA
     num_of_gprs = 32

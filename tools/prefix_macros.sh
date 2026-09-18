@@ -22,6 +22,8 @@ EL2_PDEF="$DEFINES_PATH/el2_pdef.vh"
 PD_DEFINES="$DEFINES_PATH/pd_defines.vh"
 EL2_DEF="$DESIGN_DIR/include/el2_def.sv"
 EL2_IFU_IC_MEM="$DESIGN_DIR/ifu/el2_ifu_ic_mem.sv"
+EL2_PIC_CTRL="$DESIGN_DIR/el2_pic_ctrl.sv"
+PIC_MAP_AUTO="$DEFINES_PATH/pic_map_auto.svh"
 
 echo "Starting script with following settings:"
 echo "PREFIX=$PREFIX"
@@ -39,7 +41,7 @@ DEFINES="$(sed -nr "$DEFINES_REGEX" $COMMON_DEFINES $PD_DEFINES $EL2_IFU_IC_MEM 
 
 # Skip files that should not be processed
 SKIP_DESIGN_FILES="el2_param.vh\|el2_pdef.vh\|common_defines.vh\|pd_defines.vh"
-DESIGN_FILES="$(find $DESIGN_DIR -name "*.sv" -o -name "*.vh" -o -name "*.v" | grep -v $SKIP_DESIGN_FILES)"
+DESIGN_FILES="$(find $DESIGN_DIR \( -name "*.sv" -o -name "*.vh" -o -name "*.svh" -o -name "*.v" \) | grep -v $SKIP_DESIGN_FILES)"
 DESIGN_FILES+=" $EXTRA_DESIGN_FILES"
 MODULES="$(sed -nr "$MODULES_REGEX" $DESIGN_FILES | sort -ur)"
 
@@ -82,11 +84,20 @@ for DEFINE in $DEFINES; do
 	sed -i -E "s/((\`ifdef)|(\`ifndef)) $DEFINE/\1 "$PREFIX"$DEFINE/g" $DESIGN_FILES
 done
 
+# Explicitly prefix RV_BUILD_AHB_LITE to avoid collisions
+echo "Prefixing RV_BUILD_AHB_LITE macro"
+sed -i -E "s/((\`ifdef)|(\`ifndef)) RV_BUILD_AHB_LITE/\1 ${PREFIX}RV_BUILD_AHB_LITE/g" $DESIGN_FILES
+sed -i -E "s/\`RV_BUILD_AHB_LITE\b/\`${PREFIX}RV_BUILD_AHB_LITE/g" $DESIGN_FILES
+
 # Replace include names in RTL sources
 echo "Replacing include names in RTL sources"
 sed -i "s/include \"el2_param.vh\"/include \""$PREFIX"el2_param.vh\"/g" $DESIGN_FILES
 sed -i "s/include \"el2_pdef.vh\"/include \""$PREFIX"el2_pdef.vh\"/g" $DESIGN_FILES
 sed -i "s/include \"common_defines.vh\"/include \""$PREFIX"common_defines.vh\"/g" $OUTPUT_PD_DEFINES
+sed -i "s/include \"pic_map_auto.svh\"/include \""$PREFIX"pic_map_auto.svh\"/g" $EL2_PIC_CTRL
+
+# Ensure .svh includes are also updated with prefix
+sed -i -E "s/include \"(el2_[a-zA-Z0-9_]+)\.svh\"/include \"${PREFIX}\1.svh\"/g" $DESIGN_FILES
 
 # Replace package name and its imports in RTL sources
 echo "Replacing package name and its imports in RTL sources"
@@ -109,6 +120,10 @@ done
 # Remove old header files to avoid redefining their contents during elaboration
 echo "Removing old header files"
 rm -f $COMMON_DEFINES $EL2_PARAM $EL2_PDEF $PD_DEFINES
+
+# Add prefix to pic_map_auto.svh
+OUTPUT_PIC_MAP_AUTO=$DEFINES_PATH/"$PREFIX"pic_map_auto.svh
+mv $PIC_MAP_AUTO $OUTPUT_PIC_MAP_AUTO
 
 # Add prefix to el2_mem_if interface
 echo "Adding prefix to el2_mem_if interface"

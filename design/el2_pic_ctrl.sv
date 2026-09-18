@@ -533,7 +533,7 @@ logic [14:0] address;
 
 assign address[14:0] = picm_raddr_ff[14:0];
 
-`include "pic_map_auto.h"
+`include "pic_map_auto.svh"
 
 endmodule
 
@@ -592,12 +592,3 @@ module el2_configurable_gw (
   assign extintsrc_req_config =  meigwctrl_type ? ((extintsrc_req_sync ^  meigwctrl_polarity) | gw_int_pending) : (extintsrc_req_sync ^  meigwctrl_polarity) ;
 
 endmodule // configurable_gw
-
-
-
-
-
-
-
-
-

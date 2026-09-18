@@ -117,7 +117,7 @@ This script derives the following consistent set of include files:
     ├── el2_pdef.vh                             # Parameter structure
     ├── pd_defines.vh                           # `defines for physical design
     ├── perl_configs.pl                         # Perl %configs hash for scripting
-    ├── pic_map_auto.h                          # PIC memory map based on configure size
+    ├── pic_map_auto.svh                        # PIC memory map based on configure size
     └── whisper.json                            # JSON file for veer-iss
     └── link.ld                                 # default linker control file
 

@@ -17,7 +17,7 @@ class VeerConfigGenerator(Generator):
             {"el2_param.vh" : {
                 "is_include_file" : True,
                 "file_type" : "systemVerilogSource"}},
-            {"pic_map_auto.h" : {
+            {"pic_map_auto.svh" : {
                 "is_include_file" : True,
                 "file_type" : "systemVerilogSource"}}]
 

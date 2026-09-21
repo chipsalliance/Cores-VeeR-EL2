@@ -348,17 +348,12 @@ module el2_tmr_misc
 
     assign fault_any = mubi_or3(fault_l0, fault_l1, misc_fault_d[i]);
 
-    always_ff @(posedge clk or negedge rst_l) begin
-      if (!rst_l) begin
-        misc_fault_q[i] <= El2MuBiFalse;
-      end else begin
-        if (mubi_check_true(misc_fault_clr[i])) begin
-          misc_fault_q[i] <= El2MuBiFalse;
-        end else begin
-          misc_fault_q[i] <= mubi_or(misc_fault_q[i], fault_any);
-        end
-      end
-    end
+    el2_tmr_fault_storage storage (
+      .*,
+      .fault_i  (fault_any),
+      .fault_o  (misc_fault_q[i]),
+      .clr_i    (misc_fault_clr[i])
+    );
 
     assign enable[i] = mubi_not(misc_fault_q[i]);
 

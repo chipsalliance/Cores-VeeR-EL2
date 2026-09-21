@@ -221,17 +221,12 @@ module el2_tmr_iccm
 
     assign fault_any  = mubi_or3(fault_l0,  fault_l1, iccm_fault_d[i]);
 
-    always_ff @(posedge clk or negedge rst_l) begin
-      if (!rst_l) begin
-        iccm_fault_q[i] <= El2MuBiFalse;
-      end else begin
-        if (mubi_check_true(iccm_fault_clr[i])) begin
-          iccm_fault_q[i] <= El2MuBiFalse;
-        end else begin
-          iccm_fault_q[i] <= mubi_or(iccm_fault_q[i], fault_any);
-        end
-      end
-    end
+    el2_tmr_fault_storage storage (
+      .*,
+      .fault_i  (fault_any),
+      .fault_o  (iccm_fault_q[i]),
+      .clr_i    (iccm_fault_clr[i])
+    );
 
     assign enable[i] = mubi_not(iccm_fault_q[i]);
   end

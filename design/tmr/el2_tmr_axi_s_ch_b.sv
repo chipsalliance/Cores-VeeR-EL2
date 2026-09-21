@@ -164,17 +164,13 @@ module el2_tmr_axi_s_ch_b # (
   assign fault_clr[2] = c_m_axi_fault_clr_i;
 
   generate for (genvar i=0; i<3; i=i+1) begin : fault_ff
-    always_ff @(posedge clk_i or negedge rst_ni) begin
-      if (!rst_ni) begin
-        fault_q[i] <= El2MuBiFalse;
-      end else begin
-        if (mubi_check_true(fault_clr[i])) begin
-          fault_q[i] <= El2MuBiFalse;
-        end else begin
-          fault_q[i] <= mubi_or(fault_q[i], fault_d[i]);
-        end
-      end
-    end
+    el2_tmr_fault_storage storage (
+      .clk      (clk_i),
+      .rst_l    (rst_ni),
+      .fault_i  (fault_d[i]),
+      .fault_o  (fault_q[i]),
+      .clr_i    (fault_clr[i])
+    );
   end endgenerate
 
   // Fault outputs (registered)

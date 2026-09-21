@@ -221,17 +221,12 @@ module el2_tmr_dccm
 
     assign fault_any  = mubi_or3(fault_l0,  fault_l1, dccm_fault_d[i]);
 
-    always_ff @(posedge clk or negedge rst_l) begin
-      if (!rst_l) begin
-        dccm_fault_q[i] <= El2MuBiFalse;
-      end else begin
-        if (mubi_check_true(dccm_fault_clr[i])) begin
-          dccm_fault_q[i] <= El2MuBiFalse;
-        end else begin
-          dccm_fault_q[i] <= mubi_or(dccm_fault_q[i], fault_any);
-        end
-      end
-    end
+    el2_tmr_fault_storage storage (
+      .*,
+      .fault_i  (fault_any),
+      .fault_o  (dccm_fault_q[i]),
+      .clr_i    (dccm_fault_clr[i])
+    );
 
     assign enable[i] = mubi_not(dccm_fault_q[i]);
   end

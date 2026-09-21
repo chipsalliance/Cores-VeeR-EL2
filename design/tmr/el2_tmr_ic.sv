@@ -400,17 +400,12 @@ module el2_tmr_ic
 
     assign fault_any = mubi_or3(fault_l0, fault_l1, ic_fault_d[i]);
 
-    always_ff @(posedge clk or negedge rst_l) begin
-      if (!rst_l) begin
-        ic_fault_q[i] <= El2MuBiFalse;
-      end else begin
-        if (mubi_check_true(ic_fault_clr[i])) begin
-          ic_fault_q[i] <= El2MuBiFalse;
-        end else begin
-          ic_fault_q[i] <= mubi_or(ic_fault_q[i], fault_any);
-        end
-      end
-    end
+    el2_tmr_fault_storage storage (
+      .*,
+      .fault_i  (fault_any),
+      .fault_o  (ic_fault_q[i]),
+      .clr_i    (ic_fault_clr[i])
+    );
 
     assign enable[i] = mubi_not(ic_fault_q[i]);
   end : gen_ic_fault

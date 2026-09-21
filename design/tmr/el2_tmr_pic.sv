@@ -232,17 +232,12 @@ module el2_tmr_pic
     assign fault_l2  = mubi_or3(fault_meicurpl[i],   fault_meipt[i], pic_fault_d[i]);
     assign fault_any = mubi_or3(fault_l0, fault_l1, fault_l2);
 
-    always_ff @(posedge clk or negedge rst_l) begin
-      if (!rst_l) begin
-        pic_fault_q[i] <= El2MuBiFalse;
-      end else begin
-        if (mubi_check_true(pic_fault_clr[i])) begin
-          pic_fault_q[i] <= El2MuBiFalse;
-        end else begin
-          pic_fault_q[i] <= mubi_or(pic_fault_q[i], fault_any);
-        end
-      end
-    end
+    el2_tmr_fault_storage storage (
+      .*,
+      .fault_i  (fault_any),
+      .fault_o  (pic_fault_q[i]),
+      .clr_i    (pic_fault_clr[i])
+    );
 
     assign enable[i] = mubi_not(pic_fault_q[i]);
 

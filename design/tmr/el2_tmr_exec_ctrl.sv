@@ -119,17 +119,12 @@ module el2_tmr_exec_ctrl
 
   // Fault aggregation and registers
   for (genvar i=0; i<3; i=i+1) begin : fault
-    always_ff @(posedge clk or negedge rst_l) begin
-      if (!rst_l) begin
-        exec_fault_q[i] <= El2MuBiFalse;
-      end else begin
-        if (mubi_check_true(exec_fault_clr[i])) begin
-          exec_fault_q[i] <= El2MuBiFalse;
-        end else begin
-          exec_fault_q[i] <= mubi_or3(exec_fault_q[i], exec_fault_d[i], exec_fault[i]);
-        end
-      end
-    end
+    el2_tmr_fault_storage storage (
+      .*,
+      .fault_i  (mubi_or(exec_fault_d[i], exec_fault[i])),
+      .fault_o  (exec_fault_q[i]),
+      .clr_i    (exec_fault_clr[i])
+    );
 
     assign enable[i] = mubi_not(exec_fault_q[i]);
 

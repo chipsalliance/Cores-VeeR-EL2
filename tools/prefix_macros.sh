@@ -93,16 +93,18 @@ sed -i -E "s/\`RV_BUILD_AHB_LITE\b/\`${PREFIX}RV_BUILD_AHB_LITE/g" $DESIGN_FILES
 echo "Replacing include names in RTL sources"
 sed -i "s/include \"el2_param.vh\"/include \""$PREFIX"el2_param.vh\"/g" $DESIGN_FILES
 sed -i "s/include \"el2_pdef.vh\"/include \""$PREFIX"el2_pdef.vh\"/g" $DESIGN_FILES
+sed -i "s/include \"common_defines.vh\"/include \""$PREFIX"common_defines.vh\"/g" $DESIGN_FILES
 sed -i "s/include \"common_defines.vh\"/include \""$PREFIX"common_defines.vh\"/g" $OUTPUT_PD_DEFINES
 sed -i "s/include \"pic_map_auto.svh\"/include \""$PREFIX"pic_map_auto.svh\"/g" $EL2_PIC_CTRL
 
 # Ensure .svh includes are also updated with prefix
 sed -i -E "s/include \"(el2_[a-zA-Z0-9_]+)\.svh\"/include \"${PREFIX}\1.svh\"/g" $DESIGN_FILES
 
-# Replace package name and its imports in RTL sources
+# Replace package name, its imports and usage in RTL sources
 echo "Replacing package name and its imports in RTL sources"
 sed -i "s/import el2_pkg/import "$PREFIX"el2_pkg/g" $DESIGN_FILES
 sed -i "s/package el2_pkg/package "$PREFIX"el2_pkg/g" $EL2_DEF
+sed -i "s/el2_mubi_pkg/"$PREFIX"el2_mubi_pkg/g" $DESIGN_FILES
 
 # Add prefix to all module names
 echo "Adding prefix to all module names"
@@ -128,6 +130,10 @@ mv $PIC_MAP_AUTO $OUTPUT_PIC_MAP_AUTO
 # Add prefix to el2_mem_if interface
 echo "Adding prefix to el2_mem_if interface"
 perl -pi -e "s/(?<!${PREFIX})el2_mem_if/"$PREFIX"el2_mem_if/g" $DESIGN_FILES
+
+# Add prefix to el2_regfile_if interface
+echo "Adding prefix to el2_regfile_if interface"
+perl -pi -e "s/(?<!${PREFIX})el2_regfile_if/"$PREFIX"el2_regfile_if/g" $DESIGN_FILES
 
 # prefix memory macro names in el2_ifu_ic_mem.sv
 echo "Prefixing memory macro names in $EL2_IFU_IC_MEM"

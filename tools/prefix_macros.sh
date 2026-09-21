@@ -64,7 +64,7 @@ echo "Adding prefix to macro names in $OUTPUT_COMMON_DEFINES and $OUTPUT_PD_DEFI
 sed -E "$DEFINES_REPLACE_REGEX" $COMMON_DEFINES >$OUTPUT_COMMON_DEFINES
 sed -E "$DEFINES_REPLACE_REGEX" $PD_DEFINES >$OUTPUT_PD_DEFINES
 
-# Add prefix to RV_RCG macros
+# Add prefix to RV_ICG macros
 RV_RCG_REPLACE_REGEX="s/^(\`define "${PREFIX}"\w+_RV_ICG )(\w+)/\1"${PREFIX}"\2/g"
 sed -i -E "$RV_RCG_REPLACE_REGEX" $OUTPUT_COMMON_DEFINES
 
@@ -84,10 +84,10 @@ for DEFINE in $DEFINES; do
 	sed -i -E "s/((\`ifdef)|(\`ifndef)) $DEFINE/\1 "$PREFIX"$DEFINE/g" $DESIGN_FILES
 done
 
-# Explicitly prefix RV_BUILD_AHB_LITE to avoid collisions
-echo "Prefixing RV_BUILD_AHB_LITE macro"
-sed -i -E "s/((\`ifdef)|(\`ifndef)) RV_BUILD_AHB_LITE/\1 ${PREFIX}RV_BUILD_AHB_LITE/g" $DESIGN_FILES
-sed -i -E "s/\`RV_BUILD_AHB_LITE\b/\`${PREFIX}RV_BUILD_AHB_LITE/g" $DESIGN_FILES
+# Prefix all RV_* macros
+echo "Prefixing all RV_* macros"
+sed -i -E "s/((\`ifdef)|(\`ifndef)) (RV_[a-zA-Z0-9_]+)/\1 ${PREFIX}\4/g" $DESIGN_FILES
+sed -i -E "s/(\`|\`define )(RV_[a-zA-Z0-9_]+)\b/\1${PREFIX}\2/g" $DESIGN_FILES
 
 # Replace include names in RTL sources
 echo "Replacing include names in RTL sources"

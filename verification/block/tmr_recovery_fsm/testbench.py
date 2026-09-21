@@ -438,7 +438,23 @@ class FatalStatusItem(uvm_sequence_item):
         self.timestamp = 0
 
     def __str__(self):
-        return f"FatalStatusItem(timestamp={self.timestamp}, " + "fatal_err={self.fatal}" + ")"
+        return f"FatalStatusItem(timestamp={self.timestamp}, fatal_err={self.fatal})"
+
+
+class ResetStatusItem(uvm_sequence_item):
+
+    def __init__(self, name="ResetStatusItem"):
+        super().__init__(name)
+        self.sync_rst_l = 0
+        self.gate = MuBiFalse
+        self.timestamp = 0
+
+    def __str__(self):
+        return (
+            f"HardResetStatusItem(timestamp={self.timestamp}, "
+            + f"sync_rst_l={self.sync_rst_l}, gate={self.gate}"
+            + ")"
+        )
 
 
 class HardResetStatusItem(uvm_sequence_item):
@@ -449,7 +465,7 @@ class HardResetStatusItem(uvm_sequence_item):
         self.timestamp = 0
 
     def __str__(self):
-        return f"HardResetStatusItem(timestamp={self.timestamp}, " + "rst_l={self.reset}" + ")"
+        return f"HardResetStatusItem(timestamp={self.timestamp}, rst_l={self.reset})"
 
 
 # ==============================================================================
@@ -790,6 +806,46 @@ class FatalSignalMonitor(uvm_monitor):
                 prev_fatal_err = curr_fatal_err
 
 
+class ResetStatusMonitor(uvm_monitor):
+    """
+    Monitors reset and gate signals
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.sync_rst_l = kwargs["sync_rst_l"]
+        self.gate = kwargs["gate"]
+        self.clock_domain = kwargs["clock_domain"]
+
+        del kwargs["sync_rst_l"]
+        del kwargs["gate"]
+        del kwargs["clock_domain"]
+        super().__init__(*args, **kwargs)
+
+    def build_phase(self):
+        self.ap = uvm_analysis_port("ap", self)
+
+    async def run_phase(self):
+        prev_reset = None
+        while True:
+            await RisingEdge(self.clock_domain.clk)
+            await ReadOnly()
+
+            curr_reset = {"sync_rst_l": self.sync_rst_l.value, "gate": self.gate.value}
+
+            if prev_reset is None:
+                prev_reset = curr_reset
+
+            if prev_reset != curr_reset:
+                item = ResetStatusItem()
+                item.timestamp = get_sim_time(units="ps")
+                item.sync_rst_l = curr_reset["sync_rst_l"]
+                item.gate = curr_reset["gate"]
+                self.logger.debug(f"Reset State: {str(item)}")
+
+                self.ap.write(item)
+                prev_reset = curr_reset
+
+
 class HardResetSignalMonitor(uvm_monitor):
     """
     Monitors the FSM hard reset signal
@@ -868,6 +924,10 @@ class BaseScoreboard(uvm_component):
         self.fatal_err_fifo = uvm_tlm_analysis_fifo("fatal_err_fifo", self)
         self.fatal_err_port = uvm_get_peek_port("fatal_err_port", self)
 
+        # Sync reset interface
+        self.sync_rst_fifo = uvm_tlm_analysis_fifo("sync_rst_fifo", self)
+        self.sync_rst_port = uvm_get_peek_port("sync_rst_port", self)
+
         # Hard FSM reset
         self.hard_rst_fifo = uvm_tlm_analysis_fifo("hard_rst_fifo", self)
         self.hard_rst_port = uvm_get_port("hard_rst_port", self)
@@ -891,6 +951,9 @@ class BaseScoreboard(uvm_component):
 
         # Fatal err
         self.fatal_err_port.connect(self.fatal_err_fifo.get_peek_export)
+
+        # Sync reset interface
+        self.sync_rst_port.connect(self.sync_rst_fifo.get_peek_export)
 
         # Hard FSM reset
         self.hard_rst_port.connect(self.hard_rst_fifo.get_export)
@@ -1078,6 +1141,14 @@ class BaseEnv(uvm_env):
             signal=getattr(cocotb.top, "fatal_err"),
         )
 
+        self.reset_mon = ResetStatusMonitor(
+            "reset_mon",
+            self,
+            clock_domain=self.clock_domain,
+            sync_rst_l=cocotb.top.sync_rst_l,
+            gate=cocotb.top.gate_outputs,
+        )
+
         self.hard_rst_mon = HardResetSignalMonitor(
             "hard_rst_mon",
             self,
@@ -1113,6 +1184,7 @@ class BaseEnv(uvm_env):
 
             self.external_flag_mon.ap.connect(self.scoreboard.external_flag_fifo.analysis_export)
             self.hard_rst_mon.ap.connect(self.scoreboard.hard_rst_fifo.analysis_export)
+            self.reset_mon.ap.connect(self.scoreboard.sync_rst_fifo.analysis_export)
             self.fatal_err_mon.ap.connect(self.scoreboard.fatal_err_fifo.analysis_export)
 
 

@@ -89,6 +89,15 @@ echo "Prefixing all RV_* macros"
 sed -i -E "s/((\`ifdef)|(\`ifndef)) (RV_[a-zA-Z0-9_]+)/\1 ${PREFIX}\4/g" $DESIGN_FILES
 sed -i -E "s/(\`|\`define )(RV_[a-zA-Z0-9_]+)\b/\1${PREFIX}\2/g" $DESIGN_FILES
 
+# Prefix all ASSERT_* macros
+echo "Prefixing all ASSERT_* macros"
+sed -i -E "s/(\`|\`define )(ASSERT_[a-zA-Z0-9_]+)\b/\1${PREFIX}\2/g" $DESIGN_FILES
+
+# Prefix all EL2_* macros
+echo "Prefixing all EL2_* macros"
+sed -i -E "s/(\`|\`define |\`undef )(EL2_[a-zA-Z0-9_]+)\b/\1${PREFIX}\2/g" $DESIGN_FILES
+
+
 # Replace include names in RTL sources
 echo "Replacing include names in RTL sources"
 sed -i "s/include \"el2_param.vh\"/include \""$PREFIX"el2_param.vh\"/g" $DESIGN_FILES

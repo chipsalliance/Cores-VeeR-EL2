@@ -1010,8 +1010,6 @@ module el2_tmr_complex
 
   // I/O inhibit signals
   el2_mubi_pkg::el2_mubi_t tmr_output_inhibit;
-  // FIXME: TODO: Drive from the recovery FSM
-  assign tmr_output_inhibit = El2MuBiFalse;
 
   el2_mubi_pkg::el2_mubi_t axi_output_inhibit;
   el2_mubi_pkg::el2_mubi_t dccm_output_inhibit;
@@ -1089,6 +1087,7 @@ module el2_tmr_complex
       .external_flag(tmr_fault),
       .clear_external_flag(tmr_fault_clr),
       .sync_rst_l(sync_rst_l),
+      .gate_outputs(tmr_output_inhibit),
       .fatal_err(recovery_fault)
   );
 

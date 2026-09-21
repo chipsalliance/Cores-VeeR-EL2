@@ -48,7 +48,8 @@ module el2_tmr_recovery_fsm
     input  logic [31:0]             recovery_csr_rddata_veer[3],
 
     // VeeR reset control
-    output logic sync_rst_l,
+    output logic      sync_rst_l,
+    output el2_mubi_t gate_outputs,
 
     // VeeR reset vector and PC
     input  logic [31:1] rst_vec,
@@ -100,7 +101,18 @@ module el2_tmr_recovery_fsm
     assign ext_mpc_debug_halt_ack_veer[i] = mpc_debug_halt_ack_veer[i];
     assign ext_mpc_debug_run_ack_veer[i] = mpc_debug_run_ack_veer[i];
   end
-  assign sync_rst_l = recovery_state != RESET_CPU;
+
+  logic sync_rst_ns, sync_rst, sync_rst_en;
+
+  assign sync_rst_en = recovery_state == RESET_CPU;
+  assign sync_rst_ns = recovery_state == RESET_CPU &
+                       (cnt_gpr[0][2] & cnt_gpr[1][2] & cnt_gpr[2][2]) &
+                       !(cnt_gpr[0][3] & cnt_gpr[1][3] & cnt_gpr[2][3]);
+
+  rvdffs #(1) sync_rst_l_ff (.*, .din(sync_rst_ns), .dout(sync_rst), .en(sync_rst_en));
+
+  assign sync_rst_l = !sync_rst;
+  assign gate_outputs = el2_mubi_reg_comp(32'(recovery_state), 32'(RESET_CPU));
 
   rvdff #(.WIDTH(2)) cpu_exec_status_d (.*,
     .din ({int_mpc_debug_halt_ack_veer,   int_mpc_debug_run_ack_veer  }),
@@ -445,7 +457,7 @@ module el2_tmr_recovery_fsm
       end
       RESET_CPU: begin : reset_cpu
         recovery_nxstate = SET_FLAG_CC;
-        recovery_state_en = (cnt_gpr[0][3] & cnt_gpr[1][3] & cnt_gpr[2][3]);
+        recovery_state_en = (cnt_gpr[0][3] & cnt_gpr[1][3] & cnt_gpr[2][3]) & (cnt_gpr[0][2] & cnt_gpr[1][2] & cnt_gpr[2][2]);
       end
       SET_FLAG_CC: begin : set_flag_cc
         recovery_nxstate = el2_mubi_mux_recovery_state_true(.sel(cpu_clear_flag), .match(WRITE_REG), .mismatch(SET_FLAG_CC));

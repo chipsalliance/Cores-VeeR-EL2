@@ -266,6 +266,14 @@ class RegBusScoreboard(BaseScoreboard):
                     f"Unexpected fatal error detected, first at {fatl_err_event.timestamp}"
                 )
 
+        while self.sync_rst_port.can_get():
+            _, reset_event = self.sync_rst_port.try_get()
+            if reset_event.sync_rst_l == 0 and reset_event.gate != MuBiTrue:
+                self.passed = False
+                self.logger.error(
+                    f"Synchronous reset asserted without gate being active, at {reset_event.timestamp}"
+                )
+
         if self.passed:
             self.logger.info("All scoreboard checks passed")
 

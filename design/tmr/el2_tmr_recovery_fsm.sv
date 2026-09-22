@@ -243,7 +243,6 @@ module el2_tmr_recovery_fsm
     assign csr_recovery_storage_int = csr_src[i] ? csr_with_ecc_wr : csr_recovery_storage[i];
     rvdffs #(39) csr_recovery_storage_ff (.*, .din(csr_recovery_storage_int), .dout(csr_recovery_storage[i]), .en(csr_we[i]));
   end
-  assign csr_recovery_storage[csr_cnt] = csr_recovery_storage[0];
   assign csr_re[csr_cnt] = (cnt_csr[2] == 8'(csr_cnt));
   // Wrap i = csr_cnt to CSR 0
   logic  csr_wrap;

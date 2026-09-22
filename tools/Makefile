@@ -51,7 +51,7 @@ TBDIR = ${RV_ROOT}/testbench
 PICOLIBC_DIR = ${RV_ROOT}/third_party/picolibc/install
 
 ifdef TMR_TB
-include $(RV_ROOT)/tools/tmr.mk
+TB_TOP ?= tb_top_tmr
 else
 TB_TOP ?= tb_top
 endif
@@ -203,6 +203,11 @@ CFLAGS += -std=c++14
 # slower runtime (faster compiles) -O2 for faster runtime (slower
 # compiles), or -O for balance.
 VERILATOR_MAKE_FLAGS = OPT_FAST="-Os"
+
+# At this point all variables are configured so include the TMR makefile
+ifdef TMR_TB
+include $(RV_ROOT)/tools/tmr.mk
+endif
 
 # Targets
 all: clean verilator

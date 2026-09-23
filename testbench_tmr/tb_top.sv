@@ -47,6 +47,19 @@ logic jtag_trst_n;
 
 logic dmi_core_enable;
 
+`ifdef RV_LOCKSTEP_ENABLE
+logic [31:0] shadow_core_trace_rv_i_insn_ip;
+logic [31:0] shadow_core_trace_rv_i_address_ip;
+logic shadow_core_trace_rv_i_valid_ip;
+logic shadow_core_trace_rv_i_exception_ip;
+logic [4:0] shadow_core_trace_rv_i_ecause_ip;
+logic shadow_core_trace_rv_i_interrupt_ip;
+logic [31:0] shadow_core_trace_rv_i_tval_ip;
+el2_mubi_pkg::el2_mubi_t disable_corruption_detection_i;
+el2_mubi_pkg::el2_mubi_t lockstep_err_injection_en_i;
+el2_mubi_pkg::el2_mubi_t corruption_detected_o;
+`endif // RV_LOCKSTEP_ENABLE
+
 assign i_cpu_halt_req      = '0;
 assign i_cpu_run_req       = '0;
 assign mpc_debug_halt_req  = '0;
@@ -1661,19 +1674,19 @@ veer_wrapper rvtop_wrapper (
     .dccm_ecc_double_error      (),
     .dccm_write_readback_error  (),
 
-// `ifdef RV_LOCKSTEP_ENABLE
-//     .shadow_core_trace_rv_i_insn_ip      (shadow_core_trace_rv_i_insn_ip),
-//     .shadow_core_trace_rv_i_address_ip   (shadow_core_trace_rv_i_address_ip),
-//     .shadow_core_trace_rv_i_valid_ip     (shadow_core_trace_rv_i_valid_ip),
-//     .shadow_core_trace_rv_i_exception_ip (shadow_core_trace_rv_i_exception_ip),
-//     .shadow_core_trace_rv_i_ecause_ip    (shadow_core_trace_rv_i_ecause_ip),
-//     .shadow_core_trace_rv_i_interrupt_ip (shadow_core_trace_rv_i_interrupt_ip),
-//     .shadow_core_trace_rv_i_tval_ip      (shadow_core_trace_rv_i_tval_ip),
+`ifdef RV_LOCKSTEP_ENABLE
+    .shadow_core_trace_rv_i_insn_ip      (shadow_core_trace_rv_i_insn_ip),
+    .shadow_core_trace_rv_i_address_ip   (shadow_core_trace_rv_i_address_ip),
+    .shadow_core_trace_rv_i_valid_ip     (shadow_core_trace_rv_i_valid_ip),
+    .shadow_core_trace_rv_i_exception_ip (shadow_core_trace_rv_i_exception_ip),
+    .shadow_core_trace_rv_i_ecause_ip    (shadow_core_trace_rv_i_ecause_ip),
+    .shadow_core_trace_rv_i_interrupt_ip (shadow_core_trace_rv_i_interrupt_ip),
+    .shadow_core_trace_rv_i_tval_ip      (shadow_core_trace_rv_i_tval_ip),
 
-//     .disable_corruption_detection_i (disable_corruption_detection_i),
-//     .lockstep_err_injection_en_i    (lockstep_err_injection_en_i),
-//     .corruption_detected_o          (corruption_detected_o),
-// `endif
+    .disable_corruption_detection_i (disable_corruption_detection_i),
+    .lockstep_err_injection_en_i    (lockstep_err_injection_en_i),
+    .corruption_detected_o          (corruption_detected_o),
+`endif
 
     .soft_int               (soft_int),
     .core_id                ('0),

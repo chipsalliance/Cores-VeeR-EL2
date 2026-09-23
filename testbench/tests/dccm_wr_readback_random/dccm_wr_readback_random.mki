@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
+
+OFILES = crt0.o dccm_wr_readback_random.o printf.o
+TEST_CFLAGS = -g -O3

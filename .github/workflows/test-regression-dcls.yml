@@ -200,7 +200,7 @@ jobs:
         # feature only affects the DCCM write path and is privilege-independent, so a single
         # priv level of these DCCM/ECC tests is enough to exercise it without re-running the
         # full matrix.
-        test: ["dccm_wr_readback", "hello_world_dccm", "ecc"]
+        test: ["dccm_wr_readback", "dccm_wr_readback_hazards", "dccm_wr_readback_random", "dccm_wr_readback_fault_dmi", "dccm_wr_readback_sys_integ", "hello_world_dccm", "ecc"]
         coverage: ["all"]
         priv: ["0"]
         tb_extra_args: [""]

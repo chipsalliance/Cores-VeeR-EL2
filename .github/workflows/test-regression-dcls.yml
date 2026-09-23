@@ -20,6 +20,8 @@ jobs:
       custom_tests: ${{ steps.select-custom.outputs.tests }}
       mubi_configs: ${{ steps.select-mubi.outputs.configs }}
       icache_ecc_tests: ${{ steps.select-icache-ecc.outputs.tests }}
+      icache_addr_xor_delays: ${{ steps.select-icache-addr-xor-delays.outputs.delays }}
+      icache_addr_xor_waypacks: ${{ steps.select-icache-addr-xor-waypacks.outputs.waypacks }}
     steps:
       - uses: actions/checkout@v4
       - name: Select tests
@@ -42,6 +44,18 @@ jobs:
           echo "tests=$(python3 .github/scripts/select_pr_tests.py \
             '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}-icache-ecc' 4 \
             'icache_ecc,dcls_ecc_asymmetric,dcls_internal_state,ecc_threshold')" | tee -a $GITHUB_OUTPUT
+      - name: Select ICache address-XOR delays
+        id: select-icache-addr-xor-delays
+        run: |
+          echo "delays=$(python3 .github/scripts/select_pr_tests.py \
+            '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}-icache-addr-xor-delay' 2 \
+            '0,1,2,3,4')" | tee -a $GITHUB_OUTPUT
+      - name: Select ICache address-XOR waypacks
+        id: select-icache-addr-xor-waypacks
+        run: |
+          echo "waypacks=$(python3 .github/scripts/select_pr_tests.py \
+            '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}-icache-addr-xor-waypack' 1 \
+            '0,1')" | tee -a $GITHUB_OUTPUT
       - name: Select MUBI configs
         id: select-mubi
         run: |
@@ -142,7 +156,7 @@ jobs:
   regression-tests-iccm-addr-xor:
     name: Regression tests (DCLS + ICCM address-XOR)
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20260714
+    container: ghcr.io/antmicro/cores-veer-el2:20260819
     strategy:
       matrix:
         bus: ["axi", "ahb"]
@@ -243,7 +257,7 @@ jobs:
   regression-tests-dccm-addr-xor:
     name: Regression tests (DCLS + DCCM address-XOR)
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20260714
+    container: ghcr.io/antmicro/cores-veer-el2:20260819
     strategy:
       matrix:
         bus: ["axi", "ahb"]
@@ -289,6 +303,62 @@ jobs:
           export RV_ROOT=`pwd`
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+
+  regression-tests-icache-addr-xor:
+    name: Regression tests (DCLS + ICache address-XOR)
+    needs: [generate-matrix]
+    runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:20260819
+    strategy:
+      matrix:
+        bus: ["axi", "ahb"]
+        # ICache address-infection subset, built with DCLS across both enabled (1) and disabled (0) modes.
+        # Tests fault recovery on address corruption when enabled, and verifies micect does NOT increment
+        # when disabled (negative regression check). Sweeps both ECC and Parity modes.
+        test: ["icache_infection"]
+        coverage: ["all"]
+        priv: ["1"]
+        ecc: ["0", "1"]
+        icache_addr_xor: ["0", "1"]
+        delay: ${{ fromJSON(needs.generate-matrix.outputs.icache_addr_xor_delays) }}
+        cache_waypack: ${{ fromJSON(needs.generate-matrix.outputs.icache_addr_xor_waypacks) }}
+        tb_extra_args: [""]
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/regression/.cache/"
+      DCLS_ENABLE: "1"
+      DCLS_DELAY: ${{ matrix.delay }}
+
+    steps:
+      - name: Setup repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+          pip install -r .github/scripts/requirements-coverage.txt
+          echo "PATH=$PATH" >> $GITHUB_ENV
+
+      - name: Setup environment
+        run: |
+          RV_ROOT=`pwd`
+          echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
+          PYTHONUNBUFFERED=1
+          echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
+          TEST_PATH=$RV_ROOT/test_results
+          echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+
+      - name: Run tests
+        run: |
+          export RV_ROOT=`pwd`
+          export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
+          export ECC="${{ matrix.ecc }}"
+          export ICACHE_ADDR_XOR="${{ matrix.icache_addr_xor }}"
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} ${{ matrix.cache_waypack }}
 
   regression-tests-icache-ecc:
     name: Regression tests (DCLS + ICache ECC/Parity)
@@ -355,7 +425,7 @@ jobs:
     name: DCLS MUBI Regression
     needs: [generate-matrix]
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20260714
+    container: ghcr.io/antmicro/cores-veer-el2:20260819
     strategy:
       fail-fast: false
       matrix:
@@ -404,7 +474,6 @@ jobs:
           export MUBI_FALSE="${{ matrix.mubi.false_val }}"
           echo "Executing MUBI Regression: Bus=${{ matrix.bus }}, Width=${MUBI_WIDTH}bit, True=${MUBI_TRUE}, False=${MUBI_FALSE}, Delay=${DCLS_DELAY}"
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test }} ${{ matrix.coverage }} ${{ matrix.priv }} 0
-
   custom-regression-tests:
     name: Custom regression tests
     if: inputs.run_custom

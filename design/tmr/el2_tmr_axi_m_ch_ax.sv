@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Antmicro
 // SPDX-License-Identifier: Apache-2.0
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+
 module el2_tmr_axi_m_ch_ax # (
   parameter unsigned AddrWidth  = 32,
   parameter unsigned IdWidth    = 1
@@ -425,3 +427,5 @@ module el2_tmr_axi_m_ch_ax # (
   assign c_s_axi_enable = mubi_not(fault_q[2]);
 
 endmodule
+
+`endif

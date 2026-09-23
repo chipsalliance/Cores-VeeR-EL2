@@ -18,8 +18,24 @@ $RV_ROOT/design/include/el2_def.sv
 -y $SYNOPSYS_SYN_ROOT/dw/sim_ver
 $RV_ROOT/design/lib/el2_assert.sv
 $RV_ROOT/design/el2_mubi_pkg.sv
-$RV_ROOT/design/el2_veer_wrapper.sv
 $RV_ROOT/design/el2_lockstep_pkg.sv
+$RV_ROOT/design/lib/el2_secded_13_8_enc.sv
+$RV_ROOT/design/lib/el2_secded_13_8_dec.sv
+$RV_ROOT/design/lib/el2_ecc_counter_8.sv
+$RV_ROOT/design/tmr/el2_tmr_voter.sv
+$RV_ROOT/design/tmr/el2_tmr_fault_storage.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_rdy.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_m_ch_ax.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_m_ch_b.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_m_ch_r.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_m_ch_w.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_m.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_s_ch_ax.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_s_ch_b.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_s_ch_r.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_s_ch_w.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_s.sv
+$RV_ROOT/design/tmr/el2_tmr_axi_counter.sv
 $RV_ROOT/design/tmr/el2_tmr_axi.sv
 $RV_ROOT/design/tmr/el2_tmr_ic.sv
 $RV_ROOT/design/tmr/el2_tmr_iccm.sv
@@ -34,6 +50,7 @@ $RV_ROOT/design/tmr/el2_tmr_3way_fatal_check_mubi.sv
 $RV_ROOT/design/tmr/el2_tmr_recovery_fsm.sv
 $RV_ROOT/design/el2_tmr_complex.sv
 $RV_ROOT/design/el2_veer_lockstep.sv
+$RV_ROOT/design/el2_veer_wrapper.sv
 $RV_ROOT/design/el2_mem.sv
 $RV_ROOT/design/el2_pic_ctrl.sv
 $RV_ROOT/design/el2_veer.sv

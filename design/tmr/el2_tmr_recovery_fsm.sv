@@ -87,7 +87,7 @@ module el2_tmr_recovery_fsm
   recovery_state_t recovery_nxstate, recovery_state;
 
   rvdffiee #($bits(recovery_state_t)) fsm_state_ff
-    (.*, .din(recovery_nxstate), .dout(recovery_state), .en(recovery_state_en));
+    (.*, .din(recovery_nxstate), .dout({recovery_state}), .en(recovery_state_en));
 
   assign pending = mubi_from_bool(recovery_state != IDLE && recovery_state != '0);
 

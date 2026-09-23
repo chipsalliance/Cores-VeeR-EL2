@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Antmicro
 // SPDX-License-Identifier: Apache-2.0
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+
 module el2_tmr_axi_rdy (
 
   input  logic  clk_i,
@@ -99,3 +101,5 @@ module el2_tmr_axi_rdy (
   assign enable_c = mubi_not(fault_q[2]);
 
 endmodule
+
+`endif

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Antmicro, Ltd. <www.antmicro.com>
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+
 /*
   This module monitors an AXI bus and reports whether there are any pending
   in-flight transactions.
@@ -131,3 +133,5 @@ module el2_tmr_axi_counter
                                 mubi_from_bool(ar_ecc_fatal));
 
 endmodule
+
+`endif

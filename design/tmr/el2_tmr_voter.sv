@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Antmicro
 // SPDX-License-Identifier: Apache-2.0
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+
 module el2_tmr_voter # (
   parameter unsigned Width = 1  // Signal width
 ) (
@@ -227,3 +229,5 @@ module el2_tmr_voter # (
   end
 
 endmodule
+
+`endif

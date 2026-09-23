@@ -7,6 +7,8 @@
 // Sets 'fatal' to El2MuBiTrue when at least one of the inputs is marked as
 // faulty and remaining 2 differ.
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+
 module el2_tmr_3way_fatal_check_mubi
 #(
   parameter unsigned Width=1
@@ -39,3 +41,5 @@ module el2_tmr_3way_fatal_check_mubi
     el2_mubi_pkg::mubi_or3(faulty_core[0], faulty_core[1], faulty_core[2])
   );
 endmodule
+
+`endif

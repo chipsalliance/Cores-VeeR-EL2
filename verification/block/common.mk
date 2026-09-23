@@ -19,6 +19,8 @@ export PYTHONPATH := $(CURDIR)/common
 COMMON_SOURCES  = $(CFGDIR)/common_defines.vh
 COMMON_SOURCES += $(CFGDIR)/el2_pdef.vh
 COMMON_SOURCES += $(SRCDIR)/include/el2_def.sv
+COMMON_SOURCES += $(SRCDIR)/lib/el2_assert.sv
+COMMON_SOURCES += $(SRCDIR)/el2_mubi_pkg.sv
 COMMON_SOURCES += $(SRCDIR)/lib/beh_lib.sv
 
 VERILOG_SOURCES := $(COMMON_SOURCES) $(VERILOG_SOURCES)

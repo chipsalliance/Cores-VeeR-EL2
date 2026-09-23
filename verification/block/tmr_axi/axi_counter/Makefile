@@ -21,8 +21,6 @@ COMPILE_ARGS = \
  -DRV_TRIPLE_MODULAR_REDUNDANCY_ENABLE=1 \
 
 VERILOG_SOURCES = \
-    $(SRCDIR)/lib/el2_assert.sv \
-    $(SRCDIR)/el2_mubi_pkg.sv \
     $(SRCDIR)/lib/el2_secded_13_8_enc.sv \
     $(SRCDIR)/lib/el2_secded_13_8_dec.sv \
     $(SRCDIR)/lib/el2_ecc_counter_8.sv \

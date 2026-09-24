@@ -56,23 +56,10 @@ The block diagram of the module is shown below:
 Block diagram of the voter module
 :::
 
-Each input has an associated enable input which is used to exclude a particular input from voting.
-There is also a fault output associated with each input which is used to indicate which one disagrees with the other two.
-In parallel to per-input fault status outputs, there is a critical fault output which is asserted when the true output signal state cannot be derived from active inputs.
-
-Depending on the number of enabled inputs, the module implements the following functionalities:
-
- - 3 inputs enabled
-
-   Majority voting with fault indication.
-
- - 2 inputs enabled
-
-   Disagreemend detection without particular fault indication.
-
- - 1 input enabled
-
-   Constant critical failure, unable to detect / correct a fault due to missing information.
+The module implements majority voting among its three data inputs.
+There's also the fault detection feature for each input.
+Faults are detected by bitwise comparison of each data input with the output voted consensus.
+Each of the three data inputs is associated with an enable input.
 
 ### Majority voting for AXI bus interfaces
 

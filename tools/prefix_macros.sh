@@ -22,6 +22,8 @@ EL2_PDEF="$DEFINES_PATH/el2_pdef.vh"
 PD_DEFINES="$DEFINES_PATH/pd_defines.vh"
 EL2_DEF="$DESIGN_DIR/include/el2_def.sv"
 EL2_IFU_IC_MEM="$DESIGN_DIR/ifu/el2_ifu_ic_mem.sv"
+EL2_PIC_CTRL="$DESIGN_DIR/el2_pic_ctrl.sv"
+PIC_MAP_AUTO="$DEFINES_PATH/pic_map_auto.svh"
 
 echo "Starting script with following settings:"
 echo "PREFIX=$PREFIX"
@@ -39,7 +41,7 @@ DEFINES="$(sed -nr "$DEFINES_REGEX" $COMMON_DEFINES $PD_DEFINES $EL2_IFU_IC_MEM 
 
 # Skip files that should not be processed
 SKIP_DESIGN_FILES="el2_param.vh\|el2_pdef.vh\|common_defines.vh\|pd_defines.vh"
-DESIGN_FILES="$(find $DESIGN_DIR -name "*.sv" -o -name "*.vh" -o -name "*.v" | grep -v $SKIP_DESIGN_FILES)"
+DESIGN_FILES="$(find $DESIGN_DIR \( -name "*.sv" -o -name "*.vh" -o -name "*.svh" -o -name "*.v" \) | grep -v $SKIP_DESIGN_FILES)"
 DESIGN_FILES+=" $EXTRA_DESIGN_FILES"
 MODULES="$(sed -nr "$MODULES_REGEX" $DESIGN_FILES | sort -ur)"
 
@@ -62,7 +64,7 @@ echo "Adding prefix to macro names in $OUTPUT_COMMON_DEFINES and $OUTPUT_PD_DEFI
 sed -E "$DEFINES_REPLACE_REGEX" $COMMON_DEFINES >$OUTPUT_COMMON_DEFINES
 sed -E "$DEFINES_REPLACE_REGEX" $PD_DEFINES >$OUTPUT_PD_DEFINES
 
-# Add prefix to RV_RCG macros
+# Add prefix to RV_ICG macros
 RV_RCG_REPLACE_REGEX="s/^(\`define "${PREFIX}"\w+_RV_ICG )(\w+)/\1"${PREFIX}"\2/g"
 sed -i -E "$RV_RCG_REPLACE_REGEX" $OUTPUT_COMMON_DEFINES
 
@@ -82,16 +84,36 @@ for DEFINE in $DEFINES; do
 	sed -i -E "s/((\`ifdef)|(\`ifndef)) $DEFINE/\1 "$PREFIX"$DEFINE/g" $DESIGN_FILES
 done
 
+# Prefix all RV_* macros
+echo "Prefixing all RV_* macros"
+sed -i -E "s/((\`ifdef)|(\`ifndef)) (RV_[a-zA-Z0-9_]+)/\1 ${PREFIX}\4/g" $DESIGN_FILES
+sed -i -E "s/(\`|\`define )(RV_[a-zA-Z0-9_]+)\b/\1${PREFIX}\2/g" $DESIGN_FILES
+
+# Prefix all ASSERT_* macros
+echo "Prefixing all ASSERT_* macros"
+sed -i -E "s/(\`|\`define )(ASSERT_[a-zA-Z0-9_]+)\b/\1${PREFIX}\2/g" $DESIGN_FILES
+
+# Prefix all EL2_* macros
+echo "Prefixing all EL2_* macros"
+sed -i -E "s/(\`|\`define |\`undef )(EL2_[a-zA-Z0-9_]+)\b/\1${PREFIX}\2/g" $DESIGN_FILES
+
+
 # Replace include names in RTL sources
 echo "Replacing include names in RTL sources"
 sed -i "s/include \"el2_param.vh\"/include \""$PREFIX"el2_param.vh\"/g" $DESIGN_FILES
 sed -i "s/include \"el2_pdef.vh\"/include \""$PREFIX"el2_pdef.vh\"/g" $DESIGN_FILES
+sed -i "s/include \"common_defines.vh\"/include \""$PREFIX"common_defines.vh\"/g" $DESIGN_FILES
 sed -i "s/include \"common_defines.vh\"/include \""$PREFIX"common_defines.vh\"/g" $OUTPUT_PD_DEFINES
+sed -i "s/include \"pic_map_auto.svh\"/include \""$PREFIX"pic_map_auto.svh\"/g" $EL2_PIC_CTRL
 
-# Replace package name and its imports in RTL sources
+# Ensure .svh includes are also updated with prefix
+sed -i -E "s/include \"(el2_[a-zA-Z0-9_]+)\.svh\"/include \"${PREFIX}\1.svh\"/g" $DESIGN_FILES
+
+# Replace package name, its imports and usage in RTL sources
 echo "Replacing package name and its imports in RTL sources"
 sed -i "s/import el2_pkg/import "$PREFIX"el2_pkg/g" $DESIGN_FILES
 sed -i "s/package el2_pkg/package "$PREFIX"el2_pkg/g" $EL2_DEF
+sed -i "s/el2_mubi_pkg/"$PREFIX"el2_mubi_pkg/g" $DESIGN_FILES
 
 # Add prefix to all module names
 echo "Adding prefix to all module names"
@@ -110,9 +132,17 @@ done
 echo "Removing old header files"
 rm -f $COMMON_DEFINES $EL2_PARAM $EL2_PDEF $PD_DEFINES
 
+# Add prefix to pic_map_auto.svh
+OUTPUT_PIC_MAP_AUTO=$DEFINES_PATH/"$PREFIX"pic_map_auto.svh
+mv $PIC_MAP_AUTO $OUTPUT_PIC_MAP_AUTO
+
 # Add prefix to el2_mem_if interface
 echo "Adding prefix to el2_mem_if interface"
 perl -pi -e "s/(?<!${PREFIX})el2_mem_if/"$PREFIX"el2_mem_if/g" $DESIGN_FILES
+
+# Add prefix to el2_regfile_if interface
+echo "Adding prefix to el2_regfile_if interface"
+perl -pi -e "s/(?<!${PREFIX})el2_regfile_if/"$PREFIX"el2_regfile_if/g" $DESIGN_FILES
 
 # prefix memory macro names in el2_ifu_ic_mem.sv
 echo "Prefixing memory macro names in $EL2_IFU_IC_MEM"

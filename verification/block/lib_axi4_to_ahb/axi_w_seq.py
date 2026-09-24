@@ -63,20 +63,45 @@ class AXIWriteLastDataSeqItem(AXIWriteDataSeqItem):
         self.axi_wlast = 1
 
 
-class AXIWriteResponseWriteSeqItem(AXIWriteBaseSeqItem):
-    def __init__(
-        self,
-        name,
-    ):
+class AXIWriteFastSeqItem(AXIWriteBaseSeqItem):
+    """Offer one complete write, optionally waiting for AW/W handshakes."""
+
+    def __init__(self, name, wait_for_handshake=True):
+        super().__init__(name)
+        self.wait_for_handshake = wait_for_handshake
+        self.axi_awvalid = 1
+        self.axi_wvalid = 1
+        self.axi_wlast = 1
+        self.axi_bready = 1
+
+    def randomize(self):
+        self.axi_awid = random.randint(0, 1)
+        self.axi_awaddr = 8 * random.randint(0, 0x1FFFFFFF)
+        self.axi_wdata = random.randint(0, 0xFFFFFFFFFFFFFFFF)
+
+
+class AXIWriteReadySeqItem(AXIWriteBaseSeqItem):
+    """Assert BREADY without waiting for BVALID."""
+
+    def __init__(self, name):
         super().__init__(name)
         self.axi_bready = 1
 
 
-class AXIWriteInactiveSeqItem(AXIWriteBaseSeqItem):
+class AXIWriteResponseWriteSeqItem(AXIWriteBaseSeqItem):
+    """Wait for a B-channel response"""
+
     def __init__(self, name):
+        super().__init__(name)
+        self.axi_bready = 0
+
+
+class AXIWriteInactiveSeqItem(AXIWriteBaseSeqItem):
+    def __init__(self, name, bready=0):
         super().__init__(name)
         self.axi_awsize = 0
         self.axi_wstrb = 0
+        self.axi_bready = bready
 
 
 class AXIWriteTransactionRequestSeq(BaseSeq):
@@ -104,6 +129,27 @@ class AXIWriteResponseSeq(BaseSeq):
         items = [
             AXIWriteInactiveSeqItem("AXIWriteInactiveSeqItem"),
             AXIWriteResponseWriteSeqItem("AXIWriteLastDataSeqItem"),
+            AXIWriteInactiveSeqItem("AXIWriteInactiveSeqItem", bready=1),
             AXIWriteInactiveSeqItem("AXIWriteInactiveSeqItem"),
         ]
         await self.run_items(items)
+
+
+class AXIWriteFastSeq(BaseSeq):
+    """Offer two complete writes while keeping BREADY asserted."""
+
+    async def body(self):
+        await self.run_items(
+            [
+                AXIWriteReadySeqItem("AXIWriteReadySeqItem"),
+                AXIWriteFastSeqItem("AXIWriteFastSeqItem"),
+                AXIWriteFastSeqItem("AXIWriteFastSeqItem", wait_for_handshake=False),
+            ]
+        )
+
+
+class AXIWriteFastFinishSeq(BaseSeq):
+    """Deassert AWVALID and WVALID while keeping BREADY asserted."""
+
+    async def body(self):
+        await self.run_items([AXIWriteInactiveSeqItem("fast_write_complete", bready=1)])

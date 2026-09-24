@@ -9,6 +9,8 @@ from ahb_lite_seq import AHBLiteAcceptReadSeq, AHBLiteAcceptWriteSeq
 from axi_r_seq import AXIReadTransactionRequestSeq, AXIReadTransactionResponseSeq
 from axi_w_seq import (
     AXIWriteDataSeq,
+    AXIWriteFastFinishSeq,
+    AXIWriteFastSeq,
     AXIWriteResponseSeq,
     AXIWriteTransactionRequestSeq,
 )
@@ -116,3 +118,21 @@ class TestBothChannelsSeq(CoordinatorSeq):
                 await self.axi_write(axi_seqr=axi_w_seqr, ahb_seqr=ahb_seqr)
             else:
                 raise ValueError("Unexpected value in sequence. Should be READ or WRITE.")
+
+
+class TestFastWriteSeq(CoordinatorSeq):
+    """Drive two back-to-back AXI writes through the normal UVM agents."""
+
+    async def body(self):
+        ahb_seqr = ConfigDB().get(None, "", "ahb_seqr")
+        axi_seqr = ConfigDB().get(None, "", "axi_w_seqr")
+        NUM_TRANSACTIONS_PER_TEST = ConfigDB().get(None, "", "NUM_TRANSACTIONS_PER_TEST")
+
+        fast_writes = AXIWriteFastSeq()
+        fast_finish = AXIWriteFastFinishSeq()
+
+        for _ in range(NUM_TRANSACTIONS_PER_TEST):
+            await fast_writes.start(axi_seqr)
+            await self.ahb_response_handler(ahb_seqr=ahb_seqr, is_read=False)
+            await fast_finish.start(axi_seqr)
+            await self.ahb_response_handler(ahb_seqr=ahb_seqr, is_read=False)

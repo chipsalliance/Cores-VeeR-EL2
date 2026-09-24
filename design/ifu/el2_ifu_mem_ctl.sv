@@ -1401,9 +1401,14 @@ ifc_dma_access_ok_prev,dma_iccm_req_f})
    // Write addresses.
    assign iccm_wr_wa_w0 = {iccm_rw_addr[pt.ICCM_BITS-1:3], 1'b0};
    assign iccm_wr_wa_w1 = {iccm_rw_addr[pt.ICCM_BITS-1:3], 1'b1};
-   // Read addresses.
+   // Read addresses. Read slot 1 holds the next word only for 64-bit accesses or
+   // accesses that start in the upper halfword (see addr_bank_inc in
+   // el2_ifu_iccm_mem); otherwise it holds a copy of the slot 0 word.
+   logic iccm_rd_hi_next, iccm_rd_hi_next_f;
+   assign iccm_rd_hi_next = (iccm_wr_size[1:0] == 2'b11) | iccm_rw_addr[1];
+   rvdff #(1) iccm_rd_hi_next_ff (.*, .clk(free_l2clk), .din(iccm_rd_hi_next), .dout(iccm_rd_hi_next_f));
    assign iccm_rd_wa_w0 = iccm_rw_addr_f[pt.ICCM_BITS-1:2];
-   assign iccm_rd_wa_w1 = iccm_rw_addr_f[pt.ICCM_BITS-1:2] + 1'b1;
+   assign iccm_rd_wa_w1 = iccm_rw_addr_f[pt.ICCM_BITS-1:2] + (pt.ICCM_BITS-2)'(iccm_rd_hi_next_f);
    // Mask assembly.
    assign iccm_wr_xor_mask_w0 = 32'({iccm_wr_wa_w0, iccm_wr_wa_w0});
    assign iccm_wr_xor_mask_w1 = 32'({iccm_wr_wa_w1, iccm_wr_wa_w1});

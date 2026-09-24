@@ -74,6 +74,19 @@ jobs:
           ${RV_ROOT}/.github/scripts/gdb_test.sh
           pkill openocd || true
 
+      - name: Test ICCM access with DCLS + ICCM address-XOR
+        run: |
+          export RV_ROOT=$(pwd)
+          mkdir iccm_xor
+          make -C iccm_xor -f ${RV_ROOT}/tools/Makefile verilator-build program.hex TEST=infinite_loop \
+            CONF_PARAMS="-set build_${{ matrix.bus }} -set openocd_test -set lockstep_enable=1 -set lockstep_regfile_enable=1 -set lockstep_delay=0 -set iccm_addr_xor=1" \
+            COVERAGE=${{ matrix.coverage }} -j$(nproc)
+          cd iccm_xor
+          ${RV_ROOT}/.github/scripts/openocd_test.sh \
+            -f ${RV_ROOT}/testbench/openocd_scripts/verilator-rst.cfg \
+            -f ${RV_ROOT}/testbench/openocd_scripts/iccm_access.tcl
+          pkill openocd || true
+
       - name: Prepare coverage data
         run: |
           export RV_ROOT=$(pwd)

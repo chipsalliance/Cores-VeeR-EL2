@@ -91,6 +91,12 @@ module el2_tmr_recovery_fsm
 
   assign pending = mubi_from_bool(recovery_state != IDLE && recovery_state != '0);
 
+  // GPR and CSR counters
+  logic [7:0] cnt_csr [3], cnt_nxtcsr [3];
+  logic [5:0] cnt_gpr [3], cnt_nxtgpr [3];
+  logic cnt_csr_clr[3], cnt_gpr_clr[3];
+  logic cnt_csr_inc[3], cnt_gpr_inc[3];
+
   // Exec control
   logic int_mpc_debug_halt_req_veer;
   logic int_mpc_debug_halt_ack_veer, int_mpc_debug_halt_ack_veer_d;
@@ -134,12 +140,6 @@ module el2_tmr_recovery_fsm
                                         recovery_state == WRITE_REG);
 
   rvtmr #(1) run_ack_tmr_m (.I(mpc_debug_run_ack_veer), .O(int_mpc_debug_run_ack_veer));
-
-  // GPR and CSR counters
-  logic [7:0] cnt_csr [3], cnt_nxtcsr [3];
-  logic [5:0] cnt_gpr [3], cnt_nxtgpr [3];
-  logic cnt_csr_clr[3], cnt_gpr_clr[3];
-  logic cnt_csr_inc[3], cnt_gpr_inc[3];
 
   for (genvar i=0; i<3; ++i) begin : csr_address_counters
     logic [7:0] cnt_csr_int;

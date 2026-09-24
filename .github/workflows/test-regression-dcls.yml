@@ -73,7 +73,7 @@ jobs:
     name: Regression tests
     needs: [generate-matrix]
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20260819
+    container: ghcr.io/antmicro/cores-veer-el2:20260923
     strategy:
       matrix:
         bus: ["axi", "ahb"]
@@ -142,7 +142,7 @@ jobs:
   regression-tests-iccm-addr-xor:
     name: Regression tests (DCLS + ICCM address-XOR)
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20260714
+    container: ghcr.io/antmicro/cores-veer-el2:20260923
     strategy:
       matrix:
         bus: ["axi", "ahb"]
@@ -192,7 +192,7 @@ jobs:
   regression-tests-dccm-wr-readback:
     name: Regression tests (DCLS + DCCM write readback)
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20260819
+    container: ghcr.io/antmicro/cores-veer-el2:20260923
     strategy:
       matrix:
         bus: ["axi", "ahb"]
@@ -243,7 +243,7 @@ jobs:
   regression-tests-dccm-addr-xor:
     name: Regression tests (DCLS + DCCM address-XOR)
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20260714
+    container: ghcr.io/antmicro/cores-veer-el2:20260923
     strategy:
       matrix:
         bus: ["axi", "ahb"]
@@ -294,7 +294,7 @@ jobs:
     name: Regression tests (DCLS + ICache ECC/Parity)
     needs: [generate-matrix]
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20260819
+    container: ghcr.io/antmicro/cores-veer-el2:20260923
     strategy:
       matrix:
         bus: ["axi", "ahb"]
@@ -355,7 +355,7 @@ jobs:
     name: DCLS MUBI Regression
     needs: [generate-matrix]
     runs-on: ubuntu-latest
-    container: ghcr.io/antmicro/cores-veer-el2:20260714
+    container: ghcr.io/antmicro/cores-veer-el2:20260923
     strategy:
       fail-fast: false
       matrix:

@@ -149,7 +149,7 @@ jobs:
         # ICCM-exercising subset, built with DCLS + RV_ICCM_ADDR_XOR enabled. The XOR feature
         # only affects the ICCM data path and is privilege-independent, so a single priv level
         # of these ICCM/ECC tests is enough to exercise it without re-running the full matrix.
-        test: ["iccm_addr_xor", "hello_world_iccm", "hello_world", "ecc"]
+        test: ["iccm_addr_xor", "iccm_dma_rd", "hello_world_iccm", "hello_world", "ecc"]
         coverage: ["all"]
         priv: ["0"]
         tb_extra_args: [""]

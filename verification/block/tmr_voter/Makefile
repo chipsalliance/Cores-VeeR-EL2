@@ -27,6 +27,7 @@ include $(TEST_DIR)/../common.mk
 # VeeR files. This test is a unit test.
 VERILOG_SOURCES = \
     $(SRCDIR)/lib/el2_assert.sv \
+    $(SRCDIR)/lib/beh_lib.sv \
     $(SRCDIR)/el2_mubi_pkg.sv \
     $(SRCDIR)/tmr/el2_tmr_voter.sv \
     $(TEST_DIR)/el2_tmr_voter_wrapper.sv

@@ -4,7 +4,6 @@ import random
 
 from pyuvm import ConfigDB, test, uvm_sequence
 from testbench import (
-    BaseScoreboard,
     BaseTest,
     DriverItem,
     MuBiFalse,
@@ -64,78 +63,7 @@ class TestSequence(uvm_sequence):
 # ==============================================================================
 
 
-class Scoreboard(BaseScoreboard):
-    """
-    Checks if majority voting works and that failures are reported
-    correctly
-    """
-
-    def check_phase(self):
-        self.passed = True
-
-        while self.port.can_get():
-            _, it = self.port.try_get()
-            self.logger.debug(str(it))
-
-            # At least one input is disabled. Skip
-            if (
-                it.signals["en_a"] != MuBiTrue
-                or it.signals["en_b"] != MuBiTrue
-                or it.signals["en_c"] != MuBiTrue
-            ):
-                continue
-
-            # Get inputs, do the voting. Assume that all are enabled
-            in_a = it.signals["in_a"]
-            in_b = it.signals["in_b"]
-            in_c = it.signals["in_c"]
-
-            # Predict
-            pred_out = None
-            pred_fault_a = MuBiFalse
-            pred_fault_b = MuBiFalse
-            pred_fault_c = MuBiFalse
-            pred_crit = MuBiFalse
-
-            if in_a != in_b and in_b != in_c and in_c == in_a:
-                pred_fault_b = MuBiTrue
-                pred_out = in_a
-            elif in_a == in_b and in_b != in_c and in_c != in_a:
-                pred_fault_c = MuBiTrue
-                pred_out = in_b
-            elif in_a != in_b and in_b == in_c and in_c != in_a:
-                pred_fault_a = MuBiTrue
-                pred_out = in_c
-            elif in_a != in_b and in_b != in_c and in_c != in_a:
-                pred_out = None
-                pred_fault_a = MuBiTrue
-                pred_fault_b = MuBiTrue
-                pred_fault_c = MuBiTrue
-                pred_crit = MuBiTrue
-            else:
-                # Assume that in the remaining cases there are no faults.
-                pred_out = in_a
-
-            # Check MuBi
-            assert it.signals["fault_a"] in [MuBiTrue, MuBiFalse]
-            assert it.signals["fault_b"] in [MuBiTrue, MuBiFalse]
-            assert it.signals["fault_c"] in [MuBiTrue, MuBiFalse]
-            assert it.signals["critical"] in [MuBiTrue, MuBiFalse]
-
-            # Check
-            if pred_out is not None:
-                assert pred_out == it.signals["out"]
-
-            assert pred_fault_a == it.signals["fault_a"]
-            assert pred_fault_b == it.signals["fault_b"]
-            assert pred_fault_c == it.signals["fault_c"]
-            assert pred_crit == it.signals["critical"]
-
-
-# ==============================================================================
-
-
 @test()
 class TestVoting(BaseTest):
     def __init__(self, name, parent):
-        super().__init__(name, parent, TestSequence, Scoreboard)
+        super().__init__(name, parent, TestSequence)

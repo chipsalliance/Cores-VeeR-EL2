@@ -15,6 +15,37 @@ from pyuvm import *
 MuBiFalse = 0b01
 MuBiTrue = 0b10
 
+
+def mubi_from_bool(b):
+    return MuBiTrue if b else MuBiFalse
+
+
+# ==============================================================================
+
+
+def predict_dut(in_a, in_b, in_c, en_a, en_b, en_c):
+
+    # Majority voting
+    pred_out = (in_a & in_b) | (in_a & in_c) | (in_b & in_c)
+
+    # Faults
+    pred_fault_a = (in_a != pred_out) or en_a == MuBiFalse
+    pred_fault_b = (in_b != pred_out) or en_b == MuBiFalse
+    pred_fault_c = (in_c != pred_out) or en_c == MuBiFalse
+
+    # Critical
+    pred_crit = sum([pred_fault_a, pred_fault_b, pred_fault_c]) >= 2
+
+    # Map to MuBi, return
+    return (
+        pred_out,
+        mubi_from_bool(pred_fault_a),
+        mubi_from_bool(pred_fault_b),
+        mubi_from_bool(pred_fault_c),
+        mubi_from_bool(pred_crit),
+    )
+
+
 # ==============================================================================
 
 
@@ -104,7 +135,39 @@ class BaseScoreboard(uvm_component):
         self.port.connect(self.fifo.get_export)
 
     def check_phase(self):
-        raise NotImplementedError()
+        self.passed = True
+
+        while self.port.can_get():
+            _, it = self.port.try_get()
+            self.logger.debug(str(it))
+
+            in_a = it.signals["in_a"]
+            in_b = it.signals["in_b"]
+            in_c = it.signals["in_c"]
+
+            en_a = it.signals["en_a"]
+            en_b = it.signals["en_b"]
+            en_c = it.signals["en_c"]
+
+            # Predict
+            pred_out, pred_fault_a, pred_fault_b, pred_fault_c, pred_crit = predict_dut(
+                in_a, in_b, in_c, en_a, en_b, en_c
+            )
+
+            # Check MuBi
+            assert it.signals["fault_a"] in [MuBiTrue, MuBiFalse]
+            assert it.signals["fault_b"] in [MuBiTrue, MuBiFalse]
+            assert it.signals["fault_c"] in [MuBiTrue, MuBiFalse]
+            assert it.signals["critical"] in [MuBiTrue, MuBiFalse]
+
+            # Check
+            if pred_out is not None:
+                assert pred_out == it.signals["out"]
+
+            assert pred_fault_a == it.signals["fault_a"]
+            assert pred_fault_b == it.signals["fault_b"]
+            assert pred_fault_c == it.signals["fault_c"]
+            assert pred_crit == it.signals["critical"]
 
     def final_phase(self):
         if not self.passed:

@@ -9,6 +9,7 @@ overview
 memory-map
 error-protection
 dual-core-lock-step
+triple-modular-redundancy
 timers
 power
 interrupts

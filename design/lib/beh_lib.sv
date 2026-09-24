@@ -15,6 +15,7 @@
 
 // all flops call the rvdff flop
 
+`include "common_defines.vh"
 
 module rvdff #( parameter WIDTH=1, SHORT=0 )
    (
@@ -766,6 +767,34 @@ module rvecc_decode_64  (
 
  endmodule // rvecc_decode_64
 
+`ifndef TECH_SPECIFIC_EC_RV_TMR
+module `TEC_RV_TMR
+  (
+    input  logic I0, I1, I2,
+    output logic O
+    );
+
+  assign O = (I0 & I1) | (I1 & I2) | (I2 & I0);
+
+endmodule
+`endif
+
+module rvtmr
+#( parameter WIDTH=1 )(
+    input  logic[WIDTH-1:0] I [3],
+    output logic[WIDTH-1:0] O
+);
+
+    for(genvar i=0; i< WIDTH; i++) begin
+`ifdef TECH_SPECIFIC_EC_RV_ICG
+        `USER_EC_RV_TMR voter(.I0(I[0][i]), .I1(I[1][i]), .I2(I[2][i]), .O(O[i]));
+`else
+        `TEC_RV_TMR voter(.I0(I[0][i]), .I1(I[1][i]), .I2(I[2][i]), .O(O[i]));
+`endif
+    end
+
+endmodule
+
 `ifndef TECH_SPECIFIC_EC_RV_ICG
 module `TEC_RV_ICG
   (
@@ -837,5 +866,79 @@ module rvoclkhdr
 
 endmodule
 
+/*
+   A mux that switches between its input and tieoff
+*/
+module rvotieoff #(
+   parameter unsigned             WIDTH  = 1,
+   parameter unsigned [WIDTH-1:0] TIEOFF = '0
+) (
+   input  logic [WIDTH-1:0] din,   // Data input
+   output logic [WIDTH-1:0] dout,  // Data output
+   input  logic             inh    // Output inhibit
+);
 
+   // Async. mux between input and TIEOFF
+   assign dout =  ({WIDTH{~inh}} & din) | ({WIDTH{inh}} & TIEOFF);
 
+endmodule // rvotieoff
+
+/*
+   A latch that stores its input state when the inhibit input is high
+*/
+module rvolatch #(
+   parameter unsigned             WIDTH  = 1
+) (
+   input  logic [WIDTH-1:0] din,   // Data input
+   output logic [WIDTH-1:0] dout,  // Data output
+   input  logic             inh    // Output inhibit
+);
+
+   // Latch
+   always_latch begin
+      if (!inh) dout = din;
+   end
+
+endmodule // rvolatch
+
+/*
+   An output gate module used to cut-off output from logic being asynchronously
+   reset.
+*/
+module rvogate #(
+   parameter unsigned             WIDTH  = 1,
+   parameter unsigned [WIDTH-1:0] TIEOFF = '0
+) (
+   input  logic [WIDTH-1:0] din,   // Data input
+   output logic [WIDTH-1:0] dout,  // Data output
+   input  logic             inh    // Output inhibit
+);
+
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ISOLATE_LATCH
+   rvolatch  #(.WIDTH(WIDTH)) latch (.*);
+`else
+   rvotieoff #(.WIDTH(WIDTH), .TIEOFF(TIEOFF)) mux (.*);
+`endif
+
+endmodule // rvogate
+/*
+   The module is used to store a el2_mubi_t value. It resets to El2MuBiFalse.
+   The implementation uses a regular rvdff plus inverters (via static XOR)
+*/
+module rvmubidff # (
+   localparam unsigned WIDTH = $bits(el2_mubi_pkg::el2_mubi_t)
+)(
+   input  logic              clk,
+   input  logic              rst_l,
+   input  logic [WIDTH-1:0]  din,
+   output logic [WIDTH-1:0]  dout
+);
+
+   logic [WIDTH-1:0] dff_d;
+   logic [WIDTH-1:0] dff_q;
+
+   assign dff_d = din ^ el2_mubi_pkg::El2MuBiFalse;
+   rvdff #(WIDTH) dff (.*, .din(dff_d), .dout(dff_q));
+   assign dout = dff_q ^ el2_mubi_pkg::El2MuBiFalse;
+
+endmodule

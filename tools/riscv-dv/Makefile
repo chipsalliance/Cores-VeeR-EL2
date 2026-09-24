@@ -54,6 +54,7 @@ VERILATOR_EXTRA_DEFS = +define+TB_SILENT_FAIL
 
 HDL_FILES = $(WORK_DIR)/common_defines.vh \
             $(WORK_DIR)/el2_pdef.vh \
+            $(RV_ROOT)/testbench/tb_top_if.sv \
             $(RV_ROOT)/testbench/tb_top_pkg.sv \
             $(RV_ROOT)/testbench/tb_top.sv \
             $(RV_ROOT)/testbench/ahb_sif.sv \

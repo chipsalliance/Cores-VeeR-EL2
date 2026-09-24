@@ -1,0 +1,109 @@
+// Copyright 2026 Antmicro <www.antmicro.com>
+// //
+// // SPDX-License-Identifier: Apache-2.0
+//
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+module el2_tmr_dmi
+  import el2_mubi_pkg::*;
+(
+    input  logic clk,
+    input  logic rst_l,
+
+    // DMI
+    input  logic        dmi_reg_en,
+    input  logic        dmi_reg_wr_en,
+    input  logic [6:0]  dmi_reg_addr,
+    input  logic [31:0] dmi_reg_wdata,
+    output logic [31:0] dmi_reg_rdata,
+
+    // DMI TMR
+    output logic        dmi_reg_en_veer[3],
+    output logic        dmi_reg_wr_en_veer[3],
+    output logic [ 6:0] dmi_reg_addr_veer[3],
+    output logic [31:0] dmi_reg_wdata_veer[3],
+    input  logic [31:0] dmi_reg_rdata_veer[3],
+
+    // Fault inputs
+    input  el2_mubi_pkg::el2_mubi_t dmi_fault_d[3],
+    // Fault outputs
+    output el2_mubi_pkg::el2_mubi_t dmi_fault_q[3],
+    // Fault clear inputs
+    input  el2_mubi_pkg::el2_mubi_t dmi_fault_clr[3],
+
+    // Inhibit (cutoff) input
+    input  el2_mubi_pkg::el2_mubi_t dmi_output_inhibit
+);
+
+  // ......................................................
+
+  logic        dmi_reg_en_int;
+  logic        dmi_reg_wr_en_int;
+  logic [6:0]  dmi_reg_addr_int;
+  logic [31:0] dmi_reg_wdata_int;
+  logic [31:0] dmi_reg_rdata_int;
+
+  el2_mubi_t enable[3];
+
+  el2_mubi_t fault_dmi_reg_rdata[3];
+  el2_mubi_t crit_dmi_reg_rdata_nc;
+
+  // ......................................................
+
+  el2_tmr_voter #(.Width($bits(dmi_reg_rdata))) u_voter_dmi_reg_rdata (
+    .in_a     (dmi_reg_rdata_veer[0]),
+    .in_b     (dmi_reg_rdata_veer[1]),
+    .in_c     (dmi_reg_rdata_veer[2]),
+
+    .en_a     (enable[0]),
+    .en_b     (enable[1]),
+    .en_c     (enable[2]),
+
+    .out      (dmi_reg_rdata_int),
+
+    .fault_a  (fault_dmi_reg_rdata[0]),
+    .fault_b  (fault_dmi_reg_rdata[1]),
+    .fault_c  (fault_dmi_reg_rdata[2]),
+
+    .critical (crit_dmi_reg_rdata_nc)
+  );
+
+  // ......................................................
+
+  logic  inh;
+  assign inh = mubi_check_true(dmi_output_inhibit);
+
+  rvogate #(.WIDTH($bits(dmi_reg_rdata_int))) u_dmi_reg_rdata_gate (.*, .din(dmi_reg_rdata_int), .dout(dmi_reg_rdata));
+  rvogate #(.WIDTH($bits(dmi_reg_en_int)))    u_dmi_reg_en_gate    (.*, .din(dmi_reg_en),        .dout(dmi_reg_en_int));
+  rvogate #(.WIDTH($bits(dmi_reg_addr_int)))  u_dmi_reg_addr_gate  (.*, .din(dmi_reg_addr),      .dout(dmi_reg_addr_int));
+  rvogate #(.WIDTH($bits(dmi_reg_wr_en_int))) u_dmi_reg_wr_en_gate (.*, .din(dmi_reg_wr_en),     .dout(dmi_reg_wr_en_int));
+  rvogate #(.WIDTH($bits(dmi_reg_wdata_int))) u_dmi_reg_wdata_gate (.*, .din(dmi_reg_wdata),     .dout(dmi_reg_wdata_int));
+
+  // ......................................................
+
+  // Fault aggregation and registers
+  for (genvar i=0; i<3; i=i+1) begin : fault
+    el2_mubi_t fault_any;
+
+    assign fault_any = mubi_or(fault_dmi_reg_rdata[i], dmi_fault_d[i]);
+
+    el2_tmr_fault_storage storage (
+      .*,
+      .fault_i  (fault_any),
+      .fault_o  (dmi_fault_q[i]),
+      .clr_i    (dmi_fault_clr[i])
+    );
+
+    assign enable[i] = mubi_not(dmi_fault_q[i]);
+
+  end
+
+  // Propagate response to Cores
+  for (genvar i=0; i < 3; i+=1) begin : resp
+    assign dmi_reg_en_veer[i]    = dmi_reg_en_int;
+    assign dmi_reg_addr_veer[i]  = dmi_reg_addr_int;
+    assign dmi_reg_wr_en_veer[i] = dmi_reg_wr_en_int;
+    assign dmi_reg_wdata_veer[i] = dmi_reg_wdata_int;
+  end
+
+endmodule
+`endif

@@ -42,6 +42,14 @@ import el2_pkg::*;
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
     el2_regfile_if.veer_gpr_rf regfile,
 `endif
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    input  el2_mubi_pkg::el2_mubi_t recovery_gpr_en,     // Enable the GPR state recovery
+    input  logic                    recovery_gpr_wen,    // GPR recovery backdoor write enable
+    input  logic [ 4:0]             recovery_gpr_wraddr, // GPR recovery backdoor write address
+    input  logic [31:0]             recovery_gpr_wrdata, // GPR recovery backdoor write data
+    input  logic [ 4:0]             recovery_gpr_rdaddr, // GPR recovery backdoor read address
+    output logic [31:0]             recovery_gpr_rddata, // GPR recovery backdoor read data
+`endif
 
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
    /*pragma coverage off*/
@@ -52,6 +60,10 @@ import el2_pkg::*;
    logic [31:1] [31:0] gpr_out;      // 31 x 32 bit GPRs
    logic [31:1] [31:0] gpr_in;
    logic [31:1] w0v,w1v,w2v;
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+   logic [31:1] w3v;
+   logic        wen3;
+`endif
    logic [31:1] gpr_wr_en;
 
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
@@ -74,10 +86,18 @@ import el2_pkg::*;
 `endif
 
    // GPR Write Enables
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+   assign gpr_wr_en[31:1] = (w0v[31:1] | w1v[31:1] | w2v[31:1] | w3v[31:1]);
+`else
    assign gpr_wr_en[31:1] = (w0v[31:1] | w1v[31:1] | w2v[31:1]);
+`endif
    for ( genvar j=1; j<32; j++ )  begin : gpr
       rvdffe #(32) gprff (.*, .en(gpr_wr_en[j]), .din(gpr_in[j][31:0]), .dout(gpr_out[j][31:0]));
    end : gpr
+
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+      assign wen3 = el2_mubi_pkg::mubi_check_true(recovery_gpr_en) & recovery_gpr_wen;
+`endif
 
    // the read out
    always_comb begin
@@ -86,12 +106,19 @@ import el2_pkg::*;
       w0v[31:1] = 31'b0;
       w1v[31:1] = 31'b0;
       w2v[31:1] = 31'b0;
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+      recovery_gpr_rddata[31:0] = 32'b0;
+`endif
       gpr_in[31:1] = '0;
 
       // GPR Read logic
       for (int j=1; j<32; j++ )  begin
          rd0[31:0] |= ({32{(raddr0[4:0]== 5'(j))}} & gpr_out[j][31:0]);
          rd1[31:0] |= ({32{(raddr1[4:0]== 5'(j))}} & gpr_out[j][31:0]);
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+      recovery_gpr_rddata[31:0] |= (
+          {32{(el2_mubi_pkg::mubi_check_true(recovery_gpr_en) & (recovery_gpr_rdaddr[4:0]== 5'(j)))}} & gpr_out[j][31:0]);
+`endif
       end
 
      // GPR Write logic
@@ -99,8 +126,14 @@ import el2_pkg::*;
          w0v[j]     = wen0  & (waddr0[4:0]== 5'(j) );
          w1v[j]     = wen1  & (waddr1[4:0]== 5'(j) );
          w2v[j]     = wen2  & (waddr2[4:0]== 5'(j) );
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+         w3v[j]     = wen3  & (recovery_gpr_wraddr[4:0]== 5'(j));
+`endif
          gpr_in[j]  =    ({32{w0v[j]}} & wd0[31:0]) |
                          ({32{w1v[j]}} & wd1[31:0]) |
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+                         ({32{w3v[j]}} & recovery_gpr_wrdata[31:0]) |
+`endif
                          ({32{w2v[j]}} & wd2[31:0]);
      end
    end // always_comb begin
@@ -110,6 +143,11 @@ import el2_pkg::*;
    logic  write_collision_unused;
    assign write_collision_unused = ( (w0v[31:1] == w1v[31:1]) & wen0 & wen1 ) |
                                    ( (w0v[31:1] == w2v[31:1]) & wen0 & wen2 ) |
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+                                   ( (w3v[31:1] == w0v[31:1]) & wen3 & wen0 ) |
+                                   ( (w3v[31:1] == w1v[31:1]) & wen3 & wen1 ) |
+                                   ( (w3v[31:1] == w2v[31:1]) & wen3 & wen2 ) |
+`endif
                                    ( (w1v[31:1] == w2v[31:1]) & wen1 & wen2 );
 
 

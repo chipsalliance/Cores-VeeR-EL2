@@ -38,6 +38,8 @@ import el2_pkg::*;
    input logic scan_mode,
    /*pragma coverage on*/
 
+   output logic reset_delayed, // Reset detection
+
    //rst_vec is supposed to be connected to constant in the top level
    /*pragma coverage off*/
    input logic [31:1] rst_vec, // reset vector, from core pins
@@ -265,6 +267,10 @@ import el2_pkg::*;
 
 `endif
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+   output logic [31:1] dec_tlu_npc,   // Next state of the PC register
+`endif
+
    // pmp
    output el2_pmp_cfg_pkt_t pmp_pmpcfg  [pt.PMP_ENTRIES],
    output logic [31:0]      pmp_pmpaddr [pt.PMP_ENTRIES]
@@ -277,7 +283,7 @@ import el2_pkg::*;
                  tdata_kill_write;
 
 
-   logic reset_delayed, reset_detect, reset_detected;
+   logic reset_detect, reset_detected;
    logic wr_mstatus_r, wr_mtvec_r, wr_mcyclel_r, wr_mcycleh_r,
          wr_minstretl_r, wr_minstreth_r, wr_mscratch_r, wr_mepc_r, wr_mcause_r, wr_mscause_r, wr_mtval_r,
          wr_mrac_r, wr_meihap_r, wr_meicurpl_r, wr_meipt_r, wr_dcsr_r,
@@ -1728,7 +1734,8 @@ end
 
    assign wr_mcyclel_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MCYCLEL);
 
-   assign mcyclel_cout_in = ~(kill_ebreak_count_r | (dec_tlu_dbg_halted & dcsr[DCSR_STOPC]) | dec_tlu_pmu_fw_halted | mcountinhibit[0]);
+   assign mcyclel_cout_in = ~(kill_ebreak_count_r | (dec_tlu_dbg_halted & dcsr[DCSR_STOPC]) | dec_tlu_pmu_fw_halted | mcountinhibit[0] |
+      (pt.MCYCLE_STOP_MPC_HALT & (mpc_halt_state_ns | ~reset_detect)));
 
    // split for power
    assign {mcyclela_cout, mcyclel_inc[7:0]}  = mcyclel[7:0] +  {7'b0, 1'b1};
@@ -1825,6 +1832,10 @@ end
                           ({31{~pc0_valid_r}} & pc_r_d1[31:1]));
 
    rvdffpcie #(31)  pwbc_ff (.*, .en(pc0_valid_r), .din(pc_r[31:1]), .dout(pc_r_d1[31:1]));
+
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+   assign dec_tlu_npc = npc_r;
+`endif
 
    assign wr_mepc_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MEPC);
 

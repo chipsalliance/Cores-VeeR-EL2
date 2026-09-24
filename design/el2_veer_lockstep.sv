@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+`ifdef RV_LOCKSTEP_ENABLE
 module el2_veer_lockstep
   import el2_pkg::*;
   import el2_mubi_pkg::*;
@@ -1187,3 +1188,4 @@ module el2_veer_lockstep
   assign case1 = disable_detection_invalid;
   assign corruption_detected_o = mubi_and(mubi_or(case0, case1), mubi_from_bool(rst_n));
 endmodule : el2_veer_lockstep
+`endif

@@ -31,202 +31,45 @@ module el2_tmr_voter # (
 );
   import el2_mubi_pkg::*;
 
-  // Comparators
-  el2_mubi_t cmp_ab;
-  el2_mubi_t cmp_bc;
-  el2_mubi_t cmp_ca;
+  logic [Width-1:0] in[3];
+  el2_mubi_t        en[3];
 
-  always_comb begin
-    cmp_ab = mubi_from_bool(in_a === in_b);
-    cmp_bc = mubi_from_bool(in_b === in_c);
-    cmp_ca = mubi_from_bool(in_c === in_a);
-  end
+  assign in = '{in_a, in_b, in_c}; 
+  assign en = '{en_a, en_b, en_c}; 
 
-  // Mux selectors
-  el2_mubi_t sel_a;
-  el2_mubi_t sel_b;
-  el2_mubi_t sel_c;
+  // Majority voting
+  rvtmr #(.WIDTH(Width)) voter (
+    .I (in),
+    .O (out)
+  );
 
-  // Voting and fault detection
-  always_comb begin
+  // Fault detection
+  el2_mubi_t fault[3];
+  for (genvar i=0; i<3; ++i) begin : fault_detection
 
-    // Majority voting
-    if (mubi_check_true(mubi_and3(en_a, en_b, en_c))) begin
-
-      // A is faulty
-      if (mubi_check_true(mubi_and3(mubi_not(cmp_ab), cmp_bc, mubi_not(cmp_ca)))) begin
-        fault_a = El2MuBiTrue;
-        fault_b = El2MuBiFalse;
-        fault_c = El2MuBiFalse;
-
-        sel_a   = El2MuBiFalse;
-        sel_b   = El2MuBiTrue;
-        sel_c   = El2MuBiFalse;
-
-        critical = El2MuBiFalse;
-
-      // B is faulty
-      end else if (mubi_check_true(mubi_and3(mubi_not(cmp_ab), mubi_not(cmp_bc), cmp_ca))) begin
-        fault_a = El2MuBiFalse;
-        fault_b = El2MuBiTrue;
-        fault_c = El2MuBiFalse;
-
-        sel_a   = El2MuBiFalse;
-        sel_b   = El2MuBiFalse;
-        sel_c   = El2MuBiTrue;
-
-        critical = El2MuBiFalse;
-
-      // C is faulty
-      end else if (mubi_check_true(mubi_and3(cmp_ab, mubi_not(cmp_bc), mubi_not(cmp_ca)))) begin
-        fault_a = El2MuBiFalse;
-        fault_b = El2MuBiFalse;
-        fault_c = El2MuBiTrue;
-
-        sel_a   = El2MuBiTrue;
-        sel_b   = El2MuBiFalse;
-        sel_c   = El2MuBiFalse;
-
-        critical = El2MuBiFalse;
-
-      // Complete disagreement
-      end else if (mubi_check_true(mubi_and3(mubi_not(cmp_ab), mubi_not(cmp_bc), mubi_not(cmp_ca)))) begin
-        fault_a = El2MuBiTrue;
-        fault_b = El2MuBiTrue;
-        fault_c = El2MuBiTrue;
-
-        sel_a   = El2MuBiFalse;
-        sel_b   = El2MuBiFalse;
-        sel_c   = El2MuBiFalse;
-
-        critical = El2MuBiTrue;
-
-      // Complete agreement
-      end else begin
-        fault_a = El2MuBiFalse;
-        fault_b = El2MuBiFalse;
-        fault_c = El2MuBiFalse;
-
-        sel_a   = El2MuBiTrue;
-        sel_b   = El2MuBiFalse;
-        sel_c   = El2MuBiFalse;
-
-        critical = El2MuBiFalse;
+    // Compare bit-by-bit and OR reduce
+    el2_mubi_t neq_any;
+    always_comb begin
+      neq_any = El2MuBiFalse;
+      for (int j=0; j<Width; ++j) begin
+        neq_any = mubi_or(neq_any, mubi_from_bool(in[i][j] ^ out[j]));
       end
-
-    // A is disabled
-    end else if (mubi_check_true(mubi_and3(mubi_not(en_a), en_b, en_c))) begin
-
-      // B and C mismatch
-      if (mubi_check_false(cmp_bc)) begin
-        fault_a = El2MuBiFalse;
-        fault_b = El2MuBiTrue;
-        fault_c = El2MuBiTrue;
-
-        sel_a   = El2MuBiFalse;
-        sel_b   = El2MuBiFalse;
-        sel_c   = El2MuBiFalse;
-
-        critical = El2MuBiTrue;
-
-      // Agreement
-      end else begin
-        fault_a = El2MuBiFalse;
-        fault_b = El2MuBiFalse;
-        fault_c = El2MuBiFalse;
-
-        sel_a   = El2MuBiFalse;
-        sel_b   = El2MuBiTrue;
-        sel_c   = El2MuBiFalse;
-
-        critical = El2MuBiFalse;
-      end
-
-    // B is disabled
-    end else if (mubi_check_true(mubi_and3(en_a, mubi_not(en_b), en_c))) begin
-
-      // C and A mismatch
-      if (mubi_check_false(cmp_ca)) begin
-        fault_a = El2MuBiTrue;
-        fault_b = El2MuBiFalse;
-        fault_c = El2MuBiTrue;
-
-        sel_a   = El2MuBiFalse;
-        sel_b   = El2MuBiFalse;
-        sel_c   = El2MuBiFalse;
-
-        critical = El2MuBiTrue;
-
-      // Agreement
-      end else begin
-        fault_a = El2MuBiFalse;
-        fault_b = El2MuBiFalse;
-        fault_c = El2MuBiFalse;
-
-        sel_a   = El2MuBiFalse;
-        sel_b   = El2MuBiFalse;
-        sel_c   = El2MuBiTrue;
-
-        critical = El2MuBiFalse;
-      end
-
-    // C is disabled
-    end else if (mubi_check_true(mubi_and3(en_a, en_b, mubi_not(en_c)))) begin
-
-      // A and B mismatch
-      if (mubi_check_false(cmp_ab)) begin
-        fault_a = El2MuBiTrue;
-        fault_b = El2MuBiTrue;
-        fault_c = El2MuBiFalse;
-
-        sel_a   = El2MuBiFalse;
-        sel_b   = El2MuBiFalse;
-        sel_c   = El2MuBiFalse;
-
-        critical = El2MuBiTrue;
-
-      // Agreement
-      end else begin
-        fault_a = El2MuBiFalse;
-        fault_b = El2MuBiFalse;
-        fault_c = El2MuBiFalse;
-
-        sel_a   = El2MuBiTrue;
-        sel_b   = El2MuBiFalse;
-        sel_c   = El2MuBiFalse;
-
-        critical = El2MuBiFalse;
-      end
-
-    // Two or more inputs are disabled
-    end else begin
-      fault_a = en_a;
-      fault_b = en_b;
-      fault_c = en_c;
-
-      sel_a   = El2MuBiFalse;
-      sel_b   = El2MuBiFalse;
-      sel_c   = El2MuBiFalse;
-
-      critical = El2MuBiTrue;
     end
 
-  end
+    // Gate with enable
+    assign fault[i] = mubi_or(neq_any, mubi_not(en[i]));
+  end  
 
-  // Output multiplexer
-  always_comb begin
-    out = '0;
+  // Map outputs
+  assign fault_a = fault[0];
+  assign fault_b = fault[1];
+  assign fault_c = fault[2];
 
-    if (mubi_check_true(sel_a)) begin
-      out |= in_a;
-    end
-    if (mubi_check_true(sel_b)) begin
-      out |= in_b;
-    end
-    if (mubi_check_true(sel_c)) begin
-      out |= in_c;
-    end
-  end
+  // Critical output
+  rvtmr #(.WIDTH($bits(el2_mubi_t))) critical_tmr (
+    .I (fault),
+    .O (critical)
+  );
 
 endmodule
 

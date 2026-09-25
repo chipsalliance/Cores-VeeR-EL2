@@ -47,8 +47,11 @@ async def dma_sb_error(dut, force_halt=False):
     dut.ifc_dma_access_ok.value = 1
     dut.iccm_rd_data.value = 44
     dut.iccm_rd_data_ecc.value = 44 ^ get_bitflip_mask(0)
+    # The single-bit error is in the second read word, which is only
+    # ECC-checked for 64-bit DMA reads.
+    dut.dma_mem_sz.value = 3
     await fetch_miss(dut, rand_ifu_addr())
-    await read(dut, rand_iccm_addr())
+    await read(dut, rand_iccm_addr() & ~0x7)
     await RisingEdge(dut.iccm_dma_rvalid)
     # dec_tlu_force_halt must appear here to achieve DMA_SB_ERR -> ERR_IDLE transition
     # FSM always switches state from `DMA_SB_ERR` in the next cycle

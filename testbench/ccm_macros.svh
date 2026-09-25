@@ -12,15 +12,21 @@ init_iccm();
 `endif
 addr = 'hffff_fff0;
 saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
-if ( (saddr < `RV_ICCM_SADR) || (saddr > `RV_ICCM_EADR)) return;
+addr += 4;
+eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
+if ((saddr < `RV_ICCM_SADR) || (saddr > `RV_ICCM_EADR)) return;
+if ((eaddr < `RV_ICCM_SADR) || (eaddr > `RV_ICCM_EADR)) begin
+    $display("[%0t ns] ********************************************************",$time);
+    $display("[%0t ns] ICCM content does not fit in the ICCM size, terminating!",$time);
+    $display("[%0t ns] ********************************************************",$time);
+    $finish;
+end
 `ifndef RV_ICCM_ENABLE
     $display("[%0t ns] ********************************************************",$time);
     $display("[%0t ns] ICCM preload: there is no ICCM in VeeR, terminating !!!",$time);
     $display("[%0t ns] ********************************************************",$time);
     $finish;
 `endif
-addr += 4;
-eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 $display("[%0t ns] ICCM pre-load from %h to %h",$time, saddr, eaddr);
 
 for(addr= saddr; addr <= eaddr; addr+=4) begin
@@ -47,15 +53,21 @@ addresses:
 
 addr = 'hffff_fff8;
 saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
+addr += 4;
+eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 if (saddr < `RV_DCCM_SADR || saddr > `RV_DCCM_EADR) return;
+if ((eaddr < `RV_DCCM_SADR) || (eaddr > `RV_DCCM_EADR)) begin
+    $display("[%0t ns] ********************************************************",$time);
+    $display("[%0t ns] DCCM content does not fit in the DCCM size, terminating!",$time);
+    $display("[%0t ns] ********************************************************",$time);
+    $finish;
+end
 `ifndef RV_DCCM_ENABLE
     $display("[%0t ns] ********************************************************",$time);
     $display("[%0t ns] DCCM preload: there is no DCCM in VeeR, terminating !!!",$time);
     $display("[%0t ns] ********************************************************",$time);
     $finish;
 `endif
-addr += 4;
-eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 $display("[%0t ns] DCCM pre-load from %h to %h",$time, saddr, eaddr);
 
 for(addr=saddr; addr <= eaddr; addr+=4) begin

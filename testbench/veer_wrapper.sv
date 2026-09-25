@@ -427,7 +427,10 @@ module veer_wrapper
 
   // Functional coverage
 `ifdef FCOV
+`ifndef VERILATOR
   el2_veer_lockstep_cov_bind dcls_coverage();
+`endif
+  el2_veer_lockstep_delay_cov_bind dcls_delay_coverage();
 `endif
 
   el2_veer_wrapper rvtop (

@@ -780,6 +780,59 @@ module tb_top
     logic [8:0] inject_veer_in_dist_no, inject_lockstep_in_dist_no;
     bit   at_newline = 1'b1;
 
+`ifdef RV_DCCM_WR_READBACK
+    logic        dccm_write_readback_error;
+    logic        dccm_wr_skip_armed;
+    wire         dccm_wr_skip_active;
+    int          dccm_wr_rdbk_err_pulse_count;
+    logic [6:0]  dmi_target_addr;
+    logic [15:0] dmi_seq_id;
+    logic [31:0] dmi_rdata_latched;
+    typedef enum logic [3:0] {
+        DMI_IDLE,
+        DMI_RD_CYCLE1,
+        DMI_RD_CYCLE2,
+        DMI_WR_CYCLE1,
+        DMI_WR_CYCLE2,
+        DMI_ASYMM_CYCLE1,
+        DMI_ASYMM_CYCLE2
+    } dmi_fsm_t;
+    dmi_fsm_t dmi_fsm;
+    assign dccm_wr_skip_active = dccm_wr_skip_armed && el2_mem_export.dccm_clken && (|el2_mem_export.dccm_wren_bank);
+
+    // Phase 4: System Integration (DMA & ECC) Verification State (#512)
+    logic        sys_integ_p1_armed;
+    logic [1:0]  sys_integ_p1_state;
+    logic        sys_integ_p1_dccm_ready_seen_low;
+    logic        sys_integ_p1_dccm_ready_seen_high;
+    logic        sys_integ_p1_pass;
+
+    logic        sys_integ_p2_armed;
+    logic [1:0]  sys_integ_p2_state;
+    logic        sys_integ_p2_pass;
+
+    logic        sys_integ_p3_armed;
+    logic [1:0]  sys_integ_p3_state;
+    logic        sys_integ_p3_saw_defer;
+    logic        sys_integ_p3_pass;
+
+    logic        sys_integ_p4_armed;
+    logic [1:0]  sys_integ_p4_state;
+    logic        sys_integ_p4_pass;
+
+    logic        sys_integ_p5_armed;
+    logic [1:0]  sys_integ_p5_state;
+    logic        sys_integ_p5_saw_defer;
+    logic        sys_integ_p5_pass;
+
+    logic        force_p2_active;
+    logic        force_p3_active;
+    logic        force_p3_saw_issue;
+    logic        force_p4_active;
+    logic        force_p5_active;
+    logic        force_p5_saw_issue;
+`endif
+
     // Reconstruct 32-bit MUBI vectors transmitted via 32-bit tohost mailbox writes.
     // Since tohost is a 32-bit register and command opcodes occupy the lower byte (bits [7:0]),
     // a 32-bit MUBI payload shifted by 8 bits loses its top 8 bits (e.g. 0x55555555 becomes 0x00555555).
@@ -1151,6 +1204,537 @@ module tb_top
             end
         end
     end
+
+`ifdef RV_DCCM_WR_READBACK
+    initial begin
+        force rvtop_wrapper.rvtop.veer.dbg.dmcontrol_reg[0] = 1'b1;
+    end
+
+    always @(posedge core_clk or negedge rst_l_combined) begin
+        if (~rst_l_combined) begin
+            dccm_wr_skip_armed           <= 1'b0;
+            dccm_wr_rdbk_err_pulse_count <= 0;
+            dmi_target_addr              <= 7'h0;
+            dmi_seq_id                   <= 16'h0;
+            dmi_rdata_latched            <= 32'h0;
+            dmi_fsm                      <= DMI_IDLE;
+            sys_integ_p1_armed           <= 1'b0;
+            sys_integ_p1_state           <= 2'd0;
+            sys_integ_p1_dccm_ready_seen_low  <= 1'b0;
+            sys_integ_p1_dccm_ready_seen_high <= 1'b0;
+            sys_integ_p1_pass            <= 1'b0;
+            sys_integ_p2_armed           <= 1'b0;
+            sys_integ_p2_state           <= 2'd0;
+            sys_integ_p2_pass            <= 1'b0;
+            sys_integ_p3_armed           <= 1'b0;
+            sys_integ_p3_state           <= 2'd0;
+            sys_integ_p3_saw_defer       <= 1'b0;
+            sys_integ_p3_pass            <= 1'b0;
+            sys_integ_p4_armed           <= 1'b0;
+            sys_integ_p4_state           <= 2'd0;
+            sys_integ_p4_pass            <= 1'b0;
+            sys_integ_p5_armed           <= 1'b0;
+            sys_integ_p5_state           <= 2'd0;
+            sys_integ_p5_saw_defer       <= 1'b0;
+            sys_integ_p5_pass            <= 1'b0;
+            force rvtop_wrapper.rvtop.veer.dbg.dmcontrol_reg[0] = 1'b1;
+            release rvtop_wrapper.rvtop.dmi_reg_en;
+            release rvtop_wrapper.rvtop.dmi_reg_wr_en;
+            release rvtop_wrapper.rvtop.dmi_reg_addr;
+            release rvtop_wrapper.rvtop.dmi_reg_wdata;
+            release rvtop_wrapper.rvtop.veer.dma_mem_write;
+        `ifdef RV_LOCKSTEP_ENABLE
+            release rvtop_wrapper.rvtop.lockstep.xshadow_core.dccm_write_readback_error;
+            `ifdef RV_ASSERT_OR_VERILATOR
+                release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
+            `endif
+        `endif
+        end else begin
+            // Track dccm_write_readback_error pulse
+            if (dccm_write_readback_error) begin
+                dccm_wr_rdbk_err_pulse_count <= dccm_wr_rdbk_err_pulse_count + 1;
+                $display("[%0t ns] [TB] dccm_write_readback_error pulse #%0d observed", $time, dccm_wr_rdbk_err_pulse_count + 1);
+            end
+
+            // Disarm write skip once it fired
+            if (dccm_wr_skip_active) begin
+                dccm_wr_skip_armed <= 1'b0;
+                $display("[%0t ns] [TB] DCCM write-skip injected: suppressed DCCM RAM WE", $time);
+            end
+
+            // Synchronous FSM for DMI and Mailbox operations
+            case (dmi_fsm)
+                DMI_IDLE: begin
+                    if (mailbox_write) begin
+                        case (mailbox_data[7:0])
+                            8'hB0: begin
+                                dccm_wr_skip_armed <= 1'b1;
+                                dmi_seq_id <= mailbox_data[31:16];
+                                write_dccm_word(32'hF0047004, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xB0: DCCM write-skip armed (seq=%0d)", $time, mailbox_data[31:16]);
+                            end
+                            8'hB1: begin
+                                dmi_target_addr <= mailbox_data[14:8];
+                                dmi_seq_id      <= mailbox_data[31:16];
+                                force rvtop_wrapper.rvtop.dmi_reg_en    = 1'b1;
+                                force rvtop_wrapper.rvtop.dmi_reg_wr_en = 1'b0;
+                                force rvtop_wrapper.rvtop.dmi_reg_addr  = mailbox_data[14:8];
+                                force rvtop_wrapper.rvtop.dmi_reg_wdata = 32'h0;
+                                dmi_fsm <= DMI_RD_CYCLE1;
+                            end
+                            8'hB2: begin
+                                dmi_target_addr <= mailbox_data[14:8];
+                                dmi_seq_id      <= mailbox_data[31:16];
+                                force rvtop_wrapper.rvtop.dmi_reg_en    = 1'b1;
+                                force rvtop_wrapper.rvtop.dmi_reg_wr_en = 1'b1;
+                                force rvtop_wrapper.rvtop.dmi_reg_addr  = mailbox_data[14:8];
+                                force rvtop_wrapper.rvtop.dmi_reg_wdata = 32'h80000000;
+                                dmi_fsm <= DMI_WR_CYCLE1;
+                            end
+                            8'hB3: begin
+                                dmi_seq_id <= mailbox_data[31:16];
+                            `ifdef RV_LOCKSTEP_ENABLE
+                                `ifdef RV_ASSERT_OR_VERILATOR
+                                    force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
+                                `endif
+                                force rvtop_wrapper.rvtop.lockstep.xshadow_core.dccm_write_readback_error = 1'b1;
+                                dmi_fsm <= DMI_ASYMM_CYCLE1;
+                            `else
+                                write_dccm_word(32'hF0047000, 32'h0);
+                                write_dccm_word(32'hF0047004, {16'h0, mailbox_data[31:16]});
+                            `endif
+                            end
+                            8'hB4: begin
+                                dmi_seq_id <= mailbox_data[31:16];
+                                write_dccm_word(32'hF0047000, dccm_wr_rdbk_err_pulse_count);
+                                write_dccm_word(32'hF0047004, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xB4: reported pulse count = %0d (seq=%0d)", $time, dccm_wr_rdbk_err_pulse_count, mailbox_data[31:16]);
+                            end
+                            8'hB5: begin
+                                sys_integ_p1_armed <= 1'b1;
+                                sys_integ_p1_state <= 2'd0;
+                                sys_integ_p1_dccm_ready_seen_low  <= 1'b0;
+                                sys_integ_p1_dccm_ready_seen_high <= 1'b0;
+                                sys_integ_p1_pass <= 1'b0;
+                                dmi_seq_id <= mailbox_data[31:16];
+                                `ifdef RV_LOCKSTEP_ENABLE
+                                    `ifdef RV_ASSERT_OR_VERILATOR
+                                        force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
+                                    `endif
+                                `endif
+                                force rvtop_wrapper.rvtop.veer.dma_mem_write = 1'b1;
+                                write_dccm_word(32'hF0047000, 32'h1);
+                                write_dccm_word(32'hF0047004, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xB5: Phase 1 (DMA Write Collision) armed, forced dma_mem_write=1 (seq=%0d)", $time, mailbox_data[31:16]);
+                            end
+                            8'hB6: begin
+                                sys_integ_p2_armed <= 1'b1;
+                                sys_integ_p2_state <= 2'd0;
+                                sys_integ_p2_pass  <= 1'b0;
+                                dmi_seq_id <= mailbox_data[31:16];
+                                write_dccm_word(32'hF0047000, 32'h1);
+                                write_dccm_word(32'hF0047004, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xB6: Phase 2 (DMA Read Snoop) armed (seq=%0d)", $time, mailbox_data[31:16]);
+                            end
+                            8'hB7: begin
+                                sys_integ_p3_armed     <= 1'b1;
+                                sys_integ_p3_state     <= 2'd0;
+                                sys_integ_p3_saw_defer <= 1'b0;
+                                sys_integ_p3_pass      <= 1'b0;
+                                dmi_seq_id <= mailbox_data[31:16];
+                                write_dccm_word(32'hF0047000, 32'h1);
+                                write_dccm_word(32'hF0047004, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xB7: Phase 3 (DMA Read Steal Deferral) armed (seq=%0d)", $time, mailbox_data[31:16]);
+                            end
+                            8'hB8: begin
+                                sys_integ_p4_armed <= 1'b1;
+                                sys_integ_p4_state <= 2'd0;
+                                sys_integ_p4_pass  <= 1'b0;
+                                dmi_seq_id <= mailbox_data[31:16];
+                                write_dccm_word(32'hF0047000, 32'h1);
+                                write_dccm_word(32'hF0047004, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xB8: Phase 4 (ECC 1-Bit Snoop) armed (seq=%0d)", $time, mailbox_data[31:16]);
+                            end
+                            8'hB9: begin
+                                sys_integ_p5_armed     <= 1'b1;
+                                sys_integ_p5_state     <= 2'd0;
+                                sys_integ_p5_saw_defer <= 1'b0;
+                                sys_integ_p5_pass      <= 1'b0;
+                                dmi_seq_id <= mailbox_data[31:16];
+                                write_dccm_word(32'hF0047000, 32'h1);
+                                write_dccm_word(32'hF0047004, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xB9: Phase 5 (ECC 1-Bit Steal Deferral) armed (seq=%0d)", $time, mailbox_data[31:16]);
+                            end
+                            8'hBA: begin
+                                dmi_seq_id <= mailbox_data[31:16];
+                                case (mailbox_data[15:8])
+                                    8'd1: begin
+                                        write_dccm_word(32'hF0047000, {31'h0, sys_integ_p1_pass});
+                                        sys_integ_p1_armed <= 1'b0;
+                                    end
+                                    8'd2: begin
+                                        write_dccm_word(32'hF0047000, {31'h0, sys_integ_p2_pass});
+                                        sys_integ_p2_armed <= 1'b0;
+                                    end
+                                    8'd3: begin
+                                        write_dccm_word(32'hF0047000, {31'h0, sys_integ_p3_pass});
+                                        sys_integ_p3_armed <= 1'b0;
+                                    end
+                                    8'd4: begin
+                                        write_dccm_word(32'hF0047000, {31'h0, sys_integ_p4_pass});
+                                        sys_integ_p4_armed <= 1'b0;
+                                    end
+                                    8'd5: begin
+                                        write_dccm_word(32'hF0047000, {31'h0, sys_integ_p5_pass});
+                                        sys_integ_p5_armed <= 1'b0;
+                                    end
+                                    default: write_dccm_word(32'hF0047000, 32'h0);
+                                endcase
+                                write_dccm_word(32'hF0047004, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xBA: queried Phase %0d status (seq=%0d)", $time, mailbox_data[15:8], mailbox_data[31:16]);
+                            end
+                            default: ;
+                        endcase
+                    end
+                end
+
+                DMI_RD_CYCLE1: begin
+                    // dmi_reg_en remains asserted across this edge so dmi_rddata_reg flops dmi_reg_rdata_din
+                    dmi_fsm <= DMI_RD_CYCLE2;
+                end
+
+                DMI_RD_CYCLE2: begin
+                    dmi_rdata_latched = rvtop_wrapper.rvtop.dmi_reg_rdata;
+                    release rvtop_wrapper.rvtop.dmi_reg_en;
+                    release rvtop_wrapper.rvtop.dmi_reg_wr_en;
+                    release rvtop_wrapper.rvtop.dmi_reg_addr;
+                    release rvtop_wrapper.rvtop.dmi_reg_wdata;
+                    write_dccm_word(32'hF0047000, dmi_rdata_latched);
+                    write_dccm_word(32'hF0047004, {16'h0, dmi_seq_id});
+                    $display("[%0t ns] [TB] DMI read reg 0x%0h returned 0x%08x (seq=%0d)", $time, dmi_target_addr, dmi_rdata_latched, dmi_seq_id);
+                    dmi_fsm <= DMI_IDLE;
+                end
+
+                DMI_WR_CYCLE1: begin
+                    dmi_fsm <= DMI_WR_CYCLE2;
+                end
+
+                DMI_WR_CYCLE2: begin
+                    release rvtop_wrapper.rvtop.dmi_reg_en;
+                    release rvtop_wrapper.rvtop.dmi_reg_wr_en;
+                    release rvtop_wrapper.rvtop.dmi_reg_addr;
+                    release rvtop_wrapper.rvtop.dmi_reg_wdata;
+                    write_dccm_word(32'hF0047004, {16'h0, dmi_seq_id});
+                    $display("[%0t ns] [TB] DMI write reg 0x%0h (W1C clear) completed (seq=%0d)", $time, dmi_target_addr, dmi_seq_id);
+                    dmi_fsm <= DMI_IDLE;
+                end
+
+                DMI_ASYMM_CYCLE1: begin
+                `ifdef RV_LOCKSTEP_ENABLE
+                    write_dccm_word(32'hF0047000, (corruption_detected_o != el2_mubi_pkg::El2MuBiFalse) ? 32'h1 : 32'h0);
+                    release rvtop_wrapper.rvtop.lockstep.xshadow_core.dccm_write_readback_error;
+                    `ifdef RV_ASSERT_OR_VERILATOR
+                        release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
+                    `endif
+                    dmi_fsm <= DMI_ASYMM_CYCLE2;
+                `else
+                    dmi_fsm <= DMI_IDLE;
+                `endif
+                end
+
+                DMI_ASYMM_CYCLE2: begin
+                    write_dccm_word(32'hF0047004, {16'h0, dmi_seq_id});
+                    $display("[%0t ns] [TB] Asymmetric DCLS test completed (seq=%0d)", $time, dmi_seq_id);
+                    dmi_fsm <= DMI_IDLE;
+                end
+
+                default: dmi_fsm <= DMI_IDLE;
+            endcase
+
+            // Phase 1: DMA Write Collision Monitor (WR_SYS_001)
+            if (sys_integ_p1_armed) begin
+                case (sys_integ_p1_state)
+                    2'd0: begin
+                        if (rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff) begin
+                            if (~rvtop_wrapper.rvtop.veer.lsu.dccm_ready) begin
+                                sys_integ_p1_dccm_ready_seen_low <= 1'b1;
+                                $display("[%0t ns] [TB-Phase1] WR_SYS_001: Verified dccm_ready is 0 while dccm_wr_rdbk_pend_ff=1 and dma_mem_write=1", $time);
+                            end
+                            sys_integ_p1_state <= 2'd1;
+                        end
+                    end
+                    2'd1: begin
+                        if (~rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff) begin
+                            if (rvtop_wrapper.rvtop.veer.lsu.dccm_ready) begin
+                                sys_integ_p1_dccm_ready_seen_high <= 1'b1;
+                                $display("[%0t ns] [TB-Phase1] WR_SYS_001: Verified dccm_ready restored to 1 after pending check resolved", $time);
+                            end
+                            release rvtop_wrapper.rvtop.veer.dma_mem_write;
+                            `ifdef RV_LOCKSTEP_ENABLE
+                                `ifdef RV_ASSERT_OR_VERILATOR
+                                    release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
+                                `endif
+                            `endif
+                            if (sys_integ_p1_dccm_ready_seen_low && rvtop_wrapper.rvtop.veer.lsu.dccm_ready) begin
+                                sys_integ_p1_pass <= 1'b1;
+                                $display("[%0t ns] [TB-Phase1] WR_SYS_001: PHASE 1 VERIFIED SUCCESSFULLY", $time);
+                            end
+                            sys_integ_p1_armed <= 1'b0;
+                            sys_integ_p1_state <= 2'd0;
+                        end
+                    end
+                    default: sys_integ_p1_state <= 2'd0;
+                endcase
+            end
+
+            // Phase 2: DMA Read Collision Snoop Path Monitor (WR_SYS_002A)
+            if (sys_integ_p2_armed && force_p2_active) begin
+                if (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_snoop_lo &&
+                    ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_issue &&
+                    rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_resolve &&
+                    rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff) begin
+                    sys_integ_p2_pass <= 1'b1;
+                    $display("[%0t ns] [TB-Phase2] WR_SYS_002A: Verified snoop_lo=1, issue=0 (no port steal), resolve=1", $time);
+                end else begin
+                    $display("[%0t ns] [TB-Phase2] WR_SYS_002A ERROR: pend=%b, snoop_lo=%b, issue=%b, resolve=%b", $time,
+                             rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff,
+                             rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_snoop_lo,
+                             rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_issue,
+                             rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_resolve);
+                end
+                release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.lsu_dccm_rden_d;
+                release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.addr_in_dccm_d;
+                release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.lsu_addr_d;
+                `ifdef RV_LOCKSTEP_ENABLE
+                    `ifdef RV_ASSERT_OR_VERILATOR
+                        release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
+                    `endif
+                `endif
+                sys_integ_p2_armed <= 1'b0;
+            end
+
+            // Phase 3: DMA Read Steal Deferral Monitor (WR_SYS_002B)
+            if (sys_integ_p3_armed) begin
+                case (sys_integ_p3_state)
+                    2'd0: begin
+                        if (force_p3_active) begin
+                            if (~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_snoop_lo &&
+                                ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_issue &&
+                                ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_resolve &&
+                                rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff) begin
+                                sys_integ_p3_saw_defer <= 1'b1;
+                                $display("[%0t ns] [TB-Phase3] WR_SYS_002B: Cycle 1 verified - issue=0 (steal deferred by DMA read), pend=1", $time);
+                            end else begin
+                                $display("[%0t ns] [TB-Phase3] WR_SYS_002B ERROR: Cycle 1 failed - pend=%b, issue=%b, resolve=%b", $time,
+                                         rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff,
+                                         rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_issue,
+                                         rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_resolve);
+                            end
+                            sys_integ_p3_state <= 2'd1;
+                        end
+                    end
+                    2'd1: begin
+                        sys_integ_p3_state <= 2'd2;
+                    end
+                    2'd2: begin
+                        if ((force_p3_saw_issue || rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_active) && sys_integ_p3_saw_defer) begin
+                            sys_integ_p3_pass <= 1'b1;
+                            $display("[%0t ns] [TB-Phase3] WR_SYS_002B: Cycle 2 verified - issue=1 on idle cycle, resolve=1", $time);
+                        end else begin
+                            $display("[%0t ns] [TB-Phase3] WR_SYS_002B ERROR: Cycle 2 failed - saw_issue=%b, active=%b, saw_defer=%b", $time,
+                                     force_p3_saw_issue, rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_active, sys_integ_p3_saw_defer);
+                        end
+                        `ifdef RV_LOCKSTEP_ENABLE
+                            `ifdef RV_ASSERT_OR_VERILATOR
+                                release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
+                            `endif
+                        `endif
+                        sys_integ_p3_armed <= 1'b0;
+                        sys_integ_p3_state <= 2'd0;
+                    end
+                    default: sys_integ_p3_state <= 2'd0;
+                endcase
+            end
+
+            // Phase 4: ECC 1-Bit Correction Snoop Path Monitor (WR_SYS_003A)
+            if (sys_integ_p4_armed && force_p4_active) begin
+                if (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_snoop_lo &&
+                    ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_issue &&
+                    rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_resolve &&
+                    rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff) begin
+                    sys_integ_p4_pass <= 1'b1;
+                    $display("[%0t ns] [TB-Phase4] WR_SYS_003A: Verified snoop_lo=1, issue=0 (resolves via snoop before correction write-back)", $time);
+                end else begin
+                    $display("[%0t ns] [TB-Phase4] WR_SYS_003A ERROR: snoop_lo=%b, issue=%b, resolve=%b", $time,
+                             rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_snoop_lo,
+                             rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_issue,
+                             rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_resolve);
+                end
+                release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.lsu_dccm_rden_d;
+                release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.addr_in_dccm_d;
+                release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.lsu_addr_d;
+                release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.end_addr_d;
+                release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.ld_single_ecc_error_lo_r_ff;
+                `ifdef RV_LOCKSTEP_ENABLE
+                    `ifdef RV_ASSERT_OR_VERILATOR
+                        release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
+                    `endif
+                `endif
+                sys_integ_p4_armed <= 1'b0;
+            end
+
+            // Phase 5: ECC 1-Bit Correction Steal Deferral Monitor (WR_SYS_003B)
+            if (sys_integ_p5_armed) begin
+                case (sys_integ_p5_state)
+                    2'd0: begin
+                        if (force_p5_active) begin
+                            if (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.ld_single_ecc_error_r_ff &&
+                                ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_issue &&
+                                ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_resolve &&
+                                rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff) begin
+                                sys_integ_p5_saw_defer <= 1'b1;
+                                $display("[%0t ns] [TB-Phase5] WR_SYS_003B: Cycle 1 verified - ld_single_ecc_error_r_ff=1, issue=0 (steal deferred by ECC write-back), pend=1", $time);
+                            end else begin
+                                $display("[%0t ns] [TB-Phase5] WR_SYS_003B ERROR: Cycle 1 failed - ld_ecc_ff=%b, issue=%b, resolve=%b", $time,
+                                         rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.ld_single_ecc_error_r_ff,
+                                         rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_issue,
+                                         rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_resolve);
+                            end
+                            sys_integ_p5_state <= 2'd1;
+                        end
+                    end
+                    2'd1: begin
+                        sys_integ_p5_state <= 2'd2;
+                    end
+                    2'd2: begin
+                        if ((force_p5_saw_issue || rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_active) && sys_integ_p5_saw_defer) begin
+                            sys_integ_p5_pass <= 1'b1;
+                            $display("[%0t ns] [TB-Phase5] WR_SYS_003B: Cycle 2 verified - issue=1 (steal issued after ECC correction), resolve=1", $time);
+                        end else begin
+                            $display("[%0t ns] [TB-Phase5] WR_SYS_003B ERROR: Cycle 2 failed - saw_issue=%b, active=%b, saw_defer=%b", $time,
+                                     force_p5_saw_issue, rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_active, sys_integ_p5_saw_defer);
+                        end
+                        `ifdef RV_LOCKSTEP_ENABLE
+                            `ifdef RV_ASSERT_OR_VERILATOR
+                                release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
+                            `endif
+                        `endif
+                        sys_integ_p5_armed <= 1'b0;
+                        sys_integ_p5_state <= 2'd0;
+                    end
+                    default: sys_integ_p5_state <= 2'd0;
+                endcase
+            end
+        end
+    end
+
+    // Phases 2-5: Negedge stimulus driver
+    always @(negedge core_clk or negedge rst_l_combined) begin
+        if (~rst_l_combined) begin
+            force_p2_active    <= 1'b0;
+            force_p3_active    <= 1'b0;
+            force_p3_saw_issue <= 1'b0;
+            force_p4_active    <= 1'b0;
+            force_p5_active    <= 1'b0;
+            force_p5_saw_issue <= 1'b0;
+            release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.lsu_dccm_rden_d;
+            release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.addr_in_dccm_d;
+            release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.lsu_addr_d;
+            release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.end_addr_d;
+            release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.ld_single_ecc_error_lo_r_ff;
+        end else begin
+            // Phase 2: DMA Read Snoop (WR_SYS_002A)
+            if (sys_integ_p2_armed) begin
+                if (rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff && ~force_p2_active) begin
+                    `ifdef RV_LOCKSTEP_ENABLE
+                        `ifdef RV_ASSERT_OR_VERILATOR
+                            force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
+                        `endif
+                    `endif
+                    force rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.lsu_dccm_rden_d = 1'b1;
+                    force rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.addr_in_dccm_d   = 1'b1;
+                    force rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.lsu_addr_d       = 32'(rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_addr_ff);
+                    force_p2_active <= 1'b1;
+                end
+            end else begin
+                force_p2_active <= 1'b0;
+            end
+
+            // Phase 3: DMA Read Steal Deferral (WR_SYS_002B)
+            if (sys_integ_p3_armed) begin
+                if (rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff && ~force_p3_active && (sys_integ_p3_state == 2'd0)) begin
+                    `ifdef RV_LOCKSTEP_ENABLE
+                        `ifdef RV_ASSERT_OR_VERILATOR
+                            force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
+                        `endif
+                    `endif
+                    force rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.lsu_dccm_rden_d = 1'b1;
+                    force rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.addr_in_dccm_d   = 1'b1;
+                    force rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.lsu_addr_d       = 32'hF0047400;
+                    force rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.end_addr_d       = 16'h7400;
+                    force_p3_active <= 1'b1;
+                end
+                if (sys_integ_p3_state == 2'd1) begin
+                    release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.lsu_dccm_rden_d;
+                    release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.addr_in_dccm_d;
+                    release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.lsu_addr_d;
+                    release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.end_addr_d;
+                    force_p3_active <= 1'b0;
+                    if (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_issue &&
+                        rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_resolve) begin
+                        force_p3_saw_issue <= 1'b1;
+                    end
+                end
+            end else begin
+                force_p3_active    <= 1'b0;
+                force_p3_saw_issue <= 1'b0;
+            end
+
+            // Phase 4: ECC 1-Bit Correction Snoop Path (WR_SYS_003A)
+            if (sys_integ_p4_armed) begin
+                if (rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff && ~force_p4_active) begin
+                    `ifdef RV_LOCKSTEP_ENABLE
+                        `ifdef RV_ASSERT_OR_VERILATOR
+                            force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
+                        `endif
+                    `endif
+                    force rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.lsu_dccm_rden_d = 1'b1;
+                    force rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.addr_in_dccm_d   = 1'b1;
+                    force rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.lsu_addr_d       = 32'(rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_addr_ff);
+                    force rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.end_addr_d       = 16'(rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_addr_ff);
+                    force rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.ld_single_ecc_error_lo_r_ff = 1'b1;
+                    force_p4_active <= 1'b1;
+                end
+            end else begin
+                force_p4_active <= 1'b0;
+            end
+
+            // Phase 5: ECC 1-Bit Correction Steal Deferral (WR_SYS_003B)
+            if (sys_integ_p5_armed) begin
+                if (rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff && ~force_p5_active && (sys_integ_p5_state == 2'd0)) begin
+                    `ifdef RV_LOCKSTEP_ENABLE
+                        `ifdef RV_ASSERT_OR_VERILATOR
+                            force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
+                        `endif
+                    `endif
+                    force rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.ld_single_ecc_error_lo_r_ff = 1'b1;
+                    force_p5_active <= 1'b1;
+                end
+                if (sys_integ_p5_state == 2'd1) begin
+                    release rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.ld_single_ecc_error_lo_r_ff;
+                    force_p5_active <= 1'b0;
+                    if (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_issue &&
+                        rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_resolve) begin
+                        force_p5_saw_issue <= 1'b1;
+                    end
+                end
+            end else begin
+                force_p5_active    <= 1'b0;
+                force_p5_saw_issue <= 1'b0;
+            end
+        end
+    end
+`endif
 
 `ifdef RV_LOCKSTEP_ENABLE
 // Injected values should be randomized & it should be ensured that they're different
@@ -2662,7 +3246,11 @@ veer_wrapper rvtop_wrapper (
     .iccm_ecc_double_error     (),
     .dccm_ecc_single_error     (),
     .dccm_ecc_double_error     (),
+`ifdef RV_DCCM_WR_READBACK
+    .dccm_write_readback_error (dccm_write_readback_error),
+`else
     .dccm_write_readback_error (),
+`endif
 
 `ifdef RV_LOCKSTEP_ENABLE
     .shadow_core_trace_rv_i_insn_ip      (shadow_core_trace_rv_i_insn_ip),
@@ -2989,6 +3577,9 @@ addresses:
  0xffff_fffc - DCCM end address to load
 */
 
+`ifndef VERILATOR
+init_dccm();
+`endif
 addr = 'hffff_fff8;
 saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 if (saddr < `RV_DCCM_SADR || saddr > `RV_DCCM_EADR) return;
@@ -3088,6 +3679,25 @@ endcase // }
 `endif
 endtask
 
+task init_dccm;
+`ifdef RV_DCCM_ENABLE
+    `DRAM(0) = '{default:39'h0};
+    `DRAM(1) = '{default:39'h0};
+`ifdef RV_DCCM_NUM_BANKS_4
+    `DRAM(2) = '{default:39'h0};
+    `DRAM(3) = '{default:39'h0};
+`endif
+`ifdef RV_DCCM_NUM_BANKS_8
+    `DRAM(2) = '{default:39'h0};
+    `DRAM(3) = '{default:39'h0};
+    `DRAM(4) = '{default:39'h0};
+    `DRAM(5) = '{default:39'h0};
+    `DRAM(6) = '{default:39'h0};
+    `DRAM(7) = '{default:39'h0};
+`endif
+`endif
+endtask
+
 task init_iccm;
 `ifdef RV_ICCM_ENABLE
     `IRAM(0) = '{default:39'h0};
@@ -3161,6 +3771,16 @@ function int get_iccm_bank(input[31:0] addr,  output int bank_idx);
     return int'( addr[5:2]);
 `endif
 endfunction
+
+`ifdef RV_DCCM_WR_READBACK
+task write_dccm_word(input [31:0] addr, input [31:0] val);
+`ifdef RV_DCCM_ADDR_XOR
+    slam_dccm_ram(addr, {riscv_ecc32(val), val ^ {{(pt.DCCM_DATA_WIDTH-2*(pt.DCCM_BITS-2)){1'b0}}, addr[pt.DCCM_BITS-1:2], addr[pt.DCCM_BITS-1:2]}});
+`else
+    slam_dccm_ram(addr, val == 0 ? '0 : {riscv_ecc32(val), val});
+`endif
+endtask
+`endif
 
 task dump_signature ();
     integer fp, i;
@@ -3251,11 +3871,17 @@ if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable
             end
         end
     end
+`ifdef RV_DCCM_WR_READBACK
+    wire [pt.DCCM_NUM_BANKS-1:0] dccm_wren_bank_masked = (dccm_wr_skip_active || force_p4_active || force_p5_active) ? '0 : el2_mem_export.dccm_wren_bank;
+`else
+    wire [pt.DCCM_NUM_BANKS-1:0] dccm_wren_bank_masked = el2_mem_export.dccm_wren_bank;
+`endif
+
     for (genvar i=0; i<pt.DCCM_NUM_BANKS; i++) begin: dccm_eff_signals
         // Single-port SRAM macros share ME (clken) for both read and write accesses.
         // Gating clken via access_fault disables all memory access (reads and writes) to the bank.
         assign dccm_clken_eff[i] = error_injection_mode.dccm_access_fault ? 1'b0 : el2_mem_export.dccm_clken[i];
-        assign dccm_wren_eff[i] = error_injection_mode.dccm_wren_fault ? 1'b0 : el2_mem_export.dccm_wren_bank[i];
+        assign dccm_wren_eff[i] = error_injection_mode.dccm_wren_fault ? 1'b0 : dccm_wren_bank_masked[i];
         assign dccm_addr_eff[i] = error_injection_mode.dccm_addr_fault ? (el2_mem_export.dccm_addr_bank[i] ^ 1'b1) : el2_mem_export.dccm_addr_bank[i];
     end
     for (genvar i=0; i<pt.DCCM_NUM_BANKS; i++) begin: dccm_loop

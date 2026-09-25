@@ -1340,6 +1340,8 @@ ifc_dma_access_ok_prev,dma_iccm_req_f})
          logic [77:0]       iccm_rdmux_data;
          logic              iccm_rd_ecc_single_err_hold_in ;
          logic [2:0]        dma_mem_tag_ff;
+         logic              iccm_dma_rd_dword_f;       // in-flight DMA read is a doubleword (rvalid stage)
+         logic [1:0]        iccm_dma_word_rvalid_in;   // per-39b-word DMA ECC-check enable
 
 
 
@@ -1375,18 +1377,23 @@ ifc_dma_access_ok_prev,dma_iccm_req_f})
          assign iccm_dma_ecc_error_in   =   |(iccm_double_ecc_error[1:0]);
 
          rvdffe    #(64) dma_data_ff      (.*, .clk(clk), .en(iccm_dma_rvalid_in),  .din(iccm_dma_rdata_in[63:0]), .dout(iccm_dma_rdata[63:0]));
-         rvdffie   #(11) dma_misc_bits    (.*, .clk(free_l2clk), .din({dma_mem_tag[2:0],
+         rvdffie   #(12) dma_misc_bits    (.*, .clk(free_l2clk), .din({iccm_dma_rden & (iccm_wr_size[1:0] == 2'b11),
+                                                                       dma_mem_tag[2:0],
                                                                        dma_mem_tag_ff[2:0],
                                                                        dma_mem_addr[3:2],
                                                                        iccm_dma_rden,
                                                                        iccm_dma_rvalid_in,
                                                                        iccm_dma_ecc_error_in }),
-                                                                .dout({dma_mem_tag_ff[2:0],
+                                                                .dout({iccm_dma_rd_dword_f,
+                                                                       dma_mem_tag_ff[2:0],
                                                                        iccm_dma_rtag[2:0],
                                                                        dma_mem_addr_ff[3:2],
                                                                        iccm_dma_rvalid_in,
                                                                        iccm_dma_rvalid,
                                                                        iccm_dma_ecc_error }));
+
+         assign iccm_dma_word_rvalid_in[0] = iccm_dma_rvalid_in;
+         assign iccm_dma_word_rvalid_in[1] = iccm_dma_rvalid_in & iccm_dma_rd_dword_f;
 
          assign iccm_rw_addr[pt.ICCM_BITS-1:1]    = (  ifc_dma_access_q_ok & dma_iccm_req  & ~iccm_correct_ecc) ? dma_mem_addr[pt.ICCM_BITS-1:1] :
                                                  (~(ifc_dma_access_q_ok & dma_iccm_req) &  iccm_correct_ecc) ? {iccm_ecc_corr_index_ff[pt.ICCM_BITS-1:2],1'b0} : ifc_fetch_addr_bf[pt.ICCM_BITS-1:1] ;
@@ -1435,7 +1442,7 @@ ifc_dma_access_ok_prev,dma_iccm_req_f})
    // Remove the ECC and align by the fetch halfword.
     assign iccm_rd_data[63:0] =  64'({iccm_rdmux_data[70:39], iccm_rdmux_data[31:0]} >> (16*ifu_fetch_addr_int_f[1]));
    for (genvar i=0; i < 2 ; i++) begin : ICCM_ECC_CHECK
-      assign iccm_ecc_word_enable[i] = ((|ic_fetch_val_shift_right[(2*i+1):(2*i)] & ~exu_flush_final & sel_iccm_data) | iccm_dma_rvalid_in) & ~dec_tlu_core_ecc_disable;
+      assign iccm_ecc_word_enable[i] = ((|ic_fetch_val_shift_right[(2*i+1):(2*i)] & ~exu_flush_final & sel_iccm_data) | iccm_dma_word_rvalid_in[i]) & ~dec_tlu_core_ecc_disable;
    rvecc_decode  ecc_decode (
                            .en(iccm_ecc_word_enable[i]),
                            .sed_ded ( 1'b0 ),    // 1 : means only detection

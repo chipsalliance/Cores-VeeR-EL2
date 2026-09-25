@@ -1225,10 +1225,11 @@ Failing to do either leaves the DCLS protection unverified against logic-optimiz
 
 ## Validation Plan
 
-The DCLS feature will be tested within:
+The DCLS feature and its associated memory integrity countermeasures are verified across:
 
-* Software DCLS [smoke tests](https://github.com/chipsalliance/Cores-VeeR-EL2/tree/main/testbench/tests/dcls) - cover VeeR CPU core with the Shadow Core execution flow.
-* RTL `el2_veer_lockstep` [module tests](https://github.com/chipsalliance/Cores-VeeR-EL2/tree/main/verification/block/dcls) - covers the Shadow Core by itself.
+* Software DCLS [directed and fault-injection tests](https://github.com/chipsalliance/Cores-VeeR-EL2/tree/main/testbench/tests/dcls) (`dcls`, `dcls_debug`, `dcls_error_ctrl`, `dcls_mubi_sweep`, `dcls_internal_state`, `dcls_regfile_read`, `dcls_ecc_asymmetric`) - cover the Main Core and Shadow Core lockstep execution flow, internal register/CSR comparison, and multi-bit boolean control signaling.
+* Software memory integrity [countermeasure tests](https://github.com/chipsalliance/Cores-VeeR-EL2/tree/main/testbench/tests) (`iccm_addr_xor`, `dccm_addr_xor`, `icache_infection`, `dccm_wr_readback`, `dccm_wr_readback_hazards`, `dccm_wr_readback_random`, `dccm_wr_readback_fault_dmi`, `dccm_wr_readback_sys_integ`) - cover address-XOR infection across ICCM, DCCM, and ICache as well as DCCM write-readback verification under DCLS.
+* RTL `el2_veer_lockstep` [module tests](https://github.com/chipsalliance/Cores-VeeR-EL2/tree/main/verification/block/dcls) (`test_lockstep.py`) - cover the Shadow Core wrapper, reset sequencing, and multi-bit boolean control logic standalone.
 
 :::{list-table} Validation Plan
 :name: vp-block-name-list-table
@@ -1238,111 +1239,111 @@ The DCLS feature will be tested within:
 * - **Function**
   - **VeeR EL2 CPU core input corruption detection**
 * - Reference Document
-  -
+  - [Monitored IOs](#monitored-ios)
 * - Check description
   - Verify the panic signal is raised only upon core states' mismatch. Introduce corruption via VeeR EL2 CPU core inputs directed to the Shadow Core.
 * - Coverage groups
-  - Each output of the VeeR EL2 CPU Core is reached when detecting the mismatch by `Equivalence Checker`. All bounds of configurable delay are reached.
+  - Each input of the VeeR EL2 CPU Core routed to the Shadow Core is exercised to trigger a mismatch at the `Equivalence Checker`. All bounds of configurable delay (`DCLS_DELAY` = `0..4`) and both bus interfaces (`AXI4` and `AHB-Lite`) are reached.
 * - Assertions
-  - Detection bit is asserted upon encountered corruption. Error behavior follows the error handling policy. No action is taken if no corruption was introduced.
+  - Detection bit (`corruption_detected_o`) is asserted upon encountered corruption. Error behavior follows the error handling policy. No action is taken if no corruption was introduced.
 * - Comments
-  -
+  - Injects faults onto Shadow Core and Main Core input ports (signal IDs `0..31`, AXI `48..99`, AHB `48..66`) via testbench mailbox commands `CMD_INJ_LOCKSTEP` (`0x92`) and `CMD_INJ_VEER` (`0x91`) in `tb_top.sv`.
 * - Test Name
-  -
+  - `dcls`
 * -
   -
 * - **Function**
   - **VeeR EL2 CPU core output corruption detection**
 * - Reference Document
-  -
+  - [Monitored IOs](#monitored-ios)
 * - Check description
   - Verify the panic signal is raised only upon core states' mismatch. Introduce corruption via the outputs of the main VeeR CPU core directed to `Equivalence Checker` in the Shadow Core.
 * - Coverage groups
-  - Each output of the VeeR EL2 CPU Core is reached when detecting the mismatch by `Equivalence Checker`. All bounds of configurable delay are reached.
+  - Each output of the VeeR EL2 CPU Core is reached when detecting the mismatch by `Equivalence Checker`. All bounds of configurable delay (`DCLS_DELAY` = `0..4`) and both bus interfaces (`AXI4` and `AHB-Lite`) are reached.
 * - Assertions
-  - Detection bit is asserted upon encountered corruption. Error behavior follows the relevant error handling policy. No action is taken if no corruption was introduced.
+  - Detection bit (`corruption_detected_o`) is asserted upon encountered corruption. Error behavior follows the relevant error handling policy. No action is taken if no corruption was introduced.
 * - Comments
-  -
+  - Injects faults directly onto core output signals compared by the `Equivalence Checker` (signal IDs `32..47`, AXI `100..194`, AHB `67..92`) via `CMD_INJ_LOCKSTEP` (`0x92`) and `CMD_INJ_VEER` (`0x91`) in `tb_top.sv`.
 * - Test Name
-  -
+  - `dcls`
 * -
   -
 * - **Function**
   - **Internal state corruption detection**
 * - Reference Document
-  -
+  - [Monitored Registers](#monitored-registers)
 * - Check description
   - Verify the panic signal is raised only upon core states' mismatch. Introduce corruption via exposed registers of the Shadow Core.
 * - Coverage groups
-  - Each [monitored register](#monitored-registers) is detected by the `Equivalence Checker`. All bounds of configurable delay are reached.
+  - Each [monitored register](#monitored-registers) group (GPRs, fetch PC, and architectural CSRs) is detected by the `Equivalence Checker`. All bounds of configurable delay (`DCLS_DELAY` = `0..4`) are reached.
 * - Assertions
-  - Detection bit is asserted upon encountered corruption. Error behavior follows the relevant error handling policy. No action is taken if no corruption was introduced.
+  - Detection bit (`corruption_detected_o`) is asserted upon encountered corruption. Error behavior follows the relevant error handling policy. No action is taken if no corruption was introduced.
 * - Comments
-  - The default path will likely be more easily testable with the help of the software testbench. It should be possible to simulate a fault injection via mailbox see: [top_tb.sv](https://github.com/chipsalliance/Cores-VeeR-EL2/blob/795eb588e34b6815033b769d54fcf7cfac4aae3a/testbench/tb_top.sv#L727).
+  - Simulates fault injection via mailbox (`CMD_INJ_LOCKSTEP` cases `200..202` in [tb_top.sv](https://github.com/chipsalliance/Cores-VeeR-EL2/blob/main/testbench/tb_top.sv)) targeting Shadow Core GPR (`x15`), fetch Program Counter (`q0pcff`), and CSR (`mtvec`), as well as asymmetric RAS ECC threshold CSRs (`mdccmect`, `miccmect`, `micect` via cases `203..205`).
 * - Test Name
-  -
+  - `dcls_internal_state`, `dcls_ecc_asymmetric`
 * -
   -
 * - **Function**
   - **DCLS default execution**
 * - Reference Document
-  -
+  - [VeeR EL2 DCLS Overview](#veer-el2-dcls-overview)
 * - Check description
   - Verify the DCLS feature behavior during non-obstructed execution.
 * - Coverage groups
-  -
+  - Standard instruction streams, CSR accesses, ECC paths, caches, and privilege modes executed across `DCLS_DELAY` = `0..4` on both `AXI4` and `AHB-Lite` builds.
 * - Assertions
   - Detection bit is not raised. Detection interrupt is not asserted. The test provides the same results as the VeeR EL2 CPU core without the DCLS feature enabled.
 * - Comments
-  - It might be beneficial to use a software test with a program that will produce a result that can by easily compared to an alternative flow and also engage the VeeR EL2 core. Consider matrix multiplication.
+  - Standard benchmark and functional workloads run with `DCLS_ENABLE=1` in the CI DCLS regression suite (`test-regression-dcls.yml`).
 * - Test Name
-  -
+  - `dhry`, `hello_world`, `hello_world_dccm`, `hello_world_iccm`, `ecc`, `csr_misa`, `csr_access`, `csr_mstatus`, `csr_mseccfg`, `perf_counters`, `icache`, `bitmanip`
 * -
   -
 * - **Function**
   - **Error reporting**
 * - Reference Document
-  -
+  - [Error Policy](#error-policy), [Shadow Core Control](#shadow-core-control), [Multibit boolean logic](#multibit-boolean-logic)
 * - Check description
-  - Verify error reporting policy upon detected corruption.
+  - Verify error reporting policy upon detected corruption, artificial error injection, and error detection suppression across multi-bit boolean (`el2_mubi_t`) encodings.
 * - Coverage groups
-  - Each error policy is covered.
+  - Each error policy and control port (`disable_corruption_detection_i`, `lockstep_err_injection_en_i`, `corruption_detected_o`) is covered across `mubi_width` = `{2, 4, 8, 16, 32}` and `DCLS_DELAY` = `0..4`.
 * - Assertions
-  -
+  - `corruption_detected_o` asserts (`El2MuBiTrue`) when core mismatch occurs or `lockstep_err_injection_en_i != El2MuBiFalse`, unless `disable_corruption_detection_i == El2MuBiTrue`. Invalid multi-bit encodings on `disable_corruption_detection_i` fail secure and assert `corruption_detected_o`.
 * - Comments
-  -
+  - Verified at both the top-level SoC testbench (`CMD_INJ_EXT = 0x93`, `CMD_INJ_CTRL = 0x94`) and standalone pyUVM block verification (`verification/block/dcls/test_lockstep.py`).
 * - Test Name
-  -
+  - `dcls_error_ctrl`, `dcls_mubi_sweep`, `test_lockstep.py` (`TestErrorInjection`, `TestInvalidErrorInjection`, `TestInvalidDisableCorruptionDetection`)
 * -
   -
 * - **Function**
   - **Reset**
 * - Reference Document
-  -
+  - [Error Policy](#error-policy), [Monitored IOs](#monitored-ios)
 * - Check description
   - Verify the behavior in reset. Ensure normal execution upon leaving reset.
 * - Coverage groups
-  -
+  - Cold reset and warm reset (`CMD_RST = 0x96`) across all configurable `LOCKSTEP_DELAY` values (`0..4`).
 * - Assertions
   - Shadow Core enters reset at the same time the main VeeR core does. Shadow Core exits reset after a predefined delay following the main core. Detected corruption and interrupts are deasserted upon entering the reset.
 * - Comments
-  -
+  - `TestReset` in `test_lockstep.py` verifies cycle-accurate `shadow_reset` and `shadow_dbg_reset` staggering and `corruption_detected_o == El2MuBiFalse`. Software DCLS tests repeatedly issue warm resets from `trap_handler()` to verify corruption clearing and lockstep resynchronization.
 * - Test Name
-  -
+  - `test_lockstep.py` (`TestReset`), `dcls`, `dcls_internal_state`, `dcls_ecc_asymmetric`, `dcls_error_ctrl`, `dcls_mubi_sweep`
 * -
   -
 * - **Function**
   - **Disable error detection after entering debug state**
 * - Reference Document
-  -
+  - [Configuration](#configuration)
 * - Check description
   - Verify the DCLS feature behavior after entering debug state.
 * - Coverage groups
-  -
+  - Error injection before Debug Mode entry, Debug Mode halt/run transition (`CMD_ENT_DBG = 0xA0`), and error injection after Debug Mode exit prior to reset.
 * - Assertions
-  - Corruption detection is disabled when Main Core enters debug mode. It is not disabled until core resets.
+  - Corruption detection is disabled when Main Core enters debug mode. It remains disabled until the core resets.
 * - Comments
-  -
+  - Verified across `DCLS_DELAY` = `0..4` on `AXI4` and `AHB-Lite`.
 * - Test Name
   - `dcls_debug`
 * -
@@ -1350,17 +1351,79 @@ The DCLS feature will be tested within:
 * - **Function**
   - **Register file fault injection detection**
 * - Reference Document
-  -
+  - [Register File](#register-file)
 * - Check description
   - Inject a fault into the register file or the register file output ports of the main or the shadow core.
 * - Coverage groups
-  -
+  - Fixed monitored GPR subset (`x1`, `x2`, `x8`, `x10..x17`) with `lockstep_regfile_read_enable=0` and full GPR file (`x1..x31`) read output ports (`rd0`/`rd1`) with `lockstep_regfile_read_enable=1`.
 * - Assertions
-  - Detection bit is asserted upon encountered corruption. Error behavior follows the relevant error handling policy. No action is taken if no corruption was introduced.
+  - Detection bit (`corruption_detected_o`) is asserted upon encountered corruption when the register is compared or read. Error behavior follows the relevant error handling policy. No action is taken if no corruption was introduced.
 * - Comments
-  -
+  - `dcls_regfile_read` ([PR #508](https://github.com/chipsalliance/Cores-VeeR-EL2/pull/508)) sweeps fault injection across monitored GPRs (`lockstep_regfile_read_enable=0`) and all GPR read ports (`lockstep_regfile_read_enable=1`). `dcls_internal_state` (Scenario 1, Case `200`) also injects a bit-flip into Shadow Core GPR `a5` (`x15`) under both modes.
 * - Test Name
-  -
+  - `dcls_regfile_read`, `dcls_internal_state`
 * -
   -
+* - **Function**
+  - **Multi-memory asymmetric ECC threshold alert detection**
+* - Reference Document
+  - [Control and Status Registers](#control-and-status-registers)
+* - Check description
+  - Verify DCLS divergence detection when an asymmetric single-bit ECC/parity error threshold alert occurs on only one core across DCCM (`mdccmect`), ICCM (`miccmect`), or ICache (`micect`).
+* - Coverage groups
+  - All 3 internal memory error counter CSRs (`0x7F0`, `0x7F1`, `0x7F2`) across `DCLS_DELAY` = `0..4` and `icache_ecc` = `{0, 1}`.
+* - Assertions
+  - Detection bit (`corruption_detected_o`) is asserted upon asymmetric threshold alert divergence between Main Core and Shadow Core.
+* - Comments
+  - Injects asymmetric threshold counter state onto the Shadow Core via mailbox cases `203..205` in `tb_top.sv` and verifies warm-reset recovery after each trap.
+* - Test Name
+  - `dcls_ecc_asymmetric`, `ecc_threshold`, `icache_ecc`
+* -
+  -
+* - **Function**
+  - **ICCM and DCCM address-XOR infection detection**
+* - Reference Document
+  - [VeeR EL2 DCLS Overview](#veer-el2-dcls-overview)
+* - Check description
+  - Verify that address-XOR ECC encoding (`iccm_addr_xor=1`, `dccm_addr_xor=1`) detects address-path, write-enable, and memory-access faults on non-duplicated ICCM and DCCM memories outside the lockstep domain.
+* - Coverage groups
+  - Clean read/write cancellation, read address fault (`0xE5`/`0xE9`), write address fault (`0xE5`/`0xE9`), write-enable suppression fault (`0xE6`/`0xEA`), and memory access/clock-enable fault (`0xE7`/`0xEB`).
+* - Assertions
+  - Address or control faults on ICCM/DCCM yield an uncorrectable ECC mismatch and raise the corresponding precise instruction (`mcause=0x1`) or load (`mcause=0x5`) access fault trap (`mscause=0x1`).
+* - Comments
+  - Executed with `DCLS_ENABLE=1` and `ICCM_ADDR_XOR=1` / `DCCM_ADDR_XOR=1` in CI (`regression-tests-iccm-addr-xor` and `regression-tests-dccm-addr-xor`).
+* - Test Name
+  - `iccm_addr_xor`, `dccm_addr_xor`
+* -
+  -
+* - **Function**
+  - **ICache address-XOR infection detection**
+* - Reference Document
+  - [VeeR EL2 DCLS Overview](#veer-el2-dcls-overview)
+* - Check description
+  - Verify that ICache address infection (`icache_addr_xor=1` / `RV_ICACHE_ADDR_XOR`) detects address-path, data array, and hit/way-selection faults on the non-duplicated instruction cache under DCLS.
+* - Coverage groups
+  - ICache warmup, data array read fault (`0x89`), address infection fault (`0x8A` on `ic_rd_addr_infect`) with positive (`icache_addr_xor=1`) and negative (`icache_addr_xor=0`) checks, and hit/way selection fault (`0x8B`) across `AXI4`/`AHB-Lite` and `icache_ecc` = `{0, 1}`.
+* - Assertions
+  - When `icache_addr_xor=1`, an infected address fault triggers an ICache parity/ECC error (`ic_perr_r`), flushes the pipeline, refetches cleanly from the SoC bus, and increments `micect` (`0x7F0`).
+* - Comments
+  - Implemented in [PR #531](https://github.com/chipsalliance/Cores-VeeR-EL2/pull/531) (`regression-tests-icache-addr-xor`).
+* - Test Name
+  - `icache_infection`
+* -
+  -
+* - **Function**
+  - **DCCM write-readback countermeasure verification**
+* - Reference Document
+  - [VeeR EL2 DCLS Overview](#veer-el2-dcls-overview)
+* - Check description
+  - Verify the DCCM write-readback countermeasure (`dccm_wr_readback=1` / `RV_DCCM_WR_READBACK`) detects dropped or corrupted DCCM writes and operates transparently across pipeline hazards, DMA collisions, ECC corrections, and runtime `MFDC.dwrd` toggling under DCLS.
+* - Coverage groups
+  - Immediate port-steal and load-snoop paths, store buffer saturation backpressure, runtime `MFDC.dwrd` (bit 7) enable/disable, randomized RMW/bank interleaving stress, DMI diagnostic capture (`0x70..0x72`) with dropped-write fault injection and asymmetric DCLS mismatch detection, and DMA/ECC 1-bit correction collision arbitration.
+* - Assertions
+  - Non-faulty stores and snooped/stolen readbacks complete without deadlock or false errors. Injected write-skip faults are captured in DMI diagnostic registers (`0x70..0x72`) and trigger lockstep mismatch detection when asymmetric.
+* - Comments
+  - Implemented in [PR #549](https://github.com/chipsalliance/Cores-VeeR-EL2/pull/549) (`regression-tests-dccm-wr-readback`, covering Issue `#512` / PR `#510`).
+* - Test Name
+  - `dccm_wr_readback`, `dccm_wr_readback_hazards`, `dccm_wr_readback_random`, `dccm_wr_readback_fault_dmi`, `dccm_wr_readback_sys_integ`
 :::

@@ -20,6 +20,16 @@ logic                       soft_int;
 
 el2_mem_if el2_mem_export ();
 
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+`define VEER rvtop_wrapper.rvtop.veer
+`else
+`define VEER rvtop_wrapper.rvtop.tmr_complex.cores[0].veer
+`define VEER0 rvtop_wrapper.rvtop.tmr_complex.cores[0].veer
+`define VEER1 rvtop_wrapper.rvtop.tmr_complex.cores[1].veer
+`define VEER2 rvtop_wrapper.rvtop.tmr_complex.cores[2].veer
+`endif
+`define DEC `VEER.dec
+
 logic [31:1] jtag_id;
 assign jtag_id[31:28] = 4'b1;
 assign jtag_id[27:12] = '0;
@@ -46,19 +56,6 @@ logic jtag_tdi;
 logic jtag_trst_n;
 
 logic dmi_core_enable;
-
-`ifdef RV_LOCKSTEP_ENABLE
-logic [31:0] shadow_core_trace_rv_i_insn_ip;
-logic [31:0] shadow_core_trace_rv_i_address_ip;
-logic shadow_core_trace_rv_i_valid_ip;
-logic shadow_core_trace_rv_i_exception_ip;
-logic [4:0] shadow_core_trace_rv_i_ecause_ip;
-logic shadow_core_trace_rv_i_interrupt_ip;
-logic [31:0] shadow_core_trace_rv_i_tval_ip;
-el2_mubi_pkg::el2_mubi_t disable_corruption_detection_i;
-el2_mubi_pkg::el2_mubi_t lockstep_err_injection_en_i;
-el2_mubi_pkg::el2_mubi_t corruption_detected_o;
-`endif // RV_LOCKSTEP_ENABLE
 
 assign i_cpu_halt_req      = '0;
 assign i_cpu_run_req       = '0;
@@ -1674,20 +1671,6 @@ veer_wrapper rvtop_wrapper (
     .dccm_ecc_double_error      (),
     .dccm_write_readback_error  (),
 
-`ifdef RV_LOCKSTEP_ENABLE
-    .shadow_core_trace_rv_i_insn_ip      (shadow_core_trace_rv_i_insn_ip),
-    .shadow_core_trace_rv_i_address_ip   (shadow_core_trace_rv_i_address_ip),
-    .shadow_core_trace_rv_i_valid_ip     (shadow_core_trace_rv_i_valid_ip),
-    .shadow_core_trace_rv_i_exception_ip (shadow_core_trace_rv_i_exception_ip),
-    .shadow_core_trace_rv_i_ecause_ip    (shadow_core_trace_rv_i_ecause_ip),
-    .shadow_core_trace_rv_i_interrupt_ip (shadow_core_trace_rv_i_interrupt_ip),
-    .shadow_core_trace_rv_i_tval_ip      (shadow_core_trace_rv_i_tval_ip),
-
-    .disable_corruption_detection_i (disable_corruption_detection_i),
-    .lockstep_err_injection_en_i    (lockstep_err_injection_en_i),
-    .corruption_detected_o          (corruption_detected_o),
-`endif
-
     .soft_int               (soft_int),
     .core_id                ('0),
     .scan_mode              (1'b0),        // To enable scan mode
@@ -1772,8 +1755,8 @@ end
 always @(negedge core_clk) begin
   if (mailbox_write && (mailbox_data[7:0] == 8'hFF)) begin
     $display("[%0t ns] TEST_PASSED",$time);
-    //$display("[%0t ns] \nFinished : minstret = %0d, mcycle = %0d",$time, `DEC.tlu.minstretl[31:0],`DEC.tlu.mcyclel[31:0]);
-    //$display("[%0t ns] See \"exec.log\" for execution trace with register updates..\n",$time);
+    $display("[%0t ns] \nFinished : minstret = %0d, mcycle = %0d",$time, `DEC.tlu.minstretl[31:0],`DEC.tlu.mcyclel[31:0]);
+    $display("[%0t ns] See \"exec.log\" for execution trace with register updates..\n",$time);
     // OpenOCD test breaks if simulation closes the TCP connection first.
     // This delay allows OpenOCD to close the connection before the #finish.
     #15000;

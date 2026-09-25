@@ -101,7 +101,7 @@ jobs:
           # Use hello_world_iccm for testing '--test-lsu-clk-ratio'
           - test: "hello_world_iccm"
             bus: "axi"
-            coverage: "branch"
+            coverage: "all"
             priv: "0"
             tb_extra_args: "--test-lsu-clk-ratio"
     env:
@@ -132,12 +132,26 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+          echo "FULL_NAME=dcls-${{ matrix.bus }}-${{ matrix.test }}-${{ matrix.priv == 0 && 'm' || 'mu' }}-delay${{ matrix.delay }}" >> $GITHUB_ENV
 
       - name: Run tests
         run: |
           export RV_ROOT=`pwd`
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+
+      - name: Prepare coverage data
+        run: |
+          source .venv/bin/activate
+          mkdir -p results
+          .github/scripts/convert_dat.sh ${TEST_PATH}/coverage.dat results/coverage_${FULL_NAME}
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression_tests_coverage_data_dcls_${{ env.FULL_NAME }}_${{ matrix.coverage }}
+          path: results/*.info
 
   regression-tests-iccm-addr-xor:
     name: Regression tests (DCLS + ICCM address-XOR)
@@ -182,12 +196,26 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+          echo "FULL_NAME=dcls-iccm-addr-xor-${{ matrix.bus }}-${{ matrix.test }}" >> $GITHUB_ENV
 
       - name: Run tests
         run: |
           export RV_ROOT=`pwd`
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+
+      - name: Prepare coverage data
+        run: |
+          source .venv/bin/activate
+          mkdir -p results
+          .github/scripts/convert_dat.sh ${TEST_PATH}/coverage.dat results/coverage_${FULL_NAME}
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression_tests_coverage_data_dcls_${{ env.FULL_NAME }}_${{ matrix.coverage }}
+          path: results/*.info
 
   regression-tests-dccm-wr-readback:
     name: Regression tests (DCLS + DCCM write readback)
@@ -233,12 +261,26 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+          echo "FULL_NAME=dcls-dccm-wr-readback-${{ matrix.bus }}-${{ matrix.test }}" >> $GITHUB_ENV
 
       - name: Run tests
         run: |
           export RV_ROOT=`pwd`
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+
+      - name: Prepare coverage data
+        run: |
+          source .venv/bin/activate
+          mkdir -p results
+          .github/scripts/convert_dat.sh ${TEST_PATH}/coverage.dat results/coverage_${FULL_NAME}
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression_tests_coverage_data_dcls_${{ env.FULL_NAME }}_${{ matrix.coverage }}
+          path: results/*.info
 
   regression-tests-dccm-addr-xor:
     name: Regression tests (DCLS + DCCM address-XOR)
@@ -283,12 +325,26 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+          echo "FULL_NAME=dcls-dccm-addr-xor-${{ matrix.bus }}-${{ matrix.test }}" >> $GITHUB_ENV
 
       - name: Run tests
         run: |
           export RV_ROOT=`pwd`
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+
+      - name: Prepare coverage data
+        run: |
+          source .venv/bin/activate
+          mkdir -p results
+          .github/scripts/convert_dat.sh ${TEST_PATH}/coverage.dat results/coverage_${FULL_NAME}
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression_tests_coverage_data_dcls_${{ env.FULL_NAME }}_${{ matrix.coverage }}
+          path: results/*.info
 
   regression-tests-icache-ecc:
     name: Regression tests (DCLS + ICache ECC/Parity)
@@ -342,6 +398,7 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+          echo "FULL_NAME=dcls-icache-ecc-${{ matrix.bus }}-${{ matrix.test }}-delay${{ matrix.delay }}-ecc${{ matrix.ecc }}-rf${{ matrix.rf_read }}" >> $GITHUB_ENV
 
       - name: Run tests
         run: |
@@ -350,6 +407,19 @@ jobs:
           export ECC="${{ matrix.ecc }}"
           export DCLS_REGFILE_READ_ENABLE="${{ matrix.rf_read }}"
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+
+      - name: Prepare coverage data
+        run: |
+          source .venv/bin/activate
+          mkdir -p results
+          .github/scripts/convert_dat.sh ${TEST_PATH}/coverage.dat results/coverage_${FULL_NAME}
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression_tests_coverage_data_dcls_${{ env.FULL_NAME }}_${{ matrix.coverage }}
+          path: results/*.info
 
   regression-tests-mubi:
     name: DCLS MUBI Regression
@@ -394,6 +464,7 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+          echo "FULL_NAME=dcls-mubi-${{ matrix.bus }}-w${{ matrix.mubi.width }}-t${{ matrix.mubi.true_val }}-f${{ matrix.mubi.false_val }}-delay${{ matrix.delay }}" >> $GITHUB_ENV
 
       - name: Run DCLS MUBI regression test
         run: |
@@ -404,6 +475,19 @@ jobs:
           export MUBI_FALSE="${{ matrix.mubi.false_val }}"
           echo "Executing MUBI Regression: Bus=${{ matrix.bus }}, Width=${MUBI_WIDTH}bit, True=${MUBI_TRUE}, False=${MUBI_FALSE}, Delay=${DCLS_DELAY}"
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test }} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+
+      - name: Prepare coverage data
+        run: |
+          source .venv/bin/activate
+          mkdir -p results
+          .github/scripts/convert_dat.sh ${TEST_PATH}/coverage.dat results/coverage_${FULL_NAME}
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression_tests_coverage_data_dcls_${{ env.FULL_NAME }}_${{ matrix.coverage }}
+          path: results/*.info
 
   custom-regression-tests:
     name: Custom regression tests

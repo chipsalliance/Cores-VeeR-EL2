@@ -30,3 +30,5 @@ map el2_configurable_gw 'el2_pic_ctrl.IO_CLK_GRP[1].GW[3].gw_inst' 'tb_top.rvtop
 map el2_cmp_and_mux 'el2_pic_ctrl.genblock.LEVEL[0].COMPARE[0].cmp_l1' 'tb_top.rvtop_wrapper.rvtop.veer.pic_ctrl_inst.genblock.LEVEL[0].COMPARE[0].cmp_l1'
 map el2_cmp_and_mux 'el2_pic_ctrl.genblock.LEVEL[0].COMPARE[1].cmp_l1' 'tb_top.rvtop_wrapper.rvtop.veer.pic_ctrl_inst.genblock.LEVEL[0].COMPARE[1].cmp_l1'
 
+map el2_veer_lockstep el2_veer_lockstep_wrapper.lockstep tb_top.rvtop_wrapper.rvtop.lockstep
+map el2_veer el2_veer_lockstep_wrapper.veer tb_top.rvtop_wrapper.rvtop.veer

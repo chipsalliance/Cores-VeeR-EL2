@@ -386,6 +386,18 @@ module el2_tmr_complex
     input logic [pt.PIC_TOTAL_INT:1]           extintsrc_req,
     input logic                   timer_int,
     input logic                   soft_int,
+
+    // A fatal, unrecoverable fault has been detected. Once asserted it can only
+    // be cleared by a hard reset via rst_l
+    output el2_mubi_pkg::el2_mubi_t tmr_fatal,
+    // A recoverable error has been detected and the recovery procedure is pending
+    output el2_mubi_pkg::el2_mubi_t tmr_recovery_pending,
+    // The recovery procedure has failed. Once asserted it can only be cleared
+    // by a hard reset via rst_l
+    output el2_mubi_pkg::el2_mubi_t tmr_recovery_fault,
+    // Individual core fault status
+    output el2_mubi_pkg::el2_mubi_t tmr_core_fault[3],
+
     // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
     /*pragma coverage off*/
     input logic                   scan_mode
@@ -1008,6 +1020,24 @@ module el2_tmr_complex
 
   //-------------------------------------------------------------------
 
+  // Global, unrecoverable fault latch register
+  el2_mubi_t tmr_fatal_d;
+  el2_mubi_t tmr_fatal_next;
+
+  rvtmr #($bits(el2_mubi_t)) tmr_fatal_voter (.I(tmr_fault_q), .O(tmr_fatal_d));
+  assign tmr_fatal_next = mubi_or3(tmr_fatal, tmr_fatal_d, recovery_fault);
+  rvmubidff tmr_fatal_dff (.*, .din(tmr_fatal_next), .dout(tmr_fatal));
+
+  // Recovery fault latch register
+  el2_mubi_t tmr_recovery_fault_next;
+  assign tmr_recovery_fault_next = mubi_or(tmr_recovery_fault, recovery_fault);
+  rvmubidff tmr_recovery_fault_dff (.*, .din(tmr_recovery_fault_next), .dout(tmr_recovery_fault));
+
+  // Individual core fault status
+  assign tmr_core_fault = tmr_fault_q;
+
+  //-------------------------------------------------------------------
+
   // I/O inhibit signals
   el2_mubi_pkg::el2_mubi_t tmr_output_inhibit;
 
@@ -1088,6 +1118,7 @@ module el2_tmr_complex
       .clear_external_flag(tmr_fault_clr),
       .sync_rst_l(sync_rst_l),
       .gate_outputs(tmr_output_inhibit),
+      .pending(tmr_recovery_pending),
       .fatal_err(recovery_fault)
   );
 

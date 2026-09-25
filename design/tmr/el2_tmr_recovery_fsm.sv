@@ -70,7 +70,8 @@ module el2_tmr_recovery_fsm
     output logic ext_mpc_debug_run_ack_veer[3],
     input  logic ext_mpc_reset_run_req_veer[3],
 
-    // Error flags
+    // Status flags
+    output el2_mubi_pkg::el2_mubi_t pending,
     output el2_mubi_pkg::el2_mubi_t fatal_err,
 
     input  logic scan_mode
@@ -85,7 +86,10 @@ module el2_tmr_recovery_fsm
   logic recovery_state_en;
   recovery_state_t recovery_nxstate, recovery_state;
 
-  rvdffiee #(9) fsm_state_ff (.*, .din(recovery_nxstate), .dout(recovery_state), .en(recovery_state_en));
+  rvdffiee #($bits(recovery_state_t)) fsm_state_ff
+    (.*, .din(recovery_nxstate), .dout(recovery_state), .en(recovery_state_en));
+
+  assign pending = mubi_from_bool(recovery_state != IDLE && recovery_state != '0);
 
   // Exec control
   logic int_mpc_debug_halt_req_veer;

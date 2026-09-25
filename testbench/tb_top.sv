@@ -56,6 +56,7 @@ module tb_top
     input bit                       lsu_bus_clk_en
 );
 `endif
+
 `ifdef RV_LOCKSTEP_ENABLE
     logic [31:0] shadow_core_trace_rv_i_insn_ip;
     logic [31:0] shadow_core_trace_rv_i_address_ip;
@@ -68,6 +69,15 @@ module tb_top
     el2_mubi_pkg::el2_mubi_t lockstep_err_injection_en_i;
     el2_mubi_pkg::el2_mubi_t corruption_detected_o;
 `endif // RV_LOCKSTEP_ENABLE
+
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    el2_mubi_pkg::el2_mubi_t tmr_fatal;
+    el2_mubi_pkg::el2_mubi_t tmr_recovery_pending;
+    el2_mubi_pkg::el2_mubi_t tmr_recovery_fault;
+    el2_mubi_pkg::el2_mubi_t tmr_core_fault_0;
+    el2_mubi_pkg::el2_mubi_t tmr_core_fault_1;
+    el2_mubi_pkg::el2_mubi_t tmr_core_fault_2;
+`endif
 
 `ifdef RV_BUILD_AHB_LITE
     logic                       lmem_hsel;
@@ -2770,6 +2780,15 @@ veer_wrapper rvtop_wrapper (
     .disable_corruption_detection_i (disable_corruption_detection_i),
     .lockstep_err_injection_en_i    (lockstep_err_injection_en_i),
     .corruption_detected_o          (corruption_detected_o),
+`endif
+
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    .tmr_fatal             (tmr_fatal),
+    .tmr_recovery_pending  (tmr_recovery_pending),
+    .tmr_recovery_fault    (tmr_recovery_fault),
+    .tmr_core_fault_0      (tmr_core_fault_0),
+    .tmr_core_fault_1      (tmr_core_fault_1),
+    .tmr_core_fault_2      (tmr_core_fault_2),
 `endif
 
     .soft_int               (soft_int),

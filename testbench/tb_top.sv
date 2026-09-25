@@ -765,7 +765,19 @@ module tb_top
 `endif
 
 `ifdef RV_BUILD_AXI4
-    assign mailbox_write = lmem.awvalid && lmem.awaddr == mem_mailbox && rst_l_combined;
+    // AW and W may arrive in different cycles (e.g. through the OpenOCD
+    // crossbar), so remember a mailbox AW until its W beat arrives.
+    logic mailbox_aw_pending;
+    always_ff @(posedge core_clk or negedge rst_l_combined) begin
+        if (!rst_l_combined)
+            mailbox_aw_pending <= 1'b0;
+        else if (lmem.wvalid)
+            mailbox_aw_pending <= 1'b0;
+        else if (lmem.awvalid && lmem.awaddr == mem_mailbox)
+            mailbox_aw_pending <= 1'b1;
+    end
+    assign mailbox_write = lmem.wvalid && rst_l_combined &&
+                           (mailbox_aw_pending || (lmem.awvalid && lmem.awaddr == mem_mailbox));
     assign mailbox_data  = lmem.wdata;
 `endif
 

@@ -1,4 +1,4 @@
-module tb_top #(
+module tb_top_tmr #(
   `include "el2_param.vh"
 );
 
@@ -17,6 +17,9 @@ logic [pt.PIC_TOTAL_INT:1]  extintsrc_req;
 logic                       nmi_int;
 logic                       timer_int;
 logic                       soft_int;
+
+logic                       mpc_reset_run_req;
+logic                       debug_brkpt_status;
 
 el2_mem_if el2_mem_export ();
 
@@ -115,63 +118,73 @@ end
 // ------------------------------------------------------------------
 `ifdef RV_BUILD_AHB_LITE
 
-logic                       lmem_hsel;
-logic        [31:0]         lmem_haddr;
-logic        [2:0]          lmem_hburst;
-logic                       lmem_hmastlock;
-logic        [3:0]          lmem_hprot;
-logic        [2:0]          lmem_hsize;
-logic        [1:0]          lmem_htrans;
-logic                       lmem_hwrite;
-logic                       lmem_hreadyout;
-logic                       lmem_hreadyin;
+logic                lmem_hsel;
+logic [31:0]         lmem_haddr;
+logic [2:0]          lmem_hburst;
+logic                lmem_hmastlock;
+logic [3:0]          lmem_hprot;
+logic [2:0]          lmem_hsize;
+logic [1:0]          lmem_htrans;
+logic                lmem_hwrite;
+logic                lmem_hreadyout;
+logic                lmem_hreadyin;
 
-logic        [31:0]         ic_haddr        ;
-logic        [2:0]          ic_hburst       ;
-logic                       ic_hmastlock    ;
-logic        [3:0]          ic_hprot        ;
-logic        [2:0]          ic_hsize        ;
-logic        [1:0]          ic_htrans       ;
-logic                       ic_hwrite       ;
-logic        [63:0]         ic_hrdata       ;
-logic                       ic_hready       ;
-logic                       ic_hresp        ;
+logic [63:0]         lmem_hrdata;
+logic [63:0]         lmem_hwdata;
+logic                lmem_hready;
+logic                lmem_hresp;
 
-logic        [31:0]         lsu_haddr       ;
-logic        [2:0]          lsu_hburst      ;
-logic                       lsu_hmastlock   ;
-logic        [3:0]          lsu_hprot       ;
-logic        [2:0]          lsu_hsize       ;
-logic        [1:0]          lsu_htrans      ;
-logic                       lsu_hwrite      ;
-logic        [63:0]         lsu_hrdata      ;
-logic        [63:0]         lsu_hwdata      ;
-logic                       lsu_hready      ;
-logic                       lsu_hresp       ;
+logic [31:0]         ic_haddr;
+logic [2:0]          ic_hburst;
+logic                ic_hmastlock;
+logic [3:0]          ic_hprot;
+logic [2:0]          ic_hsize;
+logic [1:0]          ic_htrans;
+logic                ic_hwrite;
+logic [63:0]         ic_hrdata;
+logic                ic_hready;
+logic                ic_hresp;
 
-logic        [31:0]         sb_haddr        ;
-logic        [2:0]          sb_hburst       ;
-logic                       sb_hmastlock    ;
-logic        [3:0]          sb_hprot        ;
-logic        [2:0]          sb_hsize        ;
-logic        [1:0]          sb_htrans       ;
-logic                       sb_hwrite       ;
+logic [31:0]         lsu_haddr;
+logic [2:0]          lsu_hburst;
+logic                lsu_hmastlock;
+logic [3:0]          lsu_hprot;
+logic [2:0]          lsu_hsize;
+logic [1:0]          lsu_htrans;
+logic                lsu_hwrite;
+logic [63:0]         lsu_hrdata;
+logic [63:0]         lsu_hwdata;
+logic                lsu_hready;
+logic                lsu_hresp;
 
-logic        [63:0]         sb_hrdata       ;
-logic        [63:0]         sb_hwdata       ;
-logic                       sb_hready       ;
-logic                       sb_hresp        ;
+logic [31:0]         sb_haddr;
+logic [2:0]          sb_hburst;
+logic                sb_hmastlock;
+logic [3:0]          sb_hprot;
+logic [2:0]          sb_hsize;
+logic [1:0]          sb_htrans;
+logic                sb_hwrite;
 
-logic                       dma_hsel;
-logic        [31:0]         dma_haddr;
-logic        [2:0]          dma_hburst;
-logic                       dma_hmastlock;
-logic        [3:0]          dma_hprot;
-logic        [2:0]          dma_hsize;
-logic        [1:0]          dma_htrans;
-logic                       dma_hwrite;
-logic                       dma_hreadyout;
-logic                       dma_hreadyin;
+logic [63:0]         sb_hrdata;
+logic [63:0]         sb_hwdata;
+logic                sb_hready;
+logic                sb_hresp;
+
+logic                dma_hsel;
+logic [31:0]         dma_haddr;
+logic [2:0]          dma_hburst;
+logic                dma_hmastlock;
+logic [3:0]          dma_hprot;
+logic [2:0]          dma_hsize;
+logic [1:0]          dma_htrans;
+logic                dma_hwrite;
+logic                dma_hreadyout;
+logic                dma_hreadyin;
+
+logic [63:0]         dma_hrdata;
+logic [63:0]         dma_hwdata;
+logic                dma_hready;
+logic                dma_hresp;
 
 // SB and LSU AHB master mux
 ahb_lite_2to1_mux #(
@@ -1432,7 +1445,7 @@ veer_wrapper rvtop_wrapper (
 
     .lsu_axi_bvalid         (lsu_axi_bvalid),
     .lsu_axi_bready         (lsu_axi_bready),
-    .lsu_axi_bresp          (lsu_axi_bresp_override),
+    .lsu_axi_bresp          (lsu_axi_bresp),
     .lsu_axi_bid            (lsu_axi_bid),
 
 
@@ -1453,7 +1466,7 @@ veer_wrapper rvtop_wrapper (
     .lsu_axi_rready         (lsu_axi_rready),
     .lsu_axi_rid            (lsu_axi_rid),
     .lsu_axi_rdata          (lsu_axi_rdata),
-    .lsu_axi_rresp          (lsu_axi_rresp_override),
+    .lsu_axi_rresp          (lsu_axi_rresp),
     .lsu_axi_rlast          (lsu_axi_rlast),
 
     //-------------------------- IFU AXI signals--------------------------
@@ -1499,7 +1512,7 @@ veer_wrapper rvtop_wrapper (
     .ifu_axi_rready         (ifu_axi_rready),
     .ifu_axi_rid            (ifu_axi_rid),
     .ifu_axi_rdata          (ifu_axi_rdata),
-    .ifu_axi_rresp          (ifu_axi_rresp_override),
+    .ifu_axi_rresp          (ifu_axi_rresp),
     .ifu_axi_rlast          (ifu_axi_rlast),
 
     //-------------------------- SB AXI signals--------------------------
@@ -1775,7 +1788,7 @@ end
 // System control commands
 // TODO
 assign rst_l_cmd     = '1;
-assign extrinsic_req = '0;
+assign extintsrc_req = '0;
 assign nmi_int       = '0;
 assign timer_int     = '0;
 assign soft_int      = '0;

@@ -14,7 +14,7 @@
 //
 
 `ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
-`define TMR_RECOVERY_FSM tb_top.rvtop_wrapper.rvtop.tmr_complex.el2_tmr_recovery_fsm_u
+`define TMR_RECOVERY_FSM `TB_TOP.rvtop_wrapper.rvtop.tmr_complex.el2_tmr_recovery_fsm_u
 `endif
 
 package tb_top_pkg;

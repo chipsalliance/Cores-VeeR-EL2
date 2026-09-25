@@ -1738,8 +1738,31 @@ logic [63:0]  mailbox_data;
 `endif
 
 `ifdef RV_BUILD_AXI4
-  assign mailbox_write = lmem.awvalid && lmem.awaddr == mem_mailbox && rst_l_combined;
-  assign mailbox_data  = lmem.wdata;
+  logic [31:0] mailbox_addr_q [$];
+  logic [63:0] mailbox_data_q [$];
+
+  initial begin
+     mailbox_write = 0;
+     mailbox_data  = 0;
+  end
+
+  always @(posedge core_clk) begin
+    if (rst_l_combined) begin
+      if (lmem.awvalid && lmem.awready)
+        mailbox_addr_q.push_back(lmem.awaddr);
+      if (lmem.wvalid && lmem.wready)
+        mailbox_data_q.push_back(lmem.wdata);
+
+      if (mailbox_addr_q.size() > 0 && mailbox_data_q.size() > 0) begin
+        logic [31:0] mailbox_addr;
+        mailbox_addr  = mailbox_addr_q.pop_front();
+        mailbox_data  = mailbox_data_q.pop_front();
+        mailbox_write = mailbox_addr == mem_mailbox;
+        @(posedge core_clk);
+        mailbox_write = 0;
+      end
+    end
+  end
 `endif
 
 // Console

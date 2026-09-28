@@ -418,7 +418,7 @@ import el2_pkg::*;
 
    // Generate the ahb signals
    assign ahb_haddr[31:3] = bypass_en ? master_addr[31:3]  : buf_addr[31:3];
-   assign ahb_haddr[2:0]  = {3{(ahb_htrans == 2'b10)}} & buf_cmd_byte_ptr[2:0];    // Trxn should be aligned during IDLE
+   assign ahb_haddr[2:0]  = {3{(ahb_htrans == 2'b10) | (ahb_htrans == 2'b11)}} & buf_cmd_byte_ptr[2:0];    // Trxn should be aligned during IDLE
    assign ahb_hsize[2:0]  = bypass_en ? {1'b0, ({2{buf_aligned_in}} & buf_size_in[1:0])} :
                                         {1'b0, ({2{buf_aligned}} & buf_size[1:0])};   // Send the full size for aligned trxn
    assign ahb_hburst[2:0] = 3'b0;

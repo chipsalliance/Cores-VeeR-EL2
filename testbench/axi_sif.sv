@@ -219,4 +219,301 @@ module axi_slv #(
   end
 endmodule
 
+/*
+  AXI manager model. Issues randomized requests to the given address range
+*/
+module axi_mst #(
+    // AXI ID width
+    parameter unsigned TAGW = 1,
+    // Number of AXI IDs to use starting from 0
+    parameter unsigned TAGC = 1,
+    // Address range count
+    parameter unsigned ADDR_N = 1,
+    // Address ranges boundaries. Concatenated 32b each
+    parameter bit [ADDR_N*32-1:0] ADDR_LO = 0,
+    parameter bit [ADDR_N*32-1:0] ADDR_HI = 0,
+    // Transaction interval range
+    parameter unsigned INTERVAL_MIN = 10,
+    parameter unsigned INTERVAL_MAX = 100,
+    // Min/max cycle count to drop BREADY for after a successful B transaction
+    parameter unsigned BREADY_DELAY_MIN = 0,
+    parameter unsigned BREADY_DELAY_MAX = 0,
+    // Min/max cycle count to drop RREADY for after a successful R transaction
+    parameter unsigned RREADY_DELAY_MIN = 0,
+    parameter unsigned RREADY_DELAY_MAX = 0
+) (
+    input  logic            aclk,
+    input  logic            aresetn,
+
+    input  logic            enable,
+
+    output logic            arvalid,
+    input  logic            arready,
+    output logic [    31:0] araddr,
+    output logic [TAGW-1:0] arid,
+    output logic [     7:0] arlen,
+    output logic [     1:0] arburst,
+    output logic [     2:0] arsize,
+
+    input  logic            rvalid,
+    output logic            rready,
+    input  logic [    63:0] rdata,
+    input  logic [     1:0] rresp,
+    input  logic [TAGW-1:0] rid,
+    input  logic            rlast,
+
+    output logic            awvalid,
+    input  logic            awready,
+    output logic [    31:0] awaddr,
+    output logic [TAGW-1:0] awid,
+    output logic [     7:0] awlen,
+    output logic [     1:0] awburst,
+    output logic [     2:0] awsize,
+
+    output logic [    63:0] wdata,
+    output logic [     7:0] wstrb,
+    output logic            wlast,
+    output logic            wvalid,
+    input  logic            wready,
+
+    input  logic            bvalid,
+    output logic            bready,
+    input  logic [     1:0] bresp,
+    input  logic [TAGW-1:0] bid
+);
+
+  typedef struct packed {
+    bit [    31:0] addr;
+    bit [TAGW-1:0] id;
+  } ax_t;
+
+  typedef struct packed {
+    bit [    63:0] data;
+    bit [     7:0] strb;
+  } w_t;
+
+  function automatic bit [31:0] randomize_address ();
+    int        which;
+    bit [31:0] addr_lo;
+    bit [31:0] addr_hi;
+
+    which   = $urandom_range(0, ADDR_N - 1);
+    addr_lo = (ADDR_LO >> (32 * which));
+    addr_hi = (ADDR_HI >> (32 * which));
+
+    return $urandom_range(addr_lo, addr_hi) & 32'hFFFF_FFF8; // Align to 8
+  endfunction
+
+  bit [TAGC-1:0] pending_w;
+  bit [TAGC-1:0] pending_r;
+
+  ax_t write_addr_q [$];
+  w_t  write_data_q [$];
+  ax_t read_addr_q  [$];
+
+  bit [TAGW-1:0] next_awid;
+  bit [TAGW-1:0] next_arid;
+
+  // Generate write requests
+  initial forever begin
+    @(posedge aclk or negedge aresetn);
+    if (!aresetn) begin
+      pending_w = '0;
+      next_awid = '0;
+
+    end else begin
+
+      // There are free slots
+      if (pending_w != {TAGC{1'b1}} && enable) begin
+        bit [TAGW-1:0] tag;
+        ax_t           aw;
+        w_t            w;
+
+        // Wait
+        for (int i=$urandom_range(INTERVAL_MIN, INTERVAL_MAX); i>0; i--) begin
+          @(posedge aclk or negedge aresetn);
+          if (!aresetn) break;
+        end
+        if (!aresetn) continue;
+
+        // Find the free slot
+        for (int i=0; i<TAGC; ++i) begin
+          if (!pending_w[next_awid]) break;
+          next_awid = (next_awid + 1) % TAGC;
+        end
+
+        // Randomize
+        aw.addr = randomize_address();
+        aw.id   = next_awid;
+/* verilator lint_off IGNOREDRETURN */
+        std::randomize(w);
+/* verilator lint_on IGNOREDRETURN */
+
+        // Enqueue
+        pending_w[next_awid] = 1'b1;
+        next_awid = (next_awid + 1) % TAGC;
+        write_addr_q.push_back(aw);
+        write_data_q.push_back(w);
+      end
+    end
+  end
+
+  // Generate read requests
+  initial forever begin
+    @(posedge aclk or negedge aresetn);
+    if (!aresetn) begin
+      pending_r = '0;
+      next_arid = '0;
+
+    end else begin
+
+      // There are free slots
+      if (pending_r != {TAGC{1'b1}} && enable) begin
+        bit [TAGW-1:0] tag;
+        ax_t           ar;
+
+        // Wait
+        for (int i=$urandom_range(INTERVAL_MIN, INTERVAL_MAX); i>0; i--) begin
+          @(posedge aclk or negedge aresetn);
+          if (!aresetn) break;
+        end
+        if (!aresetn) continue;
+
+        // Find the free slot
+        for (int i=0; i<TAGC; ++i) begin
+          if (!pending_r[next_arid]) break;
+          next_arid = (next_arid + 1) % TAGC;
+        end
+
+        // Randomize
+        ar.addr = randomize_address();
+        ar.id   = next_arid;
+
+        // Enqueue
+        pending_r[next_arid] = 1'b1;
+        next_arid = (next_arid + 1) % TAGC;
+        read_addr_q.push_back(ar);
+      end
+    end
+  end
+
+  // Handle responses
+  always @(posedge aclk or negedge aresetn) begin
+    if (!aresetn) begin
+      write_addr_q.delete();
+      write_data_q.delete();
+      read_addr_q.delete();
+    end else begin
+      if (bvalid && bready) begin
+        pending_w[bid] = '0;
+      end
+      if (rvalid && rready && rlast) begin
+        pending_r[rid] = '0;
+      end
+    end
+  end
+
+  // AW
+  always @(posedge aclk or negedge aresetn) begin
+    if (!aresetn) begin
+      awvalid <= '0;
+    end else begin
+
+      // Begin
+      if (!awvalid && write_addr_q.size() > 0) begin
+        ax_t aw;
+        aw = write_addr_q.pop_front();
+
+        awvalid <= '1;
+        awaddr  <= aw.addr;
+        awid    <= aw.id;
+        awlen   <= '0; // 1
+        awburst <=  1; // INCR
+        awsize  <=  3; // 8B
+      // Finish
+      end else if (awvalid && awready) begin
+        awvalid <= '0;
+      end
+    end
+  end
+
+  // W
+  always @(posedge aclk or negedge aresetn) begin
+    if (!aresetn) begin
+      wvalid <= '0;
+    end else begin
+
+      // Begin
+      if (!wvalid && write_data_q.size() > 0) begin
+        w_t w;
+        w = write_data_q.pop_front();
+
+        wvalid <= '1;
+        wdata  <= w.data;
+        wstrb  <= w.strb;
+        wlast  <= '1;
+      // Finish
+      end else if (wvalid && wready) begin
+        wvalid <= '0;
+      end
+    end
+  end
+
+  // B
+  initial forever begin
+    @(posedge aclk or negedge aresetn)
+    bready <= aresetn;
+    if (!aresetn) continue;
+
+    if (bvalid && bready) begin
+      bready <= '0;
+      for (int i=$urandom_range(BREADY_DELAY_MIN, BREADY_DELAY_MAX); i>0; i--) begin
+        @(posedge aclk or negedge aresetn);
+        if (!aresetn) break;
+      end
+      bready <= aresetn;
+    end
+  end
+
+  // AR
+  always @(posedge aclk or negedge aresetn) begin
+    if (!aresetn) begin
+      arvalid <= '0;
+    end else begin
+
+      // Begin
+      if (!arvalid && read_addr_q.size() > 0) begin
+        ax_t ar;
+        ar = read_addr_q.pop_front();
+
+        arvalid <= '1;
+        araddr  <= ar.addr;
+        arid    <= ar.id;
+        arlen   <= '0; // 1
+        arburst <=  1; // INCR
+        arsize  <=  3; // 8B
+      // Finish
+      end else if (arvalid && arready) begin
+        arvalid <= '0;
+      end
+    end
+  end
+
+  // R
+  initial forever begin
+    @(posedge aclk or negedge aresetn)
+    rready <= aresetn;
+    if (!aresetn) continue;
+
+    if (rvalid && rready) begin
+      rready <= '0;
+      for (int i=$urandom_range(RREADY_DELAY_MIN, RREADY_DELAY_MAX); i>0; i--) begin
+        @(posedge aclk or negedge aresetn);
+        if (!aresetn) break;
+      end
+      rready <= aresetn;
+    end
+  end
+endmodule
+
 `endif

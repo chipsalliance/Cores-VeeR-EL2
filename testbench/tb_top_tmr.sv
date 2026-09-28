@@ -2595,4 +2595,8 @@ initial begin
   end
 end
 
+`ifdef FAULT_INJECTION_ENABLE
+  Faultergeist fi(`FAULT_CAMPAIGN_FILE);
+`endif
+
 endmodule

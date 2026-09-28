@@ -87,8 +87,8 @@ wire ar_slave_select;
 wire aw_slave_select;
 wire w_slave_select;
 
-wire rresp_select;
-wire bresp_select;
+reg  rresp_select;
+reg  bresp_select;
 wire ar_iccm_select;
 wire aw_iccm_select;
 
@@ -127,7 +127,7 @@ assign s1_wvalid = m_wvalid &  w_slave_select;
 assign m_wready = w_slave_select ? s1_wready : s0_wready;
 assign w_slave_select = (wsel_count == 0 || wsel_count[2]) ? aw_slave_select : wsel[wsel_optr];
 
-assign m_rvalid = s0_rvalid | s1_rvalid;
+assign m_rvalid = rresp_select ? s1_rvalid : s0_rvalid;
 assign s0_rready = m_rready & ~rresp_select;
 assign s1_rready = m_rready &  rresp_select;
 assign m_rdata = rresp_select ? s1_rdata : s0_rdata;
@@ -135,16 +135,30 @@ assign m_rresp = rresp_select ? s1_rresp : s0_rresp;
 assign m_rid = rresp_select ? arid[rid_cnt] : s0_rid;
 assign m_rlast = rresp_select ? s1_rlast : s0_rlast;
 
-assign rresp_select = s1_rvalid & ~s0_rvalid;
+always @ (posedge clk or negedge reset_l)
+    if(!reset_l) begin
+        rresp_select <= '0;
+    end else begin
+        if (!m_rvalid | (m_rvalid & m_rready)) begin
+            rresp_select <= s1_rvalid & ~s0_rvalid;
+        end
+    end
 
-assign m_bvalid = s0_bvalid | s1_bvalid;
+assign m_bvalid = bresp_select ? s1_bvalid : s0_bvalid;
 assign s0_bready = m_bready & ~bresp_select;
 assign s1_bready = m_bready &  bresp_select;
 assign m_bid = bresp_select ? awid[bid_cnt] : s0_bid;
 assign m_bresp = bresp_select ? s1_bresp : s0_bresp;
 
 
-assign bresp_select = s1_bvalid & ~s0_bvalid;
+always @ (posedge clk or negedge reset_l)
+    if(!reset_l) begin
+        bresp_select <= '0;
+    end else begin
+        if (!m_bvalid | (m_bvalid & m_bready)) begin
+            bresp_select <= s1_bvalid & ~s0_bvalid;
+        end
+    end
 
 
 // W-channel select fifo

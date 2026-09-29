@@ -1,8 +1,8 @@
 `verilator_config
 
 lint_off -rule PINCONNECTEMPTY -file "*/el2_tmr_recovery_fsm.sv" -lines 233
-lint_off -rule PINCONNECTEMPTY -file "*/el2_tmr_recovery_fsm.sv" -lines 270
-lint_off -rule PINCONNECTEMPTY -file "*/el2_tmr_recovery_fsm.sv" -lines 309
+lint_off -rule PINCONNECTEMPTY -file "*/el2_tmr_recovery_fsm.sv" -lines 269
+lint_off -rule PINCONNECTEMPTY -file "*/el2_tmr_recovery_fsm.sv" -lines 308
 lint_off -rule UNUSEDPARAM
 lint_off -rule LATCH
 lint_off -rule UNOPTFLAT

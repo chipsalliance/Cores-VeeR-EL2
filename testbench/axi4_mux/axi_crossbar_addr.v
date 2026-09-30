@@ -282,7 +282,7 @@ generate
 
     for (n = 0; n < S_INT_THREADS; n = n + 1) begin
         initial begin
-            thread_count_reg[n] <= 0;
+            thread_count_reg[n] = 0;
         end
 
         assign thread_active[n] = thread_count_reg[n] != 0;

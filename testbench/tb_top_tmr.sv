@@ -72,7 +72,7 @@ assign dmi_core_enable     = ~o_cpu_halt_status;
 // ------------------------------------------------------------------
 
 initial core_clk = '0;
-always #2 core_clk <= ~core_clk;
+always #0.5 core_clk <= ~core_clk;
 
 initial begin
   porst_l =     '1;
@@ -495,11 +495,14 @@ wire                        dma_axi_awvalid;
 wire                        dma_axi_awready;
 wire [`RV_DMA_BUS_TAG-1:0]  dma_axi_awid;
 wire [31:0]                 dma_axi_awaddr;
-wire [2:0]                  dma_axi_awsize;
-wire [2:0]                  dma_axi_awprot;
+wire [3:0]                  dma_axi_awregion;
 wire [7:0]                  dma_axi_awlen;
+wire [2:0]                  dma_axi_awsize;
 wire [1:0]                  dma_axi_awburst;
-
+wire                        dma_axi_awlock;
+wire [3:0]                  dma_axi_awcache;
+wire [2:0]                  dma_axi_awprot;
+wire [3:0]                  dma_axi_awqos;
 
 wire                        dma_axi_wvalid;
 wire                        dma_axi_wready;
@@ -517,10 +520,14 @@ wire                        dma_axi_arvalid;
 wire                        dma_axi_arready;
 wire [`RV_DMA_BUS_TAG-1:0]  dma_axi_arid;
 wire [31:0]                 dma_axi_araddr;
-wire [2:0]                  dma_axi_arsize;
-wire [2:0]                  dma_axi_arprot;
+wire [3:0]                  dma_axi_arregion;
 wire [7:0]                  dma_axi_arlen;
+wire [2:0]                  dma_axi_arsize;
 wire [1:0]                  dma_axi_arburst;
+wire                        dma_axi_arlock;
+wire [3:0]                  dma_axi_arcache;
+wire [2:0]                  dma_axi_arprot;
+wire [3:0]                  dma_axi_arqos;
 
 wire                        dma_axi_rvalid;
 wire                        dma_axi_rready;
@@ -528,28 +535,162 @@ wire [`RV_DMA_BUS_TAG-1:0]  dma_axi_rid;
 wire [63:0]                 dma_axi_rdata;
 wire [1:0]                  dma_axi_rresp;
 wire                        dma_axi_rlast;
+wire                        dma_axi_awuser;
+wire                        dma_axi_wuser;
+wire                        dma_axi_buser;
+wire                        dma_axi_aruser;
+wire                        dma_axi_ruser;
 
 //-------------------------- Intermediate AXI signals--------------------------
 
-wire                        lmem_axi_arvalid;
-wire                        lmem_axi_arready;
-wire                        lmem_axi_rvalid;
-wire [RV_MUX_BUS_TAG-1:0]   lmem_axi_rid;
-wire [1:0]                  lmem_axi_rresp;
-wire [63:0]                 lmem_axi_rdata;
-wire                        lmem_axi_rlast;
-wire                        lmem_axi_rready;
-
 wire                        lmem_axi_awvalid;
 wire                        lmem_axi_awready;
+wire [RV_MUX_BUS_TAG:0]     lmem_axi_awid;
+wire [31:0]                 lmem_axi_awaddr;
+wire [3:0]                  lmem_axi_awregion;
+wire [7:0]                  lmem_axi_awlen;
+wire [2:0]                  lmem_axi_awsize;
+wire [1:0]                  lmem_axi_awburst;
+wire                        lmem_axi_awlock;
+wire [3:0]                  lmem_axi_awcache;
+wire [2:0]                  lmem_axi_awprot;
+wire [3:0]                  lmem_axi_awqos;
 
 wire                        lmem_axi_wvalid;
 wire                        lmem_axi_wready;
+wire [63:0]                 lmem_axi_wdata;
+wire [7:0]                  lmem_axi_wstrb;
+wire                        lmem_axi_wlast;
 
-wire [1:0]                  lmem_axi_bresp;
 wire                        lmem_axi_bvalid;
-wire [RV_MUX_BUS_TAG-1:0]   lmem_axi_bid;
 wire                        lmem_axi_bready;
+wire [1:0]                  lmem_axi_bresp;
+wire [RV_MUX_BUS_TAG:0]     lmem_axi_bid;
+
+wire                        lmem_axi_arvalid;
+wire                        lmem_axi_arready;
+wire [RV_MUX_BUS_TAG:0]     lmem_axi_arid;
+wire [31:0]                 lmem_axi_araddr;
+wire [3:0]                  lmem_axi_arregion;
+wire [7:0]                  lmem_axi_arlen;
+wire [2:0]                  lmem_axi_arsize;
+wire [1:0]                  lmem_axi_arburst;
+wire                        lmem_axi_arlock;
+wire [3:0]                  lmem_axi_arcache;
+wire [2:0]                  lmem_axi_arprot;
+wire [3:0]                  lmem_axi_arqos;
+
+wire                        lmem_axi_rvalid;
+wire                        lmem_axi_rready;
+wire [RV_MUX_BUS_TAG:0]     lmem_axi_rid;
+wire [63:0]                 lmem_axi_rdata;
+wire [1:0]                  lmem_axi_rresp;
+wire                        lmem_axi_rlast;
+wire                        lmem_axi_awuser;
+wire                        lmem_axi_wuser;
+wire                        lmem_axi_buser;
+wire                        lmem_axi_aruser;
+wire                        lmem_axi_ruser;
+
+// DMA bridge AXI
+wire                        br_axi_awvalid;
+wire                        br_axi_awready;
+wire [RV_MUX_BUS_TAG:0]     br_axi_awid;
+wire [31:0]                 br_axi_awaddr;
+wire [3:0]                  br_axi_awregion;
+wire [7:0]                  br_axi_awlen;
+wire [2:0]                  br_axi_awsize;
+wire [1:0]                  br_axi_awburst;
+wire                        br_axi_awlock;
+wire [3:0]                  br_axi_awcache;
+wire [2:0]                  br_axi_awprot;
+wire [3:0]                  br_axi_awqos;
+
+wire                        br_axi_wvalid;
+wire                        br_axi_wready;
+wire [63:0]                 br_axi_wdata;
+wire [7:0]                  br_axi_wstrb;
+wire                        br_axi_wlast;
+
+wire                        br_axi_bvalid;
+wire                        br_axi_bready;
+wire [1:0]                  br_axi_bresp;
+wire [RV_MUX_BUS_TAG:0]     br_axi_bid;
+
+wire                        br_axi_arvalid;
+wire                        br_axi_arready;
+wire [RV_MUX_BUS_TAG:0]     br_axi_arid;
+wire [31:0]                 br_axi_araddr;
+wire [3:0]                  br_axi_arregion;
+wire [7:0]                  br_axi_arlen;
+wire [2:0]                  br_axi_arsize;
+wire [1:0]                  br_axi_arburst;
+wire                        br_axi_arlock;
+wire [3:0]                  br_axi_arcache;
+wire [2:0]                  br_axi_arprot;
+wire [3:0]                  br_axi_arqos;
+
+wire                        br_axi_rvalid;
+wire                        br_axi_rready;
+wire [RV_MUX_BUS_TAG:0]     br_axi_rid;
+wire [63:0]                 br_axi_rdata;
+wire [1:0]                  br_axi_rresp;
+wire                        br_axi_rlast;
+wire                        br_axi_awuser;
+wire                        br_axi_wuser;
+wire                        br_axi_buser;
+wire                        br_axi_aruser;
+wire                        br_axi_ruser;
+
+// AXI injector
+wire                        inj_axi_awvalid;
+wire                        inj_axi_awready;
+wire [RV_MUX_BUS_TAG:0]     inj_axi_awid;
+wire [31:0]                 inj_axi_awaddr;
+wire [3:0]                  inj_axi_awregion;
+wire [7:0]                  inj_axi_awlen;
+wire [2:0]                  inj_axi_awsize;
+wire [1:0]                  inj_axi_awburst;
+wire                        inj_axi_awlock;
+wire [3:0]                  inj_axi_awcache;
+wire [2:0]                  inj_axi_awprot;
+wire [3:0]                  inj_axi_awqos;
+
+wire                        inj_axi_wvalid;
+wire                        inj_axi_wready;
+wire [63:0]                 inj_axi_wdata;
+wire [7:0]                  inj_axi_wstrb;
+wire                        inj_axi_wlast;
+
+wire                        inj_axi_bvalid;
+wire                        inj_axi_bready;
+wire [1:0]                  inj_axi_bresp;
+wire [RV_MUX_BUS_TAG:0]     inj_axi_bid;
+
+wire                        inj_axi_arvalid;
+wire                        inj_axi_arready;
+wire [RV_MUX_BUS_TAG:0]     inj_axi_arid;
+wire [31:0]                 inj_axi_araddr;
+wire [3:0]                  inj_axi_arregion;
+wire [7:0]                  inj_axi_arlen;
+wire [2:0]                  inj_axi_arsize;
+wire [1:0]                  inj_axi_arburst;
+wire                        inj_axi_arlock;
+wire [3:0]                  inj_axi_arcache;
+wire [2:0]                  inj_axi_arprot;
+wire [3:0]                  inj_axi_arqos;
+
+wire                        inj_axi_rvalid;
+wire                        inj_axi_rready;
+wire [RV_MUX_BUS_TAG:0]     inj_axi_rid;
+wire [63:0]                 inj_axi_rdata;
+wire [1:0]                  inj_axi_rresp;
+wire                        inj_axi_rlast;
+wire                        inj_axi_awuser;
+wire                        inj_axi_wuser;
+wire                        inj_axi_buser;
+wire                        inj_axi_aruser;
+wire                        inj_axi_ruser;
 
 wire                        mux_axi_awvalid;
 wire                        mux_axi_awready;
@@ -601,7 +742,168 @@ wire                        mux_axi_buser;
 wire                        mux_axi_aruser;
 wire                        mux_axi_ruser;
 
-// AXI LSU and SB 2:1 crossbar
+// 2to1 crossbar for the LSU DMA bridge to allow injecting AXI transactions
+// from a test module.
+axi_crossbar_wrap_2x1 #(
+  .ADDR_WIDTH     (32),
+  .DATA_WIDTH     (64),
+  .S_ID_WIDTH     (RV_MUX_BUS_TAG),
+  .M00_ADDR_WIDTH (32)
+
+) u_axi_dma_bridge_crossbar (
+
+  .clk(core_clk),
+  .rst(!rst_l_combined),
+
+  // DMA bridge
+  .s00_axi_arvalid   (br_axi_arvalid),
+  .s00_axi_arready   (br_axi_arready),
+  .s00_axi_araddr    (br_axi_araddr),
+  .s00_axi_arid      (br_axi_arid),
+  .s00_axi_arlen     (br_axi_arlen),
+  .s00_axi_arburst   (br_axi_arburst),
+  .s00_axi_arsize    (br_axi_arsize),
+
+  .s00_axi_rvalid    (br_axi_rvalid),
+  .s00_axi_rready    (br_axi_rready),
+  .s00_axi_rdata     (br_axi_rdata),
+  .s00_axi_rresp     (br_axi_rresp),
+  .s00_axi_rid       (br_axi_rid),
+  .s00_axi_rlast     (br_axi_rlast),
+
+  .s00_axi_awvalid   (br_axi_awvalid),
+  .s00_axi_awready   (br_axi_awready),
+  .s00_axi_awaddr    (br_axi_awaddr),
+  .s00_axi_awid      (br_axi_awid),
+  .s00_axi_awlen     (br_axi_awlen),
+  .s00_axi_awburst   (br_axi_awburst),
+  .s00_axi_awlock    (br_axi_awlock),
+  .s00_axi_awcache   (br_axi_awcache),
+  .s00_axi_awprot    (br_axi_awprot),
+  .s00_axi_awqos     (br_axi_awqos),
+  .s00_axi_awuser    (br_axi_awuser),
+  .s00_axi_wlast     (br_axi_wlast),
+  .s00_axi_wuser     (br_axi_wuser),
+  .s00_axi_buser     (br_axi_buser),
+  .s00_axi_arlock    (br_axi_arlock),
+  .s00_axi_arcache   (br_axi_arcache),
+  .s00_axi_arprot    (br_axi_arprot),
+  .s00_axi_arqos     (br_axi_arqos),
+  .s00_axi_aruser    (br_axi_aruser),
+  .s00_axi_ruser     (br_axi_ruser),
+  .s00_axi_awsize    (br_axi_awsize),
+
+  .s00_axi_wdata     (br_axi_wdata),
+  .s00_axi_wstrb     (br_axi_wstrb),
+  .s00_axi_wvalid    (br_axi_wvalid),
+  .s00_axi_wready    (br_axi_wready),
+
+  .s00_axi_bvalid    (br_axi_bvalid),
+  .s00_axi_bready    (br_axi_bready),
+  .s00_axi_bresp     (br_axi_bresp),
+  .s00_axi_bid       (br_axi_bid),
+
+  // AXI DMA injector
+  .s01_axi_arvalid   (inj_axi_arvalid),
+  .s01_axi_arready   (inj_axi_arready),
+  .s01_axi_araddr    (inj_axi_araddr),
+  .s01_axi_arid      (inj_axi_arid),
+  .s01_axi_arlen     (inj_axi_arlen),
+  .s01_axi_arburst   (inj_axi_arburst),
+  .s01_axi_arsize    (inj_axi_arsize),
+
+  .s01_axi_rvalid    (inj_axi_rvalid),
+  .s01_axi_rready    (inj_axi_rready),
+  .s01_axi_rdata     (inj_axi_rdata),
+  .s01_axi_rresp     (inj_axi_rresp),
+  .s01_axi_rid       (inj_axi_rid),
+  .s01_axi_rlast     (inj_axi_rlast),
+
+  .s01_axi_awvalid   (inj_axi_awvalid),
+  .s01_axi_awready   (inj_axi_awready),
+  .s01_axi_awaddr    (inj_axi_awaddr),
+  .s01_axi_awid      (inj_axi_awid),
+  .s01_axi_awlen     (inj_axi_awlen),
+  .s01_axi_awburst   (inj_axi_awburst),
+  .s01_axi_awlock    (inj_axi_awlock),
+  .s01_axi_awcache   (inj_axi_awcache),
+  .s01_axi_awprot    (inj_axi_awprot),
+  .s01_axi_awqos     (inj_axi_awqos),
+  .s01_axi_awuser    (inj_axi_awuser),
+  .s01_axi_wlast     (inj_axi_wlast),
+  .s01_axi_wuser     (inj_axi_wuser),
+  .s01_axi_buser     (inj_axi_buser),
+  .s01_axi_arlock    (inj_axi_arlock),
+  .s01_axi_arcache   (inj_axi_arcache),
+  .s01_axi_arprot    (inj_axi_arprot),
+  .s01_axi_arqos     (inj_axi_arqos),
+  .s01_axi_aruser    (inj_axi_aruser),
+  .s01_axi_ruser     (inj_axi_ruser),
+  .s01_axi_awsize    (inj_axi_awsize),
+
+  .s01_axi_wdata     (inj_axi_wdata),
+  .s01_axi_wstrb     (inj_axi_wstrb),
+  .s01_axi_wvalid    (inj_axi_wvalid),
+  .s01_axi_wready    (inj_axi_wready),
+
+  .s01_axi_bvalid    (inj_axi_bvalid),
+  .s01_axi_bready    (inj_axi_bready),
+  .s01_axi_bresp     (inj_axi_bresp),
+  .s01_axi_bid       (inj_axi_bid),
+
+  // To VeeR DMA port
+  .m00_axi_arvalid   (dma_axi_arvalid),
+  .m00_axi_arready   (dma_axi_arready),
+  .m00_axi_araddr    (dma_axi_araddr),
+  .m00_axi_arid      (dma_axi_arid),
+  .m00_axi_arlen     (dma_axi_arlen),
+  .m00_axi_arburst   (dma_axi_arburst),
+  .m00_axi_arsize    (dma_axi_arsize),
+
+  .m00_axi_rvalid    (dma_axi_rvalid),
+  .m00_axi_rready    (dma_axi_rready),
+  .m00_axi_rdata     (dma_axi_rdata),
+  .m00_axi_rresp     (dma_axi_rresp),
+  .m00_axi_rid       (dma_axi_rid),
+  .m00_axi_rlast     (dma_axi_rlast),
+
+  .m00_axi_awvalid   (dma_axi_awvalid),
+  .m00_axi_awready   (dma_axi_awready),
+  .m00_axi_awaddr    (dma_axi_awaddr),
+  .m00_axi_awid      (dma_axi_awid),
+  .m00_axi_awlen     (dma_axi_awlen),
+  .m00_axi_awburst   (dma_axi_awburst),
+  .m00_axi_awlock    (dma_axi_awlock),
+  .m00_axi_awcache   (dma_axi_awcache),
+  .m00_axi_awprot    (dma_axi_awprot),
+  .m00_axi_awqos     (dma_axi_awqos),
+  .m00_axi_awuser    (dma_axi_awuser),
+  .m00_axi_wlast     (dma_axi_wlast),
+  .m00_axi_wuser     (dma_axi_wuser),
+  .m00_axi_buser     (dma_axi_buser),
+  .m00_axi_arlock    (dma_axi_arlock),
+  .m00_axi_arcache   (dma_axi_arcache),
+  .m00_axi_arprot    (dma_axi_arprot),
+  .m00_axi_arqos     (dma_axi_arqos),
+  .m00_axi_aruser    (dma_axi_aruser),
+  .m00_axi_ruser     (dma_axi_ruser),
+  .m00_axi_awsize    (dma_axi_awsize),
+
+  .m00_axi_wdata     (dma_axi_wdata),
+  .m00_axi_wstrb     (dma_axi_wstrb),
+  .m00_axi_wvalid    (dma_axi_wvalid),
+  .m00_axi_wready    (dma_axi_wready),
+
+  .m00_axi_bvalid    (dma_axi_bvalid),
+  .m00_axi_bready    (dma_axi_bready),
+  .m00_axi_bresp     (dma_axi_bresp),
+  .m00_axi_bid       (dma_axi_bid),
+  .m00_axi_awregion  (dma_axi_awregion),
+  .m00_axi_arregion  (dma_axi_arregion)
+);
+
+// 2to1 crossbar for routing LSB -> DMA bridge and SB -> DMA bridge so that
+// access is possible from both buses.
 axi_crossbar_wrap_2x1 #(
     .ADDR_WIDTH     (32),
     .DATA_WIDTH     (64),
@@ -813,28 +1115,105 @@ axi_lsu_dma_bridge # (RV_MUX_BUS_TAG, RV_MUX_BUS_TAG) bridge (
   .s0_bready  (lmem_axi_bready),
 
 
-  .s1_arvalid (dma_axi_arvalid),
-  .s1_arready (dma_axi_arready),
+  .s1_arvalid (br_axi_arvalid),
+  .s1_arready (br_axi_arready),
 
-  .s1_rvalid  (dma_axi_rvalid),
-  .s1_rresp   (dma_axi_rresp),
-  .s1_rdata   (dma_axi_rdata),
-  .s1_rlast   (dma_axi_rlast),
-  .s1_rready  (dma_axi_rready),
+  .s1_rvalid  (br_axi_rvalid),
+  .s1_rresp   (br_axi_rresp),
+  .s1_rdata   (br_axi_rdata),
+  .s1_rlast   (br_axi_rlast),
+  .s1_rready  (br_axi_rready),
 
-  .s1_awvalid (dma_axi_awvalid),
-  .s1_awready (dma_axi_awready),
+  .s1_awvalid (br_axi_awvalid),
+  .s1_awready (br_axi_awready),
 
-  .s1_wvalid  (dma_axi_wvalid),
-  .s1_wready  (dma_axi_wready),
+  .s1_wvalid  (br_axi_wvalid),
+  .s1_wready  (br_axi_wready),
 
-  .s1_bresp   (dma_axi_bresp),
-  .s1_bvalid  (dma_axi_bvalid),
-  .s1_bready  (dma_axi_bready)
+  .s1_bresp   (br_axi_bresp),
+  .s1_bvalid  (br_axi_bvalid),
+  .s1_bready  (br_axi_bready)
 );
 
+assign lmem_axi_awid     = mux_axi_awid;
+assign lmem_axi_awaddr   = mux_axi_awaddr;
+assign lmem_axi_awregion = mux_axi_awregion;
+assign lmem_axi_awlen    = mux_axi_awlen;
+assign lmem_axi_awsize   = mux_axi_awsize;
+assign lmem_axi_awburst  = mux_axi_awburst;
+assign lmem_axi_awlock   = mux_axi_awlock;
+assign lmem_axi_awcache  = mux_axi_awcache;
+assign lmem_axi_awprot   = mux_axi_awprot;
+assign lmem_axi_awqos    = mux_axi_awqos;
+
+assign lmem_axi_wdata    = mux_axi_wdata;
+assign lmem_axi_wstrb    = mux_axi_wstrb;
+assign lmem_axi_wlast    = mux_axi_wlast;
+
+assign lmem_axi_arid     = mux_axi_arid;
+assign lmem_axi_araddr   = mux_axi_araddr;
+assign lmem_axi_arregion = mux_axi_arregion;
+assign lmem_axi_arlen    = mux_axi_arlen;
+assign lmem_axi_arsize   = mux_axi_arsize;
+assign lmem_axi_arburst  = mux_axi_arburst;
+assign lmem_axi_arlock   = mux_axi_arlock;
+assign lmem_axi_arcache  = mux_axi_arcache;
+assign lmem_axi_arprot   = mux_axi_arprot;
+assign lmem_axi_arqos    = mux_axi_arqos;
+
+assign lmem_axi_awuser   = mux_axi_awuser;
+assign lmem_axi_wuser    = mux_axi_wuser;
+assign lmem_axi_buser    = mux_axi_buser;
+assign lmem_axi_aruser   = mux_axi_aruser;
+assign lmem_axi_ruser    = mux_axi_ruser;
+
+
+assign br_axi_awid       = mux_axi_awid;
+assign br_axi_awaddr     = mux_axi_awaddr;
+assign br_axi_awregion   = mux_axi_awregion;
+assign br_axi_awlen      = mux_axi_awlen;
+assign br_axi_awsize     = mux_axi_awsize;
+assign br_axi_awburst    = mux_axi_awburst;
+assign br_axi_awlock     = mux_axi_awlock;
+assign br_axi_awcache    = mux_axi_awcache;
+assign br_axi_awprot     = mux_axi_awprot;
+assign br_axi_awqos      = mux_axi_awqos;
+
+assign br_axi_wdata      = mux_axi_wdata;
+assign br_axi_wstrb      = mux_axi_wstrb;
+assign br_axi_wlast      = mux_axi_wlast;
+
+assign br_axi_arid       = mux_axi_arid;
+assign br_axi_araddr     = mux_axi_araddr;
+assign br_axi_arregion   = mux_axi_arregion;
+assign br_axi_arlen      = mux_axi_arlen;
+assign br_axi_arsize     = mux_axi_arsize;
+assign br_axi_arburst    = mux_axi_arburst;
+assign br_axi_arlock     = mux_axi_arlock;
+assign br_axi_arcache    = mux_axi_arcache;
+assign br_axi_arprot     = mux_axi_arprot;
+assign br_axi_arqos      = mux_axi_arqos;
+
+assign br_axi_awuser     = mux_axi_awuser;
+assign br_axi_wuser      = mux_axi_wuser;
+assign br_axi_buser      = mux_axi_buser;
+assign br_axi_aruser     = mux_axi_aruser;
+assign br_axi_ruser      = mux_axi_ruser;
+
+
+// Program memory
 axi_slv # (
-  .TAGW(`RV_IFU_BUS_TAG)
+  .TAGW                (`RV_IFU_BUS_TAG),
+  .AWREADY_DELAY_MIN   (0),
+  .AWREADY_DELAY_MAX   (20),
+  .WREADY_DELAY_MIN    (0),
+  .WREADY_DELAY_MAX    (20),
+  .ARREADY_DELAY_MIN   (0),
+  .ARREADY_DELAY_MAX   (20),
+  .WRITE_LATENCY_MIN   (0),
+  .WRITE_LATENCY_MAX   (20),
+  .READ_LATENCY_MIN    (0),
+  .READ_LATENCY_MAX    (20)
 
 ) imem (
 
@@ -875,20 +1254,33 @@ axi_slv # (
   .bid     ()
 );
 
-defparam lmem.TAGW = RV_MUX_BUS_TAG;
+// Data memory
+defparam lmem.TAGW = RV_MUX_BUS_TAG + 1;
 //axi_slv #(.TAGW(`RV_LSU_BUS_TAG)) lmem(
-axi_slv lmem (
+axi_slv # (
+  .AWREADY_DELAY_MIN   (0),
+  .AWREADY_DELAY_MAX   (20),
+  .WREADY_DELAY_MIN    (0),
+  .WREADY_DELAY_MAX    (20),
+  .ARREADY_DELAY_MIN   (0),
+  .ARREADY_DELAY_MAX   (20),
+  .WRITE_LATENCY_MIN   (0),
+  .WRITE_LATENCY_MAX   (20),
+  .READ_LATENCY_MIN    (0),
+  .READ_LATENCY_MAX    (20)
+
+) lmem (
 
   .aclk    (core_clk),
   .rst_l   (rst_l_combined),
 
   .arvalid (lmem_axi_arvalid),
   .arready (lmem_axi_arready),
-  .araddr  (mux_axi_araddr),
-  .arid    (mux_axi_arid),
-  .arlen   (mux_axi_arlen),
-  .arburst (mux_axi_arburst),
-  .arsize  (mux_axi_arsize),
+  .araddr  (lmem_axi_araddr),
+  .arid    (lmem_axi_arid),
+  .arlen   (lmem_axi_arlen),
+  .arburst (lmem_axi_arburst),
+  .arsize  (lmem_axi_arsize),
 
   .rvalid  (lmem_axi_rvalid),
   .rready  (lmem_axi_rready),
@@ -899,14 +1291,14 @@ axi_slv lmem (
 
   .awvalid (lmem_axi_awvalid),
   .awready (lmem_axi_awready),
-  .awaddr  (mux_axi_awaddr),
-  .awid    (mux_axi_awid),
-  .awlen   (mux_axi_awlen),
-  .awburst (mux_axi_awburst),
-  .awsize  (mux_axi_awsize),
+  .awaddr  (lmem_axi_awaddr),
+  .awid    (lmem_axi_awid),
+  .awlen   (lmem_axi_awlen),
+  .awburst (lmem_axi_awburst),
+  .awsize  (lmem_axi_awsize),
 
-  .wdata   (mux_axi_wdata),
-  .wstrb   (mux_axi_wstrb),
+  .wdata   (lmem_axi_wdata),
+  .wstrb   (lmem_axi_wstrb),
   .wvalid  (lmem_axi_wvalid),
   .wready  (lmem_axi_wready),
 
@@ -1566,38 +1958,38 @@ veer_wrapper rvtop_wrapper (
     // AXI Write Channels
     .dma_axi_awvalid        (dma_axi_awvalid),
     .dma_axi_awready        (dma_axi_awready),
-    .dma_axi_awid           ('0),
-    .dma_axi_awaddr         (lsu_axi_awaddr),
-    .dma_axi_awsize         (lsu_axi_awsize),
-    .dma_axi_awprot         (lsu_axi_awprot),
-    .dma_axi_awlen          (lsu_axi_awlen),
-    .dma_axi_awburst        (lsu_axi_awburst),
+    .dma_axi_awid           (dma_axi_awid),
+    .dma_axi_awaddr         (dma_axi_awaddr),
+    .dma_axi_awsize         (dma_axi_awsize),
+    .dma_axi_awprot         (dma_axi_awprot),
+    .dma_axi_awlen          (dma_axi_awlen),
+    .dma_axi_awburst        (dma_axi_awburst),
 
 
     .dma_axi_wvalid         (dma_axi_wvalid),
     .dma_axi_wready         (dma_axi_wready),
-    .dma_axi_wdata          (lsu_axi_wdata),
-    .dma_axi_wstrb          (lsu_axi_wstrb),
-    .dma_axi_wlast          (lsu_axi_wlast),
+    .dma_axi_wdata          (dma_axi_wdata),
+    .dma_axi_wstrb          (dma_axi_wstrb),
+    .dma_axi_wlast          (dma_axi_wlast),
 
     .dma_axi_bvalid         (dma_axi_bvalid),
     .dma_axi_bready         (dma_axi_bready),
     .dma_axi_bresp          (dma_axi_bresp),
-    .dma_axi_bid            (),
+    .dma_axi_bid            (dma_axi_bid),
 
 
     .dma_axi_arvalid        (dma_axi_arvalid),
     .dma_axi_arready        (dma_axi_arready),
-    .dma_axi_arid           ('0),
-    .dma_axi_araddr         (lsu_axi_araddr),
-    .dma_axi_arsize         (lsu_axi_arsize),
-    .dma_axi_arprot         (lsu_axi_arprot),
-    .dma_axi_arlen          (lsu_axi_arlen),
-    .dma_axi_arburst        (lsu_axi_arburst),
+    .dma_axi_arid           (dma_axi_arid),
+    .dma_axi_araddr         (dma_axi_araddr),
+    .dma_axi_arsize         (dma_axi_arsize),
+    .dma_axi_arprot         (dma_axi_arprot),
+    .dma_axi_arlen          (dma_axi_arlen),
+    .dma_axi_arburst        (dma_axi_arburst),
 
     .dma_axi_rvalid         (dma_axi_rvalid),
     .dma_axi_rready         (dma_axi_rready),
-    .dma_axi_rid            (),
+    .dma_axi_rid            (dma_axi_rid),
     .dma_axi_rdata          (dma_axi_rdata),
     .dma_axi_rresp          (dma_axi_rresp),
     .dma_axi_rlast          (dma_axi_rlast),
@@ -1722,6 +2114,78 @@ jtagdpi #(
   assign jtag_tdi    = 1'b0;
   assign jtag_trst_n = 1'b1;
 `endif
+
+// ------------------------------------------------------------------
+// AXI DMA transaction injector
+// ------------------------------------------------------------------
+localparam bit [31:0] ICCM_RANGE_END = pt.ICCM_SADR[31:0] | (32'hFFFF_FFFF >> (32 - pt.ICCM_BITS));
+localparam bit [31:0] ICCM_RANGE_BEG = ICCM_RANGE_END - 1024; // Access the last 1024B only
+
+localparam bit [31:0] DCCM_RANGE_END = pt.DCCM_SADR[31:0] | (32'hFFFF_FFFF >> (32 - pt.DCCM_BITS));
+localparam bit [31:0] DCCM_RANGE_BEG = DCCM_RANGE_END - 1024; // Access the last 1024B only
+
+axi_mst # (
+  .TAGW        (RV_MUX_BUS_TAG),
+  .TAGC        (1 << RV_MUX_BUS_TAG),
+  .ADDR_N      (2),
+  .ADDR_LO     ({ICCM_RANGE_BEG, DCCM_RANGE_BEG}),
+  .ADDR_HI     ({ICCM_RANGE_END, DCCM_RANGE_END})
+
+) dma_axi_inj (
+
+  .aclk        (core_clk),
+  .aresetn     (rst_l_combined),
+
+  .enable      (1),
+
+  .arvalid     (inj_axi_arvalid),
+  .arready     (inj_axi_arready),
+  .araddr      (inj_axi_araddr),
+  .arid        (inj_axi_arid),
+  .arlen       (inj_axi_arlen),
+  .arburst     (inj_axi_arburst),
+  .arsize      (inj_axi_arsize),
+
+  .rvalid      (inj_axi_rvalid),
+  .rready      (inj_axi_rready),
+  .rdata       (inj_axi_rdata),
+  .rresp       (inj_axi_rresp),
+  .rid         (inj_axi_rid),
+  .rlast       (inj_axi_rlast),
+
+  .awvalid     (inj_axi_awvalid),
+  .awready     (inj_axi_awready),
+  .awaddr      (inj_axi_awaddr),
+  .awid        (inj_axi_awid),
+  .awlen       (inj_axi_awlen),
+  .awburst     (inj_axi_awburst),
+  .awsize      (inj_axi_awsize),
+
+  .wdata       (inj_axi_wdata),
+  .wstrb       (inj_axi_wstrb),
+  .wlast       (inj_axi_wlast),
+  .wvalid      (inj_axi_wvalid),
+  .wready      (inj_axi_wready),
+
+  .bvalid      (inj_axi_bvalid),
+  .bready      (inj_axi_bready),
+  .bresp       (inj_axi_bresp),
+  .bid         (inj_axi_bid)
+);
+
+assign inj_axi_awregion = '0;
+assign inj_axi_awlock   = '0;
+assign inj_axi_awcache  = '0;
+assign inj_axi_awprot   = '0;
+assign inj_axi_awqos    = '0;
+assign inj_axi_awuser   = '0;
+
+assign inj_axi_arregion = '0;
+assign inj_axi_arlock   = '0;
+assign inj_axi_arcache  = '0;
+assign inj_axi_arprot   = '0;
+assign inj_axi_arqos    = '0;
+assign inj_axi_aruser   = '0;
 
 // ------------------------------------------------------------------
 // Mailbox

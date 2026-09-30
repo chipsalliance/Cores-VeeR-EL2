@@ -208,6 +208,8 @@ VERILATOR_MAKE_FLAGS = OPT_FAST="-Os"
 # At this point all variables are configured so include the TMR makefile
 ifdef TMR_TB
 include $(RV_ROOT)/tools/tmr.mk
+else
+TMR_CONF_PARAMS =
 endif
 
 # Targets
@@ -224,7 +226,7 @@ clean:
 
 # If define files do not exist, then run veer.config.
 ${BUILD_DIR}/defines.h:
-	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/veer.config -target=$(target) $(CONF_PARAMS)
+	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/veer.config -target=$(target) $(CONF_PARAMS) $(TMR_CONF_PARAMS)
 
 ifndef TMR_TB
 verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)

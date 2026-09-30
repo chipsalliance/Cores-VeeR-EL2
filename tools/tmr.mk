@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Antmicro <www.antmicro.com>
 
-CONF_PARAMS := $(CONF_PARAMS) -set build_axi4 -set=triple_modular_redundancy_enable=1 -set=mubi_width=2 -set=mubi_false=0x1 -set=mubi_true=0x2
+TMR_CONF_PARAMS  = -set=triple_modular_redundancy_enable=1 -set=mubi_width=2 -set=mubi_false=0x1 -set=mubi_true=0x2
+# Set DMA AXI port ID width to accommodate AXI infrastructure
+TMR_CONF_PARAMS += -set=dma_bus_tag=6
+
 YOSYS ?= yosys
 
 # Verilate and compile
@@ -17,8 +20,9 @@ $(BUILD_DIR)/obj_dir/Vtb_top_tmr: $(BUILD_DIR)/defines.h $(TB_SRCS)
 		$(VERILATOR_SKIP_WARNINGS) \
 		$(TBFILES) \
 		--top-module tb_top_tmr \
-		-j 0 \
-		$(VERILATOR_DEBUG)
+		$(VERILATOR_DEBUG) \
+		$(VERILATOR_COVERAGE) \
+		-MAKEFLAGS $(VERILATOR_MAKE_FLAGS)
 
 verilator-build: $(BUILD_DIR)/obj_dir/Vtb_top_tmr
 

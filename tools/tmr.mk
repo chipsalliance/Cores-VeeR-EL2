@@ -26,8 +26,11 @@ $(BUILD_DIR)/obj_dir/Vtb_top_tmr: $(BUILD_DIR)/defines.h $(TB_SRCS)
 
 verilator-build: $(BUILD_DIR)/obj_dir/Vtb_top_tmr
 
-verilator: $(BUILD_DIR)/obj_dir/Vtb_top_tmr
-	cd $(BUILD_DIR) && obj_dir/Vtb_top_tmr $(TB_EXTRA_ARGS)
+verilator: $(BUILD_DIR)/obj_dir/Vtb_top_tmr program.hex
+	cp program.hex $(BUILD_DIR)/
+	cd $(BUILD_DIR) && obj_dir/Vtb_top_tmr \
+		$(TB_EXTRA_ARGS) \
+		+maxCycles=$(TB_MAX_CYCLES)
 
 # Synthesis
 SLANG_ARGS := --top el2_veer_wrapper \

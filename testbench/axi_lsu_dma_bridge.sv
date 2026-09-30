@@ -80,8 +80,12 @@ output                  s1_bready
 );
 
 parameter ICCM_BASE = `RV_ICCM_BITS; // in LSBs
+parameter DCCM_BASE = `RV_DCCM_BITS; // in LSBs
+
 localparam IDFIFOSZ = $clog2(`RV_DMA_BUF_DEPTH);
+
 bit[31:0] iccm_real_base_addr = `RV_ICCM_SADR ;
+bit[31:0] dccm_real_base_addr = `RV_DCCM_SADR ;
 
 wire ar_slave_select;
 wire aw_slave_select;
@@ -91,6 +95,8 @@ reg  rresp_select;
 reg  bresp_select;
 wire ar_iccm_select;
 wire aw_iccm_select;
+wire ar_dccm_select;
+wire aw_dccm_select;
 
 reg [1:0] wsel_iptr, wsel_optr;
 reg [2:0] wsel_count;
@@ -106,11 +112,14 @@ reg [IDFIFOSZ-1:0] bid_cnt;
 
 
 // 1 select slave 1; 0 - slave 0
-assign ar_slave_select = ar_iccm_select;
-assign aw_slave_select = aw_iccm_select;
+assign ar_slave_select = ar_iccm_select | ar_dccm_select;
+assign aw_slave_select = aw_iccm_select | aw_dccm_select;
 
 assign ar_iccm_select = m_araddr[31:ICCM_BASE] == iccm_real_base_addr[31:ICCM_BASE];
 assign aw_iccm_select = m_awaddr[31:ICCM_BASE] == iccm_real_base_addr[31:ICCM_BASE];
+
+assign ar_dccm_select = m_araddr[31:DCCM_BASE] == dccm_real_base_addr[31:DCCM_BASE];
+assign aw_dccm_select = m_awaddr[31:DCCM_BASE] == dccm_real_base_addr[31:DCCM_BASE];
 
 assign s0_arvalid = m_arvalid & ~ar_slave_select;
 assign s1_arvalid = m_arvalid &  ar_slave_select;

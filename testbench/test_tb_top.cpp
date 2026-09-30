@@ -21,13 +21,29 @@
 #include <fstream>
 #include "Vtb_top.h"
 #include "verilated.h"
-#include "verilated_vcd_c.h"
 
+#if VM_TRACE_VCD
+  #include "verilated_vcd_c.h"
+#endif
+#if VM_TRACE_FST
+  #include "verilated_fst_c.h"
+#endif
+
+#include <signal.h>
 
 vluint64_t main_time = 0;
+volatile int finish = 0;
 
 double sc_time_stamp () {
  return main_time;
+}
+
+void sigint_handler (int arg) {
+  (void)arg;
+  if (!finish) {
+    fprintf(stderr, "SIGINT caught, exitting...\n");
+    finish = 1;
+  }
 }
 
 std::map<std::string, uint64_t> load_symbols (const std::string& fileName) {
@@ -65,6 +81,7 @@ int main(int argc, char** argv) {
   std::cout << "\nVerilatorTB: Start of sim\n" << std::endl;
 
   Verilated::commandArgs(argc, argv);
+  signal(SIGINT, sigint_handler);
 
   Vtb_top* tb = new Vtb_top;
   bool test_halt = false;
@@ -143,13 +160,22 @@ int main(int argc, char** argv) {
   std::cout << std::flush;
 
   // init trace dump
-  VerilatedVcdC* tfp = NULL;
+  const int trace_depth = 24;
 
 #if VM_TRACE
   Verilated::traceEverOn(true);
+#if VM_TRACE_FST
+  VerilatedFstC* tfp = NULL;
+  tfp = new VerilatedFstC;
+  tb->trace (tfp, trace_depth);
+  tfp->open ("sim.fst");
+#endif
+#if VM_TRACE_VCD
+  VerilatedVcdC* tfp = NULL;
   tfp = new VerilatedVcdC;
-  tb->trace (tfp, 24);
+  tb->trace (tfp, trace_depth);
   tfp->open ("sim.vcd");
+#endif
 #endif
   tb->lsu_bus_clk_en = 1;
   // reset
@@ -290,7 +316,7 @@ int main(int argc, char** argv) {
     tb->rst_l = 1;
   }
 
-  while(!Verilated::gotFinish()){
+  while(!Verilated::gotFinish() && !finish){
 #if VM_TRACE
       tfp->dump (main_time);
 #endif

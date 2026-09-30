@@ -76,6 +76,8 @@ class TlInputItem(uvm_sequence_item):
         dec_csr_rddata_d=0,
         ifu_ic_debug_rd_data=0,
         lsu_imprecise_error_addr_any=0,
+        mpc_debug_halt_req=0,
+        mpc_debug_run_req=0,
     ):
         super().__init__("TlOutputItem")
 
@@ -90,6 +92,8 @@ class TlInputItem(uvm_sequence_item):
         self.dec_csr_rddata_d = dec_csr_rddata_d
         self.ifu_ic_debug_rd_data = ifu_ic_debug_rd_data
         self.lsu_imprecise_error_addr_any = lsu_imprecise_error_addr_any
+        self.mpc_debug_halt_req = mpc_debug_halt_req
+        self.mpc_debug_run_req = mpc_debug_run_req
 
     def randomize(self, test):
 
@@ -318,6 +322,31 @@ class TlDriver(uvm_driver):
                     await self.read_csr(csrs.DICAD0)
                     await self.read_csr(csrs.DICAD0H)
                     await self.read_csr(csrs.DICAD1)
+                elif test == "mcycle_halt":
+                    # Set CSR read decoder to MCYCLEL
+                    self.dut.dec_csr_rdaddr_d.value = csrs.MCYCLEL
+                    # request MPC halt
+                    self.dut.mpc_debug_halt_req.value = 1
+                    await ClockCycles(self.dut.clk, 2)
+                    self.dut.mpc_debug_halt_req.value = 0
+                    # Read MCYCLEL
+                    await self.read_csr(csrs.MCYCLEL)
+                    # Wait some clock cycles
+                    for _ in range(20):
+                        await RisingEdge(self.dut.clk)
+                    # Read MCYCLEL again
+                    await self.read_csr(csrs.MCYCLEL)
+                    # request MPC run
+                    self.dut.mpc_debug_run_req.value = 1
+                    await ClockCycles(self.dut.clk, 2)
+                    self.dut.mpc_debug_run_req.value = 0
+                    # Read MCYCLEL
+                    await self.read_csr(csrs.MCYCLEL)
+                    # Wait some clock cycles
+                    for _ in range(20):
+                        await RisingEdge(self.dut.clk)
+                    # Read MCYCLEL again
+                    await self.read_csr(csrs.MCYCLEL)
             else:
                 raise RuntimeError("Unknown item '{}'".format(type(it)))
 
@@ -338,6 +367,8 @@ class TlInputMonitor(uvm_component):
         self.ap = uvm_analysis_port("ap", self)
 
     async def run_phase(self):
+        prev_mpc_debug_halt_req = 0
+        prev_mpc_debug_run_req = 0
 
         while True:
             test = ConfigDB().get(self, "", "TEST")
@@ -397,6 +428,18 @@ class TlInputMonitor(uvm_component):
                 await RisingEdge(self.dut.clk)
                 ic_debug_rd_data = int(self.dut.ifu_ic_debug_rd_data.value)
                 self.ap.write(TlInputItem(ifu_ic_debug_rd_data=ic_debug_rd_data))
+            elif test == "mcycle_halt":
+                await RisingEdge(self.dut.clk)
+                # Detect rising edge of mpc_debug_halt_req
+                if prev_mpc_debug_halt_req == 0 and self.dut.mpc_debug_halt_req.value == 1:
+                    self.ap.write(TlInputItem(mpc_debug_halt_req=1))
+                # Detect rising edge of mpc_debug_run_req
+                if prev_mpc_debug_run_req == 0 and self.dut.mpc_debug_run_req.value == 1:
+                    self.ap.write(TlInputItem(mpc_debug_run_req=1))
+                prev_mpc_debug_halt_req = self.dut.mpc_debug_halt_req.value
+                prev_mpc_debug_run_req = self.dut.mpc_debug_run_req.value
+            else:
+                await RisingEdge(self.dut.clk)
 
 
 class TlOutputMonitor(uvm_component):
@@ -413,6 +456,8 @@ class TlOutputMonitor(uvm_component):
         self.ap = uvm_analysis_port("ap", self)
 
     async def run_phase(self):
+        prev_mpc_debug_halt_req = 0
+        prev_mpc_debug_run_req = 0
 
         while True:
             test = ConfigDB().get(self, "", "TEST")
@@ -475,6 +520,21 @@ class TlOutputMonitor(uvm_component):
                 dicad1 = int(self.dut.dec_csr_rddata_d.value)
                 ifu_ic_debug_rd_data = dicad0 | (dicad0h << 32) | (dicad1 << 64)
                 self.ap.write(TlOutputItem(ifu_ic_debug_rd_data=ifu_ic_debug_rd_data))
+            elif test == "mcycle_halt":
+                await RisingEdge(self.dut.clk)
+                # Detect falling edge of mpc_debug_halt_req. Sample CSR readout
+                # which should come from MCYCLEL
+                if prev_mpc_debug_halt_req == 1 and self.dut.mpc_debug_halt_req.value == 0:
+                    self.ap.write(TlOutputItem(dec_csr_rddata_d=self.dut.dec_csr_rddata_d.value))
+                # Detect falling edge of mpc_debug_run_req. Sample CSR readout
+                # which should come from MCYCLEL
+                if prev_mpc_debug_run_req == 1 and self.dut.mpc_debug_run_req.value == 0:
+                    self.ap.write(TlOutputItem(dec_csr_rddata_d=self.dut.dec_csr_rddata_d.value))
+                prev_mpc_debug_halt_req = self.dut.mpc_debug_halt_req.value
+                prev_mpc_debug_run_req = self.dut.mpc_debug_run_req.value
+                await RisingEdge(self.dut.clk)
+            else:
+                await RisingEdge(self.dut.clk)
 
 
 # ==============================================================================
@@ -501,6 +561,11 @@ class TlScoreboard(uvm_component):
         self.port_out.connect(self.fifo_out.get_export)
 
     def check_phase(self):  # noqa: C901
+
+        mcycle_prev = None
+        mcycle_halt = None
+        mcycle_run = None
+
         # Get item pairs
         while True:
             got_inp, item_inp = self.port_inp.try_get()
@@ -684,6 +749,47 @@ class TlScoreboard(uvm_component):
                     )
                     self.passed = False
 
+            elif test == "mcycle_halt":
+
+                # Got a halt request. Store MCYCLE
+                if item_inp.mpc_debug_halt_req == 1:
+                    if mcycle_halt is not None:
+                        self.logger.error("Received 2 or more consecutive MPC halt requests")
+                        self.passed = False
+                    mcycle_halt = int(item_out.dec_csr_rddata_d)
+
+                # Got a run request. Store MCYCLE
+                if item_inp.mpc_debug_run_req == 1:
+                    if mcycle_run is not None:
+                        self.logger.error("Received 2 or more consecutive MPC run requests")
+                        self.passed = False
+                    if mcycle_halt is None:
+                        self.logger.error("Received MPC run request but the core isn't halted")
+                        self.passed = False
+                    mcycle_run = int(item_out.dec_csr_rddata_d)
+
+                # Got both MCYCLE, check
+                if mcycle_halt is not None and mcycle_run is not None:
+
+                    # During halt MCYCLE shoult not increment
+                    if mcycle_halt != mcycle_run:
+                        self.logger.error(
+                            f"MCYCLEL has incremented during MPC halt! ({mcycle_run} vs. {mcycle_halt})"
+                        )
+                        self.passed = False
+
+                    # MCYCLE state on run should be greater than the one from
+                    # the previous run
+                    if mcycle_prev is not None and mcycle_run <= mcycle_prev:
+                        self.logger.error(
+                            f"MCYCLEL should increment in run state ({mcycle_prev} vs. {mcycle_run})"
+                        )
+                        self.passed = False
+
+                    mcycle_prev = mcycle_run
+                    mcycle_halt = None
+                    mcycle_run = None
+
     def final_phase(self):
         if not self.passed:
             self.logger.critical("{} reports a failure".format(type(self)))
@@ -841,8 +947,8 @@ class BaseTest(uvm_test):
         cocotb.top.exu_i0_br_way_r.value = 0
         cocotb.top.dbg_halt_req.value = 0
         cocotb.top.dbg_resume_req.value = 0
-        cocotb.top.ifu_miss_state_idle.value = 0
-        cocotb.top.lsu_idle_any.value = 0
+        cocotb.top.ifu_miss_state_idle.value = 1
+        cocotb.top.lsu_idle_any.value = 1
         cocotb.top.dec_div_active.value = 0
         cocotb.top.ifu_ic_error_start.value = 0
         cocotb.top.ifu_iccm_rd_ecc_single_err.value = 0
@@ -860,6 +966,7 @@ class BaseTest(uvm_test):
         cocotb.top.mpc_reset_run_req.value = 0
 
         # Start clocks
+        self.start_clock("free_clk")
         self.start_clock("free_l2clk")
         self.start_clock("clk")
 

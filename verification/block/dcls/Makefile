@@ -21,8 +21,6 @@ VERILOG_INCLUDE_DIRS += \
 VERILOG_SOURCES  = \
 	${SRCDIR}/lib/el2_mem_if.sv \
 	${SRCDIR}/lib/el2_regfile_if.sv \
-	${SRCDIR}/lib/el2_assert.sv \
-	${SRCDIR}/el2_mubi_pkg.sv \
 	${SRCDIR}/el2_veer_wrapper.sv \
 	${SRCDIR}/el2_mem.sv \
 	${SRCDIR}/el2_pic_ctrl.sv \

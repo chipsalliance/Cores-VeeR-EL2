@@ -1,0 +1,141 @@
+#!/usr/bin/perl
+
+# Perl script to generate input for the espresso tool
+# The input contains mapping from linear space to CSR addresses
+
+use Getopt::Long;
+
+use integer;
+
+$helpusage = "placeholder";
+
+GetOptions ('in=s'        => \$in,
+            'len=s'       => \$len)  || die("$helpusage");
+
+if (!defined($in))  { die("must define -in=input"); }
+if (!defined($len)) { $len=8; }
+
+@in=`cat $in`;
+
+foreach $line (@in) {
+
+    if ($line=~/^\s*\#/) { next; }
+
+    if ($line=~/^.definition/) {
+        $pstate=1; next;
+    }
+     if ($pstate==1) {  # definition
+        if ($line!~/^.output/) {
+            if ($line=~/(\S+)\s*=\s*(\S+)/) {
+                $key=$1; $value=$2;
+                $value=~s/\[//g;
+                $value=~s/\]//g;
+                my @prefixes=("");
+                while($value=~/([^\s\.]*)(\.++)(\S*)/) {
+                    $pref=$1; $any=$2; $value=$3;
+                    my @_local = ();
+                    foreach $ppref (@prefixes) {
+                        for ($i = 0; $i < (1 << length($any)); $i++) {
+                            push @_local, sprintf("%s%s%s", $pperf, $pref, d2bl($i,length($any)));
+                        }
+                    }
+                    @prefixes=@_local;
+                }
+                my @final = ();
+                foreach $ppref (@prefixes) {
+                    push @final, qq\$ppref$value\;
+                }
+                $csrs{$key}=[@final];
+            }
+        }
+        else { $pstate=2; next; }
+    }
+
+    if ($line=~/^.input/) {
+        $pstate=2; next;
+    }
+
+    if ($pstate==2) { if ($line=~/(\S+)\s*=\s*\{/) {next;}}
+
+    if ($line=~/^.output/) {
+        $pstate=3; next;
+    }
+
+    if ($pstate==3) { if ($line=~/(\S+)\s*=\s*\{/) {next;}}
+
+    if ($line=~/^.decode/) {
+        $pstate=4; next;
+    }
+
+   if ($pstate==4) {  # decode
+        if ($line=~/([^\[]+)\[([^\]]+)\]\s*=\s*\{([^\}]+)\}/) {
+            $dview=$1; $inst=$2; $body=$3;
+            $dview=~s/\s+//g;
+            $inst=~s/\s+//g;
+            if ($body=~"valid_only") {
+                delete $csrs{$inst}
+            }
+        }
+   }
+}
+
+printf(".i $len\n");
+printf(".o 12\n");
+printf(".ilb");
+for ($i=$len-1; $i>=0; $i--) {
+    printf(" counter[$i]");
+}
+printf("\n");
+printf(".ob");
+for ($i=11; $i>=0; $i--) {
+    printf(" csr_addr[$i]");
+}
+printf("\n");
+
+printf(".type fr\n");
+$cnt=0;
+foreach $csr (sort keys %csrs) {
+    foreach $csr_addr (@{$csrs{$csr}}) {
+        if (!(defined $first_csr)) {
+            $first_csr=$csr_addr
+        }
+        printf("%s %s\n", d2bl($cnt++, $len), $csr_addr);
+    }
+}
+printf("%s %s\n", d2bl($cnt, $len), $first_csr);
+
+exit;
+
+sub d2b {
+    my ($v) = @_;
+
+    my $repeat;
+
+    $v = sprintf "%b",$v;
+    if (length($v)<$LEN) {
+        $repeat=$LEN-length($v);
+        $v="0"x$repeat.$v;
+    }
+    elsif (length($v)>$LEN) {
+        $v=substr($v,length($v)-$LEN,$LEN);
+    }
+
+    return($v);
+}
+
+sub d2bl {
+    my ($v,$LEN) = @_;
+
+    my $repeat;
+
+    $v = sprintf "%b",$v;
+    if (length($v)<$LEN) {
+        $repeat=$LEN-length($v);
+        $v="0"x$repeat.$v;
+    }
+    elsif (length($v)>$LEN) {
+        $v=substr($v,length($v)-$LEN,$LEN);
+    }
+
+    return($v);
+}

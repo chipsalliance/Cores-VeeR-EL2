@@ -56,6 +56,7 @@ module tb_top
     input bit                       lsu_bus_clk_en
 );
 `endif
+
 `ifdef RV_LOCKSTEP_ENABLE
     logic [31:0] shadow_core_trace_rv_i_insn_ip;
     logic [31:0] shadow_core_trace_rv_i_address_ip;
@@ -68,6 +69,15 @@ module tb_top
     el2_mubi_pkg::el2_mubi_t lockstep_err_injection_en_i;
     el2_mubi_pkg::el2_mubi_t corruption_detected_o;
 `endif // RV_LOCKSTEP_ENABLE
+
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    el2_mubi_pkg::el2_mubi_t tmr_fatal;
+    el2_mubi_pkg::el2_mubi_t tmr_recovery_pending;
+    el2_mubi_pkg::el2_mubi_t tmr_recovery_fault;
+    el2_mubi_pkg::el2_mubi_t tmr_core_fault_0;
+    el2_mubi_pkg::el2_mubi_t tmr_core_fault_1;
+    el2_mubi_pkg::el2_mubi_t tmr_core_fault_2;
+`endif
 
 `ifdef RV_BUILD_AHB_LITE
     logic                       lmem_hsel;
@@ -197,7 +207,6 @@ module tb_top
 
     wire                        lmem_hready_out;
     wire                        dma_hready_out;
-    int                         commit_count;
 
     logic [3:0]                 nmi_assert_int;
 
@@ -745,7 +754,6 @@ module tb_top
 `endif
 
 `endif
-    string                      abi_reg[32]; // ABI register names
     el2_mem_if el2_mem_export ();
 
     logic [pt.ICCM_NUM_BANKS-1:0][                   38:0] iccm_bank_wr_fdata;
@@ -756,7 +764,15 @@ module tb_top
     tb_top_pkg::veer_sram_error_injection_mode_t error_injection_mode;
     logic x_sanitizer_en;
 
-`define DEC rvtop_wrapper.rvtop.veer.dec
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+`define VEER rvtop_wrapper.rvtop.veer
+`else
+`define VEER rvtop_wrapper.rvtop.tmr_complex.cores[0].veer
+`define VEER0 rvtop_wrapper.rvtop.tmr_complex.cores[0].veer
+`define VEER1 rvtop_wrapper.rvtop.tmr_complex.cores[1].veer
+`define VEER2 rvtop_wrapper.rvtop.tmr_complex.cores[2].veer
+`endif
+`define DEC `VEER.dec
 
 `ifdef RV_BUILD_AHB_LITE
     always_ff @(posedge core_clk)
@@ -771,7 +787,7 @@ module tb_top
 
     assign mailbox_data_val = mailbox_data[7:0] > 8'h5 && mailbox_data[7:0] < 8'h7f;
 
-    integer fd, tp, el;
+    integer fd;
     logic next_dbus_error;
     logic next_ibus_error;
     logic next_ic_error;
@@ -891,6 +907,17 @@ module tb_top
                 if (mailbox_data[7:0] == 8'h86) begin
                     extintsrc_req[1] <= 1;
                 end
+            end
+            if(mailbox_write && (mailbox_data[7:0] == 8'h8a)) begin
+                force i_cpu_halt_req = 1'b1;
+                wait (o_cpu_halt_ack == 1'b1);
+                @(posedge core_clk);
+                release i_cpu_halt_req;
+                repeat (100) @(posedge core_clk);
+                force i_cpu_run_req = 1'b1;
+                wait (o_cpu_run_ack == 1'b1);
+                @(posedge core_clk);
+                release i_cpu_run_req;
             end
             if(mailbox_write && (mailbox_data[7:0] == 8'h90)) begin
                 extintsrc_req  <= {pt.PIC_TOTAL_INT-1{1'b0}};
@@ -1116,7 +1143,6 @@ module tb_top
     logic ic_perr_r_d1;
 
 `ifdef RV_LOCKSTEP_ENABLE
-`define VEER rvtop_wrapper.rvtop.veer
 `define LOCKSTEP rvtop_wrapper.rvtop.lockstep
 `define LOCKSTEP_CORE rvtop_wrapper.rvtop.lockstep.xshadow_core
 `define LOCKSTEP_CONST_DELAY_ASSERT_DISABLE rvtop_wrapper.rvtop.disable_const_delay_assertion
@@ -1135,7 +1161,7 @@ module tb_top
                 release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
             `endif
         end else begin
-            ic_perr_r_d1 <= rvtop_wrapper.rvtop.veer.dec.tlu.ic_perr_r;
+            ic_perr_r_d1 <= `VEER.dec.tlu.ic_perr_r;
             if (mailbox_write && mailbox_data[7:0] == 8'h89) begin
                 `ifdef RV_ASSERT_OR_VERILATOR
                     force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
@@ -2175,73 +2201,148 @@ module tb_top
     // at least two clock cycles - see RISC-V VeeR EL2 Programmer's Reference Manual section 2.16
     assign nmi_int = |{nmi_assert_int[3:2]};
 
-    // trace monitor
-    always @(posedge core_clk) begin
-        wb_valid      <= `DEC.dec_i0_wen_r;
-        wb_dest       <= `DEC.dec_i0_waddr_r;
-        wb_data       <= `DEC.dec_i0_wdata_r;
-        wb_csr_valid  <= `DEC.dec_csr_wen_r;
-        wb_csr_dest   <= `DEC.dec_csr_wraddr_r;
-        wb_csr_data   <= `DEC.dec_csr_wrdata_r;
-        if (trace_rv_i_valid_ip) begin
-           $fwrite(tp,"%b,%h,%h,%0h,%0h,3,%b,%h,%h,%b\n", trace_rv_i_valid_ip, 0, trace_rv_i_address_ip,
-                  0, trace_rv_i_insn_ip,trace_rv_i_exception_ip,trace_rv_i_ecause_ip,
-                  trace_rv_i_tval_ip,trace_rv_i_interrupt_ip);
-           // Basic trace - no exception register updates
-           // #1 0 ee000000 b0201073 c 0b02       00000000
-           commit_count++;
-           $fwrite (el, "%10d : %8s 0 %h %h%13s %14s ; %s\n", cycleCnt, $sformatf("#%0d",commit_count),
-                        trace_rv_i_address_ip, trace_rv_i_insn_ip,
-                        (wb_dest !=0 && wb_valid)?  $sformatf("%s=%h", abi_reg[wb_dest], wb_data) : "            ",
-                        (wb_csr_valid)? $sformatf("c%h=%h", wb_csr_dest, wb_csr_data) : "             ",
-                        dasm(trace_rv_i_insn_ip, trace_rv_i_address_ip, wb_dest & {5{wb_valid}}, wb_data)
-                   );
-        end
-        if(`DEC.dec_nonblock_load_wen) begin
-            $fwrite (el, "%10d : %32s=%h                ; nbL\n", cycleCnt, abi_reg[`DEC.dec_nonblock_load_waddr], `DEC.lsu_nonblock_load_data);
-            tb_top.gpr[0][`DEC.dec_nonblock_load_waddr] = `DEC.lsu_nonblock_load_data;
-        end
-        if(`DEC.exu_div_wren) begin
-            $fwrite (el, "%10d : %32s=%h                ; nbD\n", cycleCnt, abi_reg[`DEC.div_waddr_wb], `DEC.exu_div_result);
-            tb_top.gpr[0][`DEC.div_waddr_wb] = `DEC.exu_div_result;
-        end
+    // Trace interface(s)
+    trace_monitor_if  trace();
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    trace_monitor_if  trace_core[3]();
+`endif
+
+    // Connect trace signals
+    assign trace.clk    = core_clk;
+    assign trace.rst_n  = rst_l;
+
+    assign trace.trace_insn      = trace_rv_i_insn_ip;
+    assign trace.trace_address   = trace_rv_i_address_ip;
+    assign trace.trace_valid     = trace_rv_i_valid_ip; 
+    assign trace.trace_exception = trace_rv_i_exception_ip;
+    assign trace.trace_ecause    = trace_rv_i_ecause_ip;
+    assign trace.trace_interrupt = trace_rv_i_interrupt_ip;
+    assign trace.trace_tval      = trace_rv_i_tval_ip;
+
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    for (genvar i=0; i<3; i++) begin
+        assign trace_core[i].clk    = core_clk;
+        assign trace_core[i].rst_n  = rst_l;
     end
 
+    assign trace_core[0].trace_insn      = `VEER0.trace_rv_i_insn_ip;
+    assign trace_core[0].trace_address   = `VEER0.trace_rv_i_address_ip;
+    assign trace_core[0].trace_valid     = `VEER0.trace_rv_i_valid_ip;
+    assign trace_core[0].trace_exception = `VEER0.trace_rv_i_exception_ip;
+    assign trace_core[0].trace_ecause    = `VEER0.trace_rv_i_ecause_ip;
+    assign trace_core[0].trace_interrupt = `VEER0.trace_rv_i_interrupt_ip;
+    assign trace_core[0].trace_tval      = `VEER0.trace_rv_i_tval_ip;
+
+    assign trace_core[0].gpr_wvalid = `VEER0.dec.dec_i0_wen_r;
+    assign trace_core[0].gpr_waddr  = `VEER0.dec.dec_i0_waddr_r;
+    assign trace_core[0].gpr_wdata  = `VEER0.dec.dec_i0_wdata_r;
+
+    assign trace_core[0].csr_wvalid = `VEER0.dec.dec_csr_wen_r;
+    assign trace_core[0].csr_waddr  = `VEER0.dec.dec_csr_wraddr_r;
+    assign trace_core[0].csr_wdata  = `VEER0.dec.dec_csr_wrdata_r;
+
+    assign trace_core[0].nonblock_load_wvalid = `VEER0.dec.dec_nonblock_load_wen;
+    assign trace_core[0].nonblock_load_waddr  = `VEER0.dec.dec_nonblock_load_waddr;
+    assign trace_core[0].nonblock_load_wdata  = `VEER0.dec.lsu_nonblock_load_data;
+
+    assign trace_core[0].div_wvalid = `VEER0.dec.exu_div_wren;
+    assign trace_core[0].div_waddr  = `VEER0.dec.div_waddr_wb;
+    assign trace_core[0].div_wdata  = `VEER0.dec.exu_div_result;
+
+    assign trace_core[1].trace_insn      = `VEER1.trace_rv_i_insn_ip;
+    assign trace_core[1].trace_address   = `VEER1.trace_rv_i_address_ip;
+    assign trace_core[1].trace_valid     = `VEER1.trace_rv_i_valid_ip;
+    assign trace_core[1].trace_exception = `VEER1.trace_rv_i_exception_ip;
+    assign trace_core[1].trace_ecause    = `VEER1.trace_rv_i_ecause_ip;
+    assign trace_core[1].trace_interrupt = `VEER1.trace_rv_i_interrupt_ip;
+    assign trace_core[1].trace_tval      = `VEER1.trace_rv_i_tval_ip;
+
+    assign trace_core[1].gpr_wvalid = `VEER1.dec.dec_i0_wen_r;
+    assign trace_core[1].gpr_waddr  = `VEER1.dec.dec_i0_waddr_r;
+    assign trace_core[1].gpr_wdata  = `VEER1.dec.dec_i0_wdata_r;
+
+    assign trace_core[1].csr_wvalid = `VEER1.dec.dec_csr_wen_r;
+    assign trace_core[1].csr_waddr  = `VEER1.dec.dec_csr_wraddr_r;
+    assign trace_core[1].csr_wdata  = `VEER1.dec.dec_csr_wrdata_r;
+
+    assign trace_core[1].nonblock_load_wvalid = `VEER1.dec.dec_nonblock_load_wen;
+    assign trace_core[1].nonblock_load_waddr  = `VEER1.dec.dec_nonblock_load_waddr;
+    assign trace_core[1].nonblock_load_wdata  = `VEER1.dec.lsu_nonblock_load_data;
+
+    assign trace_core[1].div_wvalid = `VEER1.dec.exu_div_wren;
+    assign trace_core[1].div_waddr  = `VEER1.dec.div_waddr_wb;
+    assign trace_core[1].div_wdata  = `VEER1.dec.exu_div_result;
+
+    assign trace_core[2].trace_insn      = `VEER2.trace_rv_i_insn_ip;
+    assign trace_core[2].trace_address   = `VEER2.trace_rv_i_address_ip;
+    assign trace_core[2].trace_valid     = `VEER2.trace_rv_i_valid_ip;
+    assign trace_core[2].trace_exception = `VEER2.trace_rv_i_exception_ip;
+    assign trace_core[2].trace_ecause    = `VEER2.trace_rv_i_ecause_ip;
+    assign trace_core[2].trace_interrupt = `VEER2.trace_rv_i_interrupt_ip;
+    assign trace_core[2].trace_tval      = `VEER2.trace_rv_i_tval_ip;
+
+    assign trace_core[2].gpr_wvalid = `VEER2.dec.dec_i0_wen_r;
+    assign trace_core[2].gpr_waddr  = `VEER2.dec.dec_i0_waddr_r;
+    assign trace_core[2].gpr_wdata  = `VEER2.dec.dec_i0_wdata_r;
+
+    assign trace_core[2].csr_wvalid = `VEER2.dec.dec_csr_wen_r;
+    assign trace_core[2].csr_waddr  = `VEER2.dec.dec_csr_wraddr_r;
+    assign trace_core[2].csr_wdata  = `VEER2.dec.dec_csr_wrdata_r;
+
+    assign trace_core[2].nonblock_load_wvalid = `VEER2.dec.dec_nonblock_load_wen;
+    assign trace_core[2].nonblock_load_waddr  = `VEER2.dec.dec_nonblock_load_waddr;
+    assign trace_core[2].nonblock_load_wdata  = `VEER2.dec.lsu_nonblock_load_data;
+
+    assign trace_core[2].div_wvalid = `VEER2.dec.exu_div_wren;
+    assign trace_core[2].div_waddr  = `VEER2.dec.div_waddr_wb;
+    assign trace_core[2].div_wdata  = `VEER2.dec.exu_div_result;
+`endif
+
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    // For TMR enabled do majority voting. Regular RISC-V trace is already
+    // majority voted as a part of the TMR complex
+    begin : trace_tmr
+        rvtmr #($bits(trace.gpr_wvalid)) tmr_gpr_wvalid ('{`VEER0.dec.dec_i0_wen_r,     `VEER1.dec.dec_i0_wen_r,     `VEER2.dec.dec_i0_wen_r},     trace.gpr_wvalid);
+        rvtmr #($bits(trace.gpr_waddr))  tmr_gpr_waddr  ('{`VEER0.dec.dec_i0_waddr_r,   `VEER1.dec.dec_i0_waddr_r,   `VEER2.dec.dec_i0_waddr_r},   trace.gpr_waddr);
+        rvtmr #($bits(trace.gpr_wdata))  tmr_gpr_wdata  ('{`VEER0.dec.dec_i0_wdata_r,   `VEER1.dec.dec_i0_wdata_r,   `VEER2.dec.dec_i0_wdata_r},   trace.gpr_wdata);
+
+        rvtmr #($bits(trace.csr_wvalid)) tmr_csr_wvalid ('{`VEER0.dec.dec_csr_wen_r,    `VEER1.dec.dec_csr_wen_r,    `VEER2.dec.dec_csr_wen_r},    trace.csr_wvalid);
+        rvtmr #($bits(trace.csr_waddr))  tmr_csr_waddr  ('{`VEER0.dec.dec_csr_wraddr_r, `VEER1.dec.dec_csr_wraddr_r, `VEER2.dec.dec_csr_wraddr_r}, trace.csr_waddr);
+        rvtmr #($bits(trace.csr_wdata))  tmr_csr_wdata  ('{`VEER0.dec.dec_csr_wrdata_r, `VEER1.dec.dec_csr_wrdata_r, `VEER2.dec.dec_csr_wrdata_r}, trace.csr_wdata);
+
+        rvtmr #($bits(trace.nonblock_load_wvalid)) tmr_nonblock_load_wvalid ('{`VEER0.dec.dec_nonblock_load_wen,   `VEER1.dec.dec_nonblock_load_wen,   `VEER2.dec.dec_nonblock_load_wen},   trace.nonblock_load_wvalid);
+        rvtmr #($bits(trace.nonblock_load_waddr))  tmr_nonblock_load_waddr  ('{`VEER0.dec.dec_nonblock_load_waddr, `VEER1.dec.dec_nonblock_load_waddr, `VEER2.dec.dec_nonblock_load_waddr}, trace.nonblock_load_waddr);
+        rvtmr #($bits(trace.nonblock_load_wdata))  tmr_nonblock_load_wdata  ('{`VEER0.dec.lsu_nonblock_load_data,  `VEER1.dec.lsu_nonblock_load_data,  `VEER2.dec.lsu_nonblock_load_data},  trace.nonblock_load_wdata);
+
+        rvtmr #($bits(trace.div_wvalid)) tmr_div_wvalid ('{`VEER0.dec.exu_div_wren,   `VEER1.dec.exu_div_wren,   `VEER2.dec.exu_div_wren},   trace.div_wvalid);
+        rvtmr #($bits(trace.div_waddr))  tmr_div_waddr  ('{`VEER0.dec.div_waddr_wb,   `VEER1.dec.div_waddr_wb,   `VEER2.dec.div_waddr_wb},   trace.div_waddr);
+        rvtmr #($bits(trace.div_wdata))  tmr_div_wdata  ('{`VEER0.dec.exu_div_result, `VEER1.dec.exu_div_result, `VEER2.dec.exu_div_result}, trace.div_wdata);
+    end
+
+`else
+    assign trace.gpr_wvalid = `DEC.dec_i0_wen_r;
+    assign trace.gpr_waddr  = `DEC.dec_i0_waddr_r;
+    assign trace.gpr_wdata  = `DEC.dec_i0_wdata_r;
+
+    assign trace.csr_wvalid = `DEC.dec_csr_wen_r;
+    assign trace.csr_waddr  = `DEC.dec_csr_wraddr_r;
+    assign trace.csr_wdata  = `DEC.dec_csr_wrdata_r;
+
+    assign trace.nonblock_load_wvalid = `DEC.dec_nonblock_load_wen;
+    assign trace.nonblock_load_waddr  = `DEC.dec_nonblock_load_waddr;
+    assign trace.nonblock_load_wdata  = `DEC.lsu_nonblock_load_data;
+
+    assign trace.div_wvalid = `DEC.exu_div_wren;
+    assign trace.div_waddr  = `DEC.div_waddr_wb;
+    assign trace.div_wdata  = `DEC.exu_div_result;
+`endif
+
+    TraceMonitor trace_monitor;
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    TraceMonitor trace_monitor_core[3];
+`endif
 
     initial begin
-        abi_reg[0] = "zero";
-        abi_reg[1] = "ra";
-        abi_reg[2] = "sp";
-        abi_reg[3] = "gp";
-        abi_reg[4] = "tp";
-        abi_reg[5] = "t0";
-        abi_reg[6] = "t1";
-        abi_reg[7] = "t2";
-        abi_reg[8] = "s0";
-        abi_reg[9] = "s1";
-        abi_reg[10] = "a0";
-        abi_reg[11] = "a1";
-        abi_reg[12] = "a2";
-        abi_reg[13] = "a3";
-        abi_reg[14] = "a4";
-        abi_reg[15] = "a5";
-        abi_reg[16] = "a6";
-        abi_reg[17] = "a7";
-        abi_reg[18] = "s2";
-        abi_reg[19] = "s3";
-        abi_reg[20] = "s4";
-        abi_reg[21] = "s5";
-        abi_reg[22] = "s6";
-        abi_reg[23] = "s7";
-        abi_reg[24] = "s8";
-        abi_reg[25] = "s9";
-        abi_reg[26] = "s10";
-        abi_reg[27] = "s11";
-        abi_reg[28] = "t3";
-        abi_reg[29] = "t4";
-        abi_reg[30] = "t5";
-        abi_reg[31] = "t6";
-
         extintsrc_req = {pt.PIC_TOTAL_INT-1{1'b0}};
         timer_int     = 0;
         soft_int      = 0;
@@ -2256,13 +2357,16 @@ module tb_top
 
         $readmemh("program.hex",  lmem.mem);
         $readmemh("program.hex",  imem.mem);
-        tp = $fopen("trace_port.csv","w");
-        el = $fopen("exec.log","w");
-        $fwrite (el, "//   Cycle : #inst    0    pc    opcode    reg=value    csr=value     ; mnemonic\n");
         fd = $fopen("console.log","w");
-        commit_count = 0;
         preload_dccm();
         preload_iccm();
+
+        trace_monitor = new(trace, "exec.log", "trace_port.csv");
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+        trace_monitor_core[0] = new(trace_core[0], "exec0.log", "trace_port0.csv");
+        trace_monitor_core[1] = new(trace_core[1], "exec1.log", "trace_port1.csv");
+        trace_monitor_core[2] = new(trace_core[2], "exec2.log", "trace_port2.csv");
+`endif
 
 `ifndef VERILATOR
    `ifdef VCS_DEBUG
@@ -2678,6 +2782,15 @@ veer_wrapper rvtop_wrapper (
     .corruption_detected_o          (corruption_detected_o),
 `endif
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    .tmr_fatal             (tmr_fatal),
+    .tmr_recovery_pending  (tmr_recovery_pending),
+    .tmr_recovery_fault    (tmr_recovery_fault),
+    .tmr_core_fault_0      (tmr_core_fault_0),
+    .tmr_core_fault_1      (tmr_core_fault_1),
+    .tmr_core_fault_2      (tmr_core_fault_2),
+`endif
+
     .soft_int               (soft_int),
     .core_id                ('0),
     .scan_mode              ( 1'b0 ),         // To enable scan mode
@@ -2942,225 +3055,7 @@ axi_lsu_dma_bridge # (RV_MUX_BUS_TAG, RV_MUX_BUS_TAG) bridge(
 
 `endif
 
-task preload_iccm;
-bit[31:0] data;
-bit[31:0] addr, eaddr, saddr;
-
-/*
-addresses:
- 0xfffffff0 - ICCM start address to load
- 0xfffffff4 - ICCM end address to load
-*/
-`ifndef VERILATOR
-init_iccm();
-`endif
-addr = 'hffff_fff0;
-saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
-if ( (saddr < `RV_ICCM_SADR) || (saddr > `RV_ICCM_EADR)) return;
-`ifndef RV_ICCM_ENABLE
-    $display("[%0t ns] ********************************************************",$time);
-    $display("[%0t ns] ICCM preload: there is no ICCM in VeeR, terminating !!!",$time);
-    $display("[%0t ns] ********************************************************",$time);
-    $finish;
-`endif
-addr += 4;
-eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
-$display("[%0t ns] ICCM pre-load from %h to %h",$time, saddr, eaddr);
-
-for(addr= saddr; addr <= eaddr; addr+=4) begin
-    data = {imem.mem[addr+3],imem.mem[addr+2],imem.mem[addr+1],imem.mem[addr]};
-`ifdef RV_ICCM_ADDR_XOR
-    slam_iccm_ram(addr, {riscv_ecc32(data), data ^ {addr[`RV_ICCM_BITS-1:2], addr[`RV_ICCM_BITS-1:2]}});
-`else
-    slam_iccm_ram(addr, data == 0 ? 0 : {riscv_ecc32(data),data});
-`endif
-end
-
-endtask
-
-
-task preload_dccm;
-bit[31:0] data;
-bit[31:0] addr, saddr, eaddr;
-
-/*
-addresses:
- 0xffff_fff8 - DCCM start address to load
- 0xffff_fffc - DCCM end address to load
-*/
-
-addr = 'hffff_fff8;
-saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
-if (saddr < `RV_DCCM_SADR || saddr > `RV_DCCM_EADR) return;
-`ifndef RV_DCCM_ENABLE
-    $display("[%0t ns] ********************************************************",$time);
-    $display("[%0t ns] DCCM preload: there is no DCCM in VeeR, terminating !!!",$time);
-    $display("[%0t ns] ********************************************************",$time);
-    $finish;
-`endif
-addr += 4;
-eaddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
-$display("[%0t ns] DCCM pre-load from %h to %h",$time, saddr, eaddr);
-
-for(addr=saddr; addr <= eaddr; addr+=4) begin
-    data = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
-`ifdef RV_DCCM_ADDR_XOR
-    // DCCM address infection (see el2_lsu_dccm_ctl.sv): the core stores
-    // (data ^ mask(word_addr)) and undoes it on read, so this backdoor loader
-    // must apply the same XOR. The ECC is computed over the true data.
-    slam_dccm_ram(addr, {riscv_ecc32(data), data ^ {{(pt.DCCM_DATA_WIDTH-2*(pt.DCCM_BITS-2)){1'b0}}, addr[pt.DCCM_BITS-1:2], addr[pt.DCCM_BITS-1:2]}});
-`else
-    slam_dccm_ram(addr, data == 0 ? 0 : {riscv_ecc32(data),data});
-`endif
-end
-
-endtask
-
-
-
-`define DRAM(bk) Gen_dccm_enable.dccm_loop[bk].dccm.dccm_bank.ram_core
-`define IRAM(bk) Gen_iccm_enable.iccm_loop[bk].iccm.iccm_bank.ram_core
-
-
-task slam_dccm_ram(input [31:0] addr, input[38:0] data);
-int bank, indx;
-bank = get_dccm_bank(addr, indx);
-`ifdef RV_DCCM_ENABLE
-case(bank)
-0: `DRAM(0)[indx] = data;
-1: `DRAM(1)[indx] = data;
-`ifdef RV_DCCM_NUM_BANKS_4
-2: `DRAM(2)[indx] = data;
-3: `DRAM(3)[indx] = data;
-`endif
-`ifdef RV_DCCM_NUM_BANKS_8
-2: `DRAM(2)[indx] = data;
-3: `DRAM(3)[indx] = data;
-4: `DRAM(4)[indx] = data;
-5: `DRAM(5)[indx] = data;
-6: `DRAM(6)[indx] = data;
-7: `DRAM(7)[indx] = data;
-`endif
-endcase
-`endif
-//$display("Writing bank %0d indx=%0d A=%h, D=%h",bank, indx, addr, data);
-endtask
-
-
-task slam_iccm_ram( input[31:0] addr, input[38:0] data);
-int bank, idx;
-
-bank = get_iccm_bank(addr, idx);
-`ifdef RV_ICCM_ENABLE
-case(bank) // {
-  0: `IRAM(0)[idx] = data;
-  1: `IRAM(1)[idx] = data;
- `ifdef RV_ICCM_NUM_BANKS_4
-  2: `IRAM(2)[idx] = data;
-  3: `IRAM(3)[idx] = data;
- `endif
- `ifdef RV_ICCM_NUM_BANKS_8
-  2: `IRAM(2)[idx] = data;
-  3: `IRAM(3)[idx] = data;
-  4: `IRAM(4)[idx] = data;
-  5: `IRAM(5)[idx] = data;
-  6: `IRAM(6)[idx] = data;
-  7: `IRAM(7)[idx] = data;
- `endif
-
- `ifdef RV_ICCM_NUM_BANKS_16
-  2: `IRAM(2)[idx] = data;
-  3: `IRAM(3)[idx] = data;
-  4: `IRAM(4)[idx] = data;
-  5: `IRAM(5)[idx] = data;
-  6: `IRAM(6)[idx] = data;
-  7: `IRAM(7)[idx] = data;
-  8: `IRAM(8)[idx] = data;
-  9: `IRAM(9)[idx] = data;
-  10: `IRAM(10)[idx] = data;
-  11: `IRAM(11)[idx] = data;
-  12: `IRAM(12)[idx] = data;
-  13: `IRAM(13)[idx] = data;
-  14: `IRAM(14)[idx] = data;
-  15: `IRAM(15)[idx] = data;
- `endif
-endcase // }
-`endif
-endtask
-
-task init_iccm;
-`ifdef RV_ICCM_ENABLE
-    `IRAM(0) = '{default:39'h0};
-    `IRAM(1) = '{default:39'h0};
-`ifdef RV_ICCM_NUM_BANKS_4
-    `IRAM(2) = '{default:39'h0};
-    `IRAM(3) = '{default:39'h0};
-`endif
-`ifdef RV_ICCM_NUM_BANKS_8
-    `IRAM(4) = '{default:39'h0};
-    `IRAM(5) = '{default:39'h0};
-    `IRAM(6) = '{default:39'h0};
-    `IRAM(7) = '{default:39'h0};
-`endif
-
-`ifdef RV_ICCM_NUM_BANKS_16
-    `IRAM(4) = '{default:39'h0};
-    `IRAM(5) = '{default:39'h0};
-    `IRAM(6) = '{default:39'h0};
-    `IRAM(7) = '{default:39'h0};
-    `IRAM(8) = '{default:39'h0};
-    `IRAM(9) = '{default:39'h0};
-    `IRAM(10) = '{default:39'h0};
-    `IRAM(11) = '{default:39'h0};
-    `IRAM(12) = '{default:39'h0};
-    `IRAM(13) = '{default:39'h0};
-    `IRAM(14) = '{default:39'h0};
-    `IRAM(15) = '{default:39'h0};
- `endif
-`endif
-endtask
-
-
-function[6:0] riscv_ecc32(input[31:0] data);
-reg[6:0] synd;
-synd[0] = ^(data & 32'h56aa_ad5b);
-synd[1] = ^(data & 32'h9b33_366d);
-synd[2] = ^(data & 32'he3c3_c78e);
-synd[3] = ^(data & 32'h03fc_07f0);
-synd[4] = ^(data & 32'h03ff_f800);
-synd[5] = ^(data & 32'hfc00_0000);
-synd[6] = ^{data, synd[5:0]};
-return synd;
-endfunction
-
-function int get_dccm_bank(input[31:0] addr,  output int bank_idx);
-`ifdef RV_DCCM_NUM_BANKS_2
-    bank_idx = int'(addr[`RV_DCCM_BITS-1:3]);
-    return int'( addr[2]);
-`elsif RV_DCCM_NUM_BANKS_4
-    bank_idx = int'(addr[`RV_DCCM_BITS-1:4]);
-    return int'(addr[3:2]);
-`elsif RV_DCCM_NUM_BANKS_8
-    bank_idx = int'(addr[`RV_DCCM_BITS-1:5]);
-    return int'( addr[4:2]);
-`endif
-endfunction
-
-function int get_iccm_bank(input[31:0] addr,  output int bank_idx);
-`ifdef RV_DCCM_NUM_BANKS_2
-    bank_idx = int'(addr[`RV_DCCM_BITS-1:3]);
-    return int'( addr[2]);
-`elsif RV_ICCM_NUM_BANKS_4
-    bank_idx = int'(addr[`RV_ICCM_BITS-1:4]);
-    return int'(addr[3:2]);
-`elsif RV_ICCM_NUM_BANKS_8
-    bank_idx = int'(addr[`RV_ICCM_BITS-1:5]);
-    return int'( addr[4:2]);
-`elsif RV_ICCM_NUM_BANKS_16
-    bank_idx = int'(addr[`RV_ICCM_BITS-1:6]);
-    return int'( addr[5:2]);
-`endif
-endfunction
+`include "ccm_macros.svh"
 
 task dump_signature ();
     integer fp, i;
@@ -4116,8 +4011,145 @@ jtagdpi #(
   assign jtag_trst_n = 1'b0;
 `endif
 
-/* verilator lint_off CASEINCOMPLETE */
-`include "dasm.svi"
-/* verilator lint_on CASEINCOMPLETE */
+// Quick and dirty TMR test ///////////////////////////////////////////////////
+//
+// Randomly injects upsets to core GPRs. To enable run simulation with
+// "+upsets" plusarg. Upset intervals are counted in clock cycles.
+
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+
+`define VEER0 rvtop_wrapper.rvtop.tmr_complex.cores[0].veer
+`define VEER1 rvtop_wrapper.rvtop.tmr_complex.cores[1].veer
+`define VEER2 rvtop_wrapper.rvtop.tmr_complex.cores[2].veer
+
+task tmr_upsetter();
+
+  integer delay = 150; // Fixed delay to the first upset
+  integer which_cpu;
+  integer which_reg;
+
+  $display("Upsetter running...");
+  forever begin
+
+    repeat (delay) @(posedge core_clk);
+    delay = 100000 + $urandom() % 100000;
+
+    which_cpu = $urandom() % 3;
+    which_reg = 1 + $urandom() % 31;
+    $display("[%0t] Upset! core:%0d, gpr:x%0d", $time, which_cpu, which_reg);
+    if (which_cpu == 0) begin
+      if (which_reg ==  1) `VEER0.dec.arf.gpr[ 1].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  2) `VEER0.dec.arf.gpr[ 2].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  3) `VEER0.dec.arf.gpr[ 3].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  4) `VEER0.dec.arf.gpr[ 4].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  5) `VEER0.dec.arf.gpr[ 5].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  6) `VEER0.dec.arf.gpr[ 6].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  7) `VEER0.dec.arf.gpr[ 7].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  8) `VEER0.dec.arf.gpr[ 8].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  9) `VEER0.dec.arf.gpr[ 9].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 10) `VEER0.dec.arf.gpr[10].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 11) `VEER0.dec.arf.gpr[11].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 12) `VEER0.dec.arf.gpr[12].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 13) `VEER0.dec.arf.gpr[13].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 14) `VEER0.dec.arf.gpr[14].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 15) `VEER0.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 16) `VEER0.dec.arf.gpr[16].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 17) `VEER0.dec.arf.gpr[17].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 18) `VEER0.dec.arf.gpr[18].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 19) `VEER0.dec.arf.gpr[19].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 20) `VEER0.dec.arf.gpr[20].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 21) `VEER0.dec.arf.gpr[21].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 22) `VEER0.dec.arf.gpr[22].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 23) `VEER0.dec.arf.gpr[23].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 24) `VEER0.dec.arf.gpr[24].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 25) `VEER0.dec.arf.gpr[25].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 26) `VEER0.dec.arf.gpr[26].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 27) `VEER0.dec.arf.gpr[27].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 28) `VEER0.dec.arf.gpr[28].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 29) `VEER0.dec.arf.gpr[29].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 30) `VEER0.dec.arf.gpr[30].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 31) `VEER0.dec.arf.gpr[31].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+    end
+
+    if (which_cpu == 1) begin
+      if (which_reg ==  1) `VEER1.dec.arf.gpr[ 1].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  2) `VEER1.dec.arf.gpr[ 2].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  3) `VEER1.dec.arf.gpr[ 3].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  4) `VEER1.dec.arf.gpr[ 4].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  5) `VEER1.dec.arf.gpr[ 5].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  6) `VEER1.dec.arf.gpr[ 6].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  7) `VEER1.dec.arf.gpr[ 7].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  8) `VEER1.dec.arf.gpr[ 8].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  9) `VEER1.dec.arf.gpr[ 9].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 10) `VEER1.dec.arf.gpr[10].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 11) `VEER1.dec.arf.gpr[11].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 12) `VEER1.dec.arf.gpr[12].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 13) `VEER1.dec.arf.gpr[13].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 14) `VEER1.dec.arf.gpr[14].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 15) `VEER1.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 16) `VEER1.dec.arf.gpr[16].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 17) `VEER1.dec.arf.gpr[17].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 18) `VEER1.dec.arf.gpr[18].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 19) `VEER1.dec.arf.gpr[19].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 20) `VEER1.dec.arf.gpr[20].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 21) `VEER1.dec.arf.gpr[21].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 22) `VEER1.dec.arf.gpr[22].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 23) `VEER1.dec.arf.gpr[23].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 24) `VEER1.dec.arf.gpr[24].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 25) `VEER1.dec.arf.gpr[25].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 26) `VEER1.dec.arf.gpr[26].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 27) `VEER1.dec.arf.gpr[27].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 28) `VEER1.dec.arf.gpr[28].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 29) `VEER1.dec.arf.gpr[29].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 30) `VEER1.dec.arf.gpr[30].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 31) `VEER1.dec.arf.gpr[31].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+    end
+
+    if (which_cpu == 2) begin
+      if (which_reg ==  1) `VEER2.dec.arf.gpr[ 1].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  2) `VEER2.dec.arf.gpr[ 2].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  3) `VEER2.dec.arf.gpr[ 3].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  4) `VEER2.dec.arf.gpr[ 4].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  5) `VEER2.dec.arf.gpr[ 5].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  6) `VEER2.dec.arf.gpr[ 6].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  7) `VEER2.dec.arf.gpr[ 7].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  8) `VEER2.dec.arf.gpr[ 8].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg ==  9) `VEER2.dec.arf.gpr[ 9].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 10) `VEER2.dec.arf.gpr[10].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 11) `VEER2.dec.arf.gpr[11].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 12) `VEER2.dec.arf.gpr[12].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 13) `VEER2.dec.arf.gpr[13].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 14) `VEER2.dec.arf.gpr[14].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 15) `VEER2.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 16) `VEER2.dec.arf.gpr[16].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 17) `VEER2.dec.arf.gpr[17].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 18) `VEER2.dec.arf.gpr[18].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 19) `VEER2.dec.arf.gpr[19].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 20) `VEER2.dec.arf.gpr[20].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 21) `VEER2.dec.arf.gpr[21].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 22) `VEER2.dec.arf.gpr[22].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 23) `VEER2.dec.arf.gpr[23].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 24) `VEER2.dec.arf.gpr[24].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 25) `VEER2.dec.arf.gpr[25].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 26) `VEER2.dec.arf.gpr[26].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 27) `VEER2.dec.arf.gpr[27].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 28) `VEER2.dec.arf.gpr[28].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 29) `VEER2.dec.arf.gpr[29].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 30) `VEER2.dec.arf.gpr[30].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+      if (which_reg == 31) `VEER2.dec.arf.gpr[31].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
+    end
+
+  end
+endtask
+
+initial begin
+  if ($test$plusargs("upsets")) begin
+    fork
+      tmr_upsetter();
+    join_none
+  end
+end
+
+`endif
 
 endmodule

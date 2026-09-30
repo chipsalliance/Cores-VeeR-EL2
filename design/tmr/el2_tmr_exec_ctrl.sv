@@ -1,0 +1,146 @@
+// Copyright 2026 Antmicro <www.antmicro.com>
+// //
+// // SPDX-License-Identifier: Apache-2.0
+//
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+module el2_tmr_exec_ctrl
+  import el2_pkg::*;
+  import el2_mubi_pkg::*;
+(
+    input  logic clk,
+    input  logic rst_l,
+
+    // EXEC CTRL
+    input  logic i_cpu_halt_req,
+    output logic o_cpu_halt_ack,
+    input  logic i_cpu_run_req,
+    output logic o_cpu_run_ack,
+    output logic o_cpu_halt_status,
+    output logic o_debug_mode_status,
+
+    input  logic mpc_debug_halt_req,
+    output logic mpc_debug_halt_ack,
+    input  logic mpc_debug_run_req,
+    output logic mpc_debug_run_ack,
+    input  logic mpc_reset_run_req,
+    output logic debug_brkpt_status,
+    // EXEC CTRL TMR
+    output logic i_cpu_halt_req_veer[3],
+    input  logic o_cpu_halt_ack_veer[3],
+    output logic i_cpu_run_req_veer[3],
+    input  logic o_cpu_run_ack_veer[3],
+    input  logic o_cpu_halt_status_veer[3],
+    input  logic o_debug_mode_status_veer[3],
+
+    output logic ext_mpc_debug_halt_req_veer[3],
+    input  logic ext_mpc_debug_halt_ack_veer[3],
+    output logic ext_mpc_debug_run_req_veer[3],
+    input  logic ext_mpc_debug_run_ack_veer[3],
+    output logic ext_mpc_reset_run_req_veer[3],
+
+    input  logic debug_brkpt_status_veer[3],
+
+    // Fault inputs
+    input  el2_mubi_pkg::el2_mubi_t exec_fault_d[3],
+    // Fault outputs
+    output el2_mubi_pkg::el2_mubi_t exec_fault_q[3],
+    // Fault clear inputs
+    input  el2_mubi_pkg::el2_mubi_t exec_fault_clr[3],
+
+    // Inhibit (cutoff) input
+    input  el2_mubi_pkg::el2_mubi_t exec_output_inhibit
+);
+
+  // ......................................................
+  logic i_cpu_halt_req_int;
+  logic i_cpu_run_req_int;
+  logic mpc_debug_halt_req_int;
+  logic mpc_debug_run_req_int;
+
+  logic o_debug_mode_status_int;
+  logic debug_brkpt_status_int;
+
+  el2_mubi_t enable[3];
+  el2_mubi_t exec_fault[3];
+  el2_mubi_t crit_nc;
+
+  logic [6:0] exec_ctrl_veer[3];
+  logic [6:0] exec_ctrl_int;
+
+  for (genvar i=0; i<3; i=i+1) begin
+    assign exec_ctrl_veer[i] = {
+      o_cpu_halt_ack_veer[i],
+      o_cpu_run_ack_veer[i],
+      o_cpu_halt_status_veer[i],
+      o_debug_mode_status_veer[i],
+      ext_mpc_debug_halt_ack_veer[i],
+      ext_mpc_debug_run_ack_veer[i],
+      debug_brkpt_status_veer[i]
+    };
+  end
+
+  assign o_cpu_halt_ack          = exec_ctrl_int[6];
+  assign o_cpu_run_ack           = exec_ctrl_int[5];
+  assign o_cpu_halt_status       = exec_ctrl_int[4];
+  assign o_debug_mode_status_int = exec_ctrl_int[3];
+  assign mpc_debug_halt_ack      = exec_ctrl_int[2];
+  assign mpc_debug_run_ack       = exec_ctrl_int[1];
+  assign debug_brkpt_status_int  = exec_ctrl_int[0];
+
+  el2_tmr_voter #(.Width($bits(exec_ctrl_int))) u_voter_exec_ctl (
+    .in_a     (exec_ctrl_veer[0]),
+    .in_b     (exec_ctrl_veer[1]),
+    .in_c     (exec_ctrl_veer[2]),
+
+    .en_a     (enable[0]),
+    .en_b     (enable[1]),
+    .en_c     (enable[2]),
+
+    .out      (exec_ctrl_int),
+
+    .fault_a  (exec_fault[0]),
+    .fault_b  (exec_fault[1]),
+    .fault_c  (exec_fault[2]),
+
+    .critical (crit_nc)
+  );
+
+  // ......................................................
+
+  logic  inh;
+  assign inh = mubi_check_true(exec_output_inhibit);
+
+  // Don't gate signals over which the recovery FSM can take control. Gates for
+  // them are inside el2_tmr_complex
+  rvogate #(.WIDTH(1)) u_o_debug_mode_status_gate (.*, .din(o_debug_mode_status_int), .dout(o_debug_mode_status));
+  rvogate #(.WIDTH(1)) u_debug_brkpt_status_gate  (.*, .din(debug_brkpt_status_int),  .dout(debug_brkpt_status));
+
+  // ......................................................
+
+  // Fault aggregation and registers
+  for (genvar i=0; i<3; i=i+1) begin : fault
+    el2_tmr_fault_storage storage (
+      .*,
+      .fault_i  (mubi_or(exec_fault_d[i], exec_fault[i])),
+      .fault_o  (exec_fault_q[i]),
+      .clr_i    (exec_fault_clr[i])
+    );
+
+    assign enable[i] = mubi_not(exec_fault_q[i]);
+
+  end
+
+  // ......................................................
+
+  // Propagate response to Cores
+  for (genvar i=0; i < 3; i+=1) begin : resp
+    assign i_cpu_halt_req_veer[i]         = i_cpu_halt_req;
+    assign i_cpu_run_req_veer[i]          = i_cpu_run_req;
+
+    assign ext_mpc_debug_halt_req_veer[i] = mpc_debug_halt_req;
+    assign ext_mpc_debug_run_req_veer[i]  = mpc_debug_run_req;
+    assign ext_mpc_reset_run_req_veer[i]  = mpc_reset_run_req; // Not gated, sampled upon reset
+   end
+
+endmodule
+`endif

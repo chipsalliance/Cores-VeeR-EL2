@@ -50,6 +50,12 @@ BUILD_DIR = snapshots/${snapshot}
 TBDIR = ${RV_ROOT}/testbench
 PICOLIBC_DIR = ${RV_ROOT}/third_party/picolibc/install
 
+ifdef TMR_TB
+TB_TOP ?= tb_top_tmr
+else
+TB_TOP ?= tb_top
+endif
+
 # Override march depending on used GCC version
 ifneq ($(shell which $(GCC_PREFIX)-gcc 2> /dev/null),)
 	GCCVERSIONGT11 := $(shell expr `$(GCC_PREFIX)-gcc -dumpversion | cut -f1 -d.` \>= 11)
@@ -67,7 +73,7 @@ VERILATOR_VERSION    := $(subst .,,$(word 2,$(shell $(VERILATOR) --version)))
 
 ifneq ($(TB_MAX_CYCLES),)
 	VERILATOR_EXTRA_ARGS := -GMAX_CYCLES=$(TB_MAX_CYCLES)
-	VCS_EXTRA_ARGS := -pvalue+tb_top.MAX_CYCLES=$(TB_MAX_CYCLES)
+	VCS_EXTRA_ARGS := -pvalue+$(TB_TOP).MAX_CYCLES=$(TB_MAX_CYCLES)
 endif
 
 ifeq ("$(.SHELLSTATUS)", "0")
@@ -79,7 +85,7 @@ endif
 
 VERILATOR_SKIP_WARNINGS = $(VERILATOR_NOIMPLICIT) -Wno-TIMESCALEMOD -Wno-ASCRANGE \
 	-Wno-CASEINCOMPLETE -Wno-INITIALDLY -Wno-WIDTH -Wno-UNOPTFLAT -Wno-SIDEEFFECT \
-	-Wno-LATCH
+	-Wno-LATCH -Wno-MULTIDRIVEN
 
 # Define test name
 TEST = hello_world
@@ -113,12 +119,22 @@ endif
 
 OFILES = $(TEST).o
 
+# Verilator tracing format
+VERILATOR_TRACE ?= vcd
+
+# Debugging
 ifdef debug
  DEBUG_PLUS = +dumpon
  IRUN_DEBUG = -access +rc
  IRUN_DEBUG_RUN = -input ${RV_ROOT}/testbench/input.tcl
  VCS_DEBUG = -debug_access+r+w -debug_access+all -kdb +define+VCS_DEBUG
- VERILATOR_DEBUG = --trace
+ ifeq ($(VERILATOR_TRACE),vcd)
+   VERILATOR_DEBUG = --trace --trace-vcd --trace-underscore
+ else ifeq ($(VERILATOR_TRACE),fst)
+   VERILATOR_DEBUG = --trace --trace-fst --trace-underscore --trace-structs
+ else
+   $(error Invalid VERILATOR_TRACE, legal options are "vcd" and "fst")
+ endif
  RIVIERA_DEBUG = +access +r
 endif
 
@@ -155,8 +171,9 @@ TB_DPI_SRCS := $(addprefix $(TBDIR)/,$(TB_DPI_SRCS))
 # Testbench sources
 TB_VERILATOR_SRCS = $(TBDIR)/test_tb_top.cpp $(TB_DPI_SRCS)
 
-TBFILES = $(TBDIR)/tb_top_pkg.sv \
-          $(TBDIR)/tb_top.sv \
+TBFILES = $(TBDIR)/tb_top_if.sv \
+          $(TBDIR)/tb_top_pkg.sv \
+          $(TBDIR)/$(TB_TOP).sv \
           $(TBDIR)/ahb_sif.sv \
           $(TBDIR)/jtagdpi/jtagdpi.sv \
           $(TBDIR)/ahb_lite_2to1_mux.sv \
@@ -174,6 +191,7 @@ TBFILES = $(TBDIR)/tb_top_pkg.sv \
 defines  = $(BUILD_DIR)/common_defines.vh
 defines += ${RV_ROOT}/design/include/el2_def.sv
 defines += $(BUILD_DIR)/el2_pdef.vh
+defines += -DTB_TOP=$(TB_TOP)
 includes = -I${BUILD_DIR} -I$(TBDIR)/axi4_mux
 
 CM_HIER_FILE = $(RV_ROOT)/cm.cfg
@@ -185,6 +203,11 @@ CFLAGS += -std=c++14
 # slower runtime (faster compiles) -O2 for faster runtime (slower
 # compiles), or -O for balance.
 VERILATOR_MAKE_FLAGS = OPT_FAST="-Os"
+
+# At this point all variables are configured so include the TMR makefile
+ifdef TMR_TB
+include $(RV_ROOT)/tools/tmr.mk
+endif
 
 # Targets
 all: clean verilator
@@ -202,14 +225,16 @@ clean:
 ${BUILD_DIR}/defines.h:
 	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/veer.config -target=$(target) $(CONF_PARAMS)
 
+ifndef TMR_TB
 verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
-	$(VERILATOR) --cc -CFLAGS "${CFLAGS}" --coverage-max-width 20000 $(defines) \
+	$(VERILATOR) --cc -CFLAGS "${CFLAGS} -DTB_TOP=$(TB_TOP)" --coverage-max-width 20000 $(defines) \
 	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist \
-	  $(VERILATOR_SKIP_WARNINGS) $(VERILATOR_EXTRA_ARGS) ${TB_SILENT_FAIL} ${TBFILES} --top-module tb_top \
+	  $(VERILATOR_SKIP_WARNINGS) $(VERILATOR_EXTRA_ARGS) ${TB_SILENT_FAIL} ${TBFILES} --top-module $(TB_TOP) \
 	  -exe $(TB_VERILATOR_SRCS) --autoflush --timing --assert $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE) -fno-table
 	cp ${RV_ROOT}/testbench/test_tb_top.cpp obj_dir/
-	$(MAKE) -e -C obj_dir/ -f Vtb_top.mk $(VERILATOR_MAKE_FLAGS)
+	$(MAKE) -e -C obj_dir/ -f V$(TB_TOP).mk $(VERILATOR_MAKE_FLAGS)
 	touch verilator-build
+endif
 
 vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	$(VCS) $(VCS_DEBUG) $(VCS_EXTRA_ARGS) -full64 -assert svaext -sverilog $(FCOV_DEFINES) +define+RV_OPENSOURCE $(ASSERT_DEFINES) \
@@ -225,7 +250,7 @@ irun-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	  -xmlibdirpath . -xmlibdirname veer.build \
 	  -incdir ${RV_ROOT}/design/lib -incdir ${RV_ROOT}/design/include \
 	  -vlog_ext +.vh+.h $(defines) -incdir $(BUILD_DIR) \
-	  -f ${RV_ROOT}/testbench/flist -top tb_top  ${TBFILES} \
+	  -f ${RV_ROOT}/testbench/flist -top $(TB_TOP)  ${TBFILES} \
 	  -I${RV_ROOT}/testbench -elaborate  -snapshot ${snapshot} $(profile)
 	touch irun-build
 
@@ -243,6 +268,7 @@ riviera-build: ${TBFILES} ${BUILD_DIR}/defines.h
 
 ############ TEST Simulation ###############################
 
+ifndef TMR_TB
 verilator: program.hex verilator-build
 	# FIXME: Assuming here that either begin_signature or end_signature implies
 	# that both symbols are present.
@@ -250,10 +276,11 @@ verilator: program.hex verilator-build
 	if [ $$? -eq 0 ]; then \
 		BEG=`grep "begin_signature" $(TEST).sym | cut -d\  -f 1`;\
 		END=`grep "end_signature"   $(TEST).sym | cut -d\  -f 1`;\
-		./obj_dir/Vtb_top ${TB_EXTRA_ARGS} --mem-signature $${BEG} $${END}; \
+		./obj_dir/V$(TB_TOP) ${TB_EXTRA_ARGS} --mem-signature $${BEG} $${END}; \
 	else \
-		./obj_dir/Vtb_top ${TB_EXTRA_ARGS}; \
+		./obj_dir/V$(TB_TOP) ${TB_EXTRA_ARGS}; \
 	fi
+endif
 
 irun: program.hex irun-build
 	$(IRUN) -64bit -abvglobalfailurelimit 1 +lic_queue -licqueue \
@@ -268,7 +295,7 @@ vlog: program.hex ${TBFILES} ${BUILD_DIR}/defines.h
         $(ASSERT_DEFINES) $(defines) -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -R +nowarn3829 +nowarn2583 ${DEBUG_PLUS} -suppress 14408 -suppress 16154
 
 riviera: program.hex riviera-build
-	vsim -c -lib work ${DEBUG_PLUS} ${RIVIERA_DEBUG} tb_top -do "run -all; exit" -l riviera.log
+	vsim -c -lib work ${DEBUG_PLUS} ${RIVIERA_DEBUG} $(TB_TOP) -do "run -all; exit" -l riviera.log
 
 
 

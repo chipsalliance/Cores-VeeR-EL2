@@ -30,6 +30,8 @@ import el2_pkg::*;
    input logic clk,                          // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.
    input logic rst_l,                        // reset, active low
 
+   input logic reset_delayed,                // Reset detection
+
    input logic dec_i0_decode_d,              // Valid instruction at D and not blocked
 
    input logic exu_flush_final, // flush, includes upper and lower
@@ -209,6 +211,9 @@ import el2_pkg::*;
    output logic                    ifu_ic_debug_rd_data_valid,
    output logic                                iccm_buf_correct_ecc,
    output logic                                iccm_correction_state,
+
+   input logic mpc_reset_run_req, // Run/halt after reset
+   input logic mpc_debug_run_ack, // Run ack
 
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
    /*pragma coverage off*/

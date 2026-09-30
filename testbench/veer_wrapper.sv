@@ -362,6 +362,15 @@ module veer_wrapper
     output el2_mubi_pkg::el2_mubi_t corruption_detected_o,
 `endif
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    output el2_mubi_pkg::el2_mubi_t tmr_fatal,
+    output el2_mubi_pkg::el2_mubi_t tmr_recovery_pending,
+    output el2_mubi_pkg::el2_mubi_t tmr_recovery_fault,
+    output el2_mubi_pkg::el2_mubi_t tmr_core_fault_0,
+    output el2_mubi_pkg::el2_mubi_t tmr_core_fault_1,
+    output el2_mubi_pkg::el2_mubi_t tmr_core_fault_2,
+`endif
+
     // external MPC halt/run interface
     input  logic mpc_debug_halt_req,  // Async halt request
     input  logic mpc_debug_run_req,   // Async run request

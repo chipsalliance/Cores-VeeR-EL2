@@ -23,15 +23,10 @@ logic                       debug_brkpt_status;
 
 el2_mem_if el2_mem_export ();
 
-`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
-`define VEER rvtop_wrapper.rvtop.veer
-`else
 `define VEER rvtop_wrapper.rvtop.tmr_complex.cores[0].veer
-`define VEER0 rvtop_wrapper.rvtop.tmr_complex.cores[0].veer
-`define VEER1 rvtop_wrapper.rvtop.tmr_complex.cores[1].veer
-`define VEER2 rvtop_wrapper.rvtop.tmr_complex.cores[2].veer
-`endif
-`define DEC `VEER.dec
+`define DEC  `VEER.dec
+
+`define TMR_COMPLEX rvtop_wrapper.rvtop.tmr_complex
 
 logic [31:1] jtag_id;
 assign jtag_id[31:28] = 4'b1;
@@ -2088,7 +2083,14 @@ veer_wrapper rvtop_wrapper (
     .dmi_uncore_addr        (),
     .dmi_uncore_wdata       (),
     .dmi_uncore_rdata       (),
-    .dmi_active             ()
+    .dmi_active             (),
+    
+    .tmr_fatal              (),
+    .tmr_recovery_pending   (),
+    .tmr_recovery_fault     (),
+    .tmr_core_fault_0       (),
+    .tmr_core_fault_1       (),
+    .tmr_core_fault_2       ()
 );
 
 // ------------------------------------------------------------------
@@ -2186,6 +2188,126 @@ assign inj_axi_arcache  = '0;
 assign inj_axi_arprot   = '0;
 assign inj_axi_arqos    = '0;
 assign inj_axi_aruser   = '0;
+
+// ------------------------------------------------------------------
+// Trace log
+// ------------------------------------------------------------------
+
+trace_monitor_if  trace();            // Consensus trace
+trace_monitor_if  trace_core[3]();    // Individual core trace
+
+// Connect trace signals
+assign trace.clk    = core_clk;
+assign trace.rst_n  = rst_l_combined;
+
+assign trace.trace_insn      = trace_rv_i_insn_ip;
+assign trace.trace_address   = trace_rv_i_address_ip;
+assign trace.trace_valid     = trace_rv_i_valid_ip;
+assign trace.trace_exception = trace_rv_i_exception_ip;
+assign trace.trace_ecause    = trace_rv_i_ecause_ip;
+assign trace.trace_interrupt = trace_rv_i_interrupt_ip;
+assign trace.trace_tval      = trace_rv_i_tval_ip;
+
+for (genvar i=0; i<3; i++) begin
+    assign trace_core[i].clk    = core_clk;
+    assign trace_core[i].rst_n  = rst_l;
+
+    assign trace_core[i].trace_insn      = `TMR_COMPLEX.cores[i].veer.trace_rv_i_insn_ip;
+    assign trace_core[i].trace_address   = `TMR_COMPLEX.cores[i].veer.trace_rv_i_address_ip;
+    assign trace_core[i].trace_valid     = `TMR_COMPLEX.cores[i].veer.trace_rv_i_valid_ip;
+    assign trace_core[i].trace_exception = `TMR_COMPLEX.cores[i].veer.trace_rv_i_exception_ip;
+    assign trace_core[i].trace_ecause    = `TMR_COMPLEX.cores[i].veer.trace_rv_i_ecause_ip;
+    assign trace_core[i].trace_interrupt = `TMR_COMPLEX.cores[i].veer.trace_rv_i_interrupt_ip;
+    assign trace_core[i].trace_tval      = `TMR_COMPLEX.cores[i].veer.trace_rv_i_tval_ip;
+
+    assign trace_core[i].gpr_wvalid = `TMR_COMPLEX.cores[i].veer.dec.dec_i0_wen_r;
+    assign trace_core[i].gpr_waddr  = `TMR_COMPLEX.cores[i].veer.dec.dec_i0_waddr_r;
+    assign trace_core[i].gpr_wdata  = `TMR_COMPLEX.cores[i].veer.dec.dec_i0_wdata_r;
+
+    assign trace_core[i].csr_wvalid = `TMR_COMPLEX.cores[i].veer.dec.dec_csr_wen_r;
+    assign trace_core[i].csr_waddr  = `TMR_COMPLEX.cores[i].veer.dec.dec_csr_wraddr_r;
+    assign trace_core[i].csr_wdata  = `TMR_COMPLEX.cores[i].veer.dec.dec_csr_wrdata_r;
+
+    assign trace_core[i].nonblock_load_wvalid = `TMR_COMPLEX.cores[i].veer.dec.dec_nonblock_load_wen;
+    assign trace_core[i].nonblock_load_waddr  = `TMR_COMPLEX.cores[i].veer.dec.dec_nonblock_load_waddr;
+    assign trace_core[i].nonblock_load_wdata  = `TMR_COMPLEX.cores[i].veer.dec.lsu_nonblock_load_data;
+
+    assign trace_core[i].div_wvalid = `TMR_COMPLEX.cores[i].veer.dec.exu_div_wren;
+    assign trace_core[i].div_waddr  = `TMR_COMPLEX.cores[i].veer.dec.div_waddr_wb;
+    assign trace_core[i].div_wdata  = `TMR_COMPLEX.cores[i].veer.dec.exu_div_result;
+end
+
+// For TMR enabled do majority voting. Regular RISC-V trace is already
+// majority voted as a part of the TMR complex
+begin : trace_tmr
+    rvtmr #($bits(trace.gpr_wvalid)) tmr_gpr_wvalid (
+        '{`TMR_COMPLEX.cores[0].veer.dec.dec_i0_wen_r,
+          `TMR_COMPLEX.cores[1].veer.dec.dec_i0_wen_r,
+          `TMR_COMPLEX.cores[2].veer.dec.dec_i0_wen_r},
+        trace.gpr_wvalid);
+
+    rvtmr #($bits(trace.gpr_waddr)) tmr_gpr_waddr (
+        '{`TMR_COMPLEX.cores[0].veer.dec.dec_i0_waddr_r,
+          `TMR_COMPLEX.cores[1].veer.dec.dec_i0_waddr_r,
+          `TMR_COMPLEX.cores[2].veer.dec.dec_i0_waddr_r},
+        trace.gpr_waddr);
+
+    rvtmr #($bits(trace.gpr_wdata)) tmr_gpr_wdata (
+        '{`TMR_COMPLEX.cores[0].veer.dec.dec_i0_wdata_r,
+          `TMR_COMPLEX.cores[1].veer.dec.dec_i0_wdata_r,
+          `TMR_COMPLEX.cores[2].veer.dec.dec_i0_wdata_r},
+        trace.gpr_wdata);
+
+    rvtmr #($bits(trace.csr_wvalid)) tmr_csr_wvalid (
+        '{`TMR_COMPLEX.cores[0].veer.dec.dec_csr_wen_r,
+          `TMR_COMPLEX.cores[1].veer.dec.dec_csr_wen_r,
+          `TMR_COMPLEX.cores[2].veer.dec.dec_csr_wen_r},
+        trace.csr_wvalid);
+
+    rvtmr #($bits(trace.csr_waddr)) tmr_csr_waddr  (
+        '{`TMR_COMPLEX.cores[0].veer.dec.dec_csr_wraddr_r,
+          `TMR_COMPLEX.cores[1].veer.dec.dec_csr_wraddr_r,
+          `TMR_COMPLEX.cores[2].veer.dec.dec_csr_wraddr_r},
+        trace.csr_waddr);
+
+    rvtmr #($bits(trace.csr_wdata)) tmr_csr_wdata  (
+        '{`TMR_COMPLEX.cores[0].veer.dec.dec_csr_wrdata_r,
+          `TMR_COMPLEX.cores[1].veer.dec.dec_csr_wrdata_r,
+          `TMR_COMPLEX.cores[2].veer.dec.dec_csr_wrdata_r},
+        trace.csr_wdata);
+
+    rvtmr #($bits(trace.nonblock_load_wvalid)) tmr_nonblock_load_wvalid (
+        '{`TMR_COMPLEX.cores[0].veer.dec.dec_nonblock_load_wen,
+          `TMR_COMPLEX.cores[1].veer.dec.dec_nonblock_load_wen,
+          `TMR_COMPLEX.cores[2].veer.dec.dec_nonblock_load_wen},
+        trace.nonblock_load_wvalid);
+
+    rvtmr #($bits(trace.nonblock_load_waddr)) tmr_nonblock_load_waddr  (
+        '{`TMR_COMPLEX.cores[0].veer.dec.dec_nonblock_load_waddr,
+          `TMR_COMPLEX.cores[1].veer.dec.dec_nonblock_load_waddr,
+          `TMR_COMPLEX.cores[2].veer.dec.dec_nonblock_load_waddr},
+        trace.nonblock_load_waddr);
+
+    rvtmr #($bits(trace.nonblock_load_wdata)) tmr_nonblock_load_wdata  (
+        '{`TMR_COMPLEX.cores[0].veer.dec.lsu_nonblock_load_data,
+          `TMR_COMPLEX.cores[1].veer.dec.lsu_nonblock_load_data,
+          `TMR_COMPLEX.cores[2].veer.dec.lsu_nonblock_load_data},
+        trace.nonblock_load_wdata);
+
+    rvtmr #($bits(trace.div_wvalid)) tmr_div_wvalid ('{`TMR_COMPLEX.cores[0].veer.dec.exu_div_wren,   `TMR_COMPLEX.cores[1].veer.dec.exu_div_wren,   `TMR_COMPLEX.cores[2].veer.dec.exu_div_wren},   trace.div_wvalid);
+    rvtmr #($bits(trace.div_waddr))  tmr_div_waddr  ('{`TMR_COMPLEX.cores[0].veer.dec.div_waddr_wb,   `TMR_COMPLEX.cores[1].veer.dec.div_waddr_wb,   `TMR_COMPLEX.cores[2].veer.dec.div_waddr_wb},   trace.div_waddr);
+    rvtmr #($bits(trace.div_wdata))  tmr_div_wdata  ('{`TMR_COMPLEX.cores[0].veer.dec.exu_div_result, `TMR_COMPLEX.cores[1].veer.dec.exu_div_result, `TMR_COMPLEX.cores[2].veer.dec.exu_div_result}, trace.div_wdata);
+end
+
+TraceMonitor trace_monitor;
+TraceMonitor trace_monitor_core[3];
+
+initial begin
+    trace_monitor = new(trace, "exec.log", "trace_port.csv");
+    trace_monitor_core[0] = new(trace_core[0], "exec0.log", "trace_port0.csv");
+    trace_monitor_core[1] = new(trace_core[1], "exec1.log", "trace_port1.csv");
+    trace_monitor_core[2] = new(trace_core[2], "exec2.log", "trace_port2.csv");
+end
 
 // ------------------------------------------------------------------
 // Mailbox

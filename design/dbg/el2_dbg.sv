@@ -128,7 +128,7 @@ import el2_pkg::*;
    input logic                         dbg_bus_clk_en,
 
    // DCCM write-readback sticky fault capture (see el2_lsu_dccm_ctl), exposed
-   // read-only over DMI at 0x70/0x71/0x72. dccm_wr_rdbk_fault_clear re-arms
+   // read-only over DMI at 0x48/0x49/0x4A. dccm_wr_rdbk_fault_clear re-arms
    // capture for the next fault.
    input logic                           dccm_wr_rdbk_fault_valid,
    input logic [pt.DCCM_BITS-1:0]        dccm_wr_rdbk_fault_addr,
@@ -583,10 +583,10 @@ import el2_pkg::*;
    end // always_comb begin
 
    // DCCM write-readback fault capture.
-   // 0x70: [31]=valid (sticky, W1C by writing 1), [30:DCCM_BITS]=reserved, low DCCM_BITS bits=fault address.
-   // 0x71: fault data.
-   // 0x72: fault ecc, zero-extended.
-   assign dccm_wr_rdbk_fault_clear = (dmi_reg_addr == 7'h70) & dmi_reg_en & dmi_reg_wr_en & dmi_reg_wdata[31];
+   // 0x48: [31]=valid (sticky, W1C by writing 1), [30:DCCM_BITS]=reserved, low DCCM_BITS bits=fault address.
+   // 0x49: fault data.
+   // 0x4A: fault ecc, zero-extended.
+   assign dccm_wr_rdbk_fault_clear = (dmi_reg_addr == 7'h48) & dmi_reg_en & dmi_reg_wr_en & dmi_reg_wdata[31];
 
    assign dmi_reg_rdata_din[31:0] = ({32{dmi_reg_addr == 7'h4}}  & data0_reg[31:0])      |
                                     ({32{dmi_reg_addr == 7'h5}}  & data1_reg[31:0])      |
@@ -600,11 +600,11 @@ import el2_pkg::*;
                                     ({32{dmi_reg_addr == 7'h39}} & sbaddress0_reg[31:0]) |
                                     ({32{dmi_reg_addr == 7'h3c}} & sbdata0_reg[31:0])    |
                                     ({32{dmi_reg_addr == 7'h3d}} & sbdata1_reg[31:0])    |
-                                    ({32{dmi_reg_addr == 7'h70}} & {dccm_wr_rdbk_fault_valid,
+                                    ({32{dmi_reg_addr == 7'h48}} & {dccm_wr_rdbk_fault_valid,
                                                                      {(31-pt.DCCM_BITS){1'b0}},
                                                                      dccm_wr_rdbk_fault_addr[pt.DCCM_BITS-1:0]})    |
-                                    ({32{dmi_reg_addr == 7'h71}} & dccm_wr_rdbk_fault_data[pt.DCCM_DATA_WIDTH-1:0]) |
-                                    ({32{dmi_reg_addr == 7'h72}} & {{(32-pt.DCCM_ECC_WIDTH){1'b0}},
+                                    ({32{dmi_reg_addr == 7'h49}} & dccm_wr_rdbk_fault_data[pt.DCCM_DATA_WIDTH-1:0]) |
+                                    ({32{dmi_reg_addr == 7'h4a}} & {{(32-pt.DCCM_ECC_WIDTH){1'b0}},
                                                                      dccm_wr_rdbk_fault_data[pt.DCCM_FDATA_WIDTH-1:pt.DCCM_DATA_WIDTH]});
 
 

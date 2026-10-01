@@ -302,15 +302,15 @@ Addresses shown below are offsets relative to the Debug Module base address. Vee
   - haltsum0
   - Halt summary 0
   - [](debugging.md#halt-summary-0-register-haltsum0)
-* - 0x70
+* - 0x48
   - dccm_wr_rdbk_status
   - DCCM write-readback fault status/address (custom, vendor-specific)
   - [](debugging.md#dccm-write-readback-fault-status-register-dccm_wr_rdbk_status)
-* - 0x71
+* - 0x49
   - dccm_wr_rdbk_data
   - DCCM write-readback fault data (custom, vendor-specific)
   - [](debugging.md#dccm-write-readback-fault-data-register-dccm_wr_rdbk_data)
-* - 0x72
+* - 0x4A
   - dccm_wr_rdbk_ecc
   - DCCM write-readback fault ecc (custom, vendor-specific)
   - [](debugging.md#dccm-write-readback-fault-ecc-register-dccm_wr_rdbk_ecc)
@@ -1161,7 +1161,7 @@ Subsequent faults are not captured while *valid* is still set, so a debugger alw
 
 Writing '1' to the *valid* field clears it, re-arming capture for the next fault.
 
-:::{list-table} DCCM Write-Readback Fault Status Register (dccm_wr_rdbk_status, at Debug Module Offset 0x70)
+:::{list-table} DCCM Write-Readback Fault Status Register (dccm_wr_rdbk_status, at Debug Module Offset 0x48)
 :name: tab-dccm-wr-rdbk-status
 :header-rows: 1
 
@@ -1192,7 +1192,7 @@ Writing '1' to the *valid* field clears it, re-arming capture for the next fault
 The `dccm_wr_rdbk_data` register holds the actual data that was read back during the latched fault captured in `dccm_wr_rdbk_status`, i.e. the value that failed to match what was written.
 It is valid iff the *valid* field of `dccm_wr_rdbk_status` is set, and is cleared the same way (by writing '1' to that field).
 
-:::{list-table} DCCM Write-Readback Fault Data Register (dccm_wr_rdbk_data, at Debug Module Offset 0x71)
+:::{list-table} DCCM Write-Readback Fault Data Register (dccm_wr_rdbk_data, at Debug Module Offset 0x49)
 :name: tab-dccm-wr-rdbk-data
 :header-rows: 1
 
@@ -1214,7 +1214,7 @@ The `dccm_wr_rdbk_ecc` register holds the ECC bits associated with the data in `
 Together, `dccm_wr_rdbk_data` and `dccm_wr_rdbk_ecc` form the complete, ECC-protected DCCM word at adjacent Debug Module offsets.
 It is valid iff the *valid* field of `dccm_wr_rdbk_status` is set, and is cleared the same way (by writing '1' to that field).
 
-:::{list-table} DCCM Write-Readback Fault ECC Register (dccm_wr_rdbk_ecc, at Debug Module Offset 0x72)
+:::{list-table} DCCM Write-Readback Fault ECC Register (dccm_wr_rdbk_ecc, at Debug Module Offset 0x4A)
 :name: tab-dccm-wr-rdbk-ecc
 :header-rows: 1
 

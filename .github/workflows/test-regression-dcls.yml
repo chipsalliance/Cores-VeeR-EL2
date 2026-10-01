@@ -22,6 +22,7 @@ jobs:
       icache_ecc_tests: ${{ steps.select-icache-ecc.outputs.tests }}
       icache_addr_xor_delays: ${{ steps.select-icache-addr-xor-delays.outputs.delays }}
       icache_addr_xor_waypacks: ${{ steps.select-icache-addr-xor-waypacks.outputs.waypacks }}
+      dccm_wr_readback_delays: ${{ steps.select-dccm-wr-readback-delays.outputs.delays }}
     steps:
       - uses: actions/checkout@v4
       - name: Select tests
@@ -56,6 +57,12 @@ jobs:
           echo "waypacks=$(python3 .github/scripts/select_pr_tests.py \
             '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}-icache-addr-xor-waypack' 1 \
             '0,1')" | tee -a $GITHUB_OUTPUT
+      - name: Select DCCM write-readback delays
+        id: select-dccm-wr-readback-delays
+        run: |
+          echo "delays=$(python3 .github/scripts/select_pr_tests.py \
+            '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}-dccm-wr-readback-delay' 2 \
+            '0,1,2,3,4')" | tee -a $GITHUB_OUTPUT
       - name: Select MUBI configs
         id: select-mubi
         run: |
@@ -234,6 +241,7 @@ jobs:
 
   regression-tests-dccm-wr-readback:
     name: Regression tests (DCLS + DCCM write readback)
+    needs: [generate-matrix]
     runs-on: ubuntu-latest
     container: ghcr.io/antmicro/cores-veer-el2:20260923
     strategy:
@@ -242,16 +250,18 @@ jobs:
         # DCCM-exercising subset, built with DCLS + RV_DCCM_WR_READBACK enabled. The readback
         # feature only affects the DCCM write path and is privilege-independent, so a single
         # priv level of these DCCM/ECC tests is enough to exercise it without re-running the
-        # full matrix.
-        test: ["dccm_wr_readback", "hello_world_dccm", "ecc"]
+        # full matrix. Sweeps DCLS delay values ("0".."4", sampling 2 on PRs via select_pr_tests.py)
+        # to cover both zero-delay and delayed lockstep comparator pipelines.
+        test: ["dccm_wr_readback", "dccm_wr_readback_hazards", "dccm_wr_readback_random", "dccm_wr_readback_fault_dmi", "dccm_wr_readback_sys_integ", "hello_world_dccm", "ecc"]
         coverage: ["all"]
         priv: ["0"]
+        delay: ${{ fromJSON(needs.generate-matrix.outputs.dccm_wr_readback_delays) }}
         tb_extra_args: [""]
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/regression/.cache/"
       DCLS_ENABLE: "1"
-      DCLS_DELAY: "0"
+      DCLS_DELAY: ${{ matrix.delay }}
       DCCM_WR_READBACK: "1"
 
     steps:
@@ -276,7 +286,7 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
-          echo "FULL_NAME=dcls-dccm-wr-readback-${{ matrix.bus }}-${{ matrix.test }}" >> $GITHUB_ENV
+          echo "FULL_NAME=dcls-dccm-wr-readback-${{ matrix.bus }}-${{ matrix.test }}-delay${{ matrix.delay }}" >> $GITHUB_ENV
 
       - name: Run tests
         run: |

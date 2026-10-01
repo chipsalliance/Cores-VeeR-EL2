@@ -794,6 +794,120 @@ module tb_top
     logic [8:0] inject_veer_in_dist_no, inject_lockstep_in_dist_no;
     bit   at_newline = 1'b1;
 
+`ifdef RV_DCCM_WR_READBACK
+    // =========================================================================
+    // DCCM Write-Readback Verification Mailbox & DMI Protocol (#512)
+    // =========================================================================
+    // Firmware communicates with `tb_top.sv` by writing a 32-bit word to `tohost`:
+    //   - Bits [31:16]: `dmi_seq_id` (16-bit sequence number echoed to `RDBK_HANDSHAKE_ADDR`)
+    //   - Bits [15:8] : `subcmd` (7-bit DMI register address for 0xB1/0xB2, or counter ID for 0xBB)
+    //   - Bits [7:0]  : Command opcode (`MBX_CMD_*`)
+    //
+    // Upon completing a command, `tb_top.sv` writes the 32-bit result to
+    // `RDBK_SCRATCHPAD_ADDR` (`0xF004_7000`) and then writes `{16'h0, dmi_seq_id}`
+    // to `RDBK_HANDSHAKE_ADDR` (`0xF004_7004`) via `write_dccm_word()`.
+    //
+    // DMI Register Layout (`design/dbg/el2_dbg.sv` & `docs/source/debugging.md`, #564):
+    //   - `0x10` (`dmcontrol`):
+    //       * Bit [0] (`dmactive`): 1 = Debug Module active (ungates `dbg_dm_rst_l`).
+    //   - `0x48` (`dccm_wr_rdbk_status`):
+    //       * Bit [31]            : `valid` (`dccm_wr_rdbk_fault_valid`), sticky first-fault-wins,
+    //                               R/W1C (cleared by writing `1` to bit 31).
+    //       * Bits [30:DCCM_BITS] : Reserved (hardwired to `0`).
+    //       * Bits [DCCM_BITS-1:0]: `address` (`dccm_wr_rdbk_fault_addr`), byte offset of the
+    //                               first faulted store since the last W1C clear.
+    //   - `0x49` (`dccm_wr_rdbk_data`):
+    //       * Bits [31:0]         : `data` (`dccm_wr_rdbk_fault_data[31:0]`), raw 32-bit SRAM
+    //                               data word read back during the latched fault.
+    //   - `0x4A` (`dccm_wr_rdbk_ecc`):
+    //       * Bits [31:7]         : Reserved (hardwired to `0`).
+    //       * Bits [6:0]          : `ecc` (`dccm_wr_rdbk_fault_data[38:32]`), raw 7-bit SECDED
+    //                               ECC syndrome read back alongside `dccm_wr_rdbk_data`.
+    localparam logic [31:0] RDBK_SCRATCHPAD_ADDR     = 32'hF004_7000;
+    localparam logic [31:0] RDBK_HANDSHAKE_ADDR      = 32'hF004_7004;
+
+    localparam logic [7:0]  MBX_CMD_ARM_WR_SKIP      = 8'hB0; // Suppress DCCM SRAM WE on next store to test arena
+    localparam logic [7:0]  MBX_CMD_DMI_READ         = 8'hB1; // Read DMI register `subcmd[6:0]` (`0x48`-`0x4A`)
+    localparam logic [7:0]  MBX_CMD_DMI_WRITE        = 8'hB2; // Write DMI register (`0x10` dmactive=1, `0x48` W1C)
+    localparam logic [7:0]  MBX_CMD_GET_PULSES       = 8'hB4; // Read cumulative `dccm_write_readback_error` count
+    localparam logic [7:0]  MBX_CMD_ARM_DMA_WR_COLL  = 8'hB5; // WR_SYS_001: Arm top-level DMA write collision
+    localparam logic [7:0]  MBX_CMD_ARM_DMA_RD_SNOOP = 8'hB6; // WR_SYS_002A: Arm top-level DMA read snoop collision
+    localparam logic [7:0]  MBX_CMD_ARM_DMA_RD_DEFER = 8'hB7; // WR_SYS_002B: Arm top-level DMA read steal deferral
+    localparam logic [7:0]  MBX_CMD_ARM_ECC_SNOOP    = 8'hB8; // WR_SYS_003A: Arm 1-bit SRAM bit-flip on store to 0xF0047430
+    localparam logic [7:0]  MBX_CMD_SEED_ECC_DEFER   = 8'hB9; // WR_SYS_003B: Seed 1-bit SRAM ECC error at 0xF0047444
+    localparam logic [7:0]  MBX_CMD_RDBK_COUNTERS    = 8'hBB; // Reset (`subcmd=0`) or query (`subcmd=1..10`) RTL counters
+
+    localparam logic [6:0]  DMI_ADDR_DMCONTROL       = 7'h10;
+    localparam logic [6:0]  DMI_ADDR_RDBK_STATUS     = 7'h48;
+    localparam logic [6:0]  DMI_ADDR_RDBK_DATA       = 7'h49;
+    localparam logic [6:0]  DMI_ADDR_RDBK_ECC        = 7'h4A;
+
+    logic        dccm_write_readback_error;
+    logic        dccm_wr_skip_armed;
+    wire         dccm_wr_skip_active;
+    int          dccm_wr_rdbk_err_pulse_count;
+    int          rdbk_arm_count;
+    int          rdbk_snoop_lo_count;
+    int          rdbk_snoop_hi_count;
+    int          rdbk_steal_count;
+    int          rdbk_defer_count;
+    int          rdbk_stbuf_full_count;
+    int          rdbk_dcls_sym_err_match_count;
+    int          rdbk_dcls_main_err_mismatch_count;
+    int          rdbk_dcls_shadow_err_mismatch_count;
+    int          rdbk_dcls_dmi_rdata_mismatch_count;
+    logic        rdbk_dcls_asym_mode;
+    logic [6:0]  dmi_target_addr;
+    logic [15:0] dmi_seq_id;
+    typedef enum logic [2:0] {
+        DMI_IDLE,
+        DMI_RD_CYCLE1,
+        DMI_RD_CYCLE2,
+        DMI_WR_CYCLE1,
+        DMI_WR_CYCLE2
+    } dmi_fsm_t;
+    dmi_fsm_t dmi_fsm;
+    assign dccm_wr_skip_active = dccm_wr_skip_armed && el2_mem_export.dccm_clken && (|el2_mem_export.dccm_wren_bank) &&
+                                 (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_addr_lo[15:12] >= 4'h4);
+
+    // Top-level DMA slave bus & 1-bit SRAM ECC stimulus state for System Integration (#512)
+    logic        rdbk_dma_wr_coll_armed;
+    logic        rdbk_dma_rd_snoop_armed;
+    logic        rdbk_dma_rd_defer_armed;
+    logic        rdbk_ecc_snoop_flip_armed;
+    wire         rdbk_ecc_snoop_flip_active;
+    assign rdbk_ecc_snoop_flip_active = rdbk_ecc_snoop_flip_armed && el2_mem_export.dccm_clken &&
+                                        (|el2_mem_export.dccm_wren_bank) &&
+                                        (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_addr_lo == 16'h7430);
+
+    logic [2:0]  rdbk_dma_seq_step;
+    logic [31:0] rdbk_dma_target_addr;
+    logic        rdbk_dma_is_write;
+    wire         rdbk_dma_stim_armed = rdbk_dma_wr_coll_armed | rdbk_dma_rd_snoop_armed | rdbk_dma_rd_defer_armed;
+    wire [31:0]  rdbk_dma_trigger_store_addr = rdbk_dma_wr_coll_armed  ? 32'hF004_7400 :
+                                               (rdbk_dma_rd_snoop_armed ? 32'hF004_7410 : 32'hF004_7420);
+    wire         rdbk_dma_trigger_store_in_d = rdbk_dma_stim_armed && (rdbk_dma_seq_step == 3'd0) &&
+                                               rvtop_wrapper.rvtop.veer.lsu.lsu_pkt_d.valid &&
+                                               rvtop_wrapper.rvtop.veer.lsu.lsu_pkt_d.store &&
+                                               ~rvtop_wrapper.rvtop.veer.lsu.lsu_pkt_d.dma &&
+                                               (rvtop_wrapper.rvtop.veer.lsu.lsu_addr_d == rdbk_dma_trigger_store_addr);
+
+    wire         tb_dma_ahb_active  = rdbk_dma_trigger_store_in_d || (rdbk_dma_seq_step != 3'd0);
+    wire         tb_dma_hsel        = rdbk_dma_trigger_store_in_d;
+    wire [1:0]   tb_dma_htrans      = rdbk_dma_trigger_store_in_d ? 2'b10 : 2'b00;
+    wire         tb_dma_hwrite      = rdbk_dma_is_write;
+    wire [31:0]  tb_dma_haddr       = rdbk_dma_target_addr;
+    wire [63:0]  tb_dma_hwdata      = 64'hAABBCCDD_AABBCCDD;
+
+    wire         tb_dma_axi_active  = (rdbk_dma_seq_step != 3'd0);
+    wire         tb_dma_axi_awvalid = (rdbk_dma_seq_step == 3'd2) && rdbk_dma_is_write;
+    wire         tb_dma_axi_wvalid  = (rdbk_dma_seq_step == 3'd2) && rdbk_dma_is_write;
+    wire         tb_dma_axi_arvalid = (rdbk_dma_seq_step == 3'd2) && ~rdbk_dma_is_write;
+    wire [31:0]  tb_dma_addr        = rdbk_dma_target_addr;
+    wire [63:0]  tb_dma_wdata       = 64'hAABBCCDD_AABBCCDD;
+    wire [7:0]   tb_dma_wstrb       = 8'h0F;
+`endif
+
     // Reconstruct 32-bit MUBI vectors transmitted via 32-bit tohost mailbox writes.
     // Since tohost is a 32-bit register and command opcodes occupy the lower byte (bits [7:0]),
     // a 32-bit MUBI payload shifted by 8 bits loses its top 8 bits (e.g. 0x55555555 becomes 0x00555555).
@@ -1296,6 +1410,429 @@ module tb_top
 `endif
     end
 
+`ifdef RV_DCCM_WR_READBACK
+    always @(posedge core_clk or negedge rst_l_combined) begin
+        if (~rst_l_combined) begin
+            dccm_wr_skip_armed                  <= 1'b0;
+            dccm_wr_rdbk_err_pulse_count        <= 0;
+            rdbk_arm_count                      <= 0;
+            rdbk_snoop_lo_count                 <= 0;
+            rdbk_snoop_hi_count                 <= 0;
+            rdbk_steal_count                    <= 0;
+            rdbk_defer_count                    <= 0;
+            rdbk_stbuf_full_count               <= 0;
+            rdbk_dcls_sym_err_match_count       <= 0;
+            rdbk_dcls_main_err_mismatch_count   <= 0;
+            rdbk_dcls_shadow_err_mismatch_count <= 0;
+            rdbk_dcls_dmi_rdata_mismatch_count  <= 0;
+            rdbk_dcls_asym_mode                 <= 1'b0;
+            dmi_target_addr                     <= 7'h0;
+            dmi_seq_id                          <= 16'h0;
+            dmi_fsm                             <= DMI_IDLE;
+            rdbk_dma_wr_coll_armed              <= 1'b0;
+            rdbk_dma_rd_snoop_armed             <= 1'b0;
+            rdbk_dma_rd_defer_armed             <= 1'b0;
+            rdbk_ecc_snoop_flip_armed           <= 1'b0;
+            rdbk_dma_seq_step                   <= 3'd0;
+            rdbk_dma_target_addr                <= 32'h0;
+            rdbk_dma_is_write                   <= 1'b0;
+        end else begin
+            // Track dccm_write_readback_error pulse
+            if (dccm_write_readback_error) begin
+                dccm_wr_rdbk_err_pulse_count <= dccm_wr_rdbk_err_pulse_count + 1;
+                $display("[%0t ns] [TB] dccm_write_readback_error pulse #%0d observed", $time, dccm_wr_rdbk_err_pulse_count + 1);
+            end
+
+`ifdef RV_LOCKSTEP_ENABLE
+            if (mailbox_write && (mailbox_data[7:0] == 8'h91 || mailbox_data[7:0] == 8'h92)) begin
+                rdbk_dcls_asym_mode <= 1'b1;
+            end
+            // Track DCLS delayed-comparator equivalence & directional mismatch events (#512)
+            if (rvtop_wrapper.rvtop.lockstep.delayed_main_core_outputs.dccm_write_readback_error &&
+                rvtop_wrapper.rvtop.lockstep.shadow_core_outputs.dccm_write_readback_error &&
+                (corruption_detected_o == el2_mubi_pkg::El2MuBiFalse)) begin
+                rdbk_dcls_sym_err_match_count <= rdbk_dcls_sym_err_match_count + 1;
+            end
+            if (rvtop_wrapper.rvtop.lockstep.delayed_main_core_outputs.dccm_write_readback_error &&
+                ~rvtop_wrapper.rvtop.lockstep.shadow_core_outputs.dccm_write_readback_error &&
+                (corruption_detected_o != el2_mubi_pkg::El2MuBiFalse)) begin
+                rdbk_dcls_main_err_mismatch_count <= rdbk_dcls_main_err_mismatch_count + 1;
+            end
+            if (~rvtop_wrapper.rvtop.lockstep.delayed_main_core_outputs.dccm_write_readback_error &&
+                rvtop_wrapper.rvtop.lockstep.shadow_core_outputs.dccm_write_readback_error &&
+                (corruption_detected_o != el2_mubi_pkg::El2MuBiFalse)) begin
+                rdbk_dcls_shadow_err_mismatch_count <= rdbk_dcls_shadow_err_mismatch_count + 1;
+            end
+            if ((rvtop_wrapper.rvtop.lockstep.delayed_main_core_outputs.dmi_reg_rdata !=
+                 rvtop_wrapper.rvtop.lockstep.shadow_core_outputs.dmi_reg_rdata) &&
+                (corruption_detected_o != el2_mubi_pkg::El2MuBiFalse)) begin
+                rdbk_dcls_dmi_rdata_mismatch_count <= rdbk_dcls_dmi_rdata_mismatch_count + 1;
+            end
+`endif
+
+            // Track internal LSU write-readback RTL events in the test arena (offset >= 0x4000)
+            if (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_arm &&
+                (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.stbuf_addr_any[15:12] >= 4'h4)) begin
+                rdbk_arm_count <= rdbk_arm_count + 1;
+            end
+            if (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_snoop_lo &&
+                (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_addr_ff[15:12] >= 4'h4)) begin
+                rdbk_snoop_lo_count <= rdbk_snoop_lo_count + 1;
+            end
+            if (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_snoop_hi &&
+                (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_addr_ff[15:12] >= 4'h4)) begin
+                rdbk_snoop_hi_count <= rdbk_snoop_hi_count + 1;
+            end
+            if (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_issue &&
+                (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_addr_ff[15:12] >= 4'h4)) begin
+                rdbk_steal_count <= rdbk_steal_count + 1;
+            end
+            if (rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff &&
+                ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_resolve &&
+                (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_addr_ff[15:12] >= 4'h4)) begin
+                rdbk_defer_count <= rdbk_defer_count + 1;
+            end
+            if (rvtop_wrapper.rvtop.veer.lsu.stbuf.lsu_stbuf_full_any) begin
+                rdbk_stbuf_full_count <= rdbk_stbuf_full_count + 1;
+            end
+
+            // Disarm write skip once it fired
+            if (dccm_wr_skip_active) begin
+                dccm_wr_skip_armed <= 1'b0;
+                $display("[%0t ns] [TB] DCCM write-skip injected: suppressed DCCM RAM WE", $time);
+            end
+
+            // Disarm Phase 4 1-bit SRAM ECC flip once it fired on the store commit
+            if (rdbk_ecc_snoop_flip_active) begin
+                rdbk_ecc_snoop_flip_armed <= 1'b0;
+                $display("[%0t ns] [TB-Phase4] Injected 1-bit SRAM corruption on store to 0xF0047430", $time);
+            end
+
+            // Synchronous FSM for DMI and Mailbox operations
+            case (dmi_fsm)
+                DMI_IDLE: begin
+                    if (mailbox_write) begin
+                        case (mailbox_data[7:0])
+                            MBX_CMD_ARM_WR_SKIP: begin
+                                dccm_wr_skip_armed <= 1'b1;
+                                dmi_seq_id <= mailbox_data[31:16];
+                                write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xB0: DCCM write-skip armed (seq=%0d)", $time, mailbox_data[31:16]);
+                            end
+                            // Drive the pre-`dmi_mux` DMI bus (`rvtop.dmi_*`, the output of `dmi_wrapper` /
+                            // `dmi_jtag_to_core_sync`) so transactions traverse `dmi_mux` and `el2_dbg` end-to-end
+                            // across `0x10` (`dmcontrol`) and `0x48`-`0x4A` (`dccm_wr_rdbk_status/data/ecc`, #564).
+                            MBX_CMD_DMI_READ: begin
+                                dmi_target_addr <= mailbox_data[14:8];
+                                dmi_seq_id      <= mailbox_data[31:16];
+                                dmi_fsm         <= DMI_RD_CYCLE1;
+                            end
+                            MBX_CMD_DMI_WRITE: begin
+                                dmi_target_addr <= mailbox_data[14:8];
+                                dmi_seq_id      <= mailbox_data[31:16];
+                                dmi_fsm         <= DMI_WR_CYCLE1;
+                            end
+                            MBX_CMD_GET_PULSES: begin
+                                dmi_seq_id <= mailbox_data[31:16];
+                                write_dccm_word(RDBK_SCRATCHPAD_ADDR, dccm_wr_rdbk_err_pulse_count);
+                                write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xB4: reported pulse count = %0d (seq=%0d)", $time, dccm_wr_rdbk_err_pulse_count, mailbox_data[31:16]);
+                            end
+                            MBX_CMD_ARM_DMA_WR_COLL: begin
+                                rdbk_dma_wr_coll_armed <= 1'b1;
+                                rdbk_dma_seq_step      <= 3'd0;
+                                rdbk_dma_target_addr   <= 32'hF004_7400;
+                                rdbk_dma_is_write      <= 1'b1;
+                                dmi_seq_id             <= mailbox_data[31:16];
+                                write_dccm_word(RDBK_SCRATCHPAD_ADDR, 32'h1);
+                                write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xB5: Phase 1 (Real DMA Write Collision) armed (seq=%0d)", $time, mailbox_data[31:16]);
+                            end
+                            MBX_CMD_ARM_DMA_RD_SNOOP: begin
+                                rdbk_dma_rd_snoop_armed <= 1'b1;
+                                rdbk_dma_seq_step       <= 3'd0;
+                                rdbk_dma_target_addr    <= 32'hF004_7410;
+                                rdbk_dma_is_write       <= 1'b0;
+                                dmi_seq_id              <= mailbox_data[31:16];
+                                write_dccm_word(RDBK_SCRATCHPAD_ADDR, 32'h1);
+                                write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xB6: Phase 2 (Real DMA Read Snoop) armed (seq=%0d)", $time, mailbox_data[31:16]);
+                            end
+                            MBX_CMD_ARM_DMA_RD_DEFER: begin
+                                rdbk_dma_rd_defer_armed <= 1'b1;
+                                rdbk_dma_seq_step       <= 3'd0;
+                                rdbk_dma_target_addr    <= 32'hF004_7400;
+                                rdbk_dma_is_write       <= 1'b0;
+                                dmi_seq_id              <= mailbox_data[31:16];
+                                write_dccm_word(RDBK_SCRATCHPAD_ADDR, 32'h1);
+                                write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xB7: Phase 3 (Real DMA Read Steal Deferral) armed (seq=%0d)", $time, mailbox_data[31:16]);
+                            end
+                            MBX_CMD_ARM_ECC_SNOOP: begin
+                                rdbk_ecc_snoop_flip_armed <= 1'b1;
+                                dmi_seq_id                <= mailbox_data[31:16];
+                                write_dccm_word(RDBK_SCRATCHPAD_ADDR, 32'h1);
+                                write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xB8: Phase 4 (Real ECC 1-Bit Snoop) armed (seq=%0d)", $time, mailbox_data[31:16]);
+                            end
+                            MBX_CMD_SEED_ECC_DEFER: begin
+                                dmi_seq_id <= mailbox_data[31:16];
+                                write_dccm_word_single_ecc_err(32'hF004_7444, 32'h1234_5678);
+                                write_dccm_word(RDBK_SCRATCHPAD_ADDR, 32'h1);
+                                write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xB9: Phase 5 (Real ECC 1-Bit Steal Deferral) corrupted 0xF0047444 (seq=%0d)", $time, mailbox_data[31:16]);
+                            end
+                            MBX_CMD_RDBK_COUNTERS: begin
+                                dmi_seq_id <= mailbox_data[31:16];
+                                case (mailbox_data[15:8])
+                                    8'd0: begin
+                                        rdbk_arm_count                      <= 0;
+                                        rdbk_snoop_lo_count                 <= 0;
+                                        rdbk_snoop_hi_count                 <= 0;
+                                        rdbk_steal_count                    <= 0;
+                                        rdbk_defer_count                    <= 0;
+                                        rdbk_stbuf_full_count               <= 0;
+                                        rdbk_dcls_sym_err_match_count       <= 0;
+                                        rdbk_dcls_main_err_mismatch_count   <= 0;
+                                        rdbk_dcls_shadow_err_mismatch_count <= 0;
+                                        rdbk_dcls_dmi_rdata_mismatch_count  <= 0;
+                                        rdbk_dcls_asym_mode                 <= 1'b0;
+                                        write_dccm_word(RDBK_SCRATCHPAD_ADDR, 32'h0);
+                                    end
+                                    8'd1: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_arm_count);
+                                    8'd2: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_snoop_lo_count);
+                                    8'd3: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_snoop_hi_count);
+                                    8'd4: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_steal_count);
+                                    8'd5: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_defer_count);
+                                    8'd6: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_stbuf_full_count);
+                                    8'd7: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_dcls_sym_err_match_count);
+                                    8'd8: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_dcls_main_err_mismatch_count);
+                                    8'd9: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_dcls_shadow_err_mismatch_count);
+                                    8'd10: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_dcls_dmi_rdata_mismatch_count);
+                                    default: write_dccm_word(RDBK_SCRATCHPAD_ADDR, 32'h0);
+                                endcase
+                                write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, mailbox_data[31:16]});
+                            end
+                            default: ;
+                        endcase
+                    end
+                end
+
+                DMI_RD_CYCLE1: begin
+                    // Hold `dmi_en` asserted across this clock edge so `el2_dbg.dmi_rddata_reg`
+                    // captures `dmi_reg_rdata_din` into `dmi_rdata`.
+                    dmi_fsm <= DMI_RD_CYCLE2;
+                end
+
+                DMI_RD_CYCLE2: begin
+                    write_dccm_word(RDBK_SCRATCHPAD_ADDR, rvtop_wrapper.rvtop.dmi_rdata);
+                    write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, dmi_seq_id});
+                    $display("[%0t ns] [TB] DMI read reg 0x%0h returned 0x%08x (seq=%0d)", $time, dmi_target_addr, rvtop_wrapper.rvtop.dmi_rdata, dmi_seq_id);
+                    dmi_fsm <= DMI_IDLE;
+                end
+
+                DMI_WR_CYCLE1: begin
+                    // Hold `dmi_en` and `dmi_wr_en` asserted across this clock edge so `el2_dbg`
+                    // commits the write (e.g. `dmactive=1` on `0x10` or W1C clear on `0x48[31]`).
+                    dmi_fsm <= DMI_WR_CYCLE2;
+                end
+
+                DMI_WR_CYCLE2: begin
+                    write_dccm_word(RDBK_SCRATCHPAD_ADDR, 32'h0);
+                    write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, dmi_seq_id});
+                    $display("[%0t ns] [TB] DMI write reg 0x%0h completed (seq=%0d)", $time, dmi_target_addr, dmi_seq_id);
+                    dmi_fsm <= DMI_IDLE;
+                end
+
+                default: dmi_fsm <= DMI_IDLE;
+            endcase
+
+            // Top-Level DMA Slave Bus Stimulus Sequencer (WR_SYS_001, WR_SYS_002A, WR_SYS_002B)
+            // Step 0 waits for the trigger core store to enter LSU stage D (`rdbk_dma_trigger_store_in_d`)
+            // so the top-level AHB/AXI DMA slave transaction arrives at `dma_ctrl` on the exact cycle
+            // the core store drains from the store buffer (`stbuf_reqvld_any`) and arms write-readback.
+            if (rdbk_dma_stim_armed) begin
+                case (rdbk_dma_seq_step)
+                    3'd0: begin
+                        if (rdbk_dma_trigger_store_in_d) begin
+                            rdbk_dma_seq_step <= 3'd1;
+                        end
+                    end
+                    3'd1, 3'd2, 3'd3, 3'd4, 3'd5: begin
+                        rdbk_dma_seq_step <= rdbk_dma_seq_step + 3'd1;
+                    end
+                    3'd6: begin
+                        if (~rvtop_wrapper.rvtop.veer.dma_ctrl.dma_active) begin
+                            rdbk_dma_wr_coll_armed  <= 1'b0;
+                            rdbk_dma_rd_snoop_armed <= 1'b0;
+                            rdbk_dma_rd_defer_armed <= 1'b0;
+                            rdbk_dma_seq_step       <= 3'd0;
+                        end
+                    end
+                    default: rdbk_dma_seq_step <= 3'd0;
+                endcase
+            end
+        end
+    end
+
+    // Drive and release the pre-`dmi_mux` DMI signals (`rvtop.dmi_*`) on `negedge core_clk`
+    // while `core_clk == 0` so negative-level clock-gating latches (`TEC_RV_ICG`) in `el2_dbg`
+    // and `posedge core_clk` input delay registers in `el2_veer_lockstep` observe identical
+    // single-cycle setup/hold timing without active-region races.
+    always @(negedge core_clk or negedge rst_l_combined) begin
+        if (~rst_l_combined) begin
+            release rvtop_wrapper.rvtop.dmi_en;
+            release rvtop_wrapper.rvtop.dmi_wr_en;
+            release rvtop_wrapper.rvtop.dmi_addr;
+            release rvtop_wrapper.rvtop.dmi_wdata;
+        end else begin
+            case (dmi_fsm)
+                DMI_RD_CYCLE1: begin
+                    force rvtop_wrapper.rvtop.dmi_en    = 1'b1;
+                    force rvtop_wrapper.rvtop.dmi_wr_en = 1'b0;
+                    force rvtop_wrapper.rvtop.dmi_addr  = dmi_target_addr;
+                    force rvtop_wrapper.rvtop.dmi_wdata = 32'h0;
+                end
+                DMI_WR_CYCLE1: begin
+                    force rvtop_wrapper.rvtop.dmi_en    = 1'b1;
+                    force rvtop_wrapper.rvtop.dmi_wr_en = 1'b1;
+                    force rvtop_wrapper.rvtop.dmi_addr  = dmi_target_addr;
+                    force rvtop_wrapper.rvtop.dmi_wdata = (dmi_target_addr == DMI_ADDR_DMCONTROL) ?
+                                                          32'h0000_0001 : 32'h8000_0000;
+                end
+                default: begin
+                    release rvtop_wrapper.rvtop.dmi_en;
+                    release rvtop_wrapper.rvtop.dmi_wr_en;
+                    release rvtop_wrapper.rvtop.dmi_addr;
+                    release rvtop_wrapper.rvtop.dmi_wdata;
+                end
+            endcase
+        end
+    end
+
+`ifdef RV_ASSERT_OR_VERILATOR
+    // WR_SYS_001: Whenever a write-readback window is pending and a DMA write is requested,
+    // `dccm_ready` and `dma_dccm_req` must be held low until the readback check resolves.
+    property p_dccm_wr_rdbk_dma_wr_stall;
+        @(posedge core_clk) disable iff (~rst_l_combined)
+        (rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff &&
+         rvtop_wrapper.rvtop.veer.dma_mem_write)
+        |-> (~rvtop_wrapper.rvtop.veer.lsu.dccm_ready &&
+             ~rvtop_wrapper.rvtop.veer.dma_dccm_req);
+    endproperty
+    assert_dccm_wr_rdbk_dma_wr_stall: assert property (p_dccm_wr_rdbk_dma_wr_stall)
+        else $fatal(1, "[SVA] WR_SYS_001: DMA write was not stalled while dccm_wr_rdbk_pend_ff=1");
+
+    // WR_SYS_002A & WR_SYS_003A: Whenever a D-stage DCCM read (CPU load or DMA read) targets
+    // the pending readback word address, the check must resolve via snoop without stealing the port.
+    property p_dccm_wr_rdbk_snoop_no_steal;
+        @(posedge core_clk) disable iff (~rst_l_combined)
+        (rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff &&
+         rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.lsu_dccm_rden_d &&
+         ((rvtop_wrapper.rvtop.veer.lsu.lsu_addr_d[pt.DCCM_BITS-1:0] == rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_addr_ff) ||
+          (rvtop_wrapper.rvtop.veer.lsu.end_addr_d[pt.DCCM_BITS-1:0] == rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_addr_ff)))
+        |-> ((rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_snoop_lo ||
+              rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_snoop_hi) &&
+             ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_issue &&
+             rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_resolve);
+    endproperty
+    assert_dccm_wr_rdbk_snoop_no_steal: assert property (p_dccm_wr_rdbk_snoop_no_steal)
+        else $fatal(1, "[SVA] WR_SYS_002A/003A: Matching D-stage read did not resolve readback via snoop");
+
+    // WR_SYS_002B: Whenever a D-stage DCCM read (CPU load or DMA read) targets a different address,
+    // the read must take priority (`~dccm_wr_rdbk_issue && ~dccm_wr_rdbk_resolve`) and defer the steal.
+    property p_dccm_wr_rdbk_read_defer;
+        @(posedge core_clk) disable iff (~rst_l_combined)
+        (rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff &&
+         rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.lsu_dccm_rden_d &&
+         ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_snoop_lo &&
+         ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_snoop_hi)
+        |-> (~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_issue &&
+             ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_resolve);
+    endproperty
+    assert_dccm_wr_rdbk_read_defer: assert property (p_dccm_wr_rdbk_read_defer)
+        else $fatal(1, "[SVA] WR_SYS_002B: Non-matching D-stage read did not defer readback steal");
+
+    // WR_SYS_003B: Whenever a single-bit ECC correction write-back (`ld_single_ecc_error_r_ff`) occurs
+    // while `dccm_wr_rdbk_pend_ff` is high and no snoop covers the address, the steal must be deferred.
+    property p_dccm_wr_rdbk_ecc_scrub_defer;
+        @(posedge core_clk) disable iff (~rst_l_combined)
+        (rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff &&
+         rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.ld_single_ecc_error_r_ff &&
+         ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_snoop_lo &&
+         ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_snoop_hi)
+        |-> (~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_issue &&
+             ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_resolve);
+    endproperty
+    assert_dccm_wr_rdbk_ecc_scrub_defer: assert property (p_dccm_wr_rdbk_ecc_scrub_defer)
+        else $fatal(1, "[SVA] WR_SYS_003B: Single-bit ECC correction scrub did not defer readback steal");
+
+    // Pending window retention: whenever `dccm_wr_rdbk_pend_ff` is deferred (`~dccm_wr_rdbk_resolve`),
+    // `dccm_wr_rdbk_pend_ff` must remain asserted on the next clock cycle.
+    property p_dccm_wr_rdbk_pend_retained_on_defer;
+        @(posedge core_clk) disable iff (~rst_l_combined)
+        (rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff &&
+         ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_resolve)
+        |=> rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff;
+    endproperty
+    assert_dccm_wr_rdbk_pend_retained_on_defer: assert property (p_dccm_wr_rdbk_pend_retained_on_defer)
+        else $fatal(1, "[SVA] WR_SYS_002B/003B: dccm_wr_rdbk_pend_ff dropped while deferred");
+
+`ifdef RV_LOCKSTEP_ENABLE
+    // WR_XFEAT_002 (DCLS Delay Pipeline Alignment): When `pt.LOCKSTEP_DELAY > 0`, the delayed main-core
+    // outputs feeding the lockstep comparator must exactly equal the main-core outputs delayed by
+    // `pt.LOCKSTEP_DELAY` cycles across `dccm_write_readback_error`, `dmi_reg_rdata`, and `MFDC.dwrd`.
+    if (pt.LOCKSTEP_DELAY > 0) begin : gen_dcls_rdbk_delay_sva
+        property p_dcls_rdbk_delay_pipe;
+            @(posedge core_clk) disable iff (~rst_l_combined || ~rvtop_wrapper.rvtop.lockstep.rst_n)
+            (rvtop_wrapper.rvtop.lockstep.delayed_main_core_outputs.dccm_write_readback_error ==
+             $past(rvtop_wrapper.rvtop.lockstep.main_core_outputs.dccm_write_readback_error, pt.LOCKSTEP_DELAY)) &&
+            (rvtop_wrapper.rvtop.lockstep.delayed_main_core_outputs.dmi_reg_rdata ==
+             $past(rvtop_wrapper.rvtop.lockstep.main_core_outputs.dmi_reg_rdata, pt.LOCKSTEP_DELAY)) &&
+            (rvtop_wrapper.rvtop.lockstep.delayed_main_core_outputs.dec_tlu_dccm_wr_readback_disable ==
+             $past(rvtop_wrapper.rvtop.lockstep.main_core_outputs.dec_tlu_dccm_wr_readback_disable, pt.LOCKSTEP_DELAY));
+        endproperty
+        assert_dcls_rdbk_delay_pipe: assert property (p_dcls_rdbk_delay_pipe)
+            else $fatal(1, "[SVA] WR_XFEAT_002: DCLS delay pipeline misalignment on write-readback signals");
+    end
+
+    // WR_XFEAT_002 (DCLS Symmetric / No-Fault Equivalence): Outside intentional asymmetric lockstep
+    // fault injection (`~rdbk_dcls_asym_mode`), the delayed main core and shadow core must compute
+    // identical `dccm_write_readback_error`, `dmi_reg_rdata` (including `0x48`-`0x4A`), and `MFDC.dwrd`
+    // outputs on every cycle without raising `corruption_detected_o`.
+    property p_dcls_rdbk_sym_equiv;
+        @(posedge core_clk) disable iff (~rst_l_combined || ~rvtop_wrapper.rvtop.lockstep.rst_n || rdbk_dcls_asym_mode)
+        (rvtop_wrapper.rvtop.lockstep.delayed_main_core_outputs.dccm_write_readback_error ==
+         rvtop_wrapper.rvtop.lockstep.shadow_core_outputs.dccm_write_readback_error) &&
+        (rvtop_wrapper.rvtop.lockstep.delayed_main_core_outputs.dmi_reg_rdata ==
+         rvtop_wrapper.rvtop.lockstep.shadow_core_outputs.dmi_reg_rdata) &&
+        (rvtop_wrapper.rvtop.lockstep.delayed_main_core_outputs.dec_tlu_dccm_wr_readback_disable ==
+         rvtop_wrapper.rvtop.lockstep.shadow_core_outputs.dec_tlu_dccm_wr_readback_disable) &&
+        (corruption_detected_o == el2_mubi_pkg::El2MuBiFalse);
+    endproperty
+    assert_dcls_rdbk_sym_equiv: assert property (p_dcls_rdbk_sym_equiv)
+        else $fatal(1, "[SVA] WR_XFEAT_002: DCLS symmetric/no-fault equivalence violated on write-readback signals");
+
+    // WR_XFEAT_002 (DCLS Directional Mismatch Detection): Whenever either side of the delayed lockstep
+    // comparator diverges on `dccm_write_readback_error`, `dmi_reg_rdata`, or `MFDC.dwrd` while detection
+    // is enabled, `corruption_detected_o` must assert on the same clock cycle.
+    property p_dcls_rdbk_mismatch_detected;
+        @(posedge core_clk) disable iff (~rst_l_combined || ~rvtop_wrapper.rvtop.lockstep.rst_n ||
+                                         (disable_corruption_detection_i != el2_mubi_pkg::El2MuBiFalse) ||
+                                         (rvtop_wrapper.rvtop.lockstep.dbg_detected != el2_mubi_pkg::El2MuBiFalse))
+        ((rvtop_wrapper.rvtop.lockstep.delayed_main_core_outputs.dccm_write_readback_error !=
+          rvtop_wrapper.rvtop.lockstep.shadow_core_outputs.dccm_write_readback_error) ||
+         (rvtop_wrapper.rvtop.lockstep.delayed_main_core_outputs.dmi_reg_rdata !=
+          rvtop_wrapper.rvtop.lockstep.shadow_core_outputs.dmi_reg_rdata) ||
+         (rvtop_wrapper.rvtop.lockstep.delayed_main_core_outputs.dec_tlu_dccm_wr_readback_disable !=
+          rvtop_wrapper.rvtop.lockstep.shadow_core_outputs.dec_tlu_dccm_wr_readback_disable))
+        |-> (corruption_detected_o != el2_mubi_pkg::El2MuBiFalse);
+    endproperty
+    assert_dcls_rdbk_mismatch_detected: assert property (p_dcls_rdbk_mismatch_detected)
+        else $fatal(1, "[SVA] WR_XFEAT_002: DCLS comparator failed to assert corruption_detected_o on write-readback mismatch");
+`endif
+`endif
+`endif
 `ifdef RV_LOCKSTEP_ENABLE
 // Injected values should be randomized & it should be ensured that they're different
 // to what's their current value
@@ -1574,6 +2111,9 @@ module tb_top
                 203: force `LOCKSTEP.xshadow_core.dec.tlu.mdccmect = 32'h10000004; // Force subordinate DCCM ECC threshold alert (Threshold=2, Counter=4)
                 204: force `LOCKSTEP.xshadow_core.dec.tlu.miccmect = 32'h10000004; // Force subordinate ICCM ECC threshold alert (Threshold=2, Counter=4)
                 205: force `LOCKSTEP.xshadow_core.dec.tlu.micect   = 32'h10000004; // Force subordinate ICache ECC threshold alert (Threshold=2, Counter=4)
+            `ifdef RV_DCCM_WR_READBACK
+                206: force `LOCKSTEP_CORE.lsu.dccm_ctl.dccm_wr_rdbk_data_ff = '1;  // Force subordinate readback expected data register to trigger comparator mismatch on next store
+            `endif
 
                 // --- MONITORED REGISTER FORCES (LOCKSTEP) ---
                 221: force `LOCKSTEP_CORE.dec.arf.gpr[1].gprff.dout[0] = 1'b1;
@@ -1904,6 +2444,9 @@ module tb_top
                 255: force `VEER.dec.tlu.mtval_ff.dout[0] = 1'b1;
                 195: force `VEER.dec.tlu.mcyclel_bff.dout[8] = 1'b1;
                 196: force `VEER.dec.tlu.mrac_ff.dout[0] = 1'b1;
+            `ifdef RV_DCCM_WR_READBACK
+                206: force `VEER.lsu.dccm_ctl.dccm_wr_rdbk_data_ff = '1;  // Force main-core readback expected data register to trigger delayed comparator mismatch on next store
+            `endif
                 default: force `LOCKSTEP.lockstep_err_injection_en_i = '1;
             endcase
         end
@@ -2462,6 +3005,10 @@ module tb_top
             release `LOCKSTEP.xshadow_core.dec.tlu.mdccmect;
             release `LOCKSTEP.xshadow_core.dec.tlu.miccmect;
             release `LOCKSTEP.xshadow_core.dec.tlu.micect;
+        `ifdef RV_DCCM_WR_READBACK
+            release `LOCKSTEP_CORE.lsu.dccm_ctl.dccm_wr_rdbk_data_ff;
+            release `VEER.lsu.dccm_ctl.dccm_wr_rdbk_data_ff;
+        `endif
         end
     end
 `endif // RV_LOCKSTEP_ENABLE
@@ -2681,6 +3228,22 @@ veer_wrapper rvtop_wrapper (
     //---------------------------------------------------------------
     // DMA Slave
     //---------------------------------------------------------------
+`ifdef RV_DCCM_WR_READBACK
+    .dma_haddr              (tb_dma_ahb_active ? tb_dma_haddr  : dma_haddr),
+    .dma_hburst             (tb_dma_ahb_active ? 3'b000        : dma_hburst),
+    .dma_hmastlock          (tb_dma_ahb_active ? 1'b0          : dma_hmastlock),
+    .dma_hprot              (tb_dma_ahb_active ? 4'b0011       : dma_hprot),
+    .dma_hsize              (tb_dma_ahb_active ? 3'b010        : dma_hsize),
+    .dma_htrans             (tb_dma_ahb_active ? tb_dma_htrans : dma_htrans),
+    .dma_hwrite             (tb_dma_ahb_active ? tb_dma_hwrite : dma_hwrite),
+    .dma_hwdata             (tb_dma_ahb_active ? tb_dma_hwdata : dma_hwdata),
+
+    .dma_hrdata             ( dma_hrdata    ),
+    .dma_hresp              ( dma_hresp     ),
+    .dma_hsel               (tb_dma_ahb_active ? tb_dma_hsel   : dma_hsel),
+    .dma_hreadyin           ( dma_hready_out  ),
+    .dma_hreadyout          ( dma_hready_out  ),
+`else
     .dma_haddr              (dma_haddr),
     .dma_hburst             (dma_hburst),
     .dma_hmastlock          (dma_hmastlock),
@@ -2695,6 +3258,7 @@ veer_wrapper rvtop_wrapper (
     .dma_hsel               ( dma_hsel      ),
     .dma_hreadyin           ( dma_hready_out  ),
     .dma_hreadyout          ( dma_hready_out  ),
+`endif
 `endif // RV_BUILD_AHB_LITE
 `ifdef RV_BUILD_AXI4
     //-------------------------- LSU AXI signals--------------------------
@@ -2839,6 +3403,43 @@ veer_wrapper rvtop_wrapper (
 
     //-------------------------- DMA AXI signals--------------------------
     // AXI Write Channels
+`ifdef RV_DCCM_WR_READBACK
+    .dma_axi_awvalid        (tb_dma_axi_active ? tb_dma_axi_awvalid : dma_axi_awvalid),
+    .dma_axi_awready        (dma_axi_awready),
+    .dma_axi_awid           ('0),
+    .dma_axi_awaddr         (tb_dma_axi_active ? tb_dma_addr        : lsu_axi_awaddr),
+    .dma_axi_awsize         (tb_dma_axi_active ? 3'b010             : lsu_axi_awsize),
+    .dma_axi_awprot         (tb_dma_axi_active ? 3'b000             : lsu_axi_awprot),
+    .dma_axi_awlen          (tb_dma_axi_active ? '0                 : lsu_axi_awlen),
+    .dma_axi_awburst        (tb_dma_axi_active ? 2'b01              : lsu_axi_awburst),
+
+    .dma_axi_wvalid         (tb_dma_axi_active ? tb_dma_axi_wvalid  : dma_axi_wvalid),
+    .dma_axi_wready         (dma_axi_wready),
+    .dma_axi_wdata          (tb_dma_axi_active ? tb_dma_wdata       : lsu_axi_wdata),
+    .dma_axi_wstrb          (tb_dma_axi_active ? tb_dma_wstrb       : lsu_axi_wstrb),
+    .dma_axi_wlast          (tb_dma_axi_active ? 1'b1               : lsu_axi_wlast),
+
+    .dma_axi_bvalid         (dma_axi_bvalid),
+    .dma_axi_bready         (rdbk_dma_stim_armed ? 1'b1            : dma_axi_bready),
+    .dma_axi_bresp          (dma_axi_bresp),
+    .dma_axi_bid            (),
+
+    .dma_axi_arvalid        (tb_dma_axi_active ? tb_dma_axi_arvalid : dma_axi_arvalid),
+    .dma_axi_arready        (dma_axi_arready),
+    .dma_axi_arid           ('0),
+    .dma_axi_araddr         (tb_dma_axi_active ? tb_dma_addr        : lsu_axi_araddr),
+    .dma_axi_arsize         (tb_dma_axi_active ? 3'b010             : lsu_axi_arsize),
+    .dma_axi_arprot         (tb_dma_axi_active ? 3'b000             : lsu_axi_arprot),
+    .dma_axi_arlen          (tb_dma_axi_active ? '0                 : lsu_axi_arlen),
+    .dma_axi_arburst        (tb_dma_axi_active ? 2'b01              : lsu_axi_arburst),
+
+    .dma_axi_rvalid         (dma_axi_rvalid),
+    .dma_axi_rready         (rdbk_dma_stim_armed ? 1'b1            : dma_axi_rready),
+    .dma_axi_rid            (),
+    .dma_axi_rdata          (dma_axi_rdata),
+    .dma_axi_rresp          (dma_axi_rresp),
+    .dma_axi_rlast          (dma_axi_rlast),
+`else
     .dma_axi_awvalid        (dma_axi_awvalid),
     .dma_axi_awready        (dma_axi_awready),
     .dma_axi_awid           ('0),
@@ -2876,6 +3477,7 @@ veer_wrapper rvtop_wrapper (
     .dma_axi_rdata          (dma_axi_rdata),
     .dma_axi_rresp          (dma_axi_rresp),
     .dma_axi_rlast          (dma_axi_rlast),
+`endif
 `endif
     .timer_int              ( timer_int ),
     .extintsrc_req          ( extintsrc_req ),
@@ -2957,7 +3559,11 @@ veer_wrapper rvtop_wrapper (
     .iccm_ecc_double_error     (),
     .dccm_ecc_single_error     (),
     .dccm_ecc_double_error     (),
+`ifdef RV_DCCM_WR_READBACK
+    .dccm_write_readback_error (dccm_write_readback_error),
+`else
     .dccm_write_readback_error (),
+`endif
 
 `ifdef RV_LOCKSTEP_ENABLE
     .shadow_core_trace_rv_i_insn_ip      (shadow_core_trace_rv_i_insn_ip),
@@ -3080,7 +3686,11 @@ ahb_lsu_dma_bridge #(.pt(pt)) bridge (
     .s1_ahb_hwrite(dma_hwrite),
     .s1_ahb_hwdata(dma_hwdata),
     .s1_ahb_hrdata(dma_hrdata),
+`ifdef RV_DCCM_WR_READBACK
+    .s1_ahb_hready(rdbk_dma_stim_armed ? 1'b1 : dma_hready_out),
+`else
     .s1_ahb_hready(dma_hready_out),
+`endif
     .s1_ahb_hresp(dma_hresp)
 );
 `endif // RV_BUILD_AHB_LITE
@@ -3217,7 +3827,11 @@ axi_lsu_dma_bridge # (RV_MUX_BUS_TAG, RV_MUX_BUS_TAG) bridge(
     .s1_arvalid(dma_axi_arvalid),
     .s1_arready(dma_axi_arready),
 
+`ifdef RV_DCCM_WR_READBACK
+    .s1_rvalid(rdbk_dma_stim_armed ? 1'b0 : dma_axi_rvalid),
+`else
     .s1_rvalid(dma_axi_rvalid),
+`endif
     .s1_rresp(dma_axi_rresp),
     .s1_rdata(dma_axi_rdata),
     .s1_rlast(dma_axi_rlast),
@@ -3230,7 +3844,11 @@ axi_lsu_dma_bridge # (RV_MUX_BUS_TAG, RV_MUX_BUS_TAG) bridge(
     .s1_wready(dma_axi_wready),
 
     .s1_bresp(dma_axi_bresp),
+`ifdef RV_DCCM_WR_READBACK
+    .s1_bvalid(rdbk_dma_stim_armed ? 1'b0 : dma_axi_bvalid),
+`else
     .s1_bvalid(dma_axi_bvalid),
+`endif
     .s1_bready(dma_axi_bready)
 );
 
@@ -3284,6 +3902,9 @@ addresses:
  0xffff_fffc - DCCM end address to load
 */
 
+`ifndef VERILATOR
+init_dccm();
+`endif
 addr = 'hffff_fff8;
 saddr = {lmem.mem[addr+3],lmem.mem[addr+2],lmem.mem[addr+1],lmem.mem[addr]};
 if (saddr < `RV_DCCM_SADR || saddr > `RV_DCCM_EADR) return;
@@ -3383,6 +4004,25 @@ endcase // }
 `endif
 endtask
 
+task init_dccm;
+`ifdef RV_DCCM_ENABLE
+    `DRAM(0) = '{default:39'h0};
+    `DRAM(1) = '{default:39'h0};
+`ifdef RV_DCCM_NUM_BANKS_4
+    `DRAM(2) = '{default:39'h0};
+    `DRAM(3) = '{default:39'h0};
+`endif
+`ifdef RV_DCCM_NUM_BANKS_8
+    `DRAM(2) = '{default:39'h0};
+    `DRAM(3) = '{default:39'h0};
+    `DRAM(4) = '{default:39'h0};
+    `DRAM(5) = '{default:39'h0};
+    `DRAM(6) = '{default:39'h0};
+    `DRAM(7) = '{default:39'h0};
+`endif
+`endif
+endtask
+
 task init_iccm;
 `ifdef RV_ICCM_ENABLE
     `IRAM(0) = '{default:39'h0};
@@ -3456,6 +4096,24 @@ function int get_iccm_bank(input[31:0] addr,  output int bank_idx);
     return int'( addr[5:2]);
 `endif
 endfunction
+
+`ifdef RV_DCCM_WR_READBACK
+task write_dccm_word(input [31:0] addr, input [31:0] val);
+`ifdef RV_DCCM_ADDR_XOR
+    slam_dccm_ram(addr, {riscv_ecc32(val), val ^ {{(pt.DCCM_DATA_WIDTH-2*(pt.DCCM_BITS-2)){1'b0}}, addr[pt.DCCM_BITS-1:2], addr[pt.DCCM_BITS-1:2]}});
+`else
+    slam_dccm_ram(addr, val == 0 ? '0 : {riscv_ecc32(val), val});
+`endif
+endtask
+
+task write_dccm_word_single_ecc_err(input [31:0] addr, input [31:0] val);
+`ifdef RV_DCCM_ADDR_XOR
+    slam_dccm_ram(addr, {riscv_ecc32(val), (val ^ {{(pt.DCCM_DATA_WIDTH-2*(pt.DCCM_BITS-2)){1'b0}}, addr[pt.DCCM_BITS-1:2], addr[pt.DCCM_BITS-1:2]}) ^ 32'h1});
+`else
+    slam_dccm_ram(addr, {riscv_ecc32(val), val ^ 32'h1});
+`endif
+endtask
+`endif
 
 task dump_signature ();
     integer fp, i;
@@ -3546,18 +4204,29 @@ if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable
             end
         end
     end
+`ifdef RV_DCCM_WR_READBACK
+    wire [pt.DCCM_NUM_BANKS-1:0] dccm_wren_bank_masked = dccm_wr_skip_active ? '0 : el2_mem_export.dccm_wren_bank;
+`else
+    wire [pt.DCCM_NUM_BANKS-1:0] dccm_wren_bank_masked = el2_mem_export.dccm_wren_bank;
+`endif
+
     for (genvar i=0; i<pt.DCCM_NUM_BANKS; i++) begin: dccm_eff_signals
         // Single-port SRAM macros share ME (clken) for both read and write accesses.
         // Gating clken via access_fault disables all memory access (reads and writes) to the bank.
         assign dccm_clken_eff[i] = error_injection_mode.dccm_access_fault ? 1'b0 : el2_mem_export.dccm_clken[i];
-        assign dccm_wren_eff[i] = error_injection_mode.dccm_wren_fault ? 1'b0 : el2_mem_export.dccm_wren_bank[i];
+        assign dccm_wren_eff[i] = error_injection_mode.dccm_wren_fault ? 1'b0 : dccm_wren_bank_masked[i];
         assign dccm_addr_eff[i] = error_injection_mode.dccm_addr_fault ? (el2_mem_export.dccm_addr_bank[i] ^ 1'b1) : el2_mem_export.dccm_addr_bank[i];
     end
     for (genvar i=0; i<pt.DCCM_NUM_BANKS; i++) begin: dccm_loop
         // Only sanitize uninitialized SRAM 'X' bits when fault injection has been activated,
         // preserving standard 4-state X-propagation checks during normal operation.
         wire [38:0] dccm_bank_fdout_clean = x_sanitizer_en ? sanitize_x(dccm_bank_fdout[i]) : dccm_bank_fdout[i];
+`ifdef RV_DCCM_WR_READBACK
+        assign dccm_wr_fdata_bank[i][pt.DCCM_FDATA_WIDTH-1:0] = {el2_mem_export.dccm_wr_ecc_bank[i], el2_mem_export.dccm_wr_data_bank[i]} ^ dccm_wdata_bitflip[i] ^
+                                                                ((rdbk_ecc_snoop_flip_active && el2_mem_export.dccm_wren_bank[i]) ? 39'h1 : 39'h0);
+`else
         assign dccm_wr_fdata_bank[i][pt.DCCM_FDATA_WIDTH-1:0] = {el2_mem_export.dccm_wr_ecc_bank[i], el2_mem_export.dccm_wr_data_bank[i]} ^ dccm_wdata_bitflip[i];
+`endif
         assign el2_mem_export.dccm_bank_dout[i] = dccm_bank_fdout_clean[31:0];
         assign el2_mem_export.dccm_bank_ecc[i] = dccm_bank_fdout_clean[38:32];
 

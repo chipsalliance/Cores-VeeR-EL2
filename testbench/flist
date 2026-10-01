@@ -36,6 +36,7 @@ $RV_ROOT/design/tmr/el2_tmr_misc.sv
 $RV_ROOT/design/tmr/el2_tmr_pic.sv
 $RV_ROOT/design/tmr/el2_tmr_3way_fatal_check_mubi.sv
 $RV_ROOT/design/tmr/el2_tmr_recovery_fsm.sv
+$RV_ROOT/design/tmr/el2_tmr_boot_configuration.sv
 $RV_ROOT/design/el2_tmr_complex.sv
 $RV_ROOT/design/el2_veer_lockstep.sv
 $RV_ROOT/verification/block/dcls/el2_veer_lockstep_cov_if.sv

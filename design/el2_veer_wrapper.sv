@@ -440,6 +440,10 @@ import el2_pkg::*;
    output el2_mubi_pkg::el2_mubi_t tmr_core_fault_0,
    output el2_mubi_pkg::el2_mubi_t tmr_core_fault_1,
    output el2_mubi_pkg::el2_mubi_t tmr_core_fault_2,
+
+   input  el2_mubi_pkg::el2_mubi_t activate_core_0,
+   input  el2_mubi_pkg::el2_mubi_t activate_core_1,
+   input  el2_mubi_pkg::el2_mubi_t activate_core_2,
 `endif
 
    // external MPC halt/run interface

@@ -377,6 +377,11 @@ module el2_tmr_complex
     input  logic [31:0] dmi_reg_wdata,             // write data
     output logic [31:0] dmi_reg_rdata,
 
+    // Boot configuration
+    input  el2_mubi_pkg::el2_mubi_t activate_core_0,
+    input  el2_mubi_pkg::el2_mubi_t activate_core_1,
+    input  el2_mubi_pkg::el2_mubi_t activate_core_2,
+
     // ICCM/DCCM ECC status
     output logic                 iccm_ecc_single_error,
     output logic                 iccm_ecc_double_error,
@@ -912,6 +917,10 @@ module el2_tmr_complex
   logic        free_clk_int;
 
   //-------------------------------------------------------------------
+  logic tmr_mux_source_select_true[3];
+  logic tmr_mux_source_select_false[3];
+
+  //-------------------------------------------------------------------
 
   // TMR AXI fault signals
   el2_mubi_pkg::el2_mubi_t axi_fault_d[3];
@@ -1117,6 +1126,12 @@ module el2_tmr_complex
   el2_tmr_complex_clk el2_tmr_complex_clk_u(.*);
   el2_tmr_exec_ctrl el2_tmr_exec_ctrl_u (.*);
   el2_tmr_misc el2_tmr_misc_u (.*);
+  el2_tmr_boot_configuration el2_tmr_boot_configuration_u (
+    .activate_core({activate_core_0, activate_core_1, activate_core_2}),
+    .mux_select_true(tmr_mux_source_select_true),
+    .mux_select_false(tmr_mux_source_select_false),
+    .*
+  );
 
   logic sync_rst_l;
 

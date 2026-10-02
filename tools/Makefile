@@ -175,6 +175,7 @@ TBFILES = $(TBDIR)/tb_top_if.sv \
           $(TBDIR)/tb_top_pkg.sv \
           $(TBDIR)/$(TB_TOP).sv \
           $(TBDIR)/ahb_sif.sv \
+          $(TBDIR)/axi_sif.sv \
           $(TBDIR)/jtagdpi/jtagdpi.sv \
           $(TBDIR)/ahb_lite_2to1_mux.sv \
           $(TBDIR)/ahb_lsu_dma_bridge.sv \

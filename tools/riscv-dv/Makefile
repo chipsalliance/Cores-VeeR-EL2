@@ -58,6 +58,7 @@ HDL_FILES = $(WORK_DIR)/common_defines.vh \
             $(RV_ROOT)/testbench/tb_top_pkg.sv \
             $(RV_ROOT)/testbench/tb_top.sv \
             $(RV_ROOT)/testbench/ahb_sif.sv \
+            $(RV_ROOT)/testbench/axi_sif.sv \
             $(RV_ROOT)/design/include/el2_def.sv
 
 # Determine verilator version if possible. Set the flag accordingly. Since

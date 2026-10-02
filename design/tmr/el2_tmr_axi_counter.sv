@@ -34,6 +34,8 @@ module el2_tmr_axi_counter
   // Control and status
   input  el2_mubi_t clear_i,      // Reset for transaction counters
   output el2_mubi_t pending_o,    // Asserted when a transaction is pending
+  output el2_mubi_t aw_ahead_o,   // There's more AW than W beats pending
+  output el2_mubi_t w_ahead_o,    // There's more W than AW beats pending
 
   output el2_mubi_t ecc_error_o,  // ECC correctable error occurred
   output el2_mubi_t ecc_fatal_o   // ECC uncorrectable error occurred
@@ -122,6 +124,10 @@ module el2_tmr_axi_counter
   assign pending_o   = mubi_or3(mubi_from_bool(aw_count != '0),
                                 mubi_from_bool(w_count  != '0),
                                 mubi_from_bool(ar_count != '0));
+
+  // AW vs W count comparison
+  assign aw_ahead_o  = mubi_from_bool(aw_count > w_count);
+  assign w_ahead_o   = mubi_from_bool(aw_count < w_count);
 
   // Error signals
   assign ecc_error_o = mubi_or3(mubi_from_bool(aw_ecc_error),

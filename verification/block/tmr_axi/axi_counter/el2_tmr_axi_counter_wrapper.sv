@@ -102,6 +102,8 @@ module el2_tmr_axi_counter_wrapper
   // Control and status
   input  el2_mubi_t clear_i,      // Reset for transaction counters
   output el2_mubi_t pending_o,    // Asserted when a transaction is pending
+  output el2_mubi_t aw_ahead_o,   // There's more AW than W beats pending
+  output el2_mubi_t w_ahead_o,    // There's more W than AW beats pending
 
   output el2_mubi_t ecc_error_o,  // ECC correctable error occurred
   output el2_mubi_t ecc_fatal_o   // ECC uncorrectable error occurred

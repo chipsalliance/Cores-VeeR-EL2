@@ -166,6 +166,11 @@ module el2_tmr_axi_s # (
   // Inhibit (cutoff) input
   input  el2_mubi_pkg::el2_mubi_t  output_inhibit_i,
 
+  // Hold incoming AW, W and AR transfers
+  input  el2_mubi_pkg::el2_mubi_t  aw_hold_i,
+  input  el2_mubi_pkg::el2_mubi_t  w_hold_i,
+  input  el2_mubi_pkg::el2_mubi_t  ar_hold_i,
+
   // Outgoing AXI subordinate port
   input  logic                     s_axi_awvalid_i,
   output logic                     s_axi_awready_o,
@@ -230,9 +235,13 @@ module el2_tmr_axi_s # (
 
   // ......................................................
   // AXI AW channel
+  logic s_axi_awvalid;
   logic s_axi_awready;
 
-  rvogate #(.WIDTH($bits(s_axi_awready)))u_s_axi_awready_gate  (.*, .din(s_axi_awready), .dout(s_axi_awready_o));
+  rvogate #(.WIDTH($bits(s_axi_awvalid))) u_s_axi_awvalid_gate
+    (.*, .inh(inh | mubi_check_true(aw_hold_i)), .din(s_axi_awvalid_i), .dout(s_axi_awvalid));
+  rvogate #(.WIDTH($bits(s_axi_awready))) u_s_axi_awready_gate
+    (.*, .inh(inh | mubi_check_true(aw_hold_i)), .din(s_axi_awready),   .dout(s_axi_awready_o));
 
   el2_mubi_t m_axi_aw_a_fault;
   el2_mubi_t m_axi_aw_b_fault;
@@ -298,7 +307,7 @@ module el2_tmr_axi_s # (
     .b_m_axi_fault_clr_i (b_m_axi_fault_clr_i),
     .c_m_axi_fault_clr_i (c_m_axi_fault_clr_i),
 
-    .s_axi_axvalid_i     (s_axi_awvalid_i),
+    .s_axi_axvalid_i     (s_axi_awvalid),
     .s_axi_axready_o     (s_axi_awready),
     .s_axi_axid_i        (s_axi_awid_i),
     .s_axi_axaddr_i      (s_axi_awaddr_i),
@@ -314,9 +323,13 @@ module el2_tmr_axi_s # (
 
   // ......................................................
   // AXI W channel
+  logic s_axi_wvalid;
   logic s_axi_wready;
 
-  rvogate #(.WIDTH($bits(s_axi_wready))) u_s_axi_wready_gate (.*, .din(s_axi_wready), .dout(s_axi_wready_o));
+  rvogate #(.WIDTH($bits(s_axi_wvalid))) u_s_axi_wvalid_gate
+    (.*, .inh(inh | mubi_check_true(w_hold_i)), .din(s_axi_wvalid_i), .dout(s_axi_wvalid));
+  rvogate #(.WIDTH($bits(s_axi_wready))) u_s_axi_wready_gate
+    (.*, .inh(inh | mubi_check_true(w_hold_i)), .din(s_axi_wready),   .dout(s_axi_wready_o));
 
   el2_mubi_t m_axi_w_a_fault;
   el2_mubi_t m_axi_w_b_fault;
@@ -360,7 +373,7 @@ module el2_tmr_axi_s # (
     .b_m_axi_fault_clr_i (b_m_axi_fault_clr_i),
     .c_m_axi_fault_clr_i (c_m_axi_fault_clr_i),
 
-    .s_axi_wvalid_i      (s_axi_wvalid_i),
+    .s_axi_wvalid_i      (s_axi_wvalid),
     .s_axi_wready_o      (s_axi_wready),
     .s_axi_wdata_i       (s_axi_wdata_i),
     .s_axi_wstrb_i       (s_axi_wstrb_i),
@@ -424,9 +437,13 @@ module el2_tmr_axi_s # (
 
   // ......................................................
   // AXI AR channel
+  logic s_axi_arvalid;
   logic s_axi_arready;
 
-  rvogate #(.WIDTH($bits(s_axi_arready))) u_s_axi_arready_gate (.*, .din(s_axi_arready), .dout(s_axi_arready_o));
+  rvogate #(.WIDTH($bits(s_axi_arvalid))) u_s_axi_arvalid_gate
+    (.*, .inh(inh | mubi_check_true(ar_hold_i)), .din(s_axi_arvalid_i), .dout(s_axi_arvalid));
+  rvogate #(.WIDTH($bits(s_axi_arready))) u_s_axi_arready_gate
+    (.*, .inh(inh | mubi_check_true(ar_hold_i)), .din(s_axi_arready),   .dout(s_axi_arready_o));
 
   el2_mubi_t m_axi_ar_a_fault;
   el2_mubi_t m_axi_ar_b_fault;
@@ -492,7 +509,7 @@ module el2_tmr_axi_s # (
     .b_m_axi_fault_clr_i (b_m_axi_fault_clr_i),
     .c_m_axi_fault_clr_i (c_m_axi_fault_clr_i),
 
-    .s_axi_axvalid_i     (s_axi_arvalid_i),
+    .s_axi_axvalid_i     (s_axi_arvalid),
     .s_axi_axready_o     (s_axi_arready),
     .s_axi_axid_i        (s_axi_arid_i),
     .s_axi_axaddr_i      (s_axi_araddr_i),

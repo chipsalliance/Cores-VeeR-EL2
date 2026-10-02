@@ -913,13 +913,14 @@ module el2_tmr_complex
 
   //-------------------------------------------------------------------
 
-  el2_mubi_pkg::el2_mubi_t axi_pending;
-
   // TMR AXI fault signals
   el2_mubi_pkg::el2_mubi_t axi_fault_d[3];
   el2_mubi_pkg::el2_mubi_t axi_fault_q[3];
   el2_mubi_pkg::el2_mubi_t axi_fault_clr[3];
-  el2_mubi_pkg::el2_mubi_t axi_count_fatal;
+
+  el2_mubi_pkg::el2_mubi_t dma_axi_inhibit;
+  el2_mubi_pkg::el2_mubi_t dma_axi_pending;
+  el2_mubi_pkg::el2_mubi_t dma_axi_count_fatal;
 
   // TMR ICCM fault signals
   el2_mubi_pkg::el2_mubi_t iccm_fault_d[3];
@@ -1000,7 +1001,7 @@ module el2_tmr_complex
     assign tmr_fault_q[i]  = mubi_or3(
       mubi_or3(ic_fault_q[i],   dmi_fault_q[i],  misc_fault_q[i]),
       mubi_or3(axi_fault_q[i],  iccm_fault_q[i], exec_fault_q[i]),
-      mubi_or3(dccm_fault_q[i], pic_fault_q[i],  axi_count_fatal)
+      mubi_or3(dccm_fault_q[i], pic_fault_q[i],  dma_axi_count_fatal)
     );
 
     // Store TMR fault
@@ -1035,6 +1036,14 @@ module el2_tmr_complex
 
   // Individual core fault status
   assign tmr_core_fault = tmr_fault_q;
+
+  //-------------------------------------------------------------------
+  // AXI incoming request transaction inhibit
+
+  el2_mubi_pkg::el2_mubi_t fsm_external_flag;
+
+  assign dma_axi_inhibit   = tmr_fault;
+  assign fsm_external_flag = mubi_and(tmr_fault, mubi_not(dma_axi_pending));
 
   //-------------------------------------------------------------------
 
@@ -1114,7 +1123,7 @@ module el2_tmr_complex
   el2_tmr_recovery_fsm el2_tmr_recovery_fsm_u (
       .*,
       .faulty_core(tmr_fault_q),
-      .external_flag(tmr_fault),
+      .external_flag(fsm_external_flag),
       .clear_external_flag(tmr_fault_clr),
       .sync_rst_l(sync_rst_l),
       .gate_outputs(tmr_output_inhibit),

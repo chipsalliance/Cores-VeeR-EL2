@@ -16,7 +16,7 @@
 proc compare {x y} {
     puts "'$x' vs. '$y'"
 
-    if {[llength $y] != [llength $y]} {
+    if {[llength $x] != [llength $y]} {
         puts "length mismatch!"
         return -1
     }

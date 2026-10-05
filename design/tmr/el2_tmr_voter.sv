@@ -57,7 +57,7 @@ module el2_tmr_voter # (
     end
 
     // Gate with enable
-    assign fault[i] = mubi_or(neq_any, mubi_not(en[i]));
+    assign fault[i] = mubi_and(neq_any, en[i]);
   end  
 
   // Map outputs

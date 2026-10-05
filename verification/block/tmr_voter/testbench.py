@@ -29,9 +29,9 @@ def predict_dut(in_a, in_b, in_c, en_a, en_b, en_c):
     pred_out = (in_a & in_b) | (in_a & in_c) | (in_b & in_c)
 
     # Faults
-    pred_fault_a = (in_a != pred_out) or en_a == MuBiFalse
-    pred_fault_b = (in_b != pred_out) or en_b == MuBiFalse
-    pred_fault_c = (in_c != pred_out) or en_c == MuBiFalse
+    pred_fault_a = (in_a != pred_out) and en_a == MuBiTrue
+    pred_fault_b = (in_b != pred_out) and en_b == MuBiTrue
+    pred_fault_c = (in_c != pred_out) and en_c == MuBiTrue
 
     # Critical
     pred_crit = sum([pred_fault_a, pred_fault_b, pred_fault_c]) >= 2

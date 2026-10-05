@@ -974,6 +974,10 @@ module el2_tmr_complex
   el2_mubi_pkg::el2_mubi_t tmr_fault_q[3];
   el2_mubi_pkg::el2_mubi_t tmr_fault_clr;
 
+  // Set tmr_mode if all 3 cores are active
+  el2_mubi_pkg::el2_mubi_t tmr_mode;
+  assign tmr_mode = mubi_and3(core_active[0], core_active[1], core_active[2]);
+
   // TODO: Potentially move the following to a new "el2_tmr_fault" module
   generate for(genvar i=0; i<3; i=i+1) begin : fault
     el2_mubi_pkg::el2_mubi_t tmr_fault_d;
@@ -1028,11 +1032,19 @@ module el2_tmr_complex
 
   //-------------------------------------------------------------------
 
+  // Individual core fault status.
+  // In case when there's less than 3 cores active the fault source cannot be
+  // determined. Therefore mark all enabled cores as faulty
+  generate for(genvar i=0; i<3; i=i+1) begin : fault_final
+    assign tmr_core_fault[i] =
+      mubi_check_true(tmr_mode) ? tmr_fault_q[i] : mubi_and(tmr_fault, core_active[i]);
+  end endgenerate
+
   // Global, unrecoverable fault latch register
   el2_mubi_t tmr_fatal_d;
   el2_mubi_t tmr_fatal_next;
 
-  rvtmr #($bits(el2_mubi_t)) tmr_fatal_voter (.I(tmr_fault_q), .O(tmr_fatal_d));
+  rvtmr #($bits(el2_mubi_t)) tmr_fatal_voter (.I(tmr_core_fault), .O(tmr_fatal_d));
   assign tmr_fatal_next = mubi_or3(tmr_fatal, tmr_fatal_d, recovery_fault);
   rvmubidff tmr_fatal_dff (.*, .din(tmr_fatal_next), .dout(tmr_fatal));
 
@@ -1040,9 +1052,6 @@ module el2_tmr_complex
   el2_mubi_t tmr_recovery_fault_next;
   assign tmr_recovery_fault_next = mubi_or(tmr_recovery_fault, recovery_fault);
   rvmubidff tmr_recovery_fault_dff (.*, .din(tmr_recovery_fault_next), .dout(tmr_recovery_fault));
-
-  // Individual core fault status
-  assign tmr_core_fault = tmr_fault_q;
 
   //-------------------------------------------------------------------
   // AXI incoming request transaction inhibit
@@ -1134,7 +1143,7 @@ module el2_tmr_complex
 
   el2_tmr_recovery_fsm el2_tmr_recovery_fsm_u (
       .*,
-      .faulty_core(tmr_fault_q),
+      .faulty_core(tmr_core_fault),
       .external_flag(fsm_external_flag),
       .clear_external_flag(tmr_fault_clr),
       .sync_rst_l(sync_rst_l),

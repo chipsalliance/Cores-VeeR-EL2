@@ -966,14 +966,13 @@ module el2_tmr_complex
 
   //-------------------------------------------------------------------
   // Global TMR fault state and control
+  el2_mubi_pkg::el2_mubi_t core_active[3];
+
   el2_mubi_pkg::el2_mubi_t tmr_fault;
   el2_mubi_pkg::el2_mubi_t recovery_fault;
 
   el2_mubi_pkg::el2_mubi_t tmr_fault_q[3];
   el2_mubi_pkg::el2_mubi_t tmr_fault_clr;
-
-  // TODO: Use the signal
-  el2_mubi_pkg::el2_mubi_t core_active[3];
 
   // TODO: Potentially move the following to a new "el2_tmr_fault" module
   generate for(genvar i=0; i<3; i=i+1) begin : fault

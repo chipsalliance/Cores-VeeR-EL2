@@ -18,6 +18,9 @@ module el2_tmr_dccm
     // DCCM TMR
     el2_mem_if.veer_dccm_sink dccm_export_veer[3],
 
+    // Core active
+    input  el2_mubi_pkg::el2_mubi_t core_active[3],
+
     // Fault inputs
     input  el2_mubi_pkg::el2_mubi_t dccm_fault_d[3],
     // Fault outputs
@@ -228,7 +231,7 @@ module el2_tmr_dccm
       .clr_i    (dccm_fault_clr[i])
     );
 
-    assign enable[i] = mubi_not(dccm_fault_q[i]);
+    assign enable[i] = mubi_and(mubi_not(dccm_fault_q[i]), core_active[i]);
   end
 
   // ......................................................

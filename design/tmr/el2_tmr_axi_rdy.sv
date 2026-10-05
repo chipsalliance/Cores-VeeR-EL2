@@ -14,6 +14,9 @@ module el2_tmr_axi_rdy (
   input  logic  ready_b_i,
   input  logic  ready_c_i,
 
+  // Core active
+  input  el2_mubi_pkg::el2_mubi_t  core_active_i[3],
+
   // Channel fault output
   output el2_mubi_pkg::el2_mubi_t  fault_a_o,
   output el2_mubi_pkg::el2_mubi_t  fault_b_o,
@@ -96,9 +99,9 @@ module el2_tmr_axi_rdy (
   assign fault_c_o = fault_q[2];
 
   // Voter input enable
-  assign enable_a = mubi_not(fault_q[0]);
-  assign enable_b = mubi_not(fault_q[1]);
-  assign enable_c = mubi_not(fault_q[2]);
+  assign enable_a = mubi_and(mubi_not(fault_q[0]), core_active_i[0]);
+  assign enable_b = mubi_and(mubi_not(fault_q[1]), core_active_i[1]);
+  assign enable_c = mubi_and(mubi_not(fault_q[2]), core_active_i[2]);
 
 endmodule
 

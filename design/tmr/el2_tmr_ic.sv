@@ -19,6 +19,9 @@ module el2_tmr_ic
     // I-Cache TMR
     el2_mem_if.veer_icache_sink icache_export_veer[3],
 
+    // Core active
+    input  el2_mubi_pkg::el2_mubi_t core_active[3],
+
     // Fault inputs
     input  el2_mubi_pkg::el2_mubi_t ic_fault_d[3],
     // Fault outputs
@@ -407,7 +410,7 @@ module el2_tmr_ic
       .clr_i    (ic_fault_clr[i])
     );
 
-    assign enable[i] = mubi_not(ic_fault_q[i]);
+    assign enable[i] = mubi_and(mubi_not(ic_fault_q[i]), core_active[i]);
   end : gen_ic_fault
 
   // ......................................................

@@ -427,6 +427,9 @@ module el2_tmr_axi
     input  logic [1:0]                dma_axi_rresp_veer[3],
     input  logic                      dma_axi_rlast_veer[3],
 
+    // Core active
+    input  el2_mubi_pkg::el2_mubi_t core_active[3],
+
     // Fault inputs
     input  el2_mubi_pkg::el2_mubi_t axi_fault_d[3],
     // Fault outputs
@@ -676,6 +679,8 @@ module el2_tmr_axi
     .m_axi_rlast_i       (lsu_axi_rlast_int),
 
 
+    .core_active_i       (core_active),
+
     .a_s_axi_fault_o     (lsu_axi_fault_q[0]),
     .b_s_axi_fault_o     (lsu_axi_fault_q[1]),
     .c_s_axi_fault_o     (lsu_axi_fault_q[2]),
@@ -881,6 +886,8 @@ module el2_tmr_axi
     .m_axi_rlast_i       (ifu_axi_rlast_int),
 
 
+    .core_active_i       (core_active),
+
     .a_s_axi_fault_o     (ifu_axi_fault_q[0]),
     .b_s_axi_fault_o     (ifu_axi_fault_q[1]),
     .c_s_axi_fault_o     (ifu_axi_fault_q[2]),
@@ -1085,6 +1092,8 @@ module el2_tmr_axi
     .m_axi_rresp_i       (sb_axi_rresp_int),
     .m_axi_rlast_i       (sb_axi_rlast_int),
 
+
+    .core_active_i       (core_active),
 
     .a_s_axi_fault_o     (sb_axi_fault_q[0]),
     .b_s_axi_fault_o     (sb_axi_fault_q[1]),
@@ -1293,6 +1302,8 @@ module el2_tmr_axi
     .s_axi_rresp_o       (dma_axi_rresp_int),
     .s_axi_rlast_o       (dma_axi_rlast_int),
 
+
+    .core_active_i       (core_active),
 
     .a_m_axi_fault_o     (dma_axi_fault_q[0]),
     .b_m_axi_fault_o     (dma_axi_fault_q[1]),

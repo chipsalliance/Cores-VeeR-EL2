@@ -34,6 +34,9 @@ module el2_tmr_axi_s_ch_r # (
   input  logic [1:0]               c_m_axi_rresp_i,
   input  logic                     c_m_axi_rlast_i,
 
+  // Core active
+  input  el2_mubi_pkg::el2_mubi_t  core_active_i[3],
+
   // Channel fault output
   output el2_mubi_pkg::el2_mubi_t  a_m_axi_fault_o,
   output el2_mubi_pkg::el2_mubi_t  b_m_axi_fault_o,
@@ -242,9 +245,9 @@ module el2_tmr_axi_s_ch_r # (
   assign c_m_axi_fault_o = fault_q[2];
 
   // Voter input enable
-  assign a_m_axi_enable = mubi_not(fault_q[0]);
-  assign b_m_axi_enable = mubi_not(fault_q[1]);
-  assign c_m_axi_enable = mubi_not(fault_q[2]);
+  assign a_m_axi_enable = mubi_and(mubi_not(fault_q[0]), core_active_i[0]);
+  assign b_m_axi_enable = mubi_and(mubi_not(fault_q[1]), core_active_i[1]);
+  assign c_m_axi_enable = mubi_and(mubi_not(fault_q[2]), core_active_i[2]);
 
 endmodule
 `endif

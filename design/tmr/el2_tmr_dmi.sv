@@ -23,6 +23,9 @@ module el2_tmr_dmi
     output logic [31:0] dmi_reg_wdata_veer[3],
     input  logic [31:0] dmi_reg_rdata_veer[3],
 
+    // Core active
+    input  el2_mubi_pkg::el2_mubi_t core_active[3],
+
     // Fault inputs
     input  el2_mubi_pkg::el2_mubi_t dmi_fault_d[3],
     // Fault outputs
@@ -93,7 +96,7 @@ module el2_tmr_dmi
       .clr_i    (dmi_fault_clr[i])
     );
 
-    assign enable[i] = mubi_not(dmi_fault_q[i]);
+    assign enable[i] = mubi_and(mubi_not(dmi_fault_q[i]), core_active[i]);
 
   end
 

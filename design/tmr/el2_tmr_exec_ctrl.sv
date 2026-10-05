@@ -40,6 +40,9 @@ module el2_tmr_exec_ctrl
 
     input  logic debug_brkpt_status_veer[3],
 
+    // Core active
+    input  el2_mubi_pkg::el2_mubi_t core_active[3],
+
     // Fault inputs
     input  el2_mubi_pkg::el2_mubi_t exec_fault_d[3],
     // Fault outputs
@@ -126,7 +129,7 @@ module el2_tmr_exec_ctrl
       .clr_i    (exec_fault_clr[i])
     );
 
-    assign enable[i] = mubi_not(exec_fault_q[i]);
+    assign enable[i] = mubi_and(mubi_not(exec_fault_q[i]), core_active[i]);
 
   end
 

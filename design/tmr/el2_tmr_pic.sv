@@ -42,6 +42,9 @@ module el2_tmr_pic
     input  logic [ 3:0] meicurpl_veer[3],
     input  logic [ 3:0] meipt_veer[3],
 
+    // Core active
+    input  el2_mubi_pkg::el2_mubi_t core_active[3],
+
     // Fault inputs
     input  el2_mubi_pkg::el2_mubi_t pic_fault_d[3],
     // Fault outputs
@@ -239,7 +242,7 @@ module el2_tmr_pic
       .clr_i    (pic_fault_clr[i])
     );
 
-    assign enable[i] = mubi_not(pic_fault_q[i]);
+    assign enable[i] = mubi_and(mubi_not(pic_fault_q[i]), core_active[i]);
 
   end
 

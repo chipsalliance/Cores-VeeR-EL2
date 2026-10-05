@@ -32,6 +32,9 @@ module el2_tmr_axi_s_ch_w # (
   output logic [DataWidth/8-1:0]   c_m_axi_wstrb_o,
   output logic                     c_m_axi_wlast_o,
 
+  // Core active
+  input  el2_mubi_pkg::el2_mubi_t  core_active_i[3],
+
   // Channel fault output
   output el2_mubi_pkg::el2_mubi_t  a_m_axi_fault_o,
   output el2_mubi_pkg::el2_mubi_t  b_m_axi_fault_o,
@@ -63,6 +66,8 @@ module el2_tmr_axi_s_ch_w # (
     .ready_a_i     (a_m_axi_wready_i),
     .ready_b_i     (b_m_axi_wready_i),
     .ready_c_i     (c_m_axi_wready_i),
+
+    .core_active_i (core_active_i),
 
     .fault_a_o     (a_m_axi_fault_o),
     .fault_b_o     (b_m_axi_fault_o),

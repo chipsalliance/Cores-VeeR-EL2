@@ -60,6 +60,9 @@ module el2_tmr_misc
     input  logic core_rst_l_veer[3],
     input  logic dec_tlu_force_halt_veer[3],
 
+    // Core active
+    input  el2_mubi_pkg::el2_mubi_t core_active[3],
+
     // Fault inputs
     input  el2_mubi_pkg::el2_mubi_t misc_fault_d[3],
     // Fault outputs
@@ -355,7 +358,7 @@ module el2_tmr_misc
       .clr_i    (misc_fault_clr[i])
     );
 
-    assign enable[i] = mubi_not(misc_fault_q[i]);
+    assign enable[i] = mubi_and(mubi_not(misc_fault_q[i]), core_active[i]);
 
   end
 

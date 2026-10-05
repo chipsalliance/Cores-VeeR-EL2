@@ -18,6 +18,9 @@ module el2_tmr_iccm
     // ICCM TMR
     el2_mem_if.veer_iccm_sink iccm_export_veer[3],
 
+    // Core active
+    input  el2_mubi_pkg::el2_mubi_t core_active[3],
+
     // Fault inputs
     input  el2_mubi_pkg::el2_mubi_t iccm_fault_d[3],
     // Fault outputs
@@ -228,7 +231,7 @@ module el2_tmr_iccm
       .clr_i    (iccm_fault_clr[i])
     );
 
-    assign enable[i] = mubi_not(iccm_fault_q[i]);
+    assign enable[i] = mubi_and(mubi_not(iccm_fault_q[i]), core_active[i]);
   end
 
   // ......................................................

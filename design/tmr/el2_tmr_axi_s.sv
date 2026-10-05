@@ -148,6 +148,9 @@ module el2_tmr_axi_s # (
   input  logic [1:0]               c_m_axi_rresp_i,
   input  logic                     c_m_axi_rlast_i,
 
+  // Core active
+  input  el2_mubi_pkg::el2_mubi_t  core_active_i[3],
+
   // Channel fault output
   output el2_mubi_pkg::el2_mubi_t  a_m_axi_fault_o,
   output el2_mubi_pkg::el2_mubi_t  b_m_axi_fault_o,
@@ -295,6 +298,8 @@ module el2_tmr_axi_s # (
     .c_m_axi_axprot_o    (c_m_axi_awprot_o),
     .c_m_axi_axqos_o     (c_m_axi_awqos_o),
 
+    .core_active_i       (core_active_i),
+
     .a_m_axi_fault_o     (m_axi_aw_a_fault),
     .b_m_axi_fault_o     (m_axi_aw_b_fault),
     .c_m_axi_fault_o     (m_axi_aw_c_fault),
@@ -361,6 +366,8 @@ module el2_tmr_axi_s # (
     .c_m_axi_wstrb_o     (c_m_axi_wstrb_o),
     .c_m_axi_wlast_o     (c_m_axi_wlast_o),
 
+    .core_active_i       (core_active_i),
+
     .a_m_axi_fault_o     (m_axi_w_a_fault),
     .b_m_axi_fault_o     (m_axi_w_b_fault),
     .c_m_axi_fault_o     (m_axi_w_c_fault),
@@ -416,6 +423,8 @@ module el2_tmr_axi_s # (
     .c_m_axi_bready_o    (c_m_axi_bready_o),
     .c_m_axi_bresp_i     (c_m_axi_bresp_i),
     .c_m_axi_bid_i       (c_m_axi_bid_i),
+
+    .core_active_i       (core_active_i),
 
     .a_m_axi_fault_o     (b_a_m_axi_fault),
     .b_m_axi_fault_o     (b_m_axi_b_fault),
@@ -497,6 +506,8 @@ module el2_tmr_axi_s # (
     .c_m_axi_axprot_o    (c_m_axi_arprot_o),
     .c_m_axi_axqos_o     (c_m_axi_arqos_o),
 
+    .core_active_i       (core_active_i),
+
     .a_m_axi_fault_o     (m_axi_ar_a_fault),
     .b_m_axi_fault_o     (m_axi_ar_b_fault),
     .c_m_axi_fault_o     (m_axi_ar_c_fault),
@@ -570,6 +581,8 @@ module el2_tmr_axi_s # (
     .c_m_axi_rdata_i     (c_m_axi_rdata_i),
     .c_m_axi_rresp_i     (c_m_axi_rresp_i),
     .c_m_axi_rlast_i     (c_m_axi_rlast_i),
+
+    .core_active_i       (core_active_i),
 
     .a_m_axi_fault_o     (m_axi_r_a_fault),
     .b_m_axi_fault_o     (m_axi_r_b_fault),

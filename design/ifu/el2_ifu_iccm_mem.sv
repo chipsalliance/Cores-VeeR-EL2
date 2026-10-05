@@ -186,12 +186,16 @@ import el2_pkg::*;
 
    // We will have to update the Redundant copies in addition to the memory on subsequent writes to this memory location.
    // The data gets updated on : 1) correction cycle, 2) Future writes - this could be W writes from DMA ( match up till addr[2]) or DW writes ( match till address[3])
-   // The data to pick also depends on the current address[2], size and the addr[2] stored in the address field of the redundant flop. Correction cycle is always W write and the data is splat on both legs, so choosing lower Word
+   // The data to pick also depends on the current address[2], size and the addr[2] stored in the address field of the redundant flop.
+   // Correction cycle is always W write and the data is splat on both legs, but each leg is folded with its own word address (ICCM address-XOR),
+   // so the correction cycle needs to choose the word based on the W address.
 
-    assign redundant_data0_en      = ((iccm_rw_addr[pt.ICCM_BITS-1:3] == redundant_address[0][pt.ICCM_BITS-1:3]) & ((iccm_rw_addr[2] == redundant_address[0][2]) | (iccm_wr_size[1:0] == 2'b11)) & redundant_valid[0] & iccm_wren) |
+    assign redundant_data0_en     = ((iccm_rw_addr[pt.ICCM_BITS-1:3] == redundant_address[0][pt.ICCM_BITS-1:3]) & ((iccm_rw_addr[2] == redundant_address[0][2]) | (iccm_wr_size[1:0] == 2'b11)) & redundant_valid[0] & iccm_wren) |
                                       (~redundant_lru & iccm_buf_correct_ecc);
 
-    assign redundant_data0_in[38:0] = (((iccm_rw_addr[2] == redundant_address[0][2]) & iccm_rw_addr[2]) | (redundant_address[0][2] & (iccm_wr_size[1:0] == 2'b11))) ? iccm_wr_data[77:39]  : iccm_wr_data[38:0];
+    assign redundant_data0_in[38:0] = (((iccm_rw_addr[2] == redundant_address[0][2]) & iccm_rw_addr[2]) |
+                                       (redundant_address[0][2] & (iccm_wr_size[1:0] == 2'b11)) |
+                                       (iccm_buf_correct_ecc & iccm_rw_addr[2])) ? iccm_wr_data[77:39]  : iccm_wr_data[38:0];
 
     rvdffs #(39) r0_data  (.*,                                 // Redundant Row 1 data
                    .clk(active_clk),
@@ -202,7 +206,9 @@ import el2_pkg::*;
    assign redundant_data1_en      =  ((iccm_rw_addr[pt.ICCM_BITS-1:3] == redundant_address[1][pt.ICCM_BITS-1:3]) & ((iccm_rw_addr[2] == redundant_address[1][2]) | (iccm_wr_size[1:0] == 2'b11)) & redundant_valid[1] & iccm_wren) |
                                      (redundant_lru & iccm_buf_correct_ecc);
 
-   assign redundant_data1_in[38:0] = (((iccm_rw_addr[2] == redundant_address[1][2]) & iccm_rw_addr[2]) | (redundant_address[1][2] & (iccm_wr_size[1:0] == 2'b11))) ? iccm_wr_data[77:39]  : iccm_wr_data[38:0];
+   assign redundant_data1_in[38:0] = (((iccm_rw_addr[2] == redundant_address[1][2]) & iccm_rw_addr[2]) |
+                                      (redundant_address[1][2] & (iccm_wr_size[1:0] == 2'b11)) |
+                                      (iccm_buf_correct_ecc & iccm_rw_addr[2])) ? iccm_wr_data[77:39]  : iccm_wr_data[38:0];
 
     rvdffs #(39) r1_data  (.*,                                  // Redundant Row 1 data
                    .clk(active_clk),

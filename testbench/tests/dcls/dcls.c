@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <defines.h>
 
+#include "dcls_common.h"
+
 // ============================================================================
 
 #define read_csr(csr) ({ \
@@ -89,26 +91,11 @@ int main () {
         old_boot_count = boot_count;
         boot_count++;
 
-        // Skip some signals, as modifying them breaks code execution on main core
-        // which is needed for the test to work
-        // This should be handled in the sperate tests
-        // TODO: Add these tests
-        if (old_boot_count == (0*2) ||
-            old_boot_count == (2*2) || old_boot_count == (3*2) || old_boot_count == (6*2) ||
-            old_boot_count == (9*2) || old_boot_count == (10*2) || old_boot_count == (13*2) ||
-            old_boot_count == (18*2) || old_boot_count == (19*2) || old_boot_count == (28*2) ||
-            (old_boot_count == (33*2) && (old_boot_count % 2 == 0)) ||  //skip VEER side Unconditional forces to prevent breakage in code exectuion
-#if (SDVT_AHB == 0)
-      old_boot_count == (52*2) || old_boot_count == (63*2) || old_boot_count == (65*2) ||
-      old_boot_count == (66*2) || old_boot_count == (67*2) || 
-	    (old_boot_count >= (116*2) && old_boot_count <= (127*2)) ||  //skip Read signal channel for lsu_axi
-	    (old_boot_count >= (100*2) && old_boot_count <= (194*2) && (old_boot_count % 2 == 0)) //skip VEER side axi channels to prevent breakage in code exectuion
-#else
-      old_boot_count == (48*2) || old_boot_count == (50*2) || old_boot_count == (66*2) ||
-	    (old_boot_count >= (67*2) && old_boot_count <= (89*2) && (old_boot_count % 2 == 0)) //skip VEER side ahb channels to prevent breakage in code exectuion
-#endif
-            )
+        // Skip Main Core (`VEER`) signals that break code execution in `.text`
+        // or corrupt the DCCM stack; these are verified in `dcls_skipped_signals`.
+        if (is_skipped_in_dcls(old_boot_count)) {
             continue;
+        }
 
         printf("Injecting error into signal of ID %0d\n", old_boot_count);
         // Inject error

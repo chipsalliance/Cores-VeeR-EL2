@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       tests: ${{ steps.select.outputs.tests }}
+      dcls_extended_tests: ${{ steps.select-dcls-extended.outputs.tests }}
       custom_tests: ${{ steps.select-custom.outputs.tests }}
       mubi_configs: ${{ steps.select-mubi.outputs.configs }}
       icache_ecc_tests: ${{ steps.select-icache-ecc.outputs.tests }}
@@ -31,12 +32,18 @@ jobs:
             '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}' 4 \
             'hello_world,hello_world_dccm,dcls,dcls_debug,dcls_error_ctrl,dhry,ecc,csr_misa,csr_access,csr_mstatus,csr_mseccfg,perf_counters,icache,bitmanip' \
             'csr_access')" | tee -a $GITHUB_OUTPUT
+      - name: Select DCLS extended tests
+        id: select-dcls-extended
+        run: |
+          echo "tests=$(python3 .github/scripts/select_pr_tests.py \
+            '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}-dcls-ext' 4 \
+            'dcls_skipped_signals')" | tee -a $GITHUB_OUTPUT
       - name: Select custom tests
         id: select-custom
         run: |
           echo "tests=$(python3 .github/scripts/select_pr_tests.py \
             '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}-custom' 4 \
-            'hello_world,hello_world_dccm,dcls,dcls_debug,dcls_error_ctrl,dcls_ecc_asymmetric,dcls_internal_state,ecc_threshold,dhry,ecc,csr_misa,csr_access,csr_mstatus,csr_mseccfg,perf_counters,icache,bitmanip' \
+            'hello_world,hello_world_dccm,dcls,dcls_skipped_signals,dcls_debug,dcls_error_ctrl,dcls_ecc_asymmetric,dcls_internal_state,ecc_threshold,dhry,ecc,csr_misa,csr_access,csr_mstatus,csr_mseccfg,perf_counters,icache,bitmanip' \
             'csr_access')" | tee -a $GITHUB_OUTPUT
       - name: Select ICache ECC tests
         id: select-icache-ecc
@@ -148,6 +155,68 @@ jobs:
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
           echo "FULL_NAME=dcls-${{ matrix.bus }}-${{ matrix.test }}-${{ matrix.priv == 0 && 'm' || 'mu' }}-delay${{ matrix.delay }}" >> $GITHUB_ENV
+
+      - name: Run tests
+        run: |
+          export RV_ROOT=`pwd`
+          export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+
+      - name: Prepare coverage data
+        run: |
+          source .venv/bin/activate
+          mkdir -p results
+          .github/scripts/convert_dat.sh ${TEST_PATH}/coverage.dat results/coverage_${FULL_NAME}
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression_tests_coverage_data_dcls_${{ env.FULL_NAME }}_${{ matrix.coverage }}
+          path: results/*.info
+
+  regression-tests-dcls-extended:
+    name: Regression tests (DCLS extended)
+    needs: [generate-matrix]
+    runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:20260923
+    strategy:
+      matrix:
+        bus: ["axi", "ahb"]
+        test: ${{ fromJSON(needs.generate-matrix.outputs.dcls_extended_tests) }}
+        coverage: ["all"]
+        priv: ["0", "1"]
+        delay: ["0", "1", "2", "3", "4"]
+        tb_extra_args: [""]
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/regression/.cache/"
+      DCLS_ENABLE: "1"
+      DCLS_DELAY: ${{ matrix.delay }}
+
+    steps:
+      - name: Setup repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+          pip install -r .github/scripts/requirements-coverage.txt
+          echo "PATH=$PATH" >> $GITHUB_ENV
+
+      - name: Setup environment
+        run: |
+          RV_ROOT=`pwd`
+          echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
+          PYTHONUNBUFFERED=1
+          echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
+          TEST_PATH=$RV_ROOT/test_results
+          echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+          echo "FULL_NAME=dcls-extended-${{ matrix.bus }}-${{ matrix.test }}-${{ matrix.priv == 0 && 'm' || 'mu' }}-delay${{ matrix.delay }}" >> $GITHUB_ENV
 
       - name: Run tests
         run: |

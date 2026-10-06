@@ -27,7 +27,7 @@ class TestSequence(uvm_sequence):
             it = DriverItem()
 
             it.signals["rst_l"] = random.choice([0, 1])
-            it.signals["activate_core"] = [random.choice([MuBiTrue, MuBiFalse]) for _ in range(3)]
+            it.signals["core_active_i"] = [random.choice([MuBiTrue, MuBiFalse]) for _ in range(3)]
 
             # Send the item
             await self.seqr.start_item(it)

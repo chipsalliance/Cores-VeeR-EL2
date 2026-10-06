@@ -78,9 +78,9 @@ module tb_top
     el2_mubi_pkg::el2_mubi_t tmr_core_fault_1;
     el2_mubi_pkg::el2_mubi_t tmr_core_fault_2;
 
-    el2_mubi_pkg::el2_mubi_t activate_core_0;
-    el2_mubi_pkg::el2_mubi_t activate_core_1;
-    el2_mubi_pkg::el2_mubi_t activate_core_2;
+    el2_mubi_pkg::el2_mubi_t core_active_0;
+    el2_mubi_pkg::el2_mubi_t core_active_1;
+    el2_mubi_pkg::el2_mubi_t core_active_2;
 `endif
 
 `ifdef RV_BUILD_AHB_LITE
@@ -2313,9 +2313,9 @@ module tb_top
     assign trace_core[2].div_waddr  = `VEER2.dec.div_waddr_wb;
     assign trace_core[2].div_wdata  = `VEER2.dec.exu_div_result;
 
-    assign activate_core_0 = el2_mubi_pkg::El2MuBiTrue;
-    assign activate_core_1 = el2_mubi_pkg::El2MuBiTrue;
-    assign activate_core_2 = el2_mubi_pkg::El2MuBiTrue;
+    assign core_active_0 = el2_mubi_pkg::El2MuBiTrue;
+    assign core_active_1 = el2_mubi_pkg::El2MuBiTrue;
+    assign core_active_2 = el2_mubi_pkg::El2MuBiTrue;
 `endif
 
 `ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
@@ -2810,9 +2810,9 @@ veer_wrapper rvtop_wrapper (
     .tmr_core_fault_1      (tmr_core_fault_1),
     .tmr_core_fault_2      (tmr_core_fault_2),
 
-    .activate_core_0       (activate_core_0),
-    .activate_core_1       (activate_core_1),
-    .activate_core_2       (activate_core_2),
+    .core_active_0       (core_active_0),
+    .core_active_1       (core_active_1),
+    .core_active_2       (core_active_2),
 `endif
 
     .soft_int               (soft_int),

@@ -66,6 +66,14 @@ assign mpc_debug_run_req   = '0;
 
 assign dmi_core_enable     = ~o_cpu_halt_status;
 
+el2_mubi_pkg::el2_mubi_t core_active_0;
+el2_mubi_pkg::el2_mubi_t core_active_1;
+el2_mubi_pkg::el2_mubi_t core_active_2;
+
+assign core_active_0 = el2_mubi_pkg::El2MuBiTrue;
+assign core_active_1 = el2_mubi_pkg::El2MuBiTrue;
+assign core_active_2 = el2_mubi_pkg::El2MuBiTrue;
+
 // ------------------------------------------------------------------
 // CRG
 // ------------------------------------------------------------------
@@ -2074,6 +2082,10 @@ veer_wrapper rvtop_wrapper (
     .dccm_ecc_single_error      (),
     .dccm_ecc_double_error      (),
     .dccm_write_readback_error  (),
+
+    .core_active_0          (core_active_0),
+    .core_active_1          (core_active_1),
+    .core_active_2          (core_active_2),
 
     .soft_int               (soft_int),
     .core_id                ('0),

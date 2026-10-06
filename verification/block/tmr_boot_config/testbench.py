@@ -18,7 +18,6 @@ from pyuvm import *
 MuBiFalse = 0b01
 MuBiTrue = 0b10
 
-
 # ==============================================================================
 
 
@@ -87,19 +86,16 @@ class BusMonitor(uvm_component):
         clock = self.uut.clk
 
         while True:
-            await RisingEdge(clock)
+            # Sample data on falling edge as the monitor samples both async.
+            # reset (driven on rising edge) and signals affected by it.
+            await FallingEdge(clock)
             await ReadOnly()
 
             signals = dict()
             for k in self.signals:
                 assert hasattr(self.uut, k), k
                 s = getattr(self.uut, k)
-                if isinstance(s, Iterable):
-                    signals[k] = []
-                    for sig in s:
-                        signals[k].append(sig.value)
-                else:
-                    signals[k] = s.value
+                signals[k] = s.value
 
             self.ap.write(MonitorItem(signals))
 
@@ -110,7 +106,7 @@ class BusMonitor(uvm_component):
 class BaseScoreboard(uvm_component):
 
     def build_phase(self):
-        self.passed = False
+        self.passed = None
         self.fifo = uvm_tlm_analysis_fifo("fifo", self)
         self.port = uvm_get_port("port", self)
 
@@ -118,36 +114,41 @@ class BaseScoreboard(uvm_component):
         self.port.connect(self.fifo.get_export)
 
     def check_phase(self):
-        self.passed = True
-        reset = False
-        expected_true = []
-        expected_false = []
+        rst_state = [0, 0, 0]
+        core_active_i = [MuBiFalse, MuBiFalse, MuBiFalse]
+        core_active_o = [MuBiFalse, MuBiFalse, MuBiFalse]
 
         while self.port.can_get():
             _, it = self.port.try_get()
             self.logger.debug(str(it))
 
-            if it.signals["rst_l"] == 0:
-                reset = True
-                for val in it.signals["activate_core"]:
-                    if val == MuBiTrue:
-                        expected_true.append(1)
-                    else:
-                        expected_true.append(0)
-                    if val == MuBiFalse:
-                        expected_true.append(1)
-                    else:
-                        expected_true.append(0)
-            elif reset and it.signals["rst_l"] == 1:
-                reset = False
-            if reset:
-                for val in [*it.signals["mux_select_true"], *it.signals["mux_select_false"]]:
-                    assert val == 0, "Expected mux to return 0 when in reset"
-            else:
-                for exp, val in zip(expected_true, it.signals["mux_select_true"]):
-                    assert exp == val, f"Expected true mux value of {exp}, got {val}"
-                for exp, val in zip(expected_false, it.signals["mux_select_false"]):
-                    assert exp == val, f"Expected false mux value of {exp}, got {val}"
+            # Initialize the pass flag
+            if self.passed is None:
+                self.passed = True
+
+            # Shift reset state
+            rst_state = [it.signals["rst_l"]] + rst_state[:-1]
+
+            # Reset output
+            if not rst_state[0]:
+                core_active_o = [MuBiFalse, MuBiFalse, MuBiFalse]
+
+            # Latch output
+            if rst_state == [1, 1, 0]:
+                core_active_o = it.signals["core_active_o"]
+                if core_active_o != core_active_i:
+                    self.logger.error(
+                        f"Output vs. input error, {core_active_o} vs. {core_active_i}"
+                    )
+                    self.passed = False
+
+            # Compare core_active state
+            if core_active_o != it.signals["core_active_o"]:
+                self.logger.error("Latched state changed while it shouldn't")
+                self.passed = False
+
+            # Store current core_active_i state for the next cycle
+            core_active_i = it.signals["core_active_i"]
 
     def final_phase(self):
         if not self.passed:
@@ -183,9 +184,8 @@ class BaseEnv(uvm_env):
             uut=cocotb.top,
             signals=[
                 "rst_l",
-                "activate_core",
-                "mux_select_true",
-                "mux_select_false",
+                "core_active_i",
+                "core_active_o",
             ],
         )
 
@@ -210,7 +210,7 @@ class BaseTest(uvm_test):
     Base PyUVM test for the module
     """
 
-    def __init__(self, name, parent, seq_class, scb_class=None):
+    def __init__(self, name, parent, seq_class, scb_class=BaseScoreboard):
         super().__init__(name, parent)
         self.seq_class = seq_class
         self.scb_class = scb_class
@@ -237,12 +237,12 @@ class BaseTest(uvm_test):
         self.raise_objection()
 
         # Initialize signals
-        cocotb.top.scan_mode = 0
-        cocotb.top.rst_l = 0
+        cocotb.top.scan_mode.value = 0
+        cocotb.top.rst_l.value = 0
 
-        cocotb.top.activate_core[0].value = MuBiFalse
-        cocotb.top.activate_core[1].value = MuBiFalse
-        cocotb.top.activate_core[2].value = MuBiFalse
+        cocotb.top.core_active_i[0].value = MuBiFalse
+        cocotb.top.core_active_i[1].value = MuBiFalse
+        cocotb.top.core_active_i[2].value = MuBiFalse
 
         # Start clock
         self.start_clock("clk")

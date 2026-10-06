@@ -378,9 +378,9 @@ module el2_tmr_complex
     output logic [31:0] dmi_reg_rdata,
 
     // Boot configuration
-    input  el2_mubi_pkg::el2_mubi_t activate_core_0,
-    input  el2_mubi_pkg::el2_mubi_t activate_core_1,
-    input  el2_mubi_pkg::el2_mubi_t activate_core_2,
+    input  el2_mubi_pkg::el2_mubi_t core_active_0,
+    input  el2_mubi_pkg::el2_mubi_t core_active_1,
+    input  el2_mubi_pkg::el2_mubi_t core_active_2,
 
     // ICCM/DCCM ECC status
     output logic                 iccm_ecc_single_error,
@@ -917,10 +917,6 @@ module el2_tmr_complex
   logic        free_clk_int;
 
   //-------------------------------------------------------------------
-  logic tmr_mux_source_select_true[3];
-  logic tmr_mux_source_select_false[3];
-
-  //-------------------------------------------------------------------
 
   // TMR AXI fault signals
   el2_mubi_pkg::el2_mubi_t axi_fault_d[3];
@@ -975,6 +971,9 @@ module el2_tmr_complex
 
   el2_mubi_pkg::el2_mubi_t tmr_fault_q[3];
   el2_mubi_pkg::el2_mubi_t tmr_fault_clr;
+
+  // TODO: Use the signal
+  el2_mubi_pkg::el2_mubi_t core_active[3];
 
   // TODO: Potentially move the following to a new "el2_tmr_fault" module
   generate for(genvar i=0; i<3; i=i+1) begin : fault
@@ -1127,9 +1126,8 @@ module el2_tmr_complex
   el2_tmr_exec_ctrl el2_tmr_exec_ctrl_u (.*);
   el2_tmr_misc el2_tmr_misc_u (.*);
   el2_tmr_boot_configuration el2_tmr_boot_configuration_u (
-    .activate_core({activate_core_0, activate_core_1, activate_core_2}),
-    .mux_select_true(tmr_mux_source_select_true),
-    .mux_select_false(tmr_mux_source_select_false),
+    .core_active_i({core_active_0, core_active_1, core_active_2}),
+    .core_active_o(core_active),
     .*
   );
 

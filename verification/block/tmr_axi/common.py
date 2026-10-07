@@ -136,6 +136,11 @@ class BaseTest(uvm_test):
         if hasattr(cocotb.top, "output_inhibit_i"):
             cocotb.top.output_inhibit_i.value = MuBiFalse
 
+        if hasattr(cocotb.top, "core_active_i"):
+            cocotb.top.core_active_i[0].value = MuBiTrue
+            cocotb.top.core_active_i[1].value = MuBiTrue
+            cocotb.top.core_active_i[2].value = MuBiTrue
+
         # Start clock
         self.start_clock("clk_i")
         await ClockCycles(cocotb.top.clk_i, 2)

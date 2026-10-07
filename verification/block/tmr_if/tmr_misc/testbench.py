@@ -8,7 +8,15 @@ from cocotb.utils import get_sim_time
 from pyuvm import *
 
 import common
-from common import BusDriver, BusItem, BusMonitor, FaultItem, FaultMonitor, MuBiFalse
+from common import (
+    BusDriver,
+    BusItem,
+    BusMonitor,
+    FaultItem,
+    FaultMonitor,
+    MuBiFalse,
+    MuBiTrue,
+)
 
 # ==============================================================================
 
@@ -153,6 +161,10 @@ class BaseTest(common.BaseTest):
         cocotb.top.misc_fault_clr[0].value = MuBiFalse
         cocotb.top.misc_fault_clr[1].value = MuBiFalse
         cocotb.top.misc_fault_clr[2].value = MuBiFalse
+
+        cocotb.top.core_active[0].value = MuBiTrue
+        cocotb.top.core_active[1].value = MuBiTrue
+        cocotb.top.core_active[2].value = MuBiTrue
 
         cocotb.top.trace_rv_i_insn_ip_veer = [0] * 3
         cocotb.top.trace_rv_i_address_ip_veer = [0] * 3

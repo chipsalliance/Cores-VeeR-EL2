@@ -543,6 +543,11 @@ class BaseTest(uvm_test):
             obj = getattr(cocotb.top, name)
             obj.value = 0
 
+        # Enable all 3 cores
+        cocotb.top.core_active_0.value = MuBiTrue
+        cocotb.top.core_active_1.value = MuBiTrue
+        cocotb.top.core_active_2.value = MuBiTrue
+
         cocotb.top.clk.value = 0
         cocotb.top.rst_l.value = 1
         cocotb.top.dbg_rst_l.value = 1

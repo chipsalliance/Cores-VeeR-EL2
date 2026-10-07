@@ -449,6 +449,19 @@ module el2_tmr_axi
 
   // ......................................................
 
+  // Unused DMA AXI signals
+  logic [3:0] dma_axi_awregion_veer[3];
+  logic       dma_axi_awlock_veer[3];
+  logic [3:0] dma_axi_awcache_veer[3];
+  logic [3:0] dma_axi_awqos_veer[3];
+
+  logic [3:0] dma_axi_arregion_veer[3];
+  logic       dma_axi_arlock_veer[3];
+  logic [3:0] dma_axi_arcache_veer[3];
+  logic [3:0] dma_axi_arqos_veer[3];
+
+  // ......................................................
+
   el2_mubi_t  lsu_axi_fault_d[3];
   el2_mubi_t  lsu_axi_fault_q[3];
   el2_mubi_t  lsu_axi_fault_clr[3];
@@ -1127,14 +1140,14 @@ module el2_tmr_axi
     .a_m_axi_awready_i   (dma_axi_awready_veer  [0]),
     .a_m_axi_awid_o      (dma_axi_awid_veer     [0]),
     .a_m_axi_awaddr_o    (dma_axi_awaddr_veer   [0]),
-    .a_m_axi_awregion_o  (),
+    .a_m_axi_awregion_o  (dma_axi_awregion_veer [0]),
     .a_m_axi_awlen_o     (dma_axi_awlen_veer    [0]),
     .a_m_axi_awsize_o    (dma_axi_awsize_veer   [0]),
     .a_m_axi_awburst_o   (dma_axi_awburst_veer  [0]),
-    .a_m_axi_awlock_o    (),
-    .a_m_axi_awcache_o   (),
+    .a_m_axi_awlock_o    (dma_axi_awlock_veer   [0]),
+    .a_m_axi_awcache_o   (dma_axi_awcache_veer  [0]),
     .a_m_axi_awprot_o    (dma_axi_awprot_veer   [0]),
-    .a_m_axi_awqos_o     (),
+    .a_m_axi_awqos_o     (dma_axi_awqos_veer    [0]),
 
     .a_m_axi_wvalid_o    (dma_axi_wvalid_veer   [0]),
     .a_m_axi_wready_i    (dma_axi_wready_veer   [0]),
@@ -1151,14 +1164,14 @@ module el2_tmr_axi
     .a_m_axi_arready_i   (dma_axi_arready_veer  [0]),
     .a_m_axi_arid_o      (dma_axi_arid_veer     [0]),
     .a_m_axi_araddr_o    (dma_axi_araddr_veer   [0]),
-    .a_m_axi_arregion_o  (),
+    .a_m_axi_arregion_o  (dma_axi_arregion_veer [0]),
     .a_m_axi_arlen_o     (dma_axi_arlen_veer    [0]),
     .a_m_axi_arsize_o    (dma_axi_arsize_veer   [0]),
     .a_m_axi_arburst_o   (dma_axi_arburst_veer  [0]),
-    .a_m_axi_arlock_o    (),
-    .a_m_axi_arcache_o   (),
+    .a_m_axi_arlock_o    (dma_axi_arlock_veer   [0]),
+    .a_m_axi_arcache_o   (dma_axi_arcache_veer  [0]),
     .a_m_axi_arprot_o    (dma_axi_arprot_veer   [0]),
-    .a_m_axi_arqos_o     (),
+    .a_m_axi_arqos_o     (dma_axi_arqos_veer    [0]),
 
     .a_m_axi_rvalid_i    (dma_axi_rvalid_veer   [0]),
     .a_m_axi_rready_o    (dma_axi_rready_veer   [0]),
@@ -1172,14 +1185,14 @@ module el2_tmr_axi
     .b_m_axi_awready_i   (dma_axi_awready_veer  [1]),
     .b_m_axi_awid_o      (dma_axi_awid_veer     [1]),
     .b_m_axi_awaddr_o    (dma_axi_awaddr_veer   [1]),
-    .b_m_axi_awregion_o  (),
+    .b_m_axi_awregion_o  (dma_axi_awregion_veer [1]),
     .b_m_axi_awlen_o     (dma_axi_awlen_veer    [1]),
     .b_m_axi_awsize_o    (dma_axi_awsize_veer   [1]),
     .b_m_axi_awburst_o   (dma_axi_awburst_veer  [1]),
-    .b_m_axi_awlock_o    (),
-    .b_m_axi_awcache_o   (),
+    .b_m_axi_awlock_o    (dma_axi_awlock_veer   [1]),
+    .b_m_axi_awcache_o   (dma_axi_awcache_veer  [1]),
     .b_m_axi_awprot_o    (dma_axi_awprot_veer   [1]),
-    .b_m_axi_awqos_o     (),
+    .b_m_axi_awqos_o     (dma_axi_awqos_veer    [1]),
 
     .b_m_axi_wvalid_o    (dma_axi_wvalid_veer   [1]),
     .b_m_axi_wready_i    (dma_axi_wready_veer   [1]),
@@ -1196,14 +1209,14 @@ module el2_tmr_axi
     .b_m_axi_arready_i   (dma_axi_arready_veer  [1]),
     .b_m_axi_arid_o      (dma_axi_arid_veer     [1]),
     .b_m_axi_araddr_o    (dma_axi_araddr_veer   [1]),
-    .b_m_axi_arregion_o  (),
+    .b_m_axi_arregion_o  (dma_axi_arregion_veer [1]),
     .b_m_axi_arlen_o     (dma_axi_arlen_veer    [1]),
     .b_m_axi_arsize_o    (dma_axi_arsize_veer   [1]),
     .b_m_axi_arburst_o   (dma_axi_arburst_veer  [1]),
-    .b_m_axi_arlock_o    (),
-    .b_m_axi_arcache_o   (),
+    .b_m_axi_arlock_o    (dma_axi_arlock_veer   [1]),
+    .b_m_axi_arcache_o   (dma_axi_arcache_veer  [1]),
     .b_m_axi_arprot_o    (dma_axi_arprot_veer   [1]),
-    .b_m_axi_arqos_o     (),
+    .b_m_axi_arqos_o     (dma_axi_arqos_veer    [1]),
 
     .b_m_axi_rvalid_i    (dma_axi_rvalid_veer   [1]),
     .b_m_axi_rready_o    (dma_axi_rready_veer   [1]),
@@ -1217,14 +1230,14 @@ module el2_tmr_axi
     .c_m_axi_awready_i   (dma_axi_awready_veer  [2]),
     .c_m_axi_awid_o      (dma_axi_awid_veer     [2]),
     .c_m_axi_awaddr_o    (dma_axi_awaddr_veer   [2]),
-    .c_m_axi_awregion_o  (),
+    .c_m_axi_awregion_o  (dma_axi_awregion_veer [2]),
     .c_m_axi_awlen_o     (dma_axi_awlen_veer    [2]),
     .c_m_axi_awsize_o    (dma_axi_awsize_veer   [2]),
     .c_m_axi_awburst_o   (dma_axi_awburst_veer  [2]),
-    .c_m_axi_awlock_o    (),
-    .c_m_axi_awcache_o   (),
+    .c_m_axi_awlock_o    (dma_axi_awlock_veer   [2]),
+    .c_m_axi_awcache_o   (dma_axi_awcache_veer  [2]),
     .c_m_axi_awprot_o    (dma_axi_awprot_veer   [2]),
-    .c_m_axi_awqos_o     (),
+    .c_m_axi_awqos_o     (dma_axi_awqos_veer    [2]),
 
     .c_m_axi_wvalid_o    (dma_axi_wvalid_veer   [2]),
     .c_m_axi_wready_i    (dma_axi_wready_veer   [2]),
@@ -1241,14 +1254,14 @@ module el2_tmr_axi
     .c_m_axi_arready_i   (dma_axi_arready_veer  [2]),
     .c_m_axi_arid_o      (dma_axi_arid_veer     [2]),
     .c_m_axi_araddr_o    (dma_axi_araddr_veer   [2]),
-    .c_m_axi_arregion_o  (),
+    .c_m_axi_arregion_o  (dma_axi_arregion_veer [2]),
     .c_m_axi_arlen_o     (dma_axi_arlen_veer    [2]),
     .c_m_axi_arsize_o    (dma_axi_arsize_veer   [2]),
     .c_m_axi_arburst_o   (dma_axi_arburst_veer  [2]),
-    .c_m_axi_arlock_o    (),
-    .c_m_axi_arcache_o   (),
+    .c_m_axi_arlock_o    (dma_axi_arlock_veer   [2]),
+    .c_m_axi_arcache_o   (dma_axi_arcache_veer  [2]),
     .c_m_axi_arprot_o    (dma_axi_arprot_veer   [2]),
-    .c_m_axi_arqos_o     (),
+    .c_m_axi_arqos_o     (dma_axi_arqos_veer    [2]),
 
     .c_m_axi_rvalid_i    (dma_axi_rvalid_veer   [2]),
     .c_m_axi_rready_o    (dma_axi_rready_veer   [2]),
@@ -1328,6 +1341,7 @@ module el2_tmr_axi
   // DMA AXI (incoming) transaction counter
   el2_mubi_t dma_axi_aw_ahead;
   el2_mubi_t dma_axi_w_ahead;
+  el2_mubi_t dma_axi_count_error_nc;
 
   el2_tmr_axi_counter u_dma_counter (
     .clk_i          (free_l2clk),
@@ -1356,7 +1370,7 @@ module el2_tmr_axi
     .aw_ahead_o     (dma_axi_aw_ahead),
     .w_ahead_o      (dma_axi_w_ahead),
 
-    .ecc_error_o    (),
+    .ecc_error_o    (dma_axi_count_error_nc),
     .ecc_fatal_o    (dma_axi_count_fatal)
   );
 

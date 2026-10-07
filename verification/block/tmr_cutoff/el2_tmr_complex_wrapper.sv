@@ -412,6 +412,11 @@ module el2_tmr_complex_wrapper
     input  logic [31:0] dmi_reg_wdata,             // write data
     output logic [31:0] dmi_reg_rdata,
 
+    // Boot configuration
+    input  el2_mubi_pkg::el2_mubi_t core_active_0,
+    input  el2_mubi_pkg::el2_mubi_t core_active_1,
+    input  el2_mubi_pkg::el2_mubi_t core_active_2,
+
     // ICCM/DCCM ECC status
     output logic                 iccm_ecc_single_error,
     output logic                 iccm_ecc_double_error,
@@ -421,6 +426,18 @@ module el2_tmr_complex_wrapper
     input logic [pt.PIC_TOTAL_INT:1]           extintsrc_req,
     input logic                   timer_int,
     input logic                   soft_int,
+
+    // A fatal, unrecoverable fault has been detected. Once asserted it can only
+    // be cleared by a hard reset via rst_l
+    output el2_mubi_pkg::el2_mubi_t tmr_fatal,
+    // A recoverable error has been detected and the recovery procedure is pending
+    output el2_mubi_pkg::el2_mubi_t tmr_recovery_pending,
+    // The recovery procedure has failed. Once asserted it can only be cleared
+    // by a hard reset via rst_l
+    output el2_mubi_pkg::el2_mubi_t tmr_recovery_fault,
+    // Individual core fault status
+    output el2_mubi_pkg::el2_mubi_t tmr_core_fault[3],
+
     // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
     /*pragma coverage off*/
     input logic                   scan_mode

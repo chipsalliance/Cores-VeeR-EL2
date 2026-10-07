@@ -1017,7 +1017,7 @@ module el2_tmr_complex
 
     // Store TMR fault
     assign tmr_fault_r_next =
-      (tmr_fault_clr) ? El2MuBiFalse : mubi_or3(tmr_fault_r, tmr_fault_q[i], recovery_fault);
+      mubi_check_true(tmr_fault_clr) ? El2MuBiFalse : mubi_or3(tmr_fault_r, tmr_fault_q[i], recovery_fault);
 
     rvmubidff dff (.*, .din(tmr_fault_r_next), .dout(tmr_fault_r));
 

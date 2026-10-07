@@ -47,6 +47,9 @@ module tmr_ic_wrapper
     output logic [(26*pt.ICACHE_NUM_WAYS)-1 :0]               ic_tag_data_raw_packed_pre_veer[3],
     output logic [pt.ICACHE_NUM_WAYS-1:0] [25:0]              ic_tag_data_raw_pre_veer[3],
 
+    // Core active
+    input  el2_mubi_pkg::el2_mubi_t core_active[3],
+
     // Fault inputs
     input  el2_mubi_pkg::el2_mubi_t ic_fault_d[3],
     // Fault outputs

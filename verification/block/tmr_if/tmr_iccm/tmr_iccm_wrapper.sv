@@ -29,6 +29,9 @@ module tmr_iccm_wrapper
     output logic [pt.ICCM_NUM_BANKS-1:0][                                31:0] iccm_bank_dout_veer[3],
     output logic [pt.ICCM_NUM_BANKS-1:0][               pt.ICCM_ECC_WIDTH-1:0] iccm_bank_ecc_veer[3],
 
+    // Core active
+    input  el2_mubi_pkg::el2_mubi_t core_active[3],
+
     // Fault inputs
     input  el2_mubi_pkg::el2_mubi_t iccm_fault_d[3],
     // Fault outputs

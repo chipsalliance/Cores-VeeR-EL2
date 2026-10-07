@@ -1,3 +1,4 @@
++incdir+$RV_ROOT/design/include
 $RV_ROOT/design/lib/el2_assert.sv
 $RV_ROOT/design/el2_mubi_pkg.sv
 $RV_ROOT/design/el2_veer_wrapper.sv

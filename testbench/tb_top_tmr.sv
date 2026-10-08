@@ -9,6 +9,8 @@ import el2_mubi_pkg::*;
 
 el2_mubi_t tmr_fatal;
 el2_mubi_t tmr_recovery_pending;
+el2_mubi_t tmr_recovery_fault;
+el2_mubi_t tmr_core_fault[3];
 
 logic core_clk;
 logic rst_l;
@@ -2099,10 +2101,10 @@ veer_wrapper rvtop_wrapper (
     
     .tmr_fatal              (tmr_fatal),
     .tmr_recovery_pending   (tmr_recovery_pending),
-    .tmr_recovery_fault     (),
-    .tmr_core_fault_0       (),
-    .tmr_core_fault_1       (),
-    .tmr_core_fault_2       ()
+    .tmr_recovery_fault     (tmr_recovery_fault),
+    .tmr_core_fault_0       (tmr_core_fault[0]),
+    .tmr_core_fault_1       (tmr_core_fault[1]),
+    .tmr_core_fault_2       (tmr_core_fault[2])
 );
 
 // ------------------------------------------------------------------
@@ -2413,6 +2415,15 @@ assign nmi_int       = '0;
 assign timer_int     = '0;
 assign soft_int      = '0;
 
+// ------------------------------------------------------------------
+// TMR control and monitoring
+// ------------------------------------------------------------------
+
+el2_mubi_t tmr_fatal_r;
+el2_mubi_t tmr_recovery_pending_r;
+el2_mubi_t tmr_recovery_fault_r;
+el2_mubi_t tmr_core_fault_r[3];
+
 // Reset the whole TMR complex on a fatal fault
 always @(posedge core_clk or negedge rst_l) begin
     if (!rst_l) begin
@@ -2456,6 +2467,47 @@ initial begin
     begin
         $display("At least one core of the TMR complex must be active");
         $fatal();
+    end
+end
+
+// Monitor TMR status
+always @(posedge core_clk or negedge rst_l_combined) begin
+    if (!rst_l_combined) begin
+        tmr_fatal_r            <= El2MuBiFalse;
+        tmr_recovery_pending_r <= El2MuBiFalse;
+        tmr_recovery_fault_r   <= El2MuBiFalse;
+        tmr_core_fault_r       <= '{default: El2MuBiFalse};
+    end else begin
+
+        // Core status
+        for (int i=0; i<3; i++) begin
+            if (tmr_core_fault_r[i] != tmr_core_fault[i]) begin
+                if (mubi_check_true(mubi_check_invalid(tmr_core_fault[i]))) begin
+                    $display("[%0t ns] tmr_core_fault[%0d] has invalid value! (0b%b)", $time, i, tmr_core_fault[i]);
+                end else if (mubi_check_true(tmr_core_fault[i])) begin
+                    $display("[%0t ns] Core %0d failed", $time, i);
+                end
+            end
+        end
+
+        // Recovery state
+        if (tmr_recovery_pending_r != tmr_recovery_pending) begin
+            if (mubi_check_true(mubi_check_invalid(tmr_recovery_pending))) begin
+                $display("[%0t ns] tmr_recovery_pending has invalid value! (0b%b)", $time, tmr_recovery_pending);
+            end else begin
+                if (mubi_check_true(tmr_recovery_pending) && !mubi_check_true(tmr_fatal)) begin
+                    $display("[%0t ns] TMR recovery started", $time);
+                end
+                if (mubi_check_false(tmr_recovery_pending)) begin
+                    $display("[%0t ns] TMR recovery finished", $time);
+                end
+            end
+        end
+
+        tmr_fatal_r            <= tmr_fatal;
+        tmr_recovery_pending_r <= tmr_recovery_pending;
+        tmr_recovery_fault_r   <= tmr_recovery_fault;
+        tmr_core_fault_r       <= tmr_core_fault;
     end
 end
 

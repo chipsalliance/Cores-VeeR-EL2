@@ -136,7 +136,6 @@ import el2_pkg::*;
 
    output logic [pt.ICACHE_BANKS_WAY-1:0] [70:0]               ic_wr_data,           // Data to fill to the Icache. With ECC
    input  logic [141:0]              ic_rd_data ,              // Raw way-muxed 142-bit ECC-protected word pair. F2 stage.
-   input  logic [1:0]                ic_rd_addr_lo,            // F2-aligned ic_rw_addr_ff[2:1] for core-side rotate
    input  logic [pt.ICACHE_BANKS_WAY-1:0] ic_rd_bank_check_en, // Per-bank ECC check enable for core-side decode
    input  logic [70:0]               ic_debug_rd_data ,          // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
    input  logic [25:0]               ictag_debug_rd_data,  // Debug icache tag.
@@ -803,14 +802,25 @@ end
 
   // Core-side alignment (byte-rotate) and ECC / parity check of the raw 142-bit
   // ic_rd_data input (ic_rd_data_aligned / ic_eccerr_int / ic_parerr_int declared above).
+
+  // Rotate select: the F2-aligned ic_rw_addr[2:1], i.e., the halfword offset of
+  // the fetch within the addressed 8-byte chunk. It is registered here, inside
+  // the DCLS domain, rather than taken from EL2_IC_DATA, because the rotation is
+  // applied after the ECC/parity check: a faulty select would turn correctly
+  // checked data into a wrong instruction without any error being flagged.
+  logic [1:0] ic_rd_rot_sel;
+  rvdffie #(.WIDTH(2),.OVERRIDE(1)) ic_rd_rot_sel_ff (.*,
+             .din ((ic_debug_rd_en | ic_debug_wr_en) ? 2'b00 : ic_rw_addr[2:1]),
+             .dout(ic_rd_rot_sel[1:0]));
+
   if (pt.ICACHE_ECC) begin : g_ic_rd_ecc_core
      logic [63:0]  ic_rd_rot;
      logic [141:0] ic_rd_data_fixed;
      assign ic_rd_data_fixed = {ic_rd_data[141:135], ic_rd_data[134:71] ^ ic_rd_addr_infect,
                                 ic_rd_data[70:64],   ic_rd_data[63:0]   ^ ic_rd_addr_infect};
-     assign ic_rd_rot = (ic_rd_addr_lo == 2'b00) ? ic_rd_data_fixed[63:0]                              :
-                        (ic_rd_addr_lo == 2'b01) ? {ic_rd_data_fixed[86:71],  ic_rd_data_fixed[63:16]} :
-                        (ic_rd_addr_lo == 2'b10) ? {ic_rd_data_fixed[102:71], ic_rd_data_fixed[63:32]} :
+     assign ic_rd_rot = (ic_rd_rot_sel == 2'b00) ? ic_rd_data_fixed[63:0]                              :
+                        (ic_rd_rot_sel == 2'b01) ? {ic_rd_data_fixed[86:71],  ic_rd_data_fixed[63:16]} :
+                        (ic_rd_rot_sel == 2'b10) ? {ic_rd_data_fixed[102:71], ic_rd_data_fixed[63:32]} :
                                                  {ic_rd_data_fixed[118:71], ic_rd_data_fixed[63:48]};
      assign ic_rd_data_aligned = ic_sel_premux_data ? ic_premux_data[63:0] : ic_rd_rot;
      for (genvar i=0; i<pt.ICACHE_BANKS_WAY; i++) begin : g_dec
@@ -828,9 +838,9 @@ end
      logic [pt.ICACHE_BANKS_WAY-1:0][3:0]  ic_parerr_bank;
      assign ic_rd_data_fixed = {ic_rd_data[135:132], ic_rd_data[131:68] ^ ic_rd_addr_infect,
                                 ic_rd_data[67:64],   ic_rd_data[63:0]   ^ ic_rd_addr_infect};
-     assign ic_rd_rot_par = (ic_rd_addr_lo == 2'b00) ? ic_rd_data_fixed[63:0]                              :
-                            (ic_rd_addr_lo == 2'b01) ? {ic_rd_data_fixed[83:68],  ic_rd_data_fixed[63:16]} :
-                            (ic_rd_addr_lo == 2'b10) ? {ic_rd_data_fixed[99:68],  ic_rd_data_fixed[63:32]} :
+     assign ic_rd_rot_par = (ic_rd_rot_sel == 2'b00) ? ic_rd_data_fixed[63:0]                              :
+                            (ic_rd_rot_sel == 2'b01) ? {ic_rd_data_fixed[83:68],  ic_rd_data_fixed[63:16]} :
+                            (ic_rd_rot_sel == 2'b10) ? {ic_rd_data_fixed[99:68],  ic_rd_data_fixed[63:32]} :
                                                      {ic_rd_data_fixed[115:68], ic_rd_data_fixed[63:48]};
      assign ic_rd_data_aligned = ic_sel_premux_data ? ic_premux_data[63:0] : ic_rd_rot_par;
      assign ic_eccerr_int = '0;

@@ -40,7 +40,6 @@ import el2_pkg::*;
 
       input  logic [pt.ICACHE_BANKS_WAY-1:0][70:0]  ic_wr_data,         // Data to fill to the Icache. With ECC
       output logic [141:0]                          ic_rd_data ,        // Raw way-muxed 142-bit ECC-protected word pair. F2 stage.
-      output logic [1:0]                            ic_rd_addr_lo,      // F2-aligned ic_rw_addr_ff[2:1] for core-side rotate
       output logic [pt.ICACHE_BANKS_WAY-1:0]        ic_rd_bank_check_en,// Per-bank ECC check enable for core-side decode
       output logic [70:0]                           ic_debug_rd_data ,  // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
       output logic [25:0]                           ictag_debug_rd_data,// Debug icache tag.
@@ -125,7 +124,6 @@ import el2_pkg::*;
 
       input  logic [pt.ICACHE_BANKS_WAY-1:0][70:0]    ic_wr_data,         // Data to fill to the Icache. With ECC
       output logic [141:0]                            ic_rd_data ,        // Raw way-muxed 142-bit ECC-protected word pair. F2 stage.
-      output logic [1:0]                              ic_rd_addr_lo,      // F2-aligned ic_rw_addr_ff[2:1] for core-side rotate
       output logic [pt.ICACHE_BANKS_WAY-1:0]          ic_rd_bank_check_en,// Per-bank ECC check enable for core-side decode
       input  logic [70:0]                             ic_debug_wr_data,   // Debug wr cache.
       output logic [70:0]                             ic_debug_rd_data ,  // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
@@ -272,6 +270,11 @@ import el2_pkg::*;
              .din({ ic_b_rden[pt.ICACHE_BANKS_WAY-1:0],   ic_rw_addr_q[pt.ICACHE_TAG_INDEX_LO-1:1], ic_debug_rd_way_en[pt.ICACHE_NUM_WAYS-1:0],   ic_debug_rd_en}),
              .dout({ic_b_rden_ff[pt.ICACHE_BANKS_WAY-1:0],ic_rw_addr_ff[pt.ICACHE_TAG_INDEX_LO-1:1],ic_debug_rd_way_en_ff[pt.ICACHE_NUM_WAYS-1:0],ic_debug_rd_en_ff})
              );
+
+   // The halfword offset ic_rw_addr_ff[2:1] is deliberately unused: the
+   // read data rotate select is registered core-side in el2_ifu_mem_ctl.
+   logic unused_sigs;
+   assign unused_sigs = ^ic_rw_addr_ff[2:1];
 
  if (pt.ICACHE_WAYPACK == 0 ) begin : PACKED_0
 
@@ -623,7 +626,6 @@ import el2_pkg::*;
    // Expose the raw way-muxed 142-bit ECC-protected word pair to the core.
    // Byte-rotate + ECC decode are performed core-side (in el2_ifu_mem_ctl).
    assign ic_rd_data                = wb_dout_ecc;
-   assign ic_rd_addr_lo[1:0]        = ic_rw_addr_ff[2:1];
    assign ic_rd_bank_check_en       = bank_check_en;
 
  for (genvar i=0; i < pt.ICACHE_BANKS_WAY ; i++) begin : ic_ecc_error
@@ -659,7 +661,6 @@ else  begin : ECC0_MUX
    // Expose the raw way-muxed 136-bit parity-protected word pair to the core.
    // Byte-rotate + parity-check are performed core-side (in el2_ifu_mem_ctl).
    assign ic_rd_data          = wb_dout_ecc;
-   assign ic_rd_addr_lo       = ic_rw_addr_ff[2:1];
    assign ic_rd_bank_check_en = bank_check_en;
 
   for (genvar i=0; i < pt.ICACHE_BANKS_WAY ; i++) begin : ic_par_error

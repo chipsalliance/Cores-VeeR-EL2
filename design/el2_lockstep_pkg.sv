@@ -212,7 +212,6 @@ package el2_lockstep_pkg;
     logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_rd_data_hi;
     logic [77:0]                    iccm_rd_data_ecc;
     logic [141:0]                   ic_rd_data;
-    logic [1:0]                     ic_rd_addr_lo;
     logic [pt.ICACHE_BANKS_WAY-1:0] ic_rd_bank_check_en;
     logic [70:0]                    ic_debug_rd_data;
     logic [25:0]                    ictag_debug_rd_data;

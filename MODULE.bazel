@@ -1,0 +1,209 @@
+"""VeeR EL2 module"""
+
+module(
+    name = "veer_el2_core",
+    version = "0.0.1",
+    repo_name = "veer_el2_core",
+    bazel_compatibility = [">=9.1.1"],
+)
+
+bazel_dep(name = "rules_perl", version = "1.1.2")
+cpan = use_extension("@rules_perl//perl/cpan:extensions.bzl", "cpan")
+cpan.install(
+    name = "cpan",
+    lock = "//configs:cpanfile.snapshot.lock.json",
+)
+use_repo(
+    cpan,
+    "cpan",
+)
+
+bazel_dep(name = "rules_shell", version = "0.8.0")
+bazel_dep(name = "buildifier_prebuilt", version = "8.5.1.4", dev_dependency = True)
+
+# ---------------------------------------------------------------------------
+# bazel-orfs. Not in the BCR, so it needs a root-module git_override.
+# `bazel run @bazel-orfs//:bump` keeps these current.
+# ---------------------------------------------------------------------------
+bazel_dep(name = "bazel-orfs")
+git_override(
+    module_name = "bazel-orfs",
+    commit = "c8e12e9d7c1716b19f3fd907b583abede2a95086",
+    remote = "https://github.com/The-OpenROAD-Project/bazel-orfs.git",
+)
+
+# The slang yosys frontend plugin (slang.so). yosys-slang was renamed to
+# sv-elab and published on BCR; it's not bundled in BCR yosys, so we load
+# it as an out-of-tree plugin via orfs.default(yosys_plugins=...) below.
+# Non-dev: the orfs.default tag references @sv-elab, so the repo must stay
+# visible even when bazel-orfs is consumed as a dependency (a dev dep is
+# dropped for non-root modules). It also lets downstream roots reference
+# the plugin label.
+bazel_dep(name = "sv-elab", version = "2026-07-07")
+
+# OpenROAD and qt-bazel: overrides are only honoured from the root module.
+bazel_dep(name = "openroad")
+git_override(
+    module_name = "openroad",
+    commit = "22b7c537718e77cd3e7b6c0e883d966bf7e92563",  # the pin bazel-orfs main used; @bazel-orfs//:bump will move it
+    init_submodules = True,
+    patch_strip = 1,
+    patches = [
+        # openroad_lib, the whole tool as one cc_library, is visible only
+        # to OpenROAD's own packages. Public, so tools/structured_gen can
+        # link odb, utl and sta from this repository; nothing else changes.
+        # Not upstreamed -- retire at a bump onto an OpenROAD that exposes
+        # a library target for embedding.
+        "//bazel_patches:0002-openroad-openroad-lib-public.patch",
+        # detailed_placement checks, before its search, that the cells can be
+        # legalized at all within the displacement window: Hall's condition on
+        # windows, demand of cells against the free sites they can reach. A
+        # placement that fails it costs hours of diamond search and fails
+        # anyway (82 minutes in a CTS stage whose clock buffers landed in
+        # channels narrower than they needed). Not upstreamed; the upstream
+        # pull request carries a gtest. Retires at a bump onto an OpenROAD
+        # that has it.
+        "//bazel_patches:0004-openroad-dpl-window-supply.patch",
+    ],
+    patch_cmds = [
+        "find . -name BUILD -exec sed -i 's|\"@slang\"|\"@sv-lang//:libsvlang\"|g' {} +",
+        "sed -i 's|defines = \\[|copts = [\"-include\", \"fmt/format.h\"],\\n defines = [|' src/syn/src/elab/BUILD third-party/slang-elab/src/BUILD",
+    ],
+    remote = "https://github.com/The-OpenROAD-Project/OpenROAD.git",
+)
+
+bazel_dep(name = "qt-bazel")
+git_override(
+    module_name = "qt-bazel",
+    commit = "5587ebcaf61bab7abe8e69c4db6d068b35562245",
+    remote = "https://github.com/The-OpenROAD-Project/qt_bazel_prebuilts",
+)
+
+# Hermetic C++ toolchain. OpenROAD only registers it as a dev dependency, so every
+# root that builds OpenROAD from source has to register it itself.
+bazel_dep(name = "llvm", version = "0.8.18")
+register_toolchains("@llvm//toolchain:all")
+
+# Bazel-rules-hdl
+bazel_dep(name = "rules_hdl", dev_dependency = True)
+git_override(
+    module_name = "rules_hdl",
+    commit = "3998e10bc9506f9f3511427cf421e1fc4a142b0e",
+    remote = "https://github.com/hdl/bazel_rules_hdl",
+)
+
+## Bazel-rules-hdl needs rules-7zip
+bazel_dep(name = "rules_7zip", version = "0.0.1")
+git_override(
+    module_name = "rules_7zip",
+    commit = "03a10b5796eac0aed122cf52064ed15785610857",
+    remote = "https://github.com/zaucy/rules_7zip.git",
+)
+
+# 7zip extension
+extension_setup_7zip = use_extension("@rules_7zip//:extension_setup_7zip.bzl", "extension_setup_7zip")
+use_repo(extension_setup_7zip, "7zip")
+
+# dev_dependency: configure_environments above is root-honored only, so
+# this pair does nothing for a downstream root, which must repeat it (as
+# ORFS does). sv-lang keeps pulling rules_pycross in transitively.
+bazel_dep(name = "rules_pycross", version = "0.8.3", dev_dependency = True)
+
+pycross = use_extension("@rules_pycross//pycross/extensions:pycross.bzl", "pycross", dev_dependency = True)
+pycross.configure_environments(python_versions = ["3.13"])
+
+# 2.3.2, not 2.0.0: every module in the graph that depends on rules_python
+# (protobuf, sv-lang, yosys, rules_pkg, ...) asks for 2.3.2, so MVS resolves
+# there and a lower root pin only buys a --check_direct_dependencies warning
+# on every invocation. Raise this to whatever `bazelisk mod explain
+# rules_python` reports once a bump moves the graph again.
+bazel_dep(name = "rules_python", version = "2.3.2")
+python = use_extension("@rules_python//python/extensions:python.bzl","python")
+python.toolchain(is_default = True, python_version = "3.13")
+
+# ---------------------------------------------------------------------------
+# Pins copied from bazel-orfs's own MODULE.bazel. Non-root overrides are ignored, so a
+# downstream root has to repeat them. Re-check against bazel-orfs on every @bazel-orfs//:bump.
+# ---------------------------------------------------------------------------
+
+# OpenROAD pins sv-lang 10.0.bcr.2, which is not yet published in BCR.
+# Force the resolution to the latest published version until BCR catches up.
+single_version_override(module_name = "sv-lang", version = "10.0.1-20260316-f04e8156")
+
+# sed (transitive: abc -> ncurses -> sed): its vendored gnulib headers shadow
+# libc headers (stdio.h, error.h), which hermetic-llvm's explicit libc -isystem
+# entries outrank, so 4.9.bcr.3 fails to compile (BCR #7642). 4.9.bcr.5 carries
+# the upstream fix (BCR #7915). (The old toolchains_llvm-era memchr patch_cmds
+# is gone: it dodged a host glibc 2.41+ _Generic collision that the zero-sysroot
+# hermetic-llvm toolchain no longer triggers.)
+single_version_override(module_name = "sed", version = "4.9.bcr.5")
+
+# gawk (transitive: abc -> ncurses -> gawk; yosys -> gawk): same gnulib
+# libc-header shadowing as sed (BCR #7642); 5.3.2.bcr.7 has the fix (BCR #7989).
+single_version_override(module_name = "gawk", version = "5.3.2.bcr.7")
+
+# m4 (transitive: rules_bison/rules_flex -> m4): same gnulib libc-header
+# shadowing under hermetic-llvm (BCR #7642).
+single_version_override(module_name = "m4", version = "1.4.21.bcr.4")
+
+# rules_flex (transitive: openroad -> rules_flex): 0.3.1 uses the global
+# `CcInfo` symbol, which Bazel 9 removed in favour of an explicit
+# `load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")`. 0.4 adds that load
+# and changes nothing else, so it is a no-op on Bazel 8.
+#
+# Not 0.4.1: it deletes flex/internal/toolchain_info.bzl, which is what puts
+# `M4` (and the rest of m4_env) into `flex_toolchain.flex_env`. 0.4.1 sets M4
+# inside its own flex_action instead, so a rule that drives flex from the
+# toolchain directly gets an empty environment and flex dies looking for m4.
+# @openroad's bazel/flex.bzl genlex is exactly such a rule -- it reads
+# flex_env and rewrites the .runfiles/ paths in it -- so 0.4.1 breaks every
+# OpenSTA lexer with a bare `flex failed: (Exit 1)`.
+single_version_override(module_name = "rules_flex", version = "0.4")
+
+# rules_bison (transitive: openroad -> rules_bison): the BUILD its
+# bison_repository generates calls cc_binary/cc_library with no load(),
+# which Bazel 9 rejects. 0.4.bcr.1 emits the loads; its toolchain_info.bzl is
+# unchanged from 0.3.1, so @openroad's bazel/bison.bzl genyacc -- which reads
+# `bison_env["M4"]` and `["BISON_PKGDATADIR"]` straight off the toolchain --
+# keeps working.
+single_version_override(module_name = "rules_bison", version = "0.4.bcr.1")
+
+# scip (transitive: openroad -> or-tools -> scip): 9.2.3's BUILD overlay
+# calls cc_library with no load(); Bazel 9 removed the autoloaded native
+# rules. 9.2.3.bcr.1 is the same SCIP with the load() added.
+single_version_override(module_name = "scip", version = "9.2.3.bcr.1")
+
+# These two need patches that live in bazel-orfs's patches/ directory
+# TODO: Add a mechanism for detecting deviation of local patch copy with bazel-orfs version
+single_version_override(
+    module_name = "bison",
+    version = "3.8.2.bcr.7",
+    patch_strip = 1,
+    patches = ["//bazel_patches:0001-gnulib-wrapper-headers-use-I-not-isystem.patch"],
+)
+single_version_override(
+    module_name = "boost.icl",
+    patch_strip = 1,
+    patches = ["//bazel_patches:0001-refactor-interval-lookup-operations-icl-54.patch"],
+)
+
+# ---------------------------------------------------------------------------
+# ORFS (flow scripts, platforms) through bazel-orfs's extension.
+# ---------------------------------------------------------------------------
+orfs = use_extension("@bazel-orfs//:extension.bzl", "orfs_repositories")
+
+# The ORFS version. This is the same public API bazel-orfs asks its
+# consumers to use -- OpenROAD sets exactly these two attributes and
+# carries no patches, no strip_prefix and no URL construction, because
+# `patches` on an override is honoured only from the root module and
+# would therefore land on whoever is root. Rewritten by @bazel-orfs//:bump.
+orfs.source(
+    commit = "ef421749a1050a8e9a197e7dfcd05396807f889d",
+    integrity = "sha256-dbPWeddtJheDZ03OXnpf2jqfJl1zn1XR0YVZFvzjSa8=",
+)
+orfs.default(
+    # Expose the slang yosys plugin (from BCR sv-elab) via
+    # YOSYS_PLUGIN_PATH so SYNTH_HDL_FRONTEND=slang works.
+    yosys_plugins = ["@sv-elab//src/yosys_plugin:slang.so"],
+)
+use_repo(orfs, "gnumake", "orfs")

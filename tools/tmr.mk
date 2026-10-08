@@ -40,6 +40,10 @@ VERILATOR_FI_COMPILE_ARGS := \
 VERILATOR_FI_SIM_ARGS := FI_LOG_LEVEL="fatal"
 endif
 
+ifneq ($(TB_MAX_CYCLES),)
+	VERILATOR_TB_MAX_CYCLES := +maxCycles=$(TB_MAX_CYCLES)
+endif
+
 # Verilate and compile
 $(BUILD_DIR)/obj_dir/Vtb_top_tmr: $(BUILD_DIR)/defines.h $(TB_SRCS) $(if $(findstring $(FI),1), faultergeist)
 	$(VERILATOR) --binary --main -Mdir $(BUILD_DIR)/obj_dir \
@@ -63,8 +67,7 @@ verilator-build: $(BUILD_DIR)/obj_dir/Vtb_top_tmr
 verilator: $(BUILD_DIR)/obj_dir/Vtb_top_tmr program.hex
 	cp program.hex $(BUILD_DIR)/
 	$(VERILATOR_FI_SIM_ARGS) $(BUILD_DIR)/obj_dir/Vtb_top_tmr \
-		$(TB_EXTRA_ARGS) \
-		+maxCycles=$(TB_MAX_CYCLES)
+		$(VERILATOR_TB_MAX_CYCLES) $(TB_EXTRA_ARGS)
 
 # Synthesis
 LIB_ARGS := $(foreach f,$(LIB_FILES),-liberty $(f))

@@ -70,10 +70,6 @@ el2_mubi_pkg::el2_mubi_t core_active_0;
 el2_mubi_pkg::el2_mubi_t core_active_1;
 el2_mubi_pkg::el2_mubi_t core_active_2;
 
-assign core_active_0 = el2_mubi_pkg::El2MuBiTrue;
-assign core_active_1 = el2_mubi_pkg::El2MuBiTrue;
-assign core_active_2 = el2_mubi_pkg::El2MuBiTrue;
-
 // ------------------------------------------------------------------
 // CRG
 // ------------------------------------------------------------------
@@ -2424,10 +2420,42 @@ always @(posedge core_clk or negedge rst_l) begin
     end else begin
         if (mubi_check_true(tmr_fatal)) begin
             rst_l_cmd <= '0;
-            $display("[%0t] TMR fatal fault! Resetting", $time);
+            $display("[%0t ns] TMR fatal fault! Resetting", $time);
         end else begin
             rst_l_cmd <= (rst_l_cmd << 1) | 1'b1;
         end
+    end
+end
+
+// Control which cores of the TMR complex are active via plusargs
+initial begin
+    bit active;
+
+    core_active_0 = el2_mubi_pkg::El2MuBiTrue;
+    core_active_1 = el2_mubi_pkg::El2MuBiTrue;
+    core_active_2 = el2_mubi_pkg::El2MuBiTrue;
+
+    if ($value$plusargs("core_active_0=%d", active)) begin
+        core_active_0 = mubi_from_bool(active);
+    end
+    if ($value$plusargs("core_active_1=%d", active)) begin
+        core_active_1 = mubi_from_bool(active);
+    end
+    if ($value$plusargs("core_active_2=%d", active)) begin
+        core_active_2 = mubi_from_bool(active);
+    end
+
+    $display("TMR core 0 %s", mubi_check_true(core_active_0) ? "active" : "inactive");
+    $display("TMR core 1 %s", mubi_check_true(core_active_1) ? "active" : "inactive");
+    $display("TMR core 2 %s", mubi_check_true(core_active_2) ? "active" : "inactive");
+
+    // Check
+    if (!mubi_check_true(core_active_0) &&
+        !mubi_check_true(core_active_1) &&
+        !mubi_check_true(core_active_2))
+    begin
+        $display("At least one core of the TMR complex must be active");
+        $fatal();
     end
 end
 
@@ -2476,8 +2504,16 @@ task tmr_upsetter();
     bit pending = '0;
     forever begin
       @(posedge core_clk)
-      if (pending && mubi_check_false(tmr_recovery_pending))
+      // Skip upsetting inactive cores
+      while (1) begin
+        if (which_cpu == 0 && mubi_check_true(core_active_0)) break;
+        if (which_cpu == 1 && mubi_check_true(core_active_1)) break;
+        if (which_cpu == 2 && mubi_check_true(core_active_2)) break;
         which_cpu = (which_cpu + 1) % 3;
+      end
+      if (pending && mubi_check_false(tmr_recovery_pending)) begin
+        which_cpu = (which_cpu + 1) % 3;
+      end
       pending = mubi_check_true(tmr_recovery_pending);
     end
   end
@@ -2493,7 +2529,7 @@ task tmr_upsetter();
     do @(posedge core_clk); while (mubi_check_true(tmr_recovery_pending));
 
     which_reg = 1 + $urandom() % 31;
-    $display("[%0t] Upset! core:%0d, gpr:x%0d", $time, which_cpu, which_reg);
+    $display("[%0t ns] Upset! core:%0d, gpr:x%0d", $time, which_cpu, which_reg);
     if (which_cpu == 0) begin
       if (which_reg ==  1) `VEER0.dec.arf.gpr[ 1].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
       if (which_reg ==  2) `VEER0.dec.arf.gpr[ 2].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;

@@ -113,7 +113,6 @@ module el2_veer_lockstep_wrapper
 
   logic [pt.ICACHE_BANKS_WAY-1:0][70:0] ic_wr_data;  // Data to fill to the Icache. With ECC
   logic [141:0] ic_rd_data;   // Raw way-muxed ECC/parity word pair (rotate+check done core-side). F2 stage.
-  logic [pt.ICACHE_BANKS_WAY-1:0] ic_rd_bank_check_en;  // Per-bank check enable for core-side decode
   logic [                         70:0] ic_debug_rd_data ;        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
   logic [25:0] ictag_debug_rd_data;  // Debug icache tag.
   logic [70:0] ic_debug_wr_data;  // Debug wr cache.
@@ -408,7 +407,6 @@ module el2_veer_lockstep_wrapper
     iccm_rd_data = '0;
     iccm_rd_data_ecc = '0;
     ic_rd_data = '0;
-    ic_rd_bank_check_en = '0;
     ic_debug_rd_data = '0;
     ictag_debug_rd_data = '0;
     ic_rd_hit = '0;

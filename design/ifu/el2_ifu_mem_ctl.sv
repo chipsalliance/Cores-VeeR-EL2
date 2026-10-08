@@ -136,7 +136,6 @@ import el2_pkg::*;
 
    output logic [pt.ICACHE_BANKS_WAY-1:0] [70:0]               ic_wr_data,           // Data to fill to the Icache. With ECC
    input  logic [141:0]              ic_rd_data ,              // Raw way-muxed 142-bit ECC-protected word pair. F2 stage.
-   input  logic [pt.ICACHE_BANKS_WAY-1:0] ic_rd_bank_check_en, // Per-bank ECC check enable for core-side decode
    input  logic [70:0]               ic_debug_rd_data ,          // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
    input  logic [25:0]               ictag_debug_rd_data,  // Debug icache tag.
    output logic [70:0]               ic_debug_wr_data,     // Debug wr cache.
@@ -813,6 +812,29 @@ end
              .din ((ic_debug_rd_en | ic_debug_wr_en) ? 2'b00 : ic_rw_addr[2:1]),
              .dout(ic_rd_rot_sel[1:0]));
 
+  // Per-bank ECC/parity check enables. They are computed here rather than taken
+  // from EL2_IC_DATA, where they depend on the bank read enables: a fault on a
+  // bank read enable could there both suppress a bank read (leaving stale data on
+  // ic_rd_data) and disable the check of that bank.
+  // As in EL2_IC_DATA: always check the lower address bank, and only check the
+  // upper address bank if it is read, i.e., drop it on a CL wrap.
+  logic                           ic_rd_en_no_debug;      // ic_rd_en_with_debug without debug accesses
+  logic                           ic_rd_upper_bank;       // the read also covers the upper address bank
+  logic                           ic_cacheline_wrap;      // the upper address bank is in the next cache line
+  logic                           ic_upper_bank_check_ff;
+  logic [pt.ICACHE_BANKS_WAY-1:0] ic_bank_check_en;
+
+  assign ic_rd_en_no_debug = ic_rd_en & ~(|ic_wr_en[pt.ICACHE_NUM_WAYS-1:0]) & ~(ic_debug_rd_en | ic_debug_wr_en);
+  assign ic_rd_upper_bank  = (ic_rw_addr[2:1] == 2'b11);
+  assign ic_cacheline_wrap = (ic_rw_addr[pt.ICACHE_TAG_INDEX_LO-1:pt.ICACHE_BANK_LO] == {(pt.ICACHE_TAG_INDEX_LO - pt.ICACHE_BANK_LO){1'b1}});
+
+  rvdffie #(.WIDTH(1),.OVERRIDE(1)) ic_upper_bank_check_en_ff (.*,
+             .din (ic_rd_en_no_debug & ic_rd_upper_bank & ~ic_cacheline_wrap),
+             .dout(ic_upper_bank_check_ff));
+
+  assign ic_bank_check_en[0] = |ic_rd_hit[pt.ICACHE_NUM_WAYS-1:0];
+  assign ic_bank_check_en[1] = |ic_rd_hit[pt.ICACHE_NUM_WAYS-1:0] & ic_upper_bank_check_ff;
+
   if (pt.ICACHE_ECC) begin : g_ic_rd_ecc_core
      logic [63:0]  ic_rd_rot;
      logic [141:0] ic_rd_data_fixed;
@@ -825,7 +847,7 @@ end
      assign ic_rd_data_aligned = ic_sel_premux_data ? ic_premux_data[63:0] : ic_rd_rot;
      for (genvar i=0; i<pt.ICACHE_BANKS_WAY; i++) begin : g_dec
         rvecc_decode_64 ecc_decode_64 (
-           .en       (ic_rd_bank_check_en[i]),
+           .en       (ic_bank_check_en[i]),
            .din      (ic_rd_data_fixed[71*i +: 64]),
            .ecc_in   (ic_rd_data_fixed[71*i+64 +: 7]),
            .ecc_error(ic_eccerr_int[i]));
@@ -853,7 +875,7 @@ end
               .parity_in (wb_par_bank[i][64+j]),
               .parity_err(ic_parerr_bank[i][j]));
         end
-        assign ic_parerr_int[i] = (|ic_parerr_bank[i][3:0]) & ic_rd_bank_check_en[i];
+        assign ic_parerr_int[i] = (|ic_parerr_bank[i][3:0]) & ic_bank_check_en[i];
      end
   end
 

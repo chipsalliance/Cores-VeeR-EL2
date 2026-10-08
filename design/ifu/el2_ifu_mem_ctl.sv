@@ -135,7 +135,7 @@ import el2_pkg::*;
    output logic                      ic_rd_en,           // Icache read  enable.
 
    output logic [pt.ICACHE_BANKS_WAY-1:0] [70:0]               ic_wr_data,           // Data to fill to the Icache. With ECC
-   input  logic [141:0]              ic_rd_data ,              // Raw way-muxed 142-bit ECC-protected word pair. F2 stage.
+   input  logic [141:0]              ic_rd_data ,              // Raw way-muxed 142-bit ECC-protected word pair, physical bank order {bank1, bank0}. F2 stage.
    input  logic [70:0]               ic_debug_rd_data ,          // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
    input  logic [25:0]               ictag_debug_rd_data,  // Debug icache tag.
    output logic [70:0]               ic_debug_wr_data,     // Debug wr cache.
@@ -799,18 +799,22 @@ end
   assign ifu_wr_cumulative_err_data =  ifu_wr_data_comb_err | ifu_wr_data_comb_err_ff ;
 
 
-  // Core-side alignment (byte-rotate) and ECC / parity check of the raw 142-bit
-  // ic_rd_data input (ic_rd_data_aligned / ic_eccerr_int / ic_parerr_int declared above).
+  // Core-side bank select, alignment (byte-rotate) and ECC / parity check of the
+  // raw 142-bit ic_rd_data input (ic_rd_data_aligned / ic_eccerr_int / ic_parerr_int
+  // declared above).
 
-  // Rotate select: the F2-aligned ic_rw_addr[2:1], i.e., the halfword offset of
-  // the fetch within the addressed 8-byte chunk. It is registered here, inside
-  // the DCLS domain, rather than taken from EL2_IC_DATA, because the rotation is
-  // applied after the ECC/parity check: a faulty select would turn correctly
-  // checked data into a wrong instruction without any error being flagged.
+  // Bank and rotate select: the F2-aligned ic_rw_addr[3:1]. Bit 3 selects which
+  // bank holds the lower address 8-byte chunk, bits 2:1 are the halfword offset of
+  // the fetch within that chunk. They are registered here, inside the DCLS domain,
+  // rather than taken from EL2_IC_DATA: swapping the banks or rotating with a
+  // faulty select would turn correctly checked data, which is infected with the
+  // same cache line address in both banks, into a wrong instruction without any
+  // error being flagged.
+  logic       ic_rd_bank_sel;   // 1: the lower address chunk is in bank 1
   logic [1:0] ic_rd_rot_sel;
-  rvdffie #(.WIDTH(2),.OVERRIDE(1)) ic_rd_rot_sel_ff (.*,
-             .din ((ic_debug_rd_en | ic_debug_wr_en) ? 2'b00 : ic_rw_addr[2:1]),
-             .dout(ic_rd_rot_sel[1:0]));
+  rvdffie #(.WIDTH(3),.OVERRIDE(1)) ic_rd_addr_sel_ff (.*,
+             .din ((ic_debug_rd_en | ic_debug_wr_en) ? {ic_debug_addr[pt.ICACHE_BANK_HI], 2'b00} : ic_rw_addr[pt.ICACHE_BANK_HI:1]),
+             .dout({ic_rd_bank_sel, ic_rd_rot_sel[1:0]}));
 
   // Per-bank ECC/parity check enables. They are computed here rather than taken
   // from EL2_IC_DATA, where they depend on the bank read enables: a fault on a
@@ -837,9 +841,11 @@ end
 
   if (pt.ICACHE_ECC) begin : g_ic_rd_ecc_core
      logic [63:0]  ic_rd_rot;
+     logic [141:0] ic_rd_data_ord;   // {upper address chunk, lower address chunk}
      logic [141:0] ic_rd_data_fixed;
-     assign ic_rd_data_fixed = {ic_rd_data[141:135], ic_rd_data[134:71] ^ ic_rd_addr_infect,
-                                ic_rd_data[70:64],   ic_rd_data[63:0]   ^ ic_rd_addr_infect};
+     assign ic_rd_data_ord   = ic_rd_bank_sel ? {ic_rd_data[70:0], ic_rd_data[141:71]} : ic_rd_data;
+     assign ic_rd_data_fixed = {ic_rd_data_ord[141:135], ic_rd_data_ord[134:71] ^ ic_rd_addr_infect,
+                                ic_rd_data_ord[70:64],   ic_rd_data_ord[63:0]   ^ ic_rd_addr_infect};
      assign ic_rd_rot = (ic_rd_rot_sel == 2'b00) ? ic_rd_data_fixed[63:0]                              :
                         (ic_rd_rot_sel == 2'b01) ? {ic_rd_data_fixed[86:71],  ic_rd_data_fixed[63:16]} :
                         (ic_rd_rot_sel == 2'b10) ? {ic_rd_data_fixed[102:71], ic_rd_data_fixed[63:32]} :
@@ -855,11 +861,13 @@ end
      assign ic_parerr_int = '0;
   end else begin : g_ic_rd_par_core
      logic [63:0] ic_rd_rot_par;
+     logic [135:0] ic_rd_data_ord;   // {upper address chunk, lower address chunk}
      logic [135:0] ic_rd_data_fixed;
      logic [pt.ICACHE_BANKS_WAY-1:0][67:0] wb_par_bank;
      logic [pt.ICACHE_BANKS_WAY-1:0][3:0]  ic_parerr_bank;
-     assign ic_rd_data_fixed = {ic_rd_data[135:132], ic_rd_data[131:68] ^ ic_rd_addr_infect,
-                                ic_rd_data[67:64],   ic_rd_data[63:0]   ^ ic_rd_addr_infect};
+     assign ic_rd_data_ord   = ic_rd_bank_sel ? {ic_rd_data[67:0], ic_rd_data[135:68]} : ic_rd_data[135:0];
+     assign ic_rd_data_fixed = {ic_rd_data_ord[135:132], ic_rd_data_ord[131:68] ^ ic_rd_addr_infect,
+                                ic_rd_data_ord[67:64],   ic_rd_data_ord[63:0]   ^ ic_rd_addr_infect};
      assign ic_rd_rot_par = (ic_rd_rot_sel == 2'b00) ? ic_rd_data_fixed[63:0]                              :
                             (ic_rd_rot_sel == 2'b01) ? {ic_rd_data_fixed[83:68],  ic_rd_data_fixed[63:16]} :
                             (ic_rd_rot_sel == 2'b10) ? {ic_rd_data_fixed[99:68],  ic_rd_data_fixed[63:32]} :

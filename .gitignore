@@ -14,6 +14,7 @@ __pycache__
 sim_build
 sim-build*
 venv
+/.bazel-registry
 results.xml
 verification/sim
 verilator-cocotb-build

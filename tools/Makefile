@@ -50,6 +50,8 @@ BUILD_DIR = snapshots/${snapshot}
 TBDIR = ${RV_ROOT}/testbench
 PICOLIBC_DIR = ${RV_ROOT}/third_party/picolibc/install
 
+TIMESCALE ?= 1ns/10ps
+
 ifdef TMR_TB
 TB_TOP ?= tb_top_tmr
 else
@@ -83,7 +85,7 @@ ifeq ("$(.SHELLSTATUS)", "0")
     endif
 endif
 
-VERILATOR_SKIP_WARNINGS = $(VERILATOR_NOIMPLICIT) -Wno-TIMESCALEMOD -Wno-ASCRANGE \
+VERILATOR_SKIP_WARNINGS = $(VERILATOR_NOIMPLICIT) -Wno-ASCRANGE \
 	-Wno-CASEINCOMPLETE -Wno-INITIALDLY -Wno-WIDTH -Wno-UNOPTFLAT -Wno-SIDEEFFECT \
 	-Wno-LATCH -Wno-MULTIDRIVEN
 
@@ -233,7 +235,7 @@ ${BUILD_DIR}/defines.h:
 ifndef TMR_TB
 verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	$(VERILATOR) --cc -CFLAGS "${CFLAGS} -DTB_TOP=$(TB_TOP)" --coverage-max-width 20000 $(defines) \
-	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist \
+	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist --timescale $(TIMESCALE) \
 	  $(VERILATOR_SKIP_WARNINGS) $(VERILATOR_EXTRA_ARGS) ${TB_SILENT_FAIL} ${TBFILES} --top-module $(TB_TOP) \
 	  -exe $(TB_VERILATOR_SRCS) --autoflush --timing --assert $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE) -fno-table
 	cp ${RV_ROOT}/testbench/test_tb_top.cpp obj_dir/
@@ -246,7 +248,7 @@ vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	  +error+500 +incdir+${RV_ROOT}/design/lib \
 	  +incdir+${RV_ROOT}/design/include ${BUILD_DIR}/common_defines.vh \
 	  +incdir+$(BUILD_DIR)  +libext+.v $(defines) -CFLAGS "${CFLAGS}" \
-	  -cm_hier $(CM_HIER_FILE) $(VCS_COVERAGE) -timescale=1ns/10ps \
+	  -cm_hier $(CM_HIER_FILE) $(VCS_COVERAGE) -timescale=$(TIMESCALE) \
 	  -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -l vcs.log
 	touch vcs-build
 

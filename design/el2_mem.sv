@@ -69,7 +69,7 @@ import el2_pkg::*;
    input  logic                      ic_debug_tag_array, // Debug tag array
    input  logic [pt.ICACHE_NUM_WAYS-1:0]                ic_debug_way,       // Debug way. Rd or Wr.
 
-   output logic [141:0]                   ic_rd_data ,         // Raw way-muxed 142-bit ECC-protected word pair. F2 stage.
+   output logic [141:0]                   ic_rd_data ,         // Raw way-muxed 142-bit ECC-protected word pair, physical bank order {bank1, bank0}. F2 stage.
 
    output logic [25:0]               ictag_debug_rd_data,// Debug icache tag.
 

@@ -66,10 +66,12 @@ $(BUILD_DIR)/obj_dir/Vtb_top_tmr: $(BUILD_DIR)/defines.h $(TB_SRCS) $(if $(finds
 
 verilator-build: $(BUILD_DIR)/obj_dir/Vtb_top_tmr
 
-verilator: $(BUILD_DIR)/obj_dir/Vtb_top_tmr program.hex
-	cp program.hex $(BUILD_DIR)/
+verilator: $(BUILD_DIR)/obj_dir/Vtb_top_tmr program.hex $(POST_SIM_SCRIPT)
 	$(VERILATOR_FI_SIM_ARGS) $(BUILD_DIR)/obj_dir/Vtb_top_tmr \
-		$(VERILATOR_TB_MAX_CYCLES) $(TB_EXTRA_ARGS)
+		$(VERILATOR_TB_MAX_CYCLES) $(TB_EXTRA_ARGS) | tee run.log 2>&1
+ifneq ($(POST_SIM_SCRIPT),)
+	$(POST_SIM_SCRIPT) $(POST_SIM_SCRIPT_ARGS)
+endif
 
 # Synthesis
 LIB_ARGS := $(foreach f,$(LIB_FILES),-liberty $(f))

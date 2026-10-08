@@ -1,0 +1,21 @@
+load("@rules_perl//perl:perl.bzl", "perl_binary")
+load("@rules_perl//perl/cpan:cpan_compiler.bzl", "cpan_compiler")
+
+package(default_visibility = ["//visibility:public"])
+
+cpan_compiler(
+    name = "compiler",
+    cpanfile = "cpanfile",
+    lockfile = "cpanfile.snapshot.lock.json",
+    visibility = ["//visibility:public"],
+)
+
+# Need to wrap the script to make use of the installed modules
+perl_binary(
+    name = "gen_config_bin",
+    srcs = ["veer.config"],
+    deps = [
+        "@cpan//:JSON",
+        "//tools:gen_picmap",
+    ],
+)

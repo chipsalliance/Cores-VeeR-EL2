@@ -8,75 +8,58 @@ module el2_tmr_complex_clk
   import el2_mubi_pkg::*;
 (
     input  logic clk,
-    input  logic active_state_veer[3],
-    output logic active_l2clk_veer[3],
-    output logic free_l2clk_veer[3],
-    output logic active_clk_veer[3],
-    output logic free_clk_veer[3],
+    output logic clk_veer[3],
+
     output logic active_l2clk,
     output logic free_l2clk,
-    output logic free_clk_int,
+    output logic free_clk,
 
-    input  logic lsu_bus_clk_en,
-    input  logic ifu_bus_clk_en,
-    input  logic dbg_bus_clk_en,
-    input  logic dma_bus_clk_en,
-    output logic lsu_bus_clk_en_veer[3],
-    output logic ifu_bus_clk_en_veer[3],
-    output logic dbg_bus_clk_en_veer[3],
-    output logic dma_bus_clk_en_veer[3],
+    input  logic active_state_veer[3],
 
     input  logic dec_tlu_bus_clk_override_veer[3],
     input  logic pic_clk_override_veer[3],
     input  logic pic_io_clk_override_veer[3],
+
     output logic dec_tlu_bus_clk_override_int,
     output logic pic_clk_override_int,
     output logic pic_io_clk_override_int,
-    // TODO: Add configuration signals
+
+    input  el2_mubi_pkg::el2_mubi_t core_active[3],
+
     input  logic scan_mode
 );
 
-  logic active_state_voted;
+  logic  active_state;
+  assign active_state =
+    (mubi_check_true(core_active[0]) & active_state_veer[0]) |
+    (mubi_check_true(core_active[1]) & active_state_veer[1]) |
+    (mubi_check_true(core_active[2]) & active_state_veer[2]);
 
-  // TODO: Add logic to correctly handle different configurations
-  rvtmr #(.WIDTH(1)) active_state_voter (
-    .I(active_state_veer),
-    .O(active_state_voted)
-  );
+  rvoclkhdr free_cg2   (.clk(clk),        .en(1'b1),         .l1clk(free_l2clk),   .* );
+  rvoclkhdr free_cg1   (.clk(free_l2clk), .en(1'b1),         .l1clk(free_clk),     .* );
+  rvoclkhdr active_cg2 (.clk(clk),        .en(active_state), .l1clk(active_l2clk), .* );
 
-  // Active clock will only cost extra power
-  // TODO: Add logic to correctly handle different configurations
-  rvtmr  #(.WIDTH(1)) dec_tlu_bus_clk_override_voter (
-    .I(dec_tlu_bus_clk_override_veer),
-    .O(dec_tlu_bus_clk_override_int)
-  );
-  // TODO: Add logic to correctly handle different configurations
-  rvtmr  #(.WIDTH(1)) pic_clk_override_voter (
-    .I(pic_clk_override_veer),
-    .O(pic_clk_override_int)
-  );
-  // TODO: Add logic to correctly handle different configurations
-  rvtmr  #(.WIDTH(1)) pic_io_clk_override_voter (
-    .I(pic_io_clk_override_veer),
-    .O(pic_io_clk_override_int)
-  );
-
-  // Global CG
-  rvoclkhdr free_cg2   ( .clk(clk), .en(1'b1),         .l1clk(free_l2clk), .* );
-  rvoclkhdr active_cg2 ( .clk(clk), .en(active_state_voted), .l1clk(active_l2clk), .* );
-  rvoclkhdr free_cg1   ( .clk(free_l2clk),     .en(1'b1), .l1clk(free_clk_int), .* );
-
-  for (genvar i=0; i<3; i++) begin: pre_core_CG
-    rvoclkhdr free_cg2   ( .clk(clk), .en(1'b1 /*Change to use config*/),         .l1clk(free_l2clk_veer[i]), .* );
-    rvoclkhdr active_cg2 ( .clk(clk), .en(active_state_veer[i] /* Add core configuration*/), .l1clk(active_l2clk_veer[i]), .* );
-    rvoclkhdr free_cg1   ( .clk(free_l2clk),     .en(1'b1), .l1clk(free_clk_veer[i]), .* );
-    rvoclkhdr active_cg1 ( .clk(active_l2clk),   .en(1'b1), .l1clk(active_clk_veer[i]), .* );
-
-    // Use control signals to gate clock
-    assign lsu_bus_clk_en_veer[i] = lsu_bus_clk_en;
-    assign ifu_bus_clk_en_veer[i] = ifu_bus_clk_en;
-    assign dbg_bus_clk_en_veer[i] = dbg_bus_clk_en;
-    assign dma_bus_clk_en_veer[i] = dma_bus_clk_en;
+  // Per-core clock gate. Controlled by the boot configuration
+  for (genvar i=0; i<3; i++) begin: pre_core_cg
+    rvoclkhdr core_cg (.clk(clk), .en(mubi_check_true(core_active[i])), .l1clk(clk_veer[i]), .*);
   end
+
+  // DEC TLU bus clock gate
+  assign dec_tlu_bus_clk_override_int =
+    (mubi_check_true(core_active[0]) & dec_tlu_bus_clk_override_veer[0]) |
+    (mubi_check_true(core_active[1]) & dec_tlu_bus_clk_override_veer[1]) |
+    (mubi_check_true(core_active[2]) & dec_tlu_bus_clk_override_veer[2]);
+
+  // PIC clock gates
+  assign pic_io_clk_override_int =
+    (mubi_check_true(core_active[0]) & pic_io_clk_override_veer[0]) |
+    (mubi_check_true(core_active[1]) & pic_io_clk_override_veer[1]) |
+    (mubi_check_true(core_active[2]) & pic_io_clk_override_veer[2]);
+
+  assign pic_clk_override_int =
+    (mubi_check_true(core_active[0]) & pic_clk_override_veer[0]) |
+    (mubi_check_true(core_active[1]) & pic_clk_override_veer[1]) |
+    (mubi_check_true(core_active[2]) & pic_clk_override_veer[2]);
+
 endmodule
 `endif

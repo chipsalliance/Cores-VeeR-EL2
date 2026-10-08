@@ -410,6 +410,9 @@ module el2_tmr_complex
 );
 
   // Cores Buses
+  logic        clk_veer[3];
+  logic        sync_rst_l;
+  logic        sync_rst_l_veer[3];
   logic        core_rst_l_veer[3];
   logic [31:1] rst_vec_veer[3];
   logic        nmi_int_veer[3];
@@ -417,8 +420,6 @@ module el2_tmr_complex
   logic        active_state_veer[3];
   logic        active_l2clk_veer[3];
   logic        free_l2clk_veer[3];
-  logic        active_clk_veer[3];
-  logic        free_clk_veer[3];
   logic        timer_int_veer[3];
   logic        soft_int_veer[3];
 
@@ -697,11 +698,6 @@ module el2_tmr_complex
   logic [1:0]                dma_axi_rresp_veer[3];
   logic                      dma_axi_rlast_veer[3];
 
-  logic        lsu_bus_clk_en_veer[3];
-  logic        ifu_bus_clk_en_veer[3];
-  logic        dbg_bus_clk_en_veer[3];
-  logic        dma_bus_clk_en_veer[3];
-
   logic        dmi_reg_en_veer[3];                // read or write
   logic [6:0]  dmi_reg_addr_veer[3];              // address of DM register
   logic        dmi_reg_wr_en_veer[3];             // write instruction
@@ -914,7 +910,7 @@ module el2_tmr_complex
   logic        mexintpend_int;
   logic        mhwakeup_int;
 
-  logic        free_clk_int;
+  logic        free_clk;
 
   //-------------------------------------------------------------------
 
@@ -1127,7 +1123,6 @@ module el2_tmr_complex
   );
   el2_tmr_pic el2_tmr_pic_u (.*);
   el2_tmr_complex_io el2_tmr_complex_io_u(
-      .free_clk(free_clk_int),
       .*
   );
   el2_tmr_complex_clk el2_tmr_complex_clk_u(.*);
@@ -1138,8 +1133,6 @@ module el2_tmr_complex
     .core_active_o(core_active),
     .*
   );
-
-  logic sync_rst_l;
 
   el2_tmr_recovery_fsm el2_tmr_recovery_fsm_u (
       .*,
@@ -1152,9 +1145,13 @@ module el2_tmr_complex
       .fatal_err(recovery_fault)
   );
 
+  // Cores
   for (genvar i=0;i < 3; i+=1) begin: cores
     logic dec_tlu_dccm_wr_readback_disable; // TODO: Is it needed?
     logic dccm_write_readback_error; // TODO: Is it needed?
+
+    // Keep inactive cores in reset
+    assign sync_rst_l_veer[i] = sync_rst_l & mubi_check_true(core_active[i]);
 
     // I/O inhibit
     logic  inh;
@@ -1189,8 +1186,8 @@ module el2_tmr_complex
 
     // VeeR core
     el2_veer #(.pt(pt)) veer (
-        .clk(clk),
-        .rst_l(rst_l & sync_rst_l),
+        .clk(clk_veer[i]),
+        .rst_l(rst_l & sync_rst_l_veer[i]),
         .dbg_rst_l(dbg_rst_l),
         .rst_vec(rst_vec_veer[i]),
         .nmi_int(nmi_int_veer[i]),
@@ -1199,8 +1196,6 @@ module el2_tmr_complex
         .active_state(active_state_veer[i]),
         .active_l2clk(active_l2clk_veer[i]),
         .free_l2clk(free_l2clk_veer[i]),
-        .free_clk(free_clk_veer[i]),
-        .active_clk(active_clk_veer[i]),
         .trace_rv_i_insn_ip(trace_rv_i_insn_ip_veer[i]),
         .trace_rv_i_address_ip(trace_rv_i_address_ip_veer[i]),
         .trace_rv_i_valid_ip(trace_rv_i_valid_ip_veer[i]),
@@ -1412,10 +1407,10 @@ module el2_tmr_complex
         .dma_axi_rdata(dma_axi_rdata_veer[i]),
         .dma_axi_rresp(dma_axi_rresp_veer[i]),
         .dma_axi_rlast(dma_axi_rlast_veer[i]),
-        .lsu_bus_clk_en(lsu_bus_clk_en_veer[i]),
-        .ifu_bus_clk_en(ifu_bus_clk_en_veer[i]),
-        .dbg_bus_clk_en(dbg_bus_clk_en_veer[i]),
-        .dma_bus_clk_en(dma_bus_clk_en_veer[i]),
+        .lsu_bus_clk_en(lsu_bus_clk_en),
+        .ifu_bus_clk_en(ifu_bus_clk_en),
+        .dbg_bus_clk_en(dbg_bus_clk_en),
+        .dma_bus_clk_en(dma_bus_clk_en),
         .dmi_reg_en(dmi_reg_en_veer[i]),
         .dmi_reg_addr(dmi_reg_addr_veer[i]),
         .dmi_reg_wr_en(dmi_reg_wr_en_veer[i]),
@@ -1517,7 +1512,7 @@ module el2_tmr_complex
 
   el2_pic_ctrl  #(.pt(pt)) pic_ctrl_inst (
     .clk(free_l2clk),
-    .free_clk(free_clk_int),
+    .free_clk(free_clk),
     .clk_override(pic_clk_override_int),
     .io_clk_override(pic_io_clk_override_int),
     .picm_rdaddr(picm_rdaddr_int),

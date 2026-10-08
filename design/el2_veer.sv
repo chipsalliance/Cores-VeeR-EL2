@@ -40,15 +40,10 @@ import el2_pkg::*;
    /*pragma coverage on*/
    output logic                 core_rst_l,   // This is "rst_l | dbg_rst_l"
 
-`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
    output logic                 active_l2clk,
    output logic                 free_l2clk,
-`else
-   output logic        active_state,
-   input  logic        free_l2clk,
-   input  logic        active_l2clk,
-   input  logic        free_clk,
-   input  logic        active_clk,
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+   output logic                 active_state,
 `endif
 
    output logic [31:0] trace_rv_i_insn_ip,
@@ -958,9 +953,9 @@ import el2_pkg::*;
 
 `ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
    logic                   active_state;
+`endif
    logic                   free_clk;
    logic                   active_clk;
-`endif
    logic                   dec_pause_state_cg;
 
    logic                   lsu_nonblock_load_data_error;
@@ -998,14 +993,12 @@ import el2_pkg::*;
 
    assign active_state = (~(halt_state | pause_state) | dec_tlu_flush_lower_r | dec_tlu_flush_lower_wb)  | dec_tlu_misc_clk_override;
 
-`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
    rvoclkhdr free_cg2   ( .clk(clk), .en(1'b1),         .l1clk(free_l2clk), .* );
    rvoclkhdr active_cg2 ( .clk(clk), .en(active_state), .l1clk(active_l2clk), .* );
 
 // all other clock headers are 1st level
    rvoclkhdr free_cg1   ( .clk(free_l2clk),     .en(1'b1), .l1clk(free_clk), .* );
    rvoclkhdr active_cg1 ( .clk(active_l2clk),   .en(1'b1), .l1clk(active_clk), .* );
-`endif
 
 
    assign core_dbg_cmd_done = dma_dbg_cmd_done | dec_dbg_cmd_done;

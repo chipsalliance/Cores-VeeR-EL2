@@ -502,7 +502,6 @@ import el2_pkg::*;
    logic [25:0]  ictag_debug_rd_data;               // Debug icache tag.
    logic [pt.ICACHE_BANKS_WAY-1:0][70:0]  ic_wr_data;
    logic [141:0] ic_rd_data;
-   logic [pt.ICACHE_BANKS_WAY-1:0] ic_rd_bank_check_en;
    logic [70:0]  ic_debug_rd_data;                  // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
    logic [70:0]  ic_debug_wr_data;                  // Debug wr cache.
 

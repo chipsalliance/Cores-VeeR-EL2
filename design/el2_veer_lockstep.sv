@@ -103,7 +103,6 @@ module el2_veer_lockstep
 
     input logic [pt.ICACHE_BANKS_WAY-1:0][70:0] ic_wr_data,  // Data to fill to the Icache. With ECC
     input  logic [141:0]                   ic_rd_data ,         // Raw way-muxed 142-bit ECC-protected word pair. F2 stage.
-    input  logic [pt.ICACHE_BANKS_WAY-1:0] ic_rd_bank_check_en, // Per-bank ECC check enable for core-side decode
     input  logic [70:0]               ic_debug_rd_data ,        // Data read from Icache. 2x64bits + parity bits. F2 stage. With ECC
     input logic [25:0] ictag_debug_rd_data,  // Debug icache tag.
     input logic [70:0] ic_debug_wr_data,  // Debug wr cache.
@@ -497,7 +496,6 @@ module el2_veer_lockstep
   assign main_core_inputs.dccm_rd_data_hi = dccm_rd_data_hi;
   assign main_core_inputs.iccm_rd_data_ecc = iccm_rd_data_ecc;
   assign main_core_inputs.ic_rd_data = ic_rd_data;
-  assign main_core_inputs.ic_rd_bank_check_en = ic_rd_bank_check_en;
   assign main_core_inputs.ic_debug_rd_data = ic_debug_rd_data;
   assign main_core_inputs.ictag_debug_rd_data = ictag_debug_rd_data;
   assign main_core_inputs.ic_rd_hit = ic_rd_hit;
@@ -900,7 +898,6 @@ module el2_veer_lockstep
 
       .ic_wr_data(shadow_core_outputs.ic_wr_data),
       .ic_rd_data(shadow_core_inputs.ic_rd_data),
-      .ic_rd_bank_check_en(shadow_core_inputs.ic_rd_bank_check_en),
       .ic_debug_rd_data(shadow_core_inputs.ic_debug_rd_data),
       .ictag_debug_rd_data(shadow_core_inputs.ictag_debug_rd_data),
       .ic_debug_wr_data(shadow_core_outputs.ic_debug_wr_data),

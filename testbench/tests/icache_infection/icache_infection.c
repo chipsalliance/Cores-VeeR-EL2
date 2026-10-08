@@ -96,7 +96,7 @@ int main(void) {
     printf("[Phase 1] Cache line warmup complete. Counter = %u\n", counter);
 
     // Phase 2: Inject ICache read data fault & verify micect CSR (0x7F0) increment.
-    // Mailbox 0x89 primes tb_top to force 142-bit `ic_rd_data` to `142'h1`. Calling target_inst()
+    // Mailbox 0x89 primes tb_top to force data bit 0 of both banks of `ic_rd_data`. Calling target_inst()
     // triggers ECC/parity check failure on read data, pulsing `ic_perr_r` in the TLU,
     // which increments `micect` (0x7F0) and initiates a pipeline flush and refetch.
     printf("[Phase 2] Triggering ICache read data fault via mailbox (0x89)...\n");
@@ -152,7 +152,7 @@ int main(void) {
 #endif
 
     // Phase 4: Inject ICache hit logic fault & verify detection and micect increment.
-    // Mailbox 0x8B primes tb_top to force multi-bit read data corruption (142'h5557...),
+    // Mailbox 0x8B primes tb_top to force multi-bit read data corruption (16'h5557 pattern in both banks),
     // simulating incorrect way selection / corrupted hit data. This pulses `ic_perr_r`,
     // increments `micect` (0x7F0), and initiates cache line invalidation and refetch.
     printf("[Phase 4] Triggering ICache hit logic fault via mailbox (0x8B)...\n");

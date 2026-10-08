@@ -1203,13 +1203,16 @@ module tb_top
             ic_perr_r_d1          <= rvtop_wrapper.rvtop.veer.dec.tlu.ic_perr_r;
             next_ic_addr_error_d1 <= next_ic_addr_error;
 
-            // Mailbox 0x89: Force ICache read data corruption (forces 142-bit ic_rd_data to 142'h1)
+            // Mailbox 0x89: Force ICache read data corruption (forces data bit 0 of both banks of
+            // ic_rd_data). ic_rd_data is in physical bank order, so the fetched (lower address)
+            // chunk can come from either half; corrupting both makes the injection address-independent.
             if (mailbox_write && mailbox_data[7:0] == 8'h89) begin
                 `ifdef RV_ASSERT_OR_VERILATOR
                     force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
                 `endif
                 next_ic_error <= 1;
-                force rvtop_wrapper.rvtop.ic_rd_data = 142'h1;
+                force rvtop_wrapper.rvtop.ic_rd_data = `RV_ICACHE_ECC ? {71'h1, 71'h1}
+                                                                      : {6'b0, 68'h1, 68'h1};
             end else if (next_ic_error && ic_perr_r_d1) begin
                 next_ic_error <= 0;
                 release rvtop_wrapper.rvtop.ic_rd_data;
@@ -1254,7 +1257,9 @@ module tb_top
                 next_ic_hit_error <= 1;
                 // Corrupt read data to simulate incorrect way selection / hit logic fault.
                 // Uses 16'h5557 pattern (odd parity per 16-bit chunk) so both Parity and ECC detectors trigger.
-                force rvtop_wrapper.rvtop.ic_rd_data = 142'h5557_5557_5557_5557;
+                // Applied to both banks, as ic_rd_data is in physical bank order (see 0x89).
+                force rvtop_wrapper.rvtop.ic_rd_data = `RV_ICACHE_ECC ? {71'h5557_5557_5557_5557, 71'h5557_5557_5557_5557}
+                                                                      : {6'b0, 68'h5557_5557_5557_5557, 68'h5557_5557_5557_5557};
             end else if (next_ic_hit_error && ic_perr_r_d1) begin
                 next_ic_hit_error <= 0;
                 release rvtop_wrapper.rvtop.ic_rd_data;

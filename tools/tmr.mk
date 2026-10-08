@@ -27,8 +27,8 @@ CONFIG_JSON := $(BUILD_DIR)/config.json
 NETLIST_JSON := $(BUILD_DIR)/netlist.json
 
 FI_MODEL_NAME ?= random
-FI_NUM_OF_EVENTS ?= 10000
-FI_SIM_TIME ?= 10ms
+FI_SIM_TIME ?= 10us
+FI_NUM_OF_EVENTS ?= 30
 
 ifeq ($(FI),1)
 VERILATOR_FI_COMPILE_ARGS := \

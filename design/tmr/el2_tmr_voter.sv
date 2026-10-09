@@ -34,7 +34,12 @@ module el2_tmr_voter # (
   logic [Width-1:0] in[3];
   el2_mubi_t        en[3];
 
-  assign in = '{in_a, in_b, in_c}; 
+  // Mux data inputs
+  assign in[0] = mubi_check_true(en_a) ? in_a : in_b;
+  assign in[1] = mubi_check_true(en_b) ? in_b : in_c;
+  assign in[2] = mubi_check_true(en_c) ? in_c : in_a;
+
+  // Enable inputs aren't muxed
   assign en = '{en_a, en_b, en_c}; 
 
   // Majority voting

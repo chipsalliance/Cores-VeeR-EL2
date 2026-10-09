@@ -1,0 +1,13 @@
+# Copyright (c) 2026 Antmicro
+# SPDX-License-Identifier: Apache-2.0
+
+# Console over the testbench mailbox
+CONFIG_SERIAL=y
+CONFIG_CONSOLE=y
+CONFIG_UART_CONSOLE=y
+
+# Program is preloaded into RAM by the testbench
+CONFIG_XIP=n
+
+# Keep tick ISR overhead low in simulation
+CONFIG_SYS_CLOCK_TICKS_PER_SEC=100

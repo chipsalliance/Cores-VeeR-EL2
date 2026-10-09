@@ -1,0 +1,9 @@
+# Copyright (c) 2026 Antmicro
+# SPDX-License-Identifier: Apache-2.0
+
+board:
+  name: veer_el2_tb
+  full_name: VeeR EL2 Testbench
+  vendor: chipsalliance
+  socs:
+    - name: veer_el2

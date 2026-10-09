@@ -1,0 +1,37 @@
+# Copyright (c) 2026 Antmicro
+# SPDX-License-Identifier: Apache-2.0
+
+config VEER_EL2_TB_SERIAL
+	bool "VeeR EL2 testbench mailbox driver"
+	select SERIAL
+	select SERIAL_HAS_DRIVER
+	default y
+	depends on SOC_VEER_EL2
+	help
+	  Enable VeeR EL2 testbench mailbox driver.
+
+config VEER_EL2_TB_EXIT
+	bool "Report test result to the VeeR EL2 testbench via the mailbox"
+	default y
+	depends on VEER_EL2_TB_SERIAL
+	select HAS_POWEROFF
+	select POWEROFF
+
+config VEER_EL2_TB_EXIT_AFTER_MS
+	int "Report PASS after this many ms of uptime (0 = never)"
+	default 0
+	depends on VEER_EL2_TB_EXIT
+	help
+	  Zephyr does not end execution when main() returns, so applications
+	  that never call sys_poweroff() (most upstream samples, e.g.
+	  hello_world or philosophers) never report a result to the testbench.
+	  If set, report PASS once the system has run this long without a
+	  fatal error. Applications that call sys_poweroff() themselves can
+	  leave this at 0.
+
+config VEER_EL2_TB_EXIT_ON_MAIN_RETURN
+	bool "Report PASS when main() returns"
+	depends on VEER_EL2_TB_EXIT
+	help
+	  Do not use for apps whose main() only spawns threads and returns
+	  (e.g. philosophers): they would pass immediately.

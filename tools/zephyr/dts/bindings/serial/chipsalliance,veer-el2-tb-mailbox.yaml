@@ -1,0 +1,9 @@
+# Copyright (c) 2026 Antmicro
+# SPDX-License-Identifier: Apache-2.0
+
+description: VeeR EL2 testbench mailbox, write-only character output
+compatible: "chipsalliance,veer-el2-tb-mailbox"
+include: uart-controller.yaml
+properties:
+  reg:
+    required: true

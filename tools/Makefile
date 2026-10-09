@@ -113,7 +113,9 @@ else ifneq ("$(COVERAGE)", "")
 endif
 
 # Determine test directory
-ifneq (,$(wildcard $(TBDIR)/tests/$(TEST)))
+ifneq ($(filter zephyr_%,$(TEST)),)
+  TEST_DIR = $(RV_ROOT)/tools/zephyr
+else ifneq (,$(wildcard $(TBDIR)/tests/$(TEST)))
   TEST_DIR = $(TBDIR)/tests/$(TEST)
 endif
 
@@ -218,7 +220,7 @@ all: clean verilator
 clean:
 	rm -rf *.log *.s *.hex *.dis *.tbl irun* vcs* simv* *.map snapshots \
 	verilator* *.exe obj* *.o *.sym ucli.key vc_hdrs.h csrc *.csv work \
-	dataset.asdb library.cfg vsimsa.cfg riviera-build wave.asdb
+	dataset.asdb library.cfg vsimsa.cfg riviera-build wave.asdb $(ZEPHYR_ELF)
 
 
 
@@ -318,11 +320,19 @@ program.hex: ${BUILD_DIR}/defines.h
 		echo "Canned hex not found: ${HEX_DIR}/user_mode${USER_MODE}/$(TEST).hex"; \
 		exit 1; \
 	fi
-else
-ifneq (,$(wildcard $(TEST_DIR)/$(TEST).makefile))
+else ifneq (,$(wildcard $(TEST_DIR)/$(TEST).makefile))
 program.hex: picolibc
 	@echo Building $(TEST) via $(TEST_DIR)/$(TEST).makefile
 	$(MAKE) -f $(TEST_DIR)/$(TEST).makefile
+else ifneq ($(filter zephyr_%,$(TEST)),)
+TEST_NAME := $(patsubst zephyr_%,%,$(TEST))
+ZEPHYR_ELF := $(RV_ROOT)/tools/zephyr/build/zephyr/zephyr.elf
+
+$(ZEPHYR_ELF):
+	cd $(RV_ROOT)/tools/zephyr && west build -p always -b veer_el2_tb $(ZEPHYR_BASE)/samples/$(TEST_NAME) -- -DEXTRA_ZEPHYR_MODULES=$(RV_ROOT)/tools $(ZEPHYR_CONFIG)
+
+program.hex: $(ZEPHYR_ELF)
+	$(GCC_PREFIX)-objcopy -O verilog $(ZEPHYR_ELF) program.hex
 else
 program.hex: picolibc $(OFILES) ${BUILD_DIR}/defines.h
 	@echo Building $(TEST)
@@ -341,7 +351,6 @@ program.hex: picolibc $(OFILES) ${BUILD_DIR}/defines.h
 %.o : %.c picolibc ${BUILD_DIR}/defines.h
 	$(GCC_PREFIX)-gcc ${includes} --specs=$(PICOLIBC_DIR)/picolibc.specs ${TEST_CFLAGS} -DCOMPILER_FLAGS="\"${TEST_CFLAGS}\"" ${CC_ABI} -c $< -o $@
 
-endif
 endif
 
 

@@ -1,0 +1,9 @@
+# Copyright (c) 2026 Antmicro
+# SPDX-License-Identifier: Apache-2.0
+
+menu "Device Drivers"
+
+rsource "timer/Kconfig"
+rsource "serial/Kconfig"
+
+endmenu

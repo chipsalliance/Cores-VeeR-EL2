@@ -36,7 +36,7 @@ jobs:
         run: |
           echo "tests=$(python3 .github/scripts/select_pr_tests.py \
             '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}-custom' 4 \
-            'hello_world,hello_world_dccm,dcls,dcls_debug,dcls_error_ctrl,dcls_ecc_asymmetric,dcls_internal_state,ecc_threshold,dhry,ecc,csr_misa,csr_access,csr_mstatus,csr_mseccfg,perf_counters,icache,bitmanip' \
+            'hello_world,hello_world_dccm,dcls,dcls_debug,dcls_error_ctrl,dcls_ecc_asymmetric,dcls_internal_state,dcls_regfile_read,ecc_threshold,dhry,ecc,csr_misa,csr_access,csr_mstatus,csr_mseccfg,perf_counters,icache,bitmanip' \
             'csr_access')" | tee -a $GITHUB_OUTPUT
       - name: Select ICache ECC tests
         id: select-icache-ecc
@@ -616,11 +616,26 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+          echo "FULL_NAME=dcls-regfile-read-${{ matrix.bus }}-${{ matrix.test }}-rf${{ matrix.regfile_read_enable }}-delay${{ matrix.delay }}" >> $GITHUB_ENV
 
       - name: Run tests
         run: |
+          export RV_ROOT=`pwd`
           export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
           .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+
+      - name: Prepare coverage data
+        run: |
+          source .venv/bin/activate
+          mkdir -p results
+          .github/scripts/convert_dat.sh ${TEST_PATH}/coverage.dat results/coverage_${FULL_NAME}
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression_tests_coverage_data_dcls_${{ env.FULL_NAME }}_${{ matrix.coverage }}
+          path: results/*.info
 
   custom-regression-tests:
     name: Custom regression tests
@@ -666,6 +681,7 @@ jobs:
         run: _secret_dcls_regression:10
         env:
           DCLS_ENABLE: "1"
+          DCLS_REGFILE_READ_ENABLE: ${{ matrix.test == 'dcls_regfile_read' && matrix.priv || '0' }}
           TEST: ${{ matrix.test }}
           BUS: ${{ matrix.bus }}
           PRIV: ${{ matrix.priv }}

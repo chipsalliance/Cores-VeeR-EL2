@@ -61,21 +61,20 @@ To allow for boot time configuration special multiplexer are added before TMR vo
 Block diagram of TMR multiplexing
 :::
 
-These modes can only be configured while the VeeR complex is in the reset.
-This is achieved using external multi bit signals:
-* `activate_core_0`
-* `activate_core_1`
-* `activate_core_2`
+The operating mode is selected via the three multi-bit boolean signals:
+* `core_active_0`
+* `core_active_1`
+* `core_active_2`
 
-This signals control which core(s) will be brought from reset and have active clock tree.
+These signals control which cores will be brought from reset and have active clock tree.
 They are internally latched in the TMR registers, and refreshed each cycle after reset is released.
 TMR is used to guarantee that configuration bits are more resilient to the radiation and interference.
-Following table describes which core, mode and mux configuration is active based on the `activate_core_x` signals.
+Following table describes which core, mode and mux configuration is active based on the `core_active_x` signals.
 
 :::{list-table} Execution Mode
-* - **activate_core_0**
-  - **activate_core_1**
-  - **activate_core_2**
+* - **core_active_0**
+  - **core_active_1**
+  - **core_active_2**
   - **MUX 0 source**
   - **MUX 1 source**
   - **MUX 2 source**

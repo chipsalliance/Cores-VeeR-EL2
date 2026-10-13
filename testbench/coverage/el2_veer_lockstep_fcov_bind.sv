@@ -15,16 +15,26 @@
  * limitations under the License.
  */
 
-module el2_veer_lockstep_fcov_bind
-#(
+`include "common_defines.vh"
+
+module el2_veer_lockstep_fcov_bind #(
 `ifdef FCOV
-    `include "el2_param.vh"
+  `include "el2_param.vh"
 `endif
 ) ();
 `ifdef FCOV
-    bind el2_veer_lockstep el2_veer_lockstep_delay_cov_if el2_veer_lockstep_delay_cov_inst(
-         .*
+`ifdef RV_LOCKSTEP_ENABLE
+  bind el2_veer_lockstep el2_veer_lockstep_delay_cov_if #(
+    .pt(pt)
+  ) el2_veer_lockstep_delay_cov_inst (
+      .*
+    );
+  bind el2_veer_lockstep el2_veer_lockstep_debug_mode_cov_if #(
+    .pt(pt)
+  ) el2_veer_lockstep_debug_mode_cov_inst (
+      .*
     );
 `endif
+`endif
 
-endmodule
+endmodule : el2_veer_lockstep_fcov_bind

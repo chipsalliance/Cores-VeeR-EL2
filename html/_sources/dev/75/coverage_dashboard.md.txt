@@ -1,0 +1,33 @@
+(75_coverage_dashboard)=
+# Coverage dashboard
+
+## Summary reports (all tests)
+ * [all coverage](external:coverage_dashboard/all/index.html)
+
+## Individual test reports
+ * [dccm_test_readwrite](external:coverage_dashboard/all_dccm_test_readwrite/index.html)
+ * [dma_test_address](external:coverage_dashboard/all_dma_test_address/index.html)
+ * [dma_test_debug_address](external:coverage_dashboard/all_dma_test_debug_address/index.html)
+ * [dma_test_debug_read](external:coverage_dashboard/all_dma_test_debug_read/index.html)
+ * [dma_test_debug_write](external:coverage_dashboard/all_dma_test_debug_write/index.html)
+ * [dma_test_ecc](external:coverage_dashboard/all_dma_test_ecc/index.html)
+ * [dma_test_read](external:coverage_dashboard/all_dma_test_read/index.html)
+ * [dma_test_reset](external:coverage_dashboard/all_dma_test_reset/index.html)
+ * [dma_test_write](external:coverage_dashboard/all_dma_test_write/index.html)
+ * [exu_alu_test_arith](external:coverage_dashboard/all_exu_alu_test_arith/index.html)
+ * [exu_alu_test_logic](external:coverage_dashboard/all_exu_alu_test_logic/index.html)
+ * [exu_div_test_div](external:coverage_dashboard/all_exu_div_test_div/index.html)
+ * [exu_mul_test_mul](external:coverage_dashboard/all_exu_mul_test_mul/index.html)
+ * [iccm_test_readwrite](external:coverage_dashboard/all_iccm_test_readwrite/index.html)
+ * [lib_axi4_to_ahb_test_axi](external:coverage_dashboard/all_lib_axi4_to_ahb_test_axi/index.html)
+ * [lib_axi4_to_ahb_test_axi_read_channel](external:coverage_dashboard/all_lib_axi4_to_ahb_test_axi_read_channel/index.html)
+ * [lib_axi4_to_ahb_test_axi_write_channel](external:coverage_dashboard/all_lib_axi4_to_ahb_test_axi_write_channel/index.html)
+ * [pic_gw_test_gateway](external:coverage_dashboard/all_pic_gw_test_gateway/index.html)
+ * [pic_test_clken](external:coverage_dashboard/all_pic_test_clken/index.html)
+ * [pic_test_config](external:coverage_dashboard/all_pic_test_config/index.html)
+ * [pic_test_prioritization](external:coverage_dashboard/all_pic_test_prioritization/index.html)
+ * [pic_test_reset](external:coverage_dashboard/all_pic_test_reset/index.html)
+ * [pic_test_servicing](external:coverage_dashboard/all_pic_test_servicing/index.html)
+ * [pmp_test_address_matching](external:coverage_dashboard/all_pmp_test_address_matching/index.html)
+ * [pmp_test_multiple_configs](external:coverage_dashboard/all_pmp_test_multiple_configs/index.html)
+ * [pmp_test_xwr_access](external:coverage_dashboard/all_pmp_test_xwr_access/index.html)

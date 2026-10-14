@@ -433,6 +433,15 @@ module veer_wrapper
   el2_veer_lockstep_fcov_bind dcls_delay_coverage();
 `endif
 
+`ifdef GATELEVEL_DUT
+  el2_veer_wrapper_gate_level rvtop_synth_wrapper(
+      .el2_mem_export(mem_export.veer_sram_src),
+      .el2_icache_export(mem_export.veer_icache_src),
+      .dmi_core_enable(dmi_core_enable),
+      .dmi_active(dmi_active),
+      .*
+  );
+`else
   el2_veer_wrapper rvtop (
       .el2_mem_export(mem_export.veer_sram_src),
       .el2_icache_export(mem_export.veer_icache_src),
@@ -440,5 +449,5 @@ module veer_wrapper
       .dmi_active(dmi_active),
       .*
   );
-
+`endif
 endmodule

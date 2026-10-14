@@ -20,7 +20,7 @@ jobs:
       matrix:
         bus:
           - name: AXI
-            config: axi
+            config: axi4
           - name: AHB
             config: ahb_lite
     env:

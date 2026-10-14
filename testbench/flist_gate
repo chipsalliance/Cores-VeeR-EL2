@@ -1,0 +1,14 @@
++libext+.v+.sv
+//-y $SYNOPSYS_SYN_ROOT/dw/sim_ver
++define+RV_OPENSOURCE
++incdir+$RV_ROOT/testbench
++incdir+$RV_ROOT/design/include
+$RV_ROOT/design/lib/el2_assert.sv
+$RV_ROOT/design/el2_mubi_pkg.sv
+$RV_ROOT/design/lib/el2_mem_if.sv
+-v $RV_ROOT/design/lib/mem_lib.sv
+-v $RV_ROOT/testbench/axi_lsu_dma_bridge.sv
+
+$RV_ROOT/testbench/el2_veer_wrapper_gate_level.sv
+$RV_ROOT/testbench/veer_wrapper.sv
+

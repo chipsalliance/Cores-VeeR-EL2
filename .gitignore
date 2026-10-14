@@ -27,4 +27,3 @@ tools/renode/*.elf
 tools/renode/.venv
 docs/build
 bazel-*
-MODULE.bazel.lock

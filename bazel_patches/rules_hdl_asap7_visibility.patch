@@ -1,0 +1,15 @@
+diff --git a/dependency_support/org_theopenroadproject_asap7_pdk_r1p7/asap7.bzl b/dependency_support/org_theopenroadproject_asap7_pdk_r1p7/asap7.bzl
+--- a/dependency_support/org_theopenroadproject_asap7_pdk_r1p7/asap7.bzl
++++ b/dependency_support/org_theopenroadproject_asap7_pdk_r1p7/asap7.bzl
+@@ -113,4 +113,5 @@ def asap7_cells_files(name = None, rev = None, tracks = None, vt = None, has_gds
+     native.filegroup(
+         name = "asap7-cells-sc{tracks}_rev{rev}_{vt_long}-v".format(**args),
+         srcs = native.glob(["Verilog/asap7sc{tracks}_*_{vt_upper}_*.v".format(**args)]),
++        visibility = ["//visibility:public"],
+     )
+
+diff --git a/dependency_support/org_theopenroadproject_asap7sc7p5t_28/bundled.BUILD.bazel b/dependency_support/org_theopenroadproject_asap7sc7p5t_28/bundled.BUILD.bazel
+--- a/dependency_support/org_theopenroadproject_asap7sc7p5t_28/bundled.BUILD.bazel
++++ b/dependency_support/org_theopenroadproject_asap7sc7p5t_28/bundled.BUILD.bazel
+@@ -1,0 +1 @@
++package(default_visibility = ["//visibility:public"])

@@ -74,6 +74,7 @@ verilator: $(BUILD_DIR)/obj_dir/Vtb_top_tmr program.hex
 LIB_ARGS := $(foreach f,$(LIB_FILES),-liberty $(f))
 SLANG_ARGS := --top el2_veer_wrapper \
               --std latest --single-unit \
+              --best-effort-hierarchy \
               --allow-toplevel-iface-ports \
               --allow-hierarchical-const \
               --libraries-inherit-macros \

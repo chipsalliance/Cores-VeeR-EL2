@@ -57,6 +57,7 @@ $(BUILD_DIR)/obj_dir/Vtb_top_tmr: $(BUILD_DIR)/defines.h $(TB_SRCS) $(if $(finds
 		$(VERILATOR_SKIP_WARNINGS) \
 		$(TBFILES) $(VERILATOR_FI_COMPILE_ARGS) \
 		--top-module tb_top_tmr \
+		--timescale $(TIMESCALE) \
 		$(VERILATOR_DEBUG) \
 		$(VERILATOR_COVERAGE) \
 		-MAKEFLAGS $(VERILATOR_MAKE_FLAGS) \

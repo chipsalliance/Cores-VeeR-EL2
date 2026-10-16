@@ -28,6 +28,9 @@ module el2_veer_lockstep_fcov_bind
     bind el2_ifu_mem_ctl el2_ifu_icache_ecc_recovery_cov_if el2_ifu_icache_ecc_recovery_cov_inst(
          .*
     );
+    bind el2_lsu_dccm_ctl el2_lsu_dccm_wr_readback_cov_if el2_lsu_dccm_wr_readback_cov_inst(
+         .*
+    );
 `endif
 
 // Prevent Verilator from elaborating the VCS-only bind in

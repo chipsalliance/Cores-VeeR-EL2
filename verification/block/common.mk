@@ -17,7 +17,7 @@ export PYTHONPATH := $(CURDIR)/common
 
 # Common sources
 COMMON_SOURCES  = $(CFGDIR)/common_defines.vh
-COMMON_SOURCES += $(CFGDIR)/el2_pdef.vh
+COMMON_SOURCES += $(CFGDIR)/el2_pdef.svh
 COMMON_SOURCES += $(SRCDIR)/include/el2_def.sv
 COMMON_SOURCES += $(SRCDIR)/lib/beh_lib.sv
 

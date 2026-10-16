@@ -25,7 +25,7 @@ import el2_pkg::*;
 #(
    TAG = 1,
    CHECK_RANGES = 1,
-   `include "el2_param.vh"
+   `include "el2_param.svh"
 )
 (
    input                   clk,

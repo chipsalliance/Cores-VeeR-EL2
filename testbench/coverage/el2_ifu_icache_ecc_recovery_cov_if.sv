@@ -19,7 +19,7 @@
 interface el2_ifu_icache_ecc_recovery_cov_if
   import el2_pkg::*;
 #(
-    `include "el2_param.vh"
+    `include "el2_param.svh"
 ) (
     input logic                           clk,
     input logic                           rst_l,

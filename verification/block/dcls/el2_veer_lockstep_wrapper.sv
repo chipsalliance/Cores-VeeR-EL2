@@ -5,7 +5,7 @@ module el2_veer_lockstep_wrapper
   import el2_pkg::*;
   import el2_mubi_pkg::*;
 #(
-    `include "el2_param.vh"
+    `include "el2_param.svh"
 ) (
     input logic clk,
     input logic rst_l,

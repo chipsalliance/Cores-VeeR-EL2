@@ -17,7 +17,7 @@
 module el2_exu_mul_ctl
 import el2_pkg::*;
 #(
-`include "el2_param.vh"
+`include "el2_param.svh"
  )
   (
    input logic          clk,              // Top level clock

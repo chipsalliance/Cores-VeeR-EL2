@@ -22,7 +22,7 @@
 module el2_ifu
 import el2_pkg::*;
 #(
-`include "el2_param.vh"
+`include "el2_param.svh"
  )
   (
    input logic free_l2clk,                   // Clock always.                  Through one clock header.  For flops with    second header built in.

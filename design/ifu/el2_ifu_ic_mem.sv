@@ -20,7 +20,7 @@
 module el2_ifu_ic_mem
 import el2_pkg::*;
  #(
-`include "el2_param.vh"
+`include "el2_param.svh"
  )
   (
       input logic                                   clk,                // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.
@@ -109,7 +109,7 @@ import el2_pkg::*;
 module EL2_IC_DATA
 import el2_pkg::*;
 #(
-`include "el2_param.vh"
+`include "el2_param.svh"
  )
      (
       input logic clk,
@@ -676,7 +676,7 @@ endmodule // EL2_IC_DATA
 module EL2_IC_TAG
 import el2_pkg::*;
  #(
-`include "el2_param.vh"
+`include "el2_param.svh"
  )
      (
       input logic                                                   clk,

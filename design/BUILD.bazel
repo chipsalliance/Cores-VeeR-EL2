@@ -2,6 +2,8 @@ load("@rules_hdl//verilog:defs.bzl", "verilog_library")
 
 package(default_visibility = ["//visibility:public"])
 
+exports_files(["el2_constraints.sdc"])
+
 verilog_library(
     name = "beh_lib",
     srcs = ["lib/beh_lib.sv"],

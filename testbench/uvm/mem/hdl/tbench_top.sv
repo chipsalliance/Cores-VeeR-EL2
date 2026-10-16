@@ -10,7 +10,7 @@ import uvm_pkg::*;
 `include "dccm_memtest.sv"
 
 module tbench_top #(
-    `include "el2_param.vh"
+    `include "el2_param.svh"
 );
 
   bit clk;

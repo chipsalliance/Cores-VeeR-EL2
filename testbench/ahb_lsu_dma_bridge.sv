@@ -18,7 +18,7 @@
 module ahb_lsu_dma_bridge
 #(
   TAG = 1,
-  `include "el2_param.vh"
+  `include "el2_param.svh"
 )
 (
     input                   clk,

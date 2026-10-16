@@ -25,7 +25,7 @@
 module el2_dec_trigger
 import el2_pkg::*;
 #(
-`include "el2_param.vh"
+`include "el2_param.svh"
  )(
 
    input el2_trigger_pkt_t [3:0] trigger_pkt_any,           // Packet from tlu. 'select':0-pc,1-Opcode  'Execute' needs to be set for dec triggers to fire. 'match'-1 do mask, 0: full match

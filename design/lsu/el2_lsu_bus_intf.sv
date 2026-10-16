@@ -25,7 +25,7 @@
 module el2_lsu_bus_intf
 import el2_pkg::*;
 #(
-`include "el2_param.vh"
+`include "el2_param.svh"
  )(
    input logic                          clk,                                // Clock only while core active.  Through one clock header.  For flops with    second clock header built in.  Connected to ACTIVE_L2CLK.
    input logic                          clk_override,                       // Override non-functional clock gating

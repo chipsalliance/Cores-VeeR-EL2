@@ -174,7 +174,7 @@ TBFILES = $(TBDIR)/tb_top_pkg.sv \
 
 defines  = $(BUILD_DIR)/common_defines.vh
 defines += ${RV_ROOT}/design/include/el2_def.sv
-defines += $(BUILD_DIR)/el2_pdef.vh
+defines += $(BUILD_DIR)/el2_pdef.svh
 includes = -I${BUILD_DIR} -I$(TBDIR)/axi4_mux
 
 CM_HIER_FILE = $(RV_ROOT)/cm.cfg

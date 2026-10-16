@@ -6,7 +6,7 @@ interface dccm_interface (
     reset
 );
 
-  `include "el2_param.vh"
+  `include "el2_param.svh"
   ;
 
   logic [pt.DCCM_BITS-1:0] addr;

@@ -7,8 +7,8 @@ EL2_CONFIG_SRCS = [
 
 # Generated files made available as include files.
 EL2_CONFIG_HDRS = [
-    "el2_pdef.vh",
-    "el2_param.vh",
+    "el2_pdef.svh",
+    "el2_param.svh",
     "pd_defines.vh",
     "pic_map_auto.svh",
 ]

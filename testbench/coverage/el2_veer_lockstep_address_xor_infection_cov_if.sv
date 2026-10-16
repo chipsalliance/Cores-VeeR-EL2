@@ -28,7 +28,7 @@ interface el2_veer_lockstep_address_xor_infection_cov_if
   import el2_mubi_pkg::*;
   import el2_lockstep_pkg::*;
 #(
-  `include "el2_param.vh"
+  `include "el2_param.svh"
 ) (
   input logic                         clk,
   input logic                         rst_l,

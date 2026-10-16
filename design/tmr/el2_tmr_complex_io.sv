@@ -7,7 +7,7 @@ module el2_tmr_complex_io
   import el2_pkg::*;
   import el2_mubi_pkg::*;
 #(
-    `include "el2_param.vh"
+    `include "el2_param.svh"
 ) (
     input  logic free_l2clk,
     input  logic free_clk,

@@ -1,0 +1,31 @@
+build --incompatible_strict_action_env
+
+# Treat include paths into external/ (bzlmod/BCR deps) as -isystem to silence third-party warnings
+build --features=external_include_paths
+
+# For 3rd party code: Disable warnings entirely.
+build --per_file_copt=.*external/.*@-w
+build --host_per_file_copt=.*external/.*@-w
+
+#Required by OpenROAD (STA uses std::format_string from C++20)
+build --cxxopt "-std=c++20" --host_cxxopt "-std=c++20"
+
+# Don't make py_binary tools depend on the *host* python.  rules_python's
+# default `system_python` bootstrap emits the executable from
+# python_bootstrap_template.txt — a Python script the launcher runs with
+# whatever `python3` the host has — so every py_binary in the build, including
+# code generators inside third-party deps (e.g. @libxcb's c_client), needs a
+# host interpreter new enough for that bootstrap.  Hosts whose `python3`
+# predates 3.7 fail with `module 'sys' has no attribute '_base_executable'`.
+# The `script` bootstrap emits stage1_bootstrap_template.sh instead, which
+# execs the hermetic toolchain interpreter and needs no host python at all.
+build --@rules_python//python/config_settings:bootstrap_impl=script
+
+# No implicit __init__.py for any py target in the graph, third-party ones
+# included. The root module's rules_python_config.explicit_init_py in
+# MODULE.bazel only covers this repo's own targets, so py_binary tools inside
+# deps (@bazel_tools proguard_allowlister, yosys pmgen/callhelp, rules_pkg
+# build_zip, sv-lang's generators) still printed rules_python's deprecation
+# warning (bazel-contrib/rules_python#2945) on every fresh analysis. None of
+# them imports a package that lacks its own __init__.py.
+common --incompatible_default_to_explicit_init_py

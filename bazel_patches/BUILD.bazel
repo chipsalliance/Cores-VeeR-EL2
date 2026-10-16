@@ -1,0 +1,12 @@
+load("@bazel-orfs//:orfs_source.bzl", "ORFS_PATCHES")
+
+exports_files(glob(["*.patch"]))
+
+# The carried ORFS patches as one target, taken from ORFS_PATCHES itself so
+# it cannot drift from the list that is actually applied. //test/bump reads
+# them to build a fake ORFS tree the real patches apply to.
+filegroup(
+    name = "orfs_patches",
+    srcs = ORFS_PATCHES,
+    visibility = ["//test/bump:__pkg__"],
+)

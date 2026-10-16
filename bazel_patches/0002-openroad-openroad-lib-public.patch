@@ -1,0 +1,28 @@
+OpenROAD: make openroad_lib a public library
+
+bazel-orfs carries this against OpenROAD; it is not upstreamed.
+
+OpenROAD's root BUILD gives `openroad_lib`, the whole tool as one
+cc_library, visibility `//:__subpackages__`: only OpenROAD's own
+packages may link it. A consumer that wants to write a generator
+against odb, utl and sta in its own repository -- bazel-orfs's
+tools/structured_gen, which writes placed register files -- can depend
+on the public `openroad` binary but not on the library behind it.
+
+This makes `openroad_lib` public and nothing else. It changes no code
+and no other target's visibility.
+
+Retires when OpenROAD exposes a library target for embedding; then
+`//:bump` onto that commit drops this patch.
+
+--- a/BUILD.bazel	2026-09-17 07:07:02.809732453 +0200
++++ b/BUILD.bazel	2026-09-17 07:07:02.823261141 +0200
+@@ -256,7 +256,7 @@
+     includes = [
+         "include",
+     ],
+-    visibility = ["//:__subpackages__"],
++    visibility = ["//visibility:public"],
+     deps = [
+         "//src/gui",
+         "//src/sta:opensta_lib",

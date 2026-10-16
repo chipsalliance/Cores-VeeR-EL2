@@ -87,6 +87,7 @@ cat <<END >config.json
   "branch": "$BRANCH",
   "repo": "cores-veer-el2",
   "timestamp": "`date +"%Y-%m-%dT%H:%M:%S.%3N%z"`",
+  "table_coverage": "fcov",
   "additional": {
     "db_count": "$DB_COUNT",
     "run_id": "$GITHUB_RUN_ID"

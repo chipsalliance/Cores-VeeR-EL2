@@ -32,7 +32,7 @@ jobs:
 
       - name: Cache ORFS binaries
         id: orfs-cache
-        uses: actions/cache@v6
+        uses: actions/cache@v3
         with:
           path: /tmp/orfs-tools/bin
           key: orfs-tools-${{ runner.os }}-${{ runner.arch }}-${{ env.BAZEL_ORFS_BRANCH }}
@@ -150,7 +150,7 @@ jobs:
           bazelisk --version
 
       - name: Restore ORFS binaries
-        uses: actions/cache@v6
+        uses: actions/cache@v3
         with:
           path: /tmp/orfs-tools/bin
           key: orfs-tools-${{ runner.os }}-${{ runner.arch }}-${{ env.BAZEL_ORFS_BRANCH }}
@@ -164,7 +164,7 @@ jobs:
           yosys -V
 
       - name: Setup repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v3
         with:
           path: Cores-VeeR-EL2
           submodules: recursive

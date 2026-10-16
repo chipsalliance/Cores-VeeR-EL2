@@ -14,7 +14,8 @@ env:
 jobs:
   setup-orfs:
     name: Build OpenROAD + Yosys
-    runs-on: ubuntu-24.04
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: debian:trixie
     strategy:
       fail-fast: false
     env:
@@ -110,7 +111,8 @@ jobs:
   run-orfs:
     name: Run EL2 ORFS Flow
     needs: setup-orfs
-    runs-on: ubuntu-24.04
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: debian:trixie
     strategy:
       fail-fast: false
       matrix:

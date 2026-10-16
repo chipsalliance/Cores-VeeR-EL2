@@ -29,6 +29,7 @@ NETLIST_JSON := $(BUILD_DIR)/netlist.json
 FI_MODEL_NAME ?= random
 FI_SIM_TIME ?= 10us
 FI_NUM_OF_EVENTS ?= 30
+FI_VEER_IDX ?= 0
 
 ifeq ($(FI),1)
 VERILATOR_FI_COMPILE_ARGS := \
@@ -91,9 +92,9 @@ CONFIG_ARGS := \
 	--model-name $(FI_MODEL_NAME) \
 	--num-of-events $(FI_NUM_OF_EVENTS) \
 	--simulation-time $(FI_SIM_TIME) \
-	--sig-path-prefix tb_top_tmr.rvtop_wrapper \
-	--top-module el2_veer_wrapper \
-	--top-instance rvtop \
+	--sig-path-prefix tb_top_tmr.rvtop_wrapper.rvtop.tmr_complex.cores[$(FI_VEER_IDX)] \
+	--top-module el2_veer\$$el2_veer_wrapper.tmr_complex.cores[$(FI_VEER_IDX)].veer \
+	--top-instance veer \
 	--netlist-path $(NETLIST_JSON) \
 	--fault-campaign-out $(FAULT_CAMPAIGN_FILE) \
 	--thread-count $(shell nproc) \

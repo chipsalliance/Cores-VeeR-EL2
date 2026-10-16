@@ -31,6 +31,19 @@ module el2_veer_lockstep_fcov_bind
     bind el2_lsu_dccm_ctl el2_lsu_dccm_wr_readback_cov_if el2_lsu_dccm_wr_readback_cov_inst(
          .*
     );
+    bind el2_dec_tlu_ctl el2_core_ecc_threshold_cov_if #(
+         .pt(pt)
+    ) el2_core_ecc_threshold_cov_inst(
+         .*
+    );
+    bind el2_veer_lockstep el2_veer_lockstep_asymmetric_fault_cov_if #(
+         .pt(pt)
+    ) el2_veer_lockstep_asymmetric_fault_cov_inst(
+         .*,
+         .shadow_mdccme_ce_req(xshadow_core.dec.tlu.mdccme_ce_req),
+         .shadow_miccme_ce_req(xshadow_core.dec.tlu.miccme_ce_req),
+         .shadow_mice_ce_req  (xshadow_core.dec.tlu.mice_ce_req)
+    );
 `endif
 
 // Prevent Verilator from elaborating the VCS-only bind in

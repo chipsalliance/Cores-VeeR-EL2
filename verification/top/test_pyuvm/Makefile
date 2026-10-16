@@ -46,7 +46,7 @@ CM_FILE ?= cm.cfg
 VERILOG_SOURCES = \
     $(CFGDIR)/common_defines.vh \
     $(RV_ROOT)/design/include/el2_def.sv \
-    $(CFGDIR)/el2_pdef.vh
+    $(CFGDIR)/el2_pdef.svh
 
 SIM_FLIST_FILE = $(RV_ROOT)/testbench/flist
 

@@ -20,7 +20,7 @@ module tb_top
     import tb_top_pkg::*;
 #(
     parameter int MAX_CYCLES = 2_000_000,
-    `include "el2_param.vh"
+    `include "el2_param.svh"
 );
 
   logic i_cpu_halt_req, o_cpu_halt_ack, o_cpu_halt_status;
@@ -36,7 +36,7 @@ module tb_top
     import tb_top_pkg::*;
 #(
     parameter int MAX_CYCLES = 2_000_000,
-    `include "el2_param.vh"
+    `include "el2_param.svh"
 ) (
     input bit                       core_clk,
     input bit                       rst_l,

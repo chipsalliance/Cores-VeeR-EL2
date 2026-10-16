@@ -16,8 +16,8 @@ This set of include files :
     ./snapshots/<target>
     ├── common_defines.vh                       # `defines for testbench
     ├── defines.h                               # #defines for C/assembly headers
-    ├── el2_param.vh                            # Actual Design parameters
-    ├── el2_pdef.vh                             # Parameter structure definition
+    ├── el2_param.svh                           # Actual Design parameters
+    ├── el2_pdef.svh                            # Parameter structure definition
     ├── pd_defines.vh                           # `defines for physical design
     ├── perl_configs.pl                         # Perl %configs hash for scripting
     ├── pic_map_auto.svh                        # PIC memory map based on configure size

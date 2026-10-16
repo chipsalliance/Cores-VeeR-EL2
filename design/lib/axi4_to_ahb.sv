@@ -24,7 +24,7 @@
 module axi4_to_ahb
 import el2_pkg::*;
 #(
-`include "el2_param.vh"
+`include "el2_param.svh"
 ,parameter TAG  = 1) (
 
    input                   clk,

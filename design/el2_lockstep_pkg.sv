@@ -15,7 +15,7 @@
 
 package el2_lockstep_pkg;
   import el2_pkg::*;
-  `include "el2_param.vh"
+  `include "el2_param.svh"
   ;//
   // Outputs
   typedef struct packed {

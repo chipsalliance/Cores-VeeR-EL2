@@ -95,7 +95,7 @@ lint_off -rule UNOPTFLAT -file "*/el2_lsu_lsc_ctl.sv"
 lint_off -rule UNOPTFLAT -file "*/el2_pic_ctrl.sv"
 lint_off -rule UNOPTFLAT -file "*/el2_lsu_bus_buffer.sv"
 
-// Warnings related to the generated `el2_param.vh`
+// Warnings related to the generated `el2_param.svh`
 lint_off -rule UNUSEDPARAM -file "*/el2_ifu_compress_ctl.sv"
 lint_off -rule UNUSEDPARAM -file "*/el2_dec_gpr_ctl.sv"
 lint_off -rule UNUSEDPARAM -file "*/el2_dec_trigger.sv"

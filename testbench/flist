@@ -10,6 +10,7 @@ $RV_ROOT/design/el2_lockstep_pkg.sv
 $RV_ROOT/design/el2_veer_lockstep.sv
 $RV_ROOT/testbench/coverage/el2_veer_lockstep_delay_cov_if.sv
 $RV_ROOT/testbench/coverage/el2_veer_lockstep_debug_mode_cov_if.sv
+$RV_ROOT/testbench/coverage/el2_veer_lockstep_mubi_sweep_cov_if.sv
 $RV_ROOT/testbench/coverage/el2_veer_lockstep_fcov_bind.sv
 $RV_ROOT/verification/block/dcls/el2_veer_lockstep_cov_if.sv
 $RV_ROOT/verification/block/dcls/el2_veer_lockstep_cov_bind.sv

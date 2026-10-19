@@ -28,6 +28,9 @@ module el2_veer_lockstep_fcov_bind
     bind el2_veer_lockstep el2_veer_lockstep_debug_mode_cov_if el2_veer_lockstep_debug_mode_cov_inst(
          .*
     );
+    bind el2_veer_lockstep el2_veer_lockstep_mubi_sweep_cov_if el2_veer_lockstep_mubi_sweep_cov_inst(
+         .*
+    );
 `endif
 
 endmodule

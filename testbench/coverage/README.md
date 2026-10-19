@@ -1,12 +1,13 @@
 # VeeR EL2 Testbench Coverage Subsystem
 
-This directory contains testbench-level functional coverage interfaces and binding modules for the VeeR EL2 Dual-Core Lockstep (DCLS) subsystem, addressing the verification requirements and gap analysis for configurable pipeline delay stages, 0-delay mode, and core debug mode suppression and transitions.
+This directory contains testbench-level functional coverage interfaces and binding modules for the VeeR EL2 Dual-Core Lockstep (DCLS) subsystem, addressing the verification requirements and gap analysis for configurable pipeline delay stages, 0-delay mode, core debug mode suppression and transitions, and Multi-Bit Integrity (MUBI) encoding and fail-secure tamper coverage.
 
 ## Files
 
 - **`el2_veer_lockstep_delay_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_delay_cov` covergroup (VCS) and SVA `cover property` assertions (Verilator) along with fault trigger path classification logic.
 - **`el2_veer_lockstep_debug_mode_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_debug_mode_cov` covergroup (VCS) and SVA `cover property` assertions (Verilator) for core debug mode entry/exit transitions and DCLS corruption reporting suppression during debug mode.
-- **`el2_veer_lockstep_fcov_bind.sv`**: Testbench binding module (`el2_veer_lockstep_fcov_bind`) that binds `el2_veer_lockstep_delay_cov_if` and `el2_veer_lockstep_debug_mode_cov_if` to `el2_veer_lockstep`.
+- **`el2_veer_lockstep_mubi_sweep_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_mubi_sweep_cov` covergroup (VCS) and SVA `cover property` assertions (Verilator) for MUBI width configurations, control signal encoding validation, and fail-secure tamper protection.
+- **`el2_veer_lockstep_fcov_bind.sv`**: Testbench binding module (`el2_veer_lockstep_fcov_bind`) that binds `el2_veer_lockstep_delay_cov_if`, `el2_veer_lockstep_debug_mode_cov_if`, and `el2_veer_lockstep_mubi_sweep_cov_if` to `el2_veer_lockstep`.
 
 ## Coverage Architecture
 
@@ -48,7 +49,32 @@ Verifies DCLS error reporting suppression during debug mode and active reporting
 #### 4. Cross Coverage
 - `debug_state_x_corruption`: Crosses `core_debug_state_cp` with `outputs_corrupted_cp` and `corruption_detected_cp` (qualified by `disable_corruption_detection_i == El2MuBiFalse`) to verify DCLS disable during debug mode and active detection during normal execution.
 
+### Task 3: Multi-Bit Integrity (MUBI) Comprehensive Encoding and Fail-Secure Coverage (`el2_veer_lockstep_mubi_sweep_cov`)
+
+#### 1. `mubi_width_config_cp`
+Monitors all supported MUBI width configurations (`pt.MUBI_WIDTH` / `El2MuBiWidth`) when `corruption_detected_o` asserts `El2MuBiTrue`:
+- `width_2`, `width_4`, `width_8`, `width_16`, `width_32`: Configured 2-bit, 4-bit, 8-bit, 16-bit, and 32-bit MUBI widths.
+
+#### 2. `mubi_error_injection_control_cp`
+Tracks valid and corrupted bit patterns on `lockstep_err_injection_en_i`:
+- `inj_true`: Value equals `El2MuBiTrue` (injection active).
+- `inj_false`: Value equals `El2MuBiFalse` (injection inactive).
+- `inj_invalid_hd1_true`, `inj_invalid_hd1_false`, `inj_invalid_all_zeros`, `inj_invalid_all_ones`: Corrupted bit patterns (Hamming distance 1 from True, Hamming distance 1 from False, all-zeros, all-ones).
+
+#### 3. `mubi_disable_detection_control_cp`
+Tracks valid and corrupted bit patterns on `disable_corruption_detection_i`:
+- `disable_true`: Value equals `El2MuBiTrue` (monitoring disabled, errors suppressed).
+- `disable_false`: Value equals `El2MuBiFalse` (normal monitoring enabled).
+- `disable_invalid_hd1_true`, `disable_invalid_hd1_false`, `disable_invalid_all_zeros`, `disable_invalid_all_ones`: Corrupted bit patterns (Hamming distance 1 from True, Hamming distance 1 from False, all-zeros, all-ones).
+
+#### 4. `fail_secure_tamper_cp`
+Verifies fail-secure tamper protection:
+- `corrupted_disable_with_fault`: When `disable_corruption_detection_i` has an invalid pattern and an active fault or datapath/regfile divergence is present, `corruption_detected_o` asserts `El2MuBiTrue`.
+
+#### 5. Cross Coverage
+- `disable_ctrl_x_corruption`: Crosses `mubi_disable_detection_control_cp` [True, False, Invalid] with `fault_source_cp` (`no_fault`, `ctrl_fault`, `datapath_mismatch` covering `outputs_corrupted || regfile_corrupted`) and `corruption_detected_cp` [False, True], including active fault injection under invalid `disable_corruption_detection_i` (`disable_invalid_fault_true`).
+
 ## Testbench & CI Integration
 
 The coverage files are compiled via `testbench/flist` and automatically instantiated when building with `+define+FCOV` via `testbench/veer_wrapper.sv` (`dcls_fcov`).
-The tests in `testbench/tests/` (e.g., `dcls`, `dcls_debug`, `dcls_error_ctrl`, `dcls_mubi_sweep`, `dcls_ecc_asymmetric`, `dcls_internal_state`) provide stimulus that exercises these coverpoints across delay configurations and debug mode transitions.
+The tests in `testbench/tests/` (e.g., `dcls`, `dcls_debug`, `dcls_error_ctrl`, `dcls_mubi_sweep`, `dcls_ecc_asymmetric`, `dcls_internal_state`) provide stimulus that exercises these coverpoints across delay configurations, debug mode transitions, and MUBI widths.

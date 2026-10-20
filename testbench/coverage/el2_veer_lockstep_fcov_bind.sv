@@ -39,6 +39,12 @@ module el2_veer_lockstep_fcov_bind #(
   ) el2_veer_lockstep_mubi_sweep_cov_inst (
       .*
     );
+  bind el2_veer_lockstep el2_veer_lockstep_address_xor_infection_cov_if #(
+    .pt(pt)
+  ) el2_veer_lockstep_address_xor_infection_cov_inst (
+      .shadow_ic_perr_r(xshadow_core.dec.tlu.ic_perr_r),
+      .*
+    );
 `endif
 `endif
 

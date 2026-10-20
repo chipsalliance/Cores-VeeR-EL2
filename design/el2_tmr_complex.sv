@@ -1188,7 +1188,7 @@ module el2_tmr_complex
     el2_veer #(.pt(pt)) veer (
         .clk(clk_veer[i]),
         .rst_l(rst_l & sync_rst_l_veer[i]),
-        .dbg_rst_l(dbg_rst_l),
+        .dbg_rst_l(dbg_rst_l & sync_rst_l_veer[i]),
         .rst_vec(rst_vec_veer[i]),
         .nmi_int(nmi_int_veer[i]),
         .nmi_vec(nmi_vec_veer[i]),
@@ -1411,7 +1411,7 @@ module el2_tmr_complex
         .ifu_bus_clk_en(ifu_bus_clk_en),
         .dbg_bus_clk_en(dbg_bus_clk_en),
         .dma_bus_clk_en(dma_bus_clk_en),
-        .dmi_reg_en(dmi_reg_en_veer[i]),
+        .dmi_reg_en(dmi_reg_en_veer[i] | ~sync_rst_l_veer[i]),
         .dmi_reg_addr(dmi_reg_addr_veer[i]),
         .dmi_reg_wr_en(dmi_reg_wr_en_veer[i]),
         .dmi_reg_wdata(dmi_reg_wdata_veer[i]),

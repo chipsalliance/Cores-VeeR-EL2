@@ -11,3 +11,4 @@ config SOC_VEER_EL2
 	select RISCV_ISA_EXT_ZIFENCEI
 	select INCLUDE_RESET_VECTOR
 	select ATOMIC_OPERATIONS_C  # EL2 has no A extension
+	select SOC_EARLY_INIT_HOOK

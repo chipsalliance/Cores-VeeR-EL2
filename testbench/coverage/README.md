@@ -1,13 +1,14 @@
 # VeeR EL2 Testbench Coverage Subsystem
 
-This directory contains testbench-level functional coverage interfaces and binding modules for the VeeR EL2 Dual-Core Lockstep (DCLS) subsystem, addressing the verification requirements and gap analysis for configurable pipeline delay stages, 0-delay mode, core debug mode suppression and transitions, and Multi-Bit Integrity (MUBI) encoding and fail-secure tamper coverage.
+This directory contains testbench-level functional coverage interfaces and binding modules for the VeeR EL2 Dual-Core Lockstep (DCLS) subsystem, addressing the verification requirements and gap analysis for configurable pipeline delay stages, 0-delay mode, core debug mode suppression and transitions, Multi-Bit Integrity (MUBI) encoding and fail-secure tamper coverage, and Memory Address XOR Infection coverage.
 
 ## Files
 
 - **`el2_veer_lockstep_delay_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_delay_cov` covergroup (VCS) and SVA `cover property` assertions (Verilator) along with combinational fault-to-detection latency tracking logic.
 - **`el2_veer_lockstep_debug_mode_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_debug_mode_cov` covergroup (VCS) and SVA `cover property` assertions (Verilator) for core debug mode entry/exit transitions and DCLS corruption reporting suppression during debug mode.
 - **`el2_veer_lockstep_mubi_sweep_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_mubi_sweep_cov` covergroup (VCS) and SVA `cover property` assertions (Verilator) for MUBI width configurations, control signal encoding validation, and fail-secure tamper protection.
-- **`el2_veer_lockstep_fcov_bind.sv`**: Testbench binding module (`el2_veer_lockstep_fcov_bind`) that binds `el2_veer_lockstep_delay_cov_if`, `el2_veer_lockstep_debug_mode_cov_if`, and `el2_veer_lockstep_mubi_sweep_cov_if` to `el2_veer_lockstep`.
+- **`el2_veer_lockstep_address_xor_infection_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_address_xor_infection_cov` covergroup (VCS) and SVA `cover property` assertions (Verilator) for ICCM, DCCM, and ICache address-XOR infection and DCLS-domain `iccm_rd_data` divergence detection.
+- **`el2_veer_lockstep_fcov_bind.sv`**: Testbench binding module (`el2_veer_lockstep_fcov_bind`) that binds `el2_veer_lockstep_delay_cov_if`, `el2_veer_lockstep_debug_mode_cov_if`, `el2_veer_lockstep_mubi_sweep_cov_if`, and `el2_veer_lockstep_address_xor_infection_cov_if` to `el2_veer_lockstep`.
 
 ## Coverage Architecture
 
@@ -78,7 +79,28 @@ Verifies fail-secure tamper protection:
 #### 5. Cross Coverage
 - `disable_ctrl_x_corruption`: Crosses `mubi_disable_detection_control_cp` [True, False, Invalid] with `outputs_corrupted` [0, 1] and `corruption_detected_o` [True, False].
 
+### Task 4: Memory Address XOR Infection Coverage (`el2_veer_address_xor_infection_cov`)
+
+#### 1. `iccm_xor_infection_cp`
+Monitors ICCM address-XOR infection and DCLS subordinate core ICCM divergence:
+- `iccm_xor_active`: `ICCM_ADDR_XOR == 1` and address bit inversion / XOR infection fault triggered.
+- `iccm_mismatch_detected`: Subordinate core ICCM address or datapath divergence triggers DCLS mismatch (`corruption_detected_o == El2MuBiTrue`).
+
+#### 2. `dccm_xor_infection_cp`
+Monitors DCCM address-XOR infection and DCLS subordinate core DCCM divergence:
+- `dccm_xor_active`: `DCCM_ADDR_XOR == 1` and address bit inversion / XOR infection fault triggered during load or store.
+- `dccm_mismatch_detected`: Subordinate core DCCM address or datapath divergence triggers DCLS mismatch (`corruption_detected_o == El2MuBiTrue`).
+
+#### 3. `icache_xor_infection_cp`
+Monitors ICache address-XOR infection and DCLS subordinate core ICache divergence:
+- `icache_xor_active`: `ICACHE_ADDR_XOR == 1` active during instruction fetch / cache access.
+- `icache_mismatch_detected`: Subordinate core ICache address or datapath divergence triggers DCLS mismatch (`corruption_detected_o == El2MuBiTrue`).
+
+#### 4. `iccm_rd_data_divergence_cp`
+Verifies DCLS-domain `iccm_rd_data` divergence detection (commit `0b61bfd`):
+- `iccm_rd_data_divergence_caught`: Monitors `delayed_main_iccm_rd_data ^ shadow_iccm_rd_data` (along with ICCM read/write/address divergence in the DCLS domain) to ensure read data divergence is caught when `corruption_detected_o == El2MuBiTrue`.
+
 ## Testbench & CI Integration
 
 The coverage files are compiled via `testbench/flist` and automatically instantiated when building with `+define+FCOV` via `testbench/veer_wrapper.sv`.
-The tests in `testbench/tests/` (e.g., `dcls`, `dcls_debug`, `dcls_error_ctrl`, `dcls_mubi_sweep`, `dcls_ecc_asymmetric`, `dcls_internal_state`) provide stimulus that exercises these coverpoints across delay configurations and debug mode transitions.
+The tests in `testbench/tests/` (e.g., `dcls`, `dcls_debug`, `dcls_error_ctrl`, `dcls_mubi_sweep`, `dcls_ecc_asymmetric`, `dcls_internal_state`, `iccm_addr_xor`, `dccm_addr_xor`, `icache_infection`) provide stimulus that exercises these coverpoints across delay configurations, debug mode transitions, MUBI widths, and memory address-XOR infection modes.

@@ -39,6 +39,31 @@ module el2_veer_lockstep_fcov_bind #(
   ) el2_veer_lockstep_mubi_sweep_cov_inst (
       .*
     );
+  bind el2_veer_wrapper el2_veer_lockstep_address_xor_infection_cov_if #(
+    .pt(pt)
+  ) el2_veer_lockstep_address_xor_infection_cov_inst (
+      .rst_n                    (lockstep.rst_n),
+`ifdef RV_ICCM_ENABLE
+      .main_iccm_rd_data        (veer.ifu.mem_ctl.iccm_rd_data),
+      .shadow_iccm_rd_data      (lockstep.xshadow_core.ifu.mem_ctl.iccm_rd_data),
+      .iccm_sel_red0            (mem.iccm.iccm.sel_red0),
+      .iccm_sel_red1            (mem.iccm.iccm.sel_red1),
+      .iccm_red_addr0_odd       (mem.iccm.iccm.redundant_address[0][2]),
+      .iccm_red_addr1_odd       (mem.iccm.iccm.redundant_address[1][2]),
+`else
+      .main_iccm_rd_data        ('0),
+      .shadow_iccm_rd_data      ('0),
+      .iccm_sel_red0            ('0),
+      .iccm_sel_red1            ('0),
+      .iccm_red_addr0_odd       (1'b0),
+      .iccm_red_addr1_odd       (1'b0),
+`endif
+      .shadow_ic_perr_r         (lockstep.xshadow_core.dec.tlu.ic_perr_r),
+      .shadow_core_inputs_pre   (lockstep.shadow_core_inputs_pre),
+      .delayed_main_core_outputs(lockstep.delayed_main_core_outputs),
+      .shadow_core_outputs      (lockstep.shadow_core_outputs),
+      .*
+    );
 `endif
 `endif
 

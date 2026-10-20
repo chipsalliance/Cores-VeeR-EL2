@@ -38,13 +38,13 @@ jobs:
         run: |
           echo "tests=$(python3 .github/scripts/select_pr_tests.py \
             '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}-dcls-ext' 4 \
-            'dcls_skipped_signals')" | tee -a $GITHUB_OUTPUT
+            'dcls_skipped_signals,dcls_io_sweep')" | tee -a $GITHUB_OUTPUT
       - name: Select custom tests
         id: select-custom
         run: |
           echo "tests=$(python3 .github/scripts/select_pr_tests.py \
             '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}-custom' 4 \
-            'hello_world,hello_world_dccm,dcls,dcls_skipped_signals,dcls_debug,dcls_error_ctrl,dcls_ecc_asymmetric,dcls_internal_state,dcls_regfile_read,ecc_threshold,dhry,ecc,csr_misa,csr_access,csr_mstatus,csr_mseccfg,perf_counters,icache,bitmanip' \
+            'hello_world,hello_world_dccm,dcls,dcls_skipped_signals,dcls_io_sweep,dcls_debug,dcls_error_ctrl,dcls_ecc_asymmetric,dcls_internal_state,dcls_regfile_read,ecc_threshold,dhry,ecc,csr_misa,csr_access,csr_mstatus,csr_mseccfg,perf_counters,icache,bitmanip' \
             'csr_access')" | tee -a $GITHUB_OUTPUT
       - name: Select ICache ECC tests
         id: select-icache-ecc

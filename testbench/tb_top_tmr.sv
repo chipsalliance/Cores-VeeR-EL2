@@ -2341,26 +2341,19 @@ logic [63:0]  mailbox_data;
   logic [31:0] mailbox_addr_q [$];
   logic [63:0] mailbox_data_q [$];
 
-  initial begin
-     mailbox_write = 0;
-     mailbox_data  = 0;
-  end
-
   always @(posedge core_clk) begin
+    mailbox_write <= 1'b0;
     if (rst_l_combined) begin
-      if (lmem.awvalid && lmem.awready)
-        mailbox_addr_q.push_back(lmem.awaddr);
-      if (lmem.wvalid && lmem.wready)
-        mailbox_data_q.push_back(lmem.wdata);
+      if (lmem.awvalid && lmem.awready) mailbox_addr_q.push_back(lmem.awaddr);
+      if (lmem.wvalid  && lmem.wready ) mailbox_data_q.push_back(lmem.wdata);
 
       if (mailbox_addr_q.size() > 0 && mailbox_data_q.size() > 0) begin
-        logic [31:0] mailbox_addr;
-        mailbox_addr  = mailbox_addr_q.pop_front();
-        mailbox_data  = mailbox_data_q.pop_front();
-        mailbox_write = mailbox_addr == mem_mailbox;
-        @(posedge core_clk);
-        mailbox_write = 0;
+        mailbox_data  <= mailbox_data_q.pop_front();
+        mailbox_write <= mailbox_addr_q.pop_front() == mem_mailbox;
       end
+    end else begin
+      mailbox_addr_q.delete();
+      mailbox_data_q.delete();
     end
   end
 `endif

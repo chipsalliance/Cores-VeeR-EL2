@@ -46,7 +46,7 @@ ifneq ($(TB_MAX_CYCLES),)
 endif
 
 # Verilate and compile
-$(BUILD_DIR)/obj_dir/Vtb_top_tmr: $(BUILD_DIR)/defines.h $(TB_SRCS) $(if $(findstring $(FI),1), faultergeist)
+$(BUILD_DIR)/obj_dir/Vtb_top_tmr: $(BUILD_DIR)/defines.h $(TB_SRCS) $(if $(findstring $(FI),1), synth faultergeist)
 	$(VERILATOR) --binary --main -Mdir $(BUILD_DIR)/obj_dir \
 		--autoflush \
 		--timing \

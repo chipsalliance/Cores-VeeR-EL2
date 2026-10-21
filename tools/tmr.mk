@@ -72,31 +72,16 @@ verilator: $(BUILD_DIR)/obj_dir/Vtb_top_tmr program.hex
 
 # Synthesis
 LIB_ARGS := $(foreach f,$(LIB_FILES),-liberty $(f))
-SLANG_ARGS := --top el2_veer_wrapper \
-              --std latest --single-unit \
-              --best-effort-hierarchy \
-              --allow-toplevel-iface-ports \
-              --allow-hierarchical-const \
-              --libraries-inherit-macros \
-              --no-implicit-memories \
-              $(defines) \
-              $(includes) \
-              -F $(RV_ROOT)/design/flist
 
-$(BUILD_DIR)/synth.ys: $(BUILD_DIR)/defines.h
-	$(file  >$@,read_liberty -overwrite -setattr liberty_cell -lib $(LIB_FILES))
-	$(file >>$@,read_slang $(SLANG_ARGS))
-	$(file >>$@,synth -noabc -top el2_veer_wrapper)
-	$(file >>$@,clean)
-	$(file >>$@,rename -wire)
-	$(file >>$@,dfflibmap $(LIB_ARGS))
-	$(file >>$@,abc $(LIB_ARGS))
-	$(file >>$@,write_verilog $(BUILD_DIR)/netlist.v)
-	$(file >>$@,write_json $(NETLIST_JSON))
-	$(file >>$@,check -assert -mapped)
-
-$(NETLIST_JSON): $(BUILD_DIR)/synth.ys $(BUILD_DIR)/defines.h
-	$(YOSYS) $(BUILD_DIR)/synth.ys
+$(NETLIST_JSON): $(RV_ROOT)/tools/synth.tcl $(BUILD_DIR)/defines.h
+	export BUILD_DIR="$(BUILD_DIR)" && \
+	export LIB_FILES="$(LIB_FILES)" && \
+	export LIB_ARGS="$(LIB_ARGS)" && \
+	export NETLIST_JSON="$(NETLIST_JSON)" && \
+	export TOP="$(TOP)" && \
+	export DEFINES="$(defines)" && \
+	export INCLUDES="$(includes)" && \
+	$(YOSYS) -c $(RV_ROOT)/tools/synth.tcl
 
 synth: $(NETLIST_JSON)
 

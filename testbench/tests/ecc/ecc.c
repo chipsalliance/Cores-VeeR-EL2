@@ -18,7 +18,7 @@
 #include <stdint.h>
 
 #define STDOUT 0xd0580000
-volatile char* stdout = (char *)STDOUT;
+volatile char *stdout = (char *)STDOUT;
 
 #define MFDC_DISABLE_ECC_MASK 0x100
 #define INJECT_ICCM_SINGLE_BIT 0xe0
@@ -36,9 +36,10 @@ volatile char* stdout = (char *)STDOUT;
 void execute_from_iccm (void) __attribute__ ((aligned(4),section(".iccm_data0")));
 volatile uint32_t boot_count __attribute__((section(".dccm.persistent"))) = 0;
 uint32_t dccm_test, iccm_test;
+volatile uint32_t expect_double_bit_trap = 0;
 extern const int ICCM_ADDR, DCCM_ADDR;
 extern uintptr_t iccm_start, iccm_end;
-extern int printf(const char* format, ...);
+extern int printf(const char *format, ...);
 extern int putchar(int c);
 
 
@@ -146,14 +147,25 @@ void trap_handler(void) {
     mscause = read_mscause();
     clear_causes();
 
+    if (!expect_double_bit_trap) {
+        printf("Unexpected trap during single-bit ECC test! (mcause=0x%x, mscause=0x%x)\n",
+               mcause, mscause);
+        putchar(DISABLE_ERROR_INJECTION);
+        __asm__ volatile ("fence");
+        putchar(TEST_FAILED);
+    }
+    expect_double_bit_trap = 0;
+
     if (((mcause == 0x5 && mscause == 0x1) ||
         (mcause == 0x7 && mscause == 0x1)) &&
         dccm_test == 1) {
         printf("DCCM double bit error\n");
         putchar(DISABLE_ERROR_INJECTION);
+        __asm__ volatile ("fence");
     } else if (mcause == 0x1 && mscause == 0x1 && iccm_test == 1) {
         printf("ICCM double bit error\n");
         putchar(DISABLE_ERROR_INJECTION);
+        __asm__ volatile ("fence");
     } else {
         printf("Error unrelated to ECC\n");
         putchar(TEST_FAILED);
@@ -168,16 +180,29 @@ void run_iccm_err_test(int execute) {
     uint32_t *actual_iccm_code_end = 0;
     uint32_t mfdc, miccmect;
 
-    // Inject single bit ICCM error
+    expect_double_bit_trap = 0;
+
+    // Inject single bit ICCM error on the first 2 words (even & odd bank) so
+    // both entries of the 2-entry Redundant CAM (r0 and r1) remain resident
+    // without being evicted by subsequent words of execute_from_iccm().
     putchar(INJECT_ICCM_SINGLE_BIT);
+    __asm__ volatile ("fence");
 
     code_word = (uint32_t *) &iccm_start;
     printf("Copy code from %x [thru %x] to %x\n", (uintptr_t) code_word, &iccm_end, (uintptr_t) iccm);
     while (code_word < (uint32_t *) &iccm_end) {
+        if ((code_word - (uint32_t *) &iccm_start) == 2) {
+            __asm__ volatile ("fence");
+            putchar(DISABLE_ERROR_INJECTION);
+            __asm__ volatile ("fence");
+        }
         printf("at %x: %x\n", (uintptr_t) code_word, *code_word);
         *iccm++ = *code_word++;
     }
+    __asm__ volatile ("fence");
     putchar(DISABLE_ERROR_INJECTION);
+    __asm__ volatile ("fence");
+    __asm__ volatile ("fence.i");
     if (execute) {
         iccm_fn();
     }
@@ -193,8 +218,19 @@ void run_iccm_err_test(int execute) {
         putchar(TEST_FAILED);
     }
 
+    // Re-execute from ICCM to verify the scrubbed / redundant-CAM words do not
+    // trigger any additional ECC errors or unexpected traps on re-fetch.
+    if (execute && !(mfdc & MFDC_DISABLE_ECC_MASK)) {
+        iccm_fn();
+        if ((uint32_t)read_miccmect() != miccmect) {
+            printf("Unexpected additional ICCM single-bit error on re-fetch after correction!\n");
+            putchar(TEST_FAILED);
+        }
+    }
+
     // Inject double bit ICCM error
     putchar(INJECT_ICCM_DOUBLE_BIT);
+    __asm__ volatile ("fence");
 
     code_word = (uint32_t *) &iccm_start;
     iccm = iccm_data;
@@ -203,22 +239,33 @@ void run_iccm_err_test(int execute) {
         printf("at %x: %x\n", (uintptr_t) code_word, *code_word);
         *iccm++ = *code_word++;
     }
+    __asm__ volatile ("fence");
     putchar(DISABLE_ERROR_INJECTION);
+    __asm__ volatile ("fence");
+    __asm__ volatile ("fence.i");
     if (execute) {
+        expect_double_bit_trap = !(mfdc & MFDC_DISABLE_ECC_MASK);
         iccm_fn();
+        expect_double_bit_trap = 0;
     }
 }
 
 void run_dccm_err_test(void) {
-    uint32_t *dccm_data = (uint32_t *)DCCM_SADDR;
-    uint32_t *dccm = dccm_data;
-    uint32_t mfdc, mdccmect;
+    volatile uint32_t *dccm_data = (volatile uint32_t *)DCCM_SADDR;
+    volatile uint32_t *dccm = dccm_data;
+    uint32_t mfdc, mdccmect, rval;
+
+    expect_double_bit_trap = 0;
 
     // Inject single bit DCCM error
     putchar(INJECT_DCCM_SINGLE_BIT);
+    __asm__ volatile ("fence");
     *dccm = 0x12345678;
+    __asm__ volatile ("fence");
     putchar(DISABLE_ERROR_INJECTION);
-    printf("DCCM value: 0x%x\n", *dccm);
+    __asm__ volatile ("fence");
+    rval = *dccm;
+    printf("DCCM value: 0x%x\n", rval);
 
     mfdc = read_mfdc();
     mdccmect = read_mdccmect();
@@ -231,11 +278,35 @@ void run_dccm_err_test(void) {
         putchar(TEST_FAILED);
     }
 
+    if (!(mfdc & MFDC_DISABLE_ECC_MASK)) {
+        if (rval != 0x12345678) {
+            printf("DCCM single-bit ECC correction data mismatch! Expected 0x12345678, got 0x%x\n", rval);
+            putchar(TEST_FAILED);
+        }
+        // Re-read after hardware ECC scrub writeback to verify the scrubbed
+        // word in DCCM SRAM is clean and does not increment mdccmect again.
+        __asm__ volatile ("fence");
+        rval = *dccm;
+        if (rval != 0x12345678) {
+            printf("DCCM post-scrub read mismatch! Expected 0x12345678, got 0x%x\n", rval);
+            putchar(TEST_FAILED);
+        }
+        if ((uint32_t)read_mdccmect() != mdccmect) {
+            printf("Unexpected additional DCCM single-bit error after scrub writeback!\n");
+            putchar(TEST_FAILED);
+        }
+    }
+
     // Inject double bit DCCM error
     putchar(INJECT_DCCM_DOUBLE_BIT);
+    __asm__ volatile ("fence");
     *dccm = 0xDEADBEEF;
+    __asm__ volatile ("fence");
     putchar(DISABLE_ERROR_INJECTION);
+    __asm__ volatile ("fence");
+    expect_double_bit_trap = !(mfdc & MFDC_DISABLE_ECC_MASK);
     printf("DCCM value: 0x%x\n", *dccm);
+    expect_double_bit_trap = 0;
 }
 
 void execute_from_iccm (void) {

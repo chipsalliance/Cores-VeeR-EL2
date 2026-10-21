@@ -330,13 +330,16 @@ Should Correctly Implement Mode Switch
     Wait For Line On Uart           Finished: PASSED  matchNextLine=false
 
 Should Implement PMP
+    # FIXME: Renode allows unmatched U-mode accesses when all PMP entries are OFF (see #558).
+    # Remove the tag once CI uses a Renode version with the fix.
+    [Tags]                          robot:skip-on-failure
     Prepare Machine                 ${CURDIR}/pmp.elf
     Wait For Line On Uart           Hello VeeR (M mode)
     Wait For Line On Uart           VeeR does not have Smepmp
     Wait For Line On Uart           PMP G=0, granularity is 4
     Wait For Line On Uart           00 - User mode RWX in default state
     Wait For Line On Uart           testing...
-    Wait For Line On Uart           hello
+    Wait For Line On Uart           Trap! mcause=0x00000001, mepc=0x80000420, sp=0x80007E34
     Wait For Line On Uart           pass
     Wait For Line On Uart           01 - User mode RWX with one (any) PMP region enabled
     Wait For Line On Uart           testing...

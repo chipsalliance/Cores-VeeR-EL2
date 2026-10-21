@@ -90,6 +90,7 @@ void trap_handler(void) {
     putchar(DISABLE_ICCM_FAULT);
     putchar(DISABLE_DCCM_FAULT);
     putchar(DISABLE_ERROR_INJECTION);
+    __asm__ volatile ("fence");
 
     printf("[TRAP] Caught exception mcause=0x%x, mscause=0x%x (trap_count=%u, phase=%u)\n",
            last_mcause, last_mscause, trap_count, boot_phase);
@@ -156,11 +157,13 @@ int main(void) {
         copy_code_to_iccm_dest(ICCM_BASE + 0x100);
 
         void (*func_rd_fault)(void) = (void (*)(void))(ICCM_BASE + 0x100);
-        putchar(INJECT_ICCM_ADDR_FAULT);
         printf("[Phase 1b] Executing from 0x%x with address fault (expecting ECC trap)...\n", (uint32_t)(ICCM_BASE + 0x100));
+        putchar(INJECT_ICCM_ADDR_FAULT);
+        __asm__ volatile ("fence");
         func_rd_fault();
 
         putchar(DISABLE_ICCM_FAULT);
+        __asm__ volatile ("fence");
         printf("FAIL [Phase 1b]: Did not hit expected ECC trap on ICCM read address fault!\n");
         putchar(TEST_FAILED);
         return 1;
@@ -178,8 +181,10 @@ int main(void) {
         printf("[Phase 2] Testing ICCM Write Address Fault Injection (0xE5)...\n");
 
         putchar(INJECT_ICCM_ADDR_FAULT);
+        __asm__ volatile ("fence");
         copy_code_to_iccm_dest(ICCM_BASE + 0x200);
         putchar(DISABLE_ICCM_FAULT);
+        __asm__ volatile ("fence");
 
         void (*func_wr_fault)(void) = (void (*)(void))(ICCM_BASE + 0x200);
         printf("[Phase 2] Executing from 0x%x (written with address fault, expecting ECC trap)...\n", (uint32_t)(ICCM_BASE + 0x200));
@@ -202,8 +207,10 @@ int main(void) {
         printf("[Phase 3] Testing ICCM Write Enable Fault Injection (0xE6)...\n");
 
         putchar(INJECT_ICCM_WREN_FAULT);
+        __asm__ volatile ("fence");
         copy_code_to_iccm_dest(ICCM_BASE + 0x300);
         putchar(DISABLE_ICCM_FAULT);
+        __asm__ volatile ("fence");
 
         void (*func_wren_fault)(void) = (void (*)(void))(ICCM_BASE + 0x300);
         printf("[Phase 3] Executing from 0x%x (unwritten due to wren fault, expecting ECC trap)...\n", (uint32_t)(ICCM_BASE + 0x300));
@@ -228,11 +235,13 @@ int main(void) {
         copy_code_to_iccm_dest(ICCM_BASE + 0x400);
 
         void (*func_access_fault)(void) = (void (*)(void))(ICCM_BASE + 0x400);
-        putchar(INJECT_ICCM_ACCESS_FAULT);
         printf("[Phase 4] Executing from 0x%x with access fault (expecting ECC trap)...\n", (uint32_t)(ICCM_BASE + 0x400));
+        putchar(INJECT_ICCM_ACCESS_FAULT);
+        __asm__ volatile ("fence");
         func_access_fault();
 
         putchar(DISABLE_ICCM_FAULT);
+        __asm__ volatile ("fence");
         printf("FAIL [Phase 4]: Did not hit expected ECC trap on ICCM access fault!\n");
         putchar(TEST_FAILED);
         return 1;

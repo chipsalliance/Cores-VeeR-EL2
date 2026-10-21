@@ -1,0 +1,8 @@
+{
+   "JSON" : {
+      "dependencies" : [],
+      "sha256" : "713bdbe724dbb915ed50265ffe47e079a511980cb2427aa19076788bb64c3182",
+      "strip_prefix" : "JSON-4.11",
+      "url" : "https://cpan.metacpan.org/authors/id/I/IS/ISHIGAKI/JSON-4.11.tar.gz"
+   }
+}

@@ -1,0 +1,176 @@
+name: VeeR-EL2 ORFS Flow
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  DEBIAN_FRONTEND: noninteractive
+  BAZEL_ORFS_BRANCH: main
+
+jobs:
+  setup-orfs:
+    name: Build OpenROAD + Yosys
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: debian:trixie
+    strategy:
+      fail-fast: false
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+
+    steps:
+      # This will speedup OpenRoad rebuild
+      - uses: bazel-contrib/setup-bazel@0.19.0
+        with:
+          bazelisk-cache: true
+          disk-cache: orfs
+          repository-cache: true
+          cache-save: true
+
+      - name: Cache ORFS binaries
+        id: orfs-cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/orfs-tools/bin
+          key: orfs-tools-${{ runner.os }}-${{ runner.arch }}-${{ env.BAZEL_ORFS_BRANCH }}
+
+      - name: Install dependencies
+        if: steps.orfs-cache.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qqy --no-install-recommends \
+            ca-certificates python3 build-essential clang cmake flex bison git file zip wget tree
+
+      - name: Ensure Bazelisk
+        if: steps.orfs-cache.outputs.cache-hit != 'true'
+        run: |
+          if ! command -v bazelisk >/dev/null; then
+            sudo wget -q https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/bazelisk-linux-amd64 \
+              -O /usr/local/bin/bazelisk
+            sudo chmod +x /usr/local/bin/bazelisk
+          fi
+          bazelisk --version
+
+      - name: Check out bazel-orfs
+        if: steps.orfs-cache.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/The-OpenROAD-Project/bazel-orfs.git bazel-orfs
+          git -C bazel-orfs checkout "$BAZEL_ORFS_BRANCH"
+
+      - name: Configure Bazel
+        if: steps.orfs-cache.outputs.cache-hit != 'true'
+        working-directory: bazel-orfs
+        run: |
+          mkdir -p /tmp/distdir
+          for url in \
+            https://mirrors.kernel.org/gnu/glpk/glpk-5.0.tar.gz \
+            https://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz; do
+            if curl -fL --retry 5 --retry-delay 5 --retry-all-errors \
+                 --connect-timeout 20 --max-time 300 \
+                 -o /tmp/distdir/glpk-5.0.tar.gz "$url"; then
+              break
+            fi
+          done
+          test -s /tmp/distdir/glpk-5.0.tar.gz
+          printf '%s\n' 'common --distdir=/tmp/distdir' 'build -c opt' >> .bazelrc
+
+      - name: Build OpenROAD
+        if: steps.orfs-cache.outputs.cache-hit != 'true'
+        working-directory: bazel-orfs
+        run: bazelisk build @openroad//:openroad
+
+      - name: Build Yosys
+        if: steps.orfs-cache.outputs.cache-hit != 'true'
+        working-directory: bazel-orfs
+        run: |
+          git clone https://github.com/YosysHQ/yosys.git
+          pushd yosys
+          git checkout ${{ env.YOSYS_VERSION }}
+          git submodule update --init --recursive
+          cmake -B build . -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release --parallel $(nproc)
+          cmake --install build --strip --prefix /opt/yosys
+          popd
+
+      - name: Collect binaries
+        if: steps.orfs-cache.outputs.cache-hit != 'true'
+        working-directory: bazel-orfs
+        run: |
+          mkdir -p /tmp/orfs-tools/bin
+          cp -L bazel-out/k8-opt/bin/external/openroad+/openroad /tmp/orfs-tools/bin/openroad
+          cp -L /opt/yosys/bin/yosys /tmp/orfs-tools/bin/yosys
+          chmod +x /tmp/orfs-tools/bin/*
+          file /tmp/orfs-tools/bin/*
+          /tmp/orfs-tools/bin/openroad -version
+          /tmp/orfs-tools/bin/yosys -V
+          tar -C /tmp -czf /tmp/orfs-tools.tar.gz orfs-tools
+
+  run-orfs:
+    name: Run EL2 ORFS Flow
+    needs: setup-orfs
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: debian:trixie
+    strategy:
+      fail-fast: false
+      matrix:
+        bus:
+          - name: AXI
+            config: axi4
+          - name: AHB
+            config: ahb_lite
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+
+    steps:
+      - name: Configure Bazel
+        run: |
+          mkdir -p /tmp/distdir
+          for url in \
+            https://mirrors.kernel.org/gnu/glpk/glpk-5.0.tar.gz \
+            https://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz; do
+            if curl -fL --retry 5 --retry-delay 5 --retry-all-errors \
+                 --connect-timeout 20 --max-time 300 \
+                 -o /tmp/distdir/glpk-5.0.tar.gz "$url"; then
+              break
+            fi
+          done
+          test -s /tmp/distdir/glpk-5.0.tar.gz
+          printf '%s\n' 'common --distdir=/tmp/distdir' 'build -c opt' >> .bazelrc
+
+      - name: Ensure Bazelisk
+        run: |
+          if ! command -v bazelisk >/dev/null; then
+            sudo wget -q https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/bazelisk-linux-amd64 \
+              -O /usr/local/bin/bazelisk
+            sudo chmod +x /usr/local/bin/bazelisk
+          fi
+          bazelisk --version
+
+      - name: Restore ORFS binaries
+        uses: actions/cache@v3
+        with:
+          path: /tmp/orfs-tools/bin
+          key: orfs-tools-${{ runner.os }}-${{ runner.arch }}-${{ env.BAZEL_ORFS_BRANCH }}
+
+      - name: Add tools to PATH
+        run: echo "/tmp/orfs-tools/bin" >> "$GITHUB_PATH"
+
+      - name: Verify tools
+        run: |
+          openroad -version
+          yosys -V
+
+      - name: Setup repository
+        uses: actions/checkout@v3
+        with:
+          path: Cores-VeeR-EL2
+          submodules: recursive
+
+      - name: Run EL2 ${{ matrix.bus.name }} Flow
+        working-directory: Cores-VeeR-EL2
+        run: |
+          git checkout el2-bazel-orfs-support
+          bazelisk run //:veer_el2_${{ matrix.bus.config }}_orfs_final

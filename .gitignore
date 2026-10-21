@@ -14,6 +14,8 @@ __pycache__
 sim_build
 sim-build*
 venv
+/.bazel-registry
+/bazel-*
 results.xml
 verification/sim
 verilator-cocotb-build
@@ -25,3 +27,4 @@ tools/renode/build
 tools/renode/*.elf
 tools/renode/.venv
 docs/build
+tmp/

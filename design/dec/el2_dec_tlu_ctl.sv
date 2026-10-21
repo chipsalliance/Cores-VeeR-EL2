@@ -2918,7 +2918,7 @@ assign valid_csr = ( legal & (~(csr_dcsr | csr_dpc | csr_dmst | csr_dicawics | c
 
 assign dec_csr_legal_d = ( dec_csr_any_unq_d &
                            valid_csr &          // of a valid CSR
-                           ~(dec_csr_wen_unq_d & (csr_mvendorid | csr_marchid | csr_mimpid | csr_mhartid | csr_mdseac | csr_meihap)) // that's not a write to a RO CSR
+                           ~(dec_csr_wen_unq_d & (dec_csr_rdaddr_d[11:10] == 2'b11)) // that's not a write to a read-only (RO) CSR
                            );
    // CSR read mux
 logic [31:0] mstatus_rf, mie_rf, mtvec_rf, mscratch_rf, mepc_rf, mcause_rf, mtval_rf, mip_rf, mcyclel_rf, mcycleh_rf, minstretl_rf, minstreth_rf, mrac_rf;

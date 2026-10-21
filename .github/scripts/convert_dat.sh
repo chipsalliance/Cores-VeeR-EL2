@@ -19,3 +19,12 @@ verilator_coverage --unlink --write-info "${INFO_FILE}_branch.info" \
 
 # Extract toggle coverage separately into ${INFO_FILE}_toggle.info.
 verilator_coverage --filter-type toggle --write-info "${INFO_FILE}_toggle.info" "${DAT_FILE}"
+
+# Convert user (cover property) coverage into ${INFO_FILE}_fcov.info with BRDA
+# entries so Coverview renders functional coverage tables.
+SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+python3 "${SCRIPT_DIR}/convert_verilator_fcov_to_lcov.py" \
+  --dat "${DAT_FILE}" \
+  --repo-root "${SCRIPT_DIR}/../.." \
+  --output "${INFO_FILE}_fcov.info"
+

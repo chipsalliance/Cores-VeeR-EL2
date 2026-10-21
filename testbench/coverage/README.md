@@ -1,6 +1,6 @@
 # VeeR EL2 Testbench Coverage Subsystem
 
-This directory contains testbench-level functional coverage interfaces and binding modules for the VeeR EL2 Dual-Core Lockstep (DCLS) subsystem, addressing the verification requirements and gap analysis for configurable pipeline delay stages, 0-delay mode, core debug mode suppression and transitions, Multi-Bit Integrity (MUBI) encoding and fail-secure tamper coverage, and Memory Address XOR Infection coverage.
+This directory contains testbench-level functional coverage interfaces and binding modules for the VeeR EL2 Dual-Core Lockstep (DCLS) subsystem, addressing the verification requirements and gap analysis for configurable pipeline delay stages, 0-delay mode, core debug mode suppression and transitions, Multi-Bit Integrity (MUBI) encoding and fail-secure tamper coverage, Memory Address XOR Infection coverage, and Register File Read Port Comparison coverage.
 
 ## Files
 
@@ -8,7 +8,8 @@ This directory contains testbench-level functional coverage interfaces and bindi
 - **`el2_veer_lockstep_debug_mode_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_debug_mode_cov` covergroup (VCS) and SVA `cover property` assertions (Verilator) for core debug mode entry/exit transitions and DCLS corruption reporting suppression during debug mode.
 - **`el2_veer_lockstep_mubi_sweep_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_mubi_sweep_cov` covergroup (VCS) and SVA `cover property` assertions (Verilator) for MUBI width configurations, control signal encoding validation, and fail-secure tamper protection.
 - **`el2_veer_lockstep_address_xor_infection_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_address_xor_infection_cov` covergroup (VCS) and SVA `cover property` assertions (Verilator) for ICCM, DCCM, and ICache address-XOR infection, DCLS-domain `iccm_rd_data` divergence detection, ICCM DMA read word-enable masking (Issue #550), ICCM redundant row lane selection and CAM re-reads (Issue #562), and DCLS-internal ICache bank select and cacheline-wrap straddle check masking (Issue #569).
-- **`el2_veer_lockstep_fcov_bind.sv`**: Testbench binding module (`el2_veer_lockstep_fcov_bind`) that binds `el2_veer_lockstep_delay_cov_if`, `el2_veer_lockstep_debug_mode_cov_if`, `el2_veer_lockstep_mubi_sweep_cov_if`, and `el2_veer_lockstep_address_xor_infection_cov_if` to `el2_veer_lockstep`.
+- **`el2_veer_lockstep_regfile_read_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_regfile_read_cov` covergroup (VCS) and SVA `cover property` assertions (Verilator) for register file read port comparison modes, `rd0`/`rd1` read data divergence, architectural register divergence, and D-stage instruction type cross coverage.
+- **`el2_veer_lockstep_fcov_bind.sv`**: Testbench binding module (`el2_veer_lockstep_fcov_bind`) that binds `el2_veer_lockstep_delay_cov_if`, `el2_veer_lockstep_debug_mode_cov_if`, `el2_veer_lockstep_mubi_sweep_cov_if`, `el2_veer_lockstep_address_xor_infection_cov_if`, and `el2_veer_lockstep_regfile_read_cov_if` to `el2_veer_lockstep`.
 
 ## Coverage Architecture
 
@@ -112,7 +113,31 @@ Verifies DCLS-internal ICache bank selection, cacheline-wrap upper-bank check su
 - `straddle_intra_line_both_checked`, `straddle_cl_wrap_upper_dropped`: Halfword-straddling fetches (`ic_rd_rot_sel == 2'b11`) checking both banks within a cacheline versus suppressing the upper-bank check on a 64B cacheline wrap.
 - `dcls_icache_ctrl_mismatch_caught`: Main-vs-shadow divergence on DCLS-internal ICache read controls caught with `corruption_detected_o == El2MuBiTrue`.
 
+### Task 5: Register File Read Port Comparison Coverage (`el2_veer_lockstep_regfile_read_cov`)
+
+#### 1. `regfile_read_enable_config_cp`
+Monitors the register file DCLS comparison configuration (`RV_LOCKSTEP_REGFILE_READ_ENABLE`) when an active register divergence is present:
+- `full_regfile_mode`: `RV_LOCKSTEP_REGFILE_READ_ENABLE == 0` (flop subset comparison of `ra`, `sp`, `s0/fp`, and `a0`–`a7`).
+- `read_port_mode`: `RV_LOCKSTEP_REGFILE_READ_ENABLE == 1` (read port `rd0`/`rd1` comparison across all 31 GPRs).
+
+#### 2. `regfile_read_port_diff_cp`
+Tracks divergence on the register file read ports between the `rst_l`-aligned delayed main core and subordinate shadow core:
+- `rd0_divergence`: Main core `rd0` data differs from shadow core `rd0` data (`raddr0 != 0`).
+- `rd1_divergence`: Main core `rd1` data differs from shadow core `rd1` data (`raddr1 != 0`).
+
+#### 3. `target_register_divergence_cp`
+Tracks which architectural register differed on the active divergence cycle:
+- `zero_x0`: Zero register `x0` (`illegal_bins`, as `x0` is hardwired to zero and must never diverge).
+- `ra`: Return address `x1`.
+- `sp`: Stack pointer `x2`.
+- `s0_fp`, `s1`: Saved registers `x8` and `x9`.
+- `a0`–`a7`: Argument registers `x10` through `x17`.
+- `t0`–`t6`: Temporary registers `x5` through `x7` and `x28` through `x31`.
+
+#### 4. Cross Coverage
+- `target_register_x_instr_type`: Crosses `target_register_divergence_cp` with D-stage `instr_type_cp` (`alu`, `branch`, `store`, `load_addr`) executing on the cycle the register divergence occurred.
+
 ## Testbench & CI Integration
 
 The coverage files are compiled via `testbench/flist` and automatically instantiated when building with `+define+FCOV` via `testbench/veer_wrapper.sv` (`dcls_fcov`).
-The tests in `testbench/tests/` (e.g., `dcls`, `dcls_debug`, `dcls_error_ctrl`, `dcls_mubi_sweep`, `dcls_ecc_asymmetric`, `dcls_internal_state`, `ecc`, `iccm_addr_xor`, `dccm_addr_xor`, `icache_infection`) provide stimulus that exercises these coverpoints across delay configurations, debug mode transitions, MUBI widths, and memory address-XOR infection modes.
+The tests in `testbench/tests/` (e.g., `dcls`, `dcls_debug`, `dcls_error_ctrl`, `dcls_mubi_sweep`, `dcls_ecc_asymmetric`, `dcls_internal_state`, `dcls_regfile_read`, `ecc`, `iccm_addr_xor`, `dccm_addr_xor`, `icache_infection`) provide stimulus that exercises these coverpoints across delay configurations, debug mode transitions, MUBI widths, memory address-XOR infection modes, and register file read comparison modes.

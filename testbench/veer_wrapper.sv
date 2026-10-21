@@ -451,5 +451,34 @@ module veer_wrapper
       .dmi_active(dmi_active),
       .*
   );
+
+`ifdef RV_ASSERT_ON
+  `define TB_GPR_X0_ASSERT_ON
+`elsif VERILATOR
+  `define TB_GPR_X0_ASSERT_ON
+`endif
+`ifdef TB_GPR_X0_ASSERT_ON
+  assert_main_gpr_x0_rd0_zero: assert property (
+      @(posedge clk) disable iff (!rvtop.core_rst_l)
+      (rvtop.veer.dec.arf.raddr0 == 5'd0) |-> (rvtop.veer.dec.arf.rd0 == 32'h0))
+    else $fatal(1, "GPR x0 read port 0 returned non-zero in main core");
+  assert_main_gpr_x0_rd1_zero: assert property (
+      @(posedge clk) disable iff (!rvtop.core_rst_l)
+      (rvtop.veer.dec.arf.raddr1 == 5'd0) |-> (rvtop.veer.dec.arf.rd1 == 32'h0))
+    else $fatal(1, "GPR x0 read port 1 returned non-zero in main core");
+`ifdef RV_LOCKSTEP_ENABLE
+  assert_shadow_gpr_x0_rd0_zero: assert property (
+      @(posedge clk) disable iff (!rvtop.lockstep.rst_n)
+      (rvtop.lockstep.xshadow_core.dec.arf.raddr0 == 5'd0) |->
+      (rvtop.lockstep.xshadow_core.dec.arf.rd0 == 32'h0))
+    else $fatal(1, "GPR x0 read port 0 returned non-zero in shadow core");
+  assert_shadow_gpr_x0_rd1_zero: assert property (
+      @(posedge clk) disable iff (!rvtop.lockstep.rst_n)
+      (rvtop.lockstep.xshadow_core.dec.arf.raddr1 == 5'd0) |->
+      (rvtop.lockstep.xshadow_core.dec.arf.rd1 == 32'h0))
+    else $fatal(1, "GPR x0 read port 1 returned non-zero in shadow core");
+`endif
+  `undef TB_GPR_X0_ASSERT_ON
+`endif
 `endif
 endmodule

@@ -7,6 +7,14 @@ SECTIONS
 {
     . = 0x80000000;
     .text   : { *(.text*) }
+
+    /* Set-aliased ICache ways (spaced by 16KB = 0x4000 bytes, mapped to Set 64) */
+    . = 0x80009000;
+    .way0_text : { KEEP(*(.way0_text)) }
+    . = 0x8000d000;
+    .way1_text : { KEEP(*(.way1_text)) }
+    . = 0x80011000;
+    .way2_text : { KEEP(*(.way2_text)) }
     _end = .;
 
     /* STDOUT */

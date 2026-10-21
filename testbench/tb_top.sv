@@ -786,6 +786,7 @@ module tb_top
     integer fd, tp, el;
     logic next_dbus_error;
     logic next_ibus_error;
+    // ICache fault-injection enable flags (driven by Mailboxes 0x89-0x8B below)
     logic next_ic_error;
     logic next_ic_addr_error;
     logic next_ic_hit_error;
@@ -1264,9 +1265,25 @@ module tb_top
     end
     `endif
 
-    logic       ic_perr_r_d1;
-    logic [3:0] ic_addr_err_cnt;
-    logic       next_ic_addr_error_d1;
+    // =========================================================================
+    // ICache Fault-Injection State & Single-Cycle Release Tracking Signals
+    // (Used by Mailboxes 0x89-0x8F below; `*_d1` flops detect 1->0 transitions
+    //  so combinational blocks issue a single-shot `release` after a fault window)
+    // =========================================================================
+    logic       ic_perr_r_d1;           // Delayed `tlu.ic_perr_r` pulse for clean post-error release
+    logic [3:0] ic_addr_err_cnt;        // 0x8A: Hit counter to auto-release when RV_ICACHE_ADDR_XOR=0
+    logic       next_ic_addr_error_d1;  // 0x8A: Falling-edge release tracker for `ifu_fetch_addr_int_f`
+    logic [4:0] ic_addr_fault_bit;      // 0x8A: Selected fetch-address bit [pt.ICACHE_TAG_INDEX_LO:31]
+    logic       next_ic_way_error;      // 0x8C: Armed flag for wrong-way hit swap (`ic_rd_hit_q`)
+    logic       ic_way_err_active;      // 0x8C: Latched once fetch enters `.way0_text` (`0x80009xxx`)
+    logic       next_ic_way_error_d1;   // 0x8C: Falling-edge release tracker for `ic_rd_hit_q`
+    logic       next_ic_wr_addr_error;  // 0x8D: Armed flag for write-side XOR fault on next miss
+    logic       ic_wr_err_active;       // 0x8D: Active during line fill until `last_beat` write
+    logic       ic_wr_err_active_d1;    // 0x8D: Falling-edge release tracker for `imb_ff`/`ic_rw_addr`
+    logic       next_ic_bank1_error;    // 0x8E: Armed flag for Bank-1 data bit flip (`ic_rd_data[71]`)
+    logic       next_ic_bank1_error_d1; // 0x8E: Falling-edge release tracker for `ic_rd_data`
+    logic [2:0] ic_dcls_boundary_mode;    // 0x8F: Active sub-mode (1..4) for `EL2_IC_DATA` boundary faults
+    logic [2:0] ic_dcls_boundary_mode_d1; // 0x8F: Falling-edge release tracker for Mode 1..4 forces
 
 `ifdef RV_LOCKSTEP_ENABLE
 `define VEER rvtop_wrapper.rvtop.veer
@@ -1278,67 +1295,114 @@ module tb_top
 `elsif VERILATOR
   `define RV_ASSERT_OR_VERILATOR
 `endif
-    // Delay pipeline to synchronize shadow core (LOCKSTEP_CORE) internal IFU fault
-    // injection and release with the configured lockstep delay (pt.LOCKSTEP_DELAY).
+    // =========================================================================
+    // DCLS Shadow-Core Fault Synchronization Pipeline (`LockstepDelay` cycles):
+    // - Mailboxes 0x8A (`ifu_fetch_addr_int_f`) and 0x8D (`imb_ff` / `ic_rw_addr`)
+    //   force signals *inside* `el2_ifu_mem_ctl` to model symmetric read/write
+    //   Address-XOR corruption while preserving the true SRAM read/write index.
+    //   Because `LOCKSTEP_CORE` trails `VEER` by `LockstepDelay` (0..4) cycles,
+    //   the exact same internal fault window must be replayed on `LOCKSTEP_CORE`
+    //   `LockstepDelay` cycles later so DCLS does not flag an artificial mismatch
+    //   before the core's ICache ECC/Parity checker evaluates the read.
+    // - Mailboxes 0x89, 0x8B, 0x8C, 0x8E, and 0x8F inject faults outside DCLS
+    //   (in shared `EL2_IC_DATA` or wrapper wires), which naturally reach
+    //   `LOCKSTEP_CORE` via `el2_veer_lockstep`'s input delay lines.
+    // =========================================================================
     localparam int unsigned LockstepDelay = 32'(pt.LOCKSTEP_DELAY);
-    logic [4:0] shadow_ic_addr_error_q;
-    logic       shadow_ic_addr_error;
-    logic       shadow_ic_addr_error_d1;
+    logic [4:0]      shadow_ic_addr_error_q;
+    logic            shadow_ic_addr_error;
+    logic            shadow_ic_addr_error_d1;
+    logic [4:0][4:0] shadow_ic_addr_fault_bit_q;
+    logic [4:0]      shadow_ic_addr_fault_bit;
+    logic [4:0]      shadow_ic_wr_addr_error_q;
+    logic            shadow_ic_wr_addr_error;
+    logic            shadow_ic_wr_addr_error_d1;
 
     always @(posedge core_clk or negedge rst_l_combined) begin
         if (~rst_l_combined) begin
-            shadow_ic_addr_error_q  <= '0;
-            shadow_ic_addr_error_d1 <= 1'b0;
+            shadow_ic_addr_error_q     <= '0;
+            shadow_ic_addr_error_d1    <= 1'b0;
+            shadow_ic_addr_fault_bit_q <= '0;
+            shadow_ic_wr_addr_error_q  <= '0;
+            shadow_ic_wr_addr_error_d1 <= 1'b0;
         end else begin
-            shadow_ic_addr_error_q  <= {shadow_ic_addr_error_q[3:0], next_ic_addr_error};
-            shadow_ic_addr_error_d1 <= shadow_ic_addr_error;
+            shadow_ic_addr_error_q     <= {shadow_ic_addr_error_q[3:0], next_ic_addr_error};
+            shadow_ic_addr_error_d1    <= shadow_ic_addr_error;
+            shadow_ic_addr_fault_bit_q <= {shadow_ic_addr_fault_bit_q[3:0], ic_addr_fault_bit};
+            shadow_ic_wr_addr_error_q  <= {shadow_ic_wr_addr_error_q[3:0], ic_wr_err_active};
+            shadow_ic_wr_addr_error_d1 <= shadow_ic_wr_addr_error;
         end
     end
 
-    assign shadow_ic_addr_error = (LockstepDelay == 0) ? next_ic_addr_error :
-                                                         shadow_ic_addr_error_q[LockstepDelay - 1];
-`endif
+    localparam int ShadowIcDelayIdx = (LockstepDelay > 0) ? (LockstepDelay - 1) : 0;
+
+    assign shadow_ic_addr_error     = (LockstepDelay == 0) ? next_ic_addr_error :
+                                                             shadow_ic_addr_error_q[ShadowIcDelayIdx];
+    assign shadow_ic_addr_fault_bit = (LockstepDelay == 0) ? ic_addr_fault_bit :
+                                                             shadow_ic_addr_fault_bit_q[ShadowIcDelayIdx];
+    assign shadow_ic_wr_addr_error  = (LockstepDelay == 0) ? ic_wr_err_active :
+                                                             shadow_ic_wr_addr_error_q[ShadowIcDelayIdx];
+`endif // RV_LOCKSTEP_ENABLE
 
     // =========================================================================
-    // ICache Fault Injection & micect CSR (0x7F0) Hardware Counter Timing:
-    // 1. Mailbox writes (0x89: data fault, 0x8A: address infection, 0x8B: hit fault)
-    //    force corruption on the ICache read path and temporarily disable lockstep
-    //    constant delay assertions (`LOCKSTEP_CONST_DELAY_ASSERT_DISABLE).
-    //    - Signal Hierarchies:
-    //      - Mailboxes 0x89 & 0x8B force `rvtop_wrapper.rvtop.ic_rd_data`: This is the
-    //        142-bit top-level read data bus in el2_veer_wrapper connecting el2_mem to
-    //        both main core (el2_veer) and lockstep (el2_veer_lockstep). Forcing this
-    //        shared bus feeds both cores naturally (with lockstep delay), so no separate
-    //        LOCKSTEP_CORE force is needed.
-    //      - Mailbox 0x8A forces `ifu.mem_ctl.ifu_fetch_addr_int_f` (bit ICACHE_TAG_INDEX_LO
-    //        flipped via XOR): This is an internal signal inside each core's IFU (not present
-    //        at wrapper level). Hence, both primary core and `LOCKSTEP_CORE are forced
-    //        explicitly, with `LOCKSTEP_CORE delayed by `pt.LOCKSTEP_DELAY` cycles.
-    // 2. On the subsequent ICache access, the core detects an ECC/parity error and
+    // ICache Fault Injection Sequencer & `micect` CSR (0x7F0) Timing Protocol:
+    // 1. Supported Mailbox Commands (`mailbox_data[7:0]`):
+    //    - 0x89: Bank-0 single-bit read data fault (`ic_rd_data = 142'h1`).
+    //    - 0x8A: Read-side address infection fault (`ifu_fetch_addr_int_f` 1-bit flip;
+    //            optional bit index in `mailbox_data[15:8]`, default `ICACHE_TAG_INDEX_LO`).
+    //    - 0x8B: Multi-bit read data corruption (`ic_rd_data = 142'h5557_5557_5557_5557`).
+    //    - 0x8C: True wrong-way selection / set-alias fault (rotates `ic_rd_hit_q` ways
+    //            in `EL2_IC_DATA` when fetching from `.way0_text` at `0x80009xxx` with
+    //            both Way 0 and Way 1 valid).
+    //    - 0x8D: Write-side address infection fault (flips `imb_ff[31]` into
+    //            `ic_wr_addr_infect` on the final 16B write beat of a cold cache miss
+    //            while canceling the flip on `ic_rw_addr` so the true SRAM set is written).
+    //    - 0x8E: Bank-1 single-bit read data fault (`ic_rd_data[71]` flipped on a
+    //            cross-bank straddling fetch where `ic_rd_bank_check_en[1] == 1`).
+    //    - 0x8F: `EL2_IC_DATA` outside-DCLS control/rotator/bank-select faults (`mailbox_data[10:8]`
+    //            selects Mode 1: false `ic_cacheline_wrap_ff` & `ic_b_rden_ff = 2'b00` at `0x8000b006`,
+    //            Mode 2: suppress Bank-1 `ic_b_read_en[1]` & `ic_b_rden_ff[1]` at `0x8000b406`,
+    //            Mode 3: rotator offset `ic_rw_addr_ff[2:1]` at `0x8000d000`,
+    //            Mode 4: physical bank select `ic_rw_addr_ff[3]` at `0x8000d000`).
+    // 2. On the subsequent targeted ICache access, hardware ECC/parity error detection
     //    pulses `rvtop.veer.dec.tlu.ic_perr_r` for 1 cycle.
-    // 3. In el2_dec_tlu_ctl.sv, `ic_perr_r` synchronously increments the `micect` CSR:
+    // 3. In `el2_dec_tlu_ctl.sv`, `ic_perr_r` synchronously increments `micect` (0x7F0):
     //      assign micect_inc[26:0] = micect[26:0] + {26'b0, ic_perr_r};
-    // 4. Hardware invalidates the line, flushes the pipeline, and restarts the fetch
-    //    from the SoC bus (AXI4/AHB).
-    // 5. tb_top samples `ic_perr_r` as `ic_perr_r_d1` (1-cycle delay) to release the
-    //    forced signals and re-enable assertions, allowing the core's bus refetch to
-    //    complete cleanly. By the time software resumes and reads `micect`, the
-    //    hardware counter increment has already taken place.
+    // 4. Hardware invalidates the cache set, flushes the pipeline, and refetches cleanly
+    //    from the SoC system bus (AXI4/AHB-Lite).
+    // 5. `tb_top` samples `ic_perr_r` as `ic_perr_r_d1` (1-cycle delay) to deassert the
+    //    fault flags and re-enable lockstep constant-delay assertions (`LOCKSTEP_CONST_DELAY_ASSERT_DISABLE`),
+    //    ensuring the refetch completes cleanly before software reads `micect`.
     // =========================================================================
     always @(posedge core_clk or negedge rst_l_combined) begin
         if (~rst_l_combined) begin
-            next_ic_error         <= 0;
-            next_ic_addr_error    <= 0;
-            next_ic_addr_error_d1 <= 0;
-            next_ic_hit_error     <= 0;
-            ic_perr_r_d1          <= 0;
-            ic_addr_err_cnt       <= '0;
+            next_ic_error          <= 0;
+            next_ic_addr_error     <= 0;
+            next_ic_addr_error_d1  <= 0;
+            ic_addr_fault_bit      <= 5'(pt.ICACHE_TAG_INDEX_LO);
+            next_ic_hit_error      <= 0;
+            next_ic_way_error      <= 0;
+            ic_way_err_active      <= 0;
+            next_ic_way_error_d1   <= 0;
+            next_ic_wr_addr_error  <= 0;
+            ic_wr_err_active       <= 0;
+            ic_wr_err_active_d1    <= 0;
+            next_ic_bank1_error    <= 0;
+            next_ic_bank1_error_d1 <= 0;
+            ic_dcls_boundary_mode    <= 3'd0;
+            ic_dcls_boundary_mode_d1 <= 3'd0;
+            ic_perr_r_d1           <= 0;
+            ic_addr_err_cnt        <= '0;
             `ifdef RV_ASSERT_OR_VERILATOR
                 release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
             `endif
         end else begin
-            ic_perr_r_d1          <= rvtop_wrapper.rvtop.veer.dec.tlu.ic_perr_r;
-            next_ic_addr_error_d1 <= next_ic_addr_error;
+            ic_perr_r_d1           <= rvtop_wrapper.rvtop.veer.dec.tlu.ic_perr_r;
+            next_ic_addr_error_d1  <= next_ic_addr_error;
+            next_ic_way_error_d1   <= next_ic_way_error;
+            ic_wr_err_active_d1    <= ic_wr_err_active;
+            next_ic_bank1_error_d1 <= next_ic_bank1_error;
+            ic_dcls_boundary_mode_d1 <= ic_dcls_boundary_mode;
 
             // Mailbox 0x89: Force ICache read data corruption (forces data bit 0 of both banks of
             // ic_rd_data). ic_rd_data is in physical bank order, so the fetched (lower address)
@@ -1359,6 +1423,8 @@ module tb_top
             end
 
             // Mailbox 0x8A: Force address XOR mismatch (1-bit flip on ifu_fetch_addr_int_f).
+            // Optional `mailbox_data[15:8]` selects full-address bit [pt.ICACHE_TAG_INDEX_LO:31]
+            // (defaults to `pt.ICACHE_TAG_INDEX_LO` when `mailbox_data[15:8] == 0`).
             // Injected unconditionally: triggers ECC/parity error when RV_ICACHE_ADDR_XOR=1,
             // and slips undetected (released after 8 ICache hits) when RV_ICACHE_ADDR_XOR=0.
             if (mailbox_write && mailbox_data[7:0] == 8'h8A) begin
@@ -1367,6 +1433,8 @@ module tb_top
                 `endif
                 next_ic_addr_error <= 1;
                 ic_addr_err_cnt    <= '0;
+                ic_addr_fault_bit  <= (mailbox_data[15:8] == 8'd0) ?
+                                      5'(pt.ICACHE_TAG_INDEX_LO) : mailbox_data[12:8];
             end else if (next_ic_addr_error) begin
                 if (ic_perr_r_d1 || (ic_addr_err_cnt == 4'd8)) begin
                     next_ic_addr_error <= 0;
@@ -1379,12 +1447,13 @@ module tb_top
             // Re-enable lockstep constant-delay assertion once the shadow core (which trails
             // the main core by LockstepDelay cycles, including LockstepDelay=0) releases its force.
             `ifdef RV_ASSERT_OR_VERILATOR
-            if (!shadow_ic_addr_error && shadow_ic_addr_error_d1) begin
+            if ((!shadow_ic_addr_error && shadow_ic_addr_error_d1) ||
+                (!shadow_ic_wr_addr_error && shadow_ic_wr_addr_error_d1)) begin
                 release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
             end
             `endif
 
-            // Mailbox 0x8B: Force multi-bit read data corruption (hit logic / way selection fault).
+            // Mailbox 0x8B: Force multi-bit read data corruption.
             // Targets shared wrapper bus rvtop_wrapper.rvtop.ic_rd_data (same as 0x89) to corrupt
             // way-muxed data arriving at both primary and lockstep cores.
             if (mailbox_write && mailbox_data[7:0] == 8'h8B) begin
@@ -1392,7 +1461,6 @@ module tb_top
                     force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
                 `endif
                 next_ic_hit_error <= 1;
-                // Corrupt read data to simulate incorrect way selection / hit logic fault.
                 // Uses 16'h5557 pattern (odd parity per 16-bit chunk) so both Parity and ECC detectors trigger.
                 // Applied to both banks, as ic_rd_data is in physical bank order (see 0x89).
                 force rvtop_wrapper.rvtop.ic_rd_data = `RV_ICACHE_ECC ? {71'h5557_5557_5557_5557, 71'h5557_5557_5557_5557}
@@ -1404,38 +1472,165 @@ module tb_top
                     release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
                 `endif
             end
+
+            // Mailbox 0x8C: Force true wrong-way selection (`ic_rd_hit_q` way swap in EL2_IC_DATA)
+            // when fetching from `.way0_text` (`0x80009xxx`) where both ways hold valid lines.
+            // - When RV_ICACHE_ADDR_XOR=1: tag mismatch in `ic_rd_addr_infect` triggers `ic_perr_r`.
+            // - When RV_ICACHE_ADDR_XOR=0: wrong-way data has valid ECC/parity and executes until
+            //   returning from `.way0_text` (`ifu_fetch_addr_int_f[15:12] != 4'h9`).
+            if (mailbox_write && mailbox_data[7:0] == 8'h8C) begin
+                `ifdef RV_ASSERT_OR_VERILATOR
+                    force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
+                `endif
+                next_ic_way_error <= 1'b1;
+                ic_way_err_active <= 1'b0;
+            end else if (next_ic_way_error) begin
+                if (ic_perr_r_d1 ||
+                    (ic_way_err_active && rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_act_hit_f &&
+                     (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f[15:12] != 4'h9))) begin
+                    next_ic_way_error <= 1'b0;
+                    ic_way_err_active <= 1'b0;
+                    `ifdef RV_ASSERT_OR_VERILATOR
+                        release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
+                    `endif
+                end else if (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_act_hit_f &&
+                             (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f[15:12] == 4'h9) &&
+                             (&rvtop_wrapper.rvtop.ic_tag_valid[1:0])) begin
+                    ic_way_err_active <= 1'b1;
+                end
+            end
+
+            // Mailbox 0x8D: Force write-side address infection fault (`imb_ff[31]` inverted into
+            // `ic_wr_addr_infect` on the final 16-byte write beat of the next cache miss, while
+            // keeping `ic_rw_addr[31]` uncorrupted). Automatically releases when the line fill
+            // completes (`last_beat && bus_ifu_wr_en_ff`).
+            if (mailbox_write && mailbox_data[7:0] == 8'h8D) begin
+                `ifdef RV_ASSERT_OR_VERILATOR
+                    force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
+                `endif
+                next_ic_wr_addr_error <= 1'b1;
+                ic_wr_err_active      <= 1'b0;
+            end else if (next_ic_wr_addr_error) begin
+                if (ic_wr_err_active &&
+                    rvtop_wrapper.rvtop.veer.ifu.mem_ctl.last_beat &&
+                    rvtop_wrapper.rvtop.veer.ifu.mem_ctl.bus_ifu_wr_en_ff) begin
+                    next_ic_wr_addr_error <= 1'b0;
+                    ic_wr_err_active      <= 1'b0;
+                end else if (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_act_miss_f) begin
+                    ic_wr_err_active <= 1'b1;
+                end
+            end
+
+            // Mailbox 0x8E: Force upper-chunk single-bit read data fault on cross-bank
+            // straddling fetches (`ifu_fetch_addr_int_f[2:1] == 2'b11`, exercising `ic_bank_check_en[1]`).
+            if (mailbox_write && mailbox_data[7:0] == 8'h8E) begin
+                `ifdef RV_ASSERT_OR_VERILATOR
+                    force `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE = '1;
+                `endif
+                next_ic_bank1_error <= 1'b1;
+            end else if (next_ic_bank1_error && ic_perr_r_d1) begin
+                next_ic_bank1_error <= 1'b0;
+                `ifdef RV_ASSERT_OR_VERILATOR
+                    release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
+                `endif
+            end
+
+            // Mailbox 0x8F: Force EL2_IC_DATA outside-DCLS control/rotator/bank-select faults (Bug #569 / PR #571):
+            // - Mode 1 (`mailbox_data[10:8] == 3'd1`): Force false `ic_cacheline_wrap_ff` (`ic_rw_addr_ff = '1`
+            //   & `ic_b_rden_ff = 2'b00`) in `EL2_IC_DATA` while flipping bit 75 of `ic_rd_data` at `0x8000b006`.
+            // - Mode 2 (`mailbox_data[10:8] == 3'd2`): Suppress Bank-1 SRAM read enable
+            //   (`ic_b_read_en[1]` & `ic_bank_way_clken_final[1]` in BF-stage) and F-stage
+            //   `ic_b_rden_ff[1]` in `EL2_IC_DATA` at `0x8000b406` (`.subtest2_text`).
+            // - Mode 3 (`mailbox_data[10:8] == 3'd3`): Force rotator offset `ic_rw_addr_ff[2:1] = 2'b10`
+            //   in `EL2_IC_DATA` at `0x8000d000` (`.subtest3_text`).
+            // - Mode 4 (`mailbox_data[10:8] == 3'd4`): Force physical bank select `ic_rw_addr_ff[3] = 1'b1`
+            //   in `EL2_IC_DATA` at `0x8000d000` (`.subtest3_text`).
+            if (mailbox_write && mailbox_data[7:0] == 8'h8F) begin
+                ic_dcls_boundary_mode <= mailbox_data[10:8];
+            end else if (ic_dcls_boundary_mode == 3'd1) begin
+                if (ic_perr_r_d1 ||
+                    (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_act_hit_f &&
+                     (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f[15:1] == 15'(16'hb006 >> 1)))) begin
+                    ic_dcls_boundary_mode <= 3'd0;
+                end
+            end else if (ic_dcls_boundary_mode == 3'd2) begin
+                if (ic_perr_r_d1 ||
+                    (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_act_hit_f &&
+                     (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f[15:1] == 15'(16'hb406 >> 1)))) begin
+                    ic_dcls_boundary_mode <= 3'd0;
+                end
+            end else if ((ic_dcls_boundary_mode == 3'd3) || (ic_dcls_boundary_mode == 3'd4)) begin
+                if (ic_perr_r_d1 ||
+                    (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_act_hit_f &&
+                     (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f[15:1] == 15'(16'hd000 >> 1)))) begin
+                    ic_dcls_boundary_mode <= 3'd0;
+                end
+            end
         end
     end
 
     // =========================================================================
-    // Mailbox 0x8A Dynamic Address Bit-Flip Force & Release:
-    // Because `ifu_fetch_addr_int_f` updates on every fetch cycle from the F-stage
-    // register (`ifu_fetch_addr_f_ff`), a combinational block is used so the forced
-    // value tracks the current cycle's fetch address with bit `ICACHE_TAG_INDEX_LO`
-    // inverted (`^ 1`).
-    // - When `next_ic_addr_error` / `shadow_ic_addr_error` are 0 (all normal cycles),
-    //   all branches evaluate to false and no force or release is executed.
-    // - When the error flag transitions from 1 -> 0 (`_d1` pulse), a single-shot
-    //   `release` restores normal operation.
+    // Force Block 1: Core-Internal IFU Address-XOR Faults (0x8A, 0x8D)
+    // - Driven on `negedge core_clk` (after `posedge core_clk` state elements have
+    //   settled and before the next `posedge core_clk` sampling edge) so Verilator
+    //   does not infer combinational `UNOPTFLAT` loops across `VlForceVec` signals.
+    // - On normal cycles (`error == 0 && error_d1 == 0`), neither `force` nor `release`
+    //   executes, and a single-shot `release` restores normal driving when the window closes.
     // =========================================================================
-    always @(*) begin
+    always @(negedge core_clk) begin
+        // 0x8A: Flip selected fetch-address bit on `ifu_fetch_addr_int_f` so `ic_rd_addr_infect`
+        // uses a corrupted tag/index bit without altering the prior cycle's SRAM read index.
         if (next_ic_addr_error) begin
             force rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f =
                 rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_f_ff.dout ^
-                31'(1 << (pt.ICACHE_TAG_INDEX_LO - 1));
+                (31'd1 << (ic_addr_fault_bit - 5'd1));
         end else if (next_ic_addr_error_d1) begin
             release rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f;
         end
 
+        // 0x8D: Write-side address infection fault on the final 16-byte fill beat (`last_beat`).
+        // In `el2_ifu_mem_ctl.sv`, `imb_ff[31]` drives BOTH `ic_wr_addr_infect` (the stored XOR
+        // mask) and `ic_rw_addr[31]` (via `ifu_ic_rw_int_addr`). Inverting `imb_ff[31]` while
+        // canceling `{sel_mb_addr, 30'b0}` on `ic_rw_addr` isolates the fault strictly to the
+        // write-side XOR calculation while writing the cache line into its true SRAM set.
+        if (ic_wr_err_active &&
+            rvtop_wrapper.rvtop.veer.ifu.mem_ctl.write_ic_16_bytes &&
+            rvtop_wrapper.rvtop.veer.ifu.mem_ctl.last_beat &&
+            !rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_act_miss_f) begin
+            force rvtop_wrapper.rvtop.veer.ifu.mem_ctl.imb_ff =
+                rvtop_wrapper.rvtop.veer.ifu.mem_ctl.imb_f_ff.dout ^ 31'h4000_0000;
+            force rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_rw_addr =
+                rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_ic_rw_int_addr ^
+                {rvtop_wrapper.rvtop.veer.ifu.mem_ctl.sel_mb_addr, 30'b0};
+        end else if (ic_wr_err_active || ic_wr_err_active_d1) begin
+            release rvtop_wrapper.rvtop.veer.ifu.mem_ctl.imb_ff;
+            release rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_rw_addr;
+        end
+
 `ifdef RV_LOCKSTEP_ENABLE
+        // Replay identical internal IFU faults onto `LOCKSTEP_CORE` after `LockstepDelay` cycles.
         if (shadow_ic_addr_error) begin
             force `LOCKSTEP_CORE.ifu.mem_ctl.ifu_fetch_addr_int_f =
                 `LOCKSTEP_CORE.ifu.mem_ctl.ifu_fetch_addr_f_ff.dout ^
-                31'(1 << (pt.ICACHE_TAG_INDEX_LO - 1));
+                (31'd1 << (shadow_ic_addr_fault_bit - 5'd1));
         end else if (shadow_ic_addr_error_d1) begin
             release `LOCKSTEP_CORE.ifu.mem_ctl.ifu_fetch_addr_int_f;
         end
-`endif
+
+        if (shadow_ic_wr_addr_error &&
+            `LOCKSTEP_CORE.ifu.mem_ctl.write_ic_16_bytes &&
+            `LOCKSTEP_CORE.ifu.mem_ctl.last_beat &&
+            !`LOCKSTEP_CORE.ifu.mem_ctl.ic_act_miss_f) begin
+            force `LOCKSTEP_CORE.ifu.mem_ctl.imb_ff =
+                `LOCKSTEP_CORE.ifu.mem_ctl.imb_f_ff.dout ^ 31'h4000_0000;
+            force `LOCKSTEP_CORE.ifu.mem_ctl.ic_rw_addr =
+                `LOCKSTEP_CORE.ifu.mem_ctl.ifu_ic_rw_int_addr ^
+                {`LOCKSTEP_CORE.ifu.mem_ctl.sel_mb_addr, 30'b0};
+        end else if (shadow_ic_wr_addr_error || shadow_ic_wr_addr_error_d1) begin
+            release `LOCKSTEP_CORE.ifu.mem_ctl.imb_ff;
+            release `LOCKSTEP_CORE.ifu.mem_ctl.ic_rw_addr;
+        end
+`endif // RV_LOCKSTEP_ENABLE
     end
 
 `ifdef RV_DCCM_WR_READBACK
@@ -1957,6 +2152,111 @@ module tb_top
 `endif
 `endif
 `endif
+
+`ifdef RV_ICACHE_ENABLE
+    // =========================================================================
+    // Force Block 2: `EL2_IC_DATA` Way-Hit Swap (Mailbox 0x8C)
+    // - Driven on `negedge core_clk` separate from `wb_dout_ecc` below so `ic_rd_hit_q`
+    //   is forced cleanly before the next `posedge core_clk` sampling edge without
+    //   creating `VlForceVec` combinational cycles in Verilator.
+    // =========================================================================
+    always @(negedge core_clk) begin
+        // 0x8C: Rotate `ic_rd_hit_q` across valid ways on `.way0_text` (`0x80009xxx`)
+        // so `EL2_IC_DATA` returns valid, ECC-clean instructions from an aliased way.
+        if (next_ic_way_error &&
+            (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f[15:12] == 4'h9) &&
+            (&rvtop_wrapper.rvtop.ic_tag_valid[1:0]) &&
+            (|rvtop_wrapper.rvtop.ic_rd_hit[1:0])) begin
+            force rvtop_wrapper.rvtop.mem.icache.icm.ic_data_inst.ic_rd_hit_q =
+                (pt.ICACHE_NUM_WAYS)'({rvtop_wrapper.rvtop.ic_rd_hit[0],
+                                       rvtop_wrapper.rvtop.ic_rd_hit[pt.ICACHE_NUM_WAYS-1:1]});
+        end else if (next_ic_way_error || next_ic_way_error_d1) begin
+            release rvtop_wrapper.rvtop.mem.icache.icm.ic_data_inst.ic_rd_hit_q;
+        end
+    end
+
+    // =========================================================================
+    // Force Block 3: `EL2_IC_DATA` Read-Data, Control & Steering Faults (0x8E, 0x8F)
+    // - Driven on `negedge core_clk` in the un-duplicated `EL2_IC_DATA` / wrapper
+    //   boundary outside DCLS (cross-bank upper-chunk data flip and Bug #569 / PR #571 modes).
+    // - Grouped strictly by target RTL signal so no two clauses contend over `force`/`release`.
+    // =========================================================================
+    always @(negedge core_clk) begin
+        // 1. Shared `ic_rd_data` faults (0x8E cross-bank upper chunk & 0x8F Mode 1 upper-bank flip):
+        if (next_ic_bank1_error &&
+            (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f[2:1] == 2'b11)) begin
+            force rvtop_wrapper.rvtop.ic_rd_data =
+                rvtop_wrapper.rvtop.mem.icache.icm.ic_data_inst.wb_dout_ecc ^
+                (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f[3] ?
+                 142'd1 : (142'd1 << 71));
+        end else if ((ic_dcls_boundary_mode == 3'd1) &&
+                     rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_act_hit_f &&
+                     (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f[15:1] == 15'(16'hb006 >> 1))) begin
+            force rvtop_wrapper.rvtop.ic_rd_data =
+                rvtop_wrapper.rvtop.mem.icache.icm.ic_data_inst.wb_dout_ecc ^
+                (`RV_ICACHE_ECC ? (142'd1 << 75) : (142'd1 << 72));
+        end else if (next_ic_bank1_error || next_ic_bank1_error_d1 ||
+                     (ic_dcls_boundary_mode == 3'd1) || (ic_dcls_boundary_mode_d1 == 3'd1)) begin
+            release rvtop_wrapper.rvtop.ic_rd_data;
+        end
+
+        // 2. 0x8F Mode 2 (BF-stage): Suppress `EL2_IC_DATA` Bank-1 SRAM read enable on the
+        //    cross-bank straddling fetch at `0x8000b406` (`.subtest2_text`) so Bank-1 SRAM
+        //    retains its prior stale read data across both `ICACHE_WAYPACK=0` and `ICACHE_WAYPACK=1`.
+        if ((ic_dcls_boundary_mode == 3'd2) &&
+            rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifc_fetch_req_bf &&
+            !rvtop_wrapper.rvtop.veer.ifu.mem_ctl.sel_mb_addr &&
+            (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifc_fetch_addr_bf[15:1] == 15'(16'hb406 >> 1))) begin
+            force rvtop_wrapper.rvtop.mem.icache.icm.ic_data_inst.ic_b_read_en = 2'b01;
+            force rvtop_wrapper.rvtop.mem.icache.icm.ic_data_inst.ic_b_read_en_up =
+                {pt.ICACHE_NUM_WAYS{2'b01}};
+            force el2_mem_export.ic_bank_way_clken_final = 2'b01;
+            force el2_mem_export.ic_bank_way_clken_final_up =
+                {pt.ICACHE_NUM_WAYS{2'b01}};
+        end else if ((ic_dcls_boundary_mode == 3'd2) || (ic_dcls_boundary_mode_d1 == 3'd2)) begin
+            release rvtop_wrapper.rvtop.mem.icache.icm.ic_data_inst.ic_b_read_en;
+            release rvtop_wrapper.rvtop.mem.icache.icm.ic_data_inst.ic_b_read_en_up;
+            release el2_mem_export.ic_bank_way_clken_final;
+            release el2_mem_export.ic_bank_way_clken_final_up;
+        end
+
+        // 3. 0x8F Mode 1 & Mode 2 (F-stage): Force `EL2_IC_DATA.ic_b_rden_ff` check-enable flops
+        //    outside DCLS (`2'b00` in Mode 1 at `0x8000b006`; `2'b01` in Mode 2 at `0x8000b406`).
+        //    Core-side `ic_bank_check_en` inside DCLS (PR #571) must still catch the fault.
+        if ((ic_dcls_boundary_mode == 3'd1) &&
+            rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_act_hit_f &&
+            (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f[15:1] == 15'(16'hb006 >> 1))) begin
+            force rvtop_wrapper.rvtop.mem.icache.icm.ic_data_inst.ic_b_rden_ff = 2'b00;
+        end else if ((ic_dcls_boundary_mode == 3'd2) &&
+                     rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_act_hit_f &&
+                     (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f[15:1] == 15'(16'hb406 >> 1))) begin
+            force rvtop_wrapper.rvtop.mem.icache.icm.ic_data_inst.ic_b_rden_ff = 2'b01;
+        end else if ((ic_dcls_boundary_mode == 3'd1) || (ic_dcls_boundary_mode_d1 == 3'd1) ||
+                     (ic_dcls_boundary_mode == 3'd2) || (ic_dcls_boundary_mode_d1 == 3'd2)) begin
+            release rvtop_wrapper.rvtop.mem.icache.icm.ic_data_inst.ic_b_rden_ff;
+        end
+
+        // 4. 0x8F Mode 3 & Mode 4 (F-stage): Force `EL2_IC_DATA.ic_rw_addr_ff` intra-line address
+        //    flops outside DCLS at `0x8000d000` (`.subtest3_text`):
+        //    - Mode 3 (`ic_rw_addr_ff[2:1] = 2'b10`): tests core-side byte rotator (`ic_rd_rot_sel`).
+        //    - Mode 4 (`ic_rw_addr_ff[3]   = 1'b1`):  tests core-side bank select (`ic_rd_bank_sel`).
+        if ((ic_dcls_boundary_mode == 3'd3) &&
+            rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_act_hit_f &&
+            (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f[15:1] == 15'(16'hd000 >> 1))) begin
+            force rvtop_wrapper.rvtop.mem.icache.icm.ic_data_inst.ic_rw_addr_ff =
+                (pt.ICACHE_TAG_INDEX_LO - 1)'(2'b10);
+        end else if ((ic_dcls_boundary_mode == 3'd4) &&
+                     rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_act_hit_f &&
+                     (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f[15:1] == 15'(16'hd000 >> 1))) begin
+            force rvtop_wrapper.rvtop.mem.icache.icm.ic_data_inst.ic_rw_addr_ff =
+                (pt.ICACHE_TAG_INDEX_LO - 1)'(3'b100);
+        end else if ((ic_dcls_boundary_mode == 3'd3) || (ic_dcls_boundary_mode_d1 == 3'd3) ||
+                     (ic_dcls_boundary_mode == 3'd4) || (ic_dcls_boundary_mode_d1 == 3'd4)) begin
+            release rvtop_wrapper.rvtop.mem.icache.icm.ic_data_inst.ic_rw_addr_ff;
+        end
+    end
+`endif // RV_ICACHE_ENABLE
+
 `ifdef RV_LOCKSTEP_ENABLE
 // Injected values should be randomized & it should be ensured that they're different
 // to what's their current value

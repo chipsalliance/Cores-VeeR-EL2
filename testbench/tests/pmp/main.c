@@ -220,13 +220,11 @@ int main () {
     pmp_clear();
 
     // .......................................................................
-    // Check if user mode has access to everything by default when PMP is not
-    // configured. Just call a simple function.
+    // Check that user mode has no access when PMP is not configured.
     if (have_user_mode) {
         printf("%02d - User mode RWX in default state\n", tid++);
 
         printf(" testing...\n");
-#if RV_SMEPMP
         TRY {
             ucall(test_hello);
             printf(" fail\n");
@@ -236,17 +234,6 @@ int main () {
             printf(" pass\n");
         }
         END_TRY;
-#else
-        TRY {
-            ucall(test_hello);
-            printf(" pass\n");
-        }
-        CATCH {
-            printf(" fail\n");
-            failed++;
-        }
-        END_TRY;
-#endif
     }
 
     // .......................................................................

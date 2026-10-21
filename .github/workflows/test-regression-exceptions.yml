@@ -24,7 +24,7 @@ jobs:
         run: |
           echo "tests=$(python3 .github/scripts/select_pr_tests.py \
             '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}' 4 \
-            'machine_external_ints,dbus_store_error,lsu_trigger_hit,machine_external_vec_ints,dside_pic_access_error,iside_fetch_precise_bus_error,dside_access_region_prediction_error,cmark,iside_core_local_unmapped_address_error,dside_access_across_region_boundary,nmi_pin_assertion,dside_size_misaligned_access_to_non_idempotent_address,dside_core_local_access_unmapped_address_error,dbus_nonblocking_load_error,internal_timer_ints,ebreak_ecall,illegal_instruction,clk_override,core_pause')" | tee -a $GITHUB_OUTPUT
+            'machine_external_ints,dbus_store_error,lsu_trigger_hit,machine_external_vec_ints,dside_pic_access_error,iside_fetch_precise_bus_error,dside_access_region_prediction_error,cmark,iside_core_local_unmapped_address_error,dside_access_across_region_boundary,nmi_pin_assertion,dside_size_misaligned_access_to_non_idempotent_address,dside_core_local_access_unmapped_address_error,dbus_nonblocking_load_error,internal_timer_ints,ebreak_ecall,illegal_instruction,read_only_csr_exception,clk_override,core_pause')" | tee -a $GITHUB_OUTPUT
 
   regression-tests:
     name: Regression exceptions tests

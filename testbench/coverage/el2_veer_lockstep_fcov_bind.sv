@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+`include "common_defines.vh"
+
 module el2_veer_lockstep_fcov_bind
 #(
 `ifdef FCOV
@@ -32,6 +34,27 @@ module el2_veer_lockstep_fcov_bind
          .*
     );
     bind el2_veer_lockstep el2_veer_lockstep_address_xor_infection_cov_if el2_veer_lockstep_address_xor_infection_cov_inst(
+         .*
+    );
+    bind el2_veer_lockstep el2_veer_lockstep_regfile_read_cov_if el2_veer_lockstep_regfile_read_cov_inst(
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+  `ifdef RV_LOCKSTEP_REGFILE_READ_ENABLE
+         .main_gpr_rd0              (main_core_regfile.gpr.rd0),
+         .main_gpr_rd1              (main_core_regfile.gpr.rd1),
+         .shadow_gpr_rd0            (shadow_core_regfile.gpr.rd0),
+         .shadow_gpr_rd1            (shadow_core_regfile.gpr.rd1),
+  `else
+         .main_gpr_pkt              (main_core_regfile.gpr),
+         .shadow_gpr_pkt            (shadow_core_regfile.gpr),
+  `endif
+`endif
+         .shadow_raddr0             (xshadow_core.dec.dec_i0_rs1_d),
+         .shadow_raddr1             (xshadow_core.dec.dec_i0_rs2_d),
+         .shadow_dec_i0_decode_d    (xshadow_core.dec.dec_i0_decode_d),
+         .shadow_dec_i0_alu_decode_d(xshadow_core.dec.dec_i0_alu_decode_d),
+         .shadow_dec_i0_branch_d    (xshadow_core.dec.dec_i0_branch_d),
+         .shadow_dec_i0_instr_d     (xshadow_core.dec.dec_i0_instr_d),
+         .shadow_lsu_p              (xshadow_core.dec.lsu_p),
          .*
     );
 `endif

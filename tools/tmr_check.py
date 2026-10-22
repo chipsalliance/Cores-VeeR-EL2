@@ -35,6 +35,7 @@ def get_tmr_events(log_file):
         "fatal_faults": [],
         "recovery_started": [],
         "recovery_finished": [],
+        "recovery_time_elapsed": [],
     }
 
     with open(log_file, "r") as fp:
@@ -63,6 +64,8 @@ def get_tmr_events(log_file):
                 events["recovery_started"].append(tstamp)
             if "TMR recovery finished" in line:
                 events["recovery_finished"].append(tstamp)
+            if "of TMR recovery time" in line:
+                events["recovery_time_elapsed"].append(tstamp)
 
     return events
 
@@ -170,6 +173,13 @@ def main():
         if abs(starts - finishes) != 0:
             print(f"Mismatch in recovery start ({starts}) and finish ({finishes}) count")
             exitcode = -1
+        recovery_times = events["recovery_time_elapsed"]
+        recovery_occurrences = len(recovery_times)
+        print("Recovery time summary")
+        print(f"Recoveries occured: {recovery_occurrences}")
+        print(f"Minimal recovery time: {min(recovery_times)}ns")
+        print(f"Maximal recovery time: {max(recovery_times)}ns")
+        print(f"Avarage recovery time: {sum(recovery_times)/recovery_occurrences}ns")
 
     if args.expect_no_tmr_recovery:
         starts = len(events["recovery_started"])

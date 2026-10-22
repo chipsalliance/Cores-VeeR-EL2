@@ -72,6 +72,8 @@ el2_mubi_pkg::el2_mubi_t core_active_0;
 el2_mubi_pkg::el2_mubi_t core_active_1;
 el2_mubi_pkg::el2_mubi_t core_active_2;
 
+int recovery_time_start, recovery_time_end, recovery_time_elapsed;
+
 // ------------------------------------------------------------------
 // CRG
 // ------------------------------------------------------------------
@@ -103,6 +105,11 @@ initial begin
     $value$plusargs("maxCycles=%d", maxCycles);
 end
 
+initial begin
+    recovery_time_start = 0;
+    recovery_time_end = 0;
+    recovery_time_elapsed = 0;
+end
 always @(negedge core_clk) begin
   cycleCnt <= cycleCnt + 1;
 
@@ -2489,10 +2496,14 @@ always @(posedge core_clk or negedge rst_l_combined) begin
                 $display("[%0t ns] tmr_recovery_pending has invalid value! (0b%b)", $time, tmr_recovery_pending);
             end else begin
                 if (mubi_check_true(tmr_recovery_pending) && !mubi_check_true(tmr_fatal)) begin
-                    $display("[%0t ns] TMR recovery started", $time);
+                    recovery_time_start = $time;
+                    $display("[%0t ns] TMR recovery started", recovery_time_start);
                 end
                 if (mubi_check_false(tmr_recovery_pending)) begin
-                    $display("[%0t ns] TMR recovery finished", $time);
+                    recovery_time_end = $time;
+                    $display("[%0t ns] TMR recovery finished", recovery_time_end);
+                    recovery_time_elapsed = recovery_time_end - recovery_time_start;
+                    $display("[%0t ns] of TMR recovery time", recovery_time_elapsed);
                 end
             end
         end

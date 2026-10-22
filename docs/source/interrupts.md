@@ -51,6 +51,11 @@ Each external interrupt source connects to a dedicated gateway.
 The gateway is responsible for synchronizing the interrupt request to the core's clock domain, and for converting the request signal to a common interrupt request format (i.e., active-high and level-triggered) for the PIC.
 The PIC core can only handle one single interrupt request per interrupt source at a time.
 
+:::{note}
+In this implementation, all external interrupt requests are synchronized once in `el2_veer_wrapper` (`extint_syncro_ff`, on the free-running core clock), before the [Dual-Core Lockstep](dual-core-lock-step.md#input-synchronization) split, rather than inside each gateway.
+The gateway diagrams in this chapter are conceptual.
+:::
+
 All current SoC IP interrupts are asynchronous and level-triggered.
 Therefore, the gateway's only function for SoC IP interrupts is to synchronize the request to the core clock domain.
 There is no state kept in the gateway.

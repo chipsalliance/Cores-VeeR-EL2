@@ -1,0 +1,185 @@
+# Custom Yosys synthesis tcl script for the synthesize_rtl rule with
+# updates for reading include dir paths via environment variables and
+# read design files via read_slang
+
+yosys -import
+
+set all_liberties [split $::env(ADDITIONAL_LIBERTIES) ","]
+lappend all_liberties $::env(LIBERTY)
+
+# create liberty blackbox so cells can be manually created.
+foreach lib $all_liberties {
+  read_liberty -lib -overwrite $lib
+}
+
+write_verilog -blackboxes $::env(STANDARD_CELL_BLACK_BOX)
+
+# normalized flist content
+set srcs_flist_path [file normalize $::env(FLIST)]
+set srcs_flist_file [open $srcs_flist_path r]
+
+set normalized_flist "${srcs_flist_path}.normalized"
+set normalized_srcs_flist_file [open $normalized_flist w]
+
+# Add normalized blackbox file to $normalized_flist
+puts $normalized_srcs_flist_file [file normalize $::env(STANDARD_CELL_BLACK_BOX)]
+
+while {[gets $srcs_flist_file src] >= 0} {
+    set src [string trim $src]
+    # Skip empty lines, and comments
+    if {$src eq "" || [string match "#*" $src]} {
+        puts $normalized_srcs_flist_file $src
+        continue
+    }
+
+    puts $normalized_srcs_flist_file [file normalize $src]
+}
+
+close $srcs_flist_file
+close $normalized_srcs_flist_file
+
+set defines {}
+set inc_hdr_flist_path $::env(INC_DIR_FLIST)
+set inc_hdr_flist_file [open $inc_hdr_flist_path "r"]
+set inc_hdr_flist_data [read $inc_hdr_flist_file]
+set includes [lmap dir [split [string trim $inc_hdr_flist_data] "\n"] {
+    format "-I%s" $dir
+}]
+
+# Set SLANG args
+set SLANG_ARGS [list \
+    --top $::env(TOP) \
+    --std latest \
+    --single-unit \
+    --allow-toplevel-iface-ports \
+    --allow-hierarchical-const \
+    --libraries-inherit-macros \
+    --no-implicit-memories \
+]
+
+# Add defines
+lappend SLANG_ARGS {*}$defines
+
+# Add include paths
+lappend SLANG_ARGS {*}$includes
+
+# Add file list
+lappend SLANG_ARGS -F $normalized_flist
+
+# read design
+read_slang {*}$SLANG_ARGS
+
+# read UHDM designs
+set srcs_uhdm_flist_path $::env(UHDM_FLIST)
+set srcs_uhdm_flist_file [open $srcs_uhdm_flist_path "r"]
+set srcs_uhdm_flist_data [read $srcs_uhdm_flist_file]
+set srcs [split $srcs_uhdm_flist_data "\n"]
+puts $srcs
+foreach src $srcs {
+    # Skip empty lines, including the implict one after the last \n delimiter
+    # for files that end with a newline.
+    if {$src eq ""} continue
+    read_uhdm $src
+}
+
+# generic synthesis
+set top $::env(TOP)
+hierarchy -check -top $top
+
+if { [info exists ::env(EARLY_TECHMAP)]} {
+    techmap -map $::env(EARLY_TECHMAP)
+}
+
+# Move proc_mux at the end of `yosys proc` to avoid inferred latches.
+# See https://github.com/YosysHQ/yosys/issues/3456
+# Ideally the bug would be solved in UHDM/Yosys.
+yosys proc -nomux
+yosys proc_mux
+yosys flatten
+
+# Remove $print cells.  These cells represent Verilog $display() tasks.
+# Some place and route tools cannot handle these in the output Verilog,
+# so remove them here.
+yosys delete {*/t:$print}
+
+# Remove internal only aliases for public nets and then give created instances
+# useful names. At this stage it is mainly flipflops created by the `proc`
+# pass.
+yosys opt_clean -purge
+
+set synth_args "-noshare"
+if { [info exists ::env(SYNTH_ADDITIONAL_ARGS)] && ![string equal $::env(SYNTH_ADDITIONAL_ARGS) ""] } {
+  set synth_args "$synth_args $::env(SYNTH_ADDITIONAL_ARGS)"
+}
+
+yosys synth -top $top {*}$synth_args
+
+# Remove internal only aliases for public nets and then give created instances
+# useful names. At this stage it is all the other synthesizable constructs.
+# This should be done before techmapping where things can be converted
+# dramatically and having useful names is helpful for debugging.
+yosys opt_clean -purge
+
+# Technology mapping of adders
+if {[info exists ::env(ADDER_MAPPING)] && [file isfile $::env(ADDER_MAPPING)]} {
+  # extract the full adders
+  extract_fa
+  # map full adders
+  techmap -map $::env(ADDER_MAPPING)
+  techmap
+  # Quick optimization
+  opt -fast -purge
+}
+
+# mapping to liberty
+set liberty $::env(LIBERTY)
+dfflibmap -liberty $liberty
+yosys rename -wire
+
+opt
+
+if { [info exists ::env(CLOCK_PERIOD) ] } {
+  abc -liberty $liberty -dff -script $::env(ABC_SCRIPT) -constr $::env(CONSTR) -g aig -D $::env(CLOCK_PERIOD) {*}$::env(DONT_USE_ARGS)
+} else {
+  abc -liberty $liberty -dff -script $::env(ABC_SCRIPT) -constr $::env(CONSTR) -g aig {*}$::env(DONT_USE_ARGS)
+}
+
+setundef -zero
+splitnets
+opt_clean -purge
+
+if {[info exists ::env(TIEHI_CELL_AND_PORT)] && [info exists ::env(TIELO_CELL_AND_PORT)]} {
+  hilomap \
+        -hicell {*}[split $::env(TIEHI_CELL_AND_PORT) "/"] \
+        -locell {*}[split $::env(TIELO_CELL_AND_PORT) "/"]
+} elseif { [info exists ::env(TIEHI_CELL_AND_PORT)] } {
+  hilomap \
+        -hicell {*}$::env(TIEHI_CELL_AND_PORT)
+} elseif { [info exists ::env(TIELO_CELL_AND_PORT)] } {
+  hilomap \
+        -locell {*}$::env(TIELO_CELL_AND_PORT)
+}
+
+# Remove internal only aliases for public nets and then give created instances
+# useful names. At this stage it is anything generated by the techmapping
+# passes.
+yosys opt_clean -purge
+
+# write synthesized design
+set output $::env(OUTPUT)
+write_verilog $output
+
+# ====== print stats / info ======
+stat -liberty $liberty
+if { [info exists ::env(STATS_JSON) ] } {
+  tee -q -o $::env(STATS_JSON) stat -liberty $liberty -json
+  yosys log Structured stats: $::env(STATS_JSON)
+}
+read_liberty -lib -ignore_miss_func $liberty
+ltp -noff $top
+
+yosys log -n "Flop count: "
+yosys select -count t:*__df* t:DF* t:*_DFF* t:*_SDFF* t:*_ADFF* t:*dff
+
+set base_liberty [file tail $liberty]
+yosys log Liberty: $base_liberty

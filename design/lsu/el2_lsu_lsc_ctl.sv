@@ -28,7 +28,7 @@
 module el2_lsu_lsc_ctl
 import el2_pkg::*;
 #(
-`include "el2_param.vh"
+`include "el2_param.svh"
  )(
    input logic                rst_l,                     // reset, active low
    input logic                clk_override,              // Override non-functional clock gating

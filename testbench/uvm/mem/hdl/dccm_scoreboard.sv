@@ -3,7 +3,7 @@
 
 class dccm_scoreboard extends uvm_scoreboard;
 
-  `include "el2_param.vh"
+  `include "el2_param.svh"
   ;
 
   dccm_transaction_sequence_item data_queue[$];

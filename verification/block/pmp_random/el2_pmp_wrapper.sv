@@ -5,7 +5,7 @@ module el2_pmp_wrapper
   import el2_pkg::*;
 #(
     parameter PMP_CHANNELS = 3,
-    `include "el2_param.vh"
+    `include "el2_param.svh"
 ) (
     input logic clk,       // Top level clock
     input logic rst_l,     // Reset

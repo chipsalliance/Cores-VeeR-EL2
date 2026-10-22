@@ -11,10 +11,10 @@ class VeerConfigGenerator(Generator):
             {"common_defines.vh" : {
                 "copyto"    : "config/common_defines.vh",
                 "file_type" : "systemVerilogSource"}},
-            {"el2_pdef.vh" : {
-                "copyto" : "config/el2_pdef.vh",
+            {"el2_pdef.svh" : {
+                "copyto" : "config/el2_pdef.svh",
                 "file_type" : "systemVerilogSource"}},
-            {"el2_param.vh" : {
+            {"el2_param.svh" : {
                 "is_include_file" : True,
                 "file_type" : "systemVerilogSource"}},
             {"pic_map_auto.svh" : {

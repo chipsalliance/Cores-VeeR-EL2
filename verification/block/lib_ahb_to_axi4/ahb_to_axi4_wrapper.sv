@@ -1,7 +1,7 @@
 module ahb_to_axi4_wrapper
 #(
    TAG = 1,
-   `include "el2_param.vh"
+   `include "el2_param.svh"
 )
 (
     input                   clk,

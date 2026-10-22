@@ -11,14 +11,14 @@ fi
 
 # Prefix that will be added to all required macro/struct/module names
 PREFIX="${PREFIX:-veer0_}"
-# Path to directory where common_defines.vh, el2_param.vh, el2_pdef.vh and pd_defines.vh reside
+# Path to directory where common_defines.vh, el2_param.svh, el2_pdef.svh and pd_defines.vh reside
 DEFINES_PATH="${DEFINES_PATH:-${RV_ROOT}/snapshots/default}"
 # Path to directory hierarchy where RTL sources reside
 DESIGN_DIR="${DESIGN_DIR:-${RV_ROOT}/design}"
 
 COMMON_DEFINES="$DEFINES_PATH/common_defines.vh"
-EL2_PARAM="$DEFINES_PATH/el2_param.vh"
-EL2_PDEF="$DEFINES_PATH/el2_pdef.vh"
+EL2_PARAM="$DEFINES_PATH/el2_param.svh"
+EL2_PDEF="$DEFINES_PATH/el2_pdef.svh"
 PD_DEFINES="$DEFINES_PATH/pd_defines.vh"
 EL2_DEF="$DESIGN_DIR/include/el2_def.sv"
 EL2_IFU_IC_MEM="$DESIGN_DIR/ifu/el2_ifu_ic_mem.sv"
@@ -40,7 +40,7 @@ MODULES_REGEX="s/^module ([\`A-Za-z0-9_]+).*/\1/p"
 DEFINES="$(sed -nr "$DEFINES_REGEX" $COMMON_DEFINES $PD_DEFINES $EL2_IFU_IC_MEM | sort -ur)"
 
 # Skip files that should not be processed
-SKIP_DESIGN_FILES="el2_param.vh\|el2_pdef.vh\|common_defines.vh\|pd_defines.vh"
+SKIP_DESIGN_FILES="el2_param.svh\|el2_pdef.svh\|common_defines.vh\|pd_defines.vh"
 DESIGN_FILES="$(find $DESIGN_DIR \( -name "*.sv" -o -name "*.vh" -o -name "*.svh" -o -name "*.v" \) | grep -v $SKIP_DESIGN_FILES)"
 DESIGN_FILES+=" $EXTRA_DESIGN_FILES"
 MODULES="$(sed -nr "$MODULES_REGEX" $DESIGN_FILES | sort -ur)"
@@ -69,8 +69,8 @@ RV_RCG_REPLACE_REGEX="s/^(\`define "${PREFIX}"\w+_RV_ICG )(\w+)/\1"${PREFIX}"\2/
 sed -i -E "$RV_RCG_REPLACE_REGEX" $OUTPUT_COMMON_DEFINES
 
 # Add prefix to VeeR config struct
-OUTPUT_EL2_PARAM=$DEFINES_PATH/"$PREFIX"el2_param.vh
-OUTPUT_EL2_PDEF=$DEFINES_PATH/"$PREFIX"el2_pdef.vh
+OUTPUT_EL2_PARAM=$DEFINES_PATH/"$PREFIX"el2_param.svh
+OUTPUT_EL2_PDEF=$DEFINES_PATH/"$PREFIX"el2_pdef.svh
 echo "Adding prefix to VeeR config struct in $OUTPUT_EL2_PARAM and $OUTPUT_EL2_PDEF"
 
 sed "$STRUCT_REPLACE_REGEX" "$EL2_PARAM" >$OUTPUT_EL2_PARAM
@@ -100,13 +100,11 @@ sed -i -E "s/(\`|\`define |\`undef )(EL2_[a-zA-Z0-9_]+)\b/\1${PREFIX}\2/g" $DESI
 
 # Replace include names in RTL sources
 echo "Replacing include names in RTL sources"
-sed -i "s/include \"el2_param.vh\"/include \""$PREFIX"el2_param.vh\"/g" $DESIGN_FILES
-sed -i "s/include \"el2_pdef.vh\"/include \""$PREFIX"el2_pdef.vh\"/g" $DESIGN_FILES
 sed -i "s/include \"common_defines.vh\"/include \""$PREFIX"common_defines.vh\"/g" $DESIGN_FILES
 sed -i "s/include \"common_defines.vh\"/include \""$PREFIX"common_defines.vh\"/g" $OUTPUT_PD_DEFINES
 sed -i "s/include \"pic_map_auto.svh\"/include \""$PREFIX"pic_map_auto.svh\"/g" $EL2_PIC_CTRL
 
-# Ensure .svh includes are also updated with prefix
+# Ensure .svh includes (including el2_param.svh and el2_pdef.svh) are also updated with prefix
 sed -i -E "s/include \"(el2_[a-zA-Z0-9_]+)\.svh\"/include \"${PREFIX}\1.svh\"/g" $DESIGN_FILES
 
 # Replace package name, its imports and usage in RTL sources

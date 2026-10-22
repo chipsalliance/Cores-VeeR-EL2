@@ -24,7 +24,7 @@
 module el2_dbg
 import el2_pkg::*;
 #(
-`include "el2_param.vh"
+`include "el2_param.svh"
  )(
    // outputs to the core for command and data interface
    output logic [31:0]                 dbg_cmd_addr,

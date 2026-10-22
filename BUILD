@@ -9,12 +9,6 @@ load(
 )
 load("//design:defs.bzl", "veer_el2")
 
-# load("@protobuf//bazel:proto_library.bzl", "proto_library")
-# load("@protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
-# load("@protobuf//bazel:java_proto_library.bzl", "java_proto_library")
-# load("@protobuf//bazel:java_lite_proto_library.bzl", "java_lite_proto_library")
-# load("@protobuf//bazel:py_proto_library.bzl", "py_proto_library")
-
 ############################# AXI config ##############################
 # Generate verilog_library with VeeR EL2 config and RTL files
 veer_el2(
@@ -39,6 +33,7 @@ synthesize_rtl(
     deps = [
         ":veer_el2_axi4_verilog_lib",
     ],
+    synth_tcl = "synth.tcl",
 )
 
 ############################# AHB Lite config ##############################
@@ -50,17 +45,24 @@ veer_el2(
   target = "default_ahb",
 )
 
-synthesize_rtl(
-    name = "veer_el2_synth_asap7_ahb_lite",
-    standard_cells = "@org_theopenroadproject_asap7sc7p5t_28//:asap7-sc7p5t_rev28_rvt",
-    top_module = "el2_veer_wrapper",
+verilog_library(
+    name = "veer_el2_ahb_lite_verilog_lib",
     deps = [
         ":veer_el2_ahb_lite",
     ],
+)
+
+synthesize_rtl(
+    name = "veer_el2_synth_asap7_ahb_lite",
+    standard_cells = "@org_theopenroadproject_asap7sc7p5t_27//:asap7-sc7p5t_rev27_rvt",
+    top_module = "el2_veer_wrapper",
+    deps = [
+        ":veer_el2_ahb_lite_verilog_lib",
+    ],
+    synth_tcl = "synth.tcl",
 )
 
 sdc_library(
     name = "constraint",
     srcs = ["//design:el2_constraints.sdc"],
 )
-

@@ -3,6 +3,10 @@
 DAT_FILE="${1}"
 INFO_FILE="${2}"
 
+grep -avE $'t\x02(toggle|user)' "${DAT_FILE}" > "${DAT_FILE}.branch_tmp"
+verilator_coverage --write-info "${INFO_FILE}_branch.info" "${DAT_FILE}.branch_tmp"
+rm -f "${DAT_FILE}.branch_tmp"
+
 # verilator_coverage --filter-type only accepts a single coverage type per call.
 # First extract non-toggle coverage types (line, branch, expr, fsm_state, fsm_arc)
 # into temporary .dat files, then combine them into ${INFO_FILE}_branch.info
@@ -19,3 +23,5 @@ verilator_coverage --unlink --write-info "${INFO_FILE}_branch.info" \
 
 # Extract toggle coverage separately into ${INFO_FILE}_toggle.info.
 verilator_coverage --filter-type toggle --write-info "${INFO_FILE}_toggle.info" "${DAT_FILE}"
+verilator_coverage --filter-type user --write-info "${INFO_FILE}_fcov.info" "${DAT_FILE}"
+

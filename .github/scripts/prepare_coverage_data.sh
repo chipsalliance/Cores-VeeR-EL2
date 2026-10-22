@@ -28,7 +28,7 @@ fi
 # Source path transformations are needed before merging to have matching paths in `.desc` files.
 find info_files_$SIM -name '*.info' -exec info-process transform \
     --strip-file-prefix '.*Cores-VeeR-EL2/' \
-    --filter 'design/' $_filter_out \
+    --filter '(design/|testbench/coverage/)' $_filter_out \
     {} \;
 
 if [ $SIM = verilator ]
@@ -43,7 +43,7 @@ then
     done
 fi
 
-for TYPE in branch line toggle cond
+for TYPE in branch line toggle cond fcov
 do
     _sort_opt=''
     _transform_extra_opts=''
@@ -53,9 +53,17 @@ do
         _transform_extra_opts='--set-block-ids --add-two-way-toggles --add-missing-brda-entries'
     fi
 
+    # The nullglob check ensures the loop does not fail when SIM=v if custom VCS .info artifacts do not have *_fcov.info files
+    shopt -s nullglob
+    type_files=(info_files_$SIM/*_${TYPE}.info)
+    shopt -u nullglob
+    if [ ${#type_files[@]} -eq 0 ]; then
+        continue
+    fi
+
     info-process merge --output coverage_${TYPE}_$SIM.info $_sort_opt \
         --test-list tests_${TYPE}_$SIM.desc --test-list-strip coverage_,_$TYPE.info \
-        info_files_$SIM/*_$TYPE.info
+        "${type_files[@]}"
 
     info-process transform --normalize-hit-counts $_transform_extra_opts coverage_${TYPE}_$SIM.info
 done

@@ -78,6 +78,8 @@ int recovery_time_start, recovery_time_end, recovery_time_elapsed;
 // CRG
 // ------------------------------------------------------------------
 
+initial $timeformat(-9, 0, " ns", 10);
+
 initial core_clk = '0;
 always #0.5 core_clk <= ~core_clk;
 
@@ -2377,8 +2379,8 @@ end
 always @(negedge core_clk) begin
   if (mailbox_write && mailbox_data[7:0] > 8'h05 && mailbox_data[7:0] < 8'h7F) begin
     if (console_lf) begin
-      $fwrite(console_fd,"[%0t ns] %c", $time, mailbox_data[7:0]);
-      $write("[%0t ns] %c", $time, mailbox_data[7:0]);
+      $fwrite(console_fd,"[%0t] %c", $time, mailbox_data[7:0]);
+      $write("[%0t] %c", $time, mailbox_data[7:0]);
     end else begin
       $fwrite(console_fd,"%c", mailbox_data[7:0]);
       $write("%c", mailbox_data[7:0]);
@@ -2390,16 +2392,16 @@ end
 // End of test monitor
 always @(negedge core_clk) begin
   if (mailbox_write && (mailbox_data[7:0] == 8'hFF)) begin
-    $display("[%0t ns] TEST_PASSED",$time);
-    $display("[%0t ns] \nFinished : minstret = %0d, mcycle = %0d",$time, `DEC.tlu.minstretl[31:0],`DEC.tlu.mcyclel[31:0]);
-    $display("[%0t ns] See \"exec.log\" for execution trace with register updates..\n",$time);
+    $display("[%0t] TEST_PASSED",$time);
+    $display("[%0t] \nFinished : minstret = %0d, mcycle = %0d",$time, `DEC.tlu.minstretl[31:0],`DEC.tlu.mcyclel[31:0]);
+    $display("[%0t] See \"exec.log\" for execution trace with register updates..\n",$time);
     // OpenOCD test breaks if simulation closes the TCP connection first.
     // This delay allows OpenOCD to close the connection before the #finish.
     #15000;
     $finish;
   end
   else if(mailbox_write && mailbox_data[7:0] == 8'h01) begin
-    $display("[%0t ns] TEST_FAILED",$time);
+    $display("[%0t] TEST_FAILED",$time);
     `ifdef TB_SILENT_FAIL
         $finish;
     `else
@@ -2431,7 +2433,7 @@ always @(posedge core_clk or negedge rst_l) begin
     end else begin
         if (mubi_check_true(tmr_fatal)) begin
             rst_l_cmd <= '0;
-            $display("[%0t ns] TMR fatal fault! Resetting", $time);
+            $display("[%0t] TMR fatal fault! Resetting", $time);
         end else begin
             rst_l_cmd <= (rst_l_cmd << 1) | 1'b1;
         end
@@ -2483,9 +2485,9 @@ always @(posedge core_clk or negedge rst_l_combined) begin
         for (int i=0; i<3; i++) begin
             if (tmr_core_fault_r[i] != tmr_core_fault[i]) begin
                 if (mubi_check_true(mubi_check_invalid(tmr_core_fault[i]))) begin
-                    $display("[%0t ns] tmr_core_fault[%0d] has invalid value! (0b%b)", $time, i, tmr_core_fault[i]);
+                    $display("[%0t] tmr_core_fault[%0d] has invalid value! (0b%b)", $time, i, tmr_core_fault[i]);
                 end else if (mubi_check_true(tmr_core_fault[i])) begin
-                    $display("[%0t ns] Core %0d failed", $time, i);
+                    $display("[%0t] Core %0d failed", $time, i);
                 end
             end
         end
@@ -2493,17 +2495,17 @@ always @(posedge core_clk or negedge rst_l_combined) begin
         // Recovery state
         if (tmr_recovery_pending_r != tmr_recovery_pending) begin
             if (mubi_check_true(mubi_check_invalid(tmr_recovery_pending))) begin
-                $display("[%0t ns] tmr_recovery_pending has invalid value! (0b%b)", $time, tmr_recovery_pending);
+                $display("[%0t] tmr_recovery_pending has invalid value! (0b%b)", $time, tmr_recovery_pending);
             end else begin
                 if (mubi_check_true(tmr_recovery_pending) && !mubi_check_true(tmr_fatal)) begin
                     recovery_time_start = $time;
-                    $display("[%0t ns] TMR recovery started", recovery_time_start);
+                    $display("[%0t] TMR recovery started", recovery_time_start);
                 end
                 if (mubi_check_false(tmr_recovery_pending)) begin
                     recovery_time_end = $time;
-                    $display("[%0t ns] TMR recovery finished", recovery_time_end);
+                    $display("[%0t] TMR recovery finished", recovery_time_end);
                     recovery_time_elapsed = recovery_time_end - recovery_time_start;
-                    $display("[%0t ns] of TMR recovery time", recovery_time_elapsed);
+                    $display("[%0t] of TMR recovery time", recovery_time_elapsed);
                 end
             end
         end
@@ -2585,7 +2587,7 @@ task tmr_upsetter();
     do @(posedge core_clk); while (mubi_check_true(tmr_recovery_pending));
 
     which_reg = 1 + $urandom() % 31;
-    $display("[%0t ns] Upset! core:%0d, gpr:x%0d", $time, which_cpu, which_reg);
+    $display("[%0t] Upset! core:%0d, gpr:x%0d", $time, which_cpu, which_reg);
     if (which_cpu == 0) begin
       if (which_reg ==  1) `VEER0.dec.arf.gpr[ 1].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
       if (which_reg ==  2) `VEER0.dec.arf.gpr[ 2].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;

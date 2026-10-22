@@ -157,6 +157,12 @@ jobs:
     with:
       run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
+  Run-OpenROAD-Yosys-Synth:
+    name: Run-OpenROAD-Yosys-Synth
+    needs: [Detect-Changes]
+    if: needs.Detect-Changes.outputs.code_changed == 'true'
+    uses: ./.github/workflows/openroad-yosys-synth.yml
+
   Report-Coverage:
     name: Report-Coverage
     if: github.event_name != 'pull_request'

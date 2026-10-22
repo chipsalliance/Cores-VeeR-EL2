@@ -1,0 +1,108 @@
+name: VeeR-EL2 OpenROAD Yosys synthesis
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  setup-yosys:
+    name: Setup Yosys
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      YOSYS_VERSION: "6f876ae"
+
+    steps:
+      - name: Cache Yosys
+        id: yosys-cache
+        uses: actions/cache@v6
+        with:
+          path: /opt/yosys
+          key: yosys-${{ runner.os }}-${{ env.YOSYS_VERSION }}
+
+      - name: Install Yosys
+        if: steps.yosys-cache.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/YosysHQ/yosys.git
+          pushd yosys
+          git checkout ${{ env.YOSYS_VERSION }}
+          git submodule update --init --recursive
+          cmake -B build . -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release --parallel $(nproc)
+          cmake --install build --strip --prefix /opt/yosys
+          popd
+
+      - name: Verify Yosys
+        run: /opt/yosys/bin/yosys --version
+
+  synthesis:
+    name: Run Yosys Synthesis
+    needs: setup-yosys
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bus:
+          - name: AXI
+            config: build_axi4
+          - name: AHB
+            config: build_ahb_lite
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      ASAP7_VERSION: "472f7b3"
+      YOSYS_VERSION: "6f876ae"
+
+    steps:
+      - name: Setup repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Restore Yosys
+        uses: actions/cache@v6
+        with:
+          path: /opt/yosys
+          key: yosys-${{ runner.os }}-${{ env.YOSYS_VERSION }}
+
+      - name: Add Yosys to PATH
+        run: echo "/opt/yosys/bin" >> "$GITHUB_PATH"
+
+      - name: Verify Yosys
+        run: |
+          which yosys
+          yosys --version
+
+      - name: Clone ASAP7 PDK
+        run: |
+          export ASAP7_VERSION=${{ env.ASAP7_VERSION }}
+          git clone https://github.com/The-OpenROAD-Project/asap7sc7p5t_28.git /usr/share/asap7
+          cd /usr/share/asap7
+          git checkout ${{ env.ASAP7_VERSION }}
+          export PDK_LIBS="asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib asap7sc7p5t_OA_RVT_TT_nldm_211120.lib asap7sc7p5t_AO_RVT_TT_nldm_211120.lib"
+          export PDK_PATH=/usr/share/asap7
+          echo "PDK_LIBS=$PDK_LIBS" >> "$GITHUB_ENV"
+          echo "PDK_PATH=$PDK_PATH" >> "$GITHUB_ENV"
+
+          for lib in $PDK_LIBS; do
+            archive="${lib}.7z"
+            find "$PDK_PATH" -type f -name "$archive" \
+              -execdir 7z x -y -bso0 -bsp0 {} \;
+          done
+
+      - name: Run synthesis
+        run: |
+          export RV_ROOT=`pwd`
+          make -f $RV_ROOT/tools/Makefile synth CONF_PARAMS="-set ${{ matrix.bus.config }}"
+
+      - name: Upload synthesis artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: synth-log-${{ matrix.bus.name }}
+          path: snapshots/
+          retention-days: 7

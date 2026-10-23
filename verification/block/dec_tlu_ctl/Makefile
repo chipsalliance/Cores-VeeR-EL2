@@ -13,7 +13,7 @@ TOPLEVEL     = el2_dec_tlu_ctl_wrapper
 CM_FILE      = cm.cfg
 
 EXTRA_ARGS = -I$(SRCDIR)/include/
-EXTRA_CONFIG_OPTS += -set=mcycle_stop_mpc_halt=1
+EXTRA_CONFIG_OPTS += -set=mcycle_stop_mpc_debug_halt=1
 
 VERILOG_SOURCES  = \
     $(SRCDIR)/dec/el2_dec_pmp_ctl.sv \

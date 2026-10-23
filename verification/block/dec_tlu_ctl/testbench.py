@@ -327,7 +327,8 @@ class TlDriver(uvm_driver):
                     self.dut.dec_csr_rdaddr_d.value = csrs.MCYCLEL
                     # request MPC halt
                     self.dut.mpc_debug_halt_req.value = 1
-                    await ClockCycles(self.dut.clk, 2)
+                    while self.dut.mpc_debug_halt_ack.value == 0:
+                        await ClockCycles(self.dut.clk, 1)
                     self.dut.mpc_debug_halt_req.value = 0
                     # Read MCYCLEL
                     await self.read_csr(csrs.MCYCLEL)

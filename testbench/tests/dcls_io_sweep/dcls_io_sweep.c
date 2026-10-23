@@ -115,8 +115,7 @@
 #error "Invalid SDVT_AHB value: expected 0 (AXI4) or 1 (AHB-Lite)"
 #endif
 
-#define CSR_STR_(x) #x
-#define CSR_STR(x)  CSR_STR_(x)
+#include "../dcls/dcls_common.h"
 
 /**
  * Reads a RISC-V Control and Status Register (CSR).

@@ -1,13 +1,14 @@
 /* SPDX-License-Identifier: Apache-2.0
  * Copyright 2026 Google LLC
  *
- * Shared DCLS Skipped Signal Predicates
+ * Shared DCLS Common Utilities and Skipped Signal Predicates
  * Author: Samip Modi (samipmodi@google.com)
  *
  * Description:
- * Defines the shared `is_skipped_in_dcls()` predicate used by both `dcls.c`
- * and `dcls_skipped_signals.c` so the baseline test and the skipped-signals
- * test form a single-source-of-truth partition across AXI and AHB builds.
+ * Defines the shared two-step `CSR_STR()` inline-assembly stringification macro
+ * and the `is_skipped_in_dcls()` predicate used across DCLS tests so the
+ * baseline test and skipped-signals test form a single-source-of-truth
+ * partition across AXI and AHB builds.
  */
 
 #ifndef VEER_TESTBENCH_TESTS_DCLS_DCLS_COMMON_H_
@@ -20,6 +21,18 @@
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+/*
+ * Two-step stringification macro for inline assembly CSR operands:
+ * The `#` operator suppresses macro expansion on its direct parameter (which
+ * would turn `CSR_MRAC` into the invalid literal `"CSR_MRAC"`). Routing
+ * through `CSR_STR_HELPER` expands macro arguments first (e.g. `CSR_MRAC` ->
+ * `0x7c0` -> `"0x7c0"`) while preserving bare CSR names (e.g. `mscratch`).
+ */
+#ifndef CSR_STR
+#define CSR_STR_HELPER(x) #x
+#define CSR_STR(x)        CSR_STR_HELPER(x)
 #endif
 
 /**
@@ -38,7 +51,7 @@ static inline bool is_skipped_in_dcls(uint32_t id) {
       id == (9 * 2) || id == (10 * 2) || id == (13 * 2) ||
       id == (18 * 2) || id == (19 * 2) || id == (28 * 2) ||
       id == (33 * 2) ||
-#if (SDVT_AHB == 0)
+#if !defined(SDVT_AHB) || (SDVT_AHB == 0)
       id == (52 * 2) || id == (63 * 2) || id == (65 * 2) ||
       id == (66 * 2) || id == (67 * 2) ||
       (id >= (100 * 2) && id <= (194 * 2) && (id % 2 == 0))

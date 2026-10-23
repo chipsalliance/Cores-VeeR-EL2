@@ -77,9 +77,6 @@
 #include "defines.h"  // Generated.
 #include "testbench/tests/dcls/dcls_common.h"
 
-#define CSR_STR_(x) #x
-#define CSR_STR(x)  CSR_STR_(x)
-
 /**
  * Reads a RISC-V Control and Status Register (CSR).
  */

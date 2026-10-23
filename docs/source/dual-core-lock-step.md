@@ -1187,6 +1187,8 @@ If the aforementioned configuration options are not specified explicitly, the DC
 ```{warning}
 The DCLS feature is not supported in Debug Mode.
 Entering Debug Mode with DCLS enabled will disable DCLS until the next reset.
+In scan mode (`scan_mode` = 1), the Shadow Core's resets are taken directly from the reset inputs.
+DCLS error detection is disabled while `scan_mode` is set and until the next reset after it is cleared.
 ```
 
 The DCLS feature can be enabled via `-set lockstep_enable=1` option.

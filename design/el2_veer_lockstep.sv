@@ -423,10 +423,10 @@ module el2_veer_lockstep
     assign delayed_main_core_outputs_pre = delay_output_d[LockstepDelayPipeStages];
 
     // Shadow core enters reset immediately with main core but gets out of reset
-    // after the delay
+    // after the delay. In scan mode, the reset inputs drive it directly.
     logic [LockstepDelayPipeStages:0] rst_shadow_sr, rst_dbg_shadow_sr;
-    assign rst_shadow = &rst_shadow_sr;
-    assign rst_dbg_shadow = &rst_dbg_shadow_sr;
+    assign rst_shadow = scan_mode ? rst_l : &rst_shadow_sr;
+    assign rst_dbg_shadow = scan_mode ? dbg_rst_l : &rst_dbg_shadow_sr;
 
     always_ff @(posedge clk or negedge rst_l) begin
       if (!rst_l) begin
@@ -587,7 +587,6 @@ module el2_veer_lockstep
   assign main_core_inputs.extintsrc_req = extintsrc_req;
   assign main_core_inputs.timer_int = timer_int;
   assign main_core_inputs.soft_int = soft_int;
-  assign main_core_inputs.scan_mode = scan_mode;
 
   // Capture output
   assign main_core_outputs.core_rst_l = core_rst_l;
@@ -784,6 +783,25 @@ module el2_veer_lockstep
   end
 
   assign dbg_detected = debug_mode_status_latch;
+
+  // Latch the scan mode: in scan mode the shadow core leaves reset together with
+  // the main core, so both are only aligned again after a reset without scan mode
+  el2_mubi_t scan_mode_latch;
+  el2_mubi_t scan_detected;
+
+  always_ff @(posedge clk or negedge rst_l) begin
+    if (~rst_l) begin
+      scan_mode_latch <= El2MuBiFalse;
+    end else begin
+      if (scan_mode) begin
+        scan_mode_latch <= El2MuBiTrue;
+      end else begin
+        scan_mode_latch <= scan_mode_latch;
+      end
+    end
+  end
+
+  assign scan_detected = mubi_or(mubi_from_bool(scan_mode), scan_mode_latch);
 
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
 `endif
@@ -1138,7 +1156,7 @@ module el2_veer_lockstep
       .extintsrc_req(shadow_core_inputs.extintsrc_req),
       .timer_int(shadow_core_inputs.timer_int),
       .soft_int(shadow_core_inputs.soft_int),
-      .scan_mode(shadow_core_inputs.scan_mode)
+      .scan_mode(scan_mode)
   );
 
   // Trace
@@ -1173,6 +1191,7 @@ module el2_veer_lockstep
   // - Shadow Core is out of reset
   // - Shadow Core is enabled
   // - Main Core was never in debug state
+  // - Scan mode was not active since the last reset
   // - One of:
   //    * IOs (or regfiles if enabled) of Main Core and Shadow Core differ
   //    * error injection (`lockstep_err_injection_en_i`) is enabled
@@ -1183,7 +1202,8 @@ module el2_veer_lockstep
   el2_mubi_t any_corruption, case0, case1;
 
   assign any_corruption = mubi_or(mubi_or(corruption_detected, lockstep_err_injection_en_i), err_injection_invalid);
-  assign case0 = mubi_and(mubi_and(any_corruption, ~disable_corruption_detection_i), ~dbg_detected);
+  assign case0 = mubi_and(mubi_and(mubi_and(any_corruption, ~disable_corruption_detection_i),
+                                   ~dbg_detected), ~scan_detected);
   assign case1 = disable_detection_invalid;
   assign corruption_detected_o = mubi_and(mubi_or(case0, case1), mubi_from_bool(rst_n));
 endmodule : el2_veer_lockstep

@@ -301,6 +301,5 @@ package el2_lockstep_pkg;
     logic [pt.PIC_TOTAL_INT:1]      extintsrc_req;
     logic                           timer_int;
     logic                           soft_int;
-    logic                           scan_mode;
   } veer_inputs_t;
 endpackage

@@ -10,6 +10,8 @@ SECTIONS {
 
   . = 0xee000000;
   .text.nmi : { KEEP(*(.text.nmi*)) }
+  . = 0x91ffc000;
+  .text.pc_cov : { KEEP(*(.text.pc_cov*)) }
   . = 0x80000000;
   .text : { *(.text.init*) *(.text*) }
   _end = .;

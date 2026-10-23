@@ -18,6 +18,10 @@ _start:
         li t0, 0x8
         csrs mstatus, t0
 
+        # Exercise upper PC/NPC bits [28, 24:14]
+        la t0, _pc_cov_stub
+        jalr ra, t0, 0
+
         # Call main()
         call main
 
@@ -64,6 +68,13 @@ do_nothing:
 _nmi:
     la t0, _trap_handler
     jr t0
+
+.section .text.pc_cov
+.align 4
+.global _pc_cov_stub
+_pc_cov_stub:
+    nop
+    ret
 
 .section .data.io
 .global tohost

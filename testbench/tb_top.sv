@@ -1612,6 +1612,7 @@ module tb_top
                 254: force `LOCKSTEP_CORE.dec.tlu.mcause_ff.dout[0] = 1'b1;
                 255: force `LOCKSTEP_CORE.dec.tlu.mip_rf[7] = 1'b1;
                 195: force `LOCKSTEP_CORE.dec.tlu.minstretl_bff.dout[8] = 1'b1;
+                196: force `LOCKSTEP_CORE.dec.tlu.minstreth_ff.dout[0] = 1'b1;
                 default: force `LOCKSTEP.lockstep_err_injection_en_i = '1;
             endcase
         end else if (inject_veer_in_dist) begin: inject_veer_corruption
@@ -1904,6 +1905,7 @@ module tb_top
                 255: force `VEER.dec.tlu.mtval_ff.dout[0] = 1'b1;
                 195: force `VEER.dec.tlu.mcyclel_bff.dout[8] = 1'b1;
                 196: force `VEER.dec.tlu.mrac_ff.dout[0] = 1'b1;
+                197: force `VEER.dec.tlu.mcycleh_ff.dout[0] = 1'b1;
                 default: force `LOCKSTEP.lockstep_err_injection_en_i = '1;
             endcase
         end
@@ -2450,11 +2452,13 @@ module tb_top
             release `VEER.dec.tlu.mtval_ff.dout[0];
             release `VEER.dec.tlu.mcyclel_bff.dout[8];
             release `VEER.dec.tlu.mrac_ff.dout[0];
+            release `VEER.dec.tlu.mcycleh_ff.dout[0];
             release `LOCKSTEP_CORE.dec.tlu.mepc_ff.dout[1];
             release `LOCKSTEP_CORE.dec.tlu.mie_rf[7];
             release `LOCKSTEP_CORE.dec.tlu.mcause_ff.dout[0];
             release `LOCKSTEP_CORE.dec.tlu.mip_rf[7];
             release `LOCKSTEP_CORE.dec.tlu.minstretl_bff.dout[8];
+            release `LOCKSTEP_CORE.dec.tlu.minstreth_ff.dout[0];
             release `LOCKSTEP.lockstep_err_injection_en_i;
             release `LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout[15];
             release `LOCKSTEP.xshadow_core.ifu.aln.q0pcff.genblock.genblock.dff.dout[14];

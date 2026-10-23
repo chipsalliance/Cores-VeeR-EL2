@@ -54,7 +54,9 @@ import el2_pkg::*;
    output logic   trace_rv_i_interrupt_ip,
    output logic [31:0] trace_rv_i_tval_ip,
 
-
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+   output logic dec_tlu_dec_clk_override,  // to and from dec blocks
+`endif
    output logic                 dccm_clk_override,
    output logic                 icm_clk_override,
    output logic                 dec_tlu_core_ecc_disable,
@@ -480,6 +482,26 @@ import el2_pkg::*;
    output logic        dec_tlu_force_halt,
    output logic        dec_tlu_bus_clk_override,
    output logic [31:1] dec_tlu_npc,
+
+   output logic        dec_csr_wen_r_mod_tmr,  // csr write enable at wb
+   output logic [11:0] dec_csr_wraddr_r_tmr,   // write address for csr
+   output logic [31:0] dec_csr_wrdata_r_tmr,   // csr write data at wb
+
+   output logic csr_mitctl0_tmr,
+   output logic csr_mitctl1_tmr,
+   output logic csr_mitb0_tmr,
+   output logic csr_mitb1_tmr,
+   output logic csr_mitcnt0_tmr,
+   output logic csr_mitcnt1_tmr,
+
+   output logic dec_pause_state_tmr,          // Paused
+   output logic dec_tlu_pmu_fw_halted_tmr,    // pmu/fw halted
+   output logic internal_dbg_halt_timers_tmr, // debug halted
+
+   input  logic [31:0] dec_timer_rddata_d_tmr, // timer CSR read data
+   input  logic        dec_timer_read_d_tmr,   // timer CSR address match
+   input  logic        dec_timer_t0_pulse_tmr, // timer0 int
+   input  logic        dec_timer_t1_pulse_tmr, // timer1 int
 
    output logic        pic_clk_override,
    output logic        pic_io_clk_override,

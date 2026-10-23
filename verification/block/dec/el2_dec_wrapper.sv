@@ -299,6 +299,7 @@ module el2_dec_wrapper
 
     // clock gating overrides from mcgc
     output logic dec_tlu_misc_clk_override,   // override misc clock domain gating
+    output logic dec_tlu_dec_clk_override,
     output logic dec_tlu_ifu_clk_override,    // override fetch clock domain gating
     output logic dec_tlu_lsu_clk_override,    // override load/store clock domain gating
     output logic dec_tlu_bus_clk_override,    // override bus clock domain gating
@@ -320,6 +321,27 @@ module el2_dec_wrapper
     input  logic [31:0] recovery_csr_wrdata, // CSR recovery backdoor write data
     input  logic [11:0] recovery_csr_rdaddr, // CSR recovery backdoor read address
     output logic [31:0] recovery_csr_rddata, // CSR recovery backdoor read data
+
+    output logic        dec_csr_wen_r_mod_tmr,  // csr write enable at wb
+    output logic [11:0] dec_csr_wraddr_r_tmr,   // write address for csr
+    output logic [31:0] dec_csr_wrdata_r_tmr,   // csr write data at wb
+
+    output logic csr_mitctl0_tmr,
+    output logic csr_mitctl1_tmr,
+    output logic csr_mitb0_tmr,
+    output logic csr_mitb1_tmr,
+    output logic csr_mitcnt0_tmr,
+    output logic csr_mitcnt1_tmr,
+
+    output logic dec_pause_state_tmr,          // Paused
+    output logic dec_tlu_pmu_fw_halted_tmr,    // pmu/fw halted
+    output logic internal_dbg_halt_timers_tmr, // debug halted
+
+    input  logic [31:0] dec_timer_rddata_d_tmr, // timer CSR read data
+    input  logic        dec_timer_read_d_tmr,   // timer CSR address match
+    input  logic        dec_timer_t0_pulse_tmr, // timer0 int
+    input  logic        dec_timer_t1_pulse_tmr, // timer1 int
+
 
     output logic dec_tlu_i0_commit_cmt,  // committed i0 instruction
     // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
@@ -359,6 +381,22 @@ module el2_dec_wrapper
     .recovery_gpr_en(el2_mubi_pkg::mubi_from_bool(recovery_gpr_en)),
     .recovery_csr_en(el2_mubi_pkg::mubi_from_bool(recovery_csr_en)),
     .dec_tlu_npc(dec_tlu_npc),
+    .dec_csr_wen_r_mod_tmr(dec_csr_wen_r_mod_tmr),
+    .dec_csr_wraddr_r_tmr(dec_csr_wraddr_r_tmr),
+    .dec_csr_wrdata_r_tmr(dec_csr_wrdata_r_tmr),
+    .csr_mitctl0_tmr(csr_mitctl0_tmr),
+    .csr_mitctl1_tmr(csr_mitctl1_tmr),
+    .csr_mitb0_tmr(csr_mitb0_tmr),
+    .csr_mitb1_tmr(csr_mitb1_tmr),
+    .csr_mitcnt0_tmr(csr_mitcnt0_tmr),
+    .csr_mitcnt1_tmr(csr_mitcnt1_tmr),
+    .dec_pause_state_tmr(dec_pause_state_tmr),
+    .dec_tlu_pmu_fw_halted_tmr(dec_tlu_pmu_fw_halted_tmr),
+    .internal_dbg_halt_timers_tmr(internal_dbg_halt_timers_tmr),
+    .dec_timer_rddata_d_tmr(dec_timer_rddata_d_tmr),
+    .dec_timer_read_d_tmr(dec_timer_read_d_tmr),
+    .dec_timer_t0_pulse_tmr(dec_timer_t0_pulse_tmr),
+    .dec_timer_t1_pulse_tmr(dec_timer_t1_pulse_tmr),
 `endif
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
     .regfile(regfile.veer_rf_src),

@@ -49,6 +49,7 @@ VERILOG_SOURCES  = \
 	$(SRCDIR)/tmr/el2_tmr_recovery_fsm.sv \
 	$(SRCDIR)/tmr/el2_tmr_fault_storage.sv \
 	$(SRCDIR)/tmr/el2_tmr_boot_configuration.sv \
+	$(SRCDIR)/tmr/el2_tmr_dec_timer_ctl.sv \
 	$(SRCDIR)/el2_tmr_complex.sv \
 	$(SRCDIR)/el2_mem.sv \
 	$(SRCDIR)/el2_pic_ctrl.sv \

@@ -313,6 +313,26 @@ module el2_dec
 
 `ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
     output logic [31:1] dec_tlu_npc,   // Next state of the PC register
+
+    output logic        dec_csr_wen_r_mod_tmr,  // csr write enable at wb
+    output logic [11:0] dec_csr_wraddr_r_tmr,   // write address for csr
+    output logic [31:0] dec_csr_wrdata_r_tmr,   // csr write data at wb
+
+    output logic csr_mitctl0_tmr,
+    output logic csr_mitctl1_tmr,
+    output logic csr_mitb0_tmr,
+    output logic csr_mitb1_tmr,
+    output logic csr_mitcnt0_tmr,
+    output logic csr_mitcnt1_tmr,
+
+    output logic dec_pause_state_tmr,          // paused
+    output logic dec_tlu_pmu_fw_halted_tmr,    // pmu/fw halted
+    output logic internal_dbg_halt_timers_tmr, // debug halted
+
+    input  logic [31:0] dec_timer_rddata_d_tmr, // timer csr read data
+    input  logic        dec_timer_read_d_tmr,   // timer csr address match
+    input  logic        dec_timer_t0_pulse_tmr, // timer0 int
+    input  logic        dec_timer_t1_pulse_tmr, // timer1 int
 `endif
 
     // feature disable from mfdc
@@ -326,6 +346,9 @@ module el2_dec
 
     // clock gating overrides from mcgc
     output logic dec_tlu_misc_clk_override,   // override misc clock domain gating
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    output logic dec_tlu_dec_clk_override,  // to and from dec blocks
+`endif
     output logic dec_tlu_ifu_clk_override,    // override fetch clock domain gating
     output logic dec_tlu_lsu_clk_override,    // override load/store clock domain gating
     output logic dec_tlu_bus_clk_override,    // override bus clock domain gating
@@ -362,7 +385,9 @@ module el2_dec
 );
 
 
-  logic dec_tlu_dec_clk_override;  // to and from dec blocks
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+  logic dec_tlu_dec_clk_override;  // from dec blocks
+`endif
   logic clk_override;
 
   logic dec_ib0_valid_d;

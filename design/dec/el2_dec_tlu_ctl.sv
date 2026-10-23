@@ -269,6 +269,26 @@ import el2_pkg::*;
 
 `ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
    output logic [31:1] dec_tlu_npc,   // Next state of the PC register
+
+   output logic        dec_csr_wen_r_mod_tmr,  // csr write enable at wb
+   output logic [11:0] dec_csr_wraddr_r_tmr,   // write address for csr
+   output logic [31:0] dec_csr_wrdata_r_tmr,   // csr write data at wb
+
+   output logic csr_mitctl0_tmr,
+   output logic csr_mitctl1_tmr,
+   output logic csr_mitb0_tmr,
+   output logic csr_mitb1_tmr,
+   output logic csr_mitcnt0_tmr,
+   output logic csr_mitcnt1_tmr,
+
+   output logic dec_pause_state_tmr,          // Paused
+   output logic dec_tlu_pmu_fw_halted_tmr,    // pmu/fw halted
+   output logic internal_dbg_halt_timers_tmr, // debug halted
+
+   input  logic [31:0] dec_timer_rddata_d_tmr, // timer CSR read data
+   input  logic        dec_timer_read_d_tmr,   // timer CSR address match
+   input  logic        dec_timer_t0_pulse_tmr, // timer0 int
+   input  logic        dec_timer_t1_pulse_tmr, // timer1 int
 `endif
 
    // pmp
@@ -512,7 +532,29 @@ import el2_pkg::*;
 
 `endif
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+   assign dec_csr_wen_r_mod_tmr = dec_csr_wen_r_mod;
+   assign dec_csr_wraddr_r_tmr = dec_csr_wraddr_r;
+   assign dec_csr_wrdata_r_tmr = dec_csr_wrdata_r;
+
+   assign csr_mitctl0_tmr = csr_mitctl0;
+   assign csr_mitctl1_tmr = csr_mitctl1;
+   assign csr_mitb0_tmr = csr_mitb0;
+   assign csr_mitb1_tmr = csr_mitb1;
+   assign csr_mitcnt0_tmr = csr_mitcnt0;
+   assign csr_mitcnt1_tmr = csr_mitcnt1;
+
+   assign dec_pause_state_tmr = dec_pause_state;
+   assign dec_tlu_pmu_fw_halted_tmr = dec_tlu_pmu_fw_halted;
+   assign internal_dbg_halt_timers_tmr = internal_dbg_halt_timers;
+
+   assign dec_timer_rddata_d = dec_timer_rddata_d_tmr;
+   assign dec_timer_read_d = dec_timer_read_d_tmr;
+   assign dec_timer_t0_pulse = dec_timer_t0_pulse_tmr;
+   assign dec_timer_t1_pulse = dec_timer_t1_pulse_tmr;
+`else
    el2_dec_timer_ctl  #(.pt(pt)) int_timers(.*);
+`endif
    // end of internal timers
 
    el2_dec_pmp_ctl  #(.pt(pt)) pmp(.*);
@@ -3104,12 +3146,12 @@ import el2_pkg::*;
    logic wr_mitcnt0_r, wr_mitcnt1_r, wr_mitb0_r, wr_mitb1_r, wr_mitctl0_r, wr_mitctl1_r;
    logic mitcnt0_inc_ok, mitcnt1_inc_ok;
    logic mitcnt0_inc_cout, mitcnt1_inc_cout;
- logic mit0_match_ns;
- logic mit1_match_ns;
- logic mitctl0_0_b_ns;
- logic mitctl0_0_b;
- logic mitctl1_0_b_ns;
- logic mitctl1_0_b;
+   logic mit0_match_ns;
+   logic mit1_match_ns;
+   logic mitctl0_0_b_ns;
+   logic mitctl0_0_b;
+   logic mitctl1_0_b_ns;
+   logic mitctl1_0_b;
 
    assign mit0_match_ns = (mitcnt0[31:0] >= mitb0[31:0]);
    assign mit1_match_ns = (mitcnt1[31:0] >= mitb1[31:0]);
@@ -3124,7 +3166,10 @@ import el2_pkg::*;
 
    assign wr_mitcnt0_r = dec_csr_wen_r_mod & (dec_csr_wraddr_r[11:0] == MITCNT0);
 
-   assign mitcnt0_inc_ok = mitctl0[MITCTL_ENABLE] & (~dec_pause_state | mitctl0[MITCTL_ENABLE_PAUSED]) & (~dec_tlu_pmu_fw_halted | mitctl0[MITCTL_ENABLE_HALTED]) & ~internal_dbg_halt_timers;
+   assign mitcnt0_inc_ok = mitctl0[MITCTL_ENABLE] &
+                           (~dec_pause_state | mitctl0[MITCTL_ENABLE_PAUSED]) &
+                           (~dec_tlu_pmu_fw_halted | mitctl0[MITCTL_ENABLE_HALTED]) &
+                           ~internal_dbg_halt_timers;
 
    assign {mitcnt0_inc_cout, mitcnt0_inc[7:0]} = mitcnt0[7:0] + {7'b0, 1'b1};
    assign mitcnt0_inc[31:8] = mitcnt0[31:8] + {23'b0, mitcnt0_inc_cout};
@@ -3220,6 +3265,4 @@ import el2_pkg::*;
                                        ({32{csr_mitctl0}}      & {29'b0, mitctl0[2:0]}) |
                                        ({32{csr_mitctl1}}      & {28'b0, mitctl1[3:0]})
                                        );
-
-
 endmodule // dec_timer_ctl

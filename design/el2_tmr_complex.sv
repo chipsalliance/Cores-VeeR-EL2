@@ -437,6 +437,7 @@ module el2_tmr_complex
   logic dec_tlu_bus_clk_override_veer[3];
   logic dec_tlu_force_halt_veer[3];
   logic dec_tlu_core_ecc_disable_veer[3];
+  logic dec_tlu_dec_clk_override_veer[3];
 
   // Core ctrl signals between CPU and Recovery
   logic i_cpu_halt_req_veer[3];
@@ -464,6 +465,24 @@ module el2_tmr_complex
 
   // Program counter
   logic [31:1] dec_tlu_npc_veer[3];
+
+  // Internal timers
+  logic        dec_csr_wen_r_mod_veer[3];
+  logic [11:0] dec_csr_wraddr_r_veer[3];
+  logic [31:0] dec_csr_wrdata_r_veer[3];
+  logic        csr_mitctl0_veer[3];
+  logic        csr_mitctl1_veer[3];
+  logic        csr_mitb0_veer[3];
+  logic        csr_mitb1_veer[3];
+  logic        csr_mitcnt0_veer[3];
+  logic        csr_mitcnt1_veer[3];
+  logic        dec_pause_state_veer[3];
+  logic        dec_tlu_pmu_fw_halted_veer[3];
+  logic        internal_dbg_halt_timers_veer[3];
+  logic [31:0] dec_timer_rddata_d_veer[3];
+  logic        dec_timer_read_d_veer[3];
+  logic        dec_timer_t0_pulse_veer[3];
+  logic        dec_timer_t1_pulse_veer[3];
 
   // PIC registers
   logic        pic_clk_override_veer[3];
@@ -1145,6 +1164,12 @@ module el2_tmr_complex
       .fatal_err(recovery_fault)
   );
 
+  el2_tmr_dec_timer_ctl el2_tmr_dec_timer_ctl_u(
+    .gclk(clk),
+    .recovery_halt(mubi_check_true(tmr_recovery_pending)),
+    .*
+  );
+
   // Cores
   for (genvar i=0;i < 3; i+=1) begin: cores
     logic dec_tlu_dccm_wr_readback_disable; // TODO: Is it needed?
@@ -1184,6 +1209,37 @@ module el2_tmr_complex
     logic [31:1] dec_tlu_npc_veer_g;
     rvogate #(.WIDTH($bits(dec_tlu_npc_veer_g))) u_dec_tlu_npc_gate (.*, .din(dec_tlu_npc_veer_g),  .dout(dec_tlu_npc_veer[i]));
 
+    // Internal timer
+    logic active_state_ungated;
+    logic dec_tlu_dec_clk_override_ungated;
+    logic dec_csr_wen_r_mod_ungated;
+    logic [11:0] dec_csr_wraddr_r_ungated;
+    logic [31:0] dec_csr_wrdata_r_ungated;
+    logic csr_mitctl0_ungated;
+    logic csr_mitctl1_ungated;
+    logic csr_mitb0_ungated;
+    logic csr_mitb1_ungated;
+    logic csr_mitcnt0_ungated;
+    logic csr_mitcnt1_ungated;
+    logic dec_pause_state_ungated;
+    logic dec_tlu_pmu_fw_halted_ungated;
+    logic internal_dbg_halt_timers_ungated;
+
+    rvogate #(1) u_active_state_gate (.*, .din(active_state_ungated), .dout(active_state_veer[i]));
+    rvogate #(1) u_dec_tlu_dec_clk_override_gate (.*, .din(dec_tlu_dec_clk_override_ungated), .dout(dec_tlu_dec_clk_override_veer[i]));
+    rvogate #(1) u_dec_csr_wen_r_mod_gate (.*, .din(dec_csr_wen_r_mod_ungated), .dout(dec_csr_wen_r_mod_veer[i]));
+    rvogate #(12) u_dec_csr_wraddr_r_gate (.*, .din(dec_csr_wraddr_r_ungated), .dout(dec_csr_wraddr_r_veer[i]));
+    rvogate #(32) u_dec_csr_wrdata_r_gate (.*, .din(dec_csr_wrdata_r_ungated), .dout(dec_csr_wrdata_r_veer[i]));
+    rvogate #(1) u_csr_mitctl0_gate (.*, .din(csr_mitctl0_ungated), .dout(csr_mitctl0_veer[i]));
+    rvogate #(1) u_csr_mitctl1_gate (.*, .din(csr_mitctl1_ungated), .dout(csr_mitctl1_veer[i]));
+    rvogate #(1) u_csr_mitb0_gate (.*, .din(csr_mitb0_ungated), .dout(csr_mitb0_veer[i]));
+    rvogate #(1) u_csr_mitb1_gate (.*, .din(csr_mitb1_ungated), .dout(csr_mitb1_veer[i]));
+    rvogate #(1) u_csr_mitcnt0_gate (.*, .din(csr_mitcnt0_ungated), .dout(csr_mitcnt0_veer[i]));
+    rvogate #(1) u_csr_mitcnt1_gate (.*, .din(csr_mitcnt1_ungated), .dout(csr_mitcnt1_veer[i]));
+    rvogate #(1) u_dec_pause_state_gate (.*, .din(dec_pause_state_ungated), .dout(dec_pause_state_veer[i]));
+    rvogate #(1) u_dec_tlu_pmu_fw_halted_gate (.*, .din(dec_tlu_pmu_fw_halted_ungated), .dout(dec_tlu_pmu_fw_halted_veer[i]));
+    rvogate #(1) u_internal_dbg_halt_timers_gate (.*, .din(internal_dbg_halt_timers_ungated), .dout(internal_dbg_halt_timers_veer[i]));
+
     // VeeR core
     el2_veer #(.pt(pt)) veer (
         .clk(clk_veer[i]),
@@ -1193,7 +1249,7 @@ module el2_tmr_complex
         .nmi_int(nmi_int_veer[i]),
         .nmi_vec(nmi_vec_veer[i]),
         .core_rst_l(core_rst_l_veer[i]),
-        .active_state(active_state_veer[i]),
+        .active_state(active_state_ungated),
         .active_l2clk(active_l2clk_veer[i]),
         .free_l2clk(free_l2clk_veer[i]),
         .trace_rv_i_insn_ip(trace_rv_i_insn_ip_veer[i]),
@@ -1203,6 +1259,7 @@ module el2_tmr_complex
         .trace_rv_i_ecause_ip(trace_rv_i_ecause_ip_veer[i]),
         .trace_rv_i_interrupt_ip(trace_rv_i_interrupt_ip_veer[i]),
         .trace_rv_i_tval_ip(trace_rv_i_tval_ip_veer[i]),
+        .dec_tlu_dec_clk_override(dec_tlu_dec_clk_override_ungated),
         .dccm_clk_override(dccm_clk_override_veer[i]),
         .icm_clk_override(icm_clk_override_veer[i]),
         .dec_tlu_core_ecc_disable(dec_tlu_core_ecc_disable_veer[i]),
@@ -1437,6 +1494,22 @@ module el2_tmr_complex
         .dec_tlu_bus_clk_override(dec_tlu_bus_clk_override_veer[i]),
         .dec_tlu_dccm_wr_readback_disable(dec_tlu_dccm_wr_readback_disable),
         .dec_tlu_npc(dec_tlu_npc_veer_g),
+        .dec_csr_wen_r_mod_tmr(dec_csr_wen_r_mod_ungated),
+        .dec_csr_wraddr_r_tmr(dec_csr_wraddr_r_ungated),
+        .dec_csr_wrdata_r_tmr(dec_csr_wrdata_r_ungated),
+        .csr_mitctl0_tmr(csr_mitctl0_ungated),
+        .csr_mitctl1_tmr(csr_mitctl1_ungated),
+        .csr_mitb0_tmr(csr_mitb0_ungated),
+        .csr_mitb1_tmr(csr_mitb1_ungated),
+        .csr_mitcnt0_tmr(csr_mitcnt0_ungated),
+        .csr_mitcnt1_tmr(csr_mitcnt1_ungated),
+        .dec_pause_state_tmr(dec_pause_state_ungated),
+        .dec_tlu_pmu_fw_halted_tmr(dec_tlu_pmu_fw_halted_ungated),
+        .internal_dbg_halt_timers_tmr(internal_dbg_halt_timers_ungated),
+        .dec_timer_rddata_d_tmr(dec_timer_rddata_d_veer[i]),
+        .dec_timer_read_d_tmr(dec_timer_read_d_veer[i]),
+        .dec_timer_t0_pulse_tmr(dec_timer_t0_pulse_veer[i]),
+        .dec_timer_t1_pulse_tmr(dec_timer_t1_pulse_veer[i]),
         .pic_clk_override(pic_clk_override_veer[i]),
         .pic_io_clk_override(pic_io_clk_override_veer[i]),
         .picm_rdaddr(picm_rdaddr_veer[i]),

@@ -78,9 +78,9 @@ module el2_tmr_recovery_fsm
 );
 
 `ifdef RV_USER_MODE
-  localparam int csr_cnt = 163;
+  localparam int csr_cnt = 157;
 `else
-  localparam int csr_cnt = 146;
+  localparam int csr_cnt = 140;
 `endif
 
   logic recovery_state_en;
@@ -290,7 +290,7 @@ module el2_tmr_recovery_fsm
     assign cnt_csr_inc[i] = recovery_state == READ_REG ? csr_with_ecc_wr == csr_with_ecc_rd & mubi_check_true(all_csr_ready) :
       recovery_state == WRITE_REG ? csr_wrdata == recovery_csr_rddata_veer[i] & mubi_check_true(all_csr_ready) : 1'b1;
     assign cnt_gpr_inc[i] = recovery_state == READ_REG ? gpr_with_ecc_wr == gpr_with_ecc_rd & mubi_check_true(all_gpr_ready) :
-      recovery_state == WRITE_REG ? gpr_wrdata == recovery_gpr_rddata_veer[i] & mubi_check_true(all_csr_ready) : 1'b1;
+      recovery_state == WRITE_REG ? gpr_wrdata == recovery_gpr_rddata_veer[i] & mubi_check_true(all_gpr_ready) : 1'b1;
   end
 
   // PC storage

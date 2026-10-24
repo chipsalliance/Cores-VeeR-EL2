@@ -95,19 +95,60 @@ static void __attribute__((noinline)) trigger_gpr_read(uint32_t reg, uint32_t er
     }
 }
 
+#define TOGGLE_CSR(csr) \
+    asm volatile( \
+        "li t0, 0xAAAAAAAA\n\t" \
+        "li t1, 0x55555555\n\t" \
+        "csrr t2, " #csr "\n\t" \
+        "csrw " #csr ", x0\n\t" \
+        "csrw " #csr ", t0\n\t" \
+        "csrw " #csr ", t1\n\t" \
+        "csrw " #csr ", x0\n\t" \
+        "csrw " #csr ", t2\n\t" \
+        ".rept 10\n\t" \
+        "nop\n\t" \
+        ".endr\n\t" \
+        ::: "t0", "t1", "t2" \
+    )
+
+#define TOGGLE_MIP() \
+    do { \
+        tohost = 0x84; \
+        tohost = 0x85; \
+        asm volatile( \
+            "li t0, 1\n\t" \
+            "li t1, -1\n\t" \
+            "csrw 0x7f2, t0\n\t" \
+            "csrw 0x7d3, x0\n\t" \
+            "csrw 0x7d6, x0\n\t" \
+            ".rept 6\n\t" \
+            "nop\n\t" \
+            ".endr\n\t" \
+            "csrw 0x7f2, x0\n\t" \
+            "csrw 0x7d3, t1\n\t" \
+            "csrw 0x7d6, t1\n\t" \
+            ".rept 10\n\t" \
+            "nop\n\t" \
+            ".endr\n\t" \
+            ::: "t0", "t1" \
+        ); \
+    } while (0)
+
 static void __attribute__((noinline)) trigger_csr_read(uint32_t test_case, uint16_t err_id, uint8_t cmd) {
     switch (test_case) {
-        case 62: INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mscratch\n\t .endr"); tohost = CMD_INJ_CLEAR; break;
-        case 63: INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mstatus \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
-        case 64: INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mtvec   \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
-        case 65: INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mtval   \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
-        case 66: INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mcycle  \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
-        case 67: INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, 0x7c0   \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
-        case 68: INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mepc    \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
-        case 69: INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mie     \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
-        case 70: INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mcause  \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
-        case 71: INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mip     \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
-        case 72: INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, minstret\n\t .endr"); tohost = CMD_INJ_CLEAR; break;
+        case 62: TOGGLE_CSR(mscratch);  INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mscratch \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
+        case 63: TOGGLE_CSR(mstatus);   INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mstatus  \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
+        case 64: TOGGLE_CSR(mtvec);     INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mtvec    \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
+        case 65: TOGGLE_CSR(mtval);     INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mtval    \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
+        case 66: TOGGLE_CSR(mcycle);    INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mcycle   \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
+        case 67: TOGGLE_CSR(0x7c0);     INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, 0x7c0    \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
+        case 68: TOGGLE_CSR(mepc);      INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mepc     \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
+        case 69: TOGGLE_CSR(mie);       INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mie      \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
+        case 70: TOGGLE_CSR(mcause);    INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mcause   \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
+        case 71: TOGGLE_MIP();          INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mip      \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
+        case 72: TOGGLE_CSR(minstret);  INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, minstret \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
+        case 73: TOGGLE_CSR(mcycleh);   INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, mcycleh  \n\t .endr"); tohost = CMD_INJ_CLEAR; break;
+        case 74: TOGGLE_CSR(minstreth); INJECT_ERR(err_id, cmd); asm volatile(".rept 50\n\t csrr x0, minstreth\n\t .endr"); tohost = CMD_INJ_CLEAR; break;
         default: break;
     }
 }
@@ -173,26 +214,28 @@ int main(void) {
         while (1);
     }
     // ---------------------------------------------------------------------
-    // Test cases 62 to 72: CSRs (Main and Shadow Core)
+    // Test cases 62 to 74: CSRs (Main and Shadow Core)
     // ---------------------------------------------------------------------
-    else if (test_case <= 72) {
+    else if (test_case <= 74) {
         static const struct {
             const char *name;
             uint16_t err_id;
             uint8_t cmd;
             const char *core;
         } csr_tests[] = {
-            {"mscratch", 252, CMD_INJ_VEER,     "Main Core"},   // 62
-            {"mstatus",  253, CMD_INJ_VEER,     "Main Core"},   // 63
-            {"mtvec",    254, CMD_INJ_VEER,     "Main Core"},   // 64
-            {"mtval",    255, CMD_INJ_VEER,     "Main Core"},   // 65
-            {"mcycle",   195, CMD_INJ_VEER,     "Main Core"},   // 66
-            {"mrac",     196, CMD_INJ_VEER,     "Main Core"},   // 67
-            {"mepc",     252, CMD_INJ_LOCKSTEP, "Shadow Core"}, // 68
-            {"mie",      253, CMD_INJ_LOCKSTEP, "Shadow Core"}, // 69
-            {"mcause",   254, CMD_INJ_LOCKSTEP, "Shadow Core"}, // 70
-            {"mip",      255, CMD_INJ_LOCKSTEP, "Shadow Core"}, // 71
-            {"minstret", 195, CMD_INJ_LOCKSTEP, "Shadow Core"}  // 72
+            {"mscratch",  252, CMD_INJ_VEER,     "Main Core"},   // 62
+            {"mstatus",   253, CMD_INJ_VEER,     "Main Core"},   // 63
+            {"mtvec",     254, CMD_INJ_VEER,     "Main Core"},   // 64
+            {"mtval",     255, CMD_INJ_VEER,     "Main Core"},   // 65
+            {"mcycle",    195, CMD_INJ_VEER,     "Main Core"},   // 66
+            {"mrac",      196, CMD_INJ_VEER,     "Main Core"},   // 67
+            {"mepc",      252, CMD_INJ_LOCKSTEP, "Shadow Core"}, // 68
+            {"mie",       253, CMD_INJ_LOCKSTEP, "Shadow Core"}, // 69
+            {"mcause",    254, CMD_INJ_LOCKSTEP, "Shadow Core"}, // 70
+            {"mip",       255, CMD_INJ_LOCKSTEP, "Shadow Core"}, // 71
+            {"minstret",  195, CMD_INJ_LOCKSTEP, "Shadow Core"}, // 72
+            {"mcycleh",   197, CMD_INJ_VEER,     "Main Core"},   // 73
+            {"minstreth", 196, CMD_INJ_LOCKSTEP, "Shadow Core"}  // 74
         };
         int idx = test_case - 62;
         trigger_csr_read(test_case, csr_tests[idx].err_id, csr_tests[idx].cmd);
@@ -208,14 +251,14 @@ int main(void) {
     // ---------------------------------------------------------------------
     // Test completion / summary
     // ---------------------------------------------------------------------
-    else if (test_case >= 73) {
+    else if (test_case >= 75) {
         if (error_count > 0) {
-            printf("Test FAILED with %d total errors across 73 test cases!\n", error_count);
+            printf("Test FAILED with %d total errors across 75 test cases!\n", error_count);
             printf("Total non-monitored registers verified: %d\n", non_monitored_count);
             SEND_TEST_STATUS(TEST_FAILED);
             while(1) { asm volatile("wfi"); }
         } else {
-            printf("All 73 register tests completed successfully with 0 errors!\n");
+            printf("All 75 register tests completed successfully with 0 errors!\n");
             printf("Total non-monitored registers verified (no false corruption detected): %d\n", non_monitored_count);
             SEND_TEST_STATUS(TEST_PASSED);
             while(1) { asm volatile("wfi"); }

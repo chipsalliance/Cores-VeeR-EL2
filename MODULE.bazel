@@ -1,0 +1,56 @@
+# Copyright (c) 2026 Antmicro <www.antmicro.com>
+# SPDX-License-Identifier: Apache-2.0
+
+module(name = "cores_veer_el2")
+
+bazel_dep(name = "rules_hdl", version = "0.0.5")
+git_override(
+    module_name = "rules_hdl",
+    commit = "858b42de2a167d95a4ffea7e902a41f252c906f7",
+    remote = "https://github.com/antmicro/bazel_rules_hdl.git",
+)
+
+# Root-only overrides from rules_hdl's MODULE.bazel
+git_override(
+    module_name = "openroad",
+    commit = "51c9638fb0b005e5d60d7216970110543621125c",
+    init_submodules = True,
+    remote = "https://github.com/The-OpenROAD-Project/OpenROAD.git",
+)
+
+git_override(
+    module_name = "qt-bazel",
+    commit = "90cfbab79df93960c5493f8a75df6199fb80fe26",
+    remote = "https://github.com/The-OpenROAD-Project/qt_bazel_prebuilts",
+)
+
+git_override(
+    module_name = "z3",
+    commit = "ac9156f97cb44e56472e1c841f7a2beb1e976b24",
+    remote = "https://github.com/Z3Prover/z3.git",
+)
+
+single_version_override(
+    module_name = "rules_bison",
+    patch_strip = 1,
+    patches = ["//dependency_support/rules_bison:include_cstdlib.patch"],
+)
+
+git_override(
+    module_name = "rules_7zip",
+    commit = "03a10b5796eac0aed122cf52064ed15785610857",
+    remote = "https://github.com/zaucy/rules_7zip.git",
+)
+
+# rules_hdl registers it as dev_dependency only
+bazel_dep(name = "toolchains_llvm", version = "1.5.0")
+
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+llvm.toolchain(llvm_version = "19.1.7")
+use_repo(llvm, "llvm_toolchain")
+
+register_toolchains("@llvm_toolchain//:all")
+
+# ASAP7 cells used by examples/
+pdks = use_extension("@rules_hdl//dependency_support:pdks_extension.bzl", "pdks_extension")
+use_repo(pdks, "org_theopenroadproject_asap7sc7p5t_28")

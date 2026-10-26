@@ -59,6 +59,12 @@ jobs:
     with:
       run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
 
+  Test-Bazel-Rules-HDL:
+    name: Test-Bazel-Rules-HDL-Flow
+    needs: [Check-PR-Origin, Detect-Changes]
+    if: needs.Detect-Changes.outputs.code_changed == 'true'
+    uses: ./.github/workflows/bazel-rules-hdl-flow.yml
+
   Test-Regression-Cache-Waypack-0-num-ways-2:
     name: Test-Regression Cache Waypack 0 Num Ways 2
     needs: [Check-PR-Origin, Detect-Changes]

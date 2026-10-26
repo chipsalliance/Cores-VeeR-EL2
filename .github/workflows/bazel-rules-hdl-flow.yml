@@ -1,0 +1,81 @@
+name: VeeR-EL2 Bazel-Rules-HDL Flow
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  DEBIAN_FRONTEND: noninteractive
+
+jobs:
+  run-bazel-rules-hdl-synth:
+    name: Run EL2 Bazel-Rules-HDL Synthesis Flow
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: debian:trixie
+    strategy:
+      fail-fast: false
+      matrix:
+        bus:
+          - name: AXI
+            config: axi
+          - name: AHB
+            config: ahb_lite
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update -qq
+          apt-get install -qqy --no-install-recommends \
+            curl ca-certificates python3 build-essential clang cmake flex bison git file zip wget tree
+
+      - name: Configure Bazel
+        run: |
+          mkdir -p /tmp/distdir
+          for url in \
+            https://mirrors.kernel.org/gnu/glpk/glpk-5.0.tar.gz \
+            https://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz; do
+            if curl -fL --retry 5 --retry-delay 5 --retry-all-errors \
+                 --connect-timeout 20 --max-time 300 \
+                 -o /tmp/distdir/glpk-5.0.tar.gz "$url"; then
+              break
+            fi
+          done
+          test -s /tmp/distdir/glpk-5.0.tar.gz
+          printf '%s\n' 'common --distdir=/tmp/distdir' 'build -c opt' >> .bazelrc
+
+      - name: Install Bazel 8.5.0
+        run: |
+          wget -q \
+            https://github.com/bazelbuild/bazel/releases/download/8.5.0/bazel-8.5.0-linux-x86_64 \
+            -O /usr/local/bin/bazel
+
+          chmod +x /usr/local/bin/bazel
+
+          bazel --version
+
+      - name: Setup repository
+        uses: actions/checkout@v6
+        with:
+          path: Cores-VeeR-EL2
+          submodules: recursive
+
+      - name: Run EL2 ${{ matrix.bus.name }} Synthesis Flow
+        run: |
+          cd "$GITHUB_WORKSPACE/Cores-VeeR-EL2"
+          git status
+          bazel build //:veer_el2_synth_asap7_${{ matrix.bus.config }}
+
+      - name: Upload EL2 ${{ matrix.bus.name }} synthesis results
+        uses: actions/upload-artifact@v4
+        with:
+          name: veer_el2_synth_asap7_${{ matrix.bus.config }}
+          path: |
+            Cores-VeeR-EL2/bazel-bin/veer_el2_synth_asap7_${{ matrix.bus.config }}_synth_output.v
+            Cores-VeeR-EL2/bazel-bin/veer_el2_synth_asap7_${{ matrix.bus.config }}_yosys_output.log
+            Cores-VeeR-EL2/bazel-bin/veer_el2_synth_asap7_${{ matrix.bus.config }}_report.textproto
+          if-no-files-found: error

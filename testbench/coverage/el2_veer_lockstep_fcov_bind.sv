@@ -30,6 +30,11 @@ module el2_veer_lockstep_fcov_bind
     ) el2_ifu_icache_ecc_recovery_cov_inst(
          .*
     );
+    bind el2_lsu_dccm_ctl el2_lsu_dccm_wr_readback_cov_if #(
+         .pt(pt)
+    ) el2_lsu_dccm_wr_readback_cov_inst(
+         .*
+    );
 `ifdef RV_LOCKSTEP_ENABLE
     bind el2_veer_lockstep el2_veer_lockstep_delay_cov_if #(
          .pt(pt)

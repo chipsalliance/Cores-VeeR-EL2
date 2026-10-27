@@ -9,7 +9,8 @@ This directory contains testbench-level functional coverage interfaces and bindi
 - **`el2_veer_lockstep_mubi_sweep_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_mubi_sweep_cov` IEEE 1800 covergroup for MUBI width configurations, control signal encoding validation, and fail-secure tamper protection.
 - **`el2_veer_lockstep_address_xor_infection_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_address_xor_infection_cov` IEEE 1800 covergroup for ICCM, DCCM, and ICache address-XOR infection, DCLS-domain `iccm_rd_data` divergence detection, ICCM DMA read word-enable masking (Issue #550), ICCM redundant row lane selection and CAM re-reads (Issue #562), and DCLS-internal ICache bank select and cacheline-wrap straddle check masking (Issue #569).
 - **`el2_veer_lockstep_regfile_read_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_regfile_read_cov` IEEE 1800 covergroup for register file read port comparison modes, `rd0`/`rd1` read data divergence, architectural register divergence, and D-stage instruction type coverage.
-- **`el2_veer_lockstep_fcov_bind.sv`**: Testbench binding module (`el2_veer_lockstep_fcov_bind`) that binds `el2_veer_lockstep_delay_cov_if`, `el2_veer_lockstep_debug_mode_cov_if`, `el2_veer_lockstep_mubi_sweep_cov_if`, and `el2_veer_lockstep_regfile_read_cov_if` to `el2_veer_lockstep`, and binds `el2_veer_lockstep_address_xor_infection_cov_if` to `el2_veer_wrapper`.
+- **`el2_ifu_icache_ecc_recovery_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_ifu_icache_ecc_recovery_cov` and `el2_ifu_icache_core_check_cov` IEEE 1800 covergroups for ICache core-side ECC/parity fault recovery and bank check alignment.
+- **`el2_veer_lockstep_fcov_bind.sv`**: Testbench binding module (`el2_veer_lockstep_fcov_bind`) that binds `el2_veer_lockstep_delay_cov_if`, `el2_veer_lockstep_debug_mode_cov_if`, `el2_veer_lockstep_mubi_sweep_cov_if`, and `el2_veer_lockstep_regfile_read_cov_if` to `el2_veer_lockstep`, and binds `el2_veer_lockstep_address_xor_infection_cov_if` to `el2_veer_wrapper`, along with `el2_ifu_icache_ecc_recovery_cov_if` to `el2_ifu_mem_ctl`.
 
 ## Coverage Architecture
 
@@ -138,6 +139,28 @@ Tracks which architectural register differed on the active divergence cycle:
 #### 4. `instr_type_cp` and Cross Coverage
 - `instr_type_cp`: Tracks D-stage instruction classification (`alu`, `branch`, `store`, `load_addr`) executing while a register divergence is active.
 - `target_register_x_instr_type`: Crosses `target_register_divergence_cp` with `alu_instr_cp` (`alu` qualified by active register divergence) across all 19 monitored architectural registers.
+
+### Task 9: ICache Core-Side ECC and Parity Fault Recovery (`el2_ifu_icache_ecc_recovery_cov` & `el2_ifu_icache_core_check_cov`)
+
+#### 1. `icache_protection_mode_cp`, `icache_waypack_cp`, and `icache_num_ways_cp`
+- `icache_protection_mode_cp`: `parity_mode` (`pt.ICACHE_ECC == 0`) vs. `secded_mode` (`pt.ICACHE_ECC == 1`).
+- `icache_waypack_cp`: `waypack_0` vs. `waypack_1`.
+- `icache_num_ways_cp`: `num_ways_2` vs. `num_ways_4`.
+
+#### 2. `icache_fault_type_cp` and `icache_recovery_action_cp`
+- `icache_fault_type_cp`: Covers `single_bit_data_error`, `single_bit_tag_error`, and `double_bit_uncorrectable_error`.
+- `icache_recovery_action_cp`: Covers `pipeline_squash_and_flush`, `micect_counter_increment`, and `refetch_success`.
+
+#### 3. Recovery Cross Coverage
+- `icache_fault_x_recovery_action`: Crosses `icache_fault_type_cp` with `icache_recovery_action_cp`.
+- `icache_protection_x_fault_x_waypack_x_ways`: Crosses `icache_protection_mode_cp`, `icache_fault_type_cp`, `icache_waypack_cp`, and `icache_num_ways_cp`.
+
+#### 4. Core-Side Bank Check, Bank Select & Byte Rotator Alignment (`el2_ifu_icache_core_check_cov`, Issue #569 / PR #571)
+- `icache_bank_check_en_cp`: Covers `primary_bank_only` (`2'b01`), `both_banks_checked` (`2'b11`), and `check_disabled_or_masked` (`2'b00`, `2'b10`) on `ic_bank_check_en`.
+- `icache_rotator_offset_cp`: Covers `rot_offset_00`, `rot_offset_01`, `rot_offset_10`, and `rot_offset_11_straddle` on `ic_rd_rot_sel`.
+- `icache_straddle_bank_check_cp`: Covers `bank0_to_bank1_straddle` and `bank1_to_bank0_straddle` on cross-bank straddling fetches (`addr[2:1] == 2'b11`).
+- `icache_bank_sel_cp`: Covers `lower_chunk_in_bank0` (`1'b0`) vs. `lower_chunk_in_bank1` (`1'b1`) on `ic_rd_bank_sel`.
+- `icache_rotator_x_bank_sel`: Crosses `icache_rotator_offset_cp` with `icache_bank_sel_cp`.
 
 ## Testbench & CI Integration
 

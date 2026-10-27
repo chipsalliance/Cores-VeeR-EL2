@@ -431,8 +431,10 @@ module veer_wrapper
 `ifndef VERILATOR
   el2_veer_lockstep_cov_bind #(.pt(pt)) dcls_coverage();
 `endif
-  el2_veer_lockstep_fcov_bind #(.pt(pt)) dcls_fcov();
 `endif
+  // Instantiated outside RV_LOCKSTEP_ENABLE because it also binds non-DCLS core RAS/ECC/readback
+  // coverage interfaces; DCLS-specific binds inside el2_veer_lockstep_fcov_bind are self-guarded.
+  el2_veer_lockstep_fcov_bind #(.pt(pt)) dcls_fcov();
 `endif
 
 `ifdef GATELEVEL_DUT

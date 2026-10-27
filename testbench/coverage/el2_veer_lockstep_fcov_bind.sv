@@ -23,6 +23,11 @@ module el2_veer_lockstep_fcov_bind #(
 `endif
 ) ();
 `ifdef FCOV
+  bind el2_ifu_mem_ctl el2_ifu_icache_ecc_recovery_cov_if #(
+    .pt(pt)
+  ) el2_ifu_icache_ecc_recovery_cov_inst (
+      .*
+    );
 `ifdef RV_LOCKSTEP_ENABLE
   bind el2_veer_lockstep el2_veer_lockstep_delay_cov_if #(
     .pt(pt)

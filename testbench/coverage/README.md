@@ -10,8 +10,10 @@ This directory contains testbench-level functional coverage interfaces and bindi
 - **`el2_veer_lockstep_address_xor_infection_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_address_xor_infection_cov` IEEE 1800 covergroup for ICCM, DCCM, and ICache address-XOR infection, DCLS-domain `iccm_rd_data` divergence detection, ICCM DMA read word-enable masking (Issue #550), ICCM redundant row lane selection and CAM re-reads (Issue #562), and DCLS-internal ICache bank select and cacheline-wrap straddle check masking (Issue #569).
 - **`el2_veer_lockstep_regfile_read_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_regfile_read_cov` IEEE 1800 covergroup for register file read port comparison modes, `rd0`/`rd1` read data divergence, architectural register divergence, and D-stage instruction type coverage.
 - **`el2_lsu_dccm_wr_readback_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_lsu_dccm_wr_readback_cov` IEEE 1800 covergroup for DCCM write-readback protection.
+- **`el2_core_ecc_threshold_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_core_ecc_threshold_cov` IEEE 1800 covergroup for Multi-Memory Core RAS ECC Threshold Alerts (`MDCCMECT`, `MICCMECT`, `MICECT`).
+- **`el2_veer_lockstep_asymmetric_fault_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_asymmetric_fault_cov` IEEE 1800 covergroup for DCLS Asymmetric Shadow Core Fault Divergence.
 - **`el2_ifu_icache_ecc_recovery_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_ifu_icache_ecc_recovery_cov` and `el2_ifu_icache_core_check_cov` IEEE 1800 covergroups for ICache core-side ECC/parity fault recovery and bank check alignment.
-- **`el2_veer_lockstep_fcov_bind.sv`**: Testbench binding module (`el2_veer_lockstep_fcov_bind`) that binds `el2_veer_lockstep_delay_cov_if`, `el2_veer_lockstep_debug_mode_cov_if`, `el2_veer_lockstep_mubi_sweep_cov_if`, and `el2_veer_lockstep_regfile_read_cov_if` to `el2_veer_lockstep`, and binds `el2_veer_lockstep_address_xor_infection_cov_if` to `el2_veer_wrapper`, along with `el2_lsu_dccm_wr_readback_cov_if` to `el2_lsu_dccm_ctl`, `el2_ifu_icache_ecc_recovery_cov_if` to `el2_ifu_mem_ctl`.
+- **`el2_veer_lockstep_fcov_bind.sv`**: Testbench binding module (`el2_veer_lockstep_fcov_bind`) that binds `el2_veer_lockstep_delay_cov_if`, `el2_veer_lockstep_debug_mode_cov_if`, `el2_veer_lockstep_mubi_sweep_cov_if`, and `el2_veer_lockstep_regfile_read_cov_if` to `el2_veer_lockstep`, and binds `el2_veer_lockstep_address_xor_infection_cov_if` to `el2_veer_wrapper`, along with `el2_lsu_dccm_wr_readback_cov_if` to `el2_lsu_dccm_ctl`, `el2_core_ecc_threshold_cov_if` to `el2_dec_tlu_ctl`, `el2_veer_lockstep_asymmetric_fault_cov_if` to `el2_veer_wrapper`, `el2_ifu_icache_ecc_recovery_cov_if` to `el2_ifu_mem_ctl`.
 
 ## Coverage Architecture
 
@@ -161,6 +163,45 @@ Tracks which architectural register differed on the active divergence cycle:
 - `pending_readback_deferral_cp`: Covers `stbuf_drain_deferred`, `dma_write_deferred`, and `readback_deferred_by_ecc_scrub` (Issues #566 & #572).
 - `readback_mode_x_error_pin`: Crosses `readback_steal_vs_snoop_cp` with `write_readback_error_pin_cp`.
 - `readback_mode_x_mismatch_weight`: Crosses `readback_steal_vs_snoop_cp` with `readback_mismatch_hamming_weight_cp`.
+
+### Task 7: Multi-Memory Core RAS ECC Threshold Alerts (`el2_core_ecc_threshold_cov`)
+
+#### 1. `MDCCMECT` (`0x7F2` - DCCM)
+- `dccm_threshold_values_cp`: Threshold exponent bins (`0, 1, 2, 4, 8, 16, 26`), sampled when `dccm_sbe_incr` is active.
+- `dccm_counter_increment_cp`: Single-bit ECC error counter increment (`sbe_incr`).
+- `dccm_thresh_x_sbe_incr`: Crosses `dccm_threshold_values_cp` with `dccm_counter_increment_cp`.
+- `dccm_counter_comparison_cp`: `count_below_thresh`, `count_at_thresh`, and `count_above_thresh`.
+
+#### 2. `MICCMECT` (`0x7F1` - ICCM)
+- `iccm_threshold_values_cp`: Threshold exponent bins (`0, 1, 2, 4, 8, 16, 26`), sampled when `iccm_sbe_incr` is active.
+- `iccm_counter_increment_cp`: Instruction fetch SBE (`fetch_sbe_incr`) and DMA read SBE (`dma_sbe_incr`) counter increments.
+- `iccm_thresh_x_sbe_incr`: Crosses `iccm_threshold_values_cp` with `iccm_counter_increment_cp`.
+- `iccm_threshold_trigger_cp`: `count_below_thresh`, `count_at_thresh`, and `count_above_thresh`.
+
+#### 3. `MICECT` (`0x7F0` - ICache)
+- `icache_threshold_values_cp`: Threshold exponent bins (`0, 1, 2, 4, 8, 16, 26`), sampled when `icache_sbe_incr` is active.
+- `icache_counter_increment_cp`: Cache fetch parity/ECC error counter increment (`sbe_incr`).
+- `icache_thresh_x_sbe_incr`: Crosses `icache_threshold_values_cp` with `icache_counter_increment_cp`.
+- `icache_threshold_trigger_cp`: `count_below_thresh`, `count_at_thresh`, and `count_above_thresh`.
+
+#### 4. `core_ecc_interrupt_generation_cp`
+- `interrupt_masked`: `ce_int` asserted while `mie[30] == 0` or `mstatus.MIE == 0`.
+- `interrupt_taken`: Core takes Machine Correctable Error Interrupt trap (`take_ce_int`, `mcause == 0x8000001e`).
+
+### Task 8: DCLS Asymmetric Shadow Core Fault Divergence (`el2_veer_lockstep_asymmetric_fault_cov`)
+
+#### 1. `asymmetric_fault_source_cp`
+- `dccm_asymmetric`: Asymmetric DCCM threshold alert active (`mdccmect` mismatch, Case 203).
+- `iccm_asymmetric`: Asymmetric ICCM threshold alert active (`miccmect` mismatch, Case 204).
+- `icache_asymmetric`: Asymmetric ICache threshold alert active (`micect` mismatch, Case 205).
+
+#### 2. `asymmetric_lockstep_response_cp`
+- `comparator_mismatch`: Subordinate alert causes execution/regfile divergence (`corruption_detected_o == El2MuBiTrue`).
+- `external_interrupt_fired`: Lockstep mismatch interrupt signals to PIC (`extintsrc_req[2]`).
+
+#### 3. `lockstep_delay_cp` and Cross Coverage
+- `lockstep_delay_cp`: Configured lockstep pipeline delay (`delay_0` through `delay_4`) during asymmetric fault detection.
+- `asymmetric_source_x_delay_cross`: Crosses `asymmetric_fault_source_cp` with `lockstep_delay_cp` (`delay_0` through `delay_4`).
 
 ### Task 9: ICache Core-Side ECC and Parity Fault Recovery (`el2_ifu_icache_ecc_recovery_cov` & `el2_ifu_icache_core_check_cov`)
 

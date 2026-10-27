@@ -9,8 +9,9 @@ This directory contains testbench-level functional coverage interfaces and bindi
 - **`el2_veer_lockstep_mubi_sweep_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_mubi_sweep_cov` IEEE 1800 covergroup for MUBI width configurations, control signal encoding validation, and fail-secure tamper protection.
 - **`el2_veer_lockstep_address_xor_infection_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_address_xor_infection_cov` IEEE 1800 covergroup for ICCM, DCCM, and ICache address-XOR infection, DCLS-domain `iccm_rd_data` divergence detection, ICCM DMA read word-enable masking (Issue #550), ICCM redundant row lane selection and CAM re-reads (Issue #562), and DCLS-internal ICache bank select and cacheline-wrap straddle check masking (Issue #569).
 - **`el2_veer_lockstep_regfile_read_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_regfile_read_cov` IEEE 1800 covergroup for register file read port comparison modes, `rd0`/`rd1` read data divergence, architectural register divergence, and D-stage instruction type coverage.
+- **`el2_lsu_dccm_wr_readback_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_lsu_dccm_wr_readback_cov` IEEE 1800 covergroup for DCCM write-readback protection.
 - **`el2_ifu_icache_ecc_recovery_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_ifu_icache_ecc_recovery_cov` and `el2_ifu_icache_core_check_cov` IEEE 1800 covergroups for ICache core-side ECC/parity fault recovery and bank check alignment.
-- **`el2_veer_lockstep_fcov_bind.sv`**: Testbench binding module (`el2_veer_lockstep_fcov_bind`) that binds `el2_veer_lockstep_delay_cov_if`, `el2_veer_lockstep_debug_mode_cov_if`, `el2_veer_lockstep_mubi_sweep_cov_if`, and `el2_veer_lockstep_regfile_read_cov_if` to `el2_veer_lockstep`, and binds `el2_veer_lockstep_address_xor_infection_cov_if` to `el2_veer_wrapper`, along with `el2_ifu_icache_ecc_recovery_cov_if` to `el2_ifu_mem_ctl`.
+- **`el2_veer_lockstep_fcov_bind.sv`**: Testbench binding module (`el2_veer_lockstep_fcov_bind`) that binds `el2_veer_lockstep_delay_cov_if`, `el2_veer_lockstep_debug_mode_cov_if`, `el2_veer_lockstep_mubi_sweep_cov_if`, and `el2_veer_lockstep_regfile_read_cov_if` to `el2_veer_lockstep`, and binds `el2_veer_lockstep_address_xor_infection_cov_if` to `el2_veer_wrapper`, along with `el2_lsu_dccm_wr_readback_cov_if` to `el2_lsu_dccm_ctl`, `el2_ifu_icache_ecc_recovery_cov_if` to `el2_ifu_mem_ctl`.
 
 ## Coverage Architecture
 
@@ -139,6 +140,27 @@ Tracks which architectural register differed on the active divergence cycle:
 #### 4. `instr_type_cp` and Cross Coverage
 - `instr_type_cp`: Tracks D-stage instruction classification (`alu`, `branch`, `store`, `load_addr`) executing while a register divergence is active.
 - `target_register_x_instr_type`: Crosses `target_register_divergence_cp` with `alu_instr_cp` (`alu` qualified by active register divergence) across all 19 monitored architectural registers.
+
+### Task 6: DCCM Write Readback Protection (`el2_lsu_dccm_wr_readback_cov`)
+
+#### 1. `dccm_wr_readback_enabled_cp`
+- `feature_enabled` (`RdbkHwEnabled` & `!dec_tlu_dccm_wr_readback_disable`) vs. `feature_disabled` (`!RdbkHwEnabled` | `dec_tlu_dccm_wr_readback_disable`).
+
+#### 2. `readback_steal_vs_snoop_cp`
+- `steal_cycle` (idle cycle steal) vs. `snoop_cycle` (active load snoop).
+
+#### 3. `write_readback_error_pin_cp`
+- `no_error` vs. `error_asserted` (`dccm_wr_readback_error`).
+
+#### 4. `dmi_first_fault_wins_registers_cp` (Issue #561)
+- Covers `fault_valid_set`, `fault_addr_captured`, `fault_data_captured`, `fault_ecc_captured`, `fault_clear_w1c`, and `subsequent_fault_ignored`.
+
+#### 5. Bug Regression & Cross Coverpoints (Issues #566 & #572)
+- `readback_mismatch_hamming_weight_cp`: Covers `no_bit_mismatch`, `single_bit_mismatch_sbe`, and `multi_bit_mismatch_dbe` (Issue #566).
+- `snoop_bank_select_cp`: Covers `snoop_lo_bank` and `snoop_hi_bank` (Issue #572).
+- `pending_readback_deferral_cp`: Covers `stbuf_drain_deferred`, `dma_write_deferred`, and `readback_deferred_by_ecc_scrub` (Issues #566 & #572).
+- `readback_mode_x_error_pin`: Crosses `readback_steal_vs_snoop_cp` with `write_readback_error_pin_cp`.
+- `readback_mode_x_mismatch_weight`: Crosses `readback_steal_vs_snoop_cp` with `readback_mismatch_hamming_weight_cp`.
 
 ### Task 9: ICache Core-Side ECC and Parity Fault Recovery (`el2_ifu_icache_ecc_recovery_cov` & `el2_ifu_icache_core_check_cov`)
 

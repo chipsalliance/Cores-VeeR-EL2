@@ -26,15 +26,24 @@
 #define SET_NMI_INT          0x183
 #define CLEAR_NMI_INT        0x182
 
+#define DCLS_EXT_OUTPUT_START_CASE 207
+#define DCLS_EXT_OUTPUT_END_CASE   218
+#define DCLS_EXT_EXPECTED_TRAPS    ((DCLS_EXT_OUTPUT_END_CASE - DCLS_EXT_OUTPUT_START_CASE) * 2)
+
 volatile uint32_t boot_count __attribute__((section(".dccm.persistent"))) = 0;
 volatile uint32_t hart_id    __attribute__((section(".dccm.persistent"))) = 0;
+volatile uint32_t expected_ext_trap_pending __attribute__((section(".dccm.persistent"))) = 0;
+volatile uint32_t expected_ext_trap_id      __attribute__((section(".dccm.persistent"))) = 0;
+volatile uint32_t last_ext_trap_ok          __attribute__((section(".dccm.persistent"))) = 0;
+volatile uint32_t ext_trap_count            __attribute__((section(".dccm.persistent"))) = 0;
 
-extern uint32_t tohost;
+extern volatile uint32_t tohost;
 volatile uint32_t *threshold    = (uint32_t *)(RV_PIC_BASE_ADDR + RV_PIC_MEIPT_OFFSET);
 volatile uint32_t *gateway      = (uint32_t *)(RV_PIC_BASE_ADDR + RV_PIC_MEIGWCTRL_OFFSET);
 volatile uint32_t *clr_gateway  = (uint32_t *)(RV_PIC_BASE_ADDR + RV_PIC_MEIGWCLR_OFFSET);
 volatile uint32_t *priority     = (uint32_t *)(RV_PIC_BASE_ADDR + RV_PIC_MEIPL_OFFSET);
 volatile uint32_t *enable       = (uint32_t *)(RV_PIC_BASE_ADDR + RV_PIC_MEIE_OFFSET);
+volatile uint32_t *meip         = (uint32_t *)(RV_PIC_BASE_ADDR + RV_PIC_MEIP_OFFSET);
 
 // ============================================================================
 
@@ -43,12 +52,25 @@ void trap_handler () {
     uint32_t mcause  = read_csr(mcause);
     uint32_t mepc    = read_csr(mepc);
 
+    if (expected_ext_trap_pending != 0U) {
+        for (uint32_t slp = 0; slp < 20; slp++) {
+            __asm__ volatile ("nop");
+        }
+        if (((*meip >> 2) & 1U) != 0U) {
+            last_ext_trap_ok = 1U;
+            ext_trap_count++;
+        }
+    }
+
     tohost = CLEAR_NMI_INT;
     tohost = CMD_INJ_CLEAR;
 
     printf("trap! mstatus=0x%08X, mcause=0x%08X, mepc=0x%08X\n", mstatus, mcause, mepc);
 
     tohost = CMD_RST;
+    while (1) {
+        __asm__ volatile ("nop");
+    }
 }
 
 int main () {
@@ -59,11 +81,17 @@ int main () {
     unsigned long mie;
     unsigned long mstatus;
 
-#if (SDVT_AHB == 0)
-    if (old_boot_count < (195 * 2)) {
-#else
-    if (old_boot_count < (93 * 2)) {
-#endif
+    if (expected_ext_trap_pending != 0U) {
+        if (last_ext_trap_ok == 0U) {
+            printf("ERROR: Expected DCLS IRQ trap missing across reset for ID %0d\n",
+                   (unsigned int)expected_ext_trap_id);
+            return 1;
+        }
+        last_ext_trap_ok          = 0U;
+        expected_ext_trap_pending = 0U;
+    }
+
+    if (boot_count < (DCLS_EXT_OUTPUT_END_CASE * 2)) {
         mie = read_csr(mie);
         mie &= ~(1 << 11);
         write_csr(mie, mie);
@@ -83,13 +111,23 @@ int main () {
         write_csr(mstatus, mstatus);
     }
 
-#if (SDVT_AHB == 0)
-    while (old_boot_count < (195 * 2)) {
-#else
-    while (old_boot_count < (93 * 2)) {
-#endif
+    while (boot_count < (DCLS_EXT_OUTPUT_END_CASE * 2)) {
         old_boot_count = boot_count;
         boot_count++;
+
+        // Fast-forward past internal-state / monitored-register case IDs onto
+        // the extended core-output comparison cases (207..217).
+#if (SDVT_AHB == 0)
+        if (old_boot_count >= (195 * 2) && old_boot_count < (DCLS_EXT_OUTPUT_START_CASE * 2)) {
+            boot_count = DCLS_EXT_OUTPUT_START_CASE * 2;
+            continue;
+        }
+#else
+        if (old_boot_count >= (93 * 2) && old_boot_count < (DCLS_EXT_OUTPUT_START_CASE * 2)) {
+            boot_count = DCLS_EXT_OUTPUT_START_CASE * 2;
+            continue;
+        }
+#endif
 
         // Skip Main Core (`VEER`) signals that break code execution in `.text`
         // or corrupt the DCCM stack; these are verified in `dcls_skipped_signals`.
@@ -97,7 +135,12 @@ int main () {
             continue;
         }
 
-        printf("Injecting error into signal of ID %0d\n", old_boot_count);
+        if (old_boot_count >= (DCLS_EXT_OUTPUT_START_CASE * 2)) {
+            expected_ext_trap_id      = old_boot_count;
+            expected_ext_trap_pending = 1U;
+        }
+
+        printf("Injecting error into signal of ID %0d\n", (unsigned int)old_boot_count);
         // Inject error
         tohost = (old_boot_count >> 1) << 8 | ((old_boot_count & 1) ? CMD_INJ_LOCKSTEP : CMD_INJ_VEER);
 
@@ -118,6 +161,17 @@ int main () {
         for (uint32_t slp = 0; slp < 20; slp++) {
             __asm__ volatile ("nop"); // Sleep loop as "nop"
         }
+        if (old_boot_count >= (DCLS_EXT_OUTPUT_START_CASE * 2)) {
+            printf("ERROR: Signal ID %0d (case %0d) did not trigger a DCLS trap!\n",
+                   (unsigned int)old_boot_count, (unsigned int)(old_boot_count >> 1));
+            return 1;
+        }
+    }
+
+    if (ext_trap_count != DCLS_EXT_EXPECTED_TRAPS) {
+        printf("ERROR: Extended output trap count mismatch (got %0d, expected %0d)\n",
+               (unsigned int)ext_trap_count, (unsigned int)DCLS_EXT_EXPECTED_TRAPS);
+        return 1;
     }
     // Inject error that is known to cause error
     tohost = 1 << 8 | CMD_INJ_LOCKSTEP;

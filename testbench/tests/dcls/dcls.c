@@ -24,6 +24,9 @@
 #define SET_NMI_INT          0x183
 #define CLEAR_NMI_INT        0x182
 
+#define DCLS_EXT_OUTPUT_START_CASE 207
+#define DCLS_EXT_OUTPUT_END_CASE   218
+
 volatile uint32_t boot_count __attribute__((section(".dccm.persistent"))) = 0;
 volatile uint32_t hart_id    __attribute__((section(".dccm.persistent"))) = 0;
 
@@ -57,11 +60,7 @@ int main () {
     unsigned long mie;
     unsigned long mstatus;
 
-#if (SDVT_AHB == 0)
-    if (old_boot_count < (195 * 2)) {
-#else
-    if (old_boot_count < (93 * 2)) {
-#endif
+    if (boot_count < (DCLS_EXT_OUTPUT_END_CASE * 2)) {
         mie = read_csr(mie);
         mie &= ~(1 << 11);
         write_csr(mie, mie);
@@ -81,13 +80,23 @@ int main () {
         write_csr(mstatus, mstatus);
     }
 
-#if (SDVT_AHB == 0)
-    while (old_boot_count < (195 * 2)) {
-#else
-    while (old_boot_count < (93 * 2)) {
-#endif
+    while (boot_count < (DCLS_EXT_OUTPUT_END_CASE * 2)) {
         old_boot_count = boot_count;
         boot_count++;
+
+        // Fast-forward past internal-state / monitored-register case IDs onto
+        // the extended core-output comparison cases (207..217).
+#if (SDVT_AHB == 0)
+        if (old_boot_count >= (195 * 2) && old_boot_count < (DCLS_EXT_OUTPUT_START_CASE * 2)) {
+            boot_count = DCLS_EXT_OUTPUT_START_CASE * 2;
+            continue;
+        }
+#else
+        if (old_boot_count >= (93 * 2) && old_boot_count < (DCLS_EXT_OUTPUT_START_CASE * 2)) {
+            boot_count = DCLS_EXT_OUTPUT_START_CASE * 2;
+            continue;
+        }
+#endif
 
         // Skip some signals, as modifying them breaks code execution on main core
         // which is needed for the test to work
@@ -101,7 +110,6 @@ int main () {
 #if (SDVT_AHB == 0)
       old_boot_count == (52*2) || old_boot_count == (63*2) || old_boot_count == (65*2) ||
       old_boot_count == (66*2) || old_boot_count == (67*2) || 
-	    (old_boot_count >= (116*2) && old_boot_count <= (127*2)) ||  //skip Read signal channel for lsu_axi
 	    (old_boot_count >= (100*2) && old_boot_count <= (194*2) && (old_boot_count % 2 == 0)) //skip VEER side axi channels to prevent breakage in code exectuion
 #else
       old_boot_count == (48*2) || old_boot_count == (50*2) || old_boot_count == (66*2) ||

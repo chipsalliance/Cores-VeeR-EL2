@@ -2008,6 +2008,17 @@ module tb_top
                 45: force `LOCKSTEP_CORE.dec_tlu_perfcnt1 = '1;
                 46: force `LOCKSTEP_CORE.dec_tlu_perfcnt2 = '1;
                 47: force `LOCKSTEP_CORE.dec_tlu_perfcnt3 = '1;
+                207: force `LOCKSTEP_CORE.dccm_clk_override = '1;
+                208: force `LOCKSTEP_CORE.icm_clk_override = '1;
+                209: force `LOCKSTEP_CORE.dec_tlu_dccm_wr_readback_disable = '1;
+                210: force `LOCKSTEP_CORE.debug_brkpt_status = '1;
+                211: force `LOCKSTEP_CORE.ic_debug_wr_data = '1;
+                212: force `LOCKSTEP_CORE.ic_debug_addr = '1;
+                213: force `LOCKSTEP_CORE.ic_debug_wr_en = '1;
+                214: force `LOCKSTEP_CORE.ic_debug_rd_en = '1;
+                215: force `LOCKSTEP_CORE.ic_debug_tag_array = '1;
+                216: force `LOCKSTEP_CORE.dmi_reg_rdata = '1;
+                217: force `LOCKSTEP_CORE.dccm_write_readback_error = '1;
                 // --- END ADDED UNCONDITIONAL FORCES ---
             `ifdef RV_BUILD_AXI4
                 48: force `LOCKSTEP_CORE.lsu_axi_awready = '1;
@@ -2324,6 +2335,17 @@ module tb_top
                 45: force `VEER.dec_tlu_perfcnt1 = '1;
                 46: force `VEER.dec_tlu_perfcnt2 = '1;
                 47: force `VEER.dec_tlu_perfcnt3 = '1;
+                207: force `VEER.dccm_clk_override = '1;
+                208: force `VEER.icm_clk_override = '1;
+                209: force `VEER.dec_tlu_dccm_wr_readback_disable = '1;
+                210: force `VEER.debug_brkpt_status = '1;
+                211: force `VEER.ic_debug_wr_data = '1;
+                212: force `VEER.ic_debug_addr = '1;
+                213: force `VEER.ic_debug_wr_en = '1;
+                214: force `VEER.ic_debug_rd_en = '1;
+                215: force `VEER.ic_debug_tag_array = '1;
+                216: force `VEER.dmi_reg_rdata = '1;
+                217: force `VEER.dccm_write_readback_error = '1;
                 // --- END ADDED UNCONDITIONAL FORCES ---
             `ifdef RV_BUILD_AXI4
                 48: force `VEER.lsu_axi_awready = '1;
@@ -2619,6 +2641,17 @@ module tb_top
             release `LOCKSTEP_CORE.dec_tlu_perfcnt1;
             release `LOCKSTEP_CORE.dec_tlu_perfcnt2;
             release `LOCKSTEP_CORE.dec_tlu_perfcnt3;
+            release `LOCKSTEP_CORE.dccm_clk_override;
+            release `LOCKSTEP_CORE.icm_clk_override;
+            release `LOCKSTEP_CORE.dec_tlu_dccm_wr_readback_disable;
+            release `LOCKSTEP_CORE.debug_brkpt_status;
+            release `LOCKSTEP_CORE.ic_debug_wr_data;
+            release `LOCKSTEP_CORE.ic_debug_addr;
+            release `LOCKSTEP_CORE.ic_debug_wr_en;
+            release `LOCKSTEP_CORE.ic_debug_rd_en;
+            release `LOCKSTEP_CORE.ic_debug_tag_array;
+            release `LOCKSTEP_CORE.dmi_reg_rdata;
+            release `LOCKSTEP_CORE.dccm_write_readback_error;
             // --- END ADDED UNCONDITIONAL RELEASES ---
         `ifdef RV_BUILD_AXI4
             release `LOCKSTEP_CORE.lsu_axi_awready;
@@ -2690,6 +2723,18 @@ module tb_top
             release `LOCKSTEP_CORE.lsu_axi_wstrb;
             release `LOCKSTEP_CORE.lsu_axi_wlast;
             release `LOCKSTEP_CORE.lsu_axi_bready;
+            release `LOCKSTEP_CORE.lsu_axi_arvalid;
+            release `LOCKSTEP_CORE.lsu_axi_arid;
+            release `LOCKSTEP_CORE.lsu_axi_araddr;
+            release `LOCKSTEP_CORE.lsu_axi_arregion;
+            release `LOCKSTEP_CORE.lsu_axi_arlen;
+            release `LOCKSTEP_CORE.lsu_axi_arsize;
+            release `LOCKSTEP_CORE.lsu_axi_arburst;
+            release `LOCKSTEP_CORE.lsu_axi_arlock;
+            release `LOCKSTEP_CORE.lsu_axi_arcache;
+            release `LOCKSTEP_CORE.lsu_axi_arprot;
+            release `LOCKSTEP_CORE.lsu_axi_arqos;
+            release `LOCKSTEP_CORE.lsu_axi_rready;
             release `LOCKSTEP_CORE.ifu_axi_awvalid;
             release `LOCKSTEP_CORE.ifu_axi_awid;
             release `LOCKSTEP_CORE.ifu_axi_awaddr;
@@ -2854,6 +2899,17 @@ module tb_top
             release `VEER.dec_tlu_perfcnt1;
             release `VEER.dec_tlu_perfcnt2;
             release `VEER.dec_tlu_perfcnt3;
+            release `VEER.dccm_clk_override;
+            release `VEER.icm_clk_override;
+            release `VEER.dec_tlu_dccm_wr_readback_disable;
+            release `VEER.debug_brkpt_status;
+            release `VEER.ic_debug_wr_data;
+            release `VEER.ic_debug_addr;
+            release `VEER.ic_debug_wr_en;
+            release `VEER.ic_debug_rd_en;
+            release `VEER.ic_debug_tag_array;
+            release `VEER.dmi_reg_rdata;
+            release `VEER.dccm_write_readback_error;
             // --- END ADDED UNCONDITIONAL RELEASES ---
         `ifdef RV_BUILD_AXI4
             release `VEER.lsu_axi_awready;
@@ -2925,6 +2981,18 @@ module tb_top
             release `VEER.lsu_axi_wstrb;
             release `VEER.lsu_axi_wlast;
             release `VEER.lsu_axi_bready;
+            release `VEER.lsu_axi_arvalid;
+            release `VEER.lsu_axi_arid;
+            release `VEER.lsu_axi_araddr;
+            release `VEER.lsu_axi_arregion;
+            release `VEER.lsu_axi_arlen;
+            release `VEER.lsu_axi_arsize;
+            release `VEER.lsu_axi_arburst;
+            release `VEER.lsu_axi_arlock;
+            release `VEER.lsu_axi_arcache;
+            release `VEER.lsu_axi_arprot;
+            release `VEER.lsu_axi_arqos;
+            release `VEER.lsu_axi_rready;
             release `VEER.ifu_axi_awvalid;
             release `VEER.ifu_axi_awid;
             release `VEER.ifu_axi_awaddr;

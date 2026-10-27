@@ -22,10 +22,11 @@
  *    into ICCM (`.text.nmi` at `0xee000000`), and provides `_text_trap_handler`
  *    in `.text` (`0x80000000`) for Main Core ICCM ECC fault recovery (`ID 24`).
  * 2. Centralizes all `tb_top.sv` case classifications (`0..194` for AXI4,
- *    `0..92` for AHB-Lite) and stimulus selectors into `kDclsCaseTable[]`, and
- *    verifies at both compile time (`static_assert`) and Boot 0
- *    (`verify_case_table_sanity()`) that the configured bus mode (`SDVT_AHB`),
- *    table ordering, and injectable signal count match `EXPECTED_INJECTED_TRAPS`.
+ *    `0..92` for AHB-Lite, plus common extended core outputs `207..217`) and
+ *    stimulus selectors into `kDclsCaseTable[]`, and verifies at both compile
+ *    time (`static_assert`) and Boot 0 (`verify_case_table_sanity()`) that the
+ *    configured bus mode (`SDVT_AHB`), table ordering, and injectable signal
+ *    count match `EXPECTED_INJECTED_TRAPS`.
  * 3. Actively stimulates CPU-facing core and bus input signals during the fault
  *    window so that both `VEER` and `LOCKSTEP_CORE` input forces propagate to
  *    core outputs and assert `corruption_detected_o`.
@@ -39,7 +40,7 @@
  * 1. Phase 1 (Upfront Sanity Check, PIC & Interrupt Initialization):
  *    - On Boot 0, validates `kDclsCaseTable[]` ordering and confirms that the
  *      sum of injectable `VEER` and `LOCKSTEP_CORE` entries matches
- *      `EXPECTED_INJECTED_TRAPS` (`248` for AXI4, `116` for AHB-Lite).
+ *      `EXPECTED_INJECTED_TRAPS` (`270` for AXI4, `138` for AHB-Lite).
  *    - Configures the Programmable Interrupt Controller (PIC) to route DCLS
  *      `corruption_detected_o` (IRQ #2) as a Machine External Interrupt (MEI),
  *      enables Machine External, Timer, and Software Interrupts (`MEIE`,
@@ -146,16 +147,21 @@
 
 // `MAX_BOOT_COUNT` and `EXPECTED_INJECTED_TRAPS` are tied to the DCLS signal
 // injection case tables in `testbench/tb_top.sv` (`inject_lockstep_error`):
-// - AXI (`SDVT_AHB == 0`): 195 signal pairs (`0..389`), of which 248 real core
-//   input/output signals are injected and must each trigger a DCLS trap.
-// - AHB (`SDVT_AHB == 1`): 93 signal pairs (`0..185`), of which 116 real core
-//   input/output signals are injected and must each trigger a DCLS trap.
+// - AXI (`SDVT_AHB == 0`): 195 base pairs (`0..389`) + 11 extended output pairs
+//   (`414..435`), requiring 270 injected real core I/O DCLS traps.
+// - AHB (`SDVT_AHB == 1`): 93 base pairs (`0..185`) + 11 extended output pairs
+//   (`414..435`), requiring 138 injected real core I/O DCLS traps.
+#define DCLS_EXT_OUTPUT_START_CASE 207U
+#define DCLS_EXT_OUTPUT_END_CASE   218U
+#define DCLS_EXT_OUTPUT_CASE_COUNT (DCLS_EXT_OUTPUT_END_CASE - DCLS_EXT_OUTPUT_START_CASE)
+#define MAX_BOOT_COUNT             (DCLS_EXT_OUTPUT_END_CASE * 2U)
+
 #if (SDVT_AHB == 0)
-#define MAX_BOOT_COUNT          (195U * 2U)
-#define EXPECTED_INJECTED_TRAPS 248U
+#define DCLS_BASE_CASE_COUNT    195U
+#define EXPECTED_INJECTED_TRAPS 270U
 #else
-#define MAX_BOOT_COUNT          (93U * 2U)
-#define EXPECTED_INJECTED_TRAPS 116U
+#define DCLS_BASE_CASE_COUNT    93U
+#define EXPECTED_INJECTED_TRAPS 138U
 #endif
 
 /**
@@ -241,8 +247,8 @@ typedef struct dcls_case_desc {
 
 /**
  * Central lookup table mapping every `tb_top.sv` `inject_corruption` case
- * (`0..194` for AXI4, `0..92` for AHB-Lite) to its per-core action and
- * stimulus kind.
+ * (`0..194` for AXI4, `0..92` for AHB-Lite, plus common extended core outputs
+ * `207..217`) to its per-core action and stimulus kind.
  */
 static const dcls_case_desc_t kDclsCaseTable[] = {
   // --- Common Core Inputs (`0..31`) ---
@@ -498,11 +504,23 @@ static const dcls_case_desc_t kDclsCaseTable[] = {
   DCLS_CASE(91, kDclsActionSkipHardcodedOne,      kDclsActionSkipHardcodedOne,      kDclsStimDefault,      "dma_hreadyout"),
   DCLS_CASE(92, kDclsActionSkipCoreFreezing,      kDclsActionInject,                kDclsStimDefault,      "dma_hresp"),
 #endif
+  // --- Extended Compared Core Outputs (`207..217`, Common for AXI4 & AHB-Lite) ---
+  DCLS_CASE(207, kDclsActionInject, kDclsActionInject, kDclsStimDefault, "dccm_clk_override"),
+  DCLS_CASE(208, kDclsActionInject, kDclsActionInject, kDclsStimDefault, "icm_clk_override"),
+  DCLS_CASE(209, kDclsActionInject, kDclsActionInject, kDclsStimDefault, "dec_tlu_dccm_wr_readback_disable"),
+  DCLS_CASE(210, kDclsActionInject, kDclsActionInject, kDclsStimDefault, "debug_brkpt_status"),
+  DCLS_CASE(211, kDclsActionInject, kDclsActionInject, kDclsStimDefault, "ic_debug_wr_data"),
+  DCLS_CASE(212, kDclsActionInject, kDclsActionInject, kDclsStimDefault, "ic_debug_addr"),
+  DCLS_CASE(213, kDclsActionInject, kDclsActionInject, kDclsStimDefault, "ic_debug_wr_en"),
+  DCLS_CASE(214, kDclsActionInject, kDclsActionInject, kDclsStimDefault, "ic_debug_rd_en"),
+  DCLS_CASE(215, kDclsActionInject, kDclsActionInject, kDclsStimDefault, "ic_debug_tag_array"),
+  DCLS_CASE(216, kDclsActionInject, kDclsActionInject, kDclsStimDefault, "dmi_reg_rdata"),
+  DCLS_CASE(217, kDclsActionInject, kDclsActionInject, kDclsStimDefault, "dccm_write_readback_error"),
 };
 
 static_assert((sizeof(kDclsCaseTable) / sizeof(kDclsCaseTable[0])) ==
-                  (MAX_BOOT_COUNT / 2U),
-              "kDclsCaseTable size must match MAX_BOOT_COUNT / 2");
+                  (DCLS_BASE_CASE_COUNT + DCLS_EXT_OUTPUT_CASE_COUNT),
+              "kDclsCaseTable size must match DCLS_BASE_CASE_COUNT + DCLS_EXT_OUTPUT_CASE_COUNT");
 
 /** Saved copy of the first two ICCM words (`0xee000000`) to restore after ECC scrub. */
 volatile uint32_t saved_iccm_head[2] __attribute__((section(".dccm.persistent")));
@@ -552,18 +570,19 @@ static volatile uint32_t *const meip =
 
 /**
  * Performs an upfront Boot-0 sanity check confirming that:
- * 1. The configured bus mode (`SDVT_AHB`) matches the expected signal ID range
- *    (`MAX_BOOT_COUNT` = 390 for AXI4, 186 for AHB-Lite) and `kDclsCaseTable`
- *    has no missing or out-of-order case numbers (`0 .. (MAX_BOOT_COUNT / 2) - 1`).
+ * 1. The configured bus mode (`SDVT_AHB`) matches the expected case count
+ *    (`195 + 11` for AXI4, `93 + 11` for AHB-Lite) and `kDclsCaseTable`
+ *    has no missing or out-of-order case numbers (`0..DCLS_BASE_CASE_COUNT-1`
+ *    followed by `207..217`).
  * 2. The total number of `kDclsActionInject` slots across `VEER` and
  *    `LOCKSTEP_CORE` in `kDclsCaseTable` equals `EXPECTED_INJECTED_TRAPS`
- *    (`248` for AXI4, `116` for AHB-Lite).
+ *    (`270` for AXI4, `138` for AHB-Lite).
  */
 static bool verify_case_table_sanity(void) {
   const uint32_t num_cases =
       (uint32_t)(sizeof(kDclsCaseTable) / sizeof(kDclsCaseTable[0]));
-  const uint32_t expected_cases = (SDVT_AHB == 0) ? 195U : 93U;
-  if (num_cases != expected_cases || (num_cases * 2U) != MAX_BOOT_COUNT) {
+  const uint32_t expected_cases = DCLS_BASE_CASE_COUNT + DCLS_EXT_OUTPUT_CASE_COUNT;
+  if (num_cases != expected_cases || MAX_BOOT_COUNT != (DCLS_EXT_OUTPUT_END_CASE * 2U)) {
     printf("ERROR: Bus mode sanity check failed! SDVT_AHB=%0d, num_cases=%0d, "
            "expected_cases=%0d, MAX_BOOT_COUNT=%0d\n",
            (unsigned int)SDVT_AHB, (unsigned int)num_cases,
@@ -573,7 +592,11 @@ static bool verify_case_table_sanity(void) {
 
   uint32_t table_injectable_count = 0U;
   for (uint32_t i = 0U; i < num_cases; i++) {
-    if (kDclsCaseTable[i].case_num != i ||
+    const uint32_t expected_case_num =
+        (i < DCLS_BASE_CASE_COUNT)
+            ? i
+            : (DCLS_EXT_OUTPUT_START_CASE + (i - DCLS_BASE_CASE_COUNT));
+    if (kDclsCaseTable[i].case_num != expected_case_num ||
         kDclsCaseTable[i].signal_name == NULL) {
       printf("ERROR: Case table ordering mismatch at index %0d (case_num=%0d)!\n",
              (unsigned int)i, (unsigned int)kDclsCaseTable[i].case_num);
@@ -740,7 +763,7 @@ static void inject_iccm_ecc_from_text(uint32_t old_boot_count) {
  * Executes the fault injection and observation window from ICCM (`.text.nmi`)
  * so that IFU output forces or DCCM read data forces do not break instruction
  * fetching or stack accesses prior to `_trap_handler`. `stim_raw` is passed in
- * a GPR from `main()` (`kDclsCaseTable[case_num].stim`) so no `.rodata` table
+ * a GPR from `main()` (`desc->stim`) so no `.rodata` table
  * lookup occurs in DCCM while a fault is active.
  */
 __attribute__((section(".text.nmi"), noinline, optimize("no-jump-tables")))
@@ -942,7 +965,7 @@ int main(void) {
 
   // Enable ICache for `.text` (`0x80000000`, bit 16) and side-effect ordering
   // for `tohost` (`0xd0580000`, bit 27) during `main()` / `printf()`
-  // housekeeping so all 390 iterations complete well within `MAX_CYCLES`
+  // housekeeping so all sweep iterations complete well within `MAX_CYCLES`
   // without write-buffer coalescing on `tohost`. `inject_and_wait()` resets
   // `mrac` (`0x7c0`) and invalidates ICache via `fence.i` prior to injection.
   write_csr(CSR_VEER_MRAC, 0x08010000UL);
@@ -987,9 +1010,19 @@ int main(void) {
     old_boot_count = boot_count;
     boot_count++;
 
+    if (old_boot_count >= (DCLS_BASE_CASE_COUNT * 2U) &&
+        old_boot_count < (DCLS_EXT_OUTPUT_START_CASE * 2U)) {
+      boot_count = DCLS_EXT_OUTPUT_START_CASE * 2U;
+      continue;
+    }
+
     const uint32_t case_num = old_boot_count >> 1;
     const bool is_shadow    = (old_boot_count & 1U) != 0U;
-    const dcls_case_desc_t *const desc = &kDclsCaseTable[case_num];
+    const uint32_t table_idx =
+        (case_num < DCLS_BASE_CASE_COUNT)
+            ? case_num
+            : (DCLS_BASE_CASE_COUNT + (case_num - DCLS_EXT_OUTPUT_START_CASE));
+    const dcls_case_desc_t *const desc = &kDclsCaseTable[table_idx];
     const dcls_action_t action =
         (dcls_action_t)(is_shadow ? desc->shadow_action : desc->veer_action);
 

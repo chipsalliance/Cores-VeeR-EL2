@@ -20,7 +20,7 @@ SECTIONS {
   /* DCCM */
   . = 0xf0040000;
   dccm = .;
-  .data : { *(.*data) *(.rodata*) *(.sbss)}
+  .data : { *(.*data) *(.rodata*) *(.sbss) *(.dccm.persistent*) }
   .bss : { *(.bss); . = ALIGN(4); }
   STACK = ALIGN(16) + 0x1000;
 

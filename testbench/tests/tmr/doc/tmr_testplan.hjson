@@ -71,37 +71,37 @@
 
         List of recoverable errors:
         * `el2_tmr_complex`
-          * `tmr_fatal_dff` - bitflip will be persisted until real fatal occurs, probably unharmful?
-          * `tmr_recovery_fault_dff` - bitflip will be persisted until real fatal occurs, probably unharmful?
+          * `tmr_fatal_dff` - bitflip will be persisted until real fatal occurs
+          * `tmr_recovery_fault_dff` - bitflip will be persisted until real fatal occurs
           * `el2_tmr_{exec_ctrl|dccm|iccm|ic|misc|pic}`
-            * `storage.dff` - error should be outvoted by the other two
+            * `storage.dff` - outvoted by the other two
           * `el2_tmr_boot_configuration`
-            * `active_core_ff.dff` - error should be outvoted by the other two
-            * `reset_observed_ff` - should autorecover
+            * `active_core_ff.dff` - outvoted by the other two
+            * `reset_observed_ff` - autorecovers
           * `el2_tmr_recovery_fsm`
             * `fsm_state_ff`
-              * Inject in `IDLE` - should recover to `IDLE`
-              * Inject in `HALT_CORES` - should recover to `HALT_CORES`
-              * Inject in `READ_REG` - should recover to `HALT_CORES`
-              * Inject in `SET_FLAG_RD` - should recover to `HALT_CORES`
-              * Inject in `RESET_CPU` - should recover to `RESET_CPU`
-              * Inject in `SET_FLAG_CC` - should recover to `RESET_CPU`
-              * Inject in `WRITE_REG` - should recover to `WRITE_REG`
-              * Inject in `SET_FLAG_SR` - should recover to `WRITE_REG`
-              * Inject in `RESTART_CPU` - should recover to `RESTART_CPU`
-              * Inject in `SET_FLAG_CR` - should recover to `RESTART_CPU`
-              * Inject in `CLEAR_FLAG_ERR` - should recover to `CLEAR_FLAG_ERR`
-              * Inject in `CLEAR_FLAG_RD` - should recover to `CLEAR_FLAG_RD`
-              * Inject in `CLEAR_FLAG_CC` - should recover to `CLEAR_FLAG_CC`
-              * Inject in `CLEAR_FLAG_SR` - should recover to `CLEAR_FLAG_SR`
-              * Inject in `CLEAR_FLAG_CR` - should recover to `CLEAR_FLAG_CR`
+              * Inject in `IDLE` - recovers to `IDLE`
+              * Inject in `HALT_CORES` - recovers to `HALT_CORES`
+              * Inject in `READ_REG` - recovers to `HALT_CORES`
+              * Inject in `SET_FLAG_RD` - recovers to `HALT_CORES`
+              * Inject in `RESET_CPU` - recovers to `RESET_CPU`
+              * Inject in `SET_FLAG_CC` - recovers to `RESET_CPU`
+              * Inject in `WRITE_REG` - recovers to `WRITE_REG`
+              * Inject in `SET_FLAG_SR` - recovers to `WRITE_REG`
+              * Inject in `RESTART_CPU` - recovers to `RESTART_CPU`
+              * Inject in `SET_FLAG_CR` - recovers to `RESTART_CPU`
+              * Inject in `CLEAR_FLAG_ERR` - recovers to `CLEAR_FLAG_ERR`
+              * Inject in `CLEAR_FLAG_RD` - recovers to `CLEAR_FLAG_RD`
+              * Inject in `CLEAR_FLAG_CC` - recovers to `CLEAR_FLAG_CC`
+              * Inject in `CLEAR_FLAG_SR` - recovers to `CLEAR_FLAG_SR`
+              * Inject in `CLEAR_FLAG_CR` - recovers to `CLEAR_FLAG_CR`
             * `cnt_{csr|gpr}_ff` - worst case scenario wrong value will be written to recovered CPU which triggers new recovery sequence right after
-            * `*_value_d_m` - it will most likely just stall register read for a cycle
-            * `*_recovery_storage_ff` - should be corrected by ECC, only valid in `READ_REG` and `WRITE_REG`
-            * `pc_recovery_storage_ff` - should be corrected by ECC, written in `READ_REG` so check in later states
-            * `*_flag_ff` - error should be outvoted by the other two
+            * `*_value_d_m` - stalls register read for one clock cycle
+            * `*_recovery_storage_ff` - corrected by ECC, only valid in `READ_REG` and `WRITE_REG`
+            * `pc_recovery_storage_ff` - corrected by ECC, written in `READ_REG` so check in later states
+            * `*_flag_ff` - outvoted by the other two
           * `el2_tmr_axi_counter`
-            * `*_count.dff_storage` - should be corrected by ECC
+            * `*_count.dff_storage` - corrected by ECC
       '''
       "stage": "DV0.3",
       "tests": [
@@ -133,13 +133,13 @@
 
         List of unrecoverable errors:
         * `el2_tmr_complex`
-          * `fault.dff` - error injected will disable one of the cores until `tmr_fault_clr` is asserted which happens only at the end of the recovery FSM, if the injection happens not during recovery sequence, the TMR will switch to DCLS
+          * `fault.dff` - disables one of the cores until `tmr_fault_clr` is asserted which happens only at the end of the recovery FSM, if the injection happens but not during recovery sequence, the TMR will switch to DCLS
           * `el2_tmr_recovery_fsm`
             * `fsm_state_ff`
-              * `sync_rst_l_ff` - injected in `RESET_CPU` state should recover, otherwise unrecoverable
+              * `sync_rst_l_ff` - unrecoverable unless injected in `RESET_CPU` state
           * `el2_tmr_axi_counter`
-            * `dff_wfirst` - this will most likely break the counter and counter `clr` signal is tied to `false`
-            * `*_count.dff_ecc_fatal` - this will behave as double ECC error which is fatal error
+            * `dff_wfirst` - breaks the counter, counter's `clr` signal is tied to `false`
+            * `*_count.dff_ecc_fatal` - behaves as double ECC error which is fatal error
       '''
       "stage": "DV0.3",
       "tests": [

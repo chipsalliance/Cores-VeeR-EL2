@@ -2583,11 +2583,12 @@ end
 // Randomly injects upsets to core GPRs. To enable run simulation with
 // "+upsets" plusarg. Upset intervals are counted in clock cycles.
 
-`define VEER0 rvtop_wrapper.rvtop.tmr_complex.cores[0].veer
-`define VEER1 rvtop_wrapper.rvtop.tmr_complex.cores[1].veer
-`define VEER2 rvtop_wrapper.rvtop.tmr_complex.cores[2].veer
+`define TMR rvtop_wrapper.rvtop.tmr_complex
+`define VEER0 `TMR.cores[0].veer
+`define VEER1 `TMR.cores[1].veer
+`define VEER2 `TMR.cores[2].veer
 
-task tmr_upsetter();
+task veer_upsetter();
 
   integer delay = 150; // Fixed delay to the first upset
   integer which_cpu;
@@ -2733,10 +2734,40 @@ task tmr_upsetter();
   end
 endtask
 
+task tmr_upsetter(int fault_id);
+  // Wait until we enter recovery
+  @(posedge tmr_recovery_pending);
+  @(negedge core_clk);
+  inject_fault(fault_id);
+endtask
+
+task inject_fault(int fault_id);
+  int rand_bit;
+  case (fault_id)
+    `define FAULT_TARGET(ID, SIG_PATH)                                                        \
+      ID: begin                                                                               \
+        rand_bit = $urandom_range($bits(SIG_PATH)-1, 0);                                      \
+        SIG_PATH = SIG_PATH ^ ($bits(SIG_PATH))'(1) << rand_bit;  /* flatten-safe flip */     \
+        $display("[%0t] Fault injected ID: %0d: %s[%0d]", $time, ID, `"SIG_PATH`", rand_bit); \
+      end
+    `include "tmr_fault_targets.svh"
+    `undef FAULT_TARGET
+    default: $fatal(1, "unknown fault id %0d", fault_id);
+  endcase
+
+  $display("[%0t] Fault injected, ID: %0d, bit: %0d", $time, fault_id, rand_bit);
+endtask
+
 initial begin
-  if ($test$plusargs("upsets")) begin
+  if ($test$plusargs("veer_upsets")) begin
     fork
-      tmr_upsetter();
+      veer_upsetter();
+    join_none
+  end else if ($test$plusargs("tmr_upsets")) begin
+    int fault_id;
+    if ($value$plusargs("fault_id=%d", fault_id))
+    fork
+      tmr_upsetter(fault_id);
     join_none
   end
 end

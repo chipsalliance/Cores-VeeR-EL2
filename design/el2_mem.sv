@@ -69,9 +69,7 @@ import el2_pkg::*;
    input  logic                      ic_debug_tag_array, // Debug tag array
    input  logic [pt.ICACHE_NUM_WAYS-1:0]                ic_debug_way,       // Debug way. Rd or Wr.
 
-   output logic [141:0]                   ic_rd_data ,         // Raw way-muxed 142-bit ECC-protected word pair. F2 stage.
-   output logic [1:0]                     ic_rd_addr_lo,       // F2-aligned ic_rw_addr_ff[2:1] for core-side rotate
-   output logic [pt.ICACHE_BANKS_WAY-1:0] ic_rd_bank_check_en, // Per-bank ECC check enable for core-side decode
+   output logic [141:0]                   ic_rd_data ,         // Raw way-muxed 142-bit ECC-protected word pair, physical bank order {bank1, bank0}. F2 stage.
 
    output logic [25:0]               ictag_debug_rd_data,// Debug icache tag.
 
@@ -155,8 +153,6 @@ else  begin
    assign   ic_rd_hit[pt.ICACHE_NUM_WAYS-1:0] = '0;
    assign   ic_tag_perr    = '0 ;
    assign   ic_rd_data  = '0 ;
-   assign   ic_rd_addr_lo  = '0 ;
-   assign   ic_rd_bank_check_en  = '0 ;
    assign   ictag_debug_rd_data  = '0 ;
    assign   ic_debug_rd_data  = '0 ;
 end // else: !if( pt.ICACHE_ENABLE )

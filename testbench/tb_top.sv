@@ -756,7 +756,9 @@ module tb_top
     tb_top_pkg::veer_sram_error_injection_mode_t error_injection_mode;
     logic x_sanitizer_en;
 
-`define DEC rvtop_wrapper.rvtop.veer.dec
+`ifndef GATELEVEL_DUT
+    `define DEC rvtop_wrapper.rvtop.veer.dec
+`endif
 
 `ifdef RV_BUILD_AHB_LITE
     always_ff @(posedge core_clk)
@@ -1210,11 +1212,15 @@ module tb_top
             end
             if(mailbox_write && mailbox_data[7:0] == 8'hff) begin
                 $display("[%0t ns] TEST_PASSED",$time);
-                $display("[%0t ns] \nFinished : minstret = %0d, mcycle = %0d",$time, `DEC.tlu.minstretl[31:0],`DEC.tlu.mcyclel[31:0]);
+                `ifndef GATELEVEL_DUT
+                    $display("[%0t ns] \nFinished : minstret = %0d, mcycle = %0d",$time, `DEC.tlu.minstretl[31:0],`DEC.tlu.mcyclel[31:0]);
+                `endif
                 $display("[%0t ns] See \"exec.log\" for execution trace with register updates..\n",$time);
                 // OpenOCD test breaks if simulation closes the TCP connection first.
                 // This delay allows OpenOCD to close the connection before the #finish.
+            `ifndef GATELEVEL_DUT
                 #15000;
+            `endif
                 $finish;
             end
             else if(mailbox_write && mailbox_data[7:0] == 8'h1) begin
@@ -1325,6 +1331,7 @@ module tb_top
     //    complete cleanly. By the time software resumes and reads `micect`, the
     //    hardware counter increment has already taken place.
     // =========================================================================
+`ifndef GATELEVEL_DUT
     always @(posedge core_clk or negedge rst_l_combined) begin
         if (~rst_l_combined) begin
             next_ic_error         <= 0;
@@ -1432,6 +1439,7 @@ module tb_top
         end
 `endif
     end
+`endif
 
 `ifdef RV_DCCM_WR_READBACK
     always @(posedge core_clk or negedge rst_l_combined) begin
@@ -3131,6 +3139,11 @@ module tb_top
         end
     end
 `endif // RV_LOCKSTEP_ENABLE
+`ifdef GATELEVEL_DUT
+    initial begin
+        $display("RUNNING WITH GATELEVEL_DUT");
+    end
+`endif
 
     // nmi_int must be asserted for at least two clock cycles and then deasserted for
     // at least two clock cycles - see RISC-V VeeR EL2 Programmer's Reference Manual section 2.16
@@ -3138,12 +3151,14 @@ module tb_top
 
     // trace monitor
     always @(posedge core_clk) begin
+    `ifndef GATELEVEL_DUT
         wb_valid      <= `DEC.dec_i0_wen_r;
         wb_dest       <= `DEC.dec_i0_waddr_r;
         wb_data       <= `DEC.dec_i0_wdata_r;
         wb_csr_valid  <= `DEC.dec_csr_wen_r;
         wb_csr_dest   <= `DEC.dec_csr_wraddr_r;
         wb_csr_data   <= `DEC.dec_csr_wrdata_r;
+    `endif
         if (trace_rv_i_valid_ip) begin
            $fwrite(tp,"%b,%h,%h,%0h,%0h,3,%b,%h,%h,%b\n", trace_rv_i_valid_ip, 0, trace_rv_i_address_ip,
                   0, trace_rv_i_insn_ip,trace_rv_i_exception_ip,trace_rv_i_ecause_ip,
@@ -3151,13 +3166,16 @@ module tb_top
            // Basic trace - no exception register updates
            // #1 0 ee000000 b0201073 c 0b02       00000000
            commit_count++;
+        `ifndef GATELEVEL_DUT
            $fwrite (el, "%10d : %8s 0 %h %h%13s %14s ; %s\n", cycleCnt, $sformatf("#%0d",commit_count),
                         trace_rv_i_address_ip, trace_rv_i_insn_ip,
                         (wb_dest !=0 && wb_valid)?  $sformatf("%s=%h", abi_reg[wb_dest], wb_data) : "            ",
                         (wb_csr_valid)? $sformatf("c%h=%h", wb_csr_dest, wb_csr_data) : "             ",
                         dasm(trace_rv_i_insn_ip, trace_rv_i_address_ip, wb_dest & {5{wb_valid}}, wb_data)
                    );
+        `endif
         end
+    `ifndef GATELEVEL_DUT
         if(`DEC.dec_nonblock_load_wen) begin
             $fwrite (el, "%10d : %32s=%h                ; nbL\n", cycleCnt, abi_reg[`DEC.dec_nonblock_load_waddr], `DEC.lsu_nonblock_load_data);
             tb_top.gpr[0][`DEC.dec_nonblock_load_waddr] = `DEC.lsu_nonblock_load_data;
@@ -3166,8 +3184,8 @@ module tb_top
             $fwrite (el, "%10d : %32s=%h                ; nbD\n", cycleCnt, abi_reg[`DEC.div_waddr_wb], `DEC.exu_div_result);
             tb_top.gpr[0][`DEC.div_waddr_wb] = `DEC.exu_div_result;
         end
+    `endif
     end
-
 
     initial begin
         abi_reg[0] = "zero";
@@ -3217,10 +3235,12 @@ module tb_top
 
         $readmemh("program.hex",  lmem.mem);
         $readmemh("program.hex",  imem.mem);
+    `ifndef GATELEVEL_DUT
         tp = $fopen("trace_port.csv","w");
         el = $fopen("exec.log","w");
         $fwrite (el, "//   Cycle : #inst    0    pc    opcode    reg=value    csr=value     ; mnemonic\n");
         fd = $fopen("console.log","w");
+    `endif
         commit_count = 0;
         preload_dccm();
         preload_iccm();

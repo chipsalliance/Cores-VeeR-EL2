@@ -21,8 +21,32 @@
 #include <fstream>
 #include "Vtb_top.h"
 #include "verilated.h"
-#include "verilated_vcd_c.h"
 
+// Trace format follows the Verilator flag used at build time:
+//   --trace      -> VCD (VM_TRACE_VCD=1)
+//   --trace-fst  -> FST (VM_TRACE_FST=1)
+#if VM_TRACE_FST
+#include "verilated_fst_c.h"
+typedef VerilatedFstC TraceFile;
+#define TRACE_FILE_NAME "sim.fst"
+#elif VM_TRACE
+#include "verilated_vcd_c.h"
+typedef VerilatedVcdC TraceFile;
+#define TRACE_FILE_NAME "sim.vcd"
+#endif
+
+// Trace hierarchy depth. The synthesized netlist is deeply nested.
+#ifndef TRACE_DEPTH
+#if GATELEVEL_DUT
+#define TRACE_DEPTH 99
+#else
+#define TRACE_DEPTH 24
+#endif
+#endif
+
+#ifndef HALF_PERIOD
+#define HALF_PERIOD 5
+#endif
 
 vluint64_t main_time = 0;
 
@@ -143,19 +167,18 @@ int main(int argc, char** argv) {
   std::cout << std::flush;
 
   // init trace dump
-  VerilatedVcdC* tfp = NULL;
-
 #if VM_TRACE
+  TraceFile* tfp = NULL;
   Verilated::traceEverOn(true);
-  tfp = new VerilatedVcdC;
-  tb->trace (tfp, 24);
-  tfp->open ("sim.vcd");
+  tfp = new TraceFile;
+  tb->trace (tfp, TRACE_DEPTH);
+  tfp->open (TRACE_FILE_NAME);
 #endif
   tb->lsu_bus_clk_en = 1;
   // reset
   tb->rst_l = 0;
   for (int i=0;i<6;i++) {
-    main_time += 5;
+    main_time += HALF_PERIOD;
     tb->core_clk = !tb->core_clk;
     tb->eval();
 #if VM_TRACE
@@ -170,7 +193,7 @@ int main(int argc, char** argv) {
     // wait for ack
     std::cout<<"Waiting for halt"<<std::endl;
     while(!tb->o_cpu_halt_ack) {
-      main_time += 5;
+      main_time += HALF_PERIOD;
       tb->core_clk = !tb->core_clk;
       tb->eval();
 #if VM_TRACE
@@ -180,7 +203,7 @@ int main(int argc, char** argv) {
     tb->i_cpu_halt_req = 0;
     // wait for halt signal
     while(!tb->o_cpu_halt_status) {
-      main_time += 5;
+      main_time += HALF_PERIOD;
       tb->core_clk = !tb->core_clk;
       tb->eval();
 #if VM_TRACE
@@ -191,7 +214,7 @@ int main(int argc, char** argv) {
     tb->i_cpu_run_req = 1;
     // wait for ack
     while(!tb->o_cpu_run_ack) {
-      main_time += 5;
+      main_time += HALF_PERIOD;
       tb->core_clk = !tb->core_clk;
       tb->eval();
 #if VM_TRACE
@@ -202,7 +225,7 @@ int main(int argc, char** argv) {
     // wait for run signal
     std::cout<<"Waiting for restart"<<std::endl;
     while(tb->o_cpu_halt_status) {
-      main_time += 5;
+      main_time += HALF_PERIOD;
       tb->core_clk = !tb->core_clk;
       tb->eval();
 #if VM_TRACE
@@ -214,7 +237,7 @@ int main(int argc, char** argv) {
     // wait for ack
     std::cout<<"Waiting for mpc halt"<<std::endl;
     while(!tb->mpc_debug_halt_ack) {
-      main_time += 5;
+      main_time += HALF_PERIOD;
       tb->core_clk = !tb->core_clk;
       tb->eval();
 #if VM_TRACE
@@ -224,7 +247,7 @@ int main(int argc, char** argv) {
     tb->mpc_debug_halt_req = 0;
     // wait for halt signal
     while(!tb->o_debug_mode_status) {
-      main_time += 5;
+      main_time += HALF_PERIOD;
       tb->core_clk = !tb->core_clk;
       tb->eval();
 #if VM_TRACE
@@ -235,7 +258,7 @@ int main(int argc, char** argv) {
     tb->mpc_debug_run_req = 1;
     // wait for ack
     while(!tb->mpc_debug_run_ack) {
-      main_time += 5;
+      main_time += HALF_PERIOD;
       tb->core_clk = !tb->core_clk;
       tb->eval();
 #if VM_TRACE
@@ -246,7 +269,7 @@ int main(int argc, char** argv) {
     // wait for run signal
     std::cout<<"Waiting for mpc restart"<<std::endl;
     while(tb->o_debug_mode_status) {
-      main_time += 5;
+      main_time += HALF_PERIOD;
       tb->core_clk = !tb->core_clk;
       tb->eval();
 #if VM_TRACE
@@ -265,7 +288,7 @@ int main(int argc, char** argv) {
     tb->lsu_bus_clk_en = 0;
     for(int i=0;i<30;i++) {
       for(int j=0;j<10;j++) {
-        main_time += 5;
+        main_time += HALF_PERIOD;
         tb->core_clk = !tb->core_clk;
         tb->eval();
 #if VM_TRACE
@@ -280,7 +303,7 @@ int main(int argc, char** argv) {
     // reset
     tb->rst_l = 0;
     for (int i=0;i<30;i++) {
-      main_time += 5;
+      main_time += HALF_PERIOD;
       tb->core_clk = !tb->core_clk;
       tb->eval();
 #if VM_TRACE
@@ -294,7 +317,7 @@ int main(int argc, char** argv) {
 #if VM_TRACE
       tfp->dump (main_time);
 #endif
-      main_time += 5;
+      main_time += HALF_PERIOD;
       tb->core_clk = !tb->core_clk;
       tb->eval();
   }

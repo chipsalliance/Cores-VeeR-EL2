@@ -69,6 +69,8 @@ git_override(
     # TODO: rebase 107479-bazel-rules-hdl-el2 on develop
     commit = "49514520a93283d2f6b3582d3a0f70bfa4cdcc7a",
     remote = "https://github.com/antmicro/bazel_rules_hdl.git",
+    patches = ["//:bazel_patches/rules_hdl_asap7_visibility.patch"],
+    patch_strip = 1,
 )
 
 # Root-only overrides from rules_hdl's MODULE.bazel

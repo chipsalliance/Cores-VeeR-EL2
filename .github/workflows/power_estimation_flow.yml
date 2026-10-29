@@ -1,0 +1,184 @@
+name: VeeR-EL2 Simulation-based Power Estimation Flow
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  DEBIAN_FRONTEND: noninteractive
+
+jobs:
+  setup:
+    name: Prepare OpenROAD
+    runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:20260923
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      OPENROAD_VERSION: "6556255d82c707820dd400e9b8cf331b378b735e"
+    steps:
+      - name: Cache OpenROAD
+        id: openroad-cache
+        uses: actions/cache@v6
+        with:
+          path: /opt/openroad
+          key: openroad-${{ runner.os }}-${{ env.OPENROAD_VERSION }}
+
+      - name: Build and install OpenROAD
+        if: steps.openroad-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p /opt/openroad
+          git clone https://github.com/The-OpenROAD-Project/OpenROAD.git /opt/openroad_src
+          pushd /opt/openroad_src
+            git checkout ${{ env.OPENROAD_VERSION }}
+            git submodule update --init --recursive
+            ./etc/DependencyInstaller.sh -bazel
+            bazelisk run --//:platform=cli //:install -- /opt/openroad
+          popd
+
+  synthesis-and-power-analysis:
+    name: Run EL2 synthesis, simulation, and power analysis
+    needs: setup
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: ghcr.io/antmicro/cores-veer-el2:20260923
+    strategy:
+      fail-fast: false
+      matrix:
+        bus:
+          - name: AXI
+            config: axi4
+          - name: AHB
+            config: ahb_lite
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      OPENROAD_VERSION: "6556255d82c707820dd400e9b8cf331b378b735e"
+    steps:
+      - name: Install synthesis and simulation dependencies
+        run: |
+          apt-get update -qq
+          apt-get install -qqy --no-install-recommends \
+            curl ca-certificates python3 build-essential clang cmake flex bison git file zip wget tree
+
+      - name: Install trace2power
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+              | sh -s -- -y --profile minimal
+          source "$HOME/.cargo/env"
+          cargo install trace2power --root /opt/trace2power
+          echo "/opt/trace2power/bin" >> "$GITHUB_PATH"
+          /opt/trace2power/bin/trace2power --version
+
+      - name: Restore OpenROAD
+        uses: actions/cache@v6
+        with:
+          path: /opt/openroad
+          key: openroad-${{ runner.os }}-${{ env.OPENROAD_VERSION }}
+
+      - name: Add OpenROAD to PATH and verify
+        run: |
+          echo "/opt/openroad/bin" >> "$GITHUB_PATH"
+          /opt/openroad/bin/openroad -version
+
+      - name: Install Bazel 8.5.0
+        run: |
+          wget -q \
+            https://github.com/bazelbuild/bazel/releases/download/8.5.0/bazel-8.5.0-linux-x86_64 \
+            -O /usr/local/bin/bazel
+          chmod +x /usr/local/bin/bazel
+          bazel --version
+
+      - name: Verify Verilator
+        run: verilator --version
+
+      - name: Setup repository
+        uses: actions/checkout@v6
+        with:
+          path: Cores-VeeR-EL2
+          submodules: recursive
+
+      - name: Configure Bazel
+        working-directory: Cores-VeeR-EL2
+        run: |
+          mkdir -p /tmp/distdir
+          for url in \
+            https://mirrors.kernel.org/gnu/glpk/glpk-5.0.tar.gz \
+            https://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz; do
+            if curl -fL --retry 5 --retry-delay 5 --retry-all-errors \
+                 --connect-timeout 20 --max-time 300 \
+                 -o /tmp/distdir/glpk-5.0.tar.gz "$url"; then
+              break
+            fi
+          done
+          test -s /tmp/distdir/glpk-5.0.tar.gz
+          printf '%s\n' 'common --distdir=/tmp/distdir' 'build -c opt' >> .bazelrc
+
+      - name: Run EL2 ${{ matrix.bus.name }} Synthesis
+        working-directory: Cores-VeeR-EL2
+        run: bazel build //:veer_el2_synth_asap7_${{ matrix.bus.config }}
+
+      - name: Create ASAP7 cells simulation model file
+        working-directory: Cores-VeeR-EL2
+        run: bazel build //:asap7_sim_cell_models
+
+      - name: Create ASAP7 LEF files
+        working-directory: Cores-VeeR-EL2
+        run: bazel build //:asap7_pdk_lef
+
+      - name: Build verilator simulation
+        working-directory: Cores-VeeR-EL2
+        run: |
+          export RV_ROOT="$GITHUB_WORKSPACE/Cores-VeeR-EL2"
+          echo "RV_ROOT=$RV_ROOT" >> "$GITHUB_ENV"
+          mkdir synth_run
+          make -C synth_run -f "$RV_ROOT/tools/Makefile" verilator-build \
+            CONF_PARAMS="-set build_${{ matrix.bus.config }}"
+            GATELEVEL=1 \
+            DUT_NETLIST="$RV_ROOT/bazel-bin/veer_el2_synth_asap7_${{ matrix.bus.config }}_synth_output.v" \
+            ASAP7_CELL_MODELS="$RV_ROOT/bazel-bin/asap7_sim_cell_models.v" \
+            CLK_PERIOD_NS=2 \
+            TRACE_FORMAT=vcd
+
+      - name: Run simulation
+        working-directory: Cores-VeeR-EL2
+        run: make -C synth_run -f "$RV_ROOT/tools/Makefile" verilator TEST="hello_world" TB_EXTRA_ARGS=
+
+      - name: Get SAIF file using trace2power
+        working-directory: Cores-VeeR-EL2/synth_run
+        run: |
+          trace2power \
+            --clk-freq 500000000 \
+            --top el2_veer_wrapper \
+            --top-scope TOP.tb_top.rvtop_wrapper.rvtop_synth_wrapper.rvtop_synth \
+            --limit-scope TOP.tb_top.rvtop_wrapper.rvtop_synth_wrapper \
+            --remove-virtual-pins \
+            --export-empty \
+            --input-ports-activity \
+            --output-format saif \
+            --output base.saif \
+            sim.vcd
+
+      - name: Run static power analysis using OpenROAD
+        working-directory: Cores-VeeR-EL2
+        run: |
+          LIB_LABEL=@org_theopenroadproject_asap7sc7p5t_28//:asap7-sc7p5t_rev28_rvt-ccs_ss
+          bazel build "$LIB_LABEL"
+          export LIBERTY="$RV_ROOT/$(bazel cquery --output=files "$LIB_LABEL" 2>/dev/null | grep -- '_SS\.lib$' | head -n1)"
+          test -f "$LIBERTY"
+          export TECH_LEF="$RV_ROOT/bazel-bin/asap7_tech_1x_201209.lef"
+          export CELL_LEF="$RV_ROOT/bazel-bin/asap7sc7p5t_28_R_1x_220121a.lef"
+          export NETLIST="$RV_ROOT/bazel-bin/veer_el2_synth_asap7_${{ matrix.bus.config }}_synth_output.v"
+          export SAIF="$RV_ROOT/synth_run/base.saif"
+          export CLK_PERIOD_NS=2
+          export POWER_REPORT="$RV_ROOT/synth_run/static_power_${{ matrix.bus.config }}.rpt"
+          openroad $RV_ROOT/tools/static_power_analysis.tcl -exit
+          cat "$POWER_REPORT"
+
+      - name: Upload power report artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: static_power_${{ matrix.bus.config }}.rpt
+          path: $RV_ROOT/synth_run
+          retention-days: 7

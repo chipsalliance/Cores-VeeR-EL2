@@ -29,6 +29,20 @@ LD_ABI = $(ABI) -march=rv32imac
 
 TB_EXTRA_ARGS ?= --test-halt
 
+# can be fst or vcd
+TRACE_FORMAT ?= vcd
+ifeq ($(TRACE_FORMAT),vcd)
+	TRACE_FLAG = --trace
+else ifeq ($(TRACE_FORMAT),fst)
+	TRACE_FLAG = --trace-fst
+else
+	TRACE_FLAG =
+endif
+
+# Full clock period in ns. Verilator's testbench uses HALF_PERIOD
+CLK_PERIOD_NS ?= 10
+HALF_PERIOD = $(shell awk 'BEGIN { print ($(CLK_PERIOD_NS) / 2) }')
+
 # Check for RV_ROOT
 ifeq (,$(wildcard ${RV_ROOT}/configs/veer.config))
 $(error env var RV_ROOT does not point to a valid dir! Exiting!)
@@ -49,6 +63,8 @@ GCC_PREFIX = riscv64-unknown-elf
 BUILD_DIR = snapshots/${snapshot}
 TBDIR = ${RV_ROOT}/testbench
 PICOLIBC_DIR = ${RV_ROOT}/third_party/picolibc/install
+
+GATELEVEL ?= 0
 
 # Override march depending on used GCC version
 ifneq ($(shell which $(GCC_PREFIX)-gcc 2> /dev/null),)
@@ -80,6 +96,24 @@ endif
 VERILATOR_SKIP_WARNINGS = $(VERILATOR_NOIMPLICIT) -Wno-TIMESCALEMOD -Wno-ASCRANGE \
 	-Wno-CASEINCOMPLETE -Wno-INITIALDLY -Wno-WIDTH -Wno-UNOPTFLAT -Wno-SIDEEFFECT \
 	-Wno-LATCH
+
+ifeq ($(GATELEVEL),1)
+	DUT_DEFINE				= +define+GATELEVEL_DUT
+	DUT_FILELIST  		= $(TBDIR)/flist_gate
+	DUT_NETLIST	 			?=
+	ASAP7_CELL_MODELS ?=
+	VERILATOR_DEBUG   = $(TRACE_FLAG) --trace-underscore
+	VERILATOR_SKIP_WARNINGS += -Wno-SPECIFYIGN
+
+	ifeq ($(strip $(DUT_NETLIST)),)
+    $(error Set DUT_NETLIST to the ORFS netlist output)
+  endif
+else
+	DUT_DEFINE 				=
+	DUT_FILELIST 			= $(TBDIR)/flist
+	DUT_NETLIST 			=
+	ASAP7_CELL_MODELS =
+endif
 
 # Define test name
 TEST = hello_world
@@ -119,7 +153,7 @@ ifdef debug
  IRUN_DEBUG_RUN = -input ${RV_ROOT}/testbench/input.tcl
  VCS_DEBUG = -debug_access+r+w -debug_access+all +memcbk -kdb +define+VCS_DEBUG
  FSDB_DUMP = +fsdb+mda +fsdb+mda_depth=0 +fsdb+struct
- VERILATOR_DEBUG = --trace
+ VERILATOR_DEBUG = $(TRACE_FLAG)
  RIVIERA_DEBUG = +access +r
 endif
 
@@ -204,12 +238,12 @@ ${BUILD_DIR}/defines.h:
 	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/veer.config -target=$(target) $(CONF_PARAMS)
 
 verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
-	$(VERILATOR) --cc -CFLAGS "${CFLAGS}" --coverage-max-width 20000 $(defines) $(FCOV_DEFINES) \
-	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist \
+	$(VERILATOR) --cc -CFLAGS "${CFLAGS}" -DHALF_PERIOD=$(HALF_PERIOD) --coverage-max-width 20000 $(defines) $(FCOV_DEFINES) \
+	  $(includes) -I${RV_ROOT}/testbench -f $(DUT_FILELIST) $(DUT_DEFINE) $(DUT_NETLIST) $(ASAP7_CELL_MODELS) \
 	  $(VERILATOR_SKIP_WARNINGS) $(VERILATOR_EXTRA_ARGS) ${TB_SILENT_FAIL} ${TBFILES} --top-module tb_top \
-	  -exe $(TB_VERILATOR_SRCS) --autoflush --timing --assert $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE) -fno-table
+	  -exe $(TB_VERILATOR_SRCS) --autoflush --timing --assert $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE) -fno-table --x-initial-edge
 	cp ${RV_ROOT}/testbench/test_tb_top.cpp obj_dir/
-	$(MAKE) -e -C obj_dir/ -f Vtb_top.mk $(VERILATOR_MAKE_FLAGS)
+	$(MAKE) -e -C obj_dir/ -f Vtb_top.mk $(VERILATOR_MAKE_FLAGS) -j$(shell nproc)
 	touch verilator-build
 
 vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h

@@ -1,21 +1,19 @@
 name: Verible formatter
 
 on:
-  pull_request_target:
+  pull_request:
 
 jobs:
   format-review:
     runs-on: ubuntu-24.04
     permissions:
-      checks: write
       contents: read
-      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
       - uses: antmicro/verible-formatter-action@update-upload-action
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reviewdog_reporter: 'local'
-          fail_on_formatting_suggestions: ${{ github.event_name != 'pull_request_target' }}
+          fail_on_formatting_suggestions: 'false'

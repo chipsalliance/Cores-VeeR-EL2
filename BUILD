@@ -26,16 +26,6 @@ verilog_library(
     ],
 )
 
-synthesize_rtl(
-    name = "veer_el2_synth_asap7_axi",
-    standard_cells = "@org_theopenroadproject_asap7sc7p5t_28//:asap7-sc7p5t_rev28_rvt",
-    top_module = "el2_veer_wrapper",
-    deps = [
-        ":veer_el2_axi4_verilog_lib",
-    ],
-    synth_tcl = "synth.tcl",
-)
-
 ############################# AHB Lite config ##############################
 veer_el2(
   name = "veer_el2_ahb_lite",
@@ -52,17 +42,69 @@ verilog_library(
     ],
 )
 
+##################### Bazel rules for RTL2GDS Flow #########################
+
+synthesize_rtl(
+    name = "veer_el2_synth_asap7_axi",
+    standard_cells = "@org_theopenroadproject_asap7sc7p5t_28//:asap7-sc7p5t_rev28_rvt",
+    top_module = "el2_veer_wrapper",
+    deps = [
+        ":veer_el2_axi4_verilog_lib",
+    ],
+    synth_tcl = "synth.tcl",
+    target_clock_period_pico_seconds = 1000000, # 1 MHz
+)
+
 synthesize_rtl(
     name = "veer_el2_synth_asap7_ahb_lite",
-    standard_cells = "@org_theopenroadproject_asap7sc7p5t_27//:asap7-sc7p5t_rev27_rvt",
+    standard_cells = "@org_theopenroadproject_asap7sc7p5t_28//:asap7-sc7p5t_rev28_rvt",
     top_module = "el2_veer_wrapper",
     deps = [
         ":veer_el2_ahb_lite_verilog_lib",
     ],
     synth_tcl = "synth.tcl",
+    target_clock_period_pico_seconds = 1000000, # 1 MHz
 )
 
 sdc_library(
     name = "constraint",
     srcs = ["//design:el2_constraints.sdc"],
+)
+
+place_and_route(
+    name = "veer_el2_place_and_route_asap7_axi",
+    clock_period = "1000000", # in ps
+    core_padding_microns = 20,
+    die_height_microns = 400,
+    die_width_microns = 400,
+    min_pin_distance = "0.2",
+    placement_density = "0.35",
+    suppress_warnings = ASAP7_SUPPRESSED_WARNINGS,
+    sdc = ":constraint",
+    synthesized_rtl = ":veer_el2_synth_asap7_axi",
+    stop_after_step = "global_routing",
+)
+
+place_and_route(
+    name = "veer_el2_place_and_route_asap7_ahb_lite",
+    clock_period = "1000000", # in ps
+    core_padding_microns = 20,
+    die_height_microns = 400,
+    die_width_microns = 400,
+    min_pin_distance = "0.2",
+    placement_density = "0.35",
+    suppress_warnings = ASAP7_SUPPRESSED_WARNINGS,
+    sdc = ":constraint",
+    synthesized_rtl = ":veer_el2_synth_asap7_ahb_lite",
+    stop_after_step = "global_routing",
+)
+
+gds_write(
+    name = "veer_el2_gds_asap7_axi",
+    implemented_rtl = ":veer_el2_place_and_route_asap7_axi",
+)
+
+gds_write(
+    name = "veer_el2_gds_asap7_ahb_lite",
+    implemented_rtl = ":veer_el2_place_and_route_asap7_ahb_lite",
 )

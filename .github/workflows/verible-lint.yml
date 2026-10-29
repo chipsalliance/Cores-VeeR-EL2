@@ -1,19 +1,17 @@
 name: Verible linter
 
 on:
-  pull_request_target:
+  pull_request:
 
 jobs:
   lint-review:
     runs-on: ubuntu-24.04
     permissions:
-      checks: write
       contents: read
-      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
       - uses: chipsalliance/verible-linter-action@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -21,4 +19,3 @@ jobs:
           extra_args: '--waiver_files=./violations.waiver'
           paths: |
             ./design
-

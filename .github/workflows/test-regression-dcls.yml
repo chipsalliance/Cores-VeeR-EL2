@@ -379,10 +379,11 @@ jobs:
     strategy:
       matrix:
         bus: ["axi", "ahb"]
-        # ICache address-infection subset, built with DCLS across both enabled (1) and disabled (0) modes.
-        # Tests fault recovery on address corruption when enabled, and verifies micect does NOT increment
-        # when disabled (negative regression check). Sweeps both ECC and Parity modes.
-        test: ["icache_infection"]
+        # ICache address-infection & DCLS boundary subset, built with DCLS across both enabled (1)
+        # and disabled (0) modes. Tests fault recovery on address/boundary corruption when enabled,
+        # and verifies micect does NOT increment when disabled (negative regression check).
+        # Sweeps both ECC and Parity modes.
+        test: ["icache_infection", "icache_dcls_boundary"]
         coverage: ["all"]
         priv: ["1"]
         ecc: ["0", "1"]

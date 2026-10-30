@@ -4,3 +4,11 @@
 [submodule "third_party/riscv-dv"]
 	path = third_party/riscv-dv
 	url = https://github.com/chipsalliance/riscv-dv
+[submodule "tools/metrics_dashboard/metrics_dashboard/src/lib/aesir"]
+	path = tools/metrics_dashboard/metrics_dashboard/src/lib/aesir
+	url = https://github.com/antmicro/aesir-components.git
+	branch = distribution/svelte
+[submodule "tools/metrics_dashboard/metrics_dashboard/src/lib/aesir-html"]
+	path = tools/metrics_dashboard/metrics_dashboard/src/lib/aesir-html
+	url = https://github.com/antmicro/aesir-components.git
+	branch = distribution/html-modular

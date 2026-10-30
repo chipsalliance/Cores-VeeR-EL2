@@ -1,0 +1,242 @@
+{
+  "run": {
+    "flow": {
+      "flow__design": "aes",
+      "flow__platform": "sky130hs",
+      "flow__generate_date": "2026-02-03 10:15",
+      "flow__openroad_version": "v2.0-21004-g1a2b3c",
+      "flow__variant": "v3"
+    }
+  },
+  "constraints": {
+    "clocks": {
+      "clocks__count": 1,
+      "clocks__details": ["core_clock: 1002.4500", "vclk_core_clock: 1002.4500"]
+    }
+  },
+  "synth": {
+    "runtime": {
+      "runtime__total": "3:48.52"
+    },
+    "design": {
+      "design__die__area": 0,
+      "design__core__area": 4,
+      "design__instance__area": 51.8723,
+      "design__instance__count": 219
+    },
+    "timing": {
+      "timing__setup__ws": -76.2831,
+      "timing__setup__tns": -438.1267,
+      "timing__hold__ws": 29.1528,
+      "timing__hold__tns": 0,
+      "timing__fmax": 4312567890.125
+    },
+    "power": {
+      "power__total": 0.000821,
+      "power__internal__total": 0.000592314,
+      "power__switching__total": 0.000298416,
+      "power__leakage__total": 2.41235e-8
+    }
+  },
+  "floorplan": {
+    "runtime": {
+      "runtime__total": "0:11.82"
+    },
+    "design": {
+      "design__die__area": 96.4521,
+      "design__core__area": 71.2836,
+      "design__instance__area": 56.8214,
+      "design__instance__count": 294,
+      "design__instance__utilization": 0.986421
+    },
+    "timing": {
+      "timing__setup__ws": -45.6128,
+      "timing__setup__tns": -375.8124,
+      "timing__hold__ws": 47.6231,
+      "timing__hold__tns": 0,
+      "timing__fmax": 3512456789.5625
+    },
+    "power": {
+      "power__total": 0.000718,
+      "power__internal__total": 0.000631245,
+      "power__switching__total": 0.000214582,
+      "power__leakage__total": 3.12548e-8
+    }
+  },
+  "globalplace": {
+    "design": {
+      "design__die__area": 55.1284,
+      "design__core__area": 42.6381,
+      "design__instance__area": 54.1287,
+      "design__instance__count": 451,
+      "design__instance__utilization": 1.126842
+    },
+    "timing": {
+      "timing__setup__ws": -39.8152,
+      "timing__setup__tns": -98.4521,
+      "timing__hold__ws": 54.8321,
+      "timing__hold__tns": 0,
+      "timing__fmax": 3098765432.125
+    },
+    "power": {
+      "power__total": 0.000786,
+      "power__internal__total": 0.000982415,
+      "power__switching__total": 0.000418632,
+      "power__leakage__total": 2.18452e-8
+    }
+  },
+  "placeopt": {
+    "design": {
+      "design__die__area": 123.8452,
+      "design__core__area": 49.7251,
+      "design__instance__area": 40.1258,
+      "design__instance__count": 405,
+      "design__instance__utilization": 0.461283
+    },
+    "timing": {
+      "timing__setup__ws": -41.7284,
+      "timing__setup__tns": -112.6832,
+      "timing__hold__ws": 50.1842,
+      "timing__hold__tns": 0,
+      "timing__fmax": 3598765432.5625
+    },
+    "power": {
+      "power__total": 0.001392,
+      "power__internal__total": 0.000641285,
+      "power__switching__total": 0.000542816,
+      "power__leakage__total": 1.84251e-8
+    }
+  },
+  "cts": {
+    "design": {
+      "design__die__area": 84.1256,
+      "design__core__area": 80.2184,
+      "design__instance__area": 64.1285,
+      "design__instance__count": 574,
+      "design__instance__utilization": 0.752183
+    },
+    "timing": {
+      "timing__setup__ws": -48.1254,
+      "timing__setup__tns": -158.2741,
+      "timing__hold__ws": 29.1845,
+      "timing__hold__tns": 0,
+      "timing__fmax": 2056789123.625
+    },
+    "clock": {
+      "clock__skew__setup": 3.4281,
+      "clock__skew__hold": 7.2154
+    },
+    "power": {
+      "power__total": 0.001918,
+      "power__internal__total": 0.001002415,
+      "power__switching__total": 0.000448215,
+      "power__leakage__total": 3.21845e-8
+    }
+  },
+  "globalroute": {
+    "design": {
+      "design__die__area": 65.1284,
+      "design__core__area": 55.1826,
+      "design__instance__area": 48.1258,
+      "design__instance__count": 236,
+      "design__instance__utilization": 1.072418
+    },
+    "timing": {
+      "timing__setup__ws": -47.1825,
+      "timing__setup__tns": -185.4216,
+      "timing__hold__ws": 38.2154,
+      "timing__hold__tns": 0,
+      "timing__fmax": 4512876543.125
+    },
+    "clock": {
+      "clock__skew__setup": 3.7152,
+      "clock__skew__hold": 5.6218
+    },
+    "power": {
+      "power__total": 0.002128,
+      "power__internal__total": 0.001184215,
+      "power__switching__total": 0.000792418,
+      "power__leakage__total": 3.81245e-8
+    }
+  },
+  "detailedplace": {
+    "design": {
+      "design__die__area": 66.1824,
+      "design__core__area": 69.1258,
+      "design__instance__area": 63.1254,
+      "design__instance__count": 638,
+      "design__instance__utilization": 0.548216
+    },
+    "timing": {
+      "timing__setup__ws": -20.1845,
+      "timing__setup__tns": -123.1842,
+      "timing__hold__ws": 39.1254,
+      "timing__hold__tns": 0,
+      "timing__fmax": 4056789123.625
+    },
+    "power": {
+      "power__total": 0.001068,
+      "power__internal__total": 0.000641852,
+      "power__switching__total": 0.000412584,
+      "power__leakage__total": 4.12584e-8
+    }
+  },
+  "finish": {
+    "design": {
+      "design__die__area": 54.1825,
+      "design__core__area": 94.1284,
+      "design__instance__area": 69.1258,
+      "design__instance__count": 758,
+      "design__instance__utilization": 0.542183
+    },
+    "timing": {
+      "timing__setup__ws": -28.1842,
+      "timing__setup__tns": -126.2154,
+      "timing__hold__ws": 60.1254,
+      "timing__hold__tns": 1,
+      "timing__fmax": 2512876543.125
+    },
+    "clock": {
+      "clock__skew__setup": 2.7154,
+      "clock__skew__hold": 6.1258
+    },
+    "power": {
+      "power__total": 0.000952,
+      "power__internal__total": 0.000842158,
+      "power__switching__total": 0.000581245,
+      "power__leakage__total": 2.48215e-8
+    }
+  },
+  "units": {
+    "flow__design": "",
+    "flow__platform": "",
+    "flow__generate_date": "",
+    "flow__openroad_version": "",
+    "flow__variant": "",
+    "clocks__count": "",
+    "clocks__details": "",
+    "runtime__total": "h:m:s",
+    "design__die__area": "um^2",
+    "design__core__area": "um^2",
+    "design__instance__area": "um^2",
+    "design__instance__count": "",
+    "timing__setup__ws": "ps",
+    "timing__setup__tns": "ps",
+    "timing__hold__ws": "ps",
+    "timing__hold__tns": "ps",
+    "timing__fmax": "Hz",
+    "power__total": "W",
+    "power__internal__total": "W",
+    "power__switching__total": "W",
+    "power__leakage__total": "W",
+    "design__instance__utilization": "ratio",
+    "clock__skew__setup": "ps",
+    "clock__skew__hold": "ps"
+  },
+  "metadata": {
+    "is_pr": false,
+    "current_commit": "xcsdggs",
+    "source_branch": "main",
+    "source_repository": "asfafsf"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dashboard configuration",
+  "description": "Companion to the metrics files. Cross-checks (unknown/missing names) are done by validate_metrics.py and serialize_json.py. Paths are node names joined with '/'.",
+  "$defs": {
+    "path": {
+      "type": "string",
+      "pattern": "^[^/]+(/[^/]+)+$"
+    }
+  },
+  "type": "object",
+  "properties": {
+    "labels": {
+      "description": "Flat map of node name (category or metric) -> label (string).",
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "units": {
+      "description": "Flat map of metric name -> target unit (string). Those units are a source of truth for any incoming metric sets. If diverged, the units get converted to the ones described by the config file.",
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "date": {
+      "description": "Path of the metric holding the run date (X axis of the trend plots).",
+      "$ref": "#/$defs/path"
+    },
+    "commit": {
+      "description": "Path of the metric identifying the run's commit/version, presented as is.",
+      "$ref": "#/$defs/path"
+    },
+    "summary": {
+      "description": "Paths of the metrics to be presented in the run summaries.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/path" }
+    },
+    "unplottable": {
+      "description": "Categories or metrics excluded from plotting: a bare name matches the node anywhere in the hierarchy, a path matches that node (and everything below it).",
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[^/]+(/[^/]+)*$" }
+    }
+  },
+  "required": ["labels", "units", "date", "commit"],
+  "additionalProperties": false
+}

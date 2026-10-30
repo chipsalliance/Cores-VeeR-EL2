@@ -28,3 +28,26 @@ tools/renode/.venv
 docs/build
 bazel-*
 MODULE.bazel.lock
+# Metrics dashboard
+tools/metrics_dashboard/metrics_dashboard/node_modules
+# Output
+tools/metrics_dashboard/metrics_dashboard/.output
+tools/metrics_dashboard/metrics_dashboard/.vercel
+tools/metrics_dashboard/metrics_dashboard/.netlify
+tools/metrics_dashboard/metrics_dashboard/.wrangler
+tools/metrics_dashboard/metrics_dashboard/build
+# OS
+tools/metrics_dashboard/metrics_dashboard/.DS_Store
+tools/metrics_dashboard/metrics_dashboard/Thumbs.db
+# Env
+tools/metrics_dashboard/metrics_dashboard/.env
+tools/metrics_dashboard/metrics_dashboard/.env.*
+tools/metrics_dashboard/metrics_dashboard/!.env.example
+tools/metrics_dashboard/metrics_dashboard/!.env.test
+# Vite
+tools/metrics_dashboard/metrics_dashboard/vite.config.js.timestamp-*
+tools/metrics_dashboard/metrics_dashboard/vite.config.ts.timestamp-*
+# Generated
+tools/metrics_dashboard/metrics_dashboard/src/lib/data/
+# Metrics dashboard has json data & configuration files 
+!tools/metrics_dashboard/**/*.json

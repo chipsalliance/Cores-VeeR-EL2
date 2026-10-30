@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="text-scale" content="scale" />
+        <link rel="icon" href="data:," />
+        <title>RTL to GDSII metrics</title>
+        <script>
+            // Applies the theme before first paint; keep in sync with src/app.svelte
+            (() => {
+                let saved = null;
+                try {
+                    saved = localStorage.getItem('aesir-html-theme');
+                } catch {
+                    // Storage may be unavailable (e.g. incognito mode)
+                }
+                const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.classList.toggle('dark', dark);
+                document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+            })();
+        </script>
+        <style>
+            html {
+                background: var(--ds-background, oklch(1 0 0));
+            }
+
+            html.dark {
+                background: var(--ds-background, oklch(0 0 0));
+            }
+
+            #page-loader {
+                position: fixed;
+                inset: 0;
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: var(--ds-background);
+                color: var(--ds-foreground-muted);
+            }
+
+            #page-loader aesir-loader {
+                scale: 3;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="page-loader"><aesir-loader label="Loading page"></aesir-loader></div>
+        <div id="app"></div>
+        <script type="module" src="/src/main.ts"></script>
+    </body>
+</html>

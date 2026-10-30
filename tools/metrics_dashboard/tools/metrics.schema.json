@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Metrics file",
+  "description": "Top-level keys other than 'units' are categories (objects). Nested objects are categories, any non-object value is a leaf metric. Cross-checks (unknown/missing keys) are done by validate_metrics.py.",
+  "type": "object",
+  "properties": {
+    "units": {
+      "description": "Flat map of metric name -> unit (string).",
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "metadata": {
+      "description": "Metadata properties required for the overview",
+      "type": "object",
+      "properties": {
+        "is_pr": {
+          "type": "boolean"
+        },
+        "pr_number": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "required": ["units", "metadata"],
+  "oneOf": [
+    {
+      "properties": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "is_pr": {
+              "const": true
+            },
+            "pr_number": {
+              "type": "number"
+            },
+            "pr_title": {
+              "type": "string"
+            },
+            "merge_base": {
+              "type": "string"
+            },
+            "current_commit": {
+              "type": "string"
+            },
+            "target_branch": {
+              "type": "string"
+            },
+            "source_branch": {
+              "type": "string"
+            },
+            "target_commit": {
+              "type": "string"
+            },
+            "source_repository": {
+              "type": "string"
+            },
+            "target_repository": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "is_pr",
+            "pr_number",
+            "pr_title",
+            "merge_base",
+            "current_commit",
+            "target_branch",
+            "source_branch",
+            "target_commit",
+            "source_repository",
+            "target_repository"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "is_pr": {
+              "const": false
+            },
+            "current_commit": {
+              "type": "string"
+            },
+            "source_branch": {
+              "type": "string"
+            },
+            "source_repository": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "is_pr",
+            "current_commit",
+            "source_branch",
+            "source_repository"
+          ]
+        }
+      }
+    }
+  ],
+  "additionalProperties": { "type": "object" }
+}

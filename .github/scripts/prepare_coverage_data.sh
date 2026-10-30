@@ -9,13 +9,50 @@ then
 
   apt update
   apt install -y xz-utils
+fi
 
+DB_COUNT=`ls info_files_$SIM | sed 's#_[^_]*.info##' | sort | uniq | wc -l`
+
+# When SIM=v, automatically convert the merged VCS urg functional coverage report
+# (`report_merged.tar.gz` -> `merged_reports/grpinfo.txt`) from the GCS run bucket into
+# `info_files_v/coverage_vcs_merged_fcov.info` if no `*_fcov.info` files are present yet.
+if [ "$SIM" = "v" ]
+then
+    shopt -s nullglob
+    _vcs_fcov_files=(info_files_v/*_fcov.info)
+    shopt -u nullglob
+    if [ ${#_vcs_fcov_files[@]} -eq 0 ]
+    then
+        _vcs_tmp_dir="$(mktemp -d /tmp/vcs_fcov_XXXXXX)"
+        if command -v gsutil >/dev/null 2>&1 && [ -n "${GITHUB_RUN_ID:-}" ]
+        then
+            if gsutil -q stat "gs://veer-el2-gha-coverage/run_${GITHUB_RUN_ID}/report_merged.tar.gz"
+            then
+                gsutil cp "gs://veer-el2-gha-coverage/run_${GITHUB_RUN_ID}/report_merged.tar.gz" "${_vcs_tmp_dir}/report_merged.tar.gz" || true
+                if [ -s "${_vcs_tmp_dir}/report_merged.tar.gz" ]
+                then
+                    tar xzf "${_vcs_tmp_dir}/report_merged.tar.gz" -C "${_vcs_tmp_dir}" merged_reports/grpinfo.txt || true
+                fi
+            fi
+        fi
+        if [ -s "${_vcs_tmp_dir}/merged_reports/grpinfo.txt" ]
+        then
+            python3 .github/scripts/convert_vcs_fcov_to_lcov.py \
+                --grpinfo "${_vcs_tmp_dir}/merged_reports/grpinfo.txt" \
+                --repo-root "$PWD" \
+                --test-name "vcs_merged" \
+                --output "info_files_v/coverage_vcs_merged_fcov.info"
+        fi
+        rm -rf "${_vcs_tmp_dir}"
+    fi
+fi
+
+if [ -v CI ]
+then
   # XZ compresses .info files A LOT better than GZIP, e.g., 9.4MB vs 175MB.
   tar acf ${SIM}_coverage_single_data.tar.xz info_files_$SIM
   ls info_files_$SIM
 fi
-
-DB_COUNT=`ls info_files_$SIM | sed 's#_[^_]*.info##' | sort | uniq | wc -l`
 
 # Filter out lockstep and el2_regfile_if modules if DCLS tests are not enabled
 if [ -v DCLS_ENABLE ]
@@ -26,9 +63,15 @@ else
 fi
 
 # Source path transformations are needed before merging to have matching paths in `.desc` files.
-find info_files_$SIM -name '*.info' -exec info-process transform \
-    --strip-file-prefix '.*Cores-VeeR-EL2/' \
-    --filter '(design/|testbench/coverage/)' $_filter_out \
+# Code coverage (line, branch, cond, toggle) is restricted to `design/`, while functional
+# coverage (`*_fcov.info`) is restricted to `testbench/coverage/`.
+find info_files_$SIM -name '*.info' ! -name '*_fcov.info' -exec info-process transform \
+    --strip-file-prefix '.*Cores-VeeR-EL2[^/]*/' \
+    --filter 'design/' $_filter_out \
+    {} \;
+find info_files_$SIM -name '*_fcov.info' -exec info-process transform \
+    --strip-file-prefix '.*Cores-VeeR-EL2[^/]*/' \
+    --filter 'testbench/coverage/' $_filter_out \
     {} \;
 
 if [ $SIM = verilator ]
@@ -51,6 +94,10 @@ do
     then
         _sort_opt=--sort-brda-names
         _transform_extra_opts='--set-block-ids --add-two-way-toggles --add-missing-brda-entries'
+    elif [ "$TYPE" = "fcov" ]
+    then
+        _sort_opt=--sort-brda-names
+        _transform_extra_opts='--set-block-ids'
     fi
 
     # The nullglob check ensures the loop does not fail when SIM=v if custom VCS .info artifacts do not have *_fcov.info files
@@ -87,6 +134,7 @@ cat <<END >config.json
   "branch": "$BRANCH",
   "repo": "cores-veer-el2",
   "timestamp": "`date +"%Y-%m-%dT%H:%M:%S.%3N%z"`",
+  "table_coverage": "fcov",
   "additional": {
     "db_count": "$DB_COUNT",
     "run_id": "$GITHUB_RUN_ID"

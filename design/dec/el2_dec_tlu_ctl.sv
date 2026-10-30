@@ -514,11 +514,10 @@ import el2_pkg::*;
 
    assign clk_override = dec_tlu_dec_clk_override;
 
-   // Async inputs to the core have to be sync'd to the core clock.
-   rvsyncss #(7) syncro_ff(.*,
-                           .clk(free_clk),
-                           .din ({nmi_int,      timer_int,      soft_int,      i_cpu_halt_req,      i_cpu_run_req,      mpc_debug_halt_req,          mpc_debug_run_req}),
-                           .dout({nmi_int_sync, timer_int_sync, soft_int_sync, i_cpu_halt_req_sync, i_cpu_run_req_sync, mpc_debug_halt_req_sync_raw, mpc_debug_run_req_sync}));
+   // Async inputs are synchronized in el2_veer_wrapper, before the lockstep
+   // main/shadow split, so they arrive here already sync'd to the core clock.
+   assign {nmi_int_sync, timer_int_sync, soft_int_sync, i_cpu_halt_req_sync, i_cpu_run_req_sync, mpc_debug_halt_req_sync_raw, mpc_debug_run_req_sync} =
+          {nmi_int,      timer_int,      soft_int,      i_cpu_halt_req,      i_cpu_run_req,      mpc_debug_halt_req,          mpc_debug_run_req};
 
    // for CSRs that have inpipe writes only
 

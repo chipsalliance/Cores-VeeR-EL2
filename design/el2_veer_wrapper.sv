@@ -890,12 +890,53 @@ import el2_pkg::*;
    el2_regfile_if regfile ();
 `endif
 
+   // Async inputs to the core are synchronized once here, before the
+   // main/shadow split, so both lockstep cores consume the same synchronized
+   // input history (the shadow core via the lockstep delay line).
+   logic nmi_int_sync, timer_int_sync, soft_int_sync;
+   logic i_cpu_halt_req_sync, i_cpu_run_req_sync;
+   logic mpc_debug_halt_req_sync, mpc_debug_run_req_sync;
+
+   rvsyncss #(7) syncro_ff (
+      .clk  (clk),
+      .rst_l(core_rst_l),
+      .din ({nmi_int,      timer_int,      soft_int,      i_cpu_halt_req,      i_cpu_run_req,      mpc_debug_halt_req,      mpc_debug_run_req}),
+      .dout({nmi_int_sync, timer_int_sync, soft_int_sync, i_cpu_halt_req_sync, i_cpu_run_req_sync, mpc_debug_halt_req_sync, mpc_debug_run_req_sync})
+   );
+
+   logic [pt.PIC_TOTAL_INT:1] extintsrc_req_sync;
+
+   rvsyncss #(pt.PIC_TOTAL_INT) extint_syncro_ff (
+      .clk  (clk),
+      .rst_l(core_rst_l),
+      .din  (extintsrc_req),
+      .dout (extintsrc_req_sync)
+   );
+
+   // Core reset as seen by the debug module (connected to both cores via .*)
+   logic rst_l_sync;
+
+   rvsyncss #(1) rstl_syncff (
+      .clk  (clk),
+      .rst_l(dbg_rst_l),
+      .din  (rst_l),
+      .dout (rst_l_sync)
+   );
+
    // Instantiate the el2_veer core
    el2_veer #(.pt(pt)) veer (
                                 .clk(clk),
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
                                 .regfile(regfile.veer_rf_src),
 `endif
+                                .nmi_int           (nmi_int_sync),
+                                .timer_int         (timer_int_sync),
+                                .soft_int          (soft_int_sync),
+                                .i_cpu_halt_req    (i_cpu_halt_req_sync),
+                                .i_cpu_run_req     (i_cpu_run_req_sync),
+                                .mpc_debug_halt_req(mpc_debug_halt_req_sync),
+                                .mpc_debug_run_req (mpc_debug_run_req_sync),
+                                .extintsrc_req     (extintsrc_req_sync),
                                 .*
                                 );
 
@@ -905,6 +946,14 @@ import el2_pkg::*;
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
                                 .main_core_regfile(regfile.veer_rf_sink),
 `endif // `ifdef RV_LOCKSTEP_REGFILE_ENABLE
+                                .nmi_int           (nmi_int_sync),
+                                .timer_int         (timer_int_sync),
+                                .soft_int          (soft_int_sync),
+                                .i_cpu_halt_req    (i_cpu_halt_req_sync),
+                                .i_cpu_run_req     (i_cpu_run_req_sync),
+                                .mpc_debug_halt_req(mpc_debug_halt_req_sync),
+                                .mpc_debug_run_req (mpc_debug_run_req_sync),
+                                .extintsrc_req     (extintsrc_req_sync),
                                 .*
                                 );
 `endif // `ifdef RV_LOCKSTEP_ENABLE

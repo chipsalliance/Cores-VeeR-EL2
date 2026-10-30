@@ -166,10 +166,10 @@ package tb_top_pkg;
               end
   `ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
               if (`TMR_RECOVERY_FSM.recovery_state_en && `TMR_RECOVERY_FSM.recovery_state != '0) begin
-                  if (`TMR_RECOVERY_FSM.recovery_nxstate == HALT_CORES) begin
+                  if (`TMR_RECOVERY_FSM.recovery_nxstate == el2_tmr_pkg::HALT_CORES) begin
                       $fwrite(el, "%10d : TMR recovery procedure began\n", cycle_count);
                   end
-                  if (`TMR_RECOVERY_FSM.recovery_nxstate == IDLE) begin
+                  if (`TMR_RECOVERY_FSM.recovery_nxstate == el2_tmr_pkg::IDLE) begin
                       $fwrite(el, "%10d : TMR recovery procedure finished\n", cycle_count);
                   end
               end

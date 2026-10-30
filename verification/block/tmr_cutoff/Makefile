@@ -22,6 +22,7 @@ VERILOG_SOURCES  = \
 	$(SRCDIR)/lib/el2_secded_13_8_enc.sv \
 	$(SRCDIR)/lib/el2_secded_13_8_dec.sv \
 	$(SRCDIR)/lib/el2_ecc_counter_8.sv \
+    $(SRCDIR)/tmr/el2_tmr_pkg.sv \
 	$(SRCDIR)/tmr/el2_tmr_voter.sv \
 	$(SRCDIR)/tmr/el2_tmr_axi_rdy.sv \
 	$(SRCDIR)/tmr/el2_tmr_axi_m_ch_ax.sv \

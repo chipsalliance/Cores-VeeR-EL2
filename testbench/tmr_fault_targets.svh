@@ -1,3 +1,10 @@
+
+`define FAULT_TARGET(ID, SIG_PATH)                                  \
+ID: begin                                                           \
+  rand_bit = $urandom_range($bits(SIG_PATH)-1, 0);                  \
+  SIG_PATH = SIG_PATH ^ ($bits(SIG_PATH))'(1) << rand_bit;          \
+  $display("[%0t] TMR SEU %s[%0d]", $time, `"SIG_PATH`", rand_bit); \
+end
 `FAULT_TARGET(  0, `TMR.el2_tmr_exec_ctrl_u.fault[0].storage.storage[0].dff.dff.dout)
 `FAULT_TARGET(  1, `TMR.el2_tmr_exec_ctrl_u.fault[0].storage.storage[1].dff.dff.dout)
 `FAULT_TARGET(  2, `TMR.el2_tmr_exec_ctrl_u.fault[0].storage.storage[2].dff.dff.dout)
@@ -256,9 +263,10 @@
 `FAULT_TARGET(253, `TMR.fault[0].dff.dff.dout)
 `FAULT_TARGET(254, `TMR.fault[1].dff.dff.dout)
 `FAULT_TARGET(255, `TMR.fault[2].dff.dff.dout)
+// Unrecoverable faults under certain conditions
 `FAULT_TARGET(256, `TMR.el2_tmr_axi_u.u_dma_counter.dff_wfirst.dout)
 `FAULT_TARGET(257, `TMR.el2_tmr_recovery_fsm_u.sync_rst_l_ff.genblock.dffs.dout)
 `FAULT_TARGET(258, `TMR.el2_tmr_axi_u.u_dma_counter.u_aw_count.dff_ecc_fatal.dout)
 `FAULT_TARGET(259, `TMR.el2_tmr_axi_u.u_dma_counter.u_w_count.dff_ecc_fatal.dout)
 `FAULT_TARGET(260, `TMR.el2_tmr_axi_u.u_dma_counter.u_ar_count.dff_ecc_fatal.dout)
-// Unrecoverable faults under certain conditions
+`undef FAULT_TARGET

@@ -5,47 +5,30 @@
 //
 `ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
 
-typedef enum logic [8:0] {
-  IDLE                          = 9'b110000110,
-  HALT_CORES                    = 9'b001100011,
-  READ_REG                      = 9'b011001111,
-  SET_FLAG_RD                   = 9'b100111111,
-  RESET_CPU                     = 9'b010101100,
-  SET_FLAG_CC                   = 9'b101010001,
-  WRITE_REG                     = 9'b001010110,
-  SET_FLAG_SR                   = 9'b010010011,
-  RESTART_CPU                   = 9'b100100000,
-  SET_FLAG_CR                   = 9'b011110101,
-  CLEAR_FLAG_ERR                = 9'b000001010,
-  CLEAR_FLAG_RD                 = 9'b001111000,
-  CLEAR_FLAG_CC                 = 9'b111110010,
-  CLEAR_FLAG_SR                 = 9'b101001100,
-  CLEAR_FLAG_CR                 = 9'b000000101
-} recovery_state_t;
-
 module el2_tmr_recovery_fsm
   import el2_mubi_pkg::*;
+  import el2_tmr_pkg::*;
 (
     input  logic clk,
     input  logic rst_l,
-    input  el2_mubi_pkg::el2_mubi_t external_flag,
-    output el2_mubi_pkg::el2_mubi_t clear_external_flag,
+    input  el2_mubi_t   external_flag,
+    output el2_mubi_t   clear_external_flag,
 
-    input  el2_mubi_pkg::el2_mubi_t faulty_core[3],
+    input  el2_mubi_t   faulty_core[3],
 
-    output el2_mubi_pkg::el2_mubi_t recovery_gpr_en_veer[3],
-    output logic                    recovery_gpr_wen_veer[3],
-    output logic [ 4:0]             recovery_gpr_wraddr_veer[3],
-    output logic [31:0]             recovery_gpr_wrdata_veer[3],
-    output logic [ 4:0]             recovery_gpr_rdaddr_veer[3],
-    input  logic [31:0]             recovery_gpr_rddata_veer[3],
+    output el2_mubi_t   recovery_gpr_en_veer[3],
+    output logic        recovery_gpr_wen_veer[3],
+    output logic [ 4:0] recovery_gpr_wraddr_veer[3],
+    output logic [31:0] recovery_gpr_wrdata_veer[3],
+    output logic [ 4:0] recovery_gpr_rdaddr_veer[3],
+    input  logic [31:0] recovery_gpr_rddata_veer[3],
 
-    output el2_mubi_pkg::el2_mubi_t recovery_csr_en_veer[3],
-    output logic                    recovery_csr_wen_veer[3],
-    output logic [11:0]             recovery_csr_wraddr_veer[3],
-    output logic [31:0]             recovery_csr_wrdata_veer[3],
-    output logic [11:0]             recovery_csr_rdaddr_veer[3],
-    input  logic [31:0]             recovery_csr_rddata_veer[3],
+    output el2_mubi_t   recovery_csr_en_veer[3],
+    output logic        recovery_csr_wen_veer[3],
+    output logic [11:0] recovery_csr_wraddr_veer[3],
+    output logic [31:0] recovery_csr_wrdata_veer[3],
+    output logic [11:0] recovery_csr_rdaddr_veer[3],
+    input  logic [31:0] recovery_csr_rddata_veer[3],
 
     // VeeR reset control
     output logic      sync_rst_l,
@@ -71,8 +54,8 @@ module el2_tmr_recovery_fsm
     input  logic ext_mpc_reset_run_req_veer[3],
 
     // Status flags
-    output el2_mubi_pkg::el2_mubi_t pending,
-    output el2_mubi_pkg::el2_mubi_t fatal_err,
+    output el2_mubi_t pending,
+    output el2_mubi_t fatal_err,
 
     input  logic scan_mode
 );
@@ -585,10 +568,10 @@ module el2_tmr_csr_addr_decode
 `endif
 endmodule
 
-function automatic recovery_state_t el2_mubi_mux_recovery_state_true (
-    el2_mubi_pkg::el2_mubi_t sel, recovery_state_t match, recovery_state_t mismatch
+function automatic el2_tmr_pkg::recovery_state_t el2_mubi_mux_recovery_state_true (
+    el2_mubi_pkg::el2_mubi_t sel, el2_tmr_pkg::recovery_state_t match, el2_tmr_pkg::recovery_state_t mismatch
   );
-  recovery_state_t steps [el2_mubi_pkg::El2MuBiWidth];
+  el2_tmr_pkg::recovery_state_t steps [el2_mubi_pkg::El2MuBiWidth];
   steps[0] = el2_mubi_pkg::El2MuBiTrue[0] == sel[0] ? match : mismatch;
   for (int i=1; i < el2_mubi_pkg::El2MuBiWidth; ++i) begin
     steps[i] = el2_mubi_pkg::El2MuBiTrue[i] == sel[i] ? steps[i-1] : mismatch;
@@ -596,10 +579,10 @@ function automatic recovery_state_t el2_mubi_mux_recovery_state_true (
   return steps[el2_mubi_pkg::El2MuBiWidth-1];
 endfunction : el2_mubi_mux_recovery_state_true
 
-function automatic recovery_state_t el2_mubi_mux_recovery_state_false (
-    el2_mubi_pkg::el2_mubi_t sel, recovery_state_t match, recovery_state_t mismatch
+function automatic el2_tmr_pkg::recovery_state_t el2_mubi_mux_recovery_state_false (
+    el2_mubi_pkg::el2_mubi_t sel, el2_tmr_pkg::recovery_state_t match, el2_tmr_pkg::recovery_state_t mismatch
   );
-  recovery_state_t steps [el2_mubi_pkg::El2MuBiWidth];
+  el2_tmr_pkg::recovery_state_t steps [el2_mubi_pkg::El2MuBiWidth];
   steps[0] = el2_mubi_pkg::El2MuBiFalse[0] == sel[0] ? match : mismatch;
   for (int i=1; i < el2_mubi_pkg::El2MuBiWidth; ++i) begin
     steps[i] = el2_mubi_pkg::El2MuBiFalse[i] == sel[i] ? steps[i-1] : mismatch;

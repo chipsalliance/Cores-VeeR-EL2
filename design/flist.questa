@@ -18,6 +18,7 @@ $RV_ROOT/design/include/el2_def.sv
 -y $SYNOPSYS_SYN_ROOT/dw/sim_ver
 $RV_ROOT/design/lib/el2_assert.sv
 $RV_ROOT/design/el2_mubi_pkg.sv
+$RV_ROOT/design/tmr/el2_tmr_pkg.sv
 $RV_ROOT/design/el2_lockstep_pkg.sv
 $RV_ROOT/design/lib/el2_secded_13_8_enc.sv
 $RV_ROOT/design/lib/el2_secded_13_8_dec.sv

@@ -4,6 +4,7 @@ module tb_top_tmr #(
 
 import tb_top_pkg::*;
 import el2_mubi_pkg::*;
+import el2_tmr_pkg::*;
 
 // ============================================================================
 
@@ -2628,7 +2629,7 @@ task veer_upsetter();
     do @(posedge core_clk); while (mubi_check_true(tmr_recovery_pending));
 
     which_reg = 1 + $urandom() % 31;
-    $display("[%0t] Upset! core:%0d, gpr:x%0d", $time, which_cpu, which_reg);
+    $display("[%0t] VeeR SEU! core:%0d, gpr:x%0d", $time, which_cpu, which_reg);
     if (which_cpu == 0) begin
       if (which_reg ==  1) `VEER0.dec.arf.gpr[ 1].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
       if (which_reg ==  2) `VEER0.dec.arf.gpr[ 2].gprff.genblock.genblock.dff.dout = 'hDEADBEEF;
@@ -2734,28 +2735,81 @@ task veer_upsetter();
   end
 endtask
 
-task tmr_upsetter(int fault_id);
-  // Wait until we enter recovery
-  @(posedge tmr_recovery_pending);
-  @(negedge core_clk);
-  inject_fault(fault_id);
+int tmr_fsm_state [logic [8:0]] = '{
+   0: el2_tmr_pkg::IDLE,
+   1: el2_tmr_pkg::HALT_CORES,
+   2: el2_tmr_pkg::READ_REG,
+   3: el2_tmr_pkg::SET_FLAG_RD,
+   4: el2_tmr_pkg::RESET_CPU,
+   5: el2_tmr_pkg::SET_FLAG_CC,
+   6: el2_tmr_pkg::WRITE_REG,
+   7: el2_tmr_pkg::SET_FLAG_SR,
+   8: el2_tmr_pkg::RESTART_CPU,
+   9: el2_tmr_pkg::SET_FLAG_CR,
+  10: el2_tmr_pkg::CLEAR_FLAG_ERR,
+  11: el2_tmr_pkg::CLEAR_FLAG_RD,
+  12: el2_tmr_pkg::CLEAR_FLAG_CC,
+  13: el2_tmr_pkg::CLEAR_FLAG_SR,
+  14: el2_tmr_pkg::CLEAR_FLAG_CR
+};
+
+task tmr_upsetter(int fault_id, int fsm_state);
+  @(posedge rst_l);
+
+  if (!(fsm_state inside {-1, ['d0:'d14]})) begin
+    $fatal("fsm_state is out of legal range [-1, 0:14], got: %0d", fsm_state);
+  end
+
+  // Some signal faults must be injected in certain states to make injection reasonable
+  if (fsm_state == -1) begin
+    case (fault_id) inside
+      ['d82:'d238]: begin  // {csr|gpr}_recovery_storage_ff
+        inject_fault(fault_id, el2_tmr_pkg::READ_REG);
+        inject_fault(fault_id, el2_tmr_pkg::WRITE_REG);
+      end
+      'd239: begin  // pc_recovery_storage_ff
+        fsm_state = $urandom_range(3, 14); // state after READ_REG
+        inject_fault(fault_id, tmr_fsm_state[fsm_state]);
+      end
+      'd252: begin  // fsm_state_ff
+        inject_fault(fault_id, el2_tmr_pkg::IDLE);
+        inject_fault(fault_id, el2_tmr_pkg::HALT_CORES);
+        inject_fault(fault_id, el2_tmr_pkg::READ_REG);
+        inject_fault(fault_id, el2_tmr_pkg::SET_FLAG_RD);
+        inject_fault(fault_id, el2_tmr_pkg::RESET_CPU);
+        inject_fault(fault_id, el2_tmr_pkg::SET_FLAG_CC);
+        inject_fault(fault_id, el2_tmr_pkg::WRITE_REG);
+        inject_fault(fault_id, el2_tmr_pkg::SET_FLAG_SR);
+        inject_fault(fault_id, el2_tmr_pkg::RESTART_CPU);
+        inject_fault(fault_id, el2_tmr_pkg::SET_FLAG_CR);
+        inject_fault(fault_id, el2_tmr_pkg::CLEAR_FLAG_ERR);
+        inject_fault(fault_id, el2_tmr_pkg::CLEAR_FLAG_RD);
+        inject_fault(fault_id, el2_tmr_pkg::CLEAR_FLAG_CC);
+        inject_fault(fault_id, el2_tmr_pkg::CLEAR_FLAG_SR);
+        inject_fault(fault_id, el2_tmr_pkg::CLEAR_FLAG_CR);
+      end
+      'd257: begin // sync_rst_l_ff - recoverable
+        inject_fault(fault_id, el2_tmr_pkg::RESET_CPU);
+      end
+      default: begin
+        $display("No custom injection behavior, randomizing FSM state.");
+        inject_fault(fault_id, tmr_fsm_state[$urandom_range(0, 14)]);
+      end
+    endcase
+  end else inject_fault(fault_id, tmr_fsm_state[fsm_state]);
 endtask
 
-task inject_fault(int fault_id);
+task inject_fault(int fault_id, logic [8:0] fsm_state);
   int rand_bit;
-  case (fault_id)
-    `define FAULT_TARGET(ID, SIG_PATH)                                                        \
-      ID: begin                                                                               \
-        rand_bit = $urandom_range($bits(SIG_PATH)-1, 0);                                      \
-        SIG_PATH = SIG_PATH ^ ($bits(SIG_PATH))'(1) << rand_bit;  /* flatten-safe flip */     \
-        $display("[%0t] Fault injected ID: %0d: %s[%0d]", $time, ID, `"SIG_PATH`", rand_bit); \
-      end
-    `include "tmr_fault_targets.svh"
-    `undef FAULT_TARGET
-    default: $fatal(1, "unknown fault id %0d", fault_id);
-  endcase
 
-  $display("[%0t] Fault injected, ID: %0d, bit: %0d", $time, fault_id, rand_bit);
+  while (`TMR.el2_tmr_recovery_fsm_u.recovery_state != fsm_state) begin
+    @(negedge core_clk);
+  end
+
+  case (fault_id)
+    `include "tmr_fault_targets.svh"
+    default: $fatal(1, "Unknown fault id %0d", fault_id);
+  endcase
 endtask
 
 initial begin
@@ -2763,12 +2817,18 @@ initial begin
     fork
       veer_upsetter();
     join_none
-  end else if ($test$plusargs("tmr_upsets")) begin
-    int fault_id;
-    if ($value$plusargs("fault_id=%d", fault_id))
-    fork
-      tmr_upsetter(fault_id);
-    join_none
+  end
+
+  if ($test$plusargs("tmr_upsets")) begin
+    int fault_id, fault_fsm_state;
+    if ($value$plusargs("fault_id=%d", fault_id)) begin
+      if (!($value$plusargs("fault_fsm_state=%d", fault_fsm_state)))
+        fault_fsm_state = -1;
+
+      fork
+        tmr_upsetter(fault_id, fault_fsm_state);
+      join_none
+    end
   end
 end
 

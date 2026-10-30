@@ -20,6 +20,7 @@ EXTRA_CONFIG_ARGS += -set=mubi_width=2 -set=mubi_false=0x1 -set=mubi_true=0x2 -s
 TMR_ENABLE := 1
 
 VERILOG_SOURCES = \
+    $(SRCDIR)/tmr/el2_tmr_pkg.sv \
     $(SRCDIR)/tmr/el2_tmr_3way_fatal_check_mubi.sv \
     $(SRCDIR)/tmr/el2_tmr_recovery_fsm.sv
 

@@ -216,3 +216,13 @@ jobs:
     uses: ./.github/workflows/publish-webpage.yml
     with:
       run_custom: ${{ needs.Check-PR-Origin.outputs.is_internal == 'true' }}
+
+  Publish-Metrics-Dashboard-to-GH-Pages:
+    concurrency:
+      group: concurrency-group-${{ github.repository }}-publish
+      cancel-in-progress: false
+    permissions:
+      actions: write
+      contents: write
+    name: Publish-to-Metrics-Dashboard-to-GH-Pages
+    uses: ./.github/workflows/metrics-dashboard.yml

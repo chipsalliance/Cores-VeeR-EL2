@@ -2107,7 +2107,7 @@ veer_wrapper rvtop_wrapper (
     .dmi_uncore_wdata       (),
     .dmi_uncore_rdata       (),
     .dmi_active             (),
-    
+
     .tmr_fatal              (tmr_fatal),
     .tmr_recovery_pending   (tmr_recovery_pending),
     .tmr_recovery_fault     (tmr_recovery_fault),
@@ -2395,6 +2395,37 @@ always @(negedge core_clk) begin
       $write("%c", mailbox_data[7:0]);
     end
     console_lf <= (mailbox_data[7:0] == 8'h0A);
+  end
+end
+
+// Recovery setup
+always @(negedge core_clk) begin
+  if (mailbox_write && mailbox_data[7:0] == 8'hB0) begin
+    case (mailbox_data[9:8])
+      0: begin
+        release `TMR_COMPLEX.tmr_core_fault[0];
+        release `TMR_COMPLEX.tmr_core_fault[1];
+        release `TMR_COMPLEX.tmr_core_fault[2];
+      end
+      1: force `TMR_COMPLEX.tmr_core_fault[0] = el2_mubi_pkg::El2MuBiTrue;
+      2: force `TMR_COMPLEX.tmr_core_fault[1] = el2_mubi_pkg::El2MuBiTrue;
+      3: force `TMR_COMPLEX.tmr_core_fault[2] = el2_mubi_pkg::El2MuBiTrue;
+      default: begin end
+    endcase
+  end
+end
+
+always @(negedge core_clk) begin
+  if (mailbox_write && mailbox_data[7:0] == 8'hB1) begin
+    case (mailbox_data[8])
+      0: begin end
+      1: begin
+        force `TMR_COMPLEX.fsm_external_flag = el2_mubi_pkg::El2MuBiTrue;
+        wait (`TMR_COMPLEX.tmr_fault_clr == el2_mubi_pkg::El2MuBiTrue);
+        release `TMR_COMPLEX.fsm_external_flag;
+      end
+      default: begin end
+    endcase
   end
 end
 

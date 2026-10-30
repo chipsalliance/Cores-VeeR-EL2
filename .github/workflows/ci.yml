@@ -68,6 +68,24 @@ jobs:
       contents: read
       id-token: write
 
+  Metrics-Dashboard:
+    name: Metrics-Dashboard
+    needs: [Check-PR-Origin, Test-Bazel-Rules-HDL]
+    if: >-
+      always() && needs.Test-Bazel-Rules-HDL.result != 'skipped' &&
+      (github.ref == 'refs/heads/main' ||
+       (github.event_name == 'pull_request' && github.base_ref == 'main' &&
+        needs.Check-PR-Origin.outputs.is_internal == 'true'))
+    permissions:
+      contents: write
+      pull-requests: read
+    uses: ./.github/workflows/metrics-dashboard.yml
+    with:
+      pipeline_status: >-
+        ${{ needs.Test-Bazel-Rules-HDL.result == 'success' && 'passed'
+         || needs.Test-Bazel-Rules-HDL.result == 'cancelled' && 'canceled'
+         || 'failed' }}
+
   Run-VeeR-EL2-OpenROAD-Power-Estimation:
     name: Run-VeeR-EL2-OpenROAD-Power-Estimation
     if: github.event_name == 'schedule'

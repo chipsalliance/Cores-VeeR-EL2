@@ -89,7 +89,7 @@ module el2_tmr_recovery_fsm
   rvdffiee #($bits(recovery_state_t)) fsm_state_ff
     (.*, .din(recovery_nxstate), .dout({recovery_state}), .en(recovery_state_en));
 
-  assign pending = mubi_from_bool(recovery_state != IDLE && recovery_state != '0);
+  assign pending = mubi_and(mubi_from_bool(recovery_state != IDLE && recovery_state != '0), external_flag);
 
   // GPR and CSR counters
   logic [7:0] cnt_csr [3], cnt_nxtcsr [3];

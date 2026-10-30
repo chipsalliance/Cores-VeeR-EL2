@@ -46,24 +46,26 @@ verilog_library(
 
 synthesize_rtl(
     name = "veer_el2_synth_asap7_axi",
-    standard_cells = "@org_theopenroadproject_asap7sc7p5t_28//:asap7-sc7p5t_rev28_rvt",
+    standard_cells = "@org_theopenroadproject_asap7sc7p5t_28//:asap7-sc7p5t_rev28_rvt-ccs_tt",
     top_module = "el2_veer_wrapper",
     deps = [
         ":veer_el2_axi4_verilog_lib",
     ],
     synth_tcl = "synth.tcl",
-    target_clock_period_pico_seconds = 1000000, # 1 MHz
+    target_clock_period_pico_seconds = 4000, # 250 MHz
+    synth_additional_args = "-booth", # run booth pass to rebuild multipliers before mapping
 )
 
 synthesize_rtl(
     name = "veer_el2_synth_asap7_ahb_lite",
-    standard_cells = "@org_theopenroadproject_asap7sc7p5t_28//:asap7-sc7p5t_rev28_rvt",
+    standard_cells = "@org_theopenroadproject_asap7sc7p5t_28//:asap7-sc7p5t_rev28_rvt-ccs_tt",
     top_module = "el2_veer_wrapper",
     deps = [
         ":veer_el2_ahb_lite_verilog_lib",
     ],
     synth_tcl = "synth.tcl",
-    target_clock_period_pico_seconds = 1000000, # 1 MHz
+    target_clock_period_pico_seconds = 4000, # 250 MHz
+    synth_additional_args = "-booth", # run booth pass to rebuild multipliers before mapping
 )
 
 sdc_library(
@@ -73,7 +75,7 @@ sdc_library(
 
 place_and_route(
     name = "veer_el2_place_and_route_asap7_axi",
-    clock_period = "1000000", # in ps
+    clock_period = "4000", # in ps
     core_padding_microns = 20,
     die_height_microns = 400,
     die_width_microns = 400,
@@ -87,7 +89,7 @@ place_and_route(
 
 place_and_route(
     name = "veer_el2_place_and_route_asap7_ahb_lite",
-    clock_period = "1000000", # in ps
+    clock_period = "4000", # in ps
     core_padding_microns = 20,
     die_height_microns = 400,
     die_width_microns = 400,

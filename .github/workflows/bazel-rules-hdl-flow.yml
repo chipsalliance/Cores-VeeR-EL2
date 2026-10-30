@@ -11,8 +11,8 @@ env:
   DEBIAN_FRONTEND: noninteractive
 
 jobs:
-  run-bazel-rules-hdl-synth:
-    name: Run EL2 Bazel-Rules-HDL Synthesis Flow
+  run-bazel-rules-hdl-pnr:
+    name: Run EL2 Bazel-Rules-HDL Place and Route Flow
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
     container: debian:trixie
     strategy:
@@ -64,18 +64,24 @@ jobs:
           path: Cores-VeeR-EL2
           submodules: recursive
 
-      - name: Run EL2 ${{ matrix.bus.name }} Synthesis Flow
+      - name: Run EL2 ${{ matrix.bus.name }} Place and Route Flow
         run: |
           cd "$GITHUB_WORKSPACE/Cores-VeeR-EL2"
           git status
-          bazel build //:veer_el2_synth_asap7_${{ matrix.bus.config }}
+          bazel build //:veer_el2_place_and_route_asap7_${{ matrix.bus.config }}
 
-      - name: Upload EL2 ${{ matrix.bus.name }} synthesis results
+      - name: Upload EL2 ${{ matrix.bus.name }} place and route results
         uses: actions/upload-artifact@v4
         with:
-          name: veer_el2_synth_asap7_${{ matrix.bus.config }}
+          name: veer_el2_place_and_route_asap7_${{ matrix.bus.config }}
           path: |
-            Cores-VeeR-EL2/bazel-bin/veer_el2_synth_asap7_${{ matrix.bus.config }}_synth_output.v
-            Cores-VeeR-EL2/bazel-bin/veer_el2_synth_asap7_${{ matrix.bus.config }}_yosys_output.log
-            Cores-VeeR-EL2/bazel-bin/veer_el2_synth_asap7_${{ matrix.bus.config }}_report.textproto
+            Cores-VeeR-EL2/bazel-bin/veer_el2_place_and_route_asap7_${{ matrix.bus.config }}__floorplan.log
+            Cores-VeeR-EL2/bazel-bin/veer_el2_place_and_route_asap7_${{ matrix.bus.config }}__place_pins.log
+            Cores-VeeR-EL2/bazel-bin/veer_el2_place_and_route_asap7_${{ matrix.bus.config }}__pdn_generation.log
+            Cores-VeeR-EL2/bazel-bin/veer_el2_place_and_route_asap7_${{ matrix.bus.config }}__global_placement.log
+            Cores-VeeR-EL2/bazel-bin/veer_el2_place_and_route_asap7_${{ matrix.bus.config }}__repair.log
+            Cores-VeeR-EL2/bazel-bin/veer_el2_place_and_route_asap7_${{ matrix.bus.config }}__resizing.log
+            Cores-VeeR-EL2/bazel-bin/veer_el2_place_and_route_asap7_${{ matrix.bus.config }}__clock_tree_synthesis.log
+            Cores-VeeR-EL2/bazel-bin/veer_el2_place_and_route_asap7_${{ matrix.bus.config }}__global_routing.log
+            Cores-VeeR-EL2/bazel-bin/veer_el2_place_and_route_asap7_${{ matrix.bus.config }}_report.textproto
           if-no-files-found: error

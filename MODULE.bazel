@@ -65,9 +65,9 @@ bazel_dep(name = "rules_7zip", version = "0.0.1")
 
 git_override(
     module_name = "rules_hdl",
-    # FIXME: currently points to latest commit in 107479-bazel-rules-hdl-el2
-    # TODO: rebase 107479-bazel-rules-hdl-el2 on develop
-    commit = "49514520a93283d2f6b3582d3a0f70bfa4cdcc7a",
+    # FIXME: currently points to commit in 107479-bazel-rules-hdl-el2-pnr
+    # TODO: rebase 107479-bazel-rules-hdl-el2-pnr on develop
+    commit = "9a86b8f19a517febef2edc24bfa6709066212ae8",
     remote = "https://github.com/antmicro/bazel_rules_hdl.git",
 )
 

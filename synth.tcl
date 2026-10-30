@@ -121,7 +121,10 @@ yosys synth -top $top {*}$synth_args
 yosys opt_clean -purge
 
 # Technology mapping of adders
-if {[info exists ::env(ADDER_MAPPING)] && [file isfile $::env(ADDER_MAPPING)]} {
+# extract_fa maps adders to chains of PDK full/half adder cells, which creates
+# long ripple-carry paths. Without it Yosys uses log-depth (Brent-Kung) carry
+# logic, which is much faster. Set USE_ADDER_MAPPING to restore the old behavior.
+if {[info exists ::env(USE_ADDER_MAPPING)] && [info exists ::env(ADDER_MAPPING)] && [file isfile $::env(ADDER_MAPPING)]} {
   # extract the full adders
   extract_fa
   # map full adders

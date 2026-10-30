@@ -2149,6 +2149,15 @@ localparam bit [31:0] ICCM_RANGE_BEG = ICCM_RANGE_END - 1024; // Access the last
 localparam bit [31:0] DCCM_RANGE_END = pt.DCCM_SADR[31:0] | (32'hFFFF_FFFF >> (32 - pt.DCCM_BITS));
 localparam bit [31:0] DCCM_RANGE_BEG = DCCM_RANGE_END - 1024; // Access the last 1024B only
 
+logic dma_axi_inj_enable;
+
+initial begin
+  dma_axi_inj_enable = 0;
+  if ($test$plusargs("enable_dma_inj")) begin
+    dma_axi_inj_enable = 1;
+  end
+end
+
 axi_mst # (
   .TAGW        (RV_MUX_BUS_TAG),
   .TAGC        (1 << RV_MUX_BUS_TAG),
@@ -2161,7 +2170,7 @@ axi_mst # (
   .aclk        (core_clk),
   .aresetn     (rst_l_combined),
 
-  .enable      (1),
+  .enable      (dma_axi_inj_enable),
 
   .arvalid     (inj_axi_arvalid),
   .arready     (inj_axi_arready),

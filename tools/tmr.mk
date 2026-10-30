@@ -14,7 +14,7 @@ endif
 
 TMR_CONF_PARAMS  = -set=triple_modular_redundancy_enable=1 -set=mubi_width=2 -set=mubi_false=0x1 -set=mubi_true=0x2
 # Set DMA AXI port ID width to accommodate AXI infrastructure
-TMR_CONF_PARAMS += -set=dma_bus_tag=6
+TMR_CONF_PARAMS += -set=dma_bus_id=6 -set=dma_bus_tag=6
 
 YOSYS ?= yosys
 FAULTERGEIST ?= faultergeist-gen
@@ -25,6 +25,18 @@ LIB_FILES := $(filter $(addprefix %/,$(PDK_LIBS)),$(ALL_LIBS))
 FAULT_CAMPAIGN_FILE := $(BUILD_DIR)/fault_campaign_out.csv
 CONFIG_JSON := $(BUILD_DIR)/config.json
 NETLIST_JSON := $(BUILD_DIR)/netlist.json
+ENABLE_DMA_AXI_INJ ?= 1
+ENABLE_RAND_AXI_DELAY ?= 1
+
+TB_PLUSARGS ?= ""
+
+ifeq ($(ENABLE_DMA_AXI_INJ),1)
+	TB_PLUSARGS += +enable_dma_inj
+endif
+
+ifneq ($(ENABLE_RAND_AXI_DELAY),1)
+	TB_PLUSARGS += +axi_slv_const_rsp_time
+endif
 
 FI_MODEL_NAME ?= random
 FI_SIM_TIME ?= 10us
@@ -68,7 +80,7 @@ verilator-build: $(BUILD_DIR)/obj_dir/Vtb_top_tmr
 
 verilator: $(BUILD_DIR)/obj_dir/Vtb_top_tmr program.hex $(POST_SIM_SCRIPT)
 	$(VERILATOR_FI_SIM_ARGS) $(BUILD_DIR)/obj_dir/Vtb_top_tmr \
-		$(VERILATOR_TB_MAX_CYCLES) $(TB_EXTRA_ARGS) | tee run.log 2>&1
+		$(VERILATOR_TB_MAX_CYCLES) $(TB_EXTRA_ARGS) $(TB_PLUSARGS) | tee run.log 2>&1
 ifneq ($(POST_SIM_SCRIPT),)
 	$(POST_SIM_SCRIPT) $(POST_SIM_SCRIPT_ARGS)
 endif

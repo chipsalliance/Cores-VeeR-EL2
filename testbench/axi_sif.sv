@@ -73,6 +73,7 @@ module axi_slv #(
     output reg [TAGW-1:0] bid
 );
 
+  bit enable_random_response_time;
   bit [7:0] mem[bit [31:0]];
 
   typedef struct packed {
@@ -90,6 +91,10 @@ module axi_slv #(
   ax_t read_addr_q  [$];
 
   initial begin
+    enable_random_response_time = 1;
+    if ($test$plusargs("axi_slv_const_rsp_time")) begin
+      enable_random_response_time = 0;
+    end
     wready  = '0;
     awready = '0;
     arready = '0;
@@ -103,9 +108,11 @@ module axi_slv #(
     @(posedge aclk or negedge rst_l);
     awready <= rst_l;
     if (awvalid & awready) begin
+      int resp_time = enable_random_response_time ?
+          $urandom_range(AWREADY_DELAY_MIN, AWREADY_DELAY_MAX) : AWREADY_DELAY_MIN;
       write_addr_q.push_back('{addr: {awaddr[31:3], 3'b000}, id: awid});
       awready <= '0;
-      for (int i=$urandom_range(AWREADY_DELAY_MIN, AWREADY_DELAY_MAX); i>0; i--) begin
+      for (int i=resp_time; i>0; i--) begin
         @(posedge aclk or negedge rst_l);
         if (!rst_l) break;
       end
@@ -118,9 +125,11 @@ module axi_slv #(
     @(posedge aclk or negedge rst_l);
     wready <= rst_l;
     if (wvalid & wready) begin
+      int resp_time = enable_random_response_time ?
+          $urandom_range(WREADY_DELAY_MIN, WREADY_DELAY_MAX) : WREADY_DELAY_MIN;
       write_data_q.push_back('{data: wdata, strb: wstrb});
       wready <= '0;
-      for (int i=$urandom_range(WREADY_DELAY_MIN, WREADY_DELAY_MAX); i>0; i--) begin
+      for (int i=resp_time; i>0; i--) begin
         @(posedge aclk or negedge rst_l);
         if (!rst_l) break;
       end
@@ -136,11 +145,13 @@ module axi_slv #(
     if (write_addr_q.size() > 0 && write_data_q.size() > 0) begin
       ax_t aw;
       w_t   w;
+      int exec_time = enable_random_response_time ?
+            $urandom_range(WRITE_LATENCY_MIN, WRITE_LATENCY_MAX) : WRITE_LATENCY_MIN;
 
       aw = write_addr_q.pop_front();
       w  = write_data_q.pop_front();
 
-      for (int i=$urandom_range(WRITE_LATENCY_MIN, WRITE_LATENCY_MAX); i>0; i--) begin
+      for (int i=exec_time; i>0; i--) begin
         @(posedge aclk or negedge rst_l);
         if (!rst_l) break;
       end
@@ -170,9 +181,11 @@ module axi_slv #(
     @(posedge aclk or negedge rst_l);
     arready <= rst_l;
     if (arvalid & arready) begin
+      int resp_time = enable_random_response_time ?
+          $urandom_range(ARREADY_DELAY_MIN, ARREADY_DELAY_MAX) : ARREADY_DELAY_MIN;
       read_addr_q.push_back('{addr: {araddr[31:3], 3'b000}, id: arid});
       arready <= '0;
-      for (int i=$urandom_range(ARREADY_DELAY_MIN, ARREADY_DELAY_MAX); i>0; i--) begin
+      for (int i=resp_time; i>0; i--) begin
         @(posedge aclk or negedge rst_l);
         if (!rst_l) break;
       end
@@ -187,9 +200,11 @@ module axi_slv #(
 
     if (read_addr_q.size() > 0) begin
       ax_t ar;
+      int exec_time = enable_random_response_time ?
+          $urandom_range(READ_LATENCY_MIN, READ_LATENCY_MAX) : READ_LATENCY_MIN;
       ar = read_addr_q.pop_front();
 
-      for (int i=$urandom_range(READ_LATENCY_MIN, READ_LATENCY_MAX); i>0; i--) begin
+      for (int i=exec_time; i>0; i--) begin
         @(posedge aclk or negedge rst_l);
         if (!rst_l) break;
       end

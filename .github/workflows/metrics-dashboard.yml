@@ -1,0 +1,72 @@
+name: Metrics dashboard
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: tools/metrics_dashboard
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Serialize data
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -r tools/requirements.txt
+          python tools/serialize_json.py -o metrics_dashboard/src/lib/data -c sample-data/config.json -i sample-data/metrics*.json
+
+      - name: Install
+        working-directory: tools/metrics_dashboard/metrics_dashboard
+        run: npm ci > /dev/null
+
+      - name: Typecheck
+        working-directory: tools/metrics_dashboard/metrics_dashboard
+        run: npm run check
+        continue-on-error: true
+
+      - name: Lint
+        working-directory: tools/metrics_dashboard/metrics_dashboard
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Test
+        working-directory: tools/metrics_dashboard/metrics_dashboard
+        run: npm test
+
+      - name: Build
+        working-directory: tools/metrics_dashboard/metrics_dashboard
+        run: npm run build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: metrics-dashboard
+          path: tools/metrics_dashboard/metrics_dashboard/build
+
+      - uses: peaceiris/actions-gh-pages@v4
+        if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'pull_request' }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: tools/metrics_dashboard/metrics_dashboard/build
+          destination_dir: html/metrics_dashboard
+          keep_files: true

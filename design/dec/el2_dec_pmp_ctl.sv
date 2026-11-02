@@ -54,6 +54,7 @@ module el2_dec_pmp_ctl
 
    output logic [31:0] dec_pmp_rddata_d,  // pmp CSR read data
    output logic        dec_pmp_read_d,    // pmp CSR address match
+   output logic        dec_pmp_out_of_range, // this access targets an entry > pt.PMP_ENTRIES
 
    output el2_pmp_cfg_pkt_t pmp_pmpcfg  [pt.PMP_ENTRIES],
    output logic [31:0]      pmp_pmpaddr [pt.PMP_ENTRIES],
@@ -90,6 +91,17 @@ module el2_dec_pmp_ctl
    assign entry_lock_eff[r] = pmp_pmpcfg[r].lock;
 `endif
    end
+
+   if (pt.PMP_ENTRIES == 0)
+      assign dec_pmp_out_of_range =
+         csr_pmpcfg | csr_pmpaddr0 | csr_pmpaddr16 | csr_pmpaddr32 | csr_pmpaddr48;
+   else if (pt.PMP_ENTRIES == 16) begin
+      wire pmpcfg_oob = csr_pmpcfg && dec_csr_rdaddr_d[3:2] != 0;
+      wire pmpaddr_oob = csr_pmpaddr16 | csr_pmpaddr32 | csr_pmpaddr48;
+      assign dec_pmp_out_of_range = pmpcfg_oob | pmpaddr_oob;
+   end else
+      assign dec_pmp_out_of_range = '0;
+
 
    // ----------------------------------------------------------------------
    // PMPCFGx (RW)

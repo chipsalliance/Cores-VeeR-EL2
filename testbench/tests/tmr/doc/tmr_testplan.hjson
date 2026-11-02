@@ -71,6 +71,7 @@
 
         List of recoverable errors:
         * `el2_tmr_complex`
+          * `fault.dff` - FSM is not bothered by non-MuBi values so core with injected error is treated as non-faulty, `fault.dff` recovers at the end of the recovery sequence
           * `tmr_fatal_dff` - bitflip will be persisted until real fatal occurs
           * `tmr_recovery_fault_dff` - bitflip will be persisted until real fatal occurs
           * `el2_tmr_{exec_ctrl|dccm|iccm|ic|misc|pic}`
@@ -97,11 +98,12 @@
               * Inject in `CLEAR_FLAG_CR` - recovers to `CLEAR_FLAG_CR`
             * `cnt_{csr|gpr}_ff` - worst case scenario wrong value will be written to recovered CPU which triggers new recovery sequence right after
             * `*_value_d_m` - stalls register read for one clock cycle
-            * `*_recovery_storage_ff` - corrected by ECC, only valid in `READ_REG` and `WRITE_REG`
+            * `{csr|gpr}_recovery_storage_ff` - corrected by ECC, only valid in `READ_REG` and `WRITE_REG`
             * `pc_recovery_storage_ff` - corrected by ECC, written in `READ_REG` so check in later states
             * `*_flag_ff` - outvoted by the other two
           * `el2_tmr_axi_counter`
             * `*_count.dff_storage` - corrected by ECC
+            * `dff_wfirst` - counter won't increment once on W transaction but it's protected from underflow, it recovers when whole AW+W transaction is handled
       '''
       "stage": "DV0.3",
       "tests": [
@@ -133,12 +135,9 @@
 
         List of unrecoverable errors:
         * `el2_tmr_complex`
-          * `fault.dff` - disables one of the cores until `tmr_fault_clr` is asserted which happens only at the end of the recovery FSM, if the injection happens but not during recovery sequence, the TMR will switch to DCLS
           * `el2_tmr_recovery_fsm`
-            * `fsm_state_ff`
-              * `sync_rst_l_ff` - unrecoverable unless injected in `RESET_CPU` state
+            * `sync_rst_l_ff` - unrecoverable unless injected in `RESET_CPU` state
           * `el2_tmr_axi_counter`
-            * `dff_wfirst` - breaks the counter, counter's `clr` signal is tied to `false`
             * `*_count.dff_ecc_fatal` - behaves as double ECC error which is fatal error
       '''
       "stage": "DV0.3",

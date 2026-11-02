@@ -418,6 +418,7 @@ import el2_pkg::*;
    // PMP unit, isolated for size reasons
    logic [31:0] dec_pmp_rddata_d;
    logic dec_pmp_read_d;
+   logic dec_pmp_out_of_range;
 
    logic nmi_int_sync, timer_int_sync, soft_int_sync, i_cpu_halt_req_sync, i_cpu_run_req_sync, mpc_debug_halt_req_sync, mpc_debug_run_req_sync, mpc_debug_halt_req_sync_raw;
    logic csr_wr_clk;
@@ -2920,7 +2921,7 @@ assign dec_tlu_postsync_d = postsync & dec_csr_any_unq_d;
 assign conditionally_illegal = ((csr_mitcnt0 | csr_mitcnt1 | csr_mitb0 | csr_mitb1 | csr_mitctl0 | csr_mitctl1) & ~|pt.TIMER_LEGAL_EN);
 
 assign valid_csr = ( legal & (~(csr_dcsr | csr_dpc | csr_dmst | csr_dicawics | csr_dicad0 | csr_dicad0h | csr_dicad1 | csr_dicago) | dbg_tlu_halted_f)
-                     & ~fast_int_meicpct & ~conditionally_illegal);
+                     & ~fast_int_meicpct & ~dec_pmp_out_of_range & ~conditionally_illegal);
 
 assign dec_csr_legal_d = ( dec_csr_any_unq_d &
                            valid_csr &          // of a valid CSR

@@ -295,12 +295,14 @@ module el2_tmr_recovery_fsm
 
   // PC storage
   logic        pc_we;
+  logic [31:1] dec_tlu_npc_veer_int;
   logic [38:0] pc_with_ecc_wr;
   logic [38:0] pc_with_ecc_rd;
   logic [31:0] pc_rdata_raw;
   logic [31:1] pc_rdata;
 
-  rvtmr #(31) pc_tmr (.I(dec_tlu_npc_veer), .O(pc_with_ecc_wr[1+:31])); // TODO: Detect fatal disagreement
+  rvtmr #(31) pc_tmr (.I(dec_tlu_npc_veer), .O(dec_tlu_npc_veer_int[1+:31])); // TODO: Detect fatal disagreement
+  assign pc_with_ecc_wr[1+:31] = recovery_state == 0 ? rst_vec : dec_tlu_npc_veer_int;
   assign pc_with_ecc_wr[0] = 0;
   rvecc_encode pc_ecc_enc (.din(pc_with_ecc_wr[0+:32]), .ecc_out(pc_with_ecc_wr[32+:7]));
   rvecc_decode pc_ecc_dec (
@@ -309,7 +311,7 @@ module el2_tmr_recovery_fsm
   );
   assign pc_rdata = pc_rdata_raw[31:1];
 
-  assign pc_we = (recovery_state == READ_REG);
+  assign pc_we = (recovery_state == READ_REG | recovery_state == 0);
   rvdffs #(39) pc_recovery_storage_ff (.*, .din(pc_with_ecc_wr), .dout(pc_with_ecc_rd), .en(pc_we));
 
   // PC restoration via the reset vector

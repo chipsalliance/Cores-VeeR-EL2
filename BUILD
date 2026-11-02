@@ -9,72 +9,59 @@ load(
 )
 load("//design:defs.bzl", "veer_el2")
 
-############################# AXI config ##############################
-# Generate verilog_library with VeeR EL2 config and RTL files
-veer_el2(
-  name = "veer_el2_axi4",
-  sets = [
-    "build_axi4",
-  ],
-  target = "default",
-)
 
-verilog_library(
-    name = "veer_el2_axi4_verilog_lib",
-    deps = [
-        ":veer_el2_axi4",
-    ],
-)
+# config -> (config name, target, axi_core_if)
+CONFIGS = {
+    "axi"      : ("axi4"    , "default",     "1"),
+    "ahb_lite" : ("ahb_lite", "default_ahb", "0"),
+}
 
-############################# AHB Lite config ##############################
-veer_el2(
-  name = "veer_el2_ahb_lite",
-  sets = [
-    "build_ahb_lite",
-  ],
-  target = "default_ahb",
-)
-
-verilog_library(
-    name = "veer_el2_ahb_lite_verilog_lib",
-    deps = [
-        ":veer_el2_ahb_lite",
-    ],
-)
-
-##################### Bazel rules for RTL2GDS Flow #########################
-
-synthesize_rtl(
-    name = "veer_el2_synth_asap7_axi",
-    standard_cells = "@org_theopenroadproject_asap7sc7p5t_28//:asap7-sc7p5t_rev28_rvt-ccs_tt",
-    top_module = "el2_veer_wrapper",
-    deps = [
-        ":veer_el2_axi4_verilog_lib",
-    ],
-    synth_tcl = "synth.tcl",
-    target_clock_period_pico_seconds = 4000, # 250 MHz
-    synth_additional_args = "-booth", # run booth pass to rebuild multipliers before mapping
-)
-
-synthesize_rtl(
-    name = "veer_el2_synth_asap7_ahb_lite",
-    standard_cells = "@org_theopenroadproject_asap7sc7p5t_28//:asap7-sc7p5t_rev28_rvt-ccs_tt",
-    top_module = "el2_veer_wrapper",
-    deps = [
-        ":veer_el2_ahb_lite_verilog_lib",
-    ],
-    synth_tcl = "synth.tcl",
-    target_clock_period_pico_seconds = 4000, # 250 MHz
-    synth_additional_args = "-booth", # run booth pass to rebuild multipliers before mapping
-)
-
-sdc_library(
-    name = "constraint",
+# Update constraints file
+[genrule(
+    name = "el2_constraints_%s" % c,
     srcs = ["//design:el2_constraints.sdc"],
-)
+    outs = ["el2_constraints_%s.sdc" % c],
+    cmd = " && ".join([
+        "grep -q '^set axi_core_if ' $(location //design:el2_constraints.sdc)",
+        "sed 's/^set axi_core_if .*/set axi_core_if %s/' $(location //design:el2_constraints.sdc) > $@" % CONFIGS[c][2],
+    ]),
+) for c in CONFIGS]
 
-place_and_route(
-    name = "veer_el2_place_and_route_asap7_axi",
+[sdc_library(
+    name = "constraint_%s" % c,
+    srcs = [":el2_constraints_%s" % c],
+) for c in CONFIGS]
+
+# Generate verilog_library with VeeR EL2 config and RTL files
+[veer_el2(
+    name = "veer_el2_%s" % c,
+    sets = [
+        "build_%s" % CONFIGS[c][0],
+    ],
+    target = CONFIGS[c][1],
+) for c in CONFIGS]
+
+[verilog_library(
+    name = "veer_el2_%s_verilog_lib" % c,
+    deps = [
+        ":veer_el2_%s" % c,
+    ],
+) for c in CONFIGS]
+
+[synthesize_rtl(
+    name = "veer_el2_synth_asap7_%s" % c,
+    standard_cells = "@org_theopenroadproject_asap7sc7p5t_28//:asap7-sc7p5t_rev28_rvt-ccs_tt",
+    top_module = "el2_veer_wrapper",
+    deps = [
+        ":veer_el2_%s_verilog_lib" % c,
+    ],
+    synth_tcl = "synth.tcl",
+    target_clock_period_pico_seconds = 4000, # 250 MHz
+    synth_additional_args = "-booth", # run booth pass to rebuild multipliers before mapping
+) for c in CONFIGS]
+
+[place_and_route(
+    name = "veer_el2_place_and_route_asap7_%s" % c,
     clock_period = "4000", # in ps
     core_padding_microns = 20,
     die_height_microns = 400,
@@ -82,31 +69,12 @@ place_and_route(
     min_pin_distance = "0.2",
     placement_density = "0.35",
     suppress_warnings = ASAP7_SUPPRESSED_WARNINGS,
-    sdc = ":constraint",
-    synthesized_rtl = ":veer_el2_synth_asap7_axi",
+    sdc = ":constraint_%s" % c,
+    synthesized_rtl = ":veer_el2_synth_asap7_%s" % c,
     stop_after_step = "global_routing",
-)
+) for c in CONFIGS]
 
-place_and_route(
-    name = "veer_el2_place_and_route_asap7_ahb_lite",
-    clock_period = "4000", # in ps
-    core_padding_microns = 20,
-    die_height_microns = 400,
-    die_width_microns = 400,
-    min_pin_distance = "0.2",
-    placement_density = "0.35",
-    suppress_warnings = ASAP7_SUPPRESSED_WARNINGS,
-    sdc = ":constraint",
-    synthesized_rtl = ":veer_el2_synth_asap7_ahb_lite",
-    stop_after_step = "global_routing",
-)
-
-gds_write(
-    name = "veer_el2_gds_asap7_axi",
-    implemented_rtl = ":veer_el2_place_and_route_asap7_axi",
-)
-
-gds_write(
-    name = "veer_el2_gds_asap7_ahb_lite",
-    implemented_rtl = ":veer_el2_place_and_route_asap7_ahb_lite",
-)
+[gds_write(
+    name = "veer_el2_gds_asap7_%s" % c,
+    implemented_rtl = ":veer_el2_place_and_route_asap7_%s" % c,
+) for c in CONFIGS]

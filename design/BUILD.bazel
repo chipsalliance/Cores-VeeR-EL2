@@ -1,0 +1,84 @@
+load("@rules_hdl//verilog:defs.bzl", "verilog_library")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["el2_constraints.sdc"])
+
+verilog_library(
+    name = "beh_lib",
+    srcs = ["lib/beh_lib.sv"],
+)
+
+verilog_library(
+    name = "mem_lib",
+    srcs = [
+        "lib/mem_lib.sv",
+    ],
+)
+
+filegroup(
+    name = "el2_srcs",
+    srcs = [
+        "lib/el2_assert.sv",
+        "include/el2_def.sv", # el2_pkg
+        "lib/el2_lib.sv",
+        "lib/el2_prim_buf.sv",
+        "lib/el2_prim_generic_buf.sv",
+        "lib/ahb_to_axi4.sv",
+        "lib/axi4_to_ahb.sv",
+        "lib/el2_mem_if.sv",
+        "lib/el2_regfile_if.sv",
+        "el2_lockstep_pkg.sv",
+        "el2_mubi_pkg.sv",
+        "dbg/el2_dbg.sv",
+        "dec/el2_dec.sv",
+        "dec/el2_dec_decode_ctl.sv",
+        "dec/el2_dec_gpr_ctl.sv",
+        "dec/el2_dec_ib_ctl.sv",
+        "dec/el2_dec_pmp_ctl.sv",
+        "dec/el2_dec_tlu_ctl.sv",
+        "dec/el2_dec_trigger.sv",
+        "dmi/dmi_jtag_to_core_sync.v",
+        "dmi/dmi_mux.v",
+        "dmi/dmi_wrapper.v",
+        "dmi/rvjtag_tap.v",
+        "el2_dma_ctrl.sv",
+        "el2_mem.sv",
+        "el2_pic_ctrl.sv",
+        "el2_pmp.sv",
+        "el2_veer.sv",
+        "el2_veer_lockstep.sv",
+        "el2_veer_wrapper.sv",
+        "exu/el2_exu.sv",
+        "exu/el2_exu_alu_ctl.sv",
+        "exu/el2_exu_div_ctl.sv",
+        "exu/el2_exu_mul_ctl.sv",
+        "ifu/el2_ifu.sv",
+        "ifu/el2_ifu_aln_ctl.sv",
+        "ifu/el2_ifu_bp_ctl.sv",
+        "ifu/el2_ifu_compress_ctl.sv",
+        "ifu/el2_ifu_ic_mem.sv",
+        "ifu/el2_ifu_iccm_mem.sv",
+        "ifu/el2_ifu_ifc_ctl.sv",
+        "ifu/el2_ifu_mem_ctl.sv",
+        "lsu/el2_lsu.sv",
+        "lsu/el2_lsu_addrcheck.sv",
+        "lsu/el2_lsu_bus_buffer.sv",
+        "lsu/el2_lsu_bus_intf.sv",
+        "lsu/el2_lsu_clkdomain.sv",
+        "lsu/el2_lsu_dccm_ctl.sv",
+        "lsu/el2_lsu_dccm_mem.sv",
+        "lsu/el2_lsu_ecc.sv",
+        "lsu/el2_lsu_lsc_ctl.sv",
+        "lsu/el2_lsu_stbuf.sv",
+        "lsu/el2_lsu_trigger.sv",
+    ],
+)
+
+filegroup(
+    name = "el2_inc",
+    srcs = [
+        "include/el2_dec_csr_equ_m.svh",
+        "include/el2_dec_csr_equ_mu.svh",
+    ],
+)

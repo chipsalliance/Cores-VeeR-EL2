@@ -1,0 +1,21 @@
+# Copyright (c) 2026 Antmicro <www.antmicro.com>
+# SPDX-License-Identifier: Apache-2.0
+
+# Same flags as rules_hdl's .bazelrc
+common --enable_bzlmod
+common --noenable_workspace
+common --experimental_isolated_extension_usages
+
+build --cxxopt "-std=c++20"
+build --cxxopt "-ffp-contract=off"
+build --host_cxxopt "-std=c++20"
+build --host_cxxopt "-ffp-contract=off"
+build --repo_env=BAZEL_CXXOPTS=-std=c++20
+build --crosstool_top=@llvm_toolchain//:toolchain
+build --per_file_copt=external/abc\+.*\.c$@-stdlib=libc++
+build --incompatible_disallow_empty_glob=true
+
+# Mirrors for flaky downloads (e.g. ftp.gnu.org)
+common --downloader_config=tools/bazel_downloader.cfg
+
+try-import %workspace%/user.bazelrc

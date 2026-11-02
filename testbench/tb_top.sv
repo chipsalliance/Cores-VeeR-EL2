@@ -832,6 +832,8 @@ module tb_top
     localparam logic [31:0] RDBK_DMA_RD_DEFER_ADDR   = RDBK_ARENA_BASE_ADDR + 32'h0000_0420;
     localparam logic [31:0] RDBK_ECC_SNOOP_ADDR      = RDBK_ARENA_BASE_ADDR + 32'h0000_0430;
     localparam logic [31:0] RDBK_ECC_DEFER_SEED_ADDR = RDBK_ARENA_BASE_ADDR + 32'h0000_0444;
+    localparam logic [31:0] RDBK_FUZZ_CPU_BASE_ADDR  = RDBK_ARENA_BASE_ADDR + 32'h0000_0000;
+    localparam logic [31:0] RDBK_FUZZ_DMA_BASE_ADDR  = RDBK_ARENA_BASE_ADDR + 32'h0000_0200;
 
     localparam logic [7:0]  MBX_CMD_ARM_WR_SKIP      = 8'hB0; // Suppress DCCM SRAM WE on next store to test arena
     localparam logic [7:0]  MBX_CMD_DMI_READ         = 8'hB1; // Read DMI register `subcmd[6:0]` (`0x48`-`0x4A`)
@@ -842,7 +844,11 @@ module tb_top
     localparam logic [7:0]  MBX_CMD_ARM_DMA_RD_DEFER = 8'hB7; // WR_SYS_002B: Arm top-level DMA read steal deferral
     localparam logic [7:0]  MBX_CMD_ARM_ECC_SNOOP    = 8'hB8; // WR_SYS_003A: Arm 1-bit SRAM bit-flip on store to RDBK_ECC_SNOOP_ADDR
     localparam logic [7:0]  MBX_CMD_SEED_ECC_DEFER   = 8'hB9; // WR_SYS_003B: Seed 1-bit SRAM ECC error at RDBK_ECC_DEFER_SEED_ADDR
-    localparam logic [7:0]  MBX_CMD_RDBK_COUNTERS    = 8'hBB; // Reset (`subcmd=0`) or query (`subcmd=1..10`) RTL counters
+    localparam logic [7:0]  MBX_CMD_RDBK_COUNTERS    = 8'hBB; // Reset (`subcmd=0`) or query (`subcmd=1..15`) RTL counters
+    localparam logic [7:0]  MBX_CMD_ARM_ADDR_FLIP    = 8'hBC; // WR_FI_003: Arm 1-cycle address bit-0 flip on next store to test arena
+    localparam logic [7:0]  MBX_CMD_ARM_WFI_WAKEUP   = 8'hBD; // WR_XFEAT_003: Arm low-power halt/wakeup sequencer (`subcmd=1` mpmc, `subcmd=2` i_cpu_halt_req)
+    localparam logic [7:0]  MBX_CMD_FUZZ_DMA_CTRL    = 8'hBE; // WR_FI_005: Start (`subcmd=1`) or stop (`subcmd=0`) autonomous LFSR DMA traffic
+    localparam logic [7:0]  MBX_CMD_FUZZ_FAULT_CTRL  = 8'hBF; // Phase B Chaos Monkey: Start (`subcmd=1`) or stop (`subcmd=0`) random write fault injection
 
     localparam logic [6:0]  DMI_ADDR_DMCONTROL       = 7'h10;
     localparam logic [6:0]  DMI_ADDR_RDBK_STATUS     = 7'h48;
@@ -852,6 +858,8 @@ module tb_top
     logic        dccm_write_readback_error;
     logic        dccm_wr_skip_armed;
     wire         dccm_wr_skip_active;
+    logic        rdbk_addr_flip_armed;
+    wire         rdbk_addr_flip_active;
     int          dccm_wr_rdbk_err_pulse_count;
     int          rdbk_arm_count;
     int          rdbk_snoop_lo_count;
@@ -876,6 +884,64 @@ module tb_top
     dmi_fsm_t dmi_fsm;
     assign dccm_wr_skip_active = dccm_wr_skip_armed && el2_mem_export.dccm_clken && (|el2_mem_export.dccm_wren_bank) &&
                                  (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_addr_lo >= RDBK_ARENA_OFFSET);
+    assign rdbk_addr_flip_active = rdbk_addr_flip_armed && el2_mem_export.dccm_clken && (|el2_mem_export.dccm_wren_bank) &&
+                                   (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_addr_lo >= RDBK_ARENA_OFFSET);
+
+    // WR_XFEAT_003: Low-power halt/pause and wakeup sequencer state (#572)
+    typedef enum logic [2:0] {
+        WFI_IDLE,
+        WFI_WAIT_HALT,
+        WFI_WAIT_RDBK_ARM,
+        WFI_WAIT_HALT_ACK,
+        WFI_HOLD_HALT,
+        WFI_WAIT_RUN_ACK
+    } wfi_fsm_t;
+    wfi_fsm_t    wfi_fsm;
+    logic [2:0]  wfi_delay_cnt;
+    logic        tb_wfi_halt_req;
+    logic        tb_wfi_run_req;
+    logic        halt_or_pause_q;
+    int          wfi_halt_observed_cnt;
+
+    // WR_FI_005 & Phase B Chaos Monkey: Autonomous DMA & Fault Injection state (#572)
+    logic        fuzz_dma_en;
+    logic        fuzz_dma_stop_pending;
+    logic [15:0] fuzz_dma_stop_seq_id;
+    logic [31:0] fuzz_dma_lfsr;
+    logic [3:0]  fuzz_dma_delay_cnt;
+    logic [31:0] fuzz_dma_wdata_word;
+    logic        rdbk_dma_check_rdata;
+    int          fuzz_dma_trxn_cnt;
+
+    logic        fuzz_fault_en;
+    logic [31:0] fuzz_fault_lfsr;
+    logic        chaos_fault_in_flight;
+    logic [2:0]  chaos_cooldown_cnt;
+    int          chaos_saved_bank;
+    int          chaos_saved_indx;
+    logic [38:0] chaos_saved_codeword;
+    int          chaos_injected_cnt;
+    int          chaos_resolved_err_cnt;
+    logic        chaos_first_fault_captured;
+    logic [pt.DCCM_BITS-1:0] chaos_first_fault_addr;
+
+    wire [pt.DCCM_BANK_BITS-1:0] chaos_target_bank =
+        rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_addr_lo[pt.DCCM_WIDTH_BITS+:pt.DCCM_BANK_BITS];
+    wire chaos_inject_active =
+        fuzz_fault_en &&
+        ~chaos_fault_in_flight &&
+        (chaos_cooldown_cnt == 3'd0) &&
+        ~rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff &&
+        rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_arm &&
+        ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.ld_single_ecc_error_r &&
+        ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.ld_single_ecc_error_r_ff &&
+        el2_mem_export.dccm_clken &&
+        el2_mem_export.dccm_wren_bank[chaos_target_bank] &&
+        (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_addr_lo >= RDBK_ARENA_OFFSET) &&
+        (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_addr_lo < RDBK_FUZZ_DMA_BASE_ADDR[pt.DCCM_BITS-1:0]) &&
+        (fuzz_fault_lfsr[2:0] == 3'h5);
+    logic        chaos_wren_skip_active;
+    logic [38:0] chaos_fdata_flip_mask;
 
     // Top-level DMA slave bus & 1-bit SRAM ECC stimulus state for System Integration (#512)
     logic        rdbk_dma_wr_coll_armed;
@@ -904,6 +970,7 @@ module tb_top
     logic        rdbk_dma_axi_wvalid_q;
     logic        rdbk_dma_axi_arvalid_q;
     wire         rdbk_dma_stim_armed = rdbk_dma_wr_coll_armed | rdbk_dma_rd_snoop_armed | rdbk_dma_rd_defer_armed;
+    wire         rdbk_dma_bus_mux_en = rdbk_dma_stim_armed | fuzz_dma_en | (rdbk_dma_fsm != RDBK_DMA_IDLE);
     wire [31:0]  rdbk_dma_trigger_store_addr = rdbk_dma_wr_coll_armed  ? RDBK_DMA_WR_COLL_ADDR :
                                                (rdbk_dma_rd_snoop_armed ? RDBK_DMA_RD_SNOOP_ADDR : RDBK_DMA_RD_DEFER_ADDR);
     wire         rdbk_dma_trigger_store_in_d = rdbk_dma_stim_armed && (rdbk_dma_fsm == RDBK_DMA_IDLE) &&
@@ -920,14 +987,14 @@ module tb_top
     wire [1:0]   tb_dma_htrans         = tb_dma_ahb_addr_phase ? 2'b10 : 2'b00;
     wire         tb_dma_hwrite         = rdbk_dma_is_write;
     wire [31:0]  tb_dma_haddr          = rdbk_dma_target_addr;
-    wire [63:0]  tb_dma_hwdata         = 64'hAABBCCDD_AABBCCDD;
+    wire [63:0]  tb_dma_hwdata         = fuzz_dma_en ? {2{fuzz_dma_wdata_word}} : 64'hAABBCCDD_AABBCCDD;
 
     wire         tb_dma_axi_active     = (rdbk_dma_fsm != RDBK_DMA_IDLE);
     wire         tb_dma_axi_awvalid    = rdbk_dma_axi_awvalid_q;
     wire         tb_dma_axi_wvalid     = rdbk_dma_axi_wvalid_q;
     wire         tb_dma_axi_arvalid    = rdbk_dma_axi_arvalid_q;
     wire [31:0]  tb_dma_addr           = rdbk_dma_target_addr;
-    wire [63:0]  tb_dma_wdata          = 64'hAABBCCDD_AABBCCDD;
+    wire [63:0]  tb_dma_wdata          = fuzz_dma_en ? {2{fuzz_dma_wdata_word}} : 64'hAABBCCDD_AABBCCDD;
     wire [7:0]   tb_dma_wstrb          = rdbk_dma_target_addr[2] ? 8'hF0 : 8'h0F;
 `endif
 
@@ -1437,6 +1504,7 @@ module tb_top
     always @(posedge core_clk or negedge rst_l_combined) begin
         if (~rst_l_combined) begin
             dccm_wr_skip_armed                  <= 1'b0;
+            rdbk_addr_flip_armed                <= 1'b0;
             dccm_wr_rdbk_err_pulse_count        <= 0;
             rdbk_arm_count                      <= 0;
             rdbk_snoop_lo_count                 <= 0;
@@ -1452,6 +1520,31 @@ module tb_top
             dmi_target_addr                     <= 7'h0;
             dmi_seq_id                          <= 16'h0;
             dmi_fsm                             <= DMI_IDLE;
+            wfi_fsm                             <= WFI_IDLE;
+            wfi_delay_cnt                       <= 3'd0;
+            tb_wfi_halt_req                     <= 1'b0;
+            tb_wfi_run_req                      <= 1'b0;
+            halt_or_pause_q                     <= 1'b0;
+            wfi_halt_observed_cnt               <= 0;
+            fuzz_dma_en                         <= 1'b0;
+            fuzz_dma_stop_pending               <= 1'b0;
+            fuzz_dma_stop_seq_id                <= 16'h0;
+            fuzz_dma_lfsr                       <= 32'hACE1_2468;
+            fuzz_dma_delay_cnt                  <= 4'd0;
+            fuzz_dma_wdata_word                 <= 32'h0;
+            rdbk_dma_check_rdata                <= 1'b0;
+            fuzz_dma_trxn_cnt                   <= 0;
+            fuzz_fault_en                       <= 1'b0;
+            fuzz_fault_lfsr                     <= 32'hCAFE_BEEF;
+            chaos_fault_in_flight               <= 1'b0;
+            chaos_cooldown_cnt                  <= 3'd0;
+            chaos_saved_bank                    <= 0;
+            chaos_saved_indx                    <= 0;
+            chaos_saved_codeword                <= '0;
+            chaos_injected_cnt                  <= 0;
+            chaos_resolved_err_cnt              <= 0;
+            chaos_first_fault_captured          <= 1'b0;
+            chaos_first_fault_addr              <= '0;
             rdbk_dma_wr_coll_armed              <= 1'b0;
             rdbk_dma_rd_snoop_armed             <= 1'b0;
             rdbk_dma_rd_defer_armed             <= 1'b0;
@@ -1523,10 +1616,23 @@ module tb_top
                 rdbk_stbuf_full_count <= rdbk_stbuf_full_count + 1;
             end
 
+            // Track clock-gated halt_state / pause_state entries for WR_XFEAT_003
+            halt_or_pause_q <= (rvtop_wrapper.rvtop.veer.halt_state | rvtop_wrapper.rvtop.veer.pause_state);
+            if ((rvtop_wrapper.rvtop.veer.halt_state | rvtop_wrapper.rvtop.veer.pause_state) & ~halt_or_pause_q) begin
+                wfi_halt_observed_cnt <= wfi_halt_observed_cnt + 1;
+            end
+
             // Disarm write skip once it fired
             if (dccm_wr_skip_active) begin
                 dccm_wr_skip_armed <= 1'b0;
                 $display("[%0t ns] [TB] DCCM write-skip injected: suppressed DCCM RAM WE", $time);
+            end
+
+            // Disarm WR_FI_003 address-bit-0 flip once it fired
+            if (rdbk_addr_flip_active) begin
+                rdbk_addr_flip_armed <= 1'b0;
+                $display("[%0t ns] [TB] DCCM address-bit-0 flip injected on store to offset 0x%04x",
+                         $time, rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_addr_lo);
             end
 
             // Disarm Phase 4 1-bit SRAM ECC flip once it fired on the store commit
@@ -1534,6 +1640,77 @@ module tb_top
                 rdbk_ecc_snoop_flip_armed <= 1'b0;
                 $display("[%0t ns] [TB-Phase4] Injected 1-bit SRAM corruption on store to 0x%08x", $time, RDBK_ECC_SNOOP_ADDR);
             end
+
+            // Phase B Chaos Monkey Fault Injector & Hardware Scoreboard (#572)
+            if (fuzz_fault_en) begin
+                fuzz_fault_lfsr <= {fuzz_fault_lfsr[30:0], 1'b0} ^ (fuzz_fault_lfsr[31] ? 32'h8020_0003 : 32'h0);
+            end
+            if (chaos_inject_active) begin
+                chaos_fault_in_flight <= 1'b1;
+                chaos_injected_cnt    <= chaos_injected_cnt + 1;
+                chaos_saved_bank      <= int'(chaos_target_bank);
+                chaos_saved_indx      <= int'(el2_mem_export.dccm_addr_bank[chaos_target_bank]);
+                chaos_saved_codeword  <= {el2_mem_export.dccm_wr_ecc_bank[chaos_target_bank],
+                                          el2_mem_export.dccm_wr_data_bank[chaos_target_bank]};
+                if (~chaos_first_fault_captured) begin
+                    chaos_first_fault_captured <= 1'b1;
+                    chaos_first_fault_addr     <= rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_addr_lo;
+                end
+            end else if (chaos_fault_in_flight && rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_active) begin
+                chaos_fault_in_flight <= 1'b0;
+                chaos_cooldown_cnt    <= 3'd3;
+                if (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_readback_error) begin
+                    chaos_resolved_err_cnt <= chaos_resolved_err_cnt + 1;
+                end
+                // Restore the clean 39-bit codeword after the M-stage readback check has evaluated
+                // so subsequent loads/DMA reads do not hit latent uncorrectable ECC errors.
+                write_dccm_ram_bank_indx(chaos_saved_bank, chaos_saved_indx, chaos_saved_codeword);
+            end else if (~chaos_fault_in_flight && (chaos_cooldown_cnt != 3'd0)) begin
+                chaos_cooldown_cnt <= chaos_cooldown_cnt - 3'd1;
+            end
+
+            // WR_XFEAT_003 Low-Power Halt & Wakeup Sequencer (#572)
+            case (wfi_fsm)
+                WFI_IDLE: begin
+                    tb_wfi_halt_req <= 1'b0;
+                    tb_wfi_run_req  <= 1'b0;
+                end
+                WFI_WAIT_HALT: begin
+                    if (rvtop_wrapper.rvtop.veer.halt_state) begin
+                        wfi_delay_cnt <= 3'd4;
+                        wfi_fsm       <= WFI_HOLD_HALT;
+                    end
+                end
+                WFI_WAIT_RDBK_ARM: begin
+                    if (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_arm &&
+                        (rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.stbuf_addr_any >= RDBK_ARENA_OFFSET)) begin
+                        tb_wfi_halt_req <= 1'b1;
+                        wfi_fsm         <= WFI_WAIT_HALT_ACK;
+                    end
+                end
+                WFI_WAIT_HALT_ACK: begin
+                    if (rvtop_wrapper.rvtop.veer.o_cpu_halt_ack && rvtop_wrapper.rvtop.veer.halt_state) begin
+                        tb_wfi_halt_req <= 1'b0;
+                        wfi_delay_cnt   <= 3'd4;
+                        wfi_fsm         <= WFI_HOLD_HALT;
+                    end
+                end
+                WFI_HOLD_HALT: begin
+                    if (wfi_delay_cnt == 3'd0) begin
+                        tb_wfi_run_req <= 1'b1;
+                        wfi_fsm        <= WFI_WAIT_RUN_ACK;
+                    end else begin
+                        wfi_delay_cnt <= wfi_delay_cnt - 3'd1;
+                    end
+                end
+                WFI_WAIT_RUN_ACK: begin
+                    if (rvtop_wrapper.rvtop.veer.o_cpu_run_ack) begin
+                        tb_wfi_run_req <= 1'b0;
+                        wfi_fsm        <= WFI_IDLE;
+                    end
+                end
+                default: wfi_fsm <= WFI_IDLE;
+            endcase
 
             // Synchronous FSM for DMI and Mailbox operations
             case (dmi_fsm)
@@ -1571,6 +1748,7 @@ module tb_top
                                 rdbk_dma_target_addr    <= RDBK_DMA_WR_COLL_ADDR;
                                 rdbk_dma_exp_rdata      <= 32'h0;
                                 rdbk_dma_is_write       <= 1'b1;
+                                rdbk_dma_check_rdata    <= 1'b0;
                                 rdbk_dma_axi_awvalid_q  <= 1'b0;
                                 rdbk_dma_axi_wvalid_q   <= 1'b0;
                                 rdbk_dma_axi_arvalid_q  <= 1'b0;
@@ -1585,6 +1763,7 @@ module tb_top
                                 rdbk_dma_target_addr    <= RDBK_DMA_RD_SNOOP_ADDR;
                                 rdbk_dma_exp_rdata      <= 32'h7777_8888;
                                 rdbk_dma_is_write       <= 1'b0;
+                                rdbk_dma_check_rdata    <= 1'b1;
                                 rdbk_dma_axi_awvalid_q  <= 1'b0;
                                 rdbk_dma_axi_wvalid_q   <= 1'b0;
                                 rdbk_dma_axi_arvalid_q  <= 1'b0;
@@ -1599,6 +1778,7 @@ module tb_top
                                 rdbk_dma_target_addr    <= RDBK_DMA_WR_COLL_ADDR;
                                 rdbk_dma_exp_rdata      <= 32'hAABB_CCDD;
                                 rdbk_dma_is_write       <= 1'b0;
+                                rdbk_dma_check_rdata    <= 1'b1;
                                 rdbk_dma_axi_awvalid_q  <= 1'b0;
                                 rdbk_dma_axi_wvalid_q   <= 1'b0;
                                 rdbk_dma_axi_arvalid_q  <= 1'b0;
@@ -1622,6 +1802,69 @@ module tb_top
                                 $display("[%0t ns] [TB] Mailbox 0xB9: Phase 5 (Real ECC 1-Bit Steal Deferral) corrupted 0x%08x (seq=%0d)",
                                          $time, RDBK_ECC_DEFER_SEED_ADDR, mailbox_data[31:16]);
                             end
+                            MBX_CMD_ARM_ADDR_FLIP: begin
+                                rdbk_addr_flip_armed <= 1'b1;
+                                dmi_seq_id           <= mailbox_data[31:16];
+                                write_dccm_word(RDBK_SCRATCHPAD_ADDR, 32'h1);
+                                write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xBC: WR_FI_003 address-bit-0 flip armed (seq=%0d)",
+                                         $time, mailbox_data[31:16]);
+                            end
+                            MBX_CMD_ARM_WFI_WAKEUP: begin
+                                dmi_seq_id      <= mailbox_data[31:16];
+                                tb_wfi_halt_req <= 1'b0;
+                                tb_wfi_run_req  <= 1'b0;
+                                if (mailbox_data[15:8] == 8'd1) begin
+                                    wfi_fsm <= WFI_WAIT_HALT;
+                                end else if (mailbox_data[15:8] == 8'd2) begin
+                                    wfi_fsm <= WFI_WAIT_RDBK_ARM;
+                                end else begin
+                                    wfi_fsm <= WFI_IDLE;
+                                end
+                                write_dccm_word(RDBK_SCRATCHPAD_ADDR, 32'h1);
+                                write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xBD: WR_XFEAT_003 WFI wakeup armed (mode=%0d, seq=%0d)",
+                                         $time, mailbox_data[15:8], mailbox_data[31:16]);
+                            end
+                            MBX_CMD_FUZZ_DMA_CTRL: begin
+                                dmi_seq_id <= mailbox_data[31:16];
+                                if (mailbox_data[15:8] != 8'd0) begin
+                                    fuzz_dma_en           <= 1'b1;
+                                    fuzz_dma_stop_pending <= 1'b0;
+                                    fuzz_dma_lfsr         <= 32'hACE1_2468 ^ {16'h0, mailbox_data[31:16]};
+                                    fuzz_dma_delay_cnt    <= 4'd3;
+                                    rdbk_dma_check_rdata  <= 1'b0;
+                                    write_dccm_word(RDBK_SCRATCHPAD_ADDR, 32'h1);
+                                    write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, mailbox_data[31:16]});
+                                    $display("[%0t ns] [TB] Mailbox 0xBE: Autonomous LFSR DMA traffic ENABLED (seq=%0d)",
+                                             $time, mailbox_data[31:16]);
+                                end else begin
+                                    fuzz_dma_en <= 1'b0;
+                                    if ((rdbk_dma_fsm == RDBK_DMA_IDLE) && ~rvtop_wrapper.rvtop.veer.dma_ctrl.dma_active) begin
+                                        fuzz_dma_stop_pending <= 1'b0;
+                                        write_dccm_word(RDBK_SCRATCHPAD_ADDR, fuzz_dma_trxn_cnt);
+                                        write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, mailbox_data[31:16]});
+                                        $display("[%0t ns] [TB] Mailbox 0xBE: Autonomous LFSR DMA traffic DISABLED (%0d trxns, seq=%0d)",
+                                                 $time, fuzz_dma_trxn_cnt, mailbox_data[31:16]);
+                                    end else begin
+                                        fuzz_dma_stop_pending <= 1'b1;
+                                        fuzz_dma_stop_seq_id  <= mailbox_data[31:16];
+                                    end
+                                end
+                            end
+                            MBX_CMD_FUZZ_FAULT_CTRL: begin
+                                dmi_seq_id <= mailbox_data[31:16];
+                                if (mailbox_data[15:8] != 8'd0) begin
+                                    fuzz_fault_en   <= 1'b1;
+                                    fuzz_fault_lfsr <= 32'hCAFE_BEEF ^ {16'h0, mailbox_data[31:16]};
+                                end else begin
+                                    fuzz_fault_en   <= 1'b0;
+                                end
+                                write_dccm_word(RDBK_SCRATCHPAD_ADDR, chaos_injected_cnt);
+                                write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, mailbox_data[31:16]});
+                                $display("[%0t ns] [TB] Mailbox 0xBF: Chaos Monkey fault injector mode=%0d (injected=%0d, resolved=%0d, seq=%0d)",
+                                         $time, mailbox_data[15:8], chaos_injected_cnt, chaos_resolved_err_cnt, mailbox_data[31:16]);
+                            end
                             MBX_CMD_RDBK_COUNTERS: begin
                                 dmi_seq_id <= mailbox_data[31:16];
                                 case (mailbox_data[15:8])
@@ -1637,18 +1880,29 @@ module tb_top
                                         rdbk_dcls_shadow_err_mismatch_count <= 0;
                                         rdbk_dcls_dmi_rdata_mismatch_count  <= 0;
                                         rdbk_dcls_asym_mode                 <= 1'b0;
+                                        chaos_injected_cnt                  <= 0;
+                                        chaos_resolved_err_cnt              <= 0;
+                                        chaos_first_fault_captured          <= 1'b0;
+                                        chaos_first_fault_addr              <= '0;
+                                        fuzz_dma_trxn_cnt                   <= 0;
+                                        wfi_halt_observed_cnt               <= 0;
                                         write_dccm_word(RDBK_SCRATCHPAD_ADDR, 32'h0);
                                     end
-                                    8'd1: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_arm_count);
-                                    8'd2: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_snoop_lo_count);
-                                    8'd3: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_snoop_hi_count);
-                                    8'd4: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_steal_count);
-                                    8'd5: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_defer_count);
-                                    8'd6: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_stbuf_full_count);
-                                    8'd7: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_dcls_sym_err_match_count);
-                                    8'd8: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_dcls_main_err_mismatch_count);
-                                    8'd9: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_dcls_shadow_err_mismatch_count);
+                                    8'd1:  write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_arm_count);
+                                    8'd2:  write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_snoop_lo_count);
+                                    8'd3:  write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_snoop_hi_count);
+                                    8'd4:  write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_steal_count);
+                                    8'd5:  write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_defer_count);
+                                    8'd6:  write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_stbuf_full_count);
+                                    8'd7:  write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_dcls_sym_err_match_count);
+                                    8'd8:  write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_dcls_main_err_mismatch_count);
+                                    8'd9:  write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_dcls_shadow_err_mismatch_count);
                                     8'd10: write_dccm_word(RDBK_SCRATCHPAD_ADDR, rdbk_dcls_dmi_rdata_mismatch_count);
+                                    8'd11: write_dccm_word(RDBK_SCRATCHPAD_ADDR, chaos_injected_cnt);
+                                    8'd12: write_dccm_word(RDBK_SCRATCHPAD_ADDR, chaos_resolved_err_cnt);
+                                    8'd13: write_dccm_word(RDBK_SCRATCHPAD_ADDR, 32'(chaos_first_fault_addr));
+                                    8'd14: write_dccm_word(RDBK_SCRATCHPAD_ADDR, fuzz_dma_trxn_cnt);
+                                    8'd15: write_dccm_word(RDBK_SCRATCHPAD_ADDR, wfi_halt_observed_cnt);
                                     default: write_dccm_word(RDBK_SCRATCHPAD_ADDR, 32'h0);
                                 endcase
                                 write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, mailbox_data[31:16]});
@@ -1678,6 +1932,10 @@ module tb_top
                 end
 
                 DMI_WR_CYCLE2: begin
+                    if (dmi_target_addr == DMI_ADDR_RDBK_STATUS) begin
+                        chaos_first_fault_captured <= 1'b0;
+                        chaos_first_fault_addr     <= '0;
+                    end
                     write_dccm_word(RDBK_SCRATCHPAD_ADDR, 32'h0);
                     write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, dmi_seq_id});
                     $display("[%0t ns] [TB] DMI write reg 0x%0h completed (seq=%0d)", $time, dmi_target_addr, dmi_seq_id);
@@ -1687,14 +1945,11 @@ module tb_top
                 default: dmi_fsm <= DMI_IDLE;
             endcase
 
-            // Top-Level DMA Slave Bus Stimulus Sequencer (WR_SYS_001, WR_SYS_002A, WR_SYS_002B)
-            // `RDBK_DMA_IDLE` waits for the trigger core store to enter LSU stage D (`rdbk_dma_trigger_store_in_d`)
-            // so the top-level AHB/AXI DMA slave transaction arrives at `dma_ctrl` on the exact cycle
-            // the core store drains from the store buffer (`stbuf_reqvld_any`) and arms write-readback.
-            if (rdbk_dma_stim_armed) begin
+            // Top-Level DMA Slave Bus Stimulus Sequencer (WR_SYS_001..002B & WR_FI_005 Autonomous Fuzzing)
+            if (rdbk_dma_bus_mux_en || fuzz_dma_stop_pending) begin
                 case (rdbk_dma_fsm)
                     RDBK_DMA_IDLE: begin
-                        if (rdbk_dma_trigger_store_in_d) begin
+                        if (rdbk_dma_stim_armed && rdbk_dma_trigger_store_in_d) begin
 `ifdef RV_BUILD_AHB_LITE
                             if (dma_hready_out) begin
                                 rdbk_dma_fsm <= RDBK_DMA_AHB_DATA;
@@ -1704,6 +1959,36 @@ module tb_top
 `elsif RV_BUILD_AXI4
                             rdbk_dma_fsm <= RDBK_DMA_AXI_DELAY;
 `endif
+                        end else if (fuzz_dma_stop_pending && ~rvtop_wrapper.rvtop.veer.dma_ctrl.dma_active) begin
+                            fuzz_dma_stop_pending <= 1'b0;
+                            write_dccm_word(RDBK_SCRATCHPAD_ADDR, fuzz_dma_trxn_cnt);
+                            write_dccm_word(RDBK_HANDSHAKE_ADDR, {16'h0, fuzz_dma_stop_seq_id});
+                            $display("[%0t ns] [TB] Mailbox 0xBE: Autonomous LFSR DMA traffic DISABLED (%0d trxns, seq=%0d)",
+                                     $time, fuzz_dma_trxn_cnt, fuzz_dma_stop_seq_id);
+                        end else if (fuzz_dma_en && ~fuzz_dma_stop_pending) begin
+                            fuzz_dma_lfsr <= {fuzz_dma_lfsr[30:0], 1'b0} ^ (fuzz_dma_lfsr[31] ? 32'h8020_0003 : 32'h0);
+                            if (fuzz_dma_delay_cnt == 4'd0) begin
+                                if (fuzz_dma_lfsr[0] == 1'b0) begin
+                                    // 50%: DMA Read from Active CPU Scratch Region (RDBK_FUZZ_CPU_BASE_ADDR + 0x000..0x1FC)
+                                    rdbk_dma_target_addr <= RDBK_FUZZ_CPU_BASE_ADDR + {23'h0, fuzz_dma_lfsr[7:1], 2'b00};
+                                    rdbk_dma_is_write    <= 1'b0;
+                                end else begin
+                                    // 50%: DMA R/W to Dedicated Autonomous DMA Region (RDBK_FUZZ_DMA_BASE_ADDR + 0x000..0x1FC)
+                                    rdbk_dma_target_addr <= RDBK_FUZZ_DMA_BASE_ADDR + {23'h0, fuzz_dma_lfsr[7:1], 2'b00};
+                                    rdbk_dma_is_write    <= fuzz_dma_lfsr[8];
+                                end
+                                fuzz_dma_wdata_word  <= fuzz_dma_lfsr ^ 32'h5A5A_C3C3;
+                                rdbk_dma_check_rdata <= 1'b0;
+                                fuzz_dma_delay_cnt   <= fuzz_dma_lfsr[12:9];
+                                fuzz_dma_trxn_cnt    <= fuzz_dma_trxn_cnt + 1;
+`ifdef RV_BUILD_AHB_LITE
+                                rdbk_dma_fsm         <= RDBK_DMA_AHB_ADDR_WAIT;
+`elsif RV_BUILD_AXI4
+                                rdbk_dma_fsm         <= RDBK_DMA_AXI_DELAY;
+`endif
+                            end else begin
+                                fuzz_dma_delay_cnt <= fuzz_dma_delay_cnt - 4'd1;
+                            end
                         end
                     end
 
@@ -1716,11 +2001,11 @@ module tb_top
 
                     RDBK_DMA_AHB_DATA: begin
                         if (dma_hready_out) begin
-                            if (dma_hresp != 1'b0) begin
+                            if ((dma_hresp != 1'b0) && ~fuzz_fault_en) begin
                                 $fatal(1, "[TB-DMA-AHB] Unexpected AHB error response (hresp=%0b) on addr 0x%08x",
                                        dma_hresp, rdbk_dma_target_addr);
                             end
-                            if (~rdbk_dma_is_write &&
+                            if (~rdbk_dma_is_write && rdbk_dma_check_rdata &&
                                 ((rdbk_dma_target_addr[2] ? dma_hrdata[63:32] : dma_hrdata[31:0]) != rdbk_dma_exp_rdata)) begin
                                 $fatal(1, "[TB-DMA-AHB] Read data mismatch on addr 0x%08x: expected 0x%08x, got 0x%08x",
                                        rdbk_dma_target_addr, rdbk_dma_exp_rdata,
@@ -1766,11 +2051,12 @@ module tb_top
                             end
                             rdbk_dma_fsm <= RDBK_DMA_WAIT_DONE;
                         end else if (~rdbk_dma_is_write && dma_axi_rvalid) begin
-                            if (dma_axi_rresp != 2'b00) begin
+                            if ((dma_axi_rresp != 2'b00) && ~fuzz_fault_en) begin
                                 $fatal(1, "[TB-DMA-AXI] Unexpected AXI read error response (rresp=%0b) on addr 0x%08x",
                                        dma_axi_rresp, rdbk_dma_target_addr);
                             end
-                            if ((rdbk_dma_target_addr[2] ? dma_axi_rdata[63:32] : dma_axi_rdata[31:0]) != rdbk_dma_exp_rdata) begin
+                            if (rdbk_dma_check_rdata &&
+                                ((rdbk_dma_target_addr[2] ? dma_axi_rdata[63:32] : dma_axi_rdata[31:0]) != rdbk_dma_exp_rdata)) begin
                                 $fatal(1, "[TB-DMA-AXI] Read data mismatch on addr 0x%08x: expected 0x%08x, got 0x%08x",
                                        rdbk_dma_target_addr, rdbk_dma_exp_rdata,
                                        (rdbk_dma_target_addr[2] ? dma_axi_rdata[63:32] : dma_axi_rdata[31:0]));
@@ -1897,6 +2183,56 @@ module tb_top
     endproperty
     assert_dccm_wr_rdbk_pend_retained_on_defer: assert property (p_dccm_wr_rdbk_pend_retained_on_defer)
         else $fatal(1, "[SVA] WR_SYS_002B/003B: dccm_wr_rdbk_pend_ff dropped while deferred");
+
+    // WR_PIPE_007: Whenever a D-stage CPU load is squashed by a pipeline flush (`flush_m_up`)
+    // or decode cancel (`~dec_i0_decode_d`) and no DMA request is active, `dccm_wr_rdbk_snoop_lo/hi`
+    // must remain deasserted (`1'b0`) so a cancelled D-stage load never falsely resolves readback.
+    property p_dccm_wr_rdbk_no_flushed_snoop;
+        @(posedge core_clk) disable iff (~rst_l_combined)
+        (rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff &&
+         (rvtop_wrapper.rvtop.veer.lsu.lsu_lsc_ctl.flush_m_up ||
+          ~rvtop_wrapper.rvtop.veer.lsu.lsu_p.valid) &&
+         ~rvtop_wrapper.rvtop.veer.lsu.dma_dccm_req)
+        |-> (~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_snoop_lo &&
+             ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_snoop_hi);
+    endproperty
+    assert_dccm_wr_rdbk_no_flushed_snoop: assert property (p_dccm_wr_rdbk_no_flushed_snoop)
+        else $fatal(1, "[SVA] WR_PIPE_007: Cancelled/flushed D-stage load falsely asserted dccm_wr_rdbk_snoop_lo/hi");
+
+    // WR_XFEAT_003: Whenever `dccm_wr_rdbk_pend_ff` is asserted, `lsu_active` and `active_state`
+    // must remain asserted (`1'b1`) and `halt_state` / `pause_state` must remain deasserted (`1'b0`),
+    // preventing `active_l2clk` / `active_clk` from gating before the write-readback check resolves.
+    property p_dccm_wr_rdbk_clk_gate_interlock;
+        @(posedge core_clk) disable iff (~rst_l_combined)
+        rvtop_wrapper.rvtop.veer.lsu.dccm_wr_rdbk_pend_ff
+        |-> (rvtop_wrapper.rvtop.veer.lsu_active &&
+             rvtop_wrapper.rvtop.veer.active_state &&
+             ~rvtop_wrapper.rvtop.veer.halt_state &&
+             ~rvtop_wrapper.rvtop.veer.pause_state);
+    endproperty
+    assert_dccm_wr_rdbk_clk_gate_interlock: assert property (p_dccm_wr_rdbk_clk_gate_interlock)
+        else $fatal(1, "[SVA] WR_XFEAT_003: Core entered halt/pause or gated active_state while dccm_wr_rdbk_pend_ff=1");
+
+    // WR_FI_005: During autonomous DMA co-simulation fuzzing without fault injection,
+    // `dccm_write_readback_error` must never assert falsely.
+    property p_dccm_wr_rdbk_fuzz_zero_fp;
+        @(posedge core_clk) disable iff (~rst_l_combined)
+        (fuzz_dma_en && ~fuzz_fault_en && ~chaos_fault_in_flight &&
+         ~dccm_wr_skip_armed && ~rdbk_addr_flip_armed && ~rdbk_ecc_snoop_flip_armed)
+        |-> ~rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_readback_error;
+    endproperty
+    assert_dccm_wr_rdbk_fuzz_zero_fp: assert property (p_dccm_wr_rdbk_fuzz_zero_fp)
+        else $fatal(1, "[SVA] WR_FI_005: Spurious dccm_write_readback_error during zero-fault co-simulation fuzzing");
+
+    // Phase B Chaos Monkey Scoreboard: Every fault injected on an armed store must assert
+    // `dccm_write_readback_error` when its write-readback window resolves (`dccm_wr_rdbk_active`).
+    property p_dccm_wr_rdbk_chaos_scoreboard;
+        @(posedge core_clk) disable iff (~rst_l_combined)
+        (chaos_fault_in_flight && rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_rdbk_active)
+        |-> rvtop_wrapper.rvtop.veer.lsu.dccm_ctl.dccm_wr_readback_error;
+    endproperty
+    assert_dccm_wr_rdbk_chaos_scoreboard: assert property (p_dccm_wr_rdbk_chaos_scoreboard)
+        else $fatal(1, "[SVA] Phase B Chaos Scoreboard: Injected write fault was missed by dccm_wr_readback_error");
 
 `ifdef RV_LOCKSTEP_ENABLE
     // WR_XFEAT_002 (DCLS Delay Pipeline Alignment): When `pt.LOCKSTEP_DELAY > 0`, the delayed main-core
@@ -3539,7 +3875,7 @@ veer_wrapper rvtop_wrapper (
     .dma_axi_wlast          (tb_dma_axi_active ? 1'b1               : lsu_axi_wlast),
 
     .dma_axi_bvalid         (dma_axi_bvalid),
-    .dma_axi_bready         (rdbk_dma_stim_armed ? 1'b1            : dma_axi_bready),
+    .dma_axi_bready         (rdbk_dma_bus_mux_en ? 1'b1            : dma_axi_bready),
     .dma_axi_bresp          (dma_axi_bresp),
     .dma_axi_bid            (),
 
@@ -3553,7 +3889,7 @@ veer_wrapper rvtop_wrapper (
     .dma_axi_arburst        (tb_dma_axi_active ? 2'b01              : lsu_axi_arburst),
 
     .dma_axi_rvalid         (dma_axi_rvalid),
-    .dma_axi_rready         (rdbk_dma_stim_armed ? 1'b1            : dma_axi_rready),
+    .dma_axi_rready         (rdbk_dma_bus_mux_en ? 1'b1            : dma_axi_rready),
     .dma_axi_rid            (),
     .dma_axi_rdata          (dma_axi_rdata),
     .dma_axi_rresp          (dma_axi_rresp),
@@ -3628,10 +3964,17 @@ veer_wrapper rvtop_wrapper (
     .mpc_reset_run_req      ( 1'b1),             // Start running after reset
     .debug_brkpt_status     (debug_brkpt_status),
 
+`ifdef RV_DCCM_WR_READBACK
+    .i_cpu_halt_req         ( i_cpu_halt_req | tb_wfi_halt_req ), // Async halt req to CPU
+    .o_cpu_halt_ack         ( o_cpu_halt_ack ),                   // core response to halt
+    .o_cpu_halt_status      ( o_cpu_halt_status ),                // 1'b1 indicates core is halted
+    .i_cpu_run_req          ( i_cpu_run_req  | tb_wfi_run_req ),  // Async restart req to CPU
+`else
     .i_cpu_halt_req         ( i_cpu_halt_req ),    // Async halt req to CPU
     .o_cpu_halt_ack         ( o_cpu_halt_ack ),    // core response to halt
     .o_cpu_halt_status      ( o_cpu_halt_status ), // 1'b1 indicates core is halted
     .i_cpu_run_req          ( i_cpu_run_req ),     // Async restart req to CPU
+`endif
     .o_debug_mode_status    ( o_debug_mode_status),
     .o_cpu_run_ack          ( o_cpu_run_ack ),     // Core response to run req
 
@@ -3806,7 +4149,7 @@ ahb_lsu_dma_bridge #(.pt(pt)) bridge (
     .s1_ahb_hwdata(dma_hwdata),
     .s1_ahb_hrdata(dma_hrdata),
 `ifdef RV_DCCM_WR_READBACK
-    .s1_ahb_hready(rdbk_dma_stim_armed ? 1'b1 : dma_hready_out),
+    .s1_ahb_hready(rdbk_dma_bus_mux_en ? 1'b1 : dma_hready_out),
 `else
     .s1_ahb_hready(dma_hready_out),
 `endif
@@ -3947,7 +4290,7 @@ axi_lsu_dma_bridge # (RV_MUX_BUS_TAG, RV_MUX_BUS_TAG) bridge(
     .s1_arready(dma_axi_arready),
 
 `ifdef RV_DCCM_WR_READBACK
-    .s1_rvalid(rdbk_dma_stim_armed ? 1'b0 : dma_axi_rvalid),
+    .s1_rvalid(rdbk_dma_bus_mux_en ? 1'b0 : dma_axi_rvalid),
 `else
     .s1_rvalid(dma_axi_rvalid),
 `endif
@@ -3964,7 +4307,7 @@ axi_lsu_dma_bridge # (RV_MUX_BUS_TAG, RV_MUX_BUS_TAG) bridge(
 
     .s1_bresp(dma_axi_bresp),
 `ifdef RV_DCCM_WR_READBACK
-    .s1_bvalid(rdbk_dma_stim_armed ? 1'b0 : dma_axi_bvalid),
+    .s1_bvalid(rdbk_dma_bus_mux_en ? 1'b0 : dma_axi_bvalid),
 `else
     .s1_bvalid(dma_axi_bvalid),
 `endif
@@ -4234,6 +4577,85 @@ task write_dccm_word_single_ecc_err(input [31:0] addr, input [31:0] val);
     slam_dccm_ram(addr, {riscv_ecc32(val), val ^ 32'h1});
 `endif
 endtask
+
+task automatic write_dccm_ram_bank_indx(input int bank, input int indx, input [38:0] data);
+`ifdef RV_DCCM_ENABLE
+    case (bank)
+        0: `DRAM(0)[indx] = data;
+        1: `DRAM(1)[indx] = data;
+`ifdef RV_DCCM_NUM_BANKS_4
+        2: `DRAM(2)[indx] = data;
+        3: `DRAM(3)[indx] = data;
+`endif
+`ifdef RV_DCCM_NUM_BANKS_8
+        2: `DRAM(2)[indx] = data;
+        3: `DRAM(3)[indx] = data;
+        4: `DRAM(4)[indx] = data;
+        5: `DRAM(5)[indx] = data;
+        6: `DRAM(6)[indx] = data;
+        7: `DRAM(7)[indx] = data;
+`endif
+        default: ;
+    endcase
+`endif
+endtask
+
+function automatic bit is_dccm_cell_different(input int bank, input int indx, input logic [38:0] new_codeword);
+    logic [38:0] cur_val;
+    cur_val = '0;
+`ifdef RV_DCCM_ENABLE
+    case (bank)
+        0: cur_val = `DRAM(0)[indx];
+        1: cur_val = `DRAM(1)[indx];
+`ifdef RV_DCCM_NUM_BANKS_4
+        2: cur_val = `DRAM(2)[indx];
+        3: cur_val = `DRAM(3)[indx];
+`endif
+`ifdef RV_DCCM_NUM_BANKS_8
+        2: cur_val = `DRAM(2)[indx];
+        3: cur_val = `DRAM(3)[indx];
+        4: cur_val = `DRAM(4)[indx];
+        5: cur_val = `DRAM(5)[indx];
+        6: cur_val = `DRAM(6)[indx];
+        7: cur_val = `DRAM(7)[indx];
+`endif
+        default: cur_val = '0;
+    endcase
+`endif
+    return (cur_val != new_codeword);
+endfunction
+
+always_comb begin
+    chaos_wren_skip_active = 1'b0;
+    chaos_fdata_flip_mask  = 39'h0;
+    if (chaos_inject_active) begin
+        case (fuzz_fault_lfsr[4:3])
+            2'b00: begin
+                // Write-enable (`dccm_wren`) skip when existing SRAM cell differs, else invert all bits
+                if (is_dccm_cell_different(int'(chaos_target_bank),
+                                           int'(el2_mem_export.dccm_addr_bank[chaos_target_bank]),
+                                           {el2_mem_export.dccm_wr_ecc_bank[chaos_target_bank],
+                                            el2_mem_export.dccm_wr_data_bank[chaos_target_bank]})) begin
+                    chaos_wren_skip_active = 1'b1;
+                end else begin
+                    chaos_fdata_flip_mask  = 39'h7F_FFFF_FFFF;
+                end
+            end
+            2'b01: begin
+                // Single-bit data flip in [31:0]
+                chaos_fdata_flip_mask = (39'h1 << fuzz_fault_lfsr[9:5]);
+            end
+            2'b10: begin
+                // Multi-bit data flip in [31:0]
+                chaos_fdata_flip_mask = {7'h0, (fuzz_fault_lfsr[31:16] | 16'h0003), (fuzz_fault_lfsr[15:0] ^ 16'hA5A5)};
+            end
+            2'b11: begin
+                // ECC syndrome bit flip in [38:32]
+                chaos_fdata_flip_mask = (39'h1 << (32 + (fuzz_fault_lfsr[7:5] % 7)));
+            end
+        endcase
+    end
+end
 `endif
 
 task dump_signature ();
@@ -4326,7 +4748,10 @@ if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable
         end
     end
 `ifdef RV_DCCM_WR_READBACK
-    wire [pt.DCCM_NUM_BANKS-1:0] dccm_wren_bank_masked = dccm_wr_skip_active ? '0 : el2_mem_export.dccm_wren_bank;
+    wire [pt.DCCM_NUM_BANKS-1:0] dccm_wren_bank_masked =
+        dccm_wr_skip_active ? '0 :
+        (el2_mem_export.dccm_wren_bank &
+         ~(chaos_wren_skip_active ? (pt.DCCM_NUM_BANKS'(1'b1) << chaos_target_bank) : '0));
 `else
     wire [pt.DCCM_NUM_BANKS-1:0] dccm_wren_bank_masked = el2_mem_export.dccm_wren_bank;
 `endif
@@ -4336,7 +4761,13 @@ if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable
         // Gating clken via access_fault disables all memory access (reads and writes) to the bank.
         assign dccm_clken_eff[i] = error_injection_mode.dccm_access_fault ? 1'b0 : el2_mem_export.dccm_clken[i];
         assign dccm_wren_eff[i] = error_injection_mode.dccm_wren_fault ? 1'b0 : dccm_wren_bank_masked[i];
+`ifdef RV_DCCM_WR_READBACK
+        assign dccm_addr_eff[i] = (error_injection_mode.dccm_addr_fault ||
+                                   (rdbk_addr_flip_active && el2_mem_export.dccm_wren_bank[i])) ?
+                                  (el2_mem_export.dccm_addr_bank[i] ^ 1'b1) : el2_mem_export.dccm_addr_bank[i];
+`else
         assign dccm_addr_eff[i] = error_injection_mode.dccm_addr_fault ? (el2_mem_export.dccm_addr_bank[i] ^ 1'b1) : el2_mem_export.dccm_addr_bank[i];
+`endif
     end
     for (genvar i=0; i<pt.DCCM_NUM_BANKS; i++) begin: dccm_loop
         // Only sanitize uninitialized SRAM 'X' bits when fault injection has been activated,
@@ -4344,7 +4775,8 @@ if (pt.DCCM_ENABLE == 1) begin: Gen_dccm_enable
         wire [38:0] dccm_bank_fdout_clean = x_sanitizer_en ? sanitize_x(dccm_bank_fdout[i]) : dccm_bank_fdout[i];
 `ifdef RV_DCCM_WR_READBACK
         assign dccm_wr_fdata_bank[i][pt.DCCM_FDATA_WIDTH-1:0] = {el2_mem_export.dccm_wr_ecc_bank[i], el2_mem_export.dccm_wr_data_bank[i]} ^ dccm_wdata_bitflip[i] ^
-                                                                ((rdbk_ecc_snoop_flip_active && el2_mem_export.dccm_wren_bank[i]) ? 39'h1 : 39'h0);
+                                                                ((rdbk_ecc_snoop_flip_active && el2_mem_export.dccm_wren_bank[i]) ? 39'h1 : 39'h0) ^
+                                                                ((chaos_inject_active && (i == chaos_target_bank)) ? chaos_fdata_flip_mask : 39'h0);
 `else
         assign dccm_wr_fdata_bank[i][pt.DCCM_FDATA_WIDTH-1:0] = {el2_mem_export.dccm_wr_ecc_bank[i], el2_mem_export.dccm_wr_data_bank[i]} ^ dccm_wdata_bitflip[i];
 `endif

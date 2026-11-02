@@ -29,6 +29,11 @@
  * 5. Phase 5: ECC 1-Bit Correction Steal Deferral (WR_SYS_003B #512) - verify a
  *    real 1-bit ECC correction write-back (`ld_single_ecc_error_r_ff`, `mdccmect` + 1)
  *    defers a concurrent core readback steal (`defer >= 1`, `steal >= 1`) to the next cycle.
+ * 6. Phase 6: Low-Power `wfi` & Clock-Gating Interlock (WR_XFEAT_003 #572) - verify
+ *    that entering low-power halt/pause immediately after a DCCM store via `mpmc` (`0x7c6`),
+ *    `mcpc` (`0x7c2`) + `wfi`, or external `i_cpu_halt_req` (`0xBD`) holds `lsu_c2_dc1_clk`
+ *    active via `lsu_Active` until `dccm_wr_rdbk_pend_ff` resolves via steal, and catches
+ *    fault-injected (`0xB0`) stores before the clock gates.
  */
 
 #include <stdbool.h>
@@ -39,6 +44,7 @@
 extern volatile uint32_t tohost;
 
 // Dedicated non-colliding mailbox opcodes
+#define MAILBOX_CMD_ARM_WR_SKIP        0xB0u
 #define MAILBOX_CMD_DMI_READ           0xB1u
 #define MAILBOX_CMD_DMI_WRITE          0xB2u
 #define MAILBOX_CMD_GET_PULSES         0xB4u
@@ -48,6 +54,7 @@ extern volatile uint32_t tohost;
 #define MAILBOX_CMD_ARM_ECC_SNOOP      0xB8u
 #define MAILBOX_CMD_ARM_ECC_STEAL      0xB9u
 #define MAILBOX_CMD_RDBK_COUNTERS      0xBBu
+#define MAILBOX_CMD_ARM_WFI_WAKEUP     0xBDu
 
 #define RDBK_CNT_RESET                 0u
 #define RDBK_CNT_ARM                   1u
@@ -55,6 +62,7 @@ extern volatile uint32_t tohost;
 #define RDBK_CNT_SNOOP_HI              3u
 #define RDBK_CNT_STEAL                 4u
 #define RDBK_CNT_DEFER                 5u
+#define RDBK_CNT_WFI_HALT              15u
 
 #define DMI_REG_DMCONTROL              0x10u
 #define DMI_REG_FAULT_STATUS           0x48u
@@ -73,6 +81,7 @@ extern volatile uint32_t tohost;
 #define TARGET_ADDR_PHASE3             (DCCM_TEST_BASE + 0x0420u)
 #define TARGET_ADDR_PHASE4             (DCCM_TEST_BASE + 0x0430u)
 #define TARGET_ADDR_PHASE5             (DCCM_TEST_BASE + 0x0440u)
+#define TARGET_ADDR_PHASE6             (DCCM_TEST_BASE + 0x0450u)
 
 static volatile uint32_t *const kScratchpad = (volatile uint32_t *)COMM_SCRATCHPAD_ADDR;
 static volatile uint32_t *const kHandshake  = (volatile uint32_t *)COMM_HANDSHAKE_ADDR;
@@ -400,8 +409,119 @@ int main(void) {
   printf("[PASS] Phase 5 complete: Real ECC 1-bit correction steal deferral (defer=%u, steal=%u) & SRAM scrub verified.\n\n",
          p5_defer, p5_steal);
 
+  // -------------------------------------------------------------
+  // Phase 6: Low-Power `wfi` & Clock-Gating Interlock (WR_XFEAT_003 #572)
+  // -------------------------------------------------------------
+  printf("[TEST] Phase 6: Low-Power wfi & Clock-Gating Interlock (WR_XFEAT_003 #572)...\n");
+  volatile uint32_t *target_p6 = (volatile uint32_t *)TARGET_ADDR_PHASE6;
+  *target_p6 = 0x13572468u;
+  __asm__ volatile("fence rw, rw" ::: "memory");
+
+  for (int subcase = 0; subcase < 3; subcase++) {
+    for (int fault_mode = 0; fault_mode < 2; fault_mode++) {
+      uint32_t pulses_before = get_error_pulse_count();
+      uint32_t val_p6        = 0x60000000u | ((uint32_t)subcase << 8) | (uint32_t)fault_mode;
+
+      tb_reset_rdbk_counters();
+      if (subcase == 0) {
+        // Subcase 6A: Firmware `mpmc` (`0x7c6`) halt immediately after store; woken by `0xBD` mode 1
+        (void)send_tb_command(MAILBOX_CMD_ARM_WFI_WAKEUP, 1u);
+      } else if (subcase == 2) {
+        // Subcase 6C: External `i_cpu_halt_req` asserted on `dccm_wr_rdbk_arm` (`0xBD` mode 2)
+        (void)send_tb_command(MAILBOX_CMD_ARM_WFI_WAKEUP, 2u);
+      }
+      if (fault_mode == 1) {
+        arm_phase(MAILBOX_CMD_ARM_WR_SKIP);
+      }
+
+      if (subcase == 0) {
+        __asm__ volatile(
+            ".balign 16\n\t"
+            "sw     %[val], 0(%[addr])\n\t"
+            "csrrwi x0, 0x7c6, 1\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            :
+            : [val] "r"(val_p6), [addr] "r"(target_p6)
+            : "memory");
+      } else if (subcase == 1) {
+        // Subcase 6B: Pause counter `mcpc` (`0x7c2`) + `wfi` immediately after store
+        __asm__ volatile(
+            ".balign 16\n\t"
+            "sw     %[val], 0(%[addr])\n\t"
+            "csrrwi x0, 0x7c2, 16\n\t"
+            "wfi\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            :
+            : [val] "r"(val_p6), [addr] "r"(target_p6)
+            : "memory");
+      } else {
+        // Subcase 6C: External `i_cpu_halt_req` triggered on `dccm_wr_rdbk_arm`
+        __asm__ volatile(
+            ".balign 16\n\t"
+            "sw     %[val], 0(%[addr])\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            :
+            : [val] "r"(val_p6), [addr] "r"(target_p6)
+            : "memory");
+      }
+      __asm__ volatile("fence rw, rw" ::: "memory");
+
+      uint32_t p6_arm       = tb_get_rdbk_counter(RDBK_CNT_ARM);
+      uint32_t p6_steal     = tb_get_rdbk_counter(RDBK_CNT_STEAL);
+      uint32_t p6_halt_obs  = tb_get_rdbk_counter(RDBK_CNT_WFI_HALT);
+      uint32_t pulses_after = get_error_pulse_count();
+
+      if (p6_arm == 0u || p6_steal == 0u || p6_halt_obs == 0u) {
+        printf("[FAIL] Phase 6 (sub=%d, fault=%d): Counter check failed (arm=%u, steal=%u, halt_obs=%u)!\n",
+               subcase, fault_mode, p6_arm, p6_steal, p6_halt_obs);
+        tohost = 1;
+        return 6;
+      }
+
+      if (fault_mode == 0) {
+        if (pulses_after != pulses_before || *target_p6 != val_p6) {
+          printf("[FAIL] Phase 6 (sub=%d, clean): Unexpected error pulse or memory mismatch!\n",
+                 subcase);
+          tohost = 1;
+          return 6;
+        }
+      } else {
+        uint32_t dmi_status_p6 = send_tb_command(MAILBOX_CMD_DMI_READ, DMI_REG_FAULT_STATUS);
+        if (pulses_after != pulses_before + 1u ||
+            (dmi_status_p6 & 0x80000000u) == 0u ||
+            (dmi_status_p6 & DCCM_ADDR_MASK) != (TARGET_ADDR_PHASE6 & DCCM_ADDR_MASK)) {
+          printf("[FAIL] Phase 6 (sub=%d, fault): Fault capture failed (pulses=%u, dmi=0x%08x)!\n",
+                 subcase, pulses_after - pulses_before, dmi_status_p6);
+          tohost = 1;
+          return 6;
+        }
+        (void)send_tb_command(MAILBOX_CMD_DMI_WRITE, DMI_REG_FAULT_STATUS);
+        *target_p6 = val_p6;
+        __asm__ volatile("fence rw, rw" ::: "memory");
+      }
+    }
+  }
+  printf("[PASS] Phase 6 complete: Low-power halt/pause clock-gating interlock (mpmc, mcpc+wfi, i_cpu_halt_req) verified.\n\n");
+
   printf("================================================================\n");
-  printf("=== ALL 5 PHASES PASSED: System Integration (DMA & ECC) Verified ===\n");
+  printf("=== ALL 6 PHASES PASSED: System Integration (DMA, ECC & WFI) Verified ===\n");
   printf("================================================================\n");
   printf("TEST_PASSED\n");
 

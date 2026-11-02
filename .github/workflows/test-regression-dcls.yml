@@ -321,7 +321,7 @@ jobs:
         # priv level of these DCCM/ECC tests is enough to exercise it without re-running the
         # full matrix. Sweeps DCLS delay values ("0".."4", sampling 2 on PRs via select_pr_tests.py)
         # to cover both zero-delay and delayed lockstep comparator pipelines.
-        test: ["dccm_wr_readback", "dccm_wr_readback_hazards", "dccm_wr_readback_random", "dccm_wr_readback_fault_dmi", "dccm_wr_readback_sys_integ", "hello_world_dccm", "ecc"]
+        test: ["dccm_wr_readback", "dccm_wr_readback_hazards", "dccm_wr_readback_random", "dccm_wr_readback_fault_dmi", "dccm_wr_readback_sys_integ", "dccm_wr_readback_fuzz", "hello_world_dccm", "ecc"]
         coverage: ["all"]
         priv: ["0"]
         delay: ${{ fromJSON(needs.generate-matrix.outputs.dccm_wr_readback_delays) }}

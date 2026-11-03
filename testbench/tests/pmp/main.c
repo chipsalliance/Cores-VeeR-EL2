@@ -128,12 +128,14 @@ void __attribute__((noinline, section(".area.code"))) test_exec () {
 // ============================================================================
 
 volatile unsigned long trap_count = 0;
+volatile int log_traps = 1;
 
 int trap_handler (const struct fault* fault) {
-    printf(" Trap! mcause=0x%08x, mepc=0x%08X, sp=0x%08X\n", fault->mcause, fault->mepc, fault->r[2]);
+    if (log_traps)
+        printf(" Trap! mcause=0x%08x, mepc=0x%08X, sp=0x%08X\n", fault->mcause, fault->mepc, fault->r[2]);
 
     // Terminate the simulation if too many traps got triggered
-    if (++trap_count > 100) {
+    if (++trap_count > 200) {
         printf("Too many traps, aborting...\n");
         _exit(-1);
     }
@@ -177,7 +179,7 @@ int trap_handler (const struct fault* fault) {
 // ============================================================================
 
 int main () {
-    printf("Hello VeeR (M mode)\n");
+    printf("Hello VeeR (M mode) (%d PMP entries)\n", RV_PMP_ENTRIES);
 
 #if RV_SMEPMP
     printf("VeeR has Smepmp\n");
@@ -585,6 +587,58 @@ int main () {
     END_TRY;
 
     // .......................................................................
+
+    // .......................................................................
+    printf("%02d - Testing access to possibly unimplemented PMP entry CSRs\n", tid++);
+    int this_failed = 0, v = 0;
+    log_traps = 0;
+
+    printf("trying accesses to implemented PMP CSRs...\n");
+    TRY {
+        for (int i = 0; i < RV_PMP_ENTRIES / 4; i++) {
+            pmp_read_pmpcfg(i, &v);
+            pmp_write_pmpcfg(i, &v);
+        }
+        for (int i = 0; i < RV_PMP_ENTRIES; i++) {
+            pmp_read_pmpaddr(i, &v);
+            pmp_write_pmpaddr(i, &v);
+        }
+    } CATCH {
+        printf("access that should succeed failed\n");
+        this_failed = 1;
+    }
+    END_TRY;
+
+    printf("trying accesses to unimplemented PMP CSRs...\n");
+
+    typedef int (*pmp_fn_t)(unsigned int, uintptr_t*);
+    pmp_fn_t pmpcfg_fns[2] = { pmp_read_pmpcfg, pmp_write_pmpcfg },
+             pmpaddr_fns[2] = { pmp_read_pmpaddr, pmp_write_pmpaddr };
+
+    for (int fn = 0; fn < 2; fn++)
+        for (int i = RV_PMP_ENTRIES / 4; i < 16; i++) {
+            TRY {
+                pmpcfg_fns[fn](i, &v);
+                this_failed = 1;
+                printf("access did not trap for PMPCFG%d!\n", i);
+            } END_TRY;
+        }
+
+    for (int fn = 0; fn < 2; fn++)
+        for (int i = RV_PMP_ENTRIES; i < 64; i++) {
+            TRY {
+                pmpaddr_fns[fn](i, &v);
+                this_failed = 1;
+                printf("access did not trap for PMPADDR%d!\n", i);
+            } END_TRY;
+        }
+   
+    log_traps = 1;
+    if (this_failed) {
+        printf(" fail\n");
+        failed++;
+    } else printf(" pass\n");
+    // ...............................................................
 
     printf(" %d/%d passed\n", tid - failed, tid);
     int res = (failed == 0) ? 0 : -1;

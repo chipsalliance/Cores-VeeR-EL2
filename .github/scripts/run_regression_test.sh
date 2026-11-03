@@ -148,7 +148,7 @@ run_regression_test(){
     touch ${LOG}
     DIR="run_${NAME}_${BUS}_${COVERAGE}_${USER_MODE}_ecc_${ECC_VAL}"
 
-    if [ "$NAME" = "pmp_random" ] || [ "$NAME" = "dcls_mubi_sweep" ]; then
+    if [ "$NAME" = "pmp_random" ] || [ "$NAME" = "dcls_mubi_sweep" ] || [ "$NAME" = "csr_access" ]; then
         EXTRA_ARGS='TB_MAX_CYCLES=8000000'
     else
         EXTRA_ARGS=

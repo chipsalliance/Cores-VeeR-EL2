@@ -7,6 +7,10 @@ htif_mem: Memory.MappedMemory @sysbus 0xD0580000
 cpu: CPU.VeeR_EL2 @ sysbus
     cpuType: "rv32imc_zicsr_zifencei_zba_zbb_zbc_zbs_Smepmp"
     hartId: 0
+    pmpEntryCount: 16
+
+pic: IRQControllers.VeeR_EL2_PIC @ sysbus
+    cpu: cpu
 
 dhry_mem: Memory.MappedMemory @sysbus 0xF0040000
     size: 0x10000

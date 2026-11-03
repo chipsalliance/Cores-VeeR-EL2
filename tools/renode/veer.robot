@@ -56,10 +56,25 @@ Should Have All CSRs
     Check CSR Access                0x747 'mseccfg'
     Check CSR Access                0x757 'mseccfgh'
     Check CSR Access                0x3A0 'pmpcfg0'
+    Check CSR Access                0x3A1 'pmpcfg1'
+    Check CSR Access                0x3A2 'pmpcfg2'
+    Check CSR Access                0x3A3 'pmpcfg3'
     Check CSR Access                0x3B0 'pmpaddr0'
-    Check CSR Access                0x3C0 'pmpaddr16'
-    Check CSR Access                0x3D0 'pmpaddr32'
-    Check CSR Access                0x3E0 'pmpaddr48'
+    Check CSR Access                0x3B1 'pmpaddr1'
+    Check CSR Access                0x3B2 'pmpaddr2'
+    Check CSR Access                0x3B3 'pmpaddr3'
+    Check CSR Access                0x3B4 'pmpaddr4'
+    Check CSR Access                0x3B5 'pmpaddr5'
+    Check CSR Access                0x3B6 'pmpaddr6'
+    Check CSR Access                0x3B7 'pmpaddr7'
+    Check CSR Access                0x3B8 'pmpaddr8'
+    Check CSR Access                0x3B9 'pmpaddr9'
+    Check CSR Access                0x3BA 'pmpaddr10'
+    Check CSR Access                0x3BB 'pmpaddr11'
+    Check CSR Access                0x3BC 'pmpaddr12'
+    Check CSR Access                0x3BD 'pmpaddr13'
+    Check CSR Access                0x3BE 'pmpaddr14'
+    Check CSR Access                0x3BF 'pmpaddr15'
     Check CSR Access                0xC00 'cycle'
     Check CSR Access                0xC80 'cycleh'
     Check CSR Access                0xC02 'instret'
@@ -144,10 +159,25 @@ Should Have All CSRs
     Check CSR Access                0x747 'mseccfg'  expect_trap=${True}
     Check CSR Access                0x757 'mseccfgh'  expect_trap=${True}
     Check CSR Access                0x3A0 'pmpcfg0'  expect_trap=${True}
+    Check CSR Access                0x3A1 'pmpcfg1'  expect_trap=${True}
+    Check CSR Access                0x3A2 'pmpcfg2'  expect_trap=${True}
+    Check CSR Access                0x3A3 'pmpcfg3'  expect_trap=${True}
     Check CSR Access                0x3B0 'pmpaddr0'  expect_trap=${True}
-    Check CSR Access                0x3C0 'pmpaddr16'  expect_trap=${True}
-    Check CSR Access                0x3D0 'pmpaddr32'  expect_trap=${True}
-    Check CSR Access                0x3E0 'pmpaddr48'  expect_trap=${True}
+    Check CSR Access                0x3B1 'pmpaddr1'  expect_trap=${True}
+    Check CSR Access                0x3B2 'pmpaddr2'  expect_trap=${True}
+    Check CSR Access                0x3B3 'pmpaddr3'  expect_trap=${True}
+    Check CSR Access                0x3B4 'pmpaddr4'  expect_trap=${True}
+    Check CSR Access                0x3B5 'pmpaddr5'  expect_trap=${True}
+    Check CSR Access                0x3B6 'pmpaddr6'  expect_trap=${True}
+    Check CSR Access                0x3B7 'pmpaddr7'  expect_trap=${True}
+    Check CSR Access                0x3B8 'pmpaddr8'  expect_trap=${True}
+    Check CSR Access                0x3B9 'pmpaddr9'  expect_trap=${True}
+    Check CSR Access                0x3BA 'pmpaddr10'  expect_trap=${True}
+    Check CSR Access                0x3BB 'pmpaddr11'  expect_trap=${True}
+    Check CSR Access                0x3BC 'pmpaddr12'  expect_trap=${True}
+    Check CSR Access                0x3BD 'pmpaddr13'  expect_trap=${True}
+    Check CSR Access                0x3BE 'pmpaddr14'  expect_trap=${True}
+    Check CSR Access                0x3BF 'pmpaddr15'  expect_trap=${True}
     Check CSR Access                0xC00 'cycle'
     Check CSR Access                0xC80 'cycleh'
     Check CSR Access                0xC02 'instret'
@@ -699,6 +729,10 @@ Should Implement PMP
     Wait For Line On Uart           testing from M mode...
     Wait For Line On Uart           Trap! mcause=0x00000001, mepc=0x80004040, sp=0x80007E44
     Wait For Line On Uart           pass
-    Wait For Line On Uart           36/36 passed
+    Wait For Line On Uart           36 - Testing access to possibly unimplemented PMP entry CSRs
+    Wait For Line On Uart           trying accesses to implemented PMP CSRs...
+    Wait For Line On Uart           trying accesses to unimplemented PMP CSRs...
+    Wait For Line On Uart           pass
+    Wait For Line On Uart           37/37 passed
 
     Wait For Line On Uart           Finished: PASSED  matchNextLine=false

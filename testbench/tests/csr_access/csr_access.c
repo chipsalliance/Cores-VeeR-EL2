@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include "defines.h"
 
 #define _read_csr(csr) ({ \
     unsigned long res; \
@@ -54,11 +55,92 @@ static const struct csr_t g_read_csrs[] = {
     {0x757, "mseccfgh"},
 
     // PMP
+#if RV_PMP_ENTRIES > 0
     {0x3A0, "pmpcfg0"},
+    {0x3A1, "pmpcfg1"},
+    {0x3A2, "pmpcfg2"},
+    {0x3A3, "pmpcfg3"},
+#if RV_PMP_ENTRIES == 64
+    {0x3A4, "pmpcfg4"},
+    {0x3A5, "pmpcfg5"},
+    {0x3A6, "pmpcfg6"},
+    {0x3A7, "pmpcfg7"},
+    {0x3A8, "pmpcfg8"},
+    {0x3A9, "pmpcfg9"},
+    {0x3AA, "pmpcfg10"},
+    {0x3AB, "pmpcfg11"},
+    {0x3AC, "pmpcfg12"},
+    {0x3AD, "pmpcfg13"},
+    {0x3AE, "pmpcfg14"},
+    {0x3AF, "pmpcfg15"},
+#endif
     {0x3B0, "pmpaddr0"},
+    {0x3B1, "pmpaddr1"},
+    {0x3B2, "pmpaddr2"},
+    {0x3B3, "pmpaddr3"},
+    {0x3B4, "pmpaddr4"},
+    {0x3B5, "pmpaddr5"},
+    {0x3B6, "pmpaddr6"},
+    {0x3B7, "pmpaddr7"},
+    {0x3B8, "pmpaddr8"},
+    {0x3B9, "pmpaddr9"},
+    {0x3BA, "pmpaddr10"},
+    {0x3BB, "pmpaddr11"},
+    {0x3BC, "pmpaddr12"},
+    {0x3BD, "pmpaddr13"},
+    {0x3BE, "pmpaddr14"},
+    {0x3BF, "pmpaddr15"},
+#if RV_PMP_ENTRIES == 64
     {0x3C0, "pmpaddr16"},
+    {0x3C1, "pmpaddr17"},
+    {0x3C2, "pmpaddr18"},
+    {0x3C3, "pmpaddr19"},
+    {0x3C4, "pmpaddr20"},
+    {0x3C5, "pmpaddr21"},
+    {0x3C6, "pmpaddr22"},
+    {0x3C7, "pmpaddr23"},
+    {0x3C8, "pmpaddr24"},
+    {0x3C9, "pmpaddr25"},
+    {0x3CA, "pmpaddr26"},
+    {0x3CB, "pmpaddr27"},
+    {0x3CC, "pmpaddr28"},
+    {0x3CD, "pmpaddr29"},
+    {0x3CE, "pmpaddr30"},
+    {0x3CF, "pmpaddr31"},
     {0x3D0, "pmpaddr32"},
+    {0x3D1, "pmpaddr33"},
+    {0x3D2, "pmpaddr34"},
+    {0x3D3, "pmpaddr35"},
+    {0x3D4, "pmpaddr36"},
+    {0x3D5, "pmpaddr37"},
+    {0x3D6, "pmpaddr38"},
+    {0x3D7, "pmpaddr39"},
+    {0x3D8, "pmpaddr40"},
+    {0x3D9, "pmpaddr41"},
+    {0x3DA, "pmpaddr42"},
+    {0x3DB, "pmpaddr43"},
+    {0x3DC, "pmpaddr44"},
+    {0x3DD, "pmpaddr45"},
+    {0x3DE, "pmpaddr46"},
+    {0x3DF, "pmpaddr47"},
     {0x3E0, "pmpaddr48"},
+    {0x3E1, "pmpaddr49"},
+    {0x3E2, "pmpaddr50"},
+    {0x3E3, "pmpaddr51"},
+    {0x3E4, "pmpaddr52"},
+    {0x3E5, "pmpaddr53"},
+    {0x3E6, "pmpaddr54"},
+    {0x3E7, "pmpaddr55"},
+    {0x3E8, "pmpaddr56"},
+    {0x3E9, "pmpaddr57"},
+    {0x3EA, "pmpaddr58"},
+    {0x3EB, "pmpaddr59"},
+    {0x3EC, "pmpaddr60"},
+    {0x3ED, "pmpaddr61"},
+    {0x3EE, "pmpaddr62"},
+    {0x3EF, "pmpaddr63"},
+#endif
+#endif
 
     {0xC00, "cycle"},
     {0xC80, "cycleh"},
@@ -178,10 +260,85 @@ unsigned long read_csr (uint32_t addr) {
         case 0xC82: val = _read_csr(0xC82); break;
 
         case 0x3A0: val = _read_csr(0x3A0); break;
+        case 0x3A1: val = _read_csr(0x3A1); break;
+        case 0x3A2: val = _read_csr(0x3A2); break;
+        case 0x3A3: val = _read_csr(0x3A3); break;
+        case 0x3A4: val = _read_csr(0x3A4); break;
+        case 0x3A5: val = _read_csr(0x3A5); break;
+        case 0x3A6: val = _read_csr(0x3A6); break;
+        case 0x3A7: val = _read_csr(0x3A7); break;
+        case 0x3A8: val = _read_csr(0x3A8); break;
+        case 0x3A9: val = _read_csr(0x3A9); break;
+        case 0x3AA: val = _read_csr(0x3AA); break;
+        case 0x3AB: val = _read_csr(0x3AB); break;
+        case 0x3AC: val = _read_csr(0x3AC); break;
+        case 0x3AD: val = _read_csr(0x3AD); break;
+        case 0x3AE: val = _read_csr(0x3AE); break;
+        case 0x3AF: val = _read_csr(0x3AF); break;
         case 0x3B0: val = _read_csr(0x3B0); break;
+        case 0x3B1: val = _read_csr(0x3B1); break;
+        case 0x3B2: val = _read_csr(0x3B2); break;
+        case 0x3B3: val = _read_csr(0x3B3); break;
+        case 0x3B4: val = _read_csr(0x3B4); break;
+        case 0x3B5: val = _read_csr(0x3B5); break;
+        case 0x3B6: val = _read_csr(0x3B6); break;
+        case 0x3B7: val = _read_csr(0x3B7); break;
+        case 0x3B8: val = _read_csr(0x3B8); break;
+        case 0x3B9: val = _read_csr(0x3B9); break;
+        case 0x3BA: val = _read_csr(0x3BA); break;
+        case 0x3BB: val = _read_csr(0x3BB); break;
+        case 0x3BC: val = _read_csr(0x3BC); break;
+        case 0x3BD: val = _read_csr(0x3BD); break;
+        case 0x3BE: val = _read_csr(0x3BE); break;
+        case 0x3BF: val = _read_csr(0x3BF); break;
         case 0x3C0: val = _read_csr(0x3C0); break;
+        case 0x3C1: val = _read_csr(0x3C1); break;
+        case 0x3C2: val = _read_csr(0x3C2); break;
+        case 0x3C3: val = _read_csr(0x3C3); break;
+        case 0x3C4: val = _read_csr(0x3C4); break;
+        case 0x3C5: val = _read_csr(0x3C5); break;
+        case 0x3C6: val = _read_csr(0x3C6); break;
+        case 0x3C7: val = _read_csr(0x3C7); break;
+        case 0x3C8: val = _read_csr(0x3C8); break;
+        case 0x3C9: val = _read_csr(0x3C9); break;
+        case 0x3CA: val = _read_csr(0x3CA); break;
+        case 0x3CB: val = _read_csr(0x3CB); break;
+        case 0x3CC: val = _read_csr(0x3CC); break;
+        case 0x3CD: val = _read_csr(0x3CD); break;
+        case 0x3CE: val = _read_csr(0x3CE); break;
+        case 0x3CF: val = _read_csr(0x3CF); break;
         case 0x3D0: val = _read_csr(0x3D0); break;
+        case 0x3D1: val = _read_csr(0x3D1); break;
+        case 0x3D2: val = _read_csr(0x3D2); break;
+        case 0x3D3: val = _read_csr(0x3D3); break;
+        case 0x3D4: val = _read_csr(0x3D4); break;
+        case 0x3D5: val = _read_csr(0x3D5); break;
+        case 0x3D6: val = _read_csr(0x3D6); break;
+        case 0x3D7: val = _read_csr(0x3D7); break;
+        case 0x3D8: val = _read_csr(0x3D8); break;
+        case 0x3D9: val = _read_csr(0x3D9); break;
+        case 0x3DA: val = _read_csr(0x3DA); break;
+        case 0x3DB: val = _read_csr(0x3DB); break;
+        case 0x3DC: val = _read_csr(0x3DC); break;
+        case 0x3DD: val = _read_csr(0x3DD); break;
+        case 0x3DE: val = _read_csr(0x3DE); break;
+        case 0x3DF: val = _read_csr(0x3DF); break;
         case 0x3E0: val = _read_csr(0x3E0); break;
+        case 0x3E1: val = _read_csr(0x3E1); break;
+        case 0x3E2: val = _read_csr(0x3E2); break;
+        case 0x3E3: val = _read_csr(0x3E3); break;
+        case 0x3E4: val = _read_csr(0x3E4); break;
+        case 0x3E5: val = _read_csr(0x3E5); break;
+        case 0x3E6: val = _read_csr(0x3E6); break;
+        case 0x3E7: val = _read_csr(0x3E7); break;
+        case 0x3E8: val = _read_csr(0x3E8); break;
+        case 0x3E9: val = _read_csr(0x3E9); break;
+        case 0x3EA: val = _read_csr(0x3EA); break;
+        case 0x3EB: val = _read_csr(0x3EB); break;
+        case 0x3EC: val = _read_csr(0x3EC); break;
+        case 0x3ED: val = _read_csr(0x3ED); break;
+        case 0x3EE: val = _read_csr(0x3EE); break;
+        case 0x3EF: val = _read_csr(0x3EF); break;
 
         case 0x747: val = _read_csr(0x747); break;
         case 0x757: val = _read_csr(0x757); break;

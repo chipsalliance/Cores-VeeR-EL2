@@ -15,6 +15,9 @@ build --crosstool_top=@llvm_toolchain//:toolchain
 build --per_file_copt=external/abc\+.*\.c$@-stdlib=libc++
 build --incompatible_disallow_empty_glob=true
 
+# Build OpenRoad with GUI support
+build --@@openroad+//:platform=gui
+
 # Mirrors for flaky downloads (e.g. ftp.gnu.org)
 common --downloader_config=tools/bazel_downloader.cfg
 

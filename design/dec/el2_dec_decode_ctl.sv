@@ -202,6 +202,14 @@ import el2_pkg::*;
    input  logic       debug_mode_status,              // core in the debug halt state
    input  logic       cpu_halt_status,                // core in the PMU/FW halt state
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+   output logic [31:0] recovery_pause_rddata,
+   output logic        recovery_pause_state_rddata,
+   input  logic        recovery_pause_write,
+   input  logic [31:0] recovery_pause_wrdata,
+   input  logic        recovery_pause_state_wrdata,
+`endif
+
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
    /*pragma coverage off*/
    input  logic       scan_mode
@@ -971,7 +979,11 @@ end : cam_array
    assign clear_pause = (dec_tlu_flush_lower_r & ~dec_tlu_flush_pause_r & ~take_halt & ~resume_halt & ~resume_debug_halt) |
                         (pause_state & (write_csr_data[31:1] == 31'b0));        // if 0 or 1 then exit pause state - 1 cycle pause
 
-   assign pause_state_in = (dec_tlu_wr_pause_r | pause_state) & ~clear_pause;
+   assign pause_state_in = (dec_tlu_wr_pause_r | pause_state) & ~clear_pause
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+          | (recovery_pause_state_wrdata & recovery_pause_write)
+`endif
+  ;
 
 
 
@@ -984,13 +996,26 @@ end : cam_array
 // end pause
 
 
-   assign csr_data_wen = (((csr_clr_x | csr_set_x | csr_write_x) & csr_read_x) | dec_tlu_wr_pause_r | pause_state) & ~(debug_mode_status | cpu_halt_status);
+   assign csr_data_wen = (((csr_clr_x | csr_set_x | csr_write_x) & csr_read_x) | dec_tlu_wr_pause_r | pause_state) & ~(debug_mode_status | cpu_halt_status)
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+          | recovery_pause_write
+`endif
+   ;
 
-   assign write_csr_data_in[31:0] = (pause_state)         ? (write_csr_data[31:0] - 32'b1) :
-                                    (dec_tlu_wr_pause_r) ? dec_csr_wrdata_r[31:0] : write_csr_data_x[31:0];
+   assign write_csr_data_in[31:0] =
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+                                    (recovery_pause_write) ? recovery_pause_wrdata :
+`endif
+                                    (pause_state)         ? (write_csr_data[31:0] - 32'b1) :
+                                    (dec_tlu_wr_pause_r) ? dec_csr_wrdata_r[31:0] :
+                                    write_csr_data_x[31:0];
 
    // will hold until write-back at which time the CSR will be updated while GPR is possibly written with prior CSR
    rvdffe #(32) write_csr_ff (.*, .clk(free_l2clk), .en(csr_data_wen), .din(write_csr_data_in[31:0]), .dout(write_csr_data[31:0]));
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+   assign recovery_pause_rddata = write_csr_data;
+   assign recovery_pause_state_rddata = pause_state;
+`endif
 
    assign pause_stall = pause_state;
 

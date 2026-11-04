@@ -745,6 +745,13 @@ module el2_tmr_complex
   logic [11:0]             recovery_csr_rdaddr_veer[3];
   logic [31:0]             recovery_csr_rddata_veer[3];
 
+  // MCPC recovery signals
+  logic [31:0] recovery_pause_rddata_veer[3];
+  logic        recovery_pause_state_rddata_veer[3];
+  logic        recovery_pause_write_veer[3];
+  logic [31:0] recovery_pause_wrdata_veer[3];
+  logic        recovery_pause_state_wrdata_veer[3];
+
   // VeeR <-> Memories interfaces
   el2_mem_if local_ccm_export();
   el2_mem_if mem_export_veer[3]();
@@ -1190,6 +1197,21 @@ module el2_tmr_complex
     logic [31:0] recovery_csr_rddata_veer_g;
     rvogate #(.WIDTH($bits(recovery_csr_rddata_veer_g))) u_recovery_csr_rddata_gate (.*, .din(recovery_csr_rddata_veer_g),  .dout(recovery_csr_rddata_veer[i]));
 
+    // MCPC recovery signals gating
+    logic [31:0] recovery_pause_rddata_veer_g;
+    logic        recovery_pause_state_rddata_veer_g;
+    rvogate #(.WIDTH($bits(recovery_pause_rddata_veer_g))) u_recovery_pause_rdata_gate (
+      .*,
+      .din(recovery_pause_rddata_veer_g),
+      .dout(recovery_pause_rddata_veer[i])
+    );
+    rvogate #(.WIDTH($bits(recovery_pause_state_rddata_veer_g))) u_recovery_pause_state_rdata_gate (
+      .*,
+      .din(recovery_pause_state_rddata_veer_g),
+      .dout(recovery_pause_state_rddata_veer[i])
+    );
+
+
     // Halt/run control gating & debug
     // Gates for debug_mode_status and debug_brkpt_status are inside el2_tmr_exec_ctl.sv
     logic o_cpu_halt_ack_veer_g;
@@ -1490,6 +1512,11 @@ module el2_tmr_complex
         .recovery_csr_wrdata(recovery_csr_wrdata_veer[i]),
         .recovery_csr_rdaddr(recovery_csr_rdaddr_veer[i]),
         .recovery_csr_rddata(recovery_csr_rddata_veer_g),
+        .recovery_pause_rddata(recovery_pause_rddata_veer_g),
+        .recovery_pause_state_rddata(recovery_pause_state_rddata_veer_g),
+        .recovery_pause_write(recovery_pause_write_veer[i]),
+        .recovery_pause_wrdata(recovery_pause_wrdata_veer[i]),
+        .recovery_pause_state_wrdata(recovery_pause_state_wrdata_veer[i]),
         .dec_tlu_force_halt(dec_tlu_force_halt_veer[i]),
         .dec_tlu_bus_clk_override(dec_tlu_bus_clk_override_veer[i]),
         .dec_tlu_dccm_wr_readback_disable(dec_tlu_dccm_wr_readback_disable),

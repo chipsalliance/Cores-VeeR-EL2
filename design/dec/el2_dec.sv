@@ -361,19 +361,25 @@ module el2_dec
     el2_regfile_if.veer_rf_src regfile,
 `endif
 `ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
-    input  el2_mubi_pkg::el2_mubi_t recovery_gpr_en,     // Enable the GPR state recovery
-    input  logic                    recovery_gpr_wen,    // GPR recovery backdoor write enable
-    input  logic [ 4:0]             recovery_gpr_wraddr, // GPR recovery backdoor write address
-    input  logic [31:0]             recovery_gpr_wrdata, // GPR recovery backdoor write data
-    input  logic [ 4:0]             recovery_gpr_rdaddr, // GPR recovery backdoor read address
-    output logic [31:0]             recovery_gpr_rddata, // GPR recovery backdoor read data
+    input  el2_mubi_pkg::el2_mubi_t recovery_gpr_en,       // Enable the GPR state recovery
+    input  logic                    recovery_gpr_wen,      // GPR recovery backdoor write enable
+    input  logic [ 4:0]             recovery_gpr_wraddr,   // GPR recovery backdoor write address
+    input  logic [31:0]             recovery_gpr_wrdata,   // GPR recovery backdoor write data
+    input  logic [ 4:0]             recovery_gpr_rdaddr,   // GPR recovery backdoor read address
+    output logic [31:0]             recovery_gpr_rddata,   // GPR recovery backdoor read data
 
-    input  el2_mubi_pkg::el2_mubi_t recovery_csr_en,     // Enable the CSR state recovery backdoor
-    input  logic                    recovery_csr_wen,    // CSR recovery backdoor write enable
-    input  logic [11:0]             recovery_csr_wraddr, // CSR recovery backdoor write address
-    input  logic [31:0]             recovery_csr_wrdata, // CSR recovery backdoor write data
-    input  logic [11:0]             recovery_csr_rdaddr, // CSR recovery backdoor read address
-    output logic [31:0]             recovery_csr_rddata, // CSR recovery backdoor read data
+    input  el2_mubi_pkg::el2_mubi_t recovery_csr_en,       // Enable the CSR state recovery backdoor
+    input  logic                    recovery_csr_wen,      // CSR recovery backdoor write enable
+    input  logic [11:0]             recovery_csr_wraddr,   // CSR recovery backdoor write address
+    input  logic [31:0]             recovery_csr_wrdata,   // CSR recovery backdoor write data
+    input  logic [11:0]             recovery_csr_rdaddr,   // CSR recovery backdoor read address
+    output logic [31:0]             recovery_csr_rddata,   // CSR recovery backdoor read data
+
+    output logic [31:0]             recovery_pause_rddata,        // Current MCPC register value
+    output logic                    recovery_pause_state_rddata,  // Current MCPC state
+    input  logic                    recovery_pause_write,         // Write to MCPC register
+    input  logic [31:0]             recovery_pause_wrdata,        // MCPC write value
+    input  logic                    recovery_pause_state_wrdata,  // Recoverd MCPC state
 `endif
 
     output logic dec_tlu_i0_commit_cmt,  // committed i0 instruction

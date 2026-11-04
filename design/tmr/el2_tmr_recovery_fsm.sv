@@ -30,6 +30,12 @@ module el2_tmr_recovery_fsm
     output logic [11:0] recovery_csr_rdaddr_veer[3],
     input  logic [31:0] recovery_csr_rddata_veer[3],
 
+    input  logic [31:0] recovery_pause_rddata_veer[3],
+    input  logic        recovery_pause_state_rddata_veer[3],
+    output logic        recovery_pause_write_veer[3],
+    output logic [31:0] recovery_pause_wrdata_veer[3],
+    output logic        recovery_pause_state_wrdata_veer[3],
+
     // VeeR reset control
     output logic      sync_rst_l,
     output el2_mubi_t gate_outputs,
@@ -300,6 +306,59 @@ module el2_tmr_recovery_fsm
   // PC restoration via the reset vector
   for(genvar i=0; i<3; ++i) begin : reset_vector
     assign rst_vec_veer[i] = (recovery_state != IDLE & recovery_state != 0) ? pc_rdata : rst_vec;
+  end
+
+  // MCPC storage
+
+  logic        pause_counter_reg_we;
+  logic [31:0] pause_counter_int;
+  logic [38:0] pause_counter_with_ecc_wr;
+  logic [38:0] pause_counter_with_ecc_rd;
+  logic [31:0] pause_counter_raw;
+  logic        pause_state_reg_we;
+  logic [ 2:0] pause_state_diff;
+  logic [ 2:0] pause_state_int;
+  logic [ 2:0] pause_state_raw;
+
+  rvtmr #(32) pause_counter_tmr(.I(recovery_pause_rddata_veer), .O(pause_counter_int));
+  assign pause_counter_with_ecc_wr[0+:32] = pause_counter_int;
+  rvecc_encode pause_counter_ecc_enc (.din(pause_counter_with_ecc_wr[0+:32]), .ecc_out(pause_counter_with_ecc_wr[32+:7]));
+  rvecc_decode pause_counter_ecc_dec (
+    .en(1'b1), .din(pause_counter_with_ecc_rd[0+:32]), .ecc_in(pause_counter_with_ecc_rd[32+:7]),
+    .sed_ded(1'b0), .dout(pause_counter_raw), .ecc_out(), .single_ecc_error(), .double_ecc_error() // TODO: Add ECC error to fatal error
+  );
+
+  assign pause_counter_reg_we = recovery_state == READ_REG;
+  rvdffs #(39) pause_counter_storage_ff(
+    .*,
+    .din(pause_counter_with_ecc_wr),
+    .dout(pause_counter_with_ecc_rd),
+    .en(pause_counter_reg_we)
+  );
+
+  for(genvar i=0; i<3; ++i) begin : pause_state_logic
+    logic pause_state_rdata;
+    logic pause_state_reg;
+    rvtmr #(1) pause_state_rdata_tmr (.I(recovery_pause_state_rddata_veer), .O(pause_state_rdata));
+    rvtmr #(1) pause_state_reg_tmr (.I({pause_state_raw[0], pause_state_raw[1], pause_state_raw[2]}), .O(pause_state_reg));
+    assign pause_state_diff[i] = pause_state_reg != pause_state_raw[i];
+    assign pause_state_int[i] = recovery_state == READ_REG ? pause_state_rdata : pause_state_reg;
+  end
+
+  assign pause_state_reg_we = recovery_state == READ_REG | (|pause_state_diff);
+  rvdffs #(3) pause_state_storage_ff(
+    .*,
+    .din(pause_state_int),
+    .dout(pause_state_raw),
+    .en(pause_state_reg_we)
+  );
+
+  for(genvar i=0; i<3; ++i) begin : MCPC_logic
+    logic  pause_state_final;
+    rvtmr #(1) pause_state_tmr (.I({pause_state_raw[0], pause_state_raw[1], pause_state_raw[2]}), .O(pause_state_final));
+    assign recovery_pause_write_veer[i] = recovery_state == WRITE_REG;
+    assign recovery_pause_wrdata_veer[i] = pause_counter_raw;
+    assign recovery_pause_state_wrdata_veer[i] = pause_state_final;
   end
 
   // Flags

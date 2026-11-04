@@ -2,4 +2,4 @@
 
 lint_off -rule WIDTHTRUNC -file "*/el2_lsu_trigger_wrapper.sv"
 
-lint_off -rule UNUSEDPARAM -file "*/el2_lsu_trigger_wrapper.sv"
+lint_off -rule UNUSEDPARAM -file "*/el2_param.vh" -match "*In file included from 'el2_lsu_trigger_wrapper.sv*"

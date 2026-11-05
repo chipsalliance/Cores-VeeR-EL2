@@ -2431,6 +2431,7 @@ always @(negedge core_clk) begin
 end
 
 // End of test monitor
+int expect_fatal, got_fatal;
 always @(negedge core_clk) begin
   if (mailbox_write && (mailbox_data[7:0] == 8'hFF)) begin
     $display("[%0t] TEST_PASSED",$time);
@@ -2439,7 +2440,10 @@ always @(negedge core_clk) begin
     // OpenOCD test breaks if simulation closes the TCP connection first.
     // This delay allows OpenOCD to close the connection before the #finish.
     #15000;
-    $finish;
+    if (expect_fatal & !got_fatal)
+      $fatal(0, "Test passed but TMR did not detect expected fatal error");
+    else
+      $finish;
   end
   else if(mailbox_write && mailbox_data[7:0] == 8'h01) begin
     $display("[%0t] TEST_FAILED",$time);
@@ -2474,6 +2478,7 @@ always @(posedge core_clk or negedge rst_l) begin
     end else begin
         if (mubi_check_true(tmr_fatal)) begin
             rst_l_cmd <= '0;
+            got_fatal = 1;
             $display("[%0t] TMR fatal fault! Resetting", $time);
         end else begin
             rst_l_cmd <= (rst_l_cmd << 1) | 1'b1;
@@ -2768,7 +2773,7 @@ task tmr_upsetter(int fault_id, int fsm_state);
 `endif
 
   if (fault_id > 260) begin
-    $fatal(1, "Selected fault ID (%0d) is too high, should be lower than 261.", fault_id);
+    $fatal(0, "Selected fault ID (%0d) is too high, should be lower than 261.", fault_id);
   end
 
   // Some signal faults must be injected in certain states to make injection reasonable
@@ -2823,7 +2828,7 @@ task inject_fault(int fault_id, logic [8:0] fsm_state);
 
   case (fault_id)
     `include "tmr_fault_targets.svh"
-    default: $fatal(1, "Unknown fault id %0d", fault_id);
+    default: $fatal(0, "Unknown fault id %0d", fault_id);
   endcase
 endtask
 
@@ -2844,6 +2849,10 @@ initial begin
         tmr_upsetter(fault_id, fault_fsm_state);
       join_none
     end
+  end
+
+  if ($test$plusargs("expect_fatal")) begin
+    expect_fatal = 1;
   end
 end
 

@@ -2757,13 +2757,28 @@ task tmr_upsetter(int fault_id, int fsm_state);
   @(posedge rst_l);
 
   if (!(fsm_state inside {-1, ['d0:'d14]})) begin
-    $fatal("fsm_state is out of legal range [-1, 0:14], got: %0d", fsm_state);
+    $fatal("fsm_state is out of legal range [-1 (random), 0:14], got: %0d", fsm_state);
+  end
+
+`ifndef RV_USER_MODE
+  if (fault_id inside {['d222:'d238]}) begin
+    $display("Selected User Mode CSR in Non-User Mode build, skipping test.");
+    $finish;
+  end
+`endif
+
+  if (fault_id > 260) begin
+    $fatal(1, "Selected fault ID (%0d) is too high, should be lower than 261.", fault_id);
   end
 
   // Some signal faults must be injected in certain states to make injection reasonable
   if (fsm_state == -1) begin
     case (fault_id) inside
+`ifdef RV_USER_MODE
       ['d82:'d238]: begin  // {csr|gpr}_recovery_storage_ff
+`else
+      ['d82:'d221]: begin  // {csr|gpr}_recovery_storage_ff
+`endif
         inject_fault(fault_id, el2_tmr_pkg::READ_REG);
         inject_fault(fault_id, el2_tmr_pkg::WRITE_REG);
       end

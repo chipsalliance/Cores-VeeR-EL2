@@ -39,10 +39,6 @@ else
 	TRACE_FLAG =
 endif
 
-TIME_UNIT_PS ?= 10
-CLK_PERIOD_NS ?= 100                       # 10 MHz
-HALF_PERIOD = $(shell awk 'BEGIN { printf "%d", $(CLK_PERIOD_NS) * 1000 / 2 / $(TIME_UNIT_PS) }')
-
 # Check for RV_ROOT
 ifeq (,$(wildcard ${RV_ROOT}/configs/veer.config))
 $(error env var RV_ROOT does not point to a valid dir! Exiting!)
@@ -102,17 +98,23 @@ ifeq ($(GATELEVEL),1)
 	DUT_FILELIST  		= $(TBDIR)/flist_gate
 	DUT_NETLIST	 			?=
 	ASAP7_CELL_MODELS ?=
-	VERILATOR_DEBUG   = $(TRACE_FLAG) --trace-underscore
+	VERILATOR_DEBUG   = $(TRACE_FLAG) --trace-underscore --no-trace-params
 	VERILATOR_SKIP_WARNINGS += -Wno-SPECIFYIGN
 
+	TIME_UNIT_PS ?= 10
+	CLK_PERIOD_NS ?= 100
+	HALF_PERIOD = $(shell awk 'BEGIN { printf "%d", $(CLK_PERIOD_NS) * 1000 / 2 / $(TIME_UNIT_PS) }')
+	GATELEVEL_CFLAGS = -DHALF_PERIOD=$(HALF_PERIOD)
+
 	ifeq ($(strip $(DUT_NETLIST)),)
-    $(error Set DUT_NETLIST to the ORFS netlist output)
+    $(error Set DUT_NETLIST to the netlist output)
   endif
 else
 	DUT_DEFINE 				=
 	DUT_FILELIST 			= $(TBDIR)/flist
 	DUT_NETLIST 			=
 	ASAP7_CELL_MODELS =
+	GATELEVEL_CFLAGS  =
 endif
 
 # Define test name
@@ -238,10 +240,10 @@ ${BUILD_DIR}/defines.h:
 	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/veer.config -target=$(target) $(CONF_PARAMS)
 
 verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
-	$(VERILATOR) --cc -CFLAGS "${CFLAGS} -DHALF_PERIOD=$(HALF_PERIOD)" --coverage-max-width 20000 $(defines) $(FCOV_DEFINES) \
+	$(VERILATOR) --cc -CFLAGS "${CFLAGS} ${GATELEVEL_CFLAGS}" --coverage-max-width 20000 $(defines) $(FCOV_DEFINES) \
 	  $(includes) -I${RV_ROOT}/testbench -f $(DUT_FILELIST) $(DUT_DEFINE) $(DUT_NETLIST) $(ASAP7_CELL_MODELS) \
 	  $(VERILATOR_SKIP_WARNINGS) $(VERILATOR_EXTRA_ARGS) ${TB_SILENT_FAIL} ${TBFILES} --top-module tb_top \
-	  -exe $(TB_VERILATOR_SRCS) --autoflush --timing --assert $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE) -fno-table --x-initial-edge
+	  -exe $(TB_VERILATOR_SRCS) --autoflush --timing --assert $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE) -fno-table
 	cp ${RV_ROOT}/testbench/test_tb_top.cpp obj_dir/
 	$(MAKE) -e -C obj_dir/ -f Vtb_top.mk $(VERILATOR_MAKE_FLAGS) -j$(shell nproc)
 	touch verilator-build

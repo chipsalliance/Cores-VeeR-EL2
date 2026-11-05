@@ -2432,11 +2432,16 @@ end
 
 // End of test monitor
 int expect_fatal, got_fatal;
+process veer_upset_thread, tmr_upset_thread;
 always @(negedge core_clk) begin
   if (mailbox_write && (mailbox_data[7:0] == 8'hFF)) begin
     $display("[%0t] TEST_PASSED",$time);
     $display("[%0t] \nFinished : minstret = %0d, mcycle = %0d",$time, `DEC.tlu.minstretl[31:0],`DEC.tlu.mcyclel[31:0]);
     $display("[%0t] See \"exec.log\" for execution trace with register updates..\n",$time);
+    if (veer_upset_thread != null && veer_upset_thread.status() != process::FINISHED)
+      veer_upset_thread.kill();
+    if (veer_upset_thread != null && veer_upset_thread.status() != process::FINISHED)
+      tmr_upset_thread.kill();
     // OpenOCD test breaks if simulation closes the TCP connection first.
     // This delay allows OpenOCD to close the connection before the #finish.
     #15000;
@@ -2835,7 +2840,10 @@ endtask
 initial begin
   if ($test$plusargs("veer_upsets")) begin
     fork
-      veer_upsetter();
+      begin
+        veer_upset_thread = process::self();
+        veer_upsetter();
+      end
     join_none
   end
 
@@ -2846,7 +2854,10 @@ initial begin
         fault_fsm_state = -1;
 
       fork
-        tmr_upsetter(fault_id, fault_fsm_state);
+        begin
+          tmr_upset_thread = process::self();
+          tmr_upsetter(fault_id, fault_fsm_state);
+        end
       join_none
     end
   end

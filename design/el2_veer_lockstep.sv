@@ -27,6 +27,7 @@ module el2_veer_lockstep
     input logic        clk,
     input logic        rst_l,
     input logic        dbg_rst_l,
+    input logic        rst_l_sync,  // rst_l synchronized in el2_veer_wrapper
     input logic [31:1] rst_vec,
     input logic        nmi_int,
     input logic [31:1] nmi_vec,
@@ -485,6 +486,7 @@ module el2_veer_lockstep
   );
 
   // Capture input
+  assign main_core_inputs.rst_l_sync = rst_l_sync;
   assign main_core_inputs.rst_vec = rst_vec;
   assign main_core_inputs.nmi_int = nmi_int;
   assign main_core_inputs.nmi_vec = nmi_vec;
@@ -832,6 +834,7 @@ module el2_veer_lockstep
       .clk(clk),
       .rst_l(rst_shadow),
       .dbg_rst_l(rst_dbg_shadow),
+      .rst_l_sync(shadow_core_inputs.rst_l_sync),
       .rst_vec(shadow_core_inputs.rst_vec),
       .nmi_int(shadow_core_inputs.nmi_int),
       .nmi_vec(shadow_core_inputs.nmi_vec),

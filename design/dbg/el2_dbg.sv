@@ -140,6 +140,7 @@ import el2_pkg::*;
    input logic                         free_clk,
    input logic                         rst_l,        // This includes both top rst and debug rst
    input logic                         dbg_rst_l,
+   input logic                         rst_l_sync,   // rst_l synchronized in el2_veer_wrapper
    input logic                         clk_override,
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
    /*pragma coverage off*/
@@ -280,7 +281,6 @@ import el2_pkg::*;
    logic [2:0]        sb_axi_size;
 
    logic              dbg_dm_rst_l;
-   logic              rst_l_sync;
 
    //clken
    logic              dbg_free_clken;
@@ -305,8 +305,7 @@ import el2_pkg::*;
    assign dbg_dm_rst_l = dbg_rst_l & (dmcontrol_reg[0] | scan_mode);
    assign dbg_core_rst_l = ~dmcontrol_reg[1] | scan_mode;
 
-   // synchronize the rst
-   rvsyncss #(1) rstl_syncff (.din(rst_l), .dout(rst_l_sync), .clk(free_clk), .rst_l(dbg_rst_l));
+   // rst_l is synchronized in el2_veer_wrapper (rst_l_sync)
 
    // system bus register
    // sbcs[31:29], sbcs - [22]:sbbusyerror, [21]: sbbusy, [20]:sbreadonaddr, [19:17]:sbaccess, [16]:sbautoincrement, [15]:sbreadondata, [14:12]:sberror, sbsize=32, 128=0, 64/32/16/8 are legal

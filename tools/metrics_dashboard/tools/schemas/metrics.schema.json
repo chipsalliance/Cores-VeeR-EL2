@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Metrics file",
+  "description": "Top-level keys other than 'units' are categories (objects). Nested objects are categories, any non-object value is a leaf metric. Cross-checks (unknown/missing keys) are done by validate_metrics.py.",
+  "type": "object",
+  "properties": {
+    "units": {
+      "description": "Map of unit type -> source unit ('' for unitless). Metric paths are mapped to unit types by the config's unit types file.",
+      "type": "object",
+      "propertyNames": { "$ref": "unit_types.schema.json#/$defs/unitType" },
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "additionalProperties": { "type": "object" }
+}

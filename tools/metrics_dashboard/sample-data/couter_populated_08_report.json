@@ -1,0 +1,239 @@
+{
+  "synthesis": {
+    "modules": {
+      "\\verilog_counter": {
+        "num_wires": 260,
+        "num_wire_bits": 386,
+        "num_ports": 3,
+        "num_cells": 258,
+        "area": 4830.404,
+        "sequential_area": 3225.9724,
+        "num_cells_by_type": {
+          "sky130_fd_sc_hd__dfrtp_1": 129,
+          "sky130_fd_sc_hd__ha_1": 127,
+          "sky130_fd_sc_hd__inv_1": 1,
+          "sky130_fd_sc_hd__xor2_1": 1
+        }
+      }
+    },
+    "design": {
+      "num_wires": 260,
+      "num_wire_bits": 386,
+      "num_ports": 3,
+      "num_cells": 258,
+      "area": 4830.404,
+      "sequential_area": 3225.9724,
+      "num_cells_by_type": {
+        "sky130_fd_sc_hd__dfrtp_1": 129,
+        "sky130_fd_sc_hd__ha_1": 127,
+        "sky130_fd_sc_hd__inv_1": 1,
+        "sky130_fd_sc_hd__xor2_1": 1
+      }
+    },
+    "metadata": {
+      "creator": "Yosys 0.69+158 (artificial)",
+      "invocation": "stat -json"
+    }
+  },
+  "floorplan": {
+    "area": {
+      "design_area": 6773.0,
+      "utilization": 27.01
+    },
+    "power": {
+      "Sequential": {
+        "internal": 530.445086,
+        "switching": 165.900311,
+        "leakage": 52.324987,
+        "total": 748.670384
+      },
+      "Combinational": {
+        "internal": 0.348564,
+        "switching": 0.104499,
+        "leakage": 0.037189,
+        "total": 0.490252
+      },
+      "Clock": {
+        "internal": 112.160925,
+        "switching": 33.168615,
+        "leakage": 11.231091,
+        "total": 156.560631
+      },
+      "Macro": {
+        "internal": 0.0,
+        "switching": 0.0,
+        "leakage": 0.0,
+        "total": 0.0
+      },
+      "Pad": {
+        "internal": 0.0,
+        "switching": 0.0,
+        "leakage": 0.0,
+        "total": 0.0
+      },
+      "Total": {
+        "internal": 642.954575,
+        "switching": 199.173425,
+        "leakage": 63.593267,
+        "total": 905.721267
+      }
+    },
+    "flow__warnings__count": 60,
+    "flow__errors__count": 0,
+    "flow__warnings__count:IFP-0028": 1,
+    "flow__warnings__count:ODB-0220": 9,
+    "flow__warnings__count:STA-1140": 18,
+    "flow__warnings__count:STA-1171": 32,
+    "flow__warnings__type_count": 4
+  },
+  "global_routing": {
+    "area": {
+      "design_area": 6773.0,
+      "utilization": 27.02
+    },
+    "power": {
+      "Sequential": {
+        "internal": 535.749537,
+        "switching": 171.063553,
+        "leakage": 51.889535,
+        "total": 758.702625
+      },
+      "Combinational": {
+        "internal": 0.355535,
+        "switching": 0.111386,
+        "leakage": 0.037023,
+        "total": 0.503944
+      },
+      "Clock": {
+        "internal": 111.039316,
+        "switching": 33.915746,
+        "leakage": 10.892286,
+        "total": 155.847348
+      },
+      "Macro": {
+        "internal": 0.0,
+        "switching": 0.0,
+        "leakage": 0.0,
+        "total": 0.0
+      },
+      "Pad": {
+        "internal": 0.0,
+        "switching": 0.0,
+        "leakage": 0.0,
+        "total": 0.0
+      },
+      "Total": {
+        "internal": 647.144388,
+        "switching": 205.090685,
+        "leakage": 62.818844,
+        "total": 915.053917
+      }
+    },
+    "global_route__vias": 3038,
+    "global_route__wirelength": 23855,
+    "timing__drv__floating__nets": 0,
+    "timing__drv__floating__pins": 0,
+    "flow__warnings__count": 16,
+    "flow__errors__count": 0,
+    "flow__warnings__count:STA-1140": 1,
+    "flow__warnings__count:STA-1171": 15,
+    "flow__warnings__type_count": 2
+  },
+  "detailed_routing": {
+    "drc": {
+      "count": 0
+    },
+    "area": {
+      "design_area": 6773.0,
+      "utilization": 27.03
+    },
+    "power": {
+      "Sequential": {
+        "internal": 529.914641,
+        "switching": 148.678259,
+        "leakage": 54.321002,
+        "total": 732.913902
+      },
+      "Combinational": {
+        "internal": 0.352049,
+        "switching": 0.110964,
+        "leakage": 0.034717,
+        "total": 0.49773
+      },
+      "Clock": {
+        "internal": 111.600121,
+        "switching": 31.495345,
+        "leakage": 11.528801,
+        "total": 154.624267
+      },
+      "Macro": {
+        "internal": 0.0,
+        "switching": 0.0,
+        "leakage": 0.0,
+        "total": 0.0
+      },
+      "Pad": {
+        "internal": 0.0,
+        "switching": 0.0,
+        "leakage": 0.0,
+        "total": 0.0
+      },
+      "Total": {
+        "internal": 641.866811,
+        "switching": 180.284568,
+        "leakage": 65.88452,
+        "total": 888.035899
+      }
+    },
+    "timing": {
+      "setup": {
+        "wns": 0.0,
+        "tns": 0.0
+      },
+      "hold": {
+        "wns": 0.03,
+        "tns": 0.0
+      }
+    },
+    "route__net": 535,
+    "route__net__special": 2,
+    "route__drc_errors__iter:0": 65,
+    "route__wirelength__iter:0": 17109,
+    "route__drc_errors__iter:1": 7,
+    "route__wirelength__iter:1": 17031,
+    "route__drc_errors__iter:2": 0,
+    "route__wirelength__iter:2": 16994,
+    "route__drc_errors": 0,
+    "route__wirelength": 16994,
+    "route__vias": 2842,
+    "route__vias__singlecut": 2842,
+    "route__vias__multicut": 0,
+    "timing__drv__floating__nets": 0,
+    "timing__drv__floating__pins": 0,
+    "flow__warnings__count": 39,
+    "flow__errors__count": 0,
+    "flow__warnings__count:DRT-0120": 1,
+    "flow__warnings__count:DRT-0349": 8,
+    "flow__warnings__count:FIN-0010": 10,
+    "flow__warnings__count:STA-1140": 1,
+    "flow__warnings__count:STA-1171": 19,
+    "flow__warnings__type_count": 5
+  },
+  "cts": {
+    "clock_roots": 1,
+    "buffers_inserted": 17,
+    "clock_subnets": 17,
+    "sinks": 129
+  },
+  "units": {
+    "time": "1ns",
+    "capacitance": "1pF",
+    "resistance": "1kohm",
+    "voltage": "1V",
+    "current": "1mA",
+    "power": "1nW",
+    "distance": "1um",
+    "area": "1um^2",
+    "percentage": "%"
+  }
+}

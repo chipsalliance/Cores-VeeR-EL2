@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Run metadata",
+  "description": "Describes metadata of a single run, given as '<metrics_name>.metadata.json'.",
+  "type": "object",
+  "properties": {
+    "date": {
+      "description": "Run date, 'YYYY-MM-DD HH:MM'.",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}$"
+    },
+    "current_commit": {
+      "description": "Commit of the run.",
+      "type": "string",
+      "minLength": 1
+    },
+    "is_pr": {
+      "description": "Whether the run comes from a pull request or a branch.",
+      "type": "boolean"
+    },
+    "pipeline_status": {
+      "description": "Status of the run's pipeline.",
+      "enum": ["passed", "passed_with_warnings", "failed", "canceled"]
+    },
+    "source_branch": { "type": "string", "minLength": 1 },
+    "source_repository": { "type": "string", "minLength": 1 },
+    "pr_number": { "type": "integer", "minimum": 1 },
+    "pr_title": { "type": "string" },
+    "url": {
+      "description": "Link to the run.",
+      "type": "string",
+      "pattern": "^https?://"
+    },
+    "merge_base": { "type": "string" },
+    "target_branch": { "type": "string" },
+    "target_commit": { "type": "string" },
+    "target_repository": { "type": "string", "minLength": 1 }
+  },
+  "required": [
+    "date",
+    "current_commit",
+    "is_pr",
+    "source_branch",
+    "source_repository"
+  ],
+  "if": {
+    "properties": { "is_pr": { "const": true } },
+    "required": ["is_pr"]
+  },
+  "then": {
+    "required": ["pr_number", "pr_title", "target_repository"]
+  }
+}

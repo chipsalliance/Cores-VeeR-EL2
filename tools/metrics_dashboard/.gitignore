@@ -1,0 +1,29 @@
+metrics_dashboard/node_modules
+
+# Output
+metrics_dashboard/.output
+metrics_dashboard/.vercel
+metrics_dashboard/.netlify
+metrics_dashboard/.wrangler
+metrics_dashboard/build
+
+# OS
+metrics_dashboard/.DS_Store
+metrics_dashboard/Thumbs.db
+
+# Env
+metrics_dashboard/.env
+metrics_dashboard/.env.*
+metrics_dashboard/!.env.example
+metrics_dashboard/!.env.test
+
+# Vite
+metrics_dashboard/vite.config.js.timestamp-*
+metrics_dashboard/vite.config.ts.timestamp-*
+
+# Generated
+metrics_dashboard/src/lib/data/
+
+__pycache__
+
+build/

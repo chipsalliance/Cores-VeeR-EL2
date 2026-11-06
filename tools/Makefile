@@ -82,6 +82,9 @@ ifneq ($(TB_MAX_CYCLES),)
 	VCS_EXTRA_ARGS := -pvalue+tb_top.MAX_CYCLES=$(TB_MAX_CYCLES)
 endif
 
+VERILATOR_EXTRA_ARGS += -GTEST_NAME='"$(TEST)"'
+VCS_EXTRA_ARGS += -pvalue+tb_top.TEST_NAME='"$(TEST)"'
+
 ifeq ("$(.SHELLSTATUS)", "0")
     $(shell test $(VERILATOR_VERSION) -lt 5006)
     ifeq ("$(.SHELLSTATUS)", "0")

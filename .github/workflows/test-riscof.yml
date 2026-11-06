@@ -12,7 +12,7 @@ jobs:
   tests:
     name: Run RISCOF tests
     runs-on: ubuntu-24.04
-    container: ghcr.io/antmicro/cores-veer-el2:20260923
+    container: ghcr.io/antmicro/cores-veer-el2:20261104
     strategy:
       fail-fast: false
       matrix:
@@ -71,7 +71,7 @@ jobs:
         run: |
           export RV_ROOT=`pwd`
           pushd riscof
-            VEER_OPTS="-set=user_mode=1 -set=smepmp=1"
+            VEER_OPTS="-set=user_mode=1 -set=smepmp=1 -set pmp_entries=64"
             make -f $RV_ROOT/tools/Makefile verilator-build CONF_PARAMS="-set build_axi4 $VEER_OPTS" COVERAGE=${{ matrix.coverage }}
           popd
 

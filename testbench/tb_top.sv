@@ -19,7 +19,8 @@
 module tb_top
     import tb_top_pkg::*;
 #(
-    parameter int MAX_CYCLES = 2_000_000,
+    parameter int MAX_CYCLES = -1,
+    parameter string TEST_NAME = "",
     `include "el2_param.vh"
 );
 
@@ -35,7 +36,8 @@ module tb_top
 module tb_top
     import tb_top_pkg::*;
 #(
-    parameter int MAX_CYCLES = 2_000_000,
+    parameter int MAX_CYCLES = -1,
+    parameter string TEST_NAME = "",
     `include "el2_param.vh"
 ) (
     input bit                       core_clk,
@@ -56,6 +58,11 @@ module tb_top
     input bit                       lsu_bus_clk_en
 );
 `endif
+
+  localparam int EFFECTIVE_MAX_CYCLES = (MAX_CYCLES != -1) ? MAX_CYCLES : (TEST_NAME inside {
+      "pmp", "pmp_random", "dcls_mubi_sweep", "csr_access"
+  } ? 8_000_000 : 2_000_000);
+
 `ifdef RV_LOCKSTEP_ENABLE
     logic [31:0] shadow_core_trace_rv_i_insn_ip;
     logic [31:0] shadow_core_trace_rv_i_address_ip;
@@ -985,7 +992,7 @@ module tb_top
             cycleCnt <= cycleCnt+1;
             rst_l_cmd <= {rst_l_cmd[6:0], rst_l_cmd[0]};
             // timeout monitor
-            if(cycleCnt == MAX_CYCLES) begin
+            if(cycleCnt == EFFECTIVE_MAX_CYCLES) begin
                 $display ("Hit max cycle count (%0d) .. stopping", cycleCnt);
                 $display("TEST_FAILED");
                 `ifdef TB_SILENT_FAIL

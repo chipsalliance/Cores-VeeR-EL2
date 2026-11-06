@@ -148,15 +148,9 @@ run_regression_test(){
     touch ${LOG}
     DIR="run_${NAME}_${BUS}_${COVERAGE}_${USER_MODE}_ecc_${ECC_VAL}"
 
-    if [ "$NAME" = "pmp_random" ] || [ "$NAME" = "dcls_mubi_sweep" ]; then
-        EXTRA_ARGS='TB_MAX_CYCLES=8000000'
-    else
-        EXTRA_ARGS=
-    fi
-
     # Run the test
     mkdir -p ${DIR}
-    make -j`nproc` -C ${DIR} -f $RV_ROOT/tools/Makefile ${SIMULATOR} $EXTRA_ARGS CONF_PARAMS="${PARAMS}" TEST=${NAME} COVERAGE=${COVERAGE} 2>&1 | tee ${LOG}
+    make -j`nproc` -C ${DIR} -f $RV_ROOT/tools/Makefile ${SIMULATOR} CONF_PARAMS="${PARAMS}" TEST=${NAME} COVERAGE=${COVERAGE} 2>&1 | tee ${LOG}
 }
 
 # Example usage

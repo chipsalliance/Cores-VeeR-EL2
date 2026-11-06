@@ -1,34 +1,29 @@
 #!/usr/bin/env python3
 
-# Merge metrics files into the dashboard's columnar data file:
-#   {"runs": [{"id", "source"}], "metrics": [{"path", "unit", "values"}]}
-# where values[i] belongs to runs[i] (null if the run lacks the metric).
-# Values are validated and normalized to the config's target units.
+# Merge runs (metrics file '<name>.json' + metadata file '<name>.metadata.json') into the dashboard's columnar data file:
+#   {"metrics": [{"path", "unit"}],
+#    "refs": [{"kind": "branch", "name"} | {"kind": "pr", "number"},
+#             "runs": [{"id", "metadata"}],
+#             "values": [per metric: null if the ref lacks it, else [per run: value or null]]}]}
 
 import argparse
 import hashlib
 import json
 import os
-import shutil
 import sys
 from pathlib import Path
-import re
 
-from units import normalize
-from validate_metrics import RESERVED, CAT_SEPARATOR, load, schema_errors, validate
+from messages import Messages, add_message_arguments
+from unit_sources import join, match_unit_type
+from units import convert
+from validate_metrics import (
+    add_schema_arguments, category_paths, cross_check_config, is_metadata_file, load, load_setup, metadata_path,
+    target_unit, validate_run
+)
 
-SCRIPT_DIR = Path(__file__).resolve().parent
 DATA_FILE = "data.json"
 CONFIG_FILE = "config.json"
-# Precision for the unit conversion (number of digits after '.')
-PRECISION = 12
-
-
-def load_json(path, default=None):
-    if default is not None and not os.path.exists(path):
-        return default
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+DASHBOARD_KEYS = ("labels", "units", "summary", "overview", "unplottable")
 
 
 def write_file(path, content):
@@ -38,218 +33,195 @@ def write_file(path, content):
     os.replace(tmp, path)
 
 
-def source_id(content):
-    # Re-adding the same file is a no-op, 48 bits so that ID is a JS number
-    return int.from_bytes(hashlib.sha256(content).digest()[:6], "big")
+def source_id(*contents):
+    # Re-adding the same run is a no-op, 48 bits so that ID is a JS number
+    digest = hashlib.sha256()
+    for content in contents:
+        digest.update(hashlib.sha256(content).digest())
+    return int.from_bytes(digest.digest()[:6], "big")
 
 
-# Yield (path, value) for every leaf metric
-def flatten(node, prefix=()):
-    for key, val in node.items():
-        path = (*prefix, key)
-        if isinstance(val, dict):
-            yield from flatten(val, path)
-        else:
-            yield path, val
+def ref_key(ref):
+    return (ref["kind"], ref["number"] if ref["kind"] == "pr" else ref["name"])
 
 
-def join(path):
-    return CAT_SEPARATOR.join(path)
+def ref_of(metadata):
+    return {"kind": "pr", "number": metadata["pr_number"]} if metadata["is_pr"] else {"kind": "branch", "name": metadata["source_branch"]}
 
 
-# Stored columns follow the target units, convert them if the config changed
-def renormalize(metrics, units, errors):
-    for path, metric in metrics.items():
-        target = units.get(path[-1])
-        if target is not None and metric["unit"] != target:
-            try:
-                metric["values"] = [None if v is None else normalize(v, metric["unit"], target, PRECISION) for v in metric["values"]]
-                metric["unit"] = target
-            except ValueError as e:
-                errors.append(f"{DATA_FILE}: {join(path)}: {e}")
+def ref_name(ref):
+    return f"PR #{ref['number']}" if ref["kind"] == "pr" else f"branch '{ref['name']}'"
 
 
-def read_run(input_file, schema, units, errors, verbose):
+# ({path: unit}, {ref key: ref with its runs and {path: column}}) of the serialized data
+def read_data(data_path):
+    if not os.path.exists(data_path):
+        return {}, {}
+
+    raw = load(data_path)
+    try:
+        paths = [tuple(m["path"]) for m in raw["metrics"]]
+        units = {p: m["unit"] for p, m in zip(paths, raw["metrics"])}
+        refs = {}
+        for r in raw["refs"]:
+            ref = {k: r[k] for k in ("kind", "name", "number") if k in r}
+            ref.update(runs=r["runs"], columns={p: v for p, v in zip(paths, r["values"]) if v is not None})
+            refs[ref_key(ref)] = ref
+    except (KeyError, TypeError) as e:
+        raise ValueError(f"{DATA_FILE}: unexpected structure ({e!r}), remove it to serialize from scratch") from e
+
+    return units, refs
+
+
+# Every metric in units has a column in some ref
+def dump_data(units, refs):
+    return {
+        "metrics": [{"path": list(p), "unit": u} for p, u in units.items()],
+        "refs": [
+            {**{k: v for k, v in r.items() if k not in ("runs", "columns")}, "runs": r["runs"], "values": [r["columns"].get(p) for p in units]}
+            for r in refs.values()
+        ],
+    }
+
+
+# Removes the closed PRs along with the metrics only they had
+def remove_closed_prs(units, refs, open_prs):
+    for key, ref in list(refs.items()):
+        if ref["kind"] == "pr" and ref["number"] not in open_prs:
+            del refs[key]
+            print(f"Removed {ref_name(ref)}: not open", file=sys.stderr)
+
+    present = {p for ref in refs.values() for p in ref["columns"]}
+    for path in set(units) - present:
+        del units[path]
+
+
+# Converts the serialized data to the config's target units
+def renormalize(units, refs, config, msgs):
+    for path, unit in units.items():
+        try:
+            target = target_unit(config, match_unit_type(config.patterns, path))
+            if target is None or unit == target:
+                continue
+            for ref in refs.values():
+                if path in ref["columns"]:
+                    ref["columns"][path] = [None if v is None else convert(v, unit, target)[0] for v in ref["columns"][path]]
+            units[path] = target
+        except ValueError as e:
+            msgs.errors.append(f"{DATA_FILE}: {join(path)}: {e}")
+
+
+# (ref, run ID, {path: (value, unit)}, metadata) of the run, None if it's invalid
+def read_run(input_file, validators, config, msgs):
     content = Path(input_file).read_bytes()
-    data = json.loads(content)
+    metadata_content = metadata_path(input_file).read_bytes()
+    metadata = json.loads(metadata_content)
 
-    errs, warnings, infos = validate(data, schema)
-    errors += [f"{input_file}: {m}" for m in errs]
-    if verbose:
-        for level, msgs in (("Warning", warnings), ("Info", infos)):
-            for m in msgs:
-                print(f"{level}: {input_file}: {m}", file=sys.stderr)
-    if errs:
-        return None, content, None
+    run_msgs = Messages()
+    values = validate_run(json.loads(content), metadata, validators, config, run_msgs)
+    msgs.add(run_msgs, prefix=f"{input_file}: ")
+    if run_msgs.errors:
+        return None
 
-    src_units = data.get("units", {})
-    values = {}
-    for path, value in flatten({k: v for k, v in data.items() if k not in RESERVED}):
-        name = path[-1]
-        if name not in src_units and name not in units:
-            # No conversion needed
-            values[path] = value
-        elif name not in units:
-            errors.append(f"{input_file}: {join(path)}: no target unit in the config")
-        else:
-            try:
-                values[path] = normalize(value, src_units[name], units[name], PRECISION)
-            except ValueError as e:
-                errors.append(f"{input_file}: {join(path)}: {e}")
-
-    src_metadata = data.get("metadata")
-    if not src_metadata.get("is_pr"):
-        node_name = "branch/" + src_metadata.get("source_branch")
-    else:
-        node_name = "pr/" + str(src_metadata.get("pr_number"))
-    return node_name, content, values
+    return ref_of(metadata), source_id(content, metadata_content), values, metadata
 
 
-def check_config(metrics, config, errors):
-    paths = {join(p) for p in metrics}
+# A path can be a metric in one run and a category in another, a single metrics file can't have such a clash
+def check_paths(units, msgs):
+    paths = set(units)
+    for path in sorted(category_paths(paths) & paths):
+        msgs.errors.append(f"'{join(path)}' is both a metric and a category")
 
-    for field in ("date", "commit"):
-        if config[field] not in paths:
-            errors.append(f"config {field}: '{config[field]}' is not a metric in the data")
 
-    for key in config.get("summary", []):
-        if key not in paths:
-            errors.append(f"config summary: '{key}' is not a metric in the data")
+def write_config(output_dir, config):
+    data = {k: config.data[k] for k in DASHBOARD_KEYS if k in config.data}
+    write_file(os.path.join(output_dir, CONFIG_FILE), json.dumps(data, indent=2) + "\n")
 
-    names = {name for p in metrics for name in p}
-    categories = {join(p[:i]) for p in metrics for i in range(1, len(p))}
-    for entry in config.get("unplottable", []):
-        known = entry in paths | categories if CAT_SEPARATOR in entry else entry in names
-        if not known:
-            print(f"Warning: config unplottable: '{entry}' matches nothing in the data", file=sys.stderr)
 
-def check_paths(metrics, errors):
-    categories = {p[:i] for p in metrics for i in range(1, len(p))}
-    for path in sorted(categories & metrics.keys()):
-        errors.append(f"'{join(path)}' is both a metric and a category")
-
-def serialize_json(output_dir, input_files, config, schema, verbose=False):
-    errors = []
+def serialize_json(output_dir, input_files, config, validators, verbose=False, open_prs=None):
+    msgs = Messages()
 
     os.makedirs(output_dir, exist_ok=True)
     data_path = os.path.join(output_dir, DATA_FILE)
-    data = load_json(data_path, [])
-    if not isinstance(data, list) or not all(isinstance(n, dict) and "ref" in n for n in data):
-        raise ValueError(f"{DATA_FILE}: expected an array of objects with a 'ref' key")
-    nodes = {n["ref"]: n for n in data}
-    if len(nodes) != len(data):
-        raise ValueError(f"{DATA_FILE}: duplicate 'ref' values")
-    units = config["units"]
+    units, refs = read_data(data_path)
+
+    if open_prs is not None:
+        remove_closed_prs(units, refs, open_prs)
+
+    # Covers config changes even when no runs are added
+    renormalize(units, refs, config, msgs)
 
     num_new_runs = 0
     for input_file in input_files:
+        # Metadata files are read along with their metrics file (e.g. when matched by a glob)
+        if is_metadata_file(input_file):
+            continue
         try:
-            node_name, content, values = read_run(input_file, schema, units, errors, verbose)
-        except Exception as e:
-            errors.append(f"{input_file}: {e}")
+            run = read_run(input_file, validators, config, msgs)
+        except (OSError, ValueError) as e:
+            msgs.errors.append(f"{input_file}: {e}")
+            continue
+        if run is None:
+            continue
+        run_ref, run_id, values, metadata = run
+        if open_prs is not None and run_ref["kind"] == "pr" and run_ref["number"] not in open_prs:
+            print(f"Skipping {input_file}: {ref_name(run_ref)} is not open", file=sys.stderr)
             continue
 
-        node = nodes.get(node_name) or {"ref": node_name, "metrics": [], "runs": []}
-        runs = node["runs"]
-        metrics = {tuple(m["path"]): m for m in node["metrics"]}
-        sources = {r["id"]: r["source"] for r in runs}
-
-        renormalize(metrics, units, errors)
-
-        idx = source_id(content)
-        if idx in sources:
-            print(f"Skipping {input_file}: already merged as {sources[idx]}", file=sys.stderr)
+        ref = refs.setdefault(ref_key(run_ref), {**run_ref, "runs": [], "columns": {}})
+        runs, columns = ref["runs"], ref["columns"]
+        if any(r["id"] == run_id for r in runs):
+            print(f"Skipping {input_file}: already merged (run {run_id} of {ref_name(ref)})", file=sys.stderr)
             continue
 
-        if values is None:
-            continue
-
+        for path, (_, unit) in values.items():
+            stored = units.setdefault(path, unit)
+            if stored != unit:
+                # Units without a target in the config (e.g. custom ones) that differ between runs
+                msgs.errors.append(f"{input_file}: {join(path)}: unit '{unit}' differs from the stored '{stored}'")
+            columns.setdefault(path, [None] * len(runs))
+        runs.append({"id": run_id, "metadata": metadata})
+        for path, column in columns.items():
+            column.append(values[path][0] if path in values else None)
         num_new_runs += 1
-        for path in values:
-            if path not in metrics:
-                metrics[path] = {"path": list(path), "unit": units[path[-1]] if path[-1] in units else "", "values": [None] * len(runs)}
-        runs.append({"id": idx, "source": str(input_file)})
 
-        for path, metric in metrics.items():
-            metric["values"].append(values.get(path))
+    check_paths(units, msgs)
 
-        check_paths(metrics, errors)
-        check_config(metrics, config, errors)
+    # Once, against all the serialized data
+    metadata = [r["metadata"] for ref in refs.values() for r in ref["runs"]]
+    if metadata:
+        cross_check_config(list(units), metadata, config, msgs)
 
-        node["metrics"] = list(metrics.values())
-        node["runs"] = runs
-        nodes[node_name] = node
+    msgs.print(verbose)
 
     # Nothing is written unless every input was processed successfully
-    if errors:
-        for e in errors:
-            print(f"Error: {e}", file=sys.stderr)
+    if msgs.errors:
         raise ValueError("Couldn't process some of the input files.")
 
-    write_file(data_path, json.dumps(list(nodes.values()), separators=(",", ":")))
+    write_file(data_path, json.dumps(dump_data(units, refs), separators=(",", ":")))
+    write_config(output_dir, config)
     print(f"{num_new_runs} run(s) merged into {data_path}", file=sys.stderr)
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Validate, normalize and append metrics.")
-
-    parser.add_argument(
-        "-o", "--output",
-        required=True,
-        type=Path,
-        help="Destination directory for the dashboard data"
-    )
-
-    parser.add_argument(
-        "-c", "--config",
-        required=True,
-        type=Path,
-        help="Dashboard configuration (labels, target units, ...)"
-    )
-
-    parser.add_argument(
-        "-i", "--inputs",
-        required=True,
-        nargs="+",
-        type=Path,
-        help="Input JSON metrics files (one or more)"
-    )
-
-    parser.add_argument(
-        "--metrics-schema",
-        default=SCRIPT_DIR / "metrics.schema.json",
-        type=Path,
-        help="Metrics JSON Schema (default: %(default)s)"
-    )
-
-    parser.add_argument(
-        "--config-schema",
-        default=SCRIPT_DIR / "config.schema.json",
-        type=Path,
-        help="Config JSON Schema (default: %(default)s)"
-    )
-
-    parser.add_argument(
-        "-v", "--verbose",
-        action="store_true",
-        help="Print validation warnings"
-    )
-
+    parser = argparse.ArgumentParser(description="Validate, normalize and append metrics.", allow_abbrev=False)
+    parser.add_argument("-o", "--output", required=True, type=Path, help="destination directory for the serialized data")
+    parser.add_argument("-c", "--config", required=True, type=Path, help="dashboard configuration")
+    parser.add_argument("-i", "--inputs", nargs="*", default=[], type=Path, help="metrics files, each with a '<name>.metadata.json' next to it")
+    parser.add_argument("--open-prs", type=int, nargs="+", metavar="PR", help="open PRs; PRs not on this list are removed from the serialized data")
+    add_schema_arguments(parser)
+    add_message_arguments(parser)
     args = parser.parse_args()
 
-    if os.path.exists(args.output) and not os.path.isdir(args.output):
+    if args.output.exists() and not args.output.is_dir():
         parser.error("Output is not a directory.")
 
     try:
-        config = load(args.config)
-        metrics_schema = load(args.metrics_schema)
-        errors = schema_errors(config, load(args.config_schema), "config")
-        if errors:
-            raise ValueError("; ".join(errors))
-        serialize_json(args.output, args.inputs, config, metrics_schema, args.verbose)
+        config, validators = load_setup(args)
+        serialize_json(args.output, args.inputs, config, validators, args.verbose, args.open_prs)
     except (OSError, ValueError) as e:
         sys.exit(f"Error: {e}")
 
-    shutil.copy2(args.config, args.output / CONFIG_FILE)
 
 if __name__ == "__main__":
     main()

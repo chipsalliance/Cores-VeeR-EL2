@@ -1,42 +1,60 @@
 <script lang="ts">
-    import { AesirDropdown, AesirButton, AesirIcon, AesirCard } from '#lib/aesir/src/index.js';
+    import { AesirDropdown, AesirButton, AesirIcon, AesirCard, AesirTable, AesirSeparator } from '#lib/aesir/src/index.js';
     import { Data } from '#lib/data.ts';
-    import { diffRuns, formatPercent, formatValue, groupByCategory, type Run } from '#lib/metrics.ts';
+    import {
+        diffRuns,
+        formatDiff,
+        formatValues,
+        groupByCategory,
+        MAIN_REF,
+        type Run,
+        type Group,
+        type Section,
+        type MetricDiff
+    } from '#lib/metrics.ts';
+    import { alignColumns } from '#lib/aesir.ts';
 
     import Summary from '#lib/components/summary.svelte';
-    const runs = Data.runs;
-
-    const byValue = (value: string | null | undefined) => runs.get('branch/main')!.find((r) => r.value === value);
+    const runs = Data.runs.get(MAIN_REF) ?? [];
 
     // Compare the newest run against the one before it as default
-    let targetValue = $state(runs.get('branch/main')![0]?.value);
-    let baseValue = $state(runs.get('branch/main')![1]?.value);
+    let target = $state.raw(runs[0]);
+    let base = $state.raw(runs[1]);
+    // The selection is compared upon button click
+    let compared = $state.raw<{ target: Run; base: Run } | null>(null);
 
-    // Perform the diff upon button click (keep the states)
-    let confirmedTargetValue = $state<string | null>(null);
-    let confirmedBaseValue = $state<string | null>(null);
-
-    let target = $derived(byValue(targetValue));
-    let base = $derived(byValue(baseValue));
-    let confirmedTarget = $derived(byValue(confirmedTargetValue));
-    let confirmedBase = $derived(byValue(confirmedBaseValue));
-    let sameVersion = $derived(targetValue === baseValue);
-
-    let diffs = $derived(
-        confirmedTarget && confirmedBase ? diffRuns(Data.metrics.get('branch/main')!, confirmedBase.index, confirmedTarget.index) : []
-    );
+    let diffs = $derived(compared ? diffRuns(Data.metrics.get(MAIN_REF) ?? [], compared.base.index, compared.target.index) : []);
     let groups = $derived(groupByCategory(diffs, (d) => d.metric.path, Data.config));
 
-    function confirmComparison() {
-        if (sameVersion) return;
-        confirmedTargetValue = targetValue;
-        confirmedBaseValue = baseValue;
-    }
+    const compColumns = [
+        { key: 'metric', label: 'Metric' },
+        { key: 'base', label: 'Base' },
+        { key: 'target', label: 'Target' },
+        { key: 'change', label: 'Change', align: 'end' as const }
+    ];
+
+    const toRows = (g: Group<MetricDiff>, s: Section<MetricDiff>) =>
+        s.items.map((d) => {
+            const [base, target] = formatValues([d.base, d.target], d.metric.unit);
+            return {
+                id: `${g.name}/${s.key}/${d.metric.key}`,
+                metric: d.metric.label,
+                base,
+                target,
+                change: formatDiff(d.base, d.target)
+            };
+        });
 </script>
 
-{#snippet versionPanel(title: string, run: Run, select: (value: string) => void)}
+{#snippet versionPanel(title: string, run: Run, select: (run: Run) => void)}
     <AesirCard {title}>
-        <AesirDropdown items={runs.get('branch/main')!} onselect={(item) => item.value && select(item.value)}>
+        <AesirDropdown
+            items={runs}
+            onselect={(item) => {
+                const selected = runs.find((r) => r.value === item.value);
+                if (selected) select(selected);
+            }}
+        >
             {#snippet trigger(props)}
                 <AesirButton variant="outline" {...props} aria-label={`${title} run: ${run.label}`}
                     >{run.label}<AesirIcon name="chevron-down" /></AesirButton
@@ -55,62 +73,44 @@
 
         {#if target && base}
             <div class="version-grid">
-                {@render versionPanel('Target', target, (value) => (targetValue = value))}
-                {@render versionPanel('Base', base, (value) => (baseValue = value))}
+                {@render versionPanel('Target', target, (run) => (target = run))}
+                {@render versionPanel('Base', base, (run) => (base = run))}
             </div>
 
             <div class="actions">
-                {#if sameVersion}
+                {#if target === base}
                     <p class="error" role="alert">Please select two different runs.</p>
                 {/if}
-                <AesirButton onclick={confirmComparison} disabled={sameVersion}>Compare</AesirButton>
+                <AesirButton onclick={() => (compared = { target, base })} disabled={target === base}>Compare</AesirButton>
             </div>
         {:else}
             <p class="error">At least two runs are needed for a comparison.</p>
         {/if}
 
-        {#if confirmedTarget && confirmedBase}
+        {#if compared}
             <div class="version-grid">
-                <Summary title="Target summary" run={confirmedTarget}></Summary>
-                <Summary title="Base summary" run={confirmedBase}></Summary>
+                <Summary title="Target summary" run={compared.target}></Summary>
+                <Summary title="Base summary" run={compared.base}></Summary>
             </div>
         {/if}
     </section>
 
-    {#if confirmedTarget && confirmedBase}
-        <div>
-            <table class="comparison-table">
-                <thead>
-                    <tr>
-                        <th scope="col">Metric</th>
-                        <th scope="col">Base</th>
-                        <th scope="col">Target</th>
-                        <th scope="col">Change</th>
-                    </tr>
-                </thead>
+    {#if compared}
+        <div class="comparison-table" use:alignColumns>
+            <section>
                 {#each groups as group (group.name)}
-                    <tbody>
-                        <tr class="group">
-                            <th scope="rowgroup" colspan="4">{group.label}</th>
-                        </tr>
+                    <div class="subtable">
+                        <h3>{group.label}</h3>
+                        <AesirSeparator orientation="horizontal" />
                         {#each group.sections as section (section.key)}
                             {#if section.label}
-                                <tr class="section">
-                                    <th scope="rowgroup" colspan="4">{section.label}</th>
-                                </tr>
+                                <h4>{section.label}</h4>
                             {/if}
-                            {#each section.items as d (d.metric.key)}
-                                <tr>
-                                    <th scope="row">{d.metric.label}</th>
-                                    <td>{formatValue(d.base, d.metric.unit)}</td>
-                                    <td>{formatValue(d.target, d.metric.unit)}</td>
-                                    <td class="change" class:unchanged={d.percent === 0}>{d.percent === null ? 'n/a' : formatPercent(d.percent)}</td>
-                                </tr>
-                            {/each}
+                            <AesirTable columns={compColumns} rows={toRows(group, section)} variant="striped" density="compact" />
                         {/each}
-                    </tbody>
+                    </div>
                 {/each}
-            </table>
+            </section>
         </div>
     {/if}
 </div>
@@ -119,7 +119,7 @@
     .compare-page {
         display: grid;
         grid-template-columns: minmax(0, 1fr);
-        gap: var(--ds-spacing-8);
+        gap: var(--ds-spacing-4);
         width: 100%;
         max-width: var(--ds-sizing-7xl);
         margin-inline: auto;
@@ -170,66 +170,19 @@
         }
     }
 
-    .comparison-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        border: var(--ds-spacing-px) solid var(--ds-border);
-        border-radius: var(--ds-radius-lg);
+    .subtable {
+        margin: 0 0 var(--ds-spacing-12) 0;
     }
 
-    .comparison-table tr > :is(th, td) {
-        border-bottom: var(--ds-spacing-px) solid var(--ds-border);
-    }
+    :global {
+        .comparison-table table {
+            table-layout: fixed;
+            width: 100%;
+        }
 
-    .comparison-table tbody:last-child tr:last-child > :is(th, td) {
-        border-bottom: none;
-    }
-
-    .comparison-table tr.group th {
-        font-weight: var(--ds-font-weight-semibold);
-        background: var(--ds-background-secondary);
-    }
-
-    .comparison-table tr.section th {
-        font-size: var(--ds-font-size-xs);
-        font-weight: var(--ds-font-weight-semibold);
-        color: var(--ds-foreground-muted);
-    }
-
-    .comparison-table th,
-    .comparison-table td {
-        padding: var(--ds-spacing-2-5) var(--ds-spacing-3);
-    }
-
-    .comparison-table th {
-        text-align: left;
-        font-weight: var(--ds-font-weight-normal);
-    }
-
-    .comparison-table thead th {
-        font-size: var(--ds-font-size-xs);
-        font-weight: var(--ds-font-weight-semibold);
-        color: var(--ds-foreground-muted);
-    }
-
-    .comparison-table thead th:not(:first-child) {
-        text-align: right;
-    }
-
-    .comparison-table td {
-        text-align: right;
-        font-variant-numeric: tabular-nums;
-        color: var(--ds-foreground-muted);
-    }
-
-    .comparison-table td.change {
-        color: var(--ds-foreground);
-        font-weight: var(--ds-font-weight-medium);
-    }
-
-    .comparison-table td.change.unchanged {
-        color: var(--ds-foreground-muted);
-        font-weight: var(--ds-font-weight-normal);
+        .comparison-table.measuring table {
+            table-layout: auto;
+            width: auto;
+        }
     }
 </style>

@@ -19,5 +19,10 @@ verilator_coverage --unlink --write-info "${INFO_FILE}_branch.info" \
 
 # Extract toggle coverage separately into ${INFO_FILE}_toggle.info.
 verilator_coverage --filter-type toggle --write-info "${INFO_FILE}_toggle.info" "${DAT_FILE}"
-verilator_coverage --filter-type user --write-info "${INFO_FILE}_fcov.info" "${DAT_FILE}"
+
+# Extract functional coverage (covergroup and user cover property) into ${INFO_FILE}_fcov.info.
+verilator_coverage --filter-type covergroup --write "${INFO_FILE}_covergroup.dat" "${DAT_FILE}"
+verilator_coverage --filter-type user --write "${INFO_FILE}_user.dat" "${DAT_FILE}"
+verilator_coverage --unlink --write-info "${INFO_FILE}_fcov.info" \
+  "${INFO_FILE}_covergroup.dat" "${INFO_FILE}_user.dat"
 

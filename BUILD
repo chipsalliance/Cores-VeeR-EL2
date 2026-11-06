@@ -123,6 +123,8 @@ CONFIGS = {
     sdc = ":constraint_%s" % c,
     synthesized_rtl = ":veer_el2_synth_asap7_%s" % c,
     stop_after_step = "global_routing",
+    create_die_shot = True,
+    qt_qpa_platform = "offscreen",
 ) for c in CONFIGS]
 
 [gds_write(

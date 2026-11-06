@@ -251,9 +251,6 @@ import el2_pkg::*;
    logic               nonblock_div_cancel;
 
    logic               i0_legal;
-   logic               shift_illegal;
-   logic               illegal_inst_en;
-   logic               illegal_lockout_in, illegal_lockout;
    logic               i0_legal_decode_d;
    logic               i0_exulegal_decode_d, i0_exudecode_d, i0_exublock_d;
 
@@ -433,10 +430,10 @@ import el2_pkg::*;
    el2_reg_pkt_t i0r;
 
 
-   rvdffie  #(8) misc1ff (.*,
+   rvdffie  #(.WIDTH(7), .OVERRIDE(1)) misc1ff (.*,
                           .clk(free_l2clk),
-                          .din( {leak1_i1_stall_in,leak1_i0_stall_in,dec_tlu_flush_extint,pause_state_in ,dec_tlu_wr_pause_r, tlu_wr_pause_r1,illegal_lockout_in,ps_stall_in}),
-                          .dout({leak1_i1_stall,   leak1_i0_stall,   dec_extint_stall,    pause_state,       tlu_wr_pause_r1,tlu_wr_pause_r2,illegal_lockout,   ps_stall   })
+                          .din( {leak1_i1_stall_in,leak1_i0_stall_in,dec_tlu_flush_extint,pause_state_in ,dec_tlu_wr_pause_r, tlu_wr_pause_r1,ps_stall_in}),
+                          .dout({leak1_i1_stall,   leak1_i0_stall,   dec_extint_stall,    pause_state,       tlu_wr_pause_r1,tlu_wr_pause_r2, ps_stall   })
                           );
 
    rvdffie  #(8) misc2ff (.*,
@@ -1133,18 +1130,8 @@ end : cam_array
 
 
 
-   // illegal inst handling
-
-
-   assign shift_illegal      = dec_i0_decode_d & ~i0_legal;
-
-   assign illegal_inst_en    = shift_illegal & ~illegal_lockout;
-
-   rvdffe #(32) illegal_any_ff (.*, .en(illegal_inst_en), .din(i0_inst_d[31:0]), .dout(dec_illegal_inst[31:0]));
-
-   assign illegal_lockout_in = (shift_illegal | illegal_lockout) & ~flush_final_r;
-
-
+   // illegal/trap inst handling
+   rvdffe #(32) trap_inst_x_ff (.*, .en(i0_x_ctl_en & (~i0_legal | i0_dp.mret)), .din(i0_inst_d[31:0]), .dout(dec_illegal_inst[31:0]));
 
    // allow illegals to flow down the pipe
    assign dec_i0_decode_d = i0_valid_d & ~i0_block_d    & ~dec_tlu_flush_lower_r & ~flush_final_r;

@@ -29,6 +29,12 @@
  *      PIC IRQ #2 trap #3 and RTL counter `shadow_err_mismatch == 1`.
  *    - Phase 6E: Re-arm clean lockstep equivalence and verify subsequent stores and DMI reads complete with
  *      zero false DCLS traps.
+ * 7. Phase 7: Address-Line Fault Injection on DCCM Write Port (WR_FI_003 #572):
+ *    - Phase 7A: Inject row address bit 0 flip (`0xBC`) on `dccm_addr_bank` during a DCCM store so the write
+ *      lands in an unintended alias row while the target row retains stale data; verify steal-path detection,
+ *      `dccm_write_readback_error` pulse, and DMI `0x48`-`0x4A` capture.
+ *    - Phase 7B: Repeat write-port address-line fault injection (`0xBC`) followed by a same-address load;
+ *      verify snoop-path detection (`snoop_lo >= 1`), error pulse, and DMI `0x48`-`0x4A` capture.
  */
 
 #include <stdbool.h>
@@ -49,8 +55,12 @@ extern void _trap_handler(void);
 #define MAILBOX_CMD_DMI_WRITE     0xB2u
 #define MAILBOX_CMD_GET_PULSES    0xB4u
 #define MAILBOX_CMD_RDBK_COUNTERS 0xBBu
+#define MAILBOX_CMD_ARM_ADDR_FLIP 0xBCu
 
 #define RDBK_CNT_RESET            0u
+#define RDBK_CNT_ARM              1u
+#define RDBK_CNT_SNOOP_LO         2u
+#define RDBK_CNT_STEAL            4u
 #define RDBK_CNT_DCLS_SYM_MATCH   7u
 #define RDBK_CNT_DCLS_MAIN_MISM   8u
 #define RDBK_CNT_DCLS_SHDW_MISM   9u
@@ -71,6 +81,9 @@ extern void _trap_handler(void);
 #define TARGET_ADDR_PHASE2        (DCCM_TEST_BASE + 0x0400u)
 #define TARGET_ADDR_PHASE3        (DCCM_TEST_BASE + 0x0500u)
 #define TARGET_ADDR_PHASE5        (DCCM_TEST_BASE + 0x0600u)
+#define TARGET_ADDR_PHASE7        (DCCM_TEST_BASE + 0x0700u)
+#define ADDR_FLIP_ROW_BIT0_MASK   (1u << (2 + RV_DCCM_BANK_BITS))
+#define ALIAS_ADDR_PHASE7         (TARGET_ADDR_PHASE7 ^ ADDR_FLIP_ROW_BIT0_MASK)
 #define MEIVT_BASE_ADDR           (DCCM_TEST_BASE + 0x0800u)
 
 #define MCAUSE_M_EXT_INT          0x8000000Bu
@@ -133,6 +146,13 @@ static inline void dmi_write(uint8_t addr) {
  */
 static inline void arm_write_skip(void) {
   (void)send_tb_command(MAILBOX_CMD_ARM_WR_SKIP, 0);
+}
+
+/**
+ * Arms DCCM write-port row-address bit 0 flip (`0xBC`) for the next DCCM store.
+ */
+static inline void arm_addr_flip(void) {
+  (void)send_tb_command(MAILBOX_CMD_ARM_ADDR_FLIP, 0);
 }
 
 /**
@@ -598,15 +618,126 @@ int main(void) {
     return 6;
   }
   printf("[PASS] Phase 6E complete: Post-recovery no-fault lockstep equivalence verified.\n\n");
-  printf("================================================================\n");
-  printf("=== ALL 6 PHASES PASSED: DCCM Write Readback & DMI Verified ====\n");
-  printf("================================================================\n");
-  return 0;
 #else
-  printf("[TEST] Phase 6: DCLS lockstep disabled in build; skipping asymmetric trap check.\n");
+  printf("[TEST] Phase 6: DCLS lockstep disabled in build; skipping asymmetric trap check.\n\n");
+  dmi_write(DMI_REG_DCCM_STATUS);
+#endif
+
+  // -------------------------------------------------------------
+  // Phase 7: Address-Line Fault Injection on DCCM Write Port (WR_FI_003 #572)
+  // -------------------------------------------------------------
+  printf("[TEST] Phase 7A: Injecting write-port address-line fault (Steal Path, WR_FI_003)...\n");
+  volatile uint32_t *target_p7 = (volatile uint32_t *)TARGET_ADDR_PHASE7;
+  volatile uint32_t *alias_p7  = (volatile uint32_t *)ALIAS_ADDR_PHASE7;
+  volatile uint32_t *adj_p7    = (volatile uint32_t *)(TARGET_ADDR_PHASE7 + 4u);
+
+  const uint32_t p7_target_seed = 0x5555AAAAu;
+  const uint32_t p7_alias_seed  = 0x11112222u;
+
+  dmi_write(DMI_REG_DCCM_STATUS);
+  *target_p7 = p7_target_seed;
+  *alias_p7  = p7_alias_seed;
+  *adj_p7    = 0x33334444u;
+  __asm__ volatile("fence rw, rw" ::: "memory");
+
+  (void)rdbk_counter_cmd(RDBK_CNT_RESET);
+  uint32_t pulses_before_7a = get_error_pulse_count();
+
+  // Subcase 7A: Arm write-port row-bit-0 address flip (`0xBC`) and resolve via steal path
+  arm_addr_flip();
+  *target_p7 = 0xDEADBEEFu;
+  __asm__ volatile("fence rw, rw" ::: "memory");
+
+  uint32_t steal_7a  = rdbk_counter_cmd(RDBK_CNT_STEAL);
+  uint32_t pulses_7a = get_error_pulse_count();
+  r48 = dmi_read(DMI_REG_DCCM_STATUS);
+  r49 = dmi_read(DMI_REG_DCCM_DATA);
+  r4a = dmi_read(DMI_REG_DCCM_ECC);
+  printf("[TEST] Phase 7A DMI: 0x48=0x%08x, 0x49=0x%08x, 0x4A=0x%08x (steal=%u)\n",
+         r48, r49, r4a, steal_7a);
+
+#ifdef RV_DCCM_ADDR_XOR
+  uint32_t p7_idx = (TARGET_ADDR_PHASE7 >> 2) & ((1u << (RV_DCCM_BITS - 2)) - 1u);
+  uint32_t expected_p7_r49 = p7_target_seed ^ ((p7_idx << (RV_DCCM_BITS - 2)) | p7_idx);
+#else
+  uint32_t expected_p7_r49 = p7_target_seed;
+#endif
+  uint32_t expected_p7_r4a = compute_dccm_ecc32(p7_target_seed);
+
+  if (steal_7a == 0u || pulses_7a != pulses_before_7a + 1u ||
+      (r48 & 0x80000000u) == 0u || (r48 & r48_rsvd_mask) != 0u ||
+      (r48 & dccm_addr_mask) != (TARGET_ADDR_PHASE7 & dccm_addr_mask) ||
+      r49 != expected_p7_r49 || r4a != expected_p7_r4a) {
+    printf("[FAIL] Phase 7A: Address-line fault steal detection failed!\n");
+    tohost = 1;
+    return 7;
+  }
+#ifndef RV_DCCM_ADDR_XOR
+  if (*alias_p7 != 0xDEADBEEFu) {
+    printf("[FAIL] Phase 7A: Alias row 0x%08x did not receive misrouted write (got 0x%08x)!\n",
+           ALIAS_ADDR_PHASE7, *alias_p7);
+    tohost = 1;
+    return 7;
+  }
+#endif
+  printf("[PASS] Phase 7A complete: Steal-path write-port address-line fault caught.\n\n");
+
+  // Subcase 7B: Snoop-path detection of write-port address-line fault
+  printf("[TEST] Phase 7B: Injecting write-port address-line fault (Snoop Path, WR_FI_003)...\n");
+  dmi_write(DMI_REG_DCCM_STATUS);
+  *target_p7 = p7_target_seed;
+  *alias_p7  = p7_alias_seed;
+  __asm__ volatile("fence rw, rw" ::: "memory");
+
+  (void)rdbk_counter_cmd(RDBK_CNT_RESET);
+  uint32_t pulses_before_7b = get_error_pulse_count();
+  uint32_t snoop_val_7b = 0;
+  uint32_t dummy_7b = 0;
+
+  arm_addr_flip();
+  __asm__ volatile(
+      ".balign 16\n\t"
+      "sw   %[val], 0(%[addr])\n\t"
+      "lw   %[dum], 4(%[addr])\n\t"
+      "lw   %[dum], 4(%[addr])\n\t"
+      "lw   %[dum], 4(%[addr])\n\t"
+      "lw   %[res], 0(%[addr])\n\t"
+      "nop\n\t"
+      "nop\n\t"
+      "nop\n\t"
+      "nop\n\t"
+      : [res] "=&r"(snoop_val_7b), [dum] "=&r"(dummy_7b)
+      : [val] "r"(0xCAFEF00Du), [addr] "r"(target_p7)
+      : "memory");
+  __asm__ volatile("fence rw, rw" ::: "memory");
+
+  uint32_t snoop_7b  = rdbk_counter_cmd(RDBK_CNT_SNOOP_LO);
+  uint32_t pulses_7b = get_error_pulse_count();
+  r48 = dmi_read(DMI_REG_DCCM_STATUS);
+  r49 = dmi_read(DMI_REG_DCCM_DATA);
+  r4a = dmi_read(DMI_REG_DCCM_ECC);
+  printf("[TEST] Phase 7B DMI: 0x48=0x%08x, 0x49=0x%08x, 0x4A=0x%08x (snoop_lo=%u)\n",
+         r48, r49, r4a, snoop_7b);
+
+  if (snoop_7b == 0u || pulses_7b != pulses_before_7b + 1u ||
+      snoop_val_7b != p7_target_seed ||
+      (r48 & 0x80000000u) == 0u || (r48 & r48_rsvd_mask) != 0u ||
+      (r48 & dccm_addr_mask) != (TARGET_ADDR_PHASE7 & dccm_addr_mask) ||
+      r49 != expected_p7_r49 || r4a != expected_p7_r4a) {
+    printf("[FAIL] Phase 7B: Address-line fault snoop detection failed!\n");
+    tohost = 1;
+    return 7;
+  }
+
+  // Clean up DMI 0x48 and restore both target and alias rows
+  dmi_write(DMI_REG_DCCM_STATUS);
+  *target_p7 = p7_target_seed;
+  *alias_p7  = p7_alias_seed;
+  __asm__ volatile("fence rw, rw" ::: "memory");
+  printf("[PASS] Phase 7B complete: Snoop-path write-port address-line fault caught.\n\n");
+
   printf("================================================================\n");
-  printf("=== ALL PHASES PASSED: DCCM Write Readback & DMI Verified ======\n");
+  printf("=== ALL 7 PHASES PASSED: DCCM Write Readback & DMI Verified ====\n");
   printf("================================================================\n");
   return 0;
-#endif
 }

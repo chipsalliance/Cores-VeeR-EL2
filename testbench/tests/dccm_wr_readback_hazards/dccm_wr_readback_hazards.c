@@ -31,6 +31,12 @@
  * 5. Phase 5: Runtime Disable (#512) - Toggles `MFDC.dwrd` (bit 7) and injects write-skip
  *    faults under both `dwrd=1` (proving `dccm_wr_rdbk_arm == 0` and error suppression) and
  *    `dwrd=0` (proving re-enabled fault detection and DMI `0x48` capture).
+ * 6. Phase 6: Pipeline Flush / Cancelled Snoop Verification (WR_PIPE_007 #572) - Verifies
+ *    that a younger speculative DCCM load to the same address flushed by a branch
+ *    misprediction or synchronous exception (`ecall`, illegal instruction, misaligned load)
+ *    does not falsely resolve `dccm_wr_rdbk_pend_ff` via snoop (`snoop_lo == 0`), and that
+ *    the older committed store still completes its readback check via `dccm_wr_rdbk_issue`
+ *    (both clean and fault-injected via `0xB0`).
  */
 
 #include <stdbool.h>
@@ -687,6 +693,254 @@ static void test_phase5_runtime_disable(void) {
 }
 
 /**
+ * Naked machine-mode synchronous trap handler for Phase 6B (`WR_PIPE_007`).
+ * Uses only `t0` and `mscratch` (zero DCCM loads/stores) so RTL write-readback
+ * counters reflect only the test sequence under test. Records `mcause` in
+ * `mscratch` and advances `mepc` by 20 bytes (skipping the 4-byte `.norvc`
+ * trapping instruction and the four subsequent 4-byte `.norvc` instructions in
+ * the flush shadow to land in the post-sequence `nop` sled).
+ */
+void __attribute__((naked, aligned(4))) phase6_sync_trap_handler(void) {
+  __asm__ volatile(
+      "csrr t0, mcause\n\t"
+      "csrw mscratch, t0\n\t"
+      "csrr t0, mepc\n\t"
+      "addi t0, t0, 20\n\t"
+      "csrw mepc, t0\n\t"
+      "mret\n\t");
+}
+
+/**
+ * Phase 6: Pipeline Flush / Cancelled Snoop Verification (`WR_PIPE_007`) (#572)
+ *
+ * Verifies that when a younger speculative DCCM load targeting `dccm_wr_rdbk_addr_ff`
+ * enters `D` stage in the shadow of a mispredicted branch (Subcase 6A) or an older
+ * trapping instruction (`ecall`, illegal instruction, or R-stage misaligned load in
+ * Subcase 6B) and is flushed by `flush_dc2_up`:
+ * 1. `dccm_wr_rdbk_snoop_lo` and `dccm_wr_rdbk_snoop_hi` are suppressed (`0`).
+ * 2. The older committed store's `dccm_wr_rdbk_pend_ff` survives the flush and
+ *    resolves via the opportunistic steal path (`dccm_wr_rdbk_issue`, `steal == 1`).
+ * 3. When a physical write-skip fault (`0xB0`) is injected on the older store, the
+ *    post-flush steal check detects the fault (`dccm_write_readback_error` pulse +1)
+ *    and latches the fault address in DMI `0x48`.
+ */
+static void test_phase6_flushed_snoop(void) {
+  printf("Starting Phase 6: Pipeline Flush / Cancelled Snoop Verification (WR_PIPE_007 #572)...\n");
+
+  volatile uint32_t *target_ptr = (volatile uint32_t *)(DCCM_TEST_BASE + 0x900u);
+  volatile uint32_t *adj_ptr    = (volatile uint32_t *)(DCCM_TEST_BASE + 0x904u);
+  *target_ptr = 0x11112222u;
+  *adj_ptr    = 0x33334444u;
+  __asm__ volatile("fence rw, rw" ::: "memory");
+
+  // -------------------------------------------------------------------------
+  // Subcase 6A: Branch Misprediction Flush (Clean & Fault-Injected)
+  // -------------------------------------------------------------------------
+  for (int fault_mode = 0; fault_mode < 2; fault_mode++) {
+    uint32_t pulses_before = get_error_pulse_count();
+    uint32_t pattern = (fault_mode == 0) ? 0x55AA55AAu : 0xDEAD6001u;
+    uint32_t dummy = 0;
+
+    for (int iter = 0; iter < 8; iter++) {
+      uint32_t take_branch = (iter == 7) ? 1u : 0u;
+      if (iter == 7) {
+        tb_reset_rdbk_counters();
+        if (fault_mode == 1) {
+          arm_write_skip();
+        }
+      }
+      __asm__ volatile(
+          ".balign 16\n\t"
+          "beqz %[take], 2f\n\t"
+          "sw   %[val], 0(%[addr])\n\t"
+          "lw   %[dum], 4(%[addr])\n\t"
+          "lw   %[dum], 4(%[addr])\n\t"
+          "2:\n\t"
+          "bne  %[take], zero, 1f\n\t"
+          "lw   %[dum], 0(%[addr])\n\t"
+          "lw   %[dum], 0(%[addr])\n\t"
+          "1:\n\t"
+          "nop\n\t"
+          "nop\n\t"
+          "nop\n\t"
+          "nop\n\t"
+          "nop\n\t"
+          "nop\n\t"
+          : [dum] "=&r"(dummy)
+          : [take] "r"(take_branch), [val] "r"(pattern), [addr] "r"(target_ptr)
+          : "memory");
+    }
+
+    uint32_t arm_cnt   = tb_get_rdbk_counter(RDBK_CNT_ARM);
+    uint32_t snoop_cnt = tb_get_rdbk_counter(RDBK_CNT_SNOOP_LO);
+    uint32_t steal_cnt = tb_get_rdbk_counter(RDBK_CNT_STEAL);
+    uint32_t pulses_after = get_error_pulse_count();
+
+    if (arm_cnt != 1u || snoop_cnt != 0u || steal_cnt != 1u) {
+      printf("Phase 6A (fault=%d) FAILED: Expected arm=1, snoop_lo=0, steal=1; got arm=%u, snoop=%u, steal=%u\n",
+             fault_mode, arm_cnt, snoop_cnt, steal_cnt);
+      report_failure();
+    }
+
+    if (fault_mode == 0) {
+      if (pulses_after != pulses_before || *target_ptr != pattern) {
+        printf("Phase 6A (clean) FAILED: Unexpected error pulse or data mismatch!\n");
+        report_failure();
+      }
+    } else {
+      uint32_t dmi_status = dmi_read(DMI_REG_DCCM_STATUS);
+      uint32_t expected_dmi48 = 0x80000000u | ((uint32_t)target_ptr & DCCM_ADDR_MASK);
+      if (pulses_after != pulses_before + 1u || dmi_status != expected_dmi48) {
+        printf("Phase 6A (fault) FAILED: Expected +1 pulse and dmi48=0x%08x; got pulses=%u, dmi48=0x%08x\n",
+               expected_dmi48, pulses_after - pulses_before, dmi_status);
+        report_failure();
+      }
+      dmi_write_w1c(DMI_REG_DCCM_STATUS);
+      *target_ptr = 0x55AA55AAu;
+      __asm__ volatile("fence rw, rw" ::: "memory");
+    }
+  }
+  printf("Phase 6A Passed: Mispredicted branch shadow load flushed cleanly; steal path & fault check verified.\n");
+
+  // -------------------------------------------------------------------------
+  // Subcase 6B: Synchronous Exception Flush (`ecall`, illegal insn, misaligned load)
+  // -------------------------------------------------------------------------
+  uint32_t orig_mtvec = 0;
+  __asm__ volatile("csrr %0, mtvec" : "=r"(orig_mtvec));
+  __asm__ volatile("csrw mtvec, %0" : : "r"((uint32_t)&phase6_sync_trap_handler));
+
+  uint32_t total_sync_traps = 0;
+  for (int exc_type = 0; exc_type < 3; exc_type++) {
+    for (int fault_mode = 0; fault_mode < 2; fault_mode++) {
+      uint32_t pulses_before = get_error_pulse_count();
+      uint32_t pattern       = 0x6B000000u | ((uint32_t)exc_type << 8) | (uint32_t)fault_mode;
+      uint32_t dummy         = 0;
+      uint32_t non_dccm_misaligned = 0x7FFFFFFEu;
+      uint32_t expected_mcause = 0;
+      uint32_t captured_mcause = 0xFFFFFFFFu;
+
+      __asm__ volatile("csrw mscratch, %0" : : "r"(0xFFFFFFFFu));
+      tb_reset_rdbk_counters();
+      if (fault_mode == 1) {
+        arm_write_skip();
+      }
+
+      if (exc_type == 0) {
+        // Environment call from M-mode (`mcause = 11`)
+        expected_mcause = 11u;
+        __asm__ volatile(
+            ".option push\n\t"
+            ".option norvc\n\t"
+            ".balign 16\n\t"
+            "sw   %[val], 0(%[addr])\n\t"
+            "lw   %[dum], 4(%[addr])\n\t"
+            "lw   %[dum], 4(%[addr])\n\t"
+            "ecall\n\t"
+            "lw   %[dum], 0(%[addr])\n\t"
+            "lw   %[dum], 0(%[addr])\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            ".option pop\n\t"
+            : [dum] "=&r"(dummy)
+            : [val] "r"(pattern), [addr] "r"(target_ptr)
+            : "t0", "memory");
+      } else if (exc_type == 1) {
+        // Illegal instruction (`mcause = 2`)
+        expected_mcause = 2u;
+        __asm__ volatile(
+            ".option push\n\t"
+            ".option norvc\n\t"
+            ".balign 16\n\t"
+            "sw   %[val], 0(%[addr])\n\t"
+            "lw   %[dum], 4(%[addr])\n\t"
+            "lw   %[dum], 4(%[addr])\n\t"
+            ".word 0x00000000\n\t"
+            "lw   %[dum], 0(%[addr])\n\t"
+            "lw   %[dum], 0(%[addr])\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            ".option pop\n\t"
+            : [dum] "=&r"(dummy)
+            : [val] "r"(pattern), [addr] "r"(target_ptr)
+            : "t0", "memory");
+      } else {
+        // R-stage Load address misaligned on region-crossing address (`mcause = 4`)
+        expected_mcause = 4u;
+        __asm__ volatile(
+            ".option push\n\t"
+            ".option norvc\n\t"
+            ".balign 16\n\t"
+            "sw   %[val], 0(%[addr])\n\t"
+            "lw   %[dum], 0(%[bad_addr])\n\t"
+            "lw   %[dum], 4(%[addr])\n\t"
+            "lw   %[dum], 4(%[addr])\n\t"
+            "lw   %[dum], 0(%[addr])\n\t"
+            "lw   %[dum], 0(%[addr])\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            ".option pop\n\t"
+            : [dum] "=&r"(dummy)
+            : [val] "r"(pattern), [addr] "r"(target_ptr),
+              [bad_addr] "r"(non_dccm_misaligned)
+            : "t0", "memory");
+      }
+
+      __asm__ volatile("csrr %0, mscratch" : "=r"(captured_mcause));
+      uint32_t arm_cnt   = tb_get_rdbk_counter(RDBK_CNT_ARM);
+      uint32_t snoop_cnt = tb_get_rdbk_counter(RDBK_CNT_SNOOP_LO);
+      uint32_t steal_cnt = tb_get_rdbk_counter(RDBK_CNT_STEAL);
+      uint32_t pulses_after = get_error_pulse_count();
+
+      if (captured_mcause != expected_mcause) {
+        printf("Phase 6B (exc=%d, fault=%d) FAILED: Expected mcause=0x%x, got 0x%x!\n",
+               exc_type, fault_mode, expected_mcause, captured_mcause);
+        report_failure();
+      }
+      total_sync_traps++;
+
+      if (arm_cnt != 1u || snoop_cnt != 0u || steal_cnt != 1u) {
+        printf("Phase 6B (exc=%d, fault=%d) FAILED: Expected arm=1, snoop_lo=0, steal=1; got arm=%u, snoop_lo=%u, steal=%u!\n",
+               exc_type, fault_mode, arm_cnt, snoop_cnt, steal_cnt);
+        report_failure();
+      }
+
+      if (fault_mode == 0) {
+        if (pulses_after != pulses_before || *target_ptr != pattern) {
+          printf("Phase 6B (exc=%d, clean) FAILED: Unexpected error pulse or target mismatch!\n",
+                 exc_type);
+          report_failure();
+        }
+      } else {
+        uint32_t dmi_status = dmi_read(DMI_REG_DCCM_STATUS);
+        uint32_t expected_dmi48 = 0x80000000u | ((uint32_t)target_ptr & DCCM_ADDR_MASK);
+        if (pulses_after != pulses_before + 1u || dmi_status != expected_dmi48) {
+          printf("Phase 6B (exc=%d, fault) FAILED: Expected +1 pulse and dmi48=0x%08x; got pulses=%u, dmi48=0x%08x\n",
+                 exc_type, expected_dmi48, pulses_after - pulses_before, dmi_status);
+          report_failure();
+        }
+        dmi_write_w1c(DMI_REG_DCCM_STATUS);
+        *target_ptr = pattern;
+        __asm__ volatile("fence rw, rw" ::: "memory");
+      }
+    }
+  }
+
+  __asm__ volatile("csrw mtvec, %0" : : "r"(orig_mtvec));
+  printf("Phase 6B Passed: Synchronous exception flushes (ecall, illegal, misaligned) verified (%u traps).\n\n",
+         total_sync_traps);
+}
+
+/**
  * Unexpected trap handler.
  */
 void trap_handler(void) {
@@ -706,7 +960,7 @@ int main(void) {
   dmi_write_w1c(0x10u);
 
   printf("===============================================================\n");
-  printf("DCCM Write Readback Check Pipeline Hazards & Stall Verification (#512)\n");
+  printf("DCCM Write Readback Check Pipeline Hazards & Stall Verification (#512 / #572)\n");
   printf("===============================================================\n\n");
 
   test_phase1_snoop_path();
@@ -714,9 +968,10 @@ int main(void) {
   test_phase3_sustained_read_stream();
   test_phase4_stbuf_full_backpressure();
   test_phase5_runtime_disable();
+  test_phase6_flushed_snoop();
 
   printf("===============================================================\n");
-  printf("SUCCESS: All 5 Issue #512 Hazard & Pipeline Phases Passed!\n");
+  printf("SUCCESS: All 6 Issue #512 & #572 Hazard & Pipeline Phases Passed!\n");
   printf("===============================================================\n");
 
   return 0;

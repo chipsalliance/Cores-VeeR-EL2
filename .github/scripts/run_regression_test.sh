@@ -59,6 +59,9 @@ run_regression_test(){
     if [[ -z "${DCLS_REGFILE_READ_ENABLE}" ]]; then
         DCLS_REGFILE_READ_ENABLE="0"
     fi
+    if [[ -z "${TMR_ENABLE}" ]]; then
+        TMR_ENABLE="0"
+    fi
     set -u
 
     if [[ "${DCLS_ENABLE}" ==  "1" ]]; then
@@ -66,6 +69,9 @@ run_regression_test(){
         if [[ "${DCLS_REGFILE_READ_ENABLE}" == "1" ]]; then
             COMMON_PARAMS="-set lockstep_regfile_read_enable=1 ${COMMON_PARAMS}"
         fi
+    fi
+    if [[ "${TMR_ENABLE}" ==  "1" ]]; then
+        COMMON_PARAMS="${COMMON_PARAMS} -set triple_modular_redundancy_enable=1"
     fi
 
     # ICCM_ADDR_XOR may not be set

@@ -73,7 +73,7 @@ jobs:
         run: _secret_prepare_env:7
 
       - name: Generate custom reports
-        run: _secret_custom_report:68
+        run: _secret_custom_report:70
 
       - name: Pack artifacts
         uses: actions/upload-artifact@v4
@@ -98,7 +98,7 @@ jobs:
           submodules: recursive
 
       - name: Extract custom coverage
-        run: _secret_extract_custom_coverage:5
+        run: _secret_extract_custom_coverage:6
 
       - name: Setup info-process
         run: .github/scripts/info_process_setup.sh

@@ -26,7 +26,12 @@ else
 fi
 
 # Source path transformations are needed before merging to have matching paths in `.desc` files.
-find info_files_$SIM -name '*.info' -exec info-process transform \
+# Restrict RTL code coverage (line, branch, cond, toggle) to design/, and include testbench/coverage/ only for fcov.
+find info_files_$SIM -name '*.info' ! -name '*_fcov.info' -exec info-process transform \
+    --strip-file-prefix '.*Cores-VeeR-EL2/' \
+    --filter 'design/' $_filter_out \
+    {} \;
+find info_files_$SIM -name '*_fcov.info' -exec info-process transform \
     --strip-file-prefix '.*Cores-VeeR-EL2/' \
     --filter '(design/|testbench/coverage/)' $_filter_out \
     {} \;
@@ -87,6 +92,7 @@ cat <<END >config.json
   "branch": "$BRANCH",
   "repo": "cores-veer-el2",
   "timestamp": "`date +"%Y-%m-%dT%H:%M:%S.%3N%z"`",
+  "table_coverage": "fcov",
   "additional": {
     "db_count": "$DB_COUNT",
     "run_id": "$GITHUB_RUN_ID"

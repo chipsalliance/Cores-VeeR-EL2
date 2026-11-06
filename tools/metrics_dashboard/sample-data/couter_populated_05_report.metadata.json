@@ -1,0 +1,13 @@
+{
+  "is_pr": true,
+  "current_commit": "ec255404e",
+  "source_branch": "fix-async-reset",
+  "source_repository": "chipsalliance/Cores-VeeR-EL2",
+  "date": "2026-10-19 11:31",
+  "pipeline_status": "canceled",
+  "url": "https://example.com/pr/22",
+  "pr_number": 22,
+  "pr_title": "Fix async reset",
+  "target_branch": "main",
+  "target_repository": "chipsalliance/Cores-VeeR-EL2"
+}

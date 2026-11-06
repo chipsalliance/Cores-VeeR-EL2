@@ -1,0 +1,9 @@
+{
+  "is_pr": false,
+  "current_commit": "4c123b161",
+  "source_branch": "main",
+  "source_repository": "chipsalliance/Cores-VeeR-EL2",
+  "date": "2026-10-07 08:05",
+  "pipeline_status": "passed",
+  "url": "https://example.com/branch/main"
+}

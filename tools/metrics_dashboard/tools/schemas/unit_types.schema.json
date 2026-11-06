@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Unit types",
+  "description": "Maps metric paths to unit types. A '*' segment matches one or more node names; exact paths win over wildcards, then the ones with more literal segments.",
+  "$defs": {
+    "unitType": {
+      "description": "Unit type name, shared with the metrics files' and the config maps.",
+      "type": "string",
+      "pattern": "^[^.*@]+$"
+    }
+  },
+  "type": "object",
+  "propertyNames": { "pattern": "^([^.*]+|\\*)(\\.([^.*]+|\\*))*$" },
+  "additionalProperties": { "$ref": "#/$defs/unitType" }
+}

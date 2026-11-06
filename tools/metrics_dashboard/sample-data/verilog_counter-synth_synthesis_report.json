@@ -1,0 +1,63 @@
+{
+  "synthesis": {
+    "modules": {
+      "\\verilog_counter": {
+        "num_wires": 260,
+        "num_wire_bits": 388,
+        "num_pub_wires": 3,
+        "num_pub_wire_bits": 131,
+        "num_ports": 3,
+        "num_port_bits": 131,
+        "num_memories": 0,
+        "num_memory_bits": 0,
+        "num_processes": 0,
+        "num_cells": 259,
+        "num_submodules": 0,
+        "area": 4833.3856,
+        "sequential_area": 3228.096,
+        "num_cells_by_type": {
+          "sky130_fd_sc_hd__dfrtp_1": 129,
+          "sky130_fd_sc_hd__ha_1": 127,
+          "sky130_fd_sc_hd__inv_1": 2,
+          "sky130_fd_sc_hd__xor2_1": 1
+        }
+      }
+    },
+    "design": {
+      "num_wires": 260,
+      "num_wire_bits": 388,
+      "num_pub_wires": 3,
+      "num_pub_wire_bits": 131,
+      "num_ports": 3,
+      "num_port_bits": 131,
+      "num_memories": 0,
+      "num_memory_bits": 0,
+      "num_processes": 0,
+      "num_cells": 259,
+      "num_submodules": 0,
+      "area": 4833.3856,
+      "sequential_area": 3228.096,
+      "num_cells_by_type": {
+        "sky130_fd_sc_hd__dfrtp_1": 129,
+        "sky130_fd_sc_hd__ha_1": 127,
+        "sky130_fd_sc_hd__inv_1": 2,
+        "sky130_fd_sc_hd__xor2_1": 1
+      }
+    },
+    "metadata": {
+      "creator": "Yosys 0.69+158 (git sha1 a1a0ad7d4-dirty, Release, Clang /usr/bin/clang++ 21.1.8)",
+      "invocation": "stat -liberty bazel-out/k8-fastbuild/bin/external/+pdks_extension+com_google_skywater_pdk_sky130_fd_sc_hd/timing/sky130_fd_sc_hd__ff_100C_1v95.lib -json "
+    }
+  },
+  "units": {
+    "time": "1ns",
+    "capacitance": "1pF",
+    "resistance": "1kohm",
+    "voltage": "1V",
+    "current": "1mA",
+    "power": "1nW",
+    "distance": "1um",
+    "area": "1um^2",
+    "percentage": "%"
+  }
+}

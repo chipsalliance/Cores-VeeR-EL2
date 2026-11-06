@@ -14,3 +14,5 @@ bun.lockb
 
 # Generated
 /src/lib/data/
+
+build/

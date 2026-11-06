@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dashboard configuration",
+  "description": "Companion to the metrics files. Cross-checks (unknown/missing names) are done by validate_metrics.py and serialize_json.py. Paths are node names joined with '.'.",
+  "$defs": {
+    "path": {
+      "type": "string",
+      "pattern": "^[^.]+(\\.[^.]+)+$"
+    },
+    "nameOrPath": {
+      "description": "Bare node name (matches anywhere in the hierarchy) or a path.",
+      "type": "string",
+      "pattern": "^[^.@][^.]*(\\.[^.]+)*$"
+    },
+    "metadataRef": {
+      "description": "Field of the run's metadata file, '@' followed by the field name ('@pr_title'), nested fields joined with '.' ('@a.b').",
+      "type": "string",
+      "pattern": "^@[^.]+(\\.[^.]+)*$"
+    }
+  },
+  "type": "object",
+  "properties": {
+    "repository": {
+      "description": "The tracked repository.",
+      "type": "string",
+      "minLength": 1
+    },
+    "labels": {
+      "description": "Flat map of node name (category, metric) or metadata field -> label (string).",
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "units": {
+      "description": "Map of metadata field -> display unit. Metadata values are not converted.",
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/metadataRef" },
+      "additionalProperties": { "type": "string" }
+    },
+    "unit_types_file": {
+      "description": "Unit types file (see unit_types.schema.json) mapping metric paths to unit types, relative to this file. The metrics files' 'units' map these unit types to source units.",
+      "type": "string",
+      "minLength": 1
+    },
+    "unit_types": {
+      "description": "Map of unit type -> target unit ('' for unitless). Values of a unit type without an entry are kept in their source units.",
+      "type": "object",
+      "propertyNames": { "$ref": "unit_types.schema.json#/$defs/unitType" },
+      "additionalProperties": { "type": "string" }
+    },
+    "summary": {
+      "description": "Paths of the metrics or metadata fields to be presented in the run summaries.",
+      "type": "array",
+      "items": {
+        "anyOf": [{ "$ref": "#/$defs/path" }, { "$ref": "#/$defs/metadataRef" }]
+      }
+    },
+    "overview": {
+      "description": "Paths of the metrics or metadata fields to be presented on the overview cards.",
+      "type": "array",
+      "items": {
+        "anyOf": [{ "$ref": "#/$defs/path" }, { "$ref": "#/$defs/metadataRef" }]
+      }
+    },
+    "unplottable": {
+      "description": "Categories or metrics excluded from plotting: a bare name matches the node anywhere in the hierarchy, a path matches that node (and everything below it).",
+      "type": "array",
+      "items": {
+        "anyOf": [
+          { "$ref": "#/$defs/nameOrPath" },
+          { "$ref": "#/$defs/metadataRef" }
+        ]
+      }
+    }
+  },
+  "required": ["repository", "labels", "unit_types_file", "unit_types"],
+  "additionalProperties": false
+}

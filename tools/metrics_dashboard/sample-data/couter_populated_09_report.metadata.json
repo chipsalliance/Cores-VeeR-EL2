@@ -1,0 +1,13 @@
+{
+  "is_pr": true,
+  "current_commit": "91e558e",
+  "source_branch": "wider-counter",
+  "source_repository": "chipsalliance/Cores-VeeR-EL2",
+  "date": "2026-11-02 10:12",
+  "pipeline_status": "passed",
+  "url": "https://example.com/pr/21",
+  "pr_number": 21,
+  "pr_title": "Widen the counter to 64 bits, which is a rather long title to see how the cards wrap it",
+  "target_branch": "main",
+  "target_repository": "chipsalliance/Cores-VeeR-EL2"
+}

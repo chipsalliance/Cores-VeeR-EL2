@@ -1,0 +1,13 @@
+{
+  "is_pr": true,
+  "current_commit": "3581569",
+  "source_branch": "cts-tuning",
+  "source_repository": "chipsalliance/Cores-VeeR-EL2",
+  "date": "2026-10-30 13:40",
+  "pipeline_status": "failed",
+  "url": "https://example.com/pr/25",
+  "pr_number": 25,
+  "pr_title": "Tune CTS",
+  "target_branch": "main",
+  "target_repository": "chipsalliance/Cores-VeeR-EL2"
+}

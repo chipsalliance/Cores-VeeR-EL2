@@ -21,7 +21,7 @@
 interface el2_mem_if
 import el2_pkg::*;
 #(
-    `include "el2_param.vh"
+    `include "el2_param.svh"
 ) ();
   //////////////////////////////////////////
   // Clock

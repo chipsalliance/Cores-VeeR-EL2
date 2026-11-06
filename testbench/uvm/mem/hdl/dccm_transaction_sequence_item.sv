@@ -3,7 +3,7 @@
 
 class dccm_transaction_sequence_item extends uvm_sequence_item;
 
-  `include "el2_param.vh"
+  `include "el2_param.svh"
   ;
 
   rand bit [       pt.DCCM_BITS-1:0] addr;

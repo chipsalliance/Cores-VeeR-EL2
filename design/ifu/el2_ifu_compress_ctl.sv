@@ -20,7 +20,7 @@
 module el2_ifu_compress_ctl
 import el2_pkg::*;
 #(
-`include "el2_param.vh"
+`include "el2_param.svh"
  )
   (
    input  logic [15:0] din,        // 16-bit   compressed instruction

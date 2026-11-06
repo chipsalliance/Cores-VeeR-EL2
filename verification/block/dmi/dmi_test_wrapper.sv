@@ -4,7 +4,7 @@
 module dmi_test_wrapper
   import el2_pkg::*;
 #(
-    `include "el2_param.vh"
+    `include "el2_param.svh"
 ) (
     // JTAG signals
     input  trst_n,    // JTAG reset

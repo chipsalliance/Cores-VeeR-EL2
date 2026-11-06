@@ -4,7 +4,7 @@
 module el2_ifu_iccm_mem_wrapper
   import el2_pkg::*;
 #(
-    `include "el2_param.vh"
+    `include "el2_param.svh"
 ) (
     input logic clk,
     input logic active_clk,

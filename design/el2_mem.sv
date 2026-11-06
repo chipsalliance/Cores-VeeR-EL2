@@ -19,7 +19,7 @@
 module el2_mem
 import el2_pkg::*;
 #(
-`include "el2_param.vh"
+`include "el2_param.svh"
  )
 (
    input logic         clk,

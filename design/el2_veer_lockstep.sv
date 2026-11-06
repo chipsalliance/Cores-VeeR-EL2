@@ -18,7 +18,7 @@ module el2_veer_lockstep
   import el2_mubi_pkg::*;
   import el2_lockstep_pkg::*;
 #(
-    `include "el2_param.vh"
+    `include "el2_param.svh"
 ) (
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
     el2_regfile_if.veer_rf_sink main_core_regfile,

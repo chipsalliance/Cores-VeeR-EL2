@@ -3,7 +3,7 @@
 module el2_exu_div_ctl_wrapper
 import el2_pkg::*;
 #(
-`include "el2_param.vh"
+`include "el2_param.svh"
 )
 (
     input logic           clk,

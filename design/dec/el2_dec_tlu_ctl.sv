@@ -26,7 +26,7 @@
 module el2_dec_tlu_ctl
 import el2_pkg::*;
 #(
-`include "el2_param.vh"
+`include "el2_param.svh"
  )
   (
    input logic clk,
@@ -3047,7 +3047,7 @@ endmodule // el2_dec_tlu_ctl
 module el2_dec_timer_ctl
 import el2_pkg::*;
 #(
-`include "el2_param.vh"
+`include "el2_param.svh"
  )
   (
    input logic clk,

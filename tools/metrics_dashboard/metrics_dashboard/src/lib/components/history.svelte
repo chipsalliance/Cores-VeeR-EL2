@@ -2,49 +2,34 @@
     import type { Action } from 'svelte/action';
     import { AesirCollapsible } from '#lib/aesir/src/index.js';
     import { Data } from '#lib/data.ts';
-    import { dateAxis, groupByCategory, seriesFor, valueAxis, type Series } from '#lib/metrics.ts';
+    import { dateAxis, groupByCategory, MAIN_REF, seriesFor, valueAxis, type Series } from '#lib/metrics.ts';
     import { plot } from '#lib/plot.ts';
     import Summary from '#lib/components/summary.svelte';
-    const axis = dateAxis(Data.config.date);
-    const series = seriesFor('branch/main', Data, axis);
-    const groups = groupByCategory(series ?? [], (s) => s.path, Data.config);
-    const latest = Data.runs.get('branch/main')![0];
-
-    const render = (s: Series<Date>) =>
-        plot(
-            s,
-            axis,
-            valueAxis(
-                s,
-                s.data.map((d) => d.param)
-            )
-        );
+    const axis = dateAxis();
+    const groups = groupByCategory(seriesFor(MAIN_REF, Data, axis) ?? [], (s) => s.path, Data.config);
+    const latest = Data.runs.get(MAIN_REF)?.[0];
 
     // Render plot only on request (expand collapsible)
     const mountPlot: Action<HTMLElement, Series<Date>> = (node, s) => {
-        let current = s;
-        let chart: ReturnType<typeof render> | undefined;
-
         const observer = new IntersectionObserver(
             (entries) => {
                 if (!entries.some((e) => e.isIntersecting)) return;
                 observer.disconnect();
-                node.append((chart = render(current)));
+                node.append(
+                    plot(
+                        s,
+                        axis,
+                        valueAxis(
+                            s,
+                            s.data.map((d) => d.param)
+                        )
+                    )
+                );
             },
             { rootMargin: '25% 0px' }
         );
         observer.observe(node);
-
-        return {
-            update(next) {
-                current = next;
-                if (chart) chart.replaceWith((chart = render(next)));
-            },
-            destroy() {
-                observer.disconnect();
-                chart?.remove();
-            }
-        };
+        return { destroy: () => observer.disconnect() };
     };
 </script>
 
@@ -53,6 +38,8 @@
         <section class="summary">
             <Summary title="Latest run" run={latest}></Summary>
         </section>
+    {:else}
+        <p class="empty">No runs yet.</p>
     {/if}
 
     <section class="categories">

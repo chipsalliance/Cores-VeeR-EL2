@@ -75,16 +75,24 @@
         html.dark {
             color-scheme: dark;
         }
+
+        .empty {
+            margin: 0;
+            color: var(--ds-foreground-muted);
+            font-size: var(--ds-font-size-sm);
+        }
     }
 
     main {
         display: grid;
+        grid-template-columns: minmax(0, 1fr);
         gap: var(--ds-spacing-8);
         padding-block: var(--ds-spacing-8) var(--ds-spacing-20);
     }
 
     .page-header {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
         gap: var(--ds-spacing-4);

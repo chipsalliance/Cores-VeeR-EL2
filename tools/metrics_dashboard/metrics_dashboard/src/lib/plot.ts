@@ -1,6 +1,7 @@
 import * as Plot from '@observablehq/plot';
 import * as d3 from 'd3';
-import { valueTickFormat, withUnit, type Series, type ValueAxis, type XAxis, type XValue } from '#lib/metrics.ts';
+import { type Series, type ValueAxis, type XAxis, type XValue } from '#lib/metrics.ts';
+import { withUnit, displayScale } from '#lib/units.ts';
 
 // Plot's defaults (px)
 const PLOT_FONT_SIZE = 10;
@@ -38,10 +39,12 @@ function marginLeft(values: readonly number[], { format: yFormat, ticks: yTicks 
     return Math.max(xl, maxChars * CHAR_WIDTH_EM * PLOT_FONT_SIZE + lg);
 }
 
-// Numeric X values get the same SI-prefixed ticks as the Y axis, unless the axis says otherwise
 function xTickFormat<X extends XValue>(s: Series<X>, axis: XAxis<X>): ((x: X) => string) | undefined {
     if (axis.tickFormat || axis.scale !== 'linear') return axis.tickFormat;
-    const format = valueTickFormat(s.data.map((d) => d.x as number));
+    const { format } = displayScale(
+        '',
+        s.data.map((d) => d.x as number)
+    );
     return (x) => format(x as number);
 }
 
@@ -95,7 +98,7 @@ export function plot<X extends XValue>(s: Series<X>, axis: XAxis<X>, yAxis: Valu
                     format: {
                         x: axis.tipFormat ?? tickFormat ?? true,
                         y: false,
-                        Value: (v: number) => withUnit(yAxis.format(v), s.unit)
+                        Value: (v: number) => withUnit(yAxis.format(v), yAxis.unit)
                     },
 
                     lineHeight,

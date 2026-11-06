@@ -1,5 +1,5 @@
 import { flushSync, mount } from 'svelte';
-import '#lib/aesir-html/components/aesir-loader.min.js';
+import '#lib/aesir-html/aesir-html.min.js';
 import App from './app.svelte';
 
 // Wait two frames so the browser paints the loader before the (blocking) chart rendering starts

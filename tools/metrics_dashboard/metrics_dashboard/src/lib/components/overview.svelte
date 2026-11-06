@@ -1,114 +1,127 @@
 <script lang="ts">
-    import { AesirBadge, AesirButton, AesirCard } from '#lib/aesir/src/index.js';
+    import { AesirBadge, AesirButton, AesirCard, AesirIcon, AesirTable } from '#lib/aesir/src/index.js';
+    import { Data } from '#lib/data.ts';
+    import { overviewCards } from '#lib/metrics.ts';
+
+    const cards = overviewCards(Data);
+    const metricRows = Math.max(Data.config.overview?.length ?? 0, 1);
+
+    const cardColumns = [
+        { key: 'label', label: 'label' },
+        { key: 'value', label: 'value', align: 'end' as const }
+    ];
 </script>
 
-<div class="overview">
-    {#each Array.from({ length: 30 }, (_, x) => x + 1) as id (id)}
-        <div class="pr-card">
-            <AesirCard title="PR # {id}" description="PR title (name#{id})">
-                {#snippet headerAction()}<AesirBadge variant={id % 3 === 0 ? 'success' : id % 3 === 1 ? 'warning' : 'destructive'}
-                        >{id % 3 === 0 ? 'pass' : id % 3 === 1 ? 'warning' : 'fail'}</AesirBadge
-                    >{/snippet}
-
-                <div class="project-card">
-                    <dl class="project-card__metrics">
-                        <div>
-                            <dt>Errors</dt>
-                            <dd>0</dd>
-                        </div>
-                        <div>
-                            <dt>Warnings</dt>
-                            <dd>42</dd>
-                        </div>
-                        <div>
-                            <dt>Runtime</dt>
-                            <dd>{id ** 2}h</dd>
-                        </div>
-                    </dl>
-                </div>
-
-                {#snippet footer()}
-                    <div class="project-card__footer">
-                        <span>Last updated: {id} minutes ago</span>
-                        <AesirButton size="sm" variant="outline">View latest run</AesirButton>
+{#if cards.length}
+    <!-- All cards are the same size -->
+    <div class="overview" style:--metric-rows={metricRows} style:--card-rows={metricRows + 2}>
+        {#each cards as card (card.key)}
+            <AesirCard class="overview-card" title={card.title} titleElement="h2" description={card.description}>
+                {#snippet headerAction()}
+                    <div class="overview-card__status">
+                        {#if card.url}
+                            <a
+                                class="overview-card__link"
+                                href={card.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label={`Open ${card.title}`}
+                            >
+                                <AesirIcon name="external-link" size="16" />
+                            </a>
+                        {/if}
+                        <AesirBadge variant={card.badge.variant}>{card.badge.label}</AesirBadge>
                     </div>
                 {/snippet}
+
+                <dl class="overview-card__metrics">
+                    <AesirTable columns={cardColumns} rows={card.rows} showHeader={false} density="sm" variant="minimal" />
+                </dl>
+
+                {#snippet footer()}
+                    <span class="overview-card__updated">Last updated: <time>{card.updated}</time></span>
+                    <AesirButton size="sm" variant="outline">View details</AesirButton>
+                {/snippet}
             </AesirCard>
-        </div>
-    {/each}
-</div>
+        {/each}
+    </div>
+{:else}
+    <p class="empty">No runs yet.</p>
+{/if}
 
 <style>
     .overview {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(min(var(--ds-sizing-xs), 100%), 1fr));
-        gap: var(--ds-spacing-10);
-        margin-inline: auto;
+        column-gap: var(--ds-spacing-6);
         max-width: var(--ds-sizing-7xl);
+        margin-inline: auto;
     }
 
-    .pr-card {
-        width: var(--ds-sizing-s);
-        height: auto;
-    }
-
-    .project-card {
-        width: 100%;
+    .overview :global(.overview-card) {
         display: grid;
-        gap: var(--ds-spacing-5);
+        grid-row: span var(--card-rows);
+        grid-template-rows: subgrid;
+        row-gap: 0;
+        margin-block-end: var(--ds-spacing-10);
     }
 
-    .project-card__metrics {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+    .overview :global(.overview-card .aesir-card__header) {
+        align-content: start;
+        padding-bottom: var(--ds-spacing-6);
+    }
+
+    .overview :global(.overview-card .aesir-card__title) {
         margin: 0;
+        font-size: var(--ds-font-size-base);
     }
 
-    .project-card__metrics div {
-        padding-inline: var(--ds-spacing-4);
-        border-left: var(--ds-spacing-px) solid var(--ds-border);
+    .overview :global(.overview-card .aesir-card__content) {
+        display: contents;
     }
 
-    .project-card__metrics div:first-child {
-        padding-left: 0;
-        border-left: 0;
-    }
-
-    .project-card__metrics dt {
-        color: var(--ds-foreground-muted);
-        font-size: var(--ds-font-size-xs);
-    }
-
-    .project-card__metrics dd {
-        margin: var(--ds-spacing-1) 0 0;
-        font-size: var(--ds-font-size-lg);
-        font-weight: var(--ds-font-weight-medium);
-    }
-
-    .project-card__footer {
-        display: flex;
-        width: 100%;
-        align-items: center;
+    .overview :global(.overview-card .aesir-card__footer) {
+        flex-wrap: wrap;
         justify-content: space-between;
-        gap: var(--ds-spacing-4);
-        color: var(--ds-foreground-muted);
-        font-size: var(--ds-font-size-xs);
+        align-self: end;
+        padding-top: var(--ds-spacing-6);
     }
 
-    @media (max-width: 479px) {
-        .project-card__metrics {
-            grid-template-columns: 1fr;
-            gap: var(--ds-spacing-3);
-        }
+    .overview :global(.overview-card .aesir-card__footer > :last-child) {
+        margin-inline-start: auto;
+    }
 
-        .project-card__metrics div {
-            padding: 0;
-            border-left: 0;
-        }
+    .overview-card__status {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        gap: var(--ds-spacing-2);
+    }
 
-        .project-card__footer {
-            align-items: flex-start;
-            flex-direction: column;
-        }
+    .overview-card__link {
+        display: inline-flex;
+        color: var(--ds-foreground-muted);
+    }
+
+    .overview-card__link:hover,
+    .overview-card__link:focus-visible {
+        color: var(--ds-foreground);
+    }
+
+    .overview-card__metrics {
+        display: grid;
+        grid-row: span var(--metric-rows);
+        grid-template-rows: subgrid;
+        row-gap: 0;
+        padding-inline: var(--ds-spacing-6);
+        grid-template-columns: minmax(0, 1fr) auto;
+        column-gap: var(--ds-spacing-4);
+        margin: 0;
+        font-size: var(--ds-font-size-sm);
+    }
+
+    .overview-card__updated {
+        color: var(--ds-foreground-muted);
+        font-size: var(--ds-font-size-xs);
     }
 </style>

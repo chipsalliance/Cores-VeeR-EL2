@@ -34,7 +34,7 @@ jobs:
           python -m venv .venv
           source .venv/bin/activate
           pip install -r tools/requirements.txt
-          python tools/serialize_json.py -o metrics_dashboard/src/lib/data -c sample-data/config.json -i sample-data/metrics*.json
+          python tools/serialize_json.py -o metrics_dashboard/src/lib/data/ -i sample-data/*_report.json -c sample-data/config.json
 
       - name: Install
         working-directory: tools/metrics_dashboard/metrics_dashboard

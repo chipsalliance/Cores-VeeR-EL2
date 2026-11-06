@@ -1,6 +1,7 @@
 // Metrics: types, parsing, formatting, grouping, diff
 
-import { format, max, timeFormat, timeParse } from 'd3';
+import { format, timeFormat, timeParse } from 'd3';
+import { displayScale, displayUnitText, withUnit } from '#lib/units.ts';
 
 // Types
 
@@ -10,27 +11,54 @@ export type Param = number | string | boolean | null | readonly Param[] | { read
 
 export type Config = {
     labels: Readonly<Record<string, string>>;
-    units: Readonly<Record<string, string>>;
-    date: string;
-    commit: string;
+    // Display units of metadata fields ('@...')
+    units?: Readonly<Record<string, string>>;
     summary?: readonly string[];
+    // Shown on the overview cards
+    overview?: readonly string[];
     unplottable?: readonly string[];
 };
 
+// Metrics definitions (paths and units)
 export type RawMetric = {
     path: readonly string[];
     unit: string;
-    // Indexed by run, null if the run lacks the metric
-    values: readonly Param[];
 };
 
-export type RawNode = {
-    ref: string;
-    runs: readonly { id: number; source: string }[];
+export type Metadata = {
+    readonly date: string;
+    readonly current_commit: string;
+    readonly is_pr: boolean;
+    readonly source_branch: string;
+    readonly source_repository: string;
+    readonly pr_number?: number;
+    readonly pr_title?: string;
+    // Link to the run
+    readonly url?: string;
+    readonly target_repository?: string;
+    readonly pipeline_status?: PipelineStatus;
+    readonly [key: string]: Param | undefined;
+};
+
+export type PipelineStatus = 'passed' | 'passed_with_warnings' | 'failed' | 'canceled';
+
+export type RawRun = {
+    id: number;
+    metadata: Metadata;
+};
+
+// A tracked branch or PR
+export type Ref = { kind: 'branch'; name: string } | { kind: 'pr'; number: number };
+
+export type RawRef = Ref & {
+    runs: readonly RawRun[];
+    values: readonly (readonly Param[] | null)[];
+};
+
+export type RawData = {
     metrics: readonly RawMetric[];
+    refs: readonly RawRef[];
 };
-
-export type RawData = RawNode[];
 
 // Numeric columns are packed, missing values are NaN
 export type Column = { numeric: true; values: Float64Array } | { numeric: false; values: readonly Param[] };
@@ -50,9 +78,9 @@ export type Run = {
     // Index into the metric columns
     index: number;
     id: number;
-    source: string;
+    metadata: Metadata;
     date: Date | null;
-    commit: string | null;
+    commit: string;
     label: string;
     // Item value for dropdown
     value: string;
@@ -60,6 +88,8 @@ export type Run = {
 
 export type Dataset = {
     config: Config;
+    // Keyed by refKey()
+    refs: readonly (Ref & { key: string })[];
     // Newest first
     runs: Map<string, Run[]>;
     metrics: ReadonlyMap<string, Metric[]>;
@@ -71,10 +101,12 @@ export type XValue = number | string | Date;
 export type XScale<X extends XValue> = X extends Date ? 'time' : X extends number ? 'linear' : 'point';
 
 export type XAxis<X extends XValue = XValue> = {
-    key: string;
+    // Metric used as the X axis (excluded from the series), if any
+    key?: string;
     label: string;
     scale: XScale<X>;
-    parse: (value: Param) => X | null;
+    // X value of the run, null if the run can't be placed on the axis
+    x: (run: Run) => X | null;
     // Use Plot defaults if not specified
     tickFormat?: (x: X) => string;
     tipFormat?: (x: X) => string;
@@ -82,6 +114,7 @@ export type XAxis<X extends XValue = XValue> = {
 
 export type ValueAxis = {
     label: string;
+    unit: string;
     format: (v: number) => string;
     // Use Plot defaults if not specified
     ticks?: number[];
@@ -99,7 +132,6 @@ export type MetricDiff = {
     metric: Metric;
     base: number;
     target: number;
-    percent: number | null;
 };
 
 export type Section<T> = {
@@ -122,7 +154,13 @@ export type SummaryRow = {
 
 // Dataset
 
-export const SEPARATOR = '/';
+export const SEPARATOR = '.';
+// References a metadata field instead of a metric, e.g. '@pr_title' (nested: '@a.b')
+export const METADATA_PREFIX = '@';
+
+export function isMetadataRef(key: string): boolean {
+    return key.startsWith(METADATA_PREFIX);
+}
 
 export function labelOf(config: Config, name: string): string {
     return config.labels[name] ?? name;
@@ -145,38 +183,48 @@ export function numberAt(metric: Metric, run: number): number | null {
     return typeof value === 'number' ? value : null;
 }
 
+// Key of a ref in the dataset's maps
+export function refKey(ref: Ref): string {
+    return ref.kind === 'pr' ? `pr/${ref.number}` : `branch/${ref.name}`;
+}
+
+// The main branch (default across the views)
+export const MAIN_REF = refKey({ kind: 'branch', name: 'main' });
+
 export function buildDataset(raw: RawData, config: Config): Dataset {
+    const refs = raw.refs.map((r) => {
+        const ref: Ref = r.kind === 'pr' ? { kind: 'pr', number: r.number } : { kind: 'branch', name: r.name };
+        return { ...ref, key: refKey(ref) };
+    });
+
     const metrics = new Map<string, Metric[]>(
-        raw.map((it) => [
-            it.ref,
-            it.metrics.map(({ path, unit, values }) => {
+        raw.refs.map((it, i) => [
+            refs[i].key,
+            raw.metrics.flatMap(({ path, unit }, m) => {
+                const values = it.values[m];
+                if (!values) return [];
                 const name = path[path.length - 1];
-                return { key: path.join(SEPARATOR), path, name, label: labelOf(config, name), unit, column: toColumn(values) };
+                return [{ key: path.join(SEPARATOR), path, name, label: labelOf(config, name), unit, column: toColumn(values) }];
             })
         ])
     );
 
     const byKey = new Map([...metrics].map(([ref, ms]) => [ref, new Map(ms.map((m) => [m.key, m]))]));
 
-    const dates = new Map([...byKey].map(([ref, metrics]) => [ref, metrics.get(config.date)]));
-    const commits = new Map([...byKey].map(([ref, metrics]) => [ref, metrics.get(config.commit)]));
-
     const runs = new Map(
-        raw.map((it) => [
-            it.ref,
+        raw.refs.map((it, i) => [
+            refs[i].key,
             it.runs
-                .map(({ id, source }, index) => {
-                    const dateText = dates ? valueAt(dates.get(it.ref)!, index) : null;
-                    const date = parseDate(dateText);
-                    const commitValue = commits ? valueAt(commits.get(it.ref)!, index) : null;
-                    const commit = commitValue === null ? null : String(commitValue);
+                .map(({ id, metadata }, index) => {
+                    const date = parseDate(metadata.date);
+                    const commit = metadata.current_commit;
                     return {
                         index,
                         id,
-                        source,
+                        metadata,
                         date,
                         commit,
-                        label: `${date ? String(dateText).trim() : `Run ${id}`} · ${commit ?? 'unknown'}`,
+                        label: `${date ? metadata.date.trim() : `Run ${id}`} · ${commit}`,
                         value: String(index)
                     };
                 })
@@ -184,14 +232,13 @@ export function buildDataset(raw: RawData, config: Config): Dataset {
         ])
     );
 
-    return { config, runs, metrics, byKey };
+    return { config, refs, runs, metrics, byKey };
 }
 
 // Parsing / formatting
 
-const parse = timeParse('%Y-%m-%d %H:%M');
-
 export function parseDate(value: unknown): Date | null {
+    const parse = timeParse('%Y-%m-%d %H:%M');
     return typeof value === 'string' ? parse(value.trim()) : null;
 }
 
@@ -251,14 +298,8 @@ export function durationTicks(values: readonly number[], count = 5): number[] {
     return ticks;
 }
 
-// Use SI prefixes
-export function valueTickFormat(values: readonly number[]): (v: number) => string {
-    const maxAbs = max(values, Math.abs) ?? 0;
-    return maxAbs >= 1e4 || (maxAbs > 0 && maxAbs < 1e-2) ? format('~s') : format(',~r');
-}
-
 export function displayUnit(unit: string): string {
-    return isDuration(unit) ? '' : unit;
+    return isDuration(unit) ? '' : displayUnitText(unit);
 }
 
 export function axisLabel({ label, unit }: Pick<Metric, 'label' | 'unit'>): string {
@@ -267,13 +308,15 @@ export function axisLabel({ label, unit }: Pick<Metric, 'label' | 'unit'>): stri
     return u ? `${label} [${u}]` : label;
 }
 
-export function withUnit(text: string, unit: string): string {
-    const u = displayUnit(unit);
-    return u ? `${text} ${u}` : text;
+// Values sharing one display unit (e.g. a row of a comparison), SI units get the prefix that suits the largest
+export function formatValues(values: readonly number[], unit: string): string[] {
+    if (isDuration(unit)) return values.map(formatDuration);
+    const scale = displayScale(unit, values);
+    return values.map((v) => withUnit(scale.format(v), scale.unit));
 }
 
 export function formatValue(value: number, unit: string): string {
-    return isDuration(unit) ? formatDuration(value) : withUnit(valueTickFormat([value])(value), unit);
+    return formatValues([value], unit)[0];
 }
 
 export function formatParam(value: Param, unit: string): string {
@@ -285,24 +328,26 @@ export function formatParam(value: Param, unit: string): string {
 }
 
 export function valueAxis(metric: Pick<Metric, 'label' | 'unit'>, values: readonly number[]): ValueAxis {
-    const label = axisLabel(metric);
-    return isDuration(metric.unit) ? { label, format: formatDuration, ticks: durationTicks(values) } : { label, format: valueTickFormat(values) };
+    if (isDuration(metric.unit)) return { label: axisLabel(metric), unit: '', format: formatDuration, ticks: durationTicks(values) };
+    const scale = displayScale(metric.unit, values);
+    return { label: scale.unit ? `${metric.label} [${scale.unit}]` : metric.label, unit: scale.unit, format: scale.format };
 }
 
-const percent = format('+.2f');
-
-export function formatPercent(value: number): string {
-    return value === 0 ? '0%' : `${percent(value)}%`;
+export function formatDiff(base: number, target: number): string {
+    const diffFmt = format('+.2~f');
+    const raw = target - base;
+    const pct = base === 0 ? 0 : (raw / Math.abs(base)) * 100;
+    // d3 uses '−' for formatting - keep for consistency
+    return raw === 0 ? '−' : `${diffFmt(raw)} (${diffFmt(pct)}%)`;
 }
 
 // X axis
 
-export function dateAxis(key: string): XAxis<Date> {
+export function dateAxis(): XAxis<Date> {
     return {
-        key,
         label: 'Run date',
         scale: 'time',
-        parse: parseDate,
+        x: (run) => run.date,
         tickFormat: timeFormat('%b %Y'),
         tipFormat: timeFormat('%Y-%m-%d %H:%M')
     };
@@ -313,7 +358,7 @@ export function numericAxis(metric: Metric): XAxis<number> {
         key: metric.key,
         label: axisLabel(metric),
         scale: 'linear',
-        parse: (value) => (typeof value === 'number' && Number.isFinite(value) ? value : null)
+        x: (run) => numberAt(metric, run.index)
     };
 }
 
@@ -322,20 +367,23 @@ export function categoryAxis(metric: Metric): XAxis<string> {
         key: metric.key,
         label: metric.label,
         scale: 'point',
-        parse: (value) => (typeof value === 'string' && value.trim() ? value.trim() : null)
+        x: (run) => {
+            const value = valueAt(metric, run.index);
+            return typeof value === 'string' && value.trim() ? value.trim() : null;
+        }
     };
 }
 
 // Grouping
 
-// Categories are separated with `/` - the last item is the actual metric
+// Categories are separated with SEPARATOR - the last item is the actual metric
 export function matchesEntry(metric: Metric, entry: string): boolean {
     return entry.includes(SEPARATOR) ? metric.key === entry || metric.key.startsWith(entry + SEPARATOR) : metric.path.includes(entry);
 }
 
-// Unplottable metrics are listed in the config
+// Unplottable metrics are listed in the config (metadata is never plotted)
 export function isPlottable(metric: Metric, config: Config): boolean {
-    return metric.column.numeric && metric.key !== config.date && !(config.unplottable ?? []).some((entry) => matchesEntry(metric, entry));
+    return metric.column.numeric && !(config.unplottable ?? []).some((entry) => matchesEntry(metric, entry));
 }
 
 export function categoryLabel(config: Config, categories: readonly string[]): string {
@@ -382,20 +430,18 @@ export function compareX(a: XValue, b: XValue): number {
 
 // Series of every plottable metric against the given X-axis, joined by run
 export function seriesFor<X extends XValue>(ref: string, dataset: Dataset, axis: XAxis<X>): Series<X>[] | null {
-    const xMetric = dataset.byKey.get(ref)!.get(axis.key);
-    if (!xMetric) return null;
+    const runs = dataset.runs.get(ref);
+    if (!runs || (axis.key !== undefined && !dataset.byKey.get(ref)?.has(axis.key))) return null;
 
     const xs: [number, X][] = [];
-    for (const run of dataset.runs.get(ref)!) {
-        const value = valueAt(xMetric, run.index);
-        const x = axis.parse(value);
+    for (const run of runs) {
+        const x = axis.x(run);
         if (isValidX(x)) xs.push([run.index, x]);
-        else console.warn(`Skipping run ${run.id}: cannot transform ${JSON.stringify(value)}`);
+        else console.warn(`Skipping run ${run.id}: no valid '${axis.label}' value`);
     }
     xs.sort((a, b) => compareX(a[1], b[1]));
 
-    return dataset.metrics
-        .get(ref)!
+    return (dataset.metrics.get(ref) ?? [])
         .filter((m) => m.key !== axis.key && isPlottable(m, dataset.config))
         .map((metric) => {
             const category = categoryLabel(dataset.config, metric.path.slice(0, -1));
@@ -420,16 +466,115 @@ export function diffRuns(metrics: readonly Metric[], baseRun: number, targetRun:
         const base = numberAt(metric, baseRun);
         const target = numberAt(metric, targetRun);
         if (base === null || target === null) return [];
-        return [{ metric, base, target, percent: percentChange(base, target) }];
+        return [{ metric, base, target }];
     });
+}
+
+// Lookup
+
+// Metadata field referenced as '@name' or '@a.b', undefined if not reported by the run
+export function metadataValue(metadata: Metadata, key: string): Param | undefined {
+    type Node = Param | undefined | { readonly [key: string]: Param | undefined };
+    let value: Node = metadata;
+    for (const name of key.slice(METADATA_PREFIX.length).split(SEPARATOR)) {
+        if (value === null || typeof value !== 'object' || Array.isArray(value)) return undefined;
+        value = (value as { readonly [key: string]: Param | undefined })[name];
+    }
+    return value as Param | undefined;
+}
+
+export type Resolved = { label: string; unit: string; value: Param };
+
+// Resolves a metric path or a metadata reference ('@...') for the run, undefined if unknown
+export function resolve(dataset: Dataset, ref: string, run: Run, key: string): Resolved | undefined {
+    if (isMetadataRef(key)) {
+        const value = metadataValue(run.metadata, key);
+        // Display unit only, metadata values are not converted
+        const unit = dataset.config.units?.[key] ?? '';
+        return value === undefined ? undefined : { label: keyLabel(dataset.config, key), unit, value };
+    }
+    const metric = dataset.byKey.get(ref)?.get(key);
+    return metric && { label: metric.label, unit: metric.unit, value: valueAt(metric, run.index) };
 }
 
 // Summary
 
-export function summaryRows(ref: string, dataset: Dataset, run: number): SummaryRow[] {
-    return (dataset.config.summary ?? []).flatMap((key) => {
-        const metric = dataset.byKey.get(ref)!.get(key);
-        if (!metric) return [];
-        return [{ key, label: metric.label, value: formatParam(valueAt(metric, run), metric.unit) }];
+// Label of a metric path or a metadata reference ('@...')
+function keyLabel(config: Config, key: string): string {
+    const name = key.slice(key.lastIndexOf(SEPARATOR) + 1).replace(METADATA_PREFIX, '');
+    return (isMetadataRef(key) && config.labels[key]) || labelOf(config, name);
+}
+
+// Rows of metric paths / metadata references (summary, overview)
+export function summaryRows(ref: string, dataset: Dataset, run: Run, keys: readonly string[] = [], keepMissing = false): SummaryRow[] {
+    return keys.flatMap((key) => {
+        const resolved = resolve(dataset, ref, run, key);
+        if (resolved) return [{ key, label: resolved.label, value: formatParam(resolved.value, resolved.unit) }];
+        return keepMissing ? [{ key, label: keyLabel(dataset.config, key), value: '-' }] : [];
     });
+}
+
+// Overview
+
+export type Badge = { variant: 'success' | 'warning' | 'destructive' | 'secondary' | 'outline'; label: string };
+
+const PIPELINE_BADGES: Record<PipelineStatus, Badge> = {
+    passed: { variant: 'success', label: 'passed' },
+    passed_with_warnings: { variant: 'warning', label: 'passed with warnings' },
+    failed: { variant: 'destructive', label: 'failed' },
+    canceled: { variant: 'secondary', label: 'canceled' }
+};
+
+export function pipelineBadge(status: PipelineStatus | undefined): Badge {
+    return (status && PIPELINE_BADGES[status]) || { variant: 'outline', label: 'unknown' };
+}
+
+export type OverviewCard = {
+    key: string;
+    title: string;
+    // PR title, none for branches
+    description?: string;
+    url?: string;
+    badge: Badge;
+    // Date reported by the latest run
+    updated: string;
+    rows: SummaryRow[];
+};
+
+// Branches first (main, then by name), then PRs from the most recently updated
+function compareRefs(dataset: Dataset, a: Ref & { key: string }, b: Ref & { key: string }): number {
+    if (a.kind !== b.kind) return a.kind === 'branch' ? -1 : 1;
+    if (a.kind === 'branch' && b.kind === 'branch') {
+        if (a.key === MAIN_REF || b.key === MAIN_REF) return a.key === MAIN_REF ? -1 : 1;
+        return a.name.localeCompare(b.name);
+    }
+    const time = (ref: string) => dataset.runs.get(ref)?.[0]?.date?.getTime() ?? -Infinity;
+    return time(b.key) - time(a.key) || (b as { number: number }).number - (a as { number: number }).number;
+}
+
+export function overviewCards(dataset: Dataset): OverviewCard[] {
+    return [...dataset.refs]
+        .sort((a, b) => compareRefs(dataset, a, b))
+        .flatMap((ref) => {
+            const latest = dataset.runs.get(ref.key)?.[0];
+            if (!latest) return [];
+            const { metadata } = latest;
+            return [
+                {
+                    key: ref.key,
+                    title: ref.kind === 'pr' ? `PR #${ref.number}` : ref.name,
+                    description: ref.kind === 'pr' ? metadata.pr_title : undefined,
+                    url: metadata.url,
+                    badge: pipelineBadge(metadata.pipeline_status),
+                    updated: metadata.date,
+                    rows: summaryRows(ref.key, dataset, latest, dataset.config.overview, true)
+                }
+            ];
+        });
+}
+
+// Value of a latest-reported metric (path) or a metadata field
+export function latestValue(dataset: Dataset, ref: string, key: string): Param {
+    const newest = dataset.runs.get(ref)?.[0];
+    return (newest && resolve(dataset, ref, newest, key)?.value) ?? null;
 }

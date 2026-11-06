@@ -98,7 +98,7 @@ jobs:
           submodules: recursive
 
       - name: Extract custom coverage
-        run: _secret_extract_custom_coverage:5
+        run: _secret_extract_custom_coverage:6
 
       - name: Setup info-process
         run: .github/scripts/info_process_setup.sh

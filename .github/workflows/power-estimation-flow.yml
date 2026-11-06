@@ -100,6 +100,13 @@ jobs:
           echo "RV_ROOT=$GITHUB_WORKSPACE/Cores-VeeR-EL2" >> "$GITHUB_ENV"
           test -d "$GITHUB_WORKSPACE/Cores-VeeR-EL2"
 
+      - name: Create Python venv
+        run: |
+          cd "$RV_ROOT"
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+
       - name: Configure Bazel
         run: |
           cd "$RV_ROOT"
@@ -149,7 +156,7 @@ jobs:
           cd "$RV_ROOT"
           make -C synth_run -f "$RV_ROOT/tools/Makefile" verilator TEST="hello_world" TB_EXTRA_ARGS=
 
-      - name: Get SAIF file using trace2power
+      - name: Get base SAIF file using trace2power
         run: |
           cd "$RV_ROOT/synth_run"
           /opt/trace2power/bin/trace2power \
@@ -163,6 +170,40 @@ jobs:
             --output-format saif \
             --output base.saif \
             sim.vcd
+
+      - name: Get per-cycle total SAIF files using trace2power
+        run: |
+          cd "$RV_ROOT"
+          mkdir -p synth_run/total_output
+          /opt/trace2power/bin/trace2power \
+            --clk-freq $(awk -v T="${{ env.CLK_PERIOD_NS }}" 'BEGIN { printf "%.0f", 1e9/T }') \
+            --top el2_veer_wrapper \
+            --top-scope TOP.tb_top.rvtop_wrapper.rvtop_synth_wrapper.rvtop_synth \
+            --limit-scope TOP.tb_top.rvtop_wrapper.rvtop_synth_wrapper \
+            --remove-virtual-pins \
+            --per-clock-cycle \
+            --input-ports-activity \
+            --output-format saif \
+            --output synth_run/total_output \
+            synth_run/sim.vcd
+
+      - name: Get per-cycle glitch power SAIF files using trace2power
+        run: |
+          cd "$RV_ROOT"
+          mkdir -p synth_run/glitch_output
+          /opt/trace2power/bin/trace2power \
+            --clk-freq $(awk -v T="${{ env.CLK_PERIOD_NS }}" 'BEGIN { printf "%.0f", 1e9/T }') \
+            --top el2_veer_wrapper \
+            --top-scope TOP.tb_top.rvtop_wrapper.rvtop_synth_wrapper.rvtop_synth \
+            --limit-scope TOP.tb_top.rvtop_wrapper.rvtop_synth_wrapper \
+            --remove-virtual-pins \
+            --per-clock-cycle \
+            --only-glitches \
+            --clock-name clk \
+            --input-ports-activity \
+            --output-format saif \
+            --output synth_run/glitch_output \
+            synth_run/sim.vcd
 
       - name: Run static power analysis using OpenROAD
         run: |
@@ -180,10 +221,32 @@ jobs:
           /opt/openroad/bin/openroad "$RV_ROOT/tools/static_power_analysis.tcl" -exit
           cat "$POWER_REPORT"
 
+      - name: Run peak and glitch power analysis using OpenROAD
+        run: |
+          cd "$RV_ROOT"
+          $RV_ROOT/venv/bin/python3 "$RV_ROOT/tools/peak_power.py" \
+            --openroad /opt/openroad/bin/openroad \
+            --base synth_run/base.saif \
+            --saif-scope rvtop_synth_wrapper/rvtop_synth \
+            --total synth_run/total_output \
+            --glitch synth_run/glitch_output \
+            --tech-lef "$TECH_LEF" \
+            --cell-lef "$CELL_LEF" \
+            --netlist "$RV_ROOT/bazel-bin/veer_el2_synth_asap7_${{ matrix.bus.config }}_synth_output.v" \
+            --top el2_veer_wrapper \
+            --clock-port "clk" \
+            --clock-period-ns $CLK_PERIOD_NS \
+            --lib "$LIBERTY" \
+            --out-dir "$RV_ROOT/power_out" \
+            --csv "$RV_ROOT/power_out/${{ matrix.bus.config }}_power_analysis.csv" \
+            --plot "$RV_ROOT/power_out/${{ matrix.bus.config }}_power_plot.png"
+
       - name: Upload power report artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: static_power_${{ matrix.bus.config }}.rpt
-          path: ${{ env.RV_ROOT }}/synth_run
+          path: |
+            ${{ env.RV_ROOT }}/synth_run
+            ${{ env.RV_ROOT }}/power_out
           retention-days: 7

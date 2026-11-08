@@ -48,10 +48,21 @@ typedef VerilatedVcdC TraceFile;
 #define HALF_PERIOD 5
 #endif
 
+#include <signal.h>
+
 vluint64_t main_time = 0;
+volatile int finish = 0;
 
 double sc_time_stamp () {
  return main_time;
+}
+
+void sigint_handler (int arg) {
+  (void)arg;
+  if (!finish) {
+    fprintf(stderr, "SIGINT caught, exitting...\n");
+    finish = 1;
+  }
 }
 
 std::map<std::string, uint64_t> load_symbols (const std::string& fileName) {
@@ -89,6 +100,7 @@ int main(int argc, char** argv) {
   std::cout << "\nVerilatorTB: Start of sim\n" << std::endl;
 
   Verilated::commandArgs(argc, argv);
+  signal(SIGINT, sigint_handler);
 
   Vtb_top* tb = new Vtb_top;
   bool test_halt = false;
@@ -313,7 +325,7 @@ int main(int argc, char** argv) {
     tb->rst_l = 1;
   }
 
-  while(!Verilated::gotFinish()){
+  while(!Verilated::gotFinish() && !finish){
 #if VM_TRACE
       tfp->dump (main_time);
 #endif

@@ -322,6 +322,9 @@ module el2_dec
 
     // clock gating overrides from mcgc
     output logic dec_tlu_misc_clk_override,   // override misc clock domain gating
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    output logic dec_tlu_dec_clk_override,  // to and from dec blocks
+`endif
     output logic dec_tlu_ifu_clk_override,    // override fetch clock domain gating
     output logic dec_tlu_lsu_clk_override,    // override load/store clock domain gating
     output logic dec_tlu_bus_clk_override,    // override bus clock domain gating
@@ -349,6 +352,7 @@ module el2_dec
     output logic [31:0]             recovery_csr_rddata, // CSR recovery backdoor read data
 
     output logic [31:1]             dec_tlu_npc,         // Next state of the PC register
+
 `endif
 
     output logic dec_tlu_i0_commit_cmt,  // committed i0 instruction
@@ -360,7 +364,9 @@ module el2_dec
 );
 
 
+`ifndef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
   logic dec_tlu_dec_clk_override;  // to and from dec blocks
+`endif
   logic clk_override;
 
   logic dec_ib0_valid_d;

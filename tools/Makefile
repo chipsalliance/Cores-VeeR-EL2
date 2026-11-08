@@ -65,6 +65,8 @@ PICOLIBC_DIR = ${RV_ROOT}/third_party/picolibc/install
 GATELEVEL ?= 0
 TIMESCALE ?= 1ns/10ps
 
+TB_TOP ?= tb_top
+
 # Override march depending on used GCC version
 ifneq ($(shell which $(GCC_PREFIX)-gcc 2> /dev/null),)
 	GCCVERSIONGT11 := $(shell expr `$(GCC_PREFIX)-gcc -dumpversion | cut -f1 -d.` \>= 11)
@@ -89,7 +91,7 @@ ifeq ($(TB_MAX_CYCLES),)
 endif
 
 VERILATOR_EXTRA_ARGS := -GMAX_CYCLES=$(TB_MAX_CYCLES)
-VCS_EXTRA_ARGS := -pvalue+tb_top.MAX_CYCLES=$(TB_MAX_CYCLES)
+VCS_EXTRA_ARGS := -pvalue+$(TB_TOP).MAX_CYCLES=$(TB_MAX_CYCLES)
 
 ifeq ("$(.SHELLSTATUS)", "0")
     $(shell test $(VERILATOR_VERSION) -lt 5006)
@@ -205,7 +207,7 @@ TB_VERILATOR_SRCS = $(TBDIR)/test_tb_top.cpp $(TB_DPI_SRCS)
 
 TBFILES = $(TBDIR)/tb_top_if.sv \
           $(TBDIR)/tb_top_pkg.sv \
-          $(TBDIR)/tb_top.sv \
+          $(TBDIR)/$(TB_TOP).sv \
           $(TBDIR)/ahb_sif.sv \
           $(TBDIR)/axi_sif.sv \
           $(TBDIR)/jtagdpi/jtagdpi.sv \
@@ -224,6 +226,7 @@ TBFILES = $(TBDIR)/tb_top_if.sv \
 defines  = $(BUILD_DIR)/common_defines.vh
 defines += ${RV_ROOT}/design/include/el2_def.sv
 defines += $(BUILD_DIR)/el2_pdef.vh
+defines += +define+TB_TOP=$(TB_TOP)
 includes = -I${BUILD_DIR} -I$(TBDIR)/axi4_mux
 
 CM_HIER_FILE = $(RV_ROOT)/cm.cfg
@@ -275,7 +278,7 @@ irun-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	  -xmlibdirpath . -xmlibdirname veer.build \
 	  -incdir ${RV_ROOT}/design/lib -incdir ${RV_ROOT}/design/include \
 	  -vlog_ext +.vh+.h $(defines) -incdir $(BUILD_DIR) \
-	  -f ${RV_ROOT}/testbench/flist -top tb_top  ${TBFILES} \
+	  -f ${RV_ROOT}/testbench/flist -top $(TB_TOP)  ${TBFILES} \
 	  -I${RV_ROOT}/testbench -elaborate  -snapshot ${snapshot} $(profile)
 	touch irun-build
 
@@ -318,7 +321,7 @@ vlog: program.hex ${TBFILES} ${BUILD_DIR}/defines.h
         $(ASSERT_DEFINES) $(defines) -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -R +nowarn3829 +nowarn2583 ${DEBUG_PLUS} -suppress 14408 -suppress 16154
 
 riviera: program.hex riviera-build
-	vsim -c -lib work ${DEBUG_PLUS} ${RIVIERA_DEBUG} tb_top -do "run -all; exit" -l riviera.log
+	vsim -c -lib work ${DEBUG_PLUS} ${RIVIERA_DEBUG} $(TB_TOP) -do "run -all; exit" -l riviera.log
 
 
 

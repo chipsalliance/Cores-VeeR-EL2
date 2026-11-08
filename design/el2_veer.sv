@@ -469,6 +469,8 @@ import el2_pkg::*;
    input  logic [31:0]             recovery_csr_wrdata, // CSR recovery backdoor write data
    input  logic [11:0]             recovery_csr_rdaddr, // CSR recovery backdoor read address
    output logic [31:0]             recovery_csr_rddata, // CSR recovery backdoor read data
+
+   output logic [31:1]             dec_tlu_npc,         // Next state of the PC register
 `endif
 
    input logic [pt.PIC_TOTAL_INT:1]           extintsrc_req,

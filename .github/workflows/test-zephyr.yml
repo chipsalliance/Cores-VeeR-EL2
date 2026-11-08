@@ -14,11 +14,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        tmr: [0, 1]
+        test: ["zephyr_hello_world", "zephyr_philosophers"]
+        tb_plusargs: ["", "+upsets"]
         include:
           - test: "zephyr_hello_world"
             zephyr_config: "-DCONFIG_VEER_EL2_TB_EXIT_ON_MAIN_RETURN=y"
           - test: "zephyr_philosophers"
             zephyr_config: "-DCONFIG_VEER_EL2_TB_EXIT_AFTER_MS=5000"
+        exclude:
+          - tmr: 0
+            tb_plusargs: "+upsets"
     env:
       DEBIAN_FRONTEND: "noninteractive"
     steps:
@@ -28,6 +34,9 @@ jobs:
           submodules: recursive
 
       - name: Install dependencies and run test
+        env:
+          TMR_TB: ${{ matrix.tmr }}
+          TB_PLUSARGS: ${{ matrix.tb_plusargs }}
         run: |
           sudo apt -qqy update && sudo apt -qqy install zip cmake tree liblz4-dev
           python3 -m venv .venv
@@ -42,7 +51,7 @@ jobs:
             west sdk install
           popd
           export RV_ROOT=`pwd`
-          make debug=1 TRACE_FORMAT=fst TB_EXTRA_ARGS="" ZEPHYR_CONFIG="${{ matrix.zephyr_config }}" -f $RV_ROOT/tools/Makefile TEST="${{ matrix.test }}" CLK_PERIOD_NS=1 verilator
+          make TRACE_FORMAT=fst TB_EXTRA_ARGS="" ZEPHYR_CONFIG="${{ matrix.zephyr_config }}" -f $RV_ROOT/tools/Makefile TEST="${{ matrix.test }}" CLK_PERIOD_NS=1 verilator
 
       - name: Upload artifacts
         if: always()

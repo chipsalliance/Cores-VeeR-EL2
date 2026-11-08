@@ -473,6 +473,32 @@ module veer_wrapper
   `define TB_GPR_X0_ASSERT_ON
 `endif
 `ifdef TB_GPR_X0_ASSERT_ON
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+  assert_core0_gpr_x0_rd0_zero: assert property (
+      @(posedge clk) disable iff (!rvtop.core_rst_l)
+      (rvtop.tmr_complex.cores[0].veer.dec.arf.raddr0 == 5'd0) |-> (rvtop.tmr_complex.cores[0].veer.dec.arf.rd0 == 32'h0))
+    else $fatal(1, "GPR x0 read port 0 returned non-zero in core 0");
+  assert_core0_gpr_x0_rd1_zero: assert property (
+      @(posedge clk) disable iff (!rvtop.core_rst_l)
+      (rvtop.tmr_complex.cores[0].veer.dec.arf.raddr1 == 5'd0) |-> (rvtop.tmr_complex.cores[0].veer.dec.arf.rd1 == 32'h0))
+    else $fatal(1, "GPR x0 read port 1 returned non-zero in core 0");
+  assert_core1_gpr_x0_rd0_zero: assert property (
+      @(posedge clk) disable iff (!rvtop.core_rst_l)
+      (rvtop.tmr_complex.cores[1].veer.dec.arf.raddr0 == 5'd0) |-> (rvtop.tmr_complex.cores[1].veer.dec.arf.rd0 == 32'h0))
+    else $fatal(1, "GPR x0 read port 0 returned non-zero in core 1");
+  assert_core1_gpr_x0_rd1_zero: assert property (
+      @(posedge clk) disable iff (!rvtop.core_rst_l)
+      (rvtop.tmr_complex.cores[1].veer.dec.arf.raddr1 == 5'd0) |-> (rvtop.tmr_complex.cores[1].veer.dec.arf.rd1 == 32'h0))
+    else $fatal(1, "GPR x0 read port 1 returned non-zero in core 1");
+  assert_core2_gpr_x0_rd0_zero: assert property (
+      @(posedge clk) disable iff (!rvtop.core_rst_l)
+      (rvtop.tmr_complex.cores[2].veer.dec.arf.raddr0 == 5'd0) |-> (rvtop.tmr_complex.cores[2].veer.dec.arf.rd0 == 32'h0))
+    else $fatal(1, "GPR x0 read port 0 returned non-zero in core 2");
+  assert_core2_gpr_x0_rd1_zero: assert property (
+      @(posedge clk) disable iff (!rvtop.core_rst_l)
+      (rvtop.tmr_complex.cores[2].veer.dec.arf.raddr1 == 5'd0) |-> (rvtop.tmr_complex.cores[2].veer.dec.arf.rd1 == 32'h0))
+    else $fatal(1, "GPR x0 read port 1 returned non-zero in core 2");
+`else
   assert_main_gpr_x0_rd0_zero: assert property (
       @(posedge clk) disable iff (!rvtop.core_rst_l)
       (rvtop.veer.dec.arf.raddr0 == 5'd0) |-> (rvtop.veer.dec.arf.rd0 == 32'h0))
@@ -492,6 +518,7 @@ module veer_wrapper
       (rvtop.lockstep.xshadow_core.dec.arf.raddr1 == 5'd0) |->
       (rvtop.lockstep.xshadow_core.dec.arf.rd1 == 32'h0))
     else $fatal(1, "GPR x0 read port 1 returned non-zero in shadow core");
+`endif
 `endif
   `undef TB_GPR_X0_ASSERT_ON
 `endif

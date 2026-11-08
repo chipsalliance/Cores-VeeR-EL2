@@ -13,6 +13,10 @@
 // limitations under the License.
 //
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+`define TMR_RECOVERY_FSM `TB_TOP.rvtop_wrapper.rvtop.tmr_complex.el2_tmr_recovery_fsm_u
+`endif
+
 package tb_top_pkg;
 
 `ifndef VERILATOR
@@ -160,6 +164,16 @@ package tb_top_pkg;
                   $fwrite(el, "%10d : %32s=%h                ; nbD\n", cycle_count, abi_reg[trace.div_waddr], trace.div_wdata);
                   gpr[trace.div_waddr] = trace.div_wdata;
               end
+  `ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+              if (`TMR_RECOVERY_FSM.recovery_state_en && `TMR_RECOVERY_FSM.recovery_state != '0) begin
+                  if (`TMR_RECOVERY_FSM.recovery_nxstate == HALT_CORES) begin
+                      $fwrite(el, "%10d : TMR recovery procedure began\n", cycle_count);
+                  end
+                  if (`TMR_RECOVERY_FSM.recovery_nxstate == IDLE) begin
+                      $fwrite(el, "%10d : TMR recovery procedure finished\n", cycle_count);
+                  end
+              end
+  `endif
               // Delay DEC internals by 1 cycle
               wb_valid      = trace.gpr_wvalid;
               wb_dest       = trace.gpr_waddr;

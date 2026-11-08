@@ -90,6 +90,10 @@ ifneq ($(DEC_TEST),)
     EXTRA_CONFIG_OPTS += "-set=fast_interrupt_redirect=0"
 endif
 
+ifneq ($(TMR_ENABLE),)
+    EXTRA_CONFIG_OPTS += "-set=triple_modular_redundancy_enable=1"
+endif
+
 # Rules for generating VeeR config
 $(CFGDIR)/common_defines.vh:
 	mkdir -p $(CFGDIR)/../..

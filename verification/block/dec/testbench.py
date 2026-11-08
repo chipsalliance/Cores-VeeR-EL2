@@ -1299,6 +1299,10 @@ class BaseTest(uvm_test):
         cocotb.top.exu_i0_br_middle_r.value = 0
         cocotb.top.exu_i0_br_way_r.value = 0
         cocotb.top.ifu_i0_cinst.value = 0
+        cocotb.top.dec_timer_rddata_d_tmr.value = 0
+        cocotb.top.dec_timer_read_d_tmr.value = 0
+        cocotb.top.dec_timer_t0_pulse_tmr.value = 0
+        cocotb.top.dec_timer_t1_pulse_tmr.value = 0
         cocotb.top.recovery_gpr_en.value = 0
         cocotb.top.recovery_gpr_wen.value = 0
         cocotb.top.recovery_gpr_wraddr.value = 0

@@ -420,6 +420,45 @@ def tmr_voter_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_if/tmr_iccm"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_faults",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_iccm_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_if/tmr_dccm"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_faults",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_dccm_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_if/tmr_ic"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_faults",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_ic_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["ecc_counter"])
 @nox.parametrize(
     "testName",

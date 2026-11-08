@@ -498,6 +498,19 @@ def tmr_misc_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_if/tmr_exec"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_faults",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_exec_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["ecc_counter"])
 @nox.parametrize(
     "testName",

@@ -172,6 +172,69 @@ jobs:
             verification/${{ matrix.test }}/*.log
             verification/${{ matrix.test }}/*.vcd.zip
 
+  generate-tmr-matrix:
+    name: Select TMR microarchitectural tests
+    runs-on: ubuntu-24.04
+    outputs:
+      tests: ${{ steps.select.outputs.tests }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select tests
+        id: select
+        # Entries are <test directory>:<nox session>. Pull requests run all
+        # but the long tests listed last, which run in the nightly build.
+        run: |
+          echo "tests=$(python3 .github/scripts/select_pr_tests.py \
+            '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}' 100 \
+            'tmr_voter:tmr_voter,ecc_counter:ecc_counter,tmr_axi/axi_m:tmr_axi_m,tmr_axi/axi_s:tmr_axi_s,tmr_axi/axi_counter:tmr_axi_counter,tmr_if/tmr_iccm:tmr_iccm,tmr_if/tmr_dccm:tmr_dccm,tmr_if/tmr_ic:tmr_ic,tmr_if/tmr_pic:tmr_pic,tmr_if/tmr_dmi:tmr_dmi,tmr_if/tmr_misc:tmr_misc,tmr_if/tmr_exec:tmr_exec,tmr_boot_config:tmr_boot_config,tmr_recovery_fsm:tmr_recovery_fsm,tmr_cutoff:tmr_cutoff' \
+            'tmr_recovery_fsm:tmr_recovery_fsm,tmr_cutoff:tmr_cutoff')" | tee -a $GITHUB_OUTPUT
+
+  tmr_tests:
+    name: TMR microarchitectural tests
+    needs: generate-tmr-matrix
+    runs-on: ubuntu-24.04
+    container: ghcr.io/antmicro/cores-veer-el2:20260923
+    strategy:
+      matrix:
+        test: ${{ fromJSON(needs.generate-tmr-matrix.outputs.tests) }}
+    env:
+      CCACHE_DIR: "/opt/verification/.cache/"
+      DEBIAN_FRONTEND: "noninteractive"
+      RANDOM_SEED: "1377424946"
+    steps:
+      - name: Setup repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Run ${{ matrix.test }}
+        run: |
+          TEST_DIR=${{ matrix.test }}
+          TEST_DIR=${TEST_DIR%%:*}
+          SESSION=${{ matrix.test }}
+          SESSION=${SESSION##*:}
+          echo "TEST_DIR=$TEST_DIR" >> $GITHUB_ENV
+          echo "SESSION=$SESSION" >> $GITHUB_ENV
+          export RV_ROOT=`pwd`
+          source .venv/bin/activate
+          pushd verification/block
+            nox -s ${SESSION}_verify
+          popd
+
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: uarch_tests_logs-${{ env.SESSION }}
+          path: |
+            verification/block/${{ env.TEST_DIR }}/*.log
+
   custom_tests:
     name: Run custom Microarchitectural tests
     if: inputs.run_custom

@@ -1,0 +1,51 @@
+name: Metabole shadow (block tests)
+
+# Runs the block-level cocotb tests under Metabole in shadow mode: every test
+# runs as in test-uarch.yml, and the summary reports which runs could have been
+# reused from the previous run on main. Informational only; it never skips a
+# test and does not gate merges.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  shadow:
+    name: Shadow run
+    runs-on: ubuntu-24.04
+    container: ghcr.io/antmicro/cores-veer-el2:20260923
+    continue-on-error: true
+    env:
+      RANDOM_SEED: "1377424946"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Restore Metabole store
+        uses: actions/cache@v4
+        with:
+          path: .metabole/store
+          key: metabole-${{ github.run_id }}
+          restore-keys: metabole-
+
+      - name: Install dependencies
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -r verification/block/requirements.txt
+          pip install metabole==0.1.0
+
+      - name: Run block tests in shadow mode
+        run: |
+          source .venv/bin/activate
+          python3 .github/scripts/metabole_shadow.py \
+            pic pic_gw dma ifu_compress ifu_mem_ctl dec_tl dec_ib exu_alu exu_mul exu_div \
+            iccm dccm lib_axi4_to_ahb lib_ahb_to_axi4 pmp pmp_random dec_pmp_ctl dmi lsu_tl \
+            dec_tlu_ctl dec dcls | tee shadow.log
+          { echo '### Metabole shadow run'; echo '```'; tail -n 25 shadow.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"

@@ -1011,6 +1011,7 @@ module tb_top
             // data[7:0] == 0x86 - Trigger external interrupt
             // data[7:0] == 0x87 - (AXI4) Trigger data bus error on the next load/store
             // data[7:0] == 0x88 - (AXI4) Trigger instruction bus error on the next load/store
+            // data[7:0] == 0x8c - Halt the core through the PMU interface and resume it after 100 cycles
             // data[7:0] == 0x90 - clear all interrupt request signals
             if(mailbox_write && (mailbox_data[7:0] >= 8'h80 && mailbox_data[7:0] < 8'h87)) begin
                 if (mailbox_data[7:0] == 8'h80) begin
@@ -1042,6 +1043,17 @@ module tb_top
                 if (mailbox_data[7:0] == 8'h86) begin
                     extintsrc_req[1] <= 1;
                 end
+            end
+            if(mailbox_write && (mailbox_data[7:0] == 8'h8c)) begin
+                force i_cpu_halt_req = 1'b1;
+                wait (o_cpu_halt_ack == 1'b1);
+                @(posedge core_clk);
+                release i_cpu_halt_req;
+                repeat (100) @(posedge core_clk);
+                force i_cpu_run_req = 1'b1;
+                wait (o_cpu_run_ack == 1'b1);
+                @(posedge core_clk);
+                release i_cpu_run_req;
             end
             if(mailbox_write && (mailbox_data[7:0] == 8'h90)) begin
                 extintsrc_req  <= {pt.PIC_TOTAL_INT-1{1'b0}};

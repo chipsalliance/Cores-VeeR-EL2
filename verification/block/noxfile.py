@@ -486,6 +486,19 @@ def tmr_axi_m_verify(session, blockName, testName, coverage):
     verify_block(session, blockName, testName, coverage)
 
 
+@nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_axi/axi_s"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_faults",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_axi_s_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
 @nox.session(reuse_venv=True)
 def lint(session: nox.Session) -> None:
     """Options are defined in pyproject.toml and .flake8 files"""

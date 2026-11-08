@@ -1,0 +1,6 @@
+# Copyright (c) 2026 Antmicro
+# SPDX-License-Identifier: Apache-2.0
+
+description: VeeR EL2 internal timers (CSR-based), used as the system timer
+compatible: "chipsalliance,veer-el2-timer"
+include: base.yaml

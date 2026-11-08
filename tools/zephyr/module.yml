@@ -1,0 +1,11 @@
+# Copyright (c) 2026 Antmicro
+# SPDX-License-Identifier: Apache-2.0
+
+name: veer-el2
+build:
+  cmake: zephyr
+  kconfig: zephyr/Kconfig
+  settings:
+    board_root: zephyr
+    soc_root: zephyr
+    dts_root: zephyr

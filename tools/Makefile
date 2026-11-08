@@ -65,7 +65,11 @@ PICOLIBC_DIR = ${RV_ROOT}/third_party/picolibc/install
 GATELEVEL ?= 0
 TIMESCALE ?= 1ns/10ps
 
+ifdef TMR_TB
+TB_TOP ?= tb_top_tmr
+else
 TB_TOP ?= tb_top
+endif
 
 # Override march depending on used GCC version
 ifneq ($(shell which $(GCC_PREFIX)-gcc 2> /dev/null),)
@@ -236,6 +240,13 @@ CFLAGS += -std=c++14
 # compiles), or -O for balance.
 VERILATOR_MAKE_FLAGS = OPT_FAST="-Os"
 
+# At this point all variables are configured so include the TMR makefile
+ifdef TMR_TB
+include $(RV_ROOT)/tools/tmr.mk
+else
+TMR_CONF_PARAMS =
+endif
+
 # Targets
 all: clean verilator
 
@@ -250,8 +261,9 @@ clean:
 
 # If define files do not exist, then run veer.config.
 ${BUILD_DIR}/defines.h:
-	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/veer.config -target=$(target) $(CONF_PARAMS)
+	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/veer.config -target=$(target) $(CONF_PARAMS) $(TMR_CONF_PARAMS)
 
+ifndef TMR_TB
 verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	$(VERILATOR) --cc -CFLAGS "${CFLAGS} ${GATELEVEL_CFLAGS}" --coverage-max-width 20000 $(defines) $(FCOV_DEFINES) \
 	  $(includes) -I${RV_ROOT}/testbench -f $(DUT_FILELIST) $(DUT_DEFINE) $(DUT_NETLIST) $(ASAP7_CELL_MODELS) --timescale $(TIMESCALE) \
@@ -260,6 +272,7 @@ verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	cp ${RV_ROOT}/testbench/test_tb_top.cpp obj_dir/
 	$(MAKE) -e -C obj_dir/ -f Vtb_top.mk $(VERILATOR_MAKE_FLAGS) -j$(shell nproc)
 	touch verilator-build
+endif
 
 vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	$(VCS) $(VCS_DEBUG) $(VCS_EXTRA_ARGS) -full64 -assert svaext -sverilog $(FCOV_DEFINES) +define+RV_OPENSOURCE $(ASSERT_DEFINES) \
@@ -293,6 +306,7 @@ riviera-build: ${TBFILES} ${BUILD_DIR}/defines.h
 
 ############ TEST Simulation ###############################
 
+ifndef TMR_TB
 verilator: program.hex verilator-build
 	# FIXME: Assuming here that either begin_signature or end_signature implies
 	# that both symbols are present.
@@ -304,6 +318,7 @@ verilator: program.hex verilator-build
 	else \
 		./obj_dir/Vtb_top ${TB_EXTRA_ARGS}; \
 	fi
+endif
 
 irun: program.hex irun-build
 	$(IRUN) -64bit -abvglobalfailurelimit 1 +lic_queue -licqueue \

@@ -421,6 +421,19 @@ def tmr_recovery_fsm_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
+@nox.parametrize("blockName", ["tmr_boot_config"])
+@nox.parametrize(
+    "testName",
+    [
+        "test_simple",
+    ],
+)
+@nox.parametrize("coverage", coverageTypes)
+def tmr_boot_config_verify(session, blockName, testName, coverage):
+    verify_block(session, blockName, testName, coverage)
+
+
+@nox.session(tags=["tests"])
 @nox.parametrize("blockName", ["tmr_voter"])
 @nox.parametrize(
     "testName",

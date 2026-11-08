@@ -1,0 +1,8 @@
+# Copyright (c) 2026 Antmicro
+# SPDX-License-Identifier: Apache-2.0
+
+config SOC_VEER_EL2
+	bool "VeeR EL2 SoC"
+
+config SOC
+	default "veer_el2" if SOC_VEER_EL2

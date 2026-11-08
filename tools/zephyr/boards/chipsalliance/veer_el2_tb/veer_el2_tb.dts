@@ -1,0 +1,39 @@
+// Copyright (c) 2026 Antmicro
+// SPDX-License-Identifier: Apache-2.0
+
+/dts-v1/;
+
+#include <chipsalliance/veer_el2.dtsi>
+#include <mem.h>
+#include <freq.h>
+
+/ {
+	model = "VeeR EL2 testbench";
+	compatible = "chipsalliance,veer-el2-tb";
+
+	chosen {
+		zephyr,console = &mailbox;
+		zephyr,sram = &ram0;  // code + data both live here (XIP=n)
+	};
+
+	// Testbench external memory, base must equal reset_vec
+	ram0: memory@80000000 {
+		device_type = "memory";
+		reg = <0x80000000 DT_SIZE_K(512)>;
+	};
+
+	soc {
+		// Testbench-only "UART": byte writes are printed by tb_top
+		mailbox: serial@d0580000 {
+			compatible = "chipsalliance,veer-el2-tb-mailbox";
+			reg = <0xd0580000 0x4>;
+			status = "okay";
+		};
+	};
+};
+
+&cpu0 {
+	// Not the real tb clock, only a timebase for ms->cycles conversion
+	// Lower = fewer simulated cycles per k_msleep()
+	clock-frequency = <DT_FREQ_M(1)>;
+};

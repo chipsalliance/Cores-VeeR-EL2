@@ -19,3 +19,8 @@ build --incompatible_disallow_empty_glob=true
 common --downloader_config=tools/bazel_downloader.cfg
 
 try-import %workspace%/user.bazelrc
+
+## Autotuner config
+build:autotuner --symlink_prefix=/
+build:autotuner --disk_cache=autotuner_runs/.cache/disk_cache
+build:autotuner --repository_cache=autotuner_runs/.cache/repository_cache

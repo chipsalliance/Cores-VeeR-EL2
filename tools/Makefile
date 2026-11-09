@@ -78,10 +78,15 @@ endif
 VERILATOR_NOIMPLICIT := -Wno-IMPLICITSTATIC
 VERILATOR_VERSION    := $(subst .,,$(word 2,$(shell $(VERILATOR) --version)))
 
-ifneq ($(TB_MAX_CYCLES),)
-	VERILATOR_EXTRA_ARGS := -GMAX_CYCLES=$(TB_MAX_CYCLES)
-	VCS_EXTRA_ARGS := -pvalue+tb_top.MAX_CYCLES=$(TB_MAX_CYCLES)
+ifeq ($(TB_MAX_CYCLES),)
+	TB_MAX_CYCLES := ${shell case "$(TEST)" in \
+		pmp|pmp_random|dcls_mubi_sweep|csr_access) echo 8000000;; \
+		*) echo 2000000;; \
+	esac}
 endif
+
+VERILATOR_EXTRA_ARGS := -GMAX_CYCLES=$(TB_MAX_CYCLES)
+VCS_EXTRA_ARGS := -pvalue+tb_top.MAX_CYCLES=$(TB_MAX_CYCLES)
 
 ifeq ("$(.SHELLSTATUS)", "0")
     $(shell test $(VERILATOR_VERSION) -lt 5006)

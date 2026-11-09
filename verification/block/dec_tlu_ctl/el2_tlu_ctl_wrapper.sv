@@ -158,6 +158,7 @@ import el2_pkg::*;
    output logic o_cpu_halt_ack, // halt req ack
    output logic o_cpu_run_ack, // run req ack
    output logic o_debug_mode_status, // Core to the PMU that core is in debug mode. When core is in debug mode, the PMU should refrain from sendng a halt or run request
+   output logic resume_halt, // Exit PMU/FW halt
 
    /*pragma coverage off*/
    input logic [31:4] core_id, // Core ID
@@ -170,6 +171,9 @@ import el2_pkg::*;
    output logic mpc_debug_halt_ack, // Halt ack
    output logic mpc_debug_run_ack, // Run ack
    output logic debug_brkpt_status, // debug breakpoint
+
+   output logic take_halt,          // Enter halt state
+   output logic resume_debug_halt,  // Exit debug hal
 
    output logic [3:0] dec_tlu_meicurpl, // to PIC
    output logic [3:0] dec_tlu_meipt, // to PIC

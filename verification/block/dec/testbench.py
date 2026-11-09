@@ -10,6 +10,7 @@ import cocotb
 import csrs
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles, FallingEdge, ReadOnly, RisingEdge
+from cocotb.utils import get_sim_time
 from csrs import get_bit
 from pyuvm import (
     ConfigDB,
@@ -179,15 +180,23 @@ class DecInputItem(uvm_sequence_item):
         csr_addr=0,
         csr_data=0,
         csr_oper=None,
+        pause_state=0,
         mtdata1=0,
         mtdata2=0,
         mtsel=0,
+        mpc_halt=False,
+        mpc_run=False,
+        halt=False,
+        run=False,
+        wait=None,
+        timestamp=0,
     ):
         super().__init__("DecInputItem")
         self.exu_i0_result_x = exu_i0_result_x
         self.csr_addr = csr_addr
         self.csr_data = csr_data
         self.csr_oper = csr_oper
+        self.pause_state = pause_state
         self.csrw_instr = csrw_instr
         self.csrr_instr = csrr_instr
         self.gpr_addr = gpr_addr
@@ -199,6 +208,12 @@ class DecInputItem(uvm_sequence_item):
         self.mtdata1 = mtdata1
         self.mtdata2 = mtdata2
         self.mtsel = mtsel
+        self.mpc_halt = mpc_halt
+        self.mpc_run = mpc_run
+        self.halt = halt
+        self.run = run
+        self.wait = wait
+        self.timestamp = timestamp
 
     def randomize(self, test):
         if test == "meihap":
@@ -239,6 +254,11 @@ class DecInputItem(uvm_sequence_item):
             self.csr_addr = csrs.MEICIDPL
             self.csrw_instr = WriteCSRInst(self.csr_addr).encode()
             self.csrr_instr = ReadCSRInst(self.csr_addr).encode()
+        elif test == "mcpc":
+            self.csr_addr = 0x7C2
+            self.csr_data = random.range(1 << 32)
+            self.csr_oper = random.choice(["wr_front", "rd_back"])
+            self.pause_state = random.range(2)
         elif test == "recovery_gpr_access":
             self.gpr_addr = random.randint(0, 31)
             self.gpr_data = random.range(1 << 32) if self.gpr_addr != 0 else 0
@@ -265,6 +285,13 @@ class DecOutputItem(uvm_sequence_item):
         gpr_addr=0,
         gpr_data=0,
         gpr_oper=None,
+        csr_addr=0,
+        csr_data=0,
+        csr_oper=None,
+        pause_state=0,
+        mpc_halt=False,
+        halt=False,
+        timestamp=0,
     ):
         super().__init__("DecOutputItem")
         self.csrr_instr = csrr_instr
@@ -276,6 +303,13 @@ class DecOutputItem(uvm_sequence_item):
         self.gpr_addr = gpr_addr
         self.gpr_data = gpr_data
         self.gpr_oper = gpr_oper
+        self.csr_addr = csr_addr
+        self.csr_data = csr_data
+        self.csr_oper = csr_oper
+        self.pause_state = pause_state
+        self.mpc_halt = mpc_halt
+        self.halt = halt
+        self.timestamp = timestamp
 
 
 # ==============================================================================
@@ -382,6 +416,21 @@ class DecDriver(uvm_driver):
         await RisingEdge(self.dut.clk)
         self.dut.recovery_csr_en.value = 0
 
+    async def write_pause_recovery(self, data, pause_state):
+        """
+        Writes a pause register through TMR recovery backdoor port
+        """
+        await RisingEdge(self.dut.clk)
+        self.dut.recovery_pause_write.value = 1
+        self.dut.recovery_pause_wrdata.value = data
+        self.dut.recovery_pause_state_wrdata.value = pause_state
+        await RisingEdge(self.dut.clk)
+        # Disable wren and drive random data to check if its honored
+        self.dut.recovery_pause_write.value = 0
+        self.dut.recovery_pause_wrdata.value = random.randrange(1 << 32)
+        self.dut.recovery_pause_state_wrdata.value = random.randrange(2)
+        await RisingEdge(self.dut.clk)
+
     async def run_phase(self):
         while True:
             it = await self.seq_item_port.get_next_item()
@@ -428,6 +477,41 @@ class DecDriver(uvm_driver):
                     await ClockCycles(self.dut.clk, 2)
                     await self.read_csr(it.csrr_instr)
                     await RisingEdge(self.dut.clk)
+                elif test == "mcpc":
+                    if it.wait is not None:
+                        await ClockCycles(self.dut.clk, it.wait)
+                    elif it.mpc_halt:
+                        cocotb.top.mpc_debug_halt_req.value = 1
+                        while cocotb.top.mpc_debug_halt_ack.value == 0:
+                            await ClockCycles(cocotb.top.clk, 1)
+                        cocotb.top.mpc_debug_halt_req.value = 0
+                    elif it.mpc_run:
+                        cocotb.top.mpc_debug_run_req.value = 1
+                        while cocotb.top.mpc_debug_run_ack.value == 0:
+                            await ClockCycles(cocotb.top.clk, 1)
+                        cocotb.top.mpc_debug_run_req.value = 0
+                    elif it.halt:
+                        cocotb.top.i_cpu_halt_req.value = 1
+                        while cocotb.top.o_cpu_halt_ack.value == 0:
+                            await ClockCycles(cocotb.top.clk, 1)
+                        cocotb.top.i_cpu_halt_req.value = 0
+                    elif it.run:
+                        cocotb.top.i_cpu_run_req.value = 1
+                        while cocotb.top.o_cpu_run_ack.value == 0:
+                            await ClockCycles(cocotb.top.clk, 1)
+                        cocotb.top.i_cpu_run_req.value = 0
+                    else:
+                        match it.csr_oper:
+                            case "wr_front":
+                                await self.write_csr(
+                                    WriteCSRInst(it.csr_addr).encode(), it.csr_data
+                                )
+                            case "rd_back":
+                                continue
+                            case _:
+                                raise RuntimeError(
+                                    "Unknown CSR oper '{}' '{}'".format(it.csr_oper, it.__dict__)
+                                )
                 elif test == "recovery_gpr_access":
                     match it.gpr_oper:
                         case "wr_front":
@@ -538,6 +622,24 @@ class DecInputMonitor(uvm_component):
                 exu_i0_result_x = int(self.dut.exu_i0_result_x.value)
                 await RisingEdge(self.dut.ifu_i0_valid)
                 self.ap.write(DecInputItem(csr_addr=csr_addr, exu_i0_result_x=exu_i0_result_x))
+            elif test == "mcpc":
+                await ReadOnly()
+                if self.dut.ifu_i0_valid.value == 1:
+                    await RisingEdge(self.dut.clk)
+                    csr_addr = int(self.dut.ifu_i0_instr.value) >> 20
+                    await ClockCycles(self.dut.clk, 1)
+                    exu_i0_result_x = int(self.dut.exu_i0_result_x.value)
+                    self.ap.write(
+                        DecInputItem(
+                            csr_addr=csr_addr,
+                            csr_oper="wr_front",
+                            pause_state=1,
+                            csr_data=exu_i0_result_x,
+                            timestamp=get_sim_time(units="ps"),
+                        )
+                    )
+                else:
+                    await RisingEdge(self.dut.clk)
             elif test == "recovery_gpr_access":
                 await RisingEdge(self.dut.clk)
                 await ReadOnly()
@@ -655,6 +757,24 @@ class DecOutputMonitor(uvm_component):
                     DecOutputItem(
                         csrr_instr=csrr_instr,
                         dec_csr_rddata_d=dec_csr_rddata_d,
+                    )
+                )
+            elif test == "mcpc":
+                await RisingEdge(self.dut.clk)
+                await ReadOnly()
+                data = int(self.dut.dut.decode.write_csr_data.value)
+                pause_state = int(self.dut.dut.decode.pause_state.value)
+                mpc_halt = bool(self.dut.o_debug_mode_status.value)
+                halt = bool(self.dut.o_cpu_halt_status.value)
+                self.ap.write(
+                    DecOutputItem(
+                        csr_addr=0x7C2,
+                        csr_data=data,
+                        pause_state=pause_state,
+                        csr_oper="rd_back",
+                        mpc_halt=mpc_halt,
+                        halt=halt,
+                        timestamp=get_sim_time(units="ps"),
                     )
                 )
             elif test == "recovery_gpr_access":
@@ -912,6 +1032,110 @@ class DecScoreboard(uvm_component):
             assert False
 
 
+class CsrPauseScoreboard(uvm_component):
+    """
+    A scoreboard for CSR recovery interface
+    """
+
+    def __init__(self, name, parent):
+        super().__init__(name, parent)
+        self.passed = False
+
+    def build_phase(self):
+        self.fifo_inp = uvm_tlm_analysis_fifo("fifo_inp", self)
+        self.fifo_out = uvm_tlm_analysis_fifo("fifo_out", self)
+        self.port_inp = uvm_get_port("port_inp", self)
+        self.port_out = uvm_get_port("port_out", self)
+
+    def connect_phase(self):
+        self.port_inp.connect(self.fifo_inp.get_export)
+        self.port_out.connect(self.fifo_out.get_export)
+
+    def check_phase(self):  # noqa: C901
+        write_time_value = {}
+        read_time_value = {}
+        # CSR writes
+        while True:
+            got_inp, item_inp = self.port_inp.try_get()
+            if not got_inp:
+                break
+
+            if item_inp.csr_oper == "wr_front" or item_inp.csr_oper == "wr_back":
+                write_time_value[item_inp.timestamp] = (
+                    item_inp.csr_data,
+                    item_inp.pause_state,
+                    item_inp.csr_oper,
+                )
+            else:
+                assert False, item_inp.csr_oper
+
+        # CSR reads
+        while True:
+            got_out, item_out = self.port_out.try_get()
+            if not got_out:
+                break
+
+            if item_out.csr_oper == "rd_back":
+                read_time_value[item_out.timestamp] = (
+                    item_out.csr_data,
+                    item_out.pause_state,
+                    item_out.halt or item_out.mpc_halt,
+                )
+            else:
+                assert False, item_inp.csr_oper
+
+        # DEBUG
+        keys = sorted(list(write_time_value.keys()))
+        for k, v in [(k, write_time_value[k]) for k in keys]:
+            self.logger.debug(f"W : time:{k:010}: 0x{v[0]:08X}, pause state:{v[1]}")
+
+        keys = sorted(list(read_time_value.keys()))
+        for k, v in [(k, read_time_value[k]) for k in keys]:
+            self.logger.debug(f"Rf: time:{k:010}: 0x{v[0]:08X}, pause_state:{v[1]}, halt:{v[2]}")
+
+        # Compare states
+        self.passed = True
+
+        w_timestamps = sorted(list(write_time_value.keys()))
+        r_timestamps = sorted(list(read_time_value.keys()))
+        while (
+            r_timestamps[0] <= w_timestamps[0]
+        ):  # Pause counter starts decrementing 1 cycle after write
+            r_timestamps = r_timestamps[1:]
+        active = False
+        while len(w_timestamps) > 0:
+            counter, _active, oper = write_time_value[w_timestamps[0]]
+            if oper == "wr_back":
+                active = bool(_active) | active
+            else:
+                active = bool(_active)
+            w_timestamps = w_timestamps[1:]
+            next_wtimestamp = w_timestamps[0] if len(w_timestamps) > 0 else r_timestamps[-1]
+            while r_timestamps[0] <= next_wtimestamp:
+                rdata, rstate, halt = read_time_value[r_timestamps[0]]
+                rstate = bool(rstate)
+                if rdata != counter:
+                    self.logger.error(
+                        f"Counter mismatch! Timestamp:{r_timestamps[0]}, Expected:0x{counter:08X}, Got:0x{rdata:08X}"
+                    )
+                    self.passed = False
+                if counter == 0:
+                    active = False
+                if active != rstate:
+                    self.logger.error(f"State mismatch! Expected:{active}, Got:{rstate}")
+                    self.passed = False
+                if not halt and rstate:
+                    counter = counter - 1
+                r_timestamps = r_timestamps[1:]
+                if len(r_timestamps) == 0:
+                    break
+
+    def final_phase(self):
+        if not self.passed:
+            self.logger.critical("{} reports a failure".format(type(self)))
+            assert False
+
+
 class CsrRecoveryScoreboard(uvm_component):
     """
     A scoreboard for CSR recovery interface
@@ -1018,6 +1242,70 @@ class DecSequence(uvm_sequence):
 
             await self.start_item(item)
             await self.finish_item(item)
+
+
+class DecPauseHaltSequence(uvm_sequence):
+    def __init__(self, name, mode):
+        super().__init__(name)
+        assert mode in ["PMU", "MPC"], mode
+        self.mode = mode
+
+    async def body(self):
+        count = 2  # 2 iterations
+        pause_counter = -1
+        for _ in range(count):
+            delay = 0
+            access_ports = []
+            access_ports = ["wr_front"]
+            pause_counter = random.randrange(1, 40)
+            item = DecInputItem(
+                csr_addr=0x7C2,
+                csr_data=pause_counter,
+                csr_oper=random.choice(access_ports),
+            )
+            await self.start_item(item)
+            await self.finish_item(item)
+            wait = random.randrange(pause_counter)
+
+            item = DecInputItem(wait=wait)
+            await self.start_item(item)
+            await self.finish_item(item)
+
+            if self.mode == "PMU":
+                item = DecInputItem(halt=True)
+                await self.start_item(item)
+                await self.finish_item(item)
+                _delay = random.randrange(min(20, pause_counter))
+                await self.start_item(item)
+                await self.finish_item(item)
+                item = DecInputItem(run=True)
+                await self.start_item(item)
+                await self.finish_item(item)
+                _delay = random.randrange(min(20, pause_counter))
+                item = DecInputItem(wait=_delay)
+                await self.start_item(item)
+                await self.finish_item(item)
+                delay += _delay
+            elif self.mode == "MPC":
+                item = DecInputItem(mpc_halt=True)
+                await self.start_item(item)
+                await self.finish_item(item)
+                _delay = random.randrange(min(20, pause_counter))
+                item = DecInputItem(wait=_delay)
+                await self.start_item(item)
+                await self.finish_item(item)
+                item = DecInputItem(mpc_run=True)
+                await self.start_item(item)
+                await self.finish_item(item)
+                _delay = random.randrange(min(20, pause_counter))
+                item = DecInputItem(wait=_delay)
+                await self.start_item(item)
+                await self.finish_item(item)
+                delay += _delay
+            if delay < pause_counter:
+                item = DecInputItem(wait=(pause_counter - delay))
+                await self.start_item(item)
+                await self.finish_item(item)
 
 
 class DecTmrGprRecoverySequence(uvm_sequence):
@@ -1138,6 +1426,8 @@ class BaseEnv(uvm_env):
         test = ConfigDB().get(self.get_parent(), "", "TEST")
         if test == "recovery_csr_access":
             self.scoreboard = CsrRecoveryScoreboard("scoreboard", self)
+        elif "mcpc" in test:
+            self.scoreboard = CsrPauseScoreboard("scoreboard", self)
         else:
             self.scoreboard = DecScoreboard("scoreboard", self)
 

@@ -369,6 +369,11 @@ module el2_dec_wrapper
 
 `ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
   logic [31:1] dec_tlu_npc;
+  logic        recovery_pause_write;
+  logic [31:0] recovery_pause_rddata;
+  logic        recovery_pause_state_rddata;
+  logic [31:0] recovery_pause_wrdata;
+  logic        recovery_pause_state_wrdata;
 `endif
 
   el2_dec dut (

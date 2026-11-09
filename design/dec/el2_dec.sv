@@ -452,6 +452,9 @@ module el2_dec
   logic dec_tlu_i0_valid_r;
 
   logic dec_pause_state;
+  logic take_halt;
+  logic resume_halt;
+  logic resume_debug_halt;
 
   logic [1:0] dec_i0_icaf_type_d;  // i0 instruction access fault type
 
@@ -478,7 +481,8 @@ module el2_dec
   el2_dec_ib_ctl #(.pt(pt)) instbuff (.*);
 
 
-  el2_dec_decode_ctl #(.pt(pt)) decode (.*);
+  el2_dec_decode_ctl #(.pt(pt)) decode (
+    .*, .debug_mode_status(o_debug_mode_status), .cpu_halt_status(o_cpu_halt_status));
 
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
       el2_regfile_if regfile_if ();

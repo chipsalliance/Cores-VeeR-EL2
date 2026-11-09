@@ -196,6 +196,12 @@ import el2_pkg::*;
 
    output logic       dec_div_active,                 // non-block divide is active
 
+   input  logic       take_halt,                      // core enters halt state
+   input  logic       resume_halt,                    // core exits PMU/FW halt
+   input  logic       resume_debug_halt,              // core exits debug halt
+   input  logic       debug_mode_status,              // core in the debug halt state
+   input  logic       cpu_halt_status,                // core in the PMU/FW halt state
+
    // Excluding scan_mode from coverage as its usage is determined by the integrator of the VeeR core.
    /*pragma coverage off*/
    input  logic       scan_mode
@@ -962,7 +968,7 @@ end : cam_array
 
 
 
-   assign clear_pause = (dec_tlu_flush_lower_r & ~dec_tlu_flush_pause_r) |
+   assign clear_pause = (dec_tlu_flush_lower_r & ~dec_tlu_flush_pause_r & ~take_halt & ~resume_halt & ~resume_debug_halt) |
                         (pause_state & (write_csr_data[31:1] == 31'b0));        // if 0 or 1 then exit pause state - 1 cycle pause
 
    assign pause_state_in = (dec_tlu_wr_pause_r | pause_state) & ~clear_pause;
@@ -978,7 +984,7 @@ end : cam_array
 // end pause
 
 
-   assign csr_data_wen = ((csr_clr_x | csr_set_x | csr_write_x) & csr_read_x) | dec_tlu_wr_pause_r | pause_state;
+   assign csr_data_wen = (((csr_clr_x | csr_set_x | csr_write_x) & csr_read_x) | dec_tlu_wr_pause_r | pause_state) & ~(debug_mode_status | cpu_halt_status);
 
    assign write_csr_data_in[31:0] = (pause_state)         ? (write_csr_data[31:0] - 32'b1) :
                                     (dec_tlu_wr_pause_r) ? dec_csr_wrdata_r[31:0] : write_csr_data_x[31:0];

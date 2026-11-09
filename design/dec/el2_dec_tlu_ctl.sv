@@ -176,18 +176,22 @@ import el2_pkg::*;
    output logic o_cpu_halt_ack, // halt req ack
    output logic o_cpu_run_ack, // run req ack
    output logic o_debug_mode_status, // Core to the PMU that core is in debug mode. When core is in debug mode, the PMU should refrain from sendng a halt or run request
+   output logic resume_halt,        // Exit PMU/FW halt
 
    /*pragma coverage off*/
    input logic [31:4] core_id, // Core ID
    /*pragma coverage on*/
 
    // external MPC halt/run interface
-   input logic mpc_debug_halt_req, // Async halt request
-   input logic mpc_debug_run_req, // Async run request
-   input logic mpc_reset_run_req, // Run/halt after reset
+   input logic mpc_debug_halt_req,  // Async halt request
+   input logic mpc_debug_run_req,   // Async run request
+   input logic mpc_reset_run_req,   // Run/halt after reset
    output logic mpc_debug_halt_ack, // Halt ack
-   output logic mpc_debug_run_ack, // Run ack
+   output logic mpc_debug_run_ack,  // Run ack
    output logic debug_brkpt_status, // debug breakpoint
+
+   output logic take_halt,          // Enter halt state
+   output logic resume_debug_halt,  // Exit debug halt
 
    output logic [3:0] dec_tlu_meicurpl, // to PIC
    output logic [3:0] dec_tlu_meipt, // to PIC
@@ -400,7 +404,7 @@ import el2_pkg::*;
    logic i0_trigger_eval_r;
 
    logic request_debug_mode_r, request_debug_mode_r_d1, request_debug_mode_done, request_debug_mode_done_f;
-   logic take_halt, halt_taken, halt_taken_f, internal_dbg_halt_mode, dbg_tlu_halted_f, take_reset,
+   logic halt_taken, halt_taken_f, internal_dbg_halt_mode, dbg_tlu_halted_f, take_reset,
          dbg_tlu_halted, core_empty, lsu_idle_any_f, ifu_miss_state_idle_f, resume_ack_ns,
          debug_halt_req_f, debug_resume_req_f_raw, debug_resume_req_f, enter_debug_halt_req, dcsr_single_step_done, dcsr_single_step_done_f,
          debug_halt_req_d1, debug_halt_req_ns, dcsr_single_step_running, dcsr_single_step_running_f, internal_dbg_halt_timers;
@@ -1144,6 +1148,7 @@ localparam MSECCFG_MML   = 0;
 
    // MPC run collides with DBG halt, fix it here
    assign debug_resume_req_f = debug_resume_req_f_raw & ~dbg_halt_req;
+   assign resume_debug_halt = debug_resume_req_f;
 
    assign dec_tlu_debug_stall = debug_halt_req_f;
    assign dec_tlu_dbg_halted = dbg_tlu_halted_f;
@@ -1606,7 +1611,8 @@ end
    assign interrupt_path[31:1] = take_nmi ? nmi_vec[31:1] : ((mtvec[0] == 1'b1) ? vectored_path[31:1] : {mtvec[30:1], 1'b0});
 
    assign sel_npc_r  = lsu_i0_rfnpc_r | fence_i_r | iccm_repair_state_rfnpc | (i_cpu_run_req_d1 & ~interrupt_valid_r) | (rfpc_i0_r & ~dec_tlu_i0_valid_r);
-   assign sel_npc_resume = (i_cpu_run_req_d1 & pmu_fw_tlu_halted_f) | pause_expired_r;
+   assign resume_halt = i_cpu_run_req_d1 & pmu_fw_tlu_halted_f;
+   assign sel_npc_resume = resume_halt | pause_expired_r;
 
    assign sel_fir_addr = take_ext_int_start_d3 & ~|lsu_fir_error[1:0];
 

@@ -5,6 +5,7 @@ from pyuvm import ConfigDB
 from testbench import (
     BaseEnv,
     BaseTest,
+    DecPauseHaltRecoverySequence,
     DecPauseHaltSequence,
     DecSequence,
     DecTmrCsrRecoverySequence,
@@ -90,6 +91,32 @@ class TestMCPCMPC(DecTluCtlTest):
             parent,
             env_class,
             seq_class=DecPauseHaltSequence,
+            seq_kwarg={"mode": "MPC"},
+        )
+
+
+@pyuvm.test()
+class TestRecoveryMCPCPMU(DecTluCtlTest):
+    def __init__(self, name, parent, env_class=BaseEnv):
+        super().__init__(
+            "recovery_mcpc",
+            name,
+            parent,
+            env_class,
+            seq_class=DecPauseHaltRecoverySequence,
+            seq_kwarg={"mode": "PMU"},
+        )
+
+
+@pyuvm.test()
+class TestRecoveryMCPCMPC(DecTluCtlTest):
+    def __init__(self, name, parent, env_class=BaseEnv):
+        super().__init__(
+            "recovery_mcpc",
+            name,
+            parent,
+            env_class,
+            seq_class=DecPauseHaltRecoverySequence,
             seq_kwarg={"mode": "MPC"},
         )
 

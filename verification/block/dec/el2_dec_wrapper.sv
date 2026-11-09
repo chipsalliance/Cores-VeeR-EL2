@@ -374,6 +374,11 @@ module el2_dec_wrapper
 
 `ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
     logic [31:1] dec_tlu_npc;
+    logic recovery_pause_write;
+    logic [31:0] recovery_pause_rddata;
+    logic        recovery_pause_state_rddata;
+    logic [31:0] recovery_pause_wrdata;
+    logic        recovery_pause_state_wrdata;
 `endif
 
   el2_dec dut (
@@ -381,6 +386,11 @@ module el2_dec_wrapper
     .recovery_gpr_en(el2_mubi_pkg::mubi_from_bool(recovery_gpr_en)),
     .recovery_csr_en(el2_mubi_pkg::mubi_from_bool(recovery_csr_en)),
     .dec_tlu_npc(dec_tlu_npc),
+    .recovery_pause_rddata(recovery_pause_rddata),
+    .recovery_pause_state_rddata(recovery_pause_state_rddata),
+    .recovery_pause_wrdata(recovery_pause_wrdata),
+    .recovery_pause_write(recovery_pause_write),
+    .recovery_pause_state_wrdata(recovery_pause_state_wrdata),
     .dec_csr_wen_r_mod_tmr(dec_csr_wen_r_mod_tmr),
     .dec_csr_wraddr_r_tmr(dec_csr_wraddr_r_tmr),
     .dec_csr_wrdata_r_tmr(dec_csr_wrdata_r_tmr),

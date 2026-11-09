@@ -259,6 +259,11 @@ class DecInputItem(uvm_sequence_item):
             self.csr_data = random.range(1 << 32)
             self.csr_oper = random.choice(["wr_front", "rd_back"])
             self.pause_state = random.range(2)
+        elif test == "recovery_mcpc":
+            self.csr_addr = 0x7C2
+            self.csr_data = random.range(1 << 32)
+            self.csr_oper = random.choice(["wr_front", "wr_back", "rd_back"])
+            self.pause_state = random.range(2)
         elif test == "recovery_gpr_access":
             self.gpr_addr = random.randint(0, 31)
             self.gpr_data = random.range(1 << 32) if self.gpr_addr != 0 else 0
@@ -477,7 +482,7 @@ class DecDriver(uvm_driver):
                     await ClockCycles(self.dut.clk, 2)
                     await self.read_csr(it.csrr_instr)
                     await RisingEdge(self.dut.clk)
-                elif test == "mcpc":
+                elif "mcpc" in test:
                     if it.wait is not None:
                         await ClockCycles(self.dut.clk, it.wait)
                     elif it.mpc_halt:
@@ -506,6 +511,8 @@ class DecDriver(uvm_driver):
                                 await self.write_csr(
                                     WriteCSRInst(it.csr_addr).encode(), it.csr_data
                                 )
+                            case "wr_back":
+                                await self.write_pause_recovery(it.csr_data, it.pause_state)
                             case "rd_back":
                                 continue
                             case _:
@@ -640,6 +647,43 @@ class DecInputMonitor(uvm_component):
                     )
                 else:
                     await RisingEdge(self.dut.clk)
+            elif test == "recovery_mcpc":
+                await ReadOnly()
+                if self.dut.ifu_i0_valid.value == 1:
+                    await RisingEdge(self.dut.clk)
+                    csr_addr = int(self.dut.ifu_i0_instr.value) >> 20
+                    await ClockCycles(self.dut.clk, 1)
+                    exu_i0_result_x = int(self.dut.exu_i0_result_x.value)
+                    self.ap.write(
+                        DecInputItem(
+                            csr_addr=csr_addr,
+                            csr_oper="wr_front",
+                            pause_state=1,
+                            csr_data=exu_i0_result_x,
+                            timestamp=get_sim_time(units="ps"),
+                        )
+                    )
+                elif self.dut.recovery_pause_write.value == 1:
+                    data = int(self.dut.recovery_pause_wrdata.value)
+                    pause_state = int(self.dut.recovery_pause_state_wrdata.value)
+                    self.ap.write(
+                        DecInputItem(
+                            csr_addr=0x7C2,
+                            csr_oper="wr_back",
+                            csr_data=data,
+                            pause_state=pause_state,
+                            timestamp=get_sim_time(units="ps"),
+                        )
+                    )
+                    await RisingEdge(self.dut.clk)
+                else:
+                    await RisingEdge(self.dut.clk)
+            elif test == "debug_csrs_access":
+                await RisingEdge(self.dut.ifu_i0_valid)
+                await RisingEdge(self.dut.clk)
+                csr_addr = int(self.dut.ifu_i0_instr.value) >> 20
+                await ClockCycles(self.dut.clk, 1)
+                exu_i0_result_x = int(self.dut.exu_i0_result_x.value)
             elif test == "recovery_gpr_access":
                 await RisingEdge(self.dut.clk)
                 await ReadOnly()
@@ -764,6 +808,24 @@ class DecOutputMonitor(uvm_component):
                 await ReadOnly()
                 data = int(self.dut.dut.decode.write_csr_data.value)
                 pause_state = int(self.dut.dut.decode.pause_state.value)
+                mpc_halt = bool(self.dut.o_debug_mode_status.value)
+                halt = bool(self.dut.o_cpu_halt_status.value)
+                self.ap.write(
+                    DecOutputItem(
+                        csr_addr=0x7C2,
+                        csr_data=data,
+                        pause_state=pause_state,
+                        csr_oper="rd_back",
+                        mpc_halt=mpc_halt,
+                        halt=halt,
+                        timestamp=get_sim_time(units="ps"),
+                    )
+                )
+            elif test == "recovery_mcpc":
+                await RisingEdge(self.dut.clk)
+                await ReadOnly()
+                data = int(self.dut.recovery_pause_rddata.value)
+                pause_state = int(self.dut.recovery_pause_state_rddata.value)
                 mpc_halt = bool(self.dut.o_debug_mode_status.value)
                 halt = bool(self.dut.o_cpu_halt_status.value)
                 self.ap.write(
@@ -1308,6 +1370,69 @@ class DecPauseHaltSequence(uvm_sequence):
                 await self.finish_item(item)
 
 
+class DecPauseHaltRecoverySequence(uvm_sequence):
+    def __init__(self, name, mode):
+        super().__init__(name)
+        assert mode in ["PMU", "MPC"], mode
+        self.mode = mode
+
+    async def body(self):
+        count = 2  # 2 iterations
+        pause_counter = -1
+        delay = 0
+        for _ in range(count):
+            access_ports = []
+            if pause_counter < delay:
+                access_ports = ["wr_front", "wr_back"]
+            else:
+                access_ports = ["wr_back"]
+            pause_counter = random.randrange(1, 40)
+            item = DecInputItem(
+                csr_addr=0x7C2,
+                csr_data=pause_counter,
+                csr_oper=random.choice(access_ports),
+            )
+            await self.start_item(item)
+            await self.finish_item(item)
+            wait = random.randrange(min(20, pause_counter))
+
+            item = DecInputItem(wait=wait)
+            await self.start_item(item)
+            await self.finish_item(item)
+
+            if self.mode == "PMU":
+                item = DecInputItem(halt=True)
+                await self.start_item(item)
+                await self.finish_item(item)
+                _delay = random.randrange(min(20, pause_counter))
+                await self.start_item(item)
+                await self.finish_item(item)
+                item = DecInputItem(run=True)
+                await self.start_item(item)
+                await self.finish_item(item)
+                _delay = random.randrange(min(20, pause_counter))
+                item = DecInputItem(wait=_delay)
+                await self.start_item(item)
+                await self.finish_item(item)
+                delay += _delay
+            elif self.mode == "MPC":
+                item = DecInputItem(mpc_halt=True)
+                await self.start_item(item)
+                await self.finish_item(item)
+                _delay = random.randrange(min(20, pause_counter))
+                item = DecInputItem(wait=_delay)
+                await self.start_item(item)
+                await self.finish_item(item)
+                item = DecInputItem(mpc_run=True)
+                await self.start_item(item)
+                await self.finish_item(item)
+                _delay = random.randrange(min(20, pause_counter))
+                item = DecInputItem(wait=_delay)
+                await self.start_item(item)
+                await self.finish_item(item)
+                delay += _delay
+
+
 class DecTmrGprRecoverySequence(uvm_sequence):
     def __init__(self, name, mode):
         super().__init__(name)
@@ -1600,6 +1725,9 @@ class BaseTest(uvm_test):
         cocotb.top.recovery_csr_wraddr.value = 0
         cocotb.top.recovery_csr_wrdata.value = 0
         cocotb.top.recovery_csr_rdaddr.value = 0
+        cocotb.top.recovery_pause_write.value = 0
+        cocotb.top.recovery_pause_wrdata.value = 0
+        cocotb.top.recovery_pause_state_wrdata.value = 0
 
         # Issue reset
         await self.do_reset()

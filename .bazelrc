@@ -22,3 +22,8 @@ build --@@openroad+//:platform=gui
 common --downloader_config=tools/bazel_downloader.cfg
 
 try-import %workspace%/user.bazelrc
+
+## Autotuner config
+build:autotuner --symlink_prefix=/
+build:autotuner --disk_cache=autotuner_runs/.cache/disk_cache
+build:autotuner --repository_cache=autotuner_runs/.cache/repository_cache

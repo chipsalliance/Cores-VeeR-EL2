@@ -20,7 +20,6 @@ verification/sim
 verilator-cocotb-build
 *.dat
 *.xml
-*.json
 tools/renode/renode_run
 tools/renode/build
 tools/renode/*.elf

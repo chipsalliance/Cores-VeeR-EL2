@@ -15,7 +15,7 @@ jobs:
   setup:
     name: Prepare OpenROAD
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: ghcr.io/antmicro/cores-veer-el2:20260923
+    container: ghcr.io/antmicro/cores-veer-el2:20261109
     env:
       DEBIAN_FRONTEND: "noninteractive"
     steps:
@@ -44,7 +44,7 @@ jobs:
     name: Run EL2 synthesis, simulation, and power analysis
     needs: setup
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: ghcr.io/antmicro/cores-veer-el2:20260923
+    container: ghcr.io/antmicro/cores-veer-el2:20261109
     strategy:
       fail-fast: false
       matrix:

@@ -28,7 +28,12 @@ foreach $line (@in) {
         if ($line!~/^.output/) {
             if ($line=~/(\S+)\s*=\s*(\S+)/) {
                 $key=$1; $value=$2;
+                # Skip CSRs with special handling
                 if ($key=~/csr_mitb\d/ || $key=~/csr_mitcnt\d/ || $key=~/csr_mitctl\d/) {
+                  next;
+                }
+                # Skip User mode read-only CSRs
+                if ($key=~/csr_hpmc\dh?/ || $key=~/csr_instret[l|h]/ || $key=~/csr_cycle[l|h]/) {
                   next;
                 }
                 $value=~s/\[//g;

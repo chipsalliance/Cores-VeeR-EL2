@@ -149,3 +149,61 @@ class TestInvalidDisableCorruptionDetection(TestReset):
 
             await self.do_reset()
             await RisingEdge(self.clk)
+
+
+@pyuvm.test()
+class TestDebugMode(TestReset):
+    """
+    A test that ensures entering debug mode latches `debug_mode_status_latch`
+    and `dbg_detected` to suppress corruption detection (including after a
+    debug run request) until a core reset restores `El2MuBiFalse`.
+    """
+
+    async def run(self):
+        latch = self.dut.lockstep.debug_mode_status_latch
+
+        # Get out of reset and verify latch starts at El2MuBiFalse
+        await self.test_reset()
+        assert latch.value == self.mubi_false
+
+        # Request debug halt so the core asserts o_debug_mode_status
+        self.dut.mpc_debug_halt_req.value = 1
+        await ClockCycles(self.clk, 10)
+        self.dut.mpc_debug_halt_req.value = 0
+        await RisingEdge(self.clk)
+
+        # Verify debug mode status latched El2MuBiTrue before injecting fault
+        assert self.dut.o_debug_mode_status.value == 1
+        assert latch.value == self.mubi_true
+
+        # Enable error injection while debug mode is latched
+        self.dut.lockstep_err_injection_en_i.value = self.mubi_true
+        await ClockCycles(self.clk, 2)
+
+        # Assert that corruption detection is suppressed in debug mode
+        signals = {
+            "shadow_reset": 1,
+            "shadow_dbg_reset": 1,
+            "corruption_detected_o": self.mubi_false,
+        }
+        self.assert_signals(signals)
+
+        # Pulse mpc_debug_run_req and verify suppression remains sticky
+        self.dut.mpc_debug_run_req.value = 1
+        await ClockCycles(self.clk, 10)
+        self.dut.mpc_debug_run_req.value = 0
+        await ClockCycles(self.clk, 5)
+        assert latch.value == self.mubi_true
+        self.assert_signals(signals)
+
+        # Reset DUT to clear sticky debug_mode_status_latch to El2MuBiFalse
+        await self.do_reset()
+        await RisingEdge(self.clk)
+        await self.test_reset()
+        assert latch.value == self.mubi_false
+
+        # Verify corruption detection is active again after reset
+        self.dut.lockstep_err_injection_en_i.value = self.mubi_true
+        await ClockCycles(self.clk, 2)
+        signals.update({"corruption_detected_o": self.mubi_true})
+        self.assert_signals(signals)

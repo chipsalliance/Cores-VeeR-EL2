@@ -38,35 +38,36 @@ volatile uint32_t *enable       = (uint32_t *)(RV_PIC_BASE_ADDR + RV_PIC_MEIE_OF
 
 // ============================================================================
 
-void trap_handler () {
+void trap_handler(void) {
     uint32_t mstatus = read_csr(mstatus);
     uint32_t mcause  = read_csr(mcause);
     uint32_t mepc    = read_csr(mepc);
 
     tohost = CMD_INJ_CLEAR;
-    tohost = RV_MUBI_FALSE << 8 | CMD_INJ_EXT;
-    tohost = RV_MUBI_FALSE << 8 | CMD_INJ_CTRL;
+    tohost = ((uint32_t)RV_MUBI_FALSE << 8) | CMD_INJ_EXT;
+    tohost = ((uint32_t)RV_MUBI_FALSE << 8) | CMD_INJ_CTRL;
 
     printf("trap! mstatus=0x%08X, mcause=0x%08X, mepc=0x%08X\n", mstatus, mcause, mepc);
     trap_count++;
 
     tohost = CMD_RST;
+    while (1);
 }
 
-int main () {
+int main(void) {
     printf("Hello VeeR\n");
     boot_count++;
 
-    unsigned long mie;
-    unsigned long mstatus;
-
-    unsigned long i;
-    unsigned long tests_done;
-
+    // Use explicit `li` + `csrc`/`csrs` inline assembly for `mie`/`mstatus`
+    // updates instead of C bitmask RMW (`mie &= ~(1 << 11)` / `mie |= (1 << 11)`)
+    // to avoid a riscv64-unknown-elf-gcc 12.2 `-O3` ICE when Zbs (`bclr`/`bset`
+    // on immediate 0x800) is enabled across multi-branch control flow.
     // Disable machine external interrupts
-    mie = read_csr(mie);
-    mie &= ~(1 << 11);
-    write_csr(mie, mie);
+    asm volatile (
+        "li t0, 0x800\n\t"
+        "csrc mie, t0\n\t"
+        ::: "t0"
+    );
 
     // Configure PIC for DCLS interrupts
     *threshold = 1;
@@ -75,41 +76,69 @@ int main () {
     priority[2] = 7;
     enable[2] = 1;
 
-    // Enable machine external interrupts
-    mie = read_csr(mie);
-    mie |= (1 << 11);
-    write_csr(mie, mie);
-
-    // Enable machine interrupts
-    mstatus = read_csr(mstatus);
-    mstatus |= (1 << 3);
-    write_csr(mstatus, mstatus);
+    // Enable machine external interrupts and global machine interrupts
+    asm volatile (
+        "li t0, 0x800\n\t"
+        "csrs mie, t0\n\t"
+        "li t0, 0x8\n\t"
+        "csrs mstatus, t0\n\t"
+        ::: "t0"
+    );
 
     if (boot_count == 1) {
         printf("Inject error (should trigger a trap)\n");
-        tohost = (RV_MUBI_TRUE << 8) | CMD_INJ_EXT;
+        tohost = ((uint32_t)RV_MUBI_TRUE << 8) | CMD_INJ_EXT;
+        for (volatile uint32_t slp = 0; slp < 1000; slp++) {
+            __asm__ volatile ("nop");
+        }
+        printf("ERROR: Expected trap did not fire in boot 1\n");
+        tohost = CMD_FAIL;
+        while (1);
     } else if (boot_count == 2) {
         if (trap_count != 1) {
             printf("ERROR: Corruption was not reported\n");
             tohost = CMD_FAIL;
+            while (1);
         }
 
         printf("Execute enter/exit debug mode\n");
-        tohost = 1 << 8 | CMD_ENT_DBG;
+        tohost = (1U << 8) | CMD_ENT_DBG;
 
         printf("Inject error (should be ignored)\n");
-        tohost = (RV_MUBI_TRUE << 8) | CMD_INJ_EXT;
+        tohost = ((uint32_t)RV_MUBI_TRUE << 8) | CMD_INJ_EXT;
+        for (volatile uint32_t slp = 0; slp < 50; slp++) {
+            __asm__ volatile ("nop");
+        }
 
         if (trap_count != 1) {
             printf("ERROR: Corruption was reported after entering debug mode\n");
             tohost = CMD_FAIL;
+            while (1);
+        }
+
+        tohost = ((uint32_t)RV_MUBI_FALSE << 8) | CMD_INJ_EXT;
+        printf("Reset core to clear sticky debug_mode_status_latch\n");
+        tohost = CMD_RST;
+        while (1);
+    } else if (boot_count == 3) {
+        printf("Inject error after post-debug reset (should trigger a trap)\n");
+        tohost = ((uint32_t)RV_MUBI_TRUE << 8) | CMD_INJ_EXT;
+        for (volatile uint32_t slp = 0; slp < 1000; slp++) {
+            __asm__ volatile ("nop");
+        }
+        printf("ERROR: Expected trap did not fire in boot 3\n");
+        tohost = CMD_FAIL;
+        while (1);
+    } else if (boot_count == 4) {
+        if (trap_count != 2) {
+            printf("ERROR: Corruption was not reported after post-debug reset\n");
+            tohost = CMD_FAIL;
+            while (1);
         }
     } else {
         printf("ERROR: This should have never been reached, reset was done too many times\n");
         tohost = CMD_FAIL;
-    }
-    for (uint32_t slp = 0; slp < 100; slp++) {
-        __asm__ volatile ("nop");
+        while (1);
     }
     return 0;
 }

@@ -67,9 +67,9 @@ module el2_tmr_recovery_fsm
 );
 
 `ifdef RV_USER_MODE
-  localparam int csr_cnt = 145;
+  localparam int csr_cnt = 144;
 `else
-  localparam int csr_cnt = 140;
+  localparam int csr_cnt = 139;
 `endif
 
   logic recovery_state_en;

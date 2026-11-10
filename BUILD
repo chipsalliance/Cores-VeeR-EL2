@@ -1,6 +1,7 @@
 load("@rules_hdl//autotuner:build_defs.bzl", "run_autotuner_tune")
 load("@rules_hdl//gds_write:build_defs.bzl", "gds_write")
 load("@rules_hdl//place_and_route:build_defs.bzl", "place_and_route", "custom_openroad_script")
+load("@rules_hdl//static_timing:build_defs.bzl", "run_opensta")
 load("@rules_hdl//synthesis:build_defs.bzl", "synthesize_rtl")
 load("@rules_hdl//synthesis:defs.bzl", "sdc_library")
 load("@rules_hdl//verilog:providers.bzl", "verilog_library")
@@ -114,6 +115,12 @@ CONFIGS = {
     synth_tcl = "synth.tcl",
     target_clock_period_pico_seconds = 4000, # 250 MHz
     synth_additional_args = "-booth", # run booth pass to rebuild multipliers before mapping
+) for c in CONFIGS]
+
+[run_opensta(
+    name = "veer_el2_synth_sta_asap7_%s" % c,
+    synth_target = ":veer_el2_synth_asap7_%s" % c,
+    sdc = ":constraint_%s" % c,
 ) for c in CONFIGS]
 
 [place_and_route(

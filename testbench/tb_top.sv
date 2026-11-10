@@ -2397,7 +2397,7 @@ module tb_top
                 98: force `VEER.dma_axi_arburst = '1;
                 99: force `VEER.dma_axi_rready = '1;
                 // --- ADDED AXI FORCES ---
-		100: force `VEER.lsu_axi_awvalid = '1;
+                100: force `VEER.lsu_axi_awvalid = '1;
                 101: force `VEER.lsu_axi_awid = '1;
                 102: force `VEER.lsu_axi_awaddr = '1;
                 103: force `VEER.lsu_axi_awregion = '1;
@@ -2939,7 +2939,7 @@ module tb_top
             release `VEER.dma_axi_arburst;
             release `VEER.dma_axi_rready;
             // --- ADDED AXI RELEASES ---
-	    release `VEER.lsu_axi_awvalid;
+            release `VEER.lsu_axi_awvalid;
             release `VEER.lsu_axi_awid;
             release `VEER.lsu_axi_awaddr;
             release `VEER.lsu_axi_awregion;
@@ -3834,7 +3834,11 @@ ahb_lsu_dma_bridge #(.pt(pt)) bridge (
 `endif // RV_BUILD_AHB_LITE
 
 `ifdef RV_BUILD_AXI4
-axi_slv #(.TAGW(`RV_IFU_BUS_TAG)) imem(
+axi_slv #(
+  .ARREADY_DELAY_MIN(1),
+  .ARREADY_DELAY_MAX(1),
+  .TAGW(`RV_IFU_BUS_TAG)
+) imem(
     .aclk(core_clk),
     .rst_l(rst_l_combined),
     .arvalid(ifu_axi_arvalid),

@@ -64,9 +64,11 @@ int main () {
     unsigned long tests_done;
 
     // Disable machine external interrupts
-    mie = read_csr(mie);
-    mie &= ~(1 << 11);
-    write_csr(mie, mie);
+    asm volatile (
+        "li t0, 0x800\n\t"
+        "csrc mie, t0\n\t"
+        ::: "t0"
+    );
 
     // Configure PIC for DCLS interrupts
     *threshold = 1;
@@ -75,15 +77,14 @@ int main () {
     priority[2] = 7;
     enable[2] = 1;
 
-    // Enable machine external interrupts
-    mie = read_csr(mie);
-    mie |= (1 << 11);
-    write_csr(mie, mie);
-
-    // Enable machine interrupts
-    mstatus = read_csr(mstatus);
-    mstatus |= (1 << 3);
-    write_csr(mstatus, mstatus);
+    // Enable machine external interrupts and global machine interrupts
+    asm volatile (
+        "li t0, 0x800\n\t"
+        "csrs mie, t0\n\t"
+        "li t0, 0x8\n\t"
+        "csrs mstatus, t0\n\t"
+        ::: "t0"
+    );
 
     if (boot_count == 1) {
         printf("Inject error (should trigger a trap)\n");
@@ -99,16 +100,31 @@ int main () {
 
         printf("Inject error (should be ignored)\n");
         tohost = (RV_MUBI_TRUE << 8) | CMD_INJ_EXT;
+        for (volatile uint32_t slp = 0; slp < 50; slp++) {
+            __asm__ volatile ("nop");
+        }
 
         if (trap_count != 1) {
             printf("ERROR: Corruption was reported after entering debug mode\n");
+            tohost = CMD_FAIL;
+        }
+
+        tohost = (RV_MUBI_FALSE << 8) | CMD_INJ_EXT;
+        printf("Reset core to clear sticky debug_mode_status_latch\n");
+        tohost = CMD_RST;
+    } else if (boot_count == 3) {
+        printf("Inject error after post-debug reset (should trigger a trap)\n");
+        tohost = (RV_MUBI_TRUE << 8) | CMD_INJ_EXT;
+    } else if (boot_count == 4) {
+        if (trap_count != 2) {
+            printf("ERROR: Corruption was not reported after post-debug reset\n");
             tohost = CMD_FAIL;
         }
     } else {
         printf("ERROR: This should have never been reached, reset was done too many times\n");
         tohost = CMD_FAIL;
     }
-    for (uint32_t slp = 0; slp < 100; slp++) {
+    for (volatile uint32_t slp = 0; slp < 100; slp++) {
         __asm__ volatile ("nop");
     }
     return 0;

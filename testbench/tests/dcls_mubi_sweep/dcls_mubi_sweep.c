@@ -50,6 +50,13 @@
  *          is strictly equal to valid RV_MUBI_TRUE, any tampered disable signal fails secure
  *          and traps immediately upon fault injection.
  *
+ * Phase 6: Debug Mode Error Suppression & Sticky Latch Reset
+ *          Triggers debug mode entry/exit (CMD_ENT_DBG) to latch debug_mode_status_latch =
+ *          El2MuBiTrue, verifies external fault injection (CMD_INJ_EXT = RV_MUBI_TRUE) is
+ *          suppressed while dbg_detected == El2MuBiTrue, and issues a core reset (CMD_RST)
+ *          so debug_mode_status_latch and dbg_detected transition back to El2MuBiFalse across
+ *          all [El2MuBiWidth-1:0] bits.
+ *
  * Final Phase: End-of-Test Lockstep Corruption Verification
  *          Masks interrupts and triggers CMD_INJ_LOCKSTEP with normal reporting enabled.
  *          Verifies that corruption_detected_o is asserted (El2MuBiTrue) when simulation
@@ -81,6 +88,7 @@
 #define CMD_INJ_CTRL         0x94
 #define CMD_INJ_CLEAR        0x95
 #define CMD_RST              0x96
+#define CMD_ENT_DBG          0xA0
 
 volatile uint32_t test_count __attribute__((section(".dccm.persistent"))) = 0;
 volatile uint32_t trap_count __attribute__((section(".dccm.persistent"))) = 0;
@@ -288,6 +296,36 @@ int main () {
         printf("PASS: SW Inject + DIS Tamper trapped as expected!\n");
         trap_count = 0;
         tohost = CMD_INJ_CLEAR;
+    }
+    tests_done += 1;
+
+    // ========================================================================
+    // Phase 6: Debug Mode Error Suppression & Sticky Latch Reset
+    // Purpose: Trigger debug mode (CMD_ENT_DBG) so debug_mode_status_latch and
+    //          dbg_detected transition from El2MuBiFalse to El2MuBiTrue, verify
+    //          external error injection (CMD_INJ_EXT) is suppressed, and issue
+    //          a core reset (CMD_RST) to transition back to El2MuBiFalse.
+    // Expected: 0 traps occur while dbg_detected == El2MuBiTrue, and subsequent
+    //           Final Phase after reset confirms corruption detection recovers.
+    // ========================================================================
+    if (test_count == tests_done) {
+        printf("Testing Debug Mode Error Suppression & Sticky Latch Reset...\n");
+        test_count++;
+        tohost = 1 << 8 | CMD_ENT_DBG;
+        tohost = RV_MUBI_TRUE << 8 | CMD_INJ_EXT;
+        for (volatile int slp = 0; slp < 20; slp++) {
+            __asm__ volatile ("nop");
+        }
+
+        if (trap_count > 0) {
+            tohost = 1;
+        } else {
+            tohost = RV_MUBI_FALSE << 8 | CMD_INJ_EXT;
+            tohost = CMD_RST;
+            for (volatile int slp = 0; slp < 100; slp++) {
+                __asm__ volatile ("nop");
+            }
+        }
     }
     tests_done += 1;
 

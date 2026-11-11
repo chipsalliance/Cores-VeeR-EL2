@@ -64,6 +64,22 @@ module el2_veer_lockstep_fcov_bind
          .shadow_miccme_ce_req (lockstep.xshadow_core.dec.tlu.miccme_ce_req),
          .shadow_mice_ce_req   (lockstep.xshadow_core.dec.tlu.mice_ce_req)
     );
+    bind el2_veer_wrapper el2_veer_lockstep_internal_state_tamper_cov_if #(
+         .pt(pt)
+    ) el2_veer_lockstep_internal_state_tamper_cov_inst(
+         .clk                  (clk),
+         .rst_l                (rst_l),
+         .dbg_rst_l            (dbg_rst_l),
+         .rst_n                (lockstep.rst_n),
+         .main_gpr_a5          (veer.dec.arf.gpr_out[15]),
+         .main_q0pc            (veer.ifu.aln.q0pc),
+         .main_mtvec           (veer.dec.tlu.mtvec),
+         .shadow_gpr_a5        (lockstep.xshadow_core.dec.arf.gpr_out[15]),
+         .shadow_q0pc          (lockstep.xshadow_core.ifu.aln.q0pc),
+         .shadow_mtvec         (lockstep.xshadow_core.dec.tlu.mtvec),
+         .corruption_detected_o(corruption_detected_o),
+         .extintsrc_req        (extintsrc_req)
+    );
 `endif
 `endif
 

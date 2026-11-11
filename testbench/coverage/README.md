@@ -9,7 +9,8 @@ This directory contains testbench-level functional coverage interfaces and bindi
 - **`el2_lsu_dccm_wr_readback_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_lsu_dccm_wr_readback_cov` covergroup for DCCM write-readback protection.
 - **`el2_core_ecc_threshold_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_core_ecc_threshold_cov` covergroup for Multi-Memory Core RAS ECC Threshold Alerts (`MDCCMECT`, `MICCMECT`, `MICECT`).
 - **`el2_veer_lockstep_asymmetric_fault_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_asymmetric_fault_cov` covergroup for DCLS Asymmetric Shadow Core Fault Divergence.
-- **`el2_veer_lockstep_fcov_bind.sv`**: Unified testbench functional coverage binding module (`el2_veer_lockstep_fcov_bind`) that binds all coverage interfaces (`el2_veer_lockstep_delay_cov_if`, `el2_ifu_icache_ecc_recovery_cov_if`, `el2_lsu_dccm_wr_readback_cov_if`, `el2_core_ecc_threshold_cov_if`, `el2_veer_lockstep_asymmetric_fault_cov_if`) into their target RTL modules under VCS and Verilator.
+- **`el2_veer_lockstep_internal_state_tamper_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_internal_state_tamper_cov` covergroup for DCLS Internal Core Architectural State Tamper (`a5`/`x15` GPR, `q0pcff` PC, and `mtvec_ff` CSR across lockstep delays `0..4` and warm-reset recovery).
+- **`el2_veer_lockstep_fcov_bind.sv`**: Unified testbench functional coverage binding module (`el2_veer_lockstep_fcov_bind`) that binds all coverage interfaces (`el2_veer_lockstep_delay_cov_if`, `el2_ifu_icache_ecc_recovery_cov_if`, `el2_lsu_dccm_wr_readback_cov_if`, `el2_core_ecc_threshold_cov_if`, `el2_veer_lockstep_asymmetric_fault_cov_if`, `el2_veer_lockstep_internal_state_tamper_cov_if`) into their target RTL modules under VCS and Verilator.
 
 ## Coverage Architecture
 
@@ -93,6 +94,19 @@ This directory contains testbench-level functional coverage interfaces and bindi
    - `icache_straddle_bank_check_cp`: Covers `bank0_to_bank1_straddle` and `bank1_to_bank0_straddle` on cross-bank straddling fetches (`addr[2:1] == 2'b11`).
    - `icache_bank_sel_cp`: Covers `lower_chunk_in_bank0` (`1'b0`) vs. `lower_chunk_in_bank1` (`1'b1`) on `ic_rd_bank_sel`.
    - `icache_rotator_x_bank_sel`: Crosses `icache_rotator_offset_cp` with `icache_bank_sel_cp`.
+
+### Task 10: DCLS Internal Core Architectural State Tamper (`el2_veer_lockstep_internal_state_tamper_cov`)
+
+1. **`internal_tamper_target_cp`**:
+   - `gpr_tamper`: Bit-flip in general purpose register (`a5` / `x15`, Case 200).
+   - `pc_tamper`: Bit-flip in fetch queue program counter flop (`q0pcff`, Case 201).
+   - `csr_tamper`: Bit-flip in trap vector base CSR flop (`mtvec_ff`, Case 202).
+2. **`internal_tamper_detection_cp`**:
+   - `trapped_and_recovered`: Divergence detected (`corruption_detected_o == El2MuBiTrue`), external interrupt trap taken (`extintsrc_req[2]`), hardware forces released (`0x95`), and warm-reset resynchronization (`0x96`) succeeds.
+3. **`lockstep_delay_cp`**:
+   - Configured lockstep pipeline delay (`delay_0` through `delay_4`) during internal state tamper detection.
+4. **`internal_tamper_x_delay_cross`**:
+   - Crosses `internal_tamper_target_cp` with `lockstep_delay_cp` (`delay_0` through `delay_4`).
 
 ## Testbench & CI Integration
 

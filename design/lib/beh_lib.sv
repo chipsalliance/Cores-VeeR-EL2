@@ -178,12 +178,12 @@ module rvdffe #( parameter WIDTH=1, SHORT=0, OVERRIDE=0 )
 
    logic                      l1clk;
 
-if (SHORT == 1) begin : genblock
+if (SHORT == 1) begin : gen_short
    if (1) begin : genblock
       assign dout = din;
    end
 end
-else begin : genblock
+else begin : gen_ff
 
 `ifndef RV_PHYSICAL
    if (WIDTH >= 8 || OVERRIDE==1) begin: genblock

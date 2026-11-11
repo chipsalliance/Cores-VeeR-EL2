@@ -299,7 +299,7 @@ import el2_pkg::*;
         always_comb begin
           wb_dout_pre_up = icache_export.wb_dout_pre_up[i][k];
         end
-        if (pt.ICACHE_BYPASS_ENABLE == 1) begin
+        if (pt.ICACHE_BYPASS_ENABLE == 1) begin : IC_BYP_EN
           assign wrptr_in_up[i][k] = (wrptr_up[i][k] == (pt.ICACHE_NUM_BYPASS-1)) ? '0 : (wrptr_up[i][k] + 1'd1);
           rvdffs  #(pt.ICACHE_NUM_BYPASS_WIDTH)  wrptr_ff(
               .*, .clk(active_clk),  .en(|write_bypass_en_up[i][k]), .din (wrptr_in_up[i][k]), .dout(wrptr_up[i][k])
@@ -360,7 +360,7 @@ import el2_pkg::*;
         always_comb begin
            wb_dout_pre_up[k][68-1:0] = icache_export.wb_dout_pre_up[i][k][68-1:0];
         end
-        if (pt.ICACHE_BYPASS_ENABLE == 1) begin
+        if (pt.ICACHE_BYPASS_ENABLE == 1) begin : IC_BYP_EN
           assign wrptr_in_up[i][k] = (wrptr_up[i][k] == (pt.ICACHE_NUM_BYPASS-1)) ? '0 : (wrptr_up[i][k] + 1'd1);
           rvdffs  #(pt.ICACHE_NUM_BYPASS_WIDTH)  wrptr_ff(
               .*, .clk(active_clk),  .en(|write_bypass_en_up[i][k]), .din (wrptr_in_up[i][k]), .dout(wrptr_up[i][k])
@@ -449,7 +449,7 @@ import el2_pkg::*;
         end
 
         // SRAMS with ECC (single/double detect; no correct)
-        if (pt.ICACHE_BYPASS_ENABLE == 1) begin
+        if (pt.ICACHE_BYPASS_ENABLE == 1) begin : IC_BYP_EN
           assign wrptr_in[k] = (wrptr[k] == (pt.ICACHE_NUM_BYPASS-1)) ? '0 : (wrptr[k] + 1'd1);
 
           rvdffs  #(pt.ICACHE_NUM_BYPASS_WIDTH)  wrptr_ff(
@@ -529,7 +529,7 @@ import el2_pkg::*;
         end
 
         // SRAMs with parity
-        if (pt.ICACHE_BYPASS_ENABLE == 1) begin
+        if (pt.ICACHE_BYPASS_ENABLE == 1) begin : IC_BYP_EN
           assign wrptr_in[k] = (wrptr[k] == (pt.ICACHE_NUM_BYPASS-1)) ? '0 : (wrptr[k] + 1'd1);
 
           rvdffs  #(pt.ICACHE_NUM_BYPASS_WIDTH)  wrptr_ff(
@@ -858,7 +858,7 @@ end // block: OTHERS
       if (pt.ICACHE_ECC) begin  : ECC1
         logic [pt.ICACHE_TAG_NUM_BYPASS-1:0][25 :0] wb_dout_hold;
 
-        if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin
+        if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin : IC_TAG_BYP_EN
           assign wrptr_in[i] = (wrptr[i] == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr[i] + 1'd1);
           rvdffs #(pt.ICACHE_TAG_NUM_BYPASS_WIDTH) wrptr_ff(
               .*, .clk(active_clk), .en(|write_bypass_en[i]), .din (wrptr_in[i]), .dout(wrptr[i])
@@ -933,7 +933,7 @@ end // block: OTHERS
       else  begin : ECC0
         logic [pt.ICACHE_TAG_NUM_BYPASS-1:0][21 :0] wb_dout_hold;
 
-        if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin
+        if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin : IC_TAG_BYP_EN
           assign wrptr_in[i] = (wrptr[i] == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr[i] + 1'd1);
           rvdffs #(pt.ICACHE_TAG_NUM_BYPASS_WIDTH) wrptr_ff(
               .*, .clk(active_clk), .en(|write_bypass_en[i]), .din (wrptr_in[i]), .dout(wrptr[i])
@@ -1049,8 +1049,8 @@ end // block: OTHERS
       end
     end
 
-    if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-      if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin
+    if (pt.ICACHE_NUM_WAYS == 4) begin : FOUR_WAYS
+      if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin : IC_TAG_BYP_EN
         assign wrptr_in = (wrptr == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr + 1'd1);
         rvdffs  #(pt.ICACHE_TAG_NUM_BYPASS_WIDTH)  wrptr_ff(
              .*, .clk(active_clk), .en(|write_bypass_en), .din (wrptr_in), .dout(wrptr)
@@ -1108,9 +1108,9 @@ end // block: OTHERS
       end
 
 
-    end // block: WAYS
+    end // block: FOUR_WAYS
     else begin : WAYS
-      if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin
+      if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin : IC_TAG_BYP_EN
         assign wrptr_in = (wrptr == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr + 1'd1);
         rvdffs  #(pt.ICACHE_TAG_NUM_BYPASS_WIDTH)  wrptr_ff(
              .*, .clk(active_clk), .en(|write_bypass_en), .din (wrptr_in), .dout(wrptr)
@@ -1169,7 +1169,7 @@ end // block: OTHERS
 
     end // block: WAYS
 
-        for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin
+        for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin : GEN_WAYS
           assign ic_tag_data_raw[i]  = ic_tag_data_raw_packed[(26*i)+25:26*i];
           assign w_tout[i][31:pt.ICACHE_TAG_LO] = ic_tag_data_raw[i][31-pt.ICACHE_TAG_LO:0] ;
           assign w_tout[i][36:32]              = ic_tag_data_raw[i][25:21] ;
@@ -1206,8 +1206,8 @@ end // block: OTHERS
           icache_export.ic_tag_clken_final[i] = ic_tag_clken_final;
         end
      end
-      if (pt.ICACHE_NUM_WAYS == 4) begin : WAYS
-        if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin
+      if (pt.ICACHE_NUM_WAYS == 4) begin : FOUR_WAYS
+        if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin : IC_TAG_BYP_EN
           assign wrptr_in = (wrptr == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr + 1'd1);
           rvdffs  #(pt.ICACHE_TAG_NUM_BYPASS_WIDTH)  wrptr_ff(
                .*, .clk(active_clk), .en(|write_bypass_en), .din (wrptr_in), .dout(wrptr)
@@ -1264,9 +1264,9 @@ end // block: OTHERS
             assign ic_tag_clken_final       =   |ic_tag_clken;
         end
 
-      end // block: WAYS
+      end // block: FOUR_WAYS
       else begin : WAYS
-        if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin
+        if (pt.ICACHE_TAG_BYPASS_ENABLE == 1) begin : IC_TAG_BYP_EN
           assign wrptr_in = (wrptr == (pt.ICACHE_TAG_NUM_BYPASS-1)) ? '0 : (wrptr + 1'd1);
           rvdffs  #(pt.ICACHE_TAG_NUM_BYPASS_WIDTH)  wrptr_ff(
                .*, .clk(active_clk), .en(|write_bypass_en), .din (wrptr_in), .dout(wrptr)
@@ -1324,7 +1324,7 @@ end // block: OTHERS
         end
       end // block: WAYS
 
-      for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin
+      for (genvar i=0; i<pt.ICACHE_NUM_WAYS; i++) begin : GEN_WAYS
           assign ic_tag_data_raw[i]  = ic_tag_data_raw_packed[(22*i)+21:22*i];
           assign w_tout[i][31:pt.ICACHE_TAG_LO] = ic_tag_data_raw[i][31-pt.ICACHE_TAG_LO:0] ;
           assign w_tout[i][32]                 = ic_tag_data_raw[i][21] ;

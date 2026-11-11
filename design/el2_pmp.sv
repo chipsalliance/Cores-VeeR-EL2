@@ -112,7 +112,7 @@ module el2_pmp
              (pmp_req_type == EXEC) |
             ((pmp_req_type == READ) & ~priv_mode);
         /* pragma coverage off */
-        default: ;
+        default: result = 1'b0;
         /* pragma coverage on */
       endcase
     end else begin

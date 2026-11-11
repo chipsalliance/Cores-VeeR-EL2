@@ -1197,6 +1197,25 @@ There are three configuration options:
 
 The configuration options are ignored and their macros are not generated if the Dual Core Lockstep feature is disabled.
 
+## Input synchronization
+
+The Main Core and the Shadow Core must observe the same input history, shifted only by `DELAY` cycles.
+Otherwise, the Equivalency Checker reports a corruption that did not happen.
+
+To guarantee this, the asynchronous inputs of the core are synchronized once in `el2_veer_wrapper`, before the Main/Shadow split.
+Both cores consume the synchronized signals: the Main Core directly, the Shadow Core through the lockstep delay line.
+This applies to:
+* `nmi_int`, `timer_int`, `soft_int`,
+* `i_cpu_halt_req`, `i_cpu_run_req`,
+* `mpc_debug_halt_req`, `mpc_debug_run_req`,
+* `extintsrc_req`,
+* `rst_l`, as sampled by the debug module for `dmstatus.allunavail`/`anyunavail` (`rst_l_sync`).
+
+The synchronizers (`syncro_ff`, `extint_syncro_ff` and `rstl_syncff`) run on the free-running core clock `clk`.
+No synchronizer remains inside the cores, so integrators may replace them with technology-specific synchronizer cells (`rvsyncss` in `design/lib/beh_lib.sv`) without affecting lockstep operation.
+
+Designs that instantiate `el2_veer` directly instead of `el2_veer_wrapper` must synchronize these inputs themselves before they reach the core, and drive the `rst_l_sync` input with `rst_l` synchronized to `clk`.
+
 ## Synthesis: optimization barriers (`el2_prim_buf`)
 
 For the DCLS to be effective, the Shadow Core and the Main/Shadow comparison logic must *not* be merged or removed by synthesis.

@@ -29,6 +29,7 @@ import el2_pkg::*;
    input logic                  clk,
    input logic                  rst_l,
    input logic                  dbg_rst_l,
+   input logic                  rst_l_sync,   // rst_l synchronized in el2_veer_wrapper
    // rst_vec is supposed to be connected to a constant in the top level
    /*pragma coverage off*/
    input logic [31:1]           rst_vec,

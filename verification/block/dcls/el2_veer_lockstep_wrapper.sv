@@ -504,6 +504,10 @@ module el2_veer_lockstep_wrapper
   el2_regfile_if regfile ();
 `endif  // `ifdef RV_LOCKSTEP_REGFILE_ENABLE
 
+  // Core reset as seen by the debug module, synchronized like in el2_veer_wrapper
+  logic rst_l_sync;
+  rvsyncss #(1) rstl_syncff (.clk(clk), .rst_l(dbg_rst_l), .din(rst_l), .dout(rst_l_sync));
+
   el2_veer #(
       .pt(pt)
   ) veer (

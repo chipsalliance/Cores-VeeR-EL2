@@ -579,10 +579,9 @@ module el2_configurable_gw (
 
   logic  gw_int_pending_in, gw_int_pending, extintsrc_req_sync;
 
-  rvsyncss_fpga  #(1) sync_inst (
-      .dout        (extintsrc_req_sync),
-      .din         (extintsrc_req),
-      .*) ;
+  // extintsrc_req is synchronized in el2_veer_wrapper, before the lockstep
+  // main/shadow split, so it arrives here already sync'd to the core clock.
+  assign extintsrc_req_sync = extintsrc_req;
 
 
   assign gw_int_pending_in =  (extintsrc_req_sync ^ meigwctrl_polarity) | (gw_int_pending & ~meigwclr) ;

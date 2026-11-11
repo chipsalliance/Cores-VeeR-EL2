@@ -2235,19 +2235,19 @@ module tb_top
 
             // --- Internal State & Safety Tamper Forces (Common for AHB & AXI) ---
                 200: begin
-                    force `LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout[15] = 1'b1; // Force register a5 (x15) bit 15 high
+                    force `LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.gen_ff.genblock.dff.dout[15] = 1'b1; // Force register a5 (x15) bit 15 high
                     $display("[%0t ns] [tb_top] forcing cur_gpr a5 (x15) bit 15 to 1", $time);
                 end
                 201: begin
                     logic [30:0] cur_pc;
-                    cur_pc = `LOCKSTEP.xshadow_core.ifu.aln.q0pcff.genblock.genblock.dff.dout;
-                    force `LOCKSTEP.xshadow_core.ifu.aln.q0pcff.genblock.genblock.dff.dout[14] = ~cur_pc[14]; // Flip PC bit 15 (mapped to internal dout[14])
+                    cur_pc = `LOCKSTEP.xshadow_core.ifu.aln.q0pcff.gen_ff.genblock.dff.dout;
+                    force `LOCKSTEP.xshadow_core.ifu.aln.q0pcff.gen_ff.genblock.dff.dout[14] = ~cur_pc[14]; // Flip PC bit 15 (mapped to internal dout[14])
                     $display("[%0t ns] [tb_top] forcing cur_pc", $time);
                 end
                 202: begin
                     logic [30:0] cur_mtvec;
-                    cur_mtvec = `LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.genblock.genblock.dff.dout;
-                    force `LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.genblock.genblock.dff.dout[4] = ~cur_mtvec[4]; // Flip mtvec bit 5 (mapped to internal dout[4])
+                    cur_mtvec = `LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.gen_ff.genblock.dff.dout;
+                    force `LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.gen_ff.genblock.dff.dout[4] = ~cur_mtvec[4]; // Flip mtvec bit 5 (mapped to internal dout[4])
                     $display("[%0t ns] [tb_top] forcing cur_mtvec", $time);
                 end
                 203: force `LOCKSTEP.xshadow_core.dec.tlu.mdccmect = 32'h10000004; // Force subordinate DCCM ECC threshold alert (Threshold=2, Counter=4)
@@ -3165,9 +3165,9 @@ module tb_top
             release `LOCKSTEP_CORE.dec.tlu.mip_rf[7];
             release `LOCKSTEP_CORE.dec.tlu.minstretl_bff.dout[8];
             release `LOCKSTEP.lockstep_err_injection_en_i;
-            release `LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.genblock.genblock.dff.dout[15];
-            release `LOCKSTEP.xshadow_core.ifu.aln.q0pcff.genblock.genblock.dff.dout[14];
-            release `LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.genblock.genblock.dff.dout[4];
+            release `LOCKSTEP.xshadow_core.dec.arf.gpr[15].gprff.gen_ff.genblock.dff.dout[15];
+            release `LOCKSTEP.xshadow_core.ifu.aln.q0pcff.gen_ff.genblock.dff.dout[14];
+            release `LOCKSTEP.xshadow_core.dec.tlu.mtvec_ff.gen_ff.genblock.dff.dout[4];
             release `LOCKSTEP.xshadow_core.dec.tlu.mdccmect;
             release `LOCKSTEP.xshadow_core.dec.tlu.miccmect;
             release `LOCKSTEP.xshadow_core.dec.tlu.micect;

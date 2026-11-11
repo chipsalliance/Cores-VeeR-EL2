@@ -13,7 +13,8 @@ This directory contains testbench-level functional coverage interfaces and bindi
 - **`el2_core_ecc_threshold_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_core_ecc_threshold_cov` IEEE 1800 covergroup for Multi-Memory Core RAS ECC Threshold Alerts (`MDCCMECT`, `MICCMECT`, `MICECT`).
 - **`el2_veer_lockstep_asymmetric_fault_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_asymmetric_fault_cov` IEEE 1800 covergroup for DCLS Asymmetric Shadow Core Fault Divergence.
 - **`el2_ifu_icache_ecc_recovery_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_ifu_icache_ecc_recovery_cov` and `el2_ifu_icache_core_check_cov` IEEE 1800 covergroups for ICache core-side ECC/parity fault recovery and bank check alignment.
-- **`el2_veer_lockstep_fcov_bind.sv`**: Testbench binding module (`el2_veer_lockstep_fcov_bind`) that binds `el2_veer_lockstep_delay_cov_if`, `el2_veer_lockstep_debug_mode_cov_if`, `el2_veer_lockstep_mubi_sweep_cov_if`, and `el2_veer_lockstep_regfile_read_cov_if` to `el2_veer_lockstep`, and binds `el2_veer_lockstep_address_xor_infection_cov_if` to `el2_veer_wrapper`, along with `el2_lsu_dccm_wr_readback_cov_if` to `el2_lsu_dccm_ctl`, `el2_core_ecc_threshold_cov_if` to `el2_dec_tlu_ctl`, `el2_veer_lockstep_asymmetric_fault_cov_if` to `el2_veer_wrapper`, `el2_ifu_icache_ecc_recovery_cov_if` to `el2_ifu_mem_ctl`.
+- **`el2_veer_lockstep_internal_state_tamper_cov_if.sv`**: Dedicated SystemVerilog coverage interface encapsulating the `el2_veer_lockstep_internal_state_tamper_cov` IEEE 1800 covergroup for DCLS Internal Core Architectural State Tamper (`a5`/`x15` GPR, `q0pcff` PC, and `mtvec_ff` CSR across lockstep delays `0..4` and warm-reset recovery).
+- **`el2_veer_lockstep_fcov_bind.sv`**: Testbench binding module (`el2_veer_lockstep_fcov_bind`) that binds `el2_veer_lockstep_delay_cov_if`, `el2_veer_lockstep_debug_mode_cov_if`, `el2_veer_lockstep_mubi_sweep_cov_if`, and `el2_veer_lockstep_regfile_read_cov_if` to `el2_veer_lockstep`, and binds `el2_veer_lockstep_address_xor_infection_cov_if` to `el2_veer_wrapper`, along with `el2_lsu_dccm_wr_readback_cov_if` to `el2_lsu_dccm_ctl`, `el2_core_ecc_threshold_cov_if` to `el2_dec_tlu_ctl`, `el2_veer_lockstep_asymmetric_fault_cov_if` to `el2_veer_wrapper`, `el2_ifu_icache_ecc_recovery_cov_if` to `el2_ifu_mem_ctl`, `el2_veer_lockstep_internal_state_tamper_cov_if` to `el2_veer_wrapper`.
 
 ## Coverage Architecture
 
@@ -224,6 +225,20 @@ Tracks which architectural register differed on the active divergence cycle:
 - `icache_straddle_bank_check_cp`: Covers `bank0_to_bank1_straddle` and `bank1_to_bank0_straddle` on cross-bank straddling fetches (`addr[2:1] == 2'b11`).
 - `icache_bank_sel_cp`: Covers `lower_chunk_in_bank0` (`1'b0`) vs. `lower_chunk_in_bank1` (`1'b1`) on `ic_rd_bank_sel`.
 - `icache_rotator_x_bank_sel`: Crosses `icache_rotator_offset_cp` with `icache_bank_sel_cp`.
+
+### Task 10: DCLS Internal Core Architectural State Tamper (`el2_veer_lockstep_internal_state_tamper_cov`)
+
+#### 1. `internal_tamper_target_cp`
+- `gpr_tamper`: Bit-flip in general purpose register (`a5` / `x15`, Case 200).
+- `pc_tamper`: Bit-flip in fetch queue program counter flop (`q0pcff`, Case 201).
+- `csr_tamper`: Bit-flip in trap vector base CSR flop (`mtvec_ff`, Case 202).
+
+#### 2. `internal_tamper_detection_cp`
+- `trapped_and_recovered`: Divergence detected (`corruption_detected_o == El2MuBiTrue`), external interrupt trap taken (`extintsrc_req[2]`), hardware forces released (`0x95`), and warm-reset resynchronization (`0x96`) succeeds.
+
+#### 3. `lockstep_delay_cp` and Cross Coverage
+- `lockstep_delay_cp`: Configured lockstep pipeline delay (`delay_0` through `delay_4`) during internal state tamper detection.
+- `internal_tamper_x_delay_cross`: Crosses `internal_tamper_target_cp` with `lockstep_delay_cp` (`delay_0` through `delay_4`).
 
 ## Testbench & CI Integration
 

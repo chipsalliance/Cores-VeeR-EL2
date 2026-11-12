@@ -149,7 +149,7 @@ always @ (posedge clk or negedge reset_l)
         rresp_select <= '0;
     end else begin
         if (!m_rvalid | (m_rvalid & m_rready)) begin
-            rresp_select <= s1_rvalid & ~s0_rvalid;
+            rresp_select <= s1_rvalid & ~s0_rvalid & ~rresp_select & (arid_cnt != rid_cnt);
         end
     end
 
@@ -165,7 +165,7 @@ always @ (posedge clk or negedge reset_l)
         bresp_select <= '0;
     end else begin
         if (!m_bvalid | (m_bvalid & m_bready)) begin
-            bresp_select <= s1_bvalid & ~s0_bvalid;
+            bresp_select <= s1_bvalid & ~s0_bvalid & ~bresp_select & (awid_cnt != bid_cnt);
         end
     end
 
@@ -173,6 +173,7 @@ always @ (posedge clk or negedge reset_l)
 // W-channel select fifo
 always @ (posedge clk or negedge reset_l)
     if(!reset_l) begin
+        wsel <= '0;
         wsel_count <= '0;
         wsel_iptr <= '0;
         wsel_optr <= '0;
@@ -192,6 +193,7 @@ always @ (posedge clk or negedge reset_l)
 // id replacement for narrow ID slave
 always @ (posedge clk or negedge reset_l)
     if(!reset_l) begin
+        arid <= '{default: '0};
         arid_cnt <= '0;
         rid_cnt <= '0;
     end
@@ -208,6 +210,7 @@ always @ (posedge clk or negedge reset_l)
 
 always @ (posedge clk or negedge reset_l)
     if(!reset_l) begin
+        awid <= '{default: '0};
         awid_cnt <= '0;
         bid_cnt <= '0;
     end

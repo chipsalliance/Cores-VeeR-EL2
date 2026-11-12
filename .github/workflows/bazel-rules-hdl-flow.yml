@@ -32,6 +32,10 @@ jobs:
           apt-get update -qq
           apt-get install -qqy --no-install-recommends \
             curl ca-certificates python3 build-essential clang cmake flex bison git file zip wget tree
+          apt-get install -qqy --no-install-recommends libx11-6 libx11-xcb1 \
+            libsm6 libice6 libxcb1 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
+            libxcb-randr0 libxcb-render0 libxcb-render-util0 libxcb-shape0 libxcb-shm0 libxcb-sync1 \
+            libxcb-util1 libxcb-xfixes0 libxcb-xkb1 libdbus-1-3 libfontconfig1 libxkbcommon0 libxkbcommon-x11-0
 
       - name: Configure Bazel
         run: |
@@ -84,4 +88,5 @@ jobs:
             Cores-VeeR-EL2/bazel-bin/veer_el2_place_and_route_asap7_${{ matrix.bus.config }}__clock_tree_synthesis.log
             Cores-VeeR-EL2/bazel-bin/veer_el2_place_and_route_asap7_${{ matrix.bus.config }}__global_routing.log
             Cores-VeeR-EL2/bazel-bin/veer_el2_place_and_route_asap7_${{ matrix.bus.config }}_report.textproto
+            Cores-VeeR-EL2/bazel-bin/veer_el2_place_and_route_asap7_${{ matrix.bus.config }}_die.png
           if-no-files-found: error

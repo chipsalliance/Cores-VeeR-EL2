@@ -149,3 +149,44 @@ class TestInvalidDisableCorruptionDetection(TestReset):
 
             await self.do_reset()
             await RisingEdge(self.clk)
+
+
+@pyuvm.test()
+class TestDebugMode(TestReset):
+    """
+    A test that ensures entering debug mode latches `debug_mode_status_latch` / `dbg_detected`
+    to suppress corruption detection until a core reset restores `El2MuBiFalse`.
+    """
+
+    async def run(self):
+        # Get out of reset
+        await self.test_reset()
+
+        # Request debug halt so the core asserts o_debug_mode_status
+        self.dut.mpc_debug_halt_req.value = 1
+        await ClockCycles(self.clk, 10)
+        self.dut.mpc_debug_halt_req.value = 0
+        await RisingEdge(self.clk)
+
+        # Enable error injection while debug mode is latched
+        self.dut.lockstep_err_injection_en_i.value = self.mubi_true
+        await RisingEdge(self.clk)
+
+        # Assert that corruption detection is suppressed in debug mode
+        signals = {
+            "shadow_reset": 1,
+            "shadow_dbg_reset": 1,
+            "corruption_detected_o": self.mubi_false,
+        }
+        self.assert_signals(signals)
+
+        # Reset the DUT to clear the sticky debug_mode_status_latch back to El2MuBiFalse
+        await self.do_reset()
+        await RisingEdge(self.clk)
+        await self.test_reset()
+
+        # Verify corruption detection is active again after reset
+        self.dut.lockstep_err_injection_en_i.value = self.mubi_true
+        await RisingEdge(self.clk)
+        signals.update({"corruption_detected_o": self.mubi_true})
+        self.assert_signals(signals)

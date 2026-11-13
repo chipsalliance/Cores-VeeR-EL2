@@ -67,7 +67,7 @@ module el2_tmr_recovery_fsm
 );
 
 `ifdef RV_USER_MODE
-  localparam int csr_cnt = 157;
+  localparam int csr_cnt = 145;
 `else
   localparam int csr_cnt = 140;
 `endif

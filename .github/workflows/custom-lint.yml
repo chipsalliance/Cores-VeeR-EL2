@@ -17,10 +17,24 @@ jobs:
     env:
       GHA_EXTERNAL_DISK: additional-tools-all
       GHA_SA: gh-sa-veer-uploader
+    strategy:
+      matrix:
+        conf_params: [
+          # Standard build
+          "",
+          # DCLS
+          "-set lockstep_enable=1 -set lockstep_regfile_enable=1 -set=mubi_width=2 -set=mubi_false=0x1 -set=mubi_true=0x2",
+          # TMR
+          "-set=triple_modular_redundancy_enable=1 -set=mubi_width=2 -set=mubi_false=0x1 -set=mubi_true=0x2"
+          ]
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Setup conf params
+        run: |
+          echo "CONF_PARAMS=\"-set build_axi4 -set fpga_optimize=0 ${{ matrix.conf_params }}\"" >> $GITHUB_ENV
 
       - name: Run lint
         run: _secret_lint:14

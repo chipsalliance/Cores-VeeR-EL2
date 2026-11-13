@@ -15,16 +15,79 @@
  * limitations under the License.
  */
 
-module el2_veer_lockstep_fcov_bind
-#(
+`include "common_defines.vh"
+
+module el2_veer_lockstep_fcov_bind #(
 `ifdef FCOV
-    `include "el2_param.vh"
+  `include "el2_param.vh"
 `endif
 ) ();
 `ifdef FCOV
-    bind el2_veer_lockstep el2_veer_lockstep_delay_cov_if el2_veer_lockstep_delay_cov_inst(
-         .*
+`ifdef RV_LOCKSTEP_ENABLE
+  bind el2_veer_lockstep el2_veer_lockstep_delay_cov_if #(
+    .pt(pt)
+  ) el2_veer_lockstep_delay_cov_inst (
+      .*
+    );
+  bind el2_veer_lockstep el2_veer_lockstep_debug_mode_cov_if #(
+    .pt(pt)
+  ) el2_veer_lockstep_debug_mode_cov_inst (
+      .*
+    );
+  bind el2_veer_lockstep el2_veer_lockstep_mubi_sweep_cov_if #(
+    .pt(pt)
+  ) el2_veer_lockstep_mubi_sweep_cov_inst (
+      .*
+    );
+  bind el2_veer_wrapper el2_veer_lockstep_address_xor_infection_cov_if #(
+    .pt(pt)
+  ) el2_veer_lockstep_address_xor_infection_cov_inst (
+      .rst_n                    (lockstep.rst_n),
+`ifdef RV_ICCM_ENABLE
+      .main_iccm_rd_data        (veer.ifu.mem_ctl.iccm_rd_data),
+      .shadow_iccm_rd_data      (lockstep.xshadow_core.ifu.mem_ctl.iccm_rd_data),
+      .iccm_sel_red0            (mem.iccm.iccm.sel_red0),
+      .iccm_sel_red1            (mem.iccm.iccm.sel_red1),
+      .iccm_red_addr0_odd       (mem.iccm.iccm.redundant_address[0][2]),
+      .iccm_red_addr1_odd       (mem.iccm.iccm.redundant_address[1][2]),
+`else
+      .main_iccm_rd_data        ('0),
+      .shadow_iccm_rd_data      ('0),
+      .iccm_sel_red0            ('0),
+      .iccm_sel_red1            ('0),
+      .iccm_red_addr0_odd       (1'b0),
+      .iccm_red_addr1_odd       (1'b0),
+`endif
+      .shadow_ic_perr_r         (lockstep.xshadow_core.dec.tlu.ic_perr_r),
+      .shadow_core_inputs_pre   (lockstep.shadow_core_inputs_pre),
+      .delayed_main_core_outputs(lockstep.delayed_main_core_outputs),
+      .shadow_core_outputs      (lockstep.shadow_core_outputs),
+      .*
+    );
+  bind el2_veer_lockstep el2_veer_lockstep_regfile_read_cov_if #(
+    .pt(pt)
+  ) el2_veer_lockstep_regfile_read_cov_inst (
+`ifdef RV_LOCKSTEP_REGFILE_ENABLE
+`ifdef RV_LOCKSTEP_REGFILE_READ_ENABLE
+      .main_gpr_rd0              (main_core_regfile.gpr.rd0),
+      .main_gpr_rd1              (main_core_regfile.gpr.rd1),
+      .shadow_gpr_rd0            (shadow_core_regfile.gpr.rd0),
+      .shadow_gpr_rd1            (shadow_core_regfile.gpr.rd1),
+`else
+      .main_gpr_pkt              (main_core_regfile.gpr),
+      .shadow_gpr_pkt            (shadow_core_regfile.gpr),
+`endif
+`endif
+      .shadow_raddr0             (xshadow_core.dec.dec_i0_rs1_d),
+      .shadow_raddr1             (xshadow_core.dec.dec_i0_rs2_d),
+      .shadow_dec_i0_decode_d    (xshadow_core.dec.dec_i0_decode_d),
+      .shadow_dec_i0_alu_decode_d(xshadow_core.dec.dec_i0_alu_decode_d),
+      .shadow_dec_i0_branch_d    (xshadow_core.dec.dec_i0_branch_d),
+      .shadow_dec_i0_instr_d     (xshadow_core.dec.dec_i0_instr_d),
+      .shadow_lsu_p              (xshadow_core.dec.lsu_p),
+      .*
     );
 `endif
+`endif
 
-endmodule
+endmodule : el2_veer_lockstep_fcov_bind

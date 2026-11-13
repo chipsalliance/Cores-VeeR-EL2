@@ -1,0 +1,479 @@
+name: Regression tests TMR
+
+on:
+  schedule:
+    - cron: "17 1 * * *" # daily, 01:17 UTC
+  workflow_dispatch:
+  workflow_call:
+  pull_request:
+
+permissions:
+  contents: read
+  packages: read
+
+env:
+  DEBIAN_FRONTEND: noninteractive
+  YOSYS_VERSION: 6f876ae0e2095753bac358c88f93bc27a62b3d9b
+  FAULTERGEIST_VERSION: 5078c4b83e5694ca9f93d21c57d91c3a529c4f3c
+  ASAP7_VERSION: 472f7b3f6680ffb1109d6792219e6ea5570c26a0
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  generate-matrix:
+    name: Generate test matrix
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    outputs:
+      tests: ${{ steps.select.outputs.tests }}
+      batches: ${{ steps.batches.outputs.batches }}
+    env:
+      TOTAL_FAULTS: 261
+      FAULTS_PER_JOB: 45
+    steps:
+      - uses: actions/checkout@v7
+      - name: Select tests
+        id: select
+        run: |
+          echo "tests=$(python3 .github/scripts/select_pr_tests.py \
+            '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}' 4 \
+            'hello_world,hello_world_dccm,dhry,ecc,csr_misa,csr_access,csr_mstatus,csr_mseccfg,perf_counters,icache,bitmanip' \
+            'csr_access')" | tee -a $GITHUB_OUTPUT
+      - name: Split fault IDs into batches
+        id: batches
+        run: |
+          python3 -c "
+          import json, os
+          total, size = int(os.environ['TOTAL_FAULTS']), int(os.environ['FAULTS_PER_JOB'])
+          assert total > 0 and size > 0, 'TOTAL_FAULTS and FAULTS_PER_JOB must be positive'
+          batches = [{'first': f, 'count': min(size, total - f)} for f in range(0, total, size)]
+          print('batches=' + json.dumps(batches))
+          " | tee -a $GITHUB_OUTPUT
+
+  regression-tests-tmr:
+    name: Regression tests
+    if: github.event_name == 'pull_request'
+    needs: [generate-matrix]
+    runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:20260923
+    strategy:
+      matrix:
+        bus: ["axi", "ahb"]
+        test: ${{ fromJSON(needs.generate-matrix.outputs.tests) }}
+        coverage: ["all"]
+        priv: ["0", "1"]
+        tb_extra_args: [""]
+        exclude:
+          # These tests require user mode
+          - priv: "0"
+            test: "csr_mseccfg"
+          - priv: "0"
+            test: "csr_access"
+          - priv: "0"
+            test: "csr_mstatus"
+          - priv: "0"
+            test: "modesw"
+          - priv: "0"
+            test: "insns"
+          - priv: "0"
+            test: "perf_counters"
+          # end tests which require user mode
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/regression/.cache/"
+      TMR_ENABLE: 1
+    steps:
+      - name: Setup repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+          pip install -r .github/scripts/requirements-coverage.txt
+          echo "PATH=$PATH" >> $GITHUB_ENV
+
+      - name: Setup environment
+        run: |
+          RV_ROOT=`pwd`
+          echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
+          PYTHONUNBUFFERED=1
+          echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
+          TEST_PATH=$RV_ROOT/test_results
+          echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+
+      - name: Run tests
+        run: |
+          export RV_ROOT=`pwd`
+          export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test }} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+
+  tmr-injection-tests:
+    name: TMR fault injection tests
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:20260923
+    needs: [generate-matrix]
+    strategy:
+      fail-fast: false
+      matrix:
+        batch: ${{ fromJSON(needs.generate-matrix.outputs.batches) }}
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/regression/.cache/"
+      CONF_PARAMS: "-target=default -set bitmanip_zba -set bitmanip_zbb -set bitmanip_zbc -set bitmanip_zbe -set bitmanip_zbf -set bitmanip_zbp -set bitmanip_zbr -set bitmanip_zbs -set fpga_optimize=0 -set build_axi4 -set icache_waypack=0 -set icache_num_ways=2"
+      FIRST_FAULT_ID: ${{ matrix.batch.first }}
+      NUM_OF_FAULTS: ${{ matrix.batch.count }}
+      TEST: zephyr_hello_world
+      TMR_TB: 1
+      TB_MAX_CYCLES: 300000
+      ZEPHYR_CONFIG: "-DCONFIG_VEER_EL2_TB_EXIT_ON_MAIN_RETURN=y"
+
+    steps:
+      - name: Setup repository
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Steup Zephyr
+        run: |
+          apt install -y --no-install-recommends git cmake ninja-build gperf ccache dfu-util \
+            device-tree-compiler wget python3-dev python3-venv python3-tk xz-utils file \
+            make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install west
+          west init -m https://github.com/zephyrproject-rtos/zephyr .
+          west config manifest.project-filter -- '-.*'
+          west update
+          west packages pip --install
+          pushd zephyr
+            export ZEPHYR_BASE=`pwd`
+            west sdk install -t riscv64-zephyr-elf
+          popd
+          echo "ZEPHYR_BASE=$ZEPHYR_BASE" >> $GITHUB_ENV
+
+      - name: Setup environment
+        run: |
+          echo "RV_ROOT=$(pwd)" >> $GITHUB_ENV
+          echo "ARTIFACTS_DIR=$(pwd)/artifacts/${TEST}" >> $GITHUB_ENV
+
+      - name: Build simulation
+        run: |
+          source .venv/bin/activate
+          mkdir -p sim && cd sim
+          make -j$(nproc) -f $RV_ROOT/tools/Makefile TB_MAX_CYCLES=${TB_MAX_CYCLES} TEST=${TEST} \
+            ZEPHYR_CONFIG="${ZEPHYR_CONFIG}" verilator-build program.hex
+
+      - name: Run faults ${{ matrix.batch.first }}..+${{ matrix.batch.num }}
+        run: |
+          source .venv/bin/activate
+          cd sim
+          mkdir -p ${ARTIFACTS_DIR}
+
+          RESULTS=${ARTIFACTS_DIR}/results_${FIRST_FAULT_ID}.csv
+          N_PASSED=0
+          N_SKIPPED=0
+          N_FAILED=0
+
+          for (( FAULT_ID = FIRST_FAULT_ID; FAULT_ID < FIRST_FAULT_ID + NUM_OF_FAULTS; FAULT_ID++ )); do
+            OUT=${ARTIFACTS_DIR}/fault_${FAULT_ID}
+            mkdir -p ${OUT}
+
+            RC=0
+            make -f ${RV_ROOT}/tools/Makefile TEST=${{ env.TEST }} \
+              ZEPHYR_CONFIG="${ZEPHYR_CONFIG}" \
+              TB_EXTRA_ARGS="+veer_upsets +tmr_upsets +fault_id=${FAULT_ID}" \
+              verilator || RC=$?
+
+            # Testbench writes these into the CWD and truncates them on every run.
+            for f in console.log exec.log run.log trace_port.csv; do
+              if [ -f "$f" ]; then mv "$f" ${OUT}/; fi
+            done
+
+            if   grep -q "skipping test"       ${OUT}/run.log; then RES=SKIPPED
+            elif grep -q "TEST_PASSED"         ${OUT}/run.log; then RES=PASSED
+            elif grep -q "Hit max cycle count" ${OUT}/run.log; then RES=TIMEOUT
+            elif grep -q "TEST_FAILED"         ${OUT}/run.log; then RES=FAILED
+            else                                                    RES=ERROR
+            fi
+            echo "Fault ID = ${FAULT_ID}, Result = ${RES}, Returncode = ${RC}" >> ${RESULTS}
+
+            case ${RES} in
+              PASSED)  N_PASSED=$((N_PASSED + 1)) ;;
+              SKIPPED) N_SKIPPED=$((N_SKIPPED + 1)) ;;
+              *)
+                N_FAILED=$((N_FAILED + 1))
+                ;;
+            esac
+          done
+
+          echo "passed=${N_PASSED} skipped=${N_SKIPPED} failed=${N_FAILED} total=${NUM_OF_FAULTS}"
+          [[ ${N_FAILED} -eq 0 ]]
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fault_campaign_${{ env.TEST }}_${{ matrix.batch.first }}
+          path: artifacts
+
+  build-yosys:
+    name: Build Yosys
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:20260923
+    steps:
+      - name: Install build dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          apt-get -qq update
+          apt-get -qqy install --no-install-recommends \
+            bison build-essential ca-certificates cmake flex gawk git \
+            libffi-dev libfl-dev libreadline-dev pkg-config python3 tcl-dev zlib1g-dev zstd
+
+      - name: Restore cached Yosys
+        id: cache
+        uses: actions/cache@v6
+        with:
+          path: yosys_${{ env.YOSYS_VERSION }}.tar.zst
+          key: yosys_${{ env.YOSYS_VERSION }}.tar.zst
+
+      - name: Checkout Yosys
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v7
+        with:
+          repository: YosysHQ/yosys
+          ref: ${{ env.YOSYS_VERSION }}
+          path: yosys
+          submodules: recursive
+
+      - name: Build and install Yosys
+        if: steps.cache.outputs.cache-hit != 'true'
+        working-directory: yosys
+        run: |
+          cmake -B build . -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release --parallel "$(nproc)"
+          cmake --install build --strip --prefix /opt/yosys
+          /opt/yosys/bin/yosys -V
+          tar -C /opt -I zstd -cf "$GITHUB_WORKSPACE/yosys_${YOSYS_VERSION}.tar.zst" yosys
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: yosys
+          path: yosys_${{ env.YOSYS_VERSION }}.tar.zst
+          if-no-files-found: error
+          retention-days: 1
+
+  build-faultergeist:
+    name: Build Faultergeist
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:20260923
+    steps:
+      - name: Install build dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          apt-get -qq update
+          apt-get -qqy install --no-install-recommends \
+            build-essential ca-certificates cmake git pkg-config zstd
+
+      - name: Restore cached Faultergeist
+        id: cache
+        uses: actions/cache@v6
+        with:
+          path: faultergeist_${{ env.FAULTERGEIST_VERSION }}.tar.zst
+          key: faultergeist_${{ env.FAULTERGEIST_VERSION }}.tar.zst
+
+      - name: Checkout Faultergeist
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v7
+        with:
+          repository: antmicro/faultergeist
+          ref: ${{ env.FAULTERGEIST_VERSION }}
+          path: faultergeist
+
+      - name: Build and install Faultergeist
+        if: steps.cache.outputs.cache-hit != 'true'
+        working-directory: faultergeist
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+          cmake --build build -j "$(nproc)"
+          cmake --install build --prefix /opt/faultergeist
+          tar -C /opt -I zstd -cf "$GITHUB_WORKSPACE/faultergeist_${FAULTERGEIST_VERSION}.tar.zst" faultergeist
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: faultergeist
+          path: faultergeist_${{ env.FAULTERGEIST_VERSION }}.tar.zst
+          if-no-files-found: error
+          retention-days: 1
+
+  tmr-faultergeist-tests:
+    name: TMR Faultergeist fault campaign tests
+    if: github.event_name != 'pull_request'
+    needs: [build-yosys, build-faultergeist]
+    runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:20260923
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/regression/.cache/"
+      TEST: zephyr_hello_world
+      TMR_TB: 1
+      FI: 1
+      FI_NUM_OF_EVENTS: ${{ matrix.fi_num_of_events }}
+      FI_SIM_TIME: ${{ matrix.fi_sim_time }}
+      FI_VEER_IDX: ${{ matrix.fi_veer_idx }}
+      TEST_NAME: ${{ matrix.test_name }}
+      PDK_LIBS: >-
+        asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib
+        asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib
+        asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib
+        asap7sc7p5t_OA_RVT_TT_nldm_211120.lib
+        asap7sc7p5t_AO_RVT_TT_nldm_211120.lib
+      PKG_CONFIG_PATH: /opt/faultergeist/lib/pkgconfig
+    strategy:
+      matrix:
+        fi_veer_idx: ["0", "1", "2"]
+        test_name: [hello_world, cmark, dhry, zephyr_hello_world, zephyr_philosophers]
+        include:
+          - test_name: hello_world
+            fi_num_of_events: "15"
+            fi_sim_time: 10us
+          - test_name: cmark
+            tb_max_cycles: "100000000"
+            fi_num_of_events: "200"
+            fi_sim_time: 10ms
+          - test_name: dhry
+            tb_max_cycles: "100000000"
+            fi_num_of_events: "200"
+            fi_sim_time: 10ms
+          - test_name: zephyr_hello_world
+            zephyr_config: -DCONFIG_VEER_EL2_TB_EXIT_ON_MAIN_RETURN=y
+            tb_max_cycles: "100000000"
+            fi_num_of_events: "200"
+            fi_sim_time: 10ms
+          - test_name: zephyr_philosophers
+            zephyr_config: -DCONFIG_VEER_EL2_TB_EXIT_AFTER_MS=5000
+            tb_max_cycles: "100000000"
+            fi_num_of_events: "200"
+            fi_sim_time: 10ms
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get -qq update
+          # 7zip for the PDK; the rest are Yosys runtime deps
+          apt-get -qqy install --no-install-recommends 7zip ca-certificates git pkg-config zstd \
+            libffi-dev libreadline-dev tcl-dev zlib1g-dev
+
+      - name: Setup repository
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Set up environment
+        run: |
+          if [ -n "${{ matrix.tb_max_cycles }}" ]; then
+            echo "TB_MAX_CYCLES=${{ matrix.tb_max_cycles }}" >> "$GITHUB_ENV"
+          fi
+
+          if [ -n "${{ matrix.zephyr_config }}" ]; then
+            echo "ZEPHYR_CONFIG=${{ matrix.zephyr_config }}" >> "$GITHUB_ENV"
+          fi
+
+          echo "RV_ROOT=$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+          echo "PDK_PATH=$GITHUB_WORKSPACE/asap7" >> "$GITHUB_ENV"
+
+          echo "/opt/yosys/bin" >> "$GITHUB_PATH"
+          echo "/opt/faultergeist/bin" >> "$GITHUB_PATH"
+
+          python3 -m venv .venv
+
+      - name: Download Yosys
+        uses: actions/download-artifact@v8
+        with:
+          name: yosys
+
+      - name: Download Faultergeist
+        uses: actions/download-artifact@v8
+        with:
+          name: faultergeist
+
+      - name: Unpack Yosys and Faultergeist
+        run: |
+          for pkg in yosys_*.tar.zst faultergeist_*.tar.zst; do
+            tar -C /opt -I zstd -xf "$pkg"
+            rm "$pkg"
+          done
+          yosys -V
+          pkg-config --libs faultergeist
+
+      # ---------------- Zephyr only ----------------
+      - name: Setup Zephyr
+        if: startsWith(matrix.test_name, 'zephyr_')
+        run: |
+          apt install -y --no-install-recommends git cmake ninja-build gperf ccache dfu-util \
+            device-tree-compiler wget python3-dev python3-venv python3-tk xz-utils file \
+            make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1
+          source .venv/bin/activate
+          pip install west
+          west init -m https://github.com/zephyrproject-rtos/zephyr .
+          west config manifest.project-filter -- '-.*'
+          west update
+          west packages pip --install
+          pushd zephyr
+            export ZEPHYR_BASE=`pwd`
+            west sdk install -t riscv64-zephyr-elf
+          popd
+          echo "ZEPHYR_BASE=$ZEPHYR_BASE" >> $GITHUB_ENV
+      # ----------------------------------------------
+
+      - name: Checkout ASAP7 PDK
+        uses: actions/checkout@v7
+        with:
+          repository: The-OpenROAD-Project/asap7sc7p5t_28
+          ref: ${{ env.ASAP7_VERSION }}
+          path: asap7
+
+      - name: Prepare ASAP7 PDK
+        run: |
+          find "$PDK_PATH" -type f \( $(printf -- '-name %s.7z -o ' $PDK_LIBS) -false \) \
+            -execdir 7z x -y -bso0 -bsp0 {} \;
+
+      - name: Synthesis
+        run: make -f "$RV_ROOT/tools/Makefile" synth
+
+      - name: Generate fault injection campaign
+        run: make -f "$RV_ROOT/tools/Makefile" faultergeist
+
+      - name: Build and run simulation with fault injection
+        run: |
+          source .venv/bin/activate
+          make ${ZEPHYR_CONFIG:+ZEPHYR_CONFIG="$ZEPHYR_CONFIG"} \
+            -f "$RV_ROOT/tools/Makefile" \
+            TB_MAX_CYCLES="${TB_MAX_CYCLES:-}" TEST="$TEST_NAME" verilator
+
+      - name: Collect artifacts
+        if: always()
+        run: |
+          mkdir -p ../artifacts
+          for pattern in '*.log' 'test_*.xml' '*.vcd' 'coverage.dat' 'netlist.json' \
+                         'zephyr.elf' 'zephyr.dts' 'zephyr.bin' 'build_info.yml'; do
+            find . -path ./.venv -prune -o -type f -name "$pattern" -exec cp -vf {} ../artifacts/ \;
+          done
+          rm -rf artifacts && mv ../artifacts ./
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: faultergeist-${{ matrix.test_name }}-veer${{ matrix.fi_veer_idx }}
+          path: |
+            snapshots
+            artifacts
+          if-no-files-found: ignore
+          retention-days: 3

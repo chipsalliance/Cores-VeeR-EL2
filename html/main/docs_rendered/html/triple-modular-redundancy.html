@@ -1,0 +1,1225 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>6. Triple Modular Redundancy (TMR) - RISC-V VeeR EL2 Programmer's Reference Manual  documentation</title>
+      
+    
+    
+      
+        
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="_static/sphinx_immaterial_theme.c5589c0bd87d933a4.min.css?v=eeeb54bc" />
+        <link rel="stylesheet" type="text/css" href="_static/main.css" />
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="white">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="RISC-V VeeR EL2 Programmer&#39;s Reference Manual  documentation" class="md-header__button md-logo" aria-label="RISC-V VeeR EL2 Programmer's Reference Manual  documentation" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            RISC-V VeeR EL2 Programmer's Reference Manual  documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              6. Triple Modular Redundancy (TMR)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="white"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/chipsalliance/Cores-VeeR-EL2" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    chipsalliance/Cores-VeeR-EL2
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="RISC-V VeeR EL2 Programmer&#39;s Reference Manual  documentation" class="md-nav__button md-logo" aria-label="RISC-V VeeR EL2 Programmer's Reference Manual  documentation" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    RISC-V VeeR EL2 Programmer's Reference Manual  documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/chipsalliance/Cores-VeeR-EL2" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    chipsalliance/Cores-VeeR-EL2
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="intro.html" class="md-nav__link">
+        <span class="md-ellipsis">RISC-<wbr>V Vee<wbr>R EL2 Programmer’s Reference Manual</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="overview.html" class="md-nav__link">
+        <span class="md-ellipsis">Core Overview</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="memory-map.html" class="md-nav__link">
+        <span class="md-ellipsis">Memory Map</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="error-protection.html" class="md-nav__link">
+        <span class="md-ellipsis">Memory Error Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dual-core-lock-step.html" class="md-nav__link">
+        <span class="md-ellipsis">Dual-<wbr>Core Lockstep <wbr>(DCLS)</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          <span class="md-ellipsis">Triple Modular Redundancy <wbr>(TMR)</span>
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        <span class="md-ellipsis">Triple Modular Redundancy <wbr>(TMR)</span>
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">Configuration</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">Architecture</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#boot-configuration" class="md-nav__link">
+    <span class="md-ellipsis">Boot configuration</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Boot configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tmr-configuration" class="md-nav__link">
+    <span class="md-ellipsis">TMR Configuration</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dcls-configuration" class="md-nav__link">
+    <span class="md-ellipsis">DCLS Configuration</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#single-core-configuration" class="md-nav__link">
+    <span class="md-ellipsis">Single Core Configuration</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recovery-process" class="md-nav__link">
+    <span class="md-ellipsis">Recovery process</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recovery process">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reset-handling" class="md-nav__link">
+    <span class="md-ellipsis">Reset handling</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#low-level-implementation" class="md-nav__link">
+    <span class="md-ellipsis">Low level implementation</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Low level implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#majority-voting" class="md-nav__link">
+    <span class="md-ellipsis">Majority voting</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#majority-voting-for-axi-bus-interfaces" class="md-nav__link">
+    <span class="md-ellipsis">Majority voting for AXI bus interfaces</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Majority voting for AXI bus interfaces">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bus-channel-voter" class="md-nav__link">
+    <span class="md-ellipsis">Bus channel voter</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tmr-axi-manager-interface" class="md-nav__link">
+    <span class="md-ellipsis">TMR AXI manager interface</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tmr-axi-subordinate-interface" class="md-nav__link">
+    <span class="md-ellipsis">TMR AXI subordinate interface</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#axi-transaction-completion" class="md-nav__link">
+    <span class="md-ellipsis">AXI transaction completion</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#majority-voting-for-ccm-and-pic-interfaces" class="md-nav__link">
+    <span class="md-ellipsis">Majority voting for CCM and PIC interfaces</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="timers.html" class="md-nav__link">
+        <span class="md-ellipsis">Internal Timers</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="power.html" class="md-nav__link">
+        <span class="md-ellipsis">Power Management and Multi-<wbr>Core Debug Control</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="interrupts.html" class="md-nav__link">
+        <span class="md-ellipsis">External Interrupts</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="performance.html" class="md-nav__link">
+        <span class="md-ellipsis">Performance Monitoring</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cache.html" class="md-nav__link">
+        <span class="md-ellipsis">Cache Control</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="debugging.html" class="md-nav__link">
+        <span class="md-ellipsis">Debug Support</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="core-control.html" class="md-nav__link">
+        <span class="md-ellipsis">Low-<wbr>Level Core Control</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="adaptations.html" class="md-nav__link">
+        <span class="md-ellipsis">Standard RISC-<wbr>V CSRs with Core-<wbr>Specific Adaptations</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="csrs.html" class="md-nav__link">
+        <span class="md-ellipsis">CSR Address Map</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="interrupt-priority.html" class="md-nav__link">
+        <span class="md-ellipsis">Interrupt Priorities</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="clocks.html" class="md-nav__link">
+        <span class="md-ellipsis">Clock And Reset</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="complex-ports.html" class="md-nav__link">
+        <span class="md-ellipsis">Complex Port List</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="build-args.html" class="md-nav__link">
+        <span class="md-ellipsis">Build Arguments</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tests.html" class="md-nav__link">
+        <span class="md-ellipsis">Compliance Test Suite Failures</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="errata.html" class="md-nav__link">
+        <span class="md-ellipsis">Errata</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="physical-memory-protection.html" class="md-nav__link">
+        <span class="md-ellipsis">Physical Memory Protection</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="user-mode.html" class="md-nav__link">
+        <span class="md-ellipsis">User Mode</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="verification.html" class="md-nav__link">
+        <span class="md-ellipsis">Verification</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="simulation-debugging.html" class="md-nav__link">
+        <span class="md-ellipsis">Interactive Debugging in Simulation</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tock.html" class="md-nav__link">
+        <span class="md-ellipsis">Running Tock OS</span>
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                  
+
+
+  <a href="https://github.com/chipsalliance/Cores-VeeR-EL2/blob/main/docs/source/triple-modular-redundancy.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+<h1 id="triple-modular-redundancy-tmr"><span class="section-number">6. </span>Triple Modular Redundancy (TMR)<a class="headerlink" href="#triple-modular-redundancy-tmr" title="Link to this heading">¶</a></h1>
+<p>This chapter describes the TMR feature of VeeR EL2 core.
+When enabled, the top-level module instantiates 3 independent but synchronized VeeR cores along with majority voting, error detection and recovery logic.
+Currently TMR is transparent from the software perspective, and its effects should only be limit to possible mcycle discrepancy.
+Remainder of this chapter describes exactly how TMR implementation is configured and its inner workings.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The following documentation describes planned TMR architecture and implementation which is subject to changes.
+Also, at the moment the complete TMR functionality isn’t implemented yet.</p>
+</div>
+<h2 id="configuration"><span class="section-number">6.1. </span>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h2>
+<p>To enable the TMR feature pass the following options to the <code class="docutils literal notranslate"><span class="pre">veer.config</span></code> script:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><code><span class="o">-</span><span class="nb">set</span><span class="o">=</span><span class="n">triple_modular_redundancy_enable</span><span class="o">=</span><span class="mi">1</span>
+</code></pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Triple Modular Redundancy and Dual Core Lockstep configurations are mutually exclusive</p>
+</div>
+<h2 id="architecture"><span class="section-number">6.2. </span>Architecture<a class="headerlink" href="#architecture" title="Link to this heading">¶</a></h2>
+<p>Triple Modular Redundancy complex is a super set of the regular VeeR EL2 core.</p>
+<figure class="align-default" id="id1">
+<img alt="tmr_mux.png" src="_images/tmr_complex.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 6.1 </span><span class="caption-text"><span class="caption-text">
+Block diagram of the TMR complex</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></figcaption>
+</figure>
+<p>The TMR complex contains:</p>
+<ul class="simple">
+<li><p>3 VeeR EL2 cores with memory translation and without integrated PIC</p></li>
+<li><p>common PIC for all the cores in the complex</p></li>
+<li><p>PIC TMR - interface voter that handles PIC and external interrupt buses</p></li>
+<li><p>IC TMR - interface voter that handles Instruction Cache bus</p></li>
+<li><p>Clock distribution module - gates and distributes clocks to the TMR complex logic and to the VeeR EL2 cores</p></li>
+<li><p>IO Adapter - handles selection between AXI and AHB external buses, it is not hardened</p></li>
+<li><p>AXI TMR - interface voter that handles IFU, LSU, SB and DMA AXI buses</p></li>
+<li><p>DCCM TMR - interface voter that handles DCCM bus</p></li>
+<li><p>ICCM TMR - interface voter that handles ICCM bus</p></li>
+<li><p>MISC TMR - interface voter which handles reset propagation, trace interface, timer/soft/NMI interrupts</p></li>
+<li><p>DMI/JTAG TMR - interface voter that handles JTAG bus, it also multiplexes between normal debug JTAG and failed core debug JTAG</p></li>
+<li><p>HALT/RUN TMR - interface voter that handles MPC and PMU buses, it is also used during recovery process</p></li>
+<li><p>Recovery FSM - handles system recovery in the TMR mode</p></li>
+</ul>
+<h2 id="boot-configuration"><span class="section-number">6.3. </span>Boot configuration<a class="headerlink" href="#boot-configuration" title="Link to this heading">¶</a></h2>
+<p>VeeR in the TMR configuration allows for 3 modes of operation:</p>
+<ul class="simple">
+<li><p>no redundancy single core</p></li>
+<li><p>0-delay dual core lockstep</p></li>
+<li><p>triple modular redundancy</p></li>
+</ul>
+<p>To allow for boot time configuration special multiplexer are added before TMR voters.</p>
+<figure class="align-default" id="id2">
+<img alt="tmr_mux.png" src="_images/tmr_mux.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 6.2 </span><span class="caption-text"><span class="caption-text">
+Block diagram of TMR multiplexing</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></figcaption>
+</figure>
+<p>The operating mode is selected via the three multi-bit boolean signals:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">core_active_0</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">core_active_1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">core_active_2</span></code></p></li>
+</ul>
+<p>These signals control which cores will be brought from reset and have active clock tree.
+They are internally latched in the TMR registers, and refreshed each cycle after reset is released.
+TMR is used to guarantee that configuration bits are more resilient to the radiation and interference.
+Following table describes which core, mode and mux configuration is active based on the <code class="docutils literal notranslate"><span class="pre">core_active_x</span></code> signals.</p>
+<table class="docutils data align-default" id="id3">
+<caption><span class="caption-number">Table 6.1 </span><span class="caption-text">Execution Mode</span><a class="headerlink" href="#id3" title="Link to this table">¶</a></caption>
+<tbody>
+<tr class="row-odd"><td><p><strong>core_active_0</strong></p></td>
+<td><p><strong>core_active_1</strong></p></td>
+<td><p><strong>core_active_2</strong></p></td>
+<td><p><strong>MUX 0 source</strong></p></td>
+<td><p><strong>MUX 1 source</strong></p></td>
+<td><p><strong>MUX 2 source</strong></p></td>
+<td><p><strong>Operating Mode</strong></p></td>
+<td><p><strong>Active Core(s)</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>True</p></td>
+<td><p>True</p></td>
+<td><p>True</p></td>
+<td><p>core 0</p></td>
+<td><p>core 1</p></td>
+<td><p>core 2</p></td>
+<td><p>TMR</p></td>
+<td><p>0, 1, 2</p></td>
+</tr>
+<tr class="row-odd"><td><p>True</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+<td><p>core 0</p></td>
+<td><p>core 1</p></td>
+<td><p>core 2</p></td>
+<td><p>0-delay DCLS</p></td>
+<td><p>0, 1</p></td>
+</tr>
+<tr class="row-even"><td><p>True</p></td>
+<td><p>False</p></td>
+<td><p>True</p></td>
+<td><p>core 0</p></td>
+<td><p>core 1</p></td>
+<td><p>core 2</p></td>
+<td><p>0-delay DCLS</p></td>
+<td><p>0, 2</p></td>
+</tr>
+<tr class="row-odd"><td><p>False</p></td>
+<td><p>True</p></td>
+<td><p>True</p></td>
+<td><p>core 0</p></td>
+<td><p>core 1</p></td>
+<td><p>core 2</p></td>
+<td><p>0-delay DCLS</p></td>
+<td><p>1, 2</p></td>
+</tr>
+<tr class="row-even"><td><p>True</p></td>
+<td><p>False</p></td>
+<td><p>False</p></td>
+<td><p>core 0</p></td>
+<td><p>core 0</p></td>
+<td><p>core 2</p></td>
+<td><p>Single core</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>False</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+<td><p>core 0</p></td>
+<td><p>core 1</p></td>
+<td><p>core 1</p></td>
+<td><p>Single core</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>False</p></td>
+<td><p>False</p></td>
+<td><p>True</p></td>
+<td><p>core 2</p></td>
+<td><p>core 1</p></td>
+<td><p>core 2</p></td>
+<td><p>Single core</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-odd"><td><p>False</p></td>
+<td><p>False</p></td>
+<td><p>False</p></td>
+<td><p>core 0</p></td>
+<td><p>core 1</p></td>
+<td><p>core 2</p></td>
+<td><p>Invalid</p></td>
+<td><p>None</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="tmr-configuration"><span class="section-number">6.3.1. </span>TMR Configuration<a class="headerlink" href="#tmr-configuration" title="Link to this heading">¶</a></h3>
+<p>In the TMR mode all cores are active.
+TMR muxes are configured to pass interface directly from the adjacent core.
+TMR voter is actively monitoring all cores comparing their values
+It is capable of reporting single (non-fatal errors) and all-core disagreement (fatal error).
+Recovery module is configured to perform its duty when CPU context allows for it.
+System is in the highest redundancy mode.</p>
+<h3 id="dcls-configuration"><span class="section-number">6.3.2. </span>DCLS Configuration<a class="headerlink" href="#dcls-configuration" title="Link to this heading">¶</a></h3>
+<p>In the DCLS mode 2 out of 3 cores are active.
+TMR muxes are configured to pass interface directly from the adjacent core.
+TMR voter input from the inactive core is marked as if it had previously failed TMR voting.
+It is only capable of reporting all-core disagreement (fatal error).
+Recovery module is configured to remain inactive and not respond to error signals.
+System is in the downgraded redundancy mode, any failures will result in the fatal error being raised.</p>
+<h3 id="single-core-configuration"><span class="section-number">6.3.3. </span>Single Core Configuration<a class="headerlink" href="#single-core-configuration" title="Link to this heading">¶</a></h3>
+<p>In the single core mode only 1 out of 3 cores is active.
+TMR muxes are configured so that active core(i) is routed to I(i) and I((i + 1) % 3) TMR inputs.
+Rest of the complex is configured the same way as in the DCLS mode.
+System has no redundancy and failures will not be caught.</p>
+<h2 id="recovery-process"><span class="section-number">6.4. </span>Recovery process<a class="headerlink" href="#recovery-process" title="Link to this heading">¶</a></h2>
+<p>All external buses are monitored using TMR voter and any discrepancy is reported to all voters and to the recovery FSM.
+Once the recovery FSM receives error signal, it starts executing recovery procedure.</p>
+<figure class="align-default" id="id4">
+<img alt="recovery_fsm_states.png" src="_images/recovery_fsm_states.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 6.3 </span><span class="caption-text"><span class="caption-text">
+Block diagram of the recovery FSM</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></figcaption>
+</figure>
+<p>The procedure is divide into 15 steps grouped into 5 stages.
+Stages are defined by flags, and these stages are:</p>
+<ul class="simple">
+<li><p>CPU halt and state retrieval - stops cores from executing new instructions, waits for in-flight instructions to finish, reads all registers and stores them</p></li>
+<li><p>CPU reset - synchronously resets all cores to clear their states, keeps cores in the halted state</p></li>
+<li><p>CPU state restore - loads cores’ registers value based on the stored state</p></li>
+<li><p>CPU restart - send run request to cores starting code execution after reset</p></li>
+<li><p>Flag clear and wait for next error - clears external and internal flags, waits for recovery event</p></li>
+</ul>
+<p>This division allows for stage repetition without any adverse effects.
+Flags allow for FSM state recovery in case of a state corruption.
+First 4 stages are handled by moving FSM state to the first step of a currently executed stage.
+Last stage is handled differently as it clears flags instead of setting them.
+This allows for FSM’s state recovery to a specific step based on the flags’ state.</p>
+<h3 id="reset-handling"><span class="section-number">6.4.1. </span>Reset handling<a class="headerlink" href="#reset-handling" title="Link to this heading">¶</a></h3>
+<p>Additional reset signal that is generated during recovery creates metastability hazard, as cores’ outputs can change unpredictably leading to timing violations.
+In order to guarantee correct reset behaviour and to prevent possible metastability, all cores outputs are gated.
+There are 2 possible gating options: latch, or multiplexer with tie off.</p>
+<p>Configuration is selected based on the provided configuration arguments, and default is multiplexer with tie off.
+To enable the latch based gating feature pass the following options to the <code class="docutils literal notranslate"><span class="pre">veer.config</span></code> script:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><code><span class="o">-</span><span class="nb">set</span><span class="o">=</span><span class="n">triple_modular_redundancy_isolate_latch</span><span class="o">=</span><span class="mi">1</span>
+</code></pre></div>
+</div>
+<h2 id="low-level-implementation"><span class="section-number">6.5. </span>Low level implementation<a class="headerlink" href="#low-level-implementation" title="Link to this heading">¶</a></h2>
+<h3 id="majority-voting"><span class="section-number">6.5.1. </span>Majority voting<a class="headerlink" href="#majority-voting" title="Link to this heading">¶</a></h3>
+<p>Outgoing interface signals of the three VeeR cores are passes to majority voter modules.
+The voter module implements majority voting for an N-bit signal value given three inputs.
+The block diagram of the module is shown below:</p>
+<figure class="align-default" id="id5">
+<img alt="tmr_voter.png" src="_images/tmr_voter.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 6.4 </span><span class="caption-text"><span class="caption-text">
+Block diagram of the voter module</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></figcaption>
+</figure>
+<p>The module implements majority voting among its three data inputs.
+There’s also the fault detection feature for each input.
+Faults are detected by bitwise comparison of each data input with the output voted consensus.
+Each of the three data inputs is associated with an enable input.</p>
+<h3 id="majority-voting-for-axi-bus-interfaces"><span class="section-number">6.5.2. </span>Majority voting for AXI bus interfaces<a class="headerlink" href="#majority-voting-for-axi-bus-interfaces" title="Link to this heading">¶</a></h3>
+<p>The TMR AXI interface is used to interface the triple core complex to the system bus.
+In the design, there’s one TMR AXI interface per VeeR AXI interface.
+This includes:</p>
+<ul class="simple">
+<li><p>IFU</p></li>
+<li><p>LSU</p></li>
+<li><p>DMA (external access to ICCM/DCCM)</p></li>
+<li><p>SB (debugging side bus)</p></li>
+</ul>
+<p>There are two types of the interface: for AXI manager and subordinate.</p>
+<h4 id="bus-channel-voter"><span class="section-number">6.5.2.1. </span>Bus channel voter<a class="headerlink" href="#bus-channel-voter" title="Link to this heading">¶</a></h4>
+<p>The block diagram below shows a generalized structure for a bus channel voter.
+The same structure is used for all AXI manager and subordinate channels.</p>
+<figure class="align-default" id="id6">
+<img alt="bus_channel_voter.png" src="_images/bus_channel_voter.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 6.5 </span><span class="caption-text"><span class="caption-text">
+Block diagram of TMR bus channel voter</span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></figcaption>
+</figure>
+<p>The module consists of separate majority voting modules for each multi-bit bus signal (and including <code class="docutils literal notranslate"><span class="pre">valid</span></code> or <code class="docutils literal notranslate"><span class="pre">ready</span></code>)</p>
+<p>Critical (unrecoverable) faults detected by the voters are logically OR-ed together and used to gate the handshake signal.
+This forms a fast combinational-only path that prevents spurious / faulty transactions from being issued / acknowledged by the TMR core complex.</p>
+<p>Detected individual core faults are also OR-ed together and with an external fault input but instead of used for gating, they drive flip-flops that store their state.
+Outputs of the flip-flops drive enable inputs of the voters.
+Its the responsibility of each voter to indicate a critical failure if input state cannot be derived from all of its enabled inputs.
+The outputs are also exposed to the outside of the module.</p>
+<h4 id="tmr-axi-manager-interface"><span class="section-number">6.5.2.2. </span>TMR AXI manager interface<a class="headerlink" href="#tmr-axi-manager-interface" title="Link to this heading">¶</a></h4>
+<p>The high-level block diagram of the interface is shown in the block diagram:</p>
+<figure class="align-default" id="id7">
+<img alt="axi_m_tmr_interface" src="_images/axi_m_tmr_interface.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 6.6 </span><span class="caption-text"><span class="caption-text">
+Block diagram of TMR AXI manager interface</span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></figcaption>
+</figure>
+<p>The module consists of 5 AXI manager channel modules.
+The structure of a channel module is specific to each channel but in general conforms to a bus channel voter.</p>
+<p>In this module all fault outpus from all channel modules are OR-ed together and then connected to them back through external fault inputs.
+This closes a loop around flip-fliops in bus voters making them immediately latch any fault, regardless of where it is reported.</p>
+<p>There is no need to combinationaly gate each <code class="docutils literal notranslate"><span class="pre">valid</span></code>/<code class="docutils literal notranslate"><span class="pre">ready</span></code> handshake signal with aggregated critical fault detections from all channel modules.
+This is beacause channel handshake is confined only to the channel.</p>
+<h4 id="tmr-axi-subordinate-interface"><span class="section-number">6.5.2.3. </span>TMR AXI subordinate interface<a class="headerlink" href="#tmr-axi-subordinate-interface" title="Link to this heading">¶</a></h4>
+<p>The high-level block diagram of the interface is shown in the block diagram:</p>
+<figure class="align-default" id="id8">
+<img alt="axi_s_tmr_interface" src="_images/axi_s_tmr_interface.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 6.7 </span><span class="caption-text"><span class="caption-text">
+Block diagram of TMR AXI subordinate interface</span><a class="headerlink" href="#id8" title="Permalink to this image">¶</a></figcaption>
+</figure>
+<p>The module operates in the same way as the AXI manager interface.
+All bus signals have reversed direction, voters differ as well as they operate only on signals driven by CPU cores.</p>
+<h4 id="axi-transaction-completion"><span class="section-number">6.5.2.4. </span>AXI transaction completion<a class="headerlink" href="#axi-transaction-completion" title="Link to this heading">¶</a></h4>
+<p>In case of a recoverable fault, an AXI transaction must be completed before the TMR complex can perform the recovery procedure.
+For this purpose there are write and read AXI bus monitor modules.
+Each of them is responsible for blocking recovery during pending transactions and blocking new transactions during pending recovery.
+This prevents violating AXI bus protocol and allows the system to continue operation once recovery is done.</p>
+<p>For unrecoverable (critical) faults, the AXI monitor module provides information whether the fault happened between or during a transaction.
+In the former case, reset of only the TMR complex is required. In the latter, the whole system requires a reset.</p>
+<h3 id="majority-voting-for-ccm-and-pic-interfaces"><span class="section-number">6.5.3. </span>Majority voting for CCM and PIC interfaces<a class="headerlink" href="#majority-voting-for-ccm-and-pic-interfaces" title="Link to this heading">¶</a></h3>
+<p>VeeR core uses three kinds of CCM (closely coupled memory):</p>
+<ul class="simple">
+<li><p>ICCM</p></li>
+<li><p>DCCM</p></li>
+<li><p>I-Cache</p></li>
+</ul>
+<p>There’s also the PIC which is memory mapped and connected through a dedicated interface resembling one of a CCM block.</p>
+<p>All of them are connected to the core via interfaces, where VeeR is the manager.</p>
+<p>TMR adapters for these interfaces follows the same design pattern as single AXI channel interface.
+Flow control signals are gated by critical fault detection combinational logic.</p>
+
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      2026-11-13
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="dual-core-lock-step.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 5. Dual-Core Lockstep (DCLS)" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              5. Dual-Core Lockstep (DCLS)
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="timers.html" class="md-footer__link md-footer__link--next" aria-label="Next: 7. Internal Timers" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              7. Internal Timers
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        Copyright &#169; 2026 CHIPS Alliance The Linux Foundation®.
+        
+    </div>
+  
+      <a href="https://github.com/chipsalliance/Cores-VeeR-EL2/tree/b5bb4e80fab574df98c083871a7be223c0b89c1c">b5bb4e80</a>
+        @ <a href="https://github.com/chipsalliance/Cores-VeeR-EL2/tree/main">main</a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+      
+      
+    
+    <a href="https://github.com/antmicro" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/antmicro" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["toc.integrate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+      
+        <script src="_static/sphinx_immaterial_theme.f9d9eeeb247ace16c.min.js?v=8ec58cb5"></script>
+    
+  </body>
+</html>

@@ -2586,6 +2586,16 @@ initial begin
     $readmemh(hex_file, imem.mem);
     preload_dccm();
     preload_iccm();
+    wait (rst_l_combined === 1'b1);
+    forever begin
+      wait (rst_l_combined === 1'b0);
+        $display("Loading program from '%s'", hex_file);
+        $readmemh(hex_file, lmem.mem);
+        $readmemh(hex_file, imem.mem);
+        preload_dccm();
+        preload_iccm();
+      wait (rst_l_combined === 1'b1);
+    end
 end
 
 // ============================================================================

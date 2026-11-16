@@ -754,8 +754,13 @@ module tb_top
     tb_top_pkg::veer_sram_error_injection_mode_t error_injection_mode;
     logic x_sanitizer_en;
 
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+`define VEER rvtop_wrapper.rvtop.tmr_complex.cores[0].veer
+`else
+`define VEER rvtop_wrapper.rvtop.veer
+`endif
 `ifndef GATELEVEL_DUT
-    `define DEC rvtop_wrapper.rvtop.veer.dec
+    `define DEC `VEER.dec
 `endif
 
 `ifdef RV_BUILD_AHB_LITE
@@ -1285,7 +1290,6 @@ module tb_top
     logic       next_ic_addr_error_d1;
 
 `ifdef RV_LOCKSTEP_ENABLE
-`define VEER rvtop_wrapper.rvtop.veer
 `define LOCKSTEP rvtop_wrapper.rvtop.lockstep
 `define LOCKSTEP_CORE rvtop_wrapper.rvtop.lockstep.xshadow_core
 `define LOCKSTEP_CONST_DELAY_ASSERT_DISABLE rvtop_wrapper.rvtop.disable_const_delay_assertion
@@ -1354,7 +1358,7 @@ module tb_top
                 release `LOCKSTEP_CONST_DELAY_ASSERT_DISABLE;
             `endif
         end else begin
-            ic_perr_r_d1          <= rvtop_wrapper.rvtop.veer.dec.tlu.ic_perr_r;
+            ic_perr_r_d1          <= `VEER.dec.tlu.ic_perr_r;
             next_ic_addr_error_d1 <= next_ic_addr_error;
 
             // Mailbox 0x89: Force ICache read data corruption (forces data bit 0 of both banks of
@@ -1388,7 +1392,7 @@ module tb_top
                 if (ic_perr_r_d1 || (ic_addr_err_cnt == 4'd8)) begin
                     next_ic_addr_error <= 0;
                     ic_addr_err_cnt    <= '0;
-                end else if (rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ic_act_hit_f) begin
+                end else if (`VEER.ifu.mem_ctl.ic_act_hit_f) begin
                     ic_addr_err_cnt <= ic_addr_err_cnt + 4'd1;
                 end
             end
@@ -1437,11 +1441,11 @@ module tb_top
     // =========================================================================
     always @(*) begin
         if (next_ic_addr_error) begin
-            force rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f =
-                rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_f_ff.dout ^
+            force `VEER.ifu.mem_ctl.ifu_fetch_addr_int_f =
+                `VEER.ifu.mem_ctl.ifu_fetch_addr_f_ff.dout ^
                 31'(1 << (pt.ICACHE_TAG_INDEX_LO - 1));
         end else if (next_ic_addr_error_d1) begin
-            release rvtop_wrapper.rvtop.veer.ifu.mem_ctl.ifu_fetch_addr_int_f;
+            release `VEER.ifu.mem_ctl.ifu_fetch_addr_int_f;
         end
 
 `ifdef RV_LOCKSTEP_ENABLE
@@ -3720,6 +3724,18 @@ veer_wrapper rvtop_wrapper (
     .disable_corruption_detection_i (disable_corruption_detection_i),
     .lockstep_err_injection_en_i    (lockstep_err_injection_en_i),
     .corruption_detected_o          (corruption_detected_o),
+`endif
+
+`ifdef RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE
+    .tmr_fatal              (),
+    .tmr_recovery_pending   (),
+    .tmr_recovery_fault     (),
+    .tmr_core_fault_0       (),
+    .tmr_core_fault_1       (),
+    .tmr_core_fault_2       (),
+    .core_active_0          (el2_mubi_pkg::El2MuBiTrue),
+    .core_active_1          (el2_mubi_pkg::El2MuBiTrue),
+    .core_active_2          (el2_mubi_pkg::El2MuBiTrue),
 `endif
 
     .soft_int               (soft_int),

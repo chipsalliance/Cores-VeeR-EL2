@@ -56,14 +56,17 @@ run_regression_test(){
     if [[ -z "${DCLS_ENABLE}" ]]; then
         DCLS_ENABLE="0"
     fi
+    if [[ -z "${DCLS_REGFILE_ENABLE}" ]]; then
+        DCLS_REGFILE_ENABLE="1"
+    fi
     if [[ -z "${DCLS_REGFILE_READ_ENABLE}" ]]; then
         DCLS_REGFILE_READ_ENABLE="0"
     fi
     set -u
 
     if [[ "${DCLS_ENABLE}" ==  "1" ]]; then
-        COMMON_PARAMS="-set lockstep_enable=1 -set lockstep_regfile_enable=1 -set lockstep_delay=${DCLS_DELAY} ${COMMON_PARAMS}"
-        if [[ "${DCLS_REGFILE_READ_ENABLE}" == "1" ]]; then
+        COMMON_PARAMS="-set lockstep_enable=1 -set lockstep_regfile_enable=${DCLS_REGFILE_ENABLE} -set lockstep_delay=${DCLS_DELAY} ${COMMON_PARAMS}"
+        if [[ "${DCLS_REGFILE_ENABLE}" == "1" && "${DCLS_REGFILE_READ_ENABLE}" == "1" ]]; then
             COMMON_PARAMS="-set lockstep_regfile_read_enable=1 ${COMMON_PARAMS}"
         fi
     fi

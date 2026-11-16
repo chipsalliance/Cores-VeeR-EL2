@@ -97,6 +97,7 @@ HEX_DIR = ${TBDIR}/hex
 # Coverage reporting
 ifneq ("$(COVERAGE)", "")
     FCOV_DEFINES = +define+FCOV
+    VERILATOR_FCOV = -DFCOV=1
 endif
 ifeq ("$(COVERAGE)", "all")
     VERILATOR_COVERAGE = --coverage
@@ -234,7 +235,7 @@ ${BUILD_DIR}/defines.h:
 
 ifndef TMR_TB
 verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
-	$(VERILATOR) --cc -CFLAGS "${CFLAGS} -DTB_TOP=$(TB_TOP)" --coverage-max-width 20000 $(defines) \
+	$(VERILATOR) --cc -CFLAGS "${CFLAGS} -DTB_TOP=$(TB_TOP)" --coverage-max-width 20000 $(defines) $(VERILATOR_FCOV) \
 	  $(includes) -I${RV_ROOT}/testbench -f ${RV_ROOT}/testbench/flist --timescale $(TIMESCALE) \
 	  $(VERILATOR_SKIP_WARNINGS) $(VERILATOR_EXTRA_ARGS) ${TB_SILENT_FAIL} ${TBFILES} --top-module $(TB_TOP) \
 	  -exe $(TB_VERILATOR_SRCS) --autoflush --timing --assert $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE) -fno-table

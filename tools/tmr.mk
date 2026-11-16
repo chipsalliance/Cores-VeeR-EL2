@@ -65,6 +65,7 @@ $(BUILD_DIR)/obj_dir/Vtb_top_tmr: $(BUILD_DIR)/defines.h $(TB_SRCS) $(if $(finds
 		--coverage-max-width 20000 \
 		-CFLAGS "$(CFLAGS)" \
 		$(defines) \
+		$(VERILATOR_FCOV) \
 		-f $(RV_ROOT)/testbench/flist \
 		$(includes) -I${RV_ROOT}/testbench \
 		$(VERILATOR_SKIP_WARNINGS) \

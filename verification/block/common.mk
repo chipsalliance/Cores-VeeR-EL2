@@ -48,6 +48,12 @@ ifeq ($(SIM), verilator)
     EXTRA_ARGS   += --trace --trace-structs
     EXTRA_ARGS   += $(VERILATOR_COVERAGE)
     EXTRA_ARGS   += -I$(CFGDIR) -Wno-DECLFILENAME
+
+    # Expose the FCOV-guarded covergroup interfaces.
+    ifneq ("$(filter all functional,$(COVERAGE_TYPE))","")
+        COMPILE_ARGS += -DFCOV=1
+    endif
+
     PLUSARGS     += --trace
 
     # Include test specific Verilator config if it exists

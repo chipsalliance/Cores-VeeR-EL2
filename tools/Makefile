@@ -190,6 +190,13 @@ VPATH = $(TEST_DIR) $(BUILD_DIR) $(TBDIR)
 
 -include $(TEST_DIR)/$(TEST).mki
 
+# Dhrystone iteration count is configurable only for TEST=dhry.
+DHRY_RUNS ?= 1000
+ifeq ($(TEST),dhry)
+  TEST_CFLAGS += -DDHRY_RUNS=$(DHRY_RUNS)
+endif
+
+
 # Testbench DPI sources
 TB_DPI_SRCS = jtagdpi/jtagdpi.c \
               tcp_server/tcp_server.c

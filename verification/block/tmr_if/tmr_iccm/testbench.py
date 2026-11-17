@@ -169,3 +169,6 @@ class BaseTest(common.BaseTest):
         cocotb.top.iccm_bank_wr_ecc_veer.value = [0] * 3
         cocotb.top.iccm_bank_dout.value = 0
         cocotb.top.iccm_bank_ecc.value = 0
+
+        cocotb.top.iccm_ecc_single_error_veer.value = [0] * 3
+        cocotb.top.iccm_ecc_double_error_veer.value = [0] * 3

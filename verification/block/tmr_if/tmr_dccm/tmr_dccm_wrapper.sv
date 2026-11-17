@@ -21,6 +21,10 @@ module tmr_dccm_wrapper
     input logic [pt.DCCM_NUM_BANKS-1:0][              pt.DCCM_DATA_WIDTH-1:0] dccm_bank_dout,
     input logic [pt.DCCM_NUM_BANKS-1:0][               pt.DCCM_ECC_WIDTH-1:0] dccm_bank_ecc,
 
+    output logic dccm_ecc_single_error,
+    output logic dccm_ecc_double_error,
+    output logic dccm_write_readback_error,
+
     // DCCM TMR
     input logic [pt.DCCM_NUM_BANKS-1:0]                                       dccm_clken_veer[3],
     input logic [pt.DCCM_NUM_BANKS-1:0]                                       dccm_wren_bank_veer[3],
@@ -30,6 +34,10 @@ module tmr_dccm_wrapper
 
     output logic [pt.DCCM_NUM_BANKS-1:0][              pt.DCCM_DATA_WIDTH-1:0] dccm_bank_dout_veer[3],
     output logic [pt.DCCM_NUM_BANKS-1:0][               pt.DCCM_ECC_WIDTH-1:0] dccm_bank_ecc_veer[3],
+
+    input logic dccm_ecc_single_error_veer[3],
+    input logic dccm_ecc_double_error_veer[3],
+    input logic dccm_write_readback_error_veer[3],
 
     // Core active
     input  el2_mubi_pkg::el2_mubi_t core_active[3],

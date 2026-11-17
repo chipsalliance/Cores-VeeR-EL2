@@ -172,6 +172,7 @@ class BaseTest(if_common.BaseTest):
 
         cocotb.top.dccm_ecc_single_error_veer.value = [0] * 3
         cocotb.top.dccm_ecc_double_error_veer.value = [0] * 3
+        cocotb.top.dccm_write_readback_error_veer.value = [0] * 3
         cocotb.top.dccm_clken_veer.value = [0] * 3
         cocotb.top.dccm_wren_bank_veer.value = [0] * 3
         cocotb.top.dccm_addr_bank_veer.value = [0] * 3

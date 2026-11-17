@@ -140,6 +140,7 @@
 #define CMD_INJ_LOCKSTEP 0x92
 #define CMD_INJ_CLEAR    0x95
 #define CMD_RST          0x96
+#define CMD_DBG_RST      0x97
 #define SET_NMI_INT      0x183
 #define CLEAR_NMI_INT    0x182
 
@@ -894,12 +895,13 @@ static void (*volatile inject_and_wait_fn)(uint32_t, uint32_t) = inject_and_wait
 int main(void) {
   // If the simulator ran with `--test-halt` (`tools/Makefile` default), initial
   // boot exercised `mpc_debug_halt_req`, latching `dbg_detected = MuBiTrue` in
-  // `el2_veer_lockstep` until `rst_l` asserts. Issue one clean warm reset
-  // (`CMD_RST`) before starting the sweep so DCLS detection is active from ID 0.
+  // `el2_veer_lockstep` until `rst_l` asserts. Issue one clean combined core +
+  // debug reset (`CMD_DBG_RST`) before starting the sweep so DCLS detection is
+  // active from ID 0 and `rst_dbg_shadow_sr` exercises its `1 -> 0` transition.
   if (initial_reset_done == 0U) {
     write_csr(CSR_VEER_MRAC, 0x08010000UL);
     initial_reset_done = 1U;
-    tohost = CMD_RST;
+    tohost = CMD_DBG_RST;
     while (true) {
       asm volatile("nop");
     }

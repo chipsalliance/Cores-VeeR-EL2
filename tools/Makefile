@@ -29,12 +29,14 @@ LD_ABI = $(ABI) -march=rv32imac
 
 TB_EXTRA_ARGS ?= --test-halt
 
-# can be fst or vcd
+# can be fst, vcd or saif
 TRACE_FORMAT ?= vcd
 ifeq ($(TRACE_FORMAT),vcd)
 	TRACE_FLAG = --trace
 else ifeq ($(TRACE_FORMAT),fst)
 	TRACE_FLAG = --trace-fst
+else ifeq ($(TRACE_FORMAT),saif)
+	TRACE_FLAG = --trace-saif
 else
 	TRACE_FLAG =
 endif

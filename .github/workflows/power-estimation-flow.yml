@@ -55,8 +55,9 @@ jobs:
             config: ahb_lite
     env:
       DEBIAN_FRONTEND: "noninteractive"
-      CLK_PERIOD_NS: 100
       GHA_MACHINE_TYPE: n2-standard-16
+      CLK_PERIOD_NS: 100
+      TRACE_FORMAT: "saif"
     steps:
       - name: Install synthesis and simulation dependencies
         run: |
@@ -79,13 +80,6 @@ jobs:
           set -euo pipefail
           tar -C /opt -xzf "$GITHUB_WORKSPACE/openroad.tar.gz"
           /opt/openroad/bin/openroad -version
-
-      - name: Install trace2power
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
-              | sh -s -- -y --profile minimal
-          source "$HOME/.cargo/env"
-          cargo install trace2power --root /opt/trace2power
 
       - name: Install Bazel 8.5.0
         run: |
@@ -142,27 +136,12 @@ jobs:
             DUT_NETLIST="$RV_ROOT/bazel-bin/veer_el2_synth_asap7_${{ matrix.bus.config }}_synth_output.v" \
             ASAP7_CELL_MODELS="$RV_ROOT/bazel-bin/asap7_sim_cell_models.v" \
             CLK_PERIOD_NS=${{ env.CLK_PERIOD_NS }} \
-            TRACE_FORMAT=vcd
+            TRACE_FORMAT=${{ env.TRACE_FORMAT }}
 
       - name: Run simulation
         run: |
           cd "$RV_ROOT"
-          make -C synth_run -f "$RV_ROOT/tools/Makefile" verilator TEST="hello_world" TB_EXTRA_ARGS=
-
-      - name: Get SAIF file using trace2power
-        run: |
-          cd "$RV_ROOT/synth_run"
-          /opt/trace2power/bin/trace2power \
-            --clk-freq $(awk -v T="${{ env.CLK_PERIOD_NS }}" 'BEGIN { printf "%.0f", 1e9/T }') \
-            --top el2_veer_wrapper \
-            --top-scope TOP.tb_top.rvtop_wrapper.rvtop_synth_wrapper.rvtop_synth \
-            --limit-scope TOP.tb_top.rvtop_wrapper.rvtop_synth_wrapper \
-            --remove-virtual-pins \
-            --export-empty \
-            --input-ports-activity \
-            --output-format saif \
-            --output base.saif \
-            sim.vcd
+          make -C synth_run -f "$RV_ROOT/tools/Makefile" verilator TEST="dhry"
 
       - name: Run static power analysis using OpenROAD
         run: |
@@ -174,7 +153,7 @@ jobs:
           export TECH_LEF="$RV_ROOT/bazel-bin/asap7_tech_1x_201209.lef"
           export CELL_LEF="$RV_ROOT/bazel-bin/asap7sc7p5t_28_R_1x_220121a.lef"
           export NETLIST="$RV_ROOT/bazel-bin/veer_el2_synth_asap7_${{ matrix.bus.config }}_synth_output.v"
-          export SAIF="$RV_ROOT/synth_run/base.saif"
+          export SAIF="$RV_ROOT/synth_run/sim.saif"
           export CLK_PERIOD_NS=${{ env.CLK_PERIOD_NS }}
           export POWER_REPORT="$RV_ROOT/synth_run/static_power_${{ matrix.bus.config }}.rpt"
           /opt/openroad/bin/openroad "$RV_ROOT/tools/static_power_analysis.tcl" -exit

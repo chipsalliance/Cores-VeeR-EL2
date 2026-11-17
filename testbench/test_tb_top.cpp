@@ -23,12 +23,17 @@
 #include "verilated.h"
 
 // Trace format follows the Verilator flag used at build time:
-//   --trace      -> VCD (VM_TRACE_VCD=1)
-//   --trace-fst  -> FST (VM_TRACE_FST=1)
+//   --trace      -> VCD  (VM_TRACE_VCD=1)
+//   --trace-fst  -> FST  (VM_TRACE_FST=1)
+//   --trace-saif -> SAIF (VM_TRACE_SAIF=1)
 #if VM_TRACE_FST
 #include "verilated_fst_c.h"
 typedef VerilatedFstC TraceFile;
 #define TRACE_FILE_NAME "sim.fst"
+#elif VM_TRACE_SAIF
+#include "verilated_saif_c.h"
+typedef VerilatedSaifC TraceFile;
+#define TRACE_FILE_NAME "sim.saif"
 #elif VM_TRACE
 #include "verilated_vcd_c.h"
 typedef VerilatedVcdC TraceFile;

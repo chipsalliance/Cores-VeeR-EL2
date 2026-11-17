@@ -10,9 +10,7 @@ link_design el2_veer_wrapper
 # The clock period must match the simulation that generated the SAIF.
 create_clock -name core_clock -period $::env(CLK_PERIOD_NS) [get_ports clk]
 
-# trace2power's SAIF is rooted at rvtop_synth_wrapper, with the synthesized
-# design instance nested below it as rvtop_synth.
-read_saif -scope rvtop_synth_wrapper/rvtop_synth $::env(SAIF)
+read_saif -scope TOP/tb_top/rvtop_wrapper/rvtop_synth_wrapper/rvtop_synth $::env(SAIF)
 
 if {[info exists ::env(POWER_REPORT)]} {
     report_power > $::env(POWER_REPORT)

@@ -2440,7 +2440,7 @@ always @(negedge core_clk) begin
     $display("[%0t] See \"exec.log\" for execution trace with register updates..\n",$time);
     if (veer_upset_thread != null && veer_upset_thread.status() != process::FINISHED)
       veer_upset_thread.kill();
-    if (veer_upset_thread != null && veer_upset_thread.status() != process::FINISHED)
+    if (tmr_upset_thread != null && tmr_upset_thread.status() != process::FINISHED)
       tmr_upset_thread.kill();
     // OpenOCD test breaks if simulation closes the TCP connection first.
     // This delay allows OpenOCD to close the connection before the #finish.

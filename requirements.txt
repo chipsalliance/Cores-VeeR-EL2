@@ -27,3 +27,6 @@ pytest-md==0.2.0
 
 # Scientific/Math (used in some block tests)
 scipy==1.17.1
+
+# Power analysis
+matplotlib==3.11.2

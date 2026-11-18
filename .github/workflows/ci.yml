@@ -51,6 +51,10 @@ jobs:
             code:
               - '!docs/**'
 
+  Run-VeeR-EL2-OpenROAD-Autotuner:
+    name: Run-VeeR-EL2-Autotuner
+    uses: ./.github/workflows/autotuner.yml
+
   Test-DCLS:
     name: Test-DCLS-Regression
     needs: [Check-PR-Origin, Detect-Changes]

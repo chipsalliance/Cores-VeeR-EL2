@@ -1,0 +1,79 @@
+name: VeeR-EL2 Autotuner
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  DEBIAN_FRONTEND: noninteractive
+
+jobs:
+  run-bazel-rules-hdl-autotuner:
+    name: Run EL2 Bazel-Rules-HDL Autotuner flow
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    permissions:
+      contents: read
+      id-token: write
+    container: ghcr.io/antmicro/cores-veer-el2:bazelenv-2026-11-24
+    strategy:
+      fail-fast: false
+      matrix:
+        bus:
+          - name: AXI
+            config: axi4
+          - name: AHB
+            config: ahb_lite
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      GHA_MACHINE_TYPE: n2-standard-16
+
+    steps:
+      - name: Setup repository
+        uses: actions/checkout@v6
+        with:
+          path: Cores-VeeR-EL2
+          submodules: recursive
+
+      - uses: google-github-actions/auth@v2
+        id: gcp-auth
+        with:
+          service_account: ${{ secrets.GCP_SA }}
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          cleanup_credentials: true
+          create_credentials_file: true
+          export_environment_variables: false
+
+      - name: Bazel setup
+        uses: bazel-contrib/setup-bazel@0.19.2
+        with:
+          bazelisk-version: v1.30.0
+          bazelisk-cache: true
+          cache-save: true
+          external-cache: true
+          repository-cache: true
+          module-root: "$GITHUB_WORKSPACE/Cores-VeeR-EL2"
+          bazelrc: |
+            build --incompatible_strict_action_env
+            build --google_credentials=${{ steps.gcp-auth.outputs.credentials_file_path }}
+            build --remote_cache=https://storage.googleapis.com/gha-runners-bazel-cache-cores-veer-el2
+            build --color=yes
+
+      - name: Run EL2 ${{ matrix.bus.name }} Autotuner
+        run: |
+          cd "$GITHUB_WORKSPACE/Cores-VeeR-EL2"
+          git status
+          bazel run //:veer-el2_tune_${{ matrix.bus.config }}
+
+      - name: Upload EL2 ${{ matrix.bus.name }} autotuner results
+        uses: actions/upload-artifact@v4
+        with:
+          name: veer-el2_tune_${{ matrix.bus.config }}
+          path: |
+            Cores-VeeR-EL2/autotuner_runs/veer-el2_tune_${{ matrix.bus.config }}/autotuner-best.json
+            Cores-VeeR-EL2/autotuner_runs/veer-el2_tune_${{ matrix.bus.config }}/reference/bazel.log
+            Cores-VeeR-EL2/autotuner_runs/veer-el2_tune_${{ matrix.bus.config }}/sample*/iteration*/bazel.log
+          if-no-files-found: warn

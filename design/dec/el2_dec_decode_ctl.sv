@@ -1131,7 +1131,7 @@ end : cam_array
 
 
    // illegal/trap inst handling
-   rvdffe #(32) trap_inst_x_ff (.*, .en(i0_x_ctl_en & (~i0_legal | i0_dp.mret)), .din(i0_inst_d[31:0]), .dout(dec_illegal_inst[31:0]));
+   rvdffe #(32) trap_inst_x_ff (.*, .en(dec_i0_decode_d & (~i0_legal | i0_dp.mret)), .din(i0_inst_d[31:0]), .dout(dec_illegal_inst[31:0]));
 
    // allow illegals to flow down the pipe
    assign dec_i0_decode_d = i0_valid_d & ~i0_block_d    & ~dec_tlu_flush_lower_r & ~flush_final_r;

@@ -29,12 +29,13 @@ LD_ABI = $(ABI) -march=rv32imac
 
 TB_EXTRA_ARGS ?= --test-halt
 
+DUMP_NAME ?= sim
 # can be fst, vcd or saif
 TRACE_FORMAT ?= vcd
 ifeq ($(TRACE_FORMAT),vcd)
 	TRACE_FLAG = --trace
 else ifeq ($(TRACE_FORMAT),fst)
-	TRACE_FLAG = --trace-fst
+	TRACE_FLAG = --trace --trace-fst
 else ifeq ($(TRACE_FORMAT),saif)
 	TRACE_FLAG = --trace-saif
 else
@@ -208,7 +209,7 @@ CFLAGS += $(TB_DPI_INCS)
 TB_DPI_SRCS := $(addprefix $(TBDIR)/,$(TB_DPI_SRCS))
 
 # Testbench sources
-TB_VERILATOR_SRCS = $(TBDIR)/test_tb_top.cpp $(TB_DPI_SRCS)
+TB_VERILATOR_SRCS = $(TB_DPI_SRCS)
 
 TBFILES = $(TBDIR)/tb_top_if.sv \
           $(TBDIR)/tb_top_pkg.sv \
@@ -260,12 +261,10 @@ ${BUILD_DIR}/defines.h:
 	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/veer.config -target=$(target) $(CONF_PARAMS)
 
 verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
-	$(VERILATOR) --cc -CFLAGS "${CFLAGS} ${GATELEVEL_CFLAGS}" --coverage-max-width 20000 $(defines) $(FCOV_DEFINES) \
+	$(VERILATOR) --binary --build --cc -CFLAGS "${CFLAGS} ${GATELEVEL_CFLAGS}" --coverage-max-width 20000 $(defines) $(FCOV_DEFINES) \
 	  $(includes) -I${RV_ROOT}/testbench -f $(DUT_FILELIST) $(DUT_DEFINE) $(DUT_NETLIST) $(ASAP7_CELL_MODELS) --timescale $(TIMESCALE) \
 	  $(VERILATOR_SKIP_WARNINGS) $(VERILATOR_EXTRA_ARGS) ${TB_SILENT_FAIL} ${TBFILES} --top-module tb_top \
-	  -exe $(TB_VERILATOR_SRCS) --autoflush --timing --assert $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE) -fno-table
-	cp ${RV_ROOT}/testbench/test_tb_top.cpp obj_dir/
-	$(MAKE) -e -C obj_dir/ -f Vtb_top.mk $(VERILATOR_MAKE_FLAGS) -j$(shell nproc)
+	  $(TB_VERILATOR_SRCS) --autoflush --timing --assert $(VERILATOR_DEBUG) $(VERILATOR_COVERAGE) -fno-table
 	touch verilator-build
 
 vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
@@ -301,16 +300,8 @@ riviera-build: ${TBFILES} ${BUILD_DIR}/defines.h
 ############ TEST Simulation ###############################
 
 verilator: program.hex verilator-build
-	# FIXME: Assuming here that either begin_signature or end_signature implies
-	# that both symbols are present.
-	grep -E "(begin|end)_signature" $(TEST).sym >/dev/null 2>&1; \
-	if [ $$? -eq 0 ]; then \
-		BEG=`grep "begin_signature" $(TEST).sym | cut -d\  -f 1`;\
-		END=`grep "end_signature"   $(TEST).sym | cut -d\  -f 1`;\
-		./obj_dir/Vtb_top ${TB_EXTRA_ARGS} --mem-signature $${BEG} $${END}; \
-	else \
-		./obj_dir/Vtb_top ${TB_EXTRA_ARGS}; \
-	fi
+	./obj_dir/Vtb_top ${TB_EXTRA_ARGS} \
+		+program_hex=program.hex +symbols=$(TEST).sym +trace=$(DUMP_NAME).$(TRACE_FORMAT)
 
 irun: program.hex irun-build
 	$(IRUN) -64bit -abvglobalfailurelimit 1 +lic_queue -licqueue \

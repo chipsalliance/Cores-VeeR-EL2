@@ -67,10 +67,8 @@ bazel_dep(name = "rules_7zip", version = "0.0.1")
 git_override(
     module_name = "rules_hdl",
     # the develop branch
-    commit = "ce4912928ce421658a54892da07af811e21216ce",
+    commit = "5d32269c8c98b8a1bf497603514873e017782afc",
     remote = "https://github.com/antmicro/bazel_rules_hdl.git",
-    patches = ["//:bazel_patches/rules_hdl_asap7_visibility.patch"],
-    patch_strip = 1,
 )
 
 # Root-only overrides from rules_hdl's MODULE.bazel

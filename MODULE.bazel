@@ -66,7 +66,7 @@ bazel_dep(name = "rules_7zip", version = "0.0.1")
 
 git_override(
     module_name = "rules_hdl",
-    commit = "c51aae6732c09d2f266219a71ba70dc90274ca57",
+    commit = "252496e7f07bb1cfedf0c8b76b0a6a88bef90acb",
     remote = "https://github.com/antmicro/bazel_rules_hdl.git",
 )
 

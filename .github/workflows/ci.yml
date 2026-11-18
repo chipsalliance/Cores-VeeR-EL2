@@ -72,6 +72,10 @@ jobs:
     name: Run-VeeR-EL2-OpenROAD-Power-Estimation
     if: github.event_name == 'schedule'
     uses: ./.github/workflows/power-estimation-flow.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      id-token: write
 
   Run-VeeR-EL2-OpenROAD-Autotuner:
     name: Run-VeeR-EL2-Autotuner

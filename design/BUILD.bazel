@@ -16,6 +16,16 @@ verilog_library(
     ],
 )
 
+verilog_library(
+    name = "el2_gate_support",
+    srcs = [
+        "lib/el2_assert.sv",
+        "include/el2_def.sv",   # el2_pkg
+        "lib/el2_mem_if.sv",
+        "el2_mubi_pkg.sv",
+    ],
+)
+
 filegroup(
     name = "el2_srcs",
     srcs = [

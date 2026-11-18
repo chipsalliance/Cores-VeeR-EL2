@@ -14,6 +14,11 @@
 //
 
 package tb_top_pkg;
+`ifdef GATELEVEL_DUT
+    `ifdef GATELEVEL_TRACE_SAIF
+        /*verilator tracing_off*/
+    `endif
+`endif
 
 `ifndef VERILATOR
   class bitflip_mask_generator #(

@@ -1,6 +1,7 @@
 load("@rules_perl//perl:perl.bzl", "perl_binary")
 load("@rules_perl//perl/cpan:cpan_compiler.bzl", "cpan_compiler")
 
+exports_files(["veer.config"])
 package(default_visibility = ["//visibility:public"])
 
 cpan_compiler(

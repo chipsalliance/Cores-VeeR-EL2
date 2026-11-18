@@ -127,3 +127,52 @@ prefix_veer_sources = rule(
     },
     provides = [VerilogInfo],
 )
+
+# TODO: This should be replaced with a proper gcc-riscv compilation within Bazel
+def build_el2_test_program(name, test, make_args = []):
+    """Builds <test> with the host RISC-V toolchain.
+
+    Produces :<name>_hex (program.hex) and :<name>_sym (program.sym).
+    """
+    hex_out = "%s/program.hex" % name
+    sym_out = "%s/program.sym" % name
+    native.genrule(
+        name = name,
+        srcs = [
+            "//tools:Makefile",
+            "//configs:veer.config",
+            "testbench/link.ld",
+        ] + native.glob([
+            "testbench/asm/**",
+            "testbench/tests/**",
+        ]),
+        outs = [hex_out, sym_out],
+        tools = ["testbench/build_test_hex.sh"],
+        tags = [
+            "local",
+            "no-remote-cache"
+        ],
+        cmd = """
+            set -euo pipefail
+            # Toolchain: default to /opt/riscv, override with --action_env=RISCV_ROOT=...
+            export PATH="$${RISCV_ROOT:-/opt/riscv}/bin:$$PATH"
+            if ! command -v riscv64-unknown-elf-gcc >/dev/null 2>&1; then
+                echo "ERROR: riscv64-unknown-elf-gcc not found." >&2
+                echo "PATH=$$PATH" >&2
+                echo "Install it, or pass --action_env=RISCV_ROOT=<toolchain root>" >&2
+                echo "(or --action_env=PATH). Refusing to fall back to canned hex files." >&2
+                exit 1
+            fi
+            tmp="$$(mktemp -d)"
+            PROGRAM_OUTPUT_DIR="$$tmp" bash $(execpath testbench/build_test_hex.sh) %s %s
+            cp "$$tmp/%s.hex" $(execpath %s)
+            if [ -f "$$tmp/%s.sym" ]; then cp "$$tmp/%s.sym" $(execpath %s); else : > $(execpath %s); fi
+            rm -rf "$$tmp"
+        """ % (
+            test, " ".join(["'%s'" % a for a in make_args]),
+            test, hex_out,
+            test, test, sym_out, sym_out,
+        ),
+    )
+    native.filegroup(name = name + "_hex", srcs = [hex_out])
+    native.filegroup(name = name + "_sym", srcs = [sym_out])

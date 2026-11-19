@@ -10,6 +10,8 @@ export type Param = number | string | boolean | null | readonly Param[] | { read
 // Shapes produced by serialize_json.py, validated on the Python side
 
 export type Config = {
+    // Branch shown by default across the views, DEFAULT_MAIN_BRANCH if not set
+    main_branch?: string;
     labels: Readonly<Record<string, string>>;
     // Display units of metadata fields ('@...')
     units?: Readonly<Record<string, string>>;
@@ -37,6 +39,8 @@ export type Metadata = {
     readonly url?: string;
     readonly target_repository?: string;
     readonly pipeline_status?: PipelineStatus;
+    // Variant of the design
+    readonly configuration?: string;
     readonly [key: string]: Param | undefined;
 };
 
@@ -75,19 +79,24 @@ export type Metric = {
 };
 
 export type Run = {
-    // Index into the metric columns
+    // Key of the ref the run belongs to
+    ref: string;
+    // Index into the ref's metric columns
     index: number;
     id: number;
     metadata: Metadata;
     date: Date | null;
     commit: string;
+    configuration: Configuration;
     label: string;
-    // Item value for dropdown
+    // Item value for dropdown, unique across the refs
     value: string;
 };
 
 export type Dataset = {
     config: Config;
+    // Key of the main branch's ref
+    main: string;
     // Keyed by refKey()
     refs: readonly (Ref & { key: string })[];
     // Newest first
@@ -120,10 +129,14 @@ export type ValueAxis = {
     ticks?: number[];
 };
 
+export type Configuration = string | null;
+
 export type Point<X extends XValue = XValue> = {
     x: X;
     param: number;
     category: string;
+    // Lines are drawn per configuration
+    configuration: string;
 };
 
 export type Series<X extends XValue = XValue> = Metric & { data: Point<X>[] };
@@ -188,8 +201,23 @@ export function refKey(ref: Ref): string {
     return ref.kind === 'pr' ? `pr/${ref.number}` : `branch/${ref.name}`;
 }
 
-// The main branch (default across the views)
-export const MAIN_REF = refKey({ kind: 'branch', name: 'main' });
+export function refTitle(ref: Ref): string {
+    return ref.kind === 'pr' ? `PR #${ref.number}` : ref.name;
+}
+
+export const DEFAULT_MAIN_BRANCH = 'main';
+
+function configurationOf(metadata: Metadata): Configuration {
+    const configuration = metadata.configuration;
+    return typeof configuration === 'string' && configuration.trim() ? configuration.trim() : null;
+}
+
+export function latestRuns(dataset: Dataset, ref: string): Run[] {
+    const latest = new Map<Configuration, Run>();
+    // Runs are newest first
+    for (const run of dataset.runs.get(ref) ?? []) if (!latest.has(run.configuration)) latest.set(run.configuration, run);
+    return [...latest.values()].sort((a, b) => (a.configuration ?? '').localeCompare(b.configuration ?? ''));
+}
 
 export function buildDataset(raw: RawData, config: Config): Dataset {
     const refs = raw.refs.map((r) => {
@@ -215,24 +243,28 @@ export function buildDataset(raw: RawData, config: Config): Dataset {
         raw.refs.map((it, i) => [
             refs[i].key,
             it.runs
-                .map(({ id, metadata }, index) => {
+                .map(({ id, metadata }, index): Run => {
                     const date = parseDate(metadata.date);
                     const commit = metadata.current_commit;
+                    const configuration = configurationOf(metadata);
                     return {
+                        ref: refs[i].key,
                         index,
                         id,
                         metadata,
                         date,
                         commit,
-                        label: `${date ? metadata.date.trim() : `Run ${id}`} · ${commit}`,
-                        value: String(index)
+                        configuration,
+                        label: [date ? metadata.date.trim() : `Run ${id}`, commit, configuration].filter(Boolean).join(' · '),
+                        value: `${refs[i].key}#${index}`
                     };
                 })
                 .sort((a, b) => (b.date?.getTime() ?? -Infinity) - (a.date?.getTime() ?? -Infinity))
         ])
     );
 
-    return { config, refs, runs, metrics, byKey };
+    const main = refKey({ kind: 'branch', name: config.main_branch || DEFAULT_MAIN_BRANCH });
+    return { config, main, refs, runs, metrics, byKey };
 }
 
 // Parsing / formatting
@@ -433,10 +465,10 @@ export function seriesFor<X extends XValue>(ref: string, dataset: Dataset, axis:
     const runs = dataset.runs.get(ref);
     if (!runs || (axis.key !== undefined && !dataset.byKey.get(ref)?.has(axis.key))) return null;
 
-    const xs: [number, X][] = [];
+    const xs: [number, X, string][] = [];
     for (const run of runs) {
         const x = axis.x(run);
-        if (isValidX(x)) xs.push([run.index, x]);
+        if (isValidX(x)) xs.push([run.index, x, run.configuration ?? '']);
         else console.warn(`Skipping run ${run.id}: no valid '${axis.label}' value`);
     }
     xs.sort((a, b) => compareX(a[1], b[1]));
@@ -445,9 +477,9 @@ export function seriesFor<X extends XValue>(ref: string, dataset: Dataset, axis:
         .filter((m) => m.key !== axis.key && isPlottable(m, dataset.config))
         .map((metric) => {
             const category = categoryLabel(dataset.config, metric.path.slice(0, -1));
-            const data = xs.flatMap(([run, x]) => {
+            const data = xs.flatMap(([run, x, configuration]) => {
                 const param = numberAt(metric, run);
-                return param === null ? [] : [{ x, param, category }];
+                return param === null ? [] : [{ x, param, category, configuration }];
             });
             return { ...metric, data };
         })
@@ -461,10 +493,13 @@ export function percentChange(base: number, target: number): number | null {
     return ((target - base) / Math.abs(base)) * 100;
 }
 
-export function diffRuns(metrics: readonly Metric[], baseRun: number, targetRun: number): MetricDiff[] {
-    return metrics.flatMap((metric) => {
-        const base = numberAt(metric, baseRun);
-        const target = numberAt(metric, targetRun);
+// Metrics reported by both runs, which can belong to different refs
+export function diffRuns(dataset: Dataset, baseRun: Run, targetRun: Run): MetricDiff[] {
+    const baseMetrics = dataset.byKey.get(baseRun.ref);
+    return (dataset.metrics.get(targetRun.ref) ?? []).flatMap((metric) => {
+        const baseMetric = baseMetrics?.get(metric.key);
+        const base = baseMetric ? numberAt(baseMetric, baseRun.index) : null;
+        const target = numberAt(metric, targetRun.index);
         if (base === null || target === null) return [];
         return [{ metric, base, target }];
     });
@@ -514,23 +549,56 @@ export function summaryRows(ref: string, dataset: Dataset, run: Run, keys: reado
     });
 }
 
+// Run details (for details component)
+
+export type RunParam = { metric: Metric; value: Param };
+
+// Every metric reported by the run
+export function runParams(dataset: Dataset, run: Run): RunParam[] {
+    return (dataset.metrics.get(run.ref) ?? []).flatMap((metric) => {
+        const value = valueAt(metric, run.index);
+        return value === null ? [] : [{ metric, value }];
+    });
+}
+
+// Metadata fields of the run details with default labels
+const DETAIL_FIELDS: readonly (readonly [string, string])[] = [
+    ['@configuration', 'Configuration'],
+    ['@current_commit', 'Commit'],
+    ['@commit_message', 'Commit message'],
+    ['@date', 'Date'],
+    ['@source_branch', 'Branch'],
+    ['@target_branch', 'Target branch']
+];
+
+export function metadataRows(dataset: Dataset, run: Run): SummaryRow[] {
+    return DETAIL_FIELDS.flatMap(([key, label]) => {
+        const value = metadataValue(run.metadata, key);
+        if (value === undefined || value === null) return [];
+        const unit = dataset.config.units?.[key] ?? '';
+        return [{ key, label: dataset.config.labels[key] ?? label, value: formatParam(value, unit).trim() }];
+    });
+}
+
 // Overview
 
 export type Badge = { variant: 'success' | 'warning' | 'destructive' | 'secondary' | 'outline'; label: string };
 
-const PIPELINE_BADGES: Record<PipelineStatus, Badge> = {
-    passed: { variant: 'success', label: 'passed' },
-    passed_with_warnings: { variant: 'warning', label: 'passed with warnings' },
-    failed: { variant: 'destructive', label: 'failed' },
-    canceled: { variant: 'secondary', label: 'canceled' }
-};
-
 export function pipelineBadge(status: PipelineStatus | undefined): Badge {
-    return (status && PIPELINE_BADGES[status]) || { variant: 'outline', label: 'unknown' };
+    const pipelineBadges: Record<PipelineStatus, Badge> = {
+        passed: { variant: 'success', label: 'passed' },
+        passed_with_warnings: { variant: 'warning', label: 'passed with warnings' },
+        failed: { variant: 'destructive', label: 'failed' },
+        canceled: { variant: 'secondary', label: 'canceled' }
+    };
+    return (status && pipelineBadges[status]) || { variant: 'secondary', label: 'unknown' };
 }
 
 export type OverviewCard = {
     key: string;
+    // The card's branch or PR (refKey) and configuration
+    ref: string;
+    configuration: Configuration;
     title: string;
     // PR title, none for branches
     description?: string;
@@ -545,32 +613,35 @@ export type OverviewCard = {
 function compareRefs(dataset: Dataset, a: Ref & { key: string }, b: Ref & { key: string }): number {
     if (a.kind !== b.kind) return a.kind === 'branch' ? -1 : 1;
     if (a.kind === 'branch' && b.kind === 'branch') {
-        if (a.key === MAIN_REF || b.key === MAIN_REF) return a.key === MAIN_REF ? -1 : 1;
+        if (a.key === dataset.main || b.key === dataset.main) return a.key === dataset.main ? -1 : 1;
         return a.name.localeCompare(b.name);
     }
     const time = (ref: string) => dataset.runs.get(ref)?.[0]?.date?.getTime() ?? -Infinity;
     return time(b.key) - time(a.key) || (b as { number: number }).number - (a as { number: number }).number;
 }
 
+export function sortedRefs(dataset: Dataset): (Ref & { key: string })[] {
+    return [...dataset.refs].sort((a, b) => compareRefs(dataset, a, b));
+}
+
+// One card per branch or PR and configuration; latest run
 export function overviewCards(dataset: Dataset): OverviewCard[] {
-    return [...dataset.refs]
-        .sort((a, b) => compareRefs(dataset, a, b))
-        .flatMap((ref) => {
-            const latest = dataset.runs.get(ref.key)?.[0];
-            if (!latest) return [];
-            const { metadata } = latest;
-            return [
-                {
-                    key: ref.key,
-                    title: ref.kind === 'pr' ? `PR #${ref.number}` : ref.name,
-                    description: ref.kind === 'pr' ? metadata.pr_title : undefined,
-                    url: metadata.url,
-                    badge: pipelineBadge(metadata.pipeline_status),
-                    updated: metadata.date,
-                    rows: summaryRows(ref.key, dataset, latest, dataset.config.overview, true)
-                }
-            ];
-        });
+    return sortedRefs(dataset).flatMap((ref) =>
+        latestRuns(dataset, ref.key).map((latest) => {
+            const { metadata, configuration } = latest;
+            return {
+                key: `${ref.key}#${configuration ?? ''}`,
+                ref: ref.key,
+                configuration,
+                title: [refTitle(ref), configuration].filter(Boolean).join(' · '),
+                description: ref.kind === 'pr' ? metadata.pr_title : undefined,
+                url: metadata.url,
+                badge: pipelineBadge(metadata.pipeline_status),
+                updated: metadata.date,
+                rows: summaryRows(ref.key, dataset, latest, dataset.config.overview, true)
+            };
+        })
+    );
 }
 
 // Value of a latest-reported metric (path) or a metadata field

@@ -3,10 +3,12 @@
 # Source units of the metrics in a metrics file: the unit types file maps metric paths to unit types,
 # the metrics file's 'units' maps unit types to units.
 
+import logging
 import re
+import warnings
 from typing import NamedTuple
 
-from units import is_supported
+log = logging.getLogger(__name__)
 
 # Joins node names into metric paths
 CAT_SEPARATOR = "."
@@ -35,19 +37,21 @@ def compile_unit_types(unit_types):
     for key, unit_type in unit_types.items():
         segments = key.split(CAT_SEPARATOR)
         parts = [r"[^.]+(?:\.[^.]+)*" if s == WILDCARD else re.escape(s) for s in segments]
-        patterns.append(Pattern(
-            key=key,
-            type=unit_type,
-            regex=re.compile(r"\.".join(parts)),
-            rank=(WILDCARD not in segments, sum(s != WILDCARD for s in segments)),
-        ))
+        patterns.append(
+            Pattern(
+                key=key,
+                type=unit_type,
+                regex=re.compile(r"\.".join(parts)),
+                rank=(WILDCARD not in segments, sum(s != WILDCARD for s in segments)),
+            )
+        )
     return patterns
 
 
 # Unit type of the path, None if no pattern matches
-def match_unit_type(patterns, path, msgs=None):
+def match_unit_type(patterns, path):
     joined = join(path)
-    matches = [p for p in patterns if p.regex.fullmatch(joined)]
+    matches = [p for p in patterns if p.regex.fullmatch(joined)] if patterns else None
 
     if not matches:
         return None
@@ -57,44 +61,40 @@ def match_unit_type(patterns, path, msgs=None):
 
     if len({p.type for p in tied}) > 1:
         listed = ", ".join(f"'{p.key}' ({p.type})" for p in tied)
-        raise ValueError(f"Type conflict for matched metrics: {listed}")
+        warnings.warn(f"Type conflict for matched metrics: {listed}", stacklevel=2)
+        return None
 
-    if msgs is not None and (len(matches) > 1 or WILDCARD in best.key):
+    if len(matches) > 1 or WILDCARD in best.key:
         over = "".join(f", over '{p.key}' ({p.type})" for p in matches if p is not best)
-        msgs.infos.append(f"unit types: '{joined}' is '{best.type}' (by '{best.key}'{over})")
+        log.info(f"unit types: '{joined}' is '{best.type}' (by '{best.key}'{over})")
     return best.type
 
 
-def source_units(units, paths, patterns, msgs):
+def source_units(units, paths, patterns):
     sources = {}
     for path in paths:
-        try:
-            unit_type = match_unit_type(patterns, path, msgs)
-        except ValueError as e:
-            msgs.errors.append(f"unit types: '{join(path)}': {e}")
-            sources[path] = Source("", None)
-            continue
+        unit_type = match_unit_type(patterns, path)
 
         if unit_type is None:
-            msgs.warnings.append(f"unit types: '{join(path)}' has no unit type")
+            log.info(f"unit types: '{join(path)}' has no unit type")
             unit = ""
         elif unit_type in units:
             unit = units[unit_type]
         else:
-            msgs.warnings.append(f"units: unit type '{unit_type}' of '{join(path)}' has no unit")
+            warnings.warn(
+                f"units: unit type '{unit_type}' of '{join(path)}' has no unit", stacklevel=2
+            )
             unit = ""
 
-        # Custom units are kept as labels
-        if not is_supported(unit):
-            msgs.warnings.append(f"'{join(path)}': unit '{unit}' is not supported, values are kept as is")
         sources[path] = Source(unit, unit_type)
 
     used = {s.type for s in sources.values()}
-    for unit_type in sorted(set(units) - used):
-        msgs.infos.append(f"units: unit type '{unit_type}' is not used by any metric")
 
-    for p in patterns:
+    for unit_type in sorted(set(units) - used):
+        log.info(f"units: unit type '{unit_type}' is not used by any metric")
+
+    for p in patterns or []:
         if not any(p.regex.fullmatch(join(path)) for path in paths):
-            msgs.infos.append(f"unit types: '{p.key}' matches nothing in the data")
+            log.info(f"unit types: '{p.key}' matches nothing in the data")
 
     return sources

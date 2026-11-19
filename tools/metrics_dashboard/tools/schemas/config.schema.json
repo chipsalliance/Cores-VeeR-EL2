@@ -25,6 +25,11 @@
       "type": "string",
       "minLength": 1
     },
+    "main_branch": {
+      "description": "Branch shown by default across the dashboard (history, run summaries, first on the overview). Defaults to 'main'.",
+      "type": "string",
+      "minLength": 1
+    },
     "labels": {
       "description": "Flat map of node name (category, metric) or metadata field -> label (string).",
       "type": "object",

@@ -2,12 +2,16 @@
 
 # Unit normalization: converts values between compatible units
 
+import logging
 import re
+import warnings
 from functools import cache
 
 from pint import UnitRegistry
 from pint.errors import PintError
 from pytimeparse2 import parse as parse_duration
+
+log = logging.getLogger(__name__)
 
 ureg = UnitRegistry()
 
@@ -23,17 +27,41 @@ def is_number(value):
 
 
 def is_duration(unit):
-    return DURATION_UNIT.fullmatch(unit) is not None
+    return unit is not None and DURATION_UNIT.fullmatch(unit) is not None
 
 
-def rounded(value):
-    return float(f"{value:.{PRECISION}g}")
+def rounded(value, precision=PRECISION):
+    return float(f"{value:.{precision}g}")
+
+
+def parse_time(value, unit):
+    if not isinstance(value, str):
+        warnings.warn(f"Expected a duration string for unit '{unit}', got {value!r}", stacklevel=2)
+        return None
+    seconds = parse_duration(value)
+    if seconds is None:
+        warnings.warn(f"Unknown duration format '{value}'", stacklevel=2)
+    return seconds
+
+
+# Leading scale of a source unit, e.g. "1" in "1um2", "1e-9" in "1e-9W", "10^3" in "10^3 pW"
+SCALE = re.compile(r"\s*(?:10(?:\^|\*\*)[+-]?\d+|[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)")
+
+# Exponent written right after a unit name, e.g. "um2" (= "um^2")
+BARE_EXPONENT = re.compile(r"([^\W\d_]+)(\d+)")
+
+
+def canonical(unit):
+    """Rewrites unit notations pint does not parse, e.g. "1um2" -> "1um^2" """
+    scale = SCALE.match(unit)
+    split = scale.end() if scale else 0
+    return unit[:split] + BARE_EXPONENT.sub(r"\1^\2", unit[split:])
 
 
 @cache
 def quantity(unit):
     try:
-        return ureg.Quantity(unit)
+        return ureg.Quantity(canonical(unit))
     except Exception:
         return None
 
@@ -42,25 +70,9 @@ def is_supported(unit):
     return unit == "" or is_duration(unit) or quantity(unit) is not None
 
 
-def stored_unit(src, tgt):
-    # No target: the source unit is kept (durations are parsed to seconds)
-    if tgt is None:
-        return "s" if is_duration(src) else src
-    if src == "" and tgt:
-        raise ValueError(f"no source unit for the target unit '{tgt}'")
-    return tgt
-
-
-def normalize(value, src, dst):
-    # Convert duration to seconds
-    if is_duration(src):
-        if not isinstance(value, str):
-            raise ValueError(f"Expected a duration string for unit '{src}', got {value!r}")
-        seconds = parse_duration(value)
-        if seconds is None:
-            raise ValueError(f"Unknown duration format '{value}'")
-        value, src = rounded(seconds), "s"
-
+def normalize(value, src, dst, precision=PRECISION):
+    if value is None:
+        return None
     # No conversion needed
     if src == dst:
         return value
@@ -70,16 +82,21 @@ def normalize(value, src, dst):
     src_q = quantity(src)
     dst_q = quantity(dst) if dst else ureg.Quantity(1)
 
-    for unit, q in ((src, src_q), (dst, dst_q)):
-        if q is None:
-            raise ValueError(f"Cannot convert '{src}' to '{dst}': unit '{unit}' is not supported")
+    if None in [src_q, dst_q]:
+        raise ValueError(f"Cannot convert '{src}' to '{dst}'")
 
     try:
-        return rounded((value * src_q / dst_q).to("dimensionless").magnitude)
+        return rounded((value * src_q / dst_q).to("dimensionless").magnitude, precision)
     except PintError as e:
         raise ValueError(f"Cannot convert unit '{src}' to '{dst or 'unitless'}': {e}") from e
 
 
-def convert(value, src, tgt):
-    unit = stored_unit(src, tgt)
-    return normalize(value, src, unit), unit
+def convert(value, src, tgt, precision=PRECISION):
+    if src is None:
+        src = tgt
+    elif is_duration(src):
+        value, src = parse_time(value, src), "s"
+        if value is not None:
+            value = rounded(value, precision)
+    unit = src if tgt is None else tgt
+    return normalize(value, src, unit, precision), unit

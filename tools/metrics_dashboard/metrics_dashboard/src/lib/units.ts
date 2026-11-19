@@ -1,7 +1,6 @@
 import { format, max } from 'd3';
 
 const SI = ['q', 'r', 'y', 'z', 'a', 'f', 'p', 'n', 'µ', 'm', '', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y', 'R', 'Q'] as const;
-
 const PREFIXES: Readonly<Record<string, number>> = {
     ...Object.fromEntries(SI.map((p, i) => [p, (i - 10) * 3])),
     u: -6,
@@ -45,11 +44,10 @@ export function displayUnitText(unit: string): string {
     return si ? siUnitText(si) : unit;
 }
 
-const plain = format(',~r');
-const scientific = format('~e');
-
 // Use scientific notation if very large / small
 function numberFormat(values: readonly number[]): (v: number) => string {
+    const plain = format(',~r');
+    const scientific = format('~e');
     const maxAbs = max(values, (v) => (Number.isFinite(v) ? Math.abs(v) : NaN)) ?? 0;
     return maxAbs >= 1e6 || (maxAbs > 0 && maxAbs < 1e-3) ? scientific : plain;
 }

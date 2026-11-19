@@ -3,9 +3,8 @@ import * as d3 from 'd3';
 import { type Series, type ValueAxis, type XAxis, type XValue } from '#lib/metrics.ts';
 import { withUnit, displayScale } from '#lib/units.ts';
 
-// Plot's defaults (px)
-const PLOT_FONT_SIZE = 10;
-const PLOT_TICK_AREA = 30;
+const PLOT_FONT_SIZE = 12;
+const PLOT_TICK_AREA = 30 * (PLOT_FONT_SIZE / 10);
 // Rough average glyph width of a tick label, in em
 const CHAR_WIDTH_EM = 0.7;
 
@@ -18,7 +17,7 @@ function aesirTokens() {
         sm: px('--ds-spacing-1-5'),
         md: px('--ds-spacing-3'),
         lg: px('--ds-spacing-4'),
-        xl: px('--ds-spacing-10'),
+        xl: px('--ds-spacing-8'),
         lineHeight: px('--ds-font-line-height-xs') / px('--ds-font-size-xs')
     });
 }
@@ -50,8 +49,11 @@ function xTickFormat<X extends XValue>(s: Series<X>, axis: XAxis<X>): ((x: X) =>
 
 export function plot<X extends XValue>(s: Series<X>, axis: XAxis<X>, yAxis: ValueAxis): (SVGSVGElement | HTMLElement) & Plot.Plot {
     const tickFormat = xTickFormat(s, axis);
-    const { sm, md, lineHeight } = aesirTokens();
+    const { sm, md, xl, lineHeight } = aesirTokens();
     const xLabelOffset = PLOT_TICK_AREA + md;
+    // One line per configuration, colored and with a legend if there's more than one
+    const split = new Set(s.data.map((d) => d.configuration)).size > 1;
+    const color = split ? 'configuration' : 'var(--ds-accent)';
 
     return Plot.plot({
         inset: md,
@@ -60,13 +62,17 @@ export function plot<X extends XValue>(s: Series<X>, axis: XAxis<X>, yAxis: Valu
             yAxis
         ),
         marginBottom: xLabelOffset + sm,
+        marginTop: xl,
 
         x: {
             type: axis.scale,
             label: axis.label,
             labelOffset: xLabelOffset,
+            tickSpacing: 80 * (PLOT_FONT_SIZE / 10), // 80 is Plot's default
             tickFormat
         },
+
+        color: split ? { legend: true } : undefined,
 
         y: {
             // Explicit ticks span the domain themselves
@@ -77,6 +83,7 @@ export function plot<X extends XValue>(s: Series<X>, axis: XAxis<X>, yAxis: Valu
             tickFormat: yAxis.format
         },
 
+        style: { fontSize: `${PLOT_FONT_SIZE}px` },
         marks: [
             Plot.gridX({ stroke: 'var(--ds-border)', strokeOpacity: 1 }),
             Plot.gridY({ stroke: 'var(--ds-border)', strokeOpacity: 1 }),
@@ -86,13 +93,14 @@ export function plot<X extends XValue>(s: Series<X>, axis: XAxis<X>, yAxis: Valu
                 : Plot.lineY(s.data, {
                       x: 'x',
                       y: 'param',
-                      stroke: 'var(--ds-accent)'
+                      z: 'configuration',
+                      stroke: color
                   }),
 
             Plot.dot(s.data, {
                 x: 'x',
                 y: 'param',
-                fill: 'var(--ds-accent)',
+                fill: color,
 
                 tip: {
                     format: {
@@ -100,12 +108,13 @@ export function plot<X extends XValue>(s: Series<X>, axis: XAxis<X>, yAxis: Valu
                         y: false,
                         Value: (v: number) => withUnit(yAxis.format(v), yAxis.unit)
                     },
-
+                    fontSize: PLOT_FONT_SIZE,
                     lineHeight,
 
                     channels: {
                         Value: 'param',
-                        Category: 'category'
+                        Category: 'category',
+                        ...(split ? { Configuration: 'configuration' } : {})
                     }
                 }
             })

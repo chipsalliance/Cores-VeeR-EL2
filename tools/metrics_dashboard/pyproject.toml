@@ -1,0 +1,27 @@
+[tool.black]
+line-length = 100
+exclude = '''
+(
+  /(
+    | \.git
+    | \.gitignore
+    | \.gitmodules
+    | \.github
+    | \.pytest_cache
+    | __pycache__
+    | venv
+  )/
+)
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+skip = [ ".git",
+         ".gitignore",
+         ".gitmodules",
+         ".github",
+         ".pytest_cache",
+         "__pycache__",
+         "venv"
+        ]

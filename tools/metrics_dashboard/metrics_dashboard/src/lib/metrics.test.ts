@@ -35,10 +35,12 @@ describe('units', () => {
     });
 });
 
-describe('formatPercent', () => {
+describe('formatDiff', () => {
     it('with two decimals', () => {
         expect(mt.formatDiff(12.345, 0.11)).toBe('−12.24 (−99.11%)');
         expect(mt.formatDiff(-3, 6)).toBe('+9 (+300%)');
+    });
+    it('with no difference', () => {
         expect(mt.formatDiff(0, 0)).toBe('−');
         expect(mt.formatDiff(4, 4)).toBe('−');
     });
@@ -49,9 +51,9 @@ describe('empty data', () => {
 
     it('has no run, metrics or references', () => {
         expect(dataset.refs).toEqual([]);
-        expect(dataset.runs.get(mt.MAIN_REF)).toBeUndefined();
-        expect(dataset.metrics.get(mt.MAIN_REF)).toBeUndefined();
-        expect(mt.seriesFor(mt.MAIN_REF, dataset, mt.dateAxis())).toBeNull();
-        expect(mt.latestValue(dataset, mt.MAIN_REF, 'a.b')).toBeNull();
+        expect(dataset.runs.get(dataset.main)).toBeUndefined();
+        expect(dataset.metrics.get(dataset.main)).toBeUndefined();
+        expect(mt.seriesFor(dataset.main, dataset, mt.dateAxis())).toBeNull();
+        expect(mt.latestValue(dataset, dataset.main, 'a.b')).toBeNull();
     });
 });

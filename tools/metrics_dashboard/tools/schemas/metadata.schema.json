@@ -31,6 +31,11 @@
       "type": "string",
       "pattern": "^https?://"
     },
+    "configuration": {
+      "description": "Variant of the design the run is for. The dashboard splits the runs of a branch or PR by it.",
+      "type": "string",
+      "minLength": 1
+    },
     "merge_base": { "type": "string" },
     "target_branch": { "type": "string" },
     "target_commit": { "type": "string" },

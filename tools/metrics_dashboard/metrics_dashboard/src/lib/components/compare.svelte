@@ -1,21 +1,42 @@
 <script lang="ts">
-    import { AesirDropdown, AesirButton, AesirIcon, AesirCard, AesirTable, AesirSeparator } from '#lib/aesir/src/index.js';
+    import { AesirButton, AesirCard } from '#lib/aesir/src/index.js';
     import { Data } from '#lib/data.ts';
     import {
         diffRuns,
         formatDiff,
         formatValues,
         groupByCategory,
-        MAIN_REF,
+        refTitle,
+        sortedRefs,
         type Run,
         type Group,
         type Section,
         type MetricDiff
     } from '#lib/metrics.ts';
-    import { alignColumns } from '#lib/aesir.ts';
 
+    import MetricTables from '#lib/components/metric-tables.svelte';
+    import RunPicker from '#lib/components/run-picker.svelte';
     import Summary from '#lib/components/summary.svelte';
-    const runs = Data.runs.get(MAIN_REF) ?? [];
+
+    // Runs of every ref: the main branch first, newest first within a ref
+    const data = Data;
+    const refs =
+        data === null
+            ? []
+            : sortedRefs(data).flatMap((ref) => {
+                  const runs = data.runs.get(ref.key) ?? [];
+                  return runs.length ? [{ ...ref, title: refTitle(ref), runs }] : [];
+              });
+    const runs = refs.flatMap((ref) => ref.runs);
+    const titles = new Map(refs.map((ref) => [ref.key, ref.title]));
+    const runTitle = (run: Run) => `${titles.get(run.ref)} · ${run.label}`;
+
+    // Runs grouped under their branch or PR
+    const items = refs.flatMap((ref, i) => [
+        ...(i ? [{ type: 'separator' as const }] : []),
+        { type: 'label' as const, label: ref.title },
+        ...ref.runs.map((run) => ({ label: run.label, value: run.value }))
+    ]);
 
     // Compare the newest run against the one before it as default
     let target = $state.raw(runs[0]);
@@ -23,8 +44,8 @@
     // The selection is compared upon button click
     let compared = $state.raw<{ target: Run; base: Run } | null>(null);
 
-    let diffs = $derived(compared ? diffRuns(Data.metrics.get(MAIN_REF) ?? [], compared.base.index, compared.target.index) : []);
-    let groups = $derived(groupByCategory(diffs, (d) => d.metric.path, Data.config));
+    let diffs = $derived(Data && compared ? diffRuns(Data, compared.base, compared.target) : []);
+    let groups = $derived(Data ? groupByCategory(diffs, (d) => d.metric.path, Data.config) : []);
 
     const compColumns = [
         { key: 'metric', label: 'Metric' },
@@ -48,19 +69,7 @@
 
 {#snippet versionPanel(title: string, run: Run, select: (run: Run) => void)}
     <AesirCard {title}>
-        <AesirDropdown
-            items={runs}
-            onselect={(item) => {
-                const selected = runs.find((r) => r.value === item.value);
-                if (selected) select(selected);
-            }}
-        >
-            {#snippet trigger(props)}
-                <AesirButton variant="outline" {...props} aria-label={`${title} run: ${run.label}`}
-                    >{run.label}<AesirIcon name="chevron-down" /></AesirButton
-                >
-            {/snippet}
-        </AesirDropdown>
+        <RunPicker label={title} {run} {runs} {items} {runTitle} onselect={select} />
     </AesirCard>
 {/snippet}
 
@@ -96,22 +105,7 @@
     </section>
 
     {#if compared}
-        <div class="comparison-table" use:alignColumns>
-            <section>
-                {#each groups as group (group.name)}
-                    <div class="subtable">
-                        <h3>{group.label}</h3>
-                        <AesirSeparator orientation="horizontal" />
-                        {#each group.sections as section (section.key)}
-                            {#if section.label}
-                                <h4>{section.label}</h4>
-                            {/if}
-                            <AesirTable columns={compColumns} rows={toRows(group, section)} variant="striped" density="compact" />
-                        {/each}
-                    </div>
-                {/each}
-            </section>
-        </div>
+        <MetricTables {groups} columns={compColumns} {toRows} />
     {/if}
 </div>
 
@@ -167,22 +161,6 @@
     @media (max-width: 640px) {
         .version-grid {
             grid-template-columns: 1fr;
-        }
-    }
-
-    .subtable {
-        margin: 0 0 var(--ds-spacing-12) 0;
-    }
-
-    :global {
-        .comparison-table table {
-            table-layout: fixed;
-            width: 100%;
-        }
-
-        .comparison-table.measuring table {
-            table-layout: auto;
-            width: auto;
         }
     }
 </style>

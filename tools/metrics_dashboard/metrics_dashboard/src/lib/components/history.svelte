@@ -2,12 +2,12 @@
     import type { Action } from 'svelte/action';
     import { AesirCollapsible } from '#lib/aesir/src/index.js';
     import { Data } from '#lib/data.ts';
-    import { dateAxis, groupByCategory, MAIN_REF, seriesFor, valueAxis, type Series } from '#lib/metrics.ts';
+    import { dateAxis, groupByCategory, latestRuns, seriesFor, valueAxis, type Series } from '#lib/metrics.ts';
     import { plot } from '#lib/plot.ts';
     import Summary from '#lib/components/summary.svelte';
     const axis = dateAxis();
-    const groups = groupByCategory(seriesFor(MAIN_REF, Data, axis) ?? [], (s) => s.path, Data.config);
-    const latest = Data.runs.get(MAIN_REF)?.[0];
+    const groups = Data === null ? [] : groupByCategory(seriesFor(Data.main, Data, axis) ?? [], (s) => s.path, Data.config);
+    const latest = Data === null ? [] : latestRuns(Data, Data.main);
 
     // Render plot only on request (expand collapsible)
     const mountPlot: Action<HTMLElement, Series<Date>> = (node, s) => {
@@ -34,9 +34,11 @@
 </script>
 
 <div class="run-overview">
-    {#if latest}
+    {#if latest.length}
         <section class="summary">
-            <Summary title="Latest run" run={latest}></Summary>
+            {#each latest as run (run.value)}
+                <Summary title={['Latest run', run.configuration].filter(Boolean).join(' · ')} {run}></Summary>
+            {/each}
         </section>
     {:else}
         <p class="empty">No runs yet.</p>
@@ -70,6 +72,13 @@
         max-width: var(--ds-sizing-7xl);
         margin-inline: auto;
     }
+
+    .summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(var(--ds-sizing-md), 100%), 1fr));
+        gap: var(--ds-spacing-4);
+    }
+
     .categories {
         display: grid;
         gap: var(--ds-spacing-3);

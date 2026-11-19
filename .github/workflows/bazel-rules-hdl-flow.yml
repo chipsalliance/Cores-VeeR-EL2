@@ -85,3 +85,17 @@ jobs:
             Cores-VeeR-EL2/bazel-bin/veer_el2_place_and_route_asap7_${{ matrix.bus.config }}__global_routing.log
             Cores-VeeR-EL2/bazel-bin/veer_el2_place_and_route_asap7_${{ matrix.bus.config }}_report.textproto
           if-no-files-found: error
+
+      - name: Collect EL2 ${{ matrix.bus.name }} metrics
+        if: success() || failure()
+        run: |
+          mkdir -p metrics
+          find -L Cores-VeeR-EL2/bazel-bin Cores-VeeR-EL2/bazel-out -name '*report.json' -exec cp {} metrics/ \; 2>/dev/null || true
+
+      - name: Upload EL2 ${{ matrix.bus.name }} metrics
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veer_el2_metrics_${{ matrix.bus.config }}
+          path: metrics/
+          if-no-files-found: warn

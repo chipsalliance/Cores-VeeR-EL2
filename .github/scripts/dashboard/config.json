@@ -1,5 +1,6 @@
 {
   "repository": "chipsalliance/Cores-VeeR-EL2",
+  "main_branch": "main",
   "labels": {
     "synthesis": "Synthesis",
     "design": "Design",
@@ -7,7 +8,6 @@
     "floorplan": "Floorplan",
     "global_routing": "Global Routing",
     "detailed_routing": "Detailed Routing",
-    "metadata": "Tool",
     "area": "Area",
     "sequential_area": "Sequential Area",
     "num_cells": "Cell Count",
@@ -20,8 +20,6 @@
     "num_wires": "Wire Count",
     "num_wire_bits": "Wire Bits Count",
     "num_ports": "Port Count",
-    "\\verilog_counter": "verilog_counter",
-    "\\verilog_counter_prescaler": "verilog_counter_prescaler",
     "@source_branch": "Branch",
     "@current_commit": "Commit",
     "num_pub_wires": "Public Wire Count",
@@ -66,9 +64,11 @@
     "flow__warnings__count:FIN-0010": "Flow Warnings Count (FIN-0010)",
     "flow__warnings__count:STA-1140": "Flow Warnings Count (STA-1140)",
     "flow__warnings__count:STA-1171": "Flow Warnings Count (STA-1171)",
+    "flow__warnings__count:ODB-0220": "Flow Warnings Count (ODB-0220)",
     "flow__warnings__type_count": "Flow Warnings Type Count",
     "drc": "DRC",
-    "count": "Count"
+    "count": "Count",
+    "@configuration": "Configuration"
   },
   "unit_types_file": "units_flatmap.json",
   "unit_types": {
@@ -80,15 +80,17 @@
   "summary": [
     "@source_branch",
     "@current_commit",
+    "@configuration",
     "synthesis.design.area",
     "synthesis.design.num_cells",
     "detailed_routing.power.Total.total"
   ],
   "overview": [
-    "detailed_routing.route__drc_errors",
-    "detailed_routing.route__wirelength",
-    "detailed_routing.flow__warnings__count",
-    "detailed_routing.flow__errors__count"
+    "@source_branch",
+    "@current_commit",
+    "@configuration",
+    "floorplan.area.design_area",
+    "floorplan.area.utilization"
   ],
-  "unplottable": ["metadata", "num_processes", "flow__warnings__type_count"]
+  "unplottable": ["num_processes", "flow__warnings__type_count"]
 }

@@ -81,6 +81,18 @@
             color: var(--ds-foreground-muted);
             font-size: var(--ds-font-size-sm);
         }
+
+        /* Overrides the font size of the plots' legends */
+        [class*='-swatches'] {
+            font-size: var(--ds-font-size-xs);
+        }
+
+        [aria-label='x-axis label'] {
+            font-size: var(--ds-font-size-base);
+        }
+        [aria-label='y-axis label'] {
+            font-size: var(--ds-font-size-base);
+        }
     }
 
     main {

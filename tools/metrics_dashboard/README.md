@@ -13,7 +13,7 @@ The metrics are expected to be in the JSON format and fulfill the metrics (`tool
 To normalize and serialize metric files run `serialize_json.py` script:
 
 ```
-python tools/serialize_json.py -o metrics_dashboard/src/lib/data/ -i sample-data/*_report.json -c sample-data/config.json
+python tools/serialize_json.py -o metrics_dashboard/src/lib/data/ -i path/to/metrics/*_report.json -c ../../.github/dashboard/config.json
 ```
 
 ### Validation
@@ -21,7 +21,7 @@ python tools/serialize_json.py -o metrics_dashboard/src/lib/data/ -i sample-data
 You may separately validate a metrics file, its metadata and the configuration file using the python `validate_metrics.py` script:
 
 ```
-python tools/validate_metrics.py -c sample-data/config.json sample-data/artificial-01_report.json
+python tools/validate_metrics.py -c ../../.github/dashboard/config.json path/to/metrics/<name>_report.json
 ```
 
 ## Building the dashboard

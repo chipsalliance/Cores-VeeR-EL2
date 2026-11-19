@@ -1,3 +1,4 @@
 jsonschema
 pint
-pytimeparse2 
+pytimeparse2
+pytest

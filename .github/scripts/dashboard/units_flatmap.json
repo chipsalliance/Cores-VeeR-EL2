@@ -84,7 +84,5 @@
   "global_routing.power.Total.internal": "power",
   "global_routing.power.Total.switching": "power",
   "global_routing.power.Total.leakage": "power",
-  "global_routing.power.Total.total": "power",
-  "synthesis.modules.\\verilog_counter.area": "area",
-  "synthesis.modules.\\verilog_counter.sequential_area": "area"
+  "global_routing.power.Total.total": "power"
 }

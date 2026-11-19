@@ -1,12 +1,12 @@
 <script lang="ts">
     import { Data } from '#lib/data.ts';
-    import { MAIN_REF, summaryRows, type Run } from '#lib/metrics.ts';
+    import { summaryRows, type Run } from '#lib/metrics.ts';
     import { AesirCard, AesirTable } from '#lib/aesir/src/index.js';
 
     let { title = 'Summary', run }: { title?: string; run: Run } = $props();
 
     // Metrics and metadata fields from the config's summary
-    let rows = $derived(summaryRows(MAIN_REF, Data, run, Data.config.summary));
+    let rows = $derived(Data === null ? [] : summaryRows(run.ref, Data, run, Data.config.summary));
 
     const cols = [
         { key: 'label', label: 'label' },

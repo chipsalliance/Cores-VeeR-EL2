@@ -1,10 +1,14 @@
 <script lang="ts">
     import { AesirBadge, AesirButton, AesirCard, AesirIcon, AesirTable } from '#lib/aesir/src/index.js';
     import { Data } from '#lib/data.ts';
-    import { overviewCards } from '#lib/metrics.ts';
+    import { overviewCards, type OverviewCard } from '#lib/metrics.ts';
+    import Details from '#lib/components/details.svelte';
 
-    const cards = overviewCards(Data);
-    const metricRows = Math.max(Data.config.overview?.length ?? 0, 1);
+    const cards = Data === null ? [] : overviewCards(Data);
+    const metricRows = Data === null ? 0 : Math.max(Data.config.overview?.length ?? 0, 1);
+
+    let detailsCard = $state.raw<OverviewCard | null>(null);
+    let detailsOpen = $state(false);
 
     const cardColumns = [
         { key: 'label', label: 'label' },
@@ -12,9 +16,9 @@
     ];
 </script>
 
-{#if cards.length}
-    <!-- All cards are the same size -->
-    <div class="overview" style:--metric-rows={metricRows} style:--card-rows={metricRows + 2}>
+<!-- All cards are the same size -->
+<div class="overview" style:--metric-rows={metricRows} style:--card-rows={metricRows + 2}>
+    {#if cards.length}
         {#each cards as card (card.key)}
             <AesirCard class="overview-card" title={card.title} titleElement="h2" description={card.description}>
                 {#snippet headerAction()}
@@ -40,13 +44,27 @@
 
                 {#snippet footer()}
                     <span class="overview-card__updated">Last updated: <time>{card.updated}</time></span>
-                    <AesirButton size="sm" variant="outline">View details</AesirButton>
+                    <AesirButton
+                        size="sm"
+                        variant="outline"
+                        aria-label={`View details of ${card.title}`}
+                        onclick={() => {
+                            detailsCard = card;
+                            detailsOpen = true;
+                        }}>View details</AesirButton
+                    >
                 {/snippet}
             </AesirCard>
         {/each}
-    </div>
-{:else}
-    <p class="empty">No runs yet.</p>
+    {:else}
+        <p class="empty">No runs yet.</p>
+    {/if}
+</div>
+
+{#if detailsCard}
+    {#key detailsCard.key}
+        <Details refKey={detailsCard.ref} configuration={detailsCard.configuration} bind:open={detailsOpen} />
+    {/key}
 {/if}
 
 <style>

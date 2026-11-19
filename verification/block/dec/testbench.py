@@ -1126,6 +1126,10 @@ class CsrPauseScoreboard(uvm_component):
                     self.passed = False
                 if not halt and rstate:
                     counter = counter - 1
+                elif (
+                    halt and counter == 1
+                ):  # MCPC state is cleared when top 31-bits are set to 0, even if halt is set the in that exact cycle
+                    active = False
                 r_timestamps = r_timestamps[1:]
                 if len(r_timestamps) == 0:
                     break

@@ -16,10 +16,10 @@ TOPLEVEL   = el2_tmr_boot_configuration
 EXTRA_ARGS = -I$(SRCDIR)/include/
 
 COMPILE_ARGS = \
- -DRV_MUBI_WIDTH=2 \
- -DRV_MUBI_TRUE=2 \
- -DRV_MUBI_FALSE=1 \
- -DRV_TRIPLE_MODULAR_REDUNDANCY_ENABLE=1
+ +define+RV_MUBI_WIDTH=2 \
+ +define+RV_MUBI_TRUE=2 \
+ +define+RV_MUBI_FALSE=1 \
+ +define+RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE=1
 
 VERILOG_SOURCES = \
     $(SRCDIR)/lib/el2_assert.sv \

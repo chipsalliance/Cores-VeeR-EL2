@@ -98,6 +98,7 @@ class BaseScoreboard(uvm_component):
 
     def check_phase(self):
         pred_count = None
+        post_rst = False
 
         if self.port.can_get():
             self.passed = True
@@ -107,8 +108,9 @@ class BaseScoreboard(uvm_component):
 
             if item.signals["rst_ni"] == 0:
                 pred_count = 0
+                post_rst = True
 
-            else:
+            elif post_rst:
 
                 curr_count = int(item.signals["cnt_o"])
 

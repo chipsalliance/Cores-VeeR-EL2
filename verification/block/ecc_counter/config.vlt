@@ -1,0 +1,2 @@
+`verilator_config
+lint_off -rule UNOPTFLAT -file "*/lib/el2_ecc_counter_8.sv"

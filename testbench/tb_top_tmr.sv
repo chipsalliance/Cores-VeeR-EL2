@@ -2440,7 +2440,7 @@ always @(negedge core_clk) begin
     $display("[%0t] See \"exec.log\" for execution trace with register updates..\n",$time);
     if (veer_upset_thread != null && veer_upset_thread.status() != process::FINISHED)
       veer_upset_thread.kill();
-    if (veer_upset_thread != null && veer_upset_thread.status() != process::FINISHED)
+    if (tmr_upset_thread != null && tmr_upset_thread.status() != process::FINISHED)
       tmr_upset_thread.kill();
     // OpenOCD test breaks if simulation closes the TCP connection first.
     // This delay allows OpenOCD to close the connection before the #finish.
@@ -2586,6 +2586,16 @@ initial begin
     $readmemh(hex_file, imem.mem);
     preload_dccm();
     preload_iccm();
+    wait (rst_l_combined === 1'b1);
+    forever begin
+      wait (rst_l_combined === 1'b0);
+        $display("Loading program from '%s'", hex_file);
+        $readmemh(hex_file, lmem.mem);
+        $readmemh(hex_file, imem.mem);
+        preload_dccm();
+        preload_iccm();
+      wait (rst_l_combined === 1'b1);
+    end
 end
 
 // ============================================================================
@@ -2771,32 +2781,32 @@ task tmr_upsetter(int fault_id, int fsm_state);
   end
 
 `ifndef RV_USER_MODE
-  if (fault_id inside {['d222:'d238]}) begin
+  if (fault_id inside {['d221:'d225]}) begin
     $display("Selected User Mode CSR in Non-User Mode build, skipping test.");
     $finish;
   end
 `endif
 
-  if (fault_id > 260) begin
-    $fatal(0, "Selected fault ID (%0d) is too high, should be lower than 261.", fault_id);
+  if (fault_id > 247) begin
+    $fatal(0, "Selected fault ID (%0d) is too high, should be lower than 248.", fault_id);
   end
 
   // Some signal faults must be injected in certain states to make injection reasonable
   if (fsm_state == -1) begin
     case (fault_id) inside
 `ifdef RV_USER_MODE
-      ['d82:'d238]: begin  // {csr|gpr}_recovery_storage_ff
+      ['d82:'d225]: begin  // {csr|gpr}_recovery_storage_ff
 `else
-      ['d82:'d221]: begin  // {csr|gpr}_recovery_storage_ff
+      ['d82:'d220]: begin  // {csr|gpr}_recovery_storage_ff
 `endif
         inject_fault(fault_id, el2_tmr_pkg::READ_REG);
         inject_fault(fault_id, el2_tmr_pkg::WRITE_REG);
       end
-      'd239: begin  // pc_recovery_storage_ff
+      'd226: begin  // pc_recovery_storage_ff
         fsm_state = $urandom_range(3, 14); // state after READ_REG
         inject_fault(fault_id, tmr_fsm_state[fsm_state]);
       end
-      'd252: begin  // fsm_state_ff
+      'd239: begin  // fsm_state_ff
         inject_fault(fault_id, el2_tmr_pkg::IDLE);
         inject_fault(fault_id, el2_tmr_pkg::HALT_CORES);
         inject_fault(fault_id, el2_tmr_pkg::READ_REG);
@@ -2813,7 +2823,7 @@ task tmr_upsetter(int fault_id, int fsm_state);
         inject_fault(fault_id, el2_tmr_pkg::CLEAR_FLAG_SR);
         inject_fault(fault_id, el2_tmr_pkg::CLEAR_FLAG_CR);
       end
-      'd257: begin // sync_rst_l_ff - recoverable
+      'd244: begin // sync_rst_l_ff - recoverable
         inject_fault(fault_id, el2_tmr_pkg::RESET_CPU);
       end
       default: begin

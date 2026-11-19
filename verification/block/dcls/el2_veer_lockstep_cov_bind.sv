@@ -1,10 +1,13 @@
 module el2_veer_lockstep_cov_bind
 #(
 `ifdef FCOV
+`ifndef VERILATOR
     `include "el2_param.vh"
+`endif
 `endif
 ) ();
 `ifdef FCOV
+`ifndef VERILATOR
     if (pt.LOCKSTEP_DELAY > 0) begin
         bind el2_veer_lockstep el2_veer_lockstep_cov_if el2_veer_lockstep_cov(
 `ifdef RV_LOCKSTEP_REGFILE_ENABLE
@@ -22,6 +25,7 @@ module el2_veer_lockstep_cov_bind
              .*
         );
     end
+`endif
 `endif
 
 endmodule

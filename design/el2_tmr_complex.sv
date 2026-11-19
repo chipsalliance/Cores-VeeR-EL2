@@ -387,6 +387,7 @@ module el2_tmr_complex
     output logic                 iccm_ecc_double_error,
     output logic                 dccm_ecc_single_error,
     output logic                 dccm_ecc_double_error,
+    output logic                 dccm_write_readback_error,
 
     input logic [pt.PIC_TOTAL_INT:1]           extintsrc_req,
     input logic                   timer_int,
@@ -515,6 +516,7 @@ module el2_tmr_complex
   logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_wr_data_hi_veer[3];
   logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_rd_data_lo_veer[3];
   logic [pt.DCCM_FDATA_WIDTH-1:0] dccm_rd_data_hi_veer[3];
+  logic                           dccm_write_readback_error_veer[3];
 
   // ICCM
   logic [pt.ICCM_BITS-1:1] iccm_rw_addr_veer[3];
@@ -1180,7 +1182,6 @@ module el2_tmr_complex
   // Cores
   for (genvar i=0;i < 3; i+=1) begin: cores
     logic dec_tlu_dccm_wr_readback_disable; // TODO: Is it needed?
-    logic dccm_write_readback_error; // TODO: Is it needed?
 
     // Keep inactive cores in reset
     assign sync_rst_l_veer[i] = sync_rst_l & mubi_check_true(core_active[i]);
@@ -1499,7 +1500,7 @@ module el2_tmr_complex
         .iccm_ecc_double_error(iccm_ecc_double_error_veer[i]),
         .dccm_ecc_single_error(dccm_ecc_single_error_veer[i]),
         .dccm_ecc_double_error(dccm_ecc_double_error_veer[i]),
-        .dccm_write_readback_error(dccm_write_readback_error),
+        .dccm_write_readback_error(dccm_write_readback_error_veer[i]),
         .recovery_gpr_en(recovery_gpr_en_veer[i]),
         .recovery_gpr_wen(recovery_gpr_wen_veer[i]),
         .recovery_gpr_wraddr(recovery_gpr_wraddr_veer[i]),

@@ -462,7 +462,7 @@ def tmr_voter_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
-@nox.parametrize("blockName", ["tmr_if/tmr_iccm"])
+@nox.parametrize("blockName", ["tmr_iccm"])
 @nox.parametrize(
     "testName",
     [
@@ -475,7 +475,7 @@ def tmr_iccm_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
-@nox.parametrize("blockName", ["tmr_if/tmr_dccm"])
+@nox.parametrize("blockName", ["tmr_dccm"])
 @nox.parametrize(
     "testName",
     [
@@ -488,7 +488,7 @@ def tmr_dccm_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
-@nox.parametrize("blockName", ["tmr_if/tmr_ic"])
+@nox.parametrize("blockName", ["tmr_ic"])
 @nox.parametrize(
     "testName",
     [
@@ -501,7 +501,7 @@ def tmr_ic_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
-@nox.parametrize("blockName", ["tmr_if/tmr_pic"])
+@nox.parametrize("blockName", ["tmr_pic"])
 @nox.parametrize(
     "testName",
     [
@@ -514,7 +514,7 @@ def tmr_pic_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
-@nox.parametrize("blockName", ["tmr_if/tmr_dmi"])
+@nox.parametrize("blockName", ["tmr_dmi"])
 @nox.parametrize(
     "testName",
     [
@@ -527,7 +527,7 @@ def tmr_dmi_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
-@nox.parametrize("blockName", ["tmr_if/tmr_misc"])
+@nox.parametrize("blockName", ["tmr_misc"])
 @nox.parametrize(
     "testName",
     [
@@ -540,7 +540,7 @@ def tmr_misc_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
-@nox.parametrize("blockName", ["tmr_if/tmr_exec"])
+@nox.parametrize("blockName", ["tmr_exec"])
 @nox.parametrize(
     "testName",
     [
@@ -568,7 +568,7 @@ def ecc_counter_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
-@nox.parametrize("blockName", ["tmr_axi/axi_m"])
+@nox.parametrize("blockName", ["tmr_axi_m"])
 @nox.parametrize(
     "testName",
     [
@@ -581,7 +581,7 @@ def tmr_axi_m_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
-@nox.parametrize("blockName", ["tmr_axi/axi_s"])
+@nox.parametrize("blockName", ["tmr_axi_s"])
 @nox.parametrize(
     "testName",
     [
@@ -594,7 +594,7 @@ def tmr_axi_s_verify(session, blockName, testName, coverage):
 
 
 @nox.session(tags=["tests"])
-@nox.parametrize("blockName", ["tmr_axi/axi_counter"])
+@nox.parametrize("blockName", ["tmr_axi_counter"])
 @nox.parametrize(
     "testName",
     [

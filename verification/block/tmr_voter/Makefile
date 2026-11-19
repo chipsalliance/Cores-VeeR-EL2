@@ -15,11 +15,11 @@ MODULE    ?= $(subst $(space),$(comma),$(subst .py,,$(TEST_FILES)))
 TOPLEVEL   = el2_tmr_voter_wrapper
 
 COMPILE_ARGS = \
- -DRV_MUBI_WIDTH=2 \
- -DRV_MUBI_TRUE=2 \
- -DRV_MUBI_FALSE=1 \
- -DRV_TRIPLE_MODULAR_REDUNDANCY_ENABLE=1 \
- -GWidth=8
+ +define+RV_MUBI_WIDTH=2 \
+ +define+RV_MUBI_TRUE=2 \
+ +define+RV_MUBI_FALSE=1 \
+ +define+RV_TRIPLE_MODULAR_REDUNDANCY_ENABLE=1 \
+ -pvalue+Width=8
 
 include $(TEST_DIR)/../common.mk
 

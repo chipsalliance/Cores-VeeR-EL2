@@ -37,7 +37,7 @@ class TestSequence(uvm_sequence):
                     # .. and force storage bit
                     if upset_bit is not None:
                         v = random.choice([0, 1])
-                        it.signals[f"storage[{upset_bit}]"] = Force(v)
+                        it.signals[("storage", upset_bit)] = Force(v)
 
                     await self.seqr.start_item(it)
                     await self.seqr.finish_item(it)
@@ -48,7 +48,7 @@ class TestSequence(uvm_sequence):
 
                     # .. and release storage bit
                     if upset_bit is not None:
-                        it.signals[f"storage[{upset_bit}]"] = Release()
+                        it.signals[("storage", upset_bit)] = Release()
 
                     await self.seqr.start_item(it)
                     await self.seqr.finish_item(it)

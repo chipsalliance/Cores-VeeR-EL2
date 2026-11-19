@@ -186,7 +186,7 @@ jobs:
         run: |
           echo "tests=$(python3 .github/scripts/select_pr_tests.py \
             '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}' 100 \
-            'tmr_voter:tmr_voter,ecc_counter:ecc_counter,tmr_axi/axi_m:tmr_axi_m,tmr_axi/axi_s:tmr_axi_s,tmr_axi/axi_counter:tmr_axi_counter,tmr_if/tmr_iccm:tmr_iccm,tmr_if/tmr_dccm:tmr_dccm,tmr_if/tmr_ic:tmr_ic,tmr_if/tmr_pic:tmr_pic,tmr_if/tmr_dmi:tmr_dmi,tmr_if/tmr_misc:tmr_misc,tmr_if/tmr_exec:tmr_exec,tmr_boot_config:tmr_boot_config,tmr_recovery_fsm:tmr_recovery_fsm,tmr_cutoff:tmr_cutoff' \
+            'tmr_voter:tmr_voter,ecc_counter:ecc_counter,tmr_axi_m:tmr_axi_m,tmr_axi_s:tmr_axi_s,tmr_axi_counter:tmr_axi_counter,tmr_iccm:tmr_iccm,tmr_dccm:tmr_dccm,tmr_ic:tmr_ic,tmr_pic:tmr_pic,tmr_dmi:tmr_dmi,tmr_misc:tmr_misc,tmr_exec:tmr_exec,tmr_boot_config:tmr_boot_config,tmr_recovery_fsm:tmr_recovery_fsm,tmr_cutoff:tmr_cutoff' \
             'tmr_recovery_fsm:tmr_recovery_fsm,tmr_cutoff:tmr_cutoff')" | tee -a $GITHUB_OUTPUT
 
   tmr_tests:
@@ -265,6 +265,65 @@ jobs:
           - "block/dec_tlu_ctl"
           - "block/dec"
           - "block/dcls"
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
+      TEST: ${{ matrix.test }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Perform custom tests
+        run: _secret_custom_uarch:23
+        env:
+          TEST: ${{ matrix.test }}
+
+  custom_tmr_tests_pr:
+    name: Run custom TMR Microarchitectural tests
+    if: inputs.run_custom
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: antmicro/centos-dev-tools
+    strategy:
+      matrix:
+        test:
+          - "block/tmr_voter"
+          - "block/ecc_counter"
+          - "block/tmr_axi_m"
+          - "block/tmr_axi_s"
+          - "block/tmr_axi_counter"
+          - "block/tmr_iccm"
+          - "block/tmr_dccm"
+          - "block/tmr_ic"
+          - "block/tmr_pic"
+          - "block/tmr_dmi"
+          - "block/tmr_misc"
+          - "block/tmr_exec"
+          - "block/tmr_boot_config"
+    env:
+      GHA_EXTERNAL_DISK: additional-tools
+      GHA_SA: gh-sa-veer-uploader
+      TEST: ${{ matrix.test }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Perform custom tests
+        run: _secret_custom_uarch:23
+        env:
+          TEST: ${{ matrix.test }}
+
+  custom_tmr_tests_slow:
+    name: Run custom long TMR Microarchitectural tests
+    if: ${{ github.event_name != 'pull_request' && inputs.run_custom }}
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: antmicro/centos-dev-tools
+    strategy:
+      matrix:
+        test:
+          - "block/tmr_recovery_fsm"
+          - "block/tmr_cutoff"
     env:
       GHA_EXTERNAL_DISK: additional-tools
       GHA_SA: gh-sa-veer-uploader

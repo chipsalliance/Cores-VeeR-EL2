@@ -9,7 +9,7 @@ WAVES           ?= 1
 
 # Paths
 CURDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-CFGDIR ?= $(abspath $(CURDIR)/snapshots/default)
+CFGDIR ?= $(abspath $(TEST_DIR)/snapshots/default)
 CONFIG := $(abspath $(CURDIR)/../../configs)
 
 # Set pythonpath so that tests can access common modules

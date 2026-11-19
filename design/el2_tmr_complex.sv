@@ -534,8 +534,6 @@ module el2_tmr_complex
 
   logic [pt.ICACHE_BANKS_WAY-1:0][70:0] ic_wr_data_veer[3];
   logic [141:0]                         ic_rd_data_veer[3];
-  logic [1:0]                           ic_rd_addr_lo_veer[3];
-  logic [pt.ICACHE_BANKS_WAY-1:0]       ic_rd_bank_check_en_veer[3];
   logic [70:0]                          ic_debug_rd_data_veer[3];
   logic [25:0]                          ictag_debug_rd_data_veer[3];
   logic [70:0]                          ic_debug_wr_data_veer[3];
@@ -1304,8 +1302,6 @@ module el2_tmr_complex
         .ic_rd_en(ic_rd_en_veer[i]),
         .ic_wr_data(ic_wr_data_veer[i]),
         .ic_rd_data (ic_rd_data_veer[i]),
-        .ic_rd_addr_lo(ic_rd_addr_lo_veer[i]),
-        .ic_rd_bank_check_en(ic_rd_bank_check_en_veer[i]),
         .ic_debug_rd_data (ic_debug_rd_data_veer[i]),
         .ictag_debug_rd_data(ictag_debug_rd_data_veer[i]),
         .ic_debug_wr_data(ic_debug_wr_data_veer[i]),
@@ -1568,8 +1564,6 @@ module el2_tmr_complex
         .ic_debug_tag_array(ic_debug_tag_array_veer[i]),
         .ic_debug_way(ic_debug_way_veer[i]),
         .ic_rd_data(ic_rd_data_veer[i]),
-        .ic_rd_addr_lo(ic_rd_addr_lo_veer[i]),
-        .ic_rd_bank_check_en(ic_rd_bank_check_en_veer[i]),
         .ictag_debug_rd_data(ictag_debug_rd_data_veer[i]),
         .ic_rd_hit(ic_rd_hit_veer[i]),
         .ic_tag_perr(ic_tag_perr_veer[i]),

@@ -9,9 +9,8 @@ from cocotb.clock import Clock
 from cocotb.handle import ModifiableObject
 from cocotb.triggers import ClockCycles, FallingEdge, ReadOnly, ReadWrite, RisingEdge
 from cocotb.utils import get_sim_time
+from if_common import ClockDomain
 from pyuvm import *
-
-from common import ClockDomain
 
 # ==============================================================================
 
@@ -133,12 +132,6 @@ MCSR = [
     0x7CC,
     0x7CE,
     0x7CF,
-    #    0x7D2,
-    #    0x7D3,
-    #    0x7D4,
-    #    0x7D5,
-    #    0x7D6,
-    #    0x7D7,
     0x7F0,
     0x7F1,
     0x7F2,

@@ -211,9 +211,14 @@ module tb_top
     logic dmi_core_enable;
 
     logic [7:0] rst_l_cmd;
-    logic rst_l_combined;
+    logic       rst_l_combined;
+    // Initialize to '1 so porst_l_combined is never X in 4-state sims before
+    // rst_l falls at t=5 (porst_l falls earlier at t=1).
+    logic [7:0] porst_l_cmd = '1;
+    logic       porst_l_combined;
 
-    assign rst_l_combined = rst_l & (&rst_l_cmd);
+    assign rst_l_combined   = rst_l & (&rst_l_cmd);
+    assign porst_l_combined = porst_l & (&porst_l_cmd);
 
     always_comb dmi_core_enable = ~(o_cpu_halt_status);
 
@@ -1039,6 +1044,7 @@ module tb_top
             inject_lockstep_in_dist <= '0;
             clear_inject_in_dist <= '0;
             rst_l_cmd <= '1;
+            porst_l_cmd <= '1;
             at_newline <= 1'b1;
             inject_veer_in_dist_no <= '0;
             inject_lockstep_in_dist_no <= '0;
@@ -1054,6 +1060,7 @@ module tb_top
             clear_inject_in_dist <= '0;
             cycleCnt <= cycleCnt+1;
             rst_l_cmd <= {rst_l_cmd[6:0], rst_l_cmd[0]};
+            porst_l_cmd <= {porst_l_cmd[6:0], porst_l_cmd[0]};
             // timeout monitor
             if(cycleCnt == MAX_CYCLES) begin
                 $display ("Hit max cycle count (%0d) .. stopping", cycleCnt);
@@ -1162,6 +1169,11 @@ module tb_top
             if(mailbox_write && (mailbox_data[7:0] == 8'h96)) begin
                 $display("[%0t ns] Reset all",$time);
                 rst_l_cmd <= 8'b1;
+            end
+            if (mailbox_write && (mailbox_data[7:0] == 8'h97)) begin
+                $display("[%0t ns] Reset all (including debug module)", $time);
+                rst_l_cmd   <= 8'h01;
+                porst_l_cmd <= 8'h01;
             end
             // CPU debug enter/exit sequence
             if(mailbox_write && (mailbox_data[7:0] == 8'hA0)) begin
@@ -3656,7 +3668,7 @@ module tb_top
    //=========================================================================-
 veer_wrapper rvtop_wrapper (
     .rst_l                  ( rst_l_combined ),
-    .dbg_rst_l              ( porst_l       ),
+    .dbg_rst_l              ( porst_l_combined ),
     .clk                    ( core_clk      ),
     .rst_vec                ( reset_vector[31:1]),
     .nmi_int                ( nmi_int       ),

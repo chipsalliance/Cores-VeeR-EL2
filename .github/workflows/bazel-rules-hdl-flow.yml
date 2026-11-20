@@ -10,6 +10,7 @@ defaults:
 
 env:
   DEBIAN_FRONTEND: noninteractive
+  GHA_MACHINE_TYPE: n2-standard-16
 
 jobs:
   run-bazel-rules-hdl-pnr:

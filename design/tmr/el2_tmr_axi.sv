@@ -7,7 +7,7 @@ module el2_tmr_axi
   import el2_pkg::*;
   import el2_mubi_pkg::*;
 #(
-    `include "el2_param.vh"
+    `include "el2_param.svh"
 ) (
     input  logic                            rst_l,
     input  logic                            free_l2clk,

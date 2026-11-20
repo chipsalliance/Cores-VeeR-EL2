@@ -26,7 +26,7 @@ VERILOG_DEFINE_FILES = \
     ${UVM_ROOT}/src/uvm.sv \
     ${RV_ROOT}/snapshots/$(SNAPSHOT)/common_defines.vh \
     ${RV_ROOT}/design/include/el2_def.sv \
-	${RV_ROOT}/snapshots/$(SNAPSHOT)/el2_pdef.vh
+	${RV_ROOT}/snapshots/$(SNAPSHOT)/el2_pdef.svh
 
 VERILOG_INCLUDE_DIRS = \
     hdl \
@@ -67,7 +67,7 @@ $(UVM_ROOT):
 # -------------------------------------
 # Configure VeeR EL-2
 # -------------------------------------
-$(RV_ROOT)/snapshots/$(SNAPSHOT)/el2_param.vh:
+$(RV_ROOT)/snapshots/$(SNAPSHOT)/el2_param.svh:
 	$(RV_ROOT)/configs/veer.config -snapshot=$(SNAPSHOT) -fpga_optimize=0
 
 # FIXME: Patch source to disable "ifdef VERILATOR". Can't undef it as it has to be set for UVM sources.
@@ -78,7 +78,7 @@ $(SIM_DIR)/el2_lsu_dccm_mem.sv:
 # -------------------------------------
 # Make UVM test with Verilator
 # -------------------------------------
-verilate: ${UVM_ROOT} $(RV_ROOT)/snapshots/$(SNAPSHOT)/el2_param.vh $(VERILOG_SOURCES) $(wildcard hdl/*.sv)
+verilate: ${UVM_ROOT} $(RV_ROOT)/snapshots/$(SNAPSHOT)/el2_param.svh $(VERILOG_SOURCES) $(wildcard hdl/*.sv)
 	$(VERILATOR) --cc --exe --main --timing -Mdir $(SIM_DIR) \
 	${COMPILE_ARGS} ${EXTRA_ARGS} \
 	${VERILOG_DEFINE_FILES} \

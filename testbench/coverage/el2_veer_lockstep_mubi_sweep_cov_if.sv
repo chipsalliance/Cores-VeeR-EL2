@@ -23,7 +23,7 @@
 interface el2_veer_lockstep_mubi_sweep_cov_if
   import el2_mubi_pkg::*;
 #(
-  `include "el2_param.vh"
+  `include "el2_param.svh"
 ) (
   input logic      clk,
   input logic      rst_n,

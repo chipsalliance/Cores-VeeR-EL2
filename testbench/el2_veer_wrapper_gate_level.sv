@@ -26,7 +26,7 @@
 module el2_veer_wrapper_gate_level
 import el2_pkg::*;
  #(
-`include "el2_param.vh"
+`include "el2_param.svh"
 )
 (
    input logic                             clk,

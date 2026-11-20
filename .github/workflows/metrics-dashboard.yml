@@ -1,0 +1,154 @@
+# Merges the metrics of the Bazel-Rules-HDL flow into the dashboard deployed at html/metrics_dashboard on gh-pages.
+name: Metrics dashboard
+
+on:
+  workflow_call:
+    inputs:
+      pipeline_status:
+        description: "Status of the Bazel-Rules-HDL flow: passed, failed or canceled"
+        type: string
+        default: passed
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  DASHBOARD: tools/metrics_dashboard
+  DASHBOARD_CONFIG_DIR: .github/scripts/dashboard
+  DATA: tools/metrics_dashboard/metrics_dashboard/src/lib/data
+  DEPLOY_DIR: public.new/html/metrics_dashboard
+  # Metrics state kept across the deployments
+  DEPLOY_DATA_DIR: public.new/html/metrics_dashboard/data
+
+jobs:
+  deploy:
+    name: Update metrics dashboard
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: gh-pages
+    permissions:
+      contents: write
+      pull-requests: read
+    steps:
+      - name: Setup repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Fetch dashboard components
+        run: |
+          git submodule update --init --depth 1 \
+            "$DASHBOARD/metrics_dashboard/src/lib/aesir" "$DASHBOARD/metrics_dashboard/src/lib/aesir-html"
+
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: ./public.checkout
+
+      - name: Preserve only valid items
+        run: |
+          mkdir -p ./public.new
+          mv ./public.checkout/doctrees ./public.new/ || true
+          mv ./public.checkout/html ./public.new/ || true
+
+      # One directory per config: metrics/veer_el2_metrics_<config>/*_report.json
+      - name: Download metrics
+        uses: actions/download-artifact@v4
+        with:
+          pattern: veer_el2_metrics_*
+          path: ./metrics
+
+      - name: Prepare runs
+        env:
+          TEMPLATE: ${{ github.event_name == 'pull_request' && 'pr' || 'push' }}
+          STATUS: ${{ inputs.pipeline_status }}
+          URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SRC_BRANCH: ${{ github.head_ref || github.ref_name }}
+          SRC_REPO: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          TGT_BRANCH: ${{ github.base_ref }}
+          TGT_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          export DATE=$(date -u '+%Y-%m-%d %H:%M')
+          export COMMIT=$(git rev-parse --short=7 HEAD)
+          export COMMIT_MESSAGE=$(jq -n --arg t "$(git log -1 --format=%B)" '$t')
+          export PR_TITLE_JSON=$(jq -n --arg t "$PR_TITLE" '$t')
+
+          # Generate metadata file per configuration
+          shopt -s nullglob
+          mkdir -p metrics_processed
+          for dir in metrics/veer_el2_metrics_*/; do
+            export CONFIGURATION=$(basename "$dir")
+            CONFIGURATION=${CONFIGURATION#veer_el2_metrics_}
+            envsubst < "$DASHBOARD_CONFIG_DIR/metadata/$TEMPLATE.json.tpl" > "$dir/metadata.json"
+            .github/scripts/prepare_metrics.sh "$dir" "metrics_processed/${CONFIGURATION}_report.json" \
+              || echo "::warning::$CONFIGURATION: no run for the dashboard"
+          done
+
+      # <configuration>-<run-id>-<attempt>_report.json + _report.metadata.json (runs are found by '*_report.json')
+      - name: Append runs
+        run: |
+          mkdir -p "$DEPLOY_DATA_DIR"
+          shopt -s nullglob
+          for file in metrics_processed/*_report.json; do
+            name=$(basename "$file" _report.json)-${{ github.run_id }}-${{ github.run_attempt }}_report
+            cp "$file" "$DEPLOY_DATA_DIR/$name.json"
+            cp "${file%.json}.metadata.json" "$DEPLOY_DATA_DIR/$name.metadata.json"
+          done
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Serialize data
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$DATA"
+          # Restore currently tracked metrics
+          cp "$DEPLOY_DATA_DIR/data.json" "$DATA/" || true
+
+          # Prune PRs that are not on the list
+          MAIN_BRANCH=$(jq -r '.main_branch' "$DASHBOARD_CONFIG_DIR/config.json")
+          OPEN_PRS=$(gh pr list --base "$MAIN_BRANCH" --limit 1000 --json number --jq '.[].number')
+
+          shopt -s nullglob
+          pip install -r "$DASHBOARD/tools/requirements.txt"
+          python "$DASHBOARD/tools/serialize_json.py" -o "$DATA" -c "$DASHBOARD_CONFIG_DIR/config.json" \
+            -i "$DEPLOY_DATA_DIR"/*_report.json --open-prs $OPEN_PRS
+
+      - name: Build
+        working-directory: ${{ env.DASHBOARD }}/metrics_dashboard
+        run: npm ci > /dev/null && npm run build
+
+      - name: Update webpage
+        run: |
+          mv "$DEPLOY_DATA_DIR" data.all
+          rm -rf "$DEPLOY_DIR"
+          mkdir -p "$(dirname "$DEPLOY_DIR")"
+          mv "$DASHBOARD/metrics_dashboard/build" "$DEPLOY_DIR"
+          mv data.all "$DEPLOY_DATA_DIR"
+          cp "$DATA"/*.json "$DEPLOY_DATA_DIR/"
+
+          cp .github/scripts/indexgen/index_redirect/index.html ./public.new/
+
+      # Upload the dashboard before it's deployed to GH pages
+      - uses: actions/upload-artifact@v4
+        with:
+          name: metrics-dashboard
+          path: public.new
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public.new
+          commit_message: Update the metrics dashboard
+          force_orphan: true

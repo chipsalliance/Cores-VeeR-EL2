@@ -27,3 +27,5 @@ tools/renode/*.elf
 tools/renode/.venv
 docs/build
 bazel-*
+!.github/scripts/dashboard/*.json
+!tools/metrics_dashboard/**/*.json

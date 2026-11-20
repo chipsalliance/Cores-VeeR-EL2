@@ -1,0 +1,11 @@
+{
+    "tabWidth": 4,
+    "singleQuote": true,
+    "trailingComma": "none",
+    "printWidth": 150,
+    "plugins": ["prettier-plugin-svelte"],
+    "overrides": [
+        { "files": "*.svelte", "options": { "parser": "svelte" } },
+        { "files": ["*.json"], "options": { "useTabs": true } }
+    ]
+}

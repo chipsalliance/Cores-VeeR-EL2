@@ -3,7 +3,7 @@ load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files(["replace_async_ff.py"])
+exports_files(["replace_async_ff.py", "die_shot.tcl"])
 
 perl_library(
     name = "gen_picmap",

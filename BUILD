@@ -1,5 +1,5 @@
 load("@rules_hdl//gds_write:build_defs.bzl", "gds_write")
-load("@rules_hdl//place_and_route:build_defs.bzl", "place_and_route")
+load("@rules_hdl//place_and_route:build_defs.bzl", "place_and_route", "custom_openroad_script")
 load("@rules_hdl//synthesis:build_defs.bzl", "synthesize_rtl")
 load("@rules_hdl//synthesis:defs.bzl", "sdc_library")
 load("@rules_hdl//verilog:providers.bzl", "verilog_library")
@@ -122,7 +122,17 @@ CONFIGS = {
     suppress_warnings = ASAP7_SUPPRESSED_WARNINGS,
     sdc = ":constraint_%s" % c,
     synthesized_rtl = ":veer_el2_synth_asap7_%s" % c,
-    stop_after_step = "global_routing",
+    qt_qpa_platform = "offscreen",
+    custom_post_step_scripts = [custom_openroad_script(
+        "veer_el2_die_shot_%s" % c,
+        post_step = "global_routing",
+        inputs = ["//tools:die_shot.tcl"],
+        outputs = ["veer_el2_die_shot_%s.png" % c],
+        script = """
+            source $(location //tools:die_shot.tcl)
+            die_shot ${veer_el2_die_shot_%s.png}
+        """ % c
+    )]
 ) for c in CONFIGS]
 
 [gds_write(

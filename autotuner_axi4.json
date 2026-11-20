@@ -1,0 +1,34 @@
+{
+    "synthesize_rtl.target_clock_period_pico_seconds": {
+        "type": "int",
+        "minmax": [
+            1000,
+            10000
+        ],
+        "reference": 4000
+    },
+    "place_and_route.placement_density": {
+        "type": "float",
+        "minmax": [
+            20.0,
+            60.0
+        ],
+        "reference": 35.0
+    },
+    "place_and_route.target_die_utilization_percentage": {
+        "type": "int",
+        "minmax": [
+            30,
+            70
+        ],
+        "reference": 50
+    },
+    "place_and_route.core_padding_microns": {
+        "type": "int",
+        "minmax": [
+            5,
+            40
+        ],
+        "reference": 20
+    }
+}

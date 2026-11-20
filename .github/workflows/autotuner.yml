@@ -1,0 +1,82 @@
+name: VeeR-EL2 Autotuner
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  DEBIAN_FRONTEND: noninteractive
+
+jobs:
+  run-bazel-rules-hdl-autotuner:
+    name: Run EL2 Bazel-Rules-HDL Autotuner flow
+    runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
+    container: debian:trixie
+    strategy:
+      fail-fast: false
+      matrix:
+        bus:
+          - name: AXI
+            config: axi4
+          - name: AHB
+            config: ahb_lite
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      GHA_MACHINE_TYPE: n2-standard-16
+
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update -qq
+          apt-get install -qqy --no-install-recommends \
+            curl ca-certificates python3 build-essential clang cmake flex bison git file zip wget tree
+
+      - name: Configure Bazel
+        run: |
+          mkdir -p /tmp/distdir
+          for url in \
+            https://mirrors.kernel.org/gnu/glpk/glpk-5.0.tar.gz \
+            https://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz; do
+            if curl -fL --retry 5 --retry-delay 5 --retry-all-errors \
+                 --connect-timeout 20 --max-time 300 \
+                 -o /tmp/distdir/glpk-5.0.tar.gz "$url"; then
+              break
+            fi
+          done
+          test -s /tmp/distdir/glpk-5.0.tar.gz
+          printf '%s\n' 'common --distdir=/tmp/distdir' 'build -c opt' >> .bazelrc
+
+      - name: Install Bazel 8.5.0
+        run: |
+          wget -q \
+            https://github.com/bazelbuild/bazel/releases/download/8.5.0/bazel-8.5.0-linux-x86_64 \
+            -O /usr/local/bin/bazel
+
+          chmod +x /usr/local/bin/bazel
+
+          bazel --version
+
+      - name: Setup repository
+        uses: actions/checkout@v6
+        with:
+          path: Cores-VeeR-EL2
+          submodules: recursive
+
+      - name: Run EL2 ${{ matrix.bus.name }} Autotuner
+        run: |
+          cd "$GITHUB_WORKSPACE/Cores-VeeR-EL2"
+          git status
+          bazel run //:veer-el2_tune_${{ matrix.bus.config }}
+
+      - name: Upload EL2 ${{ matrix.bus.name }} autotuner results
+        uses: actions/upload-artifact@v4
+        with:
+          name: veer-el2_tune_${{ matrix.bus.config }}
+          path: |
+            Cores-VeeR-EL2/autotuner_runs/veer-el2_tune_${{ matrix.bus.config }}/autotuner-best.json
+            Cores-VeeR-EL2/autotuner_runs/veer-el2_tune_${{ matrix.bus.config }}/reference/bazel.log
+            Cores-VeeR-EL2/autotuner_runs/veer-el2_tune_${{ matrix.bus.config }}/sample*/iteration*/bazel.log
+          if-no-files-found: warn

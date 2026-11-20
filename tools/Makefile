@@ -65,6 +65,12 @@ PICOLIBC_DIR = ${RV_ROOT}/third_party/picolibc/install
 GATELEVEL ?= 0
 TIMESCALE ?= 1ns/10ps
 
+ifdef TMR_TB
+TB_TOP ?= tb_top_tmr
+else
+TB_TOP ?= tb_top
+endif
+
 # Override march depending on used GCC version
 ifneq ($(shell which $(GCC_PREFIX)-gcc 2> /dev/null),)
 	GCCVERSIONGT11 := $(shell expr `$(GCC_PREFIX)-gcc -dumpversion | cut -f1 -d.` \>= 11)
@@ -88,7 +94,7 @@ ifeq ($(TB_MAX_CYCLES),)
 endif
 
 VERILATOR_EXTRA_ARGS := -GMAX_CYCLES=$(TB_MAX_CYCLES)
-VCS_EXTRA_ARGS := -pvalue+tb_top.MAX_CYCLES=$(TB_MAX_CYCLES)
+VCS_EXTRA_ARGS := -pvalue+$(TB_TOP).MAX_CYCLES=$(TB_MAX_CYCLES)
 
 ifeq ("$(.SHELLSTATUS)", "0")
     $(shell test $(VERILATOR_VERSION) -lt 5006)
@@ -202,7 +208,7 @@ TB_VERILATOR_SRCS = $(TBDIR)/test_tb_top.cpp $(TB_DPI_SRCS)
 
 TBFILES = $(TBDIR)/tb_top_if.sv \
           $(TBDIR)/tb_top_pkg.sv \
-          $(TBDIR)/tb_top.sv \
+          $(TBDIR)/$(TB_TOP).sv \
           $(TBDIR)/ahb_sif.sv \
           $(TBDIR)/axi_sif.sv \
           $(TBDIR)/jtagdpi/jtagdpi.sv \
@@ -221,6 +227,7 @@ TBFILES = $(TBDIR)/tb_top_if.sv \
 defines  = $(BUILD_DIR)/common_defines.vh
 defines += ${RV_ROOT}/design/include/el2_def.sv
 defines += $(BUILD_DIR)/el2_pdef.vh
+defines += +define+TB_TOP=$(TB_TOP)
 includes = -I${BUILD_DIR} -I$(TBDIR)/axi4_mux
 
 CM_HIER_FILE = $(RV_ROOT)/cm.cfg
@@ -232,6 +239,13 @@ CFLAGS += -std=c++14
 # slower runtime (faster compiles) -O2 for faster runtime (slower
 # compiles), or -O for balance.
 VERILATOR_MAKE_FLAGS = OPT_FAST="-Os"
+
+# At this point all variables are configured so include the TMR makefile
+ifdef TMR_TB
+include $(RV_ROOT)/tools/tmr.mk
+else
+TMR_CONF_PARAMS =
+endif
 
 # Targets
 all: clean verilator
@@ -247,8 +261,9 @@ clean:
 
 # If define files do not exist, then run veer.config.
 ${BUILD_DIR}/defines.h:
-	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/veer.config -target=$(target) $(CONF_PARAMS)
+	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/veer.config -target=$(target) $(CONF_PARAMS) $(TMR_CONF_PARAMS)
 
+ifndef TMR_TB
 verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	$(VERILATOR) --cc -CFLAGS "${CFLAGS} ${GATELEVEL_CFLAGS}" --coverage-max-width 20000 $(defines) $(FCOV_DEFINES) \
 	  $(includes) -I${RV_ROOT}/testbench -f $(DUT_FILELIST) $(DUT_DEFINE) $(DUT_NETLIST) $(ASAP7_CELL_MODELS) --timescale $(TIMESCALE) \
@@ -257,6 +272,7 @@ verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	cp ${RV_ROOT}/testbench/test_tb_top.cpp obj_dir/
 	$(MAKE) -e -C obj_dir/ -f Vtb_top.mk $(VERILATOR_MAKE_FLAGS) -j$(shell nproc)
 	touch verilator-build
+endif
 
 vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	$(VCS) $(VCS_DEBUG) $(VCS_EXTRA_ARGS) -full64 -assert svaext -sverilog $(FCOV_DEFINES) +define+RV_OPENSOURCE $(ASSERT_DEFINES) \
@@ -272,7 +288,7 @@ irun-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	  -xmlibdirpath . -xmlibdirname veer.build \
 	  -incdir ${RV_ROOT}/design/lib -incdir ${RV_ROOT}/design/include \
 	  -vlog_ext +.vh+.h $(defines) -incdir $(BUILD_DIR) \
-	  -f ${RV_ROOT}/testbench/flist -top tb_top  ${TBFILES} \
+	  -f ${RV_ROOT}/testbench/flist -top $(TB_TOP)  ${TBFILES} \
 	  -I${RV_ROOT}/testbench -elaborate  -snapshot ${snapshot} $(profile)
 	touch irun-build
 
@@ -290,6 +306,7 @@ riviera-build: ${TBFILES} ${BUILD_DIR}/defines.h
 
 ############ TEST Simulation ###############################
 
+ifndef TMR_TB
 verilator: program.hex verilator-build
 	# FIXME: Assuming here that either begin_signature or end_signature implies
 	# that both symbols are present.
@@ -301,6 +318,7 @@ verilator: program.hex verilator-build
 	else \
 		./obj_dir/Vtb_top ${TB_EXTRA_ARGS}; \
 	fi
+endif
 
 irun: program.hex irun-build
 	$(IRUN) -64bit -abvglobalfailurelimit 1 +lic_queue -licqueue \
@@ -315,7 +333,7 @@ vlog: program.hex ${TBFILES} ${BUILD_DIR}/defines.h
         $(ASSERT_DEFINES) $(defines) -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -R +nowarn3829 +nowarn2583 ${DEBUG_PLUS} -suppress 14408 -suppress 16154
 
 riviera: program.hex riviera-build
-	vsim -c -lib work ${DEBUG_PLUS} ${RIVIERA_DEBUG} tb_top -do "run -all; exit" -l riviera.log
+	vsim -c -lib work ${DEBUG_PLUS} ${RIVIERA_DEBUG} $(TB_TOP) -do "run -all; exit" -l riviera.log
 
 
 

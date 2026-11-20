@@ -200,8 +200,17 @@ TB_DPI_SRCS := $(addprefix $(TBDIR)/,$(TB_DPI_SRCS))
 # Testbench sources
 TB_VERILATOR_SRCS = $(TBDIR)/test_tb_top.cpp $(TB_DPI_SRCS)
 
+ifdef TB_ICACHE_FAULT_INJ
+TB_ICACHE_FAULT_INJ_FILES = $(TBDIR)/tb_icache_fault_inj.sv
+endif
+TB_ICACHE_FAULT_INJ_STAMP = .tb_icache_fault_inj_$(if $(TB_ICACHE_FAULT_INJ),1,0)
+$(TB_ICACHE_FAULT_INJ_STAMP):
+	rm -f .tb_icache_fault_inj_*
+	touch $@
+
 TBFILES = $(TBDIR)/tb_top_if.sv \
           $(TBDIR)/tb_top_pkg.sv \
+          $(TB_ICACHE_FAULT_INJ_FILES) \
           $(TBDIR)/tb_top.sv \
           $(TBDIR)/ahb_sif.sv \
           $(TBDIR)/axi_sif.sv \
@@ -221,6 +230,9 @@ TBFILES = $(TBDIR)/tb_top_if.sv \
 defines  = $(BUILD_DIR)/common_defines.vh
 defines += ${RV_ROOT}/design/include/el2_def.sv
 defines += $(BUILD_DIR)/el2_pdef.vh
+ifdef TB_ICACHE_FAULT_INJ
+defines += +define+TB_ICACHE_FAULT_INJ
+endif
 includes = -I${BUILD_DIR} -I$(TBDIR)/axi4_mux
 
 CM_HIER_FILE = $(RV_ROOT)/cm.cfg
@@ -239,7 +251,7 @@ all: clean verilator
 clean:
 	rm -rf *.log *.s *.hex *.dis *.tbl irun* vcs* simv* *.map snapshots \
 	verilator* *.exe obj* *.o *.sym ucli.key vc_hdrs.h csrc *.csv work \
-	dataset.asdb library.cfg vsimsa.cfg riviera-build wave.asdb
+	dataset.asdb library.cfg vsimsa.cfg riviera-build wave.asdb .tb_icache_fault_inj_*
 
 
 
@@ -249,7 +261,7 @@ clean:
 ${BUILD_DIR}/defines.h:
 	BUILD_PATH=${BUILD_DIR} ${RV_ROOT}/configs/veer.config -target=$(target) $(CONF_PARAMS)
 
-verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
+verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS) $(TB_ICACHE_FAULT_INJ_STAMP)
 	$(VERILATOR) --cc -CFLAGS "${CFLAGS} ${GATELEVEL_CFLAGS}" --coverage-max-width 20000 $(defines) $(FCOV_DEFINES) \
 	  $(includes) -I${RV_ROOT}/testbench -f $(DUT_FILELIST) $(DUT_DEFINE) $(DUT_NETLIST) $(ASAP7_CELL_MODELS) --timescale $(TIMESCALE) \
 	  $(VERILATOR_SKIP_WARNINGS) $(VERILATOR_EXTRA_ARGS) ${TB_SILENT_FAIL} ${TBFILES} --top-module tb_top \
@@ -258,7 +270,7 @@ verilator-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_VERILATOR_SRCS)
 	$(MAKE) -e -C obj_dir/ -f Vtb_top.mk $(VERILATOR_MAKE_FLAGS) -j$(shell nproc)
 	touch verilator-build
 
-vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
+vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_ICACHE_FAULT_INJ_STAMP)
 	$(VCS) $(VCS_DEBUG) $(VCS_EXTRA_ARGS) -full64 -assert svaext -sverilog $(FCOV_DEFINES) +define+RV_OPENSOURCE $(ASSERT_DEFINES) \
 	  +error+500 +incdir+${RV_ROOT}/design/lib \
 	  +incdir+${RV_ROOT}/design/include ${BUILD_DIR}/common_defines.vh \
@@ -267,7 +279,7 @@ vcs-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	  -f ${RV_ROOT}/testbench/flist ${TBFILES} ${TB_DPI_SRCS} -l vcs.log
 	touch vcs-build
 
-irun-build: ${TBFILES} ${BUILD_DIR}/defines.h
+irun-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_ICACHE_FAULT_INJ_STAMP)
 	$(IRUN) -64bit -elaborate $(IRUN_DEBUG) $(ASSERT_DEFINES) -q -sv -sysv -nowarn CUVIHR \
 	  -xmlibdirpath . -xmlibdirname veer.build \
 	  -incdir ${RV_ROOT}/design/lib -incdir ${RV_ROOT}/design/include \
@@ -276,7 +288,7 @@ irun-build: ${TBFILES} ${BUILD_DIR}/defines.h
 	  -I${RV_ROOT}/testbench -elaborate  -snapshot ${snapshot} $(profile)
 	touch irun-build
 
-riviera-build: ${TBFILES} ${BUILD_DIR}/defines.h
+riviera-build: ${TBFILES} ${BUILD_DIR}/defines.h $(TB_ICACHE_FAULT_INJ_STAMP)
 	vlib work
 	vlog -work work ${ASSERT_DEFINES} \
 		+incdir+${RV_ROOT}/design/lib \

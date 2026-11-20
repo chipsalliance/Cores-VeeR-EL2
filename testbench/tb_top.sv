@@ -791,9 +791,11 @@ module tb_top
     integer fd;
     logic next_dbus_error;
     logic next_ibus_error;
+`ifndef TB_ICACHE_FAULT_INJ
     logic next_ic_error;
     logic next_ic_addr_error;
     logic next_ic_hit_error;
+`endif
     logic inject_veer_in_dist, inject_lockstep_in_dist;
     logic clear_inject_in_dist;
     logic [8:0] inject_veer_in_dist_no, inject_lockstep_in_dist_no;
@@ -1116,7 +1118,7 @@ module tb_top
                     extintsrc_req[1] <= 1;
                 end
             end
-            if(mailbox_write && (mailbox_data[7:0] == 8'h8c)) begin
+            if(mailbox_write && (mailbox_data[7:0] == 8'h8c) && (mailbox_data[15:8] == 8'h00)) begin
                 force i_cpu_halt_req = 1'b1;
                 wait (o_cpu_halt_ack == 1'b1);
                 @(posedge core_clk);
@@ -1352,10 +1354,6 @@ module tb_top
     end
     `endif
 
-    logic       ic_perr_r_d1;
-    logic [3:0] ic_addr_err_cnt;
-    logic       next_ic_addr_error_d1;
-
 `ifdef RV_LOCKSTEP_ENABLE
 `define LOCKSTEP rvtop_wrapper.rvtop.lockstep
 `define LOCKSTEP_CORE rvtop_wrapper.rvtop.lockstep.xshadow_core
@@ -1365,6 +1363,21 @@ module tb_top
 `elsif VERILATOR
   `define RV_ASSERT_OR_VERILATOR
 `endif
+`endif
+
+`ifdef TB_ICACHE_FAULT_INJ
+    tb_icache_fault_inj #(.pt(pt)) u_icache_fault_inj (
+        .core_clk       (core_clk),
+        .rst_l_combined (rst_l_combined),
+        .mailbox_write  (mailbox_write),
+        .mailbox_data   (mailbox_data)
+    );
+`else
+    logic       ic_perr_r_d1;
+    logic [3:0] ic_addr_err_cnt;
+    logic       next_ic_addr_error_d1;
+
+`ifdef RV_LOCKSTEP_ENABLE
     // Delay pipeline to synchronize shadow core (LOCKSTEP_CORE) internal IFU fault
     // injection and release with the configured lockstep delay (pt.LOCKSTEP_DELAY).
     localparam int unsigned LockstepDelay = 32'(pt.LOCKSTEP_DELAY);
@@ -1526,6 +1539,7 @@ module tb_top
 `endif
     end
 `endif
+`endif // !TB_ICACHE_FAULT_INJ
 
 `ifdef RV_DCCM_WR_READBACK
     always @(posedge core_clk or negedge rst_l_combined) begin

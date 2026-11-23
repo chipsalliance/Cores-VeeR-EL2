@@ -83,6 +83,7 @@ VERILATOR_VERSION    := $(subst .,,$(word 2,$(shell $(VERILATOR) --version)))
 ifeq ($(TB_MAX_CYCLES),)
 	TB_MAX_CYCLES := ${shell case "$(TEST)" in \
 		pmp|pmp_random|dcls_mubi_sweep|csr_access) echo 8000000;; \
+		zephyr_*) echo 100000000;; \
 		*) echo 2000000;; \
 	esac}
 endif

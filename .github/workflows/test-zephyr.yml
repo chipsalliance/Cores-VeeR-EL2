@@ -1,0 +1,54 @@
+name: Zephyr tests
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    container: ghcr.io/antmicro/cores-veer-el2:20261118
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - test: "zephyr_hello_world"
+            zephyr_config: "-DCONFIG_VEER_EL2_TB_EXIT_ON_MAIN_RETURN=y"
+          - test: "zephyr_philosophers"
+            zephyr_config: "-DCONFIG_VEER_EL2_TB_EXIT_AFTER_MS=5000"
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies and run test
+        run: |
+          sudo apt -qqy update && sudo apt -qqy install zip cmake tree liblz4-dev
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install west
+          west init -m https://github.com/zephyrproject-rtos/zephyr --mr v4.5.0 .
+          west config manifest.project-filter -- '-.*'
+          west update
+          west packages pip --install
+          pushd zephyr
+            export ZEPHYR_BASE=`pwd`
+            west sdk install
+          popd
+          export RV_ROOT=`pwd`
+          make debug=1 TRACE_FORMAT=fst TB_EXTRA_ARGS="" ZEPHYR_CONFIG="${{ matrix.zephyr_config }}" -f $RV_ROOT/tools/Makefile TEST="${{ matrix.test }}" CLK_PERIOD_NS=1 verilator
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zephyr_${{ matrix.test }}_results
+          path: |
+            exec.log
+            console.log

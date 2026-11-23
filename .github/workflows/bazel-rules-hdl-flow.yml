@@ -2,6 +2,7 @@ name: VeeR-EL2 Bazel-Rules-HDL Flow
 
 on:
   workflow_call:
+  workflow_dispatch:
 
 defaults:
   run:
@@ -14,7 +15,10 @@ jobs:
   run-bazel-rules-hdl-pnr:
     name: Run EL2 Bazel-Rules-HDL Place and Route Flow
     runs-on: [ self-hosted, Linux, X64, gcp-custom-runners ]
-    container: debian:trixie
+    permissions:
+      contents: read
+      id-token: write
+    container: ghcr.io/antmicro/cores-veer-el2:bazelenv-2026-11-24
     strategy:
       fail-fast: false
       matrix:
@@ -28,46 +32,35 @@ jobs:
       GHA_MACHINE_TYPE: n2-standard-16
 
     steps:
-      - name: Install dependencies
-        run: |
-          apt-get update -qq
-          apt-get install -qqy --no-install-recommends \
-            curl ca-certificates python3 build-essential clang cmake flex bison git file zip wget tree
-          apt-get install -qqy --no-install-recommends libx11-6 libx11-xcb1 \
-            libsm6 libice6 libxcb1 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
-            libxcb-randr0 libxcb-render0 libxcb-render-util0 libxcb-shape0 libxcb-shm0 libxcb-sync1 \
-            libxcb-util1 libxcb-xfixes0 libxcb-xkb1 libdbus-1-3 libfontconfig1 libxkbcommon0 libxkbcommon-x11-0
-
-      - name: Configure Bazel
-        run: |
-          mkdir -p /tmp/distdir
-          for url in \
-            https://mirrors.kernel.org/gnu/glpk/glpk-5.0.tar.gz \
-            https://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz; do
-            if curl -fL --retry 5 --retry-delay 5 --retry-all-errors \
-                 --connect-timeout 20 --max-time 300 \
-                 -o /tmp/distdir/glpk-5.0.tar.gz "$url"; then
-              break
-            fi
-          done
-          test -s /tmp/distdir/glpk-5.0.tar.gz
-          printf '%s\n' 'common --distdir=/tmp/distdir' 'build -c opt' >> .bazelrc
-
-      - name: Install Bazel 8.5.0
-        run: |
-          wget -q \
-            https://github.com/bazelbuild/bazel/releases/download/8.5.0/bazel-8.5.0-linux-x86_64 \
-            -O /usr/local/bin/bazel
-
-          chmod +x /usr/local/bin/bazel
-
-          bazel --version
-
       - name: Setup repository
         uses: actions/checkout@v6
         with:
           path: Cores-VeeR-EL2
           submodules: recursive
+
+      - uses: google-github-actions/auth@v2
+        id: gcp-auth
+        with:
+          service_account: ${{ secrets.GCP_SA }}
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          cleanup_credentials: true
+          create_credentials_file: true
+          export_environment_variables: false
+
+      - name: Bazel setup
+        uses: bazel-contrib/setup-bazel@0.19.2
+        with:
+          bazelisk-version: v1.30.0
+          bazelisk-cache: true
+          cache-save: true
+          external-cache: true
+          repository-cache: true
+          module-root: "$GITHUB_WORKSPACE/Cores-VeeR-EL2"
+          bazelrc: |
+            build --incompatible_strict_action_env
+            build --google_credentials=${{ steps.gcp-auth.outputs.credentials_file_path }}
+            build --remote_cache=https://storage.googleapis.com/gha-runners-bazel-cache-cores-veer-el2
+            build --color=yes
 
       - name: Run EL2 ${{ matrix.bus.name }} Place and Route Flow
         run: |

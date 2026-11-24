@@ -5,7 +5,7 @@ import os
 import random
 
 import cocotb
-from cocotb.triggers import Edge, First, ReadOnly, ReadWrite, RisingEdge, Timer
+from cocotb.triggers import Edge, FallingEdge, First, ReadOnly, ReadWrite, Timer
 from pyuvm import (
     ConfigDB,
     uvm_analysis_port,
@@ -421,7 +421,7 @@ class Monitor(uvm_monitor):
         for src_signals, dst_signal in env.signals:
             triggers.append(Edge(dst_signal))
 
-        await RisingEdge(cocotb.top.rst_l)
+        await FallingEdge(cocotb.top.rst_l)
         # Monitor
         while True:
 

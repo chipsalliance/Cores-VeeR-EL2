@@ -1,0 +1,2 @@
+# SPDX-License-Identifier: Apache-2.0
+OFILES = dcls_discrepancy_latency.o crt0.o printf.o

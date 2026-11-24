@@ -67,6 +67,8 @@ class BaseEnv(uvm_env):
     def build_phase(self):
 
         bus_signals = [
+            "iccm_ecc_single_error",
+            "iccm_ecc_double_error",
             "iccm_clken",
             "iccm_wren_bank",
             "iccm_addr_bank",
@@ -168,6 +170,8 @@ class BaseTest(if_common.BaseTest):
         cocotb.top.core_active[1].value = MuBiTrue
         cocotb.top.core_active[2].value = MuBiTrue
 
+        cocotb.top.iccm_ecc_single_error_veer.value = [0] * 3
+        cocotb.top.iccm_ecc_double_error_veer.value = [0] * 3
         cocotb.top.iccm_clken_veer.value = [0] * 3
         cocotb.top.iccm_wren_bank_veer.value = [0] * 3
         cocotb.top.iccm_addr_bank_veer.value = [0] * 3

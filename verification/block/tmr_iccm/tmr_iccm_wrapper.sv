@@ -12,6 +12,8 @@ module tmr_iccm_wrapper
     input  logic rst_l,
 
     // DCCM Memory
+    output logic iccm_ecc_single_error,
+    output logic iccm_ecc_double_error,
     output logic [pt.ICCM_NUM_BANKS-1:0]                                       iccm_clken,
     output logic [pt.ICCM_NUM_BANKS-1:0]                                       iccm_wren_bank,
     output logic [pt.ICCM_NUM_BANKS-1:0][pt.ICCM_BITS-1:pt.ICCM_BANK_INDEX_LO] iccm_addr_bank,
@@ -21,6 +23,8 @@ module tmr_iccm_wrapper
     input  logic [pt.ICCM_NUM_BANKS-1:0][               pt.ICCM_ECC_WIDTH-1:0] iccm_bank_ecc,
 
     // DCCM TMR
+    input  logic iccm_ecc_single_error_veer[3],
+    input  logic iccm_ecc_double_error_veer[3],
     input  logic [pt.ICCM_NUM_BANKS-1:0]                                       iccm_clken_veer[3],
     input  logic [pt.ICCM_NUM_BANKS-1:0]                                       iccm_wren_bank_veer[3],
     input  logic [pt.ICCM_NUM_BANKS-1:0][pt.ICCM_BITS-1:pt.ICCM_BANK_INDEX_LO] iccm_addr_bank_veer[3],

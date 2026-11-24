@@ -153,6 +153,8 @@ class TestFaults(BaseTest):
         iterations = ConfigDB().get(None, "", "TEST_ITERATIONS")
 
         veer_signals = {
+            "dccm_ecc_single_error_veer": None,
+            "dccm_ecc_double_error_veer": None,
             "dccm_clken_veer": None,
             "dccm_wren_bank_veer": None,
             "dccm_addr_bank_veer": None,

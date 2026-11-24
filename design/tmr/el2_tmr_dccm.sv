@@ -10,12 +10,16 @@ module el2_tmr_dccm
     `include "el2_param.vh"
 ) (
     input logic clk,
-    input  logic rst_l,
+    input logic rst_l,
 
     // DCCM Memory
+    output logic dccm_ecc_single_error,
+    output logic dccm_ecc_double_error,
     el2_mem_if.veer_dccm dccm_export,
 
     // DCCM TMR
+    input logic dccm_ecc_single_error_veer[3],
+    input logic dccm_ecc_double_error_veer[3],
     el2_mem_if.veer_dccm_sink dccm_export_veer[3],
 
     // Core active
@@ -44,12 +48,16 @@ module el2_tmr_dccm
   el2_mubi_t [pt.DCCM_NUM_BANKS-1:0] fault_dccm_addr_bank[3];
   el2_mubi_t [pt.DCCM_NUM_BANKS-1:0] fault_dccm_wr_data_bank[3];
   el2_mubi_t [pt.DCCM_NUM_BANKS-1:0] fault_dccm_wr_ecc_bank[3];
+  el2_mubi_t                         fault_dccm_ecc_single_error[3];
+  el2_mubi_t                         fault_dccm_ecc_double_error[3];
 
   el2_mubi_t                         crit_dccm_clken;
   el2_mubi_t                         crit_dccm_wren_bank;
   el2_mubi_t [pt.DCCM_NUM_BANKS-1:0] crit_dccm_addr_bank;
   el2_mubi_t [pt.DCCM_NUM_BANKS-1:0] crit_dccm_wr_data_bank;
   el2_mubi_t [pt.DCCM_NUM_BANKS-1:0] crit_dccm_wr_ecc_bank;
+  el2_mubi_t                         crit_dccm_ecc_single_error;
+  el2_mubi_t                         crit_dccm_ecc_double_error;
 
   el2_mubi_t crit_any;
 
@@ -57,8 +65,46 @@ module el2_tmr_dccm
 
   // ......................................................
 
+  logic dccm_ecc_single_error_int;
+  logic dccm_ecc_double_error_int;
   logic [pt.DCCM_NUM_BANKS-1:0] dccm_clken;
   logic [pt.DCCM_NUM_BANKS-1:0] dccm_wren_bank;
+
+  el2_tmr_voter #(.Width(1)) u_voter_dccm_ecc_single_error (
+    .in_a     (dccm_ecc_single_error_veer[0]),
+    .in_b     (dccm_ecc_single_error_veer[1]),
+    .in_c     (dccm_ecc_single_error_veer[2]),
+
+    .en_a     (enable[0]),
+    .en_b     (enable[1]),
+    .en_c     (enable[2]),
+
+    .out      (dccm_ecc_single_error_int),
+
+    .fault_a  (fault_dccm_ecc_single_error[0]),
+    .fault_b  (fault_dccm_ecc_single_error[1]),
+    .fault_c  (fault_dccm_ecc_single_error[2]),
+
+    .critical (crit_dccm_ecc_single_error)
+  );
+
+  el2_tmr_voter #(.Width(1)) u_voter_dccm_ecc_double_error (
+    .in_a     (dccm_ecc_double_error_veer[0]),
+    .in_b     (dccm_ecc_double_error_veer[1]),
+    .in_c     (dccm_ecc_double_error_veer[2]),
+
+    .en_a     (enable[0]),
+    .en_b     (enable[1]),
+    .en_c     (enable[2]),
+
+    .out      (dccm_ecc_double_error_int),
+
+    .fault_a  (fault_dccm_ecc_double_error[0]),
+    .fault_b  (fault_dccm_ecc_double_error[1]),
+    .fault_c  (fault_dccm_ecc_double_error[2]),
+
+    .critical (crit_dccm_ecc_double_error)
+  );
 
   el2_tmr_voter #(.Width(pt.DCCM_NUM_BANKS)) u_voter_dccm_clken (
     .in_a     (dccm_export_veer[0].dccm_clken),
@@ -199,8 +245,10 @@ module el2_tmr_dccm
   logic  inh;
   assign inh = mubi_check_true(dccm_output_inhibit);
 
-  rvogate #(.WIDTH($bits(dccm_export_int.dccm_clken)))     u_dccm_clken_gate     (.*, .din(dccm_export_int.dccm_clken),     .dout(dccm_export.dccm_clken));
-  rvogate #(.WIDTH($bits(dccm_export_int.dccm_wren_bank))) u_dccm_wren_bank_gate (.*, .din(dccm_export_int.dccm_wren_bank), .dout(dccm_export.dccm_wren_bank));
+  rvogate #(.WIDTH($bits(dccm_ecc_single_error)))          u_dccm_ecc_single_error_gate (.*, .din(dccm_ecc_single_error_int),      .dout(dccm_ecc_single_error));
+  rvogate #(.WIDTH($bits(dccm_ecc_double_error)))          u_dccm_ecc_double_error_gate (.*, .din(dccm_ecc_double_error_int),      .dout(dccm_ecc_double_error));
+  rvogate #(.WIDTH($bits(dccm_export_int.dccm_clken)))     u_dccm_clken_gate            (.*, .din(dccm_export_int.dccm_clken),     .dout(dccm_export.dccm_clken));
+  rvogate #(.WIDTH($bits(dccm_export_int.dccm_wren_bank))) u_dccm_wren_bank_gate        (.*, .din(dccm_export_int.dccm_wren_bank), .dout(dccm_export.dccm_wren_bank));
 
   for (genvar i = 0; i < pt.DCCM_NUM_BANKS; i++) begin : gen_dccm_gates
     rvogate #(.WIDTH($bits(dccm_export_int.dccm_addr_bank[i])))    u_dccm_addr_bank_gate    (.*, .din(dccm_export_int.dccm_addr_bank[i]),    .dout(dccm_export.dccm_addr_bank[i]));
@@ -217,12 +265,14 @@ module el2_tmr_dccm
   for (genvar i = 0; i < 3; i++) begin : gen_dccm_faults
     el2_mubi_t  fault_l0;
     el2_mubi_t  fault_l1;
+    el2_mubi_t  fault_l2;
     el2_mubi_t  fault_any;
 
-    assign fault_l0 = mubi_or(fault_dccm_clken[i], fault_dccm_wren_bank[i]);
+    assign fault_l0 = mubi_or3(fault_dccm_clken[i], fault_dccm_wren_bank[i], dccm_fault_d[i]);
     assign fault_l1 = mubi_or3(fault_dccm_addr_bank_aggr[i], fault_dccm_wr_data_bank_aggr[i], fault_dccm_wr_ecc_bank_aggr[i]);
+    assign fault_l2 = mubi_or(fault_dccm_ecc_single_error[i], fault_dccm_ecc_double_error[i]);
 
-    assign fault_any  = mubi_or3(fault_l0,  fault_l1, dccm_fault_d[i]);
+    assign fault_any  = mubi_or3(fault_l0,  fault_l1, fault_l2);
 
     el2_tmr_fault_storage storage (
       .*,
@@ -239,11 +289,13 @@ module el2_tmr_dccm
   // Critical fault aggregation
   el2_mubi_t  crit_l0;
   el2_mubi_t  crit_l1;
+  el2_mubi_t  crit_l2;
 
   assign crit_l0 = mubi_or(crit_dccm_clken, crit_dccm_wren_bank);
   assign crit_l1 = mubi_or3(crit_dccm_addr_bank_aggr, crit_dccm_wr_data_bank_aggr, crit_dccm_wr_ecc_bank_aggr);
+  assign crit_l2 = mubi_or(crit_dccm_ecc_single_error, crit_dccm_ecc_double_error);
 
-  assign crit_any  = mubi_or(crit_l0,  crit_l1);
+  assign crit_any  = mubi_or3(crit_l0,  crit_l1, crit_l2);
 
   // ......................................................
 

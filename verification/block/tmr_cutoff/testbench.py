@@ -5,8 +5,7 @@ import os
 import random
 
 import cocotb
-from cocotb.handle import Force, Release
-from cocotb.triggers import Edge, First, Timer
+from cocotb.triggers import Edge, First, ReadOnly, ReadWrite, RisingEdge, Timer
 from pyuvm import (
     ConfigDB,
     uvm_analysis_port,
@@ -39,6 +38,7 @@ INPUTS = (
     "core_id",
     "mem_export_iccm_bank_dout",
     "mem_export_iccm_bank_ecc",
+    "mem_export_dccm_bank_dout",
     "mem_export_dccm_bank_ecc",
     "icache_export_wb_packeddout_pre",
     "icache_export_wb_dout_pre_up",
@@ -131,6 +131,11 @@ INPUTS = (
     "timer_int",
     "soft_int",
     "scan_mode",
+    "force_address_select",
+    "force_core_id",
+    "force_data",
+    "force_release",
+    "force_update",
 )
 
 # This list contains pairs of signals that are gated. The first one in the pair
@@ -150,31 +155,6 @@ SIGNALS = (
     ("el2_tmr_complex.cores.veer.o_cpu_run_ack", "o_cpu_run_ack"),
     ("el2_tmr_complex.cores.veer.mpc_debug_halt_ack", "mpc_debug_halt_ack"),
     ("el2_tmr_complex.cores.veer.mpc_debug_run_ack", "mpc_debug_run_ack"),
-    # FIXME: Interfaces...
-    # ("el2_tmr_complex.cores.mem.mem_export.clk", "mem_export_clk"),
-    # ("el2_tmr_complex.cores.mem.mem_export.iccm_clken", "mem_export_iccm_clken"),
-    # ("el2_tmr_complex.cores.mem.mem_export.iccm_wren_bank", "mem_export_iccm_wren_bank"),
-    # ("el2_tmr_complex.cores.mem.mem_export.iccm_addr_bank", "mem_export_iccm_addr_bank"),
-    # ("el2_tmr_complex.cores.mem.mem_export.iccm_bank_wr_data", "mem_export_iccm_bank_wr_data"),
-    # ("el2_tmr_complex.cores.mem.mem_export.iccm_bank_wr_ecc", "mem_export_iccm_bank_wr_ecc"),
-    # ("el2_tmr_complex.cores.mem.mem_export.dccm_clken", "mem_export_dccm_clken"),
-    # ("el2_tmr_complex.cores.mem.mem_export.dccm_wren_bank", "mem_export_dccm_wren_bank"),
-    # ("el2_tmr_complex.cores.mem.mem_export.dccm_addr_bank", "mem_export_dccm_addr_bank"),
-    # ("el2_tmr_complex.cores.mem.mem_export.dccm_wr_data_bank", "mem_export_dccm_wr_data_bank"),
-    # ("el2_tmr_complex.cores.mem.mem_export.dccm_wr_ecc_bank", "mem_export_dccm_wr_ecc_bank"),
-    # ("el2_tmr_complex.cores.mem.mem_export.dccm_bank_dout", "mem_export_dccm_bank_dout"),
-    # ("el2_tmr_complex.cores.mem.icache_export.clk", "icache_export_clk"),
-    # ("el2_tmr_complex.cores.mem.icache_export.ic_b_sb_wren", "icache_export_ic_b_sb_wren"),
-    # ("el2_tmr_complex.cores.mem.icache_export.ic_b_sb_bit_en_vec", "icache_export_ic_b_sb_bit_en_vec"),
-    # ("el2_tmr_complex.cores.mem.icache_export.ic_sb_wr_data", "icache_export_ic_sb_wr_data"),
-    # ("el2_tmr_complex.cores.mem.icache_export.ic_rw_addr_bank_q", "icache_export_ic_rw_addr_bank_q"),
-    # ("el2_tmr_complex.cores.mem.icache_export.ic_bank_way_clken_final", "icache_export_ic_bank_way_clken_final"),
-    # ("el2_tmr_complex.cores.mem.icache_export.ic_bank_way_clken_final_up", "icache_export_ic_bank_way_clken_final_up"),
-    # ("el2_tmr_complex.cores.mem.icache_export.ic_tag_clken_final", "icache_export_ic_tag_clken_final"),
-    # ("el2_tmr_complex.cores.mem.icache_export.ic_tag_wren_q", "icache_export_ic_tag_wren_q"),
-    # ("el2_tmr_complex.cores.mem.icache_export.ic_tag_wren_biten_vec", "icache_export_ic_tag_wren_biten_vec"),
-    # ("el2_tmr_complex.cores.mem.icache_export.ic_tag_wr_data", "icache_export_ic_tag_wr_data"),
-    # ("el2_tmr_complex.cores.mem.icache_export.ic_rw_addr_q", "icache_export_ic_rw_addr_q"),
     ("el2_tmr_complex.cores.veer.debug_brkpt_status", "debug_brkpt_status"),
     ("el2_tmr_complex.cores.veer.dec_tlu_perfcnt0", "dec_tlu_perfcnt0"),
     ("el2_tmr_complex.cores.veer.dec_tlu_perfcnt1", "dec_tlu_perfcnt1"),
@@ -275,6 +255,36 @@ SIGNALS = (
     ("el2_tmr_complex.cores.veer.dma_axi_rdata", "dma_axi_rdata"),
     ("el2_tmr_complex.cores.veer.dma_axi_rresp", "dma_axi_rresp"),
     ("el2_tmr_complex.cores.veer.dma_axi_rlast", "dma_axi_rlast"),
+    ("el2_tmr_complex.cores.veer.dmi_reg_rdata", "dmi_reg_rdata"),
+    ("el2_tmr_complex.cores.veer.iccm_ecc_single_error", "iccm_ecc_single_error"),
+    ("el2_tmr_complex.cores.veer.iccm_ecc_double_error", "iccm_ecc_double_error"),
+    ("el2_tmr_complex.cores.veer.dccm_ecc_single_error", "dccm_ecc_single_error"),
+    ("el2_tmr_complex.cores.veer.dccm_ecc_double_error", "dccm_ecc_double_error"),
+    # FIXME: Interfaces...
+    # ("el2_tmr_complex.cores.mem.mem_export.clk", "mem_export_clk"),
+    # ("el2_tmr_complex.cores.mem.mem_export.iccm_clken", "mem_export_iccm_clken"),
+    # ("el2_tmr_complex.cores.mem.mem_export.iccm_wren_bank", "mem_export_iccm_wren_bank"),
+    # ("el2_tmr_complex.cores.mem.mem_export.iccm_addr_bank", "mem_export_iccm_addr_bank"),
+    # ("el2_tmr_complex.cores.mem.mem_export.iccm_bank_wr_data", "mem_export_iccm_bank_wr_data"),
+    # ("el2_tmr_complex.cores.mem.mem_export.iccm_bank_wr_ecc", "mem_export_iccm_bank_wr_ecc"),
+    # ("el2_tmr_complex.cores.mem.mem_export.dccm_clken", "mem_export_dccm_clken"),
+    # ("el2_tmr_complex.cores.mem.mem_export.dccm_wren_bank", "mem_export_dccm_wren_bank"),
+    # ("el2_tmr_complex.cores.mem.mem_export.dccm_addr_bank", "mem_export_dccm_addr_bank"),
+    # ("el2_tmr_complex.cores.mem.mem_export.dccm_wr_data_bank", "mem_export_dccm_wr_data_bank"),
+    # ("el2_tmr_complex.cores.mem.mem_export.dccm_wr_ecc_bank", "mem_export_dccm_wr_ecc_bank"),
+    # ("el2_tmr_complex.cores.mem.mem_export.dccm_bank_dout", "mem_export_dccm_bank_dout"),
+    # ("el2_tmr_complex.cores.mem.icache_export.clk", "icache_export_clk"),
+    # ("el2_tmr_complex.cores.mem.icache_export.ic_b_sb_wren", "icache_export_ic_b_sb_wren"),
+    # ("el2_tmr_complex.cores.mem.icache_export.ic_b_sb_bit_en_vec", "icache_export_ic_b_sb_bit_en_vec"),
+    # ("el2_tmr_complex.cores.mem.icache_export.ic_sb_wr_data", "icache_export_ic_sb_wr_data"),
+    # ("el2_tmr_complex.cores.mem.icache_export.ic_rw_addr_bank_q", "icache_export_ic_rw_addr_bank_q"),
+    # ("el2_tmr_complex.cores.mem.icache_export.ic_bank_way_clken_final", "icache_export_ic_bank_way_clken_final"),
+    # ("el2_tmr_complex.cores.mem.icache_export.ic_bank_way_clken_final_up", "icache_export_ic_bank_way_clken_final_up"),
+    # ("el2_tmr_complex.cores.mem.icache_export.ic_tag_clken_final", "icache_export_ic_tag_clken_final"),
+    # ("el2_tmr_complex.cores.mem.icache_export.ic_tag_wren_q", "icache_export_ic_tag_wren_q"),
+    # ("el2_tmr_complex.cores.mem.icache_export.ic_tag_wren_biten_vec", "icache_export_ic_tag_wren_biten_vec"),
+    # ("el2_tmr_complex.cores.mem.icache_export.ic_tag_wr_data", "icache_export_ic_tag_wr_data"),
+    # ("el2_tmr_complex.cores.mem.icache_export.ic_rw_addr_q", "icache_export_ic_rw_addr_q"),
     # TODO: In TMR mode, the AXI to AHB converter is to be placed outside the
     # TMR complex. Remove the signals from el2_tmr_complex.sv
     # ("el2_tmr_complex.cores.veer.haddr", "haddr"),
@@ -303,12 +313,9 @@ SIGNALS = (
     # ("el2_tmr_complex.cores.veer.dma_hrdata", "dma_hrdata"),
     # ("el2_tmr_complex.cores.veer.dma_hreadyout", "dma_hreadyout"),
     # ("el2_tmr_complex.cores.veer.dma_hresp", "dma_hresp"),
-    ("el2_tmr_complex.cores.veer.dmi_reg_rdata", "dmi_reg_rdata"),
-    ("el2_tmr_complex.cores.veer.iccm_ecc_single_error", "iccm_ecc_single_error"),
-    ("el2_tmr_complex.cores.veer.iccm_ecc_double_error", "iccm_ecc_double_error"),
-    ("el2_tmr_complex.cores.veer.dccm_ecc_single_error", "dccm_ecc_single_error"),
-    ("el2_tmr_complex.cores.veer.dccm_ecc_double_error", "dccm_ecc_double_error"),
 )
+
+SIG_TO_NUM_MAP = {sig: i for i, (sig, _) in enumerate(SIGNALS)}
 
 # ==============================================================================
 
@@ -338,9 +345,15 @@ class Driver(uvm_driver):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def set_inhibit(self, value):
+    async def set_inhibit(self, value):
         value = MuBiTrue if value else MuBiFalse
-        cocotb.top.el2_tmr_complex.tmr_output_inhibit = Force(value)
+        cocotb.top.force_core_id.value = 3
+        cocotb.top.force_release.value = 1
+        cocotb.top.force_data.value = value
+        cocotb.top.force_update.value = 1
+        await ReadWrite()
+        cocotb.top.force_update.value = 0
+        await ReadWrite()
 
     async def run_phase(self):
         while True:
@@ -348,7 +361,7 @@ class Driver(uvm_driver):
             assert isinstance(it, DriverItem)
 
             # Drive inhibit
-            self.set_inhibit(it.inhibit)
+            await self.set_inhibit(it.inhibit)
             await Timer(10, "ns")
 
             # Drive the signal(s). The signals come from inside the TMR complex
@@ -356,13 +369,26 @@ class Driver(uvm_driver):
             # them.
             nbits = len(it.signals[0])
             value = random.randrange(1, 1 << nbits)
-            for s in it.signals:
-                s.value = Force(value)
+            for core_id, sig_id, _ in it.signals:
+                cocotb.top.force_core_id.value = core_id
+                cocotb.top.force_address_select.value = sig_id
+                cocotb.top.force_release.value = 1
+                cocotb.top.force_data.value = value
+                cocotb.top.force_update.value = 1
+                await ReadWrite()
+                cocotb.top.force_update.value = 0
+                await ReadWrite()
             await Timer(10, "ns")
 
             # Release the signal
-            for s in it.signals:
-                s.value = Release()
+            for core_id, sig_id, _ in it.signals:
+                cocotb.top.force_core_id.value = core_id
+                cocotb.top.force_address_select.value = sig_id
+                cocotb.top.force_release.value = 0
+                cocotb.top.force_update.value = 1
+                await ReadWrite()
+                cocotb.top.force_update.value = 0
+                await ReadWrite()
             await Timer(10, "ns")
 
             self.seq_item_port.item_done()
@@ -395,11 +421,13 @@ class Monitor(uvm_monitor):
         for src_signals, dst_signal in env.signals:
             triggers.append(Edge(dst_signal))
 
+        await RisingEdge(cocotb.top.rst_l)
         # Monitor
         while True:
 
             # Wait for any change
             trig = await First(*triggers)
+            await ReadOnly()
             indx = triggers.index(trig)
 
             src, dst = env.signals[indx]
@@ -407,7 +435,7 @@ class Monitor(uvm_monitor):
             # Sample
             item = MonitorItem(dst._path)
             item.inhibit = self.sample_inhibit()
-            item.driver = [s.value for s in src]
+            item.driver = [s.value for _, _, s in src]
             item.sink = dst.value
 
             self.logger.debug(f"{dst._path}: inh={item.inhibit}, {item.driver} -> {item.sink}")
@@ -486,11 +514,10 @@ class BaseEnv(uvm_env):
             for i in range(3):
                 name = [p + f"[{i}]" if p == "cores" else p for p in parts]
                 name = ".".join(name)
-                try:
-                    src_obj.append(getattr(cocotb.top, name))
-                except AttributeError:
+                if not hasattr(cocotb.top, name):
                     self.logger.error(f"Signal {name} not found!")
                     error = True
+                src_obj.append((i, SIG_TO_NUM_MAP[src_name], getattr(cocotb.top, name)))
 
             if error:
                 continue

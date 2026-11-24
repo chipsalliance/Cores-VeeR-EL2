@@ -14,7 +14,7 @@ TOPLEVEL     = el2_tmr_complex_wrapper
 EXTRA_VEER_CONFIG = -target=default -set bitmanip_zba -set bitmanip_zbb -set bitmanip_zbc -set bitmanip_zbe -set bitmanip_zbf -set bitmanip_zbp -set bitmanip_zbr -set bitmanip_zbs -set=triple_modular_redundancy_enable=1 -set=mubi_width=2 -set=mubi_true=0x2 -set=mubi_false=0x1 -set build_axi4 -set icache_waypack=0 -set icache_num_ways=2
 
 VERILOG_INCLUDE_DIRS += \
-	$(TEST_DIR)/../snapshots/default \
+	$(TEST_DIR)/snapshots/default \
 	$(SRCDIR)/include
 
 VERILOG_SOURCES  = \
@@ -101,4 +101,6 @@ VERILOG_SOURCES  = \
 
 include $(TEST_DIR)/../common.mk
 
+ifeq ($(SIM), verilator)
 COMPILE_ARGS += -Wno-SIMILARNAME
+endif

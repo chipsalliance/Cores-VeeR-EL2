@@ -200,12 +200,22 @@ module el2_tmr_recovery_fsm
     rvdff #(.WIDTH(32)) gpr_value_d_m (.*, .din(recovery_gpr_rddata_veer[i]), .dout(recovery_gpr_rddata_veer_d[i]));
     assign gpr_ready[i] = el2_mubi_reg_comp(recovery_gpr_rddata_veer[i], recovery_gpr_rddata_veer_d[i]);
   end
-  assign all_csr_ready = mubi_and3(mubi_or(csr_ready[0], faulty_core[0]),
-                                   mubi_or(csr_ready[1], faulty_core[1]),
-                                   mubi_or(csr_ready[2], faulty_core[2]));
-  assign all_gpr_ready = mubi_and3(mubi_or(gpr_ready[0], faulty_core[0]),
-                                   mubi_or(gpr_ready[1], faulty_core[1]),
-                                   mubi_or(gpr_ready[2], faulty_core[2]));
+  assign all_csr_ready = mubi_and(
+                            mubi_and3(mubi_or(csr_ready[0], faulty_core[0]),
+                                      mubi_or(csr_ready[1], faulty_core[1]),
+                                      mubi_or(csr_ready[2], faulty_core[2])),
+                            mubi_or(el2_mubi_reg_comp(32'(recovery_state), 32'(READ_REG)),
+                                    el2_mubi_reg_comp(32'(recovery_state), 32'(WRITE_REG))
+                            )
+                          );
+  assign all_gpr_ready = mubi_and(
+                            mubi_and3(mubi_or(gpr_ready[0], faulty_core[0]),
+                                      mubi_or(gpr_ready[1], faulty_core[1]),
+                                      mubi_or(gpr_ready[2], faulty_core[2])),
+                            mubi_or(el2_mubi_reg_comp(32'(recovery_state), 32'(READ_REG)),
+                                    el2_mubi_reg_comp(32'(recovery_state), 32'(WRITE_REG))
+                            )
+                          );
 
   el2_mubi_t csr_fatal, gpr_fatal;
   el2_tmr_3way_fatal_check_mubi #(.Width(32)) verify_csr(.in(recovery_csr_rddata_veer_d),

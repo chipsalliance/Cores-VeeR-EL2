@@ -7,7 +7,15 @@ import os
 import cocotb
 from cocotb.clock import Clock
 from cocotb.handle import ModifiableObject
-from cocotb.triggers import ClockCycles, FallingEdge, ReadOnly, ReadWrite, RisingEdge
+from cocotb.triggers import (
+    ClockCycles,
+    Edge,
+    FallingEdge,
+    First,
+    ReadOnly,
+    ReadWrite,
+    RisingEdge,
+)
 from cocotb.utils import get_sim_time
 from if_common import ClockDomain
 from pyuvm import *
@@ -472,7 +480,7 @@ class RegBusMonitor(uvm_monitor):
 
     async def run_phase(self):
         while True:
-            await RisingEdge(self.clock_domain.clk)
+            await FallingEdge(self.clock_domain.clk)
             await ReadOnly()
             if self.signals["en"].value == MuBiTrue:
                 item = RegBusItem()
@@ -506,13 +514,13 @@ class RegBusDriver(uvm_driver):
         while True:
             it = await self.seq_item_port.get_next_item()
             assert isinstance(it, RegBusItem)
-            await ReadWrite()
             if it.wait_enable:
-                while self.signals["en"].value != MuBiTrue and self.signals["reset"].value != 0:
-                    await RisingEdge(self.clock_domain.clk)
-                    await ReadWrite()
+                while self.signals["reset"].value != 0 and self.signals["en"].value != MuBiTrue:
+                    triggers = [Edge(self.signals["en"]), FallingEdge(self.signals["reset"])]
+                    _ = await First(*triggers)
                 self.seq_item_port.item_done()
             elif it.sample_bus:
+                await FallingEdge(self.clock_domain.clk)
                 ans = RegBusItem()
                 ans.en = self.signals["en"].value
                 ans.rdaddr = self.signals["rdaddr"].value
@@ -524,7 +532,6 @@ class RegBusDriver(uvm_driver):
             elif it.drive_rddata:
                 self.signals["rddata"].value = it.rddata
                 await RisingEdge(self.clock_domain.clk)
-                await ReadWrite()
                 self.seq_item_port.item_done()
             elif it.noop:
                 await RisingEdge(self.clock_domain.clk)
@@ -1207,6 +1214,15 @@ class BaseTest(uvm_test):
         for sig in cocotb.top.recovery_gpr_rddata_veer:
             sig.value = 0
         for sig in cocotb.top.recovery_csr_rddata_veer:
+            sig.value = 0
+
+        cocotb.top.rst_vec.value = 0
+        for sig in cocotb.top.dec_tlu_npc_veer:
+            sig.value = 0
+
+        for sig in cocotb.top.recovery_pause_rddata_veer:
+            sig.value = 0
+        for sig in cocotb.top.recovery_pause_state_rddata_veer:
             sig.value = 0
 
         for sig in cocotb.top.mpc_debug_halt_ack_veer:

@@ -179,8 +179,8 @@ class RegBusScoreboard(BaseScoreboard):
             self.fatal_err_ts = fatal_event.timestamp
             self.logger.debug(f"{log_prefix} Detected fatal error at {self.fatal_err_ts}")
 
-            # Check if fatal_err was reported exactly one cycle after error
-            exp_fatal_ts = tr_ts + self.period_ns
+            # Check if fatal_err was reported exactly half cycle after error (sampling on falling edge due to ReadWrite inaccuracy)
+            exp_fatal_ts = tr_ts + (self.period_ns // 2)
             if (fatal_event.fatal == MuBiTrue) and (self.fatal_err_ts != exp_fatal_ts):
                 self.passed = False
                 self.logger.error(

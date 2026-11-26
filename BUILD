@@ -166,7 +166,7 @@ CONFIGS = {
     samples = 2,
     sdc = "//:constraint_%s" % c,
     stop_after_step = "global_routing",
-    synth_tcl = "//:synth.tcl",
+    frontend = "slang",
     top = "el2_veer_wrapper",
     deps = [
         "//:veer_el2_%s_verilog_lib" % c,

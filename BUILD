@@ -112,9 +112,26 @@ CONFIGS = {
     deps = [
         ":veer_el2_%s_verilog_lib" % c,
     ],
-    synth_tcl = "synth.tcl",
+    strategy = "basic",
     target_clock_period_pico_seconds = 4000, # 250 MHz
-    synth_additional_args = "-booth", # run booth pass to rebuild multipliers before mapping
+    frontend = "slang",
+    parser_extra_commands = [
+        "--allow-toplevel-iface-ports",
+        "--allow-hierarchical-const",
+        "--single-unit",
+        "--libraries-inherit-macros",
+        "--no-implicit-memories",
+    ],
+    verilog_defines = [
+        "TEC_RV_TMR=el2_tmr_mod",
+        "TEC_RV_ICG=el2_clk_gate",
+    ],
+) for c in CONFIGS]
+
+[run_opensta(
+    name = "veer_el2_synth_sta_asap7_%s" % c,
+    synth_target = ":veer_el2_synth_asap7_%s" % c,
+    sdc = ":constraint_%s" % c,
 ) for c in CONFIGS]
 
 [run_opensta(
@@ -161,7 +178,7 @@ CONFIGS = {
     samples = 2,
     sdc = "//:constraint_%s" % c,
     stop_after_step = "global_routing",
-    synth_tcl = "//:synth.tcl",
+    frontend = "slang",
     top = "el2_veer_wrapper",
     deps = [
         "//:veer_el2_%s_verilog_lib" % c,

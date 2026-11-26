@@ -658,19 +658,29 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/antmicro/cores-veer-el2:20261118
     strategy:
+      fail-fast: false
       matrix:
         bus: ["axi", "ahb"]
-        test: ["dcls_regfile_read"]
+        test: ["dcls_regfile_read", "dcls_discrepancy_latency"]
+        regfile_enable: ["0", "1"]
         regfile_read_enable: ["0", "1"]
         coverage: ["all"]
         priv: ["0"]
         delay: ["0", "1", "2", "3", "4"]
         tb_extra_args: [""]
+        exclude:
+          - test: "dcls_regfile_read"
+            regfile_enable: "0"
+          - test: "dcls_discrepancy_latency"
+            regfile_enable: "1"
+          - test: "dcls_discrepancy_latency"
+            regfile_read_enable: "1"
     env:
       DEBIAN_FRONTEND: "noninteractive"
       CCACHE_DIR: "/opt/regression/.cache/"
       DCLS_ENABLE: "1"
       DCLS_DELAY: ${{ matrix.delay }}
+      DCLS_REGFILE_ENABLE: ${{ matrix.regfile_enable }}
       DCLS_REGFILE_READ_ENABLE: ${{ matrix.regfile_read_enable }}
 
     steps:
@@ -695,7 +705,7 @@ jobs:
           echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
           TEST_PATH=$RV_ROOT/test_results
           echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
-          echo "FULL_NAME=dcls-regfile-read-${{ matrix.bus }}-${{ matrix.test }}-rf${{ matrix.regfile_read_enable }}-delay${{ matrix.delay }}" >> $GITHUB_ENV
+          echo "FULL_NAME=dcls-regfile-read-${{ matrix.bus }}-${{ matrix.test }}-rfen${{ matrix.regfile_enable }}-rf${{ matrix.regfile_read_enable }}-delay${{ matrix.delay }}" >> $GITHUB_ENV
 
       - name: Run tests
         run: |

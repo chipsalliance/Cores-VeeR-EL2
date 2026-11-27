@@ -10,6 +10,7 @@ defaults:
 
 env:
   DEBIAN_FRONTEND: noninteractive
+  GHA_MACHINE_TYPE: n2-standard-16
 
 jobs:
   run-bazel-rules-hdl-pnr:
@@ -85,3 +86,18 @@ jobs:
             Cores-VeeR-EL2/bazel-bin/veer_el2_gds_asap7_${{ matrix.bus.config }}.gds
             Cores-VeeR-EL2/bazel-bin/veer_el2_die_shot_${{ matrix.bus.config }}.png
           if-no-files-found: error
+
+      - name: Collect EL2 ${{ matrix.bus.name }} metrics
+        if: success() || failure()
+        run: |
+          mkdir -p metrics
+          find -L Cores-VeeR-EL2/bazel-bin Cores-VeeR-EL2/bazel-out -name '*report.json' -exec cp {} metrics/ \; 2>/dev/null || true
+          echo "${{ job.status }}" > metrics/job_status
+
+      - name: Upload EL2 ${{ matrix.bus.name }} metrics
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veer_el2_metrics_${{ matrix.bus.config }}
+          path: metrics/
+          if-no-files-found: warn

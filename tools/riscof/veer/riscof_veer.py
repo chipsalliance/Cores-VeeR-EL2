@@ -166,7 +166,7 @@ class veer(pluginTemplate):
 	      # echo statement.
           if self.target_run:
             simcmd = [
-                self.sim_binary + " --symbols program.sym",
+                self.sim_binary + " +symbols=program.sym",
                 'mv veer.signature DUT-{}.signature'.format(veer.__model__),
             ]
           else:

@@ -18,7 +18,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    container: ghcr.io/antmicro/cores-veer-el2:bazelenv-2026-11-24
+    container: ghcr.io/antmicro/cores-veer-el2:bazelenv-2026-11-26
     strategy:
       fail-fast: false
       matrix:

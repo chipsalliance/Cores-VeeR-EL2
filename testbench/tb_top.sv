@@ -15,47 +15,31 @@
 // limitations under the License.
 //
 
-`ifndef VERILATOR
+`include "el2_pdef.vh"
+
 module tb_top
     import tb_top_pkg::*;
 #(
     parameter int MAX_CYCLES = 2_000_000,
+    // HALF_PERIOD is passed at compile time in picoseconds.
+    parameter int HALF_PERIOD = 2500,
     `include "el2_param.vh"
 );
-
-  logic i_cpu_halt_req, o_cpu_halt_ack, o_cpu_halt_status;
-  logic i_cpu_run_req, o_cpu_run_ack;
-  logic mpc_debug_halt_req, mpc_debug_halt_ack;
-  logic mpc_debug_run_req, mpc_debug_run_ack;
-  logic o_debug_mode_status;
-  logic lsu_bus_clk_en;
-
-  assign lsu_bus_clk_en = 1'b1;
-`else
-module tb_top
-    import tb_top_pkg::*;
-#(
-    parameter int MAX_CYCLES = 2_000_000,
-    `include "el2_param.vh"
-) (
-    input bit                       core_clk,
-    input bit                       rst_l,
-    input bit [31:0]                mem_signature_begin,
-    input bit [31:0]                mem_signature_end,
-    input bit [31:0]                mem_mailbox,
-    input bit                       i_cpu_halt_req,    // Async halt req to CPU
-    output bit                      o_cpu_halt_ack,    // core response to halt
-    output bit                      o_cpu_halt_status, // 1'b1 indicates core is halted
-    input bit                       i_cpu_run_req,     // Async restart req to CPU
-    output bit                      o_cpu_run_ack,     // Core response to run req
-    input bit                       mpc_debug_halt_req,
-    output bit                      mpc_debug_halt_ack,
-    input bit                       mpc_debug_run_req,
-    output bit                      mpc_debug_run_ack,
-    output bit                      o_debug_mode_status,
-    input bit                       lsu_bus_clk_en
-);
+`ifdef GATELEVEL_DUT
+    `ifdef GATELEVEL_TRACE_SAIF
+        /*verilator tracing_off*/
+    `endif
 `endif
+    localparam real HALF_NS = HALF_PERIOD / 1000.0;  // HALF_PERIOD is in ps
+
+    logic core_clk, rst_l;
+    logic [31:0] mem_signature_begin, mem_signature_end, mem_mailbox;
+    logic i_cpu_halt_req, o_cpu_halt_ack, o_cpu_halt_status;
+    logic i_cpu_run_req, o_cpu_run_ack;
+    logic mpc_debug_halt_req, mpc_debug_halt_ack;
+    logic mpc_debug_run_req, mpc_debug_run_ack;
+    logic o_debug_mode_status;
+    logic lsu_bus_clk_en;
 `ifdef RV_LOCKSTEP_ENABLE
     logic [31:0] shadow_core_trace_rv_i_insn_ip;
     logic [31:0] shadow_core_trace_rv_i_address_ip;
@@ -93,13 +77,6 @@ module tb_top
     logic                       dma_hreadyin;
 `endif // RV_BUILD_AHB_LITE
 
-`ifndef VERILATOR
-    bit                         core_clk;
-    bit          [31:0]         mem_signature_begin = 32'd0; // TODO:
-    bit          [31:0]         mem_signature_end   = 32'd0;
-    bit          [31:0]         mem_mailbox         = 32'hD0580000;
-    logic                       rst_l;
-`endif
     logic                       porst_l;
     logic [pt.PIC_TOTAL_INT:1]  extintsrc_req;
     logic                       nmi_int;
@@ -1128,11 +1105,13 @@ module tb_top
                 wait (o_cpu_halt_ack == 1'b1);
                 @(posedge core_clk);
                 release i_cpu_halt_req;
+                i_cpu_halt_req = 1'b0;  // a released variable keeps its forced value
                 repeat (100) @(posedge core_clk);
                 force i_cpu_run_req = 1'b1;
                 wait (o_cpu_run_ack == 1'b1);
                 @(posedge core_clk);
                 release i_cpu_run_req;
+                i_cpu_run_req = 1'b0;   // a released variable keeps its forced value
             end
             if(mailbox_write && (mailbox_data[7:0] == 8'h90)) begin
                 extintsrc_req  <= {pt.PIC_TOTAL_INT-1{1'b0}};
@@ -1178,34 +1157,18 @@ module tb_top
             // CPU debug enter/exit sequence
             if(mailbox_write && (mailbox_data[7:0] == 8'hA0)) begin
                 $display("Request to halt CPU");
-            `ifdef VERILATOR
-                force mpc_debug_halt_req = 1'b1;
-            `else
                 mpc_debug_halt_req = 1'b1;
-            `endif
 
                 $display("Wait for CPU to ACK halt request");
                 @(posedge mpc_debug_halt_ack);
-            `ifdef VERILATOR
-                release mpc_debug_halt_req;
-            `else
                 mpc_debug_halt_req = 1'b0;
-            `endif
 
                 $display("CPU ACKed halt request, request to run CPU");
-            `ifdef VERILATOR
-                force mpc_debug_run_req = 1'b1;
-            `else
                 mpc_debug_run_req = 1'b1;
-            `endif
 
                 $display("Wait for CPU to ACK run request");
                 @(posedge mpc_debug_run_ack);
-            `ifdef VERILATOR
-                release mpc_debug_run_req;
-            `else
                 mpc_debug_run_req = 1'b0;
-            `endif
                 $display("CPU ACKed run request");
             end
             // ECC error injection
@@ -3630,6 +3593,86 @@ module tb_top
     TraceMonitor trace_monitor;
 
     initial begin
+        string symbols_path;
+        string program_hex_path;
+        string requested_mailbox_symbol;
+        string trace_path;
+        string line;
+        logic [31:0] sym_mailbox_addr;
+        integer sym_mailbox_found;
+        string symbol_name;
+        string symbol_type;
+        integer symbols_file;
+        integer scan_result;
+        integer mailbox_sym_requested;
+        integer test_halt;
+        integer test_lsu_clk_ratio;
+        logic [31:0] symbol_address;
+
+        core_clk = 1'b0;
+        rst_l = 1'b0;
+        mem_signature_begin = 32'd0;
+        mem_signature_end = 32'd0;
+        mem_mailbox = 32'hD0580000;
+        program_hex_path = "program.hex";
+        i_cpu_halt_req = 1'b0;
+        i_cpu_run_req = 1'b0;
+        mpc_debug_halt_req = 1'b0;
+        mpc_debug_run_req = 1'b0;
+        lsu_bus_clk_en = 1'b1;
+        test_halt = $test$plusargs("test_halt");
+        test_lsu_clk_ratio = $test$plusargs("test_lsu_clk_ratio");
+        mailbox_sym_requested = 0;
+        sym_mailbox_found = 0;
+        sym_mailbox_addr = 32'd0;
+
+        // Keep log timestamps in ns whatever the simulation precision is
+        $timeformat(-9, 0, "", 0);
+        $display("\nVerilatorTB: Start of sim\n");
+
+        if ($value$plusargs("mailbox_sym=%s", requested_mailbox_symbol))
+            mailbox_sym_requested = 1;
+
+        // +symbols=<file>: lines are "<hex addr> [<type>] <name>"; the first
+        // token is the address and the last one the name (as in the C++ TB)
+        if ($value$plusargs("symbols=%s", symbols_path)) begin
+            symbols_file = $fopen(symbols_path, "r");
+            if (symbols_file == 0)
+                $fatal(1, "Error loading symbols from '%s'", symbols_path);
+            while (!$feof(symbols_file)) begin
+                line = "";
+                scan_result = $fgets(line, symbols_file);
+                if (line.len() > 0) begin
+                    symbol_type = "";
+                    symbol_name = "";
+                    scan_result = $sscanf(line, "%h %s %s", symbol_address, symbol_type, symbol_name);
+                    if (scan_result == 2) symbol_name = symbol_type;
+                    if (scan_result >= 2) begin
+                        if (symbol_name == "begin_signature")
+                            mem_signature_begin = symbol_address;
+                        else if (symbol_name == "end_signature")
+                            mem_signature_end = symbol_address;
+                        if (mailbox_sym_requested && symbol_name == requested_mailbox_symbol) begin
+                            sym_mailbox_addr  = symbol_address;
+                            sym_mailbox_found = 1;
+                        end
+                    end
+                end
+            end
+            $fclose(symbols_file);
+        end
+        // Same precedence as the C++ TB: symbols < --mem-signature <
+        // --mailbox-addr < --mailbox-sym
+        scan_result = $value$plusargs("mem_signature_begin=%h", mem_signature_begin);
+        scan_result = $value$plusargs("mem_signature_end=%h", mem_signature_end);
+        scan_result = $value$plusargs("mailbox_addr=%h", mem_mailbox);
+        if (sym_mailbox_found) mem_mailbox = sym_mailbox_addr;
+        scan_result = $value$plusargs("program_hex=%s", program_hex_path);
+
+        $display("mem_signature_begin = %08X", mem_signature_begin);
+        $display("mem_signature_end   = %08X", mem_signature_end);
+        $display("mem_mailbox         = %08X", mem_mailbox);
+
         extintsrc_req = {pt.PIC_TOTAL_INT-1{1'b0}};
         timer_int     = 0;
         soft_int      = 0;
@@ -3642,9 +3685,8 @@ module tb_top
         nmi_assert_int = 0;
         nmi_vector     = 32'hee000000;
 
-        $readmemh("program.hex",  lmem.mem);
-        $readmemh("program.hex",  imem.mem);
-        // Initialize lmem AXI read outputs to '0 (instead of 'x) for 0->1->0 toggle coverage on fault injection
+        $readmemh(program_hex_path, lmem.mem);
+        $readmemh(program_hex_path, imem.mem);
 `ifdef RV_BUILD_AXI4
         lmem.rdata = '0;
         lmem.rid   = '0;
@@ -3666,49 +3708,68 @@ module tb_top
        $fsdbDumpvars(0, tb_top);
        $fsdbDumpMDA();
    `endif
-        rst_l = 1'b1;
-        rst_l = #5 1'b0;
-        rst_l = #25 1'b1;
-        // halt and start the core
-        i_cpu_halt_req = 1'b0;
-        i_cpu_run_req = 1'b0;
-        mpc_debug_halt_req = 1'b0;
-        mpc_debug_run_req = 1'b0;
-   `ifndef RV_LOCKSTEP_ENABLE  //https://github.com/chipsalliance/Cores-VeeR-EL2/issues/475
-        $display("[%0t ns] halting CPU and waiting for ack",$time);
-        i_cpu_halt_req = #5 1'b1;
-        wait(o_cpu_halt_ack == 1);
-        $display("[%0t ns] waiting for halt",$time);
-        i_cpu_halt_req = 1'b0;
-        wait(o_cpu_halt_status == 1'b1);
-        $display("[%0t ns] requesting start and waiting for ack",$time);
-        i_cpu_run_req = 1'b1;
-        wait(o_cpu_run_ack == 1'b1);
-        $display("[%0t ns] waiting for run",$time);
-        i_cpu_run_req = 1'b0;
-        wait(o_cpu_halt_status == 1'b0);
-        $display("[%0t ns] done",$time);
-
-        $display("[%0t ns] requesting mpc halt and wating for ack",$time);
-        mpc_debug_halt_req = 1'b1;
-        wait(mpc_debug_halt_ack == 1'b1);
-        $display("[%0t ns] waiting for debug halt",$time);
-        mpc_debug_halt_req = 1'b0;
-        wait(o_debug_mode_status == 1'b1);
-        $display("[%0t ns] requesting start and waiting for ack",$time);
-        mpc_debug_run_req = 1'b1;
-        wait(mpc_debug_run_ack == 1'b1);
-        $display("[%0t ns] waiting for cpu to start",$time);
-        mpc_debug_run_req = 1'b0;
-        wait(o_debug_mode_status == 1'b0);
-        $display("[%0t ns] done",$time);
-    `endif
 `endif
+        // +trace=<file>: VCD/FST/SAIF, depending on the Verilator trace flag
+        if ($value$plusargs("trace=%s", trace_path)) begin
+            $dumpfile(trace_path);
+            $dumpvars(0, tb_top);
+        end
+
+        // Reset: 6 half periods low, released mid-phase (between the negedge
+        // and the next posedge) so it never races with a clock edge
+        #(6 * HALF_NS + HALF_NS / 2.0);
+        rst_l = 1'b1;
+
+        if (test_halt) begin
+            i_cpu_halt_req = 1'b1;
+            $display("[%0t ns] Waiting for halt", $time);
+            wait(o_cpu_halt_ack == 1);
+            i_cpu_halt_req = 1'b0;
+            wait(o_cpu_halt_status == 1'b1);
+            i_cpu_run_req = 1'b1;
+            wait(o_cpu_run_ack == 1'b1);
+            i_cpu_run_req = 1'b0;
+            $display("[%0t ns] Waiting for restart", $time);
+            wait(o_cpu_halt_status == 1'b0);
+
+            mpc_debug_halt_req = 1'b1;
+            $display("[%0t ns] Waiting for mpc halt", $time);
+            wait(mpc_debug_halt_ack == 1'b1);
+            mpc_debug_halt_req = 1'b0;
+            wait(o_debug_mode_status == 1'b1);
+            mpc_debug_run_req = 1'b1;
+            wait(mpc_debug_run_ack == 1'b1);
+            mpc_debug_run_req = 1'b0;
+            $display("[%0t ns] Waiting for mpc restart", $time);
+            wait(o_debug_mode_status == 1'b0);
+        end
+
+        if (test_lsu_clk_ratio) begin
+            // Re-align to mid-phase: after the test_halt waits we are on a clock
+            // edge, and the changes below must not race with it
+            @(negedge core_clk);
+            #(HALF_NS / 2.0);
+            $display("[%0t ns] Testing lower clock ratio between bus master interface and core", $time);
+            lsu_bus_clk_en = 1'b0;
+            repeat (30) begin
+                #(10 * HALF_NS);
+                lsu_bus_clk_en = ~lsu_bus_clk_en;
+            end
+            lsu_bus_clk_en = 1'b1;
+            $display("[%0t ns] Pre-start checks complete. Restarting again for normal operation.", $time);
+            rst_l = 1'b0;
+            #(30 * HALF_NS);
+            rst_l = 1'b1;
+        end
     end
-`ifndef VERILATOR
+
     initial begin
-        forever  core_clk = #5 ~core_clk;
+        forever #(HALF_NS) core_clk = ~core_clk;
     end
+
+    final $display("\nVerilatorTB: End of sim");
+
+`ifndef VERILATOR
     initial begin
         porst_l = 1'b1;
         porst_l = #1 1'b0;
@@ -3722,6 +3783,11 @@ module tb_top
     initial $display("Dual Core Lockstep enabled!");
 `endif
 
+`ifdef GATELEVEL_DUT
+    `ifdef GATELEVEL_TRACE_SAIF
+        /*verilator tracing_on*/
+    `endif
+`endif
    //=========================================================================-
    // RTL instance
    //=========================================================================-
@@ -4167,7 +4233,11 @@ veer_wrapper rvtop_wrapper (
     .dmi_active             ()
 
 );
-
+`ifdef GATELEVEL_DUT
+    `ifdef GATELEVEL_TRACE_SAIF
+        /*verilator tracing_off*/
+    `endif
+`endif
 
    //=========================================================================-
    // AHB I$ instance

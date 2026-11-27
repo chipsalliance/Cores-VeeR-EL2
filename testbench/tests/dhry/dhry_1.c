@@ -24,6 +24,10 @@ extern uint64_t get_mcycle();
 
 #include "dhry.h"
 
+#ifndef DHRY_RUNS
+#define DHRY_RUNS 1000
+#endif
+
 /* Global Variables: */
 
 Rec_Pointer     Ptr_Glob,
@@ -155,7 +159,7 @@ main ()
   printf ("\n");
   #else
   // We do not have scanf.  Hardwire number of runs.
-  Number_Of_Runs = 1000;
+  Number_Of_Runs = DHRY_RUNS;
   #endif
 
   printf ("Execution starts, %d runs through Dhrystone\n", Number_Of_Runs);

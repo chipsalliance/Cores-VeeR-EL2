@@ -340,7 +340,7 @@ import el2_pkg::*;
    logic        force_halt;
    logic [5:0]  mfdht, mfdht_ns;
    logic mstatus_mie_ns;
-   logic [30:0] mtvec_ns, mtvec;
+   logic [30:0] mtvec_ns, mtvec, mtvec_int;
    logic [15:2] dcsr_ns, dcsr;
    logic [5:0] mip_ns, mip;
    logic [5:0] mie_ns, mie;
@@ -1608,8 +1608,10 @@ end
 
    // Compute interrupt path:
    // If vectored async is set in mtvec, flush path for interrupts is MTVEC + (4 * CAUSE);
-   assign vectored_path[31:1]  = {mtvec[30:1], 1'b0} + {25'b0, exc_cause_r[4:0], 1'b0};
-   assign interrupt_path[31:1] = take_nmi ? nmi_vec[31:1] : ((mtvec[0] == 1'b1) ? vectored_path[31:1] : {mtvec[30:1], 1'b0});
+   // An interrupt taken while a csrw mtvec commits in R must use the new value
+   assign mtvec_int[30:0] = wr_mtvec_r ? mtvec_ns[30:0] : mtvec[30:0];
+   assign vectored_path[31:1]  = {mtvec_int[30:1], 1'b0} + {25'b0, exc_cause_r[4:0], 1'b0};
+   assign interrupt_path[31:1] = take_nmi ? nmi_vec[31:1] : ((mtvec_int[0] == 1'b1) ? vectored_path[31:1] : {mtvec_int[30:1], 1'b0});
 
    assign sel_npc_r  = lsu_i0_rfnpc_r | fence_i_r | iccm_repair_state_rfnpc | (i_cpu_run_req_d1 & ~interrupt_valid_r) | (rfpc_i0_r & ~dec_tlu_i0_valid_r);
    assign resume_halt = i_cpu_run_req_d1 & pmu_fw_tlu_halted_f;

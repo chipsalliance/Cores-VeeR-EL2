@@ -51,6 +51,12 @@ jobs:
             code:
               - '!docs/**'
 
+  Test-TMR:
+    name: Test-TMR-Regression
+    needs: [Detect-Changes]
+    if: needs.Detect-Changes.outputs.code_changed == 'true'
+    uses: ./.github/workflows/test-tmr.yml
+
   Test-DCLS:
     name: Test-DCLS-Regression
     needs: [Check-PR-Origin, Detect-Changes]

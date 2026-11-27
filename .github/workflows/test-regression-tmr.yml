@@ -1,0 +1,105 @@
+name: Regression tests TMR
+
+on:
+  workflow_call:
+    inputs:
+      run_custom:
+        type: boolean
+        default: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  generate-matrix:
+    name: Generate test matrix
+    runs-on: ubuntu-24.04
+    outputs:
+      tests: ${{ steps.select.outputs.tests }}
+      custom_tests: ${{ steps.select-custom.outputs.tests }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select tests
+        id: select
+        run: |
+          echo "tests=$(python3 .github/scripts/select_pr_tests.py \
+            '${{ github.event_name }}' '${{ github.event.pull_request.head.sha || github.sha }}' 4 \
+            'hello_world,hello_world_dccm,tmr_internal_timers,tmr_internal_timers_irq,dhry,ecc,csr_misa,csr_access,csr_mstatus,csr_mseccfg,perf_counters,icache,bitmanip' \
+            'csr_access')" | tee -a $GITHUB_OUTPUT
+
+  regression-tests:
+    name: Regression tests
+    needs: [generate-matrix]
+    runs-on: ubuntu-latest
+    container: ghcr.io/antmicro/cores-veer-el2:20261118
+    strategy:
+      matrix:
+        bus: ["axi"]
+        test: ${{ fromJSON(needs.generate-matrix.outputs.tests) }}
+        coverage: ["all"]
+        priv: ["0", "1"]
+        tb_extra_args: [""]
+        tb_plusargs: ["", "+upsets"]
+        exclude:
+          # These tests require user mode
+          - priv: "0"
+            test: "csr_mseccfg"
+          - priv: "0"
+            test: "csr_access"
+          - priv: "0"
+            test: "csr_mstatus"
+          - priv: "0"
+            test: "modesw"
+          - priv: "0"
+            test: "insns"
+          - priv: "0"
+            test: "perf_counters"
+          # end tests which require user mode
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      CCACHE_DIR: "/opt/regression/.cache/"
+      TMR_TB: "1"
+      TB_PLUSARGS: ${{ matrix.tb_plusargs }}
+    steps:
+      - name: Setup repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+          pip install -r .github/scripts/requirements-coverage.txt
+          echo "PATH=$PATH" >> $GITHUB_ENV
+
+      - name: Setup environment
+        run: |
+          RV_ROOT=`pwd`
+          echo "RV_ROOT=$RV_ROOT" >> $GITHUB_ENV
+          PYTHONUNBUFFERED=1
+          echo "PYTHONUNBUFFERED=$PYTHONUNBUFFERED" >> $GITHUB_ENV
+          TEST_PATH=$RV_ROOT/test_results
+          echo "TEST_PATH=$TEST_PATH" >> $GITHUB_ENV
+          echo "FULL_NAME=tmr-${{ matrix.bus }}-${{ matrix.test }}-${{ matrix.priv == 0 && 'm' || 'mu' }}-delay${{ matrix.delay }}" >> $GITHUB_ENV
+
+      - name: Run tests
+        run: |
+          export RV_ROOT=`pwd`
+          export TB_EXTRA_ARGS="${{ matrix.tb_extra_args }}"
+          .github/scripts/run_regression_test.sh $TEST_PATH ${{ matrix.bus }} ${{ matrix.test}} ${{ matrix.coverage }} ${{ matrix.priv }} 0
+
+      - name: Prepare coverage data
+        run: |
+          source .venv/bin/activate
+          mkdir -p results
+          .github/scripts/convert_dat.sh ${TEST_PATH}/coverage.dat results/coverage_${FULL_NAME}
+
+      - name: Pack artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression_tests_coverage_data_tmr_${{ env.FULL_NAME }}_${{ matrix.coverage }}
+          path: results/*.info

@@ -17,7 +17,7 @@
 module el2_dec_decode_ctl
 import el2_pkg::*;
 #(
-`include "el2_param.vh"
+`include "el2_param.svh"
  )
   (
    input logic dec_tlu_trace_disable,

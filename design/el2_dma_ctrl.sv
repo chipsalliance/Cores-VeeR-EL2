@@ -24,7 +24,7 @@
 module el2_dma_ctrl 
 import el2_pkg::*;
 #(
-`include "el2_param.vh"
+`include "el2_param.svh"
  )(
    input logic         clk,
    input logic         free_clk,

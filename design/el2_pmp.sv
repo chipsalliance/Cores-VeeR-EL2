@@ -21,7 +21,7 @@ module el2_pmp
     // Granularity of NAPOT access,
     // 0 = No restriction, 1 = 8 byte, 2 = 16 byte, 3 = 32 byte, etc.
     parameter PMP_GRANULARITY = 0,  // TODO: Move to veer.config
-    `include "el2_param.vh"
+    `include "el2_param.svh"
 ) (
     input logic clk,       // Top level clock
     input logic rst_l,     // Reset

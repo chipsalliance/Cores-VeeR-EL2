@@ -3,7 +3,7 @@
 module el2_lsu_trigger_wrapper
   import el2_pkg::*;
 #(
-    `include "el2_param.vh"
+    `include "el2_param.svh"
 ) (
     // Unpacked [3:0] trigger_pkt_t
     input logic [3:0] select,

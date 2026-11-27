@@ -25,7 +25,7 @@
 module el2_lsu_trigger
 import el2_pkg::*;
 #(
-`include "el2_param.vh"
+`include "el2_param.svh"
  )(
    input el2_trigger_pkt_t [3:0] trigger_pkt_any,            // trigger packet from dec
    input el2_lsu_pkt_t           lsu_pkt_m,                  // lsu packet

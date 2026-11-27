@@ -21,7 +21,7 @@
 interface el2_lsu_dccm_wr_readback_cov_if
   import el2_pkg::*;
 #(
-    `include "el2_param.vh"
+    `include "el2_param.svh"
 ) (
     input logic                           clk,
     input logic                           rst_l,

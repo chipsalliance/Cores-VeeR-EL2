@@ -3,7 +3,7 @@
 //`define EL2_DEF_SV
 package el2_pkg;
 
-`include "el2_pdef.vh"
+`include "el2_pdef.svh"
 
 typedef struct packed {
                        logic  trace_rv_i_valid_ip;

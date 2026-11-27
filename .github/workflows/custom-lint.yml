@@ -6,6 +6,10 @@ on:
       - main
   pull_request:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   run-lint:
     name: Run lint
@@ -17,10 +21,32 @@ jobs:
     env:
       GHA_EXTERNAL_DISK: additional-tools-all
       GHA_SA: gh-sa-veer-uploader
+      FPGA_OPT: ${{ matrix.fpga_optimize }}
+      JOB_UID: ${{ github.job }}-${{ matrix.redundancy }}-${{ matrix.fpga_optimize }}
+    strategy:
+      fail-fast: false
+      matrix:
+        redundancy: ["none", "dcls", "tmr"]
+        fpga_optimize: ["0", "1"]
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
 
+      - name: Setup conf params
+        run: |
+          CONF_PARAMS="-set build_axi4 -set fpga_optimize=${{ matrix.fpga_optimize }}"
+
+          case ${{ matrix.redundancy }} in
+            none) CONF_PARAMS="$CONF_PARAMS" ;;
+            dcls) CONF_PARAMS="$CONF_PARAMS -set lockstep_enable=1 -set lockstep_regfile_enable=1 -set mubi_width=2 -set mubi_false=0x1 -set mubi_true=0x2" ;;
+            tmr)  CONF_PARAMS="$CONF_PARAMS -set triple_modular_redundancy_enable=1 -set mubi_width=2 -set mubi_false=0x1 -set mubi_true=0x2" ;;
+            *)
+              echo "Incorrect core redundancy type selected"
+              ;;
+          esac
+
+          echo "CONF_PARAMS=$CONF_PARAMS" >> $GITHUB_ENV
+
       - name: Run lint
-        run: _secret_lint:14
+        run: _secret_lint:24

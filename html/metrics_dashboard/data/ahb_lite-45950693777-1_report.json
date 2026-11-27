@@ -1,0 +1,107 @@
+{
+  "cts": {
+    "clock_roots": 3,
+    "buffers_inserted": 5202,
+    "clock_subnets": 5202,
+    "sinks": 23620
+  },
+  "floorplan": {
+    "area": {
+      "design_area": 27214,
+      "utilization": 21
+    },
+    "power": {
+      "Sequential": {
+        "internal": 0.00690,
+        "switching": 0.0000784,
+        "leakage": 0.00000559,
+        "total": 0.00699
+      },
+      "Combinational": {
+        "internal": 0.000629,
+        "switching": 0.000388,
+        "leakage": 0.0000254,
+        "total": 0.00104
+      },
+      "Clock": {
+        "internal": 1.69E-8,
+        "switching": 5.67E-8,
+        "leakage": 5.12E-11,
+        "total": 7.37E-8
+      },
+      "Macro": {
+        "internal": 0.00,
+        "switching": 0.00,
+        "leakage": 0.00,
+        "total": 0.00
+      },
+      "Pad": {
+        "internal": 0.00,
+        "switching": 0.00,
+        "leakage": 0.00,
+        "total": 0.00
+      },
+      "Total": {
+        "internal": 0.00753,
+        "switching": 0.000467,
+        "leakage": 0.0000310,
+        "total": 0.00803
+      }
+    }
+  },
+  "units": {
+    "percentage": "%",
+    "time": "1ps",
+    "capacitance": "1fF",
+    "resistance": "1kohm",
+    "voltage": "1v",
+    "current": "1mA",
+    "power": "1pW",
+    "distance": "1um",
+    "area": "1um2"
+  },
+  "global_routing": {
+    "area": {
+      "design_area": 31123,
+      "utilization": 24
+    },
+    "power": {
+      "Sequential": {
+        "internal": 0.00676,
+        "switching": 0.000147,
+        "leakage": 0.00000559,
+        "total": 0.00692
+      },
+      "Combinational": {
+        "internal": 0.00109,
+        "switching": 0.00179,
+        "leakage": 0.0000336,
+        "total": 0.00292
+      },
+      "Clock": {
+        "internal": 0.00337,
+        "switching": 0.00328,
+        "leakage": 9.71E-7,
+        "total": 0.00665
+      },
+      "Macro": {
+        "internal": 0.00,
+        "switching": 0.00,
+        "leakage": 0.00,
+        "total": 0.00
+      },
+      "Pad": {
+        "internal": 0.00,
+        "switching": 0.00,
+        "leakage": 0.00,
+        "total": 0.00
+      },
+      "Total": {
+        "internal": 0.0112,
+        "switching": 0.00522,
+        "leakage": 0.0000402,
+        "total": 0.0165
+      }
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "cts": {
+    "clock_roots": 3,
+    "buffers_inserted": 4963,
+    "clock_subnets": 4963,
+    "sinks": 22551
+  },
+  "floorplan": {
+    "area": {
+      "design_area": 26117,
+      "utilization": 20
+    },
+    "power": {
+      "Sequential": {
+        "internal": 0.00658,
+        "switching": 0.0000716,
+        "leakage": 0.00000526,
+        "total": 0.00666
+      },
+      "Combinational": {
+        "internal": 0.000497,
+        "switching": 0.000317,
+        "leakage": 0.0000245,
+        "total": 0.000838
+      },
+      "Clock": {
+        "internal": 1.69E-8,
+        "switching": 5.67E-8,
+        "leakage": 5.12E-11,
+        "total": 7.37E-8
+      },
+      "Macro": {
+        "internal": 0.00,
+        "switching": 0.00,
+        "leakage": 0.00,
+        "total": 0.00
+      },
+      "Pad": {
+        "internal": 0.00,
+        "switching": 0.00,
+        "leakage": 0.00,
+        "total": 0.00
+      },
+      "Total": {
+        "internal": 0.00708,
+        "switching": 0.000388,
+        "leakage": 0.0000297,
+        "total": 0.00750
+      }
+    }
+  },
+  "units": {
+    "percentage": "%",
+    "time": "1ps",
+    "capacitance": "1fF",
+    "resistance": "1kohm",
+    "voltage": "1v",
+    "current": "1mA",
+    "power": "1pW",
+    "distance": "1um",
+    "area": "1um2"
+  }
+}
